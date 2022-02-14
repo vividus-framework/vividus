@@ -81,6 +81,8 @@ include::partial$visibility-types.adoc[]
 
 == Properties
 
+NOTE: The properties marked with *bold* are mandatory.
+
 :application-under-test: mobile application
 :session-scope-property-base: mobile-application
 [cols="6,3,2,6", options="header"]
@@ -91,7 +93,6 @@ include::partial$visibility-types.adoc[]
 |Description
 
 include::partial$selenium-properties.adoc[]
-include::partial$selenium-grid-properties.adoc[]
 
 |`selenium.grid.platform-name`
 a|`Android`

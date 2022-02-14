@@ -1,4 +1,3 @@
-:grid-default-hostname: hub.crossbrowsertesting.com
 :test-cloud-name: CrossBrowserTesting
 :test-cloud-key: crossbrowsertesting
 :test-cloud-link: https://crossbrowsertesting.com/
@@ -20,13 +19,28 @@ include::partial$test-cloud-usage.adoc[]
 
 == Properties
 
-[cols="3,1,1,3", options="header"]
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="5,2,3,5", options="header"]
 |===
 |Property Name
 |Acceptable values
 |Default
 |Description
 
-include::partial$selenium-grid-properties.adoc[]
+|`selenium.grid.host`
+|hostname
+|hub.crossbrowsertesting.com
+|CrossBrowserTesting https://www.w3.org/TR/webdriver/#dfn-remote-ends[remote end] host to be used to create a new session
+
+|[subs=+quotes]`*selenium.grid.username*`
+|username
+|empty
+|CrossBrowserTesting username (usually it's an email that must be percent-encoded)
+
+|[subs=+quotes]`*selenium.grid.password*`
+|password
+|empty
+|CrossBrowserTesting authkey
 
 |===
