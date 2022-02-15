@@ -74,6 +74,10 @@ NOTE: The properties marked with *bold* are mandatory.
 |`false`
 |Enables dry-run execution mode (no actual steps will be executed, dynamic variables and expressions won't be resolved). For example dry-run could be useful to debug what stroies will be executed with provided config.
 
+|`bdd.configuration.skip-story-if-given-story-failed`
+|`false`
+|Skips the story in case of failure in the given story
+
 |`statistics.print-failures`
 |`false`
 |If set to `true` prints table of failures including: story, scenario, step and error message
