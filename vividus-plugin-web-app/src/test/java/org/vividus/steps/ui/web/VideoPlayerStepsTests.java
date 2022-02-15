@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,31 +21,32 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.vividus.steps.ui.validation.IBaseValidations;
+import org.vividus.context.VariableContext;
+import org.vividus.steps.ui.validation.BaseValidations;
 import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.web.action.IVideoPlayerActions;
-import org.vividus.ui.web.action.search.WebLocatorType;
-import org.vividus.ui.web.util.LocatorUtil;
+import org.vividus.ui.web.action.VideoPlayerActions;
 
 @ExtendWith(MockitoExtension.class)
 class VideoPlayerStepsTests
 {
     private static final String VIDEO_PLAYER = "Video player";
-    private static final String VIDEO_PLAYER_NAME = "video_player_name";
-    private static final Locator SEARCH_ATTRIBUTE = new Locator(WebLocatorType.XPATH,
-            LocatorUtil.getXPath("//video[@*='%1$s']", VIDEO_PLAYER_NAME));
+    private static final Locator LOCATOR = mock(Locator.class);
 
-    @Mock
-    private IBaseValidations baseValidations;
+    @Mock private BaseValidations baseValidations;
 
-    @Mock
-    private IVideoPlayerActions videoPlayerActions;
+    @Mock private VideoPlayerActions videoPlayerActions;
+
+    @Mock private VariableContext variableContext;
 
     @InjectMocks
     private VideoPlayerSteps videoPlayerSteps;
@@ -54,15 +55,15 @@ class VideoPlayerStepsTests
     void testRewindTimeInVideoPlayer()
     {
         WebElement videoPlayer = mockVideoPlayer();
-        videoPlayerSteps.rewindTimeInVideoPlayer(1, VIDEO_PLAYER_NAME);
+        videoPlayerSteps.rewindTimeInVideoPlayer(1, LOCATOR);
         verify(videoPlayerActions).rewind(videoPlayer, 1);
     }
 
     @Test
     void testRewindTimeInVideoPlayerNull()
     {
-        when(baseValidations.assertIfElementExists(VIDEO_PLAYER, SEARCH_ATTRIBUTE)).thenReturn(null);
-        videoPlayerSteps.rewindTimeInVideoPlayer(1, VIDEO_PLAYER_NAME);
+        when(baseValidations.assertElementExists(VIDEO_PLAYER, LOCATOR)).thenReturn(Optional.empty());
+        videoPlayerSteps.rewindTimeInVideoPlayer(1, LOCATOR);
         verifyNoInteractions(videoPlayerActions);
     }
 
@@ -70,7 +71,7 @@ class VideoPlayerStepsTests
     void testPlayVideoInVideoPlayer()
     {
         WebElement videoPlayer = mockVideoPlayer();
-        videoPlayerSteps.playVideoInVideoPlayer(VIDEO_PLAYER_NAME);
+        videoPlayerSteps.playVideoInVideoPlayer(LOCATOR);
         verify(videoPlayerActions).play(videoPlayer);
     }
 
@@ -78,14 +79,24 @@ class VideoPlayerStepsTests
     void testPauseVideoInVideoPlayer()
     {
         WebElement videoPlayer = mockVideoPlayer();
-        videoPlayerSteps.pauseVideoInVideoPlayer(VIDEO_PLAYER_NAME);
+        videoPlayerSteps.pauseVideoInVideoPlayer(LOCATOR);
         verify(videoPlayerActions).pause(videoPlayer);
+    }
+
+    @Test
+    void shouldProvideInfoAboutVideo()
+    {
+        WebElement videoPlayer = mockVideoPlayer();
+        Map<String, Object> info = Map.of("duration", "101");
+        when(videoPlayerActions.getInfo(videoPlayer)).thenReturn(info);
+        videoPlayerSteps.saveVideoInfo(LOCATOR, Set.of(), VIDEO_PLAYER);
+        verify(variableContext).putVariable(Set.of(), VIDEO_PLAYER, info);
     }
 
     private WebElement mockVideoPlayer()
     {
         WebElement videoPlayer = mock(WebElement.class);
-        when(baseValidations.assertIfElementExists(VIDEO_PLAYER, SEARCH_ATTRIBUTE)).thenReturn(videoPlayer);
+        when(baseValidations.assertElementExists(VIDEO_PLAYER, LOCATOR)).thenReturn(Optional.of(videoPlayer));
         return videoPlayer;
     }
 }

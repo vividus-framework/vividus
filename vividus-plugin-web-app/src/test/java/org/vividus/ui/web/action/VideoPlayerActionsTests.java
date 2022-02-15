@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,5 +56,17 @@ class VideoPlayerActionsTests
     {
         videoPlayerActions.pause(webElement);
         verify(javascriptActions).executeScript("arguments[0].pause();", webElement);
+    }
+
+    @Test
+    void shouldReturnVideoDetails()
+    {
+        videoPlayerActions.getInfo(webElement);
+        verify(javascriptActions).executeScript("return"
+            + " { 'duration' : arguments[0].duration,"
+            + "   'src' :  arguments[0].src,"
+            + "   'currentTime' :  arguments[0].currentTime,"
+            + "   'networkState' :  arguments[0].networkState,"
+            + " }", webElement);
     }
 }

@@ -1,0 +1,11 @@
+Composite: When I rewind time to '$number' seconds in the video player with the name '$videoPlayerName'
+!-- Step is deprecated and will be removed in VIVIDUS 0.5.0. Use instead: When I rewind time to `$number` seconds in video player located `$locator`
+When I rewind time to `<number>` seconds in video player located `xpath(//video[@*='<videoPlayerName>'])`
+
+Composite: When I play video in the video player with the name '$videoPlayerName'
+!-- Step is deprecated and will be removed in VIVIDUS 0.5.0. Use instead: When I play video in video player located `$locator`
+When I play video in video player located `xpath(//video[@*='<videoPlayerName>'])`
+
+Composite: When I pause video in the video player with the name '$videoPlayerName'
+!-- Step is deprecated and will be removed in VIVIDUS 0.5.0. Use instead: When I pause video in video player located `$locator`
+When I pause video in video player located `xpath(//video[@*='<videoPlayerName>'])`
