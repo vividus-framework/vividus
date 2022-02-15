@@ -689,3 +689,69 @@ where the first measure is window width, the last one is window height.
 Given I am on a page with the URL 'https://example.com/'
 When I change window size to `640x320`
 ----
+
+=== Video steps
+
+Steps allow to interact with https://www.w3schools.com/html/html5_video.asp[video] elements.
+
+==== Play Video
+
+Starts video playback.
+
+[source,gherkin]
+----
+When I play video in video player located `$locator`
+----
+* `$locator` - <<_locator>>
+
+==== Pause Video
+
+Pauses video playback.
+
+[source,gherkin]
+----
+When I pause video in video player located `$locator`
+----
+* `$locator` - <<_locator>>
+
+==== Rewind Video
+
+Rewinds video to the desired mark in seconds.
+
+[source,gherkin]
+----
+When I rewind time to `$number` seconds in video player located `$locator`
+----
+* `$number` - time mark in seconds
+* `$locator` - <<_locator>>
+
+==== Get info
+Saves video player info: *duration*, *currentTime*, *src*, *networkState*.
+For more information about the properties see https://www.w3schools.com/tags/ref_av_dom.asp[HTML Audio/Video Properties]
+
+[source,gherkin]
+----
+When I save info from video player located `$locator` to $scopes variable `$variableName`
+----
+
+* `$locator` - <<_locator>>
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to save the info. If the variable name is *info*, the following variables will be created:
+** `${info.src}`- The the current source of the audio/video element
+** `${info.duration}` - The length of the current audio/video (in seconds)
+** `${info.currentTime}` - The current playback position in the audio/video(in seconds)
+** `${info.networkState}` - The the current network state of the audio/video. For more information see: https://www.w3schools.com/tags/av_prop_networkstate.asp[Network State]
+
+.Video player verifications
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://www.youtube.com/watch?v=pYqyVpCV-3c'
+When I pause video in video player located `cssSelector(video)`
+When I rewind time to `777` seconds in video player located `cssSelector(video)`
+When I play video in video player located `cssSelector(video)`
+When I save info from video player located `cssSelector(video)` to SCENARIO variable `info`
+Then `${info.currentTime}` is > `0`
+Then `${info.duration}` is > `1000`
+Then `${info.networkState}` is = `2`
+Then `${info.src}` matches `.+youtube.+`
+----
