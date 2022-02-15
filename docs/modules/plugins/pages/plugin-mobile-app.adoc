@@ -410,14 +410,14 @@ When I upload file `images/avatar.png` to device
 Then the avatar icon is displayed with the uploaded image
 ----
 
-:web-view-info: See http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information.
+:web-view-info: (see http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information)
 
 === Switch to Web view by index
 
 [WARNING]
 This step is deprecated and will be removed in VIVIDUS 0.5.0. The replacement is <<_switch_to_web_view_by_name>>.
 
-Switches context to a web view by the index, it starts from 1. {web-view-info}
+Switches context to a web view by the index, it starts from 1 {web-view-info}.
 
 [source,gherkin]
 ----
@@ -437,7 +437,7 @@ Then number of elements found by `xpath(html)` is equal to `1`
 
 === Switch to Web view by name
 
-Switches context to a web view with name that matches the rule. {web-view-info}
+Switches context to a web view with name that matches the rule {web-view-info}. Also Appium capabilities for https://github.com/appium/appium-xcuitest-driver#web-context[iOS] and https://github.com/appium/appium-uiautomator2-driver#web-context[Android] are available for the fine-tuning configuration. 
 
 [source,gherkin]
 ----
