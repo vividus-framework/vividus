@@ -19,6 +19,7 @@ dependencies {
     implementation project(':vividus-plugin-azure-data-factory')
     implementation project(':vividus-plugin-azure-event-grid')
     implementation project(':vividus-plugin-azure-functions')
+    implementation project(':vividus-plugin-azure-key-vault')
     implementation project(':vividus-plugin-azure-storage-account')
     implementation project(':vividus-plugin-azure-storage-queue')
     implementation project(':vividus-plugin-browserstack')
