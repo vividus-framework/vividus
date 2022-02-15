@@ -254,7 +254,8 @@ include::partial$azure-profile-and-subscription.adoc[leveloffset=+1]
 ==== Collect storage accounts info
 
 Collects storage accounts info in the specified resource group and saves it as
-JSON to a variable.
+JSON to a variable. For more information, see the
+https://docs.microsoft.com/en-us/rest/api/storagerp/storage-accounts/list[Azure Docs].
 
 [source,gherkin]
 ----
@@ -275,4 +276,27 @@ over scope `/subscriptions/{subscription ID}/resourceGroups/{resource group name
 [source,gherkin]
 ----
 When I collect storage accounts in resource group `TEST-SA` and save them as JSON to scenario variable `storage-accounts`
+----
+
+==== Retrieve the blob service properties
+
+Retrieves the properties of a storage account’s Blob service, including
+properties for Storage Analytics and CORS (Cross-Origin Resource Sharing) rules,
+and saves them as JSON to a variable. For more information, see the
+https://docs.microsoft.com/en-us/rest/api/storageservices/get-blob-service-properties[Azure Docs].
+
+[source,gherkin]
+----
+When I retrieve blob service properties of storage account with name `$storageAccountName` from resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`
+----
+
+* `$storageAccountName` - The name of the storage account within the specified resource group.
+* `$resourceGroupName` - The name of the resource group within the user's subscription to retrieve the storage account from. The name is case-insensitive.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the blob service properties as JSON.
+
+.Retrieve the blob service properties
+[source,gherkin]
+----
+When I retrieve blob service properties of storage account with name `testaccountname` from resource group `TEST-SA` and save them as JSON to scenario variable `blob-service-properties`
 ----
