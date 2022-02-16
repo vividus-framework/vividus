@@ -20,11 +20,11 @@ import java.util.stream.Stream;
 
 public enum TestCaseStatus
 {
-    BROKEN(0, "notPerformed"),
+    BROKEN(0, "broken"),
     FAILED(1, "failed"),
     UNKNOWN(2, ""),
     PENDING(3, "pending"),
-    SKIPPED(4, "ignorable"),
+    SKIPPED(4, "notPerformed"),
     PASSED(5, "successful");
 
     private final String name;

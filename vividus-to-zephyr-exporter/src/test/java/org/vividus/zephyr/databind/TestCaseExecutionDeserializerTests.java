@@ -36,7 +36,7 @@ import org.vividus.zephyr.model.TestCaseExecution;
 import org.vividus.zephyr.model.TestCaseStatus;
 
 @ExtendWith(MockitoExtension.class)
-public class TestCaseDeserializerTests
+public class TestCaseExecutionDeserializerTests
 {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -46,7 +46,7 @@ public class TestCaseDeserializerTests
     @Mock
     private ObjectCodec objectCodec;
 
-    private final TestCaseDeserializer deserializer = new TestCaseDeserializer();
+    private final TestCaseExecutionDeserializer deserializer = new TestCaseExecutionDeserializer();
 
     @BeforeEach
     void init()
@@ -55,7 +55,7 @@ public class TestCaseDeserializerTests
     }
 
     @Test
-    void testDeserialize() throws IOException
+    void testExecutionDeserialize() throws IOException
     {
         JsonNode root = MAPPER.readTree("{\"status\" : \"failed\", \"labels\" : [{\"name\" : \"testCaseId\","
                 + "\"value\" : \"TEST-001\"}, {\"name\" : \"framework\", \"value\" : \"Vividus\"}]}");
@@ -67,7 +67,7 @@ public class TestCaseDeserializerTests
     }
 
     @Test
-    void testDeserializeWithoutTestCaseId() throws IOException
+    void testExecutionDeserializeWithoutTestCaseId() throws IOException
     {
         JsonNode root = MAPPER.readTree("{\"status\" : \"passed\","
                 + "\"labels\" : [{\"name\" : \"framework\", \"value\" : \"Vividus\"}]}");
@@ -79,7 +79,7 @@ public class TestCaseDeserializerTests
     }
 
     @Test
-    void testDeserializeWithTwoTestCaseIds() throws IOException
+    void testExecutionDeserializeWithTwoTestCaseIds() throws IOException
     {
         JsonNode root = MAPPER.readTree("{\"status\" : \"broken\", \"labels\" : [{\"name\" : \"testCaseId\","
                 + "\"value\" : \"TEST-002\"}, {\"name\" : \"testCaseId\",\"value\" : \"TEST-003\"},"

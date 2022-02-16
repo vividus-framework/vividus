@@ -51,7 +51,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
-import org.vividus.zephyr.databind.TestCaseDeserializer;
+import org.vividus.zephyr.databind.TestCaseExecutionDeserializer;
 import org.vividus.zephyr.model.TestCaseExecution;
 import org.vividus.zephyr.model.TestCaseStatus;
 
@@ -156,6 +156,6 @@ class TestCaseParserTests
                 .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
                 .build()
                 .registerModule(new SimpleModule()
-                        .addDeserializer(TestCaseExecution.class, new TestCaseDeserializer()));
+                        .addDeserializer(TestCaseExecution.class, new TestCaseExecutionDeserializer()));
     }
 }

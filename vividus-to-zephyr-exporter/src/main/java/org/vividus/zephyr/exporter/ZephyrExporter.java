@@ -49,7 +49,7 @@ import org.vividus.model.jbehave.Story;
 import org.vividus.output.OutputReader;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
-import org.vividus.zephyr.databind.TestCaseDeserializer;
+import org.vividus.zephyr.databind.TestCaseExecutionDeserializer;
 import org.vividus.zephyr.facade.IZephyrFacade;
 import org.vividus.zephyr.facade.TestCaseParameters;
 import org.vividus.zephyr.facade.ZephyrFacade;
@@ -89,17 +89,17 @@ public class ZephyrExporter
                                       .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
                                       .build()
                                       .registerModule(new SimpleModule()
-                                          .addDeserializer(TestCaseExecution.class, new TestCaseDeserializer()));
+                                          .addDeserializer(TestCaseExecution.class, new TestCaseExecutionDeserializer()));
     }
 
     public void exportResults() throws IOException, JiraConfigurationException
     {
-        if (zephyrExporterProperties.getExportResults())
+        for (Story story : OutputReader.readStoriesFromJsons(zephyrExporterProperties.getSourceDirectory()))
         {
-            for (Story story : OutputReader.readStoriesFromJsons(zephyrExporterProperties.getSourceDirectory()))
+            if (zephyrExporterProperties.getExportResults())
             {
                 TestCaseLevel testCaseLevel = zephyrExporterProperties.getLevel();
-                if (testCaseLevel.equals(TestCaseLevel.SCENARIO))
+                if (testCaseLevel == TestCaseLevel.SCENARIO)
                 {
                     LOGGER.atInfo().addArgument(story::getPath).log("Exporting scenarios from {} story");
                     for (Scenario scenario : story.getFoldedScenarios())
@@ -113,10 +113,7 @@ public class ZephyrExporter
                     exportStory(story);
                 }
             }
-        }
-        else
-        {
-            for (Story story : OutputReader.readStoriesFromJsons(zephyrExporterProperties.getSourceDirectory()))
+            else
             {
                 for (Scenario scenario : story.getFoldedScenarios())
                 {

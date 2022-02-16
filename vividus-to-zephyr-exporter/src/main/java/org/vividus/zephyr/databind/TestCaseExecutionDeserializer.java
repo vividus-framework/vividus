@@ -26,11 +26,11 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import org.vividus.util.json.JsonPathUtils;
 import org.vividus.zephyr.model.TestCaseExecution;
 
-public class TestCaseDeserializer extends StdDeserializer<TestCaseExecution>
+public class TestCaseExecutionDeserializer extends StdDeserializer<TestCaseExecution>
 {
     private static final long serialVersionUID = 7820826665413256040L;
 
-    public TestCaseDeserializer()
+    public TestCaseExecutionDeserializer()
     {
         super(TestCaseExecution.class);
     }
