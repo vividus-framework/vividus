@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,11 @@ class ExtendedConfigurationTests
     {
         String compositePathPatterns = "**/*.steps";
         List<String> compositePaths = List.of("/path/to/composite.steps");
-        when(pathFinder.findPaths(equalToCompositeStepsBatch(compositePathPatterns))).thenReturn(compositePaths);
+        when(pathFinder.findPaths(argPathResolution(compositePathPatterns))).thenReturn(compositePaths);
+
+        String aliasPathPatterns = "**/*.json";
+        List<String> aliasPaths = List.of("/path/to/aliases.json");
+        when(pathFinder.findPaths(argPathResolution(aliasPathPatterns))).thenReturn(aliasPaths);
 
         ExamplesTableFactory examplesTableFactory = mock(ExamplesTableFactory.class);
         when(configuration.examplesTableFactory()).thenReturn(examplesTableFactory);
@@ -123,6 +127,7 @@ class ExtendedConfigurationTests
             StoryControls storyControls = mock(StoryControls.class);
             configuration.setCustomConverters(parameterConverterList);
             configuration.setCompositePaths(compositePathPatterns);
+            configuration.setAliasPaths(aliasPathPatterns);
             configuration.setStoryControls(storyControls);
             StepMonitor stepMonitor = mock(StepMonitor.class);
             configuration.setStepMonitors(List.of(stepMonitor));
@@ -132,6 +137,7 @@ class ExtendedConfigurationTests
             InOrder ordered = inOrder(configuration);
             ordered.verify(configuration).useKeywords((Keywords) constructedMocks.get(Keywords.class));
             ordered.verify(configuration).useCompositePaths(new HashSet<>(compositePaths));
+            ordered.verify(configuration).useAliasPaths(new HashSet<>(aliasPaths));
             ordered.verify(configuration).useParameterConverters(
                     (ParameterConvertersDecorator) constructedMocks.get(ParameterConvertersDecorator.class));
             ordered.verify(configuration).useStoryParser(
@@ -166,10 +172,10 @@ class ExtendedConfigurationTests
         verify(tableTransformer).transform(tableAsString, null, tableProperties);
     }
 
-    private static BatchResourceConfiguration equalToCompositeStepsBatch(String compositePathPatterns)
+    private static BatchResourceConfiguration argPathResolution(String compositePathPatterns)
     {
         List<String> resourceIncludePatterns = List.of(compositePathPatterns);
-        return argThat(batch -> "/".equals(batch.getResourceLocation())
+        return argThat(batch -> batch != null && "/".equals(batch.getResourceLocation())
                 && resourceIncludePatterns.equals(batch.getResourceIncludePatterns())
                 && List.of().equals(batch.getResourceExcludePatterns()));
     }

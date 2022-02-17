@@ -649,3 +649,52 @@ NOTE: `MYPAS_WORD` is a sample password and should be never used, own strong pas
 ----
 http.auth.password=ENC(WVnXhzG704KRZZFYL7hfpA4YoSm8V2F5eNXyr7CRYCichteHvNS3nB23zaI8CuLy)
 ----
+
+== Steps aliases
+
+VIVIDUS allows to define set of aliases for steps in JSON format and then use them in stories.
+
+=== How to use steps aliases
+
+. Select a step you want to create alias for, as an example let's take the following step:
++
+.VIVIDUS step
+[source,gherkin]
+----
+When I hover mouse over element located `$locator`
+----
+
+. Create a new JSON file (for example, `aliases/aliases.json`) and put the following content with one or more aliases:
++
+.aliases/aliases.json
+[source,json]
+----
+[
+    {
+        "name": "When I hover mouse over element located `$locator`",
+        "aliases":
+        [
+            {
+                "name": "When I place mouse pointer over web element located by `$locator`"
+            },
+            {
+                "name": "When I hover mouse pointer over web element located `$locator`"
+            }
+        ]
+    }
+]
+----
+
+. Point the alias configuration property to an exact location or location pattern with the JSON files containing ailases:
++
+[source,properties]
+----
+engine.alias-paths=aliases/aliases.json
+----
+
+. Use the defned alias in place of actual step in your story
++
+[source,gherkin]
+----
+When I place mouse pointer over web element located by `id(loginButton)`
+----

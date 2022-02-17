@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Then `$value` matches `$regex`",
+    "aliases": [
+      {
+        "name": "Then `$value` matches the regular expression `$regex`"
+      }
+    ]
+  }
+]

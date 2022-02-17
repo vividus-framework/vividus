@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -54,6 +55,7 @@ public class ExtendedConfiguration extends Configuration
     private List<StepMonitor> stepMonitors;
     private Map<String, TableTransformer> customTableTransformers;
     private String compositePaths;
+    private String aliasPaths;
     private StoryControls storyControls;
     private String examplesTableHeaderSeparator;
     private String examplesTableValueSeparator;
@@ -62,7 +64,8 @@ public class ExtendedConfiguration extends Configuration
     public void init() throws IOException
     {
         initKeywords();
-        initCompositePaths();
+        useCompositePaths(resolvePaths(compositePaths));
+        useAliasPaths(resolvePaths(aliasPaths));
         useParameterControls(parameterControls);
         useParameterConverters(new ParameterConvertersDecorator(this, placeholderResolver)
                 .addConverters(customConverters));
@@ -83,13 +86,13 @@ public class ExtendedConfiguration extends Configuration
         useKeywords(new Keywords(keywords));
     }
 
-    private void initCompositePaths() throws IOException
+    private Set<String> resolvePaths(String pathsPattern) throws IOException
     {
-        BatchResourceConfiguration compositeStepsBatch = new BatchResourceConfiguration();
-        compositeStepsBatch.setResourceLocation("/");
-        compositeStepsBatch.setResourceIncludePatterns(compositePaths);
-        compositeStepsBatch.setResourceExcludePatterns(null);
-        useCompositePaths(new HashSet<>(pathFinder.findPaths(compositeStepsBatch)));
+        BatchResourceConfiguration resourceBatch = new BatchResourceConfiguration();
+        resourceBatch.setResourceLocation("/");
+        resourceBatch.setResourceIncludePatterns(pathsPattern);
+        resourceBatch.setResourceExcludePatterns(null);
+        return new HashSet<>(pathFinder.findPaths(resourceBatch));
     }
 
     public void setPathFinder(IPathFinder pathFinder)
@@ -128,6 +131,11 @@ public class ExtendedConfiguration extends Configuration
     public void setCompositePaths(String compositePaths)
     {
         this.compositePaths = compositePaths;
+    }
+
+    public void setAliasPaths(String aliasPaths)
+    {
+        this.aliasPaths = aliasPaths;
     }
 
     public void setPlaceholderResolver(PlaceholderResolver placeholderResolver)
