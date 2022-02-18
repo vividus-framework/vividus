@@ -319,7 +319,7 @@ When I $actionType baseline with `$name` ignoring:$ignoredElements
 
 * `actionType` - {visual-testing-actions}
 * `name` - name of baseline
-* `checkSettings` - examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCANTAGE`
+* `checkSettings` - examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`
 
 .Perform visual check on compare with ignoring options
 [source,gherkin]
@@ -340,7 +340,7 @@ When I $actionType baseline with `$name` ignoring:$ignoredElements using screens
 
 * `actionType` - {visual-testing-actions}
 * `name` - name of baseline
-* `checkSettings` - examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCANTAGE`
+* `checkSettings` - examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`
 * `screenshotConfiguration` - configuration to make screenshot
 
 .Perform visual check on establish with ignoring options and specified configuration
