@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelParseException;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
 class SpelExpressionResolverTests
@@ -53,5 +54,19 @@ class SpelExpressionResolverTests
         assertEquals("Unable to evaluate the string '#{anyOf(1,2,3)}' as SpEL expression, it'll be used as is",
             event.getFormattedMessage());
         assertInstanceOf(SpelEvaluationException.class, event.getThrowable().get());
+    }
+
+    @Test
+    void shouldProcessParsingExpressionAndReturnOriginalValue()
+    {
+        var expressionString = "#{generate(regexify '[a-zA-Z0-9]{1}[a-zA-Z0-9\\ ]{1,12}[a-zA-Z0-9]{1}')}";
+        assertEquals(expressionString, PARSER.resolve(expressionString));
+        var loggingEvents = LOGGER.getLoggingEvents();
+        assertThat(loggingEvents, Matchers.hasSize(1));
+        LoggingEvent event = loggingEvents.get(0);
+        assertEquals("Unable to evaluate the string '#{generate(regexify '[a-zA-Z0-9]{1}[a-zA-Z0-9\\ ]{1,"
+                        + "12}[a-zA-Z0-9]{1}')}' as SpEL expression, it'll be used as is",
+                event.getFormattedMessage());
+        assertInstanceOf(SpelParseException.class, event.getThrowable().get());
     }
 }
