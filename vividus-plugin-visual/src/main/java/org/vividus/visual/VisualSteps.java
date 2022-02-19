@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ public class VisualSteps extends AbstractVisualSteps
      * @param actionType ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
      * @param name of baseline
      * @param checkSettings examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE`
-     *                      or `REQUIRED_DIFF_PERCANTAGE`<br>
+     *                      or `REQUIRED_DIFF_PERCENTAGE`<br>
      * Example:<br>
      * |ELEMENT            |AREA                  |<br>
      * |By.xpath(.//header)|By.cssSelector(footer)|
