@@ -8,7 +8,7 @@ dependencies {
     implementation project(':vividus-util')
     implementation(group: 'com.jayway.jsonpath', name: 'json-path-assert', version: "${jsonPathVersion}")
     implementation(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '2.31.0')
-    implementation(group: 'com.flipkart.zjsonpatch', name: 'zjsonpatch', version: '0.4.11')
+    implementation(group: 'com.flipkart.zjsonpatch', name: 'zjsonpatch', version: '0.4.12')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
