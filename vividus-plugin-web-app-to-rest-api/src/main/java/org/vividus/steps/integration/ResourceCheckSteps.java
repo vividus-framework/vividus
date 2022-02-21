@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.vividus.steps.integration;
 
-import static org.vividus.util.HtmlUtils.getElements;
+import static org.vividus.util.HtmlUtils.getElementsByCssSelector;
 import static org.vividus.util.UriUtils.buildNewUrl;
 
 import java.io.IOException;
@@ -46,6 +46,7 @@ import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.softassert.SoftAssert;
 import org.vividus.testcontext.ContextCopyingExecutor;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
+import org.vividus.util.HtmlUtils;
 import org.vividus.validator.model.WebPageResourceValidation;
 
 public class ResourceCheckSteps
@@ -103,7 +104,7 @@ public class ResourceCheckSteps
     public void checkResources(String cssSelector, String html) throws InterruptedException, ExecutionException
     {
         execute(() -> {
-            Collection<Element> resourcesToValidate = getElements(html, cssSelector);
+            Collection<Element> resourcesToValidate = HtmlUtils.getElementsByCssSelector(html, cssSelector);
             Stream<WebPageResourceValidation> validations = createResourceValidations(resourcesToValidate,
                 p -> createResourceValidation(p.getLeft(), p.getRight()));
             validateResources(validations);
@@ -238,7 +239,7 @@ public class ResourceCheckSteps
                          {
                              httpRequestExecutor.executeHttpRequest(HttpMethod.GET, pageUrl, Optional.empty());
                              return Optional.ofNullable(httpTestContext.getResponse().getResponseBodyAsString())
-                                            .map(response -> getElements(pageUrl, response, cssSelector))
+                                            .map(response -> getElementsByCssSelector(pageUrl, response, cssSelector))
                                             .map(elements -> createResourceValidations(elements,
                                                 p -> new WebPageResourceValidation(p.getLeft(), p.getRight(), pageUrl)))
                                             .orElseGet(() -> Stream.of(createMissingPageBodyValidation(pageUrl)));

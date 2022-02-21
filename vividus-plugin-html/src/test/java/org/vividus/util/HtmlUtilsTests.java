@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockedStatic;
+import org.vividus.html.LocatorType;
 
 class HtmlUtilsTests
 {
@@ -42,7 +45,7 @@ class HtmlUtilsTests
     @Test
     void shouldGetElementsBySelector()
     {
-        assertEquals("Title of the document", HtmlUtils.getElements(HTML, TITLE).get(0).text());
+        assertEquals("Title of the document", HtmlUtils.getElementsByCssSelector(HTML, TITLE).get(0).text());
     }
 
     @Test
@@ -57,10 +60,17 @@ class HtmlUtilsTests
             jsoup.when(() -> Jsoup.parse(HTML, baseUri)).thenReturn(document);
             when(document.select(TITLE)).thenReturn(elements);
 
-            assertEquals(elements, HtmlUtils.getElements(baseUri, HTML, TITLE));
+            assertEquals(elements, HtmlUtils.getElementsByCssSelector(baseUri, HTML, TITLE));
 
             jsoup.verify(() -> Jsoup.parse(HTML, baseUri));
             jsoup.verifyNoMoreInteractions();
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"CSS_SELECTOR, body", "XPATH, //body"})
+    void shouldFindElement(LocatorType locatorType, String locator)
+    {
+        assertEquals(1, HtmlUtils.getElements(HTML, locatorType, locator).size());
     }
 }

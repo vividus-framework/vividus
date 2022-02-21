@@ -1,1 +1,141 @@
-include::ROOT:page$under-construction.adoc[]
+:locator-types: `CSS selector` or `XPath`
+
+= HTML Plugin
+
+The plugin provides the ability to work with HTML documents: data extraction and validation.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-html', version: '{current-version}')
+----
+
+== Locators
+
+HTML locators should be used in order to interact with HTML document elements. The following locators are supported:
+- https://jsoup.org/cookbook/extracting-data/selector-syntax[`CSS selector`]
+- https://developer.mozilla.org/en-US/docs/Web/XPath[`XPath`]
+
+== Steps
+
+=== Validate elements
+
+Validates the number of elements found by the locator matches the specified rules.
+
+[source,gherkin]
+----
+Then number of elements found by $locatorType `$locator` in HTML `$html` is $comparisonRule `$number`
+----
+
+- `$locatorType` - {locator-types}.
+- `$locator` - See <<_locators>>.
+- `$html` - The HTML document to validate.
+- `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+- `$quantity` -  The expected number of elements.
+
+.Validate starfield release date
+[source,gherkin]
+----
+When I issue a HTTP GET request for a resource with the URL 'https://bethesda.net/en/game/starfield'
+Then number of elements found by XPath `//h3[contains(., '111122')]` in HTML `${response}` is = `1`
+----
+
+=== Validate element text
+
+Validates whether the element found by the locator contains the expected text.
+
+[source,gherkin]
+----
+Then element found by $locatorType `$locator` in HTML `$html` contains text `$expectedText`
+----
+
+- `$locatorType` - {locator-types}.
+- `$locator` - See <<_locators>>.
+- `$html` - The HTML document to validate.
+- `$expectedText` - The expected element text.
+
+.Validate starfield release date
+[source,gherkin]
+----
+When I issue a HTTP GET request for a resource with the URL 'https://bethesda.net/en/game/starfield'
+Then element found by XPath `//h3` in HTML `${response}` contains text `111122`
+----
+
+=== Save attribute value
+
+Saves the attribute value into the variable.
+
+[source,gherkin]
+----
+When I save `$attributeName` attribute value of element found by $locatorType `$locator` in HTML `$html` to $scopes variable `$variableName`
+----
+
+- `$attributeName` - The name of the attribute.
+- `$locatorType` - {locator-types}.
+- `$locator` - See <<_locators>>.
+- `$html` - The HTML document to find element.
+- `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+- `$variableName` - The name of the variable to save the attribute value.
+
+.Validate paragraph title
+[source,gherkin]
+----
+When I initialize the story variable `html` with value
+`
+<html>
+  <head>
+    <title>Page Title</title>
+    <script>//<![CDATA[Here comes the data//]]></script>
+  </head>
+  <body>
+    <h1>This is a Heading</h1>
+    <p title="paragraph">This is a paragraph.</p>
+  </body>
+</html>
+`
+When I save `title` attribute value of element found by CSS selector `p` in HTML `${html}` to scenario variable `title`
+Then `${title}` is = `paragraph`
+----
+
+=== Save data/text of element
+
+Saves the data or the text of element. Where the *data* is characters between the start-tag and end-tag of the element and the *text* is the textual content of the element  without any inner element.
+[source,gherkin]
+----
+When I save $dataType of element found by $locatorType `$locator` in HTML `$html` to $scopes variable `variableName`
+----
+
+- `$dataType` - Either `data` or `text`
+- `$html` - The HTML document to find element.
+- `$locatorType` - {locator-types}.
+- `$locator` - See <<_locators>>.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the data or text.
+
+.Validate data/text
+[source,gherkin]
+----
+When I initialize the story variable `html` with value
+`
+<html>
+  <head>
+    <title>Page Title</title>
+    <script>//<![CDATA[Here comes the data//]]></script>
+  </head>
+  <body>
+    <h1>This is a Heading</h1>
+    <p title="paragraph">This is a paragraph.</p>
+  </body>
+</html>
+`
+When I save data of element found by <locatorType> `<script>` in HTML `${html}` to scenario variable `data`
+When I save text of element found by <locatorType> `<script>` in HTML `${html}` to scenario variable `text`
+Then `${data}` is equal to `//<![CDATA[Here comes the data//]]>`
+Then `${text}` is equal to `This is a Heading`
+Examples:
+|locatorType |script  |header|
+|CSS selector|script  |h1    |
+|XPath       |//script|//h1  |
+----
