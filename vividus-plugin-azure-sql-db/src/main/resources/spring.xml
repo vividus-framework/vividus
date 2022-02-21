@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+    default-lazy-init="true">
+
+    <bean id="sqlDatabaseManagementSteps" class="org.vividus.azure.sql.SqlDatabaseManagementSteps">
+        <constructor-arg>
+            <bean class="com.azure.core.management.profile.AzureProfile">
+                <constructor-arg type="com.azure.core.management.AzureEnvironment" value="${azure.sql-db.environment}" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <util:list id="stepBeanNames-Azure-SqlDatabase" value-type="java.lang.String">
+        <idref bean="sqlDatabaseManagementSteps" />
+    </util:list>
+</beans>

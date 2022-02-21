@@ -1,0 +1,47 @@
+:azure-service-name: sql-db
+
+= Azure SQL Database Plugin
+
+The plugin provides functionality to interact with https://docs.microsoft.com/en-us/azure/azure-sql/[Azure SQL Database].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-azure-sql-db', version: '{current-version}')
+----
+
+== SQL Database management
+
+=== Configuration
+
+include::partial$azure-authentication.adoc[leveloffset=+1]
+
+include::partial$azure-profile-and-subscription.adoc[leveloffset=+1]
+
+=== Steps
+
+==== Retrieve the SQL Database properties
+
+Retrieves the properties of the specified SQL Database belonging to the
+identified SQL Server and saves them as JSON to a variable. For more
+information, see the
+https://docs.microsoft.com/en-us/rest/api/sql/databases/get[Azure Docs].
+
+[source,gherkin]
+----
+When I retrieve properties of database with name `$databaseName` from SQL Server `$sqlServerName` from resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`
+----
+
+* `$databaseName` - The name of the SQL Database.
+* `$sqlServerName` - The name of the SQL Server.
+* `$resourceGroupName` - The name of the resource group within the user's subscription to retrieve the SQL Server from. The name is case-insensitive.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the SQL Database properties as JSON.
+
+.Retrieve the SQL Database properties
+[source,gherkin]
+----
+When I retrieve properties of database with name `CITY-DB` from SQL Server `geography-server` from resource group `TEST-SQL` and save them as JSON to scenario variable `sql-db-properties`
+----
