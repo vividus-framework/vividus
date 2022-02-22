@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,8 @@ public final class ConfigurationResolver
     private static final String VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY = "vividus.encryptor.password";
     private static final String DEFAULT_ENCRYPTOR_ALGORITHM = "PBEWithMD5AndDES";
     private static final String DEFAULT_ENCRYPTOR_PASSWORD = "82=thuMUH@";
+
+    private static final SpelExpressionResolver SPEL_RESOLVER = new SpelExpressionResolver();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationResolver.class);
 
@@ -186,10 +188,15 @@ public final class ConfigurationResolver
         suites = propertyPlaceholderHelper.replacePlaceholders(suites, mergedProperties::getProperty);
 
         Multimap<String, String> configuration = LinkedHashMultimap.create();
-        configuration.putAll("profile", asPaths(profiles));
-        configuration.putAll("environment", asPaths(environments));
-        configuration.putAll("suite", asPaths(suites));
+        configuration.putAll("profile", asPaths(resolveSpel(profiles)));
+        configuration.putAll("environment", asPaths(resolveSpel(environments)));
+        configuration.putAll("suite", asPaths(resolveSpel(suites)));
         return configuration;
+    }
+
+    private static String resolveSpel(String property)
+    {
+        return String.valueOf(SPEL_RESOLVER.resolve(property));
     }
 
     private static List<String> asPaths(String value)
@@ -244,7 +251,6 @@ public final class ConfigurationResolver
                         .collect(Collectors.toSet()))
                 : Optional.empty();
 
-        SpelExpressionResolver spelResolver = new SpelExpressionResolver();
         for (Entry<Object, Object> entry : properties.entrySet())
         {
             Object value = entry.getValue();
@@ -253,7 +259,7 @@ public final class ConfigurationResolver
                 String strValue = (String) value;
                 if (propertyPlaceholders.stream().flatMap(Set::stream).noneMatch(strValue::contains))
                 {
-                    entry.setValue(spelResolver.resolve(strValue));
+                    entry.setValue(SPEL_RESOLVER.resolve(strValue));
                 }
             }
         }
