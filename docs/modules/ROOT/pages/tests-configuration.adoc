@@ -354,7 +354,7 @@ To enable the feature create a file `spring.xml` in the `src/main/resources` dir
        xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
        default-lazy-init="false">
 
-    <bean class="org.vividus.bdd.priority.MetaBasedStoryExecutionPriority" factory-method="byNumericMetaValue">
+    <bean class="org.vividus.priority.MetaBasedStoryExecutionPriority" factory-method="byNumericMetaValue">
         <constructor-arg index="0" value="story_priority" />
     </bean>
 </beans>
