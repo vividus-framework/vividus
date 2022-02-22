@@ -25,6 +25,7 @@ dependencies {
     implementation project(':vividus-plugin-azure-event-hub')
     implementation project(':vividus-plugin-azure-functions')
     implementation project(':vividus-plugin-azure-key-vault')
+    implementation project(':vividus-plugin-azure-sql-db')
     implementation project(':vividus-plugin-azure-storage-account')
     implementation project(':vividus-plugin-azure-storage-queue')
     implementation project(':vividus-plugin-browserstack')
