@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
+import org.vividus.html.LocatorType;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.util.ResourceUtils;
@@ -42,8 +43,9 @@ import org.vividus.variable.VariableScope;
 @ExtendWith(MockitoExtension.class)
 class HtmlStepsTests
 {
+    private static final String CSS_SELECTOR = "CSS selector";
     private static final String TEXT = "Example Domain";
-    private static final String NUMBER_OF_ELEMENTS_FOUND_FORMAT = "Number of elements found by CSS selector '%s'";
+    private static final String NUMBER_OF_ELEMENTS_FOUND_FORMAT = "Number of elements found by %s '%s'";
     private static final String VARIABLE_NAME = "variableName";
     private static final String HREF = "href";
     private static final String HTML_CONTENT = ResourceUtils.loadResource(HtmlStepsTests.class, "index.html");
@@ -72,36 +74,43 @@ class HtmlStepsTests
     void testElementContainsDataByCssSelector()
     {
         elementContainsDataByCssSelector("body > div > h1", 1, true);
-        verify(softAssert).assertEquals("Element found by css selector contains expected data", TEXT, TEXT);
+        verify(softAssert).assertEquals("Element found by CSS selector contains expected data", TEXT, TEXT);
     }
 
     private void elementContainsDataByCssSelector(String selector, int size, boolean result)
     {
-        mockFoundElements(selector, size, result);
-        htmlSteps.elementContainsDataByCssSelector(HTML_CONTENT, TEXT, selector);
-        verifyFoundElements(selector, size);
+        mockFoundElements(selector, CSS_SELECTOR, size, result);
+        htmlSteps.elementContainsDataByLocator(LocatorType.CSS_SELECTOR, selector, HTML_CONTENT, TEXT);
+        verifyFoundElements(selector, CSS_SELECTOR, size);
     }
 
     @ParameterizedTest
     @CsvSource({
-            "body > div > h1, 1, true",
-            "body > p       , 0, false"
+        "body > div > h1,                              CSS_SELECTOR, CSS selector, 1, true",
+        "body > p,                                     CSS_SELECTOR, CSS selector, 0, false",
+        "//h1[@id = 'header'],                         XPATH       , XPath,        1, true",
+        "//h1[text() = 'Example Domain'],              XPATH       , XPath,        1, true",
+        "'//h1[contains(text(), \"Example Domain\")]', XPATH       , XPath,        1, true",
+        "'//h1[not(contains(text(), \"Header\"))]',    XPATH       , XPath,        1, true",
+        "//body/p,                                     XPATH       , XPath,        0, true"
     })
-    void testDoesElementByCssSelectorExist(String selector, int size, boolean result)
+    void shouldValidateElementsExistenceByLocator(String locator, LocatorType type, String description, int size,
+        boolean result)
     {
-        mockFoundElements(selector, size, result);
-        htmlSteps.doesElementByCssSelectorExist(selector, HTML_CONTENT, ComparisonRule.EQUAL_TO, 1);
-        verifyFoundElements(selector, size);
+        mockFoundElements(locator, description, size, result);
+        htmlSteps.doesElementByLocatorExist(type, locator, HTML_CONTENT, ComparisonRule.EQUAL_TO, 1);
+        verifyFoundElements(locator, description, size);
     }
 
     @Test
     void testSaveAttributeValueOfElementByCssSelector()
     {
         String selector = "body > div > p:nth-child(3) > a";
-        mockFoundElements(selector, 1, true);
+        mockFoundElements(selector, CSS_SELECTOR, 1, true);
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        htmlSteps.saveAttributeValueOfElementByCssSelector(HREF, HTML_CONTENT, selector, scopes, VARIABLE_NAME);
-        verifyFoundElements(selector, 1);
+        htmlSteps.saveAttributeValueOfElementByLocator(HREF, LocatorType.CSS_SELECTOR, selector, HTML_CONTENT, scopes,
+            VARIABLE_NAME);
+        verifyFoundElements(selector, CSS_SELECTOR, 1);
         verify(variableContext).putVariable(scopes, VARIABLE_NAME, "http://www.iana.org/domains/example");
     }
 
@@ -109,10 +118,10 @@ class HtmlStepsTests
     void testSaveAttributeValueOfElementByCssSelectorNotFound()
     {
         String selector = "body > div > p:nth-child(4)";
-        mockFoundElements(selector, 0, false);
-        htmlSteps.saveAttributeValueOfElementByCssSelector(HTML_CONTENT, HREF, selector,
+        mockFoundElements(selector, CSS_SELECTOR, 0, false);
+        htmlSteps.saveAttributeValueOfElementByLocator(HTML_CONTENT, LocatorType.CSS_SELECTOR, selector, HREF,
                 Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
-        verifyFoundElements(selector, 0);
+        verifyFoundElements(selector, CSS_SELECTOR, 0);
         verifyNoInteractions(variableContext);
     }
 
@@ -120,23 +129,23 @@ class HtmlStepsTests
     void shouldSaveDataOfElementFoundByCssSelector()
     {
         String selector = "h1";
-        mockFoundElements(selector, 1, true);
+        mockFoundElements(selector, CSS_SELECTOR, 1, true);
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        htmlSteps.saveData(DataType.TEXT, HTML_CONTENT, selector, scopes, VARIABLE_NAME);
-        verifyFoundElements(selector, 1);
+        htmlSteps.saveData(DataType.TEXT, LocatorType.CSS_SELECTOR, selector, HTML_CONTENT, scopes, VARIABLE_NAME);
+        verifyFoundElements(selector, CSS_SELECTOR, 1);
         verify(variableContext).putVariable(scopes, VARIABLE_NAME, TEXT);
     }
 
-    private void mockFoundElements(String selector, int size, boolean result)
+    private void mockFoundElements(String selector, String locatorType, int size, boolean result)
     {
-        lenient().when(softAssert.assertThat(eq(String.format(NUMBER_OF_ELEMENTS_FOUND_FORMAT, selector)), eq(size),
-                elementsMatcher())).thenReturn(result);
+        lenient().when(softAssert.assertThat(eq(String.format(NUMBER_OF_ELEMENTS_FOUND_FORMAT, locatorType, selector)),
+                eq(size), elementsMatcher())).thenReturn(result);
     }
 
-    private void verifyFoundElements(String selector, int size)
+    private void verifyFoundElements(String selector, String locatorType, int size)
     {
-        verify(softAssert).assertThat(eq(String.format(NUMBER_OF_ELEMENTS_FOUND_FORMAT, selector)), eq(size),
-                elementsMatcher());
+        verify(softAssert).assertThat(eq(String.format(NUMBER_OF_ELEMENTS_FOUND_FORMAT, locatorType, selector)),
+                eq(size), elementsMatcher());
     }
 
     private Matcher<? super Integer> elementsMatcher()

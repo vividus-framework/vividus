@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.jbehave.core.annotations.When;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.vividus.context.VariableContext;
+import org.vividus.html.LocatorType;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.util.HtmlUtils;
@@ -40,10 +41,10 @@ public class HtmlSteps
         this.variableContext = variableContext;
     }
 
-    private Optional<Element> findElementByCssSelectorExist(String html, String cssSelector)
+    private Optional<Element> assertElementByLocatorExists(String html, LocatorType locatorType, String locator)
     {
-        Elements elements = findElements(html, cssSelector);
-        if (assertElements(cssSelector, ComparisonRule.EQUAL_TO, 1, elements))
+        Elements elements = HtmlUtils.getElements(html, locatorType, locator);
+        if (assertElements(locatorType, locator, ComparisonRule.EQUAL_TO, 1, elements))
         {
             return Optional.of(elements.first());
         }
@@ -51,8 +52,9 @@ public class HtmlSteps
     }
 
     /**
-     * Checks if HTML contains elements according to rule by CSS selector
-     * @param cssSelector    CSS selector
+     * Checks if HTML contains elements according to rule by locator
+     * @param locatorType    <b>CSS selector</b> or <b>XPath</b>
+     * @param locator        Locator to locate elements in HTML document
      * @param html           HTML to check
      * @param comparisonRule The rule to match the quantity of elements. The supported rules:
      *                       <ul>
@@ -68,75 +70,75 @@ public class HtmlSteps
      * @see <a href="https://jsoup.org/apidocs/org/jsoup/select/Selector.html"><i>Jsoup Selector API</i></a>
      * @return true if elements quantity corresponds to rule, false otherwise
      */
-    @Then("number of elements found by CSS selector `$cssSelector` in HTML `$html` is $comparisonRule `$quantity`")
-    public boolean doesElementByCssSelectorExist(String cssSelector, String html, ComparisonRule comparisonRule,
-            int number)
+    @Then("number of elements found by $locatorType `$locator` in HTML `$html` is $comparisonRule `$number`")
+    public boolean doesElementByLocatorExist(LocatorType locatorType,
+            String locator, String html, ComparisonRule comparisonRule, int number)
     {
-        Elements elements = findElements(html, cssSelector);
-        return assertElements(cssSelector, comparisonRule, number, elements);
+        Elements elements = HtmlUtils.getElements(html, locatorType, locator);
+        return assertElements(locatorType, locator, comparisonRule, number, elements);
     }
 
-    private boolean assertElements(String cssSelector, ComparisonRule comparisonRule, int number, Elements elements)
+    private boolean assertElements(LocatorType locatorType, String cssSelector, ComparisonRule comparisonRule,
+            int number, Elements elements)
     {
-        return softAssert.assertThat(String.format("Number of elements found by CSS selector '%s'", cssSelector),
-                elements.size(), comparisonRule.getComparisonRule(number));
-    }
-
-    private Elements findElements(String html, String cssSelector)
-    {
-        return HtmlUtils.getElements(html, cssSelector);
+        return softAssert.assertThat(String.format("Number of elements found by %s '%s'", locatorType.getDescription(),
+            cssSelector), elements.size(), comparisonRule.getComparisonRule(number));
     }
 
     /**
-     * Checks if HTML has expected data by given CSS selector
-     * @param html HTML to check
-     * @param expectedData expected value of element by CSSs selector
-     * @param cssSelector CSS selector
+     * Checks if HTML has expected data by given locator
+     * @param html         HTML to check
+     * @param expectedText expected value of element
+     * @param locatorType  <b>CSS selector</b> or <b>XPath</b>
+     * @param locator      Locator to locate element in HTML document
      * @see <a href="https://www.w3schools.com/cssref/css_selectors.asp"><i>CSS Selector Reference</i></a>
      * @see <a href="https://jsoup.org/apidocs/org/jsoup/select/Selector.html"><i>Jsoup Selector API</i></a>
      */
-    @Then("HTML `$html` contains data `$expectedData` by CSS selector `$cssSelector`")
-    public void elementContainsDataByCssSelector(String html, String expectedData, String cssSelector)
+    @Then("element found by $locatorType `$locator` in HTML `$html` contains text `$expectedText`")
+    public void elementContainsDataByLocator(LocatorType locatorType, String locator, String html, String expectedText)
     {
-        findElementByCssSelectorExist(html, cssSelector).ifPresent(e -> softAssert
-                .assertEquals("Element found by css selector contains expected data", expectedData, e.text()));
+        assertElementByLocatorExists(html, locatorType, locator).ifPresent(e -> softAssert
+            .assertEquals(String.format("Element found by %s contains expected data", locatorType.getDescription()),
+                    expectedText, e.text()));
     }
 
     /**
-     * Sets specified attribute value of the element found by the CSS selector to the variable with name
+     * Sets specified attribute value of the element found by the locator to the variable with name
      * @param attributeName name of the element attribute
      * @param html HTML to check
-     * @param cssSelector CSS selector
+     * @param locatorType  <b>CSS selector</b> or <b>XPath</b>
+     * @param locator CSS selector
      * @see <a href="https://www.w3schools.com/cssref/css_selectors.asp"><i>CSS Selector Reference</i></a>
      * @see <a href="https://jsoup.org/apidocs/org/jsoup/select/Selector.html"><i>Jsoup Selector API</i></a>
      * @param scopes scopes The set of variable scopes (comma separated list of scopes e.g.: STORY, NEXT_BATCHES)
      * @param variableName variable name
      */
-    @When(value = "I save `$attributeName` attribute value of element from HTML `$html` by CSS selector"
-            + " `$cssSelector` to $scopes variable `$variableName`", priority = 1)
-    public void saveAttributeValueOfElementByCssSelector(String attributeName, String html, String cssSelector,
-            Set<VariableScope> scopes, String variableName)
+    @When(value = "I save `$attributeName` attribute value of element found by $locatorType `$locator` in HTML "
+        + "`$html` to $scopes variable `$variableName`", priority = 1)
+    public void saveAttributeValueOfElementByLocator(String attributeName, LocatorType locatorType, String locator,
+            String html, Set<VariableScope> scopes, String variableName)
     {
-        findElementByCssSelectorExist(html, cssSelector)
+        assertElementByLocatorExists(html, locatorType, locator)
                 .ifPresent(e -> variableContext.putVariable(scopes, variableName, e.attr(attributeName)));
     }
 
     /**
-     * Sets specified data type (text, data) of the element found by the CSS selector to the variable with name
+     * Sets specified data type (text, data) of the element found by the locator to the variable with name
      * @param dataType to save
+     * @param locatorType  <b>CSS selector</b> or <b>XPath</b>
+     * @param locator CSS selector
      * @param html HTML to check
-     * @param cssSelector CSS selector
-     * @see <a href="https://www.w3schools.com/cssref/css_selectors.asp"><i>CSS Selector Reference</i></a>
-     * @see <a href="https://jsoup.org/apidocs/org/jsoup/select/Selector.html"><i>Jsoup Selector API</i></a>
      * @param scopes scopes The set of variable scopes (comma separated list of scopes e.g.: STORY, NEXT_BATCHES)
      * @param variableName variable name
+     * @see <a href="https://www.w3schools.com/cssref/css_selectors.asp"><i>CSS Selector Reference</i></a>
+     * @see <a href="https://jsoup.org/apidocs/org/jsoup/select/Selector.html"><i>Jsoup Selector API</i></a>
      */
-    @When("I save $dataType of element from HTML `$html` by CSS selector `$cssSelector` to "
-            + "$scopes variable `$variableName`")
-    public void saveData(DataType dataType, String html, String cssSelector, Set<VariableScope> scopes,
-            String variableName)
+    @When("I save $dataType of element found by $locatorType `$locator` in HTML `$html` to $scopes variable"
+            + " `$variableName`")
+    public void saveData(DataType dataType, LocatorType locatorType, String locator, String html,
+            Set<VariableScope> scopes, String variableName)
     {
-        findElementByCssSelectorExist(html, cssSelector)
-                .ifPresent(e -> variableContext.putVariable(scopes, variableName, dataType.get(e)));
+        assertElementByLocatorExists(html, locatorType, locator)
+            .ifPresent(e -> variableContext.putVariable(scopes, variableName, dataType.get(e)));
     }
 }

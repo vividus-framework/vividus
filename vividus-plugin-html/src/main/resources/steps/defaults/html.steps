@@ -1,0 +1,12 @@
+Composite: When I save $dataType of element from HTML `$html` by CSS selector `$cssSelector` to $scopes variable `$variableName`
+!-- Step is deprecated and will be removed in VIVIDUS 0.5.0. Use instead: When I save $dataType of element found by $locatorType `$locator` in HTML `$html` to $scopes variable `$variableName`
+When I save <dataType> of element found by CSS selector `<cssSelector>` in HTML `<html>` to <scopes> variable `<variableName>`
+
+Composite: Then HTML `$html` contains data `$expectedData` by CSS selector `$cssSelector`
+!-- Step is deprecated and will be removed in VIVIDUS 0.5.0. Use instead: Then element found by $locatorType `$locator` in HTML `$html` contains text `$expectedText`
+Then element found by CSS selector `<cssSelector>` in HTML `<html>` contains text `<expectedData>`
+
+Composite: When I save `$attributeName` attribute value of element from HTML `$html` by CSS selector `$cssSelector` to $scopes variable `$variableName`
+Priority:1
+!-- Step is deprecated and will be removed in VIVIDUS 0.5.0. Use instead: When I save `$attributeName` attribute value of element found by $locatorType `$locator` in HTML `$html` to $scopes variable `$variableName`
+When I save `<attributeName>` attribute value of element found by CSS selector `<cssSelector>` in HTML `<html>` to <scopes> variable `<variableName>`
