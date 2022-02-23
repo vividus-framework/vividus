@@ -1,7 +1,8 @@
-var elementToScroll = arguments[0];
-var exit = arguments[arguments.length-1];
-var waitForScroll;
-var currentWindow = window;
+let elementToScroll = arguments[0];
+const exit = arguments[arguments.length-1];
+let waitForScroll;
+let currentWindow = window;
+const stickyHeaderSize = arguments[1] / 100
 
 try {
     // Check, if we have an access to top level document
@@ -11,7 +12,7 @@ try {
         currentWindow = currentWindow.parent;
     }
     currentWindow.addEventListener('scroll', clearTimeoutAndWait, false);
-    currentWindow.scrollBy(0, elementToScroll.getBoundingClientRect().top - currentWindow.innerHeight * 0.25);
+    currentWindow.scrollBy(0, elementToScroll.getBoundingClientRect().top - currentWindow.innerHeight * stickyHeaderSize);
 }
 catch(e) {
     // swallow error quietly
