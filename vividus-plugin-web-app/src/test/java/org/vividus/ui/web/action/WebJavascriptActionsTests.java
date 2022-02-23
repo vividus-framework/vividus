@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,10 +118,12 @@ class WebJavascriptActionsTests
     void testScrollElementIntoViewportCenter()
     {
         WebElement webElement = mock(WebElement.class);
+        var stickyHeaderSize = 111122;
+        javascriptActions.setStickyHeaderSizePercentage(stickyHeaderSize);
         javascriptActions.scrollElementIntoViewportCenter(webElement);
         verify((JavascriptExecutor) webDriver).executeAsyncScript(
                 ResourceUtils.loadResource(WebJavascriptActionsTests.class, "scroll-element-into-viewport-center.js"),
-                webElement);
+                webElement, stickyHeaderSize);
     }
 
     @Test

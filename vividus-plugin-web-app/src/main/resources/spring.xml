@@ -77,7 +77,9 @@
     </bean>
 
     <bean id="fieldActions" class="org.vividus.ui.web.action.FieldActions" />
-    <bean id="javascriptActions" class="org.vividus.ui.web.action.WebJavascriptActions" />
+    <bean id="javascriptActions" class="org.vividus.ui.web.action.WebJavascriptActions">
+        <property name="stickyHeaderSizePercentage" value="${web-application.sticky-header-size-percentage}" />
+    </bean>
     <bean id="mouseActions" class="org.vividus.ui.web.action.MouseActions">
         <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers" />
     </bean>

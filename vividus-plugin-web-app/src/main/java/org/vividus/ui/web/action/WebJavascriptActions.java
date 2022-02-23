@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,8 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
         return new BrowserConfig(userAgent, devicePixelRatio);
     });
 
+    private int stickyHeaderSizePercentage;
+
     public WebJavascriptActions(IWebDriverProvider webDriverProvider, IWebDriverManager webDriverManager)
     {
         super(webDriverProvider);
@@ -93,7 +95,8 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
 
     public void scrollElementIntoViewportCenter(WebElement webElement)
     {
-        executeAsyncScriptFromResource("scroll-element-into-viewport-center.js", webElement);
+        executeAsyncScriptFromResource("scroll-element-into-viewport-center.js", webElement,
+            stickyHeaderSizePercentage);
     }
 
     /**
@@ -241,6 +244,11 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
     public void waitUntilScrollFinished()
     {
         executeAsyncScriptFromResource("wait-for-scroll.js");
+    }
+
+    public void setStickyHeaderSizePercentage(int stickyHeaderSizePercentage)
+    {
+        this.stickyHeaderSizePercentage = stickyHeaderSizePercentage;
     }
 
     private static final class BrowserConfig
