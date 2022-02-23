@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -339,8 +339,8 @@ public class HttpResponseValidationSteps
      * <p>
      * <code>
      * When I save files content from the response archive into variables with parameters:<br>
-     * |path                        |variableName|scope   |outputFormat|
-     * |files/2011-11-11/skyrim.json|entityJson  |SCENARIO|TEXT        |
+     * |path                        |variableName|scopes   |outputFormat|
+     * |files/2011-11-11/skyrim.json|entityJson  |SCENARIO |TEXT        |
      * </code>
      * </p>
      * Currently available types are TEXT and BASE64
