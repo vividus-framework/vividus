@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,7 +182,8 @@ class HttpClientFactoryTests
             verify(credentialsProvider).setCredentials(eq(AuthScope.ANY),
                     argThat(usernamePasswordCredentialsMatcher()));
             verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
-            verify(mockedHttpClientBuilder, never()).addInterceptorFirst(any(HttpRequestInterceptor.class));
+            verify(mockedHttpClientBuilder, never()).addInterceptorFirst(
+                    (HttpRequestInterceptor) argThat(arg -> arg instanceof LoggingHttpRequestInterceptor));
         }
     }
 
@@ -349,8 +350,10 @@ class HttpClientFactoryTests
         config.setMaxTotalConnections(maxTotalConnections);
         int maxConnectionsPerRoute = 2;
         config.setMaxConnectionsPerRoute(maxConnectionsPerRoute);
-        HttpRequestInterceptor requestInterceptor = mock(HttpRequestInterceptor.class);
-        config.setLastRequestInterceptor(requestInterceptor);
+        HttpRequestInterceptor firstRequestInterceptor = mock(HttpRequestInterceptor.class);
+        config.setFirstRequestInterceptor(firstRequestInterceptor);
+        HttpRequestInterceptor lastRequestInterceptor = mock(HttpRequestInterceptor.class);
+        config.setLastRequestInterceptor(lastRequestInterceptor);
         HttpResponseInterceptor responseInterceptor = mock(HttpResponseInterceptor.class);
         config.setLastResponseInterceptor(responseInterceptor);
         RedirectStrategy redirectStrategy = mock(RedirectStrategy.class);
@@ -384,7 +387,8 @@ class HttpClientFactoryTests
             verify(mockedHttpClientBuilder).setConnectionManager(connectionManager);
             verify(mockedHttpClientBuilder).setMaxConnTotal(maxTotalConnections);
             verify(mockedHttpClientBuilder).setMaxConnPerRoute(maxConnectionsPerRoute);
-            verify(mockedHttpClientBuilder).addInterceptorLast(requestInterceptor);
+            verify(mockedHttpClientBuilder).addInterceptorFirst(firstRequestInterceptor);
+            verify(mockedHttpClientBuilder).addInterceptorLast(lastRequestInterceptor);
             verify(mockedHttpClientBuilder).addInterceptorLast(responseInterceptor);
             verify(mockedHttpClientBuilder).setRedirectStrategy(redirectStrategy);
             verify(mockedHttpClientBuilder).setDefaultRequestConfig(

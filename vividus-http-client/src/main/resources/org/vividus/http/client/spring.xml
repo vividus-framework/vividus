@@ -65,6 +65,11 @@
             </bean>
         </property>
         <property name="skipResponseEntity" value="false" />
+        <property name="firstRequestInterceptor">
+            <bean class="org.vividus.http.client.LoggingHttpRequestInterceptor">
+                <constructor-arg value="org.vividus.http.client.HttpClient" type="java.lang.Class" />
+            </bean>
+        </property>
     </bean>
 
     <bean id="localDnsStorage" factory-bean="propertyParser"

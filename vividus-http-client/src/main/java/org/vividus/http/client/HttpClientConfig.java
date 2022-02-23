@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ public class HttpClientConfig
     private HttpClientConnectionManager connectionManager;
     private int maxTotalConnections;
     private int maxConnectionsPerRoute;
+    private HttpRequestInterceptor firstRequestInterceptor;
     private HttpRequestInterceptor lastRequestInterceptor;
     private HttpResponseInterceptor lastResponseInterceptor;
     private RedirectStrategy redirectStrategy;
@@ -154,6 +155,16 @@ public class HttpClientConfig
     public void setMaxConnectionsPerRoute(int maxConnectionsPerRoute)
     {
         this.maxConnectionsPerRoute = maxConnectionsPerRoute;
+    }
+
+    public HttpRequestInterceptor getFirstRequestInterceptor()
+    {
+        return firstRequestInterceptor;
+    }
+
+    public void setFirstRequestInterceptor(HttpRequestInterceptor firstRequestInterceptor)
+    {
+        this.firstRequestInterceptor = firstRequestInterceptor;
     }
 
     public HttpRequestInterceptor getLastRequestInterceptor()
