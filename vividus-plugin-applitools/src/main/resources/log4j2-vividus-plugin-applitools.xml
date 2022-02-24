@@ -6,5 +6,9 @@
             <AppenderRef ref="file" level="info"/>
             <AppenderRef ref="AllureLogAppender" level="warn"/>
         </Logger>
+        <Logger name="org.vividus.visual.eyes.ApplitoolsHttpClient" level="INFO" additivity="false">
+            <AppenderRef ref="console" />
+            <AppenderRef ref="file" />
+        </Logger>
     </Loggers>
 </Configuration>

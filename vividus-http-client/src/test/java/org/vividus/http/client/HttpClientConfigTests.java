@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,6 +169,20 @@ class HttpClientConfigTests
         HttpClientConnectionManager connectionManager = mock(HttpClientConnectionManager.class);
         config.setConnectionManager(connectionManager);
         assertEquals(connectionManager, config.getConnectionManager());
+    }
+
+    @Test
+    void shouldReturnDefaultFirstRequestInterceptor()
+    {
+        assertNull(config.getFirstRequestInterceptor());
+    }
+
+    @Test
+    void shouldGetAndSetFirstRequestInterceptor()
+    {
+        HttpRequestInterceptor interceptor = mock(HttpRequestInterceptor.class);
+        config.setFirstRequestInterceptor(interceptor);
+        assertEquals(interceptor, config.getFirstRequestInterceptor());
     }
 
     @Test

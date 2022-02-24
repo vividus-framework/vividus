@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,8 +78,11 @@ public class HttpClientFactory implements IHttpClientFactory
         builder.setConnectionManager(config.getConnectionManager());
         builder.setMaxConnTotal(config.getMaxTotalConnections());
         builder.setMaxConnPerRoute(config.getMaxConnectionsPerRoute());
+
+        builder.addInterceptorFirst(config.getFirstRequestInterceptor());
         builder.addInterceptorLast(config.getLastRequestInterceptor());
         builder.addInterceptorLast(config.getLastResponseInterceptor());
+
         builder.setRedirectStrategy(config.getRedirectStrategy());
         builder.setRetryHandler(config.getHttpRequestRetryHandler());
         builder.setServiceUnavailableRetryStrategy(config.getServiceUnavailableRetryStrategy());
