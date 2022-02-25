@@ -62,7 +62,7 @@
                 <constructor-arg value="rest-api.http.header." />
             </bean>
         </property>
-        <property name="lastRequestInterceptor" ref="httpClientInterceptor" />
+        <property name="lastRequestInterceptor" ref="publishingAttachmentInterceptor" />
         <property name="lastResponseInterceptor">
             <bean class="org.vividus.http.SavingConnectionDetailsHttpResponseInterceptor">
                 <property name="httpTestContext" ref="httpTestContext" />
@@ -73,7 +73,7 @@
         </property>
         <property name="httpResponseHandlers">
             <list>
-                <ref bean="httpClientInterceptor" />
+                <ref bean="publishingAttachmentInterceptor" />
             </list>
         </property>
     </bean>
@@ -84,7 +84,7 @@
         <constructor-arg ref="softAssert" />
     </bean>
 
-    <bean id="httpClientInterceptor" class="org.vividus.http.HttpClientInterceptor" />
+    <bean id="publishingAttachmentInterceptor" class="org.vividus.http.PublishingAttachmentInterceptor" />
 
     <bean id="httpCookieSteps" class="org.vividus.steps.api.HttpCookieSteps"/>
 

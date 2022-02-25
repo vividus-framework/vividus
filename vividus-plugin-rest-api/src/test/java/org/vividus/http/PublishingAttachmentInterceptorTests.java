@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ import org.vividus.http.client.HttpResponse;
 import org.vividus.reporter.event.IAttachmentPublisher;
 
 @ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class})
-class HttpClientInterceptorTests
+class PublishingAttachmentInterceptorTests
 {
     private static final String ENDPOINT = "uri";
     private static final String METHOD = "method";
@@ -77,9 +77,9 @@ class HttpClientInterceptorTests
     private static final byte[] DATA = "data".getBytes(StandardCharsets.UTF_8);
 
     @Mock private IAttachmentPublisher attachmentPublisher;
-    @InjectMocks private HttpClientInterceptor httpClientInterceptor;
+    @InjectMocks private PublishingAttachmentInterceptor interceptor;
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(HttpClientInterceptor.class);
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(PublishingAttachmentInterceptor.class);
 
     @Test
     void testHttpRequestIsAttachedSuccessfully() throws IOException
@@ -159,7 +159,7 @@ class HttpClientInterceptorTests
         when(httpResponse.getMethod()).thenReturn(METHOD);
         when(httpResponse.getFrom()).thenReturn(URI.create(ENDPOINT));
         when(httpResponse.getResponseHeaders()).thenReturn(new Header[] { mock(Header.class) });
-        httpClientInterceptor.handle(httpResponse);
+        interceptor.handle(httpResponse);
         ArgumentCaptor<Map<String, Integer>> argumentCaptor = verifyPublishAttachment(RESPONSE);
         assertEquals(HttpStatus.SC_OK, argumentCaptor.getValue().get("statusCode").intValue());
     }
@@ -172,7 +172,7 @@ class HttpClientInterceptorTests
         when(httpResponse.getMethod()).thenReturn(METHOD);
         when(httpResponse.getFrom()).thenReturn(URI.create(ENDPOINT));
         when(httpResponse.getResponseHeaders()).thenReturn(new Header[0]);
-        httpClientInterceptor.handle(httpResponse);
+        interceptor.handle(httpResponse);
         verifyPublishAttachment(RESPONSE);
     }
 
@@ -204,7 +204,7 @@ class HttpClientInterceptorTests
     private void testHttpRequestIsAttachedSuccessfully(HttpEntityEnclosingRequest httpRequest)
     {
         HttpContext httpContext = mock(HttpContext.class);
-        httpClientInterceptor.process(httpRequest, httpContext);
+        interceptor.process(httpRequest, httpContext);
         verifyPublishAttachment(REQUEST);
         verifyNoInteractions(httpContext);
         assertThat(logger.getLoggingEvents(), empty());
@@ -227,7 +227,7 @@ class HttpClientInterceptorTests
     {
         HttpContext httpContext = mock(HttpContext.class);
         verifyNoInteractions(httpContext);
-        httpClientInterceptor.process(httpRequest, httpContext);
+        interceptor.process(httpRequest, httpContext);
         verifyPublishAttachment(REQUEST);
         verifyNoMoreInteractions(attachmentPublisher);
         assertThat(logger.getLoggingEvents(), loggingEventsMatcher);
