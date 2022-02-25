@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,13 +41,13 @@ import org.vividus.http.client.HttpResponse;
 import org.vividus.http.handler.HttpResponseHandler;
 import org.vividus.reporter.event.IAttachmentPublisher;
 
-public class HttpClientInterceptor implements HttpRequestInterceptor, HttpResponseHandler
+public class PublishingAttachmentInterceptor implements HttpRequestInterceptor, HttpResponseHandler
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientInterceptor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PublishingAttachmentInterceptor.class);
 
     private final IAttachmentPublisher attachmentPublisher;
 
-    public HttpClientInterceptor(IAttachmentPublisher attachmentPublisher)
+    public PublishingAttachmentInterceptor(IAttachmentPublisher attachmentPublisher)
     {
         this.attachmentPublisher = attachmentPublisher;
     }
