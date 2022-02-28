@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,9 +79,6 @@ class VisualTestingEngineTests
 
     private static final String DIFF_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAAHklEQVR4XmPg5uZmQAbv8t+h"
                                             + "sIEYIgRnQFnIChG6ADGrFxBXlUutAAAAAElFTkSuQmCC";
-
-    private static final String DIFF_VS_EMPTY_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAAFElEQVR4XmNgYGB"
-                                            + "4l/8OjlA4ZPABQuY3CRSTNYoAAAAASUVORK5CYII=";
 
     private static final String LOG_MESSAGE = "The {} visual difference percentage is {}% , but actual was {}%";
 
@@ -238,9 +235,9 @@ class VisualTestingEngineTests
             () -> assertEquals(BASELINE, checkResult.getBaselineName()),
             () -> assertEquals(CHECKPOINT_BASE64, checkResult.getCheckpoint()),
             () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
-            () -> assertEquals(DIFF_VS_EMPTY_BASE64, checkResult.getDiff()),
+            () -> assertNull(checkResult.getDiff()),
             () -> assertFalse(checkResult.isPassed()));
-        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, 0.0, 96.0))));
+        assertThat(testLogger.getLoggingEvents(), is(empty()));
     }
 
     private BufferedImage mockGetCheckpointScreenshot(VisualCheck visualCheck, String imageName) throws IOException

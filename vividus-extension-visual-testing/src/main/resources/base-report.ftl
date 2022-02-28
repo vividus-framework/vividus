@@ -20,45 +20,50 @@
     </style>
     <div class="container-fluid">
     <#assign compare = result.actionType.name() != "ESTABLISH">
+    <#assign hasBaseline = result.baseline?hasContent>
         <h3>Baseline name: ${result.baselineName}</h3>
         <#if compare>
-        <div class="col-md">
-            <label class="checkbox-inline">
-                <input id="diffCheckBox" type="checkbox" data-toggle="toggle" data-on="Diff" data-off="Checkpoint" data-onstyle="danger" data-offstyle="success">
-            </label>
-            <@custom_controls />
-        </div>
-        <div class="col-md-6">
-            <p>Baseline</p>
-            <#if result.baseline?hasContent>
-            <img class="img-responsive" src="data:image/png;base64,${result.baseline}" />
-            <#else>
-            <span>No baseline image</span>
+            <#if hasBaseline>
+                <div class="col-md">
+                    <label class="checkbox-inline">
+                        <input id="diffCheckBox" type="checkbox" data-toggle="toggle" data-on="Diff" data-off="Checkpoint" data-onstyle="danger" data-offstyle="success">
+                    </label>
+                    <@custom_controls />
+                </div>
             </#if>
-        </div>
-        <div class="col-md-6">
-            <p>Checkpoint</p>
-            <#if result.diff?hasContent>
-            <img id="diff" class="img-responsive" src="data:image/png;base64,${result.diff}" />
-            <#else>
-            <span>No diff image</span>
-            </#if>
-            <#if result.checkpoint?hasContent>
-            <img id="checkpoint" class="img-responsive" src="data:image/png;base64,${result.checkpoint}" />
-            <#else>
-            <span>No checkpoint image</span>
-            </#if>
-        </div>
+            <div class="col-md-6">
+                <p>Baseline</p>
+                <#if hasBaseline>
+                    <img class="img-responsive" src="data:image/png;base64,${result.baseline}" />
+                <#else>
+                    <span>No baseline image</span>
+                </#if>
+            </div>
+            <div class="col-md-6">
+                <p>Checkpoint</p>
+                <#if hasBaseline>
+                    <#if result.diff?hasContent>
+                        <img id="diff" class="img-responsive" src="data:image/png;base64,${result.diff}" />
+                    <#else>
+                        <span>No diff image</span>
+                    </#if>
+                </#if>
+                <#if result.checkpoint?hasContent>
+                    <img id="checkpoint" class="img-responsive" src="data:image/png;base64,${result.checkpoint}" />
+                <#else>
+                    <span>No checkpoint image</span>
+                </#if>
+            </div>
         <#else>
-        <div class="col-md">
-            <p>Baseline</p>
-            <@custom_controls />
-            <#if result.checkpoint?hasContent>
-            <img id="checkpoint" class="img-responsive" src="data:image/png;base64,${result.checkpoint}" />
-            <#else>
-            <span>No checkpoint image</span>
-            </#if>
-        </div>
+            <div class="col-md">
+                <p>Baseline</p>
+                <@custom_controls />
+                <#if result.checkpoint?hasContent>
+                    <img id="checkpoint" class="img-responsive" src="data:image/png;base64,${result.checkpoint}" />
+                <#else>
+                    <span>No checkpoint image</span>
+                </#if>
+            </div>
         </#if>
     </div>
 
