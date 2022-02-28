@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,6 @@ public class VisualTestingEngine implements IVisualTestingEngine
     private static final Logger LOGGER = LoggerFactory.getLogger(VisualTestingEngine.class);
 
     private static final Color DIFF_COLOR = new Color(238, 111, 238);
-    private static final Screenshot EMPTY_SCREENSHOT =
-            new Screenshot(new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR));
 
     private final ScreenshotProvider screenshotProvider;
     private final IBaselineRepository baselineRepository;
@@ -80,32 +78,32 @@ public class VisualTestingEngine implements IVisualTestingEngine
         Screenshot checkpoint = getCheckpointScreenshot(visualCheck);
         comparisonResult.setCheckpoint(imageToBase64(checkpoint.getImage()));
         Optional<Screenshot> baseline = baselineRepository.getBaseline(visualCheck.getBaselineName());
-        Screenshot baselineScreenshot;
         if (baseline.isPresent())
         {
-            baselineScreenshot = baseline.get();
+            Screenshot baselineScreenshot = baseline.get();
             comparisonResult.setBaseline(imageToBase64(baselineScreenshot.getImage()));
+
+            boolean inequalityCheck = visualCheck.getAction() == VisualActionType.CHECK_INEQUALITY_AGAINST;
+            int diffPercentage = calculateDiffPercentage(visualCheck, inequalityCheck);
+            int comparisonImageSize = calculateComparisonImageSize(baselineScreenshot, checkpoint);
+            ImageDiff diff = findImageDiff(baselineScreenshot, checkpoint, comparisonImageSize, diffPercentage);
+            comparisonResult.setPassed(!diff.hasDiff());
+            comparisonResult.setDiff(imageToBase64(diff.getMarkedImage()));
+            LOGGER.atInfo()
+                  .addArgument(() -> inequalityCheck ? "required" : "acceptable")
+                  .addArgument((double) diffPercentage)
+                  .addArgument(() -> Math.ceil((double) (diff.getDiffSize() * 100) / (double) comparisonImageSize))
+                  .log("The {} visual difference percentage is {}% , but actual was {}%");
+            if (overrideBaselines)
+            {
+                baselineRepository.saveBaseline(checkpoint, visualCheck.getBaselineName());
+            }
         }
         else
         {
-            baselineScreenshot = EMPTY_SCREENSHOT;
+            comparisonResult.setPassed(false);
         }
 
-        boolean inequalityCheck = visualCheck.getAction() == VisualActionType.CHECK_INEQUALITY_AGAINST;
-        int diffPercentage = calculateDiffPercentage(visualCheck, inequalityCheck);
-        int comparisonImageSize = calculateComparisonImageSize(baselineScreenshot, checkpoint);
-        ImageDiff diff = findImageDiff(baselineScreenshot, checkpoint, comparisonImageSize, diffPercentage);
-        comparisonResult.setPassed(!diff.hasDiff());
-        comparisonResult.setDiff(imageToBase64(diff.getMarkedImage()));
-        LOGGER.atInfo()
-                       .addArgument(() -> inequalityCheck ? "required" : "acceptable")
-                       .addArgument((double) diffPercentage)
-                       .addArgument(() -> Math.ceil((double) (diff.getDiffSize() * 100) / (double) comparisonImageSize))
-                       .log("The {} visual difference percentage is {}% , but actual was {}%");
-        if (overrideBaselines)
-        {
-            baselineRepository.saveBaseline(checkpoint, visualCheck.getBaselineName());
-        }
         return comparisonResult;
     }
 
