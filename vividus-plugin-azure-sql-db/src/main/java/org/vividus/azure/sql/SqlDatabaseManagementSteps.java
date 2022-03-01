@@ -16,37 +16,45 @@
 
 package org.vividus.azure.sql;
 
-import java.io.IOException;
 import java.util.Set;
 
 import com.azure.core.credential.TokenCredential;
+import com.azure.core.http.HttpMethod;
+import com.azure.core.http.HttpPipeline;
+import com.azure.core.http.HttpRequest;
+import com.azure.core.http.HttpResponse;
 import com.azure.core.management.profile.AzureProfile;
-import com.azure.resourcemanager.sql.SqlServerManager;
-import com.azure.resourcemanager.sql.fluent.models.DatabaseInner;
+import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.azure.util.InnersJacksonAdapter;
 import org.vividus.context.VariableContext;
+import org.vividus.softassert.SoftAssert;
 import org.vividus.variable.VariableScope;
+
+import io.netty.handler.codec.http.HttpResponseStatus;
 
 public class SqlDatabaseManagementSteps
 {
-    private final SqlServerManager sqlServerManager;
-    private final VariableContext variableContext;
-    private final InnersJacksonAdapter innersJacksonAdapter;
+    private static final String API_VERSION = "2021-08-01-preview";
 
-    public SqlDatabaseManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential,
-            InnersJacksonAdapter innersJacksonAdapter, VariableContext variableContext)
+    private final AzureProfile azureProfile;
+    private final SoftAssert softAssert;
+    private final VariableContext variableContext;
+    private final HttpPipeline httpPipeline;
+
+    public SqlDatabaseManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential, SoftAssert softAssert,
+            VariableContext variableContext)
     {
-        this.sqlServerManager = SqlServerManager.authenticate(tokenCredential, azureProfile);
+        this.azureProfile = azureProfile;
+        this.softAssert = softAssert;
         this.variableContext = variableContext;
-        this.innersJacksonAdapter = innersJacksonAdapter;
+        this.httpPipeline = HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile);
     }
 
     /**
      * Retrieves the properties of the specified SQL Database belonging to the identified SQL Server and saves them as
      * JSON to a variable. For more information, see the
-     * <a href="https://docs.microsoft.com/en-us/rest/api/sql/databases/get">Azure Docs</a>.
+     * <a href="https://docs.microsoft.com/en-us/rest/api/sql/2021-08-01-preview/databases/get">Azure Docs</a>.
      *
      * @param databaseName      The name of the SQL Database.
      * @param sqlServerName     The name of the SQL Server.
@@ -62,18 +70,30 @@ public class SqlDatabaseManagementSteps
      *                          <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      *                          </ul>
      * @param variableName      The variable name to store the SQL Database properties as JSON.
-     * @throws IOException If an input or output exception occurred
      */
     @SuppressWarnings("PMD.UseObjectForClearerAPI")
     @When("I retrieve properties of database with name `$databaseName` from SQL Server `$sqlServerName` from resource"
             + " group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`")
     public void retrieveSqlServerDatabaseProperties(String databaseName, String sqlServerName, String resourceGroupName,
-            Set<VariableScope> scopes, String variableName) throws IOException
+            Set<VariableScope> scopes, String variableName)
     {
-        DatabaseInner sqlDatabase = sqlServerManager.sqlServers()
-                .databases()
-                .getBySqlServer(resourceGroupName, sqlServerName, databaseName)
-                .innerModel();
-        variableContext.putVariable(scopes, variableName, innersJacksonAdapter.serializeToJson(sqlDatabase));
+        // Workaround for https://github.com/Azure/azure-sdk-for-java/issues/27268
+        String url = String.format(
+                "%ssubscriptions/%s/resourceGroups/%s/providers/Microsoft.Sql/servers/%s/databases/%s?api-version=%s",
+                azureProfile.getEnvironment().getResourceManagerEndpoint(), azureProfile.getSubscriptionId(),
+                resourceGroupName, sqlServerName, databaseName, API_VERSION);
+        HttpRequest httpRequest = new HttpRequest(HttpMethod.GET, url);
+        try (HttpResponse httpResponse = httpPipeline.send(httpRequest).block())
+        {
+            String responseBody = httpResponse.getBodyAsString().block();
+            if (httpResponse.getStatusCode() == HttpResponseStatus.OK.code())
+            {
+                variableContext.putVariable(scopes, variableName, responseBody);
+            }
+            else
+            {
+                softAssert.recordFailedAssertion("Azure REST API HTTP request execution is failed: " + responseBody);
+            }
+        }
     }
 }

@@ -16,68 +16,97 @@
 
 package org.vividus.azure.sql;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.Set;
 
 import com.azure.core.credential.TokenCredential;
+import com.azure.core.http.HttpMethod;
+import com.azure.core.http.HttpPipeline;
+import com.azure.core.http.HttpRequest;
+import com.azure.core.http.HttpResponse;
+import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.profile.AzureProfile;
-import com.azure.resourcemanager.sql.SqlServerManager;
-import com.azure.resourcemanager.sql.fluent.models.DatabaseInner;
-import com.azure.resourcemanager.sql.models.CreateMode;
-import com.azure.resourcemanager.sql.models.SqlDatabase;
-import com.azure.resourcemanager.sql.models.SqlDatabaseOperations;
-import com.azure.resourcemanager.sql.models.SqlServers;
+import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junitpioneer.jupiter.SetSystemProperty;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.azure.util.InnersJacksonAdapter;
 import org.vividus.context.VariableContext;
+import org.vividus.softassert.SoftAssert;
 import org.vividus.variable.VariableScope;
+
+import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 class SqlDatabaseManagementStepsTests
 {
+    private static final String SUBSCRIPTION_ID_PROPERTY_NAME = "AZURE_SUBSCRIPTION_ID";
+    private static final String SUBSCRIPTION_ID_PROPERTY_VALUE = "subscription-id";
+
     private static final String RESOURCE_GROUP_NAME = "resourceGroupName";
+    private static final String SQL_SERVER_NAME = "sqlServerName";
+    private static final String DATABASE_NAME = "dbname";
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.STORY);
     private static final String VAR_NAME = "varName";
 
-    @Mock private AzureProfile azureProfile;
     @Mock private TokenCredential tokenCredential;
+    @Mock private SoftAssert softAssert;
     @Mock private VariableContext variableContext;
 
+    @SuppressWarnings("PMD.CloseResource")
     @Test
-    void shouldRetrieveSqlServerDatabaseProperties() throws IOException
+    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
+    void shouldRetrieveSqlServerDatabasePropertiesSuccessfully()
     {
-        try (MockedStatic<SqlServerManager> sqlServerManagerStaticMock = mockStatic(SqlServerManager.class))
+        var responseAsString = "{\"key\":\"value\"}";
+        var httpResponse = mock(HttpResponse.class);
+        when(httpResponse.getStatusCode()).thenReturn(200);
+        when(httpResponse.getBodyAsString()).thenReturn(Mono.just(responseAsString));
+        testRetrieveSqlServerDatabaseProperties(httpResponse);
+        verify(variableContext).putVariable(SCOPES, VAR_NAME, responseAsString);
+    }
+
+    @SuppressWarnings("PMD.CloseResource")
+    @Test
+    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
+    void shouldFailToRetrieveSqlServerDatabaseProperties()
+    {
+        var responseAsString = "{\"key\":\"error\"}";
+        var httpResponse = mock(HttpResponse.class);
+        when(httpResponse.getStatusCode()).thenReturn(404);
+        when(httpResponse.getBodyAsString()).thenReturn(Mono.just(responseAsString));
+        testRetrieveSqlServerDatabaseProperties(httpResponse);
+        verify(softAssert).recordFailedAssertion(
+                "Azure REST API HTTP request execution is failed: " + responseAsString);
+    }
+
+    private void testRetrieveSqlServerDatabaseProperties(HttpResponse httpResponse)
+    {
+        var azureProfile = new AzureProfile(AzureEnvironment.AZURE);
+        try (MockedStatic<HttpPipelineProvider> httpPipelineProviderMock = mockStatic(HttpPipelineProvider.class))
         {
-            var sqlServerManager = mock(SqlServerManager.class);
-            sqlServerManagerStaticMock.when(() -> SqlServerManager.authenticate(tokenCredential, azureProfile))
-                    .thenReturn(sqlServerManager);
-            var sqlServers = mock(SqlServers.class);
-            when(sqlServerManager.sqlServers()).thenReturn(sqlServers);
-            var databases = mock(SqlDatabaseOperations.class);
-            when(sqlServers.databases()).thenReturn(databases);
-            var sqlServerName = "sqlServerName";
-            var databaseName = "dbname";
-            SqlDatabase sqlDatabase = mock(SqlDatabase.class);
-            when(databases.getBySqlServer(RESOURCE_GROUP_NAME, sqlServerName, databaseName)).thenReturn(sqlDatabase);
-            DatabaseInner database = new DatabaseInner();
-            database.withCreateMode(CreateMode.POINT_IN_TIME_RESTORE);
-            when(sqlDatabase.innerModel()).thenReturn(database);
-            var steps = new SqlDatabaseManagementSteps(azureProfile, tokenCredential, new InnersJacksonAdapter(),
-                    variableContext);
-            steps.retrieveSqlServerDatabaseProperties(databaseName, sqlServerName, RESOURCE_GROUP_NAME, SCOPES,
+            var httpPipeline = mock(HttpPipeline.class);
+            httpPipelineProviderMock.when(() -> HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile))
+                    .thenReturn(httpPipeline);
+            var httpRequestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+            when(httpPipeline.send(httpRequestCaptor.capture())).thenReturn(Mono.just(httpResponse));
+            var steps = new SqlDatabaseManagementSteps(azureProfile, tokenCredential, softAssert, variableContext);
+            steps.retrieveSqlServerDatabaseProperties(DATABASE_NAME, SQL_SERVER_NAME, RESOURCE_GROUP_NAME, SCOPES,
                     VAR_NAME);
-            verify(variableContext).putVariable(SCOPES, VAR_NAME,
-                    "{\"properties\":{\"createMode\":\"PointInTimeRestore\"}}");
+            var httpRequest = httpRequestCaptor.getValue();
+            assertEquals(HttpMethod.GET, httpRequest.getHttpMethod());
+            assertEquals("https://management.azure.com/subscriptions/subscription-id/resourceGroups/resourceGroupName"
+                    + "/providers/Microsoft.Sql/servers/sqlServerName/databases/dbname?api-version=2021-08-01"
+                    + "-preview", httpRequest.getUrl().toString());
         }
     }
 }
