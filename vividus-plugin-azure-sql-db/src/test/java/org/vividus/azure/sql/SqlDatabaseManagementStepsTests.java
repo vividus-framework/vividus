@@ -17,12 +17,16 @@
 package org.vividus.azure.sql;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Named.named;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.HttpMethod;
@@ -33,7 +37,9 @@ import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Named;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junitpioneer.jupiter.SetSystemProperty;
 import org.mockito.ArgumentCaptor;
@@ -54,7 +60,6 @@ class SqlDatabaseManagementStepsTests
 
     private static final String RESOURCE_GROUP_NAME = "resourceGroupName";
     private static final String SQL_SERVER_NAME = "sqlServerName";
-    private static final String DATABASE_NAME = "dbname";
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.STORY);
     private static final String VAR_NAME = "varName";
 
@@ -62,34 +67,50 @@ class SqlDatabaseManagementStepsTests
     @Mock private SoftAssert softAssert;
     @Mock private VariableContext variableContext;
 
-    @SuppressWarnings("PMD.CloseResource")
-    @Test
-    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
-    void shouldRetrieveSqlServerDatabasePropertiesSuccessfully()
+    private Stream<Named<BiConsumer<Consumer<SqlDatabaseManagementSteps>, String>>> createStreamOfTests()
     {
-        var responseAsString = "{\"key\":\"value\"}";
-        var httpResponse = mock(HttpResponse.class);
-        when(httpResponse.getStatusCode()).thenReturn(200);
-        when(httpResponse.getBodyAsString()).thenReturn(Mono.just(responseAsString));
-        testRetrieveSqlServerDatabaseProperties(httpResponse);
-        verify(variableContext).putVariable(SCOPES, VAR_NAME, responseAsString);
+        return Stream.of(
+                named("success", (test, expectedUrlPath) -> {
+                    var response = testHttpRequestExecution(test, 200, expectedUrlPath);
+                    verify(variableContext).putVariable(SCOPES, VAR_NAME, response);
+                }),
+                named("failure", (test, expectedUrlPath) -> {
+                    var response = testHttpRequestExecution(test, 404, expectedUrlPath);
+                    verify(softAssert).recordFailedAssertion(
+                            "Azure REST API HTTP request execution is failed: " + response);
+                })
+        );
+    }
+
+    @TestFactory
+    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
+    Stream<DynamicTest> shouldListSqlDatabases()
+    {
+        var urlPath = String.format(
+                "subscriptions/%s/resourceGroups/%s/providers/Microsoft.Sql/servers/%s/databases",
+                SUBSCRIPTION_ID_PROPERTY_VALUE, RESOURCE_GROUP_NAME, SQL_SERVER_NAME);
+        return DynamicTest.stream(createStreamOfTests(), test -> test.accept(
+                steps -> steps.listSqlDatabases(SQL_SERVER_NAME, RESOURCE_GROUP_NAME, SCOPES, VAR_NAME), urlPath)
+        );
+    }
+
+    @TestFactory
+    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
+    Stream<DynamicTest> shouldRetrieveSqlServerDatabaseProperties()
+    {
+        String databaseName = "dbname";
+        var urlPath = String.format(
+                "subscriptions/%s/resourceGroups/%s/providers/Microsoft.Sql/servers/%s/databases/%s",
+                SUBSCRIPTION_ID_PROPERTY_VALUE, RESOURCE_GROUP_NAME, SQL_SERVER_NAME, databaseName);
+        return DynamicTest.stream(createStreamOfTests(), test -> test.accept(
+                steps -> steps.retrieveSqlServerDatabaseProperties(databaseName, SQL_SERVER_NAME, RESOURCE_GROUP_NAME,
+                        SCOPES, VAR_NAME), urlPath)
+        );
     }
 
     @SuppressWarnings("PMD.CloseResource")
-    @Test
-    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
-    void shouldFailToRetrieveSqlServerDatabaseProperties()
-    {
-        var responseAsString = "{\"key\":\"error\"}";
-        var httpResponse = mock(HttpResponse.class);
-        when(httpResponse.getStatusCode()).thenReturn(404);
-        when(httpResponse.getBodyAsString()).thenReturn(Mono.just(responseAsString));
-        testRetrieveSqlServerDatabaseProperties(httpResponse);
-        verify(softAssert).recordFailedAssertion(
-                "Azure REST API HTTP request execution is failed: " + responseAsString);
-    }
-
-    private void testRetrieveSqlServerDatabaseProperties(HttpResponse httpResponse)
+    private String testHttpRequestExecution(Consumer<SqlDatabaseManagementSteps> test, int statusCode,
+            String expectedUrlPath)
     {
         var azureProfile = new AzureProfile(AzureEnvironment.AZURE);
         try (MockedStatic<HttpPipelineProvider> httpPipelineProviderMock = mockStatic(HttpPipelineProvider.class))
@@ -97,16 +118,20 @@ class SqlDatabaseManagementStepsTests
             var httpPipeline = mock(HttpPipeline.class);
             httpPipelineProviderMock.when(() -> HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile))
                     .thenReturn(httpPipeline);
+            var responseAsString = "{\"key\":\"value\"}";
+            var httpResponse = mock(HttpResponse.class);
+            when(httpResponse.getStatusCode()).thenReturn(statusCode);
+            when(httpResponse.getBodyAsString()).thenReturn(Mono.just(responseAsString));
             var httpRequestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
             when(httpPipeline.send(httpRequestCaptor.capture())).thenReturn(Mono.just(httpResponse));
+
             var steps = new SqlDatabaseManagementSteps(azureProfile, tokenCredential, softAssert, variableContext);
-            steps.retrieveSqlServerDatabaseProperties(DATABASE_NAME, SQL_SERVER_NAME, RESOURCE_GROUP_NAME, SCOPES,
-                    VAR_NAME);
+            test.accept(steps);
             var httpRequest = httpRequestCaptor.getValue();
             assertEquals(HttpMethod.GET, httpRequest.getHttpMethod());
-            assertEquals("https://management.azure.com/subscriptions/subscription-id/resourceGroups/resourceGroupName"
-                    + "/providers/Microsoft.Sql/servers/sqlServerName/databases/dbname?api-version=2021-08-01"
-                    + "-preview", httpRequest.getUrl().toString());
+            assertEquals("https://management.azure.com/" + expectedUrlPath + "?api-version=2021-08-01-preview",
+                    httpRequest.getUrl().toString());
+            return responseAsString;
         }
     }
 }
