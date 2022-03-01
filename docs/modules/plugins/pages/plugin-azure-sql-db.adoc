@@ -27,7 +27,7 @@ include::partial$azure-profile-and-subscription.adoc[leveloffset=+1]
 Retrieves the properties of the specified SQL Database belonging to the
 identified SQL Server and saves them as JSON to a variable. For more
 information, see the
-https://docs.microsoft.com/en-us/rest/api/sql/databases/get[Azure Docs].
+https://docs.microsoft.com/en-us/rest/api/sql/2021-08-01-preview/databases/get[Azure Docs].
 
 [source,gherkin]
 ----
