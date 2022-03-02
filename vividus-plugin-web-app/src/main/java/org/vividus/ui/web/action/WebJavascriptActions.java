@@ -36,6 +36,9 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
 
     private static final String SCROLL_ELEMENT_INTO_VIEWPORT_CENTER =
         loadScript("scroll-element-into-viewport-center.js");
+
+    private static final String WAIT_FOR_SCROLL = loadScript("wait-for-scroll.js");
+
     private final IWebDriverManager webDriverManager;
 
     private final ThreadLocal<BrowserConfig> browserConfig = ThreadLocal.withInitial(() -> {
@@ -254,7 +257,7 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
      */
     public void waitUntilScrollFinished()
     {
-        executeAsyncScriptFromResource("wait-for-scroll.js");
+        executeAsyncScript(WAIT_FOR_SCROLL);
     }
 
     public void setStickyHeaderSizePercentage(int stickyHeaderSizePercentage)
