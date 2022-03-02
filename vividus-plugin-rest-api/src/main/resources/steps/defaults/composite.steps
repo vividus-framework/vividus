@@ -15,3 +15,7 @@ When I save JSON element from `${response}` by JSON path `<jsonPath>` to <scopes
 Composite: When I save JSON element from response by JSON path `$jsonPath` to $scopes variable `$variableName`
 !-- WARNING: The step "When I save a JSON element from response by JSON path '$jsonPath' to $scopes variable '$variableName'" is deprecated and will be removed in VIVIDUS 0.5.0
 When I save JSON element from `${response}` by JSON path `<jsonPath>` to <scopes> variable `<variableName>`
+
+Composite: When I issue a HTTP $httpMethod request for a resource with the URL '$url'
+!-- WARNING: The step "When I issue a HTTP $httpMethod request for a resource with the URL '$url'" is deprecated and will be removed in VIVIDUS 0.5.0
+When I execute HTTP <httpMethod> request for resource with URL `<url>`

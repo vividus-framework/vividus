@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,27 +151,17 @@ public class HttpRequestSteps
     }
 
     /**
-     * Step is sending HTTP request for the given <b>url</b>
-     * and saving HTTP response into Scenario-level variable.<br>
-     * This step can use the request body that was set before.
-     * Request body shouldn't be set for methods that can't contain body (GET, HEAD, OPTIONS, TRACE),
-     * and should be set for methods that must contain body (PATCH, POST, PUT).
-     * @param httpMethod HTTP method type. Parameter accepts the following HTTP methods:
-     * <ul>
-     * <li>GET</li>
-     * <li>HEAD</li>
-     * <li>POST</li>
-     * <li>PUT</li>
-     * <li>OPTIONS</li>
-     * <li>DELETE</li>
-     * <li>TRACE</li>
-     * <li>PATCH</li>
-     * </ul>
-     * @param url for example https://www.vividus.org/sitemap.xml
+     * Executes the HTTP request to access a resource on the server identified by the URL. The step uses previously
+     * set HTTP headers and request body. The response HTTP headers, response status code and response body can be
+     * accessed by the corresponding steps and dynamic variables.
+     *
+     * @param httpMethod The HTTP method.
+     * @param url        The server URL.
      * @throws IOException If an input or output exception occurred
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/">The HTTP methods.</a>
      */
-    @When("I issue a HTTP $httpMethod request for a resource with the URL '$url'")
-    public void whenIDoHttpRequest(HttpMethod httpMethod, String url) throws IOException
+    @When("I execute HTTP $httpMethod request for resource with URL `$url`")
+    public void executeHttpRequest(HttpMethod httpMethod, String url) throws IOException
     {
         httpRequestExecutor.executeHttpRequest(httpMethod, url, Optional.empty());
     }

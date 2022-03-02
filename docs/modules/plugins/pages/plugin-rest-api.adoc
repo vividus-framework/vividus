@@ -227,6 +227,28 @@ When I send HTTP GET to the relative URL '/get?name=Content'
 Then a JSON element by the JSON path '$.headers.Accept-Language' is equal to '"en-ru"'
 ----
 
+=== Execute HTTP request
+
+Executes the HTTP request to access a resource on the server identified by the URL.
+
+The step uses previously set HTTP headers and request body.
+
+The response HTTP headers, response status code and response body can be accessed by the corresponding steps and dynamic variables.
+
+[source,gherkin]
+----
+When I execute HTTP $httpMethod request for resource with URL `$url`
+----
+
+* `$httpMethod` - The https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods[HTTP method].
+* `$url` - The URL of the resource on the server.
+
+.Execute HTTP GET request
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://example.com`
+----
+
 === Wait for JSON element in the HTTP response
 
 Executes the provided sub-steps until the HTTP response body contains an element by the specified JSON path or the maximum number of retries is reached. The maximum duration of the step execution is not limited. The actions of the step:
