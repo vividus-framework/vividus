@@ -34,6 +34,8 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
             + ".createEvent('MouseEvents');evObj.initEvent('%1$s', true, false); arguments[0].dispatchEvent(evObj);} "
             + "else if(document.createEventObject) { arguments[0].fireEvent('on%1$s');}";
 
+    private static final String SCROLL_ELEMENT_INTO_VIEWPORT_CENTER =
+        loadScript("scroll-element-into-viewport-center.js");
     private final IWebDriverManager webDriverManager;
 
     private final ThreadLocal<BrowserConfig> browserConfig = ThreadLocal.withInitial(() -> {
@@ -85,7 +87,17 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
      */
     public <T> T executeAsyncScriptFromResource(Class<?> clazz, String jsResourceName, Object... args)
     {
-        return executeAsyncScript(ResourceUtils.loadResource(clazz, jsResourceName), args);
+        return executeAsyncScript(loadScript(clazz, jsResourceName), args);
+    }
+
+    private static String loadScript(Class<?> clazz, String jsResourceName)
+    {
+        return ResourceUtils.loadResource(clazz, jsResourceName);
+    }
+
+    private static String loadScript(String jsResourceName)
+    {
+        return loadScript(WebJavascriptActions.class, jsResourceName);
     }
 
     public void scrollIntoView(WebElement webElement, boolean alignedToTheTop)
@@ -95,8 +107,7 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
 
     public void scrollElementIntoViewportCenter(WebElement webElement)
     {
-        executeAsyncScriptFromResource("scroll-element-into-viewport-center.js", webElement,
-            stickyHeaderSizePercentage);
+        executeAsyncScript(SCROLL_ELEMENT_INTO_VIEWPORT_CENTER, webElement, stickyHeaderSizePercentage);
     }
 
     /**
