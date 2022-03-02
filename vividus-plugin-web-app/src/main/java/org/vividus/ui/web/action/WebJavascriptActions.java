@@ -39,6 +39,8 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
 
     private static final String WAIT_FOR_SCROLL = loadScript("wait-for-scroll.js");
 
+    private static final String SCROLL_TO_END_OF_PAGE = loadScript("scroll-to-end-of-page.js");
+
     private final IWebDriverManager webDriverManager;
 
     private final ThreadLocal<BrowserConfig> browserConfig = ThreadLocal.withInitial(() -> {
@@ -118,12 +120,7 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
      */
     public void scrollToEndOfPage()
     {
-        executeAsyncScriptFromResource("scroll-to-end-of-page.js");
-    }
-
-    private void executeAsyncScriptFromResource(String resource, Object... args)
-    {
-        executeAsyncScriptFromResource(WebJavascriptActions.class, resource, args);
+        executeAsyncScript(SCROLL_TO_END_OF_PAGE);
     }
 
     /**
