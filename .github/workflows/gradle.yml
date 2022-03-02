@@ -35,7 +35,7 @@ jobs:
 
     steps:
     - name: Checkout (including submodules and tags)
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         submodules: recursive
         fetch-depth: 0
