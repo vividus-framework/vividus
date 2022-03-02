@@ -367,7 +367,7 @@ Then number of JSON elements by JSON path `$jsonPath` is $comparisonRule $elemen
 * `comparisonRule` - xref:parameters:comparison-rule.adoc[comparison rule]
 * `elementsNumber` - expected elements number
 
-.Number of account lists in JSON is less than 5
+.Number of account lists in JSON is equal to 2
 [source,gherkin]
 ----
 Then number of JSON elements by JSON path `$.accountList` is equal to 2
