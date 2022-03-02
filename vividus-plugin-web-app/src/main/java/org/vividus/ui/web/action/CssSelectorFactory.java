@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,21 +24,22 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.openqa.selenium.WebElement;
+import org.vividus.util.ResourceUtils;
 
 /**
  * <a href="https://www.w3schools.com/cssref/css_selectors.asp">CSS Selector</a> factory
  */
 public class CssSelectorFactory implements ICssSelectorFactory
 {
-    private static final String CSS_SELECTOR_FACTORY_SCRIPT_FILENAME = "css-selector-factory.js";
+    private static final String CSS_SELECTOR_FACTORY_SCRIPT = ResourceUtils.loadResource(
+            CssSelectorFactory.class, "css-selector-factory.js");
 
     @Inject private WebJavascriptActions javascriptActions;
 
     @Override
     public String getCssSelector(WebElement element)
     {
-        return javascriptActions.executeScriptFromResource(CssSelectorFactory.class,
-                CSS_SELECTOR_FACTORY_SCRIPT_FILENAME, element);
+        return javascriptActions.executeScript(CSS_SELECTOR_FACTORY_SCRIPT, element);
     }
 
     @Override
@@ -50,8 +51,7 @@ public class CssSelectorFactory implements ICssSelectorFactory
     @Override
     public Stream<String> getCssSelectors(Collection<WebElement> elements)
     {
-        List<String> elementCss = javascriptActions.executeScriptFromResource(CssSelectorFactory.class,
-                CSS_SELECTOR_FACTORY_SCRIPT_FILENAME, elements);
+        List<String> elementCss = javascriptActions.executeScript(CSS_SELECTOR_FACTORY_SCRIPT, elements);
         return elementCss.stream();
     }
 }

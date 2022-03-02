@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
+import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
 class CssSelectorFactoryTests
@@ -40,7 +41,8 @@ class CssSelectorFactoryTests
     private static final String SHARP_TWO = "#2";
     private static final List<String> CSS_SELECTORS = Arrays.asList(CSS_SELECTOR1, SHARP_TWO);
 
-    private static final String CSS_SELECTOR_FACTORY_JS = "css-selector-factory.js";
+    private static final String CSS_SELECTOR_FACTORY_SCRIPT = ResourceUtils.loadResource(
+            CssSelectorFactory.class, "css-selector-factory.js");
 
     @Mock
     private WebJavascriptActions javascriptActions;
@@ -52,8 +54,7 @@ class CssSelectorFactoryTests
     void testGetCssSelectorForElement()
     {
         WebElement element = mock(WebElement.class);
-        when(javascriptActions.executeScriptFromResource(CssSelectorFactory.class, CSS_SELECTOR_FACTORY_JS, element))
-                .thenReturn(SHARP_TWO);
+        when(javascriptActions.executeScript(CSS_SELECTOR_FACTORY_SCRIPT, element)).thenReturn(SHARP_TWO);
         assertEquals(SHARP_TWO, cssSelectorFactory.getCssSelector(element));
     }
 
@@ -62,8 +63,8 @@ class CssSelectorFactoryTests
     {
         WebElement element1 = mock(WebElement.class);
         WebElement element2 = mock(WebElement.class);
-        doReturn(CSS_SELECTORS).when(javascriptActions).executeScriptFromResource(CssSelectorFactory.class,
-                CSS_SELECTOR_FACTORY_JS, Arrays.asList(element1, element2));
+        doReturn(CSS_SELECTORS).when(javascriptActions).executeScript(CSS_SELECTOR_FACTORY_SCRIPT,
+            Arrays.asList(element1, element2));
         assertEquals(".css-selector1,#2", cssSelectorFactory.getCssSelector(Arrays.asList(element1, element2)));
     }
 
@@ -72,8 +73,8 @@ class CssSelectorFactoryTests
     {
         WebElement webElement1 = mock(WebElement.class);
         WebElement webElement2 = mock(WebElement.class);
-        doReturn(CSS_SELECTORS).when(javascriptActions).executeScriptFromResource(CssSelectorFactory.class,
-                CSS_SELECTOR_FACTORY_JS, Arrays.asList(webElement1, webElement2));
+        doReturn(CSS_SELECTORS).when(javascriptActions).executeScript(CSS_SELECTOR_FACTORY_SCRIPT,
+            Arrays.asList(webElement1, webElement2));
         assertEquals(Arrays.asList(CSS_SELECTOR1, SHARP_TWO), cssSelectorFactory
                 .getCssSelectors(Arrays.asList(webElement1, webElement2))
                 .collect(Collectors.toList()));
