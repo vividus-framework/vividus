@@ -38,15 +38,6 @@ Scenario: Verify HTTP cookies are cleared
 When I send HTTP GET to the relative URL '/cookies'
 Then JSON element by JSON path `$.cookies` is equal to `{}`
 
-Scenario: I wait for response code $responseCode for $duration duration retrying $retryTimes times $stepsToExecute
-!-- Warm up Vividus test site
-When I issue a HTTP GET request for a resource with the URL '${vividus-test-site-url}/'
-When I initialize the scenario variable `uuid` with value `#{generate(Internet.uuid)}`
-When I wait for response code `200` for `PT10S` duration retrying 10 times
-|step                                                                                                                        |
-|When I issue a HTTP GET request for a resource with the URL '${vividus-test-site-url}/api/delayed-response?clientId=${uuid}'|
-Then `${responseCode}` is equal to `200`
-
 Scenario: Validate HTTP retry on service unavailability
 Meta:
     @requirementId 214
@@ -111,3 +102,10 @@ Meta:
 Given request body: #{loadBinaryResource(data/image.png)}
 When I send HTTP POST to the relative URL '/post'
 Then `${responseCode}` is equal to `200`
+
+Scenario: Verify step "When I wait for response code $responseCode for $duration duration retrying $retryTimes times $stepsToExecute"
+When I initialize the scenario variable `relativeURL` with value `get-wrong-wrong-wrong`
+When I wait for response code `200` for `PT10S` duration retrying 3 times
+|step                                                                                                                    |
+|When I initialize the scenario variable `relativeURL` with value `#{eval(`${relativeURL}`.replaceFirst("-wrong", ""))}` |
+|When I send HTTP GET to the relative URL '${relativeURL}'                                                               |

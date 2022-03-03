@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,13 +48,17 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ByteArrayValidationRule;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.steps.SubSteps;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
+import org.vividus.util.wait.DurationBasedWaiter;
+import org.vividus.util.wait.WaitMode;
 import org.vividus.util.zip.ZipUtils;
 import org.vividus.variable.VariableScope;
 
 public class HttpResponseValidationSteps
 {
+    private static final String HTTP_RESPONSE_STATUS_CODE = "HTTP response status code";
     private static final Tika TIKA = new Tika();
 
     private final HttpTestContext httpTestContext;
@@ -190,7 +195,7 @@ public class HttpResponseValidationSteps
     @Then("the response code is $comparisonRule '$responseCode'")
     public void assertResponseCode(ComparisonRule comparisonRule, int responseCode)
     {
-        performIfHttpResponseIsPresent(response -> softAssert.assertThat("HTTP response status code",
+        performIfHttpResponseIsPresent(response -> softAssert.assertThat(HTTP_RESPONSE_STATUS_CODE,
                 response.getStatusCode(), comparisonRule.getComparisonRule(responseCode)));
     }
 
@@ -381,6 +386,39 @@ public class HttpResponseValidationSteps
         parameters.stream().map(NamedEntry::getName).forEach(expectedName ->
                 softAssert.assertThat("The response archive contains entry with name " + expectedName, entryNames,
                         hasItem(expectedName)));
+    }
+
+    /**
+     * Waits for the specified number of times until HTTP response code is equal to what is expected.
+     * <p>
+     * <b>Actions performed:</b>
+     * </p>
+     * <ul>
+     * <li>Execute sub-steps</li>
+     * <li>Check if HTTP response code is equal to what is expected</li>
+     * </ul>
+     * @param responseCode The expected HTTP status code.
+     * @param duration The time duration to wait in ISO-8601 format.
+     * @param retryTimes The number of times the request will be retried: `duration/retryTimes = timeout` is a polling
+     * timeout between requests.
+     * @param stepsToExecute The steps to execute at each wait iteration.
+     */
+    @When("I wait for response code `$responseCode` for `$duration` duration retrying $retryTimes times"
+            + "$stepsToExecute")
+    public void waitForResponseCode(int responseCode, Duration duration, int retryTimes,
+                                    SubSteps stepsToExecute)
+    {
+        new DurationBasedWaiter(new WaitMode(duration, retryTimes)).wait(
+                () -> stepsToExecute.execute(Optional.empty()),
+                () -> isResponseCodeIsEqualToExpected(httpTestContext.getResponse(), responseCode)
+        );
+        performIfHttpResponseIsPresent(
+                response -> softAssert.assertEquals(HTTP_RESPONSE_STATUS_CODE, response.getStatusCode(), responseCode));
+    }
+
+    private boolean isResponseCodeIsEqualToExpected(HttpResponse response, int expectedResponseCode)
+    {
+        return response != null && response.getStatusCode() == expectedResponseCode;
     }
 
     private Optional<String> getHeaderValueByName(HttpResponse response, String httpHeaderName)

@@ -276,6 +276,28 @@ Then server `$hostname` supports secure protocols that $rule `$protocols`
 Then server `vividus-test-site.herokuapp.com` supports secure protocols that contain `TLSv1.2,TLSv1.3`
 ----
 
+=== Wait for expected HTTP status code in response
+
+Waits for the specified number of times until HTTP response code is equal to the expected one. In case if the expected code is not returned after all retries, the assertion error will be recorded.
+
+[source,gherkin]
+----
+When I wait for response code $responseCode for $duration duration retrying $retryTimes times$stepsToExecute
+----
+
+* `$responseCode` - The expected HTTP status code.
+* `$duration` - The time duration to wait in {iso-date-format-link} format.
+* `$retryTimes` - The number of times the request will be retried: `duration/retryTimes = timeout` is a polling timeout between requests.
+* `$stepsToExecute` - The steps to execute at each wait iteration.
+
+.Wait until HTTP GET request returns status code 200
+[source,gherkin]
+----
+When I wait for response code `200` for `PT10S` duration retrying 3 times
+|step                                                        |
+|When I send HTTP GET to the relative URL '/delayed-resource'|
+----
+
 == JSON Steps
 
 :json-path: https://github.com/json-path/JsonPath#path-examples[JSON Path]
