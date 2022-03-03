@@ -22,6 +22,27 @@ include::partial$azure-profile-and-subscription.adoc[leveloffset=+1]
 
 === Steps
 
+==== Collect SQL Servers info
+
+Collects the info about all the SQL Servers under the specified resource group
+and saves it as JSON to a variable. For more information, see the
+https://docs.microsoft.com/en-us/rest/api/sql/2021-08-01-preview/servers/list-by-resource-group[Azure Docs].
+
+[source,gherkin]
+----
+When I collect SQL Servers from resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`
+----
+
+* `$resourceGroupName` - The name of the resource group within the user's subscription to retrieve SQL Servers from. The name is case-insensitive.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the info about SQL Servers as JSON.
+
+.Collect SQL Servers info
+[source,gherkin]
+----
+When I collect SQL Servers from resource group `TEST-SQL` and save them as JSON to scenario variable `sql-servers`
+----
+
 ==== Collect SQL Databases info
 
 Collects the info about all the databases belonging to the identified SQL Server
@@ -42,7 +63,7 @@ When I collect databases from SQL Server `$sqlServerName` from resource group `$
 .Collect SQL Databases info
 [source,gherkin]
 ----
-When I collect databases from SQL Server `geography-server` from resource group `EST-SQL` and save them as JSON to scenario variable `sql-dbs`
+When I collect databases from SQL Server `geography-server` from resource group `TEST-SQL` and save them as JSON to scenario variable `sql-dbs`
 ----
 
 ==== Retrieve the SQL Database properties

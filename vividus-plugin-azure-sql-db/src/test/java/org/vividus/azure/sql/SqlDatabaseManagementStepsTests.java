@@ -84,6 +84,17 @@ class SqlDatabaseManagementStepsTests
 
     @TestFactory
     @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
+    Stream<DynamicTest> shouldListSqlServers()
+    {
+        var urlPath = String.format("subscriptions/%s/resourceGroups/%s/providers/Microsoft.Sql/servers",
+                SUBSCRIPTION_ID_PROPERTY_VALUE, RESOURCE_GROUP_NAME);
+        return DynamicTest.stream(createStreamOfTests(), test -> test.accept(
+                steps -> steps.listSqlServers(RESOURCE_GROUP_NAME, SCOPES, VAR_NAME), urlPath)
+        );
+    }
+
+    @TestFactory
+    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
     Stream<DynamicTest> shouldListSqlDatabases()
     {
         var urlPath = String.format(
