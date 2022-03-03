@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,12 +114,18 @@ public class GenericNestedSteps
     private boolean isExpectedElementsQuantity(Locator locator, Matcher<Integer> elementsMatcher,
             MutableBoolean firstIteration)
     {
+        int foundElements = getElementsNumber(locator);
+        boolean elementsMatch;
         if (firstIteration.isTrue())
         {
             firstIteration.setValue(false);
-            return softAssert.assertThat("Elements number", getElementsNumber(locator), elementsMatcher);
+            elementsMatch = softAssert.assertThat("Elements number", foundElements, elementsMatcher);
         }
-        return elementsMatcher.matches(getElementsNumber(locator));
+        else
+        {
+            elementsMatch = elementsMatcher.matches(foundElements);
+        }
+        return elementsMatch && foundElements != 0;
     }
 
     private int getElementsNumber(Locator locator)
