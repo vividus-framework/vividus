@@ -31,15 +31,24 @@ import org.vividus.util.ResourceUtils;
  */
 public class CssSelectorFactory implements ICssSelectorFactory
 {
-    private static final String CSS_SELECTOR_FACTORY_SCRIPT = ResourceUtils.loadResource(
+    public static final String CSS_SELECTOR_FACTORY_SCRIPT = ResourceUtils.loadResource(
             CssSelectorFactory.class, "css-selector-factory.js");
+
+    private static final String CSS_SELECTOR_CALCULATION = CSS_SELECTOR_FACTORY_SCRIPT
+            + "var source = arguments[0];\n"
+            + "if (Array.isArray(source)) {\n"
+            + "    return Array.prototype.slice.call(source).map(getCssSelectorForElement)\n"
+            + "}\n"
+            + "else {\n"
+            + "    return getCssSelectorForElement(source);\n"
+            + "}";
 
     @Inject private WebJavascriptActions javascriptActions;
 
     @Override
     public String getCssSelector(WebElement element)
     {
-        return javascriptActions.executeScript(CSS_SELECTOR_FACTORY_SCRIPT, element);
+        return javascriptActions.executeScript(CSS_SELECTOR_CALCULATION, element);
     }
 
     @Override
@@ -51,7 +60,7 @@ public class CssSelectorFactory implements ICssSelectorFactory
     @Override
     public Stream<String> getCssSelectors(Collection<WebElement> elements)
     {
-        List<String> elementCss = javascriptActions.executeScript(CSS_SELECTOR_FACTORY_SCRIPT, elements);
+        List<String> elementCss = javascriptActions.executeScript(CSS_SELECTOR_CALCULATION, elements);
         return elementCss.stream();
     }
 }

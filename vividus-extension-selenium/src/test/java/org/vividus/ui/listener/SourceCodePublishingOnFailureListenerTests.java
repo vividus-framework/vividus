@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -98,9 +97,9 @@ class SourceCodePublishingOnFailureListenerTests
         }
 
         @Override
-        protected Optional<String> getSourceCode()
+        protected Map<String, String> getSourceCode()
         {
-            return Optional.of(SOURCES);
+            return Map.of(APPLICATION_SOURCE_CODE, SOURCES);
         }
     }
 
@@ -114,9 +113,9 @@ class SourceCodePublishingOnFailureListenerTests
         }
 
         @Override
-        protected Optional<String> getSourceCode()
+        protected Map<String, String> getSourceCode()
         {
-            return Optional.empty();
+            return Map.of();
         }
     }
 }

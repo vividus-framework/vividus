@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.vividus.ui.listener;
 
 import java.util.Map;
-import java.util.Optional;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -27,6 +26,8 @@ import org.vividus.softassert.event.AssertionFailedEvent;
 
 public abstract class AbstractSourceCodePublishingOnFailureListener
 {
+    protected static final String APPLICATION_SOURCE_CODE = "Application source code";
+
     private final IAttachmentPublisher attachmentPublisher;
     private final IWebDriverProvider webDriverProvider;
     private final String format;
@@ -46,17 +47,17 @@ public abstract class AbstractSourceCodePublishingOnFailureListener
     {
         if (publishSourceOnFailure && webDriverProvider.isWebDriverInitialized())
         {
-            getSourceCode().ifPresent(this::publishSource);
+            getSourceCode().forEach(this::publishSource);
         }
     }
 
-    private void publishSource(String source)
+    private void publishSource(String title, String source)
     {
         attachmentPublisher.publishAttachment("/templates/source-code.ftl",
-                Map.of("sourceCode", source, "format", format), "Application source code");
+            Map.of("sourceCode", source, "format", format), title);
     }
 
-    protected abstract Optional<String> getSourceCode();
+    protected abstract Map<String, String> getSourceCode();
 
     public void setPublishSourceOnFailure(boolean publishSourceOnFailure)
     {

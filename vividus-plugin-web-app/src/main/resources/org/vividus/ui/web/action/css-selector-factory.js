@@ -56,11 +56,3 @@ function isOnlySiblingOfType(element, siblings) {
 function isElementNode(element) {
     return (element.nodeType === 1);
 }
-
-var source = arguments[0];
-if (Array.isArray(source)) {
-    return Array.prototype.slice.call(source).map(getCssSelectorForElement)
-}
-else {
-    return getCssSelectorForElement(source);
-}
