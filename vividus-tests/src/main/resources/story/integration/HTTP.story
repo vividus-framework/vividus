@@ -109,3 +109,4 @@ When I wait for response code `200` for `PT10S` duration retrying 3 times
 |step                                                                                                                    |
 |When I initialize the scenario variable `relativeURL` with value `#{eval(`${relativeURL}`.replaceFirst("-wrong", ""))}` |
 |When I send HTTP GET to the relative URL '${relativeURL}'                                                               |
+Then `${responseCode}` is equal to `200`
