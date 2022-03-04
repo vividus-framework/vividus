@@ -145,3 +145,6 @@ When I initialize the scenario variable `json` with value `
 }
 `
 Then JSON element value from `${json}` by JSON path `$.persons.nemo` is equal to `#{null}`
+
+Scenario: Should escape HTML
+Then `#{escapeHTML(M&Ms)}` is = `M&amp;Ms`
