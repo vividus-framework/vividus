@@ -106,7 +106,7 @@ Then `${responseCode}` is equal to `200`
 Scenario: Verify step "When I wait for response code $responseCode for $duration duration retrying $retryTimes times $stepsToExecute"
 When I initialize the scenario variable `relativeURL` with value `get-wrong-wrong-wrong`
 When I wait for response code `200` for `PT10S` duration retrying 3 times
-|step                                                                                                                    |
-|When I initialize the scenario variable `relativeURL` with value `#{eval(`${relativeURL}`.replaceFirst("-wrong", ""))}` |
-|When I send HTTP GET to the relative URL '${relativeURL}'                                                               |
+|step                                                                                                                         |
+|When I initialize the scenario variable `relativeURL` with value `#{eval(stringUtils:substringBeforeLast(relativeURL, '-'))}`|
+|When I send HTTP GET to the relative URL '${relativeURL}'                                                                    |
 Then `${responseCode}` is equal to `200`
