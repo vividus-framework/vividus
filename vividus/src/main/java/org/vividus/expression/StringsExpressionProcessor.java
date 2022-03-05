@@ -36,6 +36,7 @@ import com.google.common.cache.LoadingCache;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.text.WordUtils;
 import org.vividus.util.ILocationProvider;
 import org.vividus.util.ResourceUtils;
@@ -79,7 +80,8 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
                     .decode(input.getBytes(UTF_8)), UTF_8)),
             new UnaryExpressionProcessor("encodeToBase64",         input -> encodeToBase64(input.getBytes(UTF_8))),
             new UnaryExpressionProcessor("anyOf",                  StringsExpressionProcessor::anyOf),
-            new UnaryExpressionProcessor("toBase64Gzip",           StringsExpressionProcessor::toBase64Gzip)
+            new UnaryExpressionProcessor("toBase64Gzip",           StringsExpressionProcessor::toBase64Gzip),
+            new UnaryExpressionProcessor("escapeHTML",             StringEscapeUtils::escapeHtml4)
         ));
     }
 

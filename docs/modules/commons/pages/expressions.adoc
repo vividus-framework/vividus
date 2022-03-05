@@ -250,6 +250,25 @@ Compress the input string to GZip and encode compressed bytes to Base64 format
 |`H4sIAAAAAAAAACvLLMtMKS0GANIHCdkHAAAA`
 |===
 
+=== `escapeHTML`
+
+Escapes reserved characters in https://www.w3schools.com/html/html_entities.asp[HTML] string 
+
+[source, subs="+quotes"]
+----
+#{escapeHTML(*$input*)}
+----
+
+* *`$input`* - any string to be escaped
+
+.Escape HTML string
+|===
+|Expression |Result
+
+|`#{escapeHTML(M&Ms)}`
+|`M&amp;Ms`
+|===
+
 == Hash calculations
 
 :algorithm-summary: hash algorithm (can use https://datatracker.ietf.org/doc/rfc1319[MD2], https://datatracker.ietf.org/doc/rfc1321[MD5], https://datatracker.ietf.org/doc/rfc3174[SHA-1], https://datatracker.ietf.org/doc/rfc6234[SHA-256], https://datatracker.ietf.org/doc/rfc6234[SHA-384], https://datatracker.ietf.org/doc/rfc6234[SHA-512])
