@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,19 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.lessThan;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,6 +59,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ByteArrayValidationRule;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.steps.SubSteps;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
@@ -75,6 +80,11 @@ class HttpResponseValidationStepsTests
     private static final String CONNECTION_SECURE_ASSERTION = "Connection is secure";
     private static final String FILE_JSON = "file.json";
     private static final String IMAGE_PNG = "images/image.png";
+    private static final String HTTP_RESPONSE_STATUS_CODE = "HTTP response status code";
+    private static final int RETRY_TIMES = 3;
+    private static final int RESPONSE_CODE = 200;
+    private static final int RESPONSE_CODE_ERROR = 404;
+    private static final Duration DURATION = Duration.ofSeconds(10);
 
     @Mock
     private HttpTestContext httpTestContext;
@@ -177,7 +187,7 @@ class HttpResponseValidationStepsTests
         int validCode = 200;
         httpResponse.setStatusCode(validCode);
         httpResponseValidationSteps.assertResponseCode(ComparisonRule.EQUAL_TO, validCode);
-        verify(softAssert).assertThat(eq("HTTP response status code"), eq(validCode),
+        verify(softAssert).assertThat(eq(HTTP_RESPONSE_STATUS_CODE), eq(validCode),
                 argThat(matcher -> matcher.toString().equals("a value equal to <" + validCode + ">")));
     }
 
@@ -454,6 +464,41 @@ class HttpResponseValidationStepsTests
         verify(softAssert).assertThat(eq(message + dummy), eq(archiveEntries),
                 argThat(e -> !e.matches(archiveEntries)));
         verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void testWaitForResponseCode()
+    {
+        mockHttpResponse();
+        SubSteps stepsToExecute = mock(SubSteps.class);
+        httpResponseValidationSteps.waitForResponseCode(RESPONSE_CODE, DURATION, RETRY_TIMES, stepsToExecute);
+        verify(stepsToExecute, atLeast(2)).execute(Optional.empty());
+    }
+
+    @Test
+    void testWaitForResponseCodeWhenResponseCodeIsEqualToExpected()
+    {
+        SubSteps stepsToExecute = mock(SubSteps.class);
+        HttpResponse httpResponse = mock(HttpResponse.class);
+        when(softAssert.assertNotNull(HTTP_RESPONSE_IS_NOT_NULL, httpResponse)).thenReturn(true);
+        when(httpResponse.getStatusCode()).thenReturn(RESPONSE_CODE_ERROR, RESPONSE_CODE);
+        when(httpTestContext.getResponse()).thenReturn(httpResponse);
+        httpResponseValidationSteps.waitForResponseCode(RESPONSE_CODE, DURATION, RETRY_TIMES, stepsToExecute);
+        verify(stepsToExecute, times(2)).execute(Optional.empty());
+        verify(softAssert).assertEquals(HTTP_RESPONSE_STATUS_CODE, RESPONSE_CODE, RESPONSE_CODE);
+    }
+
+    @Test
+    void testWaitForResponseCodeWhenResponseCodeIsNotEqualToExpected()
+    {
+        SubSteps stepsToExecute = mock(SubSteps.class);
+        HttpResponse httpResponse = mock(HttpResponse.class);
+        when(softAssert.assertNotNull(HTTP_RESPONSE_IS_NOT_NULL, httpResponse)).thenReturn(true);
+        when(httpResponse.getStatusCode()).thenReturn(RESPONSE_CODE_ERROR, RESPONSE_CODE_ERROR, RESPONSE_CODE_ERROR);
+        when(httpTestContext.getResponse()).thenReturn(httpResponse);
+        httpResponseValidationSteps.waitForResponseCode(RESPONSE_CODE, DURATION, RETRY_TIMES, stepsToExecute);
+        verify(stepsToExecute, times(3)).execute(Optional.empty());
+        verify(softAssert).assertEquals(HTTP_RESPONSE_STATUS_CODE, RESPONSE_CODE_ERROR, RESPONSE_CODE);
     }
 
     private static NamedEntry createEntry(String name)

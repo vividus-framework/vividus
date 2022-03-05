@@ -21,7 +21,6 @@ import static java.util.stream.Collectors.toList;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -44,12 +43,8 @@ import org.jbehave.core.steps.Parameters;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
-import org.vividus.http.client.HttpResponse;
 import org.vividus.model.RequestPartType;
 import org.vividus.steps.DataWrapper;
-import org.vividus.steps.SubSteps;
-import org.vividus.util.wait.DurationBasedWaiter;
-import org.vividus.util.wait.WaitMode;
 
 public class HttpRequestSteps
 {
@@ -231,43 +226,12 @@ public class HttpRequestSteps
         httpTestContext.putRequestConfig(requestConfigBuilder.build());
     }
 
-    /**
-     * Waits for a specified amount of time until HTTP response code is equal to what is expected.
-     * <p>
-     * <b>Actions performed:</b>
-     * </p>
-     * <ul>
-     * <li>Execute sub-steps</li>
-     * <li>Check if HTTP response code is equal to what is expected</li>
-     * </ul>
-     *
-     * @param responseCode for example 200, 404
-     * @param duration     Time duration to wait
-     * @param retryTimes   How many times request will be retried; duration/retryTimes=timeout between requests
-     * @param stepsToExecute Steps to execute at each wait iteration
-     */
-    @When("I wait for response code `$responseCode` for `$duration` duration retrying $retryTimes times"
-            + "$stepsToExecute")
-    public void waitForResponseCode(int responseCode, Duration duration, int retryTimes,
-            SubSteps stepsToExecute)
-    {
-        new DurationBasedWaiter(new WaitMode(duration, retryTimes)).wait(
-                () -> stepsToExecute.execute(Optional.empty()),
-                () -> isResponseCodeIsEqualToExpected(httpTestContext.getResponse(), responseCode)
-        );
-    }
-
     private void performWithHeaders(ExamplesTable headers, Consumer<List<Header>> headersConsumer)
     {
         List<Header> requestHeaders = headers.getRowsAsParameters(true).stream()
                 .map(row -> new BasicHeader(row.valueAs(NAME, String.class), row.valueAs(VALUE, String.class)))
                 .collect(toList());
         headersConsumer.accept(requestHeaders);
-    }
-
-    private boolean isResponseCodeIsEqualToExpected(HttpResponse response, int expectedResponseCode)
-    {
-        return response != null && response.getStatusCode() == expectedResponseCode;
     }
 
     private static Object castType(String typeName, String value)
