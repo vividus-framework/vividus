@@ -6,6 +6,8 @@ could be optionally specified using either global property `azure.environment`
 `azure.{azure-service-name}.environment`. The plugin-specific property takes
 precedence over the global one. The default value is `AZURE`.
 
+WARNING: The plugin-specific property `azure.{azure-service-name}.environment` is deprecated and will be removed in VIVIDUS 0.5.0. The global property must be used.
+
 The supported environments are only:
 
 - `AZURE`
