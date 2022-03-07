@@ -55,7 +55,7 @@ dependencies {
     implementation(group: 'org.slf4j', name: 'jul-to-slf4j', version: versions.slf4j)
 
     // Meta filters based on Groovy
-    implementation(group: 'org.codehaus.groovy', name: 'groovy', version: '3.0.9')
+    implementation(group: 'org.apache.groovy', name: 'groovy', version: '4.0.0')
 
     // Spring
     implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
