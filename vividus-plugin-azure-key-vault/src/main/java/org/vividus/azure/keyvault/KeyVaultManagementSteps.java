@@ -16,31 +16,29 @@
 
 package org.vividus.azure.keyvault;
 
-import java.io.IOException;
 import java.util.Set;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
-import com.azure.resourcemanager.keyvault.KeyVaultManager;
-import com.azure.resourcemanager.keyvault.fluent.models.VaultInner;
+import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.azure.util.InnersJacksonAdapter;
+import org.vividus.azure.resourcemanager.AbstractAzureResourceManagementSteps;
 import org.vividus.context.VariableContext;
+import org.vividus.softassert.SoftAssert;
 import org.vividus.variable.VariableScope;
 
-public class KeyVaultManagementSteps
+public class KeyVaultManagementSteps extends AbstractAzureResourceManagementSteps
 {
-    private final KeyVaultManager keyVaultManager;
-    private final VariableContext variableContext;
-    private final InnersJacksonAdapter innersJacksonAdapter;
+    private final AzureProfile azureProfile;
 
-    public KeyVaultManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential,
-            InnersJacksonAdapter innersJacksonAdapter, VariableContext variableContext)
+    public KeyVaultManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential, SoftAssert softAssert,
+            VariableContext variableContext)
     {
-        this.keyVaultManager = KeyVaultManager.authenticate(tokenCredential, azureProfile);
-        this.variableContext = variableContext;
-        this.innersJacksonAdapter = innersJacksonAdapter;
+        super(HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile),
+                azureProfile.getEnvironment().getResourceManagerEndpoint(), "2021-10-01", softAssert,
+                variableContext);
+        this.azureProfile = azureProfile;
     }
 
     /**
@@ -61,17 +59,15 @@ public class KeyVaultManagementSteps
      *                          <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      *                          </ul>
      * @param variableName      The variable name to store the key vault properties as JSON.
-     * @throws IOException If an input or output exception occurred
      */
     @When("I retrieve properties of key vault with name `$keyVaultName` from resource group `$resourceGroupName` and "
             + "save them as JSON to $scopes variable `$variableName`")
     public void retrieveKeyVaultProperties(String keyVaultName, String resourceGroupName, Set<VariableScope> scopes,
-            String variableName) throws IOException
+            String variableName)
     {
-        VaultInner vault = keyVaultManager.serviceClient()
-                .getVaults()
-                .getByResourceGroup(resourceGroupName, keyVaultName);
-
-        variableContext.putVariable(scopes, variableName, innersJacksonAdapter.serializeToJson(vault));
+        String urlPath = String.format(
+                "subscriptions/%s/resourceGroups/%s/providers/Microsoft.KeyVault/vaults/%s",
+                azureProfile.getSubscriptionId(), resourceGroupName, keyVaultName);
+        saveHttpResponseAsVariable(urlPath, scopes, variableName);
     }
 }

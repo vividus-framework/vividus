@@ -75,7 +75,8 @@ include::partial$azure-profile-and-subscription.adoc[leveloffset=+1]
 ==== Collect system topics info
 
 Collects system topics info in the specified resource group and saves it as
-JSON to a variable.
+JSON to a variable. For more information, see the
+https://docs.microsoft.com/en-us/rest/api/eventgrid/controlplane-version2021-12-01/system-topics/get[Azure Docs].
 
 [source,gherkin]
 ----

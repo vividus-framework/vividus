@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,40 +16,36 @@
 
 package org.vividus.azure.eventgrid;
 
-import static java.util.stream.Collectors.toList;
-
-import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
-import com.azure.resourcemanager.eventgrid.EventGridManager;
-import com.azure.resourcemanager.eventgrid.fluent.models.SystemTopicInner;
+import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.azure.util.InnersJacksonAdapter;
+import org.vividus.azure.resourcemanager.AbstractAzureResourceManagementSteps;
 import org.vividus.context.VariableContext;
+import org.vividus.softassert.SoftAssert;
 import org.vividus.variable.VariableScope;
 
-public class EventGridManagementSteps
+public class EventGridManagementSteps extends AbstractAzureResourceManagementSteps
 {
-    private final EventGridManager eventGridManager;
-    private final VariableContext variableContext;
-    private final InnersJacksonAdapter innersJacksonAdapter;
+    private final AzureProfile azureProfile;
 
-    public EventGridManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential,
-            InnersJacksonAdapter innersJacksonAdapter, VariableContext variableContext)
+    public EventGridManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential, SoftAssert softAssert,
+            VariableContext variableContext)
     {
-        this.eventGridManager = EventGridManager.authenticate(tokenCredential, azureProfile);
-        this.variableContext = variableContext;
-        this.innersJacksonAdapter = innersJacksonAdapter;
+        super(HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile),
+                azureProfile.getEnvironment().getResourceManagerEndpoint(), "2021-12-01", softAssert,
+                variableContext);
+        this.azureProfile = azureProfile;
     }
 
     /**
      * Collects the info about all the system topics info under the specified resource group and saves it as JSON to a
-     * variable.
-     *
+     * variable. For more information, see the <a href=
+     * "https://docs.microsoft.com/en-us/rest/api/eventgrid/controlplane-version2021-12-01/system-topics/get">Azure
+     * Docs</a>.
      * @param resourceGroupName The name of the resource group within the user's subscription to list the system
      *                          topics from. The name is case-insensitive.
      * @param scopes            The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable
@@ -66,14 +62,9 @@ public class EventGridManagementSteps
     @When("I collect system topics in resource group `$resourceGroupName` and save them as JSON to $scopes variable "
             + "`$variableName`")
     public void listSystemTopics(String resourceGroupName, Set<VariableScope> scopes, String variableName)
-            throws IOException
     {
-        List<SystemTopicInner> systemTopics = eventGridManager.serviceClient()
-                .getSystemTopics()
-                .listByResourceGroup(resourceGroupName)
-                .stream()
-                .collect(toList());
-
-        variableContext.putVariable(scopes, variableName, innersJacksonAdapter.serializeToJson(systemTopics));
+        String urlPath = String.format("subscriptions/%s/resourceGroups/%s/providers/Microsoft.EventGrid/systemTopics",
+                azureProfile.getSubscriptionId(), resourceGroupName);
+        saveHttpResponseAsVariable(urlPath, scopes, variableName);
     }
 }

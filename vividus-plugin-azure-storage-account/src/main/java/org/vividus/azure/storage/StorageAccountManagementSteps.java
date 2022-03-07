@@ -16,35 +16,28 @@
 
 package org.vividus.azure.storage;
 
-import static java.util.stream.Collectors.toList;
-
-import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
-import com.azure.resourcemanager.storage.StorageManager;
-import com.azure.resourcemanager.storage.fluent.models.BlobServicePropertiesInner;
-import com.azure.resourcemanager.storage.fluent.models.StorageAccountInner;
+import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.azure.util.InnersJacksonAdapter;
+import org.vividus.azure.resourcemanager.AbstractAzureResourceManagementSteps;
 import org.vividus.context.VariableContext;
+import org.vividus.softassert.SoftAssert;
 import org.vividus.variable.VariableScope;
 
-public class StorageAccountManagementSteps
+public class StorageAccountManagementSteps extends AbstractAzureResourceManagementSteps
 {
-    private final StorageManager storageManager;
-    private final VariableContext variableContext;
-    private final InnersJacksonAdapter innersJacksonAdapter;
+    private final AzureProfile azureProfile;
 
     public StorageAccountManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential,
-            InnersJacksonAdapter innersJacksonAdapter, VariableContext variableContext)
+            SoftAssert softAssert, VariableContext variableContext)
     {
-        this.storageManager = StorageManager.authenticate(tokenCredential, azureProfile);
-        this.variableContext = variableContext;
-        this.innersJacksonAdapter = innersJacksonAdapter;
+        super(HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile),
+                azureProfile.getEnvironment().getResourceManagerEndpoint(), "2021-08-01", softAssert, variableContext);
+        this.azureProfile = azureProfile;
     }
 
     /**
@@ -64,26 +57,21 @@ public class StorageAccountManagementSteps
      *                          <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      *                          </ul>
      * @param variableName      The variable name to store the info about storage accounts as JSON.
-     * @throws IOException If an input or output exception occurred
      */
     @When("I collect storage accounts in resource group `$resourceGroupName` and save them as JSON to $scopes variable "
             + "`$variableName`")
     public void listStorageAccounts(String resourceGroupName, Set<VariableScope> scopes, String variableName)
-            throws IOException
     {
-        List<StorageAccountInner> storageAccounts = storageManager.serviceClient()
-                .getStorageAccounts()
-                .listByResourceGroup(resourceGroupName)
-                .stream()
-                .collect(toList());
-
-        variableContext.putVariable(scopes, variableName, innersJacksonAdapter.serializeToJson(storageAccounts));
+        String urlPath = String.format("subscriptions/%s/resourceGroups/%s/providers/Microsoft.Storage/storageAccounts",
+                azureProfile.getSubscriptionId(), resourceGroupName);
+        saveHttpResponseAsVariable(urlPath, scopes, variableName);
     }
 
     /**
      * Retrieves the properties of a storage account’s Blob service, including properties for Storage Analytics and CORS
      * (Cross-Origin Resource Sharing) rules, and saves them as JSON to a variable. For more information, see the
-     * <a href="https://docs.microsoft.com/en-us/rest/api/storageservices/get-blob-service-properties">Azure Docs</a>.
+     * <a href="https://docs.microsoft.com/en-us/rest/api/storagerp/blob-services/get-service-properties">Azure
+     * Docs</a>.
      *
      * @param storageAccountName The name of the storage account within the specified resource group.
      * @param resourceGroupName  The name of the resource group within the user's subscription to retrieve the storage
@@ -98,17 +86,16 @@ public class StorageAccountManagementSteps
      *                           <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      *                           </ul>
      * @param variableName       The variable name to store the blob service properties as JSON.
-     * @throws IOException If an input or output exception occurred
      */
     @When("I retrieve blob service properties of storage account with name `$storageAccountName` from resource group "
             + "`$resourceGroupName` and save them as JSON to $scopes variable `$variableName`")
     public void retrieveBlobServiceProperties(String storageAccountName, String resourceGroupName,
-            Set<VariableScope> scopes, String variableName) throws IOException
+            Set<VariableScope> scopes, String variableName)
     {
-        BlobServicePropertiesInner properties = storageManager.serviceClient()
-                .getBlobServices()
-                .getServiceProperties(resourceGroupName, storageAccountName);
-
-        variableContext.putVariable(scopes, variableName, innersJacksonAdapter.serializeToJson(properties));
+        String urlPath = String.format(
+                "subscriptions/%s/resourceGroups/%s/providers/Microsoft"
+                        + ".Storage/storageAccounts/%s/blobServices/default",
+                azureProfile.getSubscriptionId(), resourceGroupName, storageAccountName);
+        saveHttpResponseAsVariable(urlPath, scopes, variableName);
     }
 }

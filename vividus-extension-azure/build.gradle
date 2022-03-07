@@ -2,6 +2,8 @@ project.description = 'Vividus extension for Azure Cloud'
 
 dependencies {
     api(group: 'com.azure', name: 'azure-identity', version: '1.4.5')
+    implementation project(':vividus-engine')
+    implementation project(':vividus-soft-assert')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')

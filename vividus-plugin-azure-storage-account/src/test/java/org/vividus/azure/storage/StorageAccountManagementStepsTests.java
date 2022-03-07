@@ -16,100 +16,120 @@
 
 package org.vividus.azure.storage;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Named.named;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import com.azure.core.credential.TokenCredential;
-import com.azure.core.http.rest.PagedIterable;
+import com.azure.core.http.HttpMethod;
+import com.azure.core.http.HttpPipeline;
+import com.azure.core.http.HttpRequest;
+import com.azure.core.http.HttpResponse;
+import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.profile.AzureProfile;
-import com.azure.resourcemanager.storage.StorageManager;
-import com.azure.resourcemanager.storage.fluent.BlobServicesClient;
-import com.azure.resourcemanager.storage.fluent.StorageAccountsClient;
-import com.azure.resourcemanager.storage.fluent.StorageManagementClient;
-import com.azure.resourcemanager.storage.fluent.models.BlobServicePropertiesInner;
-import com.azure.resourcemanager.storage.fluent.models.StorageAccountInner;
-import com.azure.resourcemanager.storage.models.DeleteRetentionPolicy;
+import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider;
 
-import org.apache.commons.lang3.function.FailableBiConsumer;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Named;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junitpioneer.jupiter.SetSystemProperty;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.azure.util.InnersJacksonAdapter;
 import org.vividus.context.VariableContext;
+import org.vividus.softassert.SoftAssert;
 import org.vividus.variable.VariableScope;
+
+import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 class StorageAccountManagementStepsTests
 {
+    private static final String SUBSCRIPTION_ID_PROPERTY_NAME = "AZURE_SUBSCRIPTION_ID";
+    private static final String SUBSCRIPTION_ID_PROPERTY_VALUE = "subscription-id";
+
     private static final String RESOURCE_GROUP_NAME = "resourceGroupName";
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.STORY);
     private static final String VAR_NAME = "varName";
 
-    @Mock private AzureProfile azureProfile;
     @Mock private TokenCredential tokenCredential;
+    @Mock private SoftAssert softAssert;
     @Mock private VariableContext variableContext;
 
-    @Test
-    @SuppressWarnings("unchecked")
-    void shouldListStorageAccounts() throws IOException
+    private Stream<Named<BiConsumer<Consumer<StorageAccountManagementSteps>, String>>> createStreamOfTests()
     {
-        runWithStorageManagementClient((storageManagementClient, steps) ->
-        {
-            var storageAccountsClient = mock(StorageAccountsClient.class);
-            when(storageManagementClient.getStorageAccounts()).thenReturn(storageAccountsClient);
-            PagedIterable<StorageAccountInner> storageAccounts = mock(PagedIterable.class);
-            when(storageAccountsClient.listByResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(storageAccounts);
-            var storageAccount = new StorageAccountInner();
-            storageAccount.withAllowBlobPublicAccess(Boolean.TRUE);
-            storageAccount.withTags(Map.of());
-            when(storageAccounts.stream()).thenReturn(Stream.of(storageAccount));
-            steps.listStorageAccounts(RESOURCE_GROUP_NAME, SCOPES, VAR_NAME);
-            verify(variableContext).putVariable(SCOPES, VAR_NAME,
-                    "[{\"tags\":{},\"properties\":{\"allowBlobPublicAccess\":true}}]");
-        });
+        return Stream.of(
+                named("success", (test, expectedUrlPath) -> {
+                    var response = testHttpRequestExecution(test, 200, expectedUrlPath);
+                    verify(variableContext).putVariable(SCOPES, VAR_NAME, response);
+                }),
+                named("failure", (test, expectedUrlPath) -> {
+                    var response = testHttpRequestExecution(test, 404, expectedUrlPath);
+                    verify(softAssert).recordFailedAssertion(
+                            "Azure REST API HTTP request execution is failed: " + response);
+                })
+        );
     }
 
-    @Test
-    void shouldRetrieveBlobServiceProperties() throws IOException
+    @TestFactory
+    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
+    Stream<DynamicTest> shouldListStorageAccounts()
     {
-        runWithStorageManagementClient((storageManagementClient, steps) ->
-        {
-            var blobServicesClient = mock(BlobServicesClient.class);
-            when(storageManagementClient.getBlobServices()).thenReturn(blobServicesClient);
-            var storageAccountName = "storageaccountname";
-            var properties = new BlobServicePropertiesInner();
-            properties.withContainerDeleteRetentionPolicy(new DeleteRetentionPolicy().withEnabled(Boolean.TRUE));
-            when(blobServicesClient.getServiceProperties(RESOURCE_GROUP_NAME, storageAccountName)).thenReturn(
-                    properties);
-            steps.retrieveBlobServiceProperties(storageAccountName, RESOURCE_GROUP_NAME, SCOPES, VAR_NAME);
-            verify(variableContext).putVariable(SCOPES, VAR_NAME,
-                    "{\"properties\":{\"containerDeleteRetentionPolicy\":{\"enabled\":true}}}");
-        });
+        var urlPath = String.format("subscriptions/%s/resourceGroups/%s/providers/Microsoft.Storage/storageAccounts",
+                SUBSCRIPTION_ID_PROPERTY_VALUE, RESOURCE_GROUP_NAME);
+        return DynamicTest.stream(createStreamOfTests(), test -> test.accept(
+                steps -> steps.listStorageAccounts(RESOURCE_GROUP_NAME, SCOPES, VAR_NAME), urlPath)
+        );
     }
 
-    private void runWithStorageManagementClient(
-            FailableBiConsumer<StorageManagementClient, StorageAccountManagementSteps, IOException> test)
-            throws IOException
+    @TestFactory
+    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
+    Stream<DynamicTest> shouldRetrieveBlobServiceProperties()
     {
-        try (MockedStatic<StorageManager> storageManagerStaticMock = mockStatic(StorageManager.class))
+        String storageAccountName = "storageaccountname";
+        var urlPath = String.format("subscriptions/%s/resourceGroups/%s/providers/Microsoft.Storage"
+                        + "/storageAccounts/%s/blobServices/default", SUBSCRIPTION_ID_PROPERTY_VALUE,
+                RESOURCE_GROUP_NAME, storageAccountName);
+        return DynamicTest.stream(createStreamOfTests(), test -> test.accept(
+                steps -> steps.retrieveBlobServiceProperties(storageAccountName, RESOURCE_GROUP_NAME, SCOPES, VAR_NAME),
+                urlPath)
+        );
+    }
+
+    @SuppressWarnings("PMD.CloseResource")
+    private String testHttpRequestExecution(Consumer<StorageAccountManagementSteps> test, int statusCode,
+            String expectedUrlPath)
+    {
+        var azureProfile = new AzureProfile(AzureEnvironment.AZURE);
+        try (MockedStatic<HttpPipelineProvider> httpPipelineProviderMock = mockStatic(HttpPipelineProvider.class))
         {
-            var storageManager = mock(StorageManager.class);
-            storageManagerStaticMock.when(() -> StorageManager.authenticate(tokenCredential, azureProfile)).thenReturn(
-                    storageManager);
-            var storageManagementClient = mock(StorageManagementClient.class);
-            when(storageManager.serviceClient()).thenReturn(storageManagementClient);
-            var steps = new StorageAccountManagementSteps(azureProfile, tokenCredential, new InnersJacksonAdapter(),
-                    variableContext);
-            test.accept(storageManagementClient, steps);
+            var httpPipeline = mock(HttpPipeline.class);
+            httpPipelineProviderMock.when(() -> HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile))
+                    .thenReturn(httpPipeline);
+            var responseAsString = "{\"key\":\"value\"}";
+            var httpResponse = mock(HttpResponse.class);
+            when(httpResponse.getStatusCode()).thenReturn(statusCode);
+            when(httpResponse.getBodyAsString()).thenReturn(Mono.just(responseAsString));
+            var httpRequestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+            when(httpPipeline.send(httpRequestCaptor.capture())).thenReturn(Mono.just(httpResponse));
+
+            var steps = new StorageAccountManagementSteps(azureProfile, tokenCredential, softAssert, variableContext);
+            test.accept(steps);
+            var httpRequest = httpRequestCaptor.getValue();
+            assertEquals(HttpMethod.GET, httpRequest.getHttpMethod());
+            assertEquals("https://management.azure.com/" + expectedUrlPath + "?api-version=2021-08-01",
+                    httpRequest.getUrl().toString());
+            return responseAsString;
         }
     }
 }
