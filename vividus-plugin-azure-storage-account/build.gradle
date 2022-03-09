@@ -4,8 +4,9 @@ dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-util')
     implementation project(':vividus-extension-azure')
+    implementation project(':vividus-soft-assert')
     implementation(group: 'com.azure', name: 'azure-storage-blob', version: '12.14.4')
-    implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-storage', version: '2.12.0')
+    implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.12.0')
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
@@ -13,4 +14,5 @@ dependencies {
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+    testImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '1.6.1')
 }

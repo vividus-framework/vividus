@@ -4,10 +4,12 @@ dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-util')
     implementation project(':vividus-extension-azure')
+    implementation project(':vividus-soft-assert')
     implementation(group: 'com.azure', name: 'azure-messaging-eventgrid', version: '4.9.0')
-    implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-eventgrid', version: '1.1.0-beta.2')
+    implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.12.0')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '1.6.1')
 }

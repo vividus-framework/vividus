@@ -3,9 +3,11 @@ project.description = 'Vividus plugin for Azure Key Vault'
 dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-extension-azure')
-    implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-keyvault', version: '2.12.0')
+    implementation project(':vividus-soft-assert')
+    implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-resources', version: '2.12.0')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '1.6.1')
 }
