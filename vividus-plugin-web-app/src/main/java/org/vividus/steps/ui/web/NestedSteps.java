@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.SubSteps;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.context.SearchContextSetter;
 import org.vividus.ui.web.action.ICssSelectorFactory;
@@ -97,9 +98,11 @@ public class NestedSteps
                 stepsToExecute.execute(Optional.empty());
             });
             IntStream.range(1, cssSelectors.size()).forEach(i -> {
+                SearchParameters searchParameters = new SearchParameters(cssSelectors.get(i),
+                        locator.getSearchParameters().getVisibility());
                 WebElement element = baseValidations
                         .assertIfElementExists("An element for iteration " + (i + 1),
-                                new Locator(WebLocatorType.CSS_SELECTOR, cssSelectors.get(i)));
+                                new Locator(WebLocatorType.CSS_SELECTOR, searchParameters));
                 runStepsWithContextReset(() ->
                 {
                     uiContext.putSearchContext(element, () -> { });

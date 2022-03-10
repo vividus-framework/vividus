@@ -760,3 +760,36 @@ Then `${info.duration}` is > `1000`
 Then `${info.networkState}` is = `2`
 Then `${info.src}` matches `.+youtube.+`
 ----
+
+=== Perform steps for each found element
+
+Executes the steps against all elements found by locator. After a required number of elements is found,
+search context switches in order for each found element and performs all steps on it.
+
+[IMPORTANT]
+If comparison rule mismatch steps will not be performed even if elements are found.
+
+[source,gherkin]
+----
+When I find $comparisonRule `$number` elements by `$locator` and for each element do$stepsToExecute
+----
+
+Alias:
+[source,gherkin]
+----
+When I find $comparisonRule '$number' elements by $locator and for each element do$stepsToExecute
+----
+
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$number` - The number of elements to find.
+* `$locator` - <<_locator>>.
+* `$stepsToExecute` - The `ExamplesTable` with a single column containing the steps to execute.
+
+.Script type check
+[source,gherkin]
+----
+When I find = `5` elements by `By.xpath(//script):a` and for each element do
+|step                                                                                      |
+|When I set 'type' attribute value of the context element to the 'scenario' variable 'type'|
+|Then `${type}` is equal to `text/javascript`                                              |
+----
