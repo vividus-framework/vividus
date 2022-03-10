@@ -355,13 +355,13 @@ public class SoftAssert implements ISoftAssert
 
         eventBus.post(new AssertionFailedEvent(assertionError));
 
-        if (failTestCaseFast && !assertionError.isKnownIssue() || assertionError.isFailTestCaseFast())
-        {
-            failTestFastHandler.failTestCaseFast();
-        }
         if (assertionError.isFailTestSuiteFast())
         {
             failTestFastHandler.failTestSuiteFast();
+        }
+        if (failTestCaseFast && !assertionError.isKnownIssue() || assertionError.isFailTestCaseFast())
+        {
+            failTestFastHandler.failTestCaseFast();
         }
     }
 
