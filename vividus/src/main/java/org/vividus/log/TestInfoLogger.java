@@ -101,7 +101,7 @@ public final class TestInfoLogger
             try (Formatter message = new Formatter())
             {
                 message.format(separatorFormat, HORIZONTAL_RULE);
-                message.format("%n Execution plan:");
+                message.format("%n Execution plan (before filtering by meta):");
 
                 executionPlan.forEach((batchKey, stories) ->
                 {
