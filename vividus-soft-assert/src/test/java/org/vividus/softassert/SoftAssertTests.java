@@ -50,8 +50,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.event.AssertionPassedEvent;
@@ -243,6 +245,19 @@ class SoftAssertTests
         softAssert.setFailTestCaseFast(true);
         testRecordFailedAssertion(softAssert::recordFailedAssertion);
         verify(failTestFastHandler).failTestCaseFast();
+        verifyNoMoreInteractions(failTestFastHandler);
+    }
+
+    @Test
+    void shouldPerformFailSuiteFastBeforeFailTesCaseFast()
+    {
+        var knownIssue = mock(KnownIssue.class);
+        when(knownIssue.isFailTestSuiteFast()).thenReturn(true);
+        when(knownIssue.isFailTestCaseFast()).thenReturn(true);
+        InOrder ordered = Mockito.inOrder(failTestFastHandler);
+        testRecordFailedAssertionAsKnownIssue(true, knownIssue);
+        ordered.verify(failTestFastHandler).failTestSuiteFast();
+        ordered.verify(failTestFastHandler).failTestCaseFast();
         verifyNoMoreInteractions(failTestFastHandler);
     }
 
