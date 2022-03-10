@@ -30,14 +30,15 @@ import org.vividus.variable.VariableScope;
 
 public class SqlDatabaseManagementSteps extends AbstractAzureResourceManagementSteps
 {
+    private static final String API_VERSION = "2021-08-01-preview";
+
     private final AzureProfile azureProfile;
 
     public SqlDatabaseManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential, SoftAssert softAssert,
             VariableContext variableContext)
     {
         super(HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile),
-                azureProfile.getEnvironment().getResourceManagerEndpoint(), "2021-08-01-preview", softAssert,
-                variableContext);
+                azureProfile.getEnvironment().getResourceManagerEndpoint(), softAssert, variableContext);
         this.azureProfile = azureProfile;
     }
 
@@ -65,7 +66,7 @@ public class SqlDatabaseManagementSteps extends AbstractAzureResourceManagementS
     {
         String urlPath = String.format("subscriptions/%s/resourceGroups/%s/providers/Microsoft.Sql/servers",
                 azureProfile.getSubscriptionId(), resourceGroupName);
-        saveHttpResponseAsVariable(urlPath, scopes, variableName);
+        saveHttpResponseAsVariable(urlPath, API_VERSION, scopes, variableName);
     }
 
     /**
@@ -95,7 +96,7 @@ public class SqlDatabaseManagementSteps extends AbstractAzureResourceManagementS
         String urlPath = String.format(
                 "subscriptions/%s/resourceGroups/%s/providers/Microsoft.Sql/servers/%s/databases",
                 azureProfile.getSubscriptionId(), resourceGroupName, sqlServerName);
-        saveHttpResponseAsVariable(urlPath, scopes, variableName);
+        saveHttpResponseAsVariable(urlPath, API_VERSION, scopes, variableName);
     }
 
     /**
@@ -127,6 +128,6 @@ public class SqlDatabaseManagementSteps extends AbstractAzureResourceManagementS
         String urlPath = String.format(
                 "subscriptions/%s/resourceGroups/%s/providers/Microsoft.Sql/servers/%s/databases/%s",
                 azureProfile.getSubscriptionId(), resourceGroupName, sqlServerName, databaseName);
-        saveHttpResponseAsVariable(urlPath, scopes, variableName);
+        saveHttpResponseAsVariable(urlPath, API_VERSION, scopes, variableName);
     }
 }

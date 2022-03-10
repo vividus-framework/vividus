@@ -30,14 +30,15 @@ import org.vividus.variable.VariableScope;
 
 public class EventGridManagementSteps extends AbstractAzureResourceManagementSteps
 {
+    private static final String API_VERSION = "2021-12-01";
+
     private final AzureProfile azureProfile;
 
     public EventGridManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential, SoftAssert softAssert,
             VariableContext variableContext)
     {
         super(HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile),
-                azureProfile.getEnvironment().getResourceManagerEndpoint(), "2021-12-01", softAssert,
-                variableContext);
+                azureProfile.getEnvironment().getResourceManagerEndpoint(), softAssert, variableContext);
         this.azureProfile = azureProfile;
     }
 
@@ -65,6 +66,6 @@ public class EventGridManagementSteps extends AbstractAzureResourceManagementSte
     {
         String urlPath = String.format("subscriptions/%s/resourceGroups/%s/providers/Microsoft.EventGrid/systemTopics",
                 azureProfile.getSubscriptionId(), resourceGroupName);
-        saveHttpResponseAsVariable(urlPath, scopes, variableName);
+        saveHttpResponseAsVariable(urlPath, API_VERSION, scopes, variableName);
     }
 }

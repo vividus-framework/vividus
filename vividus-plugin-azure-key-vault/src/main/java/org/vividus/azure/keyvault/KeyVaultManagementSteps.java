@@ -30,14 +30,15 @@ import org.vividus.variable.VariableScope;
 
 public class KeyVaultManagementSteps extends AbstractAzureResourceManagementSteps
 {
+    private static final String API_VERSION = "2021-10-01";
+
     private final AzureProfile azureProfile;
 
     public KeyVaultManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential, SoftAssert softAssert,
             VariableContext variableContext)
     {
         super(HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile),
-                azureProfile.getEnvironment().getResourceManagerEndpoint(), "2021-10-01", softAssert,
-                variableContext);
+                azureProfile.getEnvironment().getResourceManagerEndpoint(), softAssert, variableContext);
         this.azureProfile = azureProfile;
     }
 
@@ -68,6 +69,6 @@ public class KeyVaultManagementSteps extends AbstractAzureResourceManagementStep
         String urlPath = String.format(
                 "subscriptions/%s/resourceGroups/%s/providers/Microsoft.KeyVault/vaults/%s",
                 azureProfile.getSubscriptionId(), resourceGroupName, keyVaultName);
-        saveHttpResponseAsVariable(urlPath, scopes, variableName);
+        saveHttpResponseAsVariable(urlPath, API_VERSION, scopes, variableName);
     }
 }

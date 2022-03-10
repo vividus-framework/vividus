@@ -1,0 +1,71 @@
+= Azure Resource Manager Plugin
+
+The plugin provides the ability to collect information about Azure resources.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-azure-resource-manager', version: '{current-version}')
+----
+
+== Resource management
+
+=== Configuration
+
+include::partial$azure-authentication.adoc[leveloffset=+1]
+
+==== Azure environment selection
+
+https://docs.microsoft.com/en-us/azure/active-directory/develop/authentication-national-cloud[Azure environment]
+could be optionally specified using global property `azure.environment`
+(sets the environment for all Azure plugins). The default value is `AZURE`.
+
+The supported environments are only:
+
+- `AZURE`
+- `AZURE_CHINA`
+- `AZURE_GERMANY`
+- `AZURE_US_GOVERNMENT`
+
+==== Azure subscription selection
+
+Azure subscription must be configured via `AZURE_SUBSCRIPTION_ID` environment variable.
+
+
+=== Steps
+
+==== Get information about Azure resource
+
+Gets the info about the specified Azure resource using the declared Azure API
+version and saves it to a variable. For more information, see the
+https://docs.microsoft.com/en-us/rest/api/azure/[Azure REST API reference].
+
+[source,gherkin]
+----
+When I get Azure resource with identifier `$azureResourceIdentifier` using API version `$apiVersion` and save it to $scopes variable `$variableName`
+----
+
+* `$azureResourceIdentifier` - This is a VIVIDUS-only term. It's used to specify Azure resource uniquely. From
+the technical perspective it's a part of Azure resource REST API URL path. For example, if the full Azure resource URL is
++
+[source,gherkin]
+----
+https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sample-resource-group/providers/Microsoft.KeyVault/vaults/sample-vault?api-version=2021-10-01
+----
+then the resource identifier will be
++
+[source,gherkin]
+----
+resourceGroups/sample-resource-group/providers/Microsoft.KeyVault/vaults/sample-vault
+----
+* `$apiVersion` - Azure resource provider API version. Note API versions may vary depending on the resource type.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the Azure resource info.
+
+.Retrieve the Key Vault properties
+[source,gherkin]
+----
+When I get Azure resource with identifier `resourceGroups/TEST-RG/providers/Microsoft.KeyVault/vaults/KEY-VAULT-NAME` using API version `2021-10-01` and save it to scenario variable `key-vault-properties`
+----
