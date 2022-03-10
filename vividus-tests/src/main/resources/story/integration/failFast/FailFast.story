@@ -8,5 +8,5 @@ Then `20` is = `77`
 Then `1` is = `3`
 
 
-Scenario: Should not execute this scenarion if story-level fail-fast enabled
+Scenario: Should not execute this scenario if story-level fail-fast enabled
 Then `1` is = `9`
