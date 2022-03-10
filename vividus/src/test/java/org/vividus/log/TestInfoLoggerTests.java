@@ -200,7 +200,7 @@ class TestInfoLoggerTests
         assertThat(loggingEvents.get(0).getMessage(), matchesRegex(
                 "(?s)\\s*"
                 + "-{60}\\s+"
-                + " Execution plan:\\s*"
+                + " Execution plan \\(before filtering by meta\\):\\s*"
                 + "   batch-1:\\s*"
                 + "     path1\\s*"
                 + "   batch-2:\\s*"
