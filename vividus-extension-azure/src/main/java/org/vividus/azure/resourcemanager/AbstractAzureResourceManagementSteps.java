@@ -33,21 +33,20 @@ public abstract class AbstractAzureResourceManagementSteps
 {
     private final HttpPipeline httpPipeline;
     private final String resourceManagerEndpoint;
-    private final String apiVersion;
     private final SoftAssert softAssert;
     private final VariableContext variableContext;
 
     protected AbstractAzureResourceManagementSteps(HttpPipeline httpPipeline, String resourceManagerEndpoint,
-            String apiVersion, SoftAssert softAssert, VariableContext variableContext)
+            SoftAssert softAssert, VariableContext variableContext)
     {
         this.httpPipeline = httpPipeline;
         this.resourceManagerEndpoint = resourceManagerEndpoint;
-        this.apiVersion = apiVersion;
         this.softAssert = softAssert;
         this.variableContext = variableContext;
     }
 
-    protected void saveHttpResponseAsVariable(String urlPath, Set<VariableScope> scopes, String variableName)
+    protected void saveHttpResponseAsVariable(String urlPath, String apiVersion, Set<VariableScope> scopes,
+            String variableName)
     {
         // Workaround for https://github.com/Azure/azure-sdk-for-java/issues/27268
         String url = resourceManagerEndpoint + urlPath + "?api-version=" + apiVersion;

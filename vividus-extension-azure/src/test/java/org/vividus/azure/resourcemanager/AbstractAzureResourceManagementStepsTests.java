@@ -74,9 +74,9 @@ class AbstractAzureResourceManagementStepsTests
 
         var apiVersion = "2021-10-01";
         var resourceManagerEndpoint = "https://management.azure.com/";
-        var steps = new TestSteps(httpPipeline, resourceManagerEndpoint, apiVersion, softAssert, variableContext);
+        var steps = new TestSteps(httpPipeline, resourceManagerEndpoint, softAssert, variableContext);
         var urlPath = "subscriptions/sub-id/resourceGroups/rgname/providers/Microsoft.KeyVault/vaults/sample-vault";
-        steps.saveHttpResponseAsVariable(urlPath, SCOPES, VAR_NAME);
+        steps.saveHttpResponseAsVariable(urlPath, apiVersion, SCOPES, VAR_NAME);
         var httpRequest = httpRequestCaptor.getValue();
         assertEquals(HttpMethod.GET, httpRequest.getHttpMethod());
         assertEquals(resourceManagerEndpoint + urlPath + "?api-version=" + apiVersion, httpRequest.getUrl().toString());
@@ -85,10 +85,10 @@ class AbstractAzureResourceManagementStepsTests
 
     private static class TestSteps extends AbstractAzureResourceManagementSteps
     {
-        protected TestSteps(HttpPipeline httpPipeline, String resourceManagerEndpoint, String apiVersion,
-                SoftAssert softAssert, VariableContext variableContext)
+        protected TestSteps(HttpPipeline httpPipeline, String resourceManagerEndpoint, SoftAssert softAssert,
+                VariableContext variableContext)
         {
-            super(httpPipeline, resourceManagerEndpoint, apiVersion, softAssert, variableContext);
+            super(httpPipeline, resourceManagerEndpoint, softAssert, variableContext);
         }
     }
 }
