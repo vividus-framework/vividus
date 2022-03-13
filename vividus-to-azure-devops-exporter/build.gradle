@@ -8,6 +8,6 @@ dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-exporter-commons')
 
-    implementation platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.13.1')
+    implementation platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.13.2')
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml')
 }
