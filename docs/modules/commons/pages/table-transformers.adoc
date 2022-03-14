@@ -37,6 +37,37 @@ VIVIDUS global variables can be used in transformer properties (pay attention to
 |header n|value 1n| .... |value mn|
 ----
 
+=== RESOLVING_EXPRESSIONS_EAGERLY
+
+`RESOLVING_EXPRESSIONS_EAGERLY` processes expressions which are used as values inside table.
+
+[IMPORTANT]
+====
+By using expression for random data generation:
+* without `RESOLVING_EXPRESSIONS_EAGERLY` - newly generated value will always be substituted;
+* with `RESOLVING_EXPRESSIONS_EAGERLY` - value will be generated once and it will be substituted the same in all places.
+====
+
+.Usage of RESOLVING_EXPRESSIONS_EAGERLY transformer
+[source,gherkin]
+----
+{transformer=RESOLVING_EXPRESSIONS_EAGERLY}
+|firstName                     |lastName                     |
+|#{generate(Address.firstName)}|#{generate(Address.lastName)}|
+----
+
+=== RESOLVING_SELF_REFERENCES_EAGERLY
+
+`RESOLVING_SELF_REFERENCES_EAGERLY` allows to reuse table data inside itself.
+
+.Usage of RESOLVING_SELF_REFERENCES_EAGERLY transformer
+[source,gherkin]
+----
+{transformer=RESOLVING_SELF_REFERENCES_EAGERLY}
+|column1|column2  |column3  |
+|A      |<column3>|<column1>|
+----
+
 === FORMATTING
 
 `FORMATTING` transformer formats the table according to the max width of each column. Also this transformer removes the commented lines.
