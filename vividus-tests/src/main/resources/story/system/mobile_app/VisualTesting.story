@@ -59,5 +59,5 @@ When I tap on element located `xpath(<menuScrollViewXpath>)`
 When I wait until element located `xpath(<scrollViewXpath>)` appears
 When I change context to element located `xpath(<scrollViewXpath>)`
 When I <action> baseline with `${target-platform}-context-with-ignore` ignoring:
-|ELEMENT                         |
-|By.accessibilityId(historyStart)|
+|ELEMENT                   |
+|By.accessibilityId(header)|

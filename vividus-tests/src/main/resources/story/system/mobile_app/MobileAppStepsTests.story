@@ -174,14 +174,14 @@ Then number of elements found by `accessibilityId(picture)` is equal to `1`
 Scenario: Verify step: 'When I swipe $direction to element located `$locator` with duration $swipeDuration'
 When I tap on element located `accessibilityId(menuToggler)`
 When I tap on element located `xpath(<menuScrollViewXpath>)`
-Then number of elements found by `accessibilityId(historyStart)` is equal to `1`
-Then number of elements found by `accessibilityId(historyEnd)` is equal to `0`
-When I swipe UP to element located `accessibilityId(historyEnd)` with duration PT1S
-Then number of elements found by `accessibilityId(historyStart)` is equal to `0`
-Then number of elements found by `accessibilityId(historyEnd)` is equal to `1`
-When I swipe DOWN to element located `accessibilityId(historyStart)` with duration PT1S
-Then number of elements found by `accessibilityId(historyStart)` is equal to `1`
-Then number of elements found by `accessibilityId(historyEnd)` is equal to `0`
+Then number of elements found by `accessibilityId(header)` is equal to `1`
+Then number of elements found by `accessibilityId(footer)` is equal to `0`
+When I swipe UP to element located `accessibilityId(footer)` with duration PT1S
+Then number of elements found by `accessibilityId(header)` is equal to `0`
+Then number of elements found by `accessibilityId(footer)` is equal to `1`
+When I swipe DOWN to element located `accessibilityId(header)` with duration PT1S
+Then number of elements found by `accessibilityId(header)` is equal to `1`
+Then number of elements found by `accessibilityId(footer)` is equal to `0`
 
 
 Scenario: [Android] Verify step: 'When I upload file `$filePath` to device'
@@ -287,6 +287,7 @@ Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
 
 Scenario: Go to slider screen
 When I tap on element located `accessibilityId(menuToggler)`
+When I swipe UP to element located `xpath(<menuSliderXpath>)` with duration PT1S
 When I tap on element located `xpath(<menuSliderXpath>)`
 When I wait until element located `accessibilityId(zeroToHundredSlider)` appears
 
