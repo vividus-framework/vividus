@@ -32,6 +32,10 @@
     <bean id="fileSteps" class="org.vividus.steps.FileSteps" />
     <bean id="setupSteps" class="org.vividus.steps.SetupSteps" />
 
+    <bean class="org.vividus.publishing.DiffAttachmentPublisher">
+        <property name="textLengthDiffThreshold" value="${report.text-length-diff-threshold}" />
+    </bean>
+
     <util:list id="stepBeanNames-Vividus">
         <idref bean="assertSteps" />
         <idref bean="variablesSteps" />

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -47,6 +48,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
+import org.vividus.publishing.DiffAttachmentPublisher;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
@@ -65,16 +67,17 @@ class VariablesStepsTests
     @Mock private VariableContext variableContext;
     @Mock private ISoftAssert softAssert;
     @Mock private IAttachmentPublisher attachmentPublisher;
+    @Mock private DiffAttachmentPublisher diffAttachmentPublisher;
     @InjectMocks private VariablesSteps variablesSteps;
 
     @SuppressWarnings({ "checkstyle:MultipleStringLiterals", "checkstyle:MultipleStringLiteralsExtended" })
     static Stream<Arguments> stringsAsNumbers()
     {
         return Stream.of(
-                arguments("9", "10"),
-                arguments(9,   "10"),
-                arguments("9", 10),
-                arguments(9,   10)
+                arguments("1", "10"),
+                arguments(1,   "10"),
+                arguments("1", 10),
+                arguments(1,   10)
         );
     }
 
@@ -83,20 +86,23 @@ class VariablesStepsTests
     void shouldCompareStringsAsNumbers(Object variable1, Object variable2)
     {
         variablesSteps.compareVariables(variable1, ComparisonRule.LESS_THAN_OR_EQUAL_TO, variable2);
-        verify(softAssert).assertThat(eq("Checking if \"9\" is less than or equal to \"10\""),
-                eq(BigDecimal.valueOf(9)), argThat(m -> "a value less than or equal to <10>".equals(m.toString())));
+        verify(softAssert).assertThat(eq("Checking if \"1\" is less than or equal to \"10\""),
+                eq(BigDecimal.ONE), argThat(m -> "a value less than or equal to <10>".equals(m.toString())));
+        verify(diffAttachmentPublisher).publishDiff(BigDecimal.ONE, BigDecimal.TEN);
     }
 
     @ParameterizedTest
     @CsvSource({
-            "9,       string",
-            "string1, string2"
+            "9,       string,  false, 1",
+            "string1, string2, false, 1",
+            "string1, string1, true,  0"
     })
-    void testCompareSimpleVariablesStrings(String variable1, String variable2)
+    void testCompareSimpleVariablesStrings(String variable1, String variable2, boolean passed, int published)
     {
         String description = "Checking if \"" + variable1 + "\" is equal to \"" + variable2 + "\"";
-        when(softAssert.assertThat(eq(description), eq(variable1), any())).thenReturn(false);
-        assertFalse(variablesSteps.compareVariables(variable1, ComparisonRule.EQUAL_TO, variable2));
+        when(softAssert.assertThat(eq(description), eq(variable1), any())).thenReturn(passed);
+        assertEquals(passed, variablesSteps.compareVariables(variable1, ComparisonRule.EQUAL_TO, variable2));
+        verify(diffAttachmentPublisher, times(published)).publishDiff(variable1, variable2);
     }
 
     @Test
@@ -118,6 +124,7 @@ class VariablesStepsTests
         EntryComparisonResult result = captureComparisonResults().get(0).get(0);
         assertResult(KEY_1, VALUE_1, VALUE_2, false, result);
         verify(softAssert, never()).assertThat(any(), any(), any());
+        verifyNoInteractions(diffAttachmentPublisher);
     }
 
     @Test
@@ -129,6 +136,7 @@ class VariablesStepsTests
         verify(softAssert).assertTrue(TABLES_ARE_EQUAL, true);
         assertEquals(List.of(), captureComparisonResults());
         verify(softAssert, never()).assertThat(any(), any(), any());
+        verifyNoInteractions(diffAttachmentPublisher);
     }
 
     @Test
@@ -144,6 +152,7 @@ class VariablesStepsTests
         assertResult(KEY_1, twoBD, twoBD, true, result);
 
         verify(softAssert, never()).assertThat(any(), any(), any());
+        verifyNoInteractions(diffAttachmentPublisher);
     }
 
     @Test
@@ -159,6 +168,7 @@ class VariablesStepsTests
         assertResult(KEY_1, null, VALUE_2, false, results.get(1).get(0));
 
         verify(softAssert, never()).assertThat(any(), any(), any());
+        verifyNoInteractions(diffAttachmentPublisher);
     }
 
     @Test
@@ -174,6 +184,7 @@ class VariablesStepsTests
         assertResult(KEY_1, VALUE_2, null, false, results.get(1).get(0));
 
         verify(softAssert, never()).assertThat(any(), any(), any());
+        verifyNoInteractions(diffAttachmentPublisher);
     }
 
     @Test

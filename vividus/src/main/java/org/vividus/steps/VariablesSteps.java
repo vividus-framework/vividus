@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
 import org.vividus.context.VariableContext;
+import org.vividus.publishing.DiffAttachmentPublisher;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.EnumUtils;
@@ -48,7 +49,7 @@ public class VariablesSteps
     private final VariableComparator variableComparator;
 
     public VariablesSteps(VariableContext variableContext, ISoftAssert softAssert,
-            IAttachmentPublisher attachmentPublisher)
+            IAttachmentPublisher attachmentPublisher, DiffAttachmentPublisher diffAttachmentPublisher)
     {
         this.variableContext = variableContext;
         this.softAssert = softAssert;
@@ -60,7 +61,12 @@ public class VariablesSteps
             {
                 String readableCondition = EnumUtils.toHumanReadableForm(condition);
                 String description = "Checking if \"" + value1 + "\" is " + readableCondition + " \"" + value2 + "\"";
-                return softAssert.assertThat(description, value1, condition.getComparisonRule(value2));
+                boolean passed = softAssert.assertThat(description, value1, condition.getComparisonRule(value2));
+                if (!passed)
+                {
+                    diffAttachmentPublisher.publishDiff(value1, value2);
+                }
+                return passed;
             }
 
             @Override
