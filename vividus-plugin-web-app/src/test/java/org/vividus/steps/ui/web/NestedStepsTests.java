@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.SubSteps;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.context.SearchContextSetter;
 import org.vividus.ui.web.action.ICssSelectorFactory;
@@ -72,8 +74,9 @@ class NestedStepsTests
                 ComparisonRule.EQUAL_TO)).thenReturn(Arrays.asList(first, second));
         when(cssSelectorFactory.getCssSelectors(List.of(first, second)))
             .thenReturn(List.of(FIRST_XPATH, SECOND_XPATH).stream());
-        Locator secondLocator = new Locator(WebLocatorType.CSS_SELECTOR,
-                SECOND_XPATH);
+        SearchParameters searchParameters = new SearchParameters(SECOND_XPATH, Visibility.ALL);
+        when(locator.getSearchParameters()).thenReturn(searchParameters);
+        Locator secondLocator = new Locator(WebLocatorType.CSS_SELECTOR, searchParameters);
         when(baseValidations.assertIfElementExists("An element for iteration 2",
                 secondLocator)).thenReturn(second);
         SearchContextSetter searchContextSetter = mockSearchContextSetter();
