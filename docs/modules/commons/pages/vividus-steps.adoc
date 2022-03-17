@@ -221,3 +221,43 @@ Then `<column>` is equal to `value`
 Examples:
 file:///${examples-table-temporary-file}
 ----
+
+
+=== Compare variables
+
+Compare the value from the first *variable* with the value from the second *variable* in accordance with the *condition*. Could compare Maps and Lists of maps using EQUAL_TO comparison rule.
+Other rules will fallback to strings comparison.
+
+INFO: The step prints the comparison results in the unified diff format for the strings with the legth more than specified in the property xref:ROOT:tests-configuration.adoc#_configuration_properties[report.text-length-diff-threshold].
+
+WARNING: If the variables contain valid numbers than they will be converted into https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigInteger.html[BigInteger] and compared as numbers.
+
+[source,gherkin]
+----
+Then `$variable1` is $comaprisonRule `$variable2`
+----
+
+* `$variable1` - The first variable.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$variable1` - The second variable.
+
+
+.Compare Strings
+[source,gherkin]
+----
+Then `Duke` is != `Leto`
+----
+
+.Compare numbers
+[source,gherkin]
+----
+Then `10` is = `10.0`
+----
+
+.Compare list of maps
+[source,gherkin]
+----
+When I execute SQL query `SELECT * FROM test.launch_rockets WHERE name='Proton'` against `preprod` and save result to scenario variable `preprod-date`
+When I execute SQL query `SELECT * FROM test.launch_rockets WHERE name='Proton'` against `prod` and save result to scenario variable `prod-data`
+Then `${preprod-data}` is = `${prod-data}`
+----

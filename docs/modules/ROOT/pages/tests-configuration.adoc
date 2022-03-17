@@ -81,6 +81,10 @@ NOTE: The properties marked with *bold* are mandatory.
 |`statistics.print-failures`
 |`false`
 |If set to `true` prints table of failures including: story, scenario, step and error message
+
+|`report.text-length-diff-threshold`
+|`100`
+|Defines text threshold length to enable unified diff report publishing on failure, for variable comparisons. If you want to have this report despite the size of the compared data set 0.
 |===
 
 == Known Issues
