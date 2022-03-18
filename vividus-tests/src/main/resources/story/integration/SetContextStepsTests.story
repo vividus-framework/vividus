@@ -56,6 +56,14 @@ When I change context to the page
 Then number of elements found by `By.xpath(html)` is equal to `1`
 
 
+Scenario: Verify step: "When I change context to element located `$locator` in scope of current context"
+Given I am on a page with the URL '${vividus-test-site-url}'
+When I change context to element located `xpath(//a)`
+When I change context to element located `xpath(.//*)` in scope of current context
+When I save `name` attribute value of context element to scenario variable `name`
+Then `${name}` is = `vividus-logo`
+
+
 Scenario: Verify step: "When I reset context"
 When I change context to element located `By.xpath(//body)`
 Then number of elements found by `By.xpath(html)` is equal to `0`

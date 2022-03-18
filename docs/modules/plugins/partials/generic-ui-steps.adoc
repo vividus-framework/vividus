@@ -178,6 +178,25 @@ Changes the context to an element located by locator for limiting area of subseq
 
 [source,gherkin]
 ----
+When I change context to element located `$locator` in scope of current context
+----
+
+* `$locator` - <<_locator>>.
+
+.Change context
+[source,gherkin]
+----
+Then number of elements found by `By.xpath(html)` is equal to `1`
+When I change context to element located `By.xpath(//body)` in scope of current context
+Then number of elements found by `By.xpath(html)` is equal to `0`
+----
+
+=== Reset and change context
+
+Resets current context and changes the context to an element located by locator for limiting area of subsequent UI interactions.
+
+[source,gherkin]
+----
 When I change context to element located `$locator`
 ----
 
