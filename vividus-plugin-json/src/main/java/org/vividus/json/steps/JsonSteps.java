@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.util.json.JsonPathUtils;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
 public class JsonSteps
@@ -46,12 +47,15 @@ public class JsonSteps
     private final JsonContext jsonContext;
     private final VariableContext variableContext;
     private ISoftAssert softAssert;
+    private JsonUtils jsonUtils;
 
-    public JsonSteps(FluentEnumConverter fluentEnumConverter, JsonContext jsonContext, VariableContext variableContext)
+    public JsonSteps(FluentEnumConverter fluentEnumConverter, JsonContext jsonContext, VariableContext variableContext,
+            JsonUtils jsonUtils)
     {
         this.fluentEnumConverter = fluentEnumConverter;
         this.jsonContext = jsonContext;
         this.variableContext = variableContext;
+        this.jsonUtils = jsonUtils;
     }
 
     /**
@@ -108,6 +112,75 @@ public class JsonSteps
                     }
                 )
                 .ifPresent(actualData -> variableContext.putVariable(scopes, variableName, actualData));
+    }
+
+    /**
+     * Converts a JSON into the variable with specified name and scope.
+     * JSON fields will be available via their names.<br/>
+     * For example:<br/>
+     * <b>JSON:</b><br/>
+     * <pre>
+     * {
+     *   "book":[
+     *     {
+     *       "author":"Karl Marx",
+     *       "title":"Das Kapital"
+     *     }
+     *   ]
+     * }
+     * </pre>
+     * <br/>
+     * <b>Reference to a variable:</b>
+     * <pre><b>${json.books[0].title}</b></pre>
+     * @param json         The JSON used to find JSON element value.
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The name of the variable to save the found JSON element value.
+     */
+    @When("I convert JSON `$json` to $scopes variable `$variableName`")
+    public void convertJsonToVariable(String json, Set<VariableScope> scopes, String variableName)
+    {
+        variableContext.putVariable(scopes, variableName, jsonUtils.toObject(json, Object.class));
+    }
+
+    /**
+     * Converts a JSON into the variable with specified name and scope.
+     * JSON fields will be available via their names.<br/>
+     * For example:<br/>
+     * <b>JSON:</b><br/>
+     * <pre>
+     * {
+     *   "book":[
+     *     {
+     *       "author":"Karl Marx",
+     *       "title":"Das Kapital"
+     *     }
+     *   ]
+     * }
+     * </pre>
+     * <br/>
+     * <b>Reference to a variable:</b>
+     * <pre><b>${json.books[0].title}</b></pre>
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The name of the variable to save the found JSON element value.
+     */
+    @When("I convert JSON from context to $scopes variable `$variableName`")
+    public void convertJsonFromContextToVariable(Set<VariableScope> scopes, String variableName)
+    {
+        convertJsonToVariable(getActualJson(), scopes, variableName);
     }
 
     /**

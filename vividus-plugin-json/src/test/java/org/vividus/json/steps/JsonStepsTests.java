@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -52,6 +54,7 @@ import org.vividus.context.VariableContext;
 import org.vividus.json.JsonContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.json.JsonPathUtils;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
@@ -106,7 +109,7 @@ class JsonStepsTests
     void beforeEach()
     {
         JsonPathUtils.setJacksonConfiguration();
-        jsonSteps = new JsonSteps(new FluentEnumConverter(), jsonContext, variableContext);
+        jsonSteps = new JsonSteps(new FluentEnumConverter(), jsonContext, variableContext, new JsonUtils());
         jsonSteps.setSoftAssert(softAssert);
     }
 
@@ -242,6 +245,33 @@ class JsonStepsTests
     {
         shouldCheckIfJsonValueIsEqualToExpected(jsonPath,
                 () -> jsonSteps.isValueByJsonPathEqual(JSON, jsonPath, comparisonRule, expectedData));
+    }
+
+    static Stream<Arguments> jsonToVariableSource()
+    {
+        return Stream.of(
+            arguments("{\"k\" : \"v\"}", Map.of("k", "v")),
+            arguments("[{\"k2\" : \"v2\"}, {\"k1\" : \"v1\"}]", List.of(Map.of("k2", "v2"), Map.of("k1", "v1")))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("jsonToVariableSource")
+    void shouldCovertJsonToVariable(String json, Object expectedData)
+    {
+        var scopes = Set.of(VariableScope.SCENARIO);
+        jsonSteps.convertJsonToVariable(json, scopes, VARIABLE_NAME);
+        verify(variableContext).putVariable(scopes, VARIABLE_NAME, expectedData);
+    }
+
+    @ParameterizedTest
+    @MethodSource("jsonToVariableSource")
+    void shouldCovertJsonToVariableFromContext(String json, Object expectedData)
+    {
+        var scopes = Set.of(VariableScope.SCENARIO);
+        when(jsonContext.getJsonContext()).thenReturn(json);
+        jsonSteps.convertJsonFromContextToVariable(scopes, VARIABLE_NAME);
+        verify(variableContext).putVariable(scopes, VARIABLE_NAME, expectedData);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

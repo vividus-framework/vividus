@@ -141,3 +141,44 @@ When I patch JSON `$sourceJson` using `$jsonPatch` and save result to $scopes va
 When I patch JSON `{"a":"b"}` using `[{ "op": "replace", "path": "/a", "value": "c" }]` and save result to SCENARIO variable `patchedJson`
 Then `{"a":"c"}` is equal to `${patchedJson}`
 ----
+
+=== Convert JSON to variable from input
+
+Converts JSON element into the variable with specified name and scope.
+
+[source,gherkin]
+----
+When I convert JSON `$json` to $scopes variable `$variableName`
+----
+
+* `$json` - The JSON used to find JSON element value.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the found JSON element value.
+
+.Validate the title of the second book
+[source,gherkin]
+----
+When I issue a HTTP GET request for a resource with the URL 'http://jsonpath.herokuapp.com/json/goessner.json'
+When I convert JSON `${response}` to scenario variable `jsonData`
+Then `${jsonData.store.book[1].title}` is equal to `Sword of Honour`
+----
+
+=== Convert JSON to variable from context
+
+Converts JSON element into the variable with specified name and scope.
+
+[source,gherkin]
+----
+When I convert JSON from context to $scopes variable `$variableName`
+----
+
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the found JSON element value.
+
+.Validate the price of the second book
+[source,gherkin]
+----
+When I issue a HTTP GET request for a resource with the URL 'http://jsonpath.herokuapp.com/json/goessner.json'
+When I convert JSON from context to scenario variable `jsonData`
+Then `${jsonData.store.book[1].price}` is = `12.99`
+----
