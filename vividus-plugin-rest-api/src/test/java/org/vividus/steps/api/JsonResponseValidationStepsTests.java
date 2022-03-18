@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,6 +113,7 @@ class JsonResponseValidationStepsTests
     @Mock private ISoftAssert softAssert;
     @Mock private HttpTestContext httpTestContext;
     @Mock private IAttachmentPublisher attachmentPublisher;
+    @Mock private JsonUtils jsonUtils;
 
     private JsonResponseValidationSteps jsonResponseValidationSteps;
 
@@ -120,7 +121,7 @@ class JsonResponseValidationStepsTests
     void beforeEach()
     {
         JsonPathUtils.setJacksonConfiguration();
-        var jsonSteps = new JsonSteps(new FluentEnumConverter(), httpTestContext, variableContext);
+        var jsonSteps = new JsonSteps(new FluentEnumConverter(), httpTestContext, variableContext, jsonUtils);
         jsonSteps.setSoftAssert(softAssert);
         jsonResponseValidationSteps = new JsonResponseValidationSteps(httpTestContext, variableContext,
                 attachmentPublisher, new JsonUtils(), jsonSteps);

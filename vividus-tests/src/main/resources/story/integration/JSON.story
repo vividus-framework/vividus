@@ -118,3 +118,11 @@ Examples:
 |$.book[2].price     |is equal to    |9              |
 |$.book[2].attributes|is equal to    |{"used": false}|
 |$.book[3].hardcover |is equal to    |true           |
+
+Scenario: Step verification: 'When I convert JSON `$json` to $scopes variable `$variableName`' and 'When I convert JSON from context to $scopes variable `$variableName`'
+When I convert JSON `${json}` to scenario variable `jsonData`
+Then `${jsonData.store.book[0].price}` is = `8.95`
+When I find = `1` JSON elements from `${json}` by `$..book[?(@.title == 'Sword of Honour')]` and for each element do
+|step|
+|When I convert JSON from context to scenario variable `jsonData`|
+Then `${jsonData.title}` is = `Sword of Honour`
