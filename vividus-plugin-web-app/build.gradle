@@ -17,7 +17,7 @@ dependencies {
     api(group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.2')
     api(group: 'de.hs-heilbronn.mi', name: 'crawler4j-with-sleepycat', version: '4.8.2')
 
-    implementation(group: 'com.codeborne', name: 'selenide', version: '6.3.4')
+    implementation(group: 'com.codeborne', name: 'selenide', version: '6.3.5')
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-chrome-driver', version: "${seleniumVersion}")
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-edge-driver', version: "${seleniumVersion}")
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-firefox-driver', version: "${seleniumVersion}")
