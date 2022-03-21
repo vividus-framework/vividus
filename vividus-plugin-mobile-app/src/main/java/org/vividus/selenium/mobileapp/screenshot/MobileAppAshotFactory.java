@@ -16,6 +16,9 @@
 
 package org.vividus.selenium.mobileapp.screenshot;
 
+import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.scaling;
+import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.simple;
+
 import java.util.Optional;
 
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
@@ -25,7 +28,6 @@ import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
 public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotConfiguration>
@@ -54,8 +56,11 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotConfig
             }
             return c;
         }).get();
+
         ShootingStrategy strategy = getStrategyBy(ashotConfig.getShootingStrategy().get())
             .getDecoratedShootingStrategy(getBaseShootingStrategy());
+        strategy = downscale ? scaling(strategy, (float) this.getDpr()) : strategy;
+
         int statusBarSize = mobileAppWebDriverManager.getStatusBarSize();
         if (!downscale)
         {
@@ -68,7 +73,7 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotConfig
     @Override
     protected ShootingStrategy getBaseShootingStrategy()
     {
-        return downscale ? super.getBaseShootingStrategy() : ShootingStrategies.simple();
+        return simple();
     }
 
     @Override
