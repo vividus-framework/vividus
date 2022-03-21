@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,20 @@
 
 package org.vividus.steps.ui;
 
+import java.util.function.Supplier;
+
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
 import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.context.SearchContextSetter;
 
 @TakeScreenshotOnFailure
 public class GenericSetContextSteps
 {
+    public static final String ELEMENT_TO_SET_CONTEXT = "Element to set context";
     private final IUiContext uiContext;
     private final IBaseValidations baseValidations;
 
@@ -45,15 +49,33 @@ public class GenericSetContextSteps
     }
 
     /**
-     * Set the context for further localization of elements to an <b>element</b> located by <b>locator</b>
+     * Resets currently set context and
+     * sets the context for further localization of elements to an <b>element</b> located by <b>locator</b>
      * @param locator locator to find an element
      */
     @When("I change context to element located `$locator`")
-    public void changeContextToElement(Locator locator)
+    public void resetAndChangeContextToElement(Locator locator)
     {
         resetContext();
-        WebElement element = getBaseValidations().assertIfElementExists("Element to set context", locator);
-        getUiContext().putSearchContext(element, () -> changeContextToElement(locator));
+        changeContext(() -> getBaseValidations().assertIfElementExists(ELEMENT_TO_SET_CONTEXT, locator),
+            () -> resetAndChangeContextToElement(locator));
+    }
+
+    /**
+     * Sets the context for further localization of elements to an <b>element</b> located by <b>locator</b>
+     * in scope of the current context.
+     * @param locator locator to find an element
+     */
+    @When("I change context to element located `$locator` in scope of current context")
+    public void changeContextToElement(Locator locator)
+    {
+        changeContext(() -> getBaseValidations().assertElementExists(ELEMENT_TO_SET_CONTEXT, locator).orElse(null),
+            () -> changeContextToElement(locator));
+    }
+
+    private void changeContext(Supplier<WebElement> locator, SearchContextSetter setter)
+    {
+        getUiContext().putSearchContext(locator.get(), setter);
     }
 
     protected IUiContext getUiContext()
