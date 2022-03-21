@@ -37,6 +37,33 @@ VIVIDUS global variables can be used in transformer properties (pay attention to
 |header n|value 1n| .... |value mn|
 ----
 
+=== RESOLVING_EXPRESSIONS_EAGERLY
+
+`RESOLVING_EXPRESSIONS_EAGERLY` transformer processes expressions which are used inside `ExamplesTable` eagerly, i.e. at the table loading stage.
+If expressions generating random data are used in the table with `RESOLVING_EXPRESSIONS_EAGERLY` transfomer, the random data will be generated once
+and each placeholder will be replaced with this value.  While in regular flow placeholders are replaced with the expression and data is generated
+at step execution stage, in other words the same placeholders will be replaced by different randomly generated datasets.
+
+.Usage of RESOLVING_EXPRESSIONS_EAGERLY transformer
+[source,gherkin]
+----
+{transformer=RESOLVING_EXPRESSIONS_EAGERLY}
+|firstName                     |lastName                     |
+|#{generate(Address.firstName)}|#{generate(Address.lastName)}|
+----
+
+=== RESOLVING_SELF_REFERENCES_EAGERLY
+
+`RESOLVING_SELF_REFERENCES_EAGERLY` transformer enables eagerly resolution of references to one column from another column within single `ExamplesTable` ("eagerly" means at the table loading stage). Circular references will result in error.
+
+.Usage of RESOLVING_SELF_REFERENCES_EAGERLY transformer
+[source,gherkin]
+----
+{transformer=RESOLVING_SELF_REFERENCES_EAGERLY}
+|column1|column2        |column3             |
+|A      |foo<column3>bar|before<column1>after|
+----
+
 === FORMATTING
 
 `FORMATTING` transformer formats the table according to the max width of each column. Also this transformer removes the commented lines.
