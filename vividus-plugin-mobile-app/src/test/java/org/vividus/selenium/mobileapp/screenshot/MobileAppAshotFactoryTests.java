@@ -20,22 +20,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -47,9 +43,7 @@ import org.vividus.util.property.PropertyMappedCollection;
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 import ru.yandex.qatools.ashot.shooting.CuttingDecorator;
-import ru.yandex.qatools.ashot.shooting.ScalingDecorator;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
-import ru.yandex.qatools.ashot.shooting.SimpleShootingStrategy;
 import ru.yandex.qatools.ashot.shooting.cutter.CutStrategy;
 
 @ExtendWith(MockitoExtension.class)
@@ -89,13 +83,19 @@ class MobileAppAshotFactoryTests
 
     @SuppressWarnings("unchecked")
     @ParameterizedTest
-    @CsvSource({"true, 1", "false, 2"})
-    void shouldCreateAshotWithTheMergedConfiguration(boolean downscale, int headerToCut) throws IllegalAccessException
+    @CsvSource({
+        "true,  1, ru.yandex.qatools.ashot.shooting.ScalingDecorator",
+        "false, 2, ru.yandex.qatools.ashot.shooting.SimpleShootingStrategy"
+    })
+    void shouldCreateAshotWithTheMergedConfiguration(boolean downscale, int headerToCut, Class<?> strategyType)
+            throws IllegalAccessException
     {
         mockAshotConfiguration(DIMPLE, downscale);
         AShot aShot = ashotFactory.create(createConfigurationWith(10, Optional.of(SIMPLE)));
         CuttingDecorator strategy = (CuttingDecorator) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
+        ShootingStrategy baseStrategy = (ShootingStrategy) FieldUtils.readField(strategy, SHOOTING_STRATEGY, true);
         CutStrategy cutStrategy = (CutStrategy) FieldUtils.readField(strategy, CUT_STRATEGY, true);
+        assertEquals(strategyType, baseStrategy.getClass());
         assertEquals(10, cutStrategy.getFooterHeight(null));
         assertEquals(headerToCut, cutStrategy.getHeaderHeight(null));
         assertSame(coordsProvider, FieldUtils.readField(aShot, "coordsProvider", true));
@@ -131,28 +131,11 @@ class MobileAppAshotFactoryTests
         assertEquals(headerToCut, cutStrategy.getHeaderHeight(null));
     }
 
-    @ParameterizedTest
-    @MethodSource("baseStrategySource")
-    void shouldProvideBaseStrategy(boolean downscale, Class shootingStrategyClass)
-    {
-        ashotFactory.setDownscale(downscale);
-        ShootingStrategy scaling = ashotFactory.getBaseShootingStrategy();
-        assertEquals(scaling.getClass(), shootingStrategyClass);
-    }
-
     private Optional<ScreenshotConfiguration> createConfigurationWith(int nativeFooterToCut, Optional<String> strategy)
     {
         ScreenshotConfiguration screenshotConfiguration = new ScreenshotConfiguration();
         screenshotConfiguration.setNativeFooterToCut(nativeFooterToCut);
         screenshotConfiguration.setShootingStrategy(strategy);
         return Optional.of(screenshotConfiguration);
-    }
-
-    static Stream<Arguments> baseStrategySource()
-    {
-        return Stream.of(
-            arguments(false, SimpleShootingStrategy.class),
-            arguments(true, ScalingDecorator.class)
-        );
     }
 }
