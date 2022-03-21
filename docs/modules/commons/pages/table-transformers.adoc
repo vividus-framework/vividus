@@ -39,7 +39,7 @@ VIVIDUS global variables can be used in transformer properties (pay attention to
 
 === RESOLVING_EXPRESSIONS_EAGERLY
 
-`RESOLVING_EXPRESSIONS_EAGERLY` processes expressions which are used inside `ExamplesTable` eagerly, i.e. at the table loading stage.
+`RESOLVING_EXPRESSIONS_EAGERLY` transformer processes expressions which are used inside `ExamplesTable` eagerly, i.e. at the table loading stage.
 If expressions generating random data are used in the table with `RESOLVING_EXPRESSIONS_EAGERLY` transfomer, the random data will be generated once
 and each placeholder will be replaced with this value.  While in regular flow placeholders are replaced with the expression and data is generated
 at step execution stage, in other words the same placeholders will be replaced by different randomly generated datasets.
@@ -54,7 +54,7 @@ at step execution stage, in other words the same placeholders will be replaced b
 
 === RESOLVING_SELF_REFERENCES_EAGERLY
 
-`RESOLVING_SELF_REFERENCES_EAGERLY` enables eagerly resolution of references to one column from another column within single `ExamplesTable` ("eagerly" means at the table loading stage). Circular references will result in error.
+`RESOLVING_SELF_REFERENCES_EAGERLY` transformer enables eagerly resolution of references to one column from another column within single `ExamplesTable` ("eagerly" means at the table loading stage). Circular references will result in error.
 
 .Usage of RESOLVING_SELF_REFERENCES_EAGERLY transformer
 [source,gherkin]
