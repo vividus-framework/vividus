@@ -69,7 +69,7 @@ dependencies {
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
     implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
     implementation(group: 'io.github.classgraph', name: 'classgraph', version: '4.8.137')
-    implementation(group:  'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.5')
+    implementation(group:  'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.11')
     implementation(group: 'org.apache.commons', name: 'commons-jexl3', version: '3.2.1')
     implementation(group: 'net.datafaker', name: 'datafaker', version: '1.1.0')
 
