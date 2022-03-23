@@ -1,28 +1,28 @@
 {
   "STORY" : {
-    "total" : 2,
+    "total" : 3,
     "passed" : 1,
-    "failed" : 1,
+    "failed" : 2,
     "broken" : 0,
     "skipped" : 0,
     "pending" : 0,
     "knownIssue" : 0
   },
   "SCENARIO" : {
-    "total" : 4,
-    "passed" : 2,
-    "failed" : 1,
+    "total" : 7,
+    "passed" : 3,
+    "failed" : 2,
     "broken" : 0,
-    "skipped" : 1,
+    "skipped" : 2,
     "pending" : 0,
     "knownIssue" : 0
   },
   "STEP" : {
-    "total" : 4,
-    "passed" : 1,
-    "failed" : 1,
+    "total" : 10,
+    "passed" : 3,
+    "failed" : 2,
     "broken" : 0,
-    "skipped" : 2,
+    "skipped" : 5,
     "pending" : 0,
     "knownIssue" : 0
   },

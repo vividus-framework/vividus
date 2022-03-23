@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.model.KnownIssue;
 import org.vividus.softassert.model.SoftAssertionError;
+import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.ThreadedTestContext;
 import org.vividus.util.json.JsonUtils;
 
@@ -83,7 +84,7 @@ class StatisticsStoryReporterTests
 
     @Mock private EventBus eventBus;
     @Mock private RunContext runContext;
-    @Mock private ReportControlContext reportControlContext;
+    private final ReportControlContext reportControlContext = new ReportControlContext(new SimpleTestContext());
 
     private StatisticsStoryReporter reporter;
 
@@ -98,7 +99,7 @@ class StatisticsStoryReporterTests
                 new JsonUtils());
         reporter.init();
 
-        when(reportControlContext.isReportingEnabled()).thenReturn(true);
+        reportControlContext.enableReporting();
         when(runContext.isRunCompleted()).thenReturn(false);
     }
 
@@ -129,8 +130,8 @@ class StatisticsStoryReporterTests
                 + "    \"knownIssue\" : 1\n"
                 + "  },\n"
                 + "  \"STEP\" : {\n"
-                + "    \"total\" : 18,\n"
-                + "    \"passed\" : 12,\n"
+                + "    \"total\" : 17,\n"
+                + "    \"passed\" : 11,\n"
                 + "    \"failed\" : 1,\n"
                 + "    \"broken\" : 1,\n"
                 + "    \"skipped\" : 2,\n"
@@ -148,7 +149,7 @@ class StatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, output);
-        verify(runContext, times(36)).isRunCompleted();
+        verify(runContext, times(34)).isRunCompleted();
         verifyNoMoreInteractions(runContext);
     }
 
@@ -162,9 +163,9 @@ class StatisticsStoryReporterTests
         Assertions.assertAll(
             () -> assertEquals(1, output.get(NodeType.STORY).getTotal()),
             () -> assertEquals(10, output.get(NodeType.SCENARIO).getTotal()),
-            () -> assertEquals(18, output.get(NodeType.STEP).getTotal()),
+            () -> assertEquals(17, output.get(NodeType.STEP).getTotal()),
             () -> assertEquals(5, output.get(NodeType.GIVEN_STORY).getTotal()));
-        verify(runContext, times(36)).isRunCompleted();
+        verify(runContext, times(34)).isRunCompleted();
         verifyNoMoreInteractions(runContext);
     }
 
@@ -182,7 +183,7 @@ class StatisticsStoryReporterTests
             assertEquals(String.format("Unable to write statistics.json into folder: %s", tempDir),
                     event.getFormattedMessage());
             assertThat(event.getThrowable().get(), instanceOf(IOException.class));
-            verify(runContext, times(36)).isRunCompleted();
+            verify(runContext, times(34)).isRunCompleted();
             verifyNoMoreInteractions(runContext);
         }
     }
@@ -244,7 +245,10 @@ class StatisticsStoryReporterTests
         reporter.onAssertionFailure(mockFailed());
         reporter.successful(STEP_AS_STRING);
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+
+        reportControlContext.disableReporting();
         reporter.failed(ASSERTION_STEP, null);
+        reportControlContext.enableReporting();
 
         // examples end
 
@@ -256,10 +260,15 @@ class StatisticsStoryReporterTests
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reporter.beforeStep(STEP);
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
-        reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        reporter.beforeStep(STEP);
         reporter.onAssertionFailure(mockKnownIssue());
         reporter.successful(STEP_AS_STRING);
+        reporter.successful(STEP_AS_STRING);
+
+        reportControlContext.disableReporting();
         reporter.failed(ASSERTION_STEP, null);
+        reportControlContext.enableReporting();
+
         reporter.afterScenario(null);
 
         // broken
@@ -538,6 +547,7 @@ class StatisticsStoryReporterTests
         String argumentExceptionCauseMessage = "You're illegal";
         when(assertion.getError()).thenReturn(error);
         when(error.getMessage()).thenReturn(argumentExceptionCauseMessage);
+        reporter.beforeStep(STEP);
         reporter.onAssertionFailure(event);
         IllegalArgumentException exception = new IllegalArgumentException(argumentExceptionCauseMessage);
         reporter.failed("step", new IllegalArgumentException(exception));
@@ -545,8 +555,11 @@ class StatisticsStoryReporterTests
                 new BeforeOrAfterFailed(new VerificationError("message", List.of())));
         UUIDExceptionWrapper illegalArgumentExceptionWrapped = new UUIDExceptionWrapper(
                 new BeforeOrAfterFailed(new IllegalArgumentException(argumentExceptionCauseMessage)));
+        reporter.beforeStep(STEP);
         reporter.failed("verifyIfAssertionsPassed", verificationErrorWrapped);
+        reporter.beforeStep(STEP);
         reporter.failed("some other step", error);
+        reporter.beforeStep(STEP);
         reporter.failed("Step with incorrect argument", illegalArgumentExceptionWrapped);
 
         List<Failure> failures = StatisticsStoryReporter.getFailures();
