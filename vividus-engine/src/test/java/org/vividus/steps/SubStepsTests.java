@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.embedder.PerformableTree.RunContext;
 import org.jbehave.core.embedder.PerformableTree.State;
 import org.jbehave.core.embedder.StoryManager;
+import org.jbehave.core.failures.IgnoringStepsFailure;
 import org.jbehave.core.failures.PendingStepFound;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.reporters.StoryReporter;
@@ -53,27 +54,32 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class SubStepsTests
 {
+    private static final Optional<Supplier<String>> EMPTY_STEP_CONTEXT_INFO_PROVIDER = Optional.empty();
+
     @Mock private StoryReporter storyReporter;
     @Mock private RunContext context;
     @Mock private Configuration configuration;
+    @Mock private Keywords keywords;
     @Mock private Embedder embedder;
     private SubSteps subSteps;
 
     @BeforeEach
     void beforeEach()
     {
-        StoryManager storyManager = mock(StoryManager.class);
+        var storyManager = mock(StoryManager.class);
         when(storyManager.getContext()).thenReturn(context);
         when(embedder.storyManager()).thenReturn(storyManager);
+
+        when(context.configuration()).thenReturn(configuration);
+        when(configuration.keywords()).thenReturn(keywords);
     }
 
     @Test
     void testExecuteSubStepWithParameters()
     {
-        StepResult stepResult = mock(StepResult.class);
+        var stepResult = mock(StepResult.class);
         testExecuteSubSteps(stepResult, step ->
         {
-            Keywords keywords = mock(Keywords.class);
             when(configuration.keywords()).thenReturn(keywords);
             when(step.asString(keywords)).thenReturn("step");
 
@@ -84,10 +90,9 @@ class SubStepsTests
     @Test
     void testExecuteSubStepWithParametersThrowingException()
     {
-        StepResult stepResult = mock(StepResult.class);
+        var stepResult = mock(StepResult.class);
         testExecuteSubSteps(stepResult, step ->
         {
-            Keywords keywords = mock(Keywords.class);
             when(configuration.keywords()).thenReturn(keywords);
             when(step.asString(keywords)).thenThrow(new IllegalArgumentException());
 
@@ -98,62 +103,87 @@ class SubStepsTests
     @Test
     void testExecuteSubStepWithoutParameters()
     {
-        StepResult stepResult = mock(StepResult.class);
-        testExecuteSubSteps(stepResult, step -> subSteps.execute(Optional.empty()), ordered -> { });
+        var stepResult = mock(StepResult.class);
+        testExecuteSubSteps(stepResult, step -> subSteps.execute(EMPTY_STEP_CONTEXT_INFO_PROVIDER), ordered -> { });
     }
 
     @Test
     void testExecuteSubStepsWithFirstFailed()
     {
-        StepResult stepResult1 = mock(StepResult.class);
+        var stepResult1 = mock(StepResult.class);
         UUIDExceptionWrapper exception = new UUIDExceptionWrapper(new IllegalArgumentException());
         when(stepResult1.getFailure()).thenReturn(exception);
-        Step step1 = mock(Step.class);
+        var step1 = mock(Step.class);
         when(step1.perform(storyReporter, null)).thenReturn(stepResult1);
 
-        StepResult stepResult2 = mock(StepResult.class);
-        Step step2 = mock(Step.class);
+        var stepResult2 = mock(StepResult.class);
+        var step2 = mock(Step.class);
         when(step2.doNotPerform(storyReporter, null)).thenReturn(stepResult2);
 
-        State state1 = mock(State.class);
-        State state2 = mockStepRun(state1, s -> s.perform(storyReporter, null), stepResult1);
-        State state3 = mockStepRun(state2, s -> s.doNotPerform(storyReporter, null), stepResult2);
+        var state1 = mock(State.class);
+        var state2 = mockStepRun(state1, s -> s.perform(storyReporter, null), stepResult1);
+        var state3 = mockStepRun(state2, s -> s.doNotPerform(storyReporter, null), stepResult2);
         when(context.state()).thenReturn(state1, state2, state3);
 
         subSteps = new SubSteps(configuration, storyReporter, embedder, List.of(step1, step2));
-        Optional<Supplier<String>> stepContextInfoProvider = Optional.empty();
-        UUIDExceptionWrapper actual = assertThrows(UUIDExceptionWrapper.class,
-                () -> subSteps.execute(stepContextInfoProvider));
+        var actual = assertThrows(UUIDExceptionWrapper.class, () -> subSteps.execute(EMPTY_STEP_CONTEXT_INFO_PROVIDER));
         assertEquals(exception, actual);
 
-        InOrder ordered = inOrder(step1, step2, context);
+        var ordered = inOrder(step1, step2, state3, context);
         ordered.verify(step1).perform(storyReporter, null);
         ordered.verify(context).stateIs(state2);
         ordered.verify(step2).doNotPerform(storyReporter, null);
         ordered.verify(context).stateIs(state3);
+        ordered.verify(context).state();
+        ordered.verify(state3).getFailure();
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void testExecuteSubStepsWithIgnoringStepsFailure()
+    {
+        var stepResult1 = mock(StepResult.class);
+        var step1 = mock(Step.class);
+        when(step1.perform(storyReporter, null)).thenReturn(stepResult1);
+
+        var state1 = mock(State.class);
+        var state2 = mockStepRun(state1, s -> s.perform(storyReporter, null), stepResult1);
+        var ignoringStepsFailure = new IgnoringStepsFailure("scenario fail-fast");
+        when(state2.getFailure()).thenReturn(ignoringStepsFailure);
+        when(context.state()).thenReturn(state1, state2);
+
+        subSteps = new SubSteps(configuration, storyReporter, embedder, List.of(step1));
+        var actual = assertThrows(IgnoringStepsFailure.class, () -> subSteps.execute(EMPTY_STEP_CONTEXT_INFO_PROVIDER));
+        assertEquals(ignoringStepsFailure, actual);
+
+        var ordered = inOrder(step1, state2, context);
+        ordered.verify(step1).perform(storyReporter, null);
+        ordered.verify(context).stateIs(state2);
+        ordered.verify(context, times(2)).state();
+        ordered.verify(state2).getFailure();
         ordered.verifyNoMoreInteractions();
     }
 
     @Test
     void testExecuteSubStepInterruptedException()
     {
-        StepResult stepResult = mock(StepResult.class);
+        var stepResult = mock(StepResult.class);
         testExecuteSubSteps(stepResult, step ->
         {
             when(stepResult.getFailure()).thenReturn(new UUIDExceptionWrapper(new InterruptedException()));
-            assertThrows(IllegalStateException.class, () -> subSteps.execute(Optional.empty()));
+            assertThrows(IllegalStateException.class, () -> subSteps.execute(EMPTY_STEP_CONTEXT_INFO_PROVIDER));
         }, ordered -> { });
     }
 
     @Test
     void testExecuteSubStepWithError()
     {
-        StepResult stepResult = mock(StepResult.class);
+        var stepResult = mock(StepResult.class);
         testExecuteSubSteps(stepResult, step ->
         {
-            AssertionError error = new AssertionError();
+            var error = new AssertionError();
             when(stepResult.getFailure()).thenReturn(new UUIDExceptionWrapper(error));
-            AssertionError actual = assertThrows(AssertionError.class, () -> subSteps.execute(Optional.empty()));
+            var actual = assertThrows(AssertionError.class, () -> subSteps.execute(EMPTY_STEP_CONTEXT_INFO_PROVIDER));
             assertEquals(error, actual);
         }, ordered -> { });
     }
@@ -161,14 +191,13 @@ class SubStepsTests
     @Test
     void testExecuteSubStepWithAnyException()
     {
-        StepResult stepResult = mock(StepResult.class);
+        var stepResult = mock(StepResult.class);
         testExecuteSubSteps(stepResult, step ->
         {
-            UUIDExceptionWrapper exception = new UUIDExceptionWrapper(new IllegalArgumentException());
+            var exception = new UUIDExceptionWrapper(new IllegalArgumentException());
             when(stepResult.getFailure()).thenReturn(exception);
-            Optional<Supplier<String>> stepContextInfoProvider = Optional.empty();
-            UUIDExceptionWrapper actual = assertThrows(UUIDExceptionWrapper.class,
-                    () -> subSteps.execute(stepContextInfoProvider));
+            var actual = assertThrows(UUIDExceptionWrapper.class,
+                    () -> subSteps.execute(EMPTY_STEP_CONTEXT_INFO_PROVIDER));
             assertEquals(exception, actual);
         }, ordered -> { });
     }
@@ -176,31 +205,30 @@ class SubStepsTests
     @Test
     void testExecuteSubStepWithPendingStepException()
     {
-        StepResult stepResult = mock(StepResult.class);
+        var stepResult = mock(StepResult.class);
         testExecuteSubSteps(stepResult, step ->
         {
-            PendingStepFound pending = new PendingStepFound("When I perform pending step");
-            when(stepResult.getFailure()).thenReturn(pending);
-            Optional<Supplier<String>> stepContextInfoProvider = Optional.empty();
-            UUIDExceptionWrapper actual = assertThrows(UUIDExceptionWrapper.class,
-                    () -> subSteps.execute(stepContextInfoProvider));
-            assertEquals(pending, actual.getCause());
+            var pendingStepFound = new PendingStepFound("When I perform pending step");
+            when(stepResult.getFailure()).thenReturn(pendingStepFound);
+            var actual = assertThrows(UUIDExceptionWrapper.class,
+                    () -> subSteps.execute(EMPTY_STEP_CONTEXT_INFO_PROVIDER));
+            assertEquals(pendingStepFound, actual.getCause());
         }, ordered -> { });
     }
 
     private void testExecuteSubSteps(StepResult stepResult, Consumer<Step> test, Consumer<InOrder> stepResultVerifier)
     {
-        Step step = mock(Step.class);
+        var step = mock(Step.class);
         when(step.perform(storyReporter, null)).thenReturn(stepResult);
 
-        State state = mock(State.class);
-        State newState = mockStepRun(state, s -> s.perform(storyReporter, null), stepResult);
+        var state = mock(State.class);
+        var newState = mockStepRun(state, s -> s.perform(storyReporter, null), stepResult);
         when(context.state()).thenReturn(state, newState);
 
         subSteps = new SubSteps(configuration, storyReporter, embedder, List.of(step));
         test.accept(step);
 
-        InOrder ordered = inOrder(step, stepResult, context);
+        var ordered = inOrder(step, stepResult, context);
         ordered.verify(step).perform(storyReporter, null);
         stepResultVerifier.accept(ordered);
         ordered.verify(context).stateIs(newState);
@@ -208,13 +236,13 @@ class SubStepsTests
 
     private State mockStepRun(State state, Consumer<Step> stepRunner, StepResult stepResult)
     {
-        State newState = mock(State.class);
+        var newState = mock(State.class);
         doReturn(newState).when(state).run(argThat(s ->
         {
             s.getComposedSteps().forEach(stepRunner);
             stepRunner.accept(s);
             return true;
-        }), argThat(results -> results.add(stepResult)), eq(storyReporter));
+        }), argThat(results -> results.add(stepResult)), eq(keywords), eq(storyReporter));
         return newState;
     }
 }

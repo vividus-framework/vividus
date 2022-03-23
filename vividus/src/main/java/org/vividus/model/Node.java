@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ public class Node
     private final NodeType type;
     private final Deque<Node> children = new LinkedList<>();
     private Status status;
-    private boolean hasChildrens;
+    private boolean hasChildren;
 
     private Node parent;
 
@@ -51,21 +51,15 @@ public class Node
         return parent;
     }
 
-    public void setParent(Node parent)
-    {
-        this.parent = parent;
-    }
-
     public Deque<Node> getChildren()
     {
         return children;
     }
 
-    public Node addChild(Node child)
+    public void addChild(Node child)
     {
         this.children.add(child);
-        child.setParent(this);
-        return this;
+        child.parent = this;
     }
 
     public NodeType getType()
@@ -73,13 +67,13 @@ public class Node
         return type;
     }
 
-    public void setHasChildrens(boolean hasChildrens)
+    public void setHasChildren(boolean hasChildren)
     {
-        this.hasChildrens = hasChildrens;
+        this.hasChildren = hasChildren;
     }
 
-    public boolean isHasChildrens()
+    public boolean isHasChildren()
     {
-        return hasChildrens;
+        return hasChildren;
     }
 }

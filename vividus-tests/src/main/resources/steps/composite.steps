@@ -24,3 +24,6 @@ When the condition `true` is true I do
 |step                                        |
 |Then `<var3>` is = `<var4>`                 |
 |When I use examples vars on the second level|
+
+Composite: When I execute failing composite step
+Then `true` is equal to `false`

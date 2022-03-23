@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.embedder.PerformableTree.RunContext;
 import org.jbehave.core.embedder.PerformableTree.State;
+import org.jbehave.core.failures.IgnoringStepsFailure;
 import org.jbehave.core.failures.PendingStepFound;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.reporters.StoryReporter;
@@ -65,6 +66,10 @@ public class SubSteps
                 failure = stepResult.getFailure();
             }
         }
+        if (context.state().getFailure() instanceof IgnoringStepsFailure)
+        {
+            throw context.state().getFailure();
+        }
         if (failure != null)
         {
             throw failure;
@@ -74,7 +79,7 @@ public class SubSteps
     private StepResult executeStep(Step step, RunContext context)
     {
         List<StepResult> results = new ArrayList<>();
-        State state = context.state().run(step, results, storyReporter);
+        State state = context.state().run(step, results, context.configuration().keywords(), storyReporter);
         context.stateIs(state);
 
         // The last one is the result of the deepest composed step

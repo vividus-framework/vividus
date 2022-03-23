@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,11 @@ package org.vividus.model;
 
 public class NodeContext
 {
-    private Node root;
     private Node tail;
 
-    public Node getRoot()
+    public NodeContext(Node tail)
     {
-        return root;
-    }
-
-    public NodeContext withRoot(Node node)
-    {
-        this.root = node;
-        return this;
+        this.tail = tail;
     }
 
     public Node getTail()
@@ -37,8 +30,14 @@ public class NodeContext
         return tail;
     }
 
-    public void setTail(Node tail)
+    public void addToTail(Node node)
     {
-        this.tail = tail;
+        tail.addChild(node);
+        tail = node;
+    }
+
+    public void removeFromTail()
+    {
+        tail = tail.getParent();
     }
 }

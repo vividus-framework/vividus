@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -116,65 +115,39 @@ public class StatisticsStoryReporter extends AbstractReportControlStoryReporter
     {
         if (givenStory)
         {
-            appendContainer(NodeType.GIVEN_STORY);
+            startNode(NodeType.GIVEN_STORY);
         }
         else
         {
-            testContext.put(NodeContext.class, new NodeContext().withRoot(new Node(NodeType.STORY)));
+            testContext.put(NodeContext.class, new NodeContext(new Node(NodeType.STORY)));
         }
     }
 
     @Override
     public void beforeScenario(Scenario scenario)
     {
-        Node node = appendContainer(NodeType.SCENARIO);
+        Node node = startNode(NodeType.SCENARIO);
         if (!scenario.getSteps().isEmpty())
         {
-            node.setHasChildrens(true);
+            node.setHasChildren(true);
         }
-    }
-
-    private Node appendContainer(NodeType type)
-    {
-        NodeContext context = context();
-        Node current = context.getRoot();
-        if (context.getTail() != null)
-        {
-            current = context.getTail();
-        }
-        Node node = new Node(type);
-        current.addChild(node);
-        context.setTail(node);
-        return node;
     }
 
     @Override
     public void afterScenario(Timing timing)
     {
-        completeNode();
+        endNode();
     }
 
     @Override
     public void afterStory(boolean givenStory)
     {
-        if (context() != null && !givenStory)
+        super.afterStory(givenStory);
+        endNode();
+        if (!givenStory)
         {
-            calculateStatus(context().getRoot());
             testContext.remove(NodeContext.class);
         }
-        else if (givenStory)
-        {
-            completeNode();
-        }
-        super.afterStory(givenStory);
-    }
-
-    private void completeNode()
-    {
-        NodeContext context = context();
-        Node node = context.getTail();
-        calculateStatus(node);
-        context.setTail(node.getParent());
     }
 
     @Override
@@ -184,13 +157,7 @@ public class StatisticsStoryReporter extends AbstractReportControlStoryReporter
         {
             if (step.getExecutionType() != StepExecutionType.COMMENT)
             {
-                Node node = new Node(NodeType.STEP);
-                if (isRoot())
-                {
-                    context().getRoot().addChild(node);
-                    return;
-                }
-                context().getTail().addChild(node);
+                startNode(NodeType.STEP);
             }
         });
     }
@@ -198,25 +165,25 @@ public class StatisticsStoryReporter extends AbstractReportControlStoryReporter
     @Override
     public void successful(String step)
     {
-        perform(() -> updateStepStatus(Status.PASSED));
+        perform(() -> endStep(Status.PASSED));
     }
 
     @Override
     public void ignorable(String step)
     {
-        updateStepStatus(Status.SKIPPED);
+        endStep(Status.SKIPPED);
     }
 
     @Override
     public void pending(String step)
     {
-        updateStepStatus(Status.PENDING);
+        endStep(Status.PENDING);
     }
 
     @Override
     public void notPerformed(String step)
     {
-        updateStepStatus(Status.SKIPPED);
+        endStep(Status.SKIPPED);
     }
 
     @Override
@@ -229,7 +196,7 @@ public class StatisticsStoryReporter extends AbstractReportControlStoryReporter
             {
                 addFailure(() -> throwable.getCause().toString());
             }
-            updateStepStatus(status);
+            endStep(status);
         });
     }
 
@@ -256,67 +223,62 @@ public class StatisticsStoryReporter extends AbstractReportControlStoryReporter
         }
     }
 
-    private void calculateStatus(Node node)
+    private Node startNode(NodeType type)
     {
-        if (hasNoExecutedChildrens(node))
-        {
-            node.withStatus(Status.SKIPPED);
-            aggregate(node);
-            return;
-        }
-        node.getChildren().stream()
-                          .map(n ->
-                          {
-                              if (n.getType() == NodeType.STEP)
-                              {
-                                  aggregate(n);
-                              }
-                              return n;
-                          })
-                          .reduce((l, r) -> l.getStatus().getPriority() < r.getStatus().getPriority() ? l : r)
-                          .map(Node::getStatus)
-                          .map(node::withStatus)
-                          .ifPresentOrElse(this::aggregate, () -> {
-                              node.withStatus(Status.PASSED);
-                              aggregate(node);
-                          });
-    }
-
-    private boolean hasNoExecutedChildrens(Node node)
-    {
-        return node.getChildren().isEmpty() && node.isHasChildrens();
-    }
-
-    private void aggregate(Node node)
-    {
-        Statistic stat = AGGREGATOR.get(node.getType());
-        mapper.get(node.getStatus()).accept(stat);
+        Node node = new Node(type);
+        context().addToTail(node);
+        return node;
     }
 
     private void updateStepStatus(Status status)
     {
-        NodeContext context = context();
-        Node currentNode = isRoot() ? context.getRoot() : context.getTail();
-        Iterator<Node> iterator = currentNode.getChildren().descendingIterator();
-        while (iterator.hasNext())
+        updateNodeStatus(context().getTail(), status);
+    }
+
+    private void endStep(Status status)
+    {
+        updateStepStatus(status);
+        endNode();
+    }
+
+    private void endNode()
+    {
+        Node currentNode = context().getTail();
+        if (currentNode.getChildren().isEmpty() && currentNode.isHasChildren())
         {
-            Node node = iterator.next();
-            if (node.getStatus() == null)
-            {
-                node.withStatus(status);
-                return;
-            }
+            currentNode.withStatus(Status.SKIPPED);
+        }
+        else if (currentNode.getStatus() == null)
+        {
+            currentNode.withStatus(Status.PASSED);
+        }
+        currentNode.getChildren().stream()
+                          .reduce((l, r) -> l.getStatus().getPriority() < r.getStatus().getPriority() ? l : r)
+                          .map(Node::getStatus)
+                          .ifPresent(status -> updateNodeStatus(currentNode, status));
+
+        // Skip statistics increment for "wrapping" steps: composite steps and steps executing nested steps are
+        // considered as containers (no business logic), thus they are not counted in the overall statistics
+        if (currentNode.getType() != NodeType.STEP || currentNode.getChildren().isEmpty())
+        {
+            Statistic targetStatisticsCategory = AGGREGATOR.get(currentNode.getType());
+            mapper.get(currentNode.getStatus()).accept(targetStatisticsCategory);
+        }
+
+        context().removeFromTail();
+    }
+
+    private void updateNodeStatus(Node node, Status status)
+    {
+        if (node.getStatus() == null || node.getStatus().getPriority() > status.getPriority())
+        {
+            node.withStatus(status);
         }
     }
 
     private NodeContext context()
     {
         return testContext.get(NodeContext.class);
-    }
-
-    private boolean isRoot()
-    {
-        return context().getTail() == null;
     }
 
     public static Map<NodeType, Statistic> getStatistics()
