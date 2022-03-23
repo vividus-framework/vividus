@@ -22,17 +22,13 @@ import java.util.stream.Collectors;
 
 import com.github.difflib.DiffUtils;
 import com.github.difflib.UnifiedDiffUtils;
-import com.github.difflib.algorithm.DiffException;
 import com.github.difflib.patch.Patch;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vividus.reporter.event.AttachmentPublisher;
 
 public class DiffAttachmentPublisher
 {
     private static final String VARIABLE = "variable";
-    private static final Logger LOGGER = LoggerFactory.getLogger(DiffAttachmentPublisher.class);
     private static final int CONTEXT_SIZE = 10;
     private final AttachmentPublisher attachmentPublisher;
     private int textLengthDiffThreshold;
@@ -52,18 +48,11 @@ public class DiffAttachmentPublisher
         }
         List<String> expectedLines = toLines(expectedString);
         List<String> actualLines = toLines(actualString);
-        try
-        {
-            Patch<String> diff = DiffUtils.diff(expectedLines, actualLines);
-            String uDiff = UnifiedDiffUtils.generateUnifiedDiff(VARIABLE, VARIABLE, expectedLines, diff, CONTEXT_SIZE)
-                                           .stream()
-                                           .collect(Collectors.joining("\n"));
-            attachmentPublisher.publishAttachment("/templates/udiff.ftl", Map.of("udiff", uDiff), "Comparison result");
-        }
-        catch (DiffException e)
-        {
-            LOGGER.atWarn().setCause(e).log("Unable to publish variables difference");
-        }
+        Patch<String> diff = DiffUtils.diff(expectedLines, actualLines);
+        String uDiff = UnifiedDiffUtils.generateUnifiedDiff(VARIABLE, VARIABLE, expectedLines, diff, CONTEXT_SIZE)
+                                       .stream()
+                                       .collect(Collectors.joining("\n"));
+        attachmentPublisher.publishAttachment("/templates/udiff.ftl", Map.of("udiff", uDiff), "Comparison result");
     }
 
     private List<String> toLines(String toConvert)

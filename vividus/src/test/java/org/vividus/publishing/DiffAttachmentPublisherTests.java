@@ -16,36 +16,24 @@
 
 package org.vividus.publishing;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.util.List;
 import java.util.Map;
 
-import com.github.difflib.DiffUtils;
-import com.github.difflib.algorithm.DiffException;
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.reporter.event.AttachmentPublisher;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class DiffAttachmentPublisherTests
 {
-    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(DiffAttachmentPublisher.class);
-
     @Mock private AttachmentPublisher attachmentPublisher;
 
     @InjectMocks private DiffAttachmentPublisher diffAttachmentPublisher;
@@ -62,18 +50,5 @@ class DiffAttachmentPublisherTests
         diffAttachmentPublisher.publishDiff(left, right);
         verify(attachmentPublisher, times(expectedPublisherInvocations)).publishAttachment("/templates/udiff.ftl",
             Map.of("udiff", udiff), "Comparison result");
-    }
-
-    @Test
-    void shouldLogExceptionIfAny()
-    {
-        DiffException exception = new DiffException();
-        try (MockedStatic<DiffUtils> diffUtils = Mockito.mockStatic(DiffUtils.class))
-        {
-            var strings = List.of();
-            diffUtils.when(() -> DiffUtils.diff(strings, strings)).thenThrow(exception);
-            diffAttachmentPublisher.publishDiff("", "");
-        }
-        assertEquals(List.of(warn(exception, "Unable to publish variables difference")), LOGGER.getLoggingEvents());
     }
 }
