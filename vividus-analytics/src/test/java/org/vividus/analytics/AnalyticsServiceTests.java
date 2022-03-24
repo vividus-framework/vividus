@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,24 +30,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.analytics.model.AnalyticsEvent;
+import org.vividus.analytics.model.AnalyticsEventBatch;
 
 @ExtendWith(MockitoExtension.class)
 class AnalyticsServiceTests
 {
-    @Mock
-    private GoogleAnalyticsFacade googleAnalyticsFacade;
-
-    @Mock
-    private AnalyticsEvent analyticsEvent;
-
-    @InjectMocks
-    private AnalyticsService analyticsService;
+    @Mock private GoogleAnalyticsFacade googleAnalyticsFacade;
+    @Mock private AnalyticsEventBatch analyticsEventBatch;
+    @InjectMocks private AnalyticsService analyticsService;
 
     @Test
     void shouldNotPostEventsWhenAnalyticsDisabled()
     {
-        analyticsService.onAnalyticEvent(analyticsEvent);
+        analyticsService.onAnalyticEvent(analyticsEventBatch);
         verifyNoInteractions(googleAnalyticsFacade);
     }
 
@@ -57,12 +52,12 @@ class AnalyticsServiceTests
         CountDownLatch watcher = new CountDownLatch(1);
         Mockito.lenient().doNothing().when(googleAnalyticsFacade).postEvent(argThat(e -> {
             watcher.countDown();
-            assertSame(analyticsEvent, e);
+            assertSame(analyticsEventBatch, e);
             return true;
         }));
         analyticsService.setEnabled(true);
-        analyticsService.onAnalyticEvent(analyticsEvent);
+        analyticsService.onAnalyticEvent(analyticsEventBatch);
         watcher.await(10, TimeUnit.SECONDS);
-        verify(googleAnalyticsFacade).postEvent(analyticsEvent);
+        verify(googleAnalyticsFacade).postEvent(analyticsEventBatch);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package org.vividus.analytics;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.eventbus.EventBus;
@@ -30,6 +33,7 @@ import org.jbehave.core.reporters.NullStoryReporter;
 import org.jbehave.core.steps.StepCollector;
 import org.jbehave.core.steps.StepCollector.Stage;
 import org.vividus.analytics.model.AnalyticsEvent;
+import org.vividus.analytics.model.AnalyticsEventBatch;
 import org.vividus.analytics.model.CustomDefinitions;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
@@ -66,9 +70,13 @@ public class AnalyticsStoryReporter extends NullStoryReporter
             CustomDefinitions.REMOTE.add(payload,
                     getEnvironmentProperties(PropertyCategory.PROFILE).get("Remote Execution"));
             payload.put(SESSION_CONTROL, "start");
-            eventBus.post(new AnalyticsEvent("startTests", payload));
 
-            postPluginsAnalytic(modules);
+            List<AnalyticsEvent> events = new ArrayList<>();
+            events.add(new AnalyticsEvent("startTests", payload));
+            events.addAll(collectPluginsAnalytic(modules));
+
+            eventBus.post(new AnalyticsEventBatch(events));
+
             stopwatch = Stopwatch.createStarted();
         }
     }
@@ -85,8 +93,9 @@ public class AnalyticsStoryReporter extends NullStoryReporter
             CustomDefinitions.STEPS.add(payload, STEPS.toString());
             CustomDefinitions.DURATION.add(payload, Long.toString(duration));
             payload.put(SESSION_CONTROL, "end");
+
             AnalyticsEvent testFinishEvent = new AnalyticsEvent("finishTests", payload);
-            eventBus.post(testFinishEvent);
+            eventBus.post(new AnalyticsEventBatch(List.of(testFinishEvent)));
         }
     }
 
@@ -108,16 +117,14 @@ public class AnalyticsStoryReporter extends NullStoryReporter
         STEPS.incrementAndGet();
     }
 
-    private void postPluginsAnalytic(Map<String, String> modules)
+    private List<AnalyticsEvent> collectPluginsAnalytic(Map<String, String> modules)
     {
-        modules.forEach((k, v) -> {
-            if (k.startsWith("vividus-plugin-"))
-            {
-                Map<String, String> payload = new HashMap<>();
-                CustomDefinitions.PLUGIN_VERSION.add(payload, v);
-                eventBus.post(new AnalyticsEvent(k, "use", payload));
-            }
-        });
+        return modules.entrySet().stream().filter(module -> module.getKey().startsWith("vividus-plugin-")).map(module ->
+        {
+            Map<String, String> payload = new HashMap<>();
+            CustomDefinitions.PLUGIN_VERSION.add(payload, module.getValue());
+            return new AnalyticsEvent(module.getKey(), "use", payload);
+        }).collect(Collectors.toList());
     }
 
     private Map<String, String> getEnvironmentProperties(PropertyCategory propertyCategory)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import static org.hamcrest.Matchers.matchesRegex;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -42,10 +41,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.analytics.model.AnalyticsEvent;
+import org.vividus.analytics.model.AnalyticsEventBatch;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
 
@@ -71,6 +72,7 @@ class AnalyticsStoryReporterTests
     private static final String SESSION_CONTROL = "sc";
 
     @Mock private EventBus eventBus;
+    @Captor private ArgumentCaptor<AnalyticsEventBatch> analyticsEventBatchCaptor;
     @InjectMocks private AnalyticsStoryReporter reporter;
 
     @BeforeEach
@@ -90,17 +92,17 @@ class AnalyticsStoryReporterTests
     {
         configureCommonProperties();
         reporter.beforeStoriesSteps(Stage.BEFORE);
-        verify(eventBus).post(argThat(e -> {
-            AnalyticsEvent event = (AnalyticsEvent) e;
-            Map<String, String> payload = event.getPayload();
-            assertAll(
-                () -> assertEquals(START, payload.get(SESSION_CONTROL)),
-                () -> assertEquals(VIVIDUS, payload.get(EVENT_CATEGORY)),
-                () -> assertEquals(Runtime.version().toString(), payload.get(CUSTOM_DIMENSION2)),
-                () -> assertEquals("not detected", payload.get(CUSTOM_DIMENSION3)),
-                () -> assertEquals(START_TESTS, payload.get(EVENT_ACTION)));
-            return true;
-        }));
+        verify(eventBus).post(analyticsEventBatchCaptor.capture());
+        AnalyticsEventBatch batch = analyticsEventBatchCaptor.getValue();
+        assertThat(batch.getEvents(), hasSize(1));
+        AnalyticsEvent event = batch.getEvents().get(0);
+        Map<String, String> payload = event.getPayload();
+        assertAll(
+            () -> assertEquals(START, payload.get(SESSION_CONTROL)),
+            () -> assertEquals(VIVIDUS, payload.get(EVENT_CATEGORY)),
+            () -> assertEquals(Runtime.version().toString(), payload.get(CUSTOM_DIMENSION2)),
+            () -> assertEquals("not detected", payload.get(CUSTOM_DIMENSION3)),
+            () -> assertEquals(START_TESTS, payload.get(EVENT_ACTION)));
     }
 
     @Test
@@ -127,10 +129,13 @@ class AnalyticsStoryReporterTests
         Stream.generate(() -> 0).limit(40).forEach(v -> reporter.beforeStep(null));
         Stream.generate(() -> 0).limit(20).forEach(v -> reporter.beforeScenario(mock(Scenario.class)));
         reporter.afterStoriesSteps(Stage.AFTER);
-        ArgumentCaptor<AnalyticsEvent> captor = ArgumentCaptor.forClass(AnalyticsEvent.class);
-        verify(eventBus, times(3)).post(captor.capture());
-        List<AnalyticsEvent> events = captor.getAllValues();
-        assertThat(events, hasSize(3));
+        verify(eventBus, times(2)).post(analyticsEventBatchCaptor.capture());
+        List<AnalyticsEventBatch> batches = analyticsEventBatchCaptor.getAllValues();
+        assertThat(batches, hasSize(2));
+
+        AnalyticsEventBatch beforeBatch = batches.get(0);
+        List<AnalyticsEvent> events = beforeBatch.getEvents();
+        assertThat(events, hasSize(2));
         AnalyticsEvent analyticsEvent = getAndRemove(events, CUSTOM_DIMENSION2);
         Map<String, String> payload = analyticsEvent.getPayload();
         assertAll(
@@ -148,7 +153,9 @@ class AnalyticsStoryReporterTests
             () -> assertEquals(plugin, payload1.get(EVENT_CATEGORY)),
             () -> assertEquals(pluginVersion, payload1.get(CUSTOM_DIMENSION5)),
             () -> assertEquals("use", payload1.get(EVENT_ACTION)));
-        Map<String, String> payload2 = events.get(0).getPayload();
+
+        AnalyticsEventBatch afterBatch = batches.get(1);
+        Map<String, String> payload2 = afterBatch.getEvents().get(0).getPayload();
         assertAll(
             () -> assertEquals("9", payload2.get("cm1")),
             () -> assertEquals("40", payload2.get("cm2")),

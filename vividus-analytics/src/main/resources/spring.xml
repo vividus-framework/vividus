@@ -8,7 +8,6 @@
 
     <bean id="analyticsFacade" init-method="init" class="org.vividus.analytics.GoogleAnalyticsFacade">
         <property name="trackingId" value="${analytics.tracking-id}" />
-        <property name="analyticsUri" value="${analytics.uri}" />
     </bean>
 
     <bean id="analyticsService" class="org.vividus.analytics.AnalyticsService">

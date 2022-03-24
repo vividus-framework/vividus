@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,11 @@
 
 package org.vividus.analytics;
 
+import static java.lang.System.lineSeparator;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections4.ListUtils.partition;
+import static org.apache.commons.lang3.StringUtils.join;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.HttpEntity;
@@ -36,6 +41,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.analytics.model.AnalyticsEvent;
+import org.vividus.analytics.model.AnalyticsEventBatch;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.client.IHttpClient;
 
@@ -51,9 +57,12 @@ public class GoogleAnalyticsFacade
 
     private static final Pattern PROJECT_NAME_PATTERN = Pattern.compile("(.+)(-\\d.+)?(\\\\|/)?");
 
+    private static final int MAX_EVENTS_PER_BATCH = 20;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GoogleAnalyticsFacade.class);
 
-    private URI analyticsUri;
+    private static final URI ANALYTICS_URI = URI.create("https://www.google-analytics.com/batch");
+
     private String trackingId;
     private List<NameValuePair> defaultParameters;
     private final IHttpClient httpClient;
@@ -83,13 +92,28 @@ public class GoogleAnalyticsFacade
         return UUID.nameUUIDFromBytes(DigestUtils.sha512Hex(projectName).getBytes(UTF_8)).toString();
     }
 
-    public void postEvent(AnalyticsEvent analyticsEvent)
+    public void postEvent(AnalyticsEventBatch analyticsEvent)
+    {
+        analyticsEvent.getEvents().stream()
+                                  .map(this::asParams)
+                                  .map(params -> URLEncodedUtils.format(params, UTF_8))
+                                  .collect(Collectors.collectingAndThen(toList(), this::prepareHttpEntites))
+                                  .forEach(this::post);
+    }
+
+    private Stream<HttpEntity> prepareHttpEntites(List<String> events)
+    {
+        return partition(events, MAX_EVENTS_PER_BATCH).stream()
+                                                      .map(batch -> join(batch, lineSeparator()))
+                                                      .map(body -> new StringEntity(body, UTF_8));
+    }
+
+    private List<NameValuePair> asParams(AnalyticsEvent event)
     {
         List<NameValuePair> params = new ArrayList<>();
         params.addAll(defaultParameters);
-        params.addAll(convertToNameValuePairs(analyticsEvent));
-        StringEntity entity = new StringEntity(URLEncodedUtils.format(params, UTF_8), UTF_8);
-        post(entity);
+        params.addAll(convertToNameValuePairs(event));
+        return params;
     }
 
     private List<BasicNameValuePair> convertToNameValuePairs(AnalyticsEvent analyticsEvent)
@@ -111,7 +135,7 @@ public class GoogleAnalyticsFacade
         try
         {
             HttpEntityEnclosingRequestBase post = HttpMethod.POST
-                    .createEntityEnclosingRequest(analyticsUri, entity);
+                    .createEntityEnclosingRequest(ANALYTICS_URI, entity);
             post.setHeader("User-Agent", "");
             httpClient.execute(post);
         }
@@ -119,11 +143,6 @@ public class GoogleAnalyticsFacade
         {
             LOGGER.info("Unable to send analytics", e);
         }
-    }
-
-    public void setAnalyticsUri(URI analyticsUri)
-    {
-        this.analyticsUri = analyticsUri;
     }
 
     public void setTrackingId(String trackingId)
