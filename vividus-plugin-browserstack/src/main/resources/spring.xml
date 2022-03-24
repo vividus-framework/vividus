@@ -17,7 +17,7 @@
         <constructor-arg index="2" value="${selenium.grid.password}" />
     </bean>
 
-    <bean id="debugSteps" class="org.vividus.browserstack.steps.DebugSteps" />
+    <bean id="browserStackDebugSteps" class="org.vividus.browserstack.steps.DebugSteps" />
     <bean id="browserStackLinkPublisher" class="org.vividus.browserstack.BrowserStackTestLinkPublisher" />
 
     <bean class="org.vividus.browserstack.BrowserStackTestStatusManager" lazy-init="false" />
@@ -27,7 +27,7 @@
      </bean>
 
     <util:list id="stepBeanNames-BrowserStack" value-type="java.lang.String">
-        <idref bean="debugSteps" />
+        <idref bean="browserStackDebugSteps" />
         <idref bean="browserStackLinkPublisher" />
     </util:list>
 </beans>
