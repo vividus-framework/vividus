@@ -1,6 +1,5 @@
 Meta:
     @epic vividus-plugin-azure-functions
-    @skip
 
 Scenario: Trigger a function
 When I trigger function `HttpTrigger1` from function app `vivdus-http-function` in resource group `vividus` with payload:
