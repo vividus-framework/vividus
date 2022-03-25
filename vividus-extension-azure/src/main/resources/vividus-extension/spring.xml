@@ -6,6 +6,4 @@
 
     <bean class="org.vividus.azure.identity.CredentialFactory" factory-method="createTokenCredential" />
 
-    <bean class="org.vividus.azure.util.InnersJacksonAdapter" />
-
 </beans>
