@@ -14,6 +14,8 @@
         </constructor-arg>
     </bean>
 
+    <bean class="org.vividus.azure.util.InnersJacksonAdapter" />
+
     <util:list id="stepBeanNames-Azure-DataFactory" value-type="java.lang.String">
         <idref bean="dataFactorySteps" />
     </util:list>
