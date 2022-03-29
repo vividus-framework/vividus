@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -66,6 +67,7 @@ class AbstractElementSearchActionTests
     private static final String NUMBER_OF_VISIBLE_ELEMENTS = "Number of {} elements is {}";
     private static final String EXCEPTION = "exception";
     private static final Duration TIMEOUT = Duration.ofSeconds(0);
+    private static final Map<LocatorType, List<String>> FILTERS = Map.of();
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementAction.class);
 
@@ -90,7 +92,7 @@ class AbstractElementSearchActionTests
     void testFindElementsSearchContextIsNull()
     {
         SearchParameters parameters = mock(SearchParameters.class);
-        List<WebElement> elements = elementSearchAction.findElements(null, locator, parameters);
+        List<WebElement> elements = elementSearchAction.findElements(null, locator, parameters, FILTERS);
         assertThat(elements, empty());
         assertThat(logger.getLoggingEvents(), equalTo(List.of(
                 error("Unable to locate elements, because search context is not set"))));
@@ -102,7 +104,7 @@ class AbstractElementSearchActionTests
         elementSearchAction.setWaitForElementTimeout(TIMEOUT);
         when(searchContext.findElements(locator)).thenReturn(null);
         List<WebElement> foundElements = elementSearchAction.findElements(searchContext, locator,
-                new SearchParameters().setWaitForElement(false));
+                new SearchParameters().setWaitForElement(false), FILTERS);
         assertThat(foundElements, empty());
         assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 0))));
     }
@@ -120,7 +122,7 @@ class AbstractElementSearchActionTests
         when(result.getData()).thenReturn(elements);
         when(elementActions.isElementVisible(element)).thenReturn(true);
         List<WebElement> foundElements = elementSearchAction.findElements(searchContext, locator,
-                new SearchParameters());
+                new SearchParameters(), FILTERS);
         assertEquals(1, foundElements.size());
         assertEquals(element, foundElements.get(0));
         verify(waitActions).wait(searchContext, TIMEOUT, condition, false);
@@ -140,7 +142,7 @@ class AbstractElementSearchActionTests
         when(elementActions.isElementVisible(element1)).thenReturn(Boolean.TRUE);
         when(elementActions.isElementVisible(element2)).thenReturn(Boolean.FALSE);
         List<WebElement> foundElements = elementSearchAction.findElements(searchContext, locator,
-                new SearchParameters().setWaitForElement(false));
+                new SearchParameters().setWaitForElement(false), FILTERS);
         assertEquals(1, foundElements.size());
         assertEquals(element1, foundElements.get(0));
         assertThat(logger.getLoggingEvents(), equalTo(List.of(
@@ -162,7 +164,7 @@ class AbstractElementSearchActionTests
         IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
         when(expectedConditions.presenceOfAllElementsLocatedBy(any(By.class))).thenReturn(condition);
         List<WebElement> foundElements = elementSearchAction.findElements(searchContext, locator,
-                new SearchParameters().setVisibility(Visibility.ALL));
+                new SearchParameters().setVisibility(Visibility.ALL), FILTERS);
         assertEquals(2, foundElements.size());
         assertEquals(element1, foundElements.get(0));
         assertEquals(element2, foundElements.get(1));
@@ -185,7 +187,7 @@ class AbstractElementSearchActionTests
         IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
         when(expectedConditions.presenceOfAllElementsLocatedBy(any(By.class))).thenReturn(condition);
         List<WebElement> foundElements = elementSearchAction.findElements(searchContext, locator,
-                new SearchParameters().setVisibility(Visibility.INVISIBLE));
+                new SearchParameters().setVisibility(Visibility.INVISIBLE), FILTERS);
         assertEquals(1, foundElements.size());
         assertEquals(List.of(element2), foundElements);
         verify(waitActions).wait(searchContext, TIMEOUT, condition, false);
@@ -203,7 +205,7 @@ class AbstractElementSearchActionTests
         Mockito.doThrow(new StaleElementReferenceException(EXCEPTION)).when(elementActions).isElementVisible(element);
         when(searchContext.findElements(locator)).thenReturn(elements);
         List<WebElement> foundElements = elementSearchAction.findElements(searchContext, locator,
-                new SearchParameters().setWaitForElement(false));
+                new SearchParameters().setWaitForElement(false), FILTERS);
         assertEquals(0, foundElements.size());
         verify(element, Mockito.never()).getSize();
         verifyNoInteractions(waitActions);
@@ -231,7 +233,7 @@ class AbstractElementSearchActionTests
                 .when(elementActions).isElementVisible(element);
         when(searchContext.findElements(locator)).thenReturn(elements);
         List<WebElement> foundElements = elementSearchAction
-                .findElements(searchContext, locator, new SearchParameters().setWaitForElement(false));
+                .findElements(searchContext, locator, new SearchParameters().setWaitForElement(false), FILTERS);
         assertEquals(expectedSize, foundElements.size());
         verify(element, Mockito.never()).getSize();
         verifyNoInteractions(waitActions);

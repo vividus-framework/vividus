@@ -17,6 +17,7 @@
 package org.vividus.ui.web.action.search;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,12 +51,12 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
     protected List<WebElement> findElementsByText(SearchContext searchContext, By defaultLocator,
             SearchParameters parameters, String... tagNames)
     {
-        List<WebElement> elements = findElements(searchContext, defaultLocator, parameters);
+        List<WebElement> elements = findElements(searchContext, defaultLocator, parameters, Map.of());
         if (elements.isEmpty())
         {
             String text = parameters.getValue();
             By newLocator = generateCaseInsensitiveLocator(text, tagNames);
-            return findElements(searchContext, newLocator, parameters)
+            return findElements(searchContext, newLocator, parameters, Map.of())
                     .stream()
                     .filter(element -> matchesToText(element, text))
                     .collect(Collectors.toList());

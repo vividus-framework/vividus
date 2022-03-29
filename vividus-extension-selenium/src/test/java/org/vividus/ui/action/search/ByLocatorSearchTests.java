@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.SearchContext;
@@ -40,6 +41,6 @@ class ByLocatorSearchTests
 
         when(searchContext.findElements(locatorType.buildBy(parameters.getValue()))).thenReturn(webElements);
 
-        assertEquals(webElements, searchAction.search(searchContext, parameters));
+        assertEquals(webElements, searchAction.search(searchContext, parameters, Map.of()));
     }
 }

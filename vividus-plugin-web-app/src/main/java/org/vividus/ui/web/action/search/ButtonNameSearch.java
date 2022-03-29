@@ -17,11 +17,13 @@
 package org.vividus.ui.web.action.search;
 
 import java.util.List;
+import java.util.Map;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.IElementSearchAction;
+import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.web.util.LocatorUtil;
 
@@ -37,7 +39,8 @@ public class ButtonNameSearch extends AbstractWebElementSearchAction implements 
     }
 
     @Override
-    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
+    public List<WebElement> search(SearchContext searchContext, SearchParameters parameters,
+            Map<LocatorType, List<String>> filters)
     {
         String value = parameters.getValue();
         By locator = LocatorUtil.getXPathLocator(".//" + BUTTON_WITH_ANY_ATTRIBUTE_NAME_PATTERN, value);

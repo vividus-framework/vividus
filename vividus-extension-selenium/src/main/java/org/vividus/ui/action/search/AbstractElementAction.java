@@ -18,6 +18,7 @@ package org.vividus.ui.action.search;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -39,6 +40,7 @@ public abstract class AbstractElementAction implements IElementAction
     private IWaitActions waitActions;
     @Inject private IExpectedConditions<By> expectedConditions;
     @Inject private ElementActions elementActions;
+    @Inject private ElementActionService elementActionService;
     private Duration waitForElementTimeout;
     private boolean retrySearchIfStale;
 
@@ -55,18 +57,19 @@ public abstract class AbstractElementAction implements IElementAction
         return type;
     }
 
-    protected List<WebElement> findElements(SearchContext searchContext, By locator, SearchParameters parameters)
+    protected List<WebElement> findElements(SearchContext searchContext, By locator, SearchParameters parameters,
+            Map<LocatorType, List<String>> filters)
     {
         if (searchContext != null)
         {
-            return findElements(searchContext, locator, parameters, false);
+            return findElements(searchContext, locator, parameters, filters, false);
         }
         LOGGER.error(IElementAction.NOT_SET_CONTEXT);
         return List.of();
     }
 
     private List<WebElement> findElements(SearchContext searchContext, By locator, SearchParameters parameters,
-            boolean retry)
+            Map<LocatorType, List<String>> filters, boolean retry)
     {
         List<WebElement> elements = parameters.isWaitForElement()
                 ? waitForElement(searchContext, locator)
@@ -77,16 +80,16 @@ public abstract class AbstractElementAction implements IElementAction
                        .log("Total number of elements found {} is {}");
         if (elementsFound)
         {
-            Visibility visibility = parameters.getVisibility();
             try
             {
-                return Visibility.ALL == visibility
-                        ? elements
-                        : filterElementsByVisibility(elements, visibility, retry);
+                List<WebElement> filteredElements = filterElementsByTypes(elements, filters);
+                Visibility visibility = parameters.getVisibility();
+                return Visibility.ALL == visibility ? filteredElements
+                        : filterElementsByVisibility(filteredElements, visibility, retry);
             }
             catch (StaleElementReferenceException e)
             {
-                return findElements(searchContext, locator, parameters, true);
+                return findElements(searchContext, locator, parameters, filters, true);
             }
         }
         return List.of();
@@ -117,6 +120,42 @@ public abstract class AbstractElementAction implements IElementAction
                            .log("Number of {} elements is {}");
             return list;
         }));
+    }
+
+    private List<WebElement> filterElementsByTypes(List<WebElement> foundElements,
+            Map<LocatorType, List<String>> filters)
+    {
+        List<WebElement> filteredElements = foundElements;
+        for (Map.Entry<LocatorType, List<String>> entry : filters.entrySet())
+        {
+            IElementFilterAction filterAction = elementActionService.find(entry.getKey());
+            for (String filterValue : entry.getValue())
+            {
+                int size = filteredElements.size();
+                if (size == 0)
+                {
+                    break;
+                }
+                try
+                {
+                    filteredElements = filterAction.filter(filteredElements, filterValue);
+                }
+                catch (StaleElementReferenceException e)
+                {
+                    if (retrySearchIfStale)
+                    {
+                        throw e;
+                    }
+                    LOGGER.warn(e.getMessage(), e);
+                }
+
+                int filteredElementsCount = size - filteredElements.size();
+                LOGGER.atInfo().addArgument(filteredElementsCount).addArgument(size)
+                        .addArgument(entry::getKey).addArgument(filterValue)
+                        .log("{} of {} elements were filtered out by {} filter with '{}' value");
+            }
+        }
+        return filteredElements;
     }
 
     private List<WebElement> waitForElement(SearchContext searchContext, By locator)
