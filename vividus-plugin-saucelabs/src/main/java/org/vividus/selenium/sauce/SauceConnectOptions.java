@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,15 +43,9 @@ public class SauceConnectOptions extends TunnelOptions
             + "    return \"PROXY %2$s\";%n"
             + "}%n";
 
-    private String noSslBumpDomains;
     private String skipProxyHostsPattern;
     private String restUrl;
     private String customArguments;
-
-    public void setNoSslBumpDomains(String noSslBumpDomains)
-    {
-        this.noSslBumpDomains = noSslBumpDomains;
-    }
 
     public void setSkipProxyHostsPattern(String skipProxyHostsPattern)
     {
@@ -72,11 +66,7 @@ public class SauceConnectOptions extends TunnelOptions
             appendOption(options, "tunnel-identifier", tunnelIdentifier);
             appendOption(options, "pidfile", createPidFile(tunnelIdentifier).toString());
         }
-        // Need to set this option, since we don't need hosts to be re-encrypted
-        if (noSslBumpDomains != null)
-        {
-            appendOption(options, "no-ssl-bump-domains", noSslBumpDomains);
-        }
+
         if (getProxy() != null)
         {
             /*
@@ -125,8 +115,7 @@ public class SauceConnectOptions extends TunnelOptions
             return false;
         }
         SauceConnectOptions that = (SauceConnectOptions) o;
-        return Objects.equals(noSslBumpDomains, that.noSslBumpDomains)
-                && Objects.equals(skipProxyHostsPattern, that.skipProxyHostsPattern)
+        return Objects.equals(skipProxyHostsPattern, that.skipProxyHostsPattern)
                 && Objects.equals(restUrl, that.restUrl);
     }
 
@@ -134,7 +123,7 @@ public class SauceConnectOptions extends TunnelOptions
     @Override
     public int hashCode()
     {
-        return 31 * super.hashCode() + Objects.hash(noSslBumpDomains, skipProxyHostsPattern, restUrl);
+        return 31 * super.hashCode() + Objects.hash(skipProxyHostsPattern, restUrl);
     }
 
     public void setCustomArguments(String customArguments)
