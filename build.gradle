@@ -62,7 +62,7 @@ ext {
         spring:                 '5.3.17',
         junit:                  '5.8.2',
         mockito:                '3.12.3',
-        powermock:              '2.0.9',
+        powermock:              'a0be5c4bbe',
         slf4jTest:              '2.4.1'
     ]
 }

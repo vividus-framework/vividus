@@ -30,6 +30,6 @@ dependencies {
     testCompileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
-    testImplementation(group: 'org.powermock', name: 'powermock-module-junit4', version: versions.powermock)
-    testImplementation(group: 'org.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
+    testImplementation(group: 'com.github.powermock.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
+    testImplementation(group: 'com.github.powermock.powermock', name: 'powermock-module-junit4', version: versions.powermock)
 }
