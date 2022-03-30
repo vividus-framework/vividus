@@ -20,8 +20,12 @@ import static org.vividus.util.ResourceUtils.createTempFile;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FilenameUtils;
@@ -31,30 +35,29 @@ public class SauceConnectOptions extends TunnelOptions
 {
     private static final String PAC_FILE_CONTENT_FORMAT =
               "function FindProxyForURL(url, host) {%n"
-            + "    if (shExpMatch(host, \"*.miso.saucelabs.com\") ||%n"
-            + "        shExpMatch(host, \"*.api.testobject.com\") ||%n"
-            + "        shExpMatch(host, \"*.saucelabs.com\") ||%n"
-            + "        shExpMatch(host, \"saucelabs.com\") ||%n"
-            + "        shExpMatch(host, \"%1$s\")) {%n"
+            + "    if (%s) {%n"
             + "        // KGP and REST connections. Another proxy can also be specified%n"
             + "        return \"DIRECT\";%n"
             + "    }%n"
             + "    // Test HTTP traffic, route it through the custom proxy%n"
-            + "    return \"PROXY %2$s\";%n"
+            + "    return \"PROXY %s\";%n"
             + "}%n";
 
-    private String skipProxyHostsPattern;
-    private String restUrl;
-    private String customArguments;
+    private final String restUrl;
+    private final String customArguments;
+    private final Set<String> skipHostGlobPatterns;
 
-    public void setSkipProxyHostsPattern(String skipProxyHostsPattern)
-    {
-        this.skipProxyHostsPattern = skipProxyHostsPattern;
-    }
-
-    public void setRestUrl(String restUrl)
+    public SauceConnectOptions(String restUrl, String customArguments, Set<String> skipHostGlobPatterns)
     {
         this.restUrl = restUrl;
+        this.customArguments = customArguments;
+        this.skipHostGlobPatterns = new TreeSet<>(skipHostGlobPatterns);
+        this.skipHostGlobPatterns.addAll(List.of(
+            "*.miso.saucelabs.com",
+            "*.api.testobject.com",
+            "*.saucelabs.com",
+            "saucelabs.com"
+        ));
     }
 
     public String build(String tunnelIdentifier) throws IOException
@@ -89,7 +92,14 @@ public class SauceConnectOptions extends TunnelOptions
     private Path createPacFile(String tunnelIdentifier) throws IOException
     {
         return createTempFile("pac-saucelabs-" + tunnelIdentifier, ".js",
-                String.format(PAC_FILE_CONTENT_FORMAT, skipProxyHostsPattern, getProxy()));
+                String.format(PAC_FILE_CONTENT_FORMAT, getSkipShExpMatcher(), getProxy()));
+    }
+
+    private String getSkipShExpMatcher()
+    {
+        return skipHostGlobPatterns.stream()
+                                   .map(host -> String.format("shExpMatch(host, \"%s\")", host))
+                                   .collect(Collectors.joining(" || "));
     }
 
     private Path createPidFile(String tunnelIdentifier) throws IOException
@@ -115,7 +125,7 @@ public class SauceConnectOptions extends TunnelOptions
             return false;
         }
         SauceConnectOptions that = (SauceConnectOptions) o;
-        return Objects.equals(skipProxyHostsPattern, that.skipProxyHostsPattern)
+        return Objects.equals(skipHostGlobPatterns, that.skipHostGlobPatterns)
                 && Objects.equals(restUrl, that.restUrl);
     }
 
@@ -123,11 +133,6 @@ public class SauceConnectOptions extends TunnelOptions
     @Override
     public int hashCode()
     {
-        return 31 * super.hashCode() + Objects.hash(skipProxyHostsPattern, restUrl);
-    }
-
-    public void setCustomArguments(String customArguments)
-    {
-        this.customArguments = customArguments;
+        return 31 * super.hashCode() + Objects.hash(skipHostGlobPatterns, restUrl);
     }
 }
