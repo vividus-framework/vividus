@@ -81,6 +81,6 @@ a|`true`
 |`saucelabs.sauce-connect.skip-host-glob-patterns`
 |Comma (,) separated list of host https://developer.mozilla.org/en-US/docs/Web/HTTP/Proxy_servers_and_tunneling/Proxy_Auto-Configuration_PAC_file#shexpmatch[glob patterns]
 |
-|Used to specify a list of glob patterns for hosts that are connected-to directly, others are connected through the SauceConnect. By default the list inicludes `*.miso.saucelabs.com`, `*.api.testobject.com`, `*.saucelabs.com`, `saucelabs.com` host patterns.
+|This property comes into effect only if proxy is used, otherwise its value is ignored. The property specifies the list of glob patterns for hosts that are connected-to directly, others are connected through the proxy. By default the list inicludes `*.miso.saucelabs.com`, `*.api.testobject.com`, `*.saucelabs.com`, `saucelabs.com` host patterns to avoid sending of status information by SauceConenct to SauceLabs REST API throughout the lifetime of a tunnel via proxy used by tests.
 
 |===
