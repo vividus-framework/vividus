@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,15 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import org.jbehave.core.model.Story;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -52,6 +57,10 @@ class SauceLabsCapabilitiesConfigurerTests
     private static final String TUNNEL_ID = "tunnelId";
 
     private static final String STORY_PATH = STORY_NAME + ".story";
+
+    private static final String REST_URL = "http://eu-central-1.saucelabs.com/rest/v1";
+    private static final String CUSTOM_ARGS = "--verbose";
+    private static final Set<String> SKIP_HOST_GLOB_PATTERNS = Set.of("example.com");
 
     @Mock private RunContext runContext;
     @Mock private SauceConnectManager sauceConnectManager;
@@ -82,7 +91,7 @@ class SauceLabsCapabilitiesConfigurerTests
         configurer.setTunnellingEnabled(true);
         Map<String, Object> sauceOptions = new HashMap<>();
         DesiredCapabilities desiredCapabilities = mockDesiredCapabilities(null, sauceOptions);
-        SauceConnectOptions sauceConnectOptions = new SauceConnectOptions();
+        SauceConnectOptions sauceConnectOptions = new SauceConnectOptions(null, null, Set.of());
         when(sauceConnectManager.start(sauceConnectOptions)).thenReturn(TUNNEL_ID);
 
         configurer.configure(desiredCapabilities);
@@ -95,25 +104,44 @@ class SauceLabsCapabilitiesConfigurerTests
     void shouldStartSauceConnectWhenSauceConnectIsDisabledButProxyIsStarted()
     {
         configurer.setTunnellingEnabled(false);
-        String restUrl = "http://eu-central-1.saucelabs.com/rest/v1";
-        configurer.setRestUrl(restUrl);
-        String sauceConnectArguments = "--verbose";
-        configurer.setSauceConnectArguments(sauceConnectArguments);
+        configurer.setRestUrl(REST_URL);
+        configurer.setSauceConnectArguments(CUSTOM_ARGS);
+        configurer.setSkipHostGlobPatterns(SKIP_HOST_GLOB_PATTERNS);
         Proxy proxy = mock(Proxy.class);
         String httpProxy = "http-proxy:8080";
         when(proxy.getHttpProxy()).thenReturn(httpProxy);
+
+        SauceConnectOptions sauceConnectOptions = new SauceConnectOptions(REST_URL, CUSTOM_ARGS,
+                SKIP_HOST_GLOB_PATTERNS);
+        sauceConnectOptions.setProxy(httpProxy);
+
         Map<String, Object> sauceOptions = new HashMap<>();
         DesiredCapabilities desiredCapabilities = mockDesiredCapabilities(proxy, sauceOptions);
-        SauceConnectOptions sauceConnectOptions = new SauceConnectOptions();
-        sauceConnectOptions.setProxy(httpProxy);
-        sauceConnectOptions.setRestUrl(restUrl);
-        sauceConnectOptions.setCustomArguments(sauceConnectArguments);
+
         when(sauceConnectManager.start(sauceConnectOptions)).thenReturn(TUNNEL_ID);
 
         configurer.configure(desiredCapabilities);
 
         assertEquals(Map.of(TUNNEL_IDENTIFIER_CAPABILITY, TUNNEL_ID), sauceOptions);
         verifyNoMoreInteractions(sauceConnectManager);
+    }
+
+    static Stream<Arguments> globPattens()
+    {
+        return Stream.of(
+            Arguments.arguments(SKIP_HOST_GLOB_PATTERNS, SKIP_HOST_GLOB_PATTERNS),
+            Arguments.arguments(null, Set.of())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("globPattens")
+    void shouldCreateOptios(Set<String> setValue, Set<String> expectedValue)
+    {
+        configurer.setRestUrl(REST_URL);
+        configurer.setSauceConnectArguments(CUSTOM_ARGS);
+        configurer.setSkipHostGlobPatterns(setValue);
+        assertEquals(new SauceConnectOptions(REST_URL, CUSTOM_ARGS, expectedValue), configurer.createOptions());
     }
 
     private void mockRunningStory()

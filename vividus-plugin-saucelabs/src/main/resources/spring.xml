@@ -36,6 +36,7 @@
         <property name="tunnellingEnabled" value="${saucelabs.sauce-connect.enabled}"/>
         <property name="restUrl" value="#{sauceRest.getRestApiEndpoint()}" />
         <property name="sauceConnectArguments" value="${saucelabs.sauce-connect.command-line-arguments}" />
+        <property name="skipHostGlobPatterns" value="${saucelabs.sauce-connect.skip-host-glob-patterns}" />
     </bean>
 
     <util:list id="stepBeanNames-SauceLabs" value-type="java.lang.String">

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.vividus.selenium.sauce;
 
+import java.util.Set;
+
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.context.RunContext;
 import org.vividus.selenium.tunnel.AbstractTunnellingCapabilitiesConfigurer;
@@ -26,6 +28,7 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilit
 
     private String sauceConnectArguments;
     private String restUrl;
+    private Set<String> skipHostGlobPatterns;
 
     public SauceLabsCapabilitiesConfigurer(RunContext runContext, SauceConnectManager sauceConnectManager)
     {
@@ -44,10 +47,8 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilit
     @Override
     protected SauceConnectOptions createOptions()
     {
-        SauceConnectOptions sauceConnectOptions = new SauceConnectOptions();
-        sauceConnectOptions.setCustomArguments(sauceConnectArguments);
-        sauceConnectOptions.setRestUrl(restUrl);
-        return sauceConnectOptions;
+        return new SauceConnectOptions(restUrl, sauceConnectArguments,
+                skipHostGlobPatterns == null ? Set.of() : skipHostGlobPatterns);
     }
 
     public void setRestUrl(String restUrl)
@@ -58,5 +59,10 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilit
     public void setSauceConnectArguments(String sauceConnectArguments)
     {
         this.sauceConnectArguments = sauceConnectArguments;
+    }
+
+    public void setSkipHostGlobPatterns(Set<String> skipHostGlobPatterns)
+    {
+        this.skipHostGlobPatterns = skipHostGlobPatterns;
     }
 }
