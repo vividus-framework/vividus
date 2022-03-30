@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,22 +145,6 @@ class SauceConnectOptionsTests
     }
 
     @Test
-    void testBuildWOProxyWithNoSslBumpDomains() throws IOException
-    {
-        String noSslValue = "all";
-        String noSslOption = "--no-ssl-bump-domains" + SPACE + noSslValue;
-        try (MockedStatic<ResourceUtils> resources = mockStatic(ResourceUtils.class))
-        {
-            Path pidPath = mockPid(resources);
-
-            sauceConnectOptions.setNoSslBumpDomains(noSslValue);
-            assertEquals(TUNNEL_IDENTIFIER_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + noSslOption + SPACE
-                            + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
-                    sauceConnectOptions.build(TUNNEL_IDENTIFIER));
-        }
-    }
-
-    @Test
     void testBuildWOProxyNullOption() throws IOException
     {
         assertEquals(NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING, sauceConnectOptions.build(null));
@@ -208,14 +192,6 @@ class SauceConnectOptionsTests
     }
 
     @Test
-    void testNotEqualsNoSslBumpDomains()
-    {
-        SauceConnectOptions options = createDefaultOptions();
-        options.setNoSslBumpDomains(null);
-        assertNotEquals(options, createDefaultOptions());
-    }
-
-    @Test
     void testNotEqualsSkipProxyHostsPattern()
     {
         SauceConnectOptions options = createDefaultOptions();
@@ -235,7 +211,6 @@ class SauceConnectOptionsTests
     {
         SauceConnectOptions options = new SauceConnectOptions();
         options.setProxy(PROXY);
-        options.setNoSslBumpDomains("--no-ssl-bump-domains all");
         options.setSkipProxyHostsPattern("vividus\\.dev");
         options.setRestUrl(SAUCE_LABS_REST_URL);
         options.setCustomArguments("--verbose");
