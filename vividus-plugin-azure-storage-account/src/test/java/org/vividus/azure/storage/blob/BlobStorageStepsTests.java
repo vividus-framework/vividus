@@ -188,6 +188,17 @@ class BlobStorageStepsTests
     }
 
     @Test
+    void shouldUpdateBlob()
+    {
+        runWithClient((steps, client) ->
+        {
+            BlobClient blobClient = mockBlobClient(client);
+            steps.updateBlob(BLOB, new DataWrapper(DATA), CONTAINER, KEY);
+            verify(blobClient).upload(argThat(data -> Arrays.equals(data.toBytes(), BYTES)), eq(true));
+        });
+    }
+
+    @Test
     void shouldDeleteBlob()
     {
         runWithClient((steps, client) ->
