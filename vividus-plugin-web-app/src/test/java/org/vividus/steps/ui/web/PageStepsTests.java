@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.vividus.steps.ui.web;
 import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,7 +27,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -36,10 +34,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -58,7 +54,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebElement;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
@@ -88,7 +83,6 @@ class PageStepsTests
 {
     private static final String HTTP_EXAMPLE_COM = "http://example.com";
     private static final String ELEMENT_TO_VERIFY_POSITION = "Element to verify position";
-    private static final String CURRENT_WINDOW_GUID = "{770e3411-5e19-4831-8f36-fc76e46a2807}";
     private static final String ID = "id";
     private static final String VALUE = "value";
     private static final String PAGE_HAS_CORRECT_RELATIVE_URL = "Page has correct relative URL";
@@ -209,34 +203,6 @@ class PageStepsTests
                 .thenReturn(null);
         pageSteps.isPageScrolledToAnElement(locator);
         verifyNoInteractions(softAssert);
-    }
-
-    @Test
-    void testCloseCurrentWindow()
-    {
-        String currentWindow = CURRENT_WINDOW_GUID;
-        String windowToSwitchTo = "{248427e8-e67d-47ba-923f-4051f349f813}";
-        when(webDriverProvider.get()).thenReturn(driver);
-        when(driver.getWindowHandle()).thenReturn(currentWindow);
-        Set<String> windowHandles = new LinkedHashSet<>(List.of(currentWindow, windowToSwitchTo));
-        when(driver.getWindowHandles()).thenReturn(windowHandles);
-        TargetLocator mockedTargetLocator = mock(TargetLocator.class);
-        when(driver.switchTo()).thenReturn(mockedTargetLocator);
-        pageSteps.closeCurrentWindow();
-        verify(driver).close();
-        verify(mockedTargetLocator).window(windowToSwitchTo);
-    }
-
-    @Test
-    void testCloseCurrentWindowNoAdditionalWindowIsOpened()
-    {
-        String currentWindow = CURRENT_WINDOW_GUID;
-        when(webDriverProvider.get()).thenReturn(driver);
-        when(driver.getWindowHandle()).thenReturn(currentWindow);
-        when(driver.getWindowHandles()).thenReturn(Set.of(currentWindow));
-        pageSteps.closeCurrentWindow();
-        verify(softAssert, times(0)).assertThat("New window or browser tab is found",
-                driver.getWindowHandles(), contains(currentWindow));
     }
 
     @ParameterizedTest

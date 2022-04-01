@@ -149,6 +149,11 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
         executeScript("window.open()");
     }
 
+    public void closeCurrentWindow()
+    {
+        executeScript("window.close()");
+    }
+
     public void triggerMouseEvents(WebElement webElement, String... eventTypes)
     {
         StringBuilder script = new StringBuilder();

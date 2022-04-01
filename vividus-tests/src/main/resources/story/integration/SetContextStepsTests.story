@@ -86,3 +86,27 @@ Given I am on a page with the URL '${vividus-test-site-url}'
 When I change context to element located `tagName(a)`
 When I execute javascript `location.reload();` with arguments:
 Then number of elements found by `cssSelector(img)` is = `1`
+
+
+Scenario: Verify step: "When I attempt to close current window with possibility to handle alert" with alert
+When I open URL `${vividus-test-site-url}/onbeforeunloadAlert.html` in new window
+Then an alert is not present
+When I click on element located `By.xpath(//a[text() = 'here'])`
+When I attempt to close current window with possibility to handle alert
+Then an alert is present
+When I dismiss alert with message which matches `.*`
+When I wait until an alert disappears
+Then an alert is not present
+When I attempt to close current window with possibility to handle alert
+Then an alert is present
+When I accept alert with message which matches `.*`
+When I switch to window with title that is equal to `Vividus Test Site`
+Then number of elements found by `By.xpath(//img[@name='vividus-logo'])` is equal to `1`
+
+
+Scenario: Verify step: "When I attempt to close current window with possibility to handle alert" without alert
+Given I am on a page with the URL '${vividus-test-site-url}'
+When I open URL `${vividus-test-site-url}/onbeforeunloadAlert.html` in new window
+Then an alert is not present
+When I attempt to close current window with possibility to handle alert
+Then number of elements found by `By.xpath(//img[@name='vividus-logo'])` is equal to `1`

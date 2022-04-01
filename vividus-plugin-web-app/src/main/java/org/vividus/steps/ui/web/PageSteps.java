@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.vividus.steps.ui.web;
-
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.not;
 
 import java.io.IOException;
 import java.net.URI;
@@ -261,41 +258,6 @@ public class PageSteps
         newURI = UriUtils.removeUserInfo(newURI);
         navigateActions.navigateTo(newURI.toString());
         waitForPageLoad(webDriverManager.isIOS());
-    }
-
-    /**
-     * Closes <b>current window</b> and switches to the window from which rederection to current window was performed
-     * <p>
-     * Each browser <b>window</b> or <b>tab</b> is considered to be a separate <b>window object</b>. This object holds
-     * corresponding <b>Document</b> object, which itself is a html page. So this method applies to both windows and
-     * tabs.
-     * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Receives all opened browser windows
-     * <li>Identifies current window and closes it
-     * <li>Switches back to the window from which rederection to current window was performed
-     * </ul>
-     * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context (Window &amp; Document)</i></a>
-     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
-     */
-    @When("I close the current window")
-    public void closeCurrentWindow()
-    {
-        WebDriver driver = getWebDriver();
-        String currentWindow = driver.getWindowHandle();
-        for (String window : driver.getWindowHandles())
-        {
-            if (!window.equals(currentWindow))
-            {
-                driver.close();
-                driver.switchTo().window(window);
-                break;
-            }
-        }
-        descriptiveSoftAssert.assertThat("Current window has been closed",
-                String.format("Current window '%s' has been closed", currentWindow), driver.getWindowHandles(),
-                not(contains(currentWindow)));
     }
 
     /**

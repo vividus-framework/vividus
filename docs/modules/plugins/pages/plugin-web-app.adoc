@@ -209,6 +209,10 @@ include::partial$dynamic-variables-ui.adoc[]
 
 == Steps
 
+:onbeforeunload-event: https://www.w3schools.com/jsref/event_onbeforeunload.asp[onbeforeunload]
+:popup-alert: https://www.w3schools.com/js/js_popup.asp
+:close-spec: https://w3c.github.io/webdriver/webdriver-spec.html#close-window[close]
+
 === Open URL in a new tab
 
 Opens a new tab, switches to the opened tab and loads the given URL
@@ -223,6 +227,57 @@ When I open URL `$URL` in new window
 [source,gherkin]
 ----
 When I open URL `https://docs.vividus.dev` in new window
+----
+
+=== Close current window
+
+Closes the current window and switches to the previous window.
+
+[source,gherkin]
+----
+When I close the current window
+----
+
+IMPORTANT: Handling {popup-alert}[alerts] displayed with '{onbeforeunload-event}' events is not implied by the WebDriver specification to {close-spec} window. For handling alerts use step based on JavaScript '<<_close_current_window_with_possibility_to_handle_alert>>'.
+
+WARNING: This step can only be applied to a session with multiple windows open.
+
+.Open URL in new tab, close it and switch to the previous page
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com/'
+When I open URL `https://example.com/contact-us` in new window
+When I close the current window
+----
+
+=== Close current window with possibility to handle alert
+
+Trying to close the current window with '{onbeforeunload-event}' events handling.
+
+* If an {popup-alert}[alert] window via '{onbeforeunload-event}' event is opened, it must be checked and handled in the subsequent steps.
+* If an {popup-alert}[alert] window is not opened, the step closes the current window and switches to the previous window.
+
+[source,gherkin]
+----
+When I attempt to close current window with possibility to handle alert
+----
+
+IMPORTANT: This step can only be used if the current window was opened via the step ``When I open URL \`$pageUrl` in new window``.
+
+NOTE: If you confirm window close in {popup-alert}[alert], the window will be closed, and you will need to switch to current window using the following step: `When I switch to window with title that $stringComparisonRule `$windowName``.
+
+.Checking for an alert when trying to close a window with form
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com/'
+When I open URL `https://example.com/form` in new window
+When I click on element located `By.xpath(//*[@id='form-edit'])`
+When I execute sequence of actions:
+|type      |argument    |
+|ENTER_TEXT|changed text|
+When I attempt to close current window with possibility to handle alert
+Then an alert is present
+When I accept alert with message which matches `.*`
 ----
 
 === Stop page loading
