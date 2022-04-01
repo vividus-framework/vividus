@@ -222,9 +222,9 @@ public class BlobStorageSteps
      * @param containerName     The name of the container to point to.
      * @param storageAccountKey The key to Storage Account endpoint.
      */
-    @When("I update blob with name `$blobName` and data `$data` to container `$containerName` of storage account "
+    @When("I upsert blob with name `$blobName` and data `$data` to container `$containerName` of storage account "
             + "`$storageAccountKey`")
-    public void updateBlob(String blobName, DataWrapper data, String containerName, String storageAccountKey)
+    public void upsertBlob(String blobName, DataWrapper data, String containerName, String storageAccountKey)
     {
         createBlobClient(blobName, containerName, storageAccountKey)
                 .upload(BinaryData.fromBytes(data.getBytes()), true);
