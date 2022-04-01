@@ -19,6 +19,8 @@ package org.vividus.steps.ui.web;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.not;
 
+import java.util.function.BiConsumer;
+
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
@@ -87,7 +89,11 @@ public class WindowSteps
     @When("I close the current window")
     public void closeCurrentWindow()
     {
-        tryToCloseCurrentWindow(false);
+        tryToCloseCurrentWindow((driver, window) ->
+        {
+            driver.close();
+            driver.switchTo().window(window);
+        });
     }
 
     /**
@@ -120,10 +126,21 @@ public class WindowSteps
     @When("I attempt to close current window with possibility to handle alert")
     public void closeCurrentWindowWithAlertsHandling()
     {
-        tryToCloseCurrentWindow(true);
+        tryToCloseCurrentWindow((driver, window) ->
+        {
+            javascriptActions.closeCurrentWindow();
+            if (!alertActions.isAlertPresent())
+            {
+                driver.switchTo().window(window);
+            }
+            else
+            {
+                LOGGER.info("Alert dialog box is shown and must be handled in the subsequent steps.");
+            }
+        });
     }
 
-    private void tryToCloseCurrentWindow(boolean handleAlerts)
+    private void tryToCloseCurrentWindow(BiConsumer<WebDriver, String> closeExecutor)
     {
         WebDriver driver = getWebDriver();
         String currentWindow = driver.getWindowHandle();
@@ -131,23 +148,7 @@ public class WindowSteps
         {
             if (!window.equals(currentWindow))
             {
-                if (handleAlerts)
-                {
-                    javascriptActions.closeCurrentWindow();
-                    if (!alertActions.isAlertPresent())
-                    {
-                        driver.switchTo().window(window);
-                    }
-                    else
-                    {
-                        LOGGER.info("Alert dialog box is shown and must be handled in the subsequent steps.");
-                    }
-                }
-                else
-                {
-                    driver.close();
-                    driver.switchTo().window(window);
-                }
+                closeExecutor.accept(driver, window);
                 break;
             }
         }
