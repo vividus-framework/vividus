@@ -149,6 +149,26 @@ When I upload blob with name `raw/test.json` and data `{"test":"data"}` to conta
 When I upload blob with name `folder/image.jpg` and data `#{loadBinaryResource(/data/image.jpg)}` to container `vividus` of storage account `testaccount`
 ----
 
+==== Upsert the blob
+
+Uploads the blob to the container. If blob already exists it will be replaced.
+
+[source,gherkin]
+----
+When I upsert blob with name `$blobName` and data `$data` to container `$containerName` of storage account `$storageAccountKey`
+----
+
+* `$blobName` - The full path to the blob in the container.
+* `$data` - The data to store as blob.
+* `$containerName` - The name of the container to point to.
+* `$storageAccountKey` - The key of storage account from the configuration.
+
+.Upsert the blob
+[source,gherkin]
+----
+When I upsert blob with name `raw/test.json` and data `{"test":"data"}` to container `vividus` of storage account `testaccount`
+----
+
 ==== Delete the blob
 
 Deletes the specified blob from the container.

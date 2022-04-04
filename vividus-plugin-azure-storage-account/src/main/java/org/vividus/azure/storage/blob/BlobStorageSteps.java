@@ -215,6 +215,22 @@ public class BlobStorageSteps
     }
 
     /**
+     * Uploads the blob to the container. If blob already exists it will be replaced.
+     *
+     * @param blobName          The full path to the creating blob in the container.
+     * @param data              The data to store as blob.
+     * @param containerName     The name of the container to point to.
+     * @param storageAccountKey The key to Storage Account endpoint.
+     */
+    @When("I upsert blob with name `$blobName` and data `$data` to container `$containerName` of storage account "
+            + "`$storageAccountKey`")
+    public void upsertBlob(String blobName, DataWrapper data, String containerName, String storageAccountKey)
+    {
+        createBlobClient(blobName, containerName, storageAccountKey)
+                .upload(BinaryData.fromBytes(data.getBytes()), true);
+    }
+
+    /**
      * Deletes the specified blob from the container.
      *
      * @param blobName          The full path to the blob in the container.
