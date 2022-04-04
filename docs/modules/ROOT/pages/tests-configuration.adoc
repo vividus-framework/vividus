@@ -137,7 +137,7 @@ The file represents a collection of JSON elements describing known issues.
 <1> [Mandatory] *Identifier* (This could be an ID of the issue in your bug tracking system)
 <2> [Mandatory] *Issue type.* One of: INTERNAL (application issue), EXTERNAL (3rd party issue), AUTOMATION (test automation issue)
 <3> [Mandatory] *Assertion pattern* describes which failed assertions should be considered as known
-<4> Story pattern to match failed story name
+<4> Story pattern to match the file name of the failed story. Pay attention, the file name extension (`.story`) should not be included in the pattern, only base file name is matched.
 <5> Scenario pattern to match failed scenario name
 <6> Step pattern to match failed step.
 <7> Variable patterns. Patterns to match variables.
