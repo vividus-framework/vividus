@@ -16,14 +16,27 @@
 
 package org.vividus.steps.ui.web;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,8 +50,10 @@ import org.openqa.selenium.WebDriver.Window;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.web.action.IAlertActions;
+import org.vividus.ui.web.action.WebJavascriptActions;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class WindowStepsTests
 {
     private static final int WIDTH = 640;
@@ -47,7 +62,14 @@ class WindowStepsTests
     private static final int SCREEN_HEIGHT = 900;
     private static final String ASSERTION_PATTERN =
             "The desired browser window size %dx%d fits the screen size (1440x900)";
+    private static final String CURRENT_WINDOW_GUID = "{770e3411-5e19-4831-8f36-fc76e46a2807}";
+    private static final String WINDOW_TO_SWITCH_TO = "{248427e8-e67d-47ba-923f-4051f349f813}";
 
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(WindowSteps.class);
+
+    @Mock private WebDriver driver;
+    @Mock private WebJavascriptActions javascriptActions;
+    @Mock private IAlertActions alertActions;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IWebDriverManager webDriverManager;
     @Mock private ISoftAssert softAssert;
@@ -98,6 +120,53 @@ class WindowStepsTests
         verify(window).setSize(targetSize);
     }
 
+    @Test
+    void testCloseCurrentWindow()
+    {
+        mockWindowHandles();
+        WebDriver.TargetLocator mockedTargetLocator = mock(WebDriver.TargetLocator.class);
+        when(driver.switchTo()).thenReturn(mockedTargetLocator);
+        windowSteps.closeCurrentWindow();
+        verify(driver).close();
+        verify(mockedTargetLocator).window(WINDOW_TO_SWITCH_TO);
+    }
+
+    @Test
+    void testCloseCurrentWindowNoAdditionalWindowIsOpened()
+    {
+        String currentWindow = CURRENT_WINDOW_GUID;
+        when(webDriverProvider.get()).thenReturn(driver);
+        when(driver.getWindowHandle()).thenReturn(currentWindow);
+        when(driver.getWindowHandles()).thenReturn(Set.of(currentWindow));
+        windowSteps.closeCurrentWindow();
+        verify(softAssert, times(0)).assertThat("New window or browser tab is found",
+                driver.getWindowHandles(), contains(currentWindow));
+    }
+
+    @Test
+    void testCloseCurrentWindowWithAlerts()
+    {
+        mockWindowHandles();
+        when(alertActions.isAlertPresent()).thenReturn(true);
+        windowSteps.closeCurrentWindowWithAlertsHandling();
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(info("Alert dialog box is shown and must be handled in the subsequent steps."))));
+        verify(javascriptActions).closeCurrentWindow();
+        verify(driver, never()).switchTo();
+    }
+
+    @Test
+    void testCloseCurrentWindowWithoutAlerts()
+    {
+        mockWindowHandles();
+        WebDriver.TargetLocator mockedTargetLocator = mock(WebDriver.TargetLocator.class);
+        when(driver.switchTo()).thenReturn(mockedTargetLocator);
+        when(alertActions.isAlertPresent()).thenReturn(false);
+        windowSteps.closeCurrentWindowWithAlertsHandling();
+        verify(javascriptActions).closeCurrentWindow();
+        verify(mockedTargetLocator).window(WINDOW_TO_SWITCH_TO);
+    }
+
     private Window mockWindow()
     {
         WebDriver mockedWebDriver = mock(WebDriver.class);
@@ -107,5 +176,14 @@ class WindowStepsTests
         Window mockedWindow = mock(Window.class);
         when(mockedOptions.window()).thenReturn(mockedWindow);
         return mockedWindow;
+    }
+
+    private void mockWindowHandles()
+    {
+        String currentWindow = CURRENT_WINDOW_GUID;
+        when(webDriverProvider.get()).thenReturn(driver);
+        when(driver.getWindowHandle()).thenReturn(currentWindow);
+        Set<String> windowHandles = new LinkedHashSet<>(List.of(currentWindow, WINDOW_TO_SWITCH_TO));
+        when(driver.getWindowHandles()).thenReturn(windowHandles);
     }
 }

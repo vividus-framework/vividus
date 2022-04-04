@@ -167,6 +167,13 @@ class WebJavascriptActionsTests
     }
 
     @Test
+    void testCloseCurrentWindow()
+    {
+        javascriptActions.closeCurrentWindow();
+        verify((JavascriptExecutor) webDriver).executeScript("window.close()");
+    }
+
+    @Test
     void testTriggerEvents()
     {
         WebElement webElement = mock(WebElement.class);
