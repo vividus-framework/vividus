@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,9 +77,9 @@ public class FileSystemBaselineRepository implements IBaselineRepository
     @Override
     public void saveBaseline(Screenshot toSave, String baselineName) throws IOException
     {
-        File baselineToSave = new File(baselineFolderResolver.get(), baselineName);
+        File baselineToSave = new File(baselineFolderResolver.get(), appendExtension(baselineName));
         ImageUtils.writeAsPng(toSave.getImage(), baselineToSave);
-        LOGGER.info("Baseline saved to: {}", appendExtension(baselineToSave.getAbsolutePath()));
+        LOGGER.info("Baseline saved to: {}", baselineToSave.getAbsolutePath());
     }
 
     public void setBaselinesFolder(File baselinesFolder)

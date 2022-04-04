@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,16 +54,15 @@ public class FilesystemScreenshotDebugger implements ScreenshotDebugger
         executeIfPathSet(l ->
         {
             File location = new File(l, System.currentTimeMillis() + UNDERSCORE + clazz.getSimpleName()
-                + UNDERSCORE + suffix);
-            String filePath = location.toString() + ".png";
+                + UNDERSCORE + suffix + ".png");
             try
             {
                 ImageUtils.writeAsPng(debugImage, location);
-                LOGGER.debug("Debug screenshot saved to {}", filePath);
+                LOGGER.debug("Debug screenshot saved to {}", location);
             }
             catch (IOException e)
             {
-                LOGGER.debug("Unable to save debug screenshot to {}", filePath, e);
+                LOGGER.debug("Unable to save debug screenshot to {}", location, e);
             }
         });
     }
