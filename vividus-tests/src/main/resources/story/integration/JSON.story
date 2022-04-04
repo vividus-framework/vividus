@@ -126,3 +126,26 @@ When I find = `1` JSON elements from `${json}` by `$..book[?(@.title == 'Sword o
 |step|
 |When I convert JSON from context to scenario variable `jsonData`|
 Then `${jsonData.title}` is = `Sword of Honour`
+
+
+Scenario: Step verification 'When I find $comparisonRule `$elementsNumber` JSON elements in `$json` by `$jsonPath` and until variable `$variableName` $comparisonRule `$expectedValue` for each element I do:$stepsToExecute'
+When I find > `1` JSON elements in `${json}` by `$.store.book` and until variable `title` matches `M.+` for each element I do:
+|step|
+|When I save JSON element value from context by JSON path `$.title` to scenario variable `title`|
+Then `Moby Dick` is = `${title}`
+When I find > `1` JSON elements in `${json}` by `$.store.book` and until variable `title` matches `S.+` for each element I do:
+|step|
+|When I save JSON element value from context by JSON path `$.title` to scenario variable `title`|
+Then `Sayings of the Century` is = `${title}`
+
+
+Scenario: Step verification 'When I find $comparisonRule `$elementsNumber` JSON elements in context by `$jsonPath` and until variable `$variableName` $comparisonRule `$expectedValue` for each element I do:$stepsToExecute'
+When I execute HTTP GET request for resource with URL `http://jsonpath.herokuapp.com/json/goessner.json`
+When I find > `1` JSON elements in context by `$.store.book` and until variable `title` matches `M.+` for each element I do:
+|step                                                                                           |
+|When I save JSON element value from context by JSON path `$.title` to scenario variable `title`|
+Then `Moby Dick` is = `${title}`
+When I find > `1` JSON elements in context by `$.store.book` and until variable `title` matches `S.+` for each element I do:
+|step                                                                                           |
+|When I save JSON element value from context by JSON path `$.title` to scenario variable `title`|
+Then `Sayings of the Century` is = `${title}`

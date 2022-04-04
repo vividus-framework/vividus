@@ -15,8 +15,13 @@
 
     <bean id="jsonPatchSteps" class="org.vividus.json.steps.JsonPatchSteps" />
 
+    <bean id="jsonNestedSteps" class="org.vividus.json.steps.JsonNestedSteps">
+        <constructor-arg type="org.vividus.softassert.ISoftAssert" ref="jsonSoftAssert" />
+    </bean>
+
     <util:list id="stepBeanNames-Json">
         <idref bean="jsonSteps" />
         <idref bean="jsonPatchSteps" />
+        <idref bean="jsonNestedSteps" />
     </util:list>
 </beans>

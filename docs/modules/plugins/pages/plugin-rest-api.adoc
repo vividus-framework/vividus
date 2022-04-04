@@ -507,54 +507,6 @@ When I save number of elements from `$json` found by JSON path `$jsonPath` to $s
 When I save number of elements from `[{"key" : "passed"}, {"key" : "failed"}]` found by JSON path `$..[?(@.key == "failed")]` to scenario variable `messageCount`
 ----
 
-=== Perform steps on elements in JSON
-
-Performs steps against all elements found by JSON path in JSON data
-
-Actions performed by step:
-
-* searches for elements using JSON path
-* checks that elements quantity matches comparison rule and elements number
-* passes if the comparison rule matches and the elements number is 0
-* for each element switches JSON context and performs all steps. No steps will be performed in case of comparison rule mismatch
-* restores previously set context
-
-[source,gherkin]
-----
-When I find $comparisonRule `$elementsNumber` JSON elements from `$json` by `$jsonPath` and for each element do$stepsToExecute
-----
-
-* `comparisonRule` - xref:parameters:comparison-rule.adoc[comparison rule]
-* `elementsNumber` - expected number of elements
-* `json` - JSON data
-* `jsonPath` - {json-path}
-* `stepsToExecute` - steps to perform on JSON elements
-
-.Verify each account id is a number
-[source,gherkin]
-----
-When I find > `0` JSON elements from `
-{
-  "accounts": [
-    {
-      "accountId": 00,
-      "status": "Active"
-    },
-    {
-      "accountId": 01,
-      "status": "Active"
-    },
-    {
-      "accountId": 10,
-      "status": "Active"
-    }
-  ]
-}
-` by `$.accounts.*` and for each element do
-|step                                                                                 |
-|Then number of JSON elements by JSON path `$[?(@.accountId =~ /\d+/i)]` is equal to 1|
-----
-
 === Validate HTTP resources
 
 Validates the defined HTTP resources
