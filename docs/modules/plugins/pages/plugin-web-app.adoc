@@ -254,7 +254,7 @@ When I close the current window
 
 Trying to close the current window with '{onbeforeunload-event}' events handling.
 
-* If an {popup-alert}[alert] window via '{onbeforeunload-event}' event is opened, it must be checked and handled in the subsequent steps.
+* If an {popup-alert}[alert] window is opened via '{onbeforeunload-event}' event, it must be checked and handled in the subsequent steps.
 * If an {popup-alert}[alert] window is not opened, the step closes the current window and switches to the previous window.
 
 [source,gherkin]

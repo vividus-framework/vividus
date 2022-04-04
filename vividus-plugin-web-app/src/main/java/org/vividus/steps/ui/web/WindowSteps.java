@@ -71,7 +71,7 @@ public class WindowSteps
     }
 
     /**
-     * Closes <b>current window</b> and switches to the window from which rederection to current window was performed
+     * Closes <b>current window</b> and switches to the window from which redirection to current window was performed
      * <p>
      * Each browser <b>window</b> or <b>tab</b> is considered to be a separate <b>window object</b>. This object holds
      * corresponding <b>Document</b> object, which itself is a html page. So this method applies to both windows and
@@ -81,7 +81,7 @@ public class WindowSteps
      * <ul>
      * <li>Receives all opened browser windows
      * <li>Identifies current window and closes it
-     * <li>Switches back to the window from which rederection to current window was performed
+     * <li>Switches back to the window from which redirection to current window was performed
      * </ul>
      * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context (Window &amp; Document)</i></a>
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
@@ -98,7 +98,7 @@ public class WindowSteps
 
     /**
      * Trying to close the <b>current window</b> with JavaScript method 'close()'.
-     * If an alert window via 'onbeforeunload' event is opened, it must be checked and handled in the subsequent steps.
+     * If an alert window is opened via 'onbeforeunload' event, it must be checked and handled in the subsequent steps.
      * If an alert window is not opened, the step closes the current window and switches to the previous window.
      * <p>
      * Each browser <b>window</b> or <b>tab</b> is considered to be a separate <b>window object</b>. This object holds
@@ -112,7 +112,7 @@ public class WindowSteps
      * <li>If an alert window via 'onbeforeunload' event opens, step completes execution
      * (alert is expected to be handled in next steps)
      * <li>If an alert window does not open, closes current window and
-     *  switches back to the window from which rederection to current window was performed
+     *  switches back to the window from which redirection to current window was performed
      * </ul>
      * <p>
      * Note that this step can only be used if the current window was opened using the step

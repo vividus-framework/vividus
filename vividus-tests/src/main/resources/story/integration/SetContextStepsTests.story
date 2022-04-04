@@ -89,6 +89,8 @@ Then number of elements found by `cssSelector(img)` is = `1`
 
 
 Scenario: Verify step: "When I attempt to close current window with possibility to handle alert" with alert
+Meta:
+    @requirementId 2314
 When I open URL `${vividus-test-site-url}/onbeforeunloadAlert.html` in new window
 Then an alert is not present
 When I click on element located `By.xpath(//a[text() = 'here'])`
@@ -105,6 +107,8 @@ Then number of elements found by `By.xpath(//img[@name='vividus-logo'])` is equa
 
 
 Scenario: Verify step: "When I attempt to close current window with possibility to handle alert" without alert
+Meta:
+    @requirementId 2314
 Given I am on a page with the URL '${vividus-test-site-url}'
 When I open URL `${vividus-test-site-url}/onbeforeunloadAlert.html` in new window
 Then an alert is not present
