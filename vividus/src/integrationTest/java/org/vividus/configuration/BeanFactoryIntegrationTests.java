@@ -50,6 +50,9 @@ class BeanFactoryIntegrationTests
     private static final String ENCRYPTED_PROPERTY = "encrypted-property";
     private static final String HELLO = "hello";
 
+    private static final String DEEPER_SUITE_LEVEL_OVERRIDABLE_PROPERTY = "deeper-suite-level-overridable-property";
+    private static final String PROFILE_SUITE_OVERRIDABLE_PROPERTY = "profile-suite-overridable-property";
+
     @BeforeEach
     void beforeEach()
     {
@@ -175,7 +178,7 @@ class BeanFactoryIntegrationTests
         System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
         BeanFactory.open();
-        assertSuiteProperty("profile-suite-overridable-property", PROPERTY_VALUE_FROM_SUITE);
+        assertSuiteProperty(PROFILE_SUITE_OVERRIDABLE_PROPERTY, PROPERTY_VALUE_FROM_SUITE);
     }
 
     @Test
@@ -226,9 +229,22 @@ class BeanFactoryIntegrationTests
         assertEquals(HELLO, properties.getProperty(ENCRYPTED_PROPERTY));
     }
 
+    @Test
+    void testLoadingOfPropertiesFromRootsForCorrespondingEmptyConfigurationProperties() throws IOException
+    {
+        var empty = "";
+        System.setProperty(CONFIGURATION_SUITES, empty);
+        System.setProperty(CONFIGURATION_PROFILES, empty);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, empty);
+        BeanFactory.open();
+        var properties = ConfigurationResolver.getInstance().getProperties();
+        assertEquals("value-from-upper-level", properties.getProperty(DEEPER_SUITE_LEVEL_OVERRIDABLE_PROPERTY));
+        assertEquals("value-from-profile", properties.getProperty(PROFILE_SUITE_OVERRIDABLE_PROPERTY));
+    }
+
     private void assertIntegrationSuiteProperty() throws IOException
     {
-        assertSuiteProperty("deeper-suite-level-overridable-property", "value-from-deeper-level");
+        assertSuiteProperty(DEEPER_SUITE_LEVEL_OVERRIDABLE_PROPERTY, "value-from-deeper-level");
     }
 
     private void assertSuiteProperty(String key, String expectedValue) throws IOException

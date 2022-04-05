@@ -106,8 +106,10 @@ public final class ConfigurationResolver
         Multimap<String, String> configuration = assembleConfiguration(configurationProperties, overridingProperties);
         for (Entry<String, String> configurationEntry : configuration.entries())
         {
-            properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true, configurationEntry.getKey(),
-                    configurationEntry.getValue()));
+            Properties configurationItem = propertiesLoader.loadFromResourceTreeRecursively(
+                    !configurationEntry.getValue().isEmpty(), configurationEntry.getKey(),
+                    configurationEntry.getValue());
+            properties.putAll(configurationItem);
         }
 
         Properties deprecatedProperties = propertiesLoader.loadFromResourceTreeRecursively(false, "deprecated");
@@ -201,6 +203,10 @@ public final class ConfigurationResolver
 
     private static List<String> asPaths(String value)
     {
+        if (value.isEmpty())
+        {
+            return List.of(value);
+        }
         // First configuration paths in the sequence have high priority then next ones
         return Stream.of(StringUtils.split(value, ','))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), Lists::reverse));
