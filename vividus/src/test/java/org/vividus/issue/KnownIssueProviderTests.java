@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.core.io.support.ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,39 +35,39 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.softassert.issue.KnownIssueType;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.property.IPropertyParser;
 
-@ExtendWith(TestLoggerFactoryExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class KnownIssueProviderTests
 {
     private static final String URL = "http://examples.com";
     private static final String MAIN_PAGE_URL = "mainPageUrl";
     private static final String FILENAME = "known-issues.json";
-    private static final String LOCATION_PATTERN = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + FILENAME;
+    private static final String LOCATION_PATTERN = CLASSPATH_ALL_URL_PREFIX + FILENAME;
     private static final String PROPERTY_PREFIX = "known-issue-provider.additional-parameters-%s";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(KnownIssueProvider.class);
-    private KnownIssueProvider knownIssueProvider;
 
-    @BeforeEach
-    void beforeEach()
-    {
-        knownIssueProvider = new KnownIssueProvider();
-    }
+    @Mock private ApplicationContext applicationContext;
+    @Mock private IPropertyParser propertyParser;
+    @InjectMocks private final KnownIssueProvider knownIssueProvider = new KnownIssueProvider();
 
     private static VividusKnownIssueIdentifier getKnownIssueIdentifier(KnownIssueType type, String assertionPattern)
     {
@@ -111,39 +112,30 @@ class KnownIssueProviderTests
     void testInit() throws IOException
     {
         knownIssueProvider.setFileName(FILENAME);
-        ApplicationContext applicationContext = mock(ApplicationContext.class);
-        IPropertyParser propertyParser = mock(IPropertyParser.class);
-        knownIssueProvider.setApplicationContext(applicationContext);
-        knownIssueProvider.setFileName(FILENAME);
-        knownIssueProvider.setPropertyParser(propertyParser);
         knownIssueProvider.setKnownIssueIdentifiers(new HashMap<>());
-        Resource resource = mock(Resource.class);
-        when(applicationContext.getResources(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + FILENAME))
-            .thenReturn(new Resource[] {resource});
-        when(resource.getDescription()).thenReturn(FILENAME);
-        InputStream knownIssues = IOUtils.toInputStream(ResourceUtils
-                .loadResource(KnownIssueProviderTests.class, FILENAME), StandardCharsets.UTF_8);
-        when(resource.getInputStream()).thenReturn(knownIssues);
-        when(propertyParser.getPropertyValue(PROPERTY_PREFIX, MAIN_PAGE_URL)).thenReturn(MAIN_PAGE_URL);
-        when(propertyParser.getPropertyValue(MAIN_PAGE_URL)).thenReturn(URL);
+        try (var knownIssues = IOUtils.toInputStream(
+                ResourceUtils.loadResource(KnownIssueProviderTests.class, FILENAME), StandardCharsets.UTF_8))
+        {
+            var resource = mock(Resource.class);
+            when(resource.getDescription()).thenReturn(FILENAME);
+            when(resource.getInputStream()).thenReturn(knownIssues);
+            when(applicationContext.getResources(CLASSPATH_ALL_URL_PREFIX + FILENAME)).thenReturn(
+                    new Resource[] { resource });
+            when(propertyParser.getPropertyValue(PROPERTY_PREFIX, MAIN_PAGE_URL)).thenReturn(MAIN_PAGE_URL);
+            when(propertyParser.getPropertyValue(MAIN_PAGE_URL)).thenReturn(URL);
 
-        knownIssueProvider.init();
+            knownIssueProvider.init();
 
-        assertEquals(1, knownIssueProvider.getKnownIssueIdentifiers().size());
+            assertEquals(1, knownIssueProvider.getKnownIssueIdentifiers().size());
+        }
     }
 
     @Test
     void testInitNoResource() throws IOException
     {
         knownIssueProvider.setFileName(FILENAME);
-        ApplicationContext applicationContext = mock(ApplicationContext.class);
-        IPropertyParser propertyParser = mock(IPropertyParser.class);
-        knownIssueProvider.setApplicationContext(applicationContext);
-        knownIssueProvider.setFileName(FILENAME);
-        knownIssueProvider.setPropertyParser(propertyParser);
         knownIssueProvider.setKnownIssueIdentifiers(new HashMap<>());
-        when(applicationContext.getResources(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + FILENAME))
-            .thenReturn(new Resource[] {});
+        when(applicationContext.getResources(CLASSPATH_ALL_URL_PREFIX + FILENAME)).thenReturn(new Resource[] {});
 
         knownIssueProvider.init();
 
@@ -153,49 +145,45 @@ class KnownIssueProviderTests
                 LOCATION_PATTERN))));
     }
 
-    @Test
-    void testInitNoPropertyByQualifier() throws IOException
+    @ParameterizedTest
+    @ValueSource(strings = MAIN_PAGE_URL)
+    @NullSource
+    void testInitNoPropertyByQualifier(String propertyValue) throws IOException
     {
         knownIssueProvider.setFileName(FILENAME);
-        ApplicationContext applicationContext = mock(ApplicationContext.class);
-        IPropertyParser propertyParser = mock(IPropertyParser.class);
-        knownIssueProvider.setApplicationContext(applicationContext);
-        knownIssueProvider.setFileName(FILENAME);
-        knownIssueProvider.setPropertyParser(propertyParser);
         knownIssueProvider.setKnownIssueIdentifiers(new HashMap<>());
-        Resource resource = mock(Resource.class);
-        when(applicationContext.getResources(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + FILENAME))
-            .thenReturn(new Resource[] {resource});
-        when(resource.getDescription()).thenReturn(FILENAME);
-        InputStream knownIssues = IOUtils.toInputStream(ResourceUtils
-                .loadResource(KnownIssueProviderTests.class, FILENAME), StandardCharsets.UTF_8);
-        when(resource.getInputStream()).thenReturn(knownIssues);
-        when(propertyParser.getPropertyValue(PROPERTY_PREFIX, MAIN_PAGE_URL)).thenReturn(MAIN_PAGE_URL);
+        try (InputStream knownIssues = IOUtils.toInputStream(
+                ResourceUtils.loadResource(KnownIssueProviderTests.class, FILENAME), StandardCharsets.UTF_8))
+        {
+            Resource resource = mock(Resource.class);
+            when(resource.getDescription()).thenReturn(FILENAME);
+            when(resource.getInputStream()).thenReturn(knownIssues);
+            when(applicationContext.getResources(CLASSPATH_ALL_URL_PREFIX + FILENAME)).thenReturn(
+                    new Resource[] { resource });
+            when(propertyParser.getPropertyValue(PROPERTY_PREFIX, MAIN_PAGE_URL)).thenReturn(MAIN_PAGE_URL);
+            when(propertyParser.getPropertyValue(MAIN_PAGE_URL)).thenReturn(propertyValue);
 
-        knownIssueProvider.init();
+            knownIssueProvider.init();
 
-        assertEquals(0, knownIssueProvider.getKnownIssueIdentifiers().size());
-        List<LoggingEvent> events = logger.getLoggingEvents();
-        assertEquals(2, events.size());
-        assertEquals(debug("Loading known issue identifiers from {}", FILENAME), events.get(0));
-        LoggingEvent info = events.get(1);
-        assertEquals("Issue with key {} filtered out by additional pattern '{}'. Actual property value is '{}'",
-                info.getMessage());
-        assertEquals("ISSUE-123", info.getArguments().get(0));
-        assertEquals(".*examples.com", info.getArguments().get(1).toString());
+            assertEquals(0, knownIssueProvider.getKnownIssueIdentifiers().size());
+            var events = logger.getLoggingEvents();
+            assertEquals(2, events.size());
+            assertEquals(debug("Loading known issue identifiers from {}", FILENAME), events.get(0));
+            var info = events.get(1);
+            assertEquals("Issue with key {} filtered out by additional pattern '{}'. Actual property value is '{}'",
+                    info.getMessage());
+            assertEquals("ISSUE-123", info.getArguments().get(0));
+            assertEquals(".*examples.com", info.getArguments().get(1).toString());
+        }
     }
 
     @Test
     void testInitIOException() throws IOException
     {
         knownIssueProvider.setFileName(FILENAME);
-        ApplicationContext applicationContext = mock(ApplicationContext.class);
-        IPropertyParser propertyParser = mock(IPropertyParser.class);
-        knownIssueProvider.setApplicationContext(applicationContext);
-        knownIssueProvider.setPropertyParser(propertyParser);
         knownIssueProvider.setKnownIssueIdentifiers(new HashMap<>());
         IOException ioe = new IOException();
-        when(applicationContext.getResources(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + FILENAME))
+        when(applicationContext.getResources(CLASSPATH_ALL_URL_PREFIX + FILENAME))
             .thenThrow(ioe);
 
         knownIssueProvider.init();

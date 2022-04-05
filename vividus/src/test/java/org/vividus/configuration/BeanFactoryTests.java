@@ -18,21 +18,33 @@ package org.vividus.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
+import org.apache.commons.collections4.MapUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.junit.platform.commons.util.ReflectionUtils.HierarchyTraversalMode;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.support.GenericXmlApplicationContext;
@@ -70,27 +82,41 @@ class BeanFactoryTests
         assertEquals(context, BeanFactory.getResourcePatternResolver());
     }
 
-    @Test
-    void testOpenNotActiveContext()
+    static Stream<Arguments> profiles()
     {
-        ConfigurableEnvironment environment = mock(ConfigurableEnvironment.class);
-        String[] profiles = { "test" };
-        String[] locations = {
-            "classpath*:/org/vividus/spring.xml",
-            "classpath*:/vividus-extension/spring.xml",
-            "classpath*:/spring.xml"
-        };
+        return Stream.of(
+                arguments(Map.of("spring.profiles.active", "web,mobile"), new String[] { "web", "mobile" }),
+                arguments(Map.of(), new String[] {  })
+        );
+    }
 
-        when(context.isActive()).thenReturn(false);
-        when(context.getEnvironment()).thenReturn(environment);
+    @ParameterizedTest
+    @MethodSource("profiles")
+    void testOpenNotActiveContext(Map<String, String> properties, String... activeProfiles)
+    {
+        try (var configurationResolverStaticMock = mockStatic(ConfigurationResolver.class))
+        {
+            var configurationResolver = mock(ConfigurationResolver.class);
+            when(configurationResolver.getProperties()).thenReturn(MapUtils.toProperties(properties));
+            configurationResolverStaticMock.when(ConfigurationResolver::getInstance).thenReturn(configurationResolver);
+            var environment = mock(ConfigurableEnvironment.class);
+            String[] locations = {
+                "classpath*:/org/vividus/spring.xml",
+                "classpath*:/vividus-extension/spring.xml",
+                "classpath*:/spring.xml"
+            };
 
-        BeanFactory.open(profiles);
+            when(context.isActive()).thenReturn(false);
+            when(context.getEnvironment()).thenReturn(environment);
 
-        verify(environment).setActiveProfiles(profiles);
-        verify(context).load(locations);
-        verify(context).refresh();
-        verify(context).registerShutdownHook();
-        verify(context).start();
+            BeanFactory.open();
+
+            verify(environment).setActiveProfiles(activeProfiles);
+            verify(context).load(locations);
+            verify(context).refresh();
+            verify(context).registerShutdownHook();
+            verify(context).start();
+        }
     }
 
     @Test
@@ -129,6 +155,15 @@ class BeanFactoryTests
     }
 
     @Test
+    void testBeanRegistration()
+    {
+        var object = new Object();
+        BeanFactory.registerBean(BEAN_NAME, Object.class, () -> object);
+        verify(context).registerBean(eq(BEAN_NAME), eq(Object.class), argThat(
+                (ArgumentMatcher<Supplier<Object>>) objectSupplier -> objectSupplier.get() == object));
+    }
+
+    @Test
     void testIsActive()
     {
         when(context.isActive()).thenReturn(true);
@@ -148,6 +183,15 @@ class BeanFactoryTests
     {
         when(context.isActive()).thenReturn(false);
         BeanFactory.close();
+    }
+
+    @Test
+    void testReset()
+    {
+        when(context.isActive()).thenReturn(true);
+        BeanFactory.reset();
+        verify(context).close();
+        assertNotSame(context, BeanFactory.getResourcePatternResolver());
     }
 
     @Test
