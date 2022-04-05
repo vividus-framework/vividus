@@ -2,7 +2,7 @@
 
 == `configuration.properties`
 
-The Vividus configuration includes the following parts: profiles, environments and suites.
+VIVIDUS configuration includes the following parts: profiles, environments and suites.
 
 === Suites
 
@@ -12,11 +12,11 @@ The property `configuration.suites` defines the suites set. It is a comma separa
 ----
 configuration.suites=testSuite,anotherDir/anotherTestSuite
 ----
-The Vividus suite consists of the unlimited number of batches. In its turn the batch consists of any number of stories represented by the files with `*.story` extension. The batches are run sequentially, while the stories in the batch are run in parallel.
+VIVIDUS suite consists of the unlimited number of batches. In its turn the batch consists of any number of stories represented by the files with `*.story` extension. The batches are run sequentially, while the stories in the batch are run in parallel.
 
-The suites are loaded one by one starting from the last one in the sequence, in other words, the values of the properties defined in the first suite will take precedence over the values of the same properties defined in all subsequent suites.
+The suites are loaded one by one starting from the last one in the sequence, in other words, the values of the properties defined in the first suite will take precedence over the values of the same properties defined in all subsequent suites. If any of the suites in the sequence is not found (i.e. no `*.properties` file are present at the given path), the error will be thrown and the execution will be stopped. However if suites property is empty (`configuration.suites=`) and no suite is configured in the root (i.e no files can be found by `/properties/suite/*.properties` pattern), no error will be thrown and the execution will be continued.
 
-The following properties are used to configure batches (Vividus doesn't provide any default batch configuration out of the box). `batch-number` is one-based batch index.
+The following properties are used to configure batches (VIVIDUS doesn't provide any default batch configuration out of the box). `batch-number` is one-based batch index.
 
 NOTE: The properties marked with *bold* are mandatory.
 
