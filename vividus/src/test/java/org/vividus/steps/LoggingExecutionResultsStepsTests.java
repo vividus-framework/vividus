@@ -16,21 +16,19 @@
 
 package org.vividus.steps;
 
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 import org.vividus.log.TestInfoLogger;
 
-class SetupStepsTests
+class LoggingExecutionResultsStepsTests
 {
     @Test
     void shouldLogEnvironmentMetadataAfterStories()
     {
-        try (MockedStatic<TestInfoLogger> testInfoLogger = mockStatic(TestInfoLogger.class))
-        {
-            new SetupSteps().afterStories();
-            testInfoLogger.verify(TestInfoLogger::logEnvironmentMetadata);
-        }
+        TestInfoLogger testInfoLogger = mock(TestInfoLogger.class);
+        new LoggingExecutionResultsSteps(testInfoLogger).afterStories();
+        verify(testInfoLogger).logTestExecutionResults();
     }
 }

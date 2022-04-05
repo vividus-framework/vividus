@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,8 @@
 package org.vividus.softassert.exception;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,22 +35,17 @@ import org.vividus.softassert.model.SoftAssertionError;
 class VerificationErrorTests
 {
     private static final String TEXT = "text";
-    private final List<SoftAssertionError> softAssertionErrors = new ArrayList<>();
     private final Set<KnownIssue> knownIssues = new HashSet<>();
 
     private VerificationError verificationError;
 
-    @Mock
-    private KnownIssue knownIssue;
-
-    @Mock
-    private SoftAssertionError softAssertionError;
+    @Mock private KnownIssue knownIssue;
+    @Mock private SoftAssertionError softAssertionError;
 
     @BeforeEach
     void beforeEach()
     {
-        verificationError = new VerificationError(TEXT, softAssertionErrors);
-        softAssertionErrors.add(softAssertionError);
+        verificationError = new VerificationError(TEXT, List.of(softAssertionError));
     }
 
     @Test
@@ -69,30 +61,5 @@ class VerificationErrorTests
     {
         when(softAssertionError.getKnownIssue()).thenReturn(null);
         assertEquals(verificationError.getKnownIssues(), knownIssues);
-    }
-
-    @Test
-    void testIsOngoingKnownIssuesOnlyIsFalse()
-    {
-        when(softAssertionError.isKnownIssue()).thenReturn(false);
-        assertFalse(verificationError.isOngoingKnownIssuesOnly());
-    }
-
-    @Test
-    void testIsOngoingKnownIssuesOnlyIsTrueWhenKnownIssueDoesNotFixed()
-    {
-        when(softAssertionError.isKnownIssue()).thenReturn(true);
-        when(softAssertionError.getKnownIssue()).thenReturn(knownIssue);
-        when(knownIssue.isFixed()).thenReturn(false);
-        assertTrue(verificationError.isOngoingKnownIssuesOnly());
-    }
-
-    @Test
-    void testIsOngoingKnownIssuesOnlyIsFalseWhenKnownIssueIsFixed()
-    {
-        when(softAssertionError.isKnownIssue()).thenReturn(true);
-        when(softAssertionError.getKnownIssue()).thenReturn(knownIssue);
-        when(knownIssue.isFixed()).thenReturn(true);
-        assertFalse(verificationError.isOngoingKnownIssuesOnly());
     }
 }

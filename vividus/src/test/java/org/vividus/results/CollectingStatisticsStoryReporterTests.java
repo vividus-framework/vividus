@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package org.vividus;
+package org.vividus.results;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
@@ -34,38 +37,43 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
-import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
-import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.failures.BeforeOrAfterFailed;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
+import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.ReportControlContext;
 import org.vividus.context.RunContext;
-import org.vividus.model.Failure;
-import org.vividus.model.NodeType;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
-import org.vividus.model.Statistic;
+import org.vividus.report.allure.model.Status;
+import org.vividus.results.model.Failure;
+import org.vividus.results.model.NodeType;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.exception.VerificationError;
+import org.vividus.softassert.issue.KnownIssueIdentifier;
+import org.vividus.softassert.issue.KnownIssueType;
 import org.vividus.softassert.model.KnownIssue;
 import org.vividus.softassert.model.SoftAssertionError;
 import org.vividus.testcontext.SimpleTestContext;
@@ -74,43 +82,213 @@ import org.vividus.util.json.JsonUtils;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "PMD.AvoidDuplicateLiterals"})
-class StatisticsStoryReporterTests
+class CollectingStatisticsStoryReporterTests
 {
     private static final String STEP_AS_STRING = "step";
     private static final Step STEP = new Step(StepExecutionType.EXECUTABLE, STEP_AS_STRING);
     private static final String ASSERTION_STEP = "assertionPassed";
 
-    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(StatisticsStoryReporter.class);
+    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(CollectingStatisticsStoryReporter.class);
 
-    @Mock private EventBus eventBus;
     @Mock private RunContext runContext;
+    @Mock private StoryReporter nextStoryReporter;
     private final ReportControlContext reportControlContext = new ReportControlContext(new SimpleTestContext());
 
-    private StatisticsStoryReporter reporter;
+    private CollectingStatisticsStoryReporter reporter;
 
     private final Story givenStory = mockStory("GivenStory");
     private final Story story = mockStory("Story");
     private final Scenario scenario = new Scenario();
 
     @BeforeEach
-    void init()
+    void beforeEach()
     {
-        reporter = new StatisticsStoryReporter(reportControlContext, runContext, eventBus, new ThreadedTestContext(),
-                new JsonUtils());
-        reporter.init();
+        reportControlContext.enableReporting();
+    }
+
+    private void initReporter(boolean collectFailures, File statisticsFolder)
+    {
+        reporter = new CollectingStatisticsStoryReporter(collectFailures, statisticsFolder, reportControlContext,
+                runContext, new ThreadedTestContext(), new JsonUtils());
+        reporter.setNext(nextStoryReporter);
+    }
+
+    @Test
+    void testScenarioExcluded(@TempDir Path tempDirectory)
+    {
+        initReporter(false, tempDirectory.toFile());
+
+        reporter.scenarioExcluded(null, null);
+        assertEquals(Optional.of(Status.SKIPPED), reporter.getRunStatus());
+        verify(nextStoryReporter).scenarioExcluded(null, null);
+    }
+
+    static Stream<Arguments> stepTypes()
+    {
+        var knownIssueError = createKnownIssueError(false);
+        var potentiallyKnownIssueError = createKnownIssueError(true);
+        var assertionError = new UUIDExceptionWrapper(new AssertionError());
+        var verificationError = createVerificationError(new SoftAssertionError(null));
+        var ioException = new IOException();
+
+        return Stream.of(
+                arguments(Status.PASSED, (BiConsumer<StoryReporter, String>) StoryReporter::successful),
+                arguments(Status.SKIPPED, (BiConsumer<StoryReporter, String>) StoryReporter::ignorable),
+                arguments(Status.SKIPPED, (BiConsumer<StoryReporter, String>) StoryReporter::notPerformed),
+                arguments(Status.KNOWN_ISSUES_ONLY, (BiConsumer<StoryReporter, String>)
+                        (reporter, step) -> reporter.failed(step, knownIssueError)
+                ),
+                arguments(Status.PENDING, (BiConsumer<StoryReporter, String>) StoryReporter::pending),
+                arguments(Status.FAILED, (BiConsumer<StoryReporter, String>)
+                        (reporter, step) -> reporter.failed(step, potentiallyKnownIssueError)
+                ),
+                arguments(Status.FAILED, (BiConsumer<StoryReporter, String>)
+                        (reporter, step) -> reporter.failed(step, assertionError)
+                ),
+                arguments(Status.FAILED, (BiConsumer<StoryReporter, String>)
+                        (reporter, step) -> reporter.failed(step, verificationError)
+                ),
+                arguments(Status.BROKEN, (BiConsumer<StoryReporter, String>)
+                        (reporter, step) -> reporter.failed(step, ioException)
+                )
+        );
+    }
+
+    private static UUIDExceptionWrapper createKnownIssueError(boolean potentiallyKnown)
+    {
+        var identifier = new KnownIssueIdentifier();
+        identifier.setType(KnownIssueType.AUTOMATION);
+        var knownIssue = new KnownIssue(null, identifier, potentiallyKnown);
+
+        var knownIssueSoftAssertionError = new SoftAssertionError(null);
+        knownIssueSoftAssertionError.setKnownIssue(knownIssue);
+        return createVerificationError(knownIssueSoftAssertionError);
+    }
+
+    private static UUIDExceptionWrapper createVerificationError(SoftAssertionError softAssertionError)
+    {
+        return new UUIDExceptionWrapper(new VerificationError(null, List.of(softAssertionError)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("stepTypes")
+    void shouldRecordStepStatus(Status expectedStatus, BiConsumer<StoryReporter, String> test,
+            @TempDir Path tempDirectory)
+    {
+        initReporter(false, tempDirectory.toFile());
+
+        reporter.beforeStory(story, false);
+        reporter.beforeScenario(scenario);
+        reporter.beforeStep(STEP);
+        test.accept(reporter, STEP_AS_STRING);
+        reporter.afterScenario(null);
+        reporter.afterStory(false);
+
+        assertEquals(Optional.of(expectedStatus), reporter.getRunStatus());
+
+        var ordered = inOrder(nextStoryReporter);
+        ordered.verify(nextStoryReporter).beforeStory(story, false);
+        ordered.verify(nextStoryReporter).beforeScenario(scenario);
+        ordered.verify(nextStoryReporter).beforeStep(STEP);
+        test.accept(ordered.verify(nextStoryReporter), STEP_AS_STRING);
+        ordered.verify(nextStoryReporter).afterScenario(null);
+        ordered.verify(nextStoryReporter).afterStory(false);
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void shouldSkipReportingForBeforeOrAfterStoriesSteps(@TempDir Path tempDirectory)
+    {
+        initReporter(false, tempDirectory.toFile());
+
+        reportControlContext.disableReporting();
+
+        reporter.beforeStoriesSteps(Stage.BEFORE);
+        reporter.beforeStep(STEP);
+        reporter.successful(STEP_AS_STRING);
+        reporter.afterStoriesSteps(Stage.BEFORE);
+        assertEquals(Optional.empty(), reporter.getRunStatus());
+        var ordered = inOrder(nextStoryReporter);
+        ordered.verify(nextStoryReporter).beforeStoriesSteps(Stage.BEFORE);
+        ordered.verify(nextStoryReporter).beforeStep(STEP);
+        ordered.verify(nextStoryReporter).successful(STEP_AS_STRING);
+        ordered.verify(nextStoryReporter).afterStoriesSteps(Stage.BEFORE);
+    }
+
+    @Test
+    void shouldEnableReportingBackAfterBeforeOrAfterStoriesSteps(@TempDir Path tempDirectory)
+    {
+        initReporter(false, tempDirectory.toFile());
+
+        reportControlContext.disableReporting();
+        reporter.beforeStoriesSteps(Stage.AFTER);
+        reporter.afterStoriesSteps(Stage.AFTER);
 
         reportControlContext.enableReporting();
-        when(runContext.isRunCompleted()).thenReturn(false);
+        reporter.beforeStory(story, false);
+        reporter.beforeScenario(scenario);
+        reporter.beforeStep(STEP);
+        reporter.successful(STEP_AS_STRING);
+        reporter.afterScenario(null);
+        reporter.afterStory(false);
+
+        assertEquals(Optional.of(Status.PASSED), reporter.getRunStatus());
+        var ordered = inOrder(nextStoryReporter);
+        ordered.verify(nextStoryReporter).beforeStoriesSteps(Stage.AFTER);
+        ordered.verify(nextStoryReporter).afterStoriesSteps(Stage.AFTER);
+        ordered.verify(nextStoryReporter).beforeStep(STEP);
+        ordered.verify(nextStoryReporter).successful(STEP_AS_STRING);
+        ordered.verify(nextStoryReporter).afterScenario(null);
+        ordered.verify(nextStoryReporter).afterStory(false);
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void shouldChangeStatusAccordingToPriorities(@TempDir Path tempDirectory)
+    {
+        initReporter(false, tempDirectory.toFile());
+
+        reporter.beforeStory(story, false);
+        reporter.beforeScenario(scenario);
+        reporter.beforeStep(STEP);
+        reporter.successful(STEP_AS_STRING);
+        assertEquals(Optional.of(Status.PASSED), reporter.getRunStatus());
+        reporter.beforeStep(STEP);
+        reporter.failed(STEP_AS_STRING, null);
+        assertEquals(Optional.of(Status.BROKEN), reporter.getRunStatus());
+        reporter.beforeStep(STEP);
+        reporter.successful(STEP_AS_STRING);
+        reporter.afterScenario(null);
+        reporter.afterStory(false);
+        assertEquals(Optional.of(Status.BROKEN), reporter.getRunStatus());
+    }
+
+    @Test
+    void shouldChangeKnownIssuesOnlyStatusToPendingStatus(@TempDir Path tempDirectory)
+    {
+        initReporter(false, tempDirectory.toFile());
+
+        reporter.beforeStory(story, false);
+        reporter.beforeScenario(scenario);
+        reporter.beforeStep(STEP);
+        var throwable = createKnownIssueError(false);
+        reporter.failed(STEP_AS_STRING, throwable);
+        assertEquals(Optional.of(Status.KNOWN_ISSUES_ONLY), reporter.getRunStatus());
+        reporter.beforeStep(STEP);
+        reporter.pending(STEP_AS_STRING);
+        reporter.afterScenario(null);
+        reporter.afterStory(false);
+        assertEquals(Optional.of(Status.PENDING), reporter.getRunStatus());
     }
 
     @Test
     void shouldSaveStatistics(@TempDir Path tempDirectory) throws IOException
     {
-        reporter.setStatisticsFolder(tempDirectory.toFile());
+        initReporter(false, tempDirectory.toFile());
         reporterFlowProvider();
 
-        String output = readStatistics(tempDirectory);
-        String expected = "{\n"
+        var output = readStatistics(tempDirectory);
+        var expected = "{\n"
                 + "  \"STORY\" : {\n"
                 + "    \"total\" : 1,\n"
                 + "    \"passed\" : 0,\n"
@@ -154,33 +332,34 @@ class StatisticsStoryReporterTests
     }
 
     @Test
-    void shouldReturnStatistics(@TempDir Path tempDirectory)
+    void shouldReturnStatistics(@TempDir File tempDirectory)
     {
-        reporter.setStatisticsFolder(tempDirectory.toFile());
+        initReporter(false, tempDirectory);
         reporterFlowProvider();
 
-        Map<NodeType, Statistic> output = StatisticsStoryReporter.getStatistics();
-        Assertions.assertAll(
+        var output = reporter.getStatistics();
+        assertAll(
             () -> assertEquals(1, output.get(NodeType.STORY).getTotal()),
             () -> assertEquals(10, output.get(NodeType.SCENARIO).getTotal()),
             () -> assertEquals(17, output.get(NodeType.STEP).getTotal()),
-            () -> assertEquals(5, output.get(NodeType.GIVEN_STORY).getTotal()));
+            () -> assertEquals(5, output.get(NodeType.GIVEN_STORY).getTotal())
+        );
         verify(runContext, times(34)).isRunCompleted();
         verifyNoMoreInteractions(runContext);
     }
 
     @Test
-    void shouldLogMessageInCaseOfIOException(@TempDir File tempDir)
+    void shouldLogMessageInCaseOfIOException(@TempDir File tempDirectory)
     {
+        initReporter(false, tempDirectory);
         try (MockedStatic<Files> files = mockStatic(Files.class))
         {
-            files.when(() -> Files.createDirectories(tempDir.toPath())).thenThrow(new IOException());
-            reporter.setStatisticsFolder(tempDir);
+            files.when(() -> Files.createDirectories(tempDirectory.toPath())).thenThrow(new IOException());
             reporterFlowProvider();
-            List<LoggingEvent> events = LOGGER.getLoggingEvents();
+            var events = LOGGER.getLoggingEvents();
             assertThat(events, hasSize(1));
-            LoggingEvent event = events.get(0);
-            assertEquals(String.format("Unable to write statistics.json into folder: %s", tempDir),
+            var event = events.get(0);
+            assertEquals(String.format("Unable to write statistics.json into folder: %s", tempDirectory),
                     event.getFormattedMessage());
             assertThat(event.getThrowable().get(), instanceOf(IOException.class));
             verify(runContext, times(34)).isRunCompleted();
@@ -193,8 +372,11 @@ class StatisticsStoryReporterTests
         return Files.readString(tempDirectory.resolve("statistics.json")).replaceAll("\\r", "");
     }
 
+    @SuppressWarnings({ "MethodLength", "PMD.ExcessiveMethodLength", "PMD.NcssCount" })
     private void reporterFlowProvider()
     {
+        when(runContext.isRunCompleted()).thenReturn(false);
+
         reporter.beforeStoriesSteps(Stage.BEFORE);
         reporter.afterStoriesSteps(Stage.BEFORE);
 
@@ -205,7 +387,9 @@ class StatisticsStoryReporterTests
         reporter.beforeStory(givenStory, true);
         reporter.beforeScenario(scenario);
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        assertEquals(Optional.of(Status.PASSED), reporter.getRunStatus());
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        assertEquals(Optional.of(Status.PASSED), reporter.getRunStatus());
         reporter.afterScenario(null);
         reporter.afterStory(true);
 
@@ -214,10 +398,13 @@ class StatisticsStoryReporterTests
         reporter.beforeScenario(scenario);
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reportStep(reporter, () -> reporter.pending(STEP_AS_STRING));
+        assertEquals(Optional.of(Status.PENDING), reporter.getRunStatus());
         reporter.afterScenario(null);
         reporter.afterStory(true);
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        assertEquals(Optional.of(Status.PENDING), reporter.getRunStatus());
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
+        assertEquals(Optional.of(Status.PENDING), reporter.getRunStatus());
         reporter.afterScenario(null);
 
         reporter.afterStory(true);
@@ -228,7 +415,8 @@ class StatisticsStoryReporterTests
 
         reporter.beforeStory(givenStory, true);
         reporter.beforeScenario(scenario);
-        reporter.beforeStep(new Step(StepExecutionType.COMMENT, STEP_AS_STRING));
+        var comment = new Step(StepExecutionType.COMMENT, STEP_AS_STRING);
+        reporter.beforeStep(comment);
         reporter.comment(STEP_AS_STRING);
         reporter.afterScenario(null);
         reporter.afterStory(true);
@@ -275,7 +463,8 @@ class StatisticsStoryReporterTests
 
         reporter.beforeScenario(scenario);
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
-        reportStep(reporter, () -> reporter.failed(STEP_AS_STRING, new Throwable()));
+        var failure = new Throwable();
+        reportStep(reporter, () -> reporter.failed(STEP_AS_STRING, failure));
         reporter.afterScenario(null);
 
         //skipped
@@ -292,16 +481,38 @@ class StatisticsStoryReporterTests
         reporter.afterStory(false);
         reporter.beforeStoriesSteps(Stage.AFTER);
         reporter.afterStoriesSteps(Stage.AFTER);
+
+        verify(nextStoryReporter).beforeStoriesSteps(Stage.BEFORE);
+        verify(nextStoryReporter).afterStoriesSteps(Stage.BEFORE);
+        verify(nextStoryReporter).beforeStory(story, false);
+        verify(nextStoryReporter, times(5)).beforeStory(givenStory, true);
+        verify(nextStoryReporter, times(8)).beforeScenario(scenario);
+        verify(nextStoryReporter, times(18)).beforeStep(STEP);
+        verify(nextStoryReporter, times(14)).successful(STEP_AS_STRING);
+        verify(nextStoryReporter, times(10)).afterScenario(null);
+        verify(nextStoryReporter, times(5)).afterStory(true);
+        verify(nextStoryReporter).pending(STEP_AS_STRING);
+        verify(nextStoryReporter).beforeStep(comment);
+        verify(nextStoryReporter).comment(STEP_AS_STRING);
+        verify(nextStoryReporter).ignorable(STEP_AS_STRING);
+        verify(nextStoryReporter).notPerformed(STEP_AS_STRING);
+        verify(nextStoryReporter, times(2)).failed(ASSERTION_STEP, null);
+        verify(nextStoryReporter).failed(STEP_AS_STRING, failure);
+        verify(nextStoryReporter).beforeScenario(skippedScenario);
+        verify(nextStoryReporter).beforeScenario(emptyScenario);
+        verify(nextStoryReporter).afterStory(false);
+        verify(nextStoryReporter).beforeStoriesSteps(Stage.AFTER);
+        verify(nextStoryReporter).afterStoriesSteps(Stage.AFTER);
     }
 
     private Story mockStory(String path)
     {
-        Story story = mock(Story.class);
+        var story = mock(Story.class);
         when(story.getPath()).thenReturn(path);
         return story;
     }
 
-    private void reportStep(StatisticsStoryReporter reporter, Runnable runnable)
+    private void reportStep(CollectingStatisticsStoryReporter reporter, Runnable runnable)
     {
         reporter.beforeStep(STEP);
         runnable.run();
@@ -309,29 +520,26 @@ class StatisticsStoryReporterTests
 
     private AssertionFailedEvent mockFailed()
     {
-        AssertionFailedEvent event = mock(AssertionFailedEvent.class);
-        SoftAssertionError error = mock(SoftAssertionError.class);
+        var event = mock(AssertionFailedEvent.class);
+        var error = mock(SoftAssertionError.class);
         when(event.getSoftAssertionError()).thenReturn(error);
-        when(error.isKnownIssue()).thenReturn(false);
+        when(error.isNotFixedKnownIssue()).thenReturn(false);
         return event;
     }
 
     private AssertionFailedEvent mockKnownIssue()
     {
-        AssertionFailedEvent event = mock(AssertionFailedEvent.class);
-        SoftAssertionError error = mock(SoftAssertionError.class);
-        KnownIssue issue = mock(KnownIssue.class);
+        var event = mock(AssertionFailedEvent.class);
+        var error = mock(SoftAssertionError.class);
         when(event.getSoftAssertionError()).thenReturn(error);
-        when(error.isKnownIssue()).thenReturn(true);
-        when(error.getKnownIssue()).thenReturn(issue);
-        when(issue.isFixed()).thenReturn(false);
+        when(error.isNotFixedKnownIssue()).thenReturn(true);
         return event;
     }
 
     @Test
     void beforeAndAfterStep(@TempDir Path tempDirectory) throws IOException
     {
-        reporter.setStatisticsFolder(tempDirectory.toFile());
+        initReporter(false, tempDirectory.toFile());
         reporter.beforeStoriesSteps(Stage.BEFORE);
         reporter.afterStoriesSteps(Stage.BEFORE);
 
@@ -350,8 +558,8 @@ class StatisticsStoryReporterTests
         reporter.beforeStoriesSteps(Stage.AFTER);
         reporter.afterStoriesSteps(Stage.AFTER);
 
-        String statistic = readStatistics(tempDirectory);
-        String expected = "{\n"
+        var statistic = readStatistics(tempDirectory);
+        var expected = "{\n"
                 + "  \"STORY\" : {\n"
                 + "    \"total\" : 1,\n"
                 + "    \"passed\" : 0,\n"
@@ -397,7 +605,7 @@ class StatisticsStoryReporterTests
     @Test
     void beforeAndAfterScenario(@TempDir Path tempDirectory) throws IOException
     {
-        reporter.setStatisticsFolder(tempDirectory.toFile());
+        initReporter(false, tempDirectory.toFile());
         reporter.beforeStoriesSteps(Stage.BEFORE);
         reporter.afterStoriesSteps(Stage.BEFORE);
 
@@ -413,8 +621,8 @@ class StatisticsStoryReporterTests
         reporter.afterStory(false);
         reporter.beforeStoriesSteps(Stage.AFTER);
         reporter.afterStoriesSteps(Stage.AFTER);
-        String statistic = readStatistics(tempDirectory);
-        String expected = "{\n"
+        var statistic = readStatistics(tempDirectory);
+        var expected = "{\n"
                 + "  \"STORY\" : {\n"
                 + "    \"total\" : 1,\n"
                 + "    \"passed\" : 0,\n"
@@ -460,7 +668,7 @@ class StatisticsStoryReporterTests
     @Test
     void beforeAndAfterStory(@TempDir Path tempDirectory) throws IOException
     {
-        reporter.setStatisticsFolder(tempDirectory.toFile());
+        initReporter(false, tempDirectory.toFile());
         reporter.beforeStoriesSteps(Stage.BEFORE);
         reporter.afterStoriesSteps(Stage.BEFORE);
 
@@ -477,8 +685,8 @@ class StatisticsStoryReporterTests
         reporter.beforeStoriesSteps(Stage.AFTER);
         reporter.afterStoriesSteps(Stage.AFTER);
 
-        String statistic = readStatistics(tempDirectory);
-        String expected = "{\n"
+        var statistic = readStatistics(tempDirectory);
+        var expected = "{\n"
                 + "  \"STORY\" : {\n"
                 + "    \"total\" : 1,\n"
                 + "    \"passed\" : 0,\n"
@@ -522,38 +730,38 @@ class StatisticsStoryReporterTests
     }
 
     @Test
+    @SuppressWarnings("PMD.NcssCount")
     void shouldProvideRecordedFailures()
     {
+        initReporter(true, null);
         reporter.beforeStory(story, false);
-        assertNull(StatisticsStoryReporter.getFailures());
-        reporter.setCollectFailures(true);
-        reporter.init();
+        assertTrue(reporter.getFailures().isPresent());
 
-        RunningStory runningStory = mock(RunningStory.class);
-        String step = "step1";
+        var runningStory = mock(RunningStory.class);
+        var step = "step1";
         when(runningStory.getRunningSteps()).thenReturn(new LinkedList<>(List.of(step, "step2")));
         when(runContext.getRunningStory()).thenReturn(runningStory);
-        String storyName = "storyName";
+        var storyName = "storyName";
         when(runningStory.getName()).thenReturn(storyName);
-        RunningScenario runningScenario = mock(RunningScenario.class);
+        var runningScenario = mock(RunningScenario.class);
         when(runningStory.getRunningScenario()).thenReturn(runningScenario);
-        String scenarioTitle = "scenarioTitle";
+        var scenarioTitle = "scenarioTitle";
         when(runningScenario.getTitle()).thenReturn(scenarioTitle);
 
-        AssertionFailedEvent event = mock(AssertionFailedEvent.class);
-        SoftAssertionError assertion = mock(SoftAssertionError.class);
+        var event = mock(AssertionFailedEvent.class);
+        var assertion = mock(SoftAssertionError.class);
         when(event.getSoftAssertionError()).thenReturn(assertion);
-        AssertionError error = mock(AssertionError.class);
-        String argumentExceptionCauseMessage = "You're illegal";
+        var error = mock(AssertionError.class);
+        var argumentExceptionCauseMessage = "You're illegal";
         when(assertion.getError()).thenReturn(error);
         when(error.getMessage()).thenReturn(argumentExceptionCauseMessage);
         reporter.beforeStep(STEP);
         reporter.onAssertionFailure(event);
-        IllegalArgumentException exception = new IllegalArgumentException(argumentExceptionCauseMessage);
+        var exception = new IllegalArgumentException(argumentExceptionCauseMessage);
         reporter.failed("step", new IllegalArgumentException(exception));
-        UUIDExceptionWrapper verificationErrorWrapped = new UUIDExceptionWrapper(
+        var verificationErrorWrapped = new UUIDExceptionWrapper(
                 new BeforeOrAfterFailed(new VerificationError("message", List.of())));
-        UUIDExceptionWrapper illegalArgumentExceptionWrapped = new UUIDExceptionWrapper(
+        var illegalArgumentExceptionWrapped = new UUIDExceptionWrapper(
                 new BeforeOrAfterFailed(new IllegalArgumentException(argumentExceptionCauseMessage)));
         reporter.beforeStep(STEP);
         reporter.failed("verifyIfAssertionsPassed", verificationErrorWrapped);
@@ -562,12 +770,13 @@ class StatisticsStoryReporterTests
         reporter.beforeStep(STEP);
         reporter.failed("Step with incorrect argument", illegalArgumentExceptionWrapped);
 
-        List<Failure> failures = StatisticsStoryReporter.getFailures();
-        failures.forEach(s -> System.out.println(s.getMessage()));
+        var optionalFailures = reporter.getFailures();
+        assertTrue(optionalFailures.isPresent());
+        var failures = optionalFailures.get();
         assertThat(failures, hasSize(3));
-        Failure fail = failures.get(0);
-        Failure broken = failures.get(1);
-        Failure assertionFail = failures.get(1);
+        var fail = failures.get(0);
+        var broken = failures.get(1);
+        var assertionFail = failures.get(1);
 
         assertFailure(fail, storyName, scenarioTitle, step, argumentExceptionCauseMessage);
         assertFailure(broken, storyName, scenarioTitle, step, "java.lang.IllegalArgumentException: You're illegal");
@@ -577,7 +786,7 @@ class StatisticsStoryReporterTests
 
     private static void assertFailure(Failure failure, String story, String scenario, String step, String cause)
     {
-        Assertions.assertAll(
+        assertAll(
             () -> assertEquals(story, failure.getStory()),
             () -> assertEquals(scenario, failure.getScenario()),
             () -> assertEquals(step, failure.getStep()),

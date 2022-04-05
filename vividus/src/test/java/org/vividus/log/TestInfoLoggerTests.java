@@ -22,7 +22,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesRegex;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -30,14 +29,13 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
-import com.google.common.collect.ImmutableList;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,13 +43,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.MockedStatic;
-import org.vividus.StatisticsStoryReporter;
-import org.vividus.model.Failure;
-import org.vividus.model.NodeType;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
-import org.vividus.model.Statistic;
+import org.vividus.results.ResultsProvider;
+import org.vividus.results.model.Failure;
+import org.vividus.results.model.NodeType;
+import org.vividus.results.model.Statistic;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
@@ -73,7 +70,7 @@ class TestInfoLoggerTests
     })
     void testLogPropertiesSecurely(String key)
     {
-        Properties properties = new Properties();
+        var properties = new Properties();
         properties.put(key, "value");
         TestInfoLogger.logPropertiesSecurely(properties);
         assertThat(LOGGER.getLoggingEvents(), is(List.of(info(FORMAT, key, "****"))));
@@ -82,11 +79,11 @@ class TestInfoLoggerTests
     @Test
     void testLogPropertiesSecurelyPlainProperties()
     {
-        String keyString = "simple.ignore-failure";
-        String valueString = "string";
-        String keyInt = "simple.int";
+        var keyString = "simple.ignore-failure";
+        var valueString = "string";
+        var keyInt = "simple.int";
         int valueInt = 2;
-        Properties properties = new Properties();
+        var properties = new Properties();
         properties.put(keyString, valueString);
         properties.put(keyInt, valueInt);
         TestInfoLogger.logPropertiesSecurely(properties);
@@ -100,8 +97,8 @@ class TestInfoLoggerTests
     private static Stream<Arguments> sourceOfFailures()
     {
         return Stream.of(
-                Arguments.of("", null),
-                Arguments.of(String.format("%n   No Failures & Errors!"), List.of()),
+                Arguments.of("", Optional.empty()),
+                Arguments.of(String.format("%n   No Failures & Errors!"), Optional.of(List.of())),
                 Arguments.of(
         "\\s+ Failures & Errors:\\s+"
         + "┌───────┬────────────────────────────────────────────────────┬───────────┬────────────────────────────────────────────────────┐\\s+"
@@ -115,62 +112,61 @@ class TestInfoLoggerTests
         + "\\│ first \\│ verify                                             \\│ do        \\│ failure                                            \\│\\s+"
         + "\\│       \\│                                                    \\│           \\│                                                    \\│\\s+"
         + "└───────┴────────────────────────────────────────────────────┴───────────┴────────────────────────────────────────────────────┘",
-                        Arrays.asList(createFailure("first", "verify", "do", "failure"),
-                                      createFailure("aaaaa", MESSAGE, "When I do\n\r|k|\n|v|", MESSAGE))));
+                        Optional.of(Arrays.asList(createFailure("first", "verify", "do", "failure"),
+                                      createFailure("aaaaa", MESSAGE, "When I do\n\r|k|\n|v|", MESSAGE)))));
     }
 
     @ParameterizedTest
     @MethodSource("sourceOfFailures")
-    @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended"})
-    void shouldLogMetadata(String failuresMessage, List<Failure> failures)
+    @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "PMD.AvoidDuplicateLiterals"})
+    void shouldLogMetadata(String failuresMessage, Optional<List<Failure>> failures)
     {
-        Statistic statistic = new Statistic();
+        var statistic = new Statistic();
         statistic.incrementBroken();
         statistic.incrementFailed();
         statistic.incrementKnownIssue();
         statistic.incrementPassed();
-        try (MockedStatic<StatisticsStoryReporter> reporter = mockStatic(StatisticsStoryReporter.class))
-        {
-            reporter.when(StatisticsStoryReporter::getStatistics).thenReturn(
-                    Map.of(NodeType.STORY, statistic,
-                           NodeType.SCENARIO, statistic,
-                           NodeType.STEP, statistic));
-            reporter.when(StatisticsStoryReporter::getFailures).thenReturn(failures);
-            TestInfoLogger.logEnvironmentMetadata();
-            ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
-            assertThat(loggingEvents, hasSize(1));
-            assertThat(loggingEvents.get(0).getMessage(), matchesRegex(
-                      "(?s)\\s+"
-                      + "-{60}\\s+"
-                      + " Configuration:\\s+"
-                      + "-{60}\\s+"
-                      + " Profile:\\s+"
-                      + "-{60}\\s+"
-                      + " Suite:\\s+"
-                      + "-{60}\\s+"
-                      + " Environment:\\s+"
-                      + "-{60}\\s+"
-                      + " Vividus:.*"
-                      + " Execution statistics:\\s+.+"
-                      + "-{40}\\s+"
-                      + "               Story   Scenario     Step\\s+"
-                      + "-{40}\\s+"
-                      + "Passed            1          1        1\\s+"
-                      + "Failed            1          1        1\\s+"
-                      + "Broken            1          1        1\\s+"
-                      + "Known Issue       1          1        1\\s+"
-                      + "Pending           0          0        0\\s+"
-                      + "Skipped           0          0        0\\s+"
-                      + "-{40}\\s+"
-                      + "TOTAL             4          4        4"
-                      + failuresMessage));
-        }
+        var statisticsProvider = mock(ResultsProvider.class);
+        when(statisticsProvider.getStatistics()).thenReturn(
+                Map.of(NodeType.STORY, statistic,
+                       NodeType.SCENARIO, statistic,
+                       NodeType.STEP, statistic)
+        );
+        when(statisticsProvider.getFailures()).thenReturn(failures);
+        new TestInfoLogger(statisticsProvider).logTestExecutionResults();
+        var loggingEvents = LOGGER.getLoggingEvents();
+        assertThat(loggingEvents, hasSize(1));
+        assertThat(loggingEvents.get(0).getMessage(), matchesRegex(
+                  "(?s)\\s+"
+                  + "-{60}\\s+"
+                  + " Configuration:\\s+"
+                  + "-{60}\\s+"
+                  + " Profile:\\s+"
+                  + "-{60}\\s+"
+                  + " Suite:\\s+"
+                  + "-{60}\\s+"
+                  + " Environment:\\s+"
+                  + "-{60}\\s+"
+                  + " Vividus:.*"
+                  + " Execution statistics:\\s+.+"
+                  + "-{40}\\s+"
+                  + "               Story   Scenario     Step\\s+"
+                  + "-{40}\\s+"
+                  + "Passed            1          1        1\\s+"
+                  + "Failed            1          1        1\\s+"
+                  + "Broken            1          1        1\\s+"
+                  + "Known Issue       1          1        1\\s+"
+                  + "Pending           0          0        0\\s+"
+                  + "Skipped           0          0        0\\s+"
+                  + "-{40}\\s+"
+                  + "TOTAL             4          4        4"
+                  + failuresMessage));
     }
 
     private static Failure createFailure(String storyName, String scenatioTitle, String step, String message)
     {
-        RunningStory runningStory = mock(RunningStory.class);
-        RunningScenario runningScenario = mock(RunningScenario.class);
+        var runningStory = mock(RunningStory.class);
+        var runningScenario = mock(RunningScenario.class);
         when(runningStory.getRunningScenario()).thenReturn(runningScenario);
         when(runningScenario.getTitle()).thenReturn(scenatioTitle);
         when(runningStory.getName()).thenReturn(storyName);
@@ -186,7 +182,7 @@ class TestInfoLoggerTests
     }
 
     @Test
-    void shouldPringExecutionPlan()
+    void shouldPrintExecutionPlan()
     {
         Map<String, List<String>> executionPlan = new LinkedHashMap<>();
         executionPlan.put("batch-1", List.of("path1"));
@@ -195,7 +191,7 @@ class TestInfoLoggerTests
 
         TestInfoLogger.logExecutionPlan(executionPlan);
 
-        ImmutableList<LoggingEvent> loggingEvents = LOGGER.getLoggingEvents();
+        var loggingEvents = LOGGER.getLoggingEvents();
         assertThat(loggingEvents, hasSize(1));
         assertThat(loggingEvents.get(0).getMessage(), matchesRegex(
                 "(?s)\\s*"

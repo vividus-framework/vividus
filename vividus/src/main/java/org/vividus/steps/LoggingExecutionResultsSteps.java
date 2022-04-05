@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package org.vividus.model;
+package org.vividus.steps;
 
-public enum NodeType
+import org.jbehave.core.annotations.AfterStories;
+import org.vividus.log.TestInfoLogger;
+
+public class LoggingExecutionResultsSteps
 {
-    STORY,
-    SCENARIO,
-    STEP,
-    GIVEN_STORY;
+    private final TestInfoLogger testInfoLogger;
+
+    public LoggingExecutionResultsSteps(TestInfoLogger testInfoLogger)
+    {
+        this.testInfoLogger = testInfoLogger;
+    }
+
+    @AfterStories
+    public void afterStories()
+    {
+        testInfoLogger.logTestExecutionResults();
+    }
 }

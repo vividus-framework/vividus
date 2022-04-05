@@ -14,6 +14,7 @@
     <bean id="issueStateProvider" class="org.vividus.issue.IssueStateProvider" />
 
     <bean id="testInfoProvider" class="org.vividus.issue.TestInfoProvider" />
+    <bean class="org.vividus.log.TestInfoLogger" />
 
     <bean class="org.vividus.issue.KnownIssueProvider" init-method="init">
         <property name="fileName" value="${known-issue-provider.fileName}" />
@@ -47,12 +48,14 @@
     <bean id="allureStoryReporter" class="org.vividus.report.allure.AllureStoryReporter" lazy-init="false">
         <property name="next">
             <bean class="org.vividus.variable.VariableStoryReporter">
-                <property name="next" ref="statusStoryReporter" />
+                <property name="next" ref="collectingStatisticsStoryReporter" />
             </bean>
         </property>
     </bean>
 
-    <bean id="statusStoryReporter" class="org.vividus.StatusStoryReporter">
+    <bean id="collectingStatisticsStoryReporter" class="org.vividus.results.CollectingStatisticsStoryReporter">
+        <constructor-arg index="0" value="${statistics.print-failures}" />
+        <constructor-arg index="1" value="${statistics.folder}" />
         <property name="next">
             <bean class="org.jbehave.core.reporters.DelegatingStoryReporter">
                 <constructor-arg>
@@ -63,10 +66,6 @@
                                 <list>
                                     <bean class="org.vividus.log.LoggingStoryReporter" />
                                     <ref bean="analyticsStoryReporter" />
-                                    <bean class="org.vividus.StatisticsStoryReporter" init-method = "init" >
-                                        <property name="statisticsFolder" value="${statistics.folder}" />
-                                        <property name="collectFailures" value="${statistics.print-failures}" />
-                                    </bean>
                                 </list>
                             </list>
                         </property>

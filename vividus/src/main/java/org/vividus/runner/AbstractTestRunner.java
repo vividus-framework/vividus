@@ -29,11 +29,11 @@ import org.junit.runners.JUnit4;
 import org.junit.runners.model.InitializationError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.IRunStatusProvider;
-import org.vividus.Status;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 import org.vividus.log.TestInfoLogger;
+import org.vividus.report.allure.model.Status;
+import org.vividus.results.ResultsProvider;
 
 public abstract class AbstractTestRunner extends JUnitStories
 {
@@ -86,7 +86,7 @@ public abstract class AbstractTestRunner extends JUnitStories
         }
         else
         {
-            exitCode = calculateExitCode(BeanFactory.getBean(IRunStatusProvider.class).getRunStatus());
+            exitCode = calculateExitCode(BeanFactory.getBean(ResultsProvider.class).getRunStatus());
         }
         System.exit(exitCode);
     }

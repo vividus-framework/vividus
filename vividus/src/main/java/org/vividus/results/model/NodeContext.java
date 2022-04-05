@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.model;
+package org.vividus.results.model;
 
 public class NodeContext
 {

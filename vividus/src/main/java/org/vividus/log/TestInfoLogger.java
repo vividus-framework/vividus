@@ -22,6 +22,7 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -30,11 +31,11 @@ import java.util.regex.Pattern;
 import org.apache.commons.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.StatisticsStoryReporter;
-import org.vividus.model.Failure;
-import org.vividus.model.NodeType;
-import org.vividus.model.Statistic;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
+import org.vividus.results.ResultsProvider;
+import org.vividus.results.model.Failure;
+import org.vividus.results.model.NodeType;
+import org.vividus.results.model.Statistic;
 import org.vividus.util.ResourceUtils;
 
 import de.vandermeer.asciitable.AT_Context;
@@ -57,8 +58,11 @@ public final class TestInfoLogger
     private static final int HORIZONTAL_RULE_LENGTH = 60;
     private static final String HORIZONTAL_RULE = HYPHEN.repeat(HORIZONTAL_RULE_LENGTH);
 
-    private TestInfoLogger()
+    private final ResultsProvider resultsProvider;
+
+    public TestInfoLogger(ResultsProvider resultsProvider)
     {
+        this.resultsProvider = resultsProvider;
     }
 
     public static void drawBanner()
@@ -66,7 +70,7 @@ public final class TestInfoLogger
         LOGGER.atInfo().addArgument(() -> ResourceUtils.loadResource("banner.vividus")).log("\n{}");
     }
 
-    public static void logEnvironmentMetadata()
+    public void logTestExecutionResults()
     {
         logInfoMessage(() ->
         {
@@ -127,9 +131,9 @@ public final class TestInfoLogger
         LOGGER.atInfo().log(messageSupplier);
     }
 
-    private static void logExecutionStatistics(Formatter message)
+    private void logExecutionStatistics(Formatter message)
     {
-        Map<NodeType, Statistic> statistics = StatisticsStoryReporter.getStatistics();
+        Map<NodeType, Statistic> statistics = resultsProvider.getStatistics();
         Statistic story = statistics.get(NodeType.STORY);
         Statistic scenario = statistics.get(NodeType.SCENARIO);
         Statistic step = statistics.get(NodeType.STEP);
@@ -150,22 +154,24 @@ public final class TestInfoLogger
         addFailureTable(message);
     }
 
-    private static void addFailureTable(Formatter message)
+    private void addFailureTable(Formatter message)
     {
-        List<Failure> failureMessages = StatisticsStoryReporter.getFailures();
-        if (failureMessages == null)
+        Optional<List<Failure>> failureMessages = resultsProvider.getFailures();
+        if (failureMessages.isEmpty())
         {
             return;
         }
-        else if (failureMessages.isEmpty())
+        List<Failure> failures = failureMessages.get();
+        if (failures.isEmpty())
         {
             message.format("%n   No Failures & Errors!");
             return;
         }
-        Collections.sort(failureMessages, Comparator.comparing(Failure::getStory)
-                                                    .thenComparing(Failure::getScenario)
-                                                    .thenComparing(Failure::getStep)
-                                                    .thenComparing(Failure::getMessage));
+        Collections.sort(failures, Comparator.comparing(Failure::getStory)
+                                             .thenComparing(Failure::getScenario)
+                                             .thenComparing(Failure::getStep)
+                                             .thenComparing(Failure::getMessage)
+        );
         message.format("%n Failures & Errors:%n");
         AT_Context context = new AT_Context();
         AsciiTable table = new AsciiTable(context);
@@ -173,8 +179,11 @@ public final class TestInfoLogger
         table.addRule();
         table.addRow("STORY", "SCENARIO", "STEP", "ERROR MESSAGE");
         table.addRule();
-        failureMessages.forEach(f -> table.addRow(f.getStory(), wrap(f.getScenario()),
-                f.getStep().replaceAll("\n|\r\n", "<br>"), wrap(f.getMessage())));
+        failures.forEach(
+                f -> table.addRow(
+                    f.getStory(), wrap(f.getScenario()), f.getStep().replaceAll("\n|\r\n", "<br>"), wrap(f.getMessage())
+                )
+        );
         table.addRule();
         table.setRenderer(AT_Renderer.create().setCWC(new CWC_LongestLine()));
         table.setPaddingLeftRight(1);

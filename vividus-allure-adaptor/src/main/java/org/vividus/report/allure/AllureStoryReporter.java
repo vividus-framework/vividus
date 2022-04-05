@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,9 +56,8 @@ import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
 import org.vividus.report.allure.adapter.IVerificationErrorAdapter;
-import org.vividus.report.allure.event.StatusProvider;
 import org.vividus.report.allure.model.ScenarioExecutionStage;
-import org.vividus.report.allure.model.StatusPriority;
+import org.vividus.report.allure.model.Status;
 import org.vividus.report.allure.model.StoryExecutionStage;
 import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.reporter.event.LinkPublishEvent;
@@ -71,20 +70,20 @@ import org.vividus.testcontext.TestContext;
 import io.qameta.allure.Allure;
 import io.qameta.allure.AllureLifecycle;
 import io.qameta.allure.entity.LabelName;
+import io.qameta.allure.model.ExecutableItem;
 import io.qameta.allure.model.Label;
 import io.qameta.allure.model.Link;
 import io.qameta.allure.model.Parameter;
-import io.qameta.allure.model.Status;
 import io.qameta.allure.model.StatusDetails;
 import io.qameta.allure.model.StepResult;
 import io.qameta.allure.model.TestResult;
-import io.qameta.allure.model.WithStatus;
 import io.qameta.allure.util.ResultsUtils;
 
 @SuppressWarnings("checkstyle:MethodCount")
 public class AllureStoryReporter extends AbstractReportControlStoryReporter
 {
     private static final String CURRENT_STEP_KEY = "allureCurrentLinkedStep";
+    private static final String PENDING_STEP_MARKER = "The step is not implemented";
 
     private final AllureLifecycle lifecycle;
     private final IAllureReportGenerator allureReportGenerator;
@@ -303,7 +302,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     public void ignorable(String step)
     {
         super.ignorable(step);
-        stopStep(Status.SKIPPED, new StatusDetails().setMessage("Step is commented"));
+        stopStep(Status.SKIPPED, new StatusDetails().setMessage("The step is commented"));
     }
 
     @Override
@@ -318,14 +317,14 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     public void pending(String step)
     {
         super.pending(step);
-        stopStep(Status.SKIPPED, new StatusDetails().setMessage("Step is not implemented"));
+        stopStep(Status.SKIPPED, new StatusDetails().setMessage(PENDING_STEP_MARKER));
     }
 
     @Override
     public void notPerformed(String step)
     {
         super.notPerformed(step);
-        stopStep(Status.SKIPPED, new StatusDetails().setMessage("Step is not performed"));
+        stopStep(Status.SKIPPED, new StatusDetails().setMessage("The step is not performed"));
     }
 
     @Override
@@ -355,7 +354,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
             }
             lifecycle.updateTestCase(getRootStepId(), result -> result.getLinks().addAll(links));
         }
-        stopStep(StatusProvider.getStatus(cause), getStatusDetailsFromThrowable(cause));
+        stopStep(Status.from(cause), getStatusDetailsFromThrowable(cause));
     }
 
     @Override
@@ -401,10 +400,10 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
                     log.setStatusDetails(new StatusDetails().setMuted(true));
                     break;
                 case "ERROR":
-                    log.setStatus(Status.FAILED);
+                    log.setStatus(io.qameta.allure.model.Status.FAILED);
                     break;
                 default:
-                    log.setStatus(Status.PASSED);
+                    log.setStatus(io.qameta.allure.model.Status.PASSED);
                     break;
             }
             log.setName(logEntry);
@@ -434,8 +433,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     @Subscribe
     public void onAssertionFailure(AssertionFailedEvent event)
     {
-        Status status = StatusPriority.from(event).getStatusModel();
-        updateStepStatus(status);
+        updateStepStatus(Status.from(event));
     }
 
     private void updateStepStatus(Status status)
@@ -454,7 +452,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
         {
             if (isStatusUpdateNeeded(stepResult, status))
             {
-                stepResult.setStatus(status);
+                stepResult.setStatus(status.getAllureStatus());
             }
         });
     }
@@ -465,7 +463,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
         {
             if (isStatusUpdateNeeded(scenarioResult, status))
             {
-                scenarioResult.setStatus(status).setStatusDetails(statusDetails);
+                scenarioResult.setStatus(status.getAllureStatus()).setStatusDetails(statusDetails);
             }
         });
     }
@@ -516,8 +514,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
                 startTestCase("Lifecycle: After story", StoryExecutionStage.LIFECYCLE_AFTER_STORY_STEPS);
             }
         }
-        StepResult stepResult = new StepResult().setName(stepTitle).setStatus(
-                StatusPriority.getLowest().getStatusModel());
+        StepResult stepResult = new StepResult().setName(stepTitle).setStatus(Status.getLowest().getAllureStatus());
         String parentStepId = getCurrentStepId();
         String childStepId = parentStepId + "-" + Thread.currentThread().getId();
         lifecycle.startStep(parentStepId, childStepId, stepResult);
@@ -554,10 +551,22 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
         lifecycle.updateStep(getCurrentStepId(), stepResult -> stepResult.setName(stepTitle));
     }
 
-    private boolean isStatusUpdateNeeded(WithStatus item, Status overrideStatus)
+    private boolean isStatusUpdateNeeded(ExecutableItem item, Status newStatus)
     {
-        return StatusPriority.from(item.getStatus()).getPriority() > StatusPriority.from(overrideStatus)
-                .getPriority();
+        Status currentStatus;
+        StatusDetails currentStatusDetails = item.getStatusDetails();
+        if (currentStatusDetails != null && PENDING_STEP_MARKER.equals(currentStatusDetails.getMessage()))
+        {
+            currentStatus = Status.PENDING;
+        }
+        else
+        {
+            currentStatus = Stream.of(Status.values())
+                    .filter(s -> s != Status.PENDING && s.getAllureStatus() == item.getStatus())
+                    .findFirst()
+                    .get();
+        }
+        return currentStatus.getPriority() > newStatus.getPriority();
     }
 
     private void startTestCase(String scenarioTitle, StoryExecutionStage storyExecutionStage)
@@ -599,7 +608,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
                     .setName(runningScenario.getTitle())
                     .setLabels(labels)
                     .setLinks(links)
-                    .setStatus(StatusPriority.getLowest().getStatusModel()));
+                    .setStatus(Status.getLowest().getAllureStatus()));
             lifecycle.startTestCase(scenarioId);
             putCurrentStepId(scenarioId);
         }
@@ -638,7 +647,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
         if (allureRunContext.isStepInProgress())
         {
             // Stop @AfterScenario step
-            stopStep(StatusPriority.getLowest().getStatusModel());
+            stopStep(Status.getLowest());
         }
 
         LinkedQueueItem<String> step = getLinkedStep();

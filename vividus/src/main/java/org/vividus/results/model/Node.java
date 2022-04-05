@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.vividus.model;
+package org.vividus.results.model;
 
 import java.util.Deque;
 import java.util.LinkedList;
 
-import org.vividus.Status;
+import org.vividus.report.allure.model.Status;
 
 public class Node
 {

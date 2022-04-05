@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,6 @@ import org.vividus.model.RunningStory;
 import org.vividus.report.allure.AllureStoryReporter.LinkedQueueItem;
 import org.vividus.report.allure.adapter.IVerificationErrorAdapter;
 import org.vividus.report.allure.model.ScenarioExecutionStage;
-import org.vividus.report.allure.model.StatusPriority;
 import org.vividus.report.allure.model.StoryExecutionStage;
 import org.vividus.reporter.event.LinkPublishEvent;
 import org.vividus.softassert.event.AssertionFailedEvent;
@@ -108,6 +107,7 @@ import io.qameta.allure.model.Label;
 import io.qameta.allure.model.Link;
 import io.qameta.allure.model.Parameter;
 import io.qameta.allure.model.Status;
+import io.qameta.allure.model.StatusDetails;
 import io.qameta.allure.model.StepResult;
 import io.qameta.allure.model.TestResult;
 
@@ -551,7 +551,7 @@ class AllureStoryReporterTests
     }
 
     @SuppressWarnings("unchecked")
-    private List<RunningStory> startStoriesWithSameName(List<Label> story1Labels, List<Label> story2Labels)
+    private void startStoriesWithSameName(List<Label> story1Labels, List<Label> story2Labels)
     {
         String storyName = "name.story";
         RunningStory runningStory1 = createRunningStory(new Properties(), new Properties(), List.of(),
@@ -568,7 +568,6 @@ class AllureStoryReporterTests
         mockRunningBatchName();
         allureStoryReporter.beforeStory(story1, false);
         allureStoryReporter.beforeStory(story2, false);
-        return List.of(runningStory1, runningStory2);
     }
 
     @Test
@@ -624,7 +623,7 @@ class AllureStoryReporterTests
                 stepResultCaptor.capture());
         StepResult capturedStepResult = stepResultCaptor.getValue();
         assertEquals(stepAsString, capturedStepResult.getName());
-        assertEquals(StatusPriority.getLowest().getStatusModel(), capturedStepResult.getStatus());
+        assertEquals(Status.PASSED, capturedStepResult.getStatus());
         ordered.verify(next).beforeStep(step);
         verifyNoMoreInteractions(next, allureLifecycle);
     }
@@ -794,7 +793,7 @@ class AllureStoryReporterTests
     }
 
     @Test
-    void testAddLogInAfterScenaioStep()
+    void testAddLogInAfterScenarioStep()
     {
         mockScenarioUid(false);
         when(allureRunContext.isStepInProgress()).thenReturn(true);
@@ -900,7 +899,11 @@ class AllureStoryReporterTests
         allureStoryReporter.pending(GIVEN_STEP);
         verify(next).pending(GIVEN_STEP);
         verify(allureLifecycle).updateStep(eq(STEP_UID), anyStepResultConsumer());
-        verify(allureLifecycle).updateTestCase(eq(SCENARIO_UID), anyTestResultConsumer());
+        verify(allureLifecycle).updateTestCase(eq(SCENARIO_UID), argThat(consumer -> {
+            consumer.accept(
+                    new TestResult().setStatusDetails(new StatusDetails().setMessage("The step is commented")));
+            return true;
+        }));
     }
 
     @Test
@@ -992,7 +995,7 @@ class AllureStoryReporterTests
         Link issue = links.get(1);
         assertEquals("https://vividus.dev/VVD-1", issue.getUrl());
         assertEquals("issue", issue.getType());
-        assertEquals(StatusPriority.getLowest().getStatusModel(), captured.getStatus());
+        assertEquals(Status.PASSED, captured.getStatus());
     }
 
     @Test
@@ -1276,7 +1279,7 @@ class AllureStoryReporterTests
     {
         return argThat(consumer ->
         {
-            consumer.accept(new StepResult());
+            consumer.accept(new StepResult().setStatus(Status.PASSED));
             return true;
         });
     }
@@ -1285,7 +1288,8 @@ class AllureStoryReporterTests
     {
         return argThat(consumer ->
         {
-            consumer.accept(new TestResult());
+            consumer.accept(
+                    new TestResult().setStatusDetails(new StatusDetails().setMessage("The step is not implemented")));
             return true;
         });
     }
