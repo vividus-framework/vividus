@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package org.vividus.steps;
+package org.vividus.results;
 
-import org.jbehave.core.annotations.AfterStories;
-import org.vividus.log.TestInfoLogger;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-public class SetupSteps
+import org.vividus.report.allure.model.Status;
+import org.vividus.results.model.Failure;
+import org.vividus.results.model.NodeType;
+import org.vividus.results.model.Statistic;
+
+public interface ResultsProvider
 {
-    @AfterStories
-    public void afterStories()
-    {
-        TestInfoLogger.logEnvironmentMetadata();
-    }
+    Optional<Status> getRunStatus();
+
+    Map<NodeType, Statistic> getStatistics();
+
+    Optional<List<Failure>> getFailures();
 }

@@ -30,7 +30,7 @@
     <bean id="debugSteps" class="org.vividus.steps.DebugSteps" />
     <bean id="executableSteps" class="org.vividus.steps.ExecutableSteps" />
     <bean id="fileSteps" class="org.vividus.steps.FileSteps" />
-    <bean id="setupSteps" class="org.vividus.steps.SetupSteps" />
+    <bean id="setupSteps" class="org.vividus.steps.LoggingExecutionResultsSteps" />
 
     <bean class="org.vividus.publishing.DiffAttachmentPublisher">
         <property name="textLengthDiffThreshold" value="${report.text-length-diff-threshold}" />
