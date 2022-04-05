@@ -91,12 +91,8 @@ public class RoundExpressionProcessor extends AbstractExpressionProcessor<String
 
         public int getMaxFractionDigits()
         {
-            return isApplicable(maxFractionDigits) ? Integer.parseInt(maxFractionDigits) : DEFAULT_MAX_FRACTION_DIGITS;
-        }
-
-        private boolean isApplicable(String valueToCheck)
-        {
-            return valueToCheck != null && !valueToCheck.isEmpty() && NumberUtils.isCreatable(valueToCheck);
+            return NumberUtils.isCreatable(maxFractionDigits) ? Integer.parseInt(maxFractionDigits)
+                    : DEFAULT_MAX_FRACTION_DIGITS;
         }
 
         public RoundingMode getRoundingMode()
