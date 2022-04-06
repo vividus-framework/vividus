@@ -21,9 +21,9 @@ import java.util.Collection;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 
-public final class SerializeJsonHelper
+public final class JsonSerializer
 {
-    private SerializeJsonHelper()
+    private JsonSerializer()
     {
     }
 

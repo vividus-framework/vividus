@@ -32,6 +32,7 @@ import java.util.stream.IntStream;
 import org.apache.commons.lang3.function.FailableBiFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.model.jbehave.NotUniqueMetaValueException;
 import org.vividus.model.jbehave.Scenario;
@@ -56,10 +57,11 @@ public class XrayExporter
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(XrayExporter.class);
 
-    private final XrayExporterOptions xrayExporterOptions;
-    private final XrayFacade xrayFacade;
-    private TestCaseFactory testCaseFactory;
-    private final TestExecutionFactory testExecutionFactory;
+    @Autowired
+    private XrayExporterOptions xrayExporterOptions;
+    @Autowired private XrayFacade xrayFacade;
+    @Autowired private TestCaseFactory testCaseFactory;
+    @Autowired private TestExecutionFactory testExecutionFactory;
 
     private final List<String> errors = new ArrayList<>();
 

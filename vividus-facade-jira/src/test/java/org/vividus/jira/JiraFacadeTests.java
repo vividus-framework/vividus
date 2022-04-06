@@ -102,7 +102,7 @@ class JiraFacadeTests
                 .thenReturn("{\"expand\": \"transitions\",\"transitions\": [{\"id\": \"1"
                         + "\",\"name\": \"Move to Backlog\",\"to\":{\"name\": \"Backlog\",\"id\":\"10000\"}}]}");
 
-        String issueId = jiraFacade.setIssueStatus(ISSUE_ID, BACKLOG);
+        String issueId = jiraFacade.changeIssueStatus(ISSUE_ID, BACKLOG);
         assertEquals(ISSUE_ID, issueId);
     }
 

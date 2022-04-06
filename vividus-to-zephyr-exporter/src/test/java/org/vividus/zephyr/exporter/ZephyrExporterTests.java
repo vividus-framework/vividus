@@ -21,6 +21,7 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -49,6 +50,7 @@ import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
+import com.google.common.collect.ImmutableList;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,7 +68,7 @@ import org.vividus.util.ResourceUtils;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.facade.ZephyrFacade;
-import org.vividus.zephyr.model.TestCaseLevel;
+import org.vividus.zephyr.model.TestCaseEntity;
 import org.vividus.zephyr.model.TestCaseStatus;
 
 @ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class})
@@ -108,7 +110,7 @@ class ZephyrExporterTests
         when(zephyrFacade.createExecution(String.format(executionBody, ISSUE_ID1))).thenReturn(111);
         when(zephyrFacade.createExecution(String.format(executionBody, ISSUE_ID2))).thenReturn(222);
         URI jsonResultsUri = getJsonResultsUri(CREATEREPORTS);
-        zephyrExporterProperties.setLevel(TestCaseLevel.SCENARIO);
+        zephyrExporterProperties.setEntity(TestCaseEntity.SCENARIO);
         zephyrExporterProperties.setSourceDirectory(Paths.get(jsonResultsUri));
         zephyrExporter.exportResults();
         verify(zephyrFacade).updateExecutionStatus(111, STATUS_UPDATE_JSON);
@@ -126,7 +128,7 @@ class ZephyrExporterTests
         when(zephyrFacade.findExecutionId(ISSUE_ID1)).thenReturn(OptionalInt.of(111));
         when(zephyrFacade.findExecutionId(ISSUE_ID2)).thenReturn(OptionalInt.empty());
         URI jsonResultsUri = getJsonResultsUri(UPDATEREPORTS);
-        zephyrExporterProperties.setLevel(TestCaseLevel.SCENARIO);
+        zephyrExporterProperties.setEntity(TestCaseEntity.SCENARIO);
         zephyrExporterProperties.setSourceDirectory(Paths.get(jsonResultsUri));
 
         zephyrExporter.exportResults();
@@ -152,7 +154,7 @@ class ZephyrExporterTests
     void shouldExportNewTestWithStoryLevel() throws URISyntaxException, IOException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri(CREATEREPORTS);
-        zephyrExporterProperties.setLevel(TestCaseLevel.STORY);
+        zephyrExporterProperties.setEntity(TestCaseEntity.STORY);
         zephyrExporterProperties.setSourceDirectory(Paths.get(jsonResultsUri));
         zephyrExporterProperties.setExportResults(true);
         when(zephyrFacade.createTestCase(any())).thenReturn(STORY_TEST_CASE_KEY1);
@@ -168,7 +170,7 @@ class ZephyrExporterTests
     void shouldExportNewTestWithScenarioLevel() throws URISyntaxException, IOException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri(CREATEREPORTS);
-        zephyrExporterProperties.setLevel(TestCaseLevel.SCENARIO);
+        zephyrExporterProperties.setEntity(TestCaseEntity.SCENARIO);
         zephyrExporterProperties.setSourceDirectory(Paths.get(jsonResultsUri));
         zephyrExporterProperties.setExportResults(true);
         when(jiraFacade.getIssue(any())).thenReturn(new JiraEntity());
@@ -187,7 +189,7 @@ class ZephyrExporterTests
     void shouldUpdateTestWithStoryLevel() throws URISyntaxException, IOException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri(UPDATEREPORTS);
-        zephyrExporterProperties.setLevel(TestCaseLevel.STORY);
+        zephyrExporterProperties.setEntity(TestCaseEntity.STORY);
         zephyrExporterProperties.setSourceDirectory(Paths.get(jsonResultsUri));
         zephyrExporterProperties.setExportResults(true);
         zephyrExporterProperties.setUpdateCasesOnExport(true);
@@ -204,24 +206,25 @@ class ZephyrExporterTests
     static Stream<Object> levels()
     {
         return Stream.of(
-            arguments(TestCaseLevel.STORY, List.of(info(EXPORTING_STORY, STORY_TITLE)), List.of(ERROR_MESSAGE)),
-            arguments(TestCaseLevel.SCENARIO, List.of(info(EXPORTING_SCENARIO_FROM_STORY, STORY_TITLE),
-                    info(EXPORTING_SCENARIO, SCENARIO_TITLE), info(EXPORTING_SCENARIO, SECOND_SCENARIO_TITLE)),
-                List.of(ERROR_MESSAGE, ERROR_MESSAGE)
-            )
+                arguments(TestCaseEntity.STORY, List.of(info(EXPORTING_STORY, STORY_TITLE)), List.of(ERROR_MESSAGE)),
+                arguments(TestCaseEntity.SCENARIO, List.of(info(EXPORTING_SCENARIO_FROM_STORY, STORY_TITLE),
+                                info(EXPORTING_SCENARIO, SCENARIO_TITLE),
+                                info(EXPORTING_SCENARIO, SECOND_SCENARIO_TITLE)),
+                        List.of(ERROR_MESSAGE, ERROR_MESSAGE)
+                )
         );
     }
 
     @ParameterizedTest
     @MethodSource("levels")
-    void shouldNotExportTestWithExceptionDifferentLevel(TestCaseLevel level, List<LoggingEvent> events,
+    void shouldNotExportTestWithExceptionDifferentLevel(TestCaseEntity caseEntity, List<LoggingEvent> events,
                                                         List<String> errors)
-        throws URISyntaxException, IOException, JiraConfigurationException
+            throws URISyntaxException, IOException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri(CREATEREPORTS);
         zephyrExporterProperties.setSourceDirectory(Paths.get(jsonResultsUri));
         zephyrExporterProperties.setExportResults(true);
-        zephyrExporterProperties.setLevel(level);
+        zephyrExporterProperties.setEntity(caseEntity);
         zephyrExporterProperties.setUpdateCasesOnExport(false);
 
         IOException exception = mock(IOException.class);
@@ -229,8 +232,10 @@ class ZephyrExporterTests
 
         zephyrExporter.exportResults();
         ArrayList<LoggingEvent> allEvents = new ArrayList<>(events);
-        errors.forEach(message -> allEvents.add(error(exception, message + level.getLevel())));
+        errors.forEach(message -> allEvents.add(error(exception, message + caseEntity.toString().toLowerCase())));
 
+        ImmutableList<LoggingEvent> actualEvents = logger.getLoggingEvents();
+        assertThat(actualEvents, hasSize(allEvents.size()));
         assertThat(logger.getLoggingEvents(), containsInAnyOrder(allEvents.toArray()));
     }
 
@@ -238,7 +243,7 @@ class ZephyrExporterTests
     void shouldUpdateTestWithScenarioLevel() throws URISyntaxException, IOException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri(UPDATEREPORTS);
-        zephyrExporterProperties.setLevel(TestCaseLevel.SCENARIO);
+        zephyrExporterProperties.setEntity(TestCaseEntity.SCENARIO);
         zephyrExporterProperties.setSourceDirectory(Paths.get(jsonResultsUri));
         zephyrExporterProperties.setUpdateCasesOnExport(true);
         zephyrExporterProperties.setExportResults(true);

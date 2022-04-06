@@ -24,7 +24,7 @@ import java.util.stream.IntStream;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-public class Story implements IContainingMeta
+public class Story implements HasMeta
 {
     private String path;
     private Lifecycle lifecycle;

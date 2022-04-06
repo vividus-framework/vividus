@@ -20,35 +20,35 @@ include::partial$jira-configuration.adoc[]
 |Required
 |Description
 
-|`zephyr.exporter.export-results`
+|`zephyr-exporter.export-results`
 |true
-|Property to export tests
+|Property regulates if test entity export is needed
 
-|`zephyr.exporter.level`
+|`zephyr-exporter.test-entity`
 |false
-|Property to export stories on STORY or SCENARIO level
+|Test entity export level. STORY or SCENARIO level
 
-|`zephyr.exporter.jira-instance-key`
+|`zephyr-exporter.jira-instance-key`
 |false
 |The key of the configured JIRA instance, in case of missing value it will be evaluated automatically based on issue keys being exported
 
-|`zephyr.exporter.source-directory`
+|`zephyr-exporter.source-directory`
 |true
-|Path to directory with test JSON results.
+|Path to directory with test execution JSON results and test entity.
 
-|`zephyr.exporter.update-execution-statuses-only`
+|`zephyr-exporter.update-execution-statuses-only`
 |false
 |Property for update existing executions statuses only.
 
-|`zephyr.exporter.update-cases-on-export`
+|`zephyr-exporter.update-test-cases`
 |false
 |Property to update existing test cases. User with update status permissions required in order to work.
 
-|`zephyr.exporter.status-for-updated-test-cases`
+|`zephyr-exporter.status-for-updated-test-cases`
 |false
 |Property defines status which will be set for all updated tests ("Backlog" by default).
 
-|`zephyr.exporter.statuses-of-test-cases-to-add-to-execution`
+|`zephyr-exporter.statuses-of-test-cases-to-add-to-execution`
 |false
 |List of test case statuses for adding to execution.
 
@@ -84,7 +84,7 @@ image::zephyr.png[]
 |Description
 
 |`jira.<jira-instance-key>.fields-mapping.story-type`
-|Key of a field containing story type
+|Key of a custom field which contains story type (Task)
 
 |===
 

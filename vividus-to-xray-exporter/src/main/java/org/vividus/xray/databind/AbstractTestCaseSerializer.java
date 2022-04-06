@@ -17,8 +17,8 @@
 package org.vividus.xray.databind;
 
 import static org.apache.commons.lang3.Validate.isTrue;
-import static org.vividus.exporter.databind.SerializeJsonHelper.writeJsonArray;
-import static org.vividus.exporter.databind.SerializeJsonHelper.writeObjectWithField;
+import static org.vividus.exporter.databind.JsonSerializer.writeJsonArray;
+import static org.vividus.exporter.databind.JsonSerializer.writeObjectWithField;
 
 import java.io.IOException;
 import java.util.Map;

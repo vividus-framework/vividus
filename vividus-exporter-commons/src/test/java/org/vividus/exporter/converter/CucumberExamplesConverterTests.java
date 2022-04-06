@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.exporter.config.converter;
+package org.vividus.exporter.converter;
 
 import static java.lang.System.lineSeparator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,10 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.vividus.exporter.converter.CucumberExamplesConverter;
 import org.vividus.model.jbehave.Parameters;
 
-public class CucumberExamplesConverterTests
+class CucumberExamplesConverterTests
 {
     private static final String KEY_1_KEY_2 = "|key 1|key 2|";
     private static final String KEY = "key ";

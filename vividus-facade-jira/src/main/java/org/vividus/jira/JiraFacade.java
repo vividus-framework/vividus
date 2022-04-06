@@ -78,14 +78,14 @@ public class JiraFacade
         return JsonPathUtils.getData(issue, "$.fields.status.name");
     }
 
-    public String setIssueStatus(String issueKey, String status) throws JiraConfigurationException, IOException
+    public String changeIssueStatus(String issueKey, String targetStatus) throws JiraConfigurationException, IOException
     {
-        String transitionId = getTransitionIdByName(issueKey, status);
+        String transitionId = getTransitionIdByName(issueKey, targetStatus);
         return jiraClientProvider.getByIssueKey(issueKey).executePost(String.format(TRANSITIONS_ENDPOINT, issueKey),
                 String.format(UPDATE_TRANSITION_BODY, transitionId));
     }
 
-    public String getTransitionIdByName(String issueKey, String status) throws JiraConfigurationException, IOException
+    String getTransitionIdByName(String issueKey, String status) throws JiraConfigurationException, IOException
     {
         String statuses = jiraClientProvider.getByIssueKey(issueKey)
                                             .executeGet(String.format(TRANSITIONS_ENDPOINT, issueKey));

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.exporter.config.facade;
+package org.vividus.exporter.facade;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,7 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.exporter.facade.ExporterFacade;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 

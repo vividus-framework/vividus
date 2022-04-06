@@ -16,8 +16,6 @@
 
 package org.vividus.model.jbehave;
 
-import static org.vividus.model.MetaWrapper.META_VALUES_SEPARATOR;
-
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -28,8 +26,10 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
-public interface IContainingMeta
+public interface HasMeta
 {
+    char META_VALUES_SEPARATOR = ';';
+
     List<Meta> getMeta();
 
     /**

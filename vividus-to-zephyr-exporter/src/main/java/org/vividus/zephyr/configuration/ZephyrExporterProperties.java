@@ -22,28 +22,28 @@ import java.util.List;
 import javax.validation.constraints.NotBlank;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.vividus.zephyr.model.TestCaseLevel;
+import org.vividus.zephyr.model.TestCaseEntity;
 import org.vividus.zephyr.model.TestCaseStatus;
 
-@ConfigurationProperties("zephyr.exporter")
+@ConfigurationProperties("zephyr-exporter")
 public class ZephyrExporterProperties
 {
     private String jiraInstanceKey;
 
     private boolean exportResults;
 
-    @NotBlank(message = "Property 'zephyr.exporter.source-directory' must not be blank")
+    @NotBlank(message = "Property 'zephyr-exporter.source-directory' must not be blank")
     private Path sourceDirectory;
 
     private boolean updateExecutionStatusesOnly;
 
     private List<TestCaseStatus> statusesOfTestCasesToAddToExecution;
 
-    private TestCaseLevel level;
+    private TestCaseEntity entity;
 
     private boolean updateCasesOnExport;
 
-    private String statusForUpdatedTestCases = "Backlog";
+    private String statusForUpdatedTestCases;
 
     public String getJiraInstanceKey()
     {
@@ -95,14 +95,14 @@ public class ZephyrExporterProperties
         this.statusesOfTestCasesToAddToExecution = statusesOfTestCasesToAddToExecution;
     }
 
-    public TestCaseLevel getLevel()
+    public TestCaseEntity getEntity()
     {
-        return level;
+        return entity;
     }
 
-    public void setLevel(TestCaseLevel level)
+    public void setEntity(TestCaseEntity entity)
     {
-        this.level = level;
+        this.entity = entity;
     }
 
     public boolean isUpdateCasesOnExport()

@@ -16,20 +16,8 @@
 
 package org.vividus.zephyr.model;
 
-public enum TestCaseLevel
+public enum TestCaseEntity
 {
-    STORY("story"),
-    SCENARIO("scenario");
-
-    private final String level;
-
-    TestCaseLevel(String level)
-    {
-        this.level = level;
-    }
-
-    public String getLevel()
-    {
-        return level;
-    }
+    STORY,
+    SCENARIO;
 }

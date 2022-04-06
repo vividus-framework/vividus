@@ -100,7 +100,7 @@ public class ZephyrFacade implements IZephyrFacade
                 .addArgument(updateTestRequest)
                 .log("Updating Test Case with ID {}: {}");
         jiraFacade.updateIssue(testCaseId, updateTestRequest);
-        jiraFacade.setIssueStatus(testCaseId, zephyrExporterProperties.getStatusForUpdatedTestCases());
+        jiraFacade.changeIssueStatus(testCaseId, zephyrExporterProperties.getStatusForUpdatedTestCases());
         LOGGER.atInfo().addArgument(testCaseId)
                 .log("Test with key {} has been updated");
     }

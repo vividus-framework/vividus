@@ -41,7 +41,7 @@ import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.model.jbehave.AbstractStepsContainer;
-import org.vividus.model.jbehave.IContainingMeta;
+import org.vividus.model.jbehave.HasMeta;
 import org.vividus.model.jbehave.NotUniqueMetaValueException;
 import org.vividus.model.jbehave.Scenario;
 import org.vividus.model.jbehave.Step;
@@ -54,8 +54,8 @@ import org.vividus.zephyr.facade.IZephyrFacade;
 import org.vividus.zephyr.facade.TestCaseParameters;
 import org.vividus.zephyr.facade.ZephyrFacade;
 import org.vividus.zephyr.model.ExecutionStatus;
+import org.vividus.zephyr.model.TestCaseEntity;
 import org.vividus.zephyr.model.TestCaseExecution;
-import org.vividus.zephyr.model.TestCaseLevel;
 import org.vividus.zephyr.model.TestCaseStatus;
 import org.vividus.zephyr.model.ZephyrExecution;
 import org.vividus.zephyr.model.ZephyrTestCase;
@@ -89,7 +89,8 @@ public class ZephyrExporter
                                       .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
                                       .build()
                                       .registerModule(new SimpleModule()
-                                          .addDeserializer(TestCaseExecution.class, new TestCaseExecutionDeserializer()));
+                                          .addDeserializer(TestCaseExecution.class,
+                                                  new TestCaseExecutionDeserializer()));
     }
 
     public void exportResults() throws IOException, JiraConfigurationException
@@ -98,8 +99,8 @@ public class ZephyrExporter
         {
             if (zephyrExporterProperties.getExportResults())
             {
-                TestCaseLevel testCaseLevel = zephyrExporterProperties.getLevel();
-                if (testCaseLevel == TestCaseLevel.SCENARIO)
+                TestCaseEntity testCaseEntity = zephyrExporterProperties.getEntity();
+                if (testCaseEntity == TestCaseEntity.SCENARIO)
                 {
                     LOGGER.atInfo().addArgument(story::getPath).log("Exporting scenarios from {} story");
                     for (Scenario scenario : story.getFoldedScenarios())
@@ -107,7 +108,7 @@ public class ZephyrExporter
                         exportScenario(story.getPath(), scenario);
                     }
                 }
-                else if (testCaseLevel.equals(TestCaseLevel.STORY))
+                else if (testCaseEntity.equals(TestCaseEntity.STORY))
                 {
                     LOGGER.atInfo().addArgument(story::getPath).log("Exporting {} story");
                     exportStory(story);
@@ -255,7 +256,7 @@ public class ZephyrExporter
         return parameters;
     }
 
-    private TestCaseParameters createTestCaseParameters(IContainingMeta entity)
+    private TestCaseParameters createTestCaseParameters(HasMeta entity)
     {
         TestCaseParameters parameters = new TestCaseParameters();
         parameters.setLabels(entity.getMetaValues(ZEPHYR_LABELS));

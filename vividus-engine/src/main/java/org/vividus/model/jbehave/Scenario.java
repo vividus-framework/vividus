@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class Scenario extends AbstractStepsContainer implements IContainingMeta
+public class Scenario extends AbstractStepsContainer implements HasMeta
 {
     private String title;
     private List<Meta> meta;

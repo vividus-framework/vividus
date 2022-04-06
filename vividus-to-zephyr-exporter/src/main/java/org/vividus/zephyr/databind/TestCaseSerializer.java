@@ -16,12 +16,11 @@
 
 package org.vividus.zephyr.databind;
 
-import static org.vividus.exporter.databind.SerializeJsonHelper.writeJsonArray;
-import static org.vividus.exporter.databind.SerializeJsonHelper.writeObjectWithField;
+import static org.vividus.exporter.databind.JsonSerializer.writeJsonArray;
+import static org.vividus.exporter.databind.JsonSerializer.writeObjectWithField;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -65,7 +64,7 @@ public class TestCaseSerializer extends JsonSerializer<ZephyrTestCase>
         {
             Map<String, String> mapping = jiraConfigurationProvider.getFieldsMappingByProjectKey(projectKey);
             String storyType = mapping.get(STORY_TYPE_FIELD_KEY);
-            if (Objects.nonNull(storyType))
+            if (storyType != null)
             {
                 writeObjectWithField(generator, mapping.get(STORY_TYPE_FIELD_KEY), "value", "Task");
             }
