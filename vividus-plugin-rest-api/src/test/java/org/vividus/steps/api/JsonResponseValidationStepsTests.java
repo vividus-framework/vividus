@@ -17,7 +17,6 @@
 package org.vividus.steps.api;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -64,7 +63,6 @@ import org.vividus.variable.VariableScope;
 import net.javacrumbs.jsonunit.core.Option;
 import net.javacrumbs.jsonunit.core.internal.Options;
 
-@SuppressWarnings("MethodCount")
 @ExtendWith(MockitoExtension.class)
 class JsonResponseValidationStepsTests
 {
@@ -100,7 +98,6 @@ class JsonResponseValidationStepsTests
 
     private static final int ELEMENTS_NUMBER = 1;
 
-    private static final String JSON_PATH = "$..value";
     private static final String THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE =
             "The number of JSON elements by JSON path: ";
     private static final String HTML =
@@ -124,8 +121,7 @@ class JsonResponseValidationStepsTests
         var jsonSteps = new JsonSteps(new FluentEnumConverter(), httpTestContext, variableContext, jsonUtils);
         jsonSteps.setSoftAssert(softAssert);
         jsonResponseValidationSteps = new JsonResponseValidationSteps(httpTestContext, variableContext,
-                attachmentPublisher, new JsonUtils(), jsonSteps);
-        jsonResponseValidationSteps.setSoftAssert(softAssert);
+                attachmentPublisher, new JsonUtils(), jsonSteps, softAssert);
     }
 
     static Stream<Arguments> jsonValuesAndElements()
@@ -286,47 +282,6 @@ class JsonResponseValidationStepsTests
                 VARIABLE_NAME);
         verifyPathNotFoundExceptionRecording(NON_EXISTING_PATH);
         verifyNoInteractions(variableContext);
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "'[{\"value\":\"b\"},{\"value\":\"c\"},{\"value\":\"a\"}]',   $..value,   3",
-            "'[{\"value\":\"b\"},{\"value1\":\"c\"},{\"value1\":\"a\"}]', $[0].value, 1"
-    })
-    void testPerformAllStepsForProvidedJsonIfFound(String json, String jsonPath, int number)
-    {
-        SubSteps subSteps = mock(SubSteps.class);
-        when(softAssert.assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + jsonPath), eq(number),
-                verifyMatcher(number))).thenReturn(true);
-        jsonResponseValidationSteps.performAllStepsForProvidedJsonIfFound(ComparisonRule.GREATER_THAN_OR_EQUAL_TO,
-                number, json, jsonPath, subSteps);
-        verify(subSteps, times(number)).execute(Optional.empty());
-        verify(httpTestContext).getJsonContext();
-        verify(httpTestContext).putJsonContext(null);
-    }
-
-    @Test
-    void shouldNotPerformStepsWhenNumberOfElementsInJsonIsZeroAndComparisonRuleIsPassed()
-    {
-        SubSteps subSteps = mock(SubSteps.class);
-        when(softAssert.assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + JSON_PATH), eq(0),
-                verifyMatcher(0))).thenReturn(true);
-        jsonResponseValidationSteps.performAllStepsForProvidedJsonIfFound(ComparisonRule.LESS_THAN_OR_EQUAL_TO,
-                0, "{}", JSON_PATH, subSteps);
-        verifyNoInteractions(subSteps, httpTestContext);
-    }
-
-    @Test
-    void testPerformAllStepsForJsonIfFound()
-    {
-        when(httpTestContext.getJsonContext()).thenReturn(JSON);
-        SubSteps subSteps = mock(SubSteps.class);
-        when(softAssert.assertThat(eq(THE_NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + JSON_PATH), eq(0),
-                verifyMatcher(3))).thenReturn(false);
-        jsonResponseValidationSteps.performAllStepsForJsonIfFound(ComparisonRule.GREATER_THAN_OR_EQUAL_TO, 0,
-                JSON_PATH, subSteps);
-        verifyNoInteractions(subSteps);
-        verify(httpTestContext, times(0)).putJsonContext(any());
     }
 
     @Test

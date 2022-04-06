@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -40,6 +39,7 @@ import org.vividus.context.VariableContext;
 import org.vividus.diff.JsonDiffMatcher;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
+import org.vividus.json.steps.AbstractJsonSteps;
 import org.vividus.json.steps.JsonSteps;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
@@ -54,7 +54,7 @@ import org.vividus.variable.VariableScope;
 
 import net.javacrumbs.jsonunit.core.internal.Options;
 
-public class JsonResponseValidationSteps
+public class JsonResponseValidationSteps extends AbstractJsonSteps
 {
     private static final Set<String> ASSERTION_BOUNDS = Set.of(
             "Different (?:value|keys) found",
@@ -70,16 +70,18 @@ public class JsonResponseValidationSteps
     private final VariableContext variableContext;
     private final IAttachmentPublisher attachmentPublisher;
     private final JsonUtils jsonUtils;
+    private final ISoftAssert softAssert;
     private final JsonSteps jsonSteps;
-    private ISoftAssert softAssert;
 
     public JsonResponseValidationSteps(HttpTestContext httpTestContext, VariableContext variableContext,
-            IAttachmentPublisher attachmentPublisher, JsonUtils jsonUtils, JsonSteps jsonSteps)
+            IAttachmentPublisher attachmentPublisher, JsonUtils jsonUtils, JsonSteps jsonSteps, ISoftAssert softAssert)
     {
-        this.httpTestContext = httpTestContext;
+        super(httpTestContext, softAssert, jsonSteps);
         this.variableContext = variableContext;
+        this.httpTestContext = httpTestContext;
         this.attachmentPublisher = attachmentPublisher;
         this.jsonUtils = jsonUtils;
+        this.softAssert = softAssert;
         this.jsonSteps = jsonSteps;
     }
 
@@ -383,99 +385,6 @@ public class JsonResponseValidationSteps
         }
     }
 
-    /**
-     * Step designed to perform steps against all elements found by JSON path in current json context or response
-     * <b>if</b> they are matching comparison rule.
-     * Actions performed by step:
-     * <ul>
-     * <li>Searches for elements using JSON path</li>
-     * <li>Checks that elements quantity matches comparison rule and elements number</li>
-     * <li>Passes if the comparison rule matches and the elements number is 0</li>
-     * <li>For each element switches JSON context and performs all steps. No steps will be performed
-     * in case of comparison rule mismatch</li>
-     * <li>Restores previously set context</li>
-     * </ul>
-     * <br> Usage example:
-     * <code>
-     * <br>When I find equal to `1` JSON elements by `$.[?(@.parent_target_id=="")]` and for each element do
-     * <br>|step                                                      |
-     * <br>|Then number of JSON elements by JSON path `$..name` is = 3|
-     * </code>
-     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
-     *                       <ul>
-     *                       <li>less than (&lt;)</li>
-     *                       <li>less than or equal to (&lt;=)</li>
-     *                       <li>greater than (&gt;)</li>
-     *                       <li>greater than or equal to (&gt;=)</li>
-     *                       <li>equal to (=)</li>
-     *                       <li>not equal to (!=)</li>
-     *                       </ul>
-     * @param elementsNumber The expected number of elements
-     * @param jsonPath       A JSON path
-     * @param stepsToExecute Examples table with steps to execute for each found elements
-     */
-    @SuppressWarnings("MagicNumber")
-    @When(value = "I find $comparisonRule `$elementsNumber` JSON elements by `$jsonPath` and for each element do"
-            + "$stepsToExecute", priority = 6)
-    public void performAllStepsForJsonIfFound(ComparisonRule comparisonRule, int elementsNumber, String jsonPath,
-            SubSteps stepsToExecute)
-    {
-        performAllStepsForProvidedJsonIfFound(comparisonRule, elementsNumber, getActualJson(), jsonPath,
-                stepsToExecute);
-    }
-
-    /**
-    * Step designed to perform steps against all elements found by JSON path in provided json
-    * <b>if</b> they are matching comparison rule.
-    * Actions performed by step:
-    * <ul>
-    * <li>Searches for elements using JSON path</li>
-    * <li>Checks that elements quantity matches comparison rule and elements number</li>
-    * <li>Passes if the comparison rule matches and the elements number is 0</li>
-    * <li>For each element switches JSON context and performs all steps. No steps will be performed
-    * in case of comparison rule mismatch</li>
-    * <li>Restores previously set context</li>
-    * </ul>
-    * <br> Usage example:
-    * <code>
-    * <br>When I find equal to `1` JSON elements from `{"parent_id":"","elements":[{"name": "1"},{"name": "2"}]}`
-    *       by `$.[?(@.parent_id=="")]` and for each element do
-    * <br>|step                                                      |
-    * <br>|Then number of JSON elements by JSON path `$..name` is = 2|
-    * </code>
-    * @param comparisonRule The rule to match the quantity of elements. The supported rules:
-    *                       <ul>
-    *                       <li>less than (&lt;)</li>
-    *                       <li>less than or equal to (&lt;=)</li>
-    *                       <li>greater than (&gt;)</li>
-    *                       <li>greater than or equal to (&gt;=)</li>
-    *                       <li>equal to (=)</li>
-    *                       <li>not equal to (!=)</li>
-    *                       </ul>
-    * @param elementsNumber The expected number of elements
-    * @param json           A JSON element
-    * @param jsonPath       A JSON path
-    * @param stepsToExecute Examples table with steps to execute for each found elements
-    */
-    @When("I find $comparisonRule `$elementsNumber` JSON elements from `$json` by `$jsonPath` and for each element do"
-            + "$stepsToExecute")
-    public void performAllStepsForProvidedJsonIfFound(ComparisonRule comparisonRule, int elementsNumber, String json,
-            String jsonPath, SubSteps stepsToExecute)
-    {
-        Optional<List<?>> jsonElements = getElements(json, jsonPath);
-        int count = countElementsNumber(jsonElements);
-        if (assertJsonElementsNumber(jsonPath, count, comparisonRule, elementsNumber) && count != 0)
-        {
-            String jsonContext = getActualJson();
-            jsonElements.get().stream().map(jsonUtils::toJson).forEach(jsonElement ->
-            {
-                httpTestContext.putJsonContext(jsonElement);
-                stepsToExecute.execute(Optional.empty());
-            });
-            httpTestContext.putJsonContext(jsonContext);
-        }
-    }
-
     private Optional<String> getJsonElementByJsonPath(String json, String jsonPath, String expectedData)
     {
         return jsonSteps.getDataByJsonPathSafely(json, jsonPath, true).map(
@@ -509,34 +418,5 @@ public class JsonResponseValidationSteps
     {
         Optional<List<?>> elements = getElements(json, jsonPath);
         return countElementsNumber(elements);
-    }
-
-    private Optional<List<?>> getElements(String json, String jsonPath)
-    {
-        Optional<Optional<Object>> jsonObject = jsonSteps.getDataByJsonPathSafely(json, jsonPath, false);
-        return jsonObject.map(e -> e.map(value -> value instanceof List ? (List<?>) value : List.of(value))
-                .orElseGet(() -> Collections.singletonList(null)));
-    }
-
-    private static int countElementsNumber(Optional<List<?>> elements)
-    {
-        return elements.map(List::size).orElse(0).intValue();
-    }
-
-    private boolean assertJsonElementsNumber(String jsonPath, int actualNumber, ComparisonRule comparisonRule,
-            int expectedElementsNumber)
-    {
-        return softAssert.assertThat("The number of JSON elements by JSON path: " + jsonPath, actualNumber,
-                comparisonRule.getComparisonRule(expectedElementsNumber));
-    }
-
-    private String getActualJson()
-    {
-        return httpTestContext.getJsonContext();
-    }
-
-    public void setSoftAssert(ISoftAssert softAssert)
-    {
-        this.softAssert = softAssert;
     }
 }
