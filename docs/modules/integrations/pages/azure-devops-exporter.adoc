@@ -88,5 +88,6 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |===
 
 :service-key: azure-devops
+:gh-packages-url: https://github.com/vividus-framework/vividus/packages/929350
 
 include::partial$export.adoc[]
