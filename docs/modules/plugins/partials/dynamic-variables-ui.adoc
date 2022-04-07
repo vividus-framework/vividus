@@ -48,9 +48,9 @@ Variable provides source code of the UI of the application under test.
 ==== *Variable name*
 
 [source,gherkin]
----
+----
 ${source-code}
----
+----
 
 .Check if element exists on UI
 [source,gherkin]
