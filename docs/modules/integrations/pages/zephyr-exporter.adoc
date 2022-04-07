@@ -116,5 +116,6 @@ Then page is scrolled to element located `id(toClick)`
 ----
 
 :service-key: zephyr
+:gh-packages-url: https://github.com/vividus-framework/vividus/packages/875007
 
 include::partial$export.adoc[]

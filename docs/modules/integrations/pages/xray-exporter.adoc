@@ -219,5 +219,6 @@ Meta: @testCaseId TEST-435
 ----
 
 :service-key: xray
+:gh-packages-url: https://github.com/vividus-framework/vividus/packages/875005
 
 include::partial$export.adoc[]
