@@ -45,11 +45,15 @@
           parent="abstractFetchingUrlsTableTransformer">
         <property name="crawlControllerFactory">
             <bean class="org.vividus.crawler.CrawlControllerFactory">
-                <property name="crawlStorageFolder" value="${output.directory}/headless-crawler-storage" />
+                <constructor-arg index="0">
+                    <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
+                        <constructor-arg value="transformer.headless."/>
+                    </bean>
+                </constructor-arg>
             </bean>
         </property>
-        <property name="filterRedirects" value="${bdd.transformer.headless.filter-redirects}" />
-        <property name="seedRelativeUrls" value="${bdd.transformer.headless.seed-relative-urls}" />
+        <property name="filterRedirects" value="${transformer.headless.filter-redirects}" />
+        <property name="seedRelativeUrls" value="${transformer.headless.seed-relative-urls}" />
     </bean>
 
     <util:list id="stepBeanNames-WebAppToRestApi" value-type="java.lang.String">

@@ -20,10 +20,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.apache.commons.io.FileUtils;
 import org.vividus.util.UriUtils;
 import org.vividus.util.UriUtils.UserInfo;
+import org.vividus.util.property.IPropertyMapper;
 
 import crawlercommons.filters.basic.BasicURLNormalizer;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
@@ -37,9 +41,14 @@ import edu.uci.ics.crawler4j.url.SleepycatWebURLFactory;
 
 public class CrawlControllerFactory implements ICrawlControllerFactory
 {
-    private static final int SOCKET_TIMEOUT = 40_000;
+    private final Map<String, String> defaultCrawlConfig;
+    private final IPropertyMapper propertyMapper;
 
-    private String crawlStorageFolder;
+    public CrawlControllerFactory(Map<String, String> defaultCrawlConfig, IPropertyMapper propertyMapper)
+    {
+        this.defaultCrawlConfig = defaultCrawlConfig;
+        this.propertyMapper = propertyMapper;
+    }
 
     @Override
     public CrawlController createCrawlController(URI mainApplicationPage)
@@ -69,20 +78,14 @@ public class CrawlControllerFactory implements ICrawlControllerFactory
 
     private CrawlConfig createCrawlConfig(URI mainApplicationPage) throws IOException
     {
-        CrawlConfig crawlConfig = new CrawlConfig();
+        CrawlConfig crawlConfig = propertyMapper.readValue(defaultCrawlConfig, MappedCrawlConfig.class);
 
         /**
          * The crawler4j requires the crawl storage folder to exist, so it should be updated to create
          * folders at any depth
          */
-        File crawlStorage = new File(crawlStorageFolder);
+        File crawlStorage = new File(crawlConfig.getCrawlStorageFolder());
         FileUtils.forceMkdir(crawlStorage);
-
-        crawlConfig.setCrawlStorageFolder(crawlStorageFolder);
-        crawlConfig.setPolitenessDelay(0);
-        crawlConfig.setSocketTimeout(SOCKET_TIMEOUT);
-        crawlConfig.setRespectNoFollow(false);
-        crawlConfig.setRespectNoIndex(false);
 
         UserInfo userInfo = UriUtils.getUserInfo(mainApplicationPage);
         if (userInfo != null)
@@ -101,8 +104,8 @@ public class CrawlControllerFactory implements ICrawlControllerFactory
         return crawlConfig;
     }
 
-    public void setCrawlStorageFolder(String crawlStorageFolder)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static final class MappedCrawlConfig extends CrawlConfig
     {
-        this.crawlStorageFolder = crawlStorageFolder;
     }
 }
