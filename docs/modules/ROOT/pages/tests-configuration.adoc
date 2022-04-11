@@ -9,6 +9,7 @@ VIVIDUS configuration includes the following parts: profiles, environments and s
 The property `configuration.suites` defines the suites set. It is a comma separated set of suite file addresses:
 
 .configuration.properties
+[source,properties]
 ----
 configuration.suites=testSuite,anotherDir/anotherTestSuite
 ----
@@ -279,11 +280,13 @@ There is a few steps to achieve this:
 
 
 .environment.properties
+[source,properties]
 ----
 system.allure.link.issue.pattern=https://vividus.dev/issues/{}
 ----
 
 .Test.story
+[source,gherkin]
 ----
 Meta:
     @issueId VVD-1
@@ -324,6 +327,7 @@ image::linked.png[Link in allure report]
 It is possible to have multiple endpoints. To achieve this user should define system suffix for the properties and meta tags.
 
 .environment.properties
+[source,properties]
 ----
 # Default property
 system.allure.link.issue.pattern=https://vividus.prod/issues/{}
@@ -332,6 +336,7 @@ system.allure.link.issue.dev.pattern=https://vividus.dev/issues/{}
 ----
 
 .Test.story
+[source,gherkin]
 ----
 Meta:
     @issueId VVD-1
