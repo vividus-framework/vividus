@@ -49,7 +49,7 @@ public class WebDriverManager extends GenericWebDriverManager implements IWebDri
         return isBrowserAnyOf(getCapabilities(webDriver), browsers);
     }
 
-    private static boolean isBrowserAnyOf(Capabilities capabilities, Browser... browsers)
+    public static boolean isBrowserAnyOf(Capabilities capabilities, Browser... browsers)
     {
         return checkCapabilities(capabilities,
                 () -> Stream.of(browsers).anyMatch(browser -> isBrowser(capabilities, browser)));
