@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,56 +14,64 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.action.storage;
+package org.vividus.ui.web.storage;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import org.openqa.selenium.html5.LocalStorage;
+import org.openqa.selenium.html5.SessionStorage;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
-public class JavascriptLocalStorage implements LocalStorage
+class JavascriptStorage implements LocalStorage, SessionStorage
 {
+    private final StorageType storageType;
     private final WebJavascriptActions javascriptActions;
 
-    JavascriptLocalStorage(WebJavascriptActions javascriptActions)
+    JavascriptStorage(StorageType storageType, WebJavascriptActions javascriptActions)
     {
+        this.storageType = storageType;
         this.javascriptActions = javascriptActions;
     }
 
     @Override
     public String getItem(String key)
     {
-        return javascriptActions.executeScript("return window.localStorage.getItem(arguments[0]);", key);
+        return executeScript("return window.%s.getItem(arguments[0])", key);
     }
 
     @Override
     public Set<String> keySet()
     {
-        return new HashSet<>(javascriptActions.executeScript("return Object.keys(window.localStorage)"));
+        return new HashSet<>(executeScript("return Object.keys(window.%s)"));
     }
 
     @Override
     public void setItem(String key, String value)
     {
-        javascriptActions.executeScript("window.localStorage.setItem(arguments[0], arguments[1]);", key, value);
+        executeScript("window.%s.setItem(arguments[0], arguments[1])", key, value);
     }
 
     @Override
     public String removeItem(String key)
     {
-        return javascriptActions.executeScript("window.localStorage.removeItem(arguments[0]);", key);
+        return executeScript("window.%s.removeItem(arguments[0])", key);
     }
 
     @Override
     public void clear()
     {
-        javascriptActions.executeScript("window.localStorage.clear();");
+        executeScript("window.%s.clear()");
     }
 
     @Override
     public int size()
     {
-        return (int) javascriptActions.executeScript("return window.localStorage.length");
+        return executeScript("return window.%s.length");
+    }
+
+    private <T> T executeScript(String format, Object... args)
+    {
+        return javascriptActions.executeScript(String.format(format, storageType.getJavascriptPropertyName()), args);
     }
 }
