@@ -126,6 +126,7 @@ class AnalyticsStoryReporterTests
                 .limit(9)
                 .map(Story::new)
                 .forEach(s -> reporter.beforeStory(s, false));
+        reporter.beforeStory(new Story("givenStory"), true);
         Stream.generate(() -> 0).limit(40).forEach(v -> reporter.beforeStep(null));
         Stream.generate(() -> 0).limit(20).forEach(v -> reporter.beforeScenario(mock(Scenario.class)));
         reporter.afterStoriesSteps(Stage.AFTER);
