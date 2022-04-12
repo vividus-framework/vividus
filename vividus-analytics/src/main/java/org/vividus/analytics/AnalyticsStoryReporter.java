@@ -102,7 +102,10 @@ public class AnalyticsStoryReporter extends NullStoryReporter
     @Override
     public void beforeStory(Story story, boolean givenStory)
     {
-        STORIES.incrementAndGet();
+        if (!givenStory)
+        {
+            STORIES.incrementAndGet();
+        }
     }
 
     @Override
