@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.util.property;
 
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.function.UnaryOperator;
 
 public interface IPropertyMapper
@@ -31,6 +32,16 @@ public interface IPropertyMapper
      * @throws IOException if any error is occurred during mapping of properties to objects
      */
     <T> T readValue(String propertyPrefix, Class<T> resultType) throws IOException;
+
+    /**
+     * Maps properties to the object created using property names and values
+     * @param <T> type of resulting object
+     * @param properties properties to map
+     * @param resultType resulting object type
+     * @return object created using property names and values
+     * @throws IOException if any error is occurred during mapping of properties to objects
+     */
+    <T> T readValue(Map<String, String> properties, Class<T> resultType) throws IOException;
 
     /**
      * Maps properties with specified prefix to the collection with values representing objects created
