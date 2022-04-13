@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,14 +40,14 @@ class AbstractReportControlStoryReporterTests
 
     @ParameterizedTest
     @CsvSource({
-        "true, false, 1",
-        "true, true, 0",
-        "false, false, 0"
+        "true, true, 1",
+        "true, false, 0",
+        "false, true, 0"
     })
     void shouldPerformRunnable(boolean reportEnabled, boolean runCompleted, int times)
     {
         when(reportControlContext.isReportingEnabled()).thenReturn(reportEnabled);
-        lenient().when(runContext.isRunCompleted()).thenReturn(runCompleted);
+        lenient().when(runContext.isRunInProgress()).thenReturn(runCompleted);
 
         reporter.perform(runnable);
 

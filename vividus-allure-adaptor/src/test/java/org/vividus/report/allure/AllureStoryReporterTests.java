@@ -1272,7 +1272,7 @@ class AllureStoryReporterTests
     private void mockEnableReporting()
     {
         when(reportControlContext.isReportingEnabled()).thenReturn(true);
-        when(runTestContext.isRunCompleted()).thenReturn(false);
+        when(runTestContext.isRunInProgress()).thenReturn(true);
     }
 
     private static Consumer<StepResult> anyStepResultConsumer()

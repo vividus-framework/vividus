@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,6 +98,7 @@ class RunContextStoryReporterTests
     @Test
     void testBeforeStep()
     {
+        when(runTestContext.isRunInProgress()).thenReturn(true);
         RunningStory runningStory = mockGetRunningStory();
         Step step = createStep(STEP);
         runContextStoryReporter.beforeStep(step);
@@ -108,7 +109,7 @@ class RunContextStoryReporterTests
     @Test
     void shouldNotPutRunningStepIfRunIsCompleted()
     {
-        when(runTestContext.isRunCompleted()).thenReturn(true);
+        when(runTestContext.isRunInProgress()).thenReturn(false);
         Step step = mock(Step.class);
 
         runContextStoryReporter.beforeStep(step);
@@ -120,6 +121,7 @@ class RunContextStoryReporterTests
     @Test
     void testSuccessful()
     {
+        when(runTestContext.isRunInProgress()).thenReturn(true);
         String step = "successful";
         RunningStory runningStory = mockGetRunningStory();
         runContextStoryReporter.beforeStep(createStep(step));
@@ -131,7 +133,7 @@ class RunContextStoryReporterTests
     @Test
     void shouldNotRemoteRunningStepOnSuccessIfRunIsCompleted()
     {
-        when(runTestContext.isRunCompleted()).thenReturn(true);
+        when(runTestContext.isRunInProgress()).thenReturn(false);
 
         runContextStoryReporter.successful(STEP);
 
@@ -142,6 +144,7 @@ class RunContextStoryReporterTests
     @Test
     void testFailed()
     {
+        when(runTestContext.isRunInProgress()).thenReturn(true);
         String step = "failed";
         Throwable cause = mock(Throwable.class);
         RunningStory runningStory = mockGetRunningStory();
@@ -154,7 +157,7 @@ class RunContextStoryReporterTests
     @Test
     void shouldNotRemoteRunningStepOnFailIfRunIsCompleted()
     {
-        when(runTestContext.isRunCompleted()).thenReturn(true);
+        when(runTestContext.isRunInProgress()).thenReturn(false);
         Throwable cause = mock(Throwable.class);
 
         runContextStoryReporter.failed(STEP, cause);
@@ -246,6 +249,18 @@ class RunContextStoryReporterTests
         runContextStoryReporter.beforeStoriesSteps(stage);
 
         verify(runTestContext, times(times)).completeRun();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "AFTER,  0",
+        "BEFORE, 1"
+    })
+    void shouldManageRunStartOnAfterStoriesSteps(Stage stage, int times)
+    {
+        runContextStoryReporter.afterStoriesSteps(stage);
+
+        verify(runTestContext, times(times)).startRun();
     }
 
     private RunningStory mockGetRunningStory()
