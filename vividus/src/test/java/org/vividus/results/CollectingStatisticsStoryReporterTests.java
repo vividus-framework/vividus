@@ -175,6 +175,7 @@ class CollectingStatisticsStoryReporterTests
     void shouldRecordStepStatus(Status expectedStatus, BiConsumer<StoryReporter, String> test,
             @TempDir Path tempDirectory)
     {
+        when(runContext.isRunInProgress()).thenReturn(true);
         initReporter(false, tempDirectory.toFile());
 
         reporter.beforeStory(story, false);
@@ -266,6 +267,7 @@ class CollectingStatisticsStoryReporterTests
     @Test
     void shouldChangeKnownIssuesOnlyStatusToPendingStatus(@TempDir Path tempDirectory)
     {
+        when(runContext.isRunInProgress()).thenReturn(true);
         initReporter(false, tempDirectory.toFile());
 
         reporter.beforeStory(story, false);
@@ -327,7 +329,7 @@ class CollectingStatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, output);
-        verify(runContext, times(34)).isRunCompleted();
+        verify(runContext, times(34)).isRunInProgress();
         verifyNoMoreInteractions(runContext);
     }
 
@@ -344,13 +346,14 @@ class CollectingStatisticsStoryReporterTests
             () -> assertEquals(17, output.get(NodeType.STEP).getTotal()),
             () -> assertEquals(5, output.get(NodeType.GIVEN_STORY).getTotal())
         );
-        verify(runContext, times(34)).isRunCompleted();
+        verify(runContext, times(34)).isRunInProgress();
         verifyNoMoreInteractions(runContext);
     }
 
     @Test
     void shouldLogMessageInCaseOfIOException(@TempDir File tempDirectory)
     {
+        when(runContext.isRunInProgress()).thenReturn(true);
         initReporter(false, tempDirectory);
         try (MockedStatic<Files> files = mockStatic(Files.class))
         {
@@ -362,7 +365,7 @@ class CollectingStatisticsStoryReporterTests
             assertEquals(String.format("Unable to write statistics.json into folder: %s", tempDirectory),
                     event.getFormattedMessage());
             assertThat(event.getThrowable().get(), instanceOf(IOException.class));
-            verify(runContext, times(34)).isRunCompleted();
+            verify(runContext, times(34)).isRunInProgress();
             verifyNoMoreInteractions(runContext);
         }
     }
@@ -375,7 +378,7 @@ class CollectingStatisticsStoryReporterTests
     @SuppressWarnings({ "MethodLength", "PMD.ExcessiveMethodLength", "PMD.NcssCount" })
     private void reporterFlowProvider()
     {
-        when(runContext.isRunCompleted()).thenReturn(false);
+        when(runContext.isRunInProgress()).thenReturn(true);
 
         reporter.beforeStoriesSteps(Stage.BEFORE);
         reporter.afterStoriesSteps(Stage.BEFORE);
@@ -539,6 +542,7 @@ class CollectingStatisticsStoryReporterTests
     @Test
     void beforeAndAfterStep(@TempDir Path tempDirectory) throws IOException
     {
+        when(runContext.isRunInProgress()).thenReturn(true);
         initReporter(false, tempDirectory.toFile());
         reporter.beforeStoriesSteps(Stage.BEFORE);
         reporter.afterStoriesSteps(Stage.BEFORE);
@@ -598,13 +602,14 @@ class CollectingStatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, statistic);
-        verify(runContext, times(12)).isRunCompleted();
+        verify(runContext, times(12)).isRunInProgress();
         verifyNoMoreInteractions(runContext);
     }
 
     @Test
     void beforeAndAfterScenario(@TempDir Path tempDirectory) throws IOException
     {
+        when(runContext.isRunInProgress()).thenReturn(true);
         initReporter(false, tempDirectory.toFile());
         reporter.beforeStoriesSteps(Stage.BEFORE);
         reporter.afterStoriesSteps(Stage.BEFORE);
@@ -661,13 +666,14 @@ class CollectingStatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, statistic);
-        verify(runContext, times(8)).isRunCompleted();
+        verify(runContext, times(8)).isRunInProgress();
         verifyNoMoreInteractions(runContext);
     }
 
     @Test
     void beforeAndAfterStory(@TempDir Path tempDirectory) throws IOException
     {
+        when(runContext.isRunInProgress()).thenReturn(true);
         initReporter(false, tempDirectory.toFile());
         reporter.beforeStoriesSteps(Stage.BEFORE);
         reporter.afterStoriesSteps(Stage.BEFORE);
@@ -725,7 +731,7 @@ class CollectingStatisticsStoryReporterTests
                 + "  }\n"
                 + "}";
         assertEquals(expected, statistic);
-        verify(runContext, times(8)).isRunCompleted();
+        verify(runContext, times(8)).isRunInProgress();
         verifyNoMoreInteractions(runContext);
     }
 
@@ -733,6 +739,7 @@ class CollectingStatisticsStoryReporterTests
     @SuppressWarnings("PMD.NcssCount")
     void shouldProvideRecordedFailures()
     {
+        when(runContext.isRunInProgress()).thenReturn(true);
         initReporter(true, null);
         reporter.beforeStory(story, false);
         assertTrue(reporter.getFailures().isPresent());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ public class RunTestContext implements RunContext
     // must be initialized for jbehave-junit-runner
     private Optional<String> runningBatchKey = Optional.of("batch-1");
     private boolean dryRun;
-    private boolean runCompleted;
+    private RunState runState = RunState.NOT_STARTED;
 
     public void putRunningStory(RunningStory story, boolean givenStory)
     {
@@ -119,19 +119,32 @@ public class RunTestContext implements RunContext
     }
 
     @Override
-    public boolean isRunCompleted()
+    public void startRun()
     {
-        return runCompleted;
+        this.runState = RunState.RUNNING;
+    }
+
+    @Override
+    public boolean isRunInProgress()
+    {
+        return this.runState == RunState.RUNNING;
     }
 
     @Override
     public void completeRun()
     {
-        this.runCompleted = true;
+        this.runState = RunState.COMPLETED;
     }
 
     public void setTestContext(TestContext testContext)
     {
         this.testContext = testContext;
+    }
+
+    private enum RunState
+    {
+        NOT_STARTED,
+        RUNNING,
+        COMPLETED;
     }
 }
