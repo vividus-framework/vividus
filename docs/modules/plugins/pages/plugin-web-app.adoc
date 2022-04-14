@@ -848,3 +848,24 @@ When I find = `5` elements by `By.xpath(//script):a` and for each element do
 |When I set 'type' attribute value of the context element to the 'scenario' variable 'type'|
 |Then `${type}` is equal to `text/javascript`                                              |
 ----
+
+=== Browser Steps
+==== Set the browser command line arguments
+
+Allows to set command line arguments for browsers. https://peter.sh/experiments/chromium-command-line-switches/[List of supported commands for Chrome browser]
+
+IMPORTANT: Step should be used before start ot the browser session
+
+[source,gherkin]
+----
+When I set browser command line arguments to `$argsString`
+----
+
+* `$argsString` - Command line arguments.
+
+.Set the browser to use the mocked camera stream
+[source,gherkin]
+----
+When I set browser command line arguments to `--use-fake-ui-for-media-stream --use-file-for-fake-video-capture=${videoStorage}/${video1}.y4m --use-fake-device-for-media-stream`
+Given I am on the main application page
+----

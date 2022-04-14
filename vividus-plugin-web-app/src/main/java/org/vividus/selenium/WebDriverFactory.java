@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.proxy.IProxy;
+import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManager;
+import org.vividus.selenium.manager.WebDriverManagerParameter;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
 
@@ -38,16 +40,19 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
 
     private final TimeoutConfigurer timeoutConfigurer;
     private final IProxy proxy;
+    private final IWebDriverManagerContext webDriverManagerContext;
     private WebDriverType webDriverType;
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
 
     public WebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
-            JsonUtils jsonUtils, TimeoutConfigurer timeoutConfigurer, IProxy proxy)
+            JsonUtils jsonUtils, TimeoutConfigurer timeoutConfigurer, IProxy proxy,
+            IWebDriverManagerContext webDriverManagerContext)
     {
         super(remoteWebDriverFactory, propertyParser, jsonUtils);
         this.timeoutConfigurer = timeoutConfigurer;
         this.proxy = proxy;
+        this.webDriverManagerContext = webDriverManagerContext;
     }
 
     @Override
@@ -111,7 +116,7 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
 
     private WebDriverConfiguration getWebDriverConfiguration(WebDriverType webDriverType, boolean localRun)
     {
-        return configurations.computeIfAbsent(webDriverType, type ->
+        WebDriverConfiguration defaultConfiguration = configurations.computeIfAbsent(webDriverType, type ->
         {
             WebDriverConfiguration configuration = createWebDriverConfiguration(type);
             if (localRun)
@@ -120,6 +125,19 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
             }
             return configuration;
         });
+        String overrideCommandLineArguments = webDriverManagerContext.getParameter(
+                WebDriverManagerParameter.COMMAND_LINE_ARGUMENTS);
+        if (overrideCommandLineArguments != null)
+        {
+            checkCommandLineArgumentsSupported(webDriverType);
+            WebDriverConfiguration configuration = new WebDriverConfiguration();
+            configuration.setBinaryPath(defaultConfiguration.getBinaryPath());
+            configuration.setDriverExecutablePath(defaultConfiguration.getDriverExecutablePath());
+            configuration.setExperimentalOptions(defaultConfiguration.getExperimentalOptions());
+            configuration.setCommandLineArguments(splitCliArguments(Optional.of(overrideCommandLineArguments)));
+            return configuration;
+        }
+        return defaultConfiguration;
     }
 
     @SuppressWarnings("unchecked")
@@ -132,21 +150,34 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
         }
 
         Optional<String> commandLineArguments = getPropertyValue(COMMAND_LINE_ARGUMENTS, webDriverType);
-        if (commandLineArguments.isPresent() && !webDriverType.isCommandLineArgumentsSupported())
+        if (commandLineArguments.isPresent())
         {
-            throw new UnsupportedOperationException(
-                    "Configuring of command-line-arguments is not supported for " + webDriverType);
+            checkCommandLineArgumentsSupported(webDriverType);
         }
 
         WebDriverConfiguration configuration = new WebDriverConfiguration();
         configuration.setDriverExecutablePath(getPropertyValue("driver-executable-path", webDriverType));
         configuration.setBinaryPath(binaryPath);
-        configuration.setCommandLineArguments(
-                commandLineArguments.map(args -> StringUtils.split(args, ' ')).orElseGet(() -> new String[0]));
+        configuration.setCommandLineArguments(splitCliArguments(commandLineArguments));
         getPropertyValue("experimental-options", webDriverType)
                 .map(options -> getJsonUtils().toObject(options, Map.class))
                 .ifPresent(configuration::setExperimentalOptions);
         return configuration;
+    }
+
+    private static String[] splitCliArguments(Optional<String> commandLineArguments)
+    {
+        return commandLineArguments.map(args -> StringUtils.split(args, ' '))
+                .orElseGet(() -> new String[0]);
+    }
+
+    private void checkCommandLineArgumentsSupported(WebDriverType webDriverType)
+    {
+        if (!webDriverType.isCommandLineArgumentsSupported())
+        {
+            throw new UnsupportedOperationException(
+                    "Configuring of command-line-arguments is not supported for " + webDriverType);
+        }
     }
 
     private Optional<String> getPropertyValue(String propertyKey, WebDriverType webDriverType)
