@@ -37,7 +37,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -67,7 +66,7 @@ import org.vividus.context.ReportControlContext;
 import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
-import org.vividus.report.allure.model.Status;
+import org.vividus.results.model.ExitCode;
 import org.vividus.results.model.Failure;
 import org.vividus.results.model.NodeType;
 import org.vividus.softassert.event.AssertionFailedEvent;
@@ -119,7 +118,7 @@ class CollectingStatisticsStoryReporterTests
         initReporter(false, tempDirectory.toFile());
 
         reporter.scenarioExcluded(null, null);
-        assertEquals(Optional.of(Status.SKIPPED), reporter.getRunStatus());
+        assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
         verify(nextStoryReporter).scenarioExcluded(null, null);
     }
 
@@ -132,23 +131,23 @@ class CollectingStatisticsStoryReporterTests
         var ioException = new IOException();
 
         return Stream.of(
-                arguments(Status.PASSED, (BiConsumer<StoryReporter, String>) StoryReporter::successful),
-                arguments(Status.SKIPPED, (BiConsumer<StoryReporter, String>) StoryReporter::ignorable),
-                arguments(Status.SKIPPED, (BiConsumer<StoryReporter, String>) StoryReporter::notPerformed),
-                arguments(Status.KNOWN_ISSUES_ONLY, (BiConsumer<StoryReporter, String>)
+                arguments(ExitCode.PASSED, (BiConsumer<StoryReporter, String>) StoryReporter::successful),
+                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>) StoryReporter::ignorable),
+                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>) StoryReporter::notPerformed),
+                arguments(ExitCode.KNOWN_ISSUES, (BiConsumer<StoryReporter, String>)
                         (reporter, step) -> reporter.failed(step, knownIssueError)
                 ),
-                arguments(Status.PENDING, (BiConsumer<StoryReporter, String>) StoryReporter::pending),
-                arguments(Status.FAILED, (BiConsumer<StoryReporter, String>)
+                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>) StoryReporter::pending),
+                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>)
                         (reporter, step) -> reporter.failed(step, potentiallyKnownIssueError)
                 ),
-                arguments(Status.FAILED, (BiConsumer<StoryReporter, String>)
+                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>)
                         (reporter, step) -> reporter.failed(step, assertionError)
                 ),
-                arguments(Status.FAILED, (BiConsumer<StoryReporter, String>)
+                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>)
                         (reporter, step) -> reporter.failed(step, verificationError)
                 ),
-                arguments(Status.BROKEN, (BiConsumer<StoryReporter, String>)
+                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>)
                         (reporter, step) -> reporter.failed(step, ioException)
                 )
         );
@@ -172,7 +171,7 @@ class CollectingStatisticsStoryReporterTests
 
     @ParameterizedTest
     @MethodSource("stepTypes")
-    void shouldRecordStepStatus(Status expectedStatus, BiConsumer<StoryReporter, String> test,
+    void shouldRecordStepStatus(ExitCode expectedStatus, BiConsumer<StoryReporter, String> test,
             @TempDir Path tempDirectory)
     {
         when(runContext.isRunInProgress()).thenReturn(true);
@@ -185,7 +184,7 @@ class CollectingStatisticsStoryReporterTests
         reporter.afterScenario(null);
         reporter.afterStory(false);
 
-        assertEquals(Optional.of(expectedStatus), reporter.getRunStatus());
+        assertEquals(expectedStatus, reporter.calculateExitCode());
 
         var ordered = inOrder(nextStoryReporter);
         ordered.verify(nextStoryReporter).beforeStory(story, false);
@@ -208,7 +207,7 @@ class CollectingStatisticsStoryReporterTests
         reporter.beforeStep(STEP);
         reporter.successful(STEP_AS_STRING);
         reporter.afterStoriesSteps(Stage.BEFORE);
-        assertEquals(Optional.empty(), reporter.getRunStatus());
+        assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
         var ordered = inOrder(nextStoryReporter);
         ordered.verify(nextStoryReporter).beforeStoriesSteps(Stage.BEFORE);
         ordered.verify(nextStoryReporter).beforeStep(STEP);
@@ -233,7 +232,7 @@ class CollectingStatisticsStoryReporterTests
         reporter.afterScenario(null);
         reporter.afterStory(false);
 
-        assertEquals(Optional.of(Status.PASSED), reporter.getRunStatus());
+        assertEquals(ExitCode.PASSED, reporter.calculateExitCode());
         var ordered = inOrder(nextStoryReporter);
         ordered.verify(nextStoryReporter).beforeStoriesSteps(Stage.AFTER);
         ordered.verify(nextStoryReporter).afterStoriesSteps(Stage.AFTER);
@@ -253,15 +252,15 @@ class CollectingStatisticsStoryReporterTests
         reporter.beforeScenario(scenario);
         reporter.beforeStep(STEP);
         reporter.successful(STEP_AS_STRING);
-        assertEquals(Optional.of(Status.PASSED), reporter.getRunStatus());
+        assertEquals(ExitCode.PASSED, reporter.calculateExitCode());
         reporter.beforeStep(STEP);
         reporter.failed(STEP_AS_STRING, null);
-        assertEquals(Optional.of(Status.BROKEN), reporter.getRunStatus());
+        assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
         reporter.beforeStep(STEP);
         reporter.successful(STEP_AS_STRING);
         reporter.afterScenario(null);
         reporter.afterStory(false);
-        assertEquals(Optional.of(Status.BROKEN), reporter.getRunStatus());
+        assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
     }
 
     @Test
@@ -275,12 +274,12 @@ class CollectingStatisticsStoryReporterTests
         reporter.beforeStep(STEP);
         var throwable = createKnownIssueError(false);
         reporter.failed(STEP_AS_STRING, throwable);
-        assertEquals(Optional.of(Status.KNOWN_ISSUES_ONLY), reporter.getRunStatus());
+        assertEquals(ExitCode.KNOWN_ISSUES, reporter.calculateExitCode());
         reporter.beforeStep(STEP);
         reporter.pending(STEP_AS_STRING);
         reporter.afterScenario(null);
         reporter.afterStory(false);
-        assertEquals(Optional.of(Status.PENDING), reporter.getRunStatus());
+        assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
     }
 
     @Test
@@ -390,9 +389,9 @@ class CollectingStatisticsStoryReporterTests
         reporter.beforeStory(givenStory, true);
         reporter.beforeScenario(scenario);
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
-        assertEquals(Optional.of(Status.PASSED), reporter.getRunStatus());
+        assertEquals(ExitCode.PASSED, reporter.calculateExitCode());
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
-        assertEquals(Optional.of(Status.PASSED), reporter.getRunStatus());
+        assertEquals(ExitCode.PASSED, reporter.calculateExitCode());
         reporter.afterScenario(null);
         reporter.afterStory(true);
 
@@ -401,13 +400,13 @@ class CollectingStatisticsStoryReporterTests
         reporter.beforeScenario(scenario);
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
         reportStep(reporter, () -> reporter.pending(STEP_AS_STRING));
-        assertEquals(Optional.of(Status.PENDING), reporter.getRunStatus());
+        assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
         reporter.afterScenario(null);
         reporter.afterStory(true);
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
-        assertEquals(Optional.of(Status.PENDING), reporter.getRunStatus());
+        assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
-        assertEquals(Optional.of(Status.PENDING), reporter.getRunStatus());
+        assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
         reporter.afterScenario(null);
 
         reporter.afterStory(true);

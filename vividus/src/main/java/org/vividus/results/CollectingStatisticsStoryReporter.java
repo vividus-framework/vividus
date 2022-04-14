@@ -46,6 +46,7 @@ import org.vividus.AbstractReportControlStoryReporter;
 import org.vividus.context.ReportControlContext;
 import org.vividus.context.RunContext;
 import org.vividus.report.allure.model.Status;
+import org.vividus.results.model.ExitCode;
 import org.vividus.results.model.Failure;
 import org.vividus.results.model.Node;
 import org.vividus.results.model.NodeContext;
@@ -104,9 +105,20 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
     }
 
     @Override
-    public Optional<Status> getRunStatus()
+    public ExitCode calculateExitCode()
     {
-        return status.get();
+        return status.get().map(s ->
+        {
+            switch (s)
+            {
+                case PASSED:
+                    return ExitCode.PASSED;
+                case KNOWN_ISSUES_ONLY:
+                    return ExitCode.KNOWN_ISSUES;
+                default:
+                    return ExitCode.FAILED;
+            }
+        }).orElse(ExitCode.FAILED);
     }
 
     @Subscribe
