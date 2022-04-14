@@ -16,7 +16,6 @@
 
 package org.vividus.runner;
 
-import java.util.Optional;
 import java.util.Properties;
 
 import org.jbehave.core.configuration.Configuration;
@@ -32,16 +31,11 @@ import org.slf4j.LoggerFactory;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 import org.vividus.log.TestInfoLogger;
-import org.vividus.report.allure.model.Status;
 import org.vividus.results.ResultsProvider;
+import org.vividus.results.model.ExitCode;
 
 public abstract class AbstractTestRunner extends JUnitStories
 {
-    private static final int RUN_PASSED_EXIT_CODE = 0;
-    private static final int RUN_KNOWN_ISSUES_EXIT_CODE = 1;
-    private static final int RUN_FAILED_EXIT_CODE = 2;
-    private static final int ERROR_EXIT_CODE = 3;
-
     private static Class<?> runnerClass;
 
     protected AbstractTestRunner()
@@ -73,7 +67,7 @@ public abstract class AbstractTestRunner extends JUnitStories
     {
         Runner runner = new JUnit4(runnerClass);
         Result result = new JUnitCore().run(runner);
-        int exitCode;
+        ExitCode exitCode;
         if (result.getFailureCount() > 0)
         {
             Logger logger = LoggerFactory.getLogger(runnerClass);
@@ -82,26 +76,12 @@ public abstract class AbstractTestRunner extends JUnitStories
                 logger.error("Failure: {}", f);
                 logger.atError().addArgument(f::getTrace).log("{}");
             });
-            exitCode = ERROR_EXIT_CODE;
+            exitCode = ExitCode.ERROR;
         }
         else
         {
-            exitCode = calculateExitCode(BeanFactory.getBean(ResultsProvider.class).getRunStatus());
+            exitCode = BeanFactory.getBean(ResultsProvider.class).calculateExitCode();
         }
-        System.exit(exitCode);
-    }
-
-    private static int calculateExitCode(Optional<Status> status)
-    {
-        if (status.isEmpty())
-        {
-            return RUN_FAILED_EXIT_CODE;
-        }
-        switch (status.get())
-        {
-            case PASSED:            return RUN_PASSED_EXIT_CODE;
-            case KNOWN_ISSUES_ONLY: return RUN_KNOWN_ISSUES_EXIT_CODE;
-            default:                return RUN_FAILED_EXIT_CODE;
-        }
+        System.exit(exitCode.getExitCode());
     }
 }

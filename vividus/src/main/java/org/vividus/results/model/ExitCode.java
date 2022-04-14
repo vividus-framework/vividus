@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package org.vividus.results;
+package org.vividus.results.model;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import org.vividus.results.model.ExitCode;
-import org.vividus.results.model.Failure;
-import org.vividus.results.model.NodeType;
-import org.vividus.results.model.Statistic;
-
-public interface ResultsProvider
+public enum ExitCode
 {
-    ExitCode calculateExitCode();
+    PASSED(0),
+    KNOWN_ISSUES(1),
+    FAILED(2),
+    ERROR(3);
 
-    Map<NodeType, Statistic> getStatistics();
+    private final int exitCode;
 
-    Optional<List<Failure>> getFailures();
+    ExitCode(int exitCode)
+    {
+        this.exitCode = exitCode;
+    }
+
+    public int getExitCode()
+    {
+        return exitCode;
+    }
 }
