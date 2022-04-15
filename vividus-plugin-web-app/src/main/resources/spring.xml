@@ -240,6 +240,8 @@
 
     <bean id="actionSteps" class="org.vividus.steps.ui.web.ActionSteps" />
 
+    <bean id="browserSteps" class="org.vividus.steps.ui.web.BrowserConfigurationSteps" />
+
     <bean id="webUiVividusSetupSteps" class="org.vividus.steps.WebUiVividusSetupSteps">
         <property name="windowsStrategy" value="${selenium.windows-strategy}" />
     </bean>
@@ -333,6 +335,7 @@
         <idref bean="scrollSteps" />
         <idref bean="performanceSteps" />
         <idref bean="windowSteps" />
+        <idref bean="browserSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebUi" key-type="java.lang.Class">

@@ -923,3 +923,37 @@ When I find = `5` elements by `By.xpath(//script):a` and for each element do
 |When I set 'type' attribute value of the context element to the 'scenario' variable 'type'|
 |Then `${type}` is equal to `text/javascript`                                              |
 ----
+
+=== Browser Configuration Steps
+==== Set the browser command line arguments
+
+Allows to set command line arguments for browsers.
+This step works similar to the property
+```properties
+web.driver.<browser-name>.command-line-arguments
+```
+In case both property and step are used - arguments from property will be ignored.
+Step will take effect for all new browser sessions created in the current story. It will not affect the current sessions.
+
+List of supported command line arguments for popular browsers:
+. https://peter.sh/experiments/chromium-command-line-switches/[Chrome]
+. https://www-archive.mozilla.org/docs/command-line-args[Firefox]
+. https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)[Internet Explorer]
+
+Not supported browsers:
+. Safari
+. Edge
+
+[source,gherkin]
+----
+When I set browser command line arguments to `$argsString`
+----
+
+* `$argsString` - Sequence of command line arguments, separated by space.
+
+.Set the browser to use the mocked camera stream
+[source,gherkin]
+----
+When I set browser command line arguments to `--use-fake-ui-for-media-stream --use-file-for-fake-video-capture=${videoStorage}/${video1}.y4m --use-fake-device-for-media-stream`
+Given I am on the main application page
+----
