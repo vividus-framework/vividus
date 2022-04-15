@@ -90,6 +90,7 @@ class WebDriverFactoryTests
     private static final String BINARY_PATH_PROPERTY_FORMAT = "web.driver.%s.binary-path";
     private static final String COMMAND_LINE_ARGUMENTS_PROPERTY_FORMAT = "web.driver.%s.command-line-arguments";
     private static final String EXPERIMENTAL_OPTIONS_PROPERTY_FORMAT = "web.driver.%s.experimental-options";
+    private static final String CLI_ARGS_NOT_SUPPORTED = "Configuring of command-line-arguments is not supported for ";
     private static final URI URL = URI.create("http://test");
     private static final String PATH = "testPath";
     private static final String ARG_1 = "--arg1";
@@ -229,7 +230,7 @@ class WebDriverFactoryTests
         webDriverFactory.setWebDriverType(webDriverType);
         lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
                 .thenReturn(null);
-        lenient().when(webDriverManagerContext.getParameter(WebDriverManagerParameter.COMMAND_LINE_ARGUMENTS))
+        when(webDriverManagerContext.getParameter(WebDriverManagerParameter.COMMAND_LINE_ARGUMENTS))
                 .thenReturn(ARGS);
         DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
         when(webDriverType.getWebDriver(eq(new DesiredCapabilities()),
@@ -240,6 +241,21 @@ class WebDriverFactoryTests
                 ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
         assertLogger();
+    }
+
+    @Test
+    void testGetWebDriverWithCommandLineArgumentsOverrideNotSupported()
+    {
+        WebDriverType webDriverType = mock(WebDriverType.class);
+        webDriverFactory.setWebDriverType(webDriverType);
+        when(webDriverType.isCommandLineArgumentsSupported()).thenReturn(Boolean.FALSE);
+        lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
+                .thenReturn(null);
+        when(webDriverManagerContext.getParameter(WebDriverManagerParameter.COMMAND_LINE_ARGUMENTS)).thenReturn(ARG_1);
+        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
+        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
+            () -> webDriverFactory.getWebDriver(desiredCapabilities));
+        assertEquals(CLI_ARGS_NOT_SUPPORTED + webDriverType, exception.getMessage());
     }
 
     @Test
@@ -292,8 +308,7 @@ class WebDriverFactoryTests
         DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
             () -> webDriverFactory.getWebDriver(desiredCapabilities));
-        assertEquals("Configuring of command-line-arguments is not supported for " + webDriverType,
-                exception.getMessage());
+        assertEquals(CLI_ARGS_NOT_SUPPORTED + webDriverType, exception.getMessage());
     }
 
     @Test

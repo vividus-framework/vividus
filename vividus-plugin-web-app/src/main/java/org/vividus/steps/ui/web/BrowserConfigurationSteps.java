@@ -20,11 +20,11 @@ import org.jbehave.core.annotations.When;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 
-public class BrowserSteps
+public class BrowserConfigurationSteps
 {
     private final IWebDriverManagerContext webDriverManagerContext;
 
-    public BrowserSteps(IWebDriverManagerContext webDriverManagerContext)
+    public BrowserConfigurationSteps(IWebDriverManagerContext webDriverManagerContext)
     {
         this.webDriverManagerContext = webDriverManagerContext;
     }
@@ -37,6 +37,10 @@ public class BrowserSteps
      * </code>
      * @param argsString Command line arguments
      * @see <a href="https://peter.sh/experiments/chromium-command-line-switches/"><i>Chrome command line arguments
+     * </i></a>
+     * @see <a href="https://www-archive.mozilla.org/docs/command-line-args"><i>Firefox command line arguments
+     * </i></a>
+     * @see <a href="https://textslashplain.com/2022/01/05/edge-command-line-arguments/"><i>Edge command line arguments
      * </i></a>
      */
     @When("I set browser command line arguments to `$argsString`")

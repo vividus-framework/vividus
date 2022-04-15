@@ -22,8 +22,8 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 public enum WebDriverManagerParameter
 {
-    COMMAND_LINE_ARGUMENTS("commandLineArguments", null),
     DESIRED_CAPABILITIES("desiredCapabilities", DesiredCapabilities::new),
+    COMMAND_LINE_ARGUMENTS("commandLineArguments", null),
     SCREEN_SIZE("screenSize", null);
 
     private final String contextKey;

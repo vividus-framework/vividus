@@ -849,19 +849,32 @@ When I find = `5` elements by `By.xpath(//script):a` and for each element do
 |Then `${type}` is equal to `text/javascript`                                              |
 ----
 
-=== Browser Steps
+=== Browser Configuration Steps
 ==== Set the browser command line arguments
 
-Allows to set command line arguments for browsers. https://peter.sh/experiments/chromium-command-line-switches/[List of supported commands for Chrome browser]
+Allows to set command line arguments for browsers.
+This step works similar to the property
+```properties
+web.driver.<browser-name>.command-line-arguments
+```
+In case both property and step are used - arguments from property will be ignored.
+Step should be used before start of the browser session in order to take effect.
 
-IMPORTANT: Step should be used before start ot the browser session
+List of supported command line arguments for popular browsers:
+. https://peter.sh/experiments/chromium-command-line-switches/[Chrome]
+. https://www-archive.mozilla.org/docs/command-line-args[Firefox]
+. https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)[Iexplore]
+
+Not supported browsers:
+. Safari
+. Edge
 
 [source,gherkin]
 ----
 When I set browser command line arguments to `$argsString`
 ----
 
-* `$argsString` - Command line arguments.
+* `$argsString` - Sequence of command line arguments, separated by ` `.
 
 .Set the browser to use the mocked camera stream
 [source,gherkin]
