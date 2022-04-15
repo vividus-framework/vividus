@@ -858,12 +858,12 @@ This step works similar to the property
 web.driver.<browser-name>.command-line-arguments
 ```
 In case both property and step are used - arguments from property will be ignored.
-Step should be used before start of the browser session in order to take effect.
+Step will take effect for all new browser sessions created in the current story. It will not affect the current sessions.
 
 List of supported command line arguments for popular browsers:
 . https://peter.sh/experiments/chromium-command-line-switches/[Chrome]
 . https://www-archive.mozilla.org/docs/command-line-args[Firefox]
-. https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)[Iexplore]
+. https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)[Internet Explorer]
 
 Not supported browsers:
 . Safari
@@ -874,7 +874,7 @@ Not supported browsers:
 When I set browser command line arguments to `$argsString`
 ----
 
-* `$argsString` - Sequence of command line arguments, separated by ` `.
+* `$argsString` - Sequence of command line arguments, separated by space.
 
 .Set the browser to use the mocked camera stream
 [source,gherkin]
