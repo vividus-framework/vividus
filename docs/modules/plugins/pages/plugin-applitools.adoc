@@ -33,7 +33,7 @@ NOTE: The expression parameters marked with *bold* are mandatory.
 |Allows users to execute tests but does not allow them to access the tests and test results, change data through the API, or make any changes to the tests. For more details see how to https://applitools.com/docs/topics/overview/obtain-api-key.html[obtain API keys].
 
 |[subs=+quotes]`*web.visual.applitools.read-api-key*`
-|`empty`
+|`<empty>`
 |Allows users to access tests and test results, but does not allow them to execute tests, change data through the API, or make any changes to the tests. For more details see how to https://applitools.com/docs/topics/overview/obtain-api-key.html[obtain API keys].
 
 |`web.visual.applitools.match-level`
@@ -41,7 +41,7 @@ NOTE: The expression parameters marked with *bold* are mandatory.
 |See https://applitools.com/docs/common/cmn-eyes-match-levels.html#Available[available match levels].
 
 |`web.visual.applitools.app-name`
-|`empty`
+|`<empty>`
 |The name of the application under test.
 
 |===

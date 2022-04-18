@@ -72,12 +72,14 @@ Then all resources by selector a are valid on:
 |Description
 
 |`bdd.transformer.sitemap.ignore-errors`
-|`true` / `false`
+a|`true`
+`false`
 |`false`
 |ignore sitemap parsing errors
 
 |`bdd.transformer.sitemap.filter-redirects`
-|`true` / `false`
+a|`true`
+`false`
 |`false`
 |defines whether urls that has redirect to the one that has already been included in the table are excluded from the table
 |===
@@ -121,7 +123,8 @@ Examples:
 |List of relative URLs, a seed URL is a URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
 
 |`transformer.headless.filter-redirects`
-|`true` / `false`
+a|`true`
+`false`
 |`false`
 |Defines whether urls that has redirect to the one that has already been included in the table are excluded from the table.
 
@@ -176,12 +179,14 @@ Examples:
 |Max number of outgoing links which are processed from a page.
 
 |`transformer.headless.respect-no-follow`
-|`true` / `false`
+a|`true`
+`false`
 |`false`
 |Whether to honor links with https://en.wikipedia.org/wiki/Nofollow[nofollow flag].
 
 |`transformer.headless.respect-no-index`
-|`true` / `false`
+a|`true`
+`false`
 |`false`
 |Whether to honor links with https://en.wikipedia.org/wiki/Noindex[noindex flag].
 
@@ -196,12 +201,14 @@ Examples:
 |Cookie policy as defined per https://hc.apache.org/httpcomponents-client-4.5.x/current/tutorial/html/statemgmt.html#d5e515[cookie specification].
 
 |`transformer.headless.allow-single-level-domain`
-|`true` / `false`
+a|`true`
+`false`
 |`false`
 |Whether to consider single level domains valid (e.g. http://localhost).
 
 |`transformer.headless.include-https-pages`
-|`true` / `false`
+a|`true`
+`false`
 |`true`
 |Whether to crawl https pages.
 

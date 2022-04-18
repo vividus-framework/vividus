@@ -40,17 +40,17 @@ NOTE: The properties marked with *bold* are mandatory.
 
 |[subs=+quotes]`*selenium.grid.host*`
 |hostname
-|empty
+|`<empty>`
 |https://wiki.saucelabs.com/display/DOCS/Data+Center+Endpoints[Sauce Labs OnDemand host] to be used to create a new session
 
 |[subs=+quotes]`*selenium.grid.username*`
 |username
-|empty
+|`<empty>`
 |https://docs.saucelabs.com/basics/data-center-endpoints/#authorization-credentials[Sauce Labs username]
 
 |[subs=+quotes]`*selenium.grid.password*`
 |password
-|empty
+|`<empty>`
 |https://docs.saucelabs.com/basics/data-center-endpoints/#authorization-credentials[Sauce Labs access key]
 
 |[subs=+quotes]`*saucelabs.data-center*`

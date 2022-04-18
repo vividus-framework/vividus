@@ -22,12 +22,12 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-visual', version: '{c
 
 |`ui.visual.ignored-elements`
 |xref:plugin-web-app.adoc#_locator[locators]
-|`empty`
+|`<empty>`
 |The comma-separated list of locators of elements to ignore element areas
 
 |`ui.visual.ignored-areas`
 |xref:plugin-web-app.adoc#_locator[locators]
-|`empty`
+|`<empty>`
 |The comma-separated list of locators of elements to ignore page areas
 
 |`ui.visual.baselines-folder`
@@ -38,11 +38,12 @@ For example, `ui.visual.baselines-folder=C:/Workspace/vividus-tests/src/main/res
 
 |`ui.visual.indexer`
 |scenario
-|`empty`
+|`<empty>`
 |Used to append scenario based index to a baseline name
 
 |`ui.visual.override-baselines`
-|`true` `false`
+a|`true`
+`false`
 |`false`
 |Used for overriding existing ones or creating not existing baselines during compare action
 
@@ -58,7 +59,7 @@ For example, `ui.visual.baselines-folder=C:/Workspace/vividus-tests/src/main/res
 
 |`ui.screenshot.debug-directory`
 |`string`
-|`false`
+|`<empty>`
 |The path to folder for saving debug screenshots. For example, `ui.screenshot.debug-directory=C:/temp/debug`
 
 |===

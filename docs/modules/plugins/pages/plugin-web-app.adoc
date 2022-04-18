@@ -99,7 +99,7 @@ include::partial$visibility-types.adoc[]
 
 === Filter types
 
-The filters are applied after elements search using of the locators specified above.
+The filters are applied after elements search using one of the locators specified above.
 The elements not matching the filter condition are sorted out without any notice.
 
 [cols="1,2,3", options="header"]
@@ -178,25 +178,25 @@ NOTE: The properties marked with *bold* are mandatory.
 include::partial$selenium-properties.adoc[]
 include::partial$proxy-properties.adoc[]
 
-|screenshot.on-failure.debug-modes
-|proxy
-|empty
+|`screenshot.on-failure.debug-modes`
+|`proxy`
+|`<empty>`
 |Provides possibility to attach screenshot for failed proxy steps
 
-|web.driver.<browser-name>.command-line-arguments
+|`web.driver.<browser-name>.command-line-arguments`
 |string with arguments
-|empty
-a|The command line arguments to use when starting browser.
+|`<empty>`
+a|The command line (CLI) arguments to use when starting browser.
 
-`<browser-name>` is one supported browsers:
+`<browser-name>` is one of the browsers supporting CLI arguments:
 
 * https://peter.sh/experiments/chromium-command-line-switches/[`CHROME`]
 * https://www-archive.mozilla.org/docs/command-line-args/[`FIREFOX`],
 * https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)?redirectedfrom=MSDN/[`IEXPLORE`].
 
-|web-application.sticky-header-size-percentage
+|`web-application.sticky-header-size-percentage`
 |header size as a viewport size percent
-|25
+|`25`
 |Before the click VIVIDUS scrolls element into the viewport, the property defines top edge indent in viewport percent for the scroll
 
 |===

@@ -45,12 +45,12 @@ NOTE: The properties marked with *bold* are mandatory.
 
 |[subs=+quotes]`*selenium.grid.username*`
 |username
-|empty
+|`<empty>`
 |https://www.browserstack.com/docs/iaam/security/manage-access-keys[BrowserStack username]
 
 |[subs=+quotes]`*selenium.grid.password*`
 |password
-|empty
+|`<empty>`
 |https://www.browserstack.com/docs/iaam/security/manage-access-keys[BrowserStack access key]
 
 |`browserstack.browserstack-local.enabled`

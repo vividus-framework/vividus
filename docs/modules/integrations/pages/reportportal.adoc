@@ -22,7 +22,8 @@ NOTE: The properties marked with bold are mandatory.
 |Description
 
 |*system.rp.enable*
-|`true`/`false`
+a|`true`
+`false`
 |`false`
 |Enables reporting to the ReportPortal
 

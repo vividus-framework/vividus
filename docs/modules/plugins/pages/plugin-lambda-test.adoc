@@ -35,12 +35,12 @@ NOTE: The properties marked with *bold* are mandatory.
 
 |[subs=+quotes]`*selenium.grid.username*`
 |username
-|empty
+|`<empty>`
 |LambdaTest username
 
 |[subs=+quotes]`*selenium.grid.password*`
 |password
-|empty
+|`<empty>`
 |LambdaTest access key
 
 |===
