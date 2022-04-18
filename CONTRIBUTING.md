@@ -9,6 +9,14 @@ Thank you for considering a contribution to Vividus! This guide explains how to:
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By participating in this project you agree to abide by its terms.
 
+## VIVIDUS Contributor License Agreement
+
+We don't have a dedicated contributor license agreement (CLA), but please consider [GitHub's terms of service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service#6-contributions-under-repository-license):
+
+> Whenever you add Content to a repository containing notice of a license, you license that Content under the same terms, and you agree that you have the right to license that Content under those terms.
+
+VIVIDUS uses the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0), which you can also find [here](https://github.com/vividus-framework/vividus/blob/master/LICENSE) in this repository.
+
 ## Making Changes
 * Fork the repository on GitHub if you haven't done it before.
 * Create a topic branch from where you want to base your work (this is usually the `master` branch).
