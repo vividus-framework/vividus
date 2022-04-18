@@ -18,24 +18,20 @@ package org.vividus.analytics;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.matchesRegex;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import com.google.common.eventbus.EventBus;
 
-import org.jbehave.core.model.Scenario;
-import org.jbehave.core.model.Story;
-import org.jbehave.core.steps.StepCollector.Stage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,9 +45,12 @@ import org.vividus.analytics.model.AnalyticsEvent;
 import org.vividus.analytics.model.AnalyticsEventBatch;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
+import org.vividus.results.ResultsProvider;
+import org.vividus.results.model.ExecutableEntity;
+import org.vividus.results.model.Statistic;
 
 @ExtendWith(MockitoExtension.class)
-class AnalyticsStoryReporterTests
+class AnalyticsStepsTests
 {
     private static final String CUSTOM_DIMENSION5 = "cd5";
 
@@ -72,8 +71,9 @@ class AnalyticsStoryReporterTests
     private static final String SESSION_CONTROL = "sc";
 
     @Mock private EventBus eventBus;
+    @Mock private ResultsProvider resultsProvider;
     @Captor private ArgumentCaptor<AnalyticsEventBatch> analyticsEventBatchCaptor;
-    @InjectMocks private AnalyticsStoryReporter reporter;
+    @InjectMocks private AnalyticsSteps reporter;
 
     @BeforeEach
     void beforeEach()
@@ -91,7 +91,7 @@ class AnalyticsStoryReporterTests
     void shouldPostTestsStartBeforeTestsWhenNoModulesAvailable()
     {
         configureCommonProperties();
-        reporter.beforeStoriesSteps(Stage.BEFORE);
+        reporter.postBeforeStoriesAnalytics();
         verify(eventBus).post(analyticsEventBatchCaptor.capture());
         AnalyticsEventBatch batch = analyticsEventBatchCaptor.getValue();
         assertThat(batch.getEvents(), hasSize(1));
@@ -106,13 +106,6 @@ class AnalyticsStoryReporterTests
     }
 
     @Test
-    void shouldDoNothingOnBeforeStoriesAtAfterStage()
-    {
-        reporter.beforeStoriesSteps(Stage.AFTER);
-        verifyNoInteractions(eventBus);
-    }
-
-    @Test
     void shouldPostVividusVersionAndPluginsInformationAndStatistic()
     {
         configureCommonProperties();
@@ -121,15 +114,22 @@ class AnalyticsStoryReporterTests
         String plugin = "vividus-plugin-web-ui";
         String pluginVersion = "0.1.2";
         EnvironmentConfigurer.addProperty(PropertyCategory.VIVIDUS, plugin, pluginVersion);
-        reporter.beforeStoriesSteps(Stage.BEFORE);
-        Stream.generate(() -> "/tony_stark/projects/vividus")
-                .limit(9)
-                .map(Story::new)
-                .forEach(s -> reporter.beforeStory(s, false));
-        reporter.beforeStory(new Story("givenStory"), true);
-        Stream.generate(() -> 0).limit(40).forEach(v -> reporter.beforeStep(null));
-        Stream.generate(() -> 0).limit(20).forEach(v -> reporter.beforeScenario(mock(Scenario.class)));
-        reporter.afterStoriesSteps(Stage.AFTER);
+        reporter.postBeforeStoriesAnalytics();
+
+        Statistic storyStatistics = mock(Statistic.class);
+        when(storyStatistics.getTotal()).thenReturn(9L);
+        Statistic stepStatistics = mock(Statistic.class);
+        when(stepStatistics.getTotal()).thenReturn(40L);
+        Statistic scenarioStatistics = mock(Statistic.class);
+        when(scenarioStatistics.getTotal()).thenReturn(20L);
+        when(resultsProvider.getStatistics()).thenReturn(Map.of(
+            ExecutableEntity.STORY, storyStatistics,
+            ExecutableEntity.STEP, stepStatistics,
+            ExecutableEntity.SCENARIO, scenarioStatistics
+        ));
+        when(resultsProvider.getDuration()).thenReturn(Duration.ofSeconds(1));
+
+        reporter.postAfterStoriesAnalytics();
         verify(eventBus, times(2)).post(analyticsEventBatchCaptor.capture());
         List<AnalyticsEventBatch> batches = analyticsEventBatchCaptor.getAllValues();
         assertThat(batches, hasSize(2));
@@ -160,17 +160,10 @@ class AnalyticsStoryReporterTests
         assertAll(
             () -> assertEquals("9", payload2.get("cm1")),
             () -> assertEquals("40", payload2.get("cm2")),
-            () -> assertThat(payload2.get("cm3"), matchesRegex("\\d+")),
+            () -> assertEquals("1", payload2.get("cm3")),
             () -> assertEquals("20", payload2.get("cm4")),
             () -> assertEquals("end", payload2.get(SESSION_CONTROL)),
             () -> assertEquals("finishTests", payload2.get(EVENT_ACTION)));
-    }
-
-    @Test
-    void shouldDoNothingOnAfterStoriesAtBeforeStage()
-    {
-        reporter.afterStoriesSteps(Stage.BEFORE);
-        verifyNoInteractions(eventBus);
     }
 
     private AnalyticsEvent getAndRemove(List<AnalyticsEvent> events, String criteria)

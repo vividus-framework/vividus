@@ -23,14 +23,14 @@ import org.vividus.report.allure.model.Status;
 
 public class Node
 {
-    private final NodeType type;
+    private final ExecutableEntity type;
     private final Deque<Node> children = new LinkedList<>();
     private Status status;
     private boolean hasChildren;
 
     private Node parent;
 
-    public Node(NodeType type)
+    public Node(ExecutableEntity type)
     {
         this.type = type;
     }
@@ -62,7 +62,7 @@ public class Node
         child.parent = this;
     }
 
-    public NodeType getType()
+    public ExecutableEntity getType()
     {
         return type;
     }

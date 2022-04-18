@@ -14,6 +14,9 @@
         <property name="enabled" value="${analytics.enabled}" />
     </bean>
 
-    <bean id="analyticsStoryReporter" class="org.vividus.analytics.AnalyticsStoryReporter" />
+    <bean id="analyticsSteps" class="org.vividus.analytics.AnalyticsSteps" />
 
+    <util:list id="stepBeanNames-Analytics" value-type="java.lang.String">
+        <idref bean="analyticsSteps" />
+    </util:list>
 </beans>

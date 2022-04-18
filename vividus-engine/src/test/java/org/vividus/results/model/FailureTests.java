@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.model;
+package org.vividus.results.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -28,7 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.results.model.Failure;
+import org.vividus.model.RunningScenario;
+import org.vividus.model.RunningStory;
 
 @ExtendWith(MockitoExtension.class)
 class FailureTests

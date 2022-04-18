@@ -16,20 +16,28 @@
 
 package org.vividus.results;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.ExitCode;
 import org.vividus.results.model.Failure;
-import org.vividus.results.model.NodeType;
 import org.vividus.results.model.Statistic;
 
 public interface ResultsProvider
 {
     ExitCode calculateExitCode();
 
-    Map<NodeType, Statistic> getStatistics();
+    Map<ExecutableEntity, Statistic> getStatistics();
 
     Optional<List<Failure>> getFailures();
+
+    /**
+     * Duration of the test run excluding time taken by @BeforeStories and @AfterStories hooks.
+     *
+     * @return duration of the test run
+     */
+    Duration getDuration();
 }
