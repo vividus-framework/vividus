@@ -17,6 +17,7 @@
 package org.vividus.results;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -66,9 +67,9 @@ import org.vividus.context.ReportControlContext;
 import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
+import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.ExitCode;
 import org.vividus.results.model.Failure;
-import org.vividus.results.model.NodeType;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.softassert.exception.VerificationError;
 import org.vividus.softassert.issue.KnownIssueIdentifier;
@@ -221,6 +222,8 @@ class CollectingStatisticsStoryReporterTests
         initReporter(false, tempDirectory.toFile());
 
         reportControlContext.disableReporting();
+        reporter.beforeStoriesSteps(Stage.BEFORE);
+        reporter.afterStoriesSteps(Stage.BEFORE);
         reporter.beforeStoriesSteps(Stage.AFTER);
         reporter.afterStoriesSteps(Stage.AFTER);
 
@@ -340,13 +343,24 @@ class CollectingStatisticsStoryReporterTests
 
         var output = reporter.getStatistics();
         assertAll(
-            () -> assertEquals(1, output.get(NodeType.STORY).getTotal()),
-            () -> assertEquals(10, output.get(NodeType.SCENARIO).getTotal()),
-            () -> assertEquals(17, output.get(NodeType.STEP).getTotal()),
-            () -> assertEquals(5, output.get(NodeType.GIVEN_STORY).getTotal())
+            () -> assertEquals(1, output.get(ExecutableEntity.STORY).getTotal()),
+            () -> assertEquals(10, output.get(ExecutableEntity.SCENARIO).getTotal()),
+            () -> assertEquals(17, output.get(ExecutableEntity.STEP).getTotal()),
+            () -> assertEquals(5, output.get(ExecutableEntity.GIVEN_STORY).getTotal())
         );
         verify(runContext, times(34)).isRunInProgress();
         verifyNoMoreInteractions(runContext);
+    }
+
+    @Test
+    void shouldReturnDuration(@TempDir File tempDirectory)
+    {
+        initReporter(false, tempDirectory);
+        reporterFlowProvider();
+
+        var duration = reporter.getDuration();
+
+        assertThat(duration.toNanos(), greaterThan(0L));
     }
 
     @Test

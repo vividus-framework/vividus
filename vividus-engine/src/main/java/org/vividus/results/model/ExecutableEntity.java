@@ -16,7 +16,7 @@
 
 package org.vividus.results.model;
 
-public enum NodeType
+public enum ExecutableEntity
 {
     STORY,
     SCENARIO,

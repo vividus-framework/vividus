@@ -46,8 +46,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
 import org.vividus.results.ResultsProvider;
+import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Failure;
-import org.vividus.results.model.NodeType;
 import org.vividus.results.model.Statistic;
 import org.vividus.util.ResourceUtils;
 
@@ -128,9 +128,9 @@ class TestInfoLoggerTests
         statistic.incrementPassed();
         var statisticsProvider = mock(ResultsProvider.class);
         when(statisticsProvider.getStatistics()).thenReturn(
-                Map.of(NodeType.STORY, statistic,
-                       NodeType.SCENARIO, statistic,
-                       NodeType.STEP, statistic)
+                Map.of(ExecutableEntity.STORY, statistic,
+                       ExecutableEntity.SCENARIO, statistic,
+                       ExecutableEntity.STEP, statistic)
         );
         when(statisticsProvider.getFailures()).thenReturn(failures);
         new TestInfoLogger(statisticsProvider).logTestExecutionResults();

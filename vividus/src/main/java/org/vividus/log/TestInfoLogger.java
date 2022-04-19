@@ -33,8 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.results.ResultsProvider;
+import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Failure;
-import org.vividus.results.model.NodeType;
 import org.vividus.results.model.Statistic;
 import org.vividus.util.ResourceUtils;
 
@@ -133,10 +133,10 @@ public final class TestInfoLogger
 
     private void logExecutionStatistics(Formatter message)
     {
-        Map<NodeType, Statistic> statistics = resultsProvider.getStatistics();
-        Statistic story = statistics.get(NodeType.STORY);
-        Statistic scenario = statistics.get(NodeType.SCENARIO);
-        Statistic step = statistics.get(NodeType.STEP);
+        Map<ExecutableEntity, Statistic> statistics = resultsProvider.getStatistics();
+        Statistic story = statistics.get(ExecutableEntity.STORY);
+        Statistic scenario = statistics.get(ExecutableEntity.SCENARIO);
+        Statistic step = statistics.get(ExecutableEntity.STEP);
         String row = "%n   %-12s %6s %10s %8s";
         message.format("%n Execution statistics:");
         String rowsSeparator = "%n   " + HYPHEN.repeat(HEADER_SIZE);

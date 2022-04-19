@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -32,6 +33,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.eventbus.Subscribe;
 
 import org.jbehave.core.model.Scenario;
@@ -46,11 +48,11 @@ import org.vividus.AbstractReportControlStoryReporter;
 import org.vividus.context.ReportControlContext;
 import org.vividus.context.RunContext;
 import org.vividus.report.allure.model.Status;
+import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.ExitCode;
 import org.vividus.results.model.Failure;
 import org.vividus.results.model.Node;
 import org.vividus.results.model.NodeContext;
-import org.vividus.results.model.NodeType;
 import org.vividus.results.model.Statistic;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.testcontext.TestContext;
@@ -63,8 +65,9 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
 
     private final AtomicReference<Optional<Status>> status = new AtomicReference<>(Optional.empty());
     private final AtomicBoolean recordStatus = new AtomicBoolean(true);
-    private final Map<NodeType, Statistic> statistics = new EnumMap<>(NodeType.class);
+    private final Map<ExecutableEntity, Statistic> statistics = new EnumMap<>(ExecutableEntity.class);
     private final Optional<List<Failure>> failures;
+    private final Stopwatch stopwatch;
 
     private final Map<Status, Consumer<Statistic>> mapper = Map.of(
             Status.PASSED, Statistic::incrementPassed,
@@ -88,12 +91,13 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
         this.testContext = testContext;
         this.jsonUtils = jsonUtils;
         this.statisticsFolder = statisticsFolder;
-        Stream.of(NodeType.values()).forEach(t -> statistics.put(t, new Statistic()));
+        Stream.of(ExecutableEntity.values()).forEach(t -> statistics.put(t, new Statistic()));
         failures = collectFailures ? Optional.of(new ArrayList<>()) : Optional.empty();
+        stopwatch = Stopwatch.createUnstarted();
     }
 
     @Override
-    public Map<NodeType, Statistic> getStatistics()
+    public Map<ExecutableEntity, Statistic> getStatistics()
     {
         return Map.copyOf(statistics);
     }
@@ -121,6 +125,12 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
         }).orElse(ExitCode.FAILED);
     }
 
+    @Override
+    public Duration getDuration()
+    {
+        return stopwatch.elapsed();
+    }
+
     @Subscribe
     public void onAssertionFailure(AssertionFailedEvent event)
     {
@@ -138,6 +148,11 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
     @Override
     public void beforeStoriesSteps(Stage stage)
     {
+        if (stage == Stage.AFTER)
+        {
+            stopwatch.stop();
+        }
+
         recordStatus.set(false);
         super.beforeStoriesSteps(stage);
     }
@@ -147,11 +162,11 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
     {
         if (givenStory)
         {
-            startNode(NodeType.GIVEN_STORY);
+            startNode(ExecutableEntity.GIVEN_STORY);
         }
         else
         {
-            testContext.put(NodeContext.class, new NodeContext(new Node(NodeType.STORY)));
+            testContext.put(NodeContext.class, new NodeContext(new Node(ExecutableEntity.STORY)));
         }
         super.beforeStory(story, givenStory);
     }
@@ -159,7 +174,7 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
     @Override
     public void beforeScenario(Scenario scenario)
     {
-        Node node = startNode(NodeType.SCENARIO);
+        Node node = startNode(ExecutableEntity.SCENARIO);
         if (!scenario.getSteps().isEmpty())
         {
             node.setHasChildren(true);
@@ -199,7 +214,7 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
         {
             if (step.getExecutionType() != StepExecutionType.COMMENT)
             {
-                startNode(NodeType.STEP);
+                startNode(ExecutableEntity.STEP);
             }
         });
         super.beforeStep(step);
@@ -258,6 +273,11 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
     {
         super.afterStoriesSteps(stage);
         recordStatus.set(true);
+
+        if (stage == Stage.BEFORE)
+        {
+            stopwatch.start();
+        }
         if (stage == Stage.AFTER)
         {
             String targetFileName = "statistics.json";
@@ -280,7 +300,7 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
         }
     }
 
-    private Node startNode(NodeType type)
+    private Node startNode(ExecutableEntity type)
     {
         Node node = new Node(type);
         context().addToTail(node);
@@ -316,7 +336,7 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
 
         // Skip statistics increment for "wrapping" steps: composite steps and steps executing nested steps are
         // considered as containers (no business logic), thus they are not counted in the overall statistics
-        if (currentNode.getType() != NodeType.STEP || currentNode.getChildren().isEmpty())
+        if (currentNode.getType() != ExecutableEntity.STEP || currentNode.getChildren().isEmpty())
         {
             Statistic targetStatisticsCategory = statistics.get(currentNode.getType());
             mapper.get(currentNode.getStatus()).accept(targetStatisticsCategory);
