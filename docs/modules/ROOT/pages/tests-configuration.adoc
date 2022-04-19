@@ -566,6 +566,50 @@ Here one could find description of general HTTP properties applied across all th
 
 |===
 
+== Externalized Configuration
+
+Most common use cases for externalized configuration are tests parametrization with properties passed from CI/CD pipeline, 
+passing of secrets into test run etc. The available approaches are listed below.
+
+. Declare an https://en.wikipedia.org/wiki/Environment_variable[environment variable] containing the desired property value and 
+then point the property to the declared environment variable:
++
+[source,shell]
+----
+export EXTERNAL_CONFIG_VALUE=value
+----
++
+[source,properties]
+----
+bdd.variables.global.some-key=${EXTERNAL_CONFIG_VALUE}
+----
++
+
+. Pass the property with its value into a test run using command line arguments prepending it with the `-Pvividus.` prefix. 
+The prefix only plays role during test start-up phase and cut off during the actual test run:
++
+[source,shell]
+----
+./gradlew runStories -Pvividus.bdd.variables.global.some-key-1=value1 -Pvividus.bdd.variables.global.some-key-2=value2
+----
++
+This approach can be used only when tests are run via Gradle.
+
+. Generate the `overriding.properties` file on-the-fly and put it into corresponding folder in a test project.
++
+The following script assumes that we are in the root of the test project folder.
++
+[source,shell]
+----
+cat > src/main/resources/overriding.properties << EOD
+bdd.variables.global.some-key-1=value1
+bdd.variables.global.some-key-2=value2
+EOD
+----
++
+This approach can be used only when tests are run via Gradle.
+
+
 == Sensitive Data Encryption
 
 VIVIDUS allows to store values of the properties in the encrypted form.
@@ -658,6 +702,8 @@ NOTE: `MYPAS_WORD` is a sample password and should be never used, own strong pas
 ----
 http.auth.password=ENC(WVnXhzG704KRZZFYL7hfpA4YoSm8V2F5eNXyr7CRYCichteHvNS3nB23zaI8CuLy)
 ----
+
+Please see <<_externalized_configuration>> to find the ways how encryptor password can be passed to the tests.
 
 == Steps aliases
 
