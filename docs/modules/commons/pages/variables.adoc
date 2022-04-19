@@ -2,7 +2,7 @@
 
 Variables are names used to store one or more values. Instead of repeating these
 values in multiple places in tests, the variable will keep the results of
-a calculation, step execution, expression evaluation, or any other user-defined data.
+a calculation, step execution, xref:ROOT:glossary.adoc#_expression[expression] evaluation, or any other user-defined data.
 
 VIVIDUS provides the following syntax to access variable value:
 [source,gherkin]
@@ -88,7 +88,11 @@ When I issue a HTTP POST request for a resource with the URL '${login-endpoint}'
 Then the response code is equal to '200'
 ----
 
-WARNING: It is possible to reuse VIVIDUS expressions using `global` variables. Please mind that expression will be executed lazily at the runtime and randomizing/generating expressions may produce different results per usage.
+[WARNING]
+It is possible to reuse repeatable xref:ROOT:glossary.adoc#_expression[VIVIDUS expressions]
+placeholders via `global` variables storage mechanism. Please mind that
+expression will be executed lazily at the runtime and randomizing/generating expressions
+may produce different results per usage.
 
 .Declaring global variable with expression `random-user`
 [source,properties]
