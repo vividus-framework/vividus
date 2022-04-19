@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,15 +66,14 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.vividus.report.allure.AllurePluginsProvider;
 import org.vividus.report.allure.AllureReportGenerator;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.util.property.PropertyMapper;
 
 import io.qameta.allure.Constants;
-import io.qameta.allure.Extension;
 import io.qameta.allure.ReportGenerator;
-import io.qameta.allure.behaviors.BehaviorsPlugin;
 import io.qameta.allure.core.Configuration;
 import io.qameta.allure.core.Plugin;
 import io.qameta.allure.duration.DurationTrendPlugin;
@@ -100,6 +99,7 @@ class AllureReportGeneratorTests
 
     @Mock private PropertyMapper propertyMapper;
     @Mock private ResourcePatternResolver resourcePatternResolver;
+    @Mock private AllurePluginsProvider allurePluginsProvider;
 
     private AllureReportGenerator allureReportGenerator;
 
@@ -110,7 +110,8 @@ class AllureReportGeneratorTests
         resultsDirectory = tempDir.resolve("allure-results");
         Files.createDirectories(resultsDirectory);
         System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
-        allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver);
+        allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver,
+                allurePluginsProvider);
     }
 
     @AfterEach
@@ -185,7 +186,8 @@ class AllureReportGeneratorTests
         File reportDirectory = tempDir.toFile();
         resultsDirectory = tempDir.resolve("allure-results-to-be-created");
         System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
-        allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver);
+        allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver,
+                allurePluginsProvider);
         testEnd(reportDirectory);
         assertThat(logger.getLoggingEvents(), is(List.of(
             buildCleanUpDirectoryLogEvent(RESULTS, resultsDirectory.toFile()),
@@ -216,6 +218,7 @@ class AllureReportGeneratorTests
     private void testEnd(File reportDirectory) throws IOException
     {
         Path historyDirectory = tempDir.resolve("history");
+        List<Plugin> plugins = List.of();
         Files.createDirectories(historyDirectory);
         allureReportGenerator.setHistoryDirectory(historyDirectory.toFile());
         allureReportGenerator.setReportDirectory(reportDirectory);
@@ -232,13 +235,7 @@ class AllureReportGeneratorTests
                             assertEquals(1, arguments.size());
                             Configuration config = (Configuration) arguments.get(0);
 
-                            List<Plugin> plugins = config.getPlugins();
-                            assertEquals(3, plugins.size());
-
-                            Extension extension = plugins.get(0).getExtensions().get(0);
-                            assertEquals(BehaviorsPlugin.class, extension.getClass());
-
-                            assertEquals(List.of(), plugins.get(1).getExtensions());
+                            assertEquals(plugins, config.getPlugins());
 
                             assertThat(config.getAggregators().stream().map(Object::getClass).collect(toList()),
                                     hasItems(
@@ -261,6 +258,7 @@ class AllureReportGeneratorTests
             prepareEnvironmentConfiguration();
             ExecutorInfo executorInfo = createExecutorInfo();
             when(propertyMapper.readValue("allure.executor.", ExecutorInfo.class)).thenReturn(executorInfo);
+            when(allurePluginsProvider.getPlugins()).thenReturn(plugins);
             allureReportGenerator.start();
             allureReportGenerator.end();
             fileUtils.verify(() -> FileUtils.copyInputStreamToFile(eq(folder.getInputStream()), any(File.class)),

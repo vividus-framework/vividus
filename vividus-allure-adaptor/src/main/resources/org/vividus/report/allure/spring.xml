@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="http://www.springframework.org/schema/beans"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+     http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"
     default-lazy-init="true">
+
+    <context:component-scan base-package="org.vividus.report.allure.plugin" />
 
     <bean class="org.vividus.report.allure.AllureRunContext" />
 
     <bean class="org.vividus.report.allure.adapter.VerificationErrorAdapter" />
+
+    <bean id="allurePluginsProvider" class="org.vividus.report.allure.AllurePluginsProvider" />
 
     <bean id="allureReportGenerator" class="org.vividus.report.allure.AllureReportGenerator"
         destroy-method="end">
