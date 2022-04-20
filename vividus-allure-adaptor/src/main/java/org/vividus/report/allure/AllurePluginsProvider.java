@@ -20,6 +20,9 @@ import java.util.List;
 
 import io.qameta.allure.core.Plugin;
 
+/**
+ * AllurePluginsProvider is a point for extension of allure plugin list on runtime.
+ */
 public class AllurePluginsProvider
 {
     private final List<Plugin> plugins;
