@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.openqa.selenium.WebElement;
@@ -78,6 +77,10 @@ public class GenericElementSteps
      * Verifies elements' located by locator state.
      * Where state one of: ENABLED/DISABLED, SELECTED/NOT_SELECTED, VISIBLE/NOT_VISIBLE
      * Step intended to verify strictly either number of elements and their state
+     * <p><i>In case when locator's visibility and checked state are equal (For an example ':i' and 'NOT_VISIBLE')
+     * exception will be thrown. In such cases please use step:
+     * 'Then number of elements found by `$locator` is $comparisonRule `$quantity`'.
+     * Contradictory visibility parameters (locator - ':i' and checked state - 'VISIBLE') are also not allowed.</i></p>
      * @param state          Desired state of an element
      * @param locator        Locator to locate element
      * @param comparisonRule The rule to match the quantity of elements. The supported rules:
@@ -95,9 +98,17 @@ public class GenericElementSteps
     public void assertElementsNumberInState(State state, Locator locator, ComparisonRule comparisonRule, int quantity)
     {
         Visibility visibility = locator.getSearchParameters().getVisibility();
-        Validate.isTrue(state != visibility.getState(),
-            "Locator visibility: %s and the state: %s to validate are the same."
-            + " This makes no sense. Please consider validation of elements size instead.", visibility, state);
+        if (visibility != Visibility.ALL && (state == State.VISIBLE || state == State.NOT_VISIBLE))
+        {
+            String errorMessage = format(
+                    state == visibility.getState()
+                            ? "Locator visibility: %s and the state: %s to validate are the same. This makes no sense. "
+                                    + "Please consider validation of elements size instead."
+                            : "Contradictory input parameters. Locator visibility: '%s', the state: '%s'.",
+                    visibility, state);
+            throw new IllegalArgumentException(errorMessage);
+        }
+
         String description = "Element is " + state;
         assertElementsNumber(locator, comparisonRule, quantity)
                 .forEach(e -> baseValidations.assertElementState(description, state, e));

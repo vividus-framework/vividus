@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.steps.ui;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -97,14 +98,35 @@ class GenericElementStepsTests
     @CsvSource({ "VISIBLE, VISIBLE", "INVISIBLE, NOT_VISIBLE" })
     void shouldThrowAnExceptionIfLocatorVisibilityAndStateToCheckAreTheSame(Visibility visibility, State state)
     {
-        SearchParameters searchParameter = new SearchParameters(VALUE, visibility);
-        Locator locator = new Locator(TestLocatorType.SEARCH, searchParameter);
-        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
+        Locator locator = getLocatorWithVisibility(visibility);
+        var illegalArgumentException = assertThrows(IllegalArgumentException.class,
             () -> elementSteps.assertElementsNumberInState(state, locator, ComparisonRule.EQUAL_TO, 0));
         assertEquals(String.format(
                 "Locator visibility: %s and the state: %s to validate are the same."
                         + " This makes no sense. Please consider validation of elements size instead.",
-                visibility, state), iae.getMessage());
+                visibility, state), illegalArgumentException.getMessage());
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "VISIBLE, NOT_VISIBLE",
+                 "INVISIBLE, VISIBLE" })
+    void shouldThrowAnExceptionIfLocatorVisibilityAndStateToCheckAreDifferent(Visibility visibility, State state)
+    {
+        Locator locator = getLocatorWithVisibility(visibility);
+        var illegalArgumentException = assertThrows(IllegalArgumentException.class,
+                () -> elementSteps.assertElementsNumberInState(state, locator, ComparisonRule.EQUAL_TO, 0));
+        assertEquals(String.format("Contradictory input parameters. Locator visibility: '%s', the state: '%s'.",
+                visibility, state), illegalArgumentException.getMessage());
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "NOT_VISIBLE",
+                 "VISIBLE" })
+    void shouldNotThrowAnExceptionIfLocatorVisibilityAll(State state)
+    {
+        Locator locator = getLocatorWithVisibility(Visibility.ALL);
+        elementSteps.assertElementsNumberInState(state, locator, ComparisonRule.EQUAL_TO, 0);
+        assertDoesNotThrow(() -> elementSteps.assertElementsNumberInState(state, locator, ComparisonRule.EQUAL_TO, 0));
     }
 
     @Test
@@ -172,5 +194,11 @@ class GenericElementStepsTests
         verify(softAssert).recordFailedAssertion(
                 "There are not enough elements with text to check sorting: " + List.of(A_LETTER));
         verifyNoMoreInteractions(baseValidations, softAssert, elementActions);
+    }
+
+    private static Locator getLocatorWithVisibility(Visibility visibility)
+    {
+        SearchParameters searchParameter = new SearchParameters(VALUE, visibility);
+        return new Locator(TestLocatorType.SEARCH, searchParameter);
     }
 }
