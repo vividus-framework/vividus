@@ -40,6 +40,58 @@ Generates a random integer value between the specified origin (`minInclusive`) a
 
 == String manipulations
 
+=== `replaceFirstByRegExp` / `replaceAllByRegExp`
+
+Replaces the first / every substring of the input that matches the regular
+expression with the given replacement string.
+
+[TIP]
+====
+Online tools like https://www.regexplanet.com/advanced/java/index.html[RegexPlanet] or
+https://regex101.com/[Regex101] can be used to test and debug regular expressions
+====
+
+[source, subs="+quotes"]
+----
+#{replaceFirstByRegExp(*$regularExpression*, *$replacement*, *$input*)}
+----
+[source, subs="+quotes"]
+----
+#{replaceAllByRegExp(*$regularExpression*, *$replacement*, *$input*)}
+----
+
+* *$regularExpression* - the regular expression to match substring(s)
+* *$replacement* - the replacement string, it may contain references to captured
+substrings, e.g. `$1` is a reference to the first group
+* *$input* - any string to be processed
+
+NOTE: The expression parameters containing commas must be surrounded with triple quotes: `"""`
+
+[cols="1, 2,1", options="header"]
+|===
+|Description |Expression |Result
+
+|Extract ID from the string
+|`#{replaceFirstByRegExp(product-(\d+), $1, product-86)}`
+|`86`
+
+|Extract ID and build new string with it
+|`#{replaceFirstByRegExp(/user/(\d+), author/$1, /user/21)}`
+|`author/21`
+
+|Extract password from the string with comma
+|`#{replaceFirstByRegExp(.*new password is (\d+), $1, """Updated, new password is qwe123""")}`
+|`qwe123`
+
+|Replace whitespaces with dashes
+|`#{replaceAllByRegExp(\s, -, convert spaces to dashes)}`
+|`convert-spaces-to-dashes`
+
+|Remove all numbers from the string
+|`#{replaceAllByRegExp(\d, """""", a1b2c3d)}`
+|`abcd`
+|===
+
 === `toLowerCase`
 
 Converts an input string to lower case.
@@ -464,42 +516,3 @@ When I initialize the scenario variable `json` with value `
 `
 Then JSON element value from `${json}` by JSON path `$.persons.nemo` is equal to `#{null}`
 ----
-
-== Regular expressions
-
-[source, subs="+quotes"]
-----
-#{replaceFirstByRegExp(<regularExpression>, <replacement>, <inputString>)}
-----
-[source, subs="+quotes"]
-----
-#{replaceAllByRegExp(<regularExpression>, <replacement>, <inputString>)}
-----
-
-These expressions replace the first substring/all substrings of input string that matches the given regular expression with the given replacement.
-Expression blocks with commas must be surrounded with triple quotes (""")
-
-* *<regularExpression>* - regular expression to match substring
-* *<replacement>* - will be used to process string. Mind that group's links will be used by reference. For example $1 - reference to first group
-* *<inputString>* - input string
-
-|===
-|Expression |Result
-
-|#{replaceFirstByRegExp(/node/(\d+)/edit, $1, /node/86/edit)}
-|86
-
-|#{replaceFirstByRegExp(/node/(\d+)/edit, $1/delete, /node/86/edit)}
-|86/delete
-
-|#{replaceFirstByRegExp(.new password is (\d+)., $1, """Updated, new password is 12345""")}
-|12345
-
-|#{replaceAllByRegExp(\s, -, convert spaces to dashes)}
-|convert-spaces-to-dashes
-|===
-
-[TIP]
-====
-You can use following online tool to test your expression's parameters http://www.regexplanet.com/advanced/java/index.html[Test regular expression]
-====
