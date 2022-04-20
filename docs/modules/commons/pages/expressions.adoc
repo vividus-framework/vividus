@@ -1,6 +1,6 @@
 = Expressions available out of the box
 
-Here one could find description of the expressions that are delivered with Vividus itself without any plugins required.
+xref:ROOT:glossary.adoc#_expression[Expressions] provided by VIVIDUS out of the box (without any extra plugins) are described below.
 
 NOTE: The expression parameters marked with *bold* are mandatory.
 
@@ -252,7 +252,7 @@ Compress the input string to GZip and encode compressed bytes to Base64 format
 
 === `escapeHTML`
 
-Escapes reserved characters in https://www.w3schools.com/html/html_entities.asp[HTML] string 
+Escapes reserved characters in https://www.w3schools.com/html/html_entities.asp[HTML] string
 
 [source, subs="+quotes"]
 ----
@@ -301,7 +301,7 @@ Calculates the {resource-info}[resource] or file hash using the specified hashin
 
 [source, subs="+quotes"]
 ----
-#{calculateFileHash($algorithm, $resourceNameOrFilePath)}
+#{calculateFileHash(*$algorithm*, *$resourceNameOrFilePath*)}
 ----
 
 * *`$algorithm`* - {algorithm-summary}

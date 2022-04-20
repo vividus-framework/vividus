@@ -73,7 +73,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 |`bdd.configuration.dry-run`
 |`false`
-|Enables dry-run execution mode (no actual steps will be executed, dynamic variables and expressions won't be resolved). For example dry-run could be useful to debug what stroies will be executed with provided config.
+|Enables dry-run execution mode (no actual steps will be executed, dynamic variables and xref:ROOT:glossary.adoc#_expression[expressions] won't be resolved). For example dry-run could be useful to debug what stroies will be executed with provided config.
 
 |`bdd.configuration.skip-story-if-given-story-failed`
 |`false`
@@ -568,10 +568,10 @@ Here one could find description of general HTTP properties applied across all th
 
 == Externalized Configuration
 
-Most common use cases for externalized configuration are tests parametrization with properties passed from CI/CD pipeline, 
+Most common use cases for externalized configuration are tests parametrization with properties passed from CI/CD pipeline,
 passing of secrets into test run etc. The available approaches are listed below.
 
-. Declare an https://en.wikipedia.org/wiki/Environment_variable[environment variable] containing the desired property value and 
+. Declare an https://en.wikipedia.org/wiki/Environment_variable[environment variable] containing the desired property value and
 then point the property to the declared environment variable:
 +
 [source,shell]
@@ -585,7 +585,7 @@ bdd.variables.global.some-key=${EXTERNAL_CONFIG_VALUE}
 ----
 +
 
-. Pass the property with its value into a test run using command line arguments prepending it with the `-Pvividus.` prefix. 
+. Pass the property with its value into a test run using command line arguments prepending it with the `-Pvividus.` prefix.
 The prefix only plays role during test start-up phase and cut off during the actual test run:
 +
 [source,shell]

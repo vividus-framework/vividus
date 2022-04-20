@@ -2,6 +2,27 @@
 
 This glossary contains the descriptions for terms and abbreviations that are used in the documentation.
 
+== Expression
+*Synoyms*: VIVIDUS expression.
+
+An expression is a special placeholder which is detected, evaluated and resolved
+during test execution. Expressions are used for the data generation and
+transformation. General expression syntax is:
+
+```gherkin
+#{expression}
+```
+
+During resolution process the expression placeholder is replaced with the result
+of the expression evaluation. If expression is unknown for VIVIDUS,
+the placeholder will be kept as is. If expression evaluation results in error,
+it will be propagated to the top level and the test will be marked as broken.
+
+It's allowed to construct nested expressions: in this case the evaluation starts
+with the deepest expression.
+
+Expressions may include any number of variables placeholders.
+
 == Resource
 *Synoyms*: project resource, test resource.
 
