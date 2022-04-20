@@ -18,22 +18,19 @@ package org.vividus.report.allure;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import io.qameta.allure.core.Plugin;
 
 public class AllurePluginsProvider
 {
-    private List<Plugin> plugins;
+    private final List<Plugin> plugins;
+
+    public AllurePluginsProvider(List<Plugin> plugins)
+    {
+        this.plugins = plugins;
+    }
 
     public List<Plugin> getPlugins()
     {
         return plugins;
-    }
-
-    @Inject
-    public void setPlugins(List<Plugin> plugins)
-    {
-        this.plugins = plugins;
     }
 }

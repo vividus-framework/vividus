@@ -18,9 +18,6 @@ package org.vividus.report.allure.plugin;
 
 import java.util.List;
 
-import javax.inject.Named;
-
-@Named
 public class VividusLogoPlugin extends EmbeddedPlugin
 {
     public VividusLogoPlugin()
