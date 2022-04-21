@@ -1,6 +1,7 @@
 = Azure Resource Manager Plugin
 
-The plugin provides the ability to collect information about Azure resources.
+The plugin provides the ability to collect information about Azure resources,
+also to create, update and delete them.
 
 == Installation
 
@@ -68,4 +69,81 @@ resourceGroups/sample-resource-group/providers/Microsoft.KeyVault/vaults/sample-
 [source,gherkin]
 ----
 When I get Azure resource with identifier `resourceGroups/TEST-RG/providers/Microsoft.KeyVault/vaults/KEY-VAULT-NAME` using API version `2021-10-01` and save it to scenario variable `key-vault-properties`
+----
+
+==== Create/Update Azure resource
+
+Creates (if resource doesn't exist) or updates the specified Azure resource
+using the declared Azure API version. For more information, see the
+https://docs.microsoft.com/en-us/rest/api/azure/[Azure REST API reference].
+
+[source,gherkin]
+----
+When I configure Azure resource with identifier `$azureResourceIdentifier` and body `$azureResourceBody` using API version `$apiVersion`
+----
+
+* `$azureResourceIdentifier` - This is a VIVIDUS-only term. It's used to specify Azure resource uniquely. From
+the technical perspective it's a part of Azure resource REST API URL path. For example, if the full Azure resource URL is
++
+[source,gherkin]
+----
+https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sample-resource-group/providers/Microsoft.KeyVault/vaults/sample-vault?api-version=2021-10-01
+----
+then the resource identifier will be
++
+[source,gherkin]
+----
+resourceGroups/sample-resource-group/providers/Microsoft.KeyVault/vaults/sample-vault
+----
+* `$azureResourceBody` - The Azure resource configuration in JSON format.
+* `$apiVersion` - Azure resource provider API version. Note API versions may vary depending on the resource type.
+
+
+.Create linked service in Azure DataFactory
+[source,gherkin]
+----
+When I configure Azure resource with identifier `resourceGroups/TEST-RG/providers/Microsoft.DataFactory/factories/TEST-ADF/linkedservices/test-datalake` and body `
+{
+    "properties": {
+        "annotations": [],
+        "type": "AzureBlobFS",
+        "typeProperties": {
+            "url": "https://storageaccount.dfs.core.windows.net/"
+        }
+    }
+}
+` using API version `2018-06-01`
+----
+
+==== Delete Azure resource
+
+Deletes the specified Azure resource using the declared Azure API version.
+For more information, see the
+https://docs.microsoft.com/en-us/rest/api/azure/[Azure REST API reference].
+
+[source,gherkin]
+----
+When I delete Azure resource with identifier `$azureResourceIdentifier` using API version `$apiVersion`
+----
+
+* `$azureResourceIdentifier` - This is a VIVIDUS-only term. It's used to specify Azure resource uniquely. From
+the technical perspective it's a part of Azure resource REST API URL path. For example, if the full Azure resource URL is
++
+[source,gherkin]
+----
+https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sample-resource-group/providers/Microsoft.KeyVault/vaults/sample-vault?api-version=2021-10-01
+----
+then the resource identifier will be
++
+[source,gherkin]
+----
+resourceGroups/sample-resource-group/providers/Microsoft.KeyVault/vaults/sample-vault
+----
+* `$apiVersion` - Azure resource provider API version. Note API versions may vary depending on the resource type.
+
+
+.Delete linked service from Azure DataFactory
+[source,gherkin]
+----
+When I delete Azure resource with identifier `resourceGroups/TEST-RG/providers/Microsoft.DataFactory/factories/TEST-ADF/linkedservices/test-datalake` using API version `2018-06-01`
 ----

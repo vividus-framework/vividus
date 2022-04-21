@@ -21,7 +21,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.azure.core.http.HttpMethod;
 import com.azure.core.http.HttpPipeline;
@@ -42,6 +45,9 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 class AbstractAzureResourceManagementStepsTests
 {
+    private static final String URL_PATH = "subscriptions/sub-id/resourceGroups/rgname/providers/Microsoft"
+            + ".KeyVault/vaults/sample-vault";
+    private static final String API_VERSION = "2021-10-01";
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.STORY);
     private static final String VAR_NAME = "varName";
 
@@ -52,18 +58,47 @@ class AbstractAzureResourceManagementStepsTests
     @Test
     void shouldSaveResponseInCaseOfSuccess()
     {
-        var response = testHttpRequestExecution(200);
+        var response = testHttpRequestExecution(200,
+                steps -> steps.saveHttpResponseAsVariable(URL_PATH, API_VERSION, SCOPES, VAR_NAME),
+                httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()));
         verify(variableContext).putVariable(SCOPES, VAR_NAME, response);
     }
 
     @Test
     void shouldRecordFailedAssertionInCaseOfFailure()
     {
-        var response = testHttpRequestExecution(404);
+        var response = testHttpRequestExecution(404,
+                steps -> steps.saveHttpResponseAsVariable(URL_PATH, API_VERSION, SCOPES, VAR_NAME),
+                httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()));
         verify(softAssert).recordFailedAssertion("Azure REST API HTTP request execution is failed: " + response);
     }
 
-    private String testHttpRequestExecution(int statusCode)
+    @Test
+    void shouldExecuteHttpPutRequest()
+    {
+        var azureResourceBody = "{\"azure-resource\":\"body\"}";
+        testHttpRequestExecution(200, steps -> steps.executeHttpPut(URL_PATH, API_VERSION, azureResourceBody),
+                httpRequest -> {
+                    assertEquals(HttpMethod.PUT, httpRequest.getHttpMethod());
+                    assertEquals(azureResourceBody,
+                            new String(httpRequest.getBody().blockFirst().array(), StandardCharsets.UTF_8));
+                    var expectedHeaders = Map.of(
+                            "Content-Type", "application/json",
+                            "Content-Length", Integer.toString(azureResourceBody.length())
+                    );
+                    assertEquals(expectedHeaders, httpRequest.getHeaders().toMap());
+                });
+    }
+
+    @Test
+    void shouldExecuteHttpDeleteRequest()
+    {
+        testHttpRequestExecution(200, steps -> steps.executeHttpDelete(URL_PATH, API_VERSION),
+                httpRequest -> assertEquals(HttpMethod.DELETE, httpRequest.getHttpMethod()));
+    }
+
+    private String testHttpRequestExecution(int statusCode, Consumer<AbstractAzureResourceManagementSteps> test,
+            Consumer<HttpRequest> httpRequestValidator)
     {
         var responseAsString = "{\"key\":\"value\"}";
         var httpResponse = mock(HttpResponse.class);
@@ -72,14 +107,13 @@ class AbstractAzureResourceManagementStepsTests
         var httpRequestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
         when(httpPipeline.send(httpRequestCaptor.capture())).thenReturn(Mono.just(httpResponse));
 
-        var apiVersion = "2021-10-01";
         var resourceManagerEndpoint = "https://management.azure.com/";
         var steps = new TestSteps(httpPipeline, resourceManagerEndpoint, softAssert, variableContext);
-        var urlPath = "subscriptions/sub-id/resourceGroups/rgname/providers/Microsoft.KeyVault/vaults/sample-vault";
-        steps.saveHttpResponseAsVariable(urlPath, apiVersion, SCOPES, VAR_NAME);
+        test.accept(steps);
         var httpRequest = httpRequestCaptor.getValue();
-        assertEquals(HttpMethod.GET, httpRequest.getHttpMethod());
-        assertEquals(resourceManagerEndpoint + urlPath + "?api-version=" + apiVersion, httpRequest.getUrl().toString());
+        assertEquals(resourceManagerEndpoint + URL_PATH + "?api-version=" + API_VERSION,
+                httpRequest.getUrl().toString());
+        httpRequestValidator.accept(httpRequest);
         return responseAsString;
     }
 
