@@ -1,4 +1,4 @@
-project.description = 'Vividus BDD engine'
+project.description = 'Vividus test engine'
 
 dependencies {
     api project(':vividus-test-context')
