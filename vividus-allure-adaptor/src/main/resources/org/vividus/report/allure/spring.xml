@@ -1,14 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns="http://www.springframework.org/schema/beans"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
+    xmlns="http://www.springframework.org/schema/beans" xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="
+     http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean class="org.vividus.report.allure.plugin.BehaviorsPlugin" />
+    <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
+        <constructor-arg><value>behaviors</value></constructor-arg>
+        <constructor-arg>
+            <util:list value-type="java.lang.String">
+                <value>index.js</value>
+            </util:list>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="io.qameta.allure.behaviors.BehaviorsPlugin" />
+        </constructor-arg>
+    </bean>
 
-    <bean class="org.vividus.report.allure.plugin.VividusLogoPlugin" />
+    <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
+        <constructor-arg><value>vividus-logo</value></constructor-arg>
+        <constructor-arg>
+            <util:list value-type="java.lang.String">
+                <value>styles.css</value>
+            </util:list>
+        </constructor-arg>
+    </bean>
 
-    <bean class="org.vividus.report.allure.plugin.VividusTitlePlugin" />
+    <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
+        <constructor-arg><value>vividus-title</value></constructor-arg>
+        <constructor-arg>
+            <util:list value-type="java.lang.String">
+                <value>styles.css</value>
+            </util:list>
+        </constructor-arg>
+    </bean>
 
     <bean class="org.vividus.report.allure.AllureRunContext" />
 
