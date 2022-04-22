@@ -162,6 +162,7 @@ The following `REPEATING` transformer:
 
 [source,gherkin]
 ----
+{transformer=REPEATING, times=3}
 |column1|column2|
 |A      |C      |
 |B      |D      |
