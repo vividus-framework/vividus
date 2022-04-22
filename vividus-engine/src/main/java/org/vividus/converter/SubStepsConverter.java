@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.vividus.converter;
 
 import static java.util.stream.Collectors.collectingAndThen;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.jbehave.core.configuration.Configuration;
@@ -31,7 +33,7 @@ import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.reporters.ConcurrentStoryReporter;
 import org.jbehave.core.reporters.DelegatingStoryReporter;
 import org.jbehave.core.reporters.StoryReporter;
-import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
+import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.jbehave.core.steps.Step;
 import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
@@ -39,30 +41,33 @@ import org.vividus.parser.IStepExamplesTableParser;
 import org.vividus.steps.SubSteps;
 
 @Named
-public class SubStepsConverter extends FunctionalParameterConverter<String, SubSteps>
+public class SubStepsConverter extends AbstractParameterConverter<String, SubSteps>
 {
-    public SubStepsConverter(Configuration configuration, RunContext runContext, Embedder embedder,
-            IStepExamplesTableParser stepExamplesTableParser)
+    @Inject private Configuration configuration;
+    @Inject private RunContext runContext;
+    @Inject private Embedder embedder;
+    @Inject private IStepExamplesTableParser stepExamplesTableParser;
+
+    @Override
+    public SubSteps convertValue(String value, Type type)
     {
-        super(subSteps -> {
-            StoryReporter storyReporter = configuration.storyReporter(
-                    runContext.getRootRunningStory().getStory().getPath());
-            if (storyReporter instanceof DelegatingStoryReporter)
-            {
-                // Need to exclude JUnitScenarioReporter from reporting of sub steps
-                storyReporter = ((DelegatingStoryReporter) storyReporter).getDelegates()
-                        .stream()
-                        .filter(e -> !(e instanceof ConcurrentStoryReporter))
-                        .collect(collectingAndThen(Collectors.toList(), DelegatingStoryReporter::new));
-            }
-            ExamplesTable subStepsTable = configuration.examplesTableFactory().createExamplesTable(subSteps);
+        StoryReporter storyReporter = configuration.storyReporter(
+                runContext.getRootRunningStory().getStory().getPath());
+        if (storyReporter instanceof DelegatingStoryReporter)
+        {
+            // Need to exclude JUnitScenarioReporter from reporting of sub steps
+            storyReporter = ((DelegatingStoryReporter) storyReporter).getDelegates()
+                    .stream()
+                    .filter(e -> !(e instanceof ConcurrentStoryReporter))
+                    .collect(collectingAndThen(Collectors.toList(), DelegatingStoryReporter::new));
+        }
+        ExamplesTable subStepsTable = configuration.examplesTableFactory().createExamplesTable(value);
 
-            Map<String, String> parameters = Optional.ofNullable(runContext.getRunningStory().getRunningScenario())
-                                                     .map(RunningScenario::getExample)
-                                                     .orElseGet(Map::of);
+        Map<String, String> parameters = Optional.ofNullable(runContext.getRunningStory().getRunningScenario())
+                .map(RunningScenario::getExample)
+                .orElseGet(Map::of);
 
-            List<Step> steps = stepExamplesTableParser.parse(subStepsTable, parameters);
-            return new SubSteps(configuration, storyReporter, embedder, steps);
-        });
+        List<Step> steps = stepExamplesTableParser.parse(subStepsTable, parameters);
+        return new SubSteps(storyReporter, embedder, steps);
     }
 }

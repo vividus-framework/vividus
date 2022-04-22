@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.Embedder;
 import org.jbehave.core.embedder.PerformableTree.RunContext;
@@ -37,14 +36,12 @@ import org.jbehave.core.steps.StepResult;
 
 public class SubSteps
 {
-    private final Configuration configuration;
     private final StoryReporter storyReporter;
     private final Embedder embedder;
     private final List<Step> steps;
 
-    public SubSteps(Configuration configuration, StoryReporter storyReporter, Embedder embedder, List<Step> steps)
+    public SubSteps(StoryReporter storyReporter, Embedder embedder, List<Step> steps)
     {
-        this.configuration = configuration;
         this.storyReporter = storyReporter;
         this.embedder = embedder;
         this.steps = steps;
@@ -57,8 +54,8 @@ public class SubSteps
         UUIDExceptionWrapper failure = null;
         for (Step step : steps)
         {
-            DecoratingResultStep decoratingResultStep = new DecoratingResultStep(step, configuration,
-                    stepContextInfoProvider);
+            DecoratingResultStep decoratingResultStep = new DecoratingResultStep(step,
+                    context.configuration().keywords(), stepContextInfoProvider);
 
             StepResult stepResult = executeStep(decoratingResultStep, context);
             if (failure == null)
@@ -104,13 +101,13 @@ public class SubSteps
     static class DecoratingResultStep extends AbstractStep
     {
         private final Step step;
-        private final Configuration configuration;
+        private final Keywords keywords;
         private final Optional<Supplier<String>> stepContextInfoProvider;
 
-        DecoratingResultStep(Step step, Configuration configuration, Optional<Supplier<String>> stepContextInfoProvider)
+        DecoratingResultStep(Step step, Keywords keywords, Optional<Supplier<String>> stepContextInfoProvider)
         {
             this.step = step;
-            this.configuration = configuration;
+            this.keywords = keywords;
             this.stepContextInfoProvider = stepContextInfoProvider;
         }
 
@@ -147,7 +144,7 @@ public class SubSteps
             {
                 try
                 {
-                    return this.asString(configuration.keywords()) + " [" + contextInfo + "]";
+                    return this.asString(keywords) + " [" + contextInfo + "]";
                 }
                 catch (Exception e)
                 {
