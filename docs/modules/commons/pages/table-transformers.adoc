@@ -145,6 +145,41 @@ the columns.
 {transformer=ITERATING, limit=5}
 ----
 
+=== REPEATING
+
+`REPEATING` transformer generates `ExamplesTable` by copy-pasting the initial table the deisred number of times.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description 
+
+|`times`
+|the number of times to copy-paste the initial table
+|===
+
+The following `REPEATING` transformer:
+
+[source,gherkin]
+----
+|column1|column2|
+|A      |C      |
+|B      |D      |
+----
+
+will result in the following `ExamplesTable`:
+
+[source,gherkin]
+----
+|column1|column2|
+|A      |C      |
+|B      |D      |
+|A      |C      |
+|B      |D      |
+|A      |C      |
+|B      |D      |
+----
+
 === FILTERING
 
 `FILTERING` transformer filters the table using the specified parameters.
