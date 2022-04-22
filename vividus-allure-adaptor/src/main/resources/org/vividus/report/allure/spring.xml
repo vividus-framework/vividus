@@ -7,7 +7,7 @@
     default-lazy-init="true">
 
     <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
-        <constructor-arg><value>behaviors</value></constructor-arg>
+        <constructor-arg value="behaviors" />
         <constructor-arg>
             <util:list value-type="java.lang.String">
                 <value>index.js</value>
@@ -19,7 +19,7 @@
     </bean>
 
     <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
-        <constructor-arg><value>vividus-logo</value></constructor-arg>
+        <constructor-arg value="vividus-logo" />
         <constructor-arg>
             <util:list value-type="java.lang.String">
                 <value>styles.css</value>
@@ -28,7 +28,7 @@
     </bean>
 
     <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
-        <constructor-arg><value>vividus-title</value></constructor-arg>
+        <constructor-arg value="vividus-title" />
         <constructor-arg>
             <util:list value-type="java.lang.String">
                 <value>styles.css</value>
