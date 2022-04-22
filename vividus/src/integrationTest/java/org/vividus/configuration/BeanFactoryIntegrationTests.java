@@ -16,6 +16,8 @@
 
 package org.vividus.configuration;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -240,6 +242,20 @@ class BeanFactoryIntegrationTests
         var properties = ConfigurationResolver.getInstance().getProperties();
         assertEquals("value-from-upper-level", properties.getProperty(DEEPER_SUITE_LEVEL_OVERRIDABLE_PROPERTY));
         assertEquals("value-from-profile", properties.getProperty(PROFILE_SUITE_OVERRIDABLE_PROPERTY));
+    }
+
+    @Test
+    void shouldThrowAnExceptionIfConfigurationPropertyFoundInInvalidLocation()
+    {
+        System.setProperty(CONFIGURATION_PROFILES, "baseicprofile,invalid");
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, BASIC_ENV);
+        System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
+
+        var ise = assertThrows(IllegalStateException.class, BeanFactory::open);
+        assertThat(ise.getMessage(), startsWith(
+              "The configuration.* properties can be set using: System properties,"
+            + " overriding.properties file or configuration.properties file. But found: [configuration.environments,"
+            + " configuration.suites, configuration.profiles]; In resource: file ["));
     }
 
     private void assertIntegrationSuiteProperty() throws IOException
