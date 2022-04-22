@@ -1,30 +1,10 @@
 = Table Transformers
 
-VIVIDUS provides a set of pre-registered table transformers. Also plugins may register own table transformers (they are documented in the corresponding plugins articles). It's allowed to define a chain of transformers, in this case the transformers are applied sequentially from top to bottom.
+VIVIDUS provides a set of pre-registered xref:ROOT:glossary.adoc#_table_transformer[table transformers].
+Also plugins may register own table transformers (they are documented in the
+corresponding plugins articles).
 
-== Escape special characters
-
-The special characters `,` `{` `}` must be escaped in the transformer properties using character `\`.
-
-.Escaping special characters in transformer properties
-[source,gherkin]
-----
-{transformer=MY_TRANSFORMER, countries=\{Australia\,Canada\}}
-----
-In the example above the transformer will have a single property with name `countries` and value `{Australia,Canada}`.
-
-== Using global variables
-
-VIVIDUS global variables can be used in transformer properties (pay attention to escaping of variables placeholders)
-
-.Usage of global variable `$\{locale}` in transformer property
-[source,gherkin]
-----
-{transformer=ONE_MORE_MY_TRANSFORMER, tables=/$\{locale\}/table1.table;/$\{locale\}/table2.table}
-----
-
-== Available transformers
-=== FROM_LANDSCAPE
+== FROM_LANDSCAPE
 
 `FROM_LANDSCAPE` transformer is designed to transform the table from a landscape form.
 
@@ -37,7 +17,7 @@ VIVIDUS global variables can be used in transformer properties (pay attention to
 |header n|value 1n| .... |value mn|
 ----
 
-=== RESOLVING_EXPRESSIONS_EAGERLY
+== RESOLVING_EXPRESSIONS_EAGERLY
 
 `RESOLVING_EXPRESSIONS_EAGERLY` transformer processes expressions which are used inside `ExamplesTable` eagerly, i.e. at the table loading stage.
 If expressions generating random data are used in the table with `RESOLVING_EXPRESSIONS_EAGERLY` transfomer, the random data will be generated once
@@ -52,7 +32,7 @@ at step execution stage, in other words the same placeholders will be replaced b
 |#{generate(Address.firstName)}|#{generate(Address.lastName)}|
 ----
 
-=== RESOLVING_SELF_REFERENCES_EAGERLY
+== RESOLVING_SELF_REFERENCES_EAGERLY
 
 `RESOLVING_SELF_REFERENCES_EAGERLY` transformer enables eagerly resolution of references to one column from another column within single `ExamplesTable` ("eagerly" means at the table loading stage). Circular references will result in error.
 
@@ -64,7 +44,7 @@ at step execution stage, in other words the same placeholders will be replaced b
 |A      |foo<column3>bar|before<column1>after|
 ----
 
-=== FORMATTING
+== FORMATTING
 
 `FORMATTING` transformer formats the table according to the max width of each column. Also this transformer removes the commented lines.
 
@@ -78,7 +58,7 @@ at step execution stage, in other words the same placeholders will be replaced b
 |longValue|
 ----
 
-=== REPLACING
+== REPLACING
 
 `REPLACING` transformer replaces all substrings inside table values with replacement according to the given parameters.
 
@@ -102,7 +82,7 @@ at step execution stage, in other words the same placeholders will be replaced b
 |vakue|
 ----
 
-=== SORTING
+== SORTING
 
 `SORTING` transformer is designed to sort the table rows by the values in
 the columns.
@@ -126,7 +106,7 @@ the columns.
 |value1|value2|
 ----
 
-=== ITERATING
+== ITERATING
 
 `ITERATING` transformer generates simple one-column table with header `iterator` and numbers as values: 0, 1, 2... .
 
@@ -145,7 +125,7 @@ the columns.
 {transformer=ITERATING, limit=5}
 ----
 
-=== REPEATING
+== REPEATING
 
 `REPEATING` transformer generates `ExamplesTable` by copy-pasting the initial table the deisred number of times.
 
@@ -181,7 +161,7 @@ will result in the following `ExamplesTable`:
 |B      |D      |
 ----
 
-=== FILTERING
+== FILTERING
 
 `FILTERING` transformer filters the table using the specified parameters.
 
@@ -239,7 +219,7 @@ In case if `byColumnNames` contains nonexistent table columns the exception with
 |value4|value5|value6|
 |value7|value8|value9|
 ----
-=== MERGING
+== MERGING
 
 `MERGING` transformer merges several tables into one.
 
@@ -333,7 +313,7 @@ In case if `byColumnNames` contains nonexistent table columns the exception with
 |value1 |
 ----
 
-=== JOINING
+== JOINING
 
 `JOINING` transformer joins values from rows/columns of the table.
 
@@ -407,7 +387,7 @@ Examples:
 /test1.table
 ----
 
-=== CARTESIAN_PRODUCT
+== CARTESIAN_PRODUCT
 
 `CARTESIAN_PRODUCT` transformer creates a https://en.wikipedia.org/wiki/Cartesian_product[cartesian product] from several tables.
 

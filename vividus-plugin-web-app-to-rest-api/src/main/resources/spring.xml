@@ -28,32 +28,53 @@
     </bean>
 
     <bean id="abstractFetchingUrlsTableTransformer"
-          class="org.vividus.transformer.AbstractFetchingUrlsTableTransformer"
+          class="org.vividus.crawler.transformer.AbstractFetchingUrlsTableTransformer"
           abstract="true">
         <property name="webApplicationConfiguration" ref="webApplicationConfiguration" />
         <property name="httpRedirectsProvider" ref="httpRedirectsProvider" />
     </bean>
 
-    <bean name="FROM_SITEMAP" class="org.vividus.transformer.SiteMapTableTransformer"
-          parent="abstractFetchingUrlsTableTransformer">
-        <property name="siteMapParser" ref="siteMapParser" />
-        <property name="ignoreErrors" value="${bdd.transformer.sitemap.ignore-errors}" />
-        <property name="filterRedirects" value="${bdd.transformer.sitemap.filter-redirects}" />
+    <bean id="siteMapParser" class="org.vividus.crawler.SiteMapParser">
+        <property name="httpClient">
+            <bean class="org.vividus.http.client.HttpClient"
+                  factory-bean="httpClientFactory"
+                  factory-method="buildHttpClient">
+                <constructor-arg>
+                    <bean parent="httpClientConfig">
+                        <property name="headers">
+                            <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
+                                <constructor-arg value="sitemap.parser.http.header." />
+                            </bean>
+                        </property>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </property>
+        <property name="siteUrl" value="${sitemap.parser.site-url}" />
+        <property name="baseUrl" value="${sitemap.parser.base-url}" />
+        <property name="followRedirects" value="${sitemap.parser.follow-redirects}" />
     </bean>
 
-    <bean name="FROM_HEADLESS_CRAWLING" class="org.vividus.transformer.HeadlessCrawlerTableTransformer"
+    <bean name="FROM_SITEMAP" class="org.vividus.crawler.transformer.SiteMapTableTransformer"
+          parent="abstractFetchingUrlsTableTransformer">
+        <property name="siteMapParser" ref="siteMapParser" />
+        <property name="ignoreErrors" value="${transformer.from-sitemap.ignore-errors}" />
+        <property name="filterRedirects" value="${transformer.from-sitemap.filter-redirects}" />
+    </bean>
+
+    <bean name="FROM_HEADLESS_CRAWLING" class="org.vividus.crawler.transformer.HeadlessCrawlerTableTransformer"
           parent="abstractFetchingUrlsTableTransformer">
         <property name="crawlControllerFactory">
             <bean class="org.vividus.crawler.CrawlControllerFactory">
                 <constructor-arg index="0">
                     <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
-                        <constructor-arg value="transformer.headless."/>
+                        <constructor-arg value="transformer.from-headless-crawling."/>
                     </bean>
                 </constructor-arg>
             </bean>
         </property>
-        <property name="filterRedirects" value="${transformer.headless.filter-redirects}" />
-        <property name="seedRelativeUrls" value="${transformer.headless.seed-relative-urls}" />
+        <property name="filterRedirects" value="${transformer.from-headless-crawling.filter-redirects}" />
+        <property name="seedRelativeUrls" value="${transformer.from-headless-crawling.seed-relative-urls}" />
     </bean>
 
     <util:list id="stepBeanNames-WebAppToRestApi" value-type="java.lang.String">

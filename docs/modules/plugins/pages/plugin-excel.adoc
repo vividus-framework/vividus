@@ -10,7 +10,8 @@ The plugin provides the ability to work with Excel documents.
 implementation(group: 'org.vividus', name: 'vividus-plugin-excel', version: '{current-version}')
 ----
 
-== Table Transformers
+== xref:ROOT:glossary.adoc#_table_transformer[Table Transformers]
+
 === FROM_EXCEL
 
 `FROM_EXCEL` transformer generates table from the given Excel file.

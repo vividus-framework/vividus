@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,10 @@ package org.vividus.transformer;
 import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Named;
-
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 
-@Named("MERGING")
 public class MergingTableTransformer extends AbstractTableLoadingTransformer
 {
     public MergingTableTransformer()

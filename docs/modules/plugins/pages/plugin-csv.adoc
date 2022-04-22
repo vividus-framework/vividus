@@ -30,7 +30,7 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-csv', version: '{curr
 
 |===
 
-== Table Transformers
+== xref:ROOT:glossary.adoc#_table_transformer[Table Transformers]
 
 NOTE: The table transformers properties marked with *bold* are mandatory.
 

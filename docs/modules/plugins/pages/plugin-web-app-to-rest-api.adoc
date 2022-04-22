@@ -43,7 +43,7 @@ Then all resources by selector a are valid on:
 |/test-automation-made-awesome|
 ----
 
-== Table Transformers
+== xref:ROOT:glossary.adoc#_table_transformer[Table Transformers]
 
 === FROM_SITEMAP
 
@@ -71,13 +71,13 @@ Then all resources by selector a are valid on:
 |Default
 |Description
 
-|`bdd.transformer.sitemap.ignore-errors`
+|`transformer.from-sitemap.ignore-errors`
 a|`true`
 `false`
 |`false`
 |ignore sitemap parsing errors
 
-|`bdd.transformer.sitemap.filter-redirects`
+|`transformer.from-sitemap.filter-redirects`
 a|`true`
 `false`
 |`false`
@@ -117,96 +117,96 @@ Examples:
 
 4+^.^|_General_
 
-|`transformer.headless.seed-relative-urls`
+|`transformer.from-headless-crawling.seed-relative-urls`
 |Comma-separated list of values
 |
 |List of relative URLs, a seed URL is a URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
 
-|`transformer.headless.filter-redirects`
+|`transformer.from-headless-crawling.filter-redirects`
 a|`true`
 `false`
 |`false`
 |Defines whether urls that has redirect to the one that has already been included in the table are excluded from the table.
 
-|`transformer.headless.socket-timeout`
+|`transformer.from-headless-crawling.socket-timeout`
 |`integer`
 |`40000`
 |Socket timeout in milliseconds.
 
-|`transformer.headless.connection-timeout`
+|`transformer.from-headless-crawling.connection-timeout`
 |`integer`
 |`30000`
 |Connection timeout in milliseconds.
 
-|`transformer.headless.max-download-size`
+|`transformer.from-headless-crawling.max-download-size`
 |`integer`
 |`1048576`
 |Max allowed size of a page in bytes. Pages larger than this size will not be fetched.
 
-|`transformer.headless.max-connections-per-host`
+|`transformer.from-headless-crawling.max-connections-per-host`
 |`integer`
 |`100`
 |Maximum connections per host.
 
-|`transformer.headless.max-total-connections`
+|`transformer.from-headless-crawling.max-total-connections`
 |`integer`
 |`100`
 |Maximum total connections.
 
-|`transformer.headless.follow-redirects`
+|`transformer.from-headless-crawling.follow-redirects`
 |`true` / `false`
 |`true`
 |Whether to follow redirects.
 
-|`transformer.headless.max-depth-of-crawling`
+|`transformer.from-headless-crawling.max-depth-of-crawling`
 |`integer`
 |`-1`
 |Maximum depth of crawling, for unlimited depth this parameter should be set to -1.
 
-|`transformer.headless.max-pages-to-fetch`
+|`transformer.from-headless-crawling.max-pages-to-fetch`
 |`integer`
 |`-1`
 |Number of pages to fetch, for unlimited number of pages this parameter should be set to -1.
 
-|`transformer.headless.politeness-delay`
+|`transformer.from-headless-crawling.politeness-delay`
 |`integer`
 |`0`
 |Politeness delay in milliseconds between sending two requests to the same host.
 
-|`transformer.headless.max-outgoing-links-to-follow`
+|`transformer.from-headless-crawling.max-outgoing-links-to-follow`
 |`integer`
 |`5000`
 |Max number of outgoing links which are processed from a page.
 
-|`transformer.headless.respect-no-follow`
+|`transformer.from-headless-crawling.respect-no-follow`
 a|`true`
 `false`
 |`false`
 |Whether to honor links with https://en.wikipedia.org/wiki/Nofollow[nofollow flag].
 
-|`transformer.headless.respect-no-index`
+|`transformer.from-headless-crawling.respect-no-index`
 a|`true`
 `false`
 |`false`
 |Whether to honor links with https://en.wikipedia.org/wiki/Noindex[noindex flag].
 
-|`transformer.headless.user-agent-string`
+|`transformer.from-headless-crawling.user-agent-string`
 |`string`
 |`crawler4j (https://github.com/rzo1/crawler4j/)`
 |https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent[User agent].
 
-|`transformer.headless.cookie-policy`
+|`transformer.from-headless-crawling.cookie-policy`
 |`ignore`, `standard`, `relaxed`
 |`no default value`
 |Cookie policy as defined per https://hc.apache.org/httpcomponents-client-4.5.x/current/tutorial/html/statemgmt.html#d5e515[cookie specification].
 
-|`transformer.headless.allow-single-level-domain`
+|`transformer.from-headless-crawling.allow-single-level-domain`
 a|`true`
 `false`
 |`false`
 |Whether to consider single level domains valid (e.g. http://localhost).
 
-|`transformer.headless.include-https-pages`
+|`transformer.from-headless-crawling.include-https-pages`
 a|`true`
 `false`
 |`true`
@@ -214,22 +214,22 @@ a|`true`
 
 4+^.^|_Proxy_
 
-|`transformer.headless.proxy-host`
+|`transformer.from-headless-crawling.proxy-host`
 |`URL`
 |`no default value`
 |Proxy host.
 
-|`transformer.headless.proxy-port`
+|`transformer.from-headless-crawling.proxy-port`
 |`integer`
 |`80`
 |Proxy port.
 
-|`transformer.headless.proxy-username`
+|`transformer.from-headless-crawling.proxy-username`
 |`string`
 |`no default value`
 |Username to authenticate with proxy.
 
-|`transformer.headless.proxy-password`
+|`transformer.from-headless-crawling.proxy-password`
 |`string`
 |`no default value`
 |Password to authenticate with proxy.

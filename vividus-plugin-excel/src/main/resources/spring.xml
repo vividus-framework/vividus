@@ -10,6 +10,8 @@
     <bean id="excelResponseValidationSteps" class="org.vividus.steps.ExcelResponseValidationSteps" />
     <bean id="excelFileSteps" class="org.vividus.steps.ExcelFileSteps" />
 
+    <bean id="FROM_EXCEL" class="org.vividus.excel.transformer.ExcelTableTransformer" />
+
     <util:list id="stepBeanNames-Excel" value-type="java.lang.String">
         <idref bean="excelResponseValidationSteps" />
         <idref bean="excelFileSteps" />
