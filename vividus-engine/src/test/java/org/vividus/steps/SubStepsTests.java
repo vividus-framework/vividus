@@ -58,7 +58,6 @@ class SubStepsTests
 
     @Mock private StoryReporter storyReporter;
     @Mock private RunContext context;
-    @Mock private Configuration configuration;
     @Mock private Keywords keywords;
     @Mock private Embedder embedder;
     private SubSteps subSteps;
@@ -70,6 +69,7 @@ class SubStepsTests
         when(storyManager.getContext()).thenReturn(context);
         when(embedder.storyManager()).thenReturn(storyManager);
 
+        Configuration configuration = mock(Configuration.class);
         when(context.configuration()).thenReturn(configuration);
         when(configuration.keywords()).thenReturn(keywords);
     }
@@ -80,7 +80,6 @@ class SubStepsTests
         var stepResult = mock(StepResult.class);
         testExecuteSubSteps(stepResult, step ->
         {
-            when(configuration.keywords()).thenReturn(keywords);
             when(step.asString(keywords)).thenReturn("step");
 
             subSteps.execute(Optional.of(() -> "parameters"));
@@ -93,7 +92,6 @@ class SubStepsTests
         var stepResult = mock(StepResult.class);
         testExecuteSubSteps(stepResult, step ->
         {
-            when(configuration.keywords()).thenReturn(keywords);
             when(step.asString(keywords)).thenThrow(new IllegalArgumentException());
 
             subSteps.execute(Optional.of(() -> "anything"));
@@ -125,7 +123,7 @@ class SubStepsTests
         var state3 = mockStepRun(state2, s -> s.doNotPerform(storyReporter, null), stepResult2);
         when(context.state()).thenReturn(state1, state2, state3);
 
-        subSteps = new SubSteps(configuration, storyReporter, embedder, List.of(step1, step2));
+        subSteps = new SubSteps(storyReporter, embedder, List.of(step1, step2));
         var actual = assertThrows(UUIDExceptionWrapper.class, () -> subSteps.execute(EMPTY_STEP_CONTEXT_INFO_PROVIDER));
         assertEquals(exception, actual);
 
@@ -152,7 +150,7 @@ class SubStepsTests
         when(state2.getFailure()).thenReturn(ignoringStepsFailure);
         when(context.state()).thenReturn(state1, state2);
 
-        subSteps = new SubSteps(configuration, storyReporter, embedder, List.of(step1));
+        subSteps = new SubSteps(storyReporter, embedder, List.of(step1));
         var actual = assertThrows(IgnoringStepsFailure.class, () -> subSteps.execute(EMPTY_STEP_CONTEXT_INFO_PROVIDER));
         assertEquals(ignoringStepsFailure, actual);
 
@@ -225,7 +223,7 @@ class SubStepsTests
         var newState = mockStepRun(state, s -> s.perform(storyReporter, null), stepResult);
         when(context.state()).thenReturn(state, newState);
 
-        subSteps = new SubSteps(configuration, storyReporter, embedder, List.of(step));
+        subSteps = new SubSteps(storyReporter, embedder, List.of(step));
         test.accept(step);
 
         var ordered = inOrder(step, stepResult, context);
