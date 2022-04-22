@@ -16,11 +16,7 @@
 
 package org.vividus.configuration;
 
-import static org.springframework.core.io.support.ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX;
-
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,31 +33,23 @@ import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.PropertiesFactoryBean;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.vividus.spring.SpelExpressionResolver;
 
 public final class ConfigurationResolver
 {
+    static final String CONFIGURATION_PROPERTY_FAMILY = "configuration.";
+
     private static final String VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY = "vividus.encryptor.password";
     private static final String DEFAULT_ENCRYPTOR_ALGORITHM = "PBEWithMD5AndDES";
     private static final String DEFAULT_ENCRYPTOR_PASSWORD = "82=thuMUH@";
 
     private static final SpelExpressionResolver SPEL_RESOLVER = new SpelExpressionResolver();
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationResolver.class);
-
     private static final String VIVIDUS_SYSTEM_PROPERTY_FAMILY = "vividus.";
-    private static final String CONFIGURATION_PROPERTY_FAMILY = "configuration.";
     private static final String ROOT = "";
     private static final String PROFILES = "profiles";
     private static final String ENVIRONMENTS = "environments";
     private static final String SUITES = "suites";
-
     private static final String PLACEHOLDER_PREFIX = "${";
     private static final String PLACEHOLDER_SUFFIX = "}";
     private static final String PLACEHOLDER_VALUE_SEPARATOR = "=";
@@ -89,19 +77,22 @@ public final class ConfigurationResolver
 
         PropertiesLoader propertiesLoader = new PropertiesLoader(BeanFactory.getResourcePatternResolver());
 
-        Properties configurationProperties = propertiesLoader.loadConfigurationProperties();
-        Properties overridingProperties = propertiesLoader.loadOverridingProperties();
-
         Properties properties = new Properties();
-        properties.putAll(configurationProperties);
+
+        final Properties configurationProperties = propertiesLoader.loadConfigurationProperties();
+        final Properties overridingProperties = propertiesLoader.loadOverridingProperties();
+
+        propertiesLoader.prohibitConfigurationProperties();
 
         for (String defaultPath : DEFAULTS_PATHS)
         {
-            properties.putAll(propertiesLoader.loadResourceFromClasspath(true, defaultPath, "defaults.properties"));
+            properties.putAll(propertiesLoader.loadDefaultProperties(defaultPath));
         }
 
+        properties.putAll(configurationProperties);
         properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true, "defaults"));
-        properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true, ROOT));
+        properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true,
+            r -> !r.getFilename().endsWith(PropertiesLoader.CONFIGURATION_FILENAME), ROOT));
 
         Multimap<String, String> configuration = assembleConfiguration(configurationProperties, overridingProperties);
         for (Entry<String, String> configurationEntry : configuration.entries())
@@ -287,109 +278,6 @@ public final class ConfigurationResolver
         if (instance == null)
         {
             throw new IllegalStateException("ConfigurationResolver has not been initialized after the reset");
-        }
-    }
-
-    private static final class PropertiesLoader
-    {
-        private static final String ROOT_LOCATION = CLASSPATH_ALL_URL_PREFIX + "/properties/";
-        private static final String DELIMITER = "/";
-
-        private final ResourcePatternResolver resourcePatternResolver;
-
-        PropertiesLoader(ResourcePatternResolver resourcePatternResolver)
-        {
-            this.resourcePatternResolver = resourcePatternResolver;
-        }
-
-        Properties loadConfigurationProperties() throws IOException
-        {
-            String location = ROOT_LOCATION + "configuration.properties";
-            Resource[] resources = resourcePatternResolver.getResources(location);
-            int resourcesLength = resources.length;
-            if (resourcesLength == 0)
-            {
-                return new Properties();
-            }
-            if (resourcesLength > 1)
-            {
-                throw new IllegalStateException(
-                        "Exactly one resource is expected: " + location + ", but found: " + resourcesLength);
-            }
-            return loadProperties(resources[0]);
-        }
-
-        Properties loadOverridingProperties() throws IOException
-        {
-            Resource resource = resourcePatternResolver.getResource("classpath:/overriding.properties");
-            return resource.exists() ? loadProperties(resource) : new Properties();
-        }
-
-        Properties loadFromResourceTreeRecursively(boolean failOnMissingResource, String... resourcePathParts)
-                throws IOException
-        {
-            String resourcePath = String.join(DELIMITER, resourcePathParts);
-            List<Resource> propertyResources = collectResourcesRecursively(resourcePath, failOnMissingResource);
-            return loadPropertiesFromResources(resourcePath, propertyResources);
-        }
-
-        Properties loadResourceFromClasspath(boolean failOnMissingResource, String resourcePath, String resourcePattern)
-                throws IOException
-        {
-            return loadPropertiesFromResources(resourcePath,
-                    collectResources(failOnMissingResource, CLASSPATH_ALL_URL_PREFIX, resourcePattern, resourcePath));
-        }
-
-        private Properties loadPropertiesFromResources(String resourcePath, List<Resource> propertyResources)
-                throws IOException
-        {
-            LOGGER.info("Loading properties from /{}", resourcePath);
-            Properties loadedProperties = loadProperties(propertyResources.toArray(new Resource[0]));
-            loadedProperties.forEach((key, value) -> LOGGER.debug("{}=={}", key, value));
-            return loadedProperties;
-        }
-
-        private List<Resource> collectResourcesRecursively(String resourcePath, boolean failOnMissingResource)
-                throws IOException
-        {
-            String[] locationParts = resourcePath.isEmpty() ? new String[] { resourcePath }
-                    : StringUtils.split(resourcePath, DELIMITER);
-            return collectResources(failOnMissingResource, ROOT_LOCATION, "*.properties", locationParts);
-        }
-
-        private List<Resource> collectResources(boolean failOnMissingResource, String root, String resourcePattern,
-                String... locationParts) throws IOException
-        {
-            List<Resource> propertyResources = new LinkedList<>();
-            StringBuilder path = new StringBuilder(root);
-            for (int i = 0; i < locationParts.length; i++)
-            {
-                boolean deepestLevel = i + 1 == locationParts.length;
-                String locationPart = locationParts[i];
-                path.append(locationPart);
-                if (!locationPart.isEmpty())
-                {
-                    path.append(DELIMITER);
-                }
-                String resourceLocation = path + resourcePattern;
-                Resource[] resources = resourcePatternResolver.getResources(resourceLocation);
-                if (deepestLevel && resources.length == 0 && failOnMissingResource)
-                {
-                    throw new IllegalStateException(
-                            "No files with properties were found at location with pattern: " + resourceLocation);
-                }
-                propertyResources.addAll(Stream.of(resources).filter(Resource::exists).collect(Collectors.toList()));
-            }
-            return propertyResources;
-        }
-
-        private static Properties loadProperties(Resource... propertyResources) throws IOException
-        {
-            PropertiesFactoryBean propertiesFactoryBean = new PropertiesFactoryBean();
-            propertiesFactoryBean.setFileEncoding(StandardCharsets.UTF_8.name());
-            propertiesFactoryBean.setLocations(propertyResources);
-            propertiesFactoryBean.setSingleton(false);
-            return propertiesFactoryBean.getObject();
         }
     }
 }
