@@ -23,6 +23,8 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -39,6 +41,7 @@ import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider
 
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Named;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junitpioneer.jupiter.SetSystemProperty;
@@ -61,6 +64,10 @@ class ResourceManagementStepsTests
     private static final String API_VERSION = "2021-10-01";
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.STORY);
     private static final String VAR_NAME = "varName";
+    private static final String AZURE_RESOURCE_IDENTIFIER = "resourceGroups/my-rg/providers/Microsoft"
+            + ".KeyVault/vaults/my-kv";
+    private static final String URL_PATH =
+            "subscriptions/" + SUBSCRIPTION_ID_PROPERTY_VALUE + "/" + AZURE_RESOURCE_IDENTIFIER;
 
     @Mock private TokenCredential tokenCredential;
     @Mock private SoftAssert softAssert;
@@ -70,11 +77,13 @@ class ResourceManagementStepsTests
     {
         return Stream.of(
                 named("success", (test, expectedUrlPath) -> {
-                    var response = testHttpRequestExecution(test, 200, expectedUrlPath);
+                    var response = testHttpRequestExecution(test, 200, expectedUrlPath,
+                            httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()));
                     verify(variableContext).putVariable(SCOPES, VAR_NAME, response);
                 }),
                 named("failure", (test, expectedUrlPath) -> {
-                    var response = testHttpRequestExecution(test, 404, expectedUrlPath);
+                    var response = testHttpRequestExecution(test, 404, expectedUrlPath,
+                            httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()));
                     verify(softAssert).recordFailedAssertion(
                             "Azure REST API HTTP request execution is failed: " + response);
                 })
@@ -85,17 +94,47 @@ class ResourceManagementStepsTests
     @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
     Stream<DynamicTest> testSaveAzureResourceAsVariable()
     {
-        var azureResourceIdentifier = "resourceGroups/my-rg/providers/Microsoft.KeyVault/vaults/my-kv";
-        var urlPath = "subscriptions/" + SUBSCRIPTION_ID_PROPERTY_VALUE + "/" + azureResourceIdentifier;
         return DynamicTest.stream(createStreamOfTests(), test -> test.accept(
-                steps -> steps.saveAzureResourceAsVariable(azureResourceIdentifier, API_VERSION, SCOPES, VAR_NAME),
-                urlPath)
+                steps -> steps.saveAzureResourceAsVariable(AZURE_RESOURCE_IDENTIFIER, API_VERSION, SCOPES, VAR_NAME),
+                URL_PATH)
+        );
+    }
+
+    @Test
+    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
+    void shouldConfigureAzureResource()
+    {
+        var azureResourceBody = "{\"resource\": \"body\"}";
+        testHttpRequestExecution(
+                steps -> steps.configureAzureResource(AZURE_RESOURCE_IDENTIFIER, azureResourceBody, API_VERSION),
+                200, URL_PATH,
+                httpRequest -> {
+                    assertEquals(HttpMethod.PUT, httpRequest.getHttpMethod());
+                    assertEquals(azureResourceBody,
+                            new String(httpRequest.getBody().blockFirst().array(), StandardCharsets.UTF_8));
+                    var expectedHeaders = Map.of(
+                            "Content-Type", "application/json",
+                            "Content-Length", Integer.toString(azureResourceBody.length())
+                    );
+                    assertEquals(expectedHeaders, httpRequest.getHeaders().toMap());
+                }
+        );
+    }
+
+    @Test
+    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
+    void shouldDeleteAzureResource()
+    {
+        testHttpRequestExecution(
+                steps -> steps.deleteAzureResource(AZURE_RESOURCE_IDENTIFIER, API_VERSION),
+                200, URL_PATH,
+                httpRequest -> assertEquals(HttpMethod.DELETE, httpRequest.getHttpMethod())
         );
     }
 
     @SuppressWarnings("PMD.CloseResource")
     private String testHttpRequestExecution(Consumer<ResourceManagementSteps> test, int statusCode,
-            String expectedUrlPath)
+            String expectedUrlPath, Consumer<HttpRequest> httpRequestValidator)
     {
         var azureProfile = new AzureProfile(AzureEnvironment.AZURE);
         try (MockedStatic<HttpPipelineProvider> httpPipelineProviderMock = mockStatic(HttpPipelineProvider.class))
@@ -113,9 +152,9 @@ class ResourceManagementStepsTests
             var steps = new ResourceManagementSteps(azureProfile, tokenCredential, softAssert, variableContext);
             test.accept(steps);
             var httpRequest = httpRequestCaptor.getValue();
-            assertEquals(HttpMethod.GET, httpRequest.getHttpMethod());
             assertEquals("https://management.azure.com/" + expectedUrlPath + "?api-version=" + API_VERSION,
                     httpRequest.getUrl().toString());
+            httpRequestValidator.accept(httpRequest);
             return responseAsString;
         }
     }

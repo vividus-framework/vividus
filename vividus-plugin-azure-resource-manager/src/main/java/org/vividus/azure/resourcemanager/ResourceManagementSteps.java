@@ -75,8 +75,68 @@ public class ResourceManagementSteps extends AbstractAzureResourceManagementStep
     public void saveAzureResourceAsVariable(String azureResourceIdentifier, String apiVersion,
             Set<VariableScope> scopes, String variableName)
     {
-        String urlPath = "subscriptions/" + azureProfile.getSubscriptionId() + StringUtils.prependIfMissing(
-                azureResourceIdentifier, "/");
+        String urlPath = buildUrlPath(azureResourceIdentifier);
         saveHttpResponseAsVariable(urlPath, apiVersion, scopes, variableName);
+    }
+
+    /**
+     * Creates (if resource doesn't exist) or updates the specified Azure resource using the declared Azure API
+     * version. For more information, see the
+     * <a href="https://docs.microsoft.com/en-us/rest/api/azure/">Azure REST API reference</a>.
+     *
+     * @param azureResourceIdentifier This is a VIVIDUS-only term. It's used to specify Azure resource uniquely. From
+     *                                the technical perspective it's a part of Azure resource REST API URL path. For
+     *                                example, if the full Azure resource URL is
+     *                                <br>
+     *                                <code>https://management.azure.com/subscriptions/
+     *                                00000000-0000-0000-0000-000000000000/resourceGroups/sample-resource-group/
+     *                                providers/Microsoft.KeyVault/vaults/sample-vault?api-version=2021-10-01</code>,
+     *                                <br>
+     *                                then resource identifier will be
+     *                                <br>
+     *                                <code>resourceGroups/sample-resource-group/providers/Microsoft.KeyVault/
+     *                                vaults/sample-vault</code>.
+     * @param azureResourceBody       The Azure resource configuration in JSON format.
+     * @param apiVersion              Azure resource provider API version. Note API versions may vary depending on
+     *                                the resource type.
+     */
+    @When("I configure Azure resource with identifier `$azureResourceIdentifier` and body `$azureResourceBody` using "
+            + "API version `$apiVersion`")
+    public void configureAzureResource(String azureResourceIdentifier, String azureResourceBody, String apiVersion)
+    {
+        String urlPath = buildUrlPath(azureResourceIdentifier);
+        executeHttpPut(urlPath, apiVersion, azureResourceBody);
+    }
+
+    /**
+     * Deletes the specified Azure resource using the declared Azure API version. For more information, see the
+     * <a href="https://docs.microsoft.com/en-us/rest/api/azure/">Azure REST API reference</a>.
+     *
+     * @param azureResourceIdentifier This is a VIVIDUS-only term. It's used to specify Azure resource uniquely. From
+     *                                the technical perspective it's a part of Azure resource REST API URL path. For
+     *                                example, if the full Azure resource URL is
+     *                                <br>
+     *                                <code>https://management.azure.com/subscriptions/
+     *                                00000000-0000-0000-0000-000000000000/resourceGroups/sample-resource-group/
+     *                                providers/Microsoft.KeyVault/vaults/sample-vault?api-version=2021-10-01</code>,
+     *                                <br>
+     *                                then resource identifier will be
+     *                                <br>
+     *                                <code>resourceGroups/sample-resource-group/providers/Microsoft.KeyVault/
+     *                                vaults/sample-vault</code>.
+     * @param apiVersion              Azure resource provider API version. Note API versions may vary depending on
+     *                                the resource type.
+     */
+    @When("I delete Azure resource with identifier `$azureResourceIdentifier` using API version `$apiVersion`")
+    public void deleteAzureResource(String azureResourceIdentifier, String apiVersion)
+    {
+        String urlPath = buildUrlPath(azureResourceIdentifier);
+        executeHttpDelete(urlPath, apiVersion);
+    }
+
+    private String buildUrlPath(String azureResourceIdentifier)
+    {
+        return "subscriptions/" + azureProfile.getSubscriptionId() + StringUtils.prependIfMissing(
+                azureResourceIdentifier, "/");
     }
 }

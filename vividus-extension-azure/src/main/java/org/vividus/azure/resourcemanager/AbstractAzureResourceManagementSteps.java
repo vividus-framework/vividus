@@ -17,7 +17,9 @@
 package org.vividus.azure.resourcemanager;
 
 import java.util.Set;
+import java.util.function.Consumer;
 
+import com.azure.core.http.ContentType;
 import com.azure.core.http.HttpMethod;
 import com.azure.core.http.HttpPipeline;
 import com.azure.core.http.HttpRequest;
@@ -48,20 +50,47 @@ public abstract class AbstractAzureResourceManagementSteps
     protected void saveHttpResponseAsVariable(String urlPath, String apiVersion, Set<VariableScope> scopes,
             String variableName)
     {
-        // Workaround for https://github.com/Azure/azure-sdk-for-java/issues/27268
-        String url = resourceManagerEndpoint + urlPath + "?api-version=" + apiVersion;
+        String url = buildUrl(urlPath, apiVersion);
         HttpRequest httpRequest = new HttpRequest(HttpMethod.GET, url);
+        executeHttpRequest(httpRequest,
+                responseBody -> variableContext.putVariable(scopes, variableName, responseBody));
+    }
+
+    protected void executeHttpPut(String urlPath, String apiVersion, String azureResourceBody)
+    {
+        String url = buildUrl(urlPath, apiVersion);
+        HttpRequest httpRequest = new HttpRequest(HttpMethod.PUT, url);
+        httpRequest.setBody(azureResourceBody);
+        httpRequest.setHeader("Content-Type", ContentType.APPLICATION_JSON);
+        executeHttpRequest(httpRequest, responseBody -> { });
+    }
+
+    protected void executeHttpDelete(String urlPath, String apiVersion)
+    {
+        String url = buildUrl(urlPath, apiVersion);
+        HttpRequest httpRequest = new HttpRequest(HttpMethod.DELETE, url);
+        executeHttpRequest(httpRequest, responseBody -> { });
+    }
+
+    private void executeHttpRequest(HttpRequest httpRequest, Consumer<String> responseBodyConsumer)
+    {
         try (HttpResponse httpResponse = httpPipeline.send(httpRequest).block())
         {
             String responseBody = httpResponse.getBodyAsString().block();
             if (httpResponse.getStatusCode() == HttpResponseStatus.OK.code())
             {
-                variableContext.putVariable(scopes, variableName, responseBody);
+                responseBodyConsumer.accept(responseBody);
             }
             else
             {
                 softAssert.recordFailedAssertion("Azure REST API HTTP request execution is failed: " + responseBody);
             }
         }
+    }
+
+    private String buildUrl(String urlPath, String apiVersion)
+    {
+        // Workaround for https://github.com/Azure/azure-sdk-for-java/issues/27268
+        return resourceManagerEndpoint + urlPath + "?api-version=" + apiVersion;
     }
 }
