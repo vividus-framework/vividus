@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,14 @@ public final class ExpectedSearchActionsConditions extends AbstractExpectedCondi
     @Override
     protected List<WebElement> findElements(SearchContext searchContext, Locator locator)
     {
+        locator.getSearchParameters().setWaitForElement(false);
         return searchActions.findElements(searchContext, locator);
     }
 
     @Override
     protected WebElement findElement(SearchContext searchContext, Locator locator)
     {
-        List<WebElement> elements = searchActions.findElements(searchContext, locator);
+        List<WebElement> elements = findElements(searchContext, locator);
         if (elements.isEmpty())
         {
             throw new NoSuchElementException("No such element " + toStringParameters(locator));
