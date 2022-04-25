@@ -143,6 +143,100 @@ https://www.ietf.org/rfc/rfc3986.txt[RFC 3986].
 
 == HTTP Steps
 
+=== Set HTTP request configuration
+
+Set up custom request configuration.
+
+[source,gherkin]
+----
+When I set HTTP request configuration:$configItems
+----
+
+* `$configItems` - Table representing list of configuration items with columns "name" and "value" specifying their names and values respectively.
++
+.Available configs
+|===
+|Config |Acceptable values |Request config default value |Description
+
+|`expectContinueEnabled`
+|Boolean
+|`false`
+|Whether the 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/100[Expect: 100-Continue]' handshake is enabled
+
+|`staleConnectionCheckEnabled`
+|Boolean
+|`false`
+|Whether stale connection check is to be used
+
+|`redirectsEnabled`
+|Boolean
+|`true`
+|Whether redirects should be handled automatically
+
+|`relativeRedirectsAllowed`
+|Boolean
+|`true`
+|Whether relative redirects should be rejected
+
+|`circularRedirectsAllowed`
+|Boolean
+|`false`
+|Whether "circular redirects" (redirects to the same location) should be allowed
+
+|`authenticationEnabled`
+|Boolean
+|`true`
+|Whether authentication should be handled automatically
+
+|`contentCompressionEnabled`
+|Boolean
+|`true`
+|Whether the target server is requested to compress content
+
+|`normalizeUri`
+|Boolean
+|`true`
+|Whether client should normalize URIs in requests or not
+
+|`maxRedirects`
+|Integer
+|`50`
+|The maximum number of redirects to be followed
+
+|`connectionRequestTimeout`
+|Integer
+|`-1`
+|The timeout in milliseconds used when requesting a connection from the connection manager
+
+|`socketTimeout`
+|Integer
+|`-1`
+|The socket timeout in milliseconds
+
+|`socketTimeout`
+|Integer
+|`-1`
+|The socket timeout in milliseconds, which is the timeout for waiting for data or, put differently, a maximum period inactivity between two consecutive data packets
+
+|`cookieSpec`
+|String
+|`null`
+|The name of the cookie specification to be used for HTTP state management
+
+|===
+
+pass:[*] `-1` means "infinity"
+
+.Load a page with slow connection and with the property `http.socket-timeout` set to `15000`
+[source,gherkin]
+----
+When I set HTTP request configuration:
+|socketTimeout |
+|25000         |
+When I execute HTTP GET request for resource with URL `http://vividus-test-site.herokuapp.com/delayedLoading?pageTimeout=20000`
+Then '${responseStatusCode}' is = '200'
+----
+
 === Set HTTP request body
 
 Sets HTTP request body that will be used while executing the request. In the case of textual content the default HTTP
@@ -251,6 +345,33 @@ When I execute HTTP GET request for resource with URL `https://example.com`
 
 === Wait for JSON element in the HTTP response
 
+Waits for a specified amount of time until HTTP response body contains an element by the specified JSON path. The actions of the step:
+
+. Execute sub-steps.
+. Check if the HTTP response is present and the response body contains an element by JSON path.
+. If the required JSON element exists or the maximum number of retries is reached, then the execution stops, otherwise the step actions are repeated.
+. Stop step execution if HTTP response is not present or JSON element is found, otherwise sleep for the calculated part of specified duration and repeat actions from the start.
+
+[source,gherkin]
+----
+When I wait for presence of element by `$jsonPath` for `$duration` duration retrying $retryTimes times$stepsToExecute
+----
+
+* `$jsonPath` - The JSON path of the element to find.
+* `$duration` - The time duration to wait in {iso-date-format-link} format.
+* `$retryTimes` -  The maximum of attempts. `duration/retryTimes = timeout` is a polling timeout between requests.
+* `$stepsToExecute` - The sub-steps to execute at each iteration.
+
+.Wait for presence of element 10 times with polling timeout between requests 5 seconds
+[source,gherkin]
+----
+When I wait for presence of element by `$.unstableElement` for `PT50S` duration retrying 10 times
+|step                                                                                    |
+|When I execute HTTP GET request for resource with URL `http://example.com/testing-page` |
+----
+
+=== Wait for JSON element in the HTTP response with polling interval
+
 Executes the provided sub-steps until the HTTP response body contains an element by the specified JSON path or the maximum number of retries is reached. The maximum duration of the step execution is not limited. The actions of the step:
 
 . execute sub-steps
@@ -318,6 +439,110 @@ When I wait for response code $responseCode for $duration duration retrying $ret
 When I wait for response code `200` for `PT10S` duration retrying 3 times
 |step                                                        |
 |When I send HTTP GET to the relative URL '/delayed-resource'|
+----
+
+=== Validate content type of response body
+
+:content-type: https://www.iana.org/assignments/media-types/media-types.xhtml[content type]
+
+Checks content type of HTTP response body matches to the specified expected {content-type} according to the provided string validation rule.
+
+[source,gherkin]
+----
+Then content type of response body $comparisonRule `$contentType`
+----
+
+* `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[String validation rule].
+* `$contentType` – Expected {content-type}, e.g. `text/html`, `application/xml`, `application/json`.
+
+.Submit a GET request and check that response body type is `application/json`
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/json`
+Then content type of response body is equal to `application/json`
+----
+
+=== Validate size of response body
+
+Compare size of decompressed HTTP response body with the specified expected size in bytes.
+
+[source,gherkin]
+----
+Then size of decompressed response body is $comparisonRule `$sizeInBytes`
+----
+
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$sizeInBytes` - The expected size of the response body in bytes.
+
+.Submit a GET request and check that response body size is greater or equal to `1200` bytes
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://example.com`
+Then size of decompressed response body is greater than or equal to `1200`
+----
+
+=== Validate archive from response body
+
+Verifies that one of specified entries in the response archive has one of specified names.
+
+[source,gherkin]
+----
+Then the response archive contains entries with the names:$parameters
+----
+
+* `$parameters` - The ExamplesTable with names of entries.
+
+.Submit a GET request and check that response archive has file with name `responseTextFromZipArchive.txt`
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://example.com/get-zip-archive`
+Then the response archive contains entries with the names:
+|name                           |
+|responseTextFromZipArchive.txt |
+----
+
+== HTTP cookie steps
+
+=== Save value of HTTP cookie
+
+Saves cookie to scope variable. If present several cookies with the same name will be saved cookie with the root path value (path is '/').
+
+[source,gherkin]
+----
+When I save value of HTTP cookie with name `$cookieName` to $scopes variable `$variableName`
+----
+
+* `$cookieName` - The name of cookie.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of variable.
+
+.Get cookie with name `cookieName` and save its value to scenario variable `value`
+[source,gherkin]
+----
+When I issue a HTTP GET request for a resource with the URL 'https://httpbin.org/cookies/set/cookieName/cookieValue'
+When I save value of HTTP cookie with name `cookieName` to scenario variable `value`
+Then '${value}' is equal to 'cookieValue'
+----
+
+=== Change value of all HTTP cookies
+
+Change cookie value. If several cookies with the same name exist in cookie store, the value will be changed for all of them.
+
+[source,gherkin]
+----
+When I change value of all HTTP cookies with name `$cookieName` to `$newCookieValue`
+----
+
+* `$cookieName` - The name of cookie.
+* `$newCookieValue` - The new value for `$cookieName`.
+
+.Get cookie with name `cookieName` and set new value for it `newCookieValue`
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/cookies/set/cookieName/cookieValue`
+When I change value of all HTTP cookies with name `cookieName` to `newCookieValue`
+When I save value of HTTP cookie with name `cookieName` to scenario variable `value`
+Then '${value}' is equal to 'newCookieValue'
 ----
 
 == JSON Steps
