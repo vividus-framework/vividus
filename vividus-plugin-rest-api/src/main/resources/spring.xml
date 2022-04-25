@@ -26,7 +26,7 @@
 
     <bean id="httpTestContext" class="org.vividus.http.HttpTestContext" />
 
-    <bean name="FROM_JSON" class="org.vividus.transformer.JsonRestApiTableTransformer">
+    <bean name="FROM_JSON" class="org.vividus.http.transformer.JsonRestApiTableTransformer">
         <property name="httpClient" ref="httpClient-RestApi"/>
     </bean>
 

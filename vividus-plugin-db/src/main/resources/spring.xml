@@ -24,6 +24,8 @@
         </constructor-arg>
     </bean>
 
+    <bean id="FROM_DB" class="org.vividus.db.transformer.DatabaseTableTransformer" />
+
     <util:list id="stepBeanNames-DB">
         <idref bean="databaseSteps" />
     </util:list>

@@ -47,7 +47,7 @@ a|The strategy defining how records with duplicate keys should be handled:
 |===
 
 
-== Table Transformers
+== xref:ROOT:glossary.adoc#_table_transformer[Table Transformers]
 
 NOTE: The table transformers properties marked with *bold* are mandatory.
 

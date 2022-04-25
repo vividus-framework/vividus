@@ -12,27 +12,6 @@
     <context:component-scan base-package="org.vividus.jackson.databind.ui.web"/>
     <context:component-scan base-package="org.vividus.converter.ui.web" />
 
-    <bean id="siteMapParser" class="org.vividus.sitemap.SiteMapParser">
-        <property name="httpClient">
-            <bean class="org.vividus.http.client.HttpClient"
-                  factory-bean="httpClientFactory"
-                  factory-method="buildHttpClient">
-                <constructor-arg>
-                    <bean parent="httpClientConfig">
-                        <property name="headers">
-                            <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
-                                <constructor-arg value="sitemap.parser.http.header." />
-                            </bean>
-                        </property>
-                    </bean>
-                </constructor-arg>
-            </bean>
-        </property>
-        <property name="siteUrl" value="${sitemap.parser.site-url}" />
-        <property name="baseUrl" value="${sitemap.parser.base-url}" />
-        <property name="followRedirects" value="${sitemap.parser.follow-redirects}" />
-    </bean>
-
     <bean id="timeoutConfigurer" class="org.vividus.selenium.TimeoutConfigurer">
         <property name="pageLoadTimeout" value="${selenium.timeout.page-load-timeout}" />
         <property name="pageLoadTimeoutTimeUnit" value="${selenium.timeout.page-load-timeout-unit}" />

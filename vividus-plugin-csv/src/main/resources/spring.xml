@@ -18,6 +18,8 @@
 
     <bean class="org.vividus.csv.CsvReader" />
 
+    <bean id="FROM_CSV" class="org.vividus.csv.transformer.CsvTableTransformer" />
+
     <util:list id="stepBeanNames-Csv" value-type="java.lang.String">
         <idref bean="csvSteps" />
     </util:list>

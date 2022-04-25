@@ -83,4 +83,15 @@
     <bean id="running-scenario" class="org.vividus.variable.RunningScenarioNameDynamicVariable"/>
     <bean id="running-story" class="org.vividus.variable.RunningStoryNameDynamicVariable"/>
 
+    <bean id="CARTESIAN_PRODUCT" class="org.vividus.transformer.CartesianProductTableTransformer" />
+    <bean id="DISTINCTING" class="org.vividus.transformer.DistinctingTableTransformer" />
+    <bean id="FILTERING" class="org.vividus.transformer.FilteringTableTransformer" />
+    <bean id="ITERATING" class="org.vividus.transformer.IteratingTableTransformer" />
+    <bean id="JOINING" class="org.vividus.transformer.JoiningTableTransformer" />
+    <bean id="MERGING" class="org.vividus.transformer.MergingTableTransformer" />
+    <bean id="REPEATING" class="org.vividus.transformer.RepeatingTableTransformer" />
+    <bean id="RESOLVING_EXPRESSIONS_EAGERLY" class="org.vividus.transformer.ResolvingExpressionsEagerlyTransformer" />
+    <bean id="RESOLVING_SELF_REFERENCES_EAGERLY" class="org.vividus.transformer.ResolvingSelfReferencesEagerlyTransformer" />
+    <bean id="SORTING" class="org.vividus.transformer.SortingTableTransformer" />
+
 </beans>

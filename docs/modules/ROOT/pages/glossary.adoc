@@ -3,7 +3,7 @@
 This glossary contains the descriptions for terms and abbreviations that are used in the documentation.
 
 == Expression
-*Synoyms*: VIVIDUS expression.
+*Synonyms*: VIVIDUS expression.
 
 An expression is a special placeholder which is detected, evaluated and resolved
 during test execution. Expressions are used for the data generation and
@@ -24,7 +24,7 @@ with the deepest expression.
 Expressions may include any number of variables placeholders.
 
 == Resource
-*Synoyms*: project resource, test resource.
+*Synonyms*: project resource, test resource.
 
 A resource is data (text, images, audio, and so on) that tests need to access
 in a way that is independent of the location of the test source code (either
@@ -47,3 +47,41 @@ can be referenced in the tests as `/data/request.json`.
 
 The name of a resource is independent of the used operating system;
 in particular, the path separator is always a slash `/`.
+
+== Table Transformer
+*Synonyms*: transformer, ExampleTable transformer.
+
+ExampleTable enables the transformation of its string representation via the
+"transformer" inlined property. It's allowed to define a chain of transformers,
+in this case the transformers are applied sequentially from top to bottom:
+
+[source,gherkin]
+----
+{transformer=MY_TRANSFORMER}
+{transformer=ONE_MORE_MY_TRANSFORMER}
+|header 1|header 2| .... |header n|
+|value 11|value 12| .... |value 1n|
+...
+|value m1|value m2| .... |value mn|
+----
+
+The special characters `,` `{` `}` must be escaped in the transformer properties
+using character `\`.
+
+.Escaping special characters in transformer properties
+[source,gherkin]
+----
+{transformer=MY_TRANSFORMER, countries=\{Australia\,Canada\}}
+----
+In the example above the transformer will have a single property with name
+`countries` and value `{Australia,Canada}`.
+
+VIVIDUS variables of scopes `global` and `next batches` can be used in
+transformer properties (pay attention to escapes of the variables placeholders
+in the example below).
+
+.Usage of global variable `$\{locale}` in transformer property
+[source,gherkin]
+----
+{transformer=ONE_MORE_MY_TRANSFORMER, tables=/$\{locale\}/table1.table;/$\{locale\}/table2.table}
+----

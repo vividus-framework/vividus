@@ -22,6 +22,99 @@ to the project root.
 </beans>
 ----
 
+
+== xref:ROOT:glossary.adoc#_table_transformer[Table Transformers]
+
+In order to create and register own table transformer the following steps should
+be done.
+
+. Create a new class that implements
+https://javadoc.io/doc/org.jbehave/jbehave-core/latest/org/jbehave/core/model/TableTransformers.TableTransformer.html[`org.jbehave.core.model.TableTransformers.TableTransformer`]:
++
+./src/main/java/com/mycompany/transformer/MyTableTransformer.java
+[source,java]
+----
+package com.mycompany.transformer;
+
+import org.jbehave.core.model.TableTransformers.TableTransformer;
+
+public class MyTableTransformer implements TableTransformer
+{
+    @Override
+    public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
+    {
+        String transformedTable = ...; // Table transformation logic
+        // ...
+        return transformedTable;
+    }
+}
+----
+
+. Register Spring bean where `id` is the name of the transformer which will
+be used to refer it in tests:
++
+./src/main/resources/spring.xml
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="MY_TRANSFORMER" class="com.mycompany.transformer.MyTableTransformer"/>
+
+</beans>
+----
+
+. Use new transformer in tests:
++
+./src/main/resources/story/MyStory.story
+[source,gherkin]
+----
+Scenario: Use the custom tramsfomer to modify ExamplesTable
+Given ...
+When ...
+Then ...
+Examples:
+{transformer=MY_TRANSFORMER}
+|header |
+|value 1|
+|value 2|
+----
+
+[NOTE]
+====
+It's recommended to stick to the following naming conventions:
+
+* `SCREAMING_SNAKE_CASE` for transfomer names:
++
+[source,gherkin]
+----
+{transformer=MY_TRANSFORMER}
+----
+* `lowerCamelCase` for transformer parameters:
++
+[source,gherkin]
+----
+{transformer=MY_TRANSFORMER, transformerParameter=value}
+----
+* `kebab-case` with dot `.` as a separator for transformer bean properties:
++
+[source,properties]
+----
+transformer.my-transformer.my-property=value
+----
++
+Pay attention to the property format:
++
+[source,properties]
+----
+transformer.<custom-transform-name>.<property-name>=<property-value>
+----
+====
+
+
 == Dynamic variables
 
 In order to create and register own dynamic variable the following steps should

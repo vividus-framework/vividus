@@ -24,8 +24,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.inject.Named;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
@@ -34,7 +32,6 @@ import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.steps.ParameterControls;
 import org.vividus.util.ExamplesTableProcessor;
 
-@Named("RESOLVING_SELF_REFERENCES_EAGERLY")
 public class ResolvingSelfReferencesEagerlyTransformer implements ExtendedTableTransformer
 {
     private final ParameterControls parameterControls;

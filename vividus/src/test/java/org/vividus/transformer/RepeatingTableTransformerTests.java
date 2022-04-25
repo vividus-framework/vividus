@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ class RepeatingTableTransformerTests
     private static final String TABLE_AS_STRING = "|h1|h2|\n|r1v1|r1v2|\n|r2v1|r2v2|";
     private static final String ROW2 = "|r2v1|r2v2|\n";
     private static final String ROW1 = "|r1v1|r1v2|\n";
-    private final RepeatingTableTranformer transformer = new RepeatingTableTranformer();
+    private final RepeatingTableTransformer transformer = new RepeatingTableTransformer();
     private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters = new ParameterConverters();
 
