@@ -81,6 +81,8 @@ public final class ConfigurationResolver
 
         final Properties configurationProperties = propertiesLoader.loadConfigurationProperties();
         final Properties overridingProperties = propertiesLoader.loadOverridingProperties();
+        final Properties deprecatedProperties = propertiesLoader.loadFromResourceTreeRecursively(false, "deprecated");
+
 
         propertiesLoader.prohibitConfigurationProperties();
 
@@ -103,7 +105,6 @@ public final class ConfigurationResolver
             properties.putAll(configurationItem);
         }
 
-        Properties deprecatedProperties = propertiesLoader.loadFromResourceTreeRecursively(false, "deprecated");
         DeprecatedPropertiesHandler deprecatedPropertiesHandler = new DeprecatedPropertiesHandler(
                 deprecatedProperties, PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX);
         deprecatedPropertiesHandler.replaceDeprecated(properties);

@@ -163,6 +163,7 @@ class ConfigurationResolverTests
             InOrder ordered = Mockito.inOrder(propertiesLoader, deprecatedPropertiesHandler);
             ordered.verify(propertiesLoader).loadConfigurationProperties();
             ordered.verify(propertiesLoader).loadOverridingProperties();
+            ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(false, DEPRECATED);
             ordered.verify(propertiesLoader).prohibitConfigurationProperties();
             ordered.verify(propertiesLoader).loadDefaultProperties(HTTP_CLIENT_DEFAULT);
             ordered.verify(propertiesLoader).loadDefaultProperties(UTIL_DEFAULT);
@@ -175,7 +176,6 @@ class ConfigurationResolverTests
             ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(true, PROFILE, DESKTOP_CHROME);
             ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(true, ENVIRONMENT, UAT);
             ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(false, SUITE, EMPTY_STRING);
-            ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(false, DEPRECATED);
             ordered.verify(deprecatedPropertiesHandler).replaceDeprecated(any(Properties.class));
             ordered.verify(deprecatedPropertiesHandler).replaceDeprecated(any(Properties.class), any(Properties.class));
             ordered.verify(deprecatedPropertiesHandler, atLeast(13)).warnIfDeprecated(any(String.class),
