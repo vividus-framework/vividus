@@ -9,7 +9,6 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
         default-lazy-init="true" profile="web">
 
-    <context:component-scan base-package="org.vividus.jackson.databind.ui.web"/>
     <context:component-scan base-package="org.vividus.converter.ui.web" />
 
     <bean id="timeoutConfigurer" class="org.vividus.selenium.TimeoutConfigurer">
@@ -22,8 +21,6 @@
     <bean id="webDriverFactory" class="org.vividus.selenium.WebDriverFactory" parent="parentWebDriverFactory">
         <property name="webDriverType" value="${selenium.browser}" />
     </bean>
-
-    <bean id="elementUtil" class="org.vividus.ui.web.util.ElementUtil" />
 
     <bean class="org.vividus.selenium.screenshot.WebAdjustingCoordsProvider" />
 

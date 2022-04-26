@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 package org.vividus.converter.ui.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,13 +32,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.SearchActions;
-import org.vividus.ui.web.util.ElementUtil;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.util.LocatorConversionUtils;
 
 @ExtendWith(MockitoExtension.class)
 class StringToWebElementParameterConverterTests
 {
     @Mock private SearchActions searchActions;
-    @Mock private ElementUtil elementUtil;
+    @Mock private LocatorConversionUtils conversionUtils;
     @InjectMocks private StringToWebElementParameterConverter converter;
 
     @Test
@@ -43,7 +47,14 @@ class StringToWebElementParameterConverterTests
     {
         String locator = "locator";
         Optional<WebElement> expected = Optional.of(mock(WebElement.class));
-        when(elementUtil.getElement(locator, searchActions)).thenReturn(() -> expected);
-        assertEquals(expected, converter.convertValue(locator, null).get());
+        Locator attributes = mock(Locator.class);
+        when(searchActions.findElement(attributes)).thenReturn(expected);
+        when(conversionUtils.convertToLocator(locator)).thenReturn(attributes);
+        Supplier<Optional<WebElement>> supplier = converter.convertValue(locator, null);
+        Optional<WebElement> actual1 = supplier.get();
+        Optional<WebElement> actual2 = supplier.get();
+        assertEquals(expected, actual1);
+        assertSame(actual1, actual2);
+        verify(searchActions).findElement(attributes);
     }
 }
