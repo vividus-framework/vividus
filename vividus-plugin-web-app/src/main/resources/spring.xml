@@ -25,6 +25,8 @@
 
     <bean id="elementUtil" class="org.vividus.ui.web.util.ElementUtil" />
 
+    <bean class="org.vividus.selenium.screenshot.WebAdjustingCoordsProvider" />
+
     <bean class="org.vividus.selenium.screenshot.WebScreenshotTaker" parent="abstractScreenshotTaker">
         <property name="fullPageScreenshots" value="${selenium.screenshot.full-page}" />
         <property name="indent" value="${selenium.screenshot.indent}" />

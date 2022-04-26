@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import org.junit.jupiter.api.Test;
-import org.vividus.selenium.screenshot.WebScreenshotConfiguration;
+import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.screenshot.IScreenshotIndexer;
@@ -72,7 +72,7 @@ class VisualCheckFactoryTests
     {
         visualCheckFactory.setScreenshotIndexer(Optional.empty());
         visualCheckFactory.setIndexers(Map.of());
-        WebScreenshotConfiguration screenshotConfiguration = mock(WebScreenshotConfiguration.class);
+        ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
         VisualCheck check = visualCheckFactory.create(NAME, VisualActionType.COMPARE_AGAINST,
                 screenshotConfiguration);
         assertAll(

@@ -112,7 +112,7 @@
 
     <bean id="mobileAppWebDriverManager" class="org.vividus.selenium.mobileapp.MobileAppWebDriverManager" parent="genericWebDriverManager"/>
 
-    <bean id="coordsProvider" class="org.vividus.selenium.mobileapp.screenshot.MobileAppCoordsProvider">
+    <bean class="org.vividus.selenium.mobileapp.screenshot.MobileAppCoordsProvider">
         <constructor-arg index="0" value="${mobile.screenshot.downscale}" />
     </bean>
 
