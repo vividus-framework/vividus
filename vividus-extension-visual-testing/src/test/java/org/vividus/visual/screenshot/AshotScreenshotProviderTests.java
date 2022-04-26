@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,11 +46,10 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.screenshot.AshotScreenshotTaker;
 import org.vividus.selenium.screenshot.ScreenshotDebugger;
-import org.vividus.selenium.screenshot.WebScreenshotTaker;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.util.ResourceUtils;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
@@ -63,21 +62,19 @@ import ru.yandex.qatools.ashot.util.ImageTool;
 @ExtendWith(MockitoExtension.class)
 class AshotScreenshotProviderTests
 {
-    private static final Locator B_LOCATOR = new Locator(WebLocatorType.XPATH, ".//b");
-    private static final Locator A_LOCATOR = new Locator(WebLocatorType.XPATH, ".//a");
-    private static final Locator ELEMENT_LOCATOR = new Locator(WebLocatorType.XPATH,
-            ".//img[@alt='Google']");
-    private static final Locator AREA_LOCATOR = new Locator(WebLocatorType.XPATH,
-            ".//form[@action='/search']");
-
-    private static final Map<IgnoreStrategy, Set<Locator>> STRATEGIES = createMap(IgnoreStrategy.ELEMENT,
-            Set.of(ELEMENT_LOCATOR, A_LOCATOR), IgnoreStrategy.AREA, Set.of(B_LOCATOR));
-    private static final Map<IgnoreStrategy, Set<Locator>> STEP_LEVEL_STRATEGIES = Map
-            .of(IgnoreStrategy.ELEMENT, Set.of(A_LOCATOR), IgnoreStrategy.AREA, Set.of(B_LOCATOR, AREA_LOCATOR));
-
     private static final String BASELINE = "baseline";
+
     @Mock
-    private WebScreenshotTaker screenshotTaker;
+    private Locator aLocator;
+    @Mock
+    private Locator bLocator;
+    @Mock
+    private Locator elementLocator;
+    @Mock
+    private Locator areaLocator;
+
+    @Mock
+    private AshotScreenshotTaker<?> screenshotTaker;
     @Mock(lenient = true)
     private ISearchActions searchActions;
     @Mock
@@ -105,9 +102,9 @@ class AshotScreenshotProviderTests
         SearchContext searchContext = mock(SearchContext.class);
         VisualCheck visualCheck = mockSearchContext(searchContext);
         Screenshot screenshot = mock(Screenshot.class);
-        when(searchActions.findElements(A_LOCATOR)).thenReturn(List.of());
+        when(searchActions.findElements(aLocator)).thenReturn(List.of());
         when(screenshotTaker.takeAshotScreenshot(searchContext, Optional.empty())).thenReturn(screenshot);
-        screenshotProvider.setIgnoreStrategies(Map.of(IgnoreStrategy.AREA, Set.of(A_LOCATOR)));
+        screenshotProvider.setIgnoreStrategies(Map.of(IgnoreStrategy.AREA, Set.of(aLocator)));
         assertSame(screenshot, screenshotProvider.take(visualCheck));
         verifyNoInteractions(screenshotDebugger);
     }
@@ -122,35 +119,40 @@ class AshotScreenshotProviderTests
     @Test
     void shouldTakeScreenshotAndProcessIgnoredElements() throws IOException
     {
+        Map<IgnoreStrategy, Set<Locator>> strategies = createMap(IgnoreStrategy.ELEMENT,
+                Set.of(elementLocator, aLocator), IgnoreStrategy.AREA, Set.of(bLocator));
+        Map<IgnoreStrategy, Set<Locator>> stepLevelStrategies = Map.of(IgnoreStrategy.ELEMENT, Set.of(aLocator),
+                IgnoreStrategy.AREA, Set.of(bLocator, areaLocator));
+
         SearchContext searchContext = mock(SearchContext.class);
         VisualCheck visualCheck = mockSearchContext(searchContext);
-        visualCheck.setElementsToIgnore(STEP_LEVEL_STRATEGIES);
-        screenshotProvider.setIgnoreStrategies(STRATEGIES);
+        visualCheck.setElementsToIgnore(stepLevelStrategies);
+        screenshotProvider.setIgnoreStrategies(strategies);
         Screenshot screenshot = new Screenshot(loadImage("original"));
         WebDriver driver = mock(WebDriver.class);
         when(webDriverProvider.get()).thenReturn(driver);
         WebElement element = mock(WebElement.class);
-        when(searchActions.findElements(ELEMENT_LOCATOR)).thenReturn(List.of(element));
+        when(searchActions.findElements(elementLocator)).thenReturn(List.of(element));
         when(coordsProvider.ofElement(driver, element)).thenReturn(new Coords(704, 89, 272, 201));
         WebElement area = mock(WebElement.class);
-        when(searchActions.findElements(AREA_LOCATOR)).thenReturn(List.of(area));
+        when(searchActions.findElements(areaLocator)).thenReturn(List.of(area));
         when(coordsProvider.ofElement(driver, area)).thenReturn(new Coords(270, 311, 1139, 52));
         when(screenshotTaker.takeAshotScreenshot(searchContext, Optional.empty())).thenReturn(screenshot);
 
         Screenshot actual = screenshotProvider.take(visualCheck);
 
-        verifyScreesnhot(screenshot, actual);
+        verifyScreenshot(screenshot, actual);
     }
 
-    private void verifyScreesnhot(Screenshot screenshot, Screenshot actual) throws IOException
+    private void verifyScreenshot(Screenshot screenshot, Screenshot actual) throws IOException
     {
         assertSame(actual, screenshot);
         BufferedImage afterCropping = loadImage("after_cropping");
         assertThat(actual.getImage(), ImageTool.equalImage(afterCropping));
-        verify(searchActions).findElements(A_LOCATOR);
-        verify(searchActions).findElements(B_LOCATOR);
-        verify(searchActions).findElements(ELEMENT_LOCATOR);
-        verify(searchActions).findElements(AREA_LOCATOR);
+        verify(searchActions).findElements(aLocator);
+        verify(searchActions).findElements(bLocator);
+        verify(searchActions).findElements(elementLocator);
+        verify(searchActions).findElements(areaLocator);
         BufferedImage elementCropped = loadImage("element_cropped");
         InOrder ordered = Mockito.inOrder(screenshotDebugger);
         ordered.verify(screenshotDebugger).debug(eq(AshotScreenshotProvider.class), eq("cropped_by_ELEMENT"),
