@@ -39,6 +39,7 @@ import com.google.common.eventbus.EventBus;
 
 import org.jbehave.core.model.Step;
 import org.jbehave.core.reporters.ThreadSafeReporter;
+import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -107,8 +108,17 @@ class AdaptedDelegatingReportPortalStoryReporterTests
     @Test
     void shouldNotExecuteBeforeStepForSystemTests()
     {
-        String step = "afterStories";
-        adaptedReporter.beforeStep(new Step(StepExecutionType.EXECUTABLE, step));
+        String thenStep = "Then I Took an Arrow in the Knee";
+
+        adaptedReporter.beforeStoriesSteps(Stage.BEFORE);
+        adaptedReporter.beforeStep(new Step(StepExecutionType.EXECUTABLE, thenStep));
+        adaptedReporter.afterStoriesSteps(Stage.BEFORE);
+
+        adaptedReporter.beforeStoriesSteps(Stage.AFTER);
+        adaptedReporter.beforeStep(new Step(StepExecutionType.EXECUTABLE, thenStep));
+        adaptedReporter.afterStoriesSteps(Stage.AFTER);
+
+        adaptedReporter.beforeStep(new Step(StepExecutionType.EXECUTABLE, "afterStories"));
         verifyNoInteractions(reporter);
     }
 
