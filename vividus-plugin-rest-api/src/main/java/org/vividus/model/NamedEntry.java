@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 package org.vividus.model;
 
 import org.jbehave.core.annotations.AsParameters;
+import org.vividus.steps.StringComparisonRule;
 
 @AsParameters
 public class NamedEntry
 {
+    private StringComparisonRule rule;
     private String name;
 
     public String getName()
@@ -31,5 +33,15 @@ public class NamedEntry
     public void setName(String name)
     {
         this.name = name;
+    }
+
+    public StringComparisonRule getRule()
+    {
+        return rule;
+    }
+
+    public void setRule(StringComparisonRule rule)
+    {
+        this.rule = rule;
     }
 }

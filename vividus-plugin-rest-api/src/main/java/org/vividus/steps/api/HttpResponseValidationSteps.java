@@ -368,24 +368,48 @@ public class HttpResponseValidationSteps
     }
 
     /**
-     * Verifies that one of specified entries in the response archive has one of specified names
-     * Example:
+     * Verifies that at least one (or no one) entry in a response archive matches the specified string comparison rule.
+     * If comparison rule column does not exist,
+     * the verification that archive entries have the specified names is performed.
+     * <p>
+     * Usage example:
+     * </p>
      * <p>
      * <code>
      * Then the response archive contains entries with the names:$parameters<br>
-     * |name                        |
-     * |files/2011-11-11/skyrim.json|
+     * |rule      |name                                    |<br>
+     * |contains  |2011-11-11/skyrim.json                  |<br>
+     * |matches   |files/2011-11-11/logs/papyrus\.\d+\.log |<br>
      * </code>
      * </p>
-     * @param parameters contains names
+     * @param parameters The ExampleTable that contains specified string comparison <b>rule</b> and entry <b>name</b>
+     * pattern that should be found using current <b>rule</b>. Available columns:
+     * <ul>
+     * <li>rule - String comparison rule: "is equal to", "contains", "does not contain", "matches".</li>
+     * <li>name - Desired entry name pattern used with current <b>rule</b>.</li>
+     * </ul>
      */
     @Then("the response archive contains entries with the names:$parameters")
     public void verifyArchiveContainsEntries(List<NamedEntry> parameters)
     {
         Set<String> entryNames = ZipUtils.readZipEntryNamesFromBytes(getResponseBody());
-        parameters.stream().map(NamedEntry::getName).forEach(expectedName ->
+
+        parameters.forEach(entry ->
+        {
+            String expectedName = entry.getName();
+            if (entry.getRule() != null)
+            {
+                StringComparisonRule comparisonRule = entry.getRule();
+                softAssert.assertThat(String.format(
+                        "The response archive contains entry matching the comparison rule '%s' with name pattern '%s'",
+                        comparisonRule, expectedName), entryNames, hasItem(comparisonRule.createMatcher(expectedName)));
+            }
+            else
+            {
                 softAssert.assertThat("The response archive contains entry with name " + expectedName, entryNames,
-                        hasItem(expectedName)));
+                        hasItem(expectedName));
+            }
+        });
     }
 
     /**
