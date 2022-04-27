@@ -31,9 +31,7 @@ import io.qameta.allure.Extension;
 class EmbeddedPluginTests
 {
     private static final String ID = "id";
-
-    @Mock
-    private List<String> resourceList;
+    private static final List<String> RESOURCE_LIST = List.of();
 
     @Mock
     private Extension extension;
@@ -41,10 +39,10 @@ class EmbeddedPluginTests
     @Test
     void testInitializationPluginWithJsAndExtension()
     {
-        EmbeddedPlugin plugin = new EmbeddedPlugin(ID, resourceList, extension);
+        EmbeddedPlugin plugin = new EmbeddedPlugin(ID, RESOURCE_LIST, extension);
 
         assertEquals(ID, plugin.getConfig().getId());
-        assertEquals(resourceList, plugin.getConfig().getJsFiles());
+        assertEquals(RESOURCE_LIST, plugin.getConfig().getJsFiles());
         assertEquals(1, plugin.getExtensions().size());
         assertEquals(extension, plugin.getExtensions().get(0));
     }
@@ -52,10 +50,10 @@ class EmbeddedPluginTests
     @Test
     void testInitializationPluginWithCss()
     {
-        EmbeddedPlugin plugin = new EmbeddedPlugin(ID, resourceList);
+        EmbeddedPlugin plugin = new EmbeddedPlugin(ID, RESOURCE_LIST);
 
         assertEquals(ID, plugin.getConfig().getId());
-        assertEquals(resourceList, plugin.getConfig().getCssFiles());
+        assertEquals(RESOURCE_LIST, plugin.getConfig().getCssFiles());
     }
 
     @Test
