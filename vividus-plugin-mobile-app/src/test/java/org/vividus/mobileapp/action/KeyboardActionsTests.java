@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +107,17 @@ class KeyboardActionsTests
     }
 
     @Test
+    void shouldCleanTextWithoutKeyboardHidingForNotRealDevice()
+    {
+        init(false);
+
+        keyboardActions.clearText(element);
+
+        verify(element).clear();
+        verifyNoInteractions(hidesKeyboard);
+    }
+
+    @Test
     void shouldClearTextInEmptyElement()
     {
         init(false);
@@ -115,7 +126,7 @@ class KeyboardActionsTests
         enableOnScreenKeyboard(false);
         when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
 
-        keyboardActions.clearText(element);
+        keyboardActions.clearTextAndHide(element);
 
         verify(element).clear();
         verify(hidesKeyboard).hideKeyboard();
@@ -166,7 +177,7 @@ class KeyboardActionsTests
         enableOnScreenKeyboard(true);
         when(element.getTagName()).thenReturn(XCUIELEMENT_TYPE_TEXT_VIEW);
 
-        keyboardActions.clearText(element);
+        keyboardActions.clearTextAndHide(element);
 
         verify(element).clear();
         verifyNoInteractions(hidesKeyboard);
@@ -183,7 +194,7 @@ class KeyboardActionsTests
         when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
         when(element.getTagName()).thenReturn(XCUIELEMENT_TYPE_TEXT_VIEW);
 
-        keyboardActions.clearText(element);
+        keyboardActions.clearTextAndHide(element);
 
         verify(element).clear();
         verify(hidesKeyboard).hideKeyboard();

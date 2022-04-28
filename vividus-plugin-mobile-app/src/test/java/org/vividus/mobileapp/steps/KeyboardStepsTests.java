@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ class KeyboardStepsTests
     private static final String HOME = "Home";
     private static final String TEXT = "text";
     private static final String ELEMENT_TO_TYPE_TEXT = "The element to type text";
+    private static final String ELEMENT_TO_CLEAR = "The element to clear";
     private static final String NAME = "name";
     private static final String MOBILE_PRESS_BUTTON = "mobile: pressButton";
 
@@ -106,8 +107,17 @@ class KeyboardStepsTests
     void shouldClearTextInField()
     {
         WebElement element = mock(WebElement.class);
-        when(baseValidations.assertElementExists("The element to clear", locator)).thenReturn(Optional.of(element));
+        when(baseValidations.assertElementExists(ELEMENT_TO_CLEAR, locator)).thenReturn(Optional.of(element));
         keyboardSteps.clearTextInField(locator);
+        verify(keyboardActions).clearTextAndHide(element);
+    }
+
+    @Test
+    void shouldClearTextWithKeepingKeyboardInField()
+    {
+        WebElement element = mock(WebElement.class);
+        when(baseValidations.assertElementExists(ELEMENT_TO_CLEAR, locator)).thenReturn(Optional.of(element));
+        keyboardSteps.clearTextInFieldAndKeepKeyboard(locator);
         verify(keyboardActions).clearText(element);
     }
 
