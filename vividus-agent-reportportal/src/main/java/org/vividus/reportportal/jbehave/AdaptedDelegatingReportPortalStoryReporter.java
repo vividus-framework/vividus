@@ -19,6 +19,7 @@ package org.vividus.reportportal.jbehave;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import com.epam.reportportal.jbehave.ReportPortalStoryReporter;
@@ -34,6 +35,7 @@ import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
 import org.jbehave.core.reporters.DelegatingStoryReporter;
 import org.jbehave.core.reporters.ThreadSafeReporter;
+import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
 import org.vividus.softassert.event.AssertionFailedEvent;
@@ -42,12 +44,25 @@ public class AdaptedDelegatingReportPortalStoryReporter extends DelegatingStoryR
 {
     private final ReportPortalStoryReporter reporter;
     private final List<TestItemLeaf> failedSteps = new ArrayList<>();
+    private final AtomicBoolean systemStage = new AtomicBoolean(false);
 
     public AdaptedDelegatingReportPortalStoryReporter(EventBus eventBus, ReportPortalStoryReporter reporter)
     {
         super(reporter);
         this.reporter = reporter;
         eventBus.register(this);
+    }
+
+    @Override
+    public void beforeStoriesSteps(Stage stage)
+    {
+        systemStage.set(true);
+    }
+
+    @Override
+    public void afterStoriesSteps(Stage stage)
+    {
+        systemStage.set(false);
     }
 
     @Override
@@ -72,7 +87,7 @@ public class AdaptedDelegatingReportPortalStoryReporter extends DelegatingStoryR
 
     private void runIfNotSystem(String step, Consumer<String> toRun)
     {
-        if (!step.contains("afterStories"))
+        if (!systemStage.get() && !step.contains("afterStories"))
         {
             toRun.accept(step);
         }
