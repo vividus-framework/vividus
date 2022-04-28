@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -46,17 +45,13 @@ import org.vividus.util.property.IPropertyMapper;
 import io.qameta.allure.ConfigurationBuilder;
 import io.qameta.allure.Constants;
 import io.qameta.allure.Extension;
-import io.qameta.allure.PluginConfiguration;
 import io.qameta.allure.ReportGenerator;
-import io.qameta.allure.behaviors.BehaviorsPlugin;
 import io.qameta.allure.core.Configuration;
-import io.qameta.allure.core.Plugin;
 import io.qameta.allure.duration.DurationTrendPlugin;
 import io.qameta.allure.entity.ExecutorInfo;
 import io.qameta.allure.entity.Status;
 import io.qameta.allure.executor.ExecutorPlugin;
 import io.qameta.allure.history.HistoryTrendPlugin;
-import io.qameta.allure.plugin.DefaultPlugin;
 import io.qameta.allure.summary.SummaryPlugin;
 import io.qameta.allure.util.PropertiesUtils;
 
@@ -75,14 +70,17 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
     private final IPropertyMapper propertyMapper;
     private final ResourcePatternResolver resourcePatternResolver;
+    private final AllurePluginsProvider allurePluginsProvider;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private boolean started;
 
-    public AllureReportGenerator(IPropertyMapper propertyMapper, ResourcePatternResolver resourcePatternResolver)
+    public AllureReportGenerator(IPropertyMapper propertyMapper, ResourcePatternResolver resourcePatternResolver,
+            AllurePluginsProvider allurePluginsProvider)
     {
         this.propertyMapper = propertyMapper;
         this.resourcePatternResolver = resourcePatternResolver;
+        this.allurePluginsProvider = allurePluginsProvider;
     }
 
     @Override
@@ -179,15 +177,10 @@ public class AllureReportGenerator implements IAllureReportGenerator
                 new DurationTrendPlugin(),
                 new ExecutorPlugin()
         );
-        List<Plugin> plugins = List.of(
-                new EmbeddedPlugin("behaviors", List.of("index.js"), new BehaviorsPlugin()),
-                new EmbeddedPlugin("custom-logo", List.of(STYLES_CSS)),
-                new EmbeddedPlugin("custom-title", List.of(STYLES_CSS))
-        );
         Configuration configuration = new ConfigurationBuilder()
                 .useDefault()
                 .fromExtensions(extensions)
-                .fromPlugins(plugins)
+                .fromPlugins(allurePluginsProvider.getPlugins())
                 .build();
         new ReportGenerator(configuration).generate(reportDirectory.toPath(), List.of(resultsDirectory.toPath()));
     }
@@ -281,24 +274,5 @@ public class AllureReportGenerator implements IAllureReportGenerator
     public void setHistoryDirectory(File historyDirectory)
     {
         this.historyDirectory = historyDirectory;
-    }
-
-    private static class EmbeddedPlugin extends DefaultPlugin
-    {
-        EmbeddedPlugin(String id, List<String> jsFiles, Extension extension)
-        {
-            super(new PluginConfiguration().setId(id).setJsFiles(jsFiles), List.of(extension), null);
-        }
-
-        EmbeddedPlugin(String id, List<String> cssFiles)
-        {
-            super(new PluginConfiguration().setId(id).setCssFiles(cssFiles), List.of(), null);
-        }
-
-        @Override
-        public void unpackReportStatic(Path outputDirectory)
-        {
-            // do nothing
-        }
     }
 }
