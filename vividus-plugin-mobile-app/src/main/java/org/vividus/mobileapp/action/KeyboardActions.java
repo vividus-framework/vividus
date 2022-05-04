@@ -58,23 +58,6 @@ public class KeyboardActions
 
     /**
      * Type <b>text</b> into the <b>element</b>
-     * <br>
-     * The atomic actions performed are:
-     * <ol>
-     * <li>type text into the element</li>
-     * <li>hide keyboard</li>
-     * </ol>
-     * @param element element to type text, must not be {@code null}
-     * @param text text to type into the element, must not be {@code null}
-     */
-    public void typeTextAndHide(WebElement element, String text)
-    {
-        typeText(element, text);
-        hideKeyboard(element);
-    }
-
-    /**
-     * Type <b>text</b> into the <b>element</b>
      * @param element element to type text, must not be {@code null}
      * @param text text to type into the element, must not be {@code null}
      */
@@ -86,22 +69,6 @@ public class KeyboardActions
 
     /**
      * Clear the <b>element</b>'s text
-     * <br>
-     * The atomic actions performed are:
-     * <ol>
-     * <li>clear the element's text</li>
-     * <li>hide keyboard</li>
-     * </ol>
-     * @param element element to clear, must not be {@code null}
-     */
-    public void clearTextAndHide(WebElement element)
-    {
-        clearText(element);
-        hideKeyboard(element);
-    }
-
-    /**
-     * Clear the <b>element</b>'s text
      * @param element element to clear, must not be {@code null}
      */
     public void clearText(WebElement element)
@@ -109,7 +76,11 @@ public class KeyboardActions
         element.clear();
     }
 
-    private void hideKeyboard(WebElement webElement)
+    /**
+     * Close the keyboard
+     * @param webElement element associated with the keyboard
+     */
+    public void hideKeyboard(WebElement webElement)
     {
         // 1. https://github.com/appium/WebDriverAgent/blob/master/WebDriverAgentLib/Commands/FBCustomCommands.m#L107
         // 2. The keyboard is not shown in some cases: e.g. when trying to clear an empty field. So we need to check

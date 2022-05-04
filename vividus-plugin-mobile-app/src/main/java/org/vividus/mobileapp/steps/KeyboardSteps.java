@@ -107,14 +107,17 @@ public class KeyboardSteps
     public void typeTextInField(String text, Locator locator)
     {
         baseValidations.assertElementExists(ELEMENT_TO_TYPE_TEXT, locator)
-                .ifPresent(e -> keyboardActions.typeTextAndHide(e, text));
+                .ifPresent(e -> {
+                    keyboardActions.typeText(e, text);
+                    keyboardActions.hideKeyboard(e);
+                });
     }
 
     /**
      * Clear a field located by the <b>locator</b>
      * @param locator locator to find a field
      */
-    @When("I clear field located `$locator`")
+    @When("I clear field located `$locator` and keep keyboard opened")
     public void clearTextInFieldAndKeepKeyboard(Locator locator)
     {
         baseValidations.assertElementExists(ELEMENT_TO_CLEAR, locator).ifPresent(keyboardActions::clearText);
@@ -133,9 +136,12 @@ public class KeyboardSteps
     @When("I clear field located `$locator`")
     public void clearTextInField(Locator locator)
     {
-        baseValidations.assertElementExists(ELEMENT_TO_CLEAR, locator).ifPresent(keyboardActions::clearTextAndHide);
+        baseValidations.assertElementExists(ELEMENT_TO_CLEAR, locator)
+                .ifPresent(e -> {
+                    keyboardActions.clearText(e);
+                    keyboardActions.hideKeyboard(e);
+                });
     }
-
 
     /**
      * Presses the key

@@ -84,7 +84,8 @@ class KeyboardStepsTests
         WebElement element = mock(WebElement.class);
         when(baseValidations.assertElementExists(ELEMENT_TO_TYPE_TEXT, locator)).thenReturn(Optional.of(element));
         keyboardSteps.typeTextInField(TEXT, locator);
-        verify(keyboardActions).typeTextAndHide(element, TEXT);
+        verify(keyboardActions).typeText(element, TEXT);
+        verify(keyboardActions).hideKeyboard(element);
     }
 
     @Test
@@ -109,7 +110,8 @@ class KeyboardStepsTests
         WebElement element = mock(WebElement.class);
         when(baseValidations.assertElementExists(ELEMENT_TO_CLEAR, locator)).thenReturn(Optional.of(element));
         keyboardSteps.clearTextInField(locator);
-        verify(keyboardActions).clearTextAndHide(element);
+        verify(keyboardActions).clearText(element);
+        verify(keyboardActions).hideKeyboard(element);
     }
 
     @Test
