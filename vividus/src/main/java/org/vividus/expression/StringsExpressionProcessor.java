@@ -81,7 +81,8 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
             new UnaryExpressionProcessor("encodeToBase64",         input -> encodeToBase64(input.getBytes(UTF_8))),
             new UnaryExpressionProcessor("anyOf",                  StringsExpressionProcessor::anyOf),
             new UnaryExpressionProcessor("toBase64Gzip",           StringsExpressionProcessor::toBase64Gzip),
-            new UnaryExpressionProcessor("escapeHTML",             StringEscapeUtils::escapeHtml4)
+            new UnaryExpressionProcessor("escapeHTML",             StringEscapeUtils::escapeHtml4),
+            new UnaryExpressionProcessor("quoteRegExp",            Pattern::quote)
         ));
     }
 
