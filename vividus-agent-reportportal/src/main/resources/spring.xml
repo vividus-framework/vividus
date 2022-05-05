@@ -6,11 +6,5 @@
         http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
 
-    <bean class="org.vividus.reportportal.listener.AttachmentListener"/>
-
-    <bean class="org.vividus.reportportal.jbehave.AdaptedReportPortalFormat">
-        <property name="testEntity" value="#{systemProperties['rp.test-entity']}"/>
-    </bean>
-
     <context:component-scan base-package="org.vividus.reportportal.config" />
 </beans>

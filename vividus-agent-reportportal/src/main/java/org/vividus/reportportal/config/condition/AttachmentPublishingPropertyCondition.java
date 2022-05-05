@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,10 @@
 
 package org.vividus.reportportal.config.condition;
 
-import com.epam.reportportal.utils.properties.ListenerProperty;
-
-import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
-import org.springframework.core.type.AnnotatedTypeMetadata;
-
-public class ReportPortalEnableCondition implements Condition
+public class AttachmentPublishingPropertyCondition extends AbstractBooleanPropertyCondition
 {
-    @Override
-    public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata)
+    protected AttachmentPublishingPropertyCondition()
     {
-        String enableProperty = ListenerProperty.ENABLE.getPropertyName();
-        return context.getEnvironment().getProperty(enableProperty, boolean.class);
+        super("rp.publish-attachments");
     }
 }
