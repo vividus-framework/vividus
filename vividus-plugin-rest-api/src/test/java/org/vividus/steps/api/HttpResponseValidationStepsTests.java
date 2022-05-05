@@ -27,6 +27,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.vividus.steps.StringComparisonRule.CONTAINS;
+import static org.vividus.steps.StringComparisonRule.DOES_NOT_CONTAIN;
+import static org.vividus.steps.StringComparisonRule.IS_EQUAL_TO;
+import static org.vividus.steps.StringComparisonRule.MATCHES;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -81,6 +85,7 @@ class HttpResponseValidationStepsTests
     private static final String FILE_JSON = "file.json";
     private static final String IMAGE_PNG = "images/image.png";
     private static final String HTTP_RESPONSE_STATUS_CODE = "HTTP response status code";
+    private static final String DUMMY = "dummy";
     private static final int RETRY_TIMES = 3;
     private static final int RESPONSE_CODE = 200;
     private static final int RESPONSE_CODE_ERROR = 404;
@@ -204,7 +209,7 @@ class HttpResponseValidationStepsTests
         mockHttpResponse();
         String body = RESPONSE_BODY;
         httpResponse.setResponseBody(body.getBytes(StandardCharsets.UTF_8));
-        httpResponseValidationSteps.doesResponseBodyMatch(StringComparisonRule.IS_EQUAL_TO, body);
+        httpResponseValidationSteps.doesResponseBodyMatch(IS_EQUAL_TO, body);
         verify(softAssert).assertThat(eq(HTTP_RESPONSE_BODY), eq(body),
                 argThat(arg -> arg.toString().equals("\"testResponse\"")));
     }
@@ -212,7 +217,7 @@ class HttpResponseValidationStepsTests
     @Test
     void testDoesResponseBodyEqualToContentNoHttpResponse()
     {
-        httpResponseValidationSteps.doesResponseBodyMatch(StringComparisonRule.IS_EQUAL_TO, StringUtils.EMPTY);
+        httpResponseValidationSteps.doesResponseBodyMatch(IS_EQUAL_TO, StringUtils.EMPTY);
         verifyNoHttpResponse();
     }
 
@@ -260,13 +265,13 @@ class HttpResponseValidationStepsTests
     @Test
     void testContentTypeOfResponseBodyNoHttpResponse()
     {
-        httpResponseValidationSteps.assertContentTypeOfResponseBody(StringComparisonRule.IS_EQUAL_TO, "text/plain");
+        httpResponseValidationSteps.assertContentTypeOfResponseBody(IS_EQUAL_TO, "text/plain");
         verifyNoHttpResponse();
     }
 
     private void testContentTypeOfResponseBody(String contentType)
     {
-        httpResponseValidationSteps.assertContentTypeOfResponseBody(StringComparisonRule.IS_EQUAL_TO, contentType);
+        httpResponseValidationSteps.assertContentTypeOfResponseBody(IS_EQUAL_TO, contentType);
         verify(softAssert).assertThat(eq("Content type of response body"), eq(contentType),
                 argThat(matcher -> matcher.toString().contains(contentType)));
     }
@@ -294,7 +299,7 @@ class HttpResponseValidationStepsTests
     {
         mockHttpResponse();
         String headerValue = mockHeaderRetrieval();
-        httpResponseValidationSteps.doesHeaderMatch(SET_COOKIES_HEADER_NAME, StringComparisonRule.IS_EQUAL_TO,
+        httpResponseValidationSteps.doesHeaderMatch(SET_COOKIES_HEADER_NAME, IS_EQUAL_TO,
                 headerValue);
         verify(softAssert).assertThat(eq("'" + SET_COOKIES_HEADER_NAME + "' header value"), eq(headerValue),
                 argThat(matcher -> matcher.toString().equals(equalTo(headerValue).toString())));
@@ -303,7 +308,7 @@ class HttpResponseValidationStepsTests
     @Test
     void testDoesHeaderEqualToValueNoHttpResponse()
     {
-        httpResponseValidationSteps.doesHeaderMatch(SET_COOKIES_HEADER_NAME, StringComparisonRule.IS_EQUAL_TO, "value");
+        httpResponseValidationSteps.doesHeaderMatch(SET_COOKIES_HEADER_NAME, IS_EQUAL_TO, "value");
         verifyNoHttpResponse();
     }
 
@@ -450,19 +455,44 @@ class HttpResponseValidationStepsTests
     {
         mockHttpResponseWithArchive();
         Set<String> archiveEntries = Set.of(IMAGE_PNG, FILE_JSON);
-        String dummy = "dummy";
         String message = "The response archive contains entry with name ";
         httpResponseValidationSteps.verifyArchiveContainsEntries(List.of(
-                createEntry(FILE_JSON),
-                createEntry(IMAGE_PNG),
-                createEntry(dummy)
+                createEntry(FILE_JSON, null),
+                createEntry(IMAGE_PNG, null),
+                createEntry(DUMMY, null)
         ));
         verify(softAssert).assertThat(eq(message + FILE_JSON), eq(archiveEntries),
                 argThat(e -> e.matches(archiveEntries)));
         verify(softAssert).assertThat(eq(message + IMAGE_PNG), eq(archiveEntries),
                 argThat(e -> e.matches(archiveEntries)));
-        verify(softAssert).assertThat(eq(message + dummy), eq(archiveEntries),
+        verify(softAssert).assertThat(eq(message + DUMMY), eq(archiveEntries),
                 argThat(e -> !e.matches(archiveEntries)));
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void testVerifyArchiveContainsEntriesWithUserRules()
+    {
+        String matchesPattern = ".+\\.png";
+        String containsPattern = "file";
+
+        mockHttpResponseWithArchive();
+        Set<String> archiveEntries = Set.of(IMAGE_PNG, FILE_JSON);
+        String message = "The response archive contains entry matching the comparison rule '%s' with name pattern '%s'";
+        httpResponseValidationSteps.verifyArchiveContainsEntries(List.of(
+                createEntry(matchesPattern, MATCHES),
+                createEntry(containsPattern, CONTAINS),
+                createEntry(DUMMY, IS_EQUAL_TO),
+                createEntry(DUMMY, DOES_NOT_CONTAIN)
+        ));
+        verify(softAssert).assertThat(eq(String.format(message, MATCHES, matchesPattern)), eq(archiveEntries),
+                argThat(e -> e.matches(archiveEntries)));
+        verify(softAssert).assertThat(eq(String.format(message, CONTAINS, containsPattern)), eq(archiveEntries),
+                argThat(e -> e.matches(archiveEntries)));
+        verify(softAssert).assertThat(eq(String.format(message, IS_EQUAL_TO, DUMMY)), eq(archiveEntries),
+                argThat(e -> !e.matches(archiveEntries)));
+        verify(softAssert).assertThat(eq(String.format(message, DOES_NOT_CONTAIN, DUMMY)), eq(archiveEntries),
+                argThat(e -> e.matches(archiveEntries)));
         verifyNoMoreInteractions(softAssert);
     }
 
@@ -501,10 +531,11 @@ class HttpResponseValidationStepsTests
         verify(softAssert).assertEquals(HTTP_RESPONSE_STATUS_CODE, RESPONSE_CODE_ERROR, RESPONSE_CODE);
     }
 
-    private static NamedEntry createEntry(String name)
+    private static NamedEntry createEntry(String name, StringComparisonRule rule)
     {
         NamedEntry entry = new NamedEntry();
         entry.setName(name);
+        entry.setRule(rule);
         return entry;
     }
 
