@@ -322,7 +322,8 @@ jobs:
                                                   -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-ios-$TEST_APP_VERSION.zip \
                                                   -Pvividus.statistics.print-failures=true \
                                                   -Pvividus.mobile.screenshot.downscale=false \
-                                                  -Pvividus.ui.visual.baselines-folder=./baselines/original
+                                                  -Pvividus.ui.visual.baselines-folder=./baselines/original \
+                                                  -Pvividus.ui.context.self-healing=true
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
         fi
