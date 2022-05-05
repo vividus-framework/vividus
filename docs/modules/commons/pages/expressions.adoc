@@ -323,6 +323,31 @@ Escapes reserved characters in https://www.w3schools.com/html/html_entities.asp[
 |`M&amp;Ms`
 |===
 
+=== `quoteRegExp`
+
+Quotes the input literal so that metacharacters or escape sequences in the input sequence will be given no special meaning in regular expression.
+
+[source, subs="+quotes"]
+----
+#{quoteRegExp(*$input*)}
+----
+
+* *`$input`* - any string to be quoted
+
+.Quote regular expression
+|===
+|Expression |Result
+
+|`#{quoteRegExp(Some(Value))}`
+|`\QSome(Value)\E`
+|===
+
+.Verify the data
+[source,gherkin]
+----
+Then `${frontEndData}` matches `#{quorePattern(${backEndData})}.*`
+----
+
 == Hash calculations
 
 :algorithm-summary: hash algorithm (can use https://datatracker.ietf.org/doc/rfc1319[MD2], https://datatracker.ietf.org/doc/rfc1321[MD5], https://datatracker.ietf.org/doc/rfc3174[SHA-1], https://datatracker.ietf.org/doc/rfc6234[SHA-256], https://datatracker.ietf.org/doc/rfc6234[SHA-384], https://datatracker.ietf.org/doc/rfc6234[SHA-512])

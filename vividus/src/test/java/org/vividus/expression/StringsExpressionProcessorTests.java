@@ -83,7 +83,8 @@ class StringsExpressionProcessorTests
                 arguments("anyOf(,)",                                                      EMPTY),
                 arguments("anyOf(\\,)",                                                    ","),
                 arguments("toBase64Gzip(vividus)",                                         "H4sIAAAAAAAA/yvLLMtMKS0GANIHCdkHAAAA"),
-                arguments("escapeHTML(M&Ms)",                                              "M&amp;Ms")
+                arguments("escapeHTML(M&Ms)",                                              "M&amp;Ms"),
+                arguments("quoteRegExp(Customer(Username))",                               "\\QCustomer(Username)\\E")
         );
         // CHECKSTYLE:ON
     }
