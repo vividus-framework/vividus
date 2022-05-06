@@ -44,7 +44,7 @@ public class MobileAppCoordsProvider extends AbstractAdjustingCoordsProvider
     public Coords ofElement(WebDriver driver, WebElement element)
     {
         Coords coords = getCoords(element);
-        coords = getUiContext().getSearchContext() == element ? coords : adjustToSearchContext(coords);
+        coords = element.equals(getUiContext().getSearchContext()) ? coords : adjustToSearchContext(coords);
         return downscale ? coords : adjustToDpr(coords);
     }
 

@@ -53,7 +53,7 @@ class MobileAppCoordsProviderTests
     @Spy private UiContext uiContext;
 
     @Test
-    void shoudProvideAdjustedWithNativeHeaderHeightCoordinates()
+    void shouldProvideAdjustedWithNativeHeaderHeightCoordinates()
     {
         MobileAppCoordsProvider coordsProvider = new MobileAppCoordsProvider(true, driverManager, uiContext);
         when(driverManager.getStatusBarSize()).thenReturn(100);
