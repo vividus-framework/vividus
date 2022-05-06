@@ -67,7 +67,7 @@ public class ZephyrFacade implements IZephyrFacade
     }
 
     @Override
-    public void updateExecutionStatus(int executionId, String executionBody)
+    public void updateExecutionStatus(String executionId, String executionBody)
             throws IOException, JiraConfigurationException
     {
         getJiraClient().executePut(String.format(ZAPI_ENDPOINT + "execution/%s/execute", executionId), executionBody);
@@ -96,8 +96,8 @@ public class ZephyrFacade implements IZephyrFacade
             zephyrConfiguration.setFolderId(folderId);
         }
 
-        Map<TestCaseStatus, Integer> statusIdMap = getExecutionStatuses();
-        zephyrConfiguration.setTestStatusPerZephyrIdMapping(statusIdMap);
+        Map<TestCaseStatus, String> statusIdMap = getExecutionStatuses();
+        zephyrConfiguration.setTestStatusPerZephyrMapping(statusIdMap);
 
         return zephyrConfiguration;
     }
@@ -144,15 +144,15 @@ public class ZephyrFacade implements IZephyrFacade
         return folderId.get(0).toString();
     }
 
-    private Map<TestCaseStatus, Integer> getExecutionStatuses() throws IOException, JiraConfigurationException
+    private Map<TestCaseStatus, String> getExecutionStatuses() throws IOException, JiraConfigurationException
     {
         String json = getJiraClient().executeGet(ZAPI_ENDPOINT + "util/testExecutionStatus");
-        Map<TestCaseStatus, Integer> testStatusPerZephyrIdMapping = new EnumMap<>(TestCaseStatus.class);
+        Map<TestCaseStatus, String> testStatusPerZephyrIdMapping = new EnumMap<>(TestCaseStatus.class);
         zephyrExporterConfiguration.getStatuses().entrySet().forEach(s ->
         {
             List<Integer> statusId = JsonPathUtils.getData(json, String.format("$.[?(@.name=='%s')].id", s.getValue()));
             notEmpty(statusId, "Status '%s' does not exist", s.getValue());
-            testStatusPerZephyrIdMapping.put(s.getKey(), statusId.get(0));
+            testStatusPerZephyrIdMapping.put(s.getKey(), String.valueOf(statusId.get(0)));
         });
         return testStatusPerZephyrIdMapping;
     }

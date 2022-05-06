@@ -35,7 +35,7 @@ import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.databind.TestCaseDeserializer;
 import org.vividus.zephyr.facade.IZephyrFacade;
-import org.vividus.zephyr.facade.ZephyrFacade;
+import org.vividus.zephyr.facade.ZephyrFacadeFactory;
 import org.vividus.zephyr.model.ExecutionStatus;
 import org.vividus.zephyr.model.TestCase;
 import org.vividus.zephyr.model.ZephyrExecution;
@@ -46,16 +46,16 @@ public class ZephyrExporter
     private static final Logger LOGGER = LoggerFactory.getLogger(ZephyrExporter.class);
 
     private final JiraFacade jiraFacade;
-    private IZephyrFacade zephyrFacade;
+    protected IZephyrFacade zephyrFacade;
     private TestCaseParser testCaseParser;
     private ZephyrExporterProperties zephyrExporterProperties;
-    private final ObjectMapper objectMapper;
+    protected final ObjectMapper objectMapper;
 
-    public ZephyrExporter(JiraFacade jiraFacade, ZephyrFacade zephyrFacade, TestCaseParser testCaseParser,
-            ZephyrExporterProperties zephyrExporterProperties)
+    public ZephyrExporter(JiraFacade jiraFacade, ZephyrFacadeFactory zephyrFacadeFactory, TestCaseParser testCaseParser,
+                          ZephyrExporterProperties zephyrExporterProperties)
     {
         this.jiraFacade = jiraFacade;
-        this.zephyrFacade = zephyrFacade;
+        this.zephyrFacade = zephyrFacadeFactory.createZephyrFacade();
         this.testCaseParser = testCaseParser;
         this.zephyrExporterProperties = zephyrExporterProperties;
         this.objectMapper = JsonMapper.builder()
@@ -75,7 +75,7 @@ public class ZephyrExporter
         }
     }
 
-    private void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
+    public void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
             throws IOException, JiraConfigurationException
     {
         JiraEntity issue = jiraFacade.getIssue(testCase.getKey());
@@ -94,8 +94,8 @@ public class ZephyrExporter
         if (executionId.isPresent())
         {
             String executionBody = objectMapper.writeValueAsString(new ExecutionStatus(
-                String.valueOf(configuration.getTestStatusPerZephyrIdMapping().get(execution.getTestCaseStatus()))));
-            zephyrFacade.updateExecutionStatus(executionId.getAsInt(), executionBody);
+                String.valueOf(configuration.getTestStatusPerZephyrMapping().get(execution.getTestCaseStatus()))));
+            zephyrFacade.updateExecutionStatus(String.valueOf(executionId.getAsInt()), executionBody);
         }
         else
         {
