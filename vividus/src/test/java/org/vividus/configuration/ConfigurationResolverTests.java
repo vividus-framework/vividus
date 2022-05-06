@@ -54,7 +54,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ConfigurationResolverTests
 {
-    public static final String DESKTOP_CHROME = "desktop/chrome";
+    private static final String DESKTOP_CHROME = "desktop/chrome";
     private static final String CONFIGURATION = "configuration";
     private static final String PROPERTY_1 = "property1";
     private static final String PROPERTY_2 = "property2";
@@ -87,6 +87,7 @@ class ConfigurationResolverTests
     private static final String DEPRECATED = "deprecated";
     private static final String EMPTY_STRING = "";
     private static final String NOSECURITY = "nosecurity";
+    private static final String PROPERTY_8 = "property8";
 
     @Mock private ResourcePatternResolver resourcePatternResolver;
 
@@ -127,7 +128,8 @@ class ConfigurationResolverTests
 
                      when(mock.loadFromResourceTreeRecursively(true, DEFAULTS)).thenReturn(toProperties(
                          Map.of(PROPERTY_2, DEFAULTS,
-                                PROPERTY_3, DEFAULTS)));
+                                PROPERTY_3, DEFAULTS,
+                                PROPERTY_8, DEFAULTS)));
 
                      when(mock.loadFromResourceTreeRecursively(eq(true), any(Predicate.class),
                          eq(EMPTY_STRING))).thenReturn(toProperties(
@@ -191,12 +193,13 @@ class ConfigurationResolverTests
                 () -> assertEquals(DEFAULT,         properties.getProperty(HTTP_CLIENT_PROPERTY_2)),
                 () -> assertEquals(DEFAULT,         properties.getProperty(VIVIDUS_UTIL_PROPERTY_1)),
                 () -> assertEquals(CONFIGURATION,   properties.getProperty(VIVIDUS_UTIL_PROPERTY_2)),
-                () -> assertEquals(DEFAULTS,        properties.getProperty(PROPERTY_2)),
+                () -> assertEquals(CONFIGURATION,   properties.getProperty(PROPERTY_2)),
                 () -> assertEquals(ROOT,            properties.getProperty(PROPERTY_3)),
                 () -> assertEquals(NOSECURITY,      properties.getProperty(PROPERTY_4)),
                 () -> assertEquals(ENVIRONMENTS,    properties.getProperty(PROPERTY_5)),
                 () -> assertEquals(SUITES,          properties.getProperty(PROPERTY_6)),
                 () -> assertEquals(DESKTOP_CHROME,  properties.getProperty(PROPERTY_7)),
+                () -> assertEquals(DEFAULTS,        properties.getProperty(PROPERTY_8)),
                 () -> assertEquals(EMPTY_STRING,    properties.getProperty(CONFIGURATION_SUITES)),
                 () -> assertEquals(ACTIVE_PROFILES, properties.getProperty(CONFIGURATION_PROFILES)),
                 () -> assertEquals(UAT,             properties.getProperty(CONFIGURATION_ENVIRONMENTS)));
