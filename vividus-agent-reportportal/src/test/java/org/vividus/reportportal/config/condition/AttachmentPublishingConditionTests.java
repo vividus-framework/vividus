@@ -21,30 +21,28 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.epam.reportportal.utils.properties.ListenerProperty;
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 
-class ReportPortalEnableConditionTests
+class AttachmentPublishingConditionTests
 {
-    private static final String RP_ENABLE_PROPERTY = ListenerProperty.ENABLE.getPropertyName();
+    private static final String ATTACHMENT_PROPERTY = "rp.publish-attachments";
 
     @ParameterizedTest
     @ValueSource(strings = { "true", "false" })
-    void testMatches(boolean rpEnabled)
+    void shouldEnableOrDisablePublishing(boolean attachmentsEnabled)
     {
-        System.setProperty(RP_ENABLE_PROPERTY, String.valueOf(rpEnabled));
-        Environment environment = mock(Environment.class);
-        ConditionContext context = mock(ConditionContext.class);
-        AnnotatedTypeMetadata metadata = mock(AnnotatedTypeMetadata.class);
+        System.setProperty(ATTACHMENT_PROPERTY, Boolean.toString(attachmentsEnabled));
+        var environment = mock(Environment.class);
+        var context = mock(ConditionContext.class);
+        var metadata = mock(AnnotatedTypeMetadata.class);
         when(context.getEnvironment()).thenReturn(environment);
-        when(environment.getProperty(RP_ENABLE_PROPERTY, boolean.class)).thenReturn(rpEnabled);
-        ReportPortalEnablePropertyCondition condition = new ReportPortalEnablePropertyCondition();
-        assertEquals(rpEnabled, condition.matches(context, metadata));
+        when(environment.getProperty(ATTACHMENT_PROPERTY, boolean.class)).thenReturn(attachmentsEnabled);
+        var condition = new AttachmentPublishingPropertyCondition();
+        assertEquals(attachmentsEnabled, condition.matches(context, metadata));
         verifyNoInteractions(metadata);
     }
 }

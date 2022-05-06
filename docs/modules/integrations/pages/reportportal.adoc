@@ -62,4 +62,10 @@ a|`true`
 |none
 |Attributes could be used for additional tagging of the launches
 
+|system.rp.publish-attachments
+a|`true`
+`false`
+|`true`
+|Enables or disables on-failure attachments (screenshots, application source code) publishing
+
 |===
