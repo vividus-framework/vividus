@@ -16,6 +16,10 @@
 
 package org.vividus.zephyr.facade;
 
+import java.io.IOException;
+import java.util.Optional;
+import java.util.OptionalInt;
+
 import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
@@ -26,13 +30,10 @@ import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 
-import java.io.IOException;
-import java.util.Optional;
-import java.util.OptionalInt;
-
 public class ZephyrScaleFacade implements IZephyrFacade
 {
     private static final String REST_ATM_ENDPOINT = "/rest/atm/1.0/";
+    private static final String TEST_RESULT_ENDPOINT_FORMAT = "/testrun/%s/testcase/%s/testresult";
 
     private final JiraFacade jiraFacade;
     private final JiraClientProvider jiraClientProvider;
@@ -41,7 +42,8 @@ public class ZephyrScaleFacade implements IZephyrFacade
     private ZephyrConfiguration zephyrConfiguration;
 
     public ZephyrScaleFacade(JiraFacade jiraFacade, JiraClientProvider jiraClientProvider,
-                             ZephyrExporterConfiguration zephyrExporterConfiguration, ZephyrExporterProperties zephyrExporterProperties)
+                             ZephyrExporterConfiguration zephyrExporterConfiguration,
+                             ZephyrExporterProperties zephyrExporterProperties)
     {
         this.jiraFacade = jiraFacade;
         this.jiraClientProvider = jiraClientProvider;
@@ -52,7 +54,7 @@ public class ZephyrScaleFacade implements IZephyrFacade
     @Override
     public Integer createExecution(String execution) throws IOException, JiraConfigurationException
     {
-        String testCaseUrl = String.format("/testrun/%s/testcase/%s/testresult",
+        String testCaseUrl = String.format(TEST_RESULT_ENDPOINT_FORMAT,
                 zephyrConfiguration.getCycleId(),
                 execution);
         String responseBody = getJiraClient().executePost(
@@ -66,7 +68,7 @@ public class ZephyrScaleFacade implements IZephyrFacade
     public void updateExecutionStatus(String executionId, String executionBody)
             throws IOException, JiraConfigurationException
     {
-        String testCaseUrl = String.format("/testrun/%s/testcase/%s/testresult",
+        String testCaseUrl = String.format(TEST_RESULT_ENDPOINT_FORMAT,
                 zephyrConfiguration.getCycleId(),
                 executionId);
         getJiraClient().executePut(String.format(REST_ATM_ENDPOINT + testCaseUrl), executionBody);
@@ -92,10 +94,12 @@ public class ZephyrScaleFacade implements IZephyrFacade
         return zephyrConfiguration;
     }
 
-    private String createTestCycle(String cycleName, String projectKey, String folderName) throws IOException, JiraConfigurationException {
-        String body = "{\"name\": \""+ cycleName +"\"," +
-                "\"projectKey\": \"" + projectKey + "\"," +
-                "\"folder\": \"/" + folderName + "\"}";
+    private String createTestCycle(String cycleName,
+                                   String projectKey,
+                                   String folderName) throws IOException, JiraConfigurationException
+    {
+        String testCycleFormat = "{\"name\": \"%s\", \"projectKey\": \"%s\",\"folder\": \"/%s\"}";
+        String body = String.format(testCycleFormat, cycleName, projectKey, folderName);
         String json = getJiraClient().executePost(REST_ATM_ENDPOINT + "/testrun", body);
         return JsonPathUtils.getData(json, "$.key");
     }

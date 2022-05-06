@@ -48,9 +48,12 @@ public class VividusToZephyrExporterApplication
         ApplicationContext ctx = SpringApplication.run(VividusToZephyrExporterApplication.class, args);
 
         ZephyrExporter exporter;
-        if (zephyrApiType == ZephyrApiType.SQUAD) {
+        if (zephyrApiType == ZephyrApiType.SQUAD)
+        {
             exporter = ctx.getBean(ZephyrExporter.class);
-        } else {
+        }
+        else
+        {
             exporter = ctx.getBean(ZephyrScaleExporter.class);
         }
         exporter.exportResults();

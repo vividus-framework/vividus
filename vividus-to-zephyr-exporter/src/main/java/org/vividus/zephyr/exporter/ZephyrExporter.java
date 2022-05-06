@@ -46,16 +46,17 @@ public class ZephyrExporter
     private static final Logger LOGGER = LoggerFactory.getLogger(ZephyrExporter.class);
 
     private final JiraFacade jiraFacade;
-    protected IZephyrFacade zephyrFacade;
+
+    private ZephyrFacadeFactory zephyrFacadeFactory;
     private TestCaseParser testCaseParser;
     private ZephyrExporterProperties zephyrExporterProperties;
-    protected final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public ZephyrExporter(JiraFacade jiraFacade, ZephyrFacadeFactory zephyrFacadeFactory, TestCaseParser testCaseParser,
                           ZephyrExporterProperties zephyrExporterProperties)
     {
         this.jiraFacade = jiraFacade;
-        this.zephyrFacade = zephyrFacadeFactory.createZephyrFacade();
+        this.zephyrFacadeFactory = zephyrFacadeFactory;
         this.testCaseParser = testCaseParser;
         this.zephyrExporterProperties = zephyrExporterProperties;
         this.objectMapper = JsonMapper.builder()
@@ -68,7 +69,7 @@ public class ZephyrExporter
     public void exportResults() throws IOException, JiraConfigurationException
     {
         List<TestCase> testCasesForImporting = testCaseParser.createTestCases(objectMapper);
-        ZephyrConfiguration configuration = zephyrFacade.prepareConfiguration();
+        ZephyrConfiguration configuration = getZephyrFacade().prepareConfiguration();
         for (TestCase testCase : testCasesForImporting)
         {
             exportTestExecution(testCase, configuration);
@@ -84,23 +85,33 @@ public class ZephyrExporter
 
         if (zephyrExporterProperties.getUpdateExecutionStatusesOnly())
         {
-            executionId = zephyrFacade.findExecutionId(issue.getId());
+            executionId = getZephyrFacade().findExecutionId(issue.getId());
         }
         else
         {
             String createExecution = objectMapper.writeValueAsString(execution);
-            executionId = OptionalInt.of(zephyrFacade.createExecution(createExecution));
+            executionId = OptionalInt.of(getZephyrFacade().createExecution(createExecution));
         }
         if (executionId.isPresent())
         {
             String executionBody = objectMapper.writeValueAsString(new ExecutionStatus(
                 String.valueOf(configuration.getTestStatusPerZephyrMapping().get(execution.getTestCaseStatus()))));
-            zephyrFacade.updateExecutionStatus(String.valueOf(executionId.getAsInt()), executionBody);
+            getZephyrFacade().updateExecutionStatus(String.valueOf(executionId.getAsInt()), executionBody);
         }
         else
         {
             LOGGER.atInfo().addArgument(testCase::getKey).log("Test case result for {} was not exported, "
                     + "because execution does not exist");
         }
+    }
+
+    public IZephyrFacade getZephyrFacade()
+    {
+        return zephyrFacadeFactory.getZephyrFacade();
+    }
+
+    public ObjectMapper getObjectMapper()
+    {
+        return objectMapper;
     }
 }

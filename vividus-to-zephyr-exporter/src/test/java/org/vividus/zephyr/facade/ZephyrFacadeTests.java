@@ -66,6 +66,8 @@ class ZephyrFacadeTests
     private static final String FOLDER_ID = "11114";
     private static final String ISSUE_ID = "111";
     private static final String TEST = "test";
+    private static final String EXECUTION_ID = "11116";
+    private static final String PASSED_STATUS_ID = "1";
 
     @Mock private JiraFacade jiraFacade;
     @Mock private JiraClient client;
@@ -96,8 +98,8 @@ class ZephyrFacadeTests
     {
         when(jiraClientProvider.getByJiraConfigurationKey(Optional.empty())).thenReturn(client);
         String executionBody = "{\"status\": \"1\"}";
-        zephyrFacade.updateExecutionStatus("11_116", executionBody);
-        verify(client).executePut(String.format(ZAPI_ENDPOINT + "execution/%s/execute", "11116"), executionBody);
+        zephyrFacade.updateExecutionStatus(EXECUTION_ID, executionBody);
+        verify(client).executePut(String.format(ZAPI_ENDPOINT + "execution/%s/execute", EXECUTION_ID), executionBody);
     }
 
     @Test
@@ -183,7 +185,7 @@ class ZephyrFacadeTests
         assertEquals(CYCLE_ID, actualConfiguration.getCycleId());
         assertEquals(FOLDER_ID, actualConfiguration.getFolderId());
         assertEquals(1, actualConfiguration.getTestStatusPerZephyrMapping().size());
-        assertEquals(1, actualConfiguration.getTestStatusPerZephyrMapping().get(TestCaseStatus.PASSED));
+        assertEquals(PASSED_STATUS_ID, actualConfiguration.getTestStatusPerZephyrMapping().get(TestCaseStatus.PASSED));
     }
 
     @Test
@@ -207,7 +209,7 @@ class ZephyrFacadeTests
         assertEquals(CYCLE_ID, actualConfiguration.getCycleId());
         assertNull(actualConfiguration.getFolderId());
         assertEquals(1, actualConfiguration.getTestStatusPerZephyrMapping().size());
-        assertEquals(1, actualConfiguration.getTestStatusPerZephyrMapping().get(TestCaseStatus.PASSED));
+        assertEquals(PASSED_STATUS_ID, actualConfiguration.getTestStatusPerZephyrMapping().get(TestCaseStatus.PASSED));
     }
 
     @Test

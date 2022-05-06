@@ -35,6 +35,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,6 +47,7 @@ import org.vividus.jira.model.JiraEntity;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.facade.ZephyrFacade;
+import org.vividus.zephyr.facade.ZephyrFacadeFactory;
 import org.vividus.zephyr.model.TestCase;
 import org.vividus.zephyr.model.TestCaseStatus;
 import org.vividus.zephyr.parser.TestCaseParser;
@@ -58,11 +60,14 @@ class ZephyrExporterTests
     private static final String ISSUE_ID1 = "1";
     private static final String ISSUE_ID2 = "2";
     private static final String STATUS_UPDATE_JSON = "{\"status\":\"-1\"}";
+    private static final String PASSED_STATUS_ID = "101";
+    private static final String STATUS_UPDATE_EXECUTION_ID = "111";
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(ZephyrExporter.class);
 
     @Mock private JiraFacade jiraFacade;
     @Mock private ZephyrFacade zephyrFacade;
+    @Mock private ZephyrFacadeFactory zephyrFacadeFactory;
     @Mock private TestCaseParser testCaseParser;
     @Mock private ZephyrExporterProperties zephyrExporterProperties;
     @InjectMocks private ZephyrExporter zephyrExporter;
@@ -81,8 +86,8 @@ class ZephyrExporterTests
         when(zephyrFacade.createExecution(String.format(executionBody, ISSUE_ID1))).thenReturn(111);
         when(zephyrFacade.createExecution(String.format(executionBody, ISSUE_ID2))).thenReturn(222);
         zephyrExporter.exportResults();
-        verify(zephyrFacade).updateExecutionStatus("111", STATUS_UPDATE_JSON);
-        verify(zephyrFacade).updateExecutionStatus("222", "{\"status\":\"1\"}");
+        verify(zephyrFacade).updateExecutionStatus(STATUS_UPDATE_EXECUTION_ID, STATUS_UPDATE_JSON);
+        verify(zephyrFacade).updateExecutionStatus("222", "{\"status\":\"101\"}");
     }
 
     @Test
@@ -98,10 +103,16 @@ class ZephyrExporterTests
         when(zephyrFacade.findExecutionId(ISSUE_ID1)).thenReturn(OptionalInt.of(111));
         when(zephyrFacade.findExecutionId(ISSUE_ID2)).thenReturn(OptionalInt.empty());
         zephyrExporter.exportResults();
-        verify(zephyrFacade).updateExecutionStatus("111", STATUS_UPDATE_JSON);
+        verify(zephyrFacade).updateExecutionStatus(STATUS_UPDATE_EXECUTION_ID, STATUS_UPDATE_JSON);
         verifyNoMoreInteractions(zephyrFacade);
         assertThat(testLogger.getLoggingEvents(), is(List.of(info("Test case result for {} was not exported, "
                 + "because execution does not exist", TEST_CASE_KEY2))));
+    }
+
+    @BeforeEach
+    private void mockFacade()
+    {
+        when(zephyrFacadeFactory.getZephyrFacade()).thenReturn(zephyrFacade);
     }
 
     private ZephyrConfiguration prepareTestConfiguration()
@@ -113,7 +124,7 @@ class ZephyrExporterTests
         configuration.setFolderId("11114");
         Map<TestCaseStatus, String> map = new EnumMap<>(TestCaseStatus.class);
         map.put(TestCaseStatus.SKIPPED, "-1");
-        map.put(TestCaseStatus.PASSED, "1");
+        map.put(TestCaseStatus.PASSED, PASSED_STATUS_ID);
         configuration.setTestStatusPerZephyrMapping(map);
         return configuration;
     }
