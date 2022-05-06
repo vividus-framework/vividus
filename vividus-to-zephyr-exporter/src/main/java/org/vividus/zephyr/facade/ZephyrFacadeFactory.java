@@ -1,24 +1,30 @@
 package org.vividus.zephyr.facade;
 
-import org.vividus.jira.JiraFacade;
 import org.vividus.zephyr.model.ZephyrApiType;
 
-public class ZephyrFacadeFactory {
-
+public class ZephyrFacadeFactory
+{
     private final ZephyrFacade zephyrFacade;
     private final ZephyrScaleFacade zephyrScaleFacade;
     private final ZephyrApiType zephyrApiType;
 
-    public ZephyrFacadeFactory(ZephyrApiType zephyrApiType, ZephyrFacade zephyrFacade, ZephyrScaleFacade zephyrScaleFacade) {
+    public ZephyrFacadeFactory(ZephyrApiType zephyrApiType,
+                               ZephyrFacade zephyrFacade,
+                               ZephyrScaleFacade zephyrScaleFacade)
+    {
         this.zephyrApiType = zephyrApiType;
         this.zephyrFacade = zephyrFacade;
         this.zephyrScaleFacade = zephyrScaleFacade;
     }
 
-    public IZephyrFacade createZephyrFacade() {
-        if (zephyrApiType == ZephyrApiType.SQUAD) {
+    public IZephyrFacade getZephyrFacade()
+    {
+        if (zephyrApiType == ZephyrApiType.SQUAD)
+        {
             return zephyrFacade;
-        } else {
+        }
+        else
+        {
             return zephyrScaleFacade;
         }
     }
