@@ -28,7 +28,7 @@ public interface IZephyrFacade
 
     Integer createExecution(String execution) throws IOException, JiraConfigurationException;
 
-    void updateExecutionStatus(int executionId, String executionBody) throws IOException, JiraConfigurationException;
+    void updateExecutionStatus(String executionId, String executionBody) throws IOException, JiraConfigurationException;
 
     OptionalInt findExecutionId(String issueId) throws IOException, JiraConfigurationException;
 }

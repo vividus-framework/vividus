@@ -81,8 +81,8 @@ class ZephyrExporterTests
         when(zephyrFacade.createExecution(String.format(executionBody, ISSUE_ID1))).thenReturn(111);
         when(zephyrFacade.createExecution(String.format(executionBody, ISSUE_ID2))).thenReturn(222);
         zephyrExporter.exportResults();
-        verify(zephyrFacade).updateExecutionStatus(111, STATUS_UPDATE_JSON);
-        verify(zephyrFacade).updateExecutionStatus(222, "{\"status\":\"1\"}");
+        verify(zephyrFacade).updateExecutionStatus("111", STATUS_UPDATE_JSON);
+        verify(zephyrFacade).updateExecutionStatus("222", "{\"status\":\"1\"}");
     }
 
     @Test
@@ -98,7 +98,7 @@ class ZephyrExporterTests
         when(zephyrFacade.findExecutionId(ISSUE_ID1)).thenReturn(OptionalInt.of(111));
         when(zephyrFacade.findExecutionId(ISSUE_ID2)).thenReturn(OptionalInt.empty());
         zephyrExporter.exportResults();
-        verify(zephyrFacade).updateExecutionStatus(111, STATUS_UPDATE_JSON);
+        verify(zephyrFacade).updateExecutionStatus("111", STATUS_UPDATE_JSON);
         verifyNoMoreInteractions(zephyrFacade);
         assertThat(testLogger.getLoggingEvents(), is(List.of(info("Test case result for {} was not exported, "
                 + "because execution does not exist", TEST_CASE_KEY2))));
@@ -111,10 +111,10 @@ class ZephyrExporterTests
         configuration.setVersionId("11112");
         configuration.setCycleId("11113");
         configuration.setFolderId("11114");
-        Map<TestCaseStatus, Integer> map = new EnumMap<>(TestCaseStatus.class);
-        map.put(TestCaseStatus.SKIPPED, -1);
-        map.put(TestCaseStatus.PASSED, 1);
-        configuration.setTestStatusPerZephyrIdMapping(map);
+        Map<TestCaseStatus, String> map = new EnumMap<>(TestCaseStatus.class);
+        map.put(TestCaseStatus.SKIPPED, "-1");
+        map.put(TestCaseStatus.PASSED, "1");
+        configuration.setTestStatusPerZephyrMapping(map);
         return configuration;
     }
 
