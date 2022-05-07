@@ -83,7 +83,6 @@ public final class ConfigurationResolver
         final Properties overridingProperties = propertiesLoader.loadOverridingProperties();
         final Properties deprecatedProperties = propertiesLoader.loadFromResourceTreeRecursively(false, "deprecated");
 
-
         propertiesLoader.prohibitConfigurationProperties();
 
         for (String defaultPath : DEFAULTS_PATHS)
@@ -91,8 +90,8 @@ public final class ConfigurationResolver
             properties.putAll(propertiesLoader.loadDefaultProperties(defaultPath));
         }
 
-        properties.putAll(configurationProperties);
         properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true, "defaults"));
+        properties.putAll(configurationProperties);
         properties.putAll(propertiesLoader.loadFromResourceTreeRecursively(true,
             r -> !r.getFilename().endsWith(PropertiesLoader.CONFIGURATION_FILENAME), ROOT));
 
