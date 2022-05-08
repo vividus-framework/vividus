@@ -1,7 +1,7 @@
 project.description = 'Vividus extension for Azure Cloud'
 
 dependencies {
-    api(group: 'com.azure', name: 'azure-identity', version: '1.5.0')
+    api(group: 'com.azure', name: 'azure-identity', version: '1.5.1')
     implementation project(':vividus-engine')
     implementation project(':vividus-soft-assert')
 
