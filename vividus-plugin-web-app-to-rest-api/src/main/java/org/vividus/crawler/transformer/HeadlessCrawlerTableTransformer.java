@@ -77,10 +77,6 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
         {
             controller.addSeed(pageUrl);
         }
-        catch (IOException e)
-        {
-            throw new UncheckedIOException(e);
-        }
         catch (InterruptedException e)
         {
             Thread.currentThread().interrupt();

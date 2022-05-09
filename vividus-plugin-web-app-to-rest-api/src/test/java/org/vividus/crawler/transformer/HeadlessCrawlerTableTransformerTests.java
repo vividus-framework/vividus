@@ -203,19 +203,6 @@ class HeadlessCrawlerTableTransformerTests
         verifyNoInteractions(redirectsProvider);
     }
 
-    @Test
-    void shouldReThrowExceptionFromCrawlController() throws IOException, InterruptedException
-    {
-        IOException ioException = mock(IOException.class);
-        CrawlController crawlController = mockCrawlerControllerFactory(MAIN_APP_PAGE);
-        doThrow(ioException).when(crawlController).addSeed(MAIN_APP_PAGE);
-
-        TableProperties properties = buildTableProperties();
-        UncheckedIOException thrown = assertThrows(UncheckedIOException.class,
-            () -> transformer.fetchUrls(properties));
-        assertEquals(ioException, thrown.getCause());
-    }
-
     private Set<String> testFetchUrls(String mainAppPageRelativeUrl, List<String> expectedSeedRelativeUrls)
             throws IOException, InterruptedException
     {
