@@ -16,14 +16,15 @@
 
 package org.vividus.visual.steps;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -66,7 +67,7 @@ class VisualStepsTests
     {
         Function<VisualCheck, VisualCheckResult> checkResultProvider = mock(Function.class);
         Supplier<VisualCheck> visualCheckFactory = mock(Supplier.class);
-        assertNull(visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE));
+        assertTrue(visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE).isEmpty());
         verify(softAssert).assertNotNull(ASSERTION_MSG, null);
         verifyNoInteractions(visualCheckFactory, checkResultProvider, attachmentPublisher);
     }
@@ -80,7 +81,7 @@ class VisualStepsTests
         when(softAssert.assertNotNull(ASSERTION_MSG, searchContext)).thenReturn(true);
         Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> null;
         Supplier<VisualCheck> visualCheckFactory = () -> visualCheck;
-        assertNull(visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE));
+        assertTrue(visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE).isEmpty());
         verifyNoInteractions(attachmentPublisher);
         verify(visualCheck).setSearchContext(searchContext);
     }
@@ -98,7 +99,9 @@ class VisualStepsTests
         Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> visualCheckResult;
         Supplier<VisualCheck> visualCheckFactory = () -> visualCheck;
         when(visualCheckResult.isPassed()).thenReturn(passed);
-        assertSame(visualCheckResult, visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE));
+        Optional<VisualCheckResult> result = visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE);
+        assertTrue(result.isPresent());
+        assertSame(visualCheckResult, result.get());
         InOrder ordered = Mockito.inOrder(attachmentPublisher, visualCheckResult, softAssert);
         ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE, Map.of("result", visualCheckResult),
                 "Visual comparison");

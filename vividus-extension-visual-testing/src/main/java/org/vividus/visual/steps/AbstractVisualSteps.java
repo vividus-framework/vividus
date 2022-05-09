@@ -17,6 +17,7 @@
 package org.vividus.visual.steps;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -42,13 +43,14 @@ public abstract class AbstractVisualSteps
         this.softAssert = softAssert;
     }
 
-    protected <T extends VisualCheck> VisualCheckResult execute(Function<T, VisualCheckResult> checkResultProvider,
+    protected <T extends VisualCheck> Optional<VisualCheckResult> execute(
+            Function<T, VisualCheckResult> checkResultProvider,
             Supplier<T> visualCheckFactory, String templateName)
     {
         SearchContext searchContext = uiContext.getSearchContext();
         if (!softAssert.assertNotNull("Search context is set", searchContext))
         {
-            return null;
+            return Optional.empty();
         }
         T visualCheck = visualCheckFactory.get();
         visualCheck.setSearchContext(searchContext);
@@ -58,7 +60,7 @@ public abstract class AbstractVisualSteps
             attachmentPublisher.publishAttachment(templateName, Map.of("result", result), "Visual comparison");
             verifyResult(result);
         }
-        return result;
+        return Optional.ofNullable(result);
     }
 
     protected void verifyResult(VisualCheckResult result)
