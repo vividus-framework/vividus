@@ -21,15 +21,12 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -37,7 +34,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
@@ -201,19 +197,6 @@ class HeadlessCrawlerTableTransformerTests
         Set<String> urls = testFetchUrls(DEFAULT_RELATIVE_URL, List.of(seedRelativeUrl));
         assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
         verifyNoInteractions(redirectsProvider);
-    }
-
-    @Test
-    void shouldReThrowExceptionFromCrawlController() throws IOException, InterruptedException
-    {
-        IOException ioException = mock(IOException.class);
-        CrawlController crawlController = mockCrawlerControllerFactory(MAIN_APP_PAGE);
-        doThrow(ioException).when(crawlController).addSeed(MAIN_APP_PAGE);
-
-        TableProperties properties = buildTableProperties();
-        UncheckedIOException thrown = assertThrows(UncheckedIOException.class,
-            () -> transformer.fetchUrls(properties));
-        assertEquals(ioException, thrown.getCause());
     }
 
     private Set<String> testFetchUrls(String mainAppPageRelativeUrl, List<String> expectedSeedRelativeUrls)
