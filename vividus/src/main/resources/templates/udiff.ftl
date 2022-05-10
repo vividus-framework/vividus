@@ -13,6 +13,13 @@
 </head>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        let targetElement = document.getElementById('myDiffElement');
+        if(`${udiff}`.length === 0)
+        {
+            targetElement.style.fontSize = "large";
+            targetElement.innerHTML = "Expected and actual string values are identical!";
+            return;
+        }
         const fileLine = `
             <span class="d2h-file-name-wrapper">
                 {{>fileIcon}}
@@ -23,7 +30,6 @@
                 <input class="d2h-file-collapse-input" type="checkbox" name="viewed" value="viewed">
                 Viewed
             </label>`;
-        let targetElement = document.getElementById('myDiffElement');
         let configuration = {
             drawFileList: false,
             fileListToggle: false,
