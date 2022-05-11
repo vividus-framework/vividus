@@ -23,7 +23,7 @@
 ** xref:plugin-html.adoc[HTML]
 ** xref:plugin-json.adoc[JSON]
 ** xref:plugin-parquet.adoc[Parquet*]
-** xref:plugin-xml.adoc[XML*]
+** xref:plugin-xml.adoc[XML]
 * Testing Clouds
 ** xref:plugin-browserstack.adoc[BrowserStack]
 ** xref:plugin-lambda-test.adoc[LambdaTest]
