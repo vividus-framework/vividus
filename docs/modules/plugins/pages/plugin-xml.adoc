@@ -1,1 +1,198 @@
-include::ROOT:page$under-construction.adoc[]
+= XML Plugin
+
+The plugin provides a set of actions for transformation and validation of XML data.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-xml', version: '{current-version}')
+----
+
+== Steps
+
+:xsd: https://www.w3schools.com/xml/schema_intro.asp[XSD Schema]
+:xslt: https://www.w3schools.com/xml/xml_xslt.asp[XSLT]
+:xml: https://www.w3schools.com/xml/default.asp[XML document]
+:xpath: https://www.w3schools.com/xml/xml_xpath.asp[XPath]
+
+=== Save data by XPath
+
+Saves XML data by XPath to a variable.
+
+[source,gherkin]
+----
+When I save data found by xpath `$xpath` in XML `$xml` to $scopes variable `$variableName`
+----
+
+* `$xpath` - The {xpath}.
+* `$xml` - The {xml}.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store a result.
+
+.Save message body
+[source,gherkin]
+----
+When I save data found by xpath `/message/body` in XML `
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+  <to>Bob</to>
+  <from>Alice</from>
+  <heading>Reminder</heading>
+  <body>Don't forget to fill TJ gaps for this week</body>
+</message>` to scenario variable `body`
+Then `${body}` is equal to `Don't forget to fill TJ gaps for this week`
+----
+
+=== Transform XML document
+
+Performs transformation of XML document using XSLT and saves the result to a variable.
+
+[source,gherkin]
+----
+When I transform XML `$xml` with `$xslt` and save result to $scopes variable `$variableName`
+----
+
+* `$xml` - The {xml} to transform.
+* `$xslt` - The {xslt}.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store a result.
+
+.Transform CD catalog into list of artists
+[source,gherkin]
+----
+When I transform XML `
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog>
+    <cd>
+        <title>Unchain my heart</title>
+        <artist>Joe Cocker</artist>
+        <price>8.20</price>
+        <year>1987</year>
+    </cd>
+    <cd>
+        <title>Empire Burlesque</title>
+        <artist>Bob Dylan</artist>
+        <price>10.90</price>
+        <year>1985</year>
+    </cd>
+    <cd>
+        <title>Hide your heart</title>
+        <artist>Bonnie Tyler</artist>
+        <price>9.90</price>
+        <year>1988</year>
+  </cd>
+</catalog>
+` with `
+<?xml version="1.0" encoding="UTF-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:template match="/">
+        <xsl:for-each select="catalog/cd">
+            <xsl:value-of select="artist"/>,
+        </xsl:for-each>
+    </xsl:template>
+</xsl:stylesheet>
+` and save result to scenario variable `artists`
+Then `${artists}` is equal to `* Joe Cocker * Bob Dylan * Bonnie Tyler`
+----
+
+=== Check element existence
+
+Checks if XML document contains element by {xpath}.
+
+[source,gherkin]
+----
+Then XML `$xml` contains element by xpath `$xpath`
+----
+
+* `$xml` - The {xml}.
+* `$xpath` - The {xpath}.
+
+.Check a message contains heading element
+[source,gherkin]
+----
+Then XML `
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+  <to>Bob</to>
+  <from>Alice</from>
+  <heading>Reminder</heading>
+  <body>Don't forget to fill TJ gaps for this week</body>
+</message>
+` contains element by xpath `/message/heading`
+----
+
+=== Compare XML documents
+
+Checks if XML document is equal to expected XML document.
+
+[source,gherkin]
+----
+Then XML `$xml` is equal to `$expectedXml`
+----
+
+* `$xml` - The actual {xml}.
+* `$expectedXml` - The expected {xml}.
+
+.Compare messages
+[source,gherkin]
+----
+Then XML `
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+  <to>Bob</to>
+  <from>Alice</from>
+  <heading>Reminder</heading>
+  <body>Don't forget to fill TJ gaps for this week</body>
+</message>
+` is equal to `
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+  <to>Bob</to>
+  <from>Alice</from>
+  <heading>Reminder</heading>
+  <body>Don't forget to fill TJ gaps for this week</body>
+</message>
+`
+----
+
+=== Validate XML document
+
+Validates {xml} against {xsd}.
+
+[source,gherkin]
+----
+Then XML `$xml` is valid against XSD `$xsd`
+----
+
+* `$xml` - The {xml}.
+* `$xsd` - The {xsd}.
+
+.Validate shipping information
+[source,gherkin]
+----
+Then XML `
+<?xml version="1.0" encoding="UTF-8"?>
+<shipto>
+    <name>Ola Nordmann</name>
+    <address>Langgt 23</address>
+    <city>4000 Stavanger</city>
+    <country>Norway</country>
+</shipto>
+` is valid against XSD `
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="shipto">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="address" type="xs:string"/>
+                <xs:element name="city" type="xs:string"/>
+                <xs:element name="country" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
+`
+----
