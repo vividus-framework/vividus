@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,8 @@ class VisualStepsTests
 {
     private static final String ACCEPTABLE_DIFF_PERCENTAGE = "ACCEPTABLE_DIFF_PERCENTAGE";
 
+    private static final String ASSERTION_MSG = "Search context is set";
+
     private static final Locator DIV_LOCATOR = new Locator(WebLocatorType.XPATH, "//div");
 
     private static final Locator A_LOCATOR = new Locator(WebLocatorType.XPATH, ".//a");
@@ -123,7 +125,9 @@ class VisualStepsTests
 
     private void mockUiContext()
     {
-        when(uiContext.getSearchContext()).thenReturn(mock(SearchContext.class));
+        SearchContext searchContext = mock(SearchContext.class);
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
+        when(softAssert.assertNotNull(ASSERTION_MSG, searchContext)).thenReturn(true);
     }
 
     @Test
@@ -272,18 +276,17 @@ class VisualStepsTests
         when(visualTestingEngine.establish(visualCheck)).thenReturn(visualCheckResult);
         when(visualCheckResult.getActionType()).thenReturn(VisualActionType.ESTABLISH);
         visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE);
-        verifyNoInteractions(softAssert);
+        verifyNoMoreInteractions(softAssert);
         verifyCheckResultPublish();
         assertEquals(Map.of(), visualCheck.getElementsToIgnore());
     }
 
     @Test
-    void shouldThrowExceptionWhenContextIsNull()
+    void shouldRecordAssertionWhenContextIsNull()
     {
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
-            () -> visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE));
-        assertEquals("Search context is null, please check is browser session started", exception.getMessage());
-        verifyNoInteractions(visualCheckFactory, visualTestingEngine, attachmentPublisher, softAssert);
+        visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE);
+        verify(softAssert).assertNotNull(ASSERTION_MSG, null);
+        verifyNoInteractions(visualCheckFactory, visualTestingEngine, attachmentPublisher);
     }
 
     static Stream<Arguments> exceptionsToCatch()

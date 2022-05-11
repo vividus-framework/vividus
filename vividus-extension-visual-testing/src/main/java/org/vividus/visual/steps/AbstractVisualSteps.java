@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.apache.commons.lang3.Validate;
 import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
@@ -43,11 +42,15 @@ public abstract class AbstractVisualSteps
         this.softAssert = softAssert;
     }
 
-    protected <T extends VisualCheck> VisualCheckResult execute(Function<T, VisualCheckResult> checkResultProvider,
+    protected <T extends VisualCheck> void execute(
+            Function<T, VisualCheckResult> checkResultProvider,
             Supplier<T> visualCheckFactory, String templateName)
     {
         SearchContext searchContext = uiContext.getSearchContext();
-        Validate.validState(searchContext != null, "Search context is null, please check is browser session started");
+        if (!softAssert.assertNotNull("Search context is set", searchContext))
+        {
+            return;
+        }
         T visualCheck = visualCheckFactory.get();
         visualCheck.setSearchContext(searchContext);
         VisualCheckResult result = checkResultProvider.apply(visualCheck);
@@ -56,7 +59,6 @@ public abstract class AbstractVisualSteps
             attachmentPublisher.publishAttachment(templateName, Map.of("result", result), "Visual comparison");
             verifyResult(result);
         }
-        return result;
     }
 
     protected void verifyResult(VisualCheckResult result)

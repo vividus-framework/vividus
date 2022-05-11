@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,7 @@
 
 package org.vividus.visual.steps;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -50,6 +47,7 @@ import org.vividus.visual.model.VisualCheckResult;
 class VisualStepsTests
 {
     private static final String TEMPLATE = "template";
+    private static final String ASSERTION_MSG = "Search context is set";
 
     @Mock
     private IUiContext uiContext;
@@ -63,13 +61,12 @@ class VisualStepsTests
 
     @SuppressWarnings("unchecked")
     @Test
-    void shouldThrowAnExceptionWhenContextIsNull()
+    void shouldRecordAssertionWhenContextIsNull()
     {
         Function<VisualCheck, VisualCheckResult> checkResultProvider = mock(Function.class);
         Supplier<VisualCheck> visualCheckFactory = mock(Supplier.class);
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
-            () -> visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE));
-        assertEquals("Search context is null, please check is browser session started", exception.getMessage());
+        visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE);
+        verify(softAssert).assertNotNull(ASSERTION_MSG, null);
         verifyNoInteractions(visualCheckFactory, checkResultProvider, attachmentPublisher);
     }
 
@@ -79,9 +76,10 @@ class VisualStepsTests
         SearchContext searchContext = mock(SearchContext.class);
         VisualCheck visualCheck = mock(VisualCheck.class);
         when(uiContext.getSearchContext()).thenReturn(searchContext);
+        when(softAssert.assertNotNull(ASSERTION_MSG, searchContext)).thenReturn(true);
         Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> null;
         Supplier<VisualCheck> visualCheckFactory = () -> visualCheck;
-        assertNull(visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE));
+        visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE);
         verifyNoInteractions(attachmentPublisher);
         verify(visualCheck).setSearchContext(searchContext);
     }
@@ -95,10 +93,11 @@ class VisualStepsTests
         VisualCheckResult visualCheckResult = mock(VisualCheckResult.class);
         when(visualCheckResult.getActionType()).thenReturn(action);
         when(uiContext.getSearchContext()).thenReturn(searchContext);
+        when(softAssert.assertNotNull(ASSERTION_MSG, searchContext)).thenReturn(true);
         Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> visualCheckResult;
         Supplier<VisualCheck> visualCheckFactory = () -> visualCheck;
         when(visualCheckResult.isPassed()).thenReturn(passed);
-        assertSame(visualCheckResult, visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE));
+        visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE);
         InOrder ordered = Mockito.inOrder(attachmentPublisher, visualCheckResult, softAssert);
         ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE, Map.of("result", visualCheckResult),
                 "Visual comparison");
