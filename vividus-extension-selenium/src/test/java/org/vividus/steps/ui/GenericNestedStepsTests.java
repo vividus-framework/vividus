@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,6 +119,23 @@ class GenericNestedStepsTests
         verify(searchActions, times(1)).findElements(searchContext, locator);
         verify(softAssert).assertThat(eq(ELEMENTS_NUMBER), eq(1), argThat(m ->
             ComparisonRule.EQUAL_TO.getComparisonRule(2).toString().equals(m.toString())));
+        verify(softAssert, never()).recordFailedAssertion(anyString());
+        verify(uiContext, never()).getSearchContextSetter();
+    }
+
+    @Test
+    void shouldNotExecuteStepsIfNoElementsFoundButConditionMatches()
+    {
+        SearchContext searchContext = mockUiContext();
+        Locator locator = mock(Locator.class);
+        when(searchActions.findElements(searchContext, locator)).thenReturn(List.of());
+
+        nestedSteps.performAllStepsWhileElementsExist(ComparisonRule.GREATER_THAN_OR_EQUAL_TO, 1, locator, 5, subSteps);
+
+        verifyNoInteractions(subSteps);
+        verify(searchActions, times(1)).findElements(searchContext, locator);
+        verify(softAssert).assertThat(eq(ELEMENTS_NUMBER), eq(0), argThat(m ->
+            ComparisonRule.GREATER_THAN_OR_EQUAL_TO.getComparisonRule(1).toString().equals(m.toString())));
         verify(softAssert, never()).recordFailedAssertion(anyString());
         verify(uiContext, never()).getSearchContextSetter();
     }
