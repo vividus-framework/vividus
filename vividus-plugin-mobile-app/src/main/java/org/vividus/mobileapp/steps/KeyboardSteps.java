@@ -117,7 +117,7 @@ public class KeyboardSteps
      * Clear a field located by the <b>locator</b>
      * @param locator locator to find a field
      */
-    @When("I clear field located `$locator` and keep keyboard opened")
+    @When("I clear field located `$locator` and keep keyboard open")
     public void clearTextInFieldAndKeepKeyboard(Locator locator)
     {
         baseValidations.assertElementExists(ELEMENT_TO_CLEAR, locator).ifPresent(keyboardActions::clearText);
