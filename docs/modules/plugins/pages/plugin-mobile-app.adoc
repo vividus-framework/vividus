@@ -687,7 +687,7 @@ Only clears the field located by the locator. The keyboard hiding is skipped.
 
 [source,gherkin]
 ----
-When I clear field located `$locator` and keep keyboard opened
+When I clear field located `$locator` and keep keyboard open
 ----
 
 * `$locator` - <<_locator>>.
