@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.vividus.steps.ui.web;
+
+import java.util.List;
 
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
@@ -61,10 +63,10 @@ public class ScrollSteps
     @When("I scroll element located `$locator` into view")
     public void scrollIntoView(Locator locator)
     {
-        WebElement toScroll = baseValidaitons.assertIfAtLeastOneElementExists("Element to scroll into view", locator);
-        if (null != toScroll)
+        List<WebElement> toScroll = baseValidaitons.assertIfElementsExist("Element to scroll into view", locator);
+        if (!toScroll.isEmpty())
         {
-            javascriptActions.scrollIntoView(toScroll, true);
+            javascriptActions.scrollIntoView(toScroll.get(0), true);
         }
     }
 }

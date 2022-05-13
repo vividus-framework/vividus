@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -113,7 +112,7 @@ class ParametersToAccessibilityCheckOptionsConverterTests
         when(uiContext.getSearchContext()).thenReturn(rootElement);
         when(cssSelectorFactory.getCssSelector(rootElement)).thenReturn(ROOT);
         WebElement webElement = mock(WebElement.class);
-        when(searchActions.findElements(eq(rootElement), argThat(l -> {
+        when(searchActions.findElements(argThat(l -> {
             Assertions.assertAll(
                 () -> assertEquals(WebLocatorType.ID, l.getLocatorType()),
                 () -> assertEquals(Visibility.ALL, l.getSearchParameters().getVisibility()));

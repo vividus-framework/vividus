@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,23 +95,10 @@ public interface IBaseValidations
     List<WebElement> assertNumberOfElementsFound(String description, Locator locator, int number,
             ComparisonRule comparisonRule);
 
-    boolean assertIfExactNumberOfElementsFound(String businessDescription, Locator locator, int number);
-
     boolean assertIfExactNumberOfElementsFound(String businessDescription, SearchContext searchContext, Locator locator,
             int number);
 
-    List<WebElement> assertIfAtLeastNumberOfElementsExist(String businessDescription, Locator locator,
-            int leastNumber);
-
-    List<WebElement> assertIfAtLeastNumberOfElementsExist(String businessDescription, SearchContext searchContext,
-            Locator locator, int leastNumber);
-
-    WebElement assertIfAtLeastOneElementExists(String businessDescription, Locator locator);
-
-    WebElement assertIfAtLeastOneElementExists(String businessDescription, SearchContext searchContext,
-            Locator locator);
+    List<WebElement> assertIfAtLeastNumberOfElementsExist(String businessDescription, Locator locator, int leastNumber);
 
     boolean assertIfElementDoesNotExist(String businessDescription, Locator locator);
-
-    boolean assertIfElementDoesNotExist(String businessDescription, SearchContext searchContext, Locator locator);
 }

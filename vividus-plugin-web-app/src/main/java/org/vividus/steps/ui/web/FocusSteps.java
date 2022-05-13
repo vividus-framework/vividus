@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,8 @@ public class FocusSteps
     @When("I set focus to the context element")
     public void setFocus()
     {
-        WebElement elementToCheck = getWebElementFromContext();
-        if (null != elementToCheck)
-        {
-            javascriptActions.executeScript("arguments[0].focus()", elementToCheck);
-        }
+        uiContext.getSearchContext(WebElement.class).ifPresent(
+                elementToCheck -> javascriptActions.executeScript("arguments[0].focus()", elementToCheck));
     }
 
     /**
@@ -67,11 +64,8 @@ public class FocusSteps
     @Then("the context element is $focusState")
     public void isElementInFocusState(FocusState focusState)
     {
-        focusValidations.isElementInFocusState(getWebElementFromContext(), focusState);
-    }
-
-    private WebElement getWebElementFromContext()
-    {
-        return uiContext.getSearchContext(WebElement.class);
+        uiContext.getSearchContext(WebElement.class).ifPresent(
+                elementToCheck -> focusValidations.isElementInFocusState(elementToCheck, focusState)
+        );
     }
 }

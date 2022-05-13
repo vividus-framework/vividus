@@ -62,8 +62,7 @@ class VisualTestingStepsTests
     void setUp()
     {
         SearchContext searchContext = mock(SearchContext.class);
-        when(uiContext.getSearchContext()).thenReturn(searchContext);
-        when(softAssert.assertNotNull("Search context is set", searchContext)).thenReturn(true);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package org.vividus.steps.ui.web;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.openqa.selenium.By;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -74,8 +73,7 @@ class TextValidationStepsTests
     void testCheckPageContainsTextThrowsWebDriverException()
     {
         By locator = LocatorUtil.getXPathLocatorByInnerText(TEXT);
-        when(uiContext.getSearchContext()).thenReturn(webDriver);
-        when(uiContext.getSearchContext(SearchContext.class)).thenReturn(webDriver);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
         when(webDriver.findElements(locator)).thenAnswer(new Answer<List<WebElement>>()
         {
             private int count;
@@ -99,8 +97,7 @@ class TextValidationStepsTests
     @Test
     void testCheckPageContainsText()
     {
-        when(uiContext.getSearchContext()).thenReturn(webDriver);
-        when(uiContext.getSearchContext(SearchContext.class)).thenReturn(webDriver);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
         when(webDriver.findElements(LocatorUtil.getXPathLocatorByInnerText(TEXT))).thenReturn(List.of(webElement));
         textValidationSteps.ifTextExists(TEXT);
         verify(softAssert).assertTrue(THERE_IS_AN_ELEMENT_WITH_TEXT_TEXT_IN_THE_CONTEXT, true);
@@ -109,7 +106,7 @@ class TextValidationStepsTests
     @Test
     void testDomElementsContainText()
     {
-        when(uiContext.getSearchContext()).thenReturn(webElement);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webElement));
         textValidationSteps.ifTextExists(TEXT);
         verify(elementValidations).assertIfElementContainsText(webElement, TEXT, true);
     }
@@ -117,8 +114,7 @@ class TextValidationStepsTests
     @Test
     void testCheckPageContainsTextInPseudoElements()
     {
-        when(uiContext.getSearchContext()).thenReturn(webDriver);
-        when(uiContext.getSearchContext(SearchContext.class)).thenReturn(webDriver);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
         when(webElementActions.getAllPseudoElementsContent()).thenReturn(List.of(TEXT));
         textValidationSteps.ifTextExists(TEXT);
         verify(softAssert).assertTrue(THERE_IS_AN_ELEMENT_WITH_TEXT_TEXT_IN_THE_CONTEXT, true);
@@ -127,8 +123,7 @@ class TextValidationStepsTests
     @Test
     void testIfTextExists()
     {
-        when(uiContext.getSearchContext()).thenReturn(webDriver);
-        when(uiContext.getSearchContext(SearchContext.class)).thenReturn(webDriver);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
         when(webElementActions.getAllPseudoElementsContent()).thenReturn(List.of());
         when(webElementActions.getPageText()).thenReturn("no");
         textValidationSteps.ifTextExists(TEXT);
@@ -138,8 +133,7 @@ class TextValidationStepsTests
     @Test
     void testIfTextExistsOnPage()
     {
-        when(uiContext.getSearchContext()).thenReturn(webDriver);
-        when(uiContext.getSearchContext(SearchContext.class)).thenReturn(webDriver);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
         when(webElementActions.getAllPseudoElementsContent()).thenReturn(List.of());
         when(webElementActions.getPageText()).thenReturn(TEXT);
         textValidationSteps.ifTextExists(TEXT);
@@ -149,7 +143,7 @@ class TextValidationStepsTests
     @Test
     void testIfTextDoesNotExist()
     {
-        when(uiContext.getSearchContext(SearchContext.class)).thenReturn(webElement);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webElement));
         when(elementValidations.assertIfElementContainsText(webElement, TEXT, false)).thenReturn(true);
         assertTrue(textValidationSteps.textDoesNotExist(TEXT));
     }
@@ -157,8 +151,8 @@ class TextValidationStepsTests
     @Test
     void testTextDoesNotExist()
     {
-        when(uiContext.getSearchContext(SearchContext.class)).thenReturn(webDriver);
-        when(baseValidations.assertIfElementDoesNotExist("An element with text 'text'", webDriver,
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
+        when(baseValidations.assertIfElementDoesNotExist("An element with text 'text'",
                 new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, TEXT))).thenReturn(true);
         assertTrue(textValidationSteps.textDoesNotExist(TEXT));
     }
@@ -170,7 +164,7 @@ class TextValidationStepsTests
     })
     void testIfTextMatchesRegexWebElementContext(String elementText, boolean actual)
     {
-        when(uiContext.getSearchContext(SearchContext.class)).thenReturn(webElement);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webElement));
         when(webElementActions.getElementText(webElement)).thenReturn(elementText);
         textValidationSteps.ifTextMatchesRegex(REGEX);
         verify(softAssert).assertTrue(TEXT_MATCHES_REGEX_MESSAGE + REGEX, actual);
@@ -183,7 +177,7 @@ class TextValidationStepsTests
     })
     void testIfTextMatchesRegexWebDriverContext(String pageText, boolean actual)
     {
-        when(uiContext.getSearchContext(SearchContext.class)).thenReturn(webDriver);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
         when(webElementActions.getPageText()).thenReturn(pageText);
         textValidationSteps.ifTextMatchesRegex(REGEX);
         verify(softAssert).assertTrue(TEXT_MATCHES_REGEX_MESSAGE + REGEX, actual);
@@ -197,7 +191,7 @@ class TextValidationStepsTests
     })
     void testIfTextDoesntMatchRegexWebElementContext(String pseudoElementContent, boolean actual)
     {
-        when(uiContext.getSearchContext(SearchContext.class)).thenReturn(webElement);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webElement));
         when(webElementActions.getElementText(webElement)).thenReturn(ELEMENT_TEXT);
         when(webElementActions.getPseudoElementContent(webElement)).thenReturn(pseudoElementContent);
         textValidationSteps.ifTextMatchesRegex(REGEX);
@@ -208,10 +202,9 @@ class TextValidationStepsTests
     void testIfTextExistsFirefox()
     {
         By locator = LocatorUtil.getXPathLocatorByInnerText(TEXT);
-        when(uiContext.getSearchContext()).thenReturn(webDriver);
-        when(uiContext.getSearchContext(SearchContext.class)).thenReturn(webDriver);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
         Mockito.lenient().when(webDriver.findElements(locator)).thenReturn(List.of());
-        when(searchActions.findElements(eq(webDriver), any(Locator.class))).thenReturn(List.of(webElement));
+        when(searchActions.findElements(any(Locator.class))).thenReturn(List.of(webElement));
         textValidationSteps.ifTextExists(TEXT.toUpperCase());
         verify(softAssert).assertTrue("There is an element with text=TEXT in the context", true);
     }

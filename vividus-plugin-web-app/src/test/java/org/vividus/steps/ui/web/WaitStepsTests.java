@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
@@ -150,11 +151,10 @@ class WaitStepsTests
     @Test
     void testWaitTillElementWithTagAndAttributeDisappears()
     {
-        when(uiContext.getSearchContext()).thenReturn(webElement);
         when(webDriverProvider.get()).thenReturn(webDriver);
         List<WebElement> elements = List.of(webElement);
         Locator locator = new Locator(WebLocatorType.XPATH, ELEMENT_WITH_TAG);
-        when(searchActions.findElements(webElement, locator)).thenReturn(elements);
+        when(searchActions.findElements(locator)).thenReturn(elements);
         waitSteps.waitTillElementDisappears(ELEMENT_TAG, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
         verify(waitActions).wait(eq(webDriver),
                 argThat(condition -> condition.toString().equals("invisibility of " + webElement)));
@@ -164,6 +164,8 @@ class WaitStepsTests
     @Test
     void testWaitTillElementWithTagAndAttributeDisappearsElementIsNotPresent()
     {
+        Locator locator = new Locator(WebLocatorType.XPATH, ELEMENT_WITH_TAG);
+        when(searchActions.findElements(locator)).thenReturn(List.of());
         waitSteps.waitTillElementDisappears(ELEMENT_TAG, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
         verifyNoInteractions(waitActions);
         verify(softAssert).recordPassedAssertion(
@@ -210,7 +212,7 @@ class WaitStepsTests
     @Test
     void testWaitTillFrameAppears()
     {
-        when(uiContext.getSearchContext(WebDriver.class)).thenReturn(webDriver);
+        when(uiContext.getSearchContext(WebDriver.class)).thenReturn(Optional.of(webDriver));
         WaitResult<List<WebElement>> waitResult = mock(WaitResult.class);
         IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
         By locator = LocatorUtil

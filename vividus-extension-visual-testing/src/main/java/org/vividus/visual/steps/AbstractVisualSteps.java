@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
@@ -46,19 +45,18 @@ public abstract class AbstractVisualSteps
             Function<T, VisualCheckResult> checkResultProvider,
             Supplier<T> visualCheckFactory, String templateName)
     {
-        SearchContext searchContext = uiContext.getSearchContext();
-        if (!softAssert.assertNotNull("Search context is set", searchContext))
-        {
-            return;
-        }
-        T visualCheck = visualCheckFactory.get();
-        visualCheck.setSearchContext(searchContext);
-        VisualCheckResult result = checkResultProvider.apply(visualCheck);
-        if (null != result)
-        {
-            attachmentPublisher.publishAttachment(templateName, Map.of("result", result), "Visual comparison");
-            verifyResult(result);
-        }
+        uiContext.getOptionalSearchContext().ifPresent(searchContext -> {
+            T visualCheck = visualCheckFactory.get();
+            visualCheck.setSearchContext(searchContext);
+
+            VisualCheckResult result = checkResultProvider.apply(visualCheck);
+
+            if (null != result)
+            {
+                attachmentPublisher.publishAttachment(templateName, Map.of("result", result), "Visual comparison");
+                verifyResult(result);
+            }
+        });
     }
 
     protected void verifyResult(VisualCheckResult result)

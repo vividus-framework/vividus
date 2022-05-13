@@ -16,7 +16,6 @@
 
 package org.vividus.ui.variable;
 
-import java.util.Optional;
 import java.util.function.ToIntFunction;
 
 import org.openqa.selenium.Rectangle;
@@ -40,7 +39,7 @@ public abstract class AbstractSearchContextRectangleDynamicVariable implements D
     public DynamicVariableCalculationResult calculateValue()
     {
         return DynamicVariableCalculationResult.withValueOrError(
-                Optional.ofNullable(uiContext.getSearchContext(WebElement.class))
+                uiContext.getSearchContext(WebElement.class)
                         .map(WebElement::getRect)
                         .map(valueProvider::applyAsInt)
                         .map(String::valueOf),

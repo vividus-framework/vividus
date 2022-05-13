@@ -70,8 +70,6 @@ class VisualStepsTests
 {
     private static final String ACCEPTABLE_DIFF_PERCENTAGE = "ACCEPTABLE_DIFF_PERCENTAGE";
 
-    private static final String ASSERTION_MSG = "Search context is set";
-
     private static final Locator DIV_LOCATOR = new Locator(WebLocatorType.XPATH, "//div");
 
     private static final Locator A_LOCATOR = new Locator(WebLocatorType.XPATH, ".//a");
@@ -126,8 +124,7 @@ class VisualStepsTests
     private void mockUiContext()
     {
         SearchContext searchContext = mock(SearchContext.class);
-        when(uiContext.getSearchContext()).thenReturn(searchContext);
-        when(softAssert.assertNotNull(ASSERTION_MSG, searchContext)).thenReturn(true);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
     }
 
     @Test
@@ -282,10 +279,10 @@ class VisualStepsTests
     }
 
     @Test
-    void shouldRecordAssertionWhenContextIsNull()
+    void shouldDoNothingOnMissingSearchContext()
     {
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.empty());
         visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE);
-        verify(softAssert).assertNotNull(ASSERTION_MSG, null);
         verifyNoInteractions(visualCheckFactory, visualTestingEngine, attachmentPublisher);
     }
 

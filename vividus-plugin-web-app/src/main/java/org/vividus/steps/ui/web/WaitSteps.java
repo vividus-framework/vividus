@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ public class WaitSteps
     {
         String elementXpath = LocatorUtil.getXPathByTagNameAndAttribute(elementTag, attributeType, attributeValue);
         Locator locator = new Locator(WebLocatorType.XPATH, elementXpath);
-        List<WebElement> elements = searchActions.findElements(getSearchContext(), locator);
+        List<WebElement> elements = searchActions.findElements(locator);
         if (!elements.isEmpty())
         {
             waitActions.wait(getWebDriver(), State.NOT_VISIBLE.getExpectedCondition(elements.get(0)));
@@ -312,9 +312,13 @@ public class WaitSteps
     @When("I wait until a frame with the name '$frameName' appears")
     public void waitTillFrameAppears(String frameName)
     {
-        WebDriver searchContext = uiContext.getSearchContext(WebDriver.class);
-        waitForElementAppearance(searchContext, LocatorUtil
-                .getXPathLocator("*[(local-name()='frame' or local-name()='iframe') and @*='%s']", frameName));
+        uiContext.getSearchContext(WebDriver.class).ifPresent(
+                searchContext -> {
+                    By locator = LocatorUtil.getXPathLocator(
+                            "*[(local-name()='frame' or local-name()='iframe') and @*='%s']", frameName);
+                    waitForElementAppearance(searchContext, locator);
+                }
+        );
     }
 
     /**

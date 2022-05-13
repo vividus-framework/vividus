@@ -17,6 +17,7 @@
 package org.vividus.ui.context;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import javax.inject.Inject;
@@ -42,40 +43,34 @@ public class UiContext implements IUiContext
         return getSearchContextImpl();
     }
 
-    private SearchContext getSearchContextImpl()
+    @Override
+    public Optional<SearchContext> getOptionalSearchContext()
     {
-        SearchContextData searchContext = getSearchContextData();
-        if (searchContext != null)
-        {
-            return searchContext.getSearchContext();
-        }
-        return null;
+        return getSearchContext(SearchContext.class);
     }
 
     @Override
-    public <T extends SearchContext> T getSearchContext(Class<T> clazz)
+    public <T extends SearchContext> Optional<T> getSearchContext(Class<T> clazz)
     {
         SearchContext searchContext = getSearchContextImpl();
         if (clazz.isInstance(searchContext))
         {
-            return clazz.cast(searchContext);
+            return Optional.of(clazz.cast(searchContext));
         }
-        StringBuilder exceptionMessage = new StringBuilder("Expected search context of ").append(clazz)
-                .append(", but was ");
         if (searchContext != null)
         {
-            exceptionMessage.append(searchContext.getClass()).append(" search context");
-            throw new IllegalSearchContextException(exceptionMessage.toString());
+            String exceptionMessage =
+                    "Expected search context of " + clazz + ", but was " + searchContext.getClass() + " search context";
+            throw new IllegalSearchContextException(exceptionMessage);
         }
-        exceptionMessage.append("null search context");
-        softAssert.recordFailedAssertion(exceptionMessage.toString());
-        return null;
+        softAssert.recordFailedAssertion("Search context is not set");
+        return Optional.empty();
     }
 
     @Override
     public SearchContextSetter getSearchContextSetter()
     {
-        SearchContextData searchContextData = testContext.get(KEY, SearchContextData.class);
+        SearchContextData searchContextData = getSearchContextData();
         if (searchContextData != null)
         {
             return searchContextData.getSearchContextSetter();
@@ -131,6 +126,16 @@ public class UiContext implements IUiContext
     public void setTestContext(TestContext testContext)
     {
         this.testContext = testContext;
+    }
+
+    private SearchContext getSearchContextImpl()
+    {
+        SearchContextData searchContext = getSearchContextData();
+        if (searchContext != null)
+        {
+            return searchContext.getSearchContext();
+        }
+        return null;
     }
 
     protected SearchContextData getSearchContextData()
