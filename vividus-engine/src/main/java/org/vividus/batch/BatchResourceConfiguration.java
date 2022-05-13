@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.vividus.batch;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -63,6 +65,8 @@ public class BatchResourceConfiguration
         {
             return List.of();
         }
-        return List.of(StringUtils.split(list, ','));
+        return Stream.of(StringUtils.split(list, ','))
+                     .map(String::strip)
+                     .collect(Collectors.toList());
     }
 }
