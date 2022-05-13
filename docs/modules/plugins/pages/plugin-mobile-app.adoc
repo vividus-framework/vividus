@@ -681,7 +681,7 @@ When I clear field located `accessibilityId(username)`
 ----
 
 
-=== Clear field and keep keyboard opened
+=== Clear field and keep keyboard open
 
 Only clears the field located by the locator. The keyboard hiding is skipped.
 
