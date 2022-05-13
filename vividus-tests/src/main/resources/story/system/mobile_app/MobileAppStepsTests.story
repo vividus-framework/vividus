@@ -155,12 +155,12 @@ When I tap on element located `accessibilityId(Return)`
 Then number of elements found by `<keyboardLocator>` is equal to `0`
 
 
-Scenario: Verify step: 'When I clear field located `$locator` and keep keyboard opened'
+Scenario: Verify step: 'When I clear field located `$locator` and keep keyboard open'
 Meta:
     @requirementId 2617
     @targetPlatform ios
 !-- Typing on android emulator doesn't shows a keyboard.
-When I clear field located `accessibilityId(nameInput)` and keep keyboard opened
+When I clear field located `accessibilityId(nameInput)` and keep keyboard open
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 Then number of elements found by `<keyboardLocator>` is equal to `1`
 When I tap on element located `accessibilityId(Return)`
