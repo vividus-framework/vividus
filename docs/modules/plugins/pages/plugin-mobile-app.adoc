@@ -695,7 +695,7 @@ When I clear field located `$locator` and keep keyboard open
 .Clear text and keep keyboard opened
 [source,gherkin]
 ----
-When I clear field located `accessibilityId(username)` and keep keyboard opened
+When I clear field located `accessibilityId(username)` and keep keyboard open
 ----
 
 === Swipe to an element
