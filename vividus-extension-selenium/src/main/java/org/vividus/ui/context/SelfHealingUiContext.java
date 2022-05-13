@@ -19,6 +19,7 @@ package org.vividus.ui.context;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -36,14 +37,14 @@ public class SelfHealingUiContext extends UiContext
     @Override
     public SearchContext getSearchContext()
     {
-        SearchContext searchContext = super.getSearchContext();
-        return wrap(searchContext, SearchContext.class, super::getSearchContext);
+        return wrap(super.getSearchContext(), SearchContext.class, super::getSearchContext);
     }
 
     @Override
-    public <T extends SearchContext> T getSearchContext(Class<T> clazz)
+    public <T extends SearchContext> Optional<T> getSearchContext(Class<T> clazz)
     {
-        return wrap(super.getSearchContext(clazz), clazz, () -> super.getSearchContext(clazz));
+        return super.getSearchContext(clazz)
+                .map(sc -> wrap(sc, clazz, () -> super.getSearchContext(clazz).get()));
     }
 
     @SuppressWarnings({ "unchecked", "AvoidHidingCauseException" })

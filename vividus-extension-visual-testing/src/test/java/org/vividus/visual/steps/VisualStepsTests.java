@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -47,7 +48,6 @@ import org.vividus.visual.model.VisualCheckResult;
 class VisualStepsTests
 {
     private static final String TEMPLATE = "template";
-    private static final String ASSERTION_MSG = "Search context is set";
 
     @Mock
     private IUiContext uiContext;
@@ -65,8 +65,8 @@ class VisualStepsTests
     {
         Function<VisualCheck, VisualCheckResult> checkResultProvider = mock(Function.class);
         Supplier<VisualCheck> visualCheckFactory = mock(Supplier.class);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.empty());
         visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE);
-        verify(softAssert).assertNotNull(ASSERTION_MSG, null);
         verifyNoInteractions(visualCheckFactory, checkResultProvider, attachmentPublisher);
     }
 
@@ -75,8 +75,7 @@ class VisualStepsTests
     {
         SearchContext searchContext = mock(SearchContext.class);
         VisualCheck visualCheck = mock(VisualCheck.class);
-        when(uiContext.getSearchContext()).thenReturn(searchContext);
-        when(softAssert.assertNotNull(ASSERTION_MSG, searchContext)).thenReturn(true);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
         Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> null;
         Supplier<VisualCheck> visualCheckFactory = () -> visualCheck;
         visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE);
@@ -92,8 +91,7 @@ class VisualStepsTests
         VisualCheck visualCheck = mock(VisualCheck.class);
         VisualCheckResult visualCheckResult = mock(VisualCheckResult.class);
         when(visualCheckResult.getActionType()).thenReturn(action);
-        when(uiContext.getSearchContext()).thenReturn(searchContext);
-        when(softAssert.assertNotNull(ASSERTION_MSG, searchContext)).thenReturn(true);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
         Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> visualCheckResult;
         Supplier<VisualCheck> visualCheckFactory = () -> visualCheck;
         when(visualCheckResult.isPassed()).thenReturn(passed);

@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,7 +42,7 @@ class SearchContextXCoordinateDynamicVariableTests
     void shouldReturnElementHeight()
     {
         var webElement = mock(WebElement.class);
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
         var rectangle = mock(Rectangle.class);
         when(webElement.getRect()).thenReturn(rectangle);
         when(rectangle.getX()).thenReturn(1924);

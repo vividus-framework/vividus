@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -41,15 +43,10 @@ class ScrollStepsTests
 {
     private static final String ELEMENT_TO_SCROLL_INTO_VIEW = "Element to scroll into view";
 
-    @Mock
-    private IUiContext uiContext;
-    @Mock
-    private WebJavascriptActions javascriptActions;
-    @Mock
-    private IBaseValidations baseValiation;
-
-    @InjectMocks
-    private ScrollSteps scrollSteps;
+    @Mock private IUiContext uiContext;
+    @Mock private WebJavascriptActions javascriptActions;
+    @Mock private IBaseValidations baseValidations;
+    @InjectMocks private ScrollSteps scrollSteps;
 
     @Test
     void shouldScrollContextInDownDirectionWhenContextIsPage()
@@ -126,8 +123,8 @@ class ScrollStepsTests
     {
         WebElement webElement = mock(WebElement.class);
         Locator locator = mock(Locator.class);
-        when(baseValiation.assertIfAtLeastOneElementExists(ELEMENT_TO_SCROLL_INTO_VIEW, locator))
-            .thenReturn(webElement);
+        when(baseValidations.assertIfElementsExist(ELEMENT_TO_SCROLL_INTO_VIEW, locator)).thenReturn(
+                List.of(webElement));
         scrollSteps.scrollIntoView(locator);
         verify(javascriptActions).scrollIntoView(webElement, true);
     }
@@ -136,9 +133,9 @@ class ScrollStepsTests
     void shouldNotCallJavaScriptActionsIfNoElementFound()
     {
         Locator locator = mock(Locator.class);
+        when(baseValidations.assertIfElementsExist(ELEMENT_TO_SCROLL_INTO_VIEW, locator)).thenReturn(List.of());
         scrollSteps.scrollIntoView(locator);
         verifyNoInteractions(javascriptActions);
-        verify(baseValiation).assertIfAtLeastOneElementExists(ELEMENT_TO_SCROLL_INTO_VIEW, locator);
     }
 
     private void verifyUnsupportedScroll(Executable toTest)

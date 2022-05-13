@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ class GenericSetVariableStepsTests
     void shouldSaveContextElementTextToVariable()
     {
         WebElement webElement = mock(WebElement.class);
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
         when(elementActions.getElementText(webElement)).thenReturn(TEXT);
         genericSetVariableSteps.saveContextElementTextToVariable(VARIABLE_SCOPE, VARIABLE_NAME);
         verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, TEXT);
@@ -81,7 +81,7 @@ class GenericSetVariableStepsTests
     @Test
     void shouldSaveContextElementTextToVariableNoContext()
     {
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(null);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.empty());
         genericSetVariableSteps.saveContextElementTextToVariable(VARIABLE_SCOPE, VARIABLE_NAME);
         verifyNoInteractions(variableContext);
     }
@@ -90,7 +90,7 @@ class GenericSetVariableStepsTests
     void shouldSaveContextElementAttributeValueToVariable()
     {
         WebElement webElement = mock(WebElement.class);
-        when(uiContext.getSearchContext(WebElement.class)).thenReturn(webElement);
+        when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
         when(webElement.getAttribute(ATTRIBUTE_NAME)).thenReturn(TEXT);
         when(softAssert.assertNotNull(ATTRIBUTE_VALUE_MESSAGE, TEXT)).thenReturn(Boolean.TRUE);
         genericSetVariableSteps.saveContextElementAttributeValueToVariable(ATTRIBUTE_NAME, VARIABLE_SCOPE,

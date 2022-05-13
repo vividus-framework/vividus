@@ -56,9 +56,7 @@ class SelfHealingUiContextTests extends UiContextTestsBase
     public static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(SelfHealingUiContext.class);
 
     @Mock private SearchContextSetter searchContextSetter;
-
-    @InjectMocks
-    private SelfHealingUiContext uiContext;
+    @InjectMocks private SelfHealingUiContext uiContext;
 
     @BeforeEach
     void beforeEach()
@@ -72,7 +70,7 @@ class SelfHealingUiContextTests extends UiContextTestsBase
         var webElement = mock(WebElement.class);
         uiContext.putSearchContext(webElement, searchContextSetter);
         doNothing().when(webElement).click();
-        uiContext.getSearchContext(WebElement.class).click();
+        uiContext.getSearchContext(WebElement.class).ifPresent(WebElement::click);
         verify(webElement).click();
         verifyNoInteractions(searchContextSetter);
         assertEquals(LOGGER.getLoggingEvents(), List.of());
@@ -146,7 +144,7 @@ class SelfHealingUiContextTests extends UiContextTestsBase
         uiContext.putSearchContext(webElement, searchContextSetter);
         var exception = new StaleElementReferenceException(MESSAGE);
         doThrow(exception).doNothing().when(webElement).doSomething();
-        (uiContext.getSearchContext(CustomWebElement.class)).doSomething();
+        (uiContext.getSearchContext(CustomWebElement.class)).ifPresent(CustomWebElement::doSomething);
         verify(webElement, times(2)).doSomething();
         verify(searchContextSetter).setSearchContext();
         assertEquals(LOGGER.getLoggingEvents(), List.of(LoggingEvent.info(exception, RETRY_MESSAGE)));
@@ -159,7 +157,7 @@ class SelfHealingUiContextTests extends UiContextTestsBase
         uiContext.putSearchContext(webElement, searchContextSetter);
         var exception = new StaleElementReferenceException(MESSAGE);
         doThrow(exception).doNothing().when(webElement).click();
-        uiContext.getSearchContext(WebElement.class).click();
+        uiContext.getSearchContext(WebElement.class).ifPresent(WebElement::click);
         verify(webElement, times(2)).click();
         verify(searchContextSetter).setSearchContext();
         assertEquals(LOGGER.getLoggingEvents(), List.of(LoggingEvent.info(exception, RETRY_MESSAGE)));
@@ -171,7 +169,7 @@ class SelfHealingUiContextTests extends UiContextTestsBase
         var webElement = mock(RemoteWebElement.class);
         uiContext.putSearchContext(webElement, searchContextSetter);
         doThrow(new StaleElementReferenceException(MESSAGE)).doNothing().when(webElement).click();
-        var searchContext = uiContext.getSearchContext(RemoteWebElement.class);
+        var searchContext = uiContext.getSearchContext(RemoteWebElement.class).get();
         assertThrows(StaleElementReferenceException.class, searchContext::click);
         assertEquals(LOGGER.getLoggingEvents(), List.of());
     }

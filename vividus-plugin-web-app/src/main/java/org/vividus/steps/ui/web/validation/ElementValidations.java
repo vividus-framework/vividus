@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,12 +93,8 @@ public class ElementValidations implements IElementValidations
     @Override
     public boolean assertIfElementHasWidthInPerc(WebElement parent, WebElement element, int widthInPerc)
     {
-        if (parent != null && element != null)
-        {
-            return uiContext.withAssertingWebElements(List.of(parent, element),
+        return parent != null && uiContext.withAssertingWebElements(List.of(parent, element),
                 () -> softAssert.assertEquals("Element has correct width", widthInPerc,
                         ElementUtil.getElementWidthInPerc(parent, element), ACCURACY));
-        }
-        return false;
     }
 }

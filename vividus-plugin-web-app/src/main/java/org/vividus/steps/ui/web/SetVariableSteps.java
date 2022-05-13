@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -301,9 +301,11 @@ public class SetVariableSteps
     @When("I save table to $scopes variable '$variableName'")
     public void saveTableToContext(Set<VariableScope> scopes, String variableName)
     {
-        List<Map<String, Object>> table = javascriptActions.executeScriptFromResource(SetVariableSteps.class,
-                "parse-table.js", uiContext.getSearchContext(WebElement.class));
-        variableContext.putVariable(scopes, variableName, table);
+        uiContext.getSearchContext(WebElement.class).ifPresent(tableElement -> {
+            List<Map<String, Object>> table = javascriptActions.executeScriptFromResource(SetVariableSteps.class,
+                    "parse-table.js", tableElement);
+            variableContext.putVariable(scopes, variableName, table);
+        });
     }
 
     private List<WebElement> getVideoIFrames(int leastNumber)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,10 +68,8 @@ import org.vividus.ui.validation.matcher.ExpectedConditionsMatcher;
 class BaseValidationsTests
 {
     private static final String SOME_ELEMENT = "Some element";
-    private static final String PATTERN_ELEMENTS = "Number %1$s of elements found by '%2$s'";
     private static final String BUSINESS_DESCRIPTION = "Test business description";
     private static final String XPATH_INT = ".//xpath=1";
-    private static final int INT_ARG = 1;
     private static final String EQUAL_TO_MATCHER = "number of elements is a value equal to <1>";
     private static final String AT_LEAST_ONE_ELEMENT_ASSERTION = "There is at least one element with attributes ' "
             + "Search: './/xpath=1'; Visibility: VISIBLE;'";
@@ -127,13 +125,12 @@ class BaseValidationsTests
     }
 
     @Test
-    void shouldNotSearchIfContextNullAssertIfElementsExist()
+    void shouldNotSearchIfContextNotPresentAssertIfElementsExist()
     {
         Locator locator = new Locator(SEARCH, XPATH_INT);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.empty());
         assertEquals(List.of(), baseValidations.assertIfElementsExist(BUSINESS_DESCRIPTION, locator));
-        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
-        verifyNoMoreInteractions(softAssert);
-        verifyNoInteractions(searchActions);
+        verifyNoInteractions(searchActions, softAssert);
     }
 
     @Test
@@ -148,42 +145,20 @@ class BaseValidationsTests
     }
 
     @Test
-    void shouldNotSearchIfContextNullAssertIfAtLeastNumberOfElementsExist()
+    void shouldNotSearchIfContextNotPresentAssertIfNumberOfElementsFound()
     {
         Locator locator = new Locator(SEARCH, XPATH_INT);
-        assertEquals(List.of(), baseValidations.assertIfAtLeastNumberOfElementsExist(BUSINESS_DESCRIPTION, null,
-                locator, 1));
-        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
-        verifyNoMoreInteractions(softAssert);
-        verifyNoInteractions(searchActions);
-    }
-
-    @Test
-    void shouldNotSearchIfContextNullAssertIfAtLeastOneElementExists()
-    {
-        Locator locator = new Locator(SEARCH, XPATH_INT);
-        assertEquals(null, baseValidations.assertIfAtLeastOneElementExists(BUSINESS_DESCRIPTION, null, locator));
-        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
-        verifyNoMoreInteractions(softAssert);
-        verifyNoInteractions(searchActions);
-    }
-
-    @Test
-    void shouldNotSearchIfContextNullAssertIfNumberOfElementsFound()
-    {
-        Locator locator = new Locator(SEARCH, XPATH_INT);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.empty());
         assertEquals(List.of(), baseValidations.assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, locator, 0,
                 ComparisonRule.EQUAL_TO));
-        verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
-        verifyNoMoreInteractions(softAssert);
-        verifyNoInteractions(searchActions);
+        verifyNoInteractions(searchActions, softAssert);
     }
 
     @Test
     void testAssertIfElementDoesNotExistWithLocator()
     {
         spy = Mockito.spy(baseValidations);
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         SearchParameters searchParameters = new SearchParameters();
         Locator attributes = new Locator(SEARCH, searchParameters);
         when(searchActions.findElements(mockedSearchContext, attributes)).thenReturn(List.of());
@@ -196,7 +171,7 @@ class BaseValidationsTests
     {
         spy = Mockito.spy(baseValidations);
         webElements = List.of(mockedWebElement);
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         SearchParameters searchParameters = new SearchParameters();
         Locator attributes = new Locator(SEARCH, searchParameters);
         when(searchActions.findElements(mockedSearchContext, attributes)).thenReturn(webElements);
@@ -242,56 +217,16 @@ class BaseValidationsTests
     }
 
     @Test
-    void testAssertIfExactNumberOfElementsFound()
-    {
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
-        Locator locator = new Locator(SEARCH, XPATH_INT);
-        String systemDescription = String.format(PATTERN_ELEMENTS, INT_ARG, locator);
-        when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
-        mockAssertingWebElements(webElements);
-        baseValidations.assertIfExactNumberOfElementsFound(BUSINESS_DESCRIPTION, locator, INT_ARG);
-        verify(softAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(systemDescription),
-                eq(webElements), argThat(e -> EQUAL_TO_MATCHER.equals(e.toString())));
-    }
-
-    @Test
-    void testAssertIfExactNumberOfElementsFoundNullList()
-    {
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
-        Locator locator = new Locator(SEARCH, XPATH_INT);
-        when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
-        String systemDescription = String.format(PATTERN_ELEMENTS, INT_ARG, locator);
-        mockAssertingWebElements(webElements);
-        assertFalse(
-                baseValidations.assertIfExactNumberOfElementsFound(BUSINESS_DESCRIPTION, locator, INT_ARG));
-        verify(softAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(systemDescription),
-                eq(webElements), argThat(e -> EQUAL_TO_MATCHER.equals(e.toString())));
-    }
-
-    @Test
     void testAssertIfElementsExist()
     {
         webElements = List.of(mockedWebElement);
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         Locator locator = new Locator(SEARCH, XPATH_INT);
         when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
         baseValidations.assertIfElementsExist(BUSINESS_DESCRIPTION, locator);
         verify(softAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(AT_LEAST_ONE_ELEMENT_ASSERTION), eq(webElements),
                 argThat(e -> NUMBER_OF_ELEMENTS_IS_GREATER_THAN_0.equals(e.toString())));
         assertEquals(1, webElements.size());
-    }
-
-    @Test
-    void testAssertIfAtLeastOneElementExists()
-    {
-        webElements = List.of(mockedWebElement);
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
-        Locator locator = new Locator(SEARCH, XPATH_INT);
-        when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
-        WebElement element = baseValidations.assertIfAtLeastOneElementExists(BUSINESS_DESCRIPTION, locator);
-        verify(softAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(AT_LEAST_ONE_ELEMENT_ASSERTION), eq(webElements),
-                argThat(e -> NUMBER_OF_ELEMENTS_IS_GREATER_THAN_0.equals(e.toString())));
-        assertEquals(mockedWebElement, element);
     }
 
     @Test
@@ -311,22 +246,25 @@ class BaseValidationsTests
     @Test
     void testAssertIfAtLeastNumberOfElementsExistSuccess()
     {
+        List<WebElement> webElements = List.of(mock(WebElement.class));
         mockAssertingWebElements(webElements);
-        List<WebElement> result = testAssertIfAtLeastNumberOfElementsExist(true);
+        List<WebElement> result = testAssertIfAtLeastNumberOfElementsExist(webElements, true);
         assertEquals(webElements, result);
     }
 
     @Test
     void testAssertIfAtLeastNumberOfElementsExistFailed()
     {
+        List<WebElement> webElements = List.of(mock(WebElement.class));
         mockAssertingWebElements(webElements);
-        List<WebElement> result = testAssertIfAtLeastNumberOfElementsExist(false);
+        List<WebElement> result = testAssertIfAtLeastNumberOfElementsExist(webElements, false);
         assertTrue(result.isEmpty());
     }
 
-    private List<WebElement> testAssertIfAtLeastNumberOfElementsExist(boolean assertionResult)
+    private List<WebElement> testAssertIfAtLeastNumberOfElementsExist(List<WebElement> webElements,
+            boolean assertionResult)
     {
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         Locator locator = new Locator(SEARCH, XPATH_INT);
         when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
         int leastCount = 1;
@@ -339,20 +277,9 @@ class BaseValidationsTests
     }
 
     @Test
-    void testAssertIfAtLeastOneElementExistsNull()
-    {
-        spy = Mockito.spy(baseValidations);
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
-        Locator locator = new Locator(SEARCH, XPATH_INT);
-        WebElement element = spy.assertIfAtLeastOneElementExists(BUSINESS_DESCRIPTION, locator);
-        verify(spy).assertIfAtLeastOneElementExists(BUSINESS_DESCRIPTION, mockedSearchContext, locator);
-        assertNull(element);
-    }
-
-    @Test
     void testAssertIfNumberOfElementsFoundWithoutContext()
     {
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         testAssertIfNumberOfElementsFound(
                 attributes -> baseValidations.assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, attributes, 1,
                         ComparisonRule.EQUAL_TO), true, List.of(mockedWebElement));
@@ -361,7 +288,7 @@ class BaseValidationsTests
     @Test
     void testAssertIfNumberOfElementsFoundWithContext()
     {
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         testAssertIfNumberOfElementsFound(
                 attributes -> baseValidations.assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, attributes, 1,
                         ComparisonRule.EQUAL_TO), true, List.of(mockedWebElement));
@@ -370,7 +297,7 @@ class BaseValidationsTests
     @Test
     void testAssertIfNumberOfElementsFoundWithoutContextNotDesiredQuantity()
     {
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         testAssertIfNumberOfElementsFound(
                 attributes -> baseValidations.assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, attributes, 1,
                         ComparisonRule.EQUAL_TO), false, List.of());
@@ -379,7 +306,7 @@ class BaseValidationsTests
     @Test
     void testAssertIfNumberOfElementsFoundWithContextNotDesiredQuantity()
     {
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         testAssertIfNumberOfElementsFound(
                 attributes -> baseValidations.assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, attributes, 1,
                         ComparisonRule.EQUAL_TO), false, List.of());
@@ -389,7 +316,7 @@ class BaseValidationsTests
     void testAssertElementExists()
     {
         webElements = List.of(mockedWebElement);
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         Locator locator = new Locator(SEARCH, XPATH_INT);
         when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
         when(softAssert.recordAssertion(true, BUSINESS_DESCRIPTION + " is found by the locator " + locator))
@@ -413,7 +340,7 @@ class BaseValidationsTests
     void testAssertElementExistsMoreThanOne()
     {
         webElements = List.of(mockedWebElement, mockedWebElement);
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         Locator locator = new Locator(SEARCH, XPATH_INT);
         when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
         Optional<WebElement> element = baseValidations.assertElementExists(BUSINESS_DESCRIPTION, locator);
@@ -426,7 +353,7 @@ class BaseValidationsTests
     void testAssertElementExistsEmptyElements()
     {
         List<WebElement> elements = List.of();
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         Locator locator = new Locator(SEARCH, XPATH_INT);
         when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(elements);
         when(softAssert.recordAssertion(false,
@@ -438,7 +365,7 @@ class BaseValidationsTests
     @Test
     void shouldFailIfExpectedNumberOfElementsIsLessThanZero()
     {
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> baseValidations
                 .assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, null, 0, ComparisonRule.LESS_THAN));
         assertEquals("Invalid input rule: the number of elements can not be less than 0", exception.getMessage());
@@ -452,7 +379,7 @@ class BaseValidationsTests
     void shouldNotWaitForElementsIfExpectedNumberOfElementsIsEqualToOrLessThanOrEqualToZero(ComparisonRule rule,
             String matcherAsString, String comparison)
     {
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         testAssertIfNumberOfElementsFound(
                 attributes -> baseValidations.assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, attributes, 0, rule),
                 false, List.of(), comparison, matcherAsString, false);
@@ -461,7 +388,7 @@ class BaseValidationsTests
     @Test
     void shouldWaitForElementIfExpectedNumberOfElementsIsGreaterThanOrEqualToZero()
     {
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         testAssertIfNumberOfElementsFound(
                 attributes -> baseValidations.assertIfNumberOfElementsFound(BUSINESS_DESCRIPTION, attributes, 0,
                         ComparisonRule.GREATER_THAN_OR_EQUAL_TO), true, List.of(), "is greater than or equal to 0",
@@ -475,7 +402,7 @@ class BaseValidationsTests
         Locator locator = mock(Locator.class);
         List<WebElement> webElements = List.of(mockedWebElement);
 
-        when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
         doReturn(true).when(spy).assertElementsNumber(BUSINESS_DESCRIPTION, webElements, ComparisonRule.GREATER_THAN,
                 1);

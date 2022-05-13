@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -52,23 +53,12 @@ class UiContextTests extends UiContextTestsBase
     private static final String EXPECTED_SEARCH_CONTEXT_OF_INTERFACE = "Expected search context of interface ";
     private static final String ASSERTING_ELEMENTS_KEY = "AssertingElements";
 
-    @Mock
-    private IWebDriverProvider webDriverProviderMock;
-
-    @Mock
-    private SearchContext searchContextMock;
-
-    @Mock
-    private SearchContextSetter searchContextSetter;
-
-    @Mock
-    private ISoftAssert softAssert;
-
-    @Mock
-    private WebDriver mockedWebDriver;
-
-    @InjectMocks
-    private UiContext uiContext;
+    @Mock private IWebDriverProvider webDriverProviderMock;
+    @Mock private SearchContext searchContextMock;
+    @Mock private SearchContextSetter searchContextSetter;
+    @Mock private ISoftAssert softAssert;
+    @Mock private WebDriver mockedWebDriver;
+    @InjectMocks private UiContext uiContext;
 
     @Test
     void testGetSearchContext()
@@ -94,8 +84,29 @@ class UiContextTests extends UiContextTestsBase
         when(webDriverProviderMock.isWebDriverInitialized()).thenReturn(true);
         uiContext.reset();
         Class<WebDriver> searchContextClass = WebDriver.class;
-        WebDriver actualSearchContext = uiContext.getSearchContext(searchContextClass);
-        assertEquals(mockedWebDriver, actualSearchContext);
+        Optional<WebDriver> actualSearchContext = uiContext.getSearchContext(searchContextClass);
+        assertEquals(Optional.of(mockedWebDriver), actualSearchContext);
+    }
+
+    @Test
+    void shouldReturnSearchContextWhenItIsAvailable()
+    {
+        uiContext.setTestContext(getContext());
+        when(webDriverProviderMock.get()).thenReturn(mockedWebDriver);
+        when(webDriverProviderMock.isWebDriverInitialized()).thenReturn(true);
+        uiContext.reset();
+        Optional<SearchContext> actualSearchContext = uiContext.getOptionalSearchContext();
+        assertEquals(Optional.of(mockedWebDriver), actualSearchContext);
+    }
+
+    @Test
+    void shouldReturnEmptySearchContextWhenItIsNotAvailable()
+    {
+        uiContext.setTestContext(getContext());
+        when(webDriverProviderMock.isWebDriverInitialized()).thenReturn(false);
+        uiContext.reset();
+        Optional<SearchContext> actualSearchContext = uiContext.getOptionalSearchContext();
+        assertEquals(Optional.empty(), actualSearchContext);
     }
 
     @Test
@@ -105,7 +116,7 @@ class UiContextTests extends UiContextTestsBase
         when(webDriverProviderMock.get()).thenReturn(mockedWebDriver);
         when(webDriverProviderMock.isWebDriverInitialized()).thenReturn(true);
         uiContext.reset();
-        IllegalSearchContextException exception = assertThrows(IllegalSearchContextException.class,
+        var exception = assertThrows(IllegalSearchContextException.class,
             () -> uiContext.getSearchContext(WebElement.class));
         assertThat(exception.getMessage(), containsString(EXPECTED_SEARCH_CONTEXT_OF_INTERFACE
                 + "org.openqa.selenium.WebElement, but was class org.openqa.selenium.WebDriver"));
@@ -116,9 +127,8 @@ class UiContextTests extends UiContextTestsBase
     {
         uiContext.setTestContext(getContext());
         uiContext.putSearchContext(null, searchContextSetter);
-        assertNull(uiContext.getSearchContext(WebDriver.class));
-        verify(softAssert).recordFailedAssertion(
-                EXPECTED_SEARCH_CONTEXT_OF_INTERFACE + "org.openqa.selenium.WebDriver, but was null search context");
+        assertEquals(Optional.empty(), uiContext.getSearchContext(WebDriver.class));
+        verify(softAssert).recordFailedAssertion("Search context is not set");
     }
 
     @Test
@@ -153,7 +163,8 @@ class UiContextTests extends UiContextTestsBase
         when(webDriverProviderMock.get()).thenReturn(mockedWebDriver);
         when(webDriverProviderMock.isWebDriverInitialized()).thenReturn(true);
         uiContext.reset();
-        assertNotNull(uiContext.getSearchContext(WebDriver.class));
+        Optional<WebDriver> searchContext = uiContext.getSearchContext(WebDriver.class);
+        assertTrue(searchContext.isPresent());
     }
 
     @Test

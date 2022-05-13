@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.ui.context;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import org.openqa.selenium.SearchContext;
@@ -24,9 +25,18 @@ import org.openqa.selenium.WebElement;
 
 public interface IUiContext
 {
+    /**
+     * Returns the current search context or null if it's not set
+     *
+     * @return Search context or null if it's not set
+     * @deprecated Use {@link #getOptionalSearchContext()} instead
+     */
+    @Deprecated(since = "0.4.8", forRemoval = true)
     SearchContext getSearchContext();
 
-    <T extends SearchContext> T getSearchContext(Class<T> clazz);
+    Optional<SearchContext> getOptionalSearchContext();
+
+    <T extends SearchContext> Optional<T> getSearchContext(Class<T> clazz);
 
     SearchContextSetter getSearchContextSetter();
 
