@@ -39,11 +39,11 @@ NOTE: The properties marked with *bold* are mandatory.
 
 |`bdd.story-loader.batch-<batch-number>.resource-include-patterns`
 |`<empty>`
-|The comma-separated set of https://ant.apache.org/manual/dirtasks.html#patterns[ant-patterns] to match the stories to be included in the batch
+|The comma-separated set of https://ant.apache.org/manual/dirtasks.html#patterns[ant-patterns] to match the stories to be included in the batch. Leading and trailing whitespaces in patterns are omitted.
 
 |`bdd.story-loader.batch-<batch-number>.resource-exclude-patterns`
 |`<empty>`
-|The comma-separated set of https://ant.apache.org/manual/dirtasks.html#patterns[ant-patterns] to match the stories to be excluded from the batch
+|The comma-separated set of https://ant.apache.org/manual/dirtasks.html#patterns[ant-patterns] to match the stories to be excluded from the batch. Leading and trailing whitespaces in patterns are omitted.
 
 |`bdd.batch-<batch-number>.name`
 |`batch-<batch-number>`
