@@ -681,6 +681,23 @@ When I clear field located `accessibilityId(username)`
 ----
 
 
+=== Clear field and keep keyboard open
+
+Only clears the field located by the locator. The keyboard hiding is skipped.
+
+[source,gherkin]
+----
+When I clear field located `$locator` and keep keyboard open
+----
+
+* `$locator` - <<_locator>>.
+
+.Clear text and keep keyboard open
+[source,gherkin]
+----
+When I clear field located `accessibilityId(username)` and keep keyboard open
+----
+
 === Swipe to an element
 
 Swipes to an element in either `UP`, `DOWN`, `LEFT` or `RIGHT` direction with

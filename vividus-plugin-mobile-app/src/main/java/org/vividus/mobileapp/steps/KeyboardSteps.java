@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ public class KeyboardSteps
         entry("9", AndroidKey.DIGIT_9.toString()));
 
     private static final String ELEMENT_TO_TYPE_TEXT = "The element to type text";
+    private static final String ELEMENT_TO_CLEAR = "The element to clear";
 
     private final KeyboardActions keyboardActions;
     private final IBaseValidations baseValidations;
@@ -106,7 +107,20 @@ public class KeyboardSteps
     public void typeTextInField(String text, Locator locator)
     {
         baseValidations.assertElementExists(ELEMENT_TO_TYPE_TEXT, locator)
-                .ifPresent(e -> keyboardActions.typeTextAndHide(e, text));
+                .ifPresent(e -> {
+                    keyboardActions.typeText(e, text);
+                    keyboardActions.hideKeyboard(e);
+                });
+    }
+
+    /**
+     * Clear a field located by the <b>locator</b>
+     * @param locator locator to find a field
+     */
+    @When("I clear field located `$locator` and keep keyboard open")
+    public void clearTextInFieldAndKeepKeyboard(Locator locator)
+    {
+        baseValidations.assertElementExists(ELEMENT_TO_CLEAR, locator).ifPresent(keyboardActions::clearText);
     }
 
     /**
@@ -122,9 +136,12 @@ public class KeyboardSteps
     @When("I clear field located `$locator`")
     public void clearTextInField(Locator locator)
     {
-        baseValidations.assertElementExists("The element to clear", locator).ifPresent(keyboardActions::clearText);
+        baseValidations.assertElementExists(ELEMENT_TO_CLEAR, locator)
+                .ifPresent(e -> {
+                    keyboardActions.clearText(e);
+                    keyboardActions.hideKeyboard(e);
+                });
     }
-
 
     /**
      * Presses the key

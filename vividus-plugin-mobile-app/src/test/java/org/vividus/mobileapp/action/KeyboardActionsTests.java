@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,22 +81,7 @@ class KeyboardActionsTests
     }
 
     @Test
-    void shouldTypeTextForNotRealDevices()
-    {
-        init(false);
-
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
-        when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
-
-        keyboardActions.typeTextAndHide(element, TEXT);
-
-        verify(element).sendKeys(TEXT);
-        verify(hidesKeyboard).hideKeyboard();
-        assertThat(logger.getLoggingEvents(), is(List.of(info("Typing text '{}' into the field", TEXT))));
-    }
-
-    @Test
-    void shouldTypeTextWithoutKeyboardHidingForNotRealDevice()
+    void shouldTypeTextForNotRealDevice()
     {
         init(false);
 
@@ -104,26 +89,23 @@ class KeyboardActionsTests
 
         verify(element).sendKeys(TEXT);
         verifyNoInteractions(hidesKeyboard);
+        assertThat(logger.getLoggingEvents(), is(List.of(info("Typing text '{}' into the field", TEXT))));
     }
 
     @Test
-    void shouldClearTextInEmptyElement()
+    void shouldCleanTextForNotRealDevice()
     {
         init(false);
-
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
-        enableOnScreenKeyboard(false);
-        when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
 
         keyboardActions.clearText(element);
 
         verify(element).clear();
-        verify(hidesKeyboard).hideKeyboard();
+        verifyNoInteractions(hidesKeyboard);
         assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
     @Test
-    void shouldTypeTextAndHideForIOSRealDevice()
+    void shouldHideForIOSRealDevice()
     {
         init(true);
 
@@ -135,14 +117,13 @@ class KeyboardActionsTests
         when(webDriverProvider.get()).thenReturn(context);
         when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of(returnButton));
 
-        keyboardActions.typeTextAndHide(element, TEXT);
+        keyboardActions.hideKeyboard(element);
 
         verify(touchActions).tap(returnButton);
-        verify(element).sendKeys(TEXT);
     }
 
     @Test
-    void shouldTypeTextAndHideForIOSRealDeviceNoKeyboardFound()
+    void shouldHideForIOSRealDeviceNoKeyboardFound()
     {
         init(true);
 
@@ -154,28 +135,27 @@ class KeyboardActionsTests
         when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> keyboardActions.typeTextAndHide(element, TEXT));
+            () -> keyboardActions.hideKeyboard(element));
         assertEquals("Unable to find a button to close the keyboard", exception.getMessage());
     }
 
     @Test
-    void shouldClearTextButNotCloseKeyboardIfElementIsTypeTextView()
+    void shouldNotCloseKeyboardIfElementIsTypeTextView()
     {
         init(true);
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
         enableOnScreenKeyboard(true);
         when(element.getTagName()).thenReturn(XCUIELEMENT_TYPE_TEXT_VIEW);
 
-        keyboardActions.clearText(element);
+        keyboardActions.hideKeyboard(element);
 
-        verify(element).clear();
         verifyNoInteractions(hidesKeyboard);
         assertThat(logger.getLoggingEvents(), is(List.of(warn("Skip hiding keyboard for {}. Use the tap step to tap"
             + " outside the {} to hide the keyboard", XCUIELEMENT_TYPE_TEXT_VIEW))));
     }
 
     @Test
-    void shouldClearTextAndCloseKeyboardIfElementIsTypeTextViewForSimulator()
+    void shouldCloseKeyboardIfElementIsTypeTextViewForSimulator()
     {
         init(false);
         when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
@@ -183,9 +163,8 @@ class KeyboardActionsTests
         when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
         when(element.getTagName()).thenReturn(XCUIELEMENT_TYPE_TEXT_VIEW);
 
-        keyboardActions.clearText(element);
+        keyboardActions.hideKeyboard(element);
 
-        verify(element).clear();
         verify(hidesKeyboard).hideKeyboard();
     }
 
@@ -203,10 +182,9 @@ class KeyboardActionsTests
         when(webDriverProvider.get()).thenReturn(context);
         when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of(returnButton));
 
-        keyboardActions.typeTextAndHide(element, TEXT);
+        keyboardActions.hideKeyboard(element);
 
         verify(touchActions).tap(returnButton);
-        verify(element).sendKeys(TEXT);
     }
 
     void init(boolean realDevice)
