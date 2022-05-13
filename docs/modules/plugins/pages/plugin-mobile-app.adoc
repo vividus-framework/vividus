@@ -692,7 +692,7 @@ When I clear field located `$locator` and keep keyboard open
 
 * `$locator` - <<_locator>>.
 
-.Clear text and keep keyboard opened
+.Clear text and keep keyboard open
 [source,gherkin]
 ----
 When I clear field located `accessibilityId(username)` and keep keyboard open
