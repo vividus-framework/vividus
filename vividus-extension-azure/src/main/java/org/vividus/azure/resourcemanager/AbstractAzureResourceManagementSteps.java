@@ -47,7 +47,7 @@ public abstract class AbstractAzureResourceManagementSteps
         this.variableContext = variableContext;
     }
 
-    protected void saveHttpResponseAsVariable(String urlPath, String apiVersion, Set<VariableScope> scopes,
+    protected void saveHttpGetResponseAsVariable(String urlPath, String apiVersion, Set<VariableScope> scopes,
             String variableName)
     {
         String url = buildUrl(urlPath, apiVersion);
@@ -56,12 +56,17 @@ public abstract class AbstractAzureResourceManagementSteps
                 responseBody -> variableContext.putVariable(scopes, variableName, responseBody));
     }
 
-    protected void executeHttpPut(String urlPath, String apiVersion, String azureResourceBody)
+    protected void saveHttpPostResponseAsVariable(String urlPath, String apiVersion, String requestBody,
+            Set<VariableScope> scopes, String variableName)
     {
-        String url = buildUrl(urlPath, apiVersion);
-        HttpRequest httpRequest = new HttpRequest(HttpMethod.PUT, url);
-        httpRequest.setBody(azureResourceBody);
-        httpRequest.setHeader("Content-Type", ContentType.APPLICATION_JSON);
+        HttpRequest httpRequest = createRequest(HttpMethod.POST, urlPath, apiVersion, requestBody);
+        executeHttpRequest(httpRequest,
+                responseBody -> variableContext.putVariable(scopes, variableName, responseBody));
+    }
+
+    protected void executeHttpPut(String urlPath, String apiVersion, String requestBody)
+    {
+        HttpRequest httpRequest = createRequest(HttpMethod.PUT, urlPath, apiVersion, requestBody);
         executeHttpRequest(httpRequest, responseBody -> { });
     }
 
@@ -70,6 +75,15 @@ public abstract class AbstractAzureResourceManagementSteps
         String url = buildUrl(urlPath, apiVersion);
         HttpRequest httpRequest = new HttpRequest(HttpMethod.DELETE, url);
         executeHttpRequest(httpRequest, responseBody -> { });
+    }
+
+    private HttpRequest createRequest(HttpMethod method, String urlPath, String apiVersion, String azureResourceBody)
+    {
+        String url = buildUrl(urlPath, apiVersion);
+        HttpRequest httpRequest = new HttpRequest(method, url);
+        httpRequest.setBody(azureResourceBody);
+        httpRequest.setHeader("Content-Type", ContentType.APPLICATION_JSON);
+        return httpRequest;
     }
 
     private void executeHttpRequest(HttpRequest httpRequest, Consumer<String> responseBodyConsumer)

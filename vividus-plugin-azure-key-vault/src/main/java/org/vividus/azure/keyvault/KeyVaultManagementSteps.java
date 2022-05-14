@@ -69,6 +69,6 @@ public class KeyVaultManagementSteps extends AbstractAzureResourceManagementStep
         String urlPath = String.format(
                 "subscriptions/%s/resourceGroups/%s/providers/Microsoft.KeyVault/vaults/%s",
                 azureProfile.getSubscriptionId(), resourceGroupName, keyVaultName);
-        saveHttpResponseAsVariable(urlPath, API_VERSION, scopes, variableName);
+        saveHttpGetResponseAsVariable(urlPath, API_VERSION, scopes, variableName);
     }
 }

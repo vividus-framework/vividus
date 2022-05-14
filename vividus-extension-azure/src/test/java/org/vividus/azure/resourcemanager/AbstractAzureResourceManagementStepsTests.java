@@ -50,17 +50,27 @@ class AbstractAzureResourceManagementStepsTests
     private static final String API_VERSION = "2021-10-01";
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.STORY);
     private static final String VAR_NAME = "varName";
+    private static final String REQUEST_BODY = "{\"azure-resource\":\"body\"}";
 
     @Mock private HttpPipeline httpPipeline;
     @Mock private SoftAssert softAssert;
     @Mock private VariableContext variableContext;
 
     @Test
-    void shouldSaveResponseInCaseOfSuccess()
+    void shouldSaveHttpGetResponseInCaseOfSuccess()
     {
         var response = testHttpRequestExecution(200,
-                steps -> steps.saveHttpResponseAsVariable(URL_PATH, API_VERSION, SCOPES, VAR_NAME),
+                steps -> steps.saveHttpGetResponseAsVariable(URL_PATH, API_VERSION, SCOPES, VAR_NAME),
                 httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()));
+        verify(variableContext).putVariable(SCOPES, VAR_NAME, response);
+    }
+
+    @Test
+    void shouldSaveHttpPostResponseInCaseOfSuccess()
+    {
+        var response = testHttpRequestExecution(200,
+                steps -> steps.saveHttpPostResponseAsVariable(URL_PATH, API_VERSION, REQUEST_BODY, SCOPES, VAR_NAME),
+                httpRequest -> assertHttpRequestWithBody(HttpMethod.POST, httpRequest));
         verify(variableContext).putVariable(SCOPES, VAR_NAME, response);
     }
 
@@ -68,7 +78,7 @@ class AbstractAzureResourceManagementStepsTests
     void shouldRecordFailedAssertionInCaseOfFailure()
     {
         var response = testHttpRequestExecution(404,
-                steps -> steps.saveHttpResponseAsVariable(URL_PATH, API_VERSION, SCOPES, VAR_NAME),
+                steps -> steps.saveHttpGetResponseAsVariable(URL_PATH, API_VERSION, SCOPES, VAR_NAME),
                 httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()));
         verify(softAssert).recordFailedAssertion("Azure REST API HTTP request execution is failed: " + response);
     }
@@ -76,18 +86,8 @@ class AbstractAzureResourceManagementStepsTests
     @Test
     void shouldExecuteHttpPutRequest()
     {
-        var azureResourceBody = "{\"azure-resource\":\"body\"}";
-        testHttpRequestExecution(200, steps -> steps.executeHttpPut(URL_PATH, API_VERSION, azureResourceBody),
-                httpRequest -> {
-                    assertEquals(HttpMethod.PUT, httpRequest.getHttpMethod());
-                    assertEquals(azureResourceBody,
-                            new String(httpRequest.getBody().blockFirst().array(), StandardCharsets.UTF_8));
-                    var expectedHeaders = Map.of(
-                            "Content-Type", "application/json",
-                            "Content-Length", Integer.toString(azureResourceBody.length())
-                    );
-                    assertEquals(expectedHeaders, httpRequest.getHeaders().toMap());
-                });
+        testHttpRequestExecution(200, steps -> steps.executeHttpPut(URL_PATH, API_VERSION, REQUEST_BODY),
+                httpRequest -> assertHttpRequestWithBody(HttpMethod.PUT, httpRequest));
     }
 
     @Test
@@ -115,6 +115,17 @@ class AbstractAzureResourceManagementStepsTests
                 httpRequest.getUrl().toString());
         httpRequestValidator.accept(httpRequest);
         return responseAsString;
+    }
+
+    private void assertHttpRequestWithBody(HttpMethod httpMethod, HttpRequest httpRequest)
+    {
+        assertEquals(httpMethod, httpRequest.getHttpMethod());
+        assertEquals(REQUEST_BODY, new String(httpRequest.getBody().blockFirst().array(), StandardCharsets.UTF_8));
+        var expectedHeaders = Map.of(
+                "Content-Type", "application/json",
+                "Content-Length", Integer.toString(REQUEST_BODY.length())
+        );
+        assertEquals(expectedHeaders, httpRequest.getHeaders().toMap());
     }
 
     private static class TestSteps extends AbstractAzureResourceManagementSteps

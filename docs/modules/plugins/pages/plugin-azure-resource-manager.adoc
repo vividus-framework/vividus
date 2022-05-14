@@ -115,6 +115,47 @@ When I configure Azure resource with identifier `resourceGroups/TEST-RG/provider
 ` using API version `2018-06-01`
 ----
 
+==== Execute Azure operation
+
+Executes the specified Azure operation using the declared Azure API version and
+saves the result to a variable. For more information, see the
+https://docs.microsoft.com/en-us/rest/api/azure/[Azure REST API reference].
+
+[source,gherkin]
+----
+When I execute Azure operation with identifier `$azureOperationIdentifier` using API version `$apiVersion` and body `$azureOperationBody` and save result to $scopes variable `$variableName`
+----
+
+* `$azureOperationIdentifier` - This is a VIVIDUS-only term. It's used to specify Azure operation uniquely. From
+the technical perspective it's a part of Azure operation REST API URL path. For
+example, if the full Azure operation URL is
++
+[source,gherkin]
+----
+https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/checkNameAvailability?api-version=2021-10-01
+----
+then the operation identifier will be
++
+[source,gherkin]
+----
+providers/Microsoft.KeyVault/checkNameAvailability
+----
+* `$apiVersion` - Azure resource provider API version. Note API versions may vary depending on the resource type.
+* `$azureOperationBody` - The Azure operation definition in JSON format.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the result of Azure operation execution.
+
+.Check Key Vault name availability
+[source,gherkin]
+----
+When I execute Azure operation with identifier `providers/Microsoft.KeyVault/checkNameAvailability` using API version `2021-10-01` and body `
+{
+  "name": "my-super-vault",
+  "type": "Microsoft.KeyVault/vaults"
+}
+` and save result to scenario variable `keyVaultNameAvailabilityCheckResult`
+----
+
 ==== Delete Azure resource
 
 Deletes the specified Azure resource using the declared Azure API version.

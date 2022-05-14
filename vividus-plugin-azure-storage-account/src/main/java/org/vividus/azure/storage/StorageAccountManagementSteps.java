@@ -66,7 +66,7 @@ public class StorageAccountManagementSteps extends AbstractAzureResourceManageme
     {
         String urlPath = String.format("subscriptions/%s/resourceGroups/%s/providers/Microsoft.Storage/storageAccounts",
                 azureProfile.getSubscriptionId(), resourceGroupName);
-        saveHttpResponseAsVariable(urlPath, API_VERSION, scopes, variableName);
+        saveHttpGetResponseAsVariable(urlPath, API_VERSION, scopes, variableName);
     }
 
     /**
@@ -98,6 +98,6 @@ public class StorageAccountManagementSteps extends AbstractAzureResourceManageme
                 "subscriptions/%s/resourceGroups/%s/providers/Microsoft"
                         + ".Storage/storageAccounts/%s/blobServices/default",
                 azureProfile.getSubscriptionId(), resourceGroupName, storageAccountName);
-        saveHttpResponseAsVariable(urlPath, API_VERSION, scopes, variableName);
+        saveHttpGetResponseAsVariable(urlPath, API_VERSION, scopes, variableName);
     }
 }
