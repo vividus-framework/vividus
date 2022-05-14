@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.apache.commons.lang3.StringUtils;
 
 public class PropertyMapper implements IPropertyMapper
@@ -74,6 +75,13 @@ public class PropertyMapper implements IPropertyMapper
     public <T> PropertyMappedCollection<T> readValues(String propertyPrefix, Class<T> valueType) throws IOException
     {
         return readValues(propertyPrefix, UnaryOperator.identity(), valueType);
+    }
+
+    @Override
+    public <T> PropertyMappedCollection<T> readValuesCaseInsensitively(String propertyPrefix, Class<T> valueType)
+        throws IOException
+    {
+        return readValues(propertyPrefix, null, UnaryOperator.identity(), valueType, CaseInsensitiveMap::new);
     }
 
     @Override
