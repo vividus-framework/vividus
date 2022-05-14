@@ -66,6 +66,6 @@ public class EventGridManagementSteps extends AbstractAzureResourceManagementSte
     {
         String urlPath = String.format("subscriptions/%s/resourceGroups/%s/providers/Microsoft.EventGrid/systemTopics",
                 azureProfile.getSubscriptionId(), resourceGroupName);
-        saveHttpResponseAsVariable(urlPath, API_VERSION, scopes, variableName);
+        saveHttpGetResponseAsVariable(urlPath, API_VERSION, scopes, variableName);
     }
 }

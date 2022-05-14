@@ -68,34 +68,63 @@ class ResourceManagementStepsTests
             + ".KeyVault/vaults/my-kv";
     private static final String URL_PATH =
             "subscriptions/" + SUBSCRIPTION_ID_PROPERTY_VALUE + "/" + AZURE_RESOURCE_IDENTIFIER;
+    private static final String REQUEST_BODY = "{\"resource\": \"body\"}";
 
     @Mock private TokenCredential tokenCredential;
     @Mock private SoftAssert softAssert;
     @Mock private VariableContext variableContext;
 
-    private Stream<Named<BiConsumer<Consumer<ResourceManagementSteps>, String>>> createStreamOfTests()
+    private Stream<Named<BiConsumer<Consumer<ResourceManagementSteps>, String>>> createTestsCreatingResources()
     {
         return Stream.of(
-                named("success", (test, expectedUrlPath) -> {
+                named("successfulCreation", (test, expectedUrlPath) -> {
                     var response = testHttpRequestExecution(test, 200, expectedUrlPath,
                             httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()));
                     verify(variableContext).putVariable(SCOPES, VAR_NAME, response);
                 }),
-                named("failure", (test, expectedUrlPath) -> {
+                named("failedCreation", (test, expectedUrlPath) -> {
                     var response = testHttpRequestExecution(test, 404, expectedUrlPath,
                             httpRequest -> assertEquals(HttpMethod.GET, httpRequest.getHttpMethod()));
-                    verify(softAssert).recordFailedAssertion(
-                            "Azure REST API HTTP request execution is failed: " + response);
+                    verifyFailedHttpRequestExecution(response);
                 })
         );
     }
 
     @TestFactory
     @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
-    Stream<DynamicTest> testSaveAzureResourceAsVariable()
+    Stream<DynamicTest> shouldSaveAzureResourceAsVariable()
     {
-        return DynamicTest.stream(createStreamOfTests(), test -> test.accept(
+        return DynamicTest.stream(createTestsCreatingResources(), test -> test.accept(
                 steps -> steps.saveAzureResourceAsVariable(AZURE_RESOURCE_IDENTIFIER, API_VERSION, SCOPES, VAR_NAME),
+                URL_PATH)
+        );
+    }
+
+    private Stream<Named<BiConsumer<Consumer<ResourceManagementSteps>, String>>> createTestsExecutionOperations()
+    {
+        return Stream.of(
+                named("successfulOperation", (test, expectedUrlPath) -> {
+                    var response = testHttpRequestExecution(test, 200, expectedUrlPath,
+                            httpRequest -> assertHttRequestWithBody(HttpMethod.POST, httpRequest)
+                    );
+                    verify(variableContext).putVariable(SCOPES, VAR_NAME, response);
+                }),
+                named("failedOperation", (test, expectedUrlPath) -> {
+                    var response = testHttpRequestExecution(test, 404, expectedUrlPath,
+                            httpRequest -> assertHttRequestWithBody(HttpMethod.POST, httpRequest)
+                    );
+                    verifyFailedHttpRequestExecution(response);
+                })
+        );
+    }
+
+    @TestFactory
+    @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
+    Stream<DynamicTest> shouldExecuteOperationAtAzureResource()
+    {
+        return DynamicTest.stream(createTestsExecutionOperations(), test -> test.accept(
+                steps -> steps.executeOperationAtAzureResource(AZURE_RESOURCE_IDENTIFIER, API_VERSION, REQUEST_BODY,
+                        SCOPES, VAR_NAME),
                 URL_PATH)
         );
     }
@@ -104,20 +133,9 @@ class ResourceManagementStepsTests
     @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
     void shouldConfigureAzureResource()
     {
-        var azureResourceBody = "{\"resource\": \"body\"}";
         testHttpRequestExecution(
-                steps -> steps.configureAzureResource(AZURE_RESOURCE_IDENTIFIER, azureResourceBody, API_VERSION),
-                200, URL_PATH,
-                httpRequest -> {
-                    assertEquals(HttpMethod.PUT, httpRequest.getHttpMethod());
-                    assertEquals(azureResourceBody,
-                            new String(httpRequest.getBody().blockFirst().array(), StandardCharsets.UTF_8));
-                    var expectedHeaders = Map.of(
-                            "Content-Type", "application/json",
-                            "Content-Length", Integer.toString(azureResourceBody.length())
-                    );
-                    assertEquals(expectedHeaders, httpRequest.getHeaders().toMap());
-                }
+                steps -> steps.configureAzureResource(AZURE_RESOURCE_IDENTIFIER, REQUEST_BODY, API_VERSION),
+                200, URL_PATH, httpRequest -> assertHttRequestWithBody(HttpMethod.PUT, httpRequest)
         );
     }
 
@@ -157,5 +175,22 @@ class ResourceManagementStepsTests
             httpRequestValidator.accept(httpRequest);
             return responseAsString;
         }
+    }
+
+    private void assertHttRequestWithBody(HttpMethod httpMethod, HttpRequest httpRequest)
+    {
+        assertEquals(httpMethod, httpRequest.getHttpMethod());
+        assertEquals(REQUEST_BODY, new String(httpRequest.getBody().blockFirst().array(), StandardCharsets.UTF_8));
+        var expectedHeaders = Map.of(
+                "Content-Type", "application/json",
+                "Content-Length", Integer.toString(REQUEST_BODY.length())
+        );
+        assertEquals(expectedHeaders, httpRequest.getHeaders().toMap());
+    }
+
+    private void verifyFailedHttpRequestExecution(String response)
+    {
+        verify(softAssert).recordFailedAssertion(
+                "Azure REST API HTTP request execution is failed: " + response);
     }
 }

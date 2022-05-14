@@ -76,7 +76,47 @@ public class ResourceManagementSteps extends AbstractAzureResourceManagementStep
             Set<VariableScope> scopes, String variableName)
     {
         String urlPath = buildUrlPath(azureResourceIdentifier);
-        saveHttpResponseAsVariable(urlPath, apiVersion, scopes, variableName);
+        saveHttpGetResponseAsVariable(urlPath, apiVersion, scopes, variableName);
+    }
+
+    /**
+     * Executes the specified Azure operation using the declared Azure API version and saves the result to a variable.
+     * For more information, see the
+     * <a href="https://docs.microsoft.com/en-us/rest/api/azure/">Azure REST API reference</a>.
+     *
+     * @param azureOperationIdentifier This is a VIVIDUS-only term. It's used to specify Azure operation uniquely. From
+     *                                 the technical perspective it's a part of Azure operation REST API URL path. For
+     *                                 example, if the full Azure operation URL is
+     *                                 <br>
+     *                                 <code>https://management.azure.com/subscriptions/
+     *                                 00000000-0000-0000-0000-000000000000/providers/
+     *                                 Microsoft.KeyVault/checkNameAvailability?api-version=2021-10-01</code>,
+     *                                 <br>
+     *                                 then the operation identifier will be
+     *                                 <br>
+     *                                 <code>providers/Microsoft.KeyVault/checkNameAvailability</code>.
+     * @param apiVersion               Azure resource provider API version. Note API versions may vary depending on
+     *                                 the resource type.
+     * @param azureOperationBody       The Azure operation definition in JSON format.
+     * @param scopes                   The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the
+     *                                 variable
+     *                                 scopes.<br>
+     *                                 <i>Available scopes:</i>
+     *                                 <ul>
+     *                                 <li><b>STEP</b> - the variable will be available only within the step,
+     *                                 <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                                 <li><b>STORY</b> - the variable will be available within the whole story,
+     *                                 <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                                 </ul>
+     * @param variableName             The variable name to store the result of Azure operation execution.
+     */
+    @When("I execute Azure operation with identifier `$azureOperationIdentifier` using API version `$apiVersion` and "
+            + "body `$azureOperationBody` and save result to $scopes variable `$variableName`")
+    public void executeOperationAtAzureResource(String azureOperationIdentifier, String apiVersion,
+            String azureOperationBody, Set<VariableScope> scopes, String variableName)
+    {
+        String urlPath = buildUrlPath(azureOperationIdentifier);
+        saveHttpPostResponseAsVariable(urlPath, apiVersion, azureOperationBody, scopes, variableName);
     }
 
     /**
