@@ -2,4 +2,4 @@
 
 The authentication process relies on the configuration of the environment variables.
 
-See the official https://github.com/Azure/azure-sdk-for-java/tree/master/sdk/identity/azure-identity#environment-variables["Azure identity"] guide to get more details on what types of authentication could be used.
+See the official https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/identity/azure-identity#environment-variables["Azure identity"] guide to get more details on what types of authentication could be used.
