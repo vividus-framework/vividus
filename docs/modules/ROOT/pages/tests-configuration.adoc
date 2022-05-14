@@ -446,7 +446,7 @@ Here one could find description of general HTTP properties applied across all th
 |Default
 |Description
 
-4+^.^|_General_
+4+^.^|[#_general]_General_
 
 |`http.circular-redirects-allowed`
 |`boolean`
@@ -483,7 +483,7 @@ Here one could find description of general HTTP properties applied across all th
 |`default`
 |The name of the https://hc.apache.org/httpcomponents-client-4.5.x/current/tutorial/html/statemgmt.html#d5e515[cookie specification] to be used for HTTP state management
 
-4+^.^|_Authentication_
+4+^.^|[#_authentication]_Authentication_
 
 |Property Name
 |Acceptable values
@@ -505,7 +505,7 @@ Here one could find description of general HTTP properties applied across all th
 |`false`
 |If enabled the HTTP client will send the basic authentication data even before the service gives an unauthorized response (401), useful when the service doesn't support unauthorized response (401) or to reduce the overhead of making the connection
 
-4+^.^|_SSL handshake_
+4+^.^|[#_ssl_handshake]_SSL handshake_
 
 |`http.ssl.check-certificate`
 |`boolean`
