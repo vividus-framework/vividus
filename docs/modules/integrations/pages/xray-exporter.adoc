@@ -139,7 +139,7 @@ include::partial$authentication.adoc[]
 
 == Cucumber Test Cases
 
-Any scenario that doesn't correspons to the <<_rules_2, manual test case rules>> is considered as cucumber test case
+Any scenario that doesn't correspons to the <<_manual_test_cases, manual test case rules>> is considered as cucumber test case
 
 .Cucumber.story
 [source,gherkin]
