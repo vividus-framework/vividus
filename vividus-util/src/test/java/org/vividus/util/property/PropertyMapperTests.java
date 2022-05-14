@@ -153,6 +153,22 @@ class PropertyMapperTests
         assertUser(entry.getValue());
     }
 
+    @Test
+    void shouldMapPropertiesToKeysInsensitiveMap() throws IOException
+    {
+        Map<String, String> adminProperties = createObjectProperties(PROPERTY_PREFIX + ADMIN + '.');
+        Map<String, String> readerProperties = createObjectProperties(PROPERTY_PREFIX + READER + '.');
+        Map<String, String> allProperties = new HashMap<>(readerProperties);
+        allProperties.putAll(adminProperties);
+        when(propertyParser.getPropertiesByPrefix(PROPERTY_PREFIX)).thenReturn(allProperties);
+        PropertyMappedCollection<User> result = propertyMapper
+            .readValuesCaseInsensitively(PROPERTY_PREFIX, User.class);
+        assertUser(result.getNullable("AdMiN").orElse(null));
+        assertUser(result.getNullable("READER").orElse(null));
+        assertUser(result.getNullable(ADMIN).orElse(null));
+        assertUser(result.getNullable(READER).orElse(null));
+    }
+
     private void mockObjectProperties()
     {
         Map<String, String> properties = createObjectProperties(PROPERTY_PREFIX + ADMIN + '.');

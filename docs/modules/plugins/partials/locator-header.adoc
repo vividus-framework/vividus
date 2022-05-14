@@ -13,3 +13,71 @@ By. prefix is optional.
 . `visibility` - *[optional]* visibility of element (visible by default)
 . `filterType` - *[optional]* type of the filter
 . `filterValue` - *[required if filter type defined]* value of the filter
+
+
+=== Reusable locators
+
+Feature allows to define custom reusable locator types via properties. These new locator types should rely on one of the already existing ones.
+
+.Properties
+----
+ui.locator.<locatorName>.pattern
+ui.locator.<locatorName>.locator-type
+----
+
+. `locatorName` - The name of the reusable locator.
+. `pattern` - The pattern of the reusable locator.
+. `locator-type` - The base locator type.
+
+.Definition of custom locator
+[source,properties]
+----
+ui.locator.anyAttOrText.locator-type=xpath
+ui.locator.anyAttOrText.pattern=//*[@*='%s' or text()='%s']
+----
+
+.Usage of custom locator
+[source,gherkin]
+----
+Given I am on the main application page
+Then number of elements found by `anyAttOrText(attribute, text)` is = `1`
+----
+
+.Usage of custom locator with comma in parameter
+[source,gherkin]
+----
+Given I am on the main application page
+Then number of elements found by `anyAttOrText(attribute, with comma\, text)` is = `1`
+----
+
+
+[cols="2,2,1,1", options="header"]
+|===
+
+|Description
+|Pattern 
+|Usage
+|Result
+
+
+|The pattern with a single paramter referenced twice.
+|`//*[@*='%1$s' or text()='%1$s']`
+|`customLocator(text)`
+|`//*[@*='text' or text()='text']`
+
+|The pattern with a `,` in value.
+|`//*[@*='%s' or text()='%s']`
+|`customLocator(te\,xt1, text2)`
+|`//*[@*='te,xt1' or text()='text2']`
+
+|The pattern containing `%` character
+|`//input[@id="username" and text()="%%%s"]`
+|`customLocator(admin)`
+|`//input[@id="username" and text()="%admin]`
+
+|The pattern without parameters
+|`//input[@id="username"]`
+|`customLocator()`
+|`//input[@id="username"]`
+
+|===

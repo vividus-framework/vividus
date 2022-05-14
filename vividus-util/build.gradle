@@ -18,6 +18,7 @@ dependencies {
 
     implementation(group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310')
 
+    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonsCollections4)
     implementation(group: 'commons-io', name: 'commons-io', version: '2.11.0')
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')
     implementation(group: 'com.jayway.jsonpath', name: 'json-path', version: "${jsonPathVersion}")

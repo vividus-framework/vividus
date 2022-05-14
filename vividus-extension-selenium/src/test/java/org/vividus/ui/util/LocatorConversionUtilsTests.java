@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -38,20 +39,25 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.testdouble.TestLocatorType;
 import org.vividus.ui.action.search.ElementActionService;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.LocatorPattern;
 import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
+import org.vividus.util.property.PropertyMappedCollection;
 
 @ExtendWith(MockitoExtension.class)
 class LocatorConversionUtilsTests
 {
     private static final String VALUE = "value";
     private static final String INVALID_LOCATOR_MESSAGE = "Invalid locator format. "
-            + "Expected matches [(?:By\\.)?([a-zA-Z]+)\\((.+)\\)(:(.*))?] Actual: [";
+            + "Expected matches [(?:By\\.)?([a-zA-Z]+)\\((.*)\\)(:(.*))?] Actual: [";
     private static final char CLOSING_BRACKET = ']';
     private static final String INVALID_LOCATOR = "To.xpath(.a)";
+    private static final String SEARCH = "search";
 
     @Mock private ElementActionService service;
+    @Mock private PropertyMappedCollection<LocatorPattern> dynamicLocators;
+
     @InjectMocks private LocatorConversionUtils utils;
 
     static Stream<Arguments> actionAttributeSource()
@@ -95,6 +101,55 @@ class LocatorConversionUtilsTests
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> utils.convertToLocator("By.jquery(.a)"));
         assertEquals("Unsupported locator type: jquery", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowAnExceptionIfDynamicLocatorUsesNotExistingType()
+    {
+        var locatorPattern = new LocatorPattern();
+        locatorPattern.setLocatorType("dah-ro-fus");
+        locatorPattern.setPattern("111111");
+        when(dynamicLocators.getNullable("jquery")).thenReturn(Optional.of(locatorPattern));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> utils.convertToLocator("jquery(.a)"));
+        assertEquals("Unsupported locator type: dah-ro-fus", exception.getMessage());
+    }
+
+    @Test
+    void shouldCreateDynamicLocatorUsingBaseType()
+    {
+        lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
+        var locatorPattern = new LocatorPattern();
+        locatorPattern.setLocatorType(SEARCH);
+        locatorPattern.setPattern("Search for %s");
+        when(dynamicLocators.getNullable("searchfor")).thenReturn(Optional.of(locatorPattern));
+        assertEquals(createAttributes(TestLocatorType.SEARCH, "Search for 111122", Visibility.VISIBLE),
+                utils.convertToLocator("By.searchFor(111122)"));
+    }
+
+    @Test
+    void shouldCreateDynamicLocatorUsingBaseTypeAndEscapedCommaInValues()
+    {
+        lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
+        var locatorPattern = new LocatorPattern();
+        locatorPattern.setLocatorType(SEARCH);
+        locatorPattern.setPattern("%s my dear %s%s");
+        when(dynamicLocators.getNullable("fusrodah")).thenReturn(Optional.of(locatorPattern));
+        assertEquals(createAttributes(TestLocatorType.SEARCH, "Hello, my dear friend!", Visibility.VISIBLE),
+                utils.convertToLocator("By.fusRoDah(Hello\\,, friend,!)"));
+    }
+
+    @Test
+    void shouldCreateDynamicLocatorWithoutParameters()
+    {
+        lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
+        var locatorPattern = new LocatorPattern();
+        locatorPattern.setLocatorType(SEARCH);
+        var pattern = "pattern";
+        locatorPattern.setPattern(pattern);
+        when(dynamicLocators.getNullable("parameterless")).thenReturn(Optional.of(locatorPattern));
+        assertEquals(createAttributes(TestLocatorType.SEARCH, pattern, Visibility.VISIBLE),
+                utils.convertToLocator("parameterLess()"));
     }
 
     @Test

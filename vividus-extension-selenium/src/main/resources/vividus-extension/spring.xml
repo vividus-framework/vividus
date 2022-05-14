@@ -119,7 +119,14 @@
 
     <bean class="org.vividus.ui.action.search.ElementActionService" init-method="init"/>
 
-    <bean class="org.vividus.ui.util.LocatorConversionUtils" />
+    <bean class="org.vividus.ui.util.LocatorConversionUtils">
+        <property name="dynamicLocators">
+            <bean factory-bean="propertyMapper" factory-method="readValuesCaseInsensitively">
+                <constructor-arg value="ui.locator." />
+                <constructor-arg value="org.vividus.ui.action.search.LocatorPattern" />
+            </bean>
+        </property>
+    </bean>
 
     <bean class="org.vividus.ui.listener.UiContextListener" lazy-init="false" />
 

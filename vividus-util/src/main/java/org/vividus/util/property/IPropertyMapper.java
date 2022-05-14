@@ -102,4 +102,17 @@ public interface IPropertyMapper
      */
     <T> PropertyMappedCollection<T> readValues(String propertyPrefix, UnaryOperator<String> keyMapper,
             Comparator<String> keyComparator, Class<T> valueType) throws IOException;
+
+    /**
+     * Maps properties with specified prefix to the ordered collection with values representing objects created
+     * using property names and their values. The access to the values by key is case-insensitive.
+     *
+     * @param propertyPrefix Prefix of properties
+     * @param valueType      Collection value type
+     * @param <T>            type of resulting objects
+     * @return collection with values representing objects created using property names and their values
+     * @throws IOException if any error is occurred during mapping of properties to objects
+     */
+    <T> PropertyMappedCollection<T> readValuesCaseInsensitively(String propertyPrefix, Class<T> valueType)
+        throws IOException;
 }
