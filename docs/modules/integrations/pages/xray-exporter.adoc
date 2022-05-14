@@ -60,7 +60,7 @@ The Xray is a Jira plugin that uses custom Jira fields for it's data, one of the
 
 === Manual Test Case Properties
 
-image::manual.png[Manual test case view]
+[[_manual_test_case_view]]image:manual.png[Manual test case view]
 
 [cols="1,3,3", options="header"]
 |===
@@ -81,7 +81,7 @@ image::manual.png[Manual test case view]
 
 === Cucumber Test Case Properties
 
-image::cucumber.png[Cucumber test case view]
+[[_cucumber_test_case_view]]image:cucumber.png[Cucumber test case view]
 
 [cols="1,3,3", options="header"]
 |===
