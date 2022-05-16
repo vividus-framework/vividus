@@ -41,7 +41,7 @@ Given request body: ${request-body}
 When I send HTTP DELETE to the relative URL '/delete'
 Then the connection is secured using TLSv1.2 protocol
 
-Scenario: Verify step "Then sHTTP resources are valid:$resources"
+Scenario: Verify step "Then HTTP resources are valid:$resources"
 Then HTTP resources are valid:
 |url                                     |
 |${vividus-test-site-url}/img/vividus.png|
