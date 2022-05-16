@@ -24,23 +24,23 @@ NOTE: The properties marked with *bold* are mandatory.
 |Default
 |Description
 
-|`web.visual.applitools.server-uri`
+|`ui.visual.applitools.server-uri`
 |`https://eyesapi.applitools.com`
 |The URI of the rest server.
 
-|`web.visual.applitools.execute-api-key`
+|`ui.visual.applitools.execute-api-key`
 |`empty`
 |Allows users to execute tests but does not allow them to access the tests and test results, change data through the API, or make any changes to the tests. For more details see how to https://applitools.com/docs/topics/overview/obtain-api-key.html[obtain API keys].
 
-|[subs=+quotes]`*web.visual.applitools.read-api-key*`
+|[subs=+quotes]`*ui.visual.applitools.read-api-key*`
 |`<empty>`
 |Allows users to access tests and test results, but does not allow them to execute tests, change data through the API, or make any changes to the tests. For more details see how to https://applitools.com/docs/topics/overview/obtain-api-key.html[obtain API keys].
 
-|`web.visual.applitools.match-level`
+|`ui.visual.applitools.match-level`
 |`EXACT`
 |See https://applitools.com/docs/common/cmn-eyes-match-levels.html#Available[available match levels].
 
-|`web.visual.applitools.app-name`
+|`ui.visual.applitools.app-name`
 |`<empty>`
 |The name of the application under test.
 
@@ -58,19 +58,19 @@ See https://applitools.com/docs/topics/general-concepts/working-withcross-enviro
 |Default
 |Description
 
-|`web.visual.applitools.host-os`
+|`ui.visual.applitools.host-os`
 |`empty`
 |The host OS running the application under test.
 
-|`web.visual.applitools.host-app`
+|`ui.visual.applitools.host-app`
 |`empty`
 |The application running the application under test (e.g. Safari, Chrome).
 
-|`web.visual.applitools.viewport-size`
+|`ui.visual.applitools.viewport-size`
 |`empty`
 |The required viewport size for the environment.
 
-|`web.visual.applitools.baseline-env-name`
+|`ui.visual.applitools.baseline-env-name`
 |`empty`
 |The name of the baseline's environment.
 
