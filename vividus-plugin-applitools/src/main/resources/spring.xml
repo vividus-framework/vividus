@@ -18,15 +18,15 @@
     <bean id="visualTestingSteps" class="org.vividus.visual.eyes.VisualTestingSteps" />
 
     <bean id="applitoolsVisualCheckFactory" class="org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory" >
-        <property name="executeApiKey" value="${web.visual.applitools.execute-api-key}" />
-        <property name="readApiKey" value="${web.visual.applitools.read-api-key}" />
-        <property name="hostApp" value="${web.visual.applitools.host-app}" />
-        <property name="hostOS" value="${web.visual.applitools.host-os}" />
-        <property name="viewportSize" value="${web.visual.applitools.viewport-size}" />
-        <property name="matchLevel" value="${web.visual.applitools.match-level}" />
-        <property name="serverUri" value="${web.visual.applitools.server-uri}" />
-        <property name="appName" value="${web.visual.applitools.app-name}" />
-        <property name="baselineEnvName" value="${web.visual.applitools.baseline-env-name}" />
+        <property name="executeApiKey" value="${ui.visual.applitools.execute-api-key}" />
+        <property name="readApiKey" value="${ui.visual.applitools.read-api-key}" />
+        <property name="hostApp" value="${ui.visual.applitools.host-app}" />
+        <property name="hostOS" value="${ui.visual.applitools.host-os}" />
+        <property name="viewportSize" value="${ui.visual.applitools.viewport-size}" />
+        <property name="matchLevel" value="${ui.visual.applitools.match-level}" />
+        <property name="serverUri" value="${ui.visual.applitools.server-uri}" />
+        <property name="appName" value="${ui.visual.applitools.app-name}" />
+        <property name="baselineEnvName" value="${ui.visual.applitools.baseline-env-name}" />
     </bean>
 
     <bean id="eyesLogHandler" class="org.vividus.visual.eyes.logger.EyesLogHandler">
