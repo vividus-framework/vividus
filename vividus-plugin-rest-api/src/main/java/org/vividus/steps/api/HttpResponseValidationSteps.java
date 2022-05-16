@@ -389,7 +389,7 @@ public class HttpResponseValidationSteps
      * <li>name - Desired entry name pattern used with current <b>rule</b>.</li>
      * </ul>
      */
-    @Then("the response archive contains entries with the names:$parameters")
+    @Then("response archive contains entries with names:$parameters")
     public void verifyArchiveContainsEntries(List<NamedEntry> parameters)
     {
         Set<String> entryNames = ZipUtils.readZipEntryNamesFromBytes(getResponseBody());
