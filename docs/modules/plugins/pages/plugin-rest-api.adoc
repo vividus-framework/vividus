@@ -488,7 +488,7 @@ If comparison rule column does not exist, the verification that archive entries 
 
 [source,gherkin]
 ----
-Then the response archive contains entries with the names:$parameters
+Then response archive contains entries with names:$parameters
 ----
 
 * `$parameters` - The ExampleTable that contains specified string comparison `rule` and entry `name` pattern that should be found using current `rule`. Available columns:
@@ -501,7 +501,7 @@ NOTE: Entry name in archive is not always the same as file name. Entry name refl
 [source,gherkin]
 ----
 When I execute HTTP GET request for resource with URL `https://example.com/get-zip-archive`
-Then the response archive contains entries with the names:
+Then response archive contains entries with names:
 |rule             |name                     |
 |matches          |data/.+\.data            |
 |does not contain |restrictedData.data      |
@@ -511,7 +511,7 @@ Then the response archive contains entries with the names:
 [source,gherkin]
 ----
 When I execute HTTP GET request for resource with URL `https://example.com/get-zip-archive`
-Then the response archive contains entries with the names:
+Then response archive contains entries with names:
 |name                           |
 |responseTextFromZipArchive.txt |
 ----
