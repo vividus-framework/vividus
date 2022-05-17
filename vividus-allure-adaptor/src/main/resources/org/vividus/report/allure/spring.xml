@@ -36,6 +36,15 @@
         </constructor-arg>
     </bean>
 
+    <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
+        <constructor-arg value="vividus-step-formatting" />
+        <constructor-arg>
+            <util:list value-type="java.lang.String">
+                <value>styles.css</value>
+            </util:list>
+        </constructor-arg>
+    </bean>
+
     <bean class="org.vividus.report.allure.AllureRunContext" />
 
     <bean class="org.vividus.report.allure.adapter.VerificationErrorAdapter" />
