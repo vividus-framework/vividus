@@ -66,6 +66,7 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.util.XpathLocatorUtil;
 import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.IWebWaitActions;
@@ -74,7 +75,6 @@ import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.ui.web.listener.IWebApplicationListener;
-import org.vividus.ui.web.util.LocatorUtil;
 import org.vividus.util.UriUtils;
 
 @SuppressWarnings("MethodCount")
@@ -185,7 +185,7 @@ class PageStepsTests
     {
         WebElement webElement = mock(WebElement.class);
         Locator locator = new Locator(WebLocatorType.XPATH,
-                new SearchParameters(LocatorUtil.getXPathByAttribute(ID, VALUE), Visibility.ALL));
+                new SearchParameters(XpathLocatorUtil.getXPathByAttribute(ID, VALUE), Visibility.ALL));
         when(mockedBaseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, locator))
                 .thenReturn(webElement);
         when(webElementActions.isPageVisibleAreaScrolledToElement(webElement)).thenReturn(true);
@@ -198,7 +198,7 @@ class PageStepsTests
     void testIsElementAtTheTopElementNull()
     {
         Locator locator = new Locator(WebLocatorType.XPATH,
-                new SearchParameters(LocatorUtil.getXPathByAttribute(ID, VALUE)));
+                new SearchParameters(XpathLocatorUtil.getXPathByAttribute(ID, VALUE)));
         when(mockedBaseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, locator))
                 .thenReturn(null);
         pageSteps.isPageScrolledToAnElement(locator);

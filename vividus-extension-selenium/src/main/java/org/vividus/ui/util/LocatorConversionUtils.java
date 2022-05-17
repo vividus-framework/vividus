@@ -121,7 +121,10 @@ public class LocatorConversionUtils
                                                              .map(p -> p.replace(ESCAPED_COMMA, ","))
                                                              .toArray(String[]::new)
                                                      : params;
-        return String.format(locatorPattern.getPattern(), params);
+        String pattern = locatorPattern.getPattern();
+        return locatorPattern.getLocatorType().equalsIgnoreCase("xpath")
+            ? XpathLocatorUtil.getXPath(pattern, params)
+            : String.format(pattern, params);
     }
 
     private static Optional<LocatorType> findLocatorType(Set<LocatorType> locatorTypes, String type)

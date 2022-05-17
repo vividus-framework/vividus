@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.util;
+package org.vividus.ui.util;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.text.StringEscapeUtils;
@@ -23,7 +24,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.Quotes;
 import org.vividus.selenium.TextUtils;
 
-public final class LocatorUtil
+public final class XpathLocatorUtil
 {
     private static final String ANY = "*";
     private static final String CONCAT = "(| )((concat\\([^)]*\\))|('(?!')[^']*')|(\"(?!\\\")[^\"]*\"))";
@@ -47,6 +48,7 @@ public final class LocatorUtil
             .compile(String.format("(%s)( or )", NORMALIZE_SPACE_WITH_PARAMETR_FORMAT));
     private static final Pattern AFTER_OR_PATTERN = Pattern
             .compile(String.format("( or )(%s)", NORMALIZE_SPACE_WITH_PARAMETR_FORMAT));
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("([\\\"'](%\\d+\\$s|%s)[\\\"'])");
 
     private static final String NORMALIZE_SPACE_FORMAT_BEFORE_OR = "$2[normalize-space()=$6$7$8]$9";
     private static final String NORMALIZE_SPACE_FORMAT_AFTER_OR = "$1$3[normalize-space()=$7$8$9]";
@@ -55,7 +57,7 @@ public final class LocatorUtil
             "(((?<=\\[)[\\w./]+(?=normalize-space))|((?<=\\[)\\./+))" + "([\\w-]*)(\\(?)(@[\\w\\-._]*)(\\)?)");
     private static final String NORMALIZE_CURRENT_NODE_PATTERN = "normalize-space($1$6)";
 
-    private LocatorUtil()
+    private XpathLocatorUtil()
     {
     }
 
@@ -86,35 +88,19 @@ public final class LocatorUtil
 
     public static String getXPath(boolean doSpaceNormalization, String xpathPattern, Object... args)
     {
+        String pattern = xpathPattern;
+        Matcher matcher = PLACEHOLDER_PATTERN.matcher(xpathPattern);
+        while (matcher.find())
+        {
+            pattern = pattern.replace(matcher.group(1), matcher.group(2));
+        }
         Object[] newArgs = new Object[args.length];
         for (int i = 0; i < args.length; i++)
         {
             String arg = TextUtils.normalizeText(args[i].toString());
             newArgs[i] = Quotes.escape(arg);
         }
-        String xpathFromRootPattern = buildXPath(doSpaceNormalization, xpathPattern, newArgs);
-        return xpathFromRootPattern.replaceAll("'((concat.*?(\"\\)))|(\"[^\"]*?\"))'", "$1");
-    }
-
-    public static By getXPathLocatorByInnerTextWithTagName(String tagName, String text)
-    {
-        return By.xpath(getXPathByInnerTextWithTagName(tagName, text));
-    }
-
-    public static By getXPathLocatorByFullInnerText(String text)
-    {
-        return By.xpath(getXPath(true, String.format(".//%1$s[.=%%1$s and not(.//%1$s[.=%%1$s])]", ANY), text));
-    }
-
-    public static By getXPathLocatorByInnerText(String text)
-    {
-        return By.xpath(getXPathByInnerTextWithTagName(ANY, text));
-    }
-
-    private static String getXPathByInnerTextWithTagName(String tagName, String text)
-    {
-        return getXPath(true,
-                String.format(".//%1$s[contains(., %%1$s) and not(.//%1$s[contains(., %%1$s)])]", tagName), text);
+        return buildXPath(doSpaceNormalization, pattern, newArgs);
     }
 
     public static By getXPathLocator(boolean doSpaceNormalization, String xpathPattern, Object... args)

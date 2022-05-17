@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,11 +46,11 @@ import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.util.XpathLocatorUtil;
 import org.vividus.ui.web.action.FrameActions;
 import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.action.IWindowsActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
-import org.vividus.ui.web.util.LocatorUtil;
 
 @ExtendWith(MockitoExtension.class)
 class SetContextStepsTests
@@ -149,7 +149,7 @@ class SetContextStepsTests
     void testSwitchingToFrameByXpathIfElementExist()
     {
         Locator locator = new Locator(WebLocatorType.XPATH,
-                LocatorUtil.getXPath(XPATH));
+                XpathLocatorUtil.getXPath(XPATH));
         when(mockedBaseValidations.assertIfElementExists(A_FRAME, locator)).thenReturn(mockedWebElement);
         InOrder ordered = inOrder(frameActions, uiContext);
         setContextSteps.switchingToFrame(locator);
@@ -161,7 +161,7 @@ class SetContextStepsTests
     @Test
     void testSwitchingToFrameByXpathIfElementNotExist()
     {
-        Locator locator = new Locator(WebLocatorType.XPATH, LocatorUtil.getXPath(XPATH));
+        Locator locator = new Locator(WebLocatorType.XPATH, XpathLocatorUtil.getXPath(XPATH));
         when(mockedBaseValidations.assertIfElementExists(A_FRAME, locator)).thenReturn(null);
         setContextSteps.switchingToFrame(locator);
         verifyNoInteractions(frameActions);

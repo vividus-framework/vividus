@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.State;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.util.XpathLocatorUtil;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
-import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
 public class RadioButtonSteps
@@ -71,7 +71,7 @@ public class RadioButtonSteps
         WebElement radioButtonLabel = baseValidations.assertIfElementExists(
                 String.format("A radio button label with text '%s'", radioOption),
                 new Locator(WebLocatorType.XPATH,
-                        LocatorUtil.getXPath(".//label[text()=%1$s or *=%1$s or @*=%1$s]", radioOption)));
+                        XpathLocatorUtil.getXPath(".//label[text()=%1$s or *=%1$s or @*=%1$s]", radioOption)));
         if (radioButtonLabel == null)
         {
             return null;
@@ -80,7 +80,7 @@ public class RadioButtonSteps
         if (StringUtils.isNotEmpty(labelForAtr))
         {
             return baseValidations.assertIfElementExists(RADIO_BUTTON, new Locator(WebLocatorType.XPATH,
-                    LocatorUtil.getXPath(".//input[@type='radio' and @id=%s]", labelForAtr)));
+                    XpathLocatorUtil.getXPath(".//input[@type='radio' and @id=%s]", labelForAtr)));
         }
         return baseValidations.assertIfElementExists(RADIO_BUTTON, radioButtonLabel,
                 new Locator(WebLocatorType.XPATH, "input[@type='radio']"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
+import org.vividus.ui.util.XpathLocatorUtil;
 import org.vividus.ui.web.action.search.WebLocatorType;
-import org.vividus.ui.web.util.LocatorUtil;
 
 public class ScriptSteps
 {
@@ -52,7 +52,7 @@ public class ScriptSteps
     {
         return baseValidations.assertIfElementExists(String.format("Script with the name '%s'", jsFileName),
                 new Locator(WebLocatorType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPath(".//script[contains(@src, %s)]", jsFileName),
+                        new SearchParameters(XpathLocatorUtil.getXPath(".//script[contains(@src, %s)]", jsFileName),
                                 Visibility.ALL)));
     }
 
@@ -77,7 +77,8 @@ public class ScriptSteps
     {
         return baseValidations.assertIfElementExists(String.format("Script with text '%s'", jsText),
                 new Locator(WebLocatorType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPath(".//script[text()=%s]", jsText), Visibility.ALL)));
+                        new SearchParameters(XpathLocatorUtil.getXPath(".//script[text()=%s]", jsText),
+                                Visibility.ALL)));
     }
 
     /**
@@ -101,7 +102,7 @@ public class ScriptSteps
     {
         return baseValidations.assertIfElementExists(String.format("Script with the text part '%s'", jsTextPart),
                 new Locator(WebLocatorType.XPATH,
-                        new SearchParameters(LocatorUtil.getXPath(".//script[contains(text(),%s)]", jsTextPart),
+                        new SearchParameters(XpathLocatorUtil.getXPath(".//script[contains(text(),%s)]", jsTextPart),
                                 Visibility.ALL)));
     }
 }
