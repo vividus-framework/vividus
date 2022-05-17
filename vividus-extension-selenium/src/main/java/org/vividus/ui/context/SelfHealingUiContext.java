@@ -75,13 +75,17 @@ public class SelfHealingUiContext extends UiContext
                     {
                         LOGGER.atInfo().setCause(cause).log("Got an exception trying to reset context");
                         getSearchContextData().getSearchContextSetter().setSearchContext();
-                        try
+                        T reestablishedContext = searchContextGetter.get();
+                        if (reestablishedContext != null)
                         {
-                            return method.invoke(searchContextGetter.get(), args);
-                        }
-                        catch (InvocationTargetException e)
-                        {
-                            throw e.getCause();
+                            try
+                            {
+                                return method.invoke(searchContextGetter.get(), args);
+                            }
+                            catch (InvocationTargetException e)
+                            {
+                                throw e.getCause();
+                            }
                         }
                     }
                     throw cause;
