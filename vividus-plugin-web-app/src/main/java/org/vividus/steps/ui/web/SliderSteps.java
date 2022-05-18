@@ -27,7 +27,7 @@ import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
@@ -49,7 +49,7 @@ public class SliderSteps
     public void setSliderValue(String value, String xpath)
     {
         WebElement slider = baseValidations.assertIfElementExists("Slider to select value in",
-                new Locator(WebLocatorType.XPATH, XpathLocatorUtil.getXPath(xpath)));
+                new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(xpath)));
         if (null != slider)
         {
             javascriptActions.executeScript("arguments[0].value=arguments[1]", slider, value);
@@ -66,7 +66,7 @@ public class SliderSteps
     public void verifySliderValue(String value, String xpath)
     {
         WebElement slider = baseValidations.assertIfElementExists("Slider to verify value in",
-                new Locator(WebLocatorType.XPATH, XpathLocatorUtil.getXPath(xpath)));
+                new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(xpath)));
         if (null != slider)
         {
             softAssert.assertThat("Slider value", slider.getAttribute("value"), equalTo(value));

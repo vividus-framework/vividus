@@ -43,7 +43,7 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.util.FormatUtil;
+import org.vividus.ui.web.util.FormatUtils;
 
 @ExtendWith(MockitoExtension.class)
 class WebElementActionsTests
@@ -242,7 +242,7 @@ class WebElementActionsTests
     @Test
     void testAddTextElementIsNull()
     {
-        String normalizedText = FormatUtil.normalizeLineEndings(TEXT);
+        String normalizedText = FormatUtils.normalizeLineEndings(TEXT);
         webElementActions.addText(null, TEXT);
         verify(webElement, never()).sendKeys(normalizedText);
     }

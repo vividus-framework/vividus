@@ -46,7 +46,7 @@ import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.FrameActions;
 import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.action.IWindowsActions;
@@ -149,7 +149,7 @@ class SetContextStepsTests
     void testSwitchingToFrameByXpathIfElementExist()
     {
         Locator locator = new Locator(WebLocatorType.XPATH,
-                XpathLocatorUtil.getXPath(XPATH));
+                XpathLocatorUtils.getXPath(XPATH));
         when(mockedBaseValidations.assertIfElementExists(A_FRAME, locator)).thenReturn(mockedWebElement);
         InOrder ordered = inOrder(frameActions, uiContext);
         setContextSteps.switchingToFrame(locator);
@@ -161,7 +161,7 @@ class SetContextStepsTests
     @Test
     void testSwitchingToFrameByXpathIfElementNotExist()
     {
-        Locator locator = new Locator(WebLocatorType.XPATH, XpathLocatorUtil.getXPath(XPATH));
+        Locator locator = new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(XPATH));
         when(mockedBaseValidations.assertIfElementExists(A_FRAME, locator)).thenReturn(null);
         setContextSteps.switchingToFrame(locator);
         verifyNoInteractions(frameActions);

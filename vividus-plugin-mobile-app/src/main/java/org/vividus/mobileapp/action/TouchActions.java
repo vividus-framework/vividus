@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import org.vividus.mobileapp.model.SwipeCoordinates;
 import org.vividus.mobileapp.model.SwipeDirection;
 import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverUtil;
+import org.vividus.selenium.WebDriverUtils;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
 import org.vividus.util.Sleeper;
@@ -121,7 +121,7 @@ public class TouchActions
                 return touchActions;
             }
         }
-        tapByElement.accept(touchActions, element(WebDriverUtil.unwrap(element, RemoteWebElement.class)));
+        tapByElement.accept(touchActions, element(WebDriverUtils.unwrap(element, RemoteWebElement.class)));
         return touchActions;
     }
 

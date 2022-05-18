@@ -25,7 +25,7 @@ import org.openqa.selenium.remote.RemoteWebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.monitor.TakeScreenshotOnFailure;
-import org.vividus.selenium.WebDriverUtil;
+import org.vividus.selenium.WebDriverUtils;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.ElementActions;
@@ -71,7 +71,7 @@ public class ElementSteps
                                tag);
                            return true;
                        })
-                       .map(element -> WebDriverUtil.unwrap(element, RemoteWebElement.class))
+                       .map(element -> WebDriverUtils.unwrap(element, RemoteWebElement.class))
                        .map(RemoteWebElement::getId)
                        .ifPresent(id -> javascriptActions.executeScript("mobile: selectPickerWheelValue",
                            Map.of("order", direction.name().toLowerCase(),

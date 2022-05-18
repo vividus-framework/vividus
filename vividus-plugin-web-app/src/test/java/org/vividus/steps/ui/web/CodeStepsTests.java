@@ -53,7 +53,7 @@ import org.vividus.steps.ui.web.model.JsArgumentType;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
@@ -147,7 +147,7 @@ class CodeStepsTests
         verifyNoInteractions(softAssert);
         verify(mockedBaseValidations).assertIfElementExists(FAVICON, new Locator(WebLocatorType.XPATH,
                 new SearchParameters(
-                        XpathLocatorUtil.getXPath(HEAD_LINK_CONTAINS_REL_SHORTCUT_ICON_ICON, FAVICON_IMG_PNG),
+                        XpathLocatorUtils.getXPath(HEAD_LINK_CONTAINS_REL_SHORTCUT_ICON_ICON, FAVICON_IMG_PNG),
                         Visibility.ALL)));
     }
 
@@ -232,7 +232,7 @@ class CodeStepsTests
     {
         when(mockedBaseValidations.assertIfElementExists(FAVICON, new Locator(WebLocatorType.XPATH,
                 new SearchParameters(
-                        XpathLocatorUtil.getXPath(HEAD_LINK_CONTAINS_REL_SHORTCUT_ICON_ICON, FAVICON_IMG_PNG),
+                        XpathLocatorUtils.getXPath(HEAD_LINK_CONTAINS_REL_SHORTCUT_ICON_ICON, FAVICON_IMG_PNG),
                         Visibility.ALL)))).thenReturn(mockedWebElement);
         when(mockedWebElement.getAttribute(HREF)).thenReturn(hrefAttribute);
     }

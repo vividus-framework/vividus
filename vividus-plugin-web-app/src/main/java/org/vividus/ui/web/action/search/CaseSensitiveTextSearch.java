@@ -25,7 +25,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.web.util.WebXpathLocatorUtil;
+import org.vividus.ui.web.util.WebXpathLocatorUtils;
 
 public class CaseSensitiveTextSearch extends AbstractWebElementSearchAction
         implements IElementSearchAction, IElementFilterAction
@@ -40,10 +40,10 @@ public class CaseSensitiveTextSearch extends AbstractWebElementSearchAction
     {
         String value = parameters.getValue();
         List<WebElement> elements = findElements(searchContext,
-                WebXpathLocatorUtil.getXPathLocatorByFullInnerText(value), parameters);
+                WebXpathLocatorUtils.getXPathLocatorByFullInnerText(value), parameters);
         if (elements.isEmpty())
         {
-            By locator = WebXpathLocatorUtil.getXPathLocatorByInnerText(value);
+            By locator = WebXpathLocatorUtils.getXPathLocatorByInnerText(value);
             return findElementsByText(searchContext, locator, parameters, "*");
         }
         return elements;

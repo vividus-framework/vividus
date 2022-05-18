@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,13 @@ import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.SearchActions;
-import org.vividus.ui.web.util.ElementUtil;
+import org.vividus.ui.web.util.ElementUtils;
 
 @Named
 public class WebElementDeserializer extends JsonDeserializer<Supplier<?>> implements ContextualDeserializer
 {
     @Inject private SearchActions searchActions;
-    @Inject private ElementUtil elementUtil;
+    @Inject private ElementUtils elementUtils;
 
     @Override
     public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property)
@@ -52,6 +52,6 @@ public class WebElementDeserializer extends JsonDeserializer<Supplier<?>> implem
     public Supplier<Optional<WebElement>> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException
     {
         String locator = p.getText();
-        return elementUtil.getElement(locator, searchActions);
+        return elementUtils.getElement(locator, searchActions);
     }
 }

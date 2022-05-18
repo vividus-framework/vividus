@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,18 @@
 
 package org.vividus.ui.web.util;
 
-public final class FormatUtil
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+class FormatUtilsTests
 {
-    private static final String NEW_LINE = "\n";
-
-    private FormatUtil()
+    @Test
+    void testNormalizeLineEndings()
     {
-    }
-
-    public static String normalizeLineEndings(String arg)
-    {
-        return arg.replaceAll("\r\n", NEW_LINE).replace("\\r\\n", NEW_LINE);
+        String text = "Line1\r\nLine2";
+        String expectedText = "Line1\nLine2";
+        String actualText = FormatUtils.normalizeLineEndings(text);
+        assertEquals(expectedText, actualText);
     }
 }

@@ -24,7 +24,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.Quotes;
 import org.vividus.selenium.TextUtils;
 
-public final class XpathLocatorUtil
+public final class XpathLocatorUtils
 {
     private static final String ANY = "*";
     private static final String CONCAT = "(| )((concat\\([^)]*\\))|('(?!')[^']*')|(\"(?!\\\")[^\"]*\"))";
@@ -57,7 +57,7 @@ public final class XpathLocatorUtil
             "(((?<=\\[)[\\w./]+(?=normalize-space))|((?<=\\[)\\./+))" + "([\\w-]*)(\\(?)(@[\\w\\-._]*)(\\)?)");
     private static final String NORMALIZE_CURRENT_NODE_PATTERN = "normalize-space($1$6)";
 
-    private XpathLocatorUtil()
+    private XpathLocatorUtils()
     {
     }
 

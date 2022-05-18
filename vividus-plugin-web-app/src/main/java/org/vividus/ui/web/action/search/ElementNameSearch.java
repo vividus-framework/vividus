@@ -23,7 +23,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 
 public class ElementNameSearch extends AbstractWebElementSearchAction implements IElementSearchAction
 {
@@ -37,6 +37,6 @@ public class ElementNameSearch extends AbstractWebElementSearchAction implements
     {
         String elementName = parameters.getValue();
         return findElementsByText(searchContext,
-                XpathLocatorUtil.getXPathLocator(".//*[@*=%1$s or text()=%1$s]", elementName), parameters, "*");
+                XpathLocatorUtils.getXPathLocator(".//*[@*=%1$s or text()=%1$s]", elementName), parameters, "*");
     }
 }

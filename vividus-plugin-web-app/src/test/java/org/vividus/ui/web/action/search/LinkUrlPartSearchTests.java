@@ -43,7 +43,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.AbstractElementAction;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class LinkUrlPartSearchTests
@@ -114,7 +114,7 @@ class LinkUrlPartSearchTests
     {
         SearchParameters parameters = new SearchParameters(URL_PART, Visibility.ALL, false);
         search.setCaseSensitiveSearch(true);
-        By locator = XpathLocatorUtil.getXPathLocator(LINK_WITH_PART_URL_PATTERN, URL_PART);
+        By locator = XpathLocatorUtils.getXPathLocator(LINK_WITH_PART_URL_PATTERN, URL_PART);
         when(searchContext.findElements(locator)).thenReturn(webElements);
         assertEquals(webElements, search.search(searchContext, parameters));
         assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 1))));

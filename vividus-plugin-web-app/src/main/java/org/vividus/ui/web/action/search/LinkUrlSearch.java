@@ -33,7 +33,7 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.util.UriUtils;
 
 public class LinkUrlSearch extends AbstractWebElementSearchAction
@@ -57,8 +57,8 @@ public class LinkUrlSearch extends AbstractWebElementSearchAction
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
     {
         String searchValue = parameters.getValue();
-        By xpathLocator = caseSensitiveSearch ? XpathLocatorUtil.getXPathLocator(LINK_PATTERN, searchValue)
-                : XpathLocatorUtil.getXPathLocator(LINK_WITH_CASE_INSENSITIVE_URL, searchValue.toLowerCase());
+        By xpathLocator = caseSensitiveSearch ? XpathLocatorUtils.getXPathLocator(LINK_PATTERN, searchValue)
+                : XpathLocatorUtils.getXPathLocator(LINK_WITH_CASE_INSENSITIVE_URL, searchValue.toLowerCase());
         return findElements(searchContext, xpathLocator, parameters);
     }
 

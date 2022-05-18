@@ -29,7 +29,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.AbstractElementAction;
 import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.IWebElementActions;
 
 public abstract class AbstractWebElementSearchAction extends AbstractElementAction
@@ -77,7 +77,7 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
                     .append(ELEMENT_WITH_ANY_ATTRIBUTE_OR_TEXT_CASE_INSENSITIVE)
                     .append("])]|");
         }
-        return XpathLocatorUtil.getXPathLocator(locator.substring(0, locator.length() - 1), text.toLowerCase());
+        return XpathLocatorUtils.getXPathLocator(locator.substring(0, locator.length() - 1), text.toLowerCase());
     }
 
     protected boolean matchesToText(WebElement element, final String text)

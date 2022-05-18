@@ -51,7 +51,7 @@ import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
@@ -215,7 +215,7 @@ class WaitStepsTests
         when(uiContext.getSearchContext(WebDriver.class)).thenReturn(Optional.of(webDriver));
         WaitResult<List<WebElement>> waitResult = mock(WaitResult.class);
         IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
-        By locator = XpathLocatorUtil
+        By locator = XpathLocatorUtils
                 .getXPathLocator("*[(local-name()='frame' or local-name()='iframe') and @*=\"name\"]");
         when(expectedSearchContextConditions.visibilityOfAllElementsLocatedBy(locator)).thenReturn(condition);
         when(waitActions.wait(webDriver, condition)).thenReturn(waitResult);

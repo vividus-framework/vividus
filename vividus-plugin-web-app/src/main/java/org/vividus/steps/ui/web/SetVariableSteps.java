@@ -32,7 +32,7 @@ import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.util.UriUtils;
@@ -311,7 +311,7 @@ public class SetVariableSteps
     private List<WebElement> getVideoIFrames(int leastNumber)
     {
         Locator locator = new Locator(WebLocatorType.XPATH,
-                XpathLocatorUtil.getXPath("div[contains(@class,'video')]/iframe"));
+                XpathLocatorUtils.getXPath("div[contains(@class,'video')]/iframe"));
         return baseValidations.assertIfAtLeastNumberOfElementsExist("The number of found video frames", locator,
                 leastNumber);
     }

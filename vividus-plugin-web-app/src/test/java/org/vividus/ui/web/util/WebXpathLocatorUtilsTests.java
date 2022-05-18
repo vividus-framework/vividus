@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 
-class WebXpathLocatorUtilTests
+class WebXpathLocatorUtilsTests
 {
     private static final String FULL_INNER_TEXT_XPATH_FORMAT = ".//%1$s[normalize-space(.)=\"%2$s\" and "
             + "not(.//%1$s[normalize-space(.)=\"%2$s\"])]";
@@ -35,7 +35,7 @@ class WebXpathLocatorUtilTests
     {
         String tagName = "tagName";
         By expectedLocator = By.xpath(String.format(INNER_TEXT_XPATH_FORMAT, tagName, TEXT_WITH_PERCENT));
-        By actualLocator = WebXpathLocatorUtil.getXPathLocatorByInnerTextWithTagName(tagName, TEXT_WITH_PERCENT);
+        By actualLocator = WebXpathLocatorUtils.getXPathLocatorByInnerTextWithTagName(tagName, TEXT_WITH_PERCENT);
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -43,7 +43,7 @@ class WebXpathLocatorUtilTests
     void testGetXPathLocatorByFullInnerText()
     {
         By expectedLocator = By.xpath(String.format(FULL_INNER_TEXT_XPATH_FORMAT, ANY_ELEMENT, TEXT_WITH_PERCENT));
-        By actualLocator = WebXpathLocatorUtil.getXPathLocatorByFullInnerText(TEXT_WITH_PERCENT);
+        By actualLocator = WebXpathLocatorUtils.getXPathLocatorByFullInnerText(TEXT_WITH_PERCENT);
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -54,7 +54,7 @@ class WebXpathLocatorUtilTests
                 + "'\"', \" %\") and not(.//*[normalize-space(.)=concat(\"This 'text' with both \", '\"', \"quotes\", "
                 + "'\"', \" %\")])]");
         String text = "This 'text' with both \"quotes\" %";
-        By actualLocator = WebXpathLocatorUtil.getXPathLocatorByFullInnerText(text);
+        By actualLocator = WebXpathLocatorUtils.getXPathLocatorByFullInnerText(text);
         assertEquals(expectedLocator.toString(), actualLocator.toString());
     }
 
@@ -62,7 +62,7 @@ class WebXpathLocatorUtilTests
     void testGetXPathLocatorByInnerTextWithoutTagName()
     {
         By expectedLocator = By.xpath(String.format(INNER_TEXT_XPATH_FORMAT, ANY_ELEMENT, TEXT_WITH_PERCENT));
-        By actualLocator = WebXpathLocatorUtil.getXPathLocatorByInnerText(TEXT_WITH_PERCENT);
+        By actualLocator = WebXpathLocatorUtils.getXPathLocatorByInnerText(TEXT_WITH_PERCENT);
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -80,7 +80,7 @@ class WebXpathLocatorUtilTests
         String text = "This action rebuilds your site's XML sitemap and regenerates the cached files, "
                 + "and may be a lengthy process. If you just installed \"XML sitemap\", this can be helpful to import "
                 + "all your site's content into the sitemap. Otherwise, this should only be used in emergencies. %";
-        By actualLocator = WebXpathLocatorUtil.getXPathLocatorByInnerText(text);
+        By actualLocator = WebXpathLocatorUtils.getXPathLocatorByInnerText(text);
         assertEquals(expectedLocator.toString(), actualLocator.toString());
     }
 }

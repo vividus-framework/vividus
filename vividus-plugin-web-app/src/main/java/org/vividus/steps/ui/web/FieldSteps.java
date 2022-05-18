@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.IFieldActions;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
-import org.vividus.ui.web.util.FormatUtil;
+import org.vividus.ui.web.util.FormatUtils;
 
 @TakeScreenshotOnFailure
 public class FieldSteps
@@ -141,7 +141,7 @@ public class FieldSteps
         WebElement element = findElement(locator);
         if (element != null)
         {
-            String normalizedText = FormatUtil.normalizeLineEndings(text);
+            String normalizedText = FormatUtils.normalizeLineEndings(text);
             element.clear();
             LOGGER.info("Entering text \"{}\" in element", normalizedText);
             if (webDriverManager.isBrowserAnyOf(Browser.SAFARI) && webElementActions.isElementContenteditable(element))

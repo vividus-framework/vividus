@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,7 +110,7 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
         WebDriver driver = new TextFormattingWebDriver(webDriver.get());
         configureWebDriver(driver);
 
-        logCapabilities(WebDriverUtil.unwrap(driver, HasCapabilities.class).getCapabilities(),
+        logCapabilities(WebDriverUtils.unwrap(driver, HasCapabilities.class).getCapabilities(),
                 "Session capabilities:\n{}");
         return driver;
     }

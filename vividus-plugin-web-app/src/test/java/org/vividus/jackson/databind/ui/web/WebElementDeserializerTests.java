@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,13 +35,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.SearchActions;
-import org.vividus.ui.web.util.ElementUtil;
+import org.vividus.ui.web.util.ElementUtils;
 
 @ExtendWith(MockitoExtension.class)
 class WebElementDeserializerTests
 {
     @Mock private SearchActions searchActions;
-    @Mock private ElementUtil elementUtil;
+    @Mock private ElementUtils elementUtils;
     @InjectMocks private WebElementDeserializer deserializer;
 
     @Test
@@ -51,7 +51,7 @@ class WebElementDeserializerTests
         JsonParser parser = mock(JsonParser.class);
         String locator = "By.id(id)";
         when(parser.getText()).thenReturn(locator);
-        when(elementUtil.getElement(locator, searchActions)).thenReturn(() -> expected);
+        when(elementUtils.getElement(locator, searchActions)).thenReturn(() -> expected);
         assertEquals(expected, deserializer.deserialize(parser, null).get());
     }
 

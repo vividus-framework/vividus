@@ -17,13 +17,13 @@
 package org.vividus.ui.web.util;
 
 import org.openqa.selenium.By;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 
-public final class WebXpathLocatorUtil
+public final class WebXpathLocatorUtils
 {
     private static final String ANY = "*";
 
-    private WebXpathLocatorUtil()
+    private WebXpathLocatorUtils()
     {
     }
 
@@ -34,7 +34,7 @@ public final class WebXpathLocatorUtil
 
     public static By getXPathLocatorByFullInnerText(String text)
     {
-        return By.xpath(XpathLocatorUtil.getXPath(true,
+        return By.xpath(XpathLocatorUtils.getXPath(true,
             String.format(".//%1$s[.=%%1$s and not(.//%1$s[.=%%1$s])]", ANY), text));
     }
 
@@ -45,7 +45,7 @@ public final class WebXpathLocatorUtil
 
     private static String getXPathByInnerTextWithTagName(String tagName, String text)
     {
-        return XpathLocatorUtil.getXPath(true,
+        return XpathLocatorUtils.getXPath(true,
                 String.format(".//%1$s[contains(., %%1$s) and not(.//%1$s[contains(., %%1$s)])]", tagName), text);
     }
 }

@@ -16,7 +16,7 @@
 
 package org.vividus.ui.web.action.search;
 
-import static org.vividus.ui.util.XpathLocatorUtil.getXPathLocator;
+import static org.vividus.ui.util.XpathLocatorUtils.getXPathLocator;
 
 import java.util.List;
 import java.util.stream.Collectors;
