@@ -207,6 +207,19 @@ include::partial$proxy-meta-tags.adoc[]
 
 include::partial$dynamic-variables-ui.adoc[]
 
+== Profiles
+
+=== Docker
+The profile can be enabled by adding `web/docker` to `configuration.profiles` property. The profile should be used together with the browser profile.
+
+WARNING: Default selenium grid URL is set to `selenium.grid.url=http://localhost:4444/wd/hub`. Don't forget to modify it if your grid is running in a different location.
+
+.Run chrome in docker container
+[source,properties]
+----
+confgiguraiton.profiles=wed/docker,web/desktop/chrome
+----
+
 == Steps
 
 :onbeforeunload-event: https://www.w3schools.com/jsref/event_onbeforeunload.asp[onbeforeunload]
