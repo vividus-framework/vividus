@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.AbstractElementAction;
 import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.util.XpathLocatorUtil;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.util.LocatorUtil;
 
 public abstract class AbstractWebElementSearchAction extends AbstractElementAction
 {
@@ -77,7 +77,7 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
                     .append(ELEMENT_WITH_ANY_ATTRIBUTE_OR_TEXT_CASE_INSENSITIVE)
                     .append("])]|");
         }
-        return LocatorUtil.getXPathLocator(locator.substring(0, locator.length() - 1), text.toLowerCase());
+        return XpathLocatorUtil.getXPathLocator(locator.substring(0, locator.length() - 1), text.toLowerCase());
     }
 
     protected boolean matchesToText(WebElement element, final String text)

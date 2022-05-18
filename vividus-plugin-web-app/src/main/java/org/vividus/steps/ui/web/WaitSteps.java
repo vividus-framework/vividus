@@ -47,9 +47,9 @@ import org.vividus.ui.action.IWaitActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.util.XpathLocatorUtil;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
-import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
 public class WaitSteps
@@ -119,7 +119,7 @@ public class WaitSteps
             + " '$attributeType'='$attributeValue' disappears")
     public void waitTillElementDisappears(String elementTag, String attributeType, String attributeValue)
     {
-        String elementXpath = LocatorUtil.getXPathByTagNameAndAttribute(elementTag, attributeType, attributeValue);
+        String elementXpath = XpathLocatorUtil.getXPathByTagNameAndAttribute(elementTag, attributeType, attributeValue);
         Locator locator = new Locator(WebLocatorType.XPATH, elementXpath);
         List<WebElement> elements = searchActions.findElements(locator);
         if (!elements.isEmpty())
@@ -153,7 +153,7 @@ public class WaitSteps
     public void waitTillElementAppears(String elementTag, String attributeType, String attributeValue)
     {
         waitForElementAppearance(getSearchContext(),
-                By.xpath(LocatorUtil.getXPathByTagNameAndAttribute(elementTag, attributeType, attributeValue)));
+                By.xpath(XpathLocatorUtil.getXPathByTagNameAndAttribute(elementTag, attributeType, attributeValue)));
     }
 
     /**
@@ -314,7 +314,7 @@ public class WaitSteps
     {
         uiContext.getSearchContext(WebDriver.class).ifPresent(
                 searchContext -> {
-                    By locator = LocatorUtil.getXPathLocator(
+                    By locator = XpathLocatorUtil.getXPathLocator(
                             "*[(local-name()='frame' or local-name()='iframe') and @*='%s']", frameName);
                     waitForElementAppearance(searchContext, locator);
                 }
@@ -329,7 +329,7 @@ public class WaitSteps
     @Then("an element with the id '$id' disappears")
     public void elementByIdDisappears(String id)
     {
-        By locator = By.xpath(LocatorUtil.getXPathByAttribute("id", id));
+        By locator = By.xpath(XpathLocatorUtil.getXPathByAttribute("id", id));
         waitActions.wait(getSearchContext(),
                 State.NOT_VISIBLE.getExpectedCondition(expectedSearchContextConditions, locator));
     }

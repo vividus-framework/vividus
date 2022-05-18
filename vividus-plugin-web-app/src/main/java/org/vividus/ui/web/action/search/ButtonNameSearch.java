@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.web.util.LocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtil;
 
 public class ButtonNameSearch extends AbstractWebElementSearchAction implements IElementSearchAction
 {
@@ -40,7 +40,7 @@ public class ButtonNameSearch extends AbstractWebElementSearchAction implements 
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
     {
         String value = parameters.getValue();
-        By locator = LocatorUtil.getXPathLocator(".//" + BUTTON_WITH_ANY_ATTRIBUTE_NAME_PATTERN, value);
+        By locator = XpathLocatorUtil.getXPathLocator(".//" + BUTTON_WITH_ANY_ATTRIBUTE_NAME_PATTERN, value);
         return findElementsByText(searchContext, locator, parameters, "button", "input");
     }
 }

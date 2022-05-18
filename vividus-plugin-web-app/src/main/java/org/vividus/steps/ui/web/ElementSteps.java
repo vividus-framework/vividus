@@ -43,11 +43,11 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.util.XpathLocatorUtil;
 import org.vividus.ui.web.action.ClickResult;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
-import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
 public class ElementSteps implements ResourceLoaderAware
@@ -258,7 +258,7 @@ public class ElementSteps implements ResourceLoaderAware
     {
         uiContext.getSearchContext(WebElement.class).ifPresent(webElement -> {
             Locator bodyLocator = new Locator(WebLocatorType.XPATH,
-                    new SearchParameters(LocatorUtil.getXPath("//body"), Visibility.ALL));
+                    new SearchParameters(XpathLocatorUtil.getXPath("//body"), Visibility.ALL));
             WebElement bodyElement = baseValidations.assertIfElementExists("'Body' element", webDriverProvider.get(),
                     bodyLocator);
             elementValidations.assertIfElementHasWidthInPerc(bodyElement, webElement, widthInPerc);

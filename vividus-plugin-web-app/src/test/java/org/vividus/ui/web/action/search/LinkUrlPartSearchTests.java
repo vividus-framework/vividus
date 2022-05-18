@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.AbstractElementAction;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
-import org.vividus.ui.web.util.LocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtil;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class LinkUrlPartSearchTests
@@ -114,7 +114,7 @@ class LinkUrlPartSearchTests
     {
         SearchParameters parameters = new SearchParameters(URL_PART, Visibility.ALL, false);
         search.setCaseSensitiveSearch(true);
-        By locator = LocatorUtil.getXPathLocator(LINK_WITH_PART_URL_PATTERN, URL_PART);
+        By locator = XpathLocatorUtil.getXPathLocator(LINK_WITH_PART_URL_PATTERN, URL_PART);
         when(searchContext.findElements(locator)).thenReturn(webElements);
         assertEquals(webElements, search.search(searchContext, parameters));
         assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 1))));

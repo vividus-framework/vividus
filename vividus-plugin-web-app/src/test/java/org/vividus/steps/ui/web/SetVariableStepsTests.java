@@ -46,9 +46,9 @@ import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.util.XpathLocatorUtil;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
-import org.vividus.ui.web.util.LocatorUtil;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,7 +63,7 @@ class SetVariableStepsTests
     private static final String URL_VARIABLE = "urlVariable";
     private static final String VALUE = "value";
     private static final Locator VIDEO_IFRAME_SEARCH = new Locator(WebLocatorType.XPATH,
-            LocatorUtil.getXPath("div[contains(@class,'video')]/iframe"));
+            XpathLocatorUtil.getXPath("div[contains(@class,'video')]/iframe"));
     private static final String VARIABLE_NAME = "variableName";
     private static final String SRC = "src";
     private static final String NUMBER_FOUND_VIDEO_MESSAGE = "The number of found video frames";

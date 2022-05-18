@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.web.util.LocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtil;
 
 public class LinkTextSearch extends AbstractWebElementSearchAction implements IElementSearchAction
 {
@@ -41,7 +41,7 @@ public class LinkTextSearch extends AbstractWebElementSearchAction implements IE
         List<WebElement> links = findElements(searchContext, By.linkText(text), parameters);
         if (links.isEmpty())
         {
-            By locator = LocatorUtil.getXPathLocator(LINK_WITH_ANY_ATTRIBUTE_OR_TEXT, text);
+            By locator = XpathLocatorUtil.getXPathLocator(LINK_WITH_ANY_ATTRIBUTE_OR_TEXT, text);
             return findElementsByText(searchContext, locator, parameters, "a");
         }
         return links;

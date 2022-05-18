@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
+import org.vividus.ui.util.XpathLocatorUtil;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.util.LocatorUtil;
 
 @ExtendWith({TestLoggerFactoryExtension.class, MockitoExtension.class})
 class ButtonNameSearchTests
@@ -65,9 +65,9 @@ class ButtonNameSearchTests
             BUTTON_TEXT_LOCATOR + AND_NOT + BUTTON_TEXT_LOCATOR + CLOSING_BRACKETS + "|"
                     + INPUT_TEXT_LOCATOR + AND_NOT + INPUT_TEXT_LOCATOR + CLOSING_BRACKETS;
     private static final String BUTTON_WITH_ANY_ATTRIBUTE_NAME_XPATH = ".//" + BUTTON_WITH_ANY_ATTRIBUTE_NAME_PATTERN;
-    private static final By BUTTON_LOCATOR = LocatorUtil.getXPathLocator(BUTTON_WITH_ANY_ATTRIBUTE_NAME_XPATH,
+    private static final By BUTTON_LOCATOR = XpathLocatorUtil.getXPathLocator(BUTTON_WITH_ANY_ATTRIBUTE_NAME_XPATH,
             VALUE);
-    private static final By BUTTON_LOCATOR_WITH_TEXT_TRANSFORM_CSS_PROPERTY = LocatorUtil
+    private static final By BUTTON_LOCATOR_WITH_TEXT_TRANSFORM_CSS_PROPERTY = XpathLocatorUtil
             .getXPathLocator(BUTTON_WITH_TEXT_TRANSFORM_CSS_PROPERTY_PATTERN, VALUE);
     private static final String TEXT_TRANSFORM = "text-transform";
     private static final String CAPITALIZE = "capitalize";
@@ -142,7 +142,7 @@ class ButtonNameSearchTests
         List<WebElement> foundElements = buttonNameSearch.search(searchContext, buttonParameters);
         doReturn(CAPITALIZE).when(webElementActions).getCssValue(webElement, TEXT_TRANSFORM);
         when(searchContext.findElements(
-                LocatorUtil.getXPathLocator(BUTTON_WITH_ANY_ATTRIBUTE_NAME_XPATH, VALUE_WITH_CAPITAL_LETTER)))
+                XpathLocatorUtil.getXPathLocator(BUTTON_WITH_ANY_ATTRIBUTE_NAME_XPATH, VALUE_WITH_CAPITAL_LETTER)))
                         .thenReturn(List.of());
         when(searchContext.findElements(BUTTON_LOCATOR_WITH_TEXT_TRANSFORM_CSS_PROPERTY)).thenReturn(webElements);
         List<WebElement> elementsWithTextTransformCssProperty = buttonNameSearch.search(searchContext,

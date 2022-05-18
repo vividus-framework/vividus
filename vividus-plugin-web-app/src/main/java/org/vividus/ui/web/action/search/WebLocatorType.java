@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@ import org.vividus.ui.action.search.ByLocatorSearch;
 import org.vividus.ui.action.search.GenericTextFilter;
 import org.vividus.ui.action.search.IElementAction;
 import org.vividus.ui.action.search.LocatorType;
-import org.vividus.ui.web.util.LocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.web.util.WebXpathLocatorUtil;
 
 public enum WebLocatorType implements LocatorType
 {
@@ -50,7 +51,7 @@ public enum WebLocatorType implements LocatorType
         @Override
         public By buildBy(String value)
         {
-            return LocatorUtil.getXPathLocator(".//*[@title=%s]", value);
+            return XpathLocatorUtil.getXPathLocator(".//*[@title=%s]", value);
         }
     },
     CSS_SELECTOR("CSS selector", ByLocatorSearch.class)
@@ -66,7 +67,7 @@ public enum WebLocatorType implements LocatorType
         @Override
         public By buildBy(String value)
         {
-            return LocatorUtil.getXPathLocator(".//img[@src='%s']", value);
+            return XpathLocatorUtil.getXPathLocator(".//img[@src='%s']", value);
         }
     },
     IMAGE_SRC_PART("Image source part", ImageWithSourcePartFilter.class)
@@ -74,7 +75,7 @@ public enum WebLocatorType implements LocatorType
         @Override
         public By buildBy(String value)
         {
-            return LocatorUtil.getXPathLocator(".//img[contains(@src,'%s')]", value);
+            return XpathLocatorUtil.getXPathLocator(".//img[contains(@src,'%s')]", value);
         }
     },
     BUTTON_NAME("Button name", ButtonNameSearch.class),
@@ -85,7 +86,7 @@ public enum WebLocatorType implements LocatorType
         {
             // due to firefox bug, we can't use name() and must use local-name()
             // as workaround 'body' represents CKE editor
-            return LocatorUtil.getXPathLocator(".//*[(local-name() = 'input' or local-name() = 'textarea' or "
+            return XpathLocatorUtil.getXPathLocator(".//*[(local-name() = 'input' or local-name() = 'textarea' or "
                     + "local-name()='body') and ((@* | text())=%s)]", value);
         }
     },
@@ -107,7 +108,7 @@ public enum WebLocatorType implements LocatorType
         @Override
         public By buildBy(String value)
         {
-            return LocatorUtil.getXPathLocatorByInnerTextWithTagName("a", value);
+            return WebXpathLocatorUtil.getXPathLocatorByInnerTextWithTagName("a", value);
         }
     },
     CLASS_NAME("Class name", ByLocatorSearch.class)
@@ -123,7 +124,7 @@ public enum WebLocatorType implements LocatorType
         @Override
         public By buildBy(String value)
         {
-            return By.xpath(LocatorUtil.getXPath(value));
+            return By.xpath(XpathLocatorUtil.getXPath(value));
         }
     },
     ID("Id", ByLocatorSearch.class)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.web.util.LocatorUtil;
+import org.vividus.ui.web.util.WebXpathLocatorUtil;
 
 public class CaseSensitiveTextSearch extends AbstractWebElementSearchAction
         implements IElementSearchAction, IElementFilterAction
@@ -39,11 +39,11 @@ public class CaseSensitiveTextSearch extends AbstractWebElementSearchAction
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
     {
         String value = parameters.getValue();
-        List<WebElement> elements = findElements(searchContext, LocatorUtil.getXPathLocatorByFullInnerText(value),
-                parameters);
+        List<WebElement> elements = findElements(searchContext,
+                WebXpathLocatorUtil.getXPathLocatorByFullInnerText(value), parameters);
         if (elements.isEmpty())
         {
-            By locator = LocatorUtil.getXPathLocatorByInnerText(value);
+            By locator = WebXpathLocatorUtil.getXPathLocatorByInnerText(value);
             return findElementsByText(searchContext, locator, parameters, "*");
         }
         return elements;

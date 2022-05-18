@@ -153,6 +153,21 @@ class LocatorConversionUtilsTests
     }
 
     @Test
+    void shouldEscapeQuotesIfLocatorXpath()
+    {
+        lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.XPATH));
+        var locatorPattern = new LocatorPattern();
+        locatorPattern.setLocatorType("xpath");
+        var pattern = ".//*[@*='%s' or text()=\"%1$s\"]";
+        locatorPattern.setPattern(pattern);
+        when(dynamicLocators.getNullable("anyattribute")).thenReturn(Optional.of(locatorPattern));
+        var actual = utils.convertToLocator("anyAttribute(Don't be a \"fool\")");
+        assertEquals(".//*[@*[normalize-space()=concat(\"Don't be a \", '\"', \"fool\", '\"')] "
+                + "or text()[normalize-space()=concat(\"Don't be a \", '\"', \"fool\", '\"')]]",
+            actual.getSearchParameters().getValue());
+    }
+
+    @Test
     void testConvertToLocatorInvalidFilterType()
     {
         when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));

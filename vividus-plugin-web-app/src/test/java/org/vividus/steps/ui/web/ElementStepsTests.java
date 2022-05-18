@@ -60,11 +60,11 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.util.XpathLocatorUtil;
 import org.vividus.ui.web.action.ClickResult;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.WebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
-import org.vividus.ui.web.util.LocatorUtil;
 
 @ExtendWith(MockitoExtension.class)
 class ElementStepsTests
@@ -89,7 +89,8 @@ class ElementStepsTests
     private static final String ABSOLUTE_PATH = "file:/D:/file.txt";
     private static final String ATTRIBUTE_VALUE = "attributeValue";
     private static final String ATTRIBUTE_TYPE = "attributeType";
-    private static final String LOCATOR_BY_ATTRIBUTE = LocatorUtil.getXPathByAttribute(ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
+    private static final String LOCATOR_BY_ATTRIBUTE = XpathLocatorUtil.getXPathByAttribute(ATTRIBUTE_TYPE,
+        ATTRIBUTE_VALUE);
     private static final String ELEMENT_XPATH = "elementXpath";
     private static final String CHILD_XPATH = "childXpath";
     private static final String THE_NUMBER_OF_PARENT_ELEMENTS = "The number of parent elements";
@@ -200,8 +201,8 @@ class ElementStepsTests
     @Test
     void doesEachElementByLocatorHaveChildWithLocatorSuccess()
     {
-        Locator elementLocator = new Locator(WebLocatorType.XPATH, LocatorUtil.getXPath(ELEMENT_XPATH));
-        Locator childLocator = new Locator(WebLocatorType.XPATH, LocatorUtil.getXPath(CHILD_XPATH));
+        Locator elementLocator = new Locator(WebLocatorType.XPATH, XpathLocatorUtil.getXPath(ELEMENT_XPATH));
+        Locator childLocator = new Locator(WebLocatorType.XPATH, XpathLocatorUtil.getXPath(CHILD_XPATH));
         when(baseValidations.assertIfElementsExist(THE_NUMBER_OF_PARENT_ELEMENTS, elementLocator)).thenReturn(
                 List.of(webElement, webElement));
         elementSteps.doesEachElementByLocatorHaveChildWithLocator(elementLocator, 2, childLocator);
@@ -212,8 +213,8 @@ class ElementStepsTests
     @Test
     void doesEachElementByLocatorHaveChildWithLocatorNoElements()
     {
-        Locator elementLocator = new Locator(WebLocatorType.XPATH, LocatorUtil.getXPath(ELEMENT_XPATH));
-        Locator childLocator = new Locator(WebLocatorType.XPATH, LocatorUtil.getXPath(CHILD_XPATH));
+        Locator elementLocator = new Locator(WebLocatorType.XPATH, XpathLocatorUtil.getXPath(ELEMENT_XPATH));
+        Locator childLocator = new Locator(WebLocatorType.XPATH, XpathLocatorUtil.getXPath(CHILD_XPATH));
         when(baseValidations.assertIfElementsExist(THE_NUMBER_OF_PARENT_ELEMENTS, elementLocator))
                 .thenReturn(List.of());
         elementSteps.doesEachElementByLocatorHaveChildWithLocator(elementLocator, 2, childLocator);

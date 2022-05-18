@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.util.XpathLocatorUtil;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
-import org.vividus.ui.web.util.LocatorUtil;
 
 @TakeScreenshotOnFailure
 public class SliderSteps
@@ -49,7 +49,7 @@ public class SliderSteps
     public void setSliderValue(String value, String xpath)
     {
         WebElement slider = baseValidations.assertIfElementExists("Slider to select value in",
-                new Locator(WebLocatorType.XPATH, LocatorUtil.getXPath(xpath)));
+                new Locator(WebLocatorType.XPATH, XpathLocatorUtil.getXPath(xpath)));
         if (null != slider)
         {
             javascriptActions.executeScript("arguments[0].value=arguments[1]", slider, value);
@@ -66,7 +66,7 @@ public class SliderSteps
     public void verifySliderValue(String value, String xpath)
     {
         WebElement slider = baseValidations.assertIfElementExists("Slider to verify value in",
-                new Locator(WebLocatorType.XPATH, LocatorUtil.getXPath(xpath)));
+                new Locator(WebLocatorType.XPATH, XpathLocatorUtil.getXPath(xpath)));
         if (null != slider)
         {
             softAssert.assertThat("Slider value", slider.getAttribute("value"), equalTo(value));
