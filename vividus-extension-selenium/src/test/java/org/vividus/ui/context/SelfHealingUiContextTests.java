@@ -40,12 +40,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.remote.RemoteWebElement;
+import org.vividus.ui.context.UiContext.SearchContextData;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SelfHealingUiContextTests extends UiContextTestsBase
@@ -172,6 +174,33 @@ class SelfHealingUiContextTests extends UiContextTestsBase
         var searchContext = uiContext.getSearchContext(RemoteWebElement.class).get();
         assertThrows(StaleElementReferenceException.class, searchContext::click);
         assertEquals(LOGGER.getLoggingEvents(), List.of());
+    }
+
+    @Test
+    void shouldRethrowExceptionIfContextReestablishmentFailed()
+    {
+        var spy = Mockito.spy(getContext());
+        uiContext.setTestContext(spy);
+        var webElement = mock(WebElement.class);
+        when(spy.get(SearchContextData.class, SearchContextData.class)).thenReturn(searchContextDataOf(webElement,
+                    searchContextSetter))
+            .thenReturn(searchContextDataOf(null, searchContextSetter));
+        uiContext.putSearchContext(webElement, searchContextSetter);
+        var exception = new StaleElementReferenceException(MESSAGE);
+        doThrow(exception).when(webElement).click();
+        var searchContext = (WebElement) uiContext.getSearchContext();
+        assertThrows(StaleElementReferenceException.class, searchContext::click);
+        verify(webElement).click();
+        verify(searchContextSetter).setSearchContext();
+        assertEquals(LOGGER.getLoggingEvents(), List.of(LoggingEvent.info(exception, RETRY_MESSAGE)));
+    }
+
+    private SearchContextData searchContextDataOf(WebElement webElement, SearchContextSetter searchContextSetter)
+    {
+        var searchContextData = new SearchContextData();
+        searchContextData.setSearchContext(webElement);
+        searchContextData.setSearchContextSetter(searchContextSetter);
+        return searchContextData;
     }
 
     private interface CustomWebElement extends WebElement
