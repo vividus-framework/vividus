@@ -122,7 +122,7 @@ public class LocatorConversionUtils
                                                              .toArray(String[]::new)
                                                      : params;
         String pattern = locatorPattern.getPattern();
-        return locatorPattern.getLocatorType().equalsIgnoreCase("xpath")
+        return "xpath".equalsIgnoreCase(locatorPattern.getLocatorType())
             ? XpathLocatorUtil.getXPath(pattern, params)
             : String.format(pattern, params);
     }

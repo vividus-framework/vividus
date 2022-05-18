@@ -79,7 +79,7 @@ public class FileSystemBaselineRepository implements IBaselineRepository
     {
         File baselineToSave = new File(baselineFolderResolver.get(), appendExtension(baselineName));
         ImageUtils.writeAsPng(toSave.getImage(), baselineToSave);
-        LOGGER.info("Baseline saved to: {}", baselineToSave.getAbsolutePath());
+        LOGGER.atInfo().addArgument(baselineToSave::getAbsolutePath).log("Baseline saved to: {}");
     }
 
     public void setBaselinesFolder(File baselinesFolder)

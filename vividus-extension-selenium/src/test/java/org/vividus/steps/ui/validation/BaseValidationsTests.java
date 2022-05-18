@@ -137,8 +137,7 @@ class BaseValidationsTests
     void shouldNotSearchIfContextNullAssertIfExactNumberOfElementsFound()
     {
         Locator locator = new Locator(SEARCH, XPATH_INT);
-        assertEquals(false, baseValidations.assertIfExactNumberOfElementsFound(BUSINESS_DESCRIPTION, null,
-                locator, 1));
+        assertFalse(baseValidations.assertIfExactNumberOfElementsFound(BUSINESS_DESCRIPTION, null, locator, 1));
         verify(softAssert).recordFailedAssertion(NOT_SET_CONTEXT);
         verifyNoMoreInteractions(softAssert);
         verifyNoInteractions(searchActions);

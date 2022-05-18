@@ -59,7 +59,7 @@ class CrawlControllerFactoryTests
                 .mockConstruction(SleepycatFrontierConfiguration.class))
         {
             Path crawlStorage = baseDirectory.resolve(CRAWL_STORAGE_FOLDER_KEY);
-            Integer socketTimeout = 10000;
+            Integer socketTimeout = 10_000;
 
             Map<String, String> config = Map.of(
                 "socket-timeout", socketTimeout.toString(),

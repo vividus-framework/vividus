@@ -46,7 +46,6 @@ import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.softassert.SoftAssert;
 import org.vividus.testcontext.ContextCopyingExecutor;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
-import org.vividus.util.HtmlUtils;
 import org.vividus.validator.model.WebPageResourceValidation;
 
 public class ResourceCheckSteps
@@ -104,7 +103,7 @@ public class ResourceCheckSteps
     public void checkResources(String cssSelector, String html) throws InterruptedException, ExecutionException
     {
         execute(() -> {
-            Collection<Element> resourcesToValidate = HtmlUtils.getElementsByCssSelector(html, cssSelector);
+            Collection<Element> resourcesToValidate = getElementsByCssSelector(html, cssSelector);
             Stream<WebPageResourceValidation> validations = createResourceValidations(resourcesToValidate,
                 p -> createResourceValidation(p.getLeft(), p.getRight()));
             validateResources(validations);

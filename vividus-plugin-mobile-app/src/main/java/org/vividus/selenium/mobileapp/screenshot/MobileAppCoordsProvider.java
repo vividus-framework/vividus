@@ -48,6 +48,7 @@ public class MobileAppCoordsProvider extends AbstractAdjustingCoordsProvider
         return downscale ? coords : adjustToDpr(coords);
     }
 
+    @Override
     protected Coords getCoords(WebElement element)
     {
         Coords coords = super.ofElement(null, element);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,6 @@ import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
 import org.vividus.mobileapp.action.TouchActions;
 import org.vividus.mobileapp.model.SwipeDirection;
-import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
@@ -68,7 +67,6 @@ class TouchStepsTests
     @Mock private ISearchActions searchActions;
     @Mock private Locator locator;
     @Mock private GenericWebDriverManager genericWebDriverManager;
-    @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IUiContext uiContext;
     @InjectMocks private TouchSteps touchSteps;
 

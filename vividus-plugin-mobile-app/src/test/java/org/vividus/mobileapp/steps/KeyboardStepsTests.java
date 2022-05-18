@@ -176,7 +176,7 @@ class KeyboardStepsTests
         performPressAndroidKeyTest(() -> keyboardSteps.pressKeys(new ExamplesTable("|key|\n|SPACE|")));
     }
 
-    @CsvSource(value = { "' ',62", "0, 7", "1, 8", "2, 9", "3, 10", "4, 11", "5, 12", "6, 13", "7, 14", "8, 15",
+    @CsvSource({ "' ',62", "0, 7", "1, 8", "2, 9", "3, 10", "4, 11", "5, 12", "6, 13", "7, 14", "8, 15",
             "9, 16", "a, 29" })
     @ParameterizedTest
     void shouldTypeAndroidKeys(String key, int expectedCode)
@@ -241,7 +241,7 @@ class KeyboardStepsTests
         when(genericWebDriverManager.isIOS()).thenReturn(true);
         keyboardSteps.setLongPressDuration(Duration.ofDays(1));
         keyboardSteps.longPressKey(HOME);
-        verify(javascriptActions).executeScript(MOBILE_PRESS_BUTTON, Map.of(NAME, HOME, DURATION_SECONDS, 86400L));
+        verify(javascriptActions).executeScript(MOBILE_PRESS_BUTTON, Map.of(NAME, HOME, DURATION_SECONDS, 86_400L));
     }
 
     @Test
@@ -250,6 +250,6 @@ class KeyboardStepsTests
         when(genericWebDriverManager.isTvOS()).thenReturn(true);
         keyboardSteps.setLongPressDuration(Duration.ofDays(1));
         keyboardSteps.longPressKey(HOME);
-        verify(javascriptActions).executeScript(MOBILE_PRESS_BUTTON, Map.of(NAME, HOME, DURATION_SECONDS, 86400L));
+        verify(javascriptActions).executeScript(MOBILE_PRESS_BUTTON, Map.of(NAME, HOME, DURATION_SECONDS, 86_400L));
     }
 }

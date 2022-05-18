@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,10 +68,10 @@ class HttpRequestStepsTests
                 @SuppressWarnings("unchecked")
                 List<Cookie> cookies = ((Map<String, List<Cookie>>) arg).get("cookies");
                 return cookies.size() == 2
-                        && cookies.get(0).toString().equals(
-                                "[version: 0][name: key][value: vale][domain: null][path: null][expiry: null]")
-                        && cookies.get(1).toString().equals(
-                                "[version: 0][name: key1][value: vale1][domain: null][path: null][expiry: null]");
+                        && "[version: 0][name: key][value: vale][domain: null][path: null][expiry: null]".equals(
+                                cookies.get(0).toString())
+                        && "[version: 0][name: key1][value: vale1][domain: null][path: null][expiry: null]".equals(
+                                cookies.get(1).toString());
             }), eq("Browser cookies"));
     }
 }

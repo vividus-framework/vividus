@@ -16,7 +16,6 @@
 
 package org.vividus.steps.ui;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -100,7 +99,7 @@ public class GenericElementSteps
         Visibility visibility = locator.getSearchParameters().getVisibility();
         if (visibility != Visibility.ALL && (state == State.VISIBLE || state == State.NOT_VISIBLE))
         {
-            String errorMessage = format(
+            String errorMessage = String.format(
                     state == visibility.getState()
                             ? "Locator visibility: %s and the state: %s to validate are the same. This makes no sense. "
                                     + "Please consider validation of elements size instead."
@@ -136,7 +135,7 @@ public class GenericElementSteps
             for (int index = 0; index < elements.size(); index++)
             {
                 String text = elementActions.getElementText(elements.get(index));
-                if (softAssert.assertTrue(format("The element with index %d contains not empty text", index + 1),
+                if (softAssert.assertTrue(String.format("The element with index %d contains not empty text", index + 1),
                         isNotEmpty(text)))
                 {
                     texts.add(text);

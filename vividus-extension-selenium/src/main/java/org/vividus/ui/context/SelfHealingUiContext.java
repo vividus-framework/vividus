@@ -58,8 +58,8 @@ public class SelfHealingUiContext extends UiContext
         proxied.add(WrapsElement.class);
         proxied.add(WebElement.class);
         proxied.add(clazz);
-        return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(),
-            proxied.toArray(new Class[proxied.size()]), (proxy, method, args) -> {
+        return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), proxied.toArray(new Class[0]),
+                (proxy, method, args) -> {
                 if ("getWrappedElement".equals(method.getName()))
                 {
                     return searchContext;
