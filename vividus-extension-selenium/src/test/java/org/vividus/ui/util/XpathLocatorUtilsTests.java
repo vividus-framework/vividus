@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.openqa.selenium.By;
 
 @SuppressWarnings("checkstyle:methodcount")
-class XpathLocatorUtilTests
+class XpathLocatorUtilsTests
 {
     private static final String FIELD_WITH_VALUE_PATTERN = ".//*[(local-name() = 'input' or local-name() = 'textarea'"
             + " or local-name()='body') and @*='%1$s' and (@value='%2$s' or text()='%2$s')]";
@@ -57,7 +57,7 @@ class XpathLocatorUtilTests
     void testGetXpathPatternWithNormalization()
     {
         By expectedLocator = By.xpath(".//*[@*[normalize-space()='attr'] or text()[normalize-space()='attr']]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(true, ELEMENT_WITH_ANY_ATTRIBUTE_NAME_PATTERN, ATTR);
+        By actualLocator = XpathLocatorUtils.getXPathLocator(true, ELEMENT_WITH_ANY_ATTRIBUTE_NAME_PATTERN, ATTR);
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -65,7 +65,7 @@ class XpathLocatorUtilTests
     void testGetXpathPatternWithoutNormalization()
     {
         By expectedLocator = By.xpath(".//*[@*='text %' or text()='text %']");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(false, ELEMENT_WITH_ANY_ATTRIBUTE_NAME_PATTERN,
+        By actualLocator = XpathLocatorUtils.getXPathLocator(false, ELEMENT_WITH_ANY_ATTRIBUTE_NAME_PATTERN,
                 TEXT_WITH_PERCENT);
         assertEquals(expectedLocator, actualLocator);
     }
@@ -77,7 +77,7 @@ class XpathLocatorUtilTests
                 + " 'abcdefghijklmnopqrstuvwxyz'))=\"what's great about it\"]"
                 + " or *[normalize-space(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',"
                 + " 'abcdefghijklmnopqrstuvwxyz'))=\"what's great about it\"]]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(
+        By actualLocator = XpathLocatorUtils.getXPathLocator(
                 ".//a[text()[translate(.,"
                         + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = '%1$s'] or *[translate(.,"
                         + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = '%1$s']]",
@@ -91,7 +91,7 @@ class XpathLocatorUtilTests
         By expectedLocator = By.xpath(".//div[contains(normalize-space(@class),\"error\") and contains"
                 + "(normalize-space(.),\"That choice is invalid. If registration is required then "
                 + "'Display on Registration' must be enabled.\")]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(".//div[contains(@class,%1$s) and contains(.,%2$s)]",
+        By actualLocator = XpathLocatorUtils.getXPathLocator(".//div[contains(@class,%1$s) and contains(.,%2$s)]",
                 "error",
                 "That choice is invalid. If registration is required then 'Display on Registration' must be enabled.",
                 true);
@@ -104,7 +104,7 @@ class XpathLocatorUtilTests
         By expectedLocator = By.xpath(".//*[(local-name()='button' and (@*[normalize-space()='text %'] or"
                 + XPATH_PART_2
                 + " or 'button') and (@*[normalize-space()='text %'] or text()[normalize-space()='text %'])))]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(true, BUTTON_WITH_ANY_ATTRIBUTE_NAME, TEXT_WITH_PERCENT);
+        By actualLocator = XpathLocatorUtils.getXPathLocator(true, BUTTON_WITH_ANY_ATTRIBUTE_NAME, TEXT_WITH_PERCENT);
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -114,7 +114,7 @@ class XpathLocatorUtilTests
         By expectedLocator = By
                 .xpath(".//div[*[(local-name()='button' and (@*[normalize-space()='text %'] or" + XPATH_PART_2
                     + " or 'button') and (@*[normalize-space()='text %'] or text()[normalize-space()='text %'])))]]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(true, DIV_WITH_CHILD_BUTTON, TEXT_WITH_PERCENT);
+        By actualLocator = XpathLocatorUtils.getXPathLocator(true, DIV_WITH_CHILD_BUTTON, TEXT_WITH_PERCENT);
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -122,7 +122,7 @@ class XpathLocatorUtilTests
     void testGetXpathPatternWithNormalization3()
     {
         By expectedLocator = By.xpath(".//a[text()[normalize-space()='text %'] or *[normalize-space()='text %']]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(true, LINK_WITH_ANY_ATTRIBUTE_OR_TEXT, TEXT_WITH_PERCENT);
+        By actualLocator = XpathLocatorUtils.getXPathLocator(true, LINK_WITH_ANY_ATTRIBUTE_OR_TEXT, TEXT_WITH_PERCENT);
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -131,7 +131,7 @@ class XpathLocatorUtilTests
     {
         By expectedLocator = By.xpath(".//*[text()[normalize-space()='text %'] and (local-name()='h1' or"
                 + " local-name()='h2' or local-name()='h3')]/../..");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(true, SECTION_PATTERN, TEXT_WITH_PERCENT);
+        By actualLocator = XpathLocatorUtils.getXPathLocator(true, SECTION_PATTERN, TEXT_WITH_PERCENT);
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -140,7 +140,7 @@ class XpathLocatorUtilTests
     {
         By expectedLocator = By
                 .xpath(".//a[./img[@alt[normalize-space()='text %']" + " or @title[normalize-space()='text %']]]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(true, LINK_IMAGE_TOOLTIP_PATTERN, TEXT_WITH_PERCENT);
+        By actualLocator = XpathLocatorUtils.getXPathLocator(true, LINK_IMAGE_TOOLTIP_PATTERN, TEXT_WITH_PERCENT);
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -149,7 +149,7 @@ class XpathLocatorUtilTests
     {
         By expectedLocator = By.xpath(XPATH_INPUT_TEXTAREA
                 + " local-name()='body') and (@*[normalize-space()='text %'] or text()[normalize-space()='text %'])]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(true,
+        By actualLocator = XpathLocatorUtils.getXPathLocator(true,
                 FIELD_WITH_ANY_ATTRIBUTE_NAME_PATTERN, TEXT_WITH_PERCENT);
         assertEquals(expectedLocator, actualLocator);
     }
@@ -158,7 +158,7 @@ class XpathLocatorUtilTests
     void testGetXpathPatternWithNormalization7()
     {
         By expectedLocator = By.xpath(".//*[@*[normalize-space()='text %'] or text()[normalize-space()='text %']]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(true, ELEMENT_WITH_ANY_ATTRIBUTE_NAME_PATTERN,
+        By actualLocator = XpathLocatorUtils.getXPathLocator(true, ELEMENT_WITH_ANY_ATTRIBUTE_NAME_PATTERN,
                 TEXT_WITH_PERCENT);
         assertEquals(expectedLocator, actualLocator);
     }
@@ -169,7 +169,7 @@ class XpathLocatorUtilTests
         By expectedLocator = By.xpath(XPATH_INPUT_TEXTAREA
                 + " local-name()='body') and @*[normalize-space()='submit'] and (@value[normalize-space()='text']"
                 + " or text()[normalize-space()='text'])]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(true, FIELD_WITH_VALUE_PATTERN, "submit", TEXT);
+        By actualLocator = XpathLocatorUtils.getXPathLocator(true, FIELD_WITH_VALUE_PATTERN, "submit", TEXT);
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -179,7 +179,7 @@ class XpathLocatorUtilTests
         By expectedLocator = By.xpath(".//[text()[normalize-space(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',"
                 + " 'abcdefghijklmnopqrstuvwxyz'))='text %'] or *[normalize-space(translate(.,"
                 + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))='text %']]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(true, ELEMENT_WITH_ANY_ATTRIBUTE_OR_TEXT_CASE_INSENSITIVE,
+        By actualLocator = XpathLocatorUtils.getXPathLocator(true, ELEMENT_WITH_ANY_ATTRIBUTE_OR_TEXT_CASE_INSENSITIVE,
                 TEXT_WITH_PERCENT);
         assertEquals(expectedLocator, actualLocator);
     }
@@ -189,7 +189,7 @@ class XpathLocatorUtilTests
     {
         By expectedLocator = By.xpath(".//a[text()[normalize-space()=\"Read Anne-Catherine's Story %\"] "
                 + "or *[normalize-space()=\"Read Anne-Catherine's Story %\"]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(".//a[text()=%1$s or *=%1$s",
+        By actualLocator = XpathLocatorUtils.getXPathLocator(".//a[text()=%1$s or *=%1$s",
                 "Read Anne-Catherine's Story %");
         assertEquals(expectedLocator, actualLocator);
     }
@@ -199,20 +199,20 @@ class XpathLocatorUtilTests
     {
         String expectedLocator = ".//*[@text[normalize-space()=\"How & When to Use 1%\"] or "
                 + "@text[normalize-space()=\"How &amp; When to Use 1%\"]]";
-        assertEquals(expectedLocator, XpathLocatorUtil.getXPathByAttribute(TEXT, "How & When to Use 1%"));
+        assertEquals(expectedLocator, XpathLocatorUtils.getXPathByAttribute(TEXT, "How & When to Use 1%"));
     }
 
     @Test
     void testGetXPathByAttributeWithoutSpecialSymbol()
     {
         assertEquals(".//*[normalize-space(@text)=\"When to Use 1%\"]",
-                XpathLocatorUtil.getXPathByAttribute(TEXT, "When to Use 1%"));
+                XpathLocatorUtils.getXPathByAttribute(TEXT, "When to Use 1%"));
     }
 
     @Test
     void testGetXPathByTagNameAndAttributeNameAndAttributeValue()
     {
-        assertEquals(".//p[normalize-space(@attr)=\"x\"]", XpathLocatorUtil.getXPathByTagNameAndAttribute("p",
+        assertEquals(".//p[normalize-space(@attr)=\"x\"]", XpathLocatorUtils.getXPathByTagNameAndAttribute("p",
                 ATTR, "x"));
     }
 
@@ -220,7 +220,7 @@ class XpathLocatorUtilTests
     void testGetXPathLocatorWithParentNode()
     {
         By expectedLocator = By.xpath("//*[normalize-space(.//@id)='main-content']//h1[text()]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(LOCATOR_WITH_PARENT_NODE);
+        By actualLocator = XpathLocatorUtils.getXPathLocator(LOCATOR_WITH_PARENT_NODE);
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -228,7 +228,7 @@ class XpathLocatorUtilTests
     void testGetXPathLocatorWithParentNodeNormalizationOff()
     {
         By expectedLocator = By.xpath(LOCATOR_WITH_PARENT_NODE);
-        By actualLocator = XpathLocatorUtil.getXPathLocator(false, LOCATOR_WITH_PARENT_NODE);
+        By actualLocator = XpathLocatorUtils.getXPathLocator(false, LOCATOR_WITH_PARENT_NODE);
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -236,7 +236,7 @@ class XpathLocatorUtilTests
     void testGetXPathLocatorThroughParentNode2()
     {
         By expectedLocator = By.xpath("//*[normalize-space(./@a-b.c_de2)='main-content']//h1[text()]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator("//*[./@a-b.c_de2='main-content']//h1[text()]");
+        By actualLocator = XpathLocatorUtils.getXPathLocator("//*[./@a-b.c_de2='main-content']//h1[text()]");
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -244,7 +244,7 @@ class XpathLocatorUtilTests
     void testGetXPathLocatorThroughParentNode3()
     {
         By expectedLocator = By.xpath("//*[normalize-space(.//@id)='main-content a-b.C_de2']//h1[text()]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator("//*[.//@id='main-content a-b.C_de2']//h1[text()]");
+        By actualLocator = XpathLocatorUtils.getXPathLocator("//*[.//@id='main-content a-b.C_de2']//h1[text()]");
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -252,7 +252,7 @@ class XpathLocatorUtilTests
     void testGetXPathLocatorThroughParentNode4()
     {
         By expectedLocator = By.xpath("//*[normalize-space(.//@a-b.C_de2)='main-content a-b.C_de2']//h1[text()]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator("//*[.//@a-b.C_de2='main-content a-b.C_de2']//h1[text()]");
+        By actualLocator = XpathLocatorUtils.getXPathLocator("//*[.//@a-b.C_de2='main-content a-b.C_de2']//h1[text()]");
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -260,7 +260,7 @@ class XpathLocatorUtilTests
     void testGetXPathLocatorThroughParentNode5()
     {
         By expectedLocator = By.xpath("//*[normalize-space(//a/@id)='main-content a-b.C_de2']//h1[text()]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator("//*[//a/@id='main-content a-b.C_de2']//h1[text()]");
+        By actualLocator = XpathLocatorUtils.getXPathLocator("//*[//a/@id='main-content a-b.C_de2']//h1[text()]");
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -268,7 +268,8 @@ class XpathLocatorUtilTests
     void testGetXPathLocatorThroughParentNode6()
     {
         By expectedLocator = By.xpath("//*[normalize-space(./a/@a-b.c_de2)='main-content a-b.c_de2']//h1[text()]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator("//*[./a/@a-b.c_de2='main-content a-b.c_de2']//h1[text()]");
+        By actualLocator = XpathLocatorUtils.getXPathLocator(
+            "//*[./a/@a-b.c_de2='main-content a-b.c_de2']//h1[text()]");
         assertEquals(expectedLocator, actualLocator);
     }
 
@@ -277,7 +278,7 @@ class XpathLocatorUtilTests
     {
         By expectedLocator = By.xpath(
                 ".//*[@*[normalize-space()=\"text with space\"] or text()[normalize-space()=\"text with space\"]]");
-        By actualLocator = XpathLocatorUtil.getXPathLocator(ELEMENT_WITH_ANY_ATTRIBUTE_NAME_PATTERN,
+        By actualLocator = XpathLocatorUtils.getXPathLocator(ELEMENT_WITH_ANY_ATTRIBUTE_NAME_PATTERN,
                 TEXT_WITH_NON_BREAKING_SPACE);
         assertEquals(expectedLocator, actualLocator);
     }
@@ -287,7 +288,7 @@ class XpathLocatorUtilTests
     {
         assertEquals(".//*[@*[normalize-space()=concat(\"Don't be a \", '\"', \"fool\", '\"')] or text()"
                 + "[normalize-space()=concat(\"Don't be a \", '\"', \"fool\", '\"')]]",
-            XpathLocatorUtil.getXPath(".//*[@*='%s' or text()=\"%1$s\"]", "Don't be a \"fool\""));
+            XpathLocatorUtils.getXPath(".//*[@*='%s' or text()=\"%1$s\"]", "Don't be a \"fool\""));
     }
 
     @ParameterizedTest
@@ -295,7 +296,7 @@ class XpathLocatorUtilTests
     void testDoNotNormalizeSpaceForEmptyAttributeValue(String xpath)
     {
         By expectedLocator = By.xpath(xpath);
-        By actualLocator = XpathLocatorUtil.getXPathLocator(xpath);
+        By actualLocator = XpathLocatorUtils.getXPathLocator(xpath);
         assertEquals(expectedLocator, actualLocator);
     }
 }

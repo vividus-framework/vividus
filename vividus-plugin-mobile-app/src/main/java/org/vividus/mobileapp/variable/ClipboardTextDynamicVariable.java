@@ -24,7 +24,7 @@ import org.openqa.selenium.WebDriver;
 import org.vividus.mobileapp.action.ApplicationActions;
 import org.vividus.mobileapp.configuration.MobileEnvironment;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverUtil;
+import org.vividus.selenium.WebDriverUtils;
 import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
 import org.vividus.testcontext.TestContext;
@@ -65,7 +65,7 @@ public class ClipboardTextDynamicVariable extends AbstractWebDriverDynamicVariab
 
     private static String getClipboardText(WebDriver webDriver)
     {
-        return WebDriverUtil.unwrap(webDriver, HasClipboard.class).getClipboardText();
+        return WebDriverUtils.unwrap(webDriver, HasClipboard.class).getClipboardText();
     }
 
     @Subscribe

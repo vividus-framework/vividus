@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,14 +37,14 @@ import org.vividus.selenium.element.TextFormattingWebElement;
 
 import io.appium.java_client.remote.SupportsContextSwitching;
 
-class WebDriverUtilTests
+class WebDriverUtilsTests
 {
     @Test
     void testWrappedWebDriverUnwrap()
     {
         var remoteWebDriver = mock(RemoteWebDriver.class);
         var wrappingDriver = new TextFormattingWebDriver(remoteWebDriver);
-        var actual = WebDriverUtil.unwrap(wrappingDriver, HasVirtualAuthenticator.class);
+        var actual = WebDriverUtils.unwrap(wrappingDriver, HasVirtualAuthenticator.class);
         assertEquals(remoteWebDriver, actual);
     }
 
@@ -52,7 +52,7 @@ class WebDriverUtilTests
     void testNonWrappedWebDriverUnwrap()
     {
         var remoteWebDriver = mock(RemoteWebDriver.class);
-        var actual = WebDriverUtil.unwrap(remoteWebDriver, HasVirtualAuthenticator.class);
+        var actual = WebDriverUtils.unwrap(remoteWebDriver, HasVirtualAuthenticator.class);
         assertEquals(remoteWebDriver, actual);
     }
 
@@ -62,7 +62,7 @@ class WebDriverUtilTests
         var webDriver = mock(WebDriver.class);
         var wrappingDriver = new TextFormattingWebDriver(webDriver);
         assertThrows(ClassCastException.class,
-                () -> WebDriverUtil.unwrap(wrappingDriver, HasVirtualAuthenticator.class));
+                () -> WebDriverUtils.unwrap(wrappingDriver, HasVirtualAuthenticator.class));
     }
 
     @Test
@@ -70,7 +70,7 @@ class WebDriverUtilTests
     {
         var remoteWebElement = mock(RemoteWebElement.class);
         var wrappingElement = new TextFormattingWebElement(remoteWebElement);
-        var actual = WebDriverUtil.unwrap(wrappingElement, WrapsDriver.class);
+        var actual = WebDriverUtils.unwrap(wrappingElement, WrapsDriver.class);
         assertEquals(remoteWebElement, actual);
     }
 
@@ -78,7 +78,7 @@ class WebDriverUtilTests
     void testWrappedWebElementWithNewInterfaceUnwrap()
     {
         var webElement = mock(SupportsContextSwitching.class, withSettings().extraInterfaces(WebElement.class));
-        var actual = WebDriverUtil.unwrap(new TestWebElement((WebElement) webElement), SupportsContextSwitching.class);
+        var actual = WebDriverUtils.unwrap(new TestWebElement((WebElement) webElement), SupportsContextSwitching.class);
         assertEquals(webElement, actual);
     }
 
@@ -86,7 +86,7 @@ class WebDriverUtilTests
     void testNonWrappedWebElementUnwrap()
     {
         var remoteWebElement = mock(RemoteWebElement.class);
-        var actual = WebDriverUtil.unwrap(remoteWebElement, WrapsDriver.class);
+        var actual = WebDriverUtils.unwrap(remoteWebElement, WrapsDriver.class);
         assertEquals(remoteWebElement, actual);
     }
 
@@ -95,7 +95,7 @@ class WebDriverUtilTests
     {
         var webElement = mock(WebElement.class);
         var wrappingElement = new TextFormattingWebElement(webElement);
-        assertThrows(ClassCastException.class, () -> WebDriverUtil.unwrap(wrappingElement, WrapsDriver.class));
+        assertThrows(ClassCastException.class, () -> WebDriverUtils.unwrap(wrappingElement, WrapsDriver.class));
     }
 
     @SuppressWarnings("unchecked")

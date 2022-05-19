@@ -25,7 +25,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 
 public class LinkUrlPartSearch extends AbstractWebElementSearchAction
         implements IElementSearchAction, IElementFilterAction
@@ -44,9 +44,9 @@ public class LinkUrlPartSearch extends AbstractWebElementSearchAction
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
     {
         String searchValue = parameters.getValue();
-        By xpathLocator = caseSensitiveSearch ? XpathLocatorUtil.getXPathLocator(LINK_WITH_PART_URL_PATTERN,
+        By xpathLocator = caseSensitiveSearch ? XpathLocatorUtils.getXPathLocator(LINK_WITH_PART_URL_PATTERN,
                 searchValue)
-                : XpathLocatorUtil.getXPathLocator(LINK_WITH_CASE_INSENSITIVE_URL_PART, searchValue.toLowerCase());
+                : XpathLocatorUtils.getXPathLocator(LINK_WITH_CASE_INSENSITIVE_URL_PART, searchValue.toLowerCase());
         return findElements(searchContext, xpathLocator, parameters);
     }
 

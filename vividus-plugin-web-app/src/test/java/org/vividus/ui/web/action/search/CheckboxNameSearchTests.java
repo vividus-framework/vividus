@@ -35,7 +35,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.selenium.element.Checkbox;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.IWebElementActions;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,13 +44,13 @@ class CheckboxNameSearchTests
     private static final String FOR = "for";
     private static final String VALUE = "value";
     private static final String ATTRIBUTE_VALUE = "checkBoxId";
-    private static final By ATTRIBUTE_LOCATOR = XpathLocatorUtil.getXPathLocator(
+    private static final By ATTRIBUTE_LOCATOR = XpathLocatorUtils.getXPathLocator(
             ".//input[@type='checkbox' and @id=%s]", ATTRIBUTE_VALUE);
-    private static final By CHECKBOX_LABEL_LOCATOR = XpathLocatorUtil.getXPathLocator(".//label[text()='" + VALUE
+    private static final By CHECKBOX_LABEL_LOCATOR = XpathLocatorUtils.getXPathLocator(".//label[text()='" + VALUE
             + "' and (preceding-sibling::input or following-sibling::input or child::input)]");
-    private static final By CHECKBOX_LABEL_DEEP_LOCATOR = XpathLocatorUtil
+    private static final By CHECKBOX_LABEL_DEEP_LOCATOR = XpathLocatorUtils
             .getXPathLocator("label[preceding-sibling::input or following-sibling::input or child::input]");
-    private static final By PRECEDING_SIBLING_CHECKBOX_LOCATOR = XpathLocatorUtil
+    private static final By PRECEDING_SIBLING_CHECKBOX_LOCATOR = XpathLocatorUtils
             .getXPathLocator("preceding-sibling::input[@type='checkbox']");
 
     private final SearchParameters parameters = new SearchParameters(VALUE, Visibility.ALL, false);

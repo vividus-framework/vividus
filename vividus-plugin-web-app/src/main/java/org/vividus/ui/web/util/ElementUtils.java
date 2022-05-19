@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,14 +25,14 @@ import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.SearchActions;
 import org.vividus.ui.util.LocatorConversionUtils;
 
-public class ElementUtil
+public class ElementUtils
 {
     public static final int ACCURACY = 2;
     public static final double HUNDRED = 100;
 
     private final LocatorConversionUtils conversionUtils;
 
-    public ElementUtil(LocatorConversionUtils conversionUtils)
+    public ElementUtils(LocatorConversionUtils conversionUtils)
     {
         this.conversionUtils = conversionUtils;
     }

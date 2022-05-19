@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.LocatorType;
-import org.vividus.ui.web.util.ElementUtil;
+import org.vividus.ui.web.util.ElementUtils;
 
 public class RelativeToParentWidthFilter implements IElementFilterAction
 {
@@ -29,8 +29,8 @@ public class RelativeToParentWidthFilter implements IElementFilterAction
     {
         int expectedRelativeToParentWidth = Integer.parseInt(relativeToParentWidth);
         WebElement parentElement = element.findElement(By.xpath(".."));
-        return Math.abs(expectedRelativeToParentWidth - ElementUtil.getElementWidthInPerc(parentElement, element))
-                <= ElementUtil.ACCURACY;
+        return Math.abs(expectedRelativeToParentWidth - ElementUtils.getElementWidthInPerc(parentElement, element))
+                <= ElementUtils.ACCURACY;
     }
 
     @Override

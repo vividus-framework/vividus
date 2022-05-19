@@ -33,7 +33,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
@@ -92,6 +92,6 @@ class SliderStepsTests
     private void mockBaseValidations(String businessDescription, WebElement foundElement)
     {
         when(baseValidations.assertIfElementExists(businessDescription, new Locator(WebLocatorType.XPATH,
-                XpathLocatorUtil.getXPath(XPATH)))).thenReturn(foundElement);
+                XpathLocatorUtils.getXPath(XPATH)))).thenReturn(foundElement);
     }
 }

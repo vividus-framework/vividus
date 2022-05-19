@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import ru.yandex.qatools.ashot.coordinates.Coords;
 
-class CoordsUtilTests
+class CoordsUtilsTests
 {
     public static final Coords COORDS =  new Coords(3, 5, 8, 10);
 
@@ -45,7 +45,7 @@ class CoordsUtilTests
     void shouldMultiplyAndProvideRoundedIntResult(double dpr, int expectedResult)
     {
         int coordinate = 2;
-        int multipliedCoordinate = CoordsUtil.scale(coordinate, dpr);
+        int multipliedCoordinate = CoordsUtils.scale(coordinate, dpr);
         assertEquals(expectedResult, multipliedCoordinate);
     }
 
@@ -54,7 +54,7 @@ class CoordsUtilTests
     void shouldMultiplyAndProvideRoundedIntResult(double dpr, Coords expectedResult)
     {
         Coords sourceCoords = new Coords(1, 2, 3, 4);
-        Coords result = CoordsUtil.scale(sourceCoords, dpr);
+        Coords result = CoordsUtils.scale(sourceCoords, dpr);
         assertEquals(expectedResult, result);
     }
 }

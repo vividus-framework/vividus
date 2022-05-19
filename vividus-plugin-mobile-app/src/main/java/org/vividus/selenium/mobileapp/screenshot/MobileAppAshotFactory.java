@@ -22,7 +22,7 @@ import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.simple;
 import java.util.Optional;
 
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
-import org.vividus.selenium.mobileapp.screenshot.util.CoordsUtil;
+import org.vividus.selenium.mobileapp.screenshot.util.CoordsUtils;
 import org.vividus.selenium.screenshot.AbstractAshotFactory;
 import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 
@@ -64,7 +64,7 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotConfig
         int statusBarSize = mobileAppWebDriverManager.getStatusBarSize();
         if (!downscale)
         {
-            statusBarSize = CoordsUtil.scale(statusBarSize, getDpr());
+            statusBarSize = CoordsUtils.scale(statusBarSize, getDpr());
         }
         strategy = configureNativePartialsToCut(statusBarSize, ashotConfig, strategy);
         return new AShot().shootingStrategy(strategy).coordsProvider(coordsProvider);

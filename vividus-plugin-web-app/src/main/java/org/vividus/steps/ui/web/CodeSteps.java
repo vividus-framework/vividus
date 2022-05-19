@@ -37,7 +37,7 @@ import org.vividus.steps.ui.web.model.JsArgumentType;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
@@ -128,7 +128,7 @@ public class CodeSteps
     {
         WebElement faviconElement = baseValidations.assertIfElementExists("Favicon",
                 new Locator(WebLocatorType.XPATH,
-                        new SearchParameters(XpathLocatorUtil.getXPath(
+                        new SearchParameters(XpathLocatorUtils.getXPath(
                                 "//head/link[@rel='shortcut icon' or @rel='icon']"), Visibility.ALL)));
         if (faviconElement != null)
         {

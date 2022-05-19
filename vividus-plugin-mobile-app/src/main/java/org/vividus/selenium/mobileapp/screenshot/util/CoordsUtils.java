@@ -21,9 +21,9 @@ import java.math.RoundingMode;
 
 import ru.yandex.qatools.ashot.coordinates.Coords;
 
-public final class CoordsUtil
+public final class CoordsUtils
 {
-    private CoordsUtil()
+    private CoordsUtils()
     {
     }
 

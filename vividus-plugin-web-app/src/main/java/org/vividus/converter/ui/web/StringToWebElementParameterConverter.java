@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import javax.inject.Named;
 import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.SearchActions;
-import org.vividus.ui.web.util.ElementUtil;
+import org.vividus.ui.web.util.ElementUtils;
 
 @Named
 public class StringToWebElementParameterConverter
         extends FunctionalParameterConverter<String, Supplier<Optional<WebElement>>>
 {
-    public StringToWebElementParameterConverter(SearchActions searchActions, ElementUtil elementUtil)
+    public StringToWebElementParameterConverter(SearchActions searchActions, ElementUtils elementUtils)
     {
-        super(value -> elementUtil.getElement(value, searchActions));
+        super(value -> elementUtils.getElement(value, searchActions));
     }
 }

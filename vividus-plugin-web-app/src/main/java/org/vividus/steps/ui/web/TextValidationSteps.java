@@ -34,7 +34,7 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
-import org.vividus.ui.web.util.WebXpathLocatorUtil;
+import org.vividus.ui.web.util.WebXpathLocatorUtils;
 
 @TakeScreenshotOnFailure
 public class TextValidationSteps
@@ -107,7 +107,7 @@ public class TextValidationSteps
             else
             {
                 List<WebElement> elements = findElements(searchContext,
-                    WebXpathLocatorUtil.getXPathLocatorByInnerText(text));
+                    WebXpathLocatorUtils.getXPathLocatorByInnerText(text));
 
                 boolean assertCondition = !elements.isEmpty();
 

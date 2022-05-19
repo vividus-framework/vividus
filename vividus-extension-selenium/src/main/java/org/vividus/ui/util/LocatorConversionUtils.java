@@ -123,7 +123,7 @@ public class LocatorConversionUtils
                                                      : params;
         String pattern = locatorPattern.getPattern();
         return "xpath".equalsIgnoreCase(locatorPattern.getLocatorType())
-            ? XpathLocatorUtil.getXPath(pattern, params)
+            ? XpathLocatorUtils.getXPath(pattern, params)
             : String.format(pattern, params);
     }
 

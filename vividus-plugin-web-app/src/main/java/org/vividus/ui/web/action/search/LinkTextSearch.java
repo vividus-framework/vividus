@@ -23,7 +23,7 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.util.XpathLocatorUtil;
+import org.vividus.ui.util.XpathLocatorUtils;
 
 public class LinkTextSearch extends AbstractWebElementSearchAction implements IElementSearchAction
 {
@@ -41,7 +41,7 @@ public class LinkTextSearch extends AbstractWebElementSearchAction implements IE
         List<WebElement> links = findElements(searchContext, By.linkText(text), parameters);
         if (links.isEmpty())
         {
-            By locator = XpathLocatorUtil.getXPathLocator(LINK_WITH_ANY_ATTRIBUTE_OR_TEXT, text);
+            By locator = XpathLocatorUtils.getXPathLocator(LINK_WITH_ANY_ATTRIBUTE_OR_TEXT, text);
             return findElementsByText(searchContext, locator, parameters, "a");
         }
         return links;

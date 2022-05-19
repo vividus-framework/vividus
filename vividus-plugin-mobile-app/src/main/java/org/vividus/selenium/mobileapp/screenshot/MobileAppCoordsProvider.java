@@ -19,7 +19,7 @@ package org.vividus.selenium.mobileapp.screenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
-import org.vividus.selenium.mobileapp.screenshot.util.CoordsUtil;
+import org.vividus.selenium.mobileapp.screenshot.util.CoordsUtils;
 import org.vividus.selenium.screenshot.AbstractAdjustingCoordsProvider;
 import org.vividus.ui.context.IUiContext;
 
@@ -59,6 +59,6 @@ public class MobileAppCoordsProvider extends AbstractAdjustingCoordsProvider
     private Coords adjustToDpr(Coords coords)
     {
         double dpr = mobileAppWebDriverManager.getDpr();
-        return CoordsUtil.scale(coords, dpr);
+        return CoordsUtils.scale(coords, dpr);
     }
 }

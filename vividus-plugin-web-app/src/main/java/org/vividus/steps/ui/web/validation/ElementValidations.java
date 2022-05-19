@@ -30,7 +30,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.web.Dimension;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IWebElementActions;
-import org.vividus.ui.web.util.ElementUtil;
+import org.vividus.ui.web.util.ElementUtils;
 
 public class ElementValidations implements IElementValidations
 {
@@ -95,6 +95,6 @@ public class ElementValidations implements IElementValidations
     {
         return parent != null && uiContext.withAssertingWebElements(List.of(parent, element),
                 () -> softAssert.assertEquals("Element has correct width", widthInPerc,
-                        ElementUtil.getElementWidthInPerc(parent, element), ACCURACY));
+                        ElementUtils.getElementWidthInPerc(parent, element), ACCURACY));
     }
 }

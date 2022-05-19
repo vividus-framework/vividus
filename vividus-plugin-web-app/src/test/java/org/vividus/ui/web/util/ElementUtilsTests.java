@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.util.LocatorConversionUtils;
 
 @ExtendWith(MockitoExtension.class)
-class ElementUtilTests
+class ElementUtilsTests
 {
     @Mock private LocatorConversionUtils conversionUtils;
-    @InjectMocks private ElementUtil util;
+    @InjectMocks private ElementUtils util;
 
     @Test
     void shouldCreateMemoizedSupplierForWebElement()
@@ -63,6 +63,6 @@ class ElementUtilTests
         WebElement parent = mock(WebElement.class);
         when(child.getSize()).thenReturn(new Dimension(10, 0));
         when(parent.getSize()).thenReturn(new Dimension(25, 0));
-        assertEquals(40, ElementUtil.getElementWidthInPerc(parent, child));
+        assertEquals(40, ElementUtils.getElementWidthInPerc(parent, child));
     }
 }

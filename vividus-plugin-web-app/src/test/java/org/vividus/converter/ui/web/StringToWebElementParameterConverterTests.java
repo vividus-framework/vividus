@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.SearchActions;
-import org.vividus.ui.web.util.ElementUtil;
+import org.vividus.ui.web.util.ElementUtils;
 
 @ExtendWith(MockitoExtension.class)
 class StringToWebElementParameterConverterTests
 {
     @Mock private SearchActions searchActions;
-    @Mock private ElementUtil elementUtil;
+    @Mock private ElementUtils elementUtils;
     @InjectMocks private StringToWebElementParameterConverter converter;
 
     @Test
@@ -43,7 +43,7 @@ class StringToWebElementParameterConverterTests
     {
         String locator = "locator";
         Optional<WebElement> expected = Optional.of(mock(WebElement.class));
-        when(elementUtil.getElement(locator, searchActions)).thenReturn(() -> expected);
+        when(elementUtils.getElement(locator, searchActions)).thenReturn(() -> expected);
         assertEquals(expected, converter.convertValue(locator, null).get());
     }
 }

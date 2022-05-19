@@ -28,7 +28,7 @@ import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.WebDriverUtil;
+import org.vividus.selenium.WebDriverUtils;
 
 import io.appium.java_client.remote.MobilePlatform;
 import io.appium.java_client.remote.SupportsContextSwitching;
@@ -190,7 +190,7 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
 
     protected static Capabilities getCapabilities(WebDriver webDriver)
     {
-        return WebDriverUtil.unwrap(webDriver, HasCapabilities.class).getCapabilities();
+        return WebDriverUtils.unwrap(webDriver, HasCapabilities.class).getCapabilities();
     }
 
     protected static boolean checkCapabilities(Capabilities capabilities, BooleanSupplier supplier)

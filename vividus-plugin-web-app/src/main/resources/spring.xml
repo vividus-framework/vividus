@@ -23,7 +23,7 @@
         <property name="webDriverType" value="${selenium.browser}" />
     </bean>
 
-    <bean id="elementUtil" class="org.vividus.ui.web.util.ElementUtil" />
+    <bean id="elementUtils" class="org.vividus.ui.web.util.ElementUtils" />
 
     <bean class="org.vividus.selenium.screenshot.WebAdjustingCoordsProvider" />
 

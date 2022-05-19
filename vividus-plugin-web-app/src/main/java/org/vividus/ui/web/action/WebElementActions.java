@@ -27,7 +27,7 @@ import org.openqa.selenium.remote.Browser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.util.FormatUtil;
+import org.vividus.ui.web.util.FormatUtils;
 
 public class WebElementActions implements IWebElementActions
 {
@@ -65,7 +65,7 @@ public class WebElementActions implements IWebElementActions
     {
         if (element != null)
         {
-            String normalizedText = FormatUtil.normalizeLineEndings(text);
+            String normalizedText = FormatUtils.normalizeLineEndings(text);
             LOGGER.info("Adding text \"{}\" into the element", normalizedText);
 
             // workaround for Safari and IE 11
