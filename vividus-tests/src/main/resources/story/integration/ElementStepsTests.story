@@ -172,10 +172,21 @@ When I hover a mouse over an element with the xpath './/div[contains(., 'Mouse e
 Then the text 'Mouse enter count: 1' exists
 
 Scenario: Step verification When I perform right click on an element by the xpath '$xpath'
-Given I am on a page with the URL 'http://demo.guru99.com/test/simple_context_menu.html'
-Then an element by the xpath './/*[@class='context-menu-item context-menu-icon context-menu-icon-edit']' does not exist
-When I perform right click on an element by the xpath './/*[@class='context-menu-one btn btn-neutral']'
-Then an element by the xpath './/*[@class='context-menu-item context-menu-icon context-menu-icon-edit']' exists
+!-- Deprecated
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+Then number of elements found by `elementName(Foo)` is = `1`
+Then number of elements found by `elementName(Bar)` is = `0`
+When I perform right click on an element by the xpath './/*[@id = 'context-menu']'
+Then number of elements found by `elementName(Foo)` is = `0`
+Then number of elements found by `elementName(Bar)` is = `1`
+
+Scenario: Step verification When I perform right click on an element located '$locator'
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+Then number of elements found by `elementName(Foo)` is = `1`
+Then number of elements found by `elementName(Bar)` is = `0`
+When I perform right click on element located `id(context-menu)`
+Then number of elements found by `elementName(Foo)` is = `0`
+Then number of elements found by `elementName(Bar)` is = `1`
 
 Scenario: Step verification 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`'
 Given I am on a page with the URL '${vividus-test-site-url}'
