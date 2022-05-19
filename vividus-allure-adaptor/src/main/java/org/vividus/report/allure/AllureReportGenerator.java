@@ -47,11 +47,13 @@ import io.qameta.allure.Constants;
 import io.qameta.allure.Extension;
 import io.qameta.allure.ReportGenerator;
 import io.qameta.allure.core.Configuration;
+import io.qameta.allure.core.LaunchResults;
 import io.qameta.allure.duration.DurationTrendPlugin;
 import io.qameta.allure.entity.ExecutorInfo;
 import io.qameta.allure.entity.Status;
 import io.qameta.allure.executor.ExecutorPlugin;
 import io.qameta.allure.history.HistoryTrendPlugin;
+import io.qameta.allure.summary.SummaryData;
 import io.qameta.allure.summary.SummaryPlugin;
 import io.qameta.allure.util.PropertiesUtils;
 
@@ -172,7 +174,15 @@ public class AllureReportGenerator implements IAllureReportGenerator
     private void generateData() throws IOException
     {
         List<Extension> extensions = List.of(
-                new SummaryPlugin(),
+                new SummaryPlugin() {
+                    @Override
+                    protected SummaryData getData(List<LaunchResults> launches)
+                    {
+                        SummaryData data = super.getData(launches);
+                        data.setReportName("Test Report");
+                        return data;
+                    }
+                },
                 new HistoryTrendPlugin(),
                 new DurationTrendPlugin(),
                 new ExecutorPlugin()
