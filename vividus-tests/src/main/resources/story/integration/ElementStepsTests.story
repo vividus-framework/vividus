@@ -39,11 +39,13 @@ Given I am on a page with the URL '${vividus-test-site-url}/dropdowns.html'
 When I change context to element located `By.xpath(.//*[@for='colors'])`
 Then the context element has a width of '13'% relative to the parent element
 
-Scenario: Step verification When I perform right click on element located `$locator`
-Given I am on a page with the URL 'http://demo.guru99.com/test/simple_context_menu.html'
-Then number of elements found by `xpath(.//*[@class='context-menu-item context-menu-icon context-menu-icon-edit'])` is equal to `0`
-When I perform right click on element located `xpath(.//*[@class='context-menu-one btn btn-neutral'])`
-Then number of elements found by `xpath(.//*[@class='context-menu-item context-menu-icon context-menu-icon-edit'])` is equal to `1`
+Scenario: Step verification When I perform right click on an element located `$locator`
+Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
+Then number of elements found by `elementName(Foo)` is = `1`
+Then number of elements found by `elementName(Bar)` is = `0`
+When I perform right click on element located `id(context-menu)`
+Then number of elements found by `elementName(Foo)` is = `0`
+Then number of elements found by `elementName(Bar)` is = `1`
 
 Scenario: Step verification Then the context element has the CSS property '$cssName'='$cssValue'
 Given I am on a page with the URL '${vividus-test-site-url}/inputs.html'
@@ -177,14 +179,6 @@ Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
 Then number of elements found by `elementName(Foo)` is = `1`
 Then number of elements found by `elementName(Bar)` is = `0`
 When I perform right click on an element by the xpath './/*[@id = 'context-menu']'
-Then number of elements found by `elementName(Foo)` is = `0`
-Then number of elements found by `elementName(Bar)` is = `1`
-
-Scenario: Step verification When I perform right click on an element located '$locator'
-Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'
-Then number of elements found by `elementName(Foo)` is = `1`
-Then number of elements found by `elementName(Bar)` is = `0`
-When I perform right click on element located `id(context-menu)`
 Then number of elements found by `elementName(Foo)` is = `0`
 Then number of elements found by `elementName(Bar)` is = `1`
 
