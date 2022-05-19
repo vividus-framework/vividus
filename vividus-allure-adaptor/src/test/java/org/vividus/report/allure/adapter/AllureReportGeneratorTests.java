@@ -245,6 +245,10 @@ class AllureReportGeneratorTests
                                             ExecutorPlugin.class
                                     )
                             );
+                            var summaryPlugin = config.getAggregators().stream().filter(SummaryPlugin.class::isInstance)
+                                    .reduce((first, second) -> second).get();
+                            summaryPlugin.aggregate(config, List.of(), resultsDirectory);
+                            assertSummaryJson();
                         }))
         {
             String text = "text";
@@ -300,6 +304,24 @@ class AllureReportGeneratorTests
         return executorInfo;
     }
 
+    private void assertSummaryJson() throws IOException
+    {
+        assertResultFile("widgets/summary.json",
+                "{\n  \"reportName\" : \"Test Report\",\n"
+                    + "  \"testRuns\" : [ ],\n"
+                    + "  \"statistic\" : {\n"
+                    + "    \"failed\" : 0,\n"
+                    + "    \"broken\" : 0,\n"
+                    + "    \"skipped\" : 0,\n"
+                    + "    \"passed\" : 0,\n"
+                    + "    \"unknown\" : 0,\n"
+                    + "    \"total\" : 0\n"
+                    + "  },\n"
+                    + "  \"time\" : { }\n"
+                    + "}"
+        );
+    }
+
     private void assertEnvironmentProperties() throws IOException
     {
         assertResultFile("environment.properties",
@@ -342,7 +364,7 @@ class AllureReportGeneratorTests
 
     private void assertResultFile(String fileName, String expected) throws IOException
     {
-        assertEquals(expected, Files.readString(resultsDirectory.resolve(fileName)));
+        assertEquals(expected, Files.readString(resultsDirectory.resolve(fileName)).replace("\r", ""));
     }
 
     private Resource mockResource(String asString) throws IOException
