@@ -7,10 +7,6 @@ updates:
     day: sunday
     time: "02:00"
   open-pull-requests-limit: 99
-  reviewers:
-  - valfirst
-  - ikalinin1
-  - uarlouski
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
@@ -18,10 +14,6 @@ updates:
     day: sunday
     time: "02:00"
   open-pull-requests-limit: 99
-  reviewers:
-  - valfirst
-  - ikalinin1
-  - uarlouski
 - package-ecosystem: gitsubmodule
   directory: "/"
   schedule:
@@ -29,7 +21,3 @@ updates:
     day: sunday
     time: "02:00"
   open-pull-requests-limit: 99
-  reviewers:
-  - valfirst
-  - ikalinin1
-  - uarlouski
