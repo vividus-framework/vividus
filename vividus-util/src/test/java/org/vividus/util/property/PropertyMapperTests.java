@@ -18,7 +18,9 @@ package org.vividus.util.property;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -77,8 +79,17 @@ class PropertyMapperTests
     {
         Map<String, String> properties = createObjectProperties("");
         when(propertyParser.getPropertyValuesByPrefix(PROPERTY_PREFIX)).thenReturn(properties);
-        User result = propertyMapper.readValue(PROPERTY_PREFIX, User.class);
-        assertUser(result);
+        Optional<User> result = propertyMapper.readValue(PROPERTY_PREFIX, User.class);
+        assertTrue(result.isPresent());
+        assertUser(result.get());
+    }
+
+    @Test
+    void shouldMapPropertiesToEmptyOptional() throws IOException
+    {
+        when(propertyParser.getPropertyValuesByPrefix(PROPERTY_PREFIX)).thenReturn(Map.of());
+        Optional<User> result = propertyMapper.readValue(PROPERTY_PREFIX, User.class);
+        assertFalse(result.isPresent());
     }
 
     @Test

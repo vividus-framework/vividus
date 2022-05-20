@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
@@ -147,8 +148,11 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
     private void writeExecutorInfo() throws IOException
     {
-        ExecutorInfo executorInfo = propertyMapper.readValue("allure.executor.", ExecutorInfo.class);
-        createJsonFileInResultsDirectory("executor.json", executorInfo);
+        Optional<ExecutorInfo> executorInfo = propertyMapper.readValue("allure.executor.", ExecutorInfo.class);
+        if (executorInfo.isPresent())
+        {
+            createJsonFileInResultsDirectory("executor.json", executorInfo.get());
+        }
     }
 
     private void writeEnvironmentProperties() throws IOException

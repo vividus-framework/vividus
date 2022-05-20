@@ -46,6 +46,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -86,6 +87,9 @@ class AllureReportGeneratorTests
     private static final String ALLURE_RESULTS_DIRECTORY_PROPERTY = "allure.results.directory";
     private static final String RESULTS = "results";
     private static final String REPORT = "report";
+
+    private static final String EXECUTOR_JSON = "executor.json";
+    private static final String ALLURE_EXECUTOR_PROPERTY_PREFIX = "allure.executor.";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AllureReportGenerator.class);
 
@@ -165,6 +169,9 @@ class AllureReportGeneratorTests
     void testEndWhenResultsDirectoryExists() throws IOException
     {
         File reportDirectory = tempDir.toFile();
+        ExecutorInfo executorInfo = createExecutorInfo();
+        when(propertyMapper.readValue(ALLURE_EXECUTOR_PROPERTY_PREFIX, ExecutorInfo.class)).thenReturn(
+                Optional.of(executorInfo));
         testEnd(reportDirectory);
         assertThat(logger.getLoggingEvents(), is(List.of(
             buildCleanUpDirectoryLogEvent(RESULTS, resultsDirectory.toFile()),
@@ -173,6 +180,7 @@ class AllureReportGeneratorTests
             buildDirectoryCleanedLogEvent(REPORT, reportDirectory),
             buildReportGeneratedLogEvent(tempDir)
         )));
+        assertExecutorJson(executorInfo);
     }
 
     @Test
@@ -183,6 +191,8 @@ class AllureReportGeneratorTests
         System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
         allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver,
                 allurePluginsProvider);
+        when(propertyMapper.readValue(ALLURE_EXECUTOR_PROPERTY_PREFIX, ExecutorInfo.class)).thenReturn(
+                Optional.empty());
         testEnd(reportDirectory);
         assertThat(logger.getLoggingEvents(), is(List.of(
             buildCleanUpDirectoryLogEvent(RESULTS, resultsDirectory.toFile()),
@@ -191,6 +201,7 @@ class AllureReportGeneratorTests
             buildDirectoryCleanedLogEvent(REPORT, reportDirectory),
             buildReportGeneratedLogEvent(tempDir)
         )));
+        assertFalse(resultsDirectory.resolve(EXECUTOR_JSON).toFile().exists());
     }
 
     private LoggingEvent buildCleanUpDirectoryLogEvent(String directoryDescription, File directory)
@@ -247,8 +258,7 @@ class AllureReportGeneratorTests
             Resource[] resources = { resource, folder };
             when(resourcePatternResolver.getResources(ALLURE_CUSTOMIZATION_PATTERN)).thenReturn(resources);
             prepareEnvironmentConfiguration();
-            ExecutorInfo executorInfo = createExecutorInfo();
-            when(propertyMapper.readValue("allure.executor.", ExecutorInfo.class)).thenReturn(executorInfo);
+
             when(allurePluginsProvider.getPlugins()).thenReturn(plugins);
             allureReportGenerator.start();
             allureReportGenerator.end();
@@ -262,7 +272,6 @@ class AllureReportGeneratorTests
                             eq(historyDirectory.toFile())));
             verify(reportGenerator.constructed().get(0)).generate(any(Path.class), any(List.class));
             assertEnvironmentProperties();
-            assertExecutorJson(executorInfo);
             assertCategoriesJson();
         }
     }
@@ -321,7 +330,7 @@ class AllureReportGeneratorTests
 
     private void assertExecutorJson(ExecutorInfo executorInfo) throws IOException
     {
-        assertResultFile("executor.json",
+        assertResultFile(EXECUTOR_JSON,
                   "{"
                 + "\"name\":\"" + executorInfo.getName()
                 + "\",\"type\":\"" + executorInfo.getType()
