@@ -59,10 +59,14 @@ public class PropertyMapper implements IPropertyMapper
     }
 
     @Override
-    public <T> T readValue(String propertyPrefix, Class<T> resultType) throws IOException
+    public <T> Optional<T> readValue(String propertyPrefix, Class<T> resultType) throws IOException
     {
         Map<String, String> propertyValuesByPrefix = propertyParser.getPropertyValuesByPrefix(propertyPrefix);
-        return readValue(propertyValuesByPrefix, resultType);
+        if (propertyValuesByPrefix.isEmpty())
+        {
+            return Optional.empty();
+        }
+        return Optional.of(readValue(propertyValuesByPrefix, resultType));
     }
 
     @Override

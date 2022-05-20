@@ -19,19 +19,21 @@ package org.vividus.util.property;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.UnaryOperator;
 
 public interface IPropertyMapper
 {
     /**
-     * Maps properties with specified prefix to the object created using property names and values
-     * @param <T> type of resulting object
+     * Maps properties with the specified prefix to the object created using property names and values. If no properties
+     * with the given prefix exists, an empty {@link Optional} will be returned
+     * @param <T> type of resulting object wrapped into {@link Optional}
      * @param propertyPrefix Prefix of properties
      * @param resultType Resulting object type
-     * @return object created using property names and values
+     * @return object created using property names and values wrapped into {@link Optional}
      * @throws IOException if any error is occurred during mapping of properties to objects
      */
-    <T> T readValue(String propertyPrefix, Class<T> resultType) throws IOException;
+    <T> Optional<T> readValue(String propertyPrefix, Class<T> resultType) throws IOException;
 
     /**
      * Maps properties to the object created using property names and values
