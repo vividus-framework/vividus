@@ -17,6 +17,7 @@
 package org.vividus.ui.web.storage;
 
 import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.html5.Storage;
 import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.remote.CapabilityType;
@@ -38,22 +39,10 @@ public class WebStorageManager
         this.javascriptActions = javascriptActions;
     }
 
-    public String getStorageItem(StorageType storageType, String key)
+    public Storage getStorage(StorageType storageType)
     {
-        return storageType == StorageType.LOCAL ? getWebStorage().getLocalStorage().getItem(key)
-                : getWebStorage().getSessionStorage().getItem(key);
-    }
-
-    public void setStorageItem(StorageType storageType, String key, String value)
-    {
-        if (storageType == StorageType.LOCAL)
-        {
-            getWebStorage().getLocalStorage().setItem(key, value);
-        }
-        else
-        {
-            getWebStorage().getSessionStorage().setItem(key, value);
-        }
+        WebStorage webStorage = getWebStorage();
+        return storageType == StorageType.LOCAL ? webStorage.getLocalStorage() : webStorage.getSessionStorage();
     }
 
     private WebStorage getWebStorage()

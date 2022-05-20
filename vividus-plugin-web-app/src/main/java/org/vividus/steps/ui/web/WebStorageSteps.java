@@ -68,7 +68,7 @@ public class WebStorageSteps
     public void saveWebStorageItemToVariable(StorageType storageType, String key, Set<VariableScope> scopes,
             String variableName)
     {
-        variableContext.putVariable(scopes, variableName, webStorageManager.getStorageItem(storageType, key));
+        variableContext.putVariable(scopes, variableName, webStorageManager.getStorage(storageType).getItem(key));
     }
 
     /**
@@ -84,7 +84,7 @@ public class WebStorageSteps
     public void setWebStorageItem(StorageType storageType, String key, String value)
     {
         LOGGER.info("Setting {} storage item with key '{}' and value '{}", storageType, key, value);
-        webStorageManager.setStorageItem(storageType, key, value);
+        webStorageManager.getStorage(storageType).setItem(key, value);
     }
 
     /**
@@ -116,6 +116,6 @@ public class WebStorageSteps
     private void assertWebStorageItem(StorageType storageType, String key, Matcher<Object> matcher)
     {
         softAssert.assertThat(String.format("%s storage item with key '%s'", storageType, key),
-                webStorageManager.getStorageItem(storageType, key), matcher);
+                webStorageManager.getStorage(storageType).getItem(key), matcher);
     }
 }

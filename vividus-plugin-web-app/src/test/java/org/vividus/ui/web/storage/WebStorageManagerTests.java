@@ -57,7 +57,7 @@ class WebStorageManagerTests
         mockDriver(Browser.SAFARI, null);
         when(javascriptActions.executeScript("return window.localStorage.getItem(arguments[0])", KEY)).thenReturn(
                 VALUE);
-        String storageItem = webStorageManager.getStorageItem(StorageType.LOCAL, KEY);
+        String storageItem = webStorageManager.getStorage(StorageType.LOCAL).getItem(KEY);
         assertEquals(VALUE, storageItem);
     }
 
@@ -84,7 +84,7 @@ class WebStorageManagerTests
             })
         )
         {
-            assertEquals(VALUE, webStorageManager.getStorageItem(StorageType.SESSION, KEY));
+            assertEquals(VALUE, webStorageManager.getStorage(StorageType.SESSION).getItem(KEY));
         }
     }
 
@@ -92,7 +92,7 @@ class WebStorageManagerTests
     void shouldSetLocalStorageItemForNonSafariBrowserAndWithoutWebStorageSupport()
     {
         mockDriver(Browser.CHROME, false);
-        webStorageManager.setStorageItem(StorageType.LOCAL, KEY, VALUE);
+        webStorageManager.getStorage(StorageType.LOCAL).setItem(KEY, VALUE);
         verify(javascriptActions).executeScript("window.localStorage.setItem(arguments[0], arguments[1])", KEY, VALUE);
     }
 
@@ -100,7 +100,7 @@ class WebStorageManagerTests
     void shouldSetLocalStorageItemForNonSafariBrowserAndWithUnknownWebStorageSupport()
     {
         mockDriver(Browser.FIREFOX, null);
-        webStorageManager.setStorageItem(StorageType.SESSION, KEY, VALUE);
+        webStorageManager.getStorage(StorageType.SESSION).setItem(KEY, VALUE);
         verify(javascriptActions).executeScript("window.sessionStorage.setItem(arguments[0], arguments[1])", KEY,
                 VALUE);
     }

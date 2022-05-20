@@ -37,6 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.html5.Storage;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.storage.StorageType;
@@ -60,7 +61,9 @@ class WebStorageStepsTests
     void shouldSaveWebStorageItemToVariable()
     {
         var storageType = mock(StorageType.class);
-        when(webStorageManager.getStorageItem(storageType, KEY)).thenReturn(VALUE);
+        Storage storage = mock(Storage.class);
+        when(webStorageManager.getStorage(storageType)).thenReturn(storage);
+        when(storage.getItem(KEY)).thenReturn(VALUE);
         var scopes = Set.of(VariableScope.STEP);
 
         webStorageSteps.saveWebStorageItemToVariable(storageType, KEY, scopes, KEY);
@@ -72,9 +75,11 @@ class WebStorageStepsTests
     void shouldSetWebStorageItem()
     {
         var storageType = mock(StorageType.class);
+        Storage storage = mock(Storage.class);
+        when(webStorageManager.getStorage(storageType)).thenReturn(storage);
         webStorageSteps.setWebStorageItem(storageType, KEY, VALUE);
 
-        verify(webStorageManager).setStorageItem(storageType, KEY, VALUE);
+        verify(storage).setItem(KEY, VALUE);
         assertThat(logger.getLoggingEvents(),
                 is(List.of(info("Setting {} storage item with key '{}' and value '{}", storageType, KEY, VALUE))));
     }
@@ -83,7 +88,9 @@ class WebStorageStepsTests
     void shouldAssertThatWebStorageItemExists()
     {
         var storageType = StorageType.LOCAL;
-        when(webStorageManager.getStorageItem(storageType, KEY)).thenReturn(VALUE);
+        Storage storage = mock(Storage.class);
+        when(webStorageManager.getStorage(storageType)).thenReturn(storage);
+        when(storage.getItem(KEY)).thenReturn(VALUE);
 
         webStorageSteps.assertWebStorageItemExists(storageType, KEY);
 
@@ -95,7 +102,9 @@ class WebStorageStepsTests
     void shouldAssertThatWebStorageItemDoesNotExist()
     {
         var storageType = StorageType.SESSION;
-        when(webStorageManager.getStorageItem(storageType, KEY)).thenReturn(VALUE);
+        Storage storage = mock(Storage.class);
+        when(webStorageManager.getStorage(storageType)).thenReturn(storage);
+        when(storage.getItem(KEY)).thenReturn(VALUE);
 
         webStorageSteps.assertWebStorageItemDoesNotExist(storageType, KEY);
 
