@@ -18,9 +18,7 @@ package org.vividus.report.allure.adapter;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.debug;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -76,10 +74,7 @@ import io.qameta.allure.Constants;
 import io.qameta.allure.ReportGenerator;
 import io.qameta.allure.core.Configuration;
 import io.qameta.allure.core.Plugin;
-import io.qameta.allure.duration.DurationTrendPlugin;
 import io.qameta.allure.entity.ExecutorInfo;
-import io.qameta.allure.executor.ExecutorPlugin;
-import io.qameta.allure.history.HistoryTrendPlugin;
 import io.qameta.allure.summary.SummaryPlugin;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -237,14 +232,6 @@ class AllureReportGeneratorTests
 
                             assertEquals(plugins, config.getPlugins());
 
-                            assertThat(config.getAggregators().stream().map(Object::getClass).collect(toList()),
-                                    hasItems(
-                                            SummaryPlugin.class,
-                                            HistoryTrendPlugin.class,
-                                            DurationTrendPlugin.class,
-                                            ExecutorPlugin.class
-                                    )
-                            );
                             var summaryPlugin = config.getAggregators().stream().filter(SummaryPlugin.class::isInstance)
                                     .reduce((first, second) -> second).get();
                             summaryPlugin.aggregate(config, List.of(), resultsDirectory);
