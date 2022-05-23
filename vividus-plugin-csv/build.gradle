@@ -4,7 +4,6 @@ dependencies {
     api project(':vividus-engine')
     api(group: 'org.apache.commons', name: 'commons-csv', version: '1.9.0')
     implementation project(':vividus-util')
-    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
