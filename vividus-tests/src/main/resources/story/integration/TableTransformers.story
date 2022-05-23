@@ -89,11 +89,11 @@ Examples:
 Scenario: Verify RESOLVING_EXPRESSIONS_EAGERLY transformer
 When I initialize story variable `table` with values:
 /data/with-replacing-transformer.table
-Then `${table[0].name}` is equal to `#{invalid(Address.firstName)}`
+Then `${table[0].name}` is equal to `#{invalid(Name.firstName)}`
 When I initialize story variable `table-resolved` with values:
 {transformer=RESOLVING_EXPRESSIONS_EAGERLY}
 /data/with-replacing-transformer.table
-Then `${table-resolved[0].name}` is not equal to `#{invalid(Address.firstName)}`
+Then `${table-resolved[0].name}` is not equal to `#{invalid(Name.firstName)}`
 
 
 Scenario: Verify RESOLVING_SELF_REFERENCES_EAGERLY transformer chained
