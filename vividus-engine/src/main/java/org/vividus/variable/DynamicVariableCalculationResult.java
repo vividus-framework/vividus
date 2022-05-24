@@ -28,10 +28,10 @@ import java.util.function.Supplier;
  */
 public final class DynamicVariableCalculationResult
 {
-    private final Optional<String> value;
+    private final Optional<Object> value;
     private final Optional<String> error;
 
-    private DynamicVariableCalculationResult(Optional<String> value, Optional<String> error)
+    private DynamicVariableCalculationResult(Optional<Object> value, Optional<String> error)
     {
         this.value = value;
         this.error = error;
@@ -43,7 +43,7 @@ public final class DynamicVariableCalculationResult
      * @param value The result of the calculation - dynamic variable value.
      * @return Created result object.
      */
-    public static DynamicVariableCalculationResult withValue(String value)
+    public static DynamicVariableCalculationResult withValue(Object value)
     {
         return new DynamicVariableCalculationResult(Optional.of(value), Optional.empty());
     }
@@ -67,14 +67,14 @@ public final class DynamicVariableCalculationResult
      * @param errorSupplier The error supplier used to generate error message in case of missing value.
      * @return Created result object.
      */
-    public static DynamicVariableCalculationResult withValueOrError(Optional<String> value,
+    public static DynamicVariableCalculationResult withValueOrError(Optional<Object> value,
             Supplier<String> errorSupplier)
     {
         return new DynamicVariableCalculationResult(value,
                 value.isEmpty() ? Optional.of(errorSupplier.get()) : Optional.empty());
     }
 
-    public Optional<String> getValueOrHandleError(Consumer<String> errorHandler)
+    public Optional<Object> getValueOrHandleError(Consumer<String> errorHandler)
     {
         if (value.isEmpty())
         {

@@ -165,7 +165,7 @@ public class VariableResolver implements DryRunAwareExecutor
         return variable;
     }
 
-    private String calculateDynamicVariableValue(String variableKey)
+    private Object calculateDynamicVariableValue(String variableKey)
     {
         return Optional.ofNullable(dynamicVariables.get(variableKey))
                 .map(DynamicVariable::calculateValue)
