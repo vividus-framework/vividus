@@ -19,6 +19,7 @@ package org.vividus.visual;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
@@ -33,10 +34,10 @@ import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.resource.ResourceLoadException;
-import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.visual.engine.IVisualTestingEngine;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
@@ -77,7 +78,7 @@ public class VisualSteps extends AbstractVisualSteps
      * Step establishes baseline or compares against existing one.
      * @param actionType ESTABLISH, COMPARE_AGAINST, or CHECK_INEQUALITY_AGAINST
      * @param name of baseline
-     * @param screenshotConfiguration to make screenshot
+     * @param screenshotConfiguration configuration to make screenshot
      * Example:<br>
      * |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|<br>
      * |By.xpath(.//header)|100           |100           |CEILING       |
@@ -86,7 +87,7 @@ public class VisualSteps extends AbstractVisualSteps
     public void runVisualTests(VisualActionType actionType, String name,
             ScreenshotConfiguration screenshotConfiguration)
     {
-        performVisualAction(() -> visualCheckFactory.create(name, actionType, screenshotConfiguration));
+        performVisualAction(() -> visualCheckFactory.create(name, actionType, Optional.of(screenshotConfiguration)));
     }
 
     private void performVisualAction(Supplier<VisualCheck> visualCheckFactory)
@@ -131,7 +132,7 @@ public class VisualSteps extends AbstractVisualSteps
      * Example:<br>
      * |ELEMENT            |AREA                  |<br>
      * |By.xpath(.//header)|By.cssSelector(footer)|
-     * @param screenshotConfiguration to make screenshot
+     * @param screenshotConfiguration configuration to make screenshot
      * Example:<br>
      * |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|<br>
      * |By.xpath(.//header)|100           |100           |CEILING       |
@@ -141,7 +142,8 @@ public class VisualSteps extends AbstractVisualSteps
     public void runVisualTests(VisualActionType actionType, String name, ExamplesTable checkSettings,
             ScreenshotConfiguration screenshotConfiguration)
     {
-        runVisualTests(() -> visualCheckFactory.create(name, actionType, screenshotConfiguration), checkSettings);
+        runVisualTests(() -> visualCheckFactory.create(name, actionType, Optional.of(screenshotConfiguration)),
+                checkSettings);
     }
 
     private void runVisualTests(Supplier<VisualCheck> visualCheckFactory, ExamplesTable checkSettings)

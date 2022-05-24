@@ -14,24 +14,11 @@
  * limitations under the License.
  */
 
-package org.vividus.converter.ui.web;
+package org.vividus.ui.screenshot;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
-import javax.inject.Named;
-
-import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
-import org.openqa.selenium.WebElement;
-import org.vividus.ui.action.SearchActions;
-import org.vividus.ui.web.util.ElementUtils;
-
-@Named
-public class StringToWebElementParameterConverter
-        extends FunctionalParameterConverter<String, Supplier<Optional<WebElement>>>
+public interface ScreenshotParametersFactory<C extends ScreenshotConfiguration>
 {
-    public StringToWebElementParameterConverter(SearchActions searchActions, ElementUtils elementUtils)
-    {
-        super(value -> elementUtils.getElement(value, searchActions));
-    }
+    Optional<ScreenshotParameters> create(Optional<C> screenshotConfiguration);
 }

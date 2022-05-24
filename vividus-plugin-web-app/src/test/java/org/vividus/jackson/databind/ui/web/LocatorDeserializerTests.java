@@ -14,36 +14,37 @@
  * limitations under the License.
  */
 
-package org.vividus.converter.ui.web;
+package org.vividus.jackson.databind.ui.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonParser;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.WebElement;
-import org.vividus.ui.action.SearchActions;
-import org.vividus.ui.web.util.ElementUtils;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.util.LocatorConversionUtils;
 
 @ExtendWith(MockitoExtension.class)
-class StringToWebElementParameterConverterTests
+class LocatorDeserializerTests
 {
-    @Mock private SearchActions searchActions;
-    @Mock private ElementUtils elementUtils;
-    @InjectMocks private StringToWebElementParameterConverter converter;
+    @Mock private Locator locator;
+    @Mock private JsonParser jsonParser;
+    @Mock private LocatorConversionUtils locatorConversionUtils;
+    @InjectMocks private LocatorDeserializer deserializer;
 
     @Test
-    void shouldConvertStringToWebElement()
+    void shouldDeserialize() throws IOException
     {
-        String locator = "locator";
-        Optional<WebElement> expected = Optional.of(mock(WebElement.class));
-        when(elementUtils.getElement(locator, searchActions)).thenReturn(() -> expected);
-        assertEquals(expected, converter.convertValue(locator, null).get());
+        String input = "input-locator";
+        when(jsonParser.getText()).thenReturn(input);
+        when(locatorConversionUtils.convertToLocator(input)).thenReturn(locator);
+        assertEquals(locator, deserializer.deserialize(jsonParser, null));
     }
 }

@@ -28,14 +28,16 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
-import org.vividus.selenium.screenshot.WebScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotParametersFactory;
+import org.vividus.ui.web.screenshot.WebScreenshotConfiguration;
+import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheckResult;
@@ -54,15 +56,19 @@ class VisualTestingStepsTests
     private final ISoftAssert softAssert = mock(ISoftAssert.class);
     private final IUiContext uiContext = mock(IUiContext.class);
     private final IAttachmentPublisher attachmentPublisher = mock(IAttachmentPublisher.class);
+    @SuppressWarnings("unchecked")
+    private final ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory = mock(
+            ScreenshotParametersFactory.class);
 
-    @InjectMocks private final VisualTestingSteps visualTestingSteps = new VisualTestingSteps(uiContext,
-            attachmentPublisher, softAssert);
+    private VisualTestingSteps visualTestingSteps;
 
     @BeforeEach
     void setUp()
     {
         SearchContext searchContext = mock(SearchContext.class);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
+        this.visualTestingSteps = new VisualTestingSteps(visualTestingService, applitoolsVisualCheckFactory,
+                screenshotParametersFactory, uiContext, attachmentPublisher, softAssert);
     }
 
     @Test
@@ -89,9 +95,12 @@ class VisualTestingStepsTests
         ApplitoolsVisualCheck check = mock(ApplitoolsVisualCheck.class);
         ApplitoolsVisualCheckResult result = mock(ApplitoolsVisualCheckResult.class);
         when(visualTestingService.run(check)).thenReturn(result);
+        WebScreenshotParameters screenshotParameters = mock(WebScreenshotParameters.class);
         WebScreenshotConfiguration screenshotConfiguration = mock(WebScreenshotConfiguration.class);
+        when(screenshotParametersFactory.create(Optional.of(screenshotConfiguration)))
+                .thenReturn(Optional.of(screenshotParameters));
         visualTestingSteps.performCheck(List.of(check, check), screenshotConfiguration);
         verifyVisualCheck(result, 2);
-        verify(check, times(2)).setScreenshotConfiguration(Optional.of(screenshotConfiguration));
+        verify(check, times(2)).setScreenshotParameters(Optional.of(screenshotParameters));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.vividus.selenium.screenshot.strategies;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.screenshot.WebScreenshotConfiguration;
 import org.vividus.ui.web.action.WebJavascriptActions;
+import org.vividus.ui.web.screenshot.WebCutOptions;
 
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
@@ -33,9 +33,9 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator extends Adj
 
     public AdjustingScrollableElementAwareViewportPastingDecorator(ShootingStrategy strategy,
             WebElement scrollableElement, WebJavascriptActions javascriptActions,
-            WebScreenshotConfiguration configuration)
+            WebCutOptions webCutOptions)
     {
-        super(strategy, configuration.getWebHeaderToCut(), configuration.getWebFooterToCut(), "arguments[1]");
+        super(strategy, webCutOptions.getWebHeaderToCut(), webCutOptions.getWebFooterToCut(), "arguments[1]");
         this.javascriptActions = javascriptActions;
         this.scrollableElement = scrollableElement;
     }

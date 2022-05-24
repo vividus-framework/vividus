@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -41,7 +42,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -54,10 +55,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.resource.ResourceLoadException;
-import org.vividus.selenium.screenshot.WebScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.visual.engine.IVisualTestingEngine;
 import org.vividus.visual.model.VisualActionType;
@@ -82,29 +84,24 @@ class VisualStepsTests
 
     private static final String BASELINE = "baseline";
 
-    private static final VisualCheckFactory FACTORY = new VisualCheckFactory();
+    @Mock private ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
+    @Mock private IVisualTestingEngine visualTestingEngine;
+    @Mock private ISoftAssert softAssert;
+    @Mock private IAttachmentPublisher attachmentPublisher;
+    @Mock private VisualCheckResult visualCheckResult;
+    @Mock private IVisualCheckFactory visualCheckFactory;
+    @Mock private IUiContext uiContext;
+    @InjectMocks private VisualSteps visualSteps;
 
-    @Mock
-    private IVisualTestingEngine visualTestingEngine;
-    @Mock
-    private ISoftAssert softAssert;
-    @Mock
-    private IAttachmentPublisher attachmentPublisher;
-    @Mock
-    private VisualCheckResult visualCheckResult;
-    @Mock
-    private IVisualCheckFactory visualCheckFactory;
-    @Mock
-    private IUiContext uiContext;
+    private VisualCheckFactory factory;
 
-    @InjectMocks
-    private VisualSteps visualSteps;
-
-    @BeforeAll
-    static void beforeAll()
+    @BeforeEach
+    void init()
     {
-        FACTORY.setScreenshotIndexer(Optional.empty());
-        FACTORY.setIndexers(Map.of());
+        factory = new VisualCheckFactory(screenshotParametersFactory);
+        lenient().when(screenshotParametersFactory.create(Optional.empty())).thenReturn(Optional.empty());
+        factory.setScreenshotIndexer(Optional.empty());
+        factory.setIndexers(Map.of());
     }
 
     @ParameterizedTest
@@ -132,9 +129,10 @@ class VisualStepsTests
     {
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
         mockUiContext();
-        WebScreenshotConfiguration screenshotConfiguration = mock(WebScreenshotConfiguration.class);
-        VisualCheck visualCheck = FACTORY.create(BASELINE, compareAgainst);
-        when(visualCheckFactory.create(BASELINE, compareAgainst, screenshotConfiguration)).thenReturn(visualCheck);
+        ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
+        VisualCheck visualCheck = factory.create(BASELINE, compareAgainst);
+        when(visualCheckFactory.create(BASELINE, compareAgainst, Optional.of(screenshotConfiguration)))
+                .thenReturn(visualCheck);
         when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
         mockCheckResult();
         visualSteps.runVisualTests(compareAgainst, BASELINE, screenshotConfiguration);
@@ -204,10 +202,11 @@ class VisualStepsTests
         Set<Locator> elementsToIgnore = Set.of(A_LOCATOR);
         Set<Locator> areasToIgnore = Set.of(DIV_LOCATOR);
         mockRow(row, elementsToIgnore, areasToIgnore);
-        WebScreenshotConfiguration screenshotConfiguration = mock(WebScreenshotConfiguration.class);
+        ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
-        VisualCheck visualCheck = FACTORY.create(BASELINE, compareAgainst);
-        when(visualCheckFactory.create(BASELINE, compareAgainst, screenshotConfiguration)).thenReturn(visualCheck);
+        VisualCheck visualCheck = factory.create(BASELINE, compareAgainst);
+        when(visualCheckFactory.create(BASELINE, compareAgainst, Optional.of(screenshotConfiguration)))
+                .thenReturn(visualCheck);
         when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
         mockCheckResult();
         visualSteps.runVisualTests(compareAgainst, BASELINE, table, screenshotConfiguration);
@@ -225,7 +224,7 @@ class VisualStepsTests
 
     private VisualCheck mockVisualCheckFactory(VisualActionType actionType)
     {
-        VisualCheck visualCheck = FACTORY.create(BASELINE, actionType);
+        VisualCheck visualCheck = factory.create(BASELINE, actionType);
         when(visualCheckFactory.create(BASELINE, actionType)).thenReturn(visualCheck);
         return visualCheck;
     }

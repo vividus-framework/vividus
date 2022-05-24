@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.screenshot;
+package org.vividus.ui.web.screenshot;
 
 import java.time.Duration;
 import java.util.Optional;
-import java.util.function.Supplier;
 
-import org.openqa.selenium.WebElement;
+import org.vividus.selenium.screenshot.CoordsProviderType;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.screenshot.ScreenshotConfiguration;
 
 public class WebScreenshotConfiguration extends ScreenshotConfiguration
 {
-    public static final int SCROLL_TIMEOUT = 500;
     private int nativeHeaderToCut;
     private int webHeaderToCut;
     private int webFooterToCut;
-    private Supplier<Optional<WebElement>> scrollableElement = Optional::empty;
+    private Optional<Locator> scrollableElement = Optional.empty();
     private CoordsProviderType coordsProvider = CoordsProviderType.CEILING;
-    private Duration scrollTimeout = Duration.ofMillis(SCROLL_TIMEOUT);
+    @SuppressWarnings("MagicNumber")
+    private Duration scrollTimeout = Duration.ofMillis(500);
 
     public int getWebHeaderToCut()
     {
@@ -52,12 +53,12 @@ public class WebScreenshotConfiguration extends ScreenshotConfiguration
         this.webFooterToCut = webFooterToCut;
     }
 
-    public Supplier<Optional<WebElement>> getScrollableElement()
+    public Optional<Locator> getScrollableElement()
     {
         return scrollableElement;
     }
 
-    public void setScrollableElement(Supplier<Optional<WebElement>> scrollableElement)
+    public void setScrollableElement(Optional<Locator> scrollableElement)
     {
         this.scrollableElement = scrollableElement;
     }

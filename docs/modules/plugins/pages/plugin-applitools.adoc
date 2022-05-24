@@ -221,7 +221,9 @@ NOTE: The expression parameters marked with *bold* are mandatory.
 ** `readApiKey` - The key to execute tests.
 ** `executeApiKey` - The key to access tests and test results.
 ** `serverUri` - The URI of the rest server.
-* `$screenshotConfiguration` - The screenshot configuration
+* `$screenshotConfiguration` - The screenshot configurations.
+
+include::partial$web-screenshot-configuration.adoc[]
 
 .Perform visual check using custom Applitools and screenshot configuration
 [source,gherkin]

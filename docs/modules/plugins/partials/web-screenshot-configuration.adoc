@@ -1,0 +1,12 @@
+Web screenshot configuration fields:
+
+* `shootingStrategy` - The shooting strategy to use.
+* `webHeaderToCut` - The header to cut on each screenshot segment during scroll e.g. sticky header.
+* `webFooterToCut` - The footer to cut on each screenshot segment during scroll e.g. sticky footer.
+* `nativeHeaderToCut` - The header to cut on final screenshot.
+* `nativeFooterToCut` - The footer to cut on final screenshot.
+* `coordsProvider` - The coords provider used to get ignoring elements position during scroll.
+** `CEILING` - Based on JS API.
+** `WEB_DRIVER` - Based on WebDriver API.
+* `scrollableElement` - The element to scroll.
+* `scrollTimeout` - The scroll timeout.

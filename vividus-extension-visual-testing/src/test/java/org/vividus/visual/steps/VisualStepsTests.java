@@ -17,6 +17,7 @@
 package org.vividus.visual.steps;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -40,6 +41,7 @@ import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.screenshot.ScreenshotPrecondtionMismatchException;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
@@ -49,15 +51,10 @@ class VisualStepsTests
 {
     private static final String TEMPLATE = "template";
 
-    @Mock
-    private IUiContext uiContext;
-    @Mock
-    private IAttachmentPublisher attachmentPublisher;
-    @Mock
-    private ISoftAssert softAssert;
-
-    @InjectMocks
-    private TestVisualSteps visualSteps;
+    @Mock private IUiContext uiContext;
+    @Mock private IAttachmentPublisher attachmentPublisher;
+    @Mock private ISoftAssert softAssert;
+    @InjectMocks private TestVisualSteps visualSteps;
 
     @SuppressWarnings("unchecked")
     @Test
@@ -107,6 +104,23 @@ class VisualStepsTests
     void shouldReturnsSoftAssert()
     {
         assertSame(softAssert, visualSteps.getSoftAssert());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldRecordInvalidVisualCheckPreconditionException()
+    {
+        SearchContext searchContext = mock(SearchContext.class);
+        ScreenshotPrecondtionMismatchException exception = mock(ScreenshotPrecondtionMismatchException.class);
+        Supplier<VisualCheck> visualCheckFactory = mock(Supplier.class);
+        doThrow(exception).when(visualCheckFactory).get();
+        Function<VisualCheck, VisualCheckResult> checkResultProvider = mock(Function.class);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
+
+        visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE);
+
+        verify(softAssert).recordFailedAssertion(exception);
+        verifyNoInteractions(attachmentPublisher, checkResultProvider);
     }
 
     private static final class TestVisualSteps extends AbstractVisualSteps

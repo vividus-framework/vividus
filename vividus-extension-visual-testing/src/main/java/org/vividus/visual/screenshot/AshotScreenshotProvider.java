@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import java.util.stream.Stream;
 
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.AshotScreenshotTaker;
-import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.selenium.screenshot.ScreenshotDebugger;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.visual.model.VisualCheck;
 
 import ru.yandex.qatools.ashot.Screenshot;
@@ -38,7 +38,7 @@ import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 
 public class AshotScreenshotProvider implements ScreenshotProvider
 {
-    private final AshotScreenshotTaker<ScreenshotConfiguration> ashotScreenshotTaker;
+    private final AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker;
     private final ISearchActions searchActions;
     private final ScreenshotDebugger screenshotDebugger;
     private final CoordsProvider coordsProvider;
@@ -62,7 +62,7 @@ public class AshotScreenshotProvider implements ScreenshotProvider
     public Screenshot take(VisualCheck visualCheck)
     {
         Screenshot screenshot = ashotScreenshotTaker.takeAshotScreenshot(visualCheck.getSearchContext(),
-                visualCheck.getScreenshotConfiguration());
+                visualCheck.getScreenshotParameters());
         BufferedImage original = screenshot.getImage();
         Map<IgnoreStrategy, Set<Locator>> stepLevelElementsToIgnore = visualCheck.getElementsToIgnore();
         for (Map.Entry<IgnoreStrategy, Set<Locator>> strategy : ignoreStrategies.entrySet())

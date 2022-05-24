@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,16 @@ package org.vividus.visual.eyes;
 
 import java.util.List;
 import java.util.Optional;
-
-import javax.inject.Inject;
+import java.util.function.Supplier;
 
 import org.jbehave.core.annotations.When;
 import org.vividus.reporter.event.IAttachmentPublisher;
-import org.vividus.selenium.screenshot.WebScreenshotConfiguration;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotParameters;
+import org.vividus.ui.screenshot.ScreenshotParametersFactory;
+import org.vividus.ui.web.screenshot.WebScreenshotConfiguration;
 import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.service.VisualTestingService;
@@ -34,12 +36,19 @@ import org.vividus.visual.steps.AbstractVisualSteps;
 
 public class VisualTestingSteps extends AbstractVisualSteps
 {
-    @Inject private VisualTestingService visualTestingService;
-    @Inject private ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
+    private final VisualTestingService visualTestingService;
+    private final ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
+    private final ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
 
-    public VisualTestingSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
+    public VisualTestingSteps(VisualTestingService visualTestingService,
+            ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory,
+            ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory, IUiContext uiContext,
+            IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
     {
         super(uiContext, attachmentPublisher, softAssert);
+        this.visualTestingService = visualTestingService;
+        this.applitoolsVisualCheckFactory = applitoolsVisualCheckFactory;
+        this.screenshotParametersFactory = screenshotParametersFactory;
     }
 
     /**
@@ -51,8 +60,7 @@ public class VisualTestingSteps extends AbstractVisualSteps
     @When("I $actionType baseline `$testName` in batch `$batchName` with Applitools")
     public void performCheck(VisualActionType actionType, String testName, String batchName)
     {
-        ApplitoolsVisualCheck visualCheck = applitoolsVisualCheckFactory.create(batchName, testName, actionType);
-        runApplitoolsTest(visualCheck);
+        runApplitoolsTest(() -> applitoolsVisualCheckFactory.create(batchName, testName, actionType));
     }
 
     /**
@@ -96,7 +104,7 @@ public class VisualTestingSteps extends AbstractVisualSteps
     @When("I run visual test with Applitools using:$applitoolsConfigurations")
     public void performCheck(List<ApplitoolsVisualCheck> applitoolsConfigurations)
     {
-        applitoolsConfigurations.forEach(this::runApplitoolsTest);
+        applitoolsConfigurations.forEach(visualCheck -> runApplitoolsTest(visualCheck, Optional.empty()));
     }
 
     /**
@@ -164,21 +172,29 @@ public class VisualTestingSteps extends AbstractVisualSteps
      *    </tbody>
      *  </table>
      * @param applitoolsConfigurations custom applitools configuration
-     * @param screenshotConfiguration custom shooting strategy configuration
+     * @param screenshotConfiguration custom shooting strategy parameters
      */
     @When(value = "I run visual test with Applitools using:$applitoolsConfigurations and screenshot"
             + " config:$screenshotConfiguration", priority = 1)
     public void performCheck(List<ApplitoolsVisualCheck> applitoolsConfigurations,
             WebScreenshotConfiguration screenshotConfiguration)
     {
-        applitoolsConfigurations.forEach(check -> {
-            check.setScreenshotConfiguration(Optional.of(screenshotConfiguration));
-            runApplitoolsTest(check);
+        applitoolsConfigurations
+                .forEach(visualCheck -> runApplitoolsTest(visualCheck, Optional.of(screenshotConfiguration)));
+    }
+
+    private void runApplitoolsTest(ApplitoolsVisualCheck visualCheck, Optional<ScreenshotConfiguration> configuration)
+    {
+        runApplitoolsTest(() ->
+        {
+            Optional<ScreenshotParameters> screenshotParameters = screenshotParametersFactory.create(configuration);
+            visualCheck.setScreenshotParameters(screenshotParameters);
+            return visualCheck;
         });
     }
 
-    void runApplitoolsTest(ApplitoolsVisualCheck applitoolsVisualCheck)
+    void runApplitoolsTest(Supplier<ApplitoolsVisualCheck> applitoolsVisualCheckSupplier)
     {
-        execute(visualTestingService::run, () -> applitoolsVisualCheck, "applitools-visual-comparison.ftl");
+        execute(visualTestingService::run, applitoolsVisualCheckSupplier, "applitools-visual-comparison.ftl");
     }
 }

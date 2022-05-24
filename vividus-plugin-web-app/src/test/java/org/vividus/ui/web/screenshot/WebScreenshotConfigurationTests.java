@@ -14,25 +14,30 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.util;
+package org.vividus.ui.web.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+
+import java.time.Duration;
 
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.WebElement;
+import org.vividus.selenium.screenshot.CoordsProviderType;
 
-class ElementUtilsTests
+class WebScreenshotConfigurationTests
 {
+    private static final WebScreenshotConfiguration CONFIGURATION = new WebScreenshotConfiguration();
+
     @Test
-    void shouldReturnRelativeToParentWidthInPercents()
+    void shouldReturnWebDriverCoordsProviderAsDefaultOne()
     {
-        WebElement child = mock(WebElement.class);
-        WebElement parent = mock(WebElement.class);
-        when(child.getSize()).thenReturn(new Dimension(10, 0));
-        when(parent.getSize()).thenReturn(new Dimension(25, 0));
-        assertEquals(40, ElementUtils.getElementWidthInPerc(parent, child));
+        assertEquals(CoordsProviderType.CEILING, CONFIGURATION.getCoordsProvider());
+    }
+
+    @Test
+    void shouldConvertTimeoutToDuration()
+    {
+        assertEquals(Duration.ofMillis(500), CONFIGURATION.getScrollTimeout());
+        CONFIGURATION.setScrollTimeout("PT1S");
+        assertEquals(Duration.ofMillis(1000), CONFIGURATION.getScrollTimeout());
     }
 }

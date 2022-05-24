@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.screenshot.WebScreenshotConfiguration;
 import org.vividus.ui.web.action.WebJavascriptActions;
+import org.vividus.ui.web.screenshot.WebCutOptions;
 
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
@@ -48,7 +48,7 @@ class AdjustingScrollableElementAwareViewportPastingDecoratorTests
     private WebJavascriptActions javascriptActions;
 
     @Mock
-    private WebScreenshotConfiguration screenshotConfiguration;
+    private WebCutOptions webCutOptions;
 
     @Mock
     private ShootingStrategy shootingStrategy;
@@ -58,10 +58,10 @@ class AdjustingScrollableElementAwareViewportPastingDecoratorTests
     @BeforeEach
     void beforeEach()
     {
-        when(screenshotConfiguration.getWebHeaderToCut()).thenReturn(THE_ANSWER);
-        when(screenshotConfiguration.getWebFooterToCut()).thenReturn(THE_ANSWER);
+        when(webCutOptions.getWebHeaderToCut()).thenReturn(THE_ANSWER);
+        when(webCutOptions.getWebFooterToCut()).thenReturn(THE_ANSWER);
         strategy = new AdjustingScrollableElementAwareViewportPastingDecorator(shootingStrategy, scrollableElement,
-                javascriptActions, screenshotConfiguration);
+                javascriptActions, webCutOptions);
     }
 
     @Test

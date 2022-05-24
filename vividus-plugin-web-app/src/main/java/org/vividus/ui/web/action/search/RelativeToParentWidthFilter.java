@@ -24,13 +24,15 @@ import org.vividus.ui.web.util.ElementUtils;
 
 public class RelativeToParentWidthFilter implements IElementFilterAction
 {
+    public static final int ACCURACY = 2;
+
     @Override
     public boolean matches(WebElement element, String relativeToParentWidth)
     {
         int expectedRelativeToParentWidth = Integer.parseInt(relativeToParentWidth);
         WebElement parentElement = element.findElement(By.xpath(".."));
         return Math.abs(expectedRelativeToParentWidth - ElementUtils.getElementWidthInPerc(parentElement, element))
-                <= ElementUtils.ACCURACY;
+                <= ACCURACY;
     }
 
     @Override

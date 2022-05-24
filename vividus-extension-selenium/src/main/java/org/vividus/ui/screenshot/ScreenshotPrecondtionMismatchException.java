@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.util;
+package org.vividus.ui.screenshot;
 
-import org.openqa.selenium.WebElement;
-
-public final class ElementUtils
+public class ScreenshotPrecondtionMismatchException extends RuntimeException
 {
-    public static final double HUNDRED = 100;
+    private static final long serialVersionUID = 5274169341675249624L;
 
-    private ElementUtils()
+    public ScreenshotPrecondtionMismatchException(String message)
     {
-    }
-
-    public static long getElementWidthInPerc(WebElement parent, WebElement element)
-    {
-        double elementWidth = element.getSize().getWidth();
-        double parentWidth = parent.getSize().getWidth();
-        return Math.round(elementWidth / parentWidth * HUNDRED);
+        super(message);
     }
 }

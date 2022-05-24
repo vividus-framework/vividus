@@ -100,14 +100,17 @@
     <bean class="org.vividus.ui.mobile.action.MobileAppElementActions" />
 
     <bean class="org.vividus.selenium.mobileapp.screenshot.MobileAppAshotFactory" parent="abstractAshotFactory">
-        <property name="ashotConfigurations">
+        <property name="downscale" value="${mobile.screenshot.downscale}" />
+    </bean>
+
+    <bean id="screenshotParametersFactory" class="org.vividus.ui.mobileapp.screenshot.MobileAppScreenshotParametersFactory">
+        <property name="screenshotConfigurations">
             <bean factory-bean="propertyMapper" factory-method="readValues">
                 <constructor-arg value="mobile.screenshot.strategy." />
-                <constructor-arg value="org.vividus.selenium.screenshot.ScreenshotConfiguration"/>
+                <constructor-arg value="org.vividus.ui.screenshot.ScreenshotConfiguration"/>
             </bean>
         </property>
         <property name="shootingStrategy" value="${mobile.screenshot.strategy}" />
-        <property name="downscale" value="${mobile.screenshot.downscale}" />
     </bean>
 
     <bean id="mobileAppWebDriverManager" class="org.vividus.selenium.mobileapp.MobileAppWebDriverManager" parent="genericWebDriverManager"/>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ import java.util.function.BiFunction;
 
 import javax.inject.Inject;
 
-import org.vividus.selenium.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotParameters;
+import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.screenshot.IScreenshotIndexer;
@@ -30,14 +32,19 @@ import org.vividus.visual.screenshot.IScreenshotIndexer;
 public class VisualCheckFactory implements IVisualCheckFactory
 {
     private Map<String, IScreenshotIndexer> indexers;
-
     private Optional<String> screenshotIndexer;
+
+    private final ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
+
+    public VisualCheckFactory(ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory)
+    {
+        this.screenshotParametersFactory = screenshotParametersFactory;
+    }
 
     @Override
     public VisualCheck create(String baselineName, VisualActionType actionType)
     {
-        String indexedBaselineName = createIndexedBaseline(baselineName);
-        return new VisualCheck(indexedBaselineName, actionType);
+        return create(baselineName, actionType, Optional.empty());
     }
 
     private String createIndexedBaseline(String baselineName)
@@ -52,16 +59,25 @@ public class VisualCheckFactory implements IVisualCheckFactory
             BiFunction<String, VisualActionType, T> checkFactory)
     {
         String indexedBaselineName = createIndexedBaseline(baselineName);
-        return checkFactory.apply(indexedBaselineName, actionType);
+        T check = checkFactory.apply(indexedBaselineName, actionType);
+        withScreenshotConfiguration(check, Optional.empty());
+        return check;
     }
 
     @Override
     public VisualCheck create(String baselineName, VisualActionType actionType,
-            ScreenshotConfiguration configuration)
+            Optional<ScreenshotConfiguration> parameters)
     {
-        VisualCheck check = create(baselineName, actionType);
-        check.setScreenshotConfiguration(Optional.of(configuration));
+        String indexedBaselineName = createIndexedBaseline(baselineName);
+        VisualCheck check = new VisualCheck(indexedBaselineName, actionType);
+        withScreenshotConfiguration(check, parameters);
         return check;
+    }
+
+    private void withScreenshotConfiguration(VisualCheck check, Optional<ScreenshotConfiguration> configuration)
+    {
+        Optional<ScreenshotParameters> screenshotParameters = screenshotParametersFactory.create(configuration);
+        check.setScreenshotParameters(screenshotParameters);
     }
 
     public void setScreenshotIndexer(Optional<String> screenshotIndexer)

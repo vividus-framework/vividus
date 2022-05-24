@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ package org.vividus.selenium.screenshot;
 import java.util.Optional;
 
 import org.openqa.selenium.SearchContext;
+import org.vividus.ui.screenshot.ScreenshotParameters;
 
-public interface AshotScreenshotTaker<T extends ScreenshotConfiguration>
+public interface AshotScreenshotTaker<T extends ScreenshotParameters>
 {
     ru.yandex.qatools.ashot.Screenshot takeAshotScreenshot(SearchContext searchContext,
             Optional<T> screenshotConfiguration);
