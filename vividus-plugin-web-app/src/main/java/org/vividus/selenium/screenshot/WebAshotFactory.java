@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,14 @@ import org.vividus.selenium.screenshot.strategies.ScreenshotShootingStrategy;
 import org.vividus.selenium.screenshot.strategies.SimpleScreenshotShootingStrategy;
 import org.vividus.selenium.screenshot.strategies.StickyHeaderCutStrategy;
 import org.vividus.ui.web.action.WebJavascriptActions;
+import org.vividus.ui.web.screenshot.WebCutOptions;
+import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.shooting.DebuggingViewportPastingDecorator;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
-public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotConfiguration>
+public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameters>
 {
     private final ScreenshotDebugger screenshotDebugger;
     private final IScrollbarHandler scrollbarHandler;
@@ -47,48 +49,49 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotConfigura
     }
 
     @Override
-    public AShot create(Optional<WebScreenshotConfiguration> screenshotConfiguration)
+    public AShot create(Optional<WebScreenshotParameters> screenshotParameters)
     {
-        return getAshotConfiguration(screenshotConfiguration, (c, b) -> c)
-                      .map(ashotConfiguration -> ashotConfiguration.getShootingStrategy()
+        return screenshotParameters.map(ashotParameters -> ashotParameters.getShootingStrategy()
                                                                    .map(this::createAShot)
-                                                                   .orElseGet(() -> createAShot(ashotConfiguration)))
+                                                                   .orElseGet(() -> createAShot(ashotParameters)))
                       .orElseGet(() -> createAShot(screenshotShootingStrategy));
     }
 
-    private AShot createAShot(WebScreenshotConfiguration screenshotConfiguration)
+    private AShot createAShot(WebScreenshotParameters screenshotParameters)
     {
         ShootingStrategy decorated = getBaseShootingStrategy();
 
-        decorated = configureNativePartialsToCut(screenshotConfiguration.getNativeHeaderToCut(),
-                screenshotConfiguration, decorated);
+        decorated = configureNativePartialsToCut(screenshotParameters.getNativeHeaderToCut(),
+                screenshotParameters, decorated);
 
-        int footerToCut = screenshotConfiguration.getWebFooterToCut();
-        int headerToCut = screenshotConfiguration.getWebHeaderToCut();
+        WebCutOptions webCutOptions = screenshotParameters.getWebCutOptions();
+        int footerToCut = webCutOptions.getWebFooterToCut();
+        int headerToCut = webCutOptions.getWebHeaderToCut();
         if (anyNotZero(footerToCut, headerToCut))
         {
             decorated = cutting(decorated, new StickyHeaderCutStrategy(headerToCut, footerToCut));
         }
 
         decorated = ((DebuggingViewportPastingDecorator) decorateWithViewportPasting(decorated,
-                screenshotConfiguration))
+                screenshotParameters))
                 .withDebugger(screenshotDebugger);
 
-        return new ScrollbarHidingAshot(screenshotConfiguration.getScrollableElement().get(), scrollbarHandler)
+        return new ScrollbarHidingAshot(screenshotParameters.getScrollableElement(), scrollbarHandler)
                 .shootingStrategy(decorated)
-                .coordsProvider(screenshotConfiguration.getCoordsProvider().create(javascriptActions));
+                .coordsProvider(screenshotParameters.getCoordsProvider().create(javascriptActions));
     }
 
     private ShootingStrategy decorateWithViewportPasting(ShootingStrategy toDecorate,
-            WebScreenshotConfiguration screenshotConfiguration)
+            WebScreenshotParameters screenshotParameters)
     {
-        return ((DebuggingViewportPastingDecorator) screenshotConfiguration.getScrollableElement().get()
+        WebCutOptions webCutOptions = screenshotParameters.getWebCutOptions();
+        return ((DebuggingViewportPastingDecorator) screenshotParameters.getScrollableElement()
                        .map(e -> (ShootingStrategy) new AdjustingScrollableElementAwareViewportPastingDecorator(
-                               toDecorate, e, javascriptActions, screenshotConfiguration))
+                               toDecorate, e, javascriptActions, webCutOptions))
                        .orElseGet(() ->
-                       new AdjustingViewportPastingDecorator(toDecorate, screenshotConfiguration.getWebHeaderToCut(),
-                               screenshotConfiguration.getWebFooterToCut())))
-                       .withScrollTimeout(((Long) screenshotConfiguration.getScrollTimeout().toMillis()).intValue());
+                       new AdjustingViewportPastingDecorator(toDecorate, webCutOptions.getWebHeaderToCut(),
+                               webCutOptions.getWebFooterToCut())))
+                       .withScrollTimeout(((Long) screenshotParameters.getScrollTimeout().toMillis()).intValue());
     }
 
     private AShot createAShot(String screenshotShootingStrategyName)

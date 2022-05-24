@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.util.ResourceUtils;
 
 import ru.yandex.qatools.ashot.AShot;
@@ -72,7 +73,7 @@ class AbstractScreenshotTakerTests
     @Mock private TakesScreenshot takesScreenshot;
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private ScreenshotDebugger screenshotDebugger;
-    @Mock private AshotFactory<ScreenshotConfiguration> ashotFactory;
+    @Mock private AshotFactory<ScreenshotParameters> ashotFactory;
     @InjectMocks private TestScreenshotTaker testScreenshotTaker;
 
     @AfterEach
@@ -161,13 +162,13 @@ class AbstractScreenshotTakerTests
         verify(screenshotDebugger).debug(TestScreenshotTaker.class, AFTER_A_SHOT, null);
     }
 
-    private static class TestScreenshotTaker extends AbstractScreenshotTaker<ScreenshotConfiguration>
+    private static class TestScreenshotTaker extends AbstractScreenshotTaker<ScreenshotParameters>
     {
         private byte[] screenshot;
 
         TestScreenshotTaker(IWebDriverProvider webDriverProvider,
                 IScreenshotFileNameGenerator screenshotFileNameGenerator,
-                AshotFactory<ScreenshotConfiguration> ashotFactory, ScreenshotDebugger screenshotDebugger)
+                AshotFactory<ScreenshotParameters> ashotFactory, ScreenshotDebugger screenshotDebugger)
         {
             super(webDriverProvider, screenshotFileNameGenerator, ashotFactory, screenshotDebugger);
         }

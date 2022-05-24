@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 
 package org.vividus.visual;
 
+import java.util.Optional;
 import java.util.function.BiFunction;
 
-import org.vividus.selenium.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 
@@ -26,7 +27,8 @@ public interface IVisualCheckFactory
 {
     VisualCheck create(String baselineName, VisualActionType actionType);
 
-    VisualCheck create(String baselineName, VisualActionType actionType, ScreenshotConfiguration configuration);
+    VisualCheck create(String baselineName, VisualActionType actionType,
+            Optional<ScreenshotConfiguration> configuration);
 
     <T extends VisualCheck> T create(String baselineName, VisualActionType actionType, BiFunction<String,
             VisualActionType, T> checkFactory);

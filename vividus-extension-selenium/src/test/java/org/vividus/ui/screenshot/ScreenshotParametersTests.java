@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,23 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.screenshot;
+package org.vividus.ui.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.time.Duration;
+import java.util.Optional;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class ScreenshotConfigurationTests
+class ScreenshotParametersTests
 {
-    private static final WebScreenshotConfiguration CONFIGURATION = new WebScreenshotConfiguration();
-
     @Test
-    void shouldReturnWebDriverCoordsProviderAsDefaultOne()
+    void shouldProvideDefalutValues()
     {
-        assertEquals(CoordsProviderType.CEILING, CONFIGURATION.getCoordsProvider());
-    }
-
-    @Test
-    void shouldConvertTimeoutToDuration()
-    {
-        assertEquals(Duration.ofMillis(500), CONFIGURATION.getScrollTimeout());
-        CONFIGURATION.setScrollTimeout("PT1S");
-        assertEquals(Duration.ofMillis(1000), CONFIGURATION.getScrollTimeout());
+        ScreenshotParameters screenshotParameters = new ScreenshotParameters();
+        Assertions.assertAll(() -> assertEquals(0, screenshotParameters.getNativeFooterToCut()),
+                             () -> assertEquals(Optional.empty(),
+                                     screenshotParameters.getShootingStrategy()));
     }
 }

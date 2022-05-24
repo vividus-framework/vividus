@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.screenshot;
+package org.vividus.ui.screenshot;
 
 import java.util.Optional;
 
-public class ScreenshotConfiguration
+public class ScreenshotParameters
 {
     private int nativeFooterToCut;
     private Optional<String> shootingStrategy = Optional.empty();

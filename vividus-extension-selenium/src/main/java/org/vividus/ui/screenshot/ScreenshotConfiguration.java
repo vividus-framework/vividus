@@ -14,22 +14,32 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.util;
+package org.vividus.ui.screenshot;
 
-import org.openqa.selenium.WebElement;
+import java.util.Optional;
 
-public final class ElementUtils
+public class ScreenshotConfiguration
 {
-    public static final double HUNDRED = 100;
+    private int nativeFooterToCut;
+    private Optional<String> shootingStrategy = Optional.empty();
 
-    private ElementUtils()
+    public int getNativeFooterToCut()
     {
+        return nativeFooterToCut;
     }
 
-    public static long getElementWidthInPerc(WebElement parent, WebElement element)
+    public void setNativeFooterToCut(int nativeFooterToCut)
     {
-        double elementWidth = element.getSize().getWidth();
-        double parentWidth = parent.getSize().getWidth();
-        return Math.round(elementWidth / parentWidth * HUNDRED);
+        this.nativeFooterToCut = nativeFooterToCut;
+    }
+
+    public Optional<String> getShootingStrategy()
+    {
+        return shootingStrategy;
+    }
+
+    public void setShootingStrategy(Optional<String> shootingStrategy)
+    {
+        this.shootingStrategy = shootingStrategy;
     }
 }

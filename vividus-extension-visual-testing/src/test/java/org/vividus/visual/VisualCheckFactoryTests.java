@@ -26,15 +26,25 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import org.junit.jupiter.api.Test;
-import org.vividus.selenium.screenshot.ScreenshotConfiguration;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.ui.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotParameters;
+import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.screenshot.IScreenshotIndexer;
 
+@ExtendWith(MockitoExtension.class)
 class VisualCheckFactoryTests
 {
     private static final String NAME = "name";
-    private final VisualCheckFactory visualCheckFactory = new VisualCheckFactory();
+    private static final String INDEXED_NAME = NAME + " [0]";
+
+    @Mock private ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
+    @InjectMocks private VisualCheckFactory visualCheckFactory;
 
     @Test
     void shouldCreateVisualCheckWithoutIndexedBaseline()
@@ -47,24 +57,39 @@ class VisualCheckFactoryTests
             () -> assertEquals(VisualActionType.COMPARE_AGAINST, check.getAction()),
             () -> assertEquals(OptionalInt.empty(), check.getAcceptableDiffPercentage()),
             () -> assertEquals(Map.of(), check.getElementsToIgnore()),
-            () -> assertEquals(Optional.empty(), check.getScreenshotConfiguration()));
+            () -> assertEquals(Optional.empty(), check.getScreenshotParameters()));
+    }
+
+    @Test
+    void shouldCreateVisualCheckFromInputFactoryWithIndexedBaseline()
+    {
+        mockIndexer();
+        VisualCheck check = visualCheckFactory.create(NAME, VisualActionType.COMPARE_AGAINST, VisualCheck::new);
+        assertAll(
+            () -> assertEquals(INDEXED_NAME, check.getBaselineName()),
+            () -> assertEquals(VisualActionType.COMPARE_AGAINST, check.getAction())
+        );
     }
 
     @Test
     void shouldCreateVisualCheckWithIndexedBaseline()
     {
-        visualCheckFactory.setScreenshotIndexer(Optional.of(NAME));
-        IScreenshotIndexer indexer = mock(IScreenshotIndexer.class);
-        visualCheckFactory.setIndexers(Map.of(NAME, indexer));
-        String indexedName = "name [0]";
-        when(indexer.index(NAME)).thenReturn(indexedName);
+        mockIndexer();
         VisualCheck check = visualCheckFactory.create(NAME, VisualActionType.COMPARE_AGAINST);
         assertAll(
-            () -> assertEquals(indexedName, check.getBaselineName()),
+            () -> assertEquals(INDEXED_NAME, check.getBaselineName()),
             () -> assertEquals(VisualActionType.COMPARE_AGAINST, check.getAction()),
             () -> assertEquals(OptionalInt.empty(), check.getAcceptableDiffPercentage()),
             () -> assertEquals(Map.of(), check.getElementsToIgnore()),
-            () -> assertEquals(Optional.empty(), check.getScreenshotConfiguration()));
+            () -> assertEquals(Optional.empty(), check.getScreenshotParameters()));
+    }
+
+    private void mockIndexer()
+    {
+        visualCheckFactory.setScreenshotIndexer(Optional.of(NAME));
+        IScreenshotIndexer indexer = mock(IScreenshotIndexer.class);
+        visualCheckFactory.setIndexers(Map.of(NAME, indexer));
+        when(indexer.index(NAME)).thenReturn(INDEXED_NAME);
     }
 
     @Test
@@ -73,13 +98,16 @@ class VisualCheckFactoryTests
         visualCheckFactory.setScreenshotIndexer(Optional.empty());
         visualCheckFactory.setIndexers(Map.of());
         ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
+        ScreenshotParameters screenshotParameters = mock(ScreenshotParameters.class);
+        when(screenshotParametersFactory.create(Optional.of(screenshotConfiguration)))
+                .thenReturn(Optional.of(screenshotParameters));
         VisualCheck check = visualCheckFactory.create(NAME, VisualActionType.COMPARE_AGAINST,
-                screenshotConfiguration);
+                Optional.of(screenshotConfiguration));
         assertAll(
             () -> assertEquals(NAME, check.getBaselineName()),
             () -> assertEquals(VisualActionType.COMPARE_AGAINST, check.getAction()),
             () -> assertEquals(OptionalInt.empty(), check.getAcceptableDiffPercentage()),
             () -> assertEquals(Map.of(), check.getElementsToIgnore()),
-            () -> assertEquals(Optional.of(screenshotConfiguration), check.getScreenshotConfiguration()));
+            () -> assertEquals(Optional.of(screenshotParameters), check.getScreenshotParameters()));
     }
 }

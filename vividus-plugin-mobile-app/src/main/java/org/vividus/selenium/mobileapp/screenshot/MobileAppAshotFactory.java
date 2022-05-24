@@ -24,13 +24,13 @@ import java.util.Optional;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
 import org.vividus.selenium.mobileapp.screenshot.util.CoordsUtils;
 import org.vividus.selenium.screenshot.AbstractAshotFactory;
-import org.vividus.selenium.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotParameters;
 
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
-public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotConfiguration>
+public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotParameters>
 {
     private final MobileAppWebDriverManager mobileAppWebDriverManager;
     private final CoordsProvider coordsProvider;
@@ -43,21 +43,11 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotConfig
     }
 
     @Override
-    public AShot create(Optional<ScreenshotConfiguration> screenshotConfiguration)
+    public AShot create(Optional<ScreenshotParameters> screenshotParameters)
     {
-        ScreenshotConfiguration ashotConfig = getAshotConfiguration(screenshotConfiguration, (c, b) -> {
-            if (c.getNativeFooterToCut() == 0)
-            {
-                c.setNativeFooterToCut(b.getNativeFooterToCut());
-            }
-            if (c.getShootingStrategy().isEmpty())
-            {
-                c.setShootingStrategy(b.getShootingStrategy());
-            }
-            return c;
-        }).get();
+        ScreenshotParameters ashotParameters = screenshotParameters.get();
 
-        ShootingStrategy strategy = getStrategyBy(ashotConfig.getShootingStrategy().get())
+        ShootingStrategy strategy = getStrategyBy(ashotParameters.getShootingStrategy().get())
             .getDecoratedShootingStrategy(getBaseShootingStrategy());
         strategy = downscale ? scaling(strategy, (float) this.getDpr()) : strategy;
 
@@ -66,7 +56,7 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotConfig
         {
             statusBarSize = CoordsUtils.scale(statusBarSize, getDpr());
         }
-        strategy = configureNativePartialsToCut(statusBarSize, ashotConfig, strategy);
+        strategy = configureNativePartialsToCut(statusBarSize, ashotParameters, strategy);
         return new AShot().shootingStrategy(strategy).coordsProvider(coordsProvider);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 import org.vividus.util.ResourceUtils;
 
 import ru.yandex.qatools.ashot.AShot;
@@ -77,7 +78,7 @@ class WebScreenshotTakerTests
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private IWebElementHighlighter webElementHighlighter;
-    @Mock private AshotFactory<WebScreenshotConfiguration> ashotFactory;
+    @Mock private AshotFactory<WebScreenshotParameters> ashotFactory;
     @Mock private ScreenshotDebugger screenshotDebugger;
     @Mock(extraInterfaces = JavascriptExecutor.class)
     private WebDriver webDriver;
@@ -211,13 +212,13 @@ class WebScreenshotTakerTests
     @Test
     void shouldTakeAShotScreenshotWithCustomConfiguration() throws IOException
     {
-        WebScreenshotConfiguration configurationMock = mock(WebScreenshotConfiguration.class);
-        Optional<WebScreenshotConfiguration> screenshotConfiguration = Optional.of(configurationMock);
-        when(ashotFactory.create(Optional.of(configurationMock))).thenReturn(ASHOT);
+        WebScreenshotParameters parametersMock = mock(WebScreenshotParameters.class);
+        Optional<WebScreenshotParameters> screenshotParameters = Optional.of(parametersMock);
+        when(ashotFactory.create(Optional.of(parametersMock))).thenReturn(ASHOT);
         when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
         assertArrayEquals(ImageTool.toByteArray(SCREENSHOT),
                 ImageTool.toByteArray(screenshotTaker.takeAshotScreenshot(webDriver,
-                        screenshotConfiguration)));
+                        screenshotParameters)));
         verify(ASHOT).takeScreenshot(webDriver);
         verify(screenshotDebugger).debug(WebScreenshotTaker.class, "After_AShot", IMAGE);
     }

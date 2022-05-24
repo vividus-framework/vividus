@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
-package org.vividus.mobileapp.converter;
+package org.vividus.jackson.databind.ui.web;
 
+import java.io.IOException;
+
+import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.vividus.converter.ui.AbstractExamplesTableToScreenshotConfigurationConverter;
-import org.vividus.ui.screenshot.ScreenshotConfiguration;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.util.LocatorConversionUtils;
 
 @Named
-public class ExamplesTableToScreenshotConfigurationConverter
-        extends AbstractExamplesTableToScreenshotConfigurationConverter<ScreenshotConfiguration>
+public class LocatorDeserializer extends JsonDeserializer<Locator>
 {
-    protected ExamplesTableToScreenshotConfigurationConverter()
+    @Inject private LocatorConversionUtils conversionUtils;
+
+    @Override
+    public Locator deserialize(JsonParser p, DeserializationContext ctxt) throws IOException
     {
-        super(ScreenshotConfiguration.class);
+        return conversionUtils.convertToLocator(p.getText());
     }
 }

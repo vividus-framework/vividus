@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.util;
+package org.vividus.ui.web.screenshot;
 
-import org.openqa.selenium.WebElement;
-
-public final class ElementUtils
+public class WebCutOptions
 {
-    public static final double HUNDRED = 100;
+    private final int webHeaderToCut;
+    private final int webFooterToCut;
 
-    private ElementUtils()
+    public WebCutOptions(int webHeaderToCut, int webFooterToCut)
     {
+        this.webHeaderToCut = webHeaderToCut;
+        this.webFooterToCut = webFooterToCut;
     }
 
-    public static long getElementWidthInPerc(WebElement parent, WebElement element)
+    public int getWebHeaderToCut()
     {
-        double elementWidth = element.getSize().getWidth();
-        double parentWidth = parent.getSize().getWidth();
-        return Math.round(elementWidth / parentWidth * HUNDRED);
+        return webHeaderToCut;
+    }
+
+    public int getWebFooterToCut()
+    {
+        return webFooterToCut;
     }
 }

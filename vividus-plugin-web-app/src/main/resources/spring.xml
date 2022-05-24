@@ -23,8 +23,6 @@
         <property name="webDriverType" value="${selenium.browser}" />
     </bean>
 
-    <bean id="elementUtils" class="org.vividus.ui.web.util.ElementUtils" />
-
     <bean class="org.vividus.selenium.screenshot.WebAdjustingCoordsProvider" />
 
     <bean class="org.vividus.selenium.screenshot.WebScreenshotTaker" parent="abstractScreenshotTaker">
@@ -34,12 +32,15 @@
     </bean>
 
     <bean class="org.vividus.selenium.screenshot.WebAshotFactory" parent="abstractAshotFactory">
-        <property name="shootingStrategy" value="${web.screenshot.strategy}" />
         <property name="screenshotShootingStrategy" value="${selenium.screenshot.strategy}" />
-        <property name="ashotConfigurations">
+    </bean>
+
+    <bean id="screenshotParametersFactory" class="org.vividus.ui.web.screenshot.WebScreenshotParametersFactory">
+        <property name="shootingStrategy" value="${web.screenshot.strategy}" />
+        <property name="screenshotConfigurations">
             <bean factory-bean="propertyMapper" factory-method="readValues">
                 <constructor-arg value="web.screenshot.strategy." />
-                <constructor-arg value="org.vividus.selenium.screenshot.WebScreenshotConfiguration"/>
+                <constructor-arg value="org.vividus.ui.web.screenshot.WebScreenshotConfiguration"/>
             </bean>
         </property>
     </bean>

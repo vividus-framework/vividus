@@ -45,7 +45,6 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,6 +53,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.ui.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.util.ResourceUtils;
 import org.vividus.visual.VisualCheckFactory;
 import org.vividus.visual.model.VisualActionType;
@@ -82,29 +83,22 @@ class VisualTestingEngineTests
 
     private static final String LOG_MESSAGE = "The {} visual difference percentage is {}% , but actual was {}%";
 
-    private static final VisualCheckFactory FACTORY = new VisualCheckFactory();
-
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(VisualTestingEngine.class);
 
-    @Mock
-    private IBaselineRepository baselineRepository;
+    @Mock private ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
+    @Mock private IBaselineRepository baselineRepository;
+    @Mock private ScreenshotProvider screenshotProvider;
+    @InjectMocks private VisualTestingEngine visualTestingEngine;
 
-    @Mock
-    private ScreenshotProvider screenshotProvider;
-
-    @InjectMocks
-    private VisualTestingEngine visualTestingEngine;
-
-    @BeforeAll
-    static void beforeAll()
-    {
-        FACTORY.setScreenshotIndexer(Optional.empty());
-        FACTORY.setIndexers(Map.of());
-    }
+    private VisualCheckFactory factory;
 
     @BeforeEach
     void init()
     {
+        factory = new VisualCheckFactory(screenshotParametersFactory);
+        when(screenshotParametersFactory.create(Optional.empty())).thenReturn(Optional.empty());
+        factory.setScreenshotIndexer(Optional.empty());
+        factory.setIndexers(Map.of());
         visualTestingEngine.setAcceptableDiffPercentage(0);
     }
 
@@ -127,7 +121,7 @@ class VisualTestingEngineTests
 
     private VisualCheck createVisualCheck(VisualActionType actionType)
     {
-        return FACTORY.create(BASELINE, actionType);
+        return factory.create(BASELINE, actionType);
     }
 
     @ParameterizedTest
@@ -178,7 +172,7 @@ class VisualTestingEngineTests
     void shouldReturnVisualCheckResultWithBaselineAndCheckpointUsingAcceptableDiffPercentage() throws IOException
     {
         when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
-        VisualCheck visualCheck = FACTORY.create(BASELINE, VisualActionType.COMPARE_AGAINST);
+        VisualCheck visualCheck = factory.create(BASELINE, VisualActionType.COMPARE_AGAINST);
         visualCheck.setAcceptableDiffPercentage(OptionalInt.of(50));
         mockGetCheckpointScreenshot(visualCheck);
         VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);

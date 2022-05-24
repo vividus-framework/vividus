@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import java.util.OptionalInt;
 import java.util.Set;
 
 import org.openqa.selenium.SearchContext;
-import org.vividus.selenium.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.visual.screenshot.IgnoreStrategy;
 
 public class VisualCheck
@@ -33,7 +33,7 @@ public class VisualCheck
     private OptionalInt acceptableDiffPercentage = OptionalInt.empty();
     private OptionalInt requiredDiffPercentage = OptionalInt.empty();
     private Map<IgnoreStrategy, Set<Locator>> elementsToIgnore = Map.of();
-    private Optional<ScreenshotConfiguration> screenshotConfiguration = Optional.empty();
+    private Optional<ScreenshotParameters> screenshotParameters = Optional.empty();
     private SearchContext searchContext;
 
     public VisualCheck()
@@ -77,14 +77,14 @@ public class VisualCheck
         return action;
     }
 
-    public Optional<ScreenshotConfiguration> getScreenshotConfiguration()
+    public Optional<ScreenshotParameters> getScreenshotParameters()
     {
-        return screenshotConfiguration;
+        return screenshotParameters;
     }
 
-    public void setScreenshotConfiguration(Optional<ScreenshotConfiguration> screenshotConfiguration)
+    public void setScreenshotParameters(Optional<ScreenshotParameters> screenshotParameters)
     {
-        this.screenshotConfiguration = screenshotConfiguration;
+        this.screenshotParameters = screenshotParameters;
     }
 
     public SearchContext getSearchContext()

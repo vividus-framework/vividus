@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.screenshot.ScreenshotPrecondtionMismatchException;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
@@ -45,16 +46,24 @@ public abstract class AbstractVisualSteps
             Function<T, VisualCheckResult> checkResultProvider,
             Supplier<T> visualCheckFactory, String templateName)
     {
-        uiContext.getOptionalSearchContext().ifPresent(searchContext -> {
-            T visualCheck = visualCheckFactory.get();
-            visualCheck.setSearchContext(searchContext);
-
-            VisualCheckResult result = checkResultProvider.apply(visualCheck);
-
-            if (null != result)
+        uiContext.getOptionalSearchContext().ifPresent(searchContext ->
+        {
+            try
             {
-                attachmentPublisher.publishAttachment(templateName, Map.of("result", result), "Visual comparison");
-                verifyResult(result);
+                T visualCheck = visualCheckFactory.get();
+                visualCheck.setSearchContext(searchContext);
+
+                VisualCheckResult result = checkResultProvider.apply(visualCheck);
+
+                if (null != result)
+                {
+                    attachmentPublisher.publishAttachment(templateName, Map.of("result", result), "Visual comparison");
+                    verifyResult(result);
+                }
+            }
+            catch (ScreenshotPrecondtionMismatchException e)
+            {
+                softAssert.recordFailedAssertion(e);
             }
         });
     }
