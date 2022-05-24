@@ -20,6 +20,8 @@ import static org.hamcrest.Matchers.containsString;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -29,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
+import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
@@ -40,6 +43,7 @@ import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
+import org.vividus.variable.VariableScope;
 
 public class CodeSteps
 {
@@ -48,6 +52,7 @@ public class CodeSteps
     @Inject private IBaseValidations baseValidations;
     @Inject private WebJavascriptActions javascriptActions;
     @Inject private ISoftAssert softAssert;
+    @Inject private VariableContext variableContext;
 
     /**
      * Executes JavaScript code with specified arguments
@@ -164,6 +169,62 @@ public class CodeSteps
         locator.getSearchParameters().setVisibility(Visibility.ALL);
         return baseValidations.assertIfNumberOfElementsFound("The number of found invisible elements",
                     locator, quantity, comparisonRule);
+    }
+
+
+    /**
+     * Executes passed JavaScript code on the opened page
+     * and saves returned value into the <b>variable</b>
+     *
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName A name under which the value should be saved
+     * @param jsCode       Code in javascript that returns some value as result
+     *                     (e.g. var a=1; return a;)
+     */
+    @When("I execute javascript `$jsCode` and save result to $scopes variable `$variableName`")
+    public void saveValueFromJS(String jsCode, Set<VariableScope> scopes, String variableName)
+    {
+        assertAndSaveResult(() -> javascriptActions.executeScript(jsCode), scopes, variableName);
+    }
+
+    /**
+     * Executes passed async javascript code on the opened page
+     * and saves returned value into the <b>variable</b>
+     * See {@link org.openqa.selenium.JavascriptExecutor#executeAsyncScript(String, Object[])}
+     * <p>
+     *
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName A name under which the value should be saved
+     * @param jsCode       Code in javascript that returns some value as result
+     *                     (e.g. var a=1; return a;)
+     */
+    @When("I execute async javascript `$jsCode` and save result to $scopes variable `$variableName`")
+    public void saveValueFromAsyncJS(String jsCode, Set<VariableScope> scopes, String variableName)
+    {
+        assertAndSaveResult(() -> javascriptActions.executeAsyncScript(jsCode), scopes, variableName);
+    }
+
+    private void assertAndSaveResult(Supplier<Object> resultProvider, Set<VariableScope> scopes, String variableName)
+    {
+        Object result = resultProvider.get();
+        if (softAssert.assertNotNull("Returned result is not null", result))
+        {
+            variableContext.putVariable(scopes, variableName, result);
+        }
     }
 
     public void setJavascriptActions(WebJavascriptActions javascriptActions)

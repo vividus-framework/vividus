@@ -54,8 +54,6 @@ import org.vividus.variable.VariableScope;
 @ExtendWith(MockitoExtension.class)
 class SetVariableStepsTests
 {
-    private static final String JS_RESULT_ASSERTION_MESSAGE = "Returned result is not null";
-    private static final String JS_CODE = "return 'value'";
     private static final String THE_SRC_VALUE_WAS_FOUND = "The 'src' attribute value was found";
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
     private static final String NAME = "name";
@@ -203,40 +201,6 @@ class SetVariableStepsTests
         when(mockedTargetLocator.frame(videoFrame)).thenReturn(webDriver);
         setVariableSteps.saveUrlValueOfVideoWithName(NAME, VARIABLE_SCOPE, URL_VARIABLE);
         verify(variableContext).putVariable(VARIABLE_SCOPE, URL_VARIABLE, null);
-    }
-
-    @Test
-    void testGettingValueFromJS()
-    {
-        when(javascriptActions.executeScript(JS_CODE)).thenReturn(VALUE);
-        when(softAssert.assertNotNull(JS_RESULT_ASSERTION_MESSAGE, VALUE)).thenReturn(true);
-        setVariableSteps.saveValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
-        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, VALUE);
-    }
-
-    @Test
-    void testGettingValueFromJSNullIsReturned()
-    {
-        setVariableSteps.saveValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
-        verify(softAssert).assertNotNull(JS_RESULT_ASSERTION_MESSAGE, null);
-        verifyNoInteractions(variableContext);
-    }
-
-    @Test
-    void testGettingValueFromAsyncJS()
-    {
-        when(javascriptActions.executeAsyncScript(JS_CODE)).thenReturn(VALUE);
-        when(softAssert.assertNotNull(JS_RESULT_ASSERTION_MESSAGE, VALUE)).thenReturn(true);
-        setVariableSteps.saveValueFromAsyncJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
-        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, VALUE);
-    }
-
-    @Test
-    void testGettingValueFromAsyncJSNullIsReturned()
-    {
-        setVariableSteps.saveValueFromAsyncJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
-        verify(softAssert).assertNotNull(JS_RESULT_ASSERTION_MESSAGE, null);
-        verifyNoInteractions(variableContext);
     }
 
     @Test

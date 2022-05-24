@@ -970,3 +970,52 @@ When I set browser command line arguments to `$argsString`
 When I set browser command line arguments to `--use-fake-ui-for-media-stream --use-file-for-fake-video-capture=${videoStorage}/${video1}.y4m --use-fake-device-for-media-stream`
 Given I am on the main application page
 ----
+
+=== Code steps
+==== Execute JavaScript and save result.
+
+https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html[Executes JavaScript] code and saves result into variable.
+
+[source,gherkin]
+----
+When I execute javascript `$jsCode` and save result to $scopes variable `$variableName`
+----
+* `$jsCode` - Any JavaScript code. In order to save a result https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/return[return] statement should be used.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to save the cookie value.
+
+.Validate timings
+[source,gherkin]
+----
+Given I am on a page with the URL 'http://vividus-test-site.herokuapp.com/mouseEvents.html'
+When I execute javascript `return JSON.stringify(window.performance.timing)` and save result to scenario variable `timings`
+Then number of JSON elements from `${timings}` by JSON path `$.connectStart` is = 1
+----
+
+==== Execute async JavaScript and save result.
+
+https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html[Executes async JavaScript] code and saves result into variable.
+
+[source,gherkin]
+----
+When I execute async javascript `$jsCode` and save result to $scopes variable `$variableName`
+----
+* `$jsCode` - Any JavaScript code. In order to save a result https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/return[return] statement should be used.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to save the cookie value.
+
+.Validate response
+[source,gherkin]
+----
+When I execute async javascript `
+var callback = arguments[arguments.length - 1];
+var xhr = new XMLHttpRequest();
+xhr.open('GET', '/resource/data.json', true);
+xhr.onreadystatechange = function() {
+  if (xhr.readyState == 4) {
+    callback(xhr.responseText);
+  }
+};
+xhr.send();` and save result to scenario variable `response`
+Then `${response}` matcher `.+`
+----
