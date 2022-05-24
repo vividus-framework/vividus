@@ -27,10 +27,10 @@ import org.vividus.variable.DynamicVariableCalculationResult;
 public abstract class AbstractHttpResponseDynamicVariable implements DynamicVariable
 {
     private final HttpTestContext httpTestContext;
-    private final Function<HttpResponse, String> valueMapper;
+    private final Function<HttpResponse, Object> valueMapper;
 
     protected AbstractHttpResponseDynamicVariable(HttpTestContext httpTestContext,
-            Function<HttpResponse, String> valueMapper)
+            Function<HttpResponse, Object> valueMapper)
     {
         this.httpTestContext = httpTestContext;
         this.valueMapper = valueMapper;

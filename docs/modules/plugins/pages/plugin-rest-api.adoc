@@ -141,6 +141,42 @@ https://www.ietf.org/rfc/rfc3986.txt[RFC 3986].
 
 |===
 
+== xref:commons:variables.adoc[Dynamic variables]
+
+=== Response
+Provides payload of the latest response as string.
+
+==== *Variable name*
+
+[source,gherkin]
+----
+${response}
+----
+
+.Validate response matches pattern
+[source,gherkin]
+----
+Then `${response}` matches `.+Home.+`
+----
+
+=== Response as binary data
+Provides payload of the latest response body as binary data.
+
+==== *Variable name*
+
+[source,gherkin]
+----
+${response-as-bytes}
+----
+
+.Save excel into temp folder
+[source,gherkin]
+----
+When I issue a HTTP GET request for a resource with the URL 'https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true'
+Then the response code is = '200'
+When I create temporary file with name `excel` and content `${response-as-bytes}` and put path to SCENARIO variable `excelPath`
+----
+
 == HTTP Steps
 
 === Set HTTP request configuration
