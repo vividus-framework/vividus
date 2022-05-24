@@ -19,7 +19,6 @@ package org.vividus.steps.ui.web;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebDriver;
@@ -223,60 +222,6 @@ public class SetVariableSteps
             }
             getWebDriver().switchTo().defaultContent();
             softAssert.recordFailedAssertion(String.format("A video with the name '%s' was not found", name));
-        }
-    }
-
-    /**
-     * Performs passed javascript code on the opened page
-     * and saves returned value into the <b>variable</b>
-     * <p>
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
-     * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     * </ul>
-     * @param variableName A name under which the value should be saved
-     * @param jsCode Code in javascript that returns some value as result
-     * (e.g. var a=1; return a;)
-     */
-    @When("I perform javascript '$jsCode' and save result to the '$scopes' variable '$variableName'")
-    public void saveValueFromJS(String jsCode, Set<VariableScope> scopes, String variableName)
-    {
-        assertAndSaveResult(() -> javascriptActions.executeScript(jsCode), scopes, variableName);
-    }
-
-    /**
-     * Performs passed async javascript code on the opened page
-     * and saves returned value into the <b>variable</b>
-     * See {@link org.openqa.selenium.JavascriptExecutor#executeAsyncScript(String, Object[])}
-     * <p>
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
-     * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step,
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     * <li><b>STORY</b> - the variable will be available within the whole story,
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     * </ul>
-     * @param variableName A name under which the value should be saved
-     * @param jsCode Code in javascript that returns some value as result
-     * (e.g. var a=1; return a;)
-     */
-    @When("I perform async javascript '$jsCode' and save result to the '$scopes' variable '$variableName'")
-    public void saveValueFromAsyncJS(String jsCode, Set<VariableScope> scopes, String variableName)
-    {
-        assertAndSaveResult(() -> javascriptActions.executeAsyncScript(jsCode), scopes, variableName);
-    }
-
-    private void assertAndSaveResult(Supplier<Object> resultProvider, Set<VariableScope> scopes, String variableName)
-    {
-        Object result = resultProvider.get();
-        if (softAssert.assertNotNull("Returned result is not null", result))
-        {
-            saveVariable(scopes, variableName, result);
         }
     }
 

@@ -1,0 +1,7 @@
+Composite: When I perform javascript '$jsCode' and save result to the '$scopes' variable '$variableName'
+!-- WARNING: The step "When I perform javascript '$jsCode' and save result to the '$scopes' variable '$variableName'" is deprecated and will be removed in VIVIDUS 0.5.0
+When I execute javascript `<jsCode>` and save result to <scopes> variable `<variableName>`
+
+Composite: When I perform async javascript '$jsCode' and save result to the '$scopes' variable '$variableName'
+!-- WARNING: The step "When I perform async javascript '$jsCode' and save result to the '$scopes' variable '$variableName'" is deprecated and will be removed in VIVIDUS 0.5.0
+When I execute async javascript `<jsCode>` and save result to <scopes> variable `<variableName>`

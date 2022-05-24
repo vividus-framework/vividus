@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -45,6 +46,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
+import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
@@ -56,10 +58,13 @@ import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
+import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
 class CodeStepsTests
 {
+    private static final String JS_RESULT_ASSERTION_MESSAGE = "Returned result is not null";
+    private static final String JS_CODE = "return 'value'";
     private static final String JS_ARGUMENT_ERROR_MESSAGE = "Please, specify command argument values and types";
     private static final String BODY = "body";
     private static final String FAVICON = "Favicon";
@@ -79,6 +84,8 @@ class CodeStepsTests
             + "or @rel='icon']";
     private static final String FAVICON_IMG_PNG = "faviconImg.png";
     private static final String XPATH = "xpath";
+    private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
+    private static final String VARIABLE_NAME = "variableName";
 
     @Mock
     private ISoftAssert softAssert;
@@ -91,6 +98,9 @@ class CodeStepsTests
 
     @Mock
     private WebJavascriptActions javascriptActions;
+
+    @Mock
+    private VariableContext variableContext;
 
     @InjectMocks
     private CodeSteps codeSteps;
@@ -211,6 +221,40 @@ class CodeStepsTests
             () -> codeSteps.executeJavascriptWithArguments("document.querySelector(arguments[0])",
                     Collections.singletonList(argument)));
         assertEquals(JS_ARGUMENT_ERROR_MESSAGE, exception.getMessage());
+    }
+
+    @Test
+    void testGettingValueFromJS()
+    {
+        when(javascriptActions.executeScript(JS_CODE)).thenReturn(VALUE);
+        when(softAssert.assertNotNull(JS_RESULT_ASSERTION_MESSAGE, VALUE)).thenReturn(true);
+        codeSteps.saveValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
+        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, VALUE);
+    }
+
+    @Test
+    void testGettingValueFromJSNullIsReturned()
+    {
+        codeSteps.saveValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
+        verify(softAssert).assertNotNull(JS_RESULT_ASSERTION_MESSAGE, null);
+        verifyNoInteractions(variableContext);
+    }
+
+    @Test
+    void testGettingValueFromAsyncJS()
+    {
+        when(javascriptActions.executeAsyncScript(JS_CODE)).thenReturn(VALUE);
+        when(softAssert.assertNotNull(JS_RESULT_ASSERTION_MESSAGE, VALUE)).thenReturn(true);
+        codeSteps.saveValueFromAsyncJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
+        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, VALUE);
+    }
+
+    @Test
+    void testGettingValueFromAsyncJSNullIsReturned()
+    {
+        codeSteps.saveValueFromAsyncJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
+        verify(softAssert).assertNotNull(JS_RESULT_ASSERTION_MESSAGE, null);
+        verifyNoInteractions(variableContext);
     }
 
     private static JsArgument createJsArgument(JsArgumentType type, String value)
