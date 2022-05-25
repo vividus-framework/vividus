@@ -303,17 +303,10 @@ class AllureReportGeneratorTests
     private void assertSummaryJson() throws IOException
     {
         assertResultFile("widgets/summary.json",
-                "{\n  \"reportName\" : \"Test Report\",\n"
-                    + "  \"testRuns\" : [ ],\n"
-                    + "  \"statistic\" : {\n"
-                    + "    \"failed\" : 0,\n"
-                    + "    \"broken\" : 0,\n"
-                    + "    \"skipped\" : 0,\n"
-                    + "    \"passed\" : 0,\n"
-                    + "    \"unknown\" : 0,\n"
-                    + "    \"total\" : 0\n"
-                    + "  },\n"
-                    + "  \"time\" : { }\n"
+                "{\"reportName\":\"Test Report\","
+                    + "\"testRuns\":[],"
+                    + "\"statistic\":{\"failed\":0,\"broken\":0,\"skipped\":0,\"passed\":0,\"unknown\":0,\"total\":0},"
+                    + "\"time\":{}"
                     + "}"
         );
     }
