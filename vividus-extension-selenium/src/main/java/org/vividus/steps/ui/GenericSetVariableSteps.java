@@ -23,13 +23,13 @@ import java.util.Set;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
 import org.vividus.context.VariableContext;
-import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.variable.VariableScope;
 
 @TakeScreenshotOnFailure

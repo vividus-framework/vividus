@@ -20,11 +20,11 @@ import java.util.function.Supplier;
 
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
-import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.context.SearchContextSetter;
+import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 
 @TakeScreenshotOnFailure
 public class GenericSetContextSteps

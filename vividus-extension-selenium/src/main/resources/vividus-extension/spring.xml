@@ -52,12 +52,12 @@
         <property name="waitActions" ref="waitActions" />
     </bean>
 
-    <bean id="abstractScreenshotOnFailureMonitor" class="org.vividus.monitor.AbstractScreenshotOnFailureMonitor"
+    <bean id="abstractScreenshotOnFailureMonitor" class="org.vividus.ui.monitor.AbstractPublishingScreenshotOnFailureMonitor"
           abstract="true">
         <property name="debugModes" value="${screenshot.on-failure.debug-modes}" />
     </bean>
 
-    <bean id="publishingHarOnFailureMonitor" class="org.vividus.monitor.PublishingHarOnFailureMonitor">
+    <bean id="publishingHarOnFailureMonitor" class="org.vividus.ui.monitor.PublishingHarOnFailureMonitor">
         <property name="publishHarOnFailure" value="${proxy.publish-har-on-failure}" />
         <constructor-arg>
             <bean class="org.vividus.proxy.har.HarOnFailureManager"/>

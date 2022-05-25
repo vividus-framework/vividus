@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.monitor;
+package org.vividus.ui.monitor;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -64,7 +64,7 @@ class PublishingHarOnFailureMonitorTests
     private static final String I_DO_ACTION = "I do action";
     private static final String WHEN_STEP_METHOD = "whenStep";
     private static final String NO_HAR_ON_FAILURE_META_NAME = "noHarOnFailure";
-    private static final String ERROR_MESSAGE = "Unable to publish a har";
+    private static final String ERROR_MESSAGE = "Unable to capture HAR";
     private static final Meta EMPTY_META = new Meta();
 
     @Mock private EventBus eventBus;
@@ -160,14 +160,13 @@ class PublishingHarOnFailureMonitorTests
     @Test
     void shouldLogErrorIfHarPublishingIsFailed() throws NoSuchMethodException
     {
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         mockScenarioAndStoryMeta(EMPTY_META);
         monitor.setPublishHarOnFailure(true);
         monitor.beforePerforming(I_DO_ACTION, false, getTakingHarMethod());
-        IllegalStateException exception = new IllegalStateException();
-        PublishingHarOnFailureMonitor spy = spy(monitor);
+        var exception = new IllegalStateException();
         when(harOnFailureManager.takeHar()).thenThrow(exception);
-        spy.performOperation(harOnFailureManager::takeHar, ERROR_MESSAGE);
-        spy.onAssertionFailure(mock(AssertionFailedEvent.class));
+        monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
         assertThat(logger.getLoggingEvents(), equalTo(List.of(error(exception, ERROR_MESSAGE))));
     }
 

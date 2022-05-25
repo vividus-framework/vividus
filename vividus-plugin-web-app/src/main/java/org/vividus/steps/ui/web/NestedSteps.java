@@ -24,7 +24,6 @@ import java.util.stream.IntStream;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
-import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.SubSteps;
 import org.vividus.steps.ui.validation.IBaseValidations;
@@ -32,6 +31,7 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.context.SearchContextSetter;
+import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.web.action.ICssSelectorFactory;
 import org.vividus.ui.web.action.search.WebLocatorType;
 

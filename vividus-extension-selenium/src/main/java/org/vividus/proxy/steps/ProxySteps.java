@@ -38,8 +38,6 @@ import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
-import org.vividus.monitor.PublishHarOnFailure;
-import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.proxy.IProxy;
 import org.vividus.proxy.model.HttpMessagePart;
 import org.vividus.softassert.ISoftAssert;
@@ -47,6 +45,8 @@ import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.DataWrapper;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.action.IWaitActions;
+import org.vividus.ui.monitor.PublishHarOnFailure;
+import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.variable.VariableScope;
 
 import io.netty.buffer.Unpooled;

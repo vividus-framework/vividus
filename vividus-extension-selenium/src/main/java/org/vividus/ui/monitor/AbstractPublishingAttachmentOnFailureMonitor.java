@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package org.vividus.monitor;
+package org.vividus.ui.monitor;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.steps.NullStepMonitor;
 import org.slf4j.Logger;
@@ -47,21 +45,22 @@ public abstract class AbstractPublishingAttachmentOnFailureMonitor extends NullS
     private final IWebDriverProvider webDriverProvider;
     private final EventBus eventBus;
     private final String metaNameToSkipPublishing;
+    private final String errorLogMessageOnFailure;
 
-    public AbstractPublishingAttachmentOnFailureMonitor(RunContext runContext, IWebDriverProvider webDriverProvider,
-            EventBus eventBus, String metaNameToSkipPublishing)
+    protected AbstractPublishingAttachmentOnFailureMonitor(RunContext runContext, IWebDriverProvider webDriverProvider,
+            EventBus eventBus, String metaNameToSkipPublishing, String errorLogMessageOnFailure)
     {
         this.runContext = runContext;
         this.webDriverProvider = webDriverProvider;
         this.eventBus = eventBus;
         this.metaNameToSkipPublishing = metaNameToSkipPublishing;
+        this.errorLogMessageOnFailure = errorLogMessageOnFailure;
     }
 
     @Override
     public void beforePerforming(String step, boolean dryRun, Method method)
     {
-        if (isPublishingEnabled(method) && !isPublishingDisabledInStoryMeta()
-                && !isPublishingDisabledInScenarioMeta())
+        if (isPublishingEnabled(method) && !isPublishingDisabledInMeta())
         {
             publishAttachmentOnFailureEnabled.set(Boolean.TRUE);
         }
@@ -77,59 +76,53 @@ public abstract class AbstractPublishingAttachmentOnFailureMonitor extends NullS
     }
 
     @Subscribe
-    public void onAssertionFailure(AssertionFailedEvent event)
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
+    public void onAssertionFailure(@SuppressWarnings("unused") AssertionFailedEvent event)
     {
         if (publishAttachmentOnFailureEnabled.get() && webDriverProvider.isWebDriverInitialized())
         {
-            publishAttachment();
+            try
+            {
+                createAttachment().map(AttachmentPublishEvent::new).ifPresent(eventBus::post);
+            }
+            // CHECKSTYLE:OFF
+            catch (RuntimeException e)
+            {
+                LOGGER.error(errorLogMessageOnFailure,  e);
+            }
+            // CHECKSTYLE:ON
         }
     }
 
-    private boolean isPublishingDisabledInStoryMeta()
+    private boolean isPublishingDisabledInMeta()
     {
         RunningStory runningStory = runContext.getRunningStory();
+        return isPublishingDisabledInStoryMeta(runningStory) || isPublishingDisabledInScenarioMeta(runningStory);
+    }
+
+    private boolean isPublishingDisabledInStoryMeta(RunningStory runningStory)
+    {
         return runningStory.getStory().getMeta().hasProperty(metaNameToSkipPublishing);
     }
 
-    private boolean isPublishingDisabledInScenarioMeta()
+    private boolean isPublishingDisabledInScenarioMeta(RunningStory runningStory)
     {
-        return Optional.of(runContext.getRunningStory()).map(RunningStory::getRunningScenario)
-                .map(RunningScenario::getScenario).map(Scenario::getMeta)
-                .map(m -> m.hasProperty(metaNameToSkipPublishing)).orElse(Boolean.FALSE);
+        return Optional.of(runningStory)
+                .map(RunningStory::getRunningScenario)
+                .map(RunningScenario::getScenario)
+                .map(Scenario::getMeta)
+                .map(m -> m.hasProperty(metaNameToSkipPublishing))
+                .orElse(Boolean.FALSE);
+    }
+
+    protected <T extends Annotation> Optional<T> getAnnotation(Method method, Class<T> annotationClass)
+    {
+        return Optional.ofNullable(method)
+                .map(m -> m.isAnnotationPresent(annotationClass) ? m : m.getDeclaringClass())
+                .map(annotatedElement -> annotatedElement.getAnnotation(annotationClass));
     }
 
     protected abstract boolean isPublishingEnabled(Method method);
 
-    protected abstract void publishAttachment();
-
-    protected void publishAttachment(byte[] content, String fileName)
-    {
-        Attachment attachment = new Attachment(content, fileName);
-        eventBus.post(new AttachmentPublishEvent(attachment));
-    }
-
-    protected Annotation getAnnotation(Method method, Class<? extends Annotation> annotationClass)
-    {
-        if (method != null)
-        {
-            AnnotatedElement annotatedElement = method.isAnnotationPresent(annotationClass) ? method
-                    : method.getDeclaringClass();
-            return annotatedElement.getAnnotation(annotationClass);
-        }
-        return null;
-    }
-
-    protected void performOperation(FailableRunnable<RuntimeException> operation, String errorMessage)
-    {
-        try
-        {
-            operation.run();
-        }
-        // CHECKSTYLE:OFF
-        catch (RuntimeException e)
-        {
-            LOGGER.error(errorMessage,  e);
-        }
-        // CHECKSTYLE:ON
-    }
+    protected abstract Optional<Attachment> createAttachment();
 }

@@ -35,11 +35,11 @@ import org.openqa.selenium.remote.RemoteWebElement;
 import org.vividus.mobileapp.configuration.MobileApplicationConfiguration;
 import org.vividus.mobileapp.model.SwipeCoordinates;
 import org.vividus.mobileapp.model.SwipeDirection;
-import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverUtils;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
+import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.util.Sleeper;
 
 import io.appium.java_client.PerformsTouchActions;

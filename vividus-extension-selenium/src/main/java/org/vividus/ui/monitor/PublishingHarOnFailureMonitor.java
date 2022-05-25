@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package org.vividus.monitor;
+package org.vividus.ui.monitor;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import com.google.common.eventbus.EventBus;
 
 import org.vividus.context.RunContext;
 import org.vividus.proxy.har.HarOnFailureManager;
+import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.util.json.JsonUtils;
 
 public class PublishingHarOnFailureMonitor extends AbstractPublishingAttachmentOnFailureMonitor
 {
-    private static final String NO_HAR_ON_FAILURE_META_NAME = "noHarOnFailure";
-
     private boolean publishHarOnFailure;
 
     private final JsonUtils jsonUtils;
@@ -37,22 +37,22 @@ public class PublishingHarOnFailureMonitor extends AbstractPublishingAttachmentO
     public PublishingHarOnFailureMonitor(EventBus eventBus, JsonUtils jsonUtils, RunContext runContext,
             IWebDriverProvider webDriverProvider, HarOnFailureManager harOnFailureManager)
     {
-        super(runContext, webDriverProvider, eventBus, NO_HAR_ON_FAILURE_META_NAME);
+        super(runContext, webDriverProvider, eventBus, "noHarOnFailure", "Unable to capture HAR");
         this.jsonUtils = jsonUtils;
         this.harOnFailureManager = harOnFailureManager;
     }
 
     @Override
-    protected void publishAttachment()
+    protected Optional<Attachment> createAttachment()
     {
-        performOperation(() -> harOnFailureManager.takeHar().ifPresent(
-                har -> publishAttachment(jsonUtils.toJsonAsBytes(har), "har.har")), "Unable to publish a har");
+        return harOnFailureManager.takeHar()
+                .map(har -> new Attachment(jsonUtils.toJsonAsBytes(har), "har.har"));
     }
 
     @Override
     protected boolean isPublishingEnabled(Method method)
     {
-        return publishHarOnFailure || getAnnotation(method, PublishHarOnFailure.class) != null;
+        return publishHarOnFailure || getAnnotation(method, PublishHarOnFailure.class).isPresent();
     }
 
     public void setPublishHarOnFailure(boolean publishHarOnFailure)

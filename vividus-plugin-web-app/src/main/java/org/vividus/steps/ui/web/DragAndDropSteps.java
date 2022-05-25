@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@ import org.jbehave.core.annotations.When;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.steps.ui.web.model.Location;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
 @TakeScreenshotOnFailure
