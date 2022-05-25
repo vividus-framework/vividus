@@ -75,6 +75,7 @@ Examples:
 Examples:
 {transformer=FROM_EXCEL, path=/my-excel-file.xlsx, sheet=Data, range=A2:B4}
 ----
+
 == Steps
 
 === Create excel file with specified content
@@ -97,4 +98,58 @@ When I create temporary excel file with content:
 |key1  |key2  |
 |value1|value2|
 and put path to scenario variable `path`
+----
+
+=== Excel validations
+
+==== By sheet name
+Checks that excel has a sheet with name *name* and specified *records*.
+
+[source,gherkin]
+----
+Then `$excelDocument` contains excel sheet with name `$name` and records:$records
+----
+* `$excelDocument` - The excel document data to verify.
+* `$name` - The name of the sheet to verify.
+* `$record` - The ExampleTable that contains specified expected records in the sheet. Available columns:
+** [subs=+quotes]`*cellsRange*` - The range of the cells to verify. (e.g. "B1:D8", "A1", "C1:C5")
+** [subs=+quotes]`*valueRegex*` - The regular expression to match a value against.
+
+.Validate excel sheet by name
+[source,gherkin]
+----
+When I issue a HTTP GET request for a resource with the URL 'https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true'
+Then the response code is = '200'
+Then `${response-as-bytes}` contains excel sheet with name `Mapping` and records:
+{valueSeparator=!}
+|cellsRange|valueRegex             |
+!A4:B5     !(Product|Price)\d+\s*  !
+!B3        !Price                  !
+!C1:C5     !                       !
+----
+
+==== By sheet index
+Checks that excel has a sheet with index *index* and specified *records*.
+
+[source,gherkin]
+----
+Then `$excelDocument` contains excel sheet with index `$index` and records:$records
+----
+* `$excelDocument` - The excel document data to verify.
+* `$index` - The index of the sheet to verify.
+* `$record` - The ExampleTable that contains specified expected records in the sheet. Available columns:
+** [subs=+quotes]`*cellsRange*` - The range of the cells to verify. (e.g. "B1:D8", "A1", "C1:C5")
+** [subs=+quotes]`*valueRegex*` - The regular expression to match a value against.
+
+.Validate excel sheet by index
+[source,gherkin]
+----
+When I issue a HTTP GET request for a resource with the URL 'https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true'
+Then the response code is = '200'
+Then `${response-as-bytes}` contains excel sheet with index `0` and records:
+{valueSeparator=!}
+|cellsRange|valueRegex             |
+!A4:B5     !(Product|Price)\d+\s*  !
+!B3        !Price                  !
+!C1:C5     !                       !
 ----
