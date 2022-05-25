@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,72 +38,73 @@ import org.vividus.excel.ExcelSheetsExtractor;
 import org.vividus.excel.IExcelSheetParser;
 import org.vividus.excel.IExcelSheetsExtractor;
 import org.vividus.excel.WorkbookParsingException;
-import org.vividus.http.HttpTestContext;
 import org.vividus.model.CellRecord;
 import org.vividus.model.CellValue;
 import org.vividus.softassert.ISoftAssert;
 
-public class ExcelResponseValidationSteps
+public class ExcelDocumentValidationSteps
 {
-    private final HttpTestContext httpTestContext;
     private final ISoftAssert softAssert;
 
-    public ExcelResponseValidationSteps(HttpTestContext httpTestContext, ISoftAssert softAssert)
+    public ExcelDocumentValidationSteps(ISoftAssert softAssert)
     {
-        this.httpTestContext = httpTestContext;
         this.softAssert = softAssert;
     }
 
     /**
-     * Checks that API response contains excel sheet with index <b>index</b> and records <b>records</b>
-     * @param index Index of the sheet (0-based)
-     * @param records Table of records with specified <b>cellsRange</b> and <b>valueRegex</b> that should be
-     * matched against cells in excel sheet:
-     * <ul>
-     * <li>cellsRange - range of cells (e.g. "B1:D8", "A1", "C1:C5").
-     * <li>valueRegex - regular expression to match a value against</li>
-     * </ul>
-     * <code>
-     * Then response contains excel sheet with index `2` and records:
-     * |cellsRange|valueRegex      |<br>
-     * |A1:E8     |\\w+            |<br>
-     * |D11:H25   |                |<br>
-     * |A1:H1     |header_\\d+_\\w+|<br>
-     * </code>
+     * Checks that excel has a sheet with index <b>index</b> and records <b>records</b>
+     *
+     * @param excelDocument Excel document data
+     * @param index    Index of the sheet (0-based)
+     * @param records  Table of records with specified <b>cellsRange</b> and <b>valueRegex</b> that should be
+     *                 matched against cells in Excel sheet:
+     *                 <ul>
+     *                 <li>cellsRange - range of cells (e.g. "B1:D8", "A1", "C1:C5").
+     *                 <li>valueRegex - regular expression to match a value against</li>
+     *                 </ul>
+     *                 <code>
+     *                 Then `${response-as-bytes}` contains excel sheet with index `2` and records:
+     *                 |cellsRange|valueRegex      |<br>
+     *                 |A1:E8     |\\w+            |<br>
+     *                 |D11:H25   |                |<br>
+     *                 |A1:H1     |header_\\d+_\\w+|<br>
+     *                 </code>
      */
-    @Then("response contains excel sheet with index `$index` and records:$records")
-    public void excelSheetWithIndexHasRecords(int index, List<CellRecord> records)
+    @Then("`$excelDocument` contains excel sheet with index `$index` and records:$records")
+    public void excelSheetWithIndexHasRecords(DataWrapper excelDocument, int index, List<CellRecord> records)
     {
-        checkRecords(records, e -> e.getSheet(index), "index " + index);
+        checkRecords(excelDocument, records, e -> e.getSheet(index), "index " + index);
     }
 
     /**
-     * Checks that API response contains excel sheet with name <b>name</b> and records <b>records</b>
-     * @param name Name of the sheet
-     * @param records Table of records with specified <b>cellsRange</b> and <b>valueRegex</b> that should be
-     * matched against cells in excel sheet:
-     * <ul>
-     * <li>cellsRange - range of cells (e.g. "B1:D8", "A1", "C1:C5").
-     * <li>valueRegex - regular expression to match a value against</li>
-     * </ul>
-     * <code>
-     * Then response contains excel sheet with name `products_140220` and records:
-     * |cellsRange|valueRegex      |<br>
-     * |A1:E8     |\\w+            |<br>
-     * |D11:H25   |                |<br>
-     * |A1:H1     |header_\\d+_\\w+|<br>
-     * </code>
+     * Checks that excel has a sheet with name <b>name</b> and records <b>records</b>
+     *
+     * @param excelDocument Excel document data
+     * @param name     Name of the sheet
+     * @param records  Table of records with specified <b>cellsRange</b> and <b>valueRegex</b> that should be
+     *                 matched against cells in Excel sheet:
+     *                 <ul>
+     *                 <li>cellsRange - range of cells (e.g. "B1:D8", "A1", "C1:C5").
+     *                 <li>valueRegex - regular expression to match a value against</li>
+     *                 </ul>
+     *                 <code>
+     *                 Then `${response-as-bytes}` contains excel sheet with name `products_140220` and records:
+     *                 |cellsRange|valueRegex      |<br>
+     *                 |A1:E8     |\\w+            |<br>
+     *                 |D11:H25   |                |<br>
+     *                 |A1:H1     |header_\\d+_\\w+|<br>
+     *                 </code>
      */
-    @Then("response contains excel sheet with name `$name` and records:$records")
-    public void excelSheetWithNameHasRecords(String name, List<CellRecord> records)
+    @Then("`$excelDocument` contains excel sheet with name `$name` and records:$records")
+    public void excelSheetWithNameHasRecords(DataWrapper excelDocument, String name, List<CellRecord> records)
     {
-        checkRecords(records, e -> e.getSheet(name), "name " + name);
+        checkRecords(excelDocument, records, e -> e.getSheet(name), "name " + name);
     }
 
-    private void checkRecords(List<CellRecord> records, Function<IExcelSheetsExtractor, Optional<Sheet>> sheetMapper,
-            String errorKey)
+    private void checkRecords(DataWrapper excelDoc, List<CellRecord> records, Function<IExcelSheetsExtractor,
+            Optional<Sheet>> sheetMapper, String errorKey)
     {
-        sheetMapper.apply(getExtractor()).ifPresentOrElse(s ->
+        sheetMapper.apply(getExtractor(excelDoc)).ifPresentOrElse(s ->
         {
             IExcelSheetParser parser = new ExcelSheetParser(s);
             records.stream()
@@ -136,11 +137,11 @@ public class ExcelResponseValidationSteps
         });
     }
 
-    private IExcelSheetsExtractor getExtractor()
+    private IExcelSheetsExtractor getExtractor(DataWrapper excelDoc)
     {
         try
         {
-            return new ExcelSheetsExtractor(httpTestContext.getResponse().getResponseBody());
+            return new ExcelSheetsExtractor(excelDoc.getBytes());
         }
         catch (WorkbookParsingException e)
         {

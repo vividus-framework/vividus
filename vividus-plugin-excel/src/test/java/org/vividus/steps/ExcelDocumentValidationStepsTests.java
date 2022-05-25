@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,8 @@ package org.vividus.steps;
 import static java.lang.String.format;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +28,6 @@ import java.util.function.BiConsumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,46 +36,32 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.http.HttpTestContext;
-import org.vividus.http.client.HttpResponse;
 import org.vividus.model.CellRecord;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
-class ExcelResponseValidationStepsTests
+class ExcelDocumentValidationStepsTests
 {
-    @Mock
-    private HttpTestContext httpTestContext;
-
     @Mock
     private ISoftAssert softAssert;
 
     @InjectMocks
-    private ExcelResponseValidationSteps steps;
-
-    @BeforeEach
-    void before()
-    {
-        HttpResponse response = mock(HttpResponse.class);
-        byte[] body = ResourceUtils.loadResourceAsByteArray(getClass(), "TestTemplate.xlsx");
-        when(httpTestContext.getResponse()).thenReturn(response);
-        when(response.getResponseBody()).thenReturn(body);
-    }
+    private ExcelDocumentValidationSteps steps;
 
     static Stream<Arguments> sheetProcessors()
     {
         return Stream.of(
-                Arguments.of((BiConsumer<ExcelResponseValidationSteps, List<CellRecord>>)
-                    (s, r) -> s.excelSheetWithIndexHasRecords(0, r)),
-                Arguments.of((BiConsumer<ExcelResponseValidationSteps, List<CellRecord>>)
-                    (s, r) -> s.excelSheetWithNameHasRecords("Mapping", r))
+                Arguments.of((BiConsumer<ExcelDocumentValidationSteps, List<CellRecord>>)
+                    (s, r) -> s.excelSheetWithIndexHasRecords(createExcelData(), 0, r)),
+                Arguments.of((BiConsumer<ExcelDocumentValidationSteps, List<CellRecord>>)
+                    (s, r) -> s.excelSheetWithNameHasRecords(createExcelData(), "Mapping", r))
                 );
     }
 
     @ParameterizedTest
     @MethodSource("sheetProcessors")
-    void testExcelSheetWithIndexHasRecords(BiConsumer<ExcelResponseValidationSteps, List<CellRecord>> consumer)
+    void testExcelSheetWithIndexHasRecords(BiConsumer<ExcelDocumentValidationSteps, List<CellRecord>> consumer)
     {
         consumer.accept(steps, List.of(
                 record("A4:B5", "(Product|Price)\\d+\\s*"),
@@ -93,7 +76,7 @@ class ExcelResponseValidationStepsTests
 
     @ParameterizedTest
     @MethodSource("sheetProcessors")
-    void testExcelSheetWithIndexHasRecordsNoMatch(BiConsumer<ExcelResponseValidationSteps, List<CellRecord>> consumer)
+    void testExcelSheetWithIndexHasRecordsNoMatch(BiConsumer<ExcelDocumentValidationSteps, List<CellRecord>> consumer)
     {
         consumer.accept(steps, List.of(
                 record("C1:C3", "\\d+"),
@@ -121,7 +104,7 @@ class ExcelResponseValidationStepsTests
     @Test
     void testExcelSheetWithIndexHasRecordsNoSheetWithIndex()
     {
-        steps.excelSheetWithIndexHasRecords(10, List.of());
+        steps.excelSheetWithIndexHasRecords(createExcelData(), 10, List.of());
         verify(softAssert).recordFailedAssertion("Sheet with the index 10 doesn't exist");
         verifyNoMoreInteractions(softAssert);
     }
@@ -129,9 +112,15 @@ class ExcelResponseValidationStepsTests
     @Test
     void testExcelSheetWithNameHasRecordsNoSheetWithIndex()
     {
-        steps.excelSheetWithNameHasRecords("test", List.of());
+        steps.excelSheetWithNameHasRecords(createExcelData(), "test", List.of());
         verify(softAssert).recordFailedAssertion("Sheet with the name test doesn't exist");
         verifyNoMoreInteractions(softAssert);
+    }
+
+    private static DataWrapper createExcelData()
+    {
+        return new DataWrapper(ResourceUtils.loadResourceAsByteArray(ExcelDocumentValidationSteps.class,
+            "TestTemplate.xlsx"));
     }
 
     private static CellRecord record(String cellRange, String regex)

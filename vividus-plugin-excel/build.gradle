@@ -3,10 +3,7 @@ project.description = 'Vividus plugin for work with excel'
 dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-util')
-    implementation project(':vividus-http-client')
     implementation project(':vividus-soft-assert')
-
-    implementation project(':vividus-plugin-rest-api')
 
     api(group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.2')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
