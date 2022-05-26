@@ -88,7 +88,10 @@
 
     <bean id="httpCookieSteps" class="org.vividus.steps.api.HttpCookieSteps"/>
 
+    <bean id="archiveSteps" class="org.vividus.archive.steps.ArchiveSteps" />
+
     <util:list id="stepBeanNames-Api" value-type="java.lang.String">
+        <idref bean="archiveSteps" />
         <idref bean="apiSteps" />
         <idref bean="httpResponseValidationSteps" />
         <idref bean="httpResourceValidationSteps" />

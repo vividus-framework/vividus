@@ -517,7 +517,36 @@ When I execute HTTP GET request for resource with URL `https://example.com`
 Then size of decompressed response body is greater than or equal to `1200`
 ----
 
+=== Save ZIP archive entries
+
+Saves specified archive entries into varaibles.
+
+[source,gherkin]
+----
+When I save content of `$archiveData` archive entries to variables:$parameters
+----
+* `$archiveData` - The archive data to verify.
+* `$parameters` - The ExampleTable that contains specified string comparison `path`, `variableName`, `scopes`, `outputFormat`. Available columns:
+** [subs=+quotes]`*path*` - The path to the archive entry.
+** [subs=+quotes]`*variable*` - The name of variable to save the data.
+** [subs=+quotes]`*scopes*` -  xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+** [subs=+quotes]`*outputFormat*` - Defines output format of the entriy, either `TEXT` or `BASE64`.
+
+.Save archive entries
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://example.com/get-zip-archive`
+When I save content of `${response-as-bytes}` archive entries to variables:
+|path                     |variableName|scopes  |outputFormat|
+|txtFileFromZipArchive.txt|text        |SCENARIO|TEXT        |
+|txtFileFromZipArchive.txt|base64      |SCENARIO|BASE64      |
+Then `${text}` is = `Response text from ZIP archive`
+Then `${base64}` is = `UmVzcG9uc2UgdGV4dCBmcm9tIFpJUCBhcmNoaXZl`
+----
+
 === Validate archive from response body
+
+WARNING: Step is deprecated and will be removed in VIVIDUS 0.5.0. Use instead <<_validate_zip_archive>>
 
 Verifies that at least one (or no one) entry in a response archive matches the specified xref:parameters:string-comparison-rule.adoc[string comparison rule].
 If comparison rule column does not exist, the verification that archive entries have the specified names is performed.
@@ -542,12 +571,46 @@ Then response archive contains entries with names:
 |matches          |data/.+\.data            |
 |does not contain |restrictedData.data      |
 ----
-
 .Submit a GET request and check that response archive has file with name `responseTextFromZipArchive.txt`
 [source,gherkin]
 ----
 When I execute HTTP GET request for resource with URL `https://example.com/get-zip-archive`
 Then response archive contains entries with names:
+|name                           |
+|responseTextFromZipArchive.txt |
+----
+
+=== Validate ZIP archive
+
+Verifies that at least one (or no one) entry in an archive matches the specified xref:parameters:string-comparison-rule.adoc[string comparison rule].
+If comparison rule column does not exist, the verification that archive entries have the specified names is performed.
+
+[source,gherkin]
+----
+Then `$archiveData` archive contains entries with names:$parameters
+----
+* `$archiveData` - The archive data to verify.
+* `$parameters` - The ExampleTable that contains specified string comparison `rule` and entry `name` pattern that should be found using current `rule`. Available columns:
+** [subs=+quotes]`*rule*` - xref:parameters:string-comparison-rule.adoc[The string comparison rule].
+** [subs=+quotes]`*name*` - Desired entry name pattern used with current `rule`.
+
+NOTE: Entry name in archive is not always the same as file name. Entry name reflects the full relative path from archive root.
+
+.Submit a GET request and check that response archive has file with extension 'data' in 'data' folder but don't contain any data file with name 'restrictedData'
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://example.com/get-zip-archive`
+Then `${response-as-bytes}` archive contains entries with names:
+|rule             |name                     |
+|matches          |data/.+\.data            |
+|does not contain |restrictedData.data      |
+----
+
+.Submit a GET request and check that response archive has file with name `responseTextFromZipArchive.txt`
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://example.com/get-zip-archive`
+Then `${response-as-bytes}` archive contains entries with names:
 |name                           |
 |responseTextFromZipArchive.txt |
 ----

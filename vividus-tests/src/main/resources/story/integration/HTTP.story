@@ -110,30 +110,3 @@ When I wait for response code `200` for `PT10S` duration retrying 3 times
 |When I initialize the scenario variable `relativeURL` with value `#{eval(stringUtils:substringBeforeLast(relativeURL, '-'))}`|
 |When I send HTTP GET to the relative URL '${relativeURL}'                                                                    |
 Then `${responseCode}` is equal to `200`
-
-Scenario: Verify step "Then the response archive contains entries with the names:$parameters"
-Meta:
-    @requirementId 2545
-When I execute HTTP GET request for resource with URL `${vividus-test-site-url}/api/zip-archive`
-Then response archive contains entries with names:
-|rule             |name                |
-|MATCHES          |.+\.data            |
-|DOES_NOT_CONTAIN |restrictedData.data |
-Then response archive contains entries with names:
-|name                         |
-|txtFileFromZipArchive.txt    |
-|emptyDataFromZipArchive.data |
-
-
-Scenario: Verify step "Then the response archive contains entries with the names:$parameters"
-Meta:
-    @requirementId 2545
-!-- Deprecated
-Then the response archive contains entries with the names:
-|rule             |name                |
-|MATCHES          |.+\.data            |
-|DOES_NOT_CONTAIN |restrictedData.data |
-Then the response archive contains entries with the names:
-|name                         |
-|txtFileFromZipArchive.txt    |
-|emptyDataFromZipArchive.data |
