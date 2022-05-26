@@ -58,7 +58,7 @@
     </bean>
 
     <bean id="publishingHarOnFailureMonitor" class="org.vividus.ui.monitor.PublishingHarOnFailureMonitor">
-        <property name="publishHarOnFailure" value="${proxy.publish-har-on-failure}" />
+        <constructor-arg value="${proxy.publish-har-on-failure}" />
         <constructor-arg>
             <bean class="org.vividus.proxy.har.HarOnFailureManager"/>
         </constructor-arg>

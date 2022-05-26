@@ -54,11 +54,6 @@ public class JsonUtils
         return performOperation(() -> mapper.writeValueAsString(object));
     }
 
-    public byte[] toJsonAsBytes(Object object)
-    {
-        return performOperation(() -> mapper.writeValueAsBytes(object));
-    }
-
     public String toPrettyJson(Object object)
     {
         return performOperation(() -> mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object));

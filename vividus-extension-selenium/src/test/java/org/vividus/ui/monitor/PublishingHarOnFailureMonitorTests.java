@@ -20,20 +20,22 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.browserup.harreader.model.Har;
+import com.browserup.harreader.model.HarLog;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
@@ -47,88 +49,93 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
 import org.vividus.proxy.har.HarOnFailureManager;
+import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.softassert.event.AssertionFailedEvent;
-import org.vividus.util.json.JsonUtils;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class PublishingHarOnFailureMonitorTests
 {
     private static final String I_DO_ACTION = "I do action";
-    private static final String WHEN_STEP_METHOD = "whenStep";
     private static final String NO_HAR_ON_FAILURE_META_NAME = "noHarOnFailure";
     private static final String ERROR_MESSAGE = "Unable to capture HAR";
     private static final Meta EMPTY_META = new Meta();
 
     @Mock private EventBus eventBus;
-    @Mock private Har harMock;
-    @Mock private JsonUtils jsonUtils;
     @Mock private RunContext runContext;
     @Mock private HarOnFailureManager harOnFailureManager;
     @Mock private IWebDriverProvider webDriverProvider;
-    @InjectMocks private PublishingHarOnFailureMonitor monitor;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(
             AbstractPublishingAttachmentOnFailureMonitor.class);
 
+    private PublishingHarOnFailureMonitor createMonitor(boolean publishHarOnFailure)
+    {
+        return new PublishingHarOnFailureMonitor(publishHarOnFailure, harOnFailureManager, eventBus, runContext,
+                webDriverProvider);
+    }
+
+    private static Method getCapturingHarMethod() throws NoSuchMethodException
+    {
+        return PublishingHarOnFailureMonitorTests.class.getDeclaredMethod("whenStep");
+    }
+
     @TestFactory
     Stream<DynamicTest> getProcessStepWithAnnotation() throws NoSuchMethodException
     {
-        return Stream
-                .of(getTakingHarMethod(),
-                        PublishingHarOnFailureMonitorTests.TestSteps.class.getDeclaredMethod("innerWhenStep"))
-                .flatMap(method ->
-                {
-                    reset(runContext);
-                    mockScenarioAndStoryMeta(EMPTY_META);
-                    return Stream.of(
+        var monitor = createMonitor(true);
+        return Stream.of(getCapturingHarMethod(), TestSteps.class.getDeclaredMethod("innerWhenStep"))
+                .flatMap(method -> Stream.of(
                             dynamicTest("beforePerformingProcessesStepWithAnnotation",
-                                    () -> monitor.beforePerforming(I_DO_ACTION, false, method)),
+                                    () -> {
+                                        mockScenarioAndStoryMeta();
+                                        monitor.beforePerforming(I_DO_ACTION, false, method);
+                                    }),
                             dynamicTest("afterPerformingProcessesStepWithAnnotation",
                                     () -> monitor.afterPerforming(I_DO_ACTION, false, method))
-                    );
-                });
-    }
-
-    private Method getTakingHarMethod() throws NoSuchMethodException
-    {
-        return getClass().getDeclaredMethod(WHEN_STEP_METHOD);
+                        )
+                );
     }
 
     @TestFactory
     Stream<DynamicTest> getIgnoreStepWithoutAnnotation() throws NoSuchMethodException
     {
+        var monitor = createMonitor(false);
         return Stream.of(getClass().getDeclaredMethod("anotherWhenStep"), null)
                 .flatMap(method -> Stream.of(
-                        dynamicTest("beforePerformingIgnoresStepWithoutAnnotation",
-                                () -> monitor.beforePerforming(I_DO_ACTION, false, method)),
-                        dynamicTest("afterPerformingIgnoresStepWithoutAnnotation",
-                                () -> monitor.afterPerforming(I_DO_ACTION, false, method))));
+                            dynamicTest("beforePerformingIgnoresStepWithoutAnnotation",
+                                    () -> monitor.beforePerforming(I_DO_ACTION, false, method)),
+                            dynamicTest("afterPerformingIgnoresStepWithoutAnnotation",
+                                    () -> monitor.afterPerforming(I_DO_ACTION, false, method))
+                        )
+                );
     }
 
     @Test
     void shouldEnableHarIfNoRunningScenario() throws NoSuchMethodException
     {
-        RunningStory runningStory = mock(RunningStory.class);
-        mockStoryMeta(runningStory, EMPTY_META);
-        monitor.beforePerforming(I_DO_ACTION, false, getTakingHarMethod());
+        mockStoryMeta(new RunningStory(), EMPTY_META);
+        var monitor = createMonitor(true);
+        monitor.beforePerforming(I_DO_ACTION, false, getCapturingHarMethod());
         monitor.onAssertionFailure(null);
         verify(webDriverProvider).isWebDriverInitialized();
     }
 
     @Test
-    void shouldNotTakeHarIfMethodAnnotatedButStoryHasNoHarOnFailure() throws NoSuchMethodException
+    void shouldNotTakeHarIfMethodAnnotatedButStoryHasNoHarOnFailure()
     {
-        RunningStory runningStory = mock(RunningStory.class);
-        mockStoryMeta(runningStory, new Meta(List.of(NO_HAR_ON_FAILURE_META_NAME)));
-        monitor.beforePerforming(I_DO_ACTION, false, getTakingHarMethod());
+        mockStoryMeta(new RunningStory(), new Meta(List.of(NO_HAR_ON_FAILURE_META_NAME)));
+        var monitor = createMonitor(true);
+        monitor.beforePerforming(I_DO_ACTION, false, null);
         monitor.onAssertionFailure(null);
         verifyNoInteractions(webDriverProvider);
     }
@@ -136,58 +143,90 @@ class PublishingHarOnFailureMonitorTests
     @Test
     void shouldNotTakeHarIfMethodAnnotatedButScenarioHasNoHarOnFailure() throws NoSuchMethodException
     {
-        RunningStory runningStory = mock(RunningStory.class);
+        var runningStory = new RunningStory();
         mockStoryMeta(runningStory, EMPTY_META);
         mockScenarioMeta(runningStory, new Meta(List.of(NO_HAR_ON_FAILURE_META_NAME)));
-        monitor.beforePerforming(I_DO_ACTION, false, getTakingHarMethod());
+        var monitor = createMonitor(false);
+        monitor.beforePerforming(I_DO_ACTION, false, getCapturingHarMethod());
         monitor.onAssertionFailure(null);
         verifyNoInteractions(webDriverProvider);
     }
 
-    @Test
-    void shouldTakeAssertionFailureHar() throws NoSuchMethodException
+    static Stream<Arguments> capturingHarData() throws NoSuchMethodException
     {
-        mockScenarioAndStoryMeta(EMPTY_META);
-        monitor.setPublishHarOnFailure(true);
-        monitor.beforePerforming(I_DO_ACTION, false, getTakingHarMethod());
-        when(harOnFailureManager.takeHar()).thenReturn(Optional.of(harMock));
+        return Stream.of(
+                arguments(true, null),
+                arguments(false, getCapturingHarMethod())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("capturingHarData")
+    void shouldCaptureHarOnAssertionFailure(boolean publishHarOnFailure, Method method)
+    {
+        mockScenarioAndStoryMeta();
+        var monitor = createMonitor(publishHarOnFailure);
+        var har = new Har();
+        har.setLog(new HarLog());
+        when(harOnFailureManager.takeHar()).thenReturn(Optional.of(har));
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        PublishingHarOnFailureMonitor spy = spy(monitor);
-        spy.onAssertionFailure(mock(AssertionFailedEvent.class));
+        monitor.beforePerforming(I_DO_ACTION, false, method);
+        monitor.onAssertionFailure(null);
+        var eventCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(eventBus).post(eventCaptor.capture());
+        var event = eventCaptor.getValue();
+        assertThat(event, instanceOf(AttachmentPublishEvent.class));
+        var attachment = ((AttachmentPublishEvent) event).getAttachment();
+        assertEquals("har-on-failure", attachment.getTitle());
+        assertEquals("{\"log\":{\"version\":\"1.1\",\"creator\":{\"name\":\"\",\"version\":\"\"},\"pages\":[],"
+                + "\"entries\":[]}}", new String(attachment.getContent(), StandardCharsets.UTF_8));
         assertThat(logger.getLoggingEvents(), empty());
     }
 
     @Test
-    void shouldLogErrorIfHarPublishingIsFailed() throws NoSuchMethodException
+    void shouldDoNothingIfNoHarIsCaptured()
     {
+        mockScenarioAndStoryMeta();
+        var monitor = createMonitor(true);
+        when(harOnFailureManager.takeHar()).thenReturn(Optional.empty());
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        mockScenarioAndStoryMeta(EMPTY_META);
-        monitor.setPublishHarOnFailure(true);
-        monitor.beforePerforming(I_DO_ACTION, false, getTakingHarMethod());
+        monitor.beforePerforming(I_DO_ACTION, false, null);
+        monitor.onAssertionFailure(null);
+        verifyNoInteractions(eventBus);
+        assertThat(logger.getLoggingEvents(), empty());
+    }
+
+    @Test
+    void shouldLogErrorIfHarPublishingIsFailed()
+    {
+        mockScenarioAndStoryMeta();
+        var monitor = createMonitor(true);
         var exception = new IllegalStateException();
         when(harOnFailureManager.takeHar()).thenThrow(exception);
-        monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
+        monitor.beforePerforming(I_DO_ACTION, false, null);
+        monitor.onAssertionFailure(null);
         assertThat(logger.getLoggingEvents(), equalTo(List.of(error(exception, ERROR_MESSAGE))));
+    }
+
+    private void mockScenarioAndStoryMeta()
+    {
+        var runningStory = new RunningStory();
+        mockStoryMeta(runningStory, EMPTY_META);
+        mockScenarioMeta(runningStory, EMPTY_META);
     }
 
     private void mockStoryMeta(RunningStory runningStory, Meta meta)
     {
         when(runContext.getRunningStory()).thenReturn(runningStory);
-        when(runningStory.getStory()).thenReturn(new Story(null, null, meta, null, null));
-    }
-
-    private void mockScenarioAndStoryMeta(Meta meta)
-    {
-        RunningStory runningStory = mock(RunningStory.class);
-        mockStoryMeta(runningStory, meta);
-        mockScenarioMeta(runningStory, meta);
+        runningStory.setStory(new Story(null, null, meta, null, null));
     }
 
     private void mockScenarioMeta(RunningStory runningStory, Meta meta)
     {
-        RunningScenario runningScenario = mock(RunningScenario.class);
-        when(runningStory.getRunningScenario()).thenReturn(runningScenario);
-        when(runningScenario.getScenario()).thenReturn(new Scenario("test scenario", meta));
+        var runningScenario = new RunningScenario();
+        runningScenario.setScenario(new Scenario("test scenario", meta));
+        runningStory.setRunningScenario(runningScenario);
     }
 
     @PublishHarOnFailure

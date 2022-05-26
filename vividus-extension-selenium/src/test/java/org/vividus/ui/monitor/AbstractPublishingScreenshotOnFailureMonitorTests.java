@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -98,7 +97,7 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
                 .flatMap(method ->
                 {
                     reset(runContext);
-                    mockScenarioAndStoryMeta(EMPTY_META);
+                    mockScenarioAndStoryMeta();
                     return Stream.of(
                             dynamicTest("beforePerformingProcessesStepWithAnnotation",
                                 () -> monitor.beforePerforming(I_DO_ACTION, false, method)),
@@ -127,7 +126,7 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
 
     @Test
     void shouldNotTakeScreenshotIfMethodAnnotatedButStoryHasNoScreenshotOnFailure()
-            throws NoSuchMethodException, IOException
+            throws NoSuchMethodException
     {
         RunningStory runningStory = mock(RunningStory.class);
         mockStoryMeta(runningStory, new Meta(List.of(NO_SCREENSHOT_ON_FAILURE)));
@@ -137,8 +136,7 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldNotTakeScreenshotIfMethodAnnotatedButScenarioHasNoScreenshotOnFailure()
-            throws NoSuchMethodException, IOException
+    void shouldNotTakeScreenshotIfMethodAnnotatedButScenarioHasNoScreenshotOnFailure() throws NoSuchMethodException
     {
         RunningStory runningStory = mock(RunningStory.class);
         mockStoryMeta(runningStory, EMPTY_META);
@@ -149,7 +147,7 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldEnableScreenshotsIfNoRunningSceanario() throws NoSuchMethodException, IOException
+    void shouldEnableScreenshotsIfNoRunningScenario() throws NoSuchMethodException
     {
         RunningStory runningStory = mock(RunningStory.class);
         mockStoryMeta(runningStory, EMPTY_META);
@@ -159,14 +157,14 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldNotTakeScreenshotIfItIsNotEnabled() throws IOException
+    void shouldNotTakeScreenshotIfItIsNotEnabled()
     {
         monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
         assertThat(logger.getLoggingEvents(), empty());
     }
 
     @Test
-    void shouldNotTakeScreenshotIfWebDriverIsNotEnabled() throws NoSuchMethodException, IOException
+    void shouldNotTakeScreenshotIfWebDriverIsNotEnabled() throws NoSuchMethodException
     {
         enableScreenshotPublishing(false);
         monitor.onAssertionFailure(mock(AssertionFailedEvent.class));
@@ -174,7 +172,7 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldTakeScreenshotOfSearchContext() throws NoSuchMethodException, IOException
+    void shouldTakeScreenshotOfSearchContext() throws NoSuchMethodException
     {
         enableScreenshotPublishing(true);
         String title = "2019-03-07_19-11-38_898-Assertion_Failure-chrome-1440x836";
@@ -190,7 +188,7 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldTakeScreenshotOfAssertedElementsISearchContextIsPage() throws NoSuchMethodException, IOException
+    void shouldTakeScreenshotOfAssertedElementsISearchContextIsPage() throws NoSuchMethodException
     {
         enableScreenshotPublishing(true);
         TestPublishingScreenshotOnFailureMonitor spy = spy(monitor);
@@ -200,9 +198,9 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldTakeScreenshotOfAssertedElementsWithDebugMode() throws NoSuchMethodException, IOException
+    void shouldTakeScreenshotOfAssertedElementsWithDebugMode() throws NoSuchMethodException
     {
-        mockScenarioAndStoryMeta(EMPTY_META);
+        mockScenarioAndStoryMeta();
         monitor.setDebugModes(Arrays.asList("mode", "ui"));
         monitor.beforePerforming(I_DO_ACTION, false, TestWithModeSteps.class.getDeclaredMethod(INNER_WHEN_MODE_STEP));
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
@@ -214,13 +212,12 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
 
     static Stream<Arguments> debugMode()
     {
-        return Stream.of(Arguments.of(Arrays.asList("another")), null);
+        return Stream.of(Arguments.of(List.of("another")), null);
     }
 
     @ParameterizedTest
     @MethodSource("debugMode")
-    void shouldNotTakeScreenshotOfAssertedElementsWithDebugModeMethod(List<String> mode)
-            throws NoSuchMethodException, IOException
+    void shouldNotTakeScreenshotOfAssertedElementsWithDebugModeMethod(List<String> mode) throws NoSuchMethodException
     {
         monitor.setDebugModes(mode);
         monitor.beforePerforming(I_DO_ACTION, false, getClass().getDeclaredMethod("whenDebugStep"));
@@ -229,9 +226,9 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldTakeScreenshotOfAssertedElementsWithoutDebugModeInAnnotation() throws NoSuchMethodException, IOException
+    void shouldTakeScreenshotOfAssertedElementsWithoutDebugModeInAnnotation() throws NoSuchMethodException
     {
-        monitor.setDebugModes(Arrays.asList("anymode"));
+        monitor.setDebugModes(List.of("anymode"));
         enableScreenshotPublishing(true);
         TestPublishingScreenshotOnFailureMonitor spy = spy(monitor);
         doReturn(Optional.empty()).when(spy).takeScreenshot(ASSERTION_FAILURE);
@@ -241,16 +238,16 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
 
     private void enableScreenshotPublishing(boolean webDriverInitialized) throws NoSuchMethodException
     {
-        mockScenarioAndStoryMeta(EMPTY_META);
+        mockScenarioAndStoryMeta();
         monitor.beforePerforming(I_DO_ACTION, false, getClass().getDeclaredMethod(WHEN_STEP_METHOD));
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(webDriverInitialized);
     }
 
-    private void mockScenarioAndStoryMeta(Meta meta)
+    private void mockScenarioAndStoryMeta()
     {
         RunningStory runningStory = mock(RunningStory.class);
-        mockStoryMeta(runningStory, meta);
-        mockScenarioMeta(runningStory, meta);
+        mockStoryMeta(runningStory, EMPTY_META);
+        mockScenarioMeta(runningStory, EMPTY_META);
     }
 
     private void mockStoryMeta(RunningStory runningStory, Meta meta)

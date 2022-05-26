@@ -16,6 +16,7 @@
 
 package org.vividus.ui.monitor;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -69,10 +70,7 @@ public abstract class AbstractPublishingAttachmentOnFailureMonitor extends NullS
     @Override
     public void afterPerforming(String step, boolean dryRun, Method method)
     {
-        if (isPublishingEnabled(method))
-        {
-            publishAttachmentOnFailureEnabled.set(Boolean.FALSE);
-        }
+        publishAttachmentOnFailureEnabled.remove();
     }
 
     @Subscribe
@@ -86,7 +84,7 @@ public abstract class AbstractPublishingAttachmentOnFailureMonitor extends NullS
                 createAttachment().map(AttachmentPublishEvent::new).ifPresent(eventBus::post);
             }
             // CHECKSTYLE:OFF
-            catch (RuntimeException e)
+            catch (RuntimeException | IOException e)
             {
                 LOGGER.error(errorLogMessageOnFailure,  e);
             }
@@ -124,5 +122,5 @@ public abstract class AbstractPublishingAttachmentOnFailureMonitor extends NullS
 
     protected abstract boolean isPublishingEnabled(Method method);
 
-    protected abstract Optional<Attachment> createAttachment();
+    protected abstract Optional<Attachment> createAttachment() throws IOException;
 }

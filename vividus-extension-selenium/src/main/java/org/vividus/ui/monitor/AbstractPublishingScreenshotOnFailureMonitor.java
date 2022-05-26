@@ -50,7 +50,7 @@ public abstract class AbstractPublishingScreenshotOnFailureMonitor extends Abstr
         return getAnnotation(method, TakeScreenshotOnFailure.class)
                 .map(TakeScreenshotOnFailure::onlyInDebugMode)
                 .map(debugModeProperty -> debugModeProperty.isEmpty()
-                        || debugModes != null && debugModes.stream().anyMatch(debugModeProperty::equals))
+                        || debugModes != null && debugModes.contains(debugModeProperty))
                 .orElse(Boolean.FALSE);
     }
 

@@ -16,47 +16,52 @@
 
 package org.vividus.ui.monitor;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
+import com.browserup.harreader.model.Har;
 import com.google.common.eventbus.EventBus;
 
 import org.vividus.context.RunContext;
 import org.vividus.proxy.har.HarOnFailureManager;
 import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.util.json.JsonUtils;
 
 public class PublishingHarOnFailureMonitor extends AbstractPublishingAttachmentOnFailureMonitor
 {
-    private boolean publishHarOnFailure;
-
-    private final JsonUtils jsonUtils;
     private final HarOnFailureManager harOnFailureManager;
 
-    public PublishingHarOnFailureMonitor(EventBus eventBus, JsonUtils jsonUtils, RunContext runContext,
-            IWebDriverProvider webDriverProvider, HarOnFailureManager harOnFailureManager)
+    private final boolean publishHarOnFailure;
+
+    public PublishingHarOnFailureMonitor(boolean publishHarOnFailure, HarOnFailureManager harOnFailureManager,
+            EventBus eventBus, RunContext runContext, IWebDriverProvider webDriverProvider)
     {
         super(runContext, webDriverProvider, eventBus, "noHarOnFailure", "Unable to capture HAR");
-        this.jsonUtils = jsonUtils;
         this.harOnFailureManager = harOnFailureManager;
+        this.publishHarOnFailure = publishHarOnFailure;
     }
 
     @Override
-    protected Optional<Attachment> createAttachment()
+    protected Optional<Attachment> createAttachment() throws IOException
     {
-        return harOnFailureManager.takeHar()
-                .map(har -> new Attachment(jsonUtils.toJsonAsBytes(har), "har.har"));
+        Optional<Har> har = harOnFailureManager.takeHar();
+        if (har.isPresent())
+        {
+            try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream())
+            {
+                har.get().writeTo(byteArrayOutputStream);
+                Attachment attachment = new Attachment(byteArrayOutputStream.toByteArray(), "har-on-failure.har");
+                return Optional.of(attachment);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
     protected boolean isPublishingEnabled(Method method)
     {
         return publishHarOnFailure || getAnnotation(method, PublishHarOnFailure.class).isPresent();
-    }
-
-    public void setPublishHarOnFailure(boolean publishHarOnFailure)
-    {
-        this.publishHarOnFailure = publishHarOnFailure;
     }
 }

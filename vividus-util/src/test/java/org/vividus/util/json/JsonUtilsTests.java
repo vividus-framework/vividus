@@ -60,13 +60,6 @@ class JsonUtilsTests
     }
 
     @Test
-    void testToBytesSuccessDefault()
-    {
-        byte[] actualJson = jsonUtils.toJsonAsBytes(TEST_OBJECT);
-        assertArrayEquals(JSON_STRING.getBytes(StandardCharsets.UTF_8), actualJson);
-    }
-
-    @Test
     void testToPrettyJsonSuccessDefault()
     {
         String actualJson = jsonUtils.toPrettyJson(TEST_OBJECT);
