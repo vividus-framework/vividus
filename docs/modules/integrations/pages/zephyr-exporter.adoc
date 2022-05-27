@@ -18,6 +18,10 @@ include::partial$jira-configuration.adoc[]
 |Required
 |Description
 
+|`zephyr.exporter.api-type`
+|false
+|The type of Jira API (`SCALE`, `SQUARE`). The `SCALE` type is selected by default.
+
 |`zephyr.exporter.jira-instance-key`
 |false
 |The key of the configured JIRA instance, in case of missing value it will be evaluated automatically based on issue keys being exported
