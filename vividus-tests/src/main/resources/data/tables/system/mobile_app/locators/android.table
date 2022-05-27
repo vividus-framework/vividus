@@ -1,16 +1,17 @@
 {transformer=FROM_LANDSCAPE}
-|textElementXpath           |//android.widget.TextView                            |
-|menuButtonXpath            |//android.widget.TextView[@text='Button']            |
-|menuInputXpath             |//android.widget.TextView[@text='Input']             |
-|nameDisplayXpath           |//android.widget.TextView[@text='${text}']           |
-|menuQrCodeXpath            |//android.widget.TextView[@text='QR Code']           |
-|menuWaitXpath              |//android.widget.TextView[@text='Wait']              |
-|menuScrollViewXpath        |//android.widget.TextView[@text='Scroll View']       |
-|menuSliderXpath            |//android.widget.TextView[@text='Slider']            |
-|nameInputXpath             |//android.widget.EditText[@text='Enter your name...']|
-|action                     |COMPARE_AGAINST                                      |
-|scrollViewXpath            |//android.widget.ScrollView                          |
-|carouselViewXpath          |//android.widget.TextView[@text='Carousel']          |
-|swipeableAreaXpath         |//android.widget.HorizontalScrollView                |
-|textFieldValueAttribute    |text                                                 |
-|scrollableMenuXpath        |//android.widget.ScrollView                          |
+|textElementXpath           |//android.widget.TextView                                                |
+|menuButtonXpath            |//android.widget.TextView[@text='Button']                                |
+|menuInputXpath             |//android.widget.TextView[@text='Input']                                 |
+|nameDisplayXpath           |//android.widget.TextView[@text='${text}']                               |
+|menuQrCodeXpath            |//android.widget.TextView[@text='QR Code']                               |
+|menuWaitXpath              |//android.widget.TextView[@text='Wait']                                  |
+|menuScrollViewXpath        |//android.widget.TextView[@text='Scroll View']                           |
+|menuSliderXpath            |//android.widget.TextView[@text='Slider']                                |
+|nameInputXpath             |//android.widget.EditText[@text='Enter your name...']                    |
+|action                     |COMPARE_AGAINST                                                          |
+|scrollViewXpath            |//android.widget.ScrollView                                              |
+|carouselViewXpath          |//android.widget.TextView[@text='Carousel']                              |
+|swipeableAreaXpath         |//android.widget.HorizontalScrollView                                    |
+|textFieldValueAttribute    |text                                                                     |
+|scrollableMenuXpath        |//android.widget.ScrollView                                              |
+|qrCodeContainerXpath       |//android.view.ViewGroup[@resource-id='RNE__Image__children__container'] |

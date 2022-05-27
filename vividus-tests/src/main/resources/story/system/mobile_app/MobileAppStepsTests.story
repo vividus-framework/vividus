@@ -298,6 +298,13 @@ When I wait until element located `xpath(<scrollableMenuXpath>)` disappears
 When I scan barcode from screen and save result to scenario variable `qrCodeLink`
 Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
 
+Scenario: Verify steps: "When I scan barcode from context and save result to $scopes variable `$variableName`"
+Meta:
+    @requirementId 2687
+When I change context to element located `xpath(<qrCodeContainerXpath>)`
+When I scan barcode from context and save result to scenario variable `qrCodeLink`
+Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
+When I reset context
 
 Scenario: Go to slider screen
 When I tap on element located `accessibilityId(menuToggler)`

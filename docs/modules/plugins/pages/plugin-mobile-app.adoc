@@ -870,6 +870,36 @@ When I set value of Android slider located `xpath(//android.widget.SeekBar)` to 
 
 include::partial$generic-ui-steps.adoc[]
 
+=== Scan barcode from context
+
+Scan a barcode from the specified context and save its value to the variable with the specified name.
+If context not set - takes a screenshot of the current screen. Only the first found barcode will be scanned.
+
+Supported Code Formats
+
+include::partial$code-formats.adoc[]
+
+Actions performed at this step:
+
+* Takes a screenshot of the specified context. If it's not set - takes a screenshot of the current screen (viewport and system bars)
+* Scans a barcode from the screenshot and save its value to the variable
+
+[source,gherkin]
+----
+When I scan barcode from context and save result to $scopes variable `$variableName`
+----
+
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the value of the barcode.
+
+.Scan the barcode
+[source,gherkin]
+----
+When I change context to element located `xpath(//android.view.ViewGroup[@resource-id='qrContainer'])`
+When I scan barcode from context and save result to scenario variable `qrCodeLink`
+Then `${qrCodeLink}` is equal to `https://www.example.com`
+----
+
 include::partial$proxy-steps.adoc[]
 
 === Change network connection
