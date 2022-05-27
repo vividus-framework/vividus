@@ -38,6 +38,8 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.context.VariableContext;
 import org.vividus.http.ConnectionDetails;
 import org.vividus.http.HttpTestContext;
@@ -47,6 +49,7 @@ import org.vividus.model.NamedEntry;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ByteArrayValidationRule;
 import org.vividus.steps.ComparisonRule;
+import org.vividus.steps.DataWrapper;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.SubSteps;
 import org.vividus.util.ResourceUtils;
@@ -58,6 +61,7 @@ import org.vividus.variable.VariableScope;
 
 public class HttpResponseValidationSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpResponseValidationSteps.class);
     private static final String HTTP_RESPONSE_STATUS_CODE = "HTTP response status code";
     private static final Tika TIKA = new Tika();
 
@@ -349,11 +353,18 @@ public class HttpResponseValidationSteps
      * </code>
      * </p>
      * Currently available types are TEXT and BASE64
+     *
      * @param parameters describes saving parameters
+     * @deprecated Use instead:
+     * {@link org.vividus.archive.steps.ArchiveSteps#saveArchiveEntriesToVariables(DataWrapper, List)}
      */
     @When("I save content of the response archive entries to the variables:$parameters")
+    @Deprecated(since = "0.4.10", forRemoval = true)
     public void saveFilesContentToVariables(List<ArchiveVariable> parameters)
     {
+        LOGGER.warn("The step: \"When I save content of the response archive entries to the variables:$parameters\""
+                + " is deprecated and will be removed in VIVIDUS 0.5.0."
+                + " Use instead: When I save content of `$archiveData` archive entries to variables:$parameters");
         List<String> expectedEntries = parameters.stream().map(ArchiveVariable::getPath).collect(Collectors.toList());
         Map<String, byte[]> zipEntries = ZipUtils.readZipEntriesFromBytes(getResponseBody(), expectedEntries::contains);
         parameters.forEach(arcVar ->
@@ -382,16 +393,24 @@ public class HttpResponseValidationSteps
      * |matches   |files/2011-11-11/logs/papyrus\.\d+\.log |<br>
      * </code>
      * </p>
+     *
      * @param parameters The ExampleTable that contains specified string comparison <b>rule</b> and entry <b>name</b>
-     * pattern that should be found using current <b>rule</b>. Available columns:
-     * <ul>
-     * <li>rule - String comparison rule: "is equal to", "contains", "does not contain", "matches".</li>
-     * <li>name - Desired entry name pattern used with current <b>rule</b>.</li>
-     * </ul>
+     *                   pattern that should be found using current <b>rule</b>. Available columns:
+     *                   <ul>
+     *                   <li>rule - String comparison rule: "is equal to", "contains", "does not contain", "matches"
+     *                   .</li>
+     *                   <li>name - Desired entry name pattern used with current <b>rule</b>.</li>
+     *                   </ul>
+     * @deprecated Use instead:
+     *             {@link org.vividus.archive.steps.ArchiveSteps#verifyArchiveContainsEntries(DataWrapper, List)}
      */
     @Then("response archive contains entries with names:$parameters")
+    @Deprecated(since = "0.4.10", forRemoval = true)
     public void verifyArchiveContainsEntries(List<NamedEntry> parameters)
     {
+        LOGGER.warn("The step: \"Then response archive contains entries with names:$parameters\" is deprecated and will"
+                  + " be removed in VIVIDUS 0.5.0."
+                  + " Use instead: Then `$archiveData` archive contains entries with names:$parameters");
         Set<String> entryNames = ZipUtils.readZipEntryNamesFromBytes(getResponseBody());
 
         parameters.forEach(entry ->
