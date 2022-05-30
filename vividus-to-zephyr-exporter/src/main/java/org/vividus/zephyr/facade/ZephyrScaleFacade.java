@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 
 public class ZephyrScaleFacade implements IZephyrFacade
 {
-    private static final String REST_ATM_ENDPOINT = "/rest/atm/1.0/";
+    private static final String REST_ATM_ENDPOINT = "/rest/atm/1.0";
     private static final String TEST_RESULT_ENDPOINT_FORMAT = "/testrun/%s/testcase/%s/testresult";
 
     private final JiraFacade jiraFacade;
