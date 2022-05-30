@@ -131,7 +131,7 @@ class ProxyStepsTests
 
     @ParameterizedTest
     @CsvSource({
-            "GET,  HttpStatus.SC_OK",
+            "GET,  200",
             "POST, 302"
     })
     void checkHarEntryExistenceWithHttpMethodAndUrlPatternNoCalls(HttpMethod httpMethodInHar, int statusCode)

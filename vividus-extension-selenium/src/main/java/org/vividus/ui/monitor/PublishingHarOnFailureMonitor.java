@@ -70,6 +70,6 @@ public class PublishingHarOnFailureMonitor extends AbstractPublishingAttachmentO
     @Override
     protected boolean isPublishingEnabled(Method method)
     {
-        return publishHarOnFailure || getAnnotation(method, PublishHarOnFailure.class).isPresent();
+        return publishHarOnFailure || getAnnotation(method, CaptureHarOnFailure.class).isPresent();
     }
 }

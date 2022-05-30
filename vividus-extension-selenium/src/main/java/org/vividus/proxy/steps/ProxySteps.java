@@ -45,7 +45,7 @@ import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.DataWrapper;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.action.IWaitActions;
-import org.vividus.ui.monitor.PublishHarOnFailure;
+import org.vividus.ui.monitor.CaptureHarOnFailure;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.variable.VariableScope;
 
@@ -61,6 +61,7 @@ import io.netty.handler.codec.http.HttpVersion;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 @TakeScreenshotOnFailure(onlyInDebugMode = "proxy")
+@CaptureHarOnFailure
 public class ProxySteps
 {
     @Inject private IProxy proxy;
@@ -101,7 +102,6 @@ public class ProxySteps
      * @param number         The number to compare with
      * @return Filtered HAR entries
      */
-    @PublishHarOnFailure
     @Then("number of HTTP $httpMethods requests with URL pattern `$urlPattern` is $comparisonRule `$number`")
     public List<HarEntry> checkNumberOfRequests(Set<HttpMethod> httpMethods, Pattern urlPattern,
             ComparisonRule comparisonRule, int number)

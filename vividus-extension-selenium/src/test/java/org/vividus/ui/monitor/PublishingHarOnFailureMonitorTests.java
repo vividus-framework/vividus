@@ -279,7 +279,7 @@ class PublishingHarOnFailureMonitorTests
         return new String(attachment.getContent(), StandardCharsets.UTF_8);
     }
 
-    @PublishHarOnFailure
+    @CaptureHarOnFailure
     @When(I_DO_ACTION)
     void whenStep()
     {
@@ -292,7 +292,7 @@ class PublishingHarOnFailureMonitorTests
         // nothing to do
     }
 
-    @PublishHarOnFailure
+    @CaptureHarOnFailure
     static class TestSteps
     {
         @When(I_DO_ACTION)
