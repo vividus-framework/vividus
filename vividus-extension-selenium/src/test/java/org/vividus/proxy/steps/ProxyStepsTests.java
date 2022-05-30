@@ -51,6 +51,7 @@ import com.browserup.harreader.model.HarResponse;
 import com.browserup.harreader.model.HttpMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -118,7 +119,7 @@ class ProxyStepsTests
     void checkHarEntryExistenceWithHttpMethodAndUrlPattern() throws IOException
     {
         HttpMethod httpMethod = HttpMethod.POST;
-        mockHar(httpMethod, 200);
+        mockHar(httpMethod, HttpStatus.SC_OK);
         int callsNumber = 1;
         ComparisonRule rule = ComparisonRule.EQUAL_TO;
         String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, "GET, POST", URL);
@@ -130,7 +131,7 @@ class ProxyStepsTests
 
     @ParameterizedTest
     @CsvSource({
-            "GET,  200",
+            "GET,  HttpStatus.SC_OK",
             "POST, 302"
     })
     void checkHarEntryExistenceWithHttpMethodAndUrlPatternNoCalls(HttpMethod httpMethodInHar, int statusCode)
@@ -150,7 +151,7 @@ class ProxyStepsTests
     void checkCaptureQueryStringFromHarEntry() throws IOException
     {
         HttpMethod httpMethod = HttpMethod.POST;
-        mockHar(httpMethod, 200);
+        mockHar(httpMethod, HttpStatus.SC_OK);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL_QUERY,
                 variableScopes, VARIABLE_NAME);
@@ -166,7 +167,7 @@ class ProxyStepsTests
     void shouldSaveUrlFromCapturedHar() throws IOException
     {
         HttpMethod httpMethod = HttpMethod.POST;
-        mockHar(httpMethod, 200);
+        mockHar(httpMethod, HttpStatus.SC_OK);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL, variableScopes,
                 VARIABLE_NAME);
@@ -178,7 +179,7 @@ class ProxyStepsTests
     void checkCaptureRequestDataFromHarEntry() throws IOException
     {
         HttpMethod httpMethod = HttpMethod.POST;
-        int statusCode = 200;
+        int statusCode = HttpStatus.SC_OK;
         mockHar(httpMethod, statusCode);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.REQUEST_DATA,
@@ -218,7 +219,7 @@ class ProxyStepsTests
     })
     void testWaitRequestInProxyLog(HttpMethod actualHttpMethod, boolean waitSuccessful) throws IOException
     {
-        mockHar(actualHttpMethod, 200);
+        mockHar(actualHttpMethod, HttpStatus.SC_OK);
         proxySteps.waitRequestInProxyLog(EnumSet.of(HttpMethod.POST), URL_PATTERN);
         verify(waitActions).wait(eq(URL_PATTERN), argThat((Function<Pattern, Boolean> e) ->
                 "waiting for HTTP POST request with URL pattern www.test.com".equals(e.toString())
@@ -228,7 +229,7 @@ class ProxyStepsTests
     @Test
     void testWaitAnyOfRequestInProxyLog() throws IOException
     {
-        mockHar(HttpMethod.PUT, 200);
+        mockHar(HttpMethod.PUT, HttpStatus.SC_OK);
         proxySteps.waitRequestInProxyLog(EnumSet.of(HttpMethod.POST, HttpMethod.PUT), URL_PATTERN);
         verify(waitActions).wait(eq(URL_PATTERN), argThat((Function<Pattern, Boolean> e) ->
                 "waiting for HTTP POST or PUT request with URL pattern www.test.com".equals(e.toString())
@@ -273,7 +274,7 @@ class ProxyStepsTests
         when(request.protocolVersion()).thenReturn(HttpVersion.HTTP_1_1);
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
-        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, 200, new DataWrapper(content), headers);
+        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, HttpStatus.SC_OK, new DataWrapper(content), headers);
 
         ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
         verify(proxy).addRequestFilter(filterCaptor.capture());
@@ -298,7 +299,7 @@ class ProxyStepsTests
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
         proxySteps.mockHttpRequests(Set.of(HttpMethod.GET, HttpMethod.POST), StringComparisonRule.CONTAINS,
-                URL, 200, new DataWrapper(VALUE1), headers);
+                URL, HttpStatus.SC_OK, new DataWrapper(VALUE1), headers);
         verifyResponse(request, messageInfo);
     }
 
@@ -313,7 +314,7 @@ class ProxyStepsTests
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
         proxySteps.mockHttpRequests(Set.of(HttpMethod.GET, HttpMethod.POST), StringComparisonRule.CONTAINS,
-                URL, 200, new DataWrapper(VALUE1), headers);
+                URL, HttpStatus.SC_OK, new DataWrapper(VALUE1), headers);
         ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
         verify(proxy).addRequestFilter(filterCaptor.capture());
         FullHttpResponse response = (FullHttpResponse) filterCaptor.getValue().filterRequest(request, null,
@@ -330,7 +331,7 @@ class ProxyStepsTests
         when(request.protocolVersion()).thenReturn(HttpVersion.HTTP_1_1);
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
-        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, 200, headers);
+        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, HttpStatus.SC_OK, headers);
 
         ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
         verify(proxy).addRequestFilter(filterCaptor.capture());
