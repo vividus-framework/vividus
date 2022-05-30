@@ -16,47 +16,55 @@
 
 package org.vividus.ui.monitor;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.Optional;
 
 import com.browserup.harreader.model.Har;
+import com.browserup.harreader.model.HarEntry;
+import com.browserup.harreader.model.HarLog;
 import com.google.common.eventbus.EventBus;
 
 import org.vividus.context.RunContext;
-import org.vividus.proxy.har.HarOnFailureManager;
+import org.vividus.proxy.IProxy;
 import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.testcontext.TestContext;
 
 public class PublishingHarOnFailureMonitor extends AbstractPublishingAttachmentOnFailureMonitor
 {
-    private final HarOnFailureManager harOnFailureManager;
+    private static final Object RECENT_HAR_ENTRY_TIMESTAMP_KEY = PublishingHarOnFailureMonitor.class;
+
+    private final TestContext testContext;
+    private final IProxy proxy;
 
     private final boolean publishHarOnFailure;
 
-    public PublishingHarOnFailureMonitor(boolean publishHarOnFailure, HarOnFailureManager harOnFailureManager,
-            EventBus eventBus, RunContext runContext, IWebDriverProvider webDriverProvider)
+    public PublishingHarOnFailureMonitor(boolean publishHarOnFailure, EventBus eventBus, RunContext runContext,
+            IWebDriverProvider webDriverProvider, IProxy proxy, TestContext testContext)
     {
         super(runContext, webDriverProvider, eventBus, "noHarOnFailure", "Unable to capture HAR");
-        this.harOnFailureManager = harOnFailureManager;
         this.publishHarOnFailure = publishHarOnFailure;
+        this.proxy = proxy;
+        this.testContext = testContext;
     }
 
     @Override
     protected Optional<Attachment> createAttachment() throws IOException
     {
-        Optional<Har> har = harOnFailureManager.takeHar();
-        if (har.isPresent())
+        Har har = proxy.getRecordedData().deepCopy();
+        HarLog harLog = har.getLog();
+        Date savedDateTime = testContext.get(RECENT_HAR_ENTRY_TIMESTAMP_KEY);
+        if (savedDateTime != null)
         {
-            try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream())
-            {
-                har.get().writeTo(byteArrayOutputStream);
-                Attachment attachment = new Attachment(byteArrayOutputStream.toByteArray(), "har-on-failure.har");
-                return Optional.of(attachment);
-            }
+            harLog.getEntries().removeIf(entry -> savedDateTime.after(entry.getStartedDateTime()));
+            harLog.getPages().removeIf(page -> savedDateTime.after(page.getStartedDateTime()));
         }
-        return Optional.empty();
+        harLog.findMostRecentEntry()
+                .map(HarEntry::getStartedDateTime)
+                .ifPresent(date -> testContext.put(RECENT_HAR_ENTRY_TIMESTAMP_KEY, date));
+        return Optional.of(new Attachment(har.asBytes(), "har-on-failure.har"));
     }
 
     @Override

@@ -51,7 +51,6 @@ import com.browserup.harreader.model.HarResponse;
 import com.browserup.harreader.model.HttpMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -119,7 +118,7 @@ class ProxyStepsTests
     void checkHarEntryExistenceWithHttpMethodAndUrlPattern() throws IOException
     {
         HttpMethod httpMethod = HttpMethod.POST;
-        mockHar(httpMethod, HttpStatus.SC_OK);
+        mockHar(httpMethod, 200);
         int callsNumber = 1;
         ComparisonRule rule = ComparisonRule.EQUAL_TO;
         String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, "GET, POST", URL);
@@ -151,7 +150,7 @@ class ProxyStepsTests
     void checkCaptureQueryStringFromHarEntry() throws IOException
     {
         HttpMethod httpMethod = HttpMethod.POST;
-        mockHar(httpMethod, HttpStatus.SC_OK);
+        mockHar(httpMethod, 200);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL_QUERY,
                 variableScopes, VARIABLE_NAME);
@@ -167,7 +166,7 @@ class ProxyStepsTests
     void shouldSaveUrlFromCapturedHar() throws IOException
     {
         HttpMethod httpMethod = HttpMethod.POST;
-        mockHar(httpMethod, HttpStatus.SC_OK);
+        mockHar(httpMethod, 200);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL, variableScopes,
                 VARIABLE_NAME);
@@ -179,7 +178,7 @@ class ProxyStepsTests
     void checkCaptureRequestDataFromHarEntry() throws IOException
     {
         HttpMethod httpMethod = HttpMethod.POST;
-        int statusCode = HttpStatus.SC_OK;
+        int statusCode = 200;
         mockHar(httpMethod, statusCode);
         Set<VariableScope> variableScopes = Set.of(VariableScope.SCENARIO);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.REQUEST_DATA,
@@ -219,7 +218,7 @@ class ProxyStepsTests
     })
     void testWaitRequestInProxyLog(HttpMethod actualHttpMethod, boolean waitSuccessful) throws IOException
     {
-        mockHar(actualHttpMethod, HttpStatus.SC_OK);
+        mockHar(actualHttpMethod, 200);
         proxySteps.waitRequestInProxyLog(EnumSet.of(HttpMethod.POST), URL_PATTERN);
         verify(waitActions).wait(eq(URL_PATTERN), argThat((Function<Pattern, Boolean> e) ->
                 "waiting for HTTP POST request with URL pattern www.test.com".equals(e.toString())
@@ -229,7 +228,7 @@ class ProxyStepsTests
     @Test
     void testWaitAnyOfRequestInProxyLog() throws IOException
     {
-        mockHar(HttpMethod.PUT, HttpStatus.SC_OK);
+        mockHar(HttpMethod.PUT, 200);
         proxySteps.waitRequestInProxyLog(EnumSet.of(HttpMethod.POST, HttpMethod.PUT), URL_PATTERN);
         verify(waitActions).wait(eq(URL_PATTERN), argThat((Function<Pattern, Boolean> e) ->
                 "waiting for HTTP POST or PUT request with URL pattern www.test.com".equals(e.toString())

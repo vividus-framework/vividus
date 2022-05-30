@@ -39,7 +39,6 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverUtils;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
-import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.util.Sleeper;
 
 import io.appium.java_client.PerformsTouchActions;
@@ -48,7 +47,6 @@ import io.appium.java_client.touch.offset.ElementOption;
 import io.appium.java_client.touch.offset.PointOption;
 import ru.yandex.qatools.ashot.util.ImageTool;
 
-@TakeScreenshotOnFailure
 public class TouchActions
 {
     private static final int HEIGHT_DIVIDER = 3;
