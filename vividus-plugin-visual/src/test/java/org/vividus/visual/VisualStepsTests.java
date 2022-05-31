@@ -34,7 +34,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -159,10 +159,10 @@ class VisualStepsTests
     {
         return Stream.of(
           Arguments.of(VisualActionType.COMPARE_AGAINST,
-                  (Function<VisualCheck, OptionalInt>) VisualCheck::getAcceptableDiffPercentage,
+                  (Function<VisualCheck, OptionalDouble>) VisualCheck::getAcceptableDiffPercentage,
                   ACCEPTABLE_DIFF_PERCENTAGE),
           Arguments.of(VisualActionType.CHECK_INEQUALITY_AGAINST,
-                  (Function<VisualCheck, OptionalInt>) VisualCheck::getRequiredDiffPercentage,
+                  (Function<VisualCheck, OptionalDouble>) VisualCheck::getRequiredDiffPercentage,
                   "REQUIRED_DIFF_PERCENTAGE")
         );
     }
@@ -170,7 +170,7 @@ class VisualStepsTests
     @ParameterizedTest
     @MethodSource("diffMethodSource")
     void shouldAssertCheckResultAndUseStepLevelSettings(VisualActionType actionType,
-            Function<VisualCheck, OptionalInt> diffValueExtractor, String columnName) throws IOException
+            Function<VisualCheck, OptionalDouble> diffValueExtractor, String columnName) throws IOException
     {
         mockUiContext();
         ExamplesTable table = mock(ExamplesTable.class);
@@ -185,7 +185,7 @@ class VisualStepsTests
         mockCheckResult();
         visualSteps.runVisualTests(actionType, BASELINE, table);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
-        assertEquals(OptionalInt.of(50), diffValueExtractor.apply(visualCheck));
+        assertEquals(OptionalDouble.of(50), diffValueExtractor.apply(visualCheck));
         assertEquals(Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore, IgnoreStrategy.AREA, areasToIgnore),
                 visualCheck.getElementsToIgnore());
         verifyCheckResultPublish();
@@ -211,7 +211,7 @@ class VisualStepsTests
         mockCheckResult();
         visualSteps.runVisualTests(compareAgainst, BASELINE, table, screenshotConfiguration);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
-        assertEquals(OptionalInt.empty(), visualCheck.getRequiredDiffPercentage());
+        assertEquals(OptionalDouble.empty(), visualCheck.getRequiredDiffPercentage());
         assertEquals(Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore, IgnoreStrategy.AREA, areasToIgnore),
                 visualCheck.getElementsToIgnore());
         verifyCheckResultPublish();
@@ -248,11 +248,11 @@ class VisualStepsTests
     }
 
     private static void mockRow(Parameters row, Set<Locator> elementIgnore, Set<Locator> areaIgnore,
-            int acceptableDiffPercentage, String columnName)
+            double acceptableDiffPercentage, String columnName)
     {
         mockRow(row, elementIgnore, areaIgnore);
         doReturn(Map.of(columnName, "50")).when(row).values();
-        doReturn(acceptableDiffPercentage).when(row).valueAs(columnName, Integer.TYPE);
+        doReturn(acceptableDiffPercentage).when(row).valueAs(columnName, Double.TYPE);
     }
 
     private static void mockGettingValue(Parameters row, String name, Set<Locator> result)

@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -180,11 +180,11 @@ public class VisualSteps extends AbstractVisualSteps
         }
     }
 
-    private OptionalInt getParameter(Parameters rowAsParameters, String paramterName)
+    private OptionalDouble getParameter(Parameters rowAsParameters, String paramterName)
     {
         return rowAsParameters.values().containsKey(paramterName)
-                ? OptionalInt.of(rowAsParameters.valueAs(paramterName, Integer.TYPE))
-                : OptionalInt.empty();
+                ? OptionalDouble.of(rowAsParameters.valueAs(paramterName, Double.TYPE))
+                : OptionalDouble.empty();
     }
 
     private Set<Locator> getLocatorsSet(Parameters rowAsParameters, IgnoreStrategy s)

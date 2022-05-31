@@ -19,6 +19,7 @@ package org.vividus.visual.engine;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -45,8 +46,8 @@ public class VisualTestingEngine implements IVisualTestingEngine
     private final ScreenshotProvider screenshotProvider;
     private final IBaselineRepository baselineRepository;
 
-    private int acceptableDiffPercentage;
-    private int requiredDiffPercentage;
+    private double acceptableDiffPercentage;
+    private double requiredDiffPercentage;
     private boolean overrideBaselines;
 
     public VisualTestingEngine(ScreenshotProvider screenshotProvider,
@@ -84,14 +85,14 @@ public class VisualTestingEngine implements IVisualTestingEngine
             comparisonResult.setBaseline(imageToBase64(baselineScreenshot.getImage()));
 
             boolean inequalityCheck = visualCheck.getAction() == VisualActionType.CHECK_INEQUALITY_AGAINST;
-            int diffPercentage = calculateDiffPercentage(visualCheck, inequalityCheck);
+            double diffPercentage = calculateDiffPercentage(visualCheck, inequalityCheck);
             int comparisonImageSize = calculateComparisonImageSize(baselineScreenshot, checkpoint);
             ImageDiff diff = findImageDiff(baselineScreenshot, checkpoint, comparisonImageSize, diffPercentage);
             comparisonResult.setPassed(!diff.hasDiff());
             comparisonResult.setDiff(imageToBase64(diff.getMarkedImage()));
             LOGGER.atInfo()
                   .addArgument(() -> inequalityCheck ? "required" : "acceptable")
-                  .addArgument((double) diffPercentage)
+                  .addArgument(BigDecimal.valueOf(diffPercentage))
                   .addArgument(() -> Math.ceil((double) (diff.getDiffSize() * 100) / (double) comparisonImageSize))
                   .log("The {} visual difference percentage is {}% , but actual was {}%");
             if (overrideBaselines)
@@ -107,7 +108,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
         return comparisonResult;
     }
 
-    private int calculateDiffPercentage(VisualCheck visualCheck, boolean inequalityCheck)
+    private double calculateDiffPercentage(VisualCheck visualCheck, boolean inequalityCheck)
     {
         if (inequalityCheck)
         {
@@ -117,7 +118,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
     }
 
     private ImageDiff findImageDiff(Screenshot expected, Screenshot actual, int comparisonImageSize,
-            int diffPercentage)
+            double diffPercentage)
     {
         PointsMarkupPolicy pointsMarkupPolicy = new PointsMarkupPolicy();
         pointsMarkupPolicy.setDiffSizeTrigger((int) (comparisonImageSize * diffPercentage * 0.01));
