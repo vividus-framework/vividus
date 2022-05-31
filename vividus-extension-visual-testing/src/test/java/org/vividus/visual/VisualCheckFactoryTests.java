@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.OptionalDouble;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,7 +55,7 @@ class VisualCheckFactoryTests
         assertAll(
             () -> assertEquals(NAME, check.getBaselineName()),
             () -> assertEquals(VisualActionType.COMPARE_AGAINST, check.getAction()),
-            () -> assertEquals(OptionalInt.empty(), check.getAcceptableDiffPercentage()),
+            () -> assertEquals(OptionalDouble.empty(), check.getAcceptableDiffPercentage()),
             () -> assertEquals(Map.of(), check.getElementsToIgnore()),
             () -> assertEquals(Optional.empty(), check.getScreenshotParameters()));
     }
@@ -79,7 +79,7 @@ class VisualCheckFactoryTests
         assertAll(
             () -> assertEquals(INDEXED_NAME, check.getBaselineName()),
             () -> assertEquals(VisualActionType.COMPARE_AGAINST, check.getAction()),
-            () -> assertEquals(OptionalInt.empty(), check.getAcceptableDiffPercentage()),
+            () -> assertEquals(OptionalDouble.empty(), check.getAcceptableDiffPercentage()),
             () -> assertEquals(Map.of(), check.getElementsToIgnore()),
             () -> assertEquals(Optional.empty(), check.getScreenshotParameters()));
     }
@@ -106,7 +106,7 @@ class VisualCheckFactoryTests
         assertAll(
             () -> assertEquals(NAME, check.getBaselineName()),
             () -> assertEquals(VisualActionType.COMPARE_AGAINST, check.getAction()),
-            () -> assertEquals(OptionalInt.empty(), check.getAcceptableDiffPercentage()),
+            () -> assertEquals(OptionalDouble.empty(), check.getAcceptableDiffPercentage()),
             () -> assertEquals(Map.of(), check.getElementsToIgnore()),
             () -> assertEquals(Optional.of(screenshotParameters), check.getScreenshotParameters()));
     }

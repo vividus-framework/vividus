@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.OptionalDouble;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,10 +30,10 @@ class VisualCheckTests
     @Test
     void shouldHaveDefaultParameters()
     {
-        VisualCheck visualCheck = new VisualCheck();
+        var visualCheck = new VisualCheck();
         Assertions.assertAll(
-            () -> assertEquals(OptionalInt.empty(), visualCheck.getAcceptableDiffPercentage()),
-            () -> assertEquals(OptionalInt.empty(), visualCheck.getRequiredDiffPercentage()),
+            () -> assertEquals(OptionalDouble.empty(), visualCheck.getAcceptableDiffPercentage()),
+            () -> assertEquals(OptionalDouble.empty(), visualCheck.getRequiredDiffPercentage()),
             () -> assertEquals(Map.of(), visualCheck.getElementsToIgnore()),
             () -> assertEquals(Optional.empty(), visualCheck.getScreenshotParameters()));
     }
@@ -41,8 +41,8 @@ class VisualCheckTests
     @Test
     void shouldVerifySetters()
     {
-        VisualCheck visualCheck = new VisualCheck();
-        OptionalInt diff = OptionalInt.of(1);
+        var visualCheck = new VisualCheck();
+        var diff = OptionalDouble.of(1);
         visualCheck.setRequiredDiffPercentage(diff);
         visualCheck.setAcceptableDiffPercentage(diff);
         Assertions.assertAll(

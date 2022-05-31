@@ -18,7 +18,7 @@ package org.vividus.visual.model;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.OptionalDouble;
 import java.util.Set;
 
 import org.openqa.selenium.SearchContext;
@@ -30,8 +30,8 @@ public class VisualCheck
 {
     private String baselineName;
     private VisualActionType action;
-    private OptionalInt acceptableDiffPercentage = OptionalInt.empty();
-    private OptionalInt requiredDiffPercentage = OptionalInt.empty();
+    private OptionalDouble acceptableDiffPercentage = OptionalDouble.empty();
+    private OptionalDouble requiredDiffPercentage = OptionalDouble.empty();
     private Map<IgnoreStrategy, Set<Locator>> elementsToIgnore = Map.of();
     private Optional<ScreenshotParameters> screenshotParameters = Optional.empty();
     private SearchContext searchContext;
@@ -62,12 +62,12 @@ public class VisualCheck
         this.elementsToIgnore = elementsToIgnore;
     }
 
-    public OptionalInt getAcceptableDiffPercentage()
+    public OptionalDouble getAcceptableDiffPercentage()
     {
         return acceptableDiffPercentage;
     }
 
-    public void setAcceptableDiffPercentage(OptionalInt acceptableDiffPercentage)
+    public void setAcceptableDiffPercentage(OptionalDouble acceptableDiffPercentage)
     {
         this.acceptableDiffPercentage = acceptableDiffPercentage;
     }
@@ -97,12 +97,12 @@ public class VisualCheck
         this.searchContext = searchContext;
     }
 
-    public OptionalInt getRequiredDiffPercentage()
+    public OptionalDouble getRequiredDiffPercentage()
     {
         return requiredDiffPercentage;
     }
 
-    public void setRequiredDiffPercentage(OptionalInt requiredDiffPercentage)
+    public void setRequiredDiffPercentage(OptionalDouble requiredDiffPercentage)
     {
         this.requiredDiffPercentage = requiredDiffPercentage;
     }

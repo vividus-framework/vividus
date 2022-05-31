@@ -33,10 +33,11 @@ import static org.mockito.Mockito.when;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.OptionalDouble;
 
 import javax.imageio.ImageIO;
 
@@ -127,11 +128,11 @@ class VisualTestingEngineTests
     @ParameterizedTest
     @CsvSource({"0, false", "25, false", "50, true", "100, true"})
     void shouldReturnVisualCheckResultWithDiffBaselineAndCheckpointDiffSensitivity(
-        int acceptableDiffPercentage, boolean status) throws IOException
+        double acceptableDiffPercentage, boolean status) throws IOException
     {
         when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
-        visualCheck.setAcceptableDiffPercentage(OptionalInt.of(acceptableDiffPercentage));
+        visualCheck.setAcceptableDiffPercentage(OptionalDouble.of(acceptableDiffPercentage));
         mockGetCheckpointScreenshot(visualCheck);
         VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
         Assertions.assertAll(
@@ -143,17 +144,21 @@ class VisualTestingEngineTests
             () -> assertEquals(status, checkResult.isPassed()));
         verify(baselineRepository, never()).saveBaseline(any(), any());
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE,
-                (double) acceptableDiffPercentage, 40.0))));
+                BigDecimal.valueOf(acceptableDiffPercentage), 40.0))));
     }
 
     @ParameterizedTest
-    @CsvSource({"0, false", "25, false", "50, true", "100, true"})
-    void shouldCompateImagesUsingRequiredDiffPercentageForTheInequalComparison(
-        int requiredDiffPercentage, boolean status) throws IOException
+    @CsvSource({"0,      false",
+                "0.0002, false",
+                "25,     false",
+                "50,     true",
+                "100,    true"})
+    void shouldCompareImagesUsingRequiredDiffPercentageForTheInequalComparison(
+        double requiredDiffPercentage, boolean status) throws IOException
     {
         when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.CHECK_INEQUALITY_AGAINST);
-        visualCheck.setRequiredDiffPercentage(OptionalInt.of(requiredDiffPercentage));
+        visualCheck.setRequiredDiffPercentage(OptionalDouble.of(requiredDiffPercentage));
         mockGetCheckpointScreenshot(visualCheck);
         VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
         Assertions.assertAll(
@@ -165,7 +170,7 @@ class VisualTestingEngineTests
             () -> assertEquals(status, checkResult.isPassed()));
         verify(baselineRepository, never()).saveBaseline(any(), any());
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, "required",
-                (double) requiredDiffPercentage, 40.0))));
+            BigDecimal.valueOf(requiredDiffPercentage), 40.0))));
     }
 
     @Test
@@ -173,7 +178,7 @@ class VisualTestingEngineTests
     {
         when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = factory.create(BASELINE, VisualActionType.COMPARE_AGAINST);
-        visualCheck.setAcceptableDiffPercentage(OptionalInt.of(50));
+        visualCheck.setAcceptableDiffPercentage(OptionalDouble.of(50));
         mockGetCheckpointScreenshot(visualCheck);
         VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
         Assertions.assertAll(
@@ -184,7 +189,8 @@ class VisualTestingEngineTests
             () -> assertEquals(DIFF_BASE64, checkResult.getDiff()),
             () -> assertTrue(checkResult.isPassed()));
         verify(baselineRepository, never()).saveBaseline(any(), any());
-        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, 50.0, 40.0))));
+        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, BigDecimal.valueOf(50.0),
+                40.0))));
     }
 
     @Test
@@ -202,7 +208,8 @@ class VisualTestingEngineTests
             () -> assertEquals(BASELINE_BASE64, checkResult.getDiff()),
             () -> assertTrue(checkResult.isPassed()));
         verify(baselineRepository, never()).saveBaseline(any(), any());
-        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, 0.0, 0.0))));
+        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, BigDecimal.valueOf(0d),
+            0.0))));
     }
 
     @Test
@@ -214,7 +221,8 @@ class VisualTestingEngineTests
         BufferedImage finalImage = mockGetCheckpointScreenshot(visualCheck);
         visualTestingEngine.compareAgainst(visualCheck);
         verify(baselineRepository).saveBaseline(argThat(s -> finalImage.equals(s.getImage())), eq(BASELINE));
-        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, 0.0, 40.0))));
+        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, BigDecimal.valueOf(0d),
+            40.0))));
     }
 
     @Test
