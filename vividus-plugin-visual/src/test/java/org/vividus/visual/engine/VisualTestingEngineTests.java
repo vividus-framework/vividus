@@ -83,6 +83,7 @@ class VisualTestingEngineTests
                                             + "sIEYIgRnQFnIChG6ADGrFxBXlUutAAAAAElFTkSuQmCC";
 
     private static final String LOG_MESSAGE = "The {} visual difference percentage is {}% , but actual was {}%";
+    private static final BigDecimal DIFF = BigDecimal.valueOf(40).setScale(3);
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(VisualTestingEngine.class);
 
@@ -144,7 +145,7 @@ class VisualTestingEngineTests
             () -> assertEquals(status, checkResult.isPassed()));
         verify(baselineRepository, never()).saveBaseline(any(), any());
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE,
-                BigDecimal.valueOf(acceptableDiffPercentage), 40.0))));
+                BigDecimal.valueOf(acceptableDiffPercentage), DIFF))));
     }
 
     @ParameterizedTest
@@ -170,7 +171,7 @@ class VisualTestingEngineTests
             () -> assertEquals(status, checkResult.isPassed()));
         verify(baselineRepository, never()).saveBaseline(any(), any());
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, "required",
-            BigDecimal.valueOf(requiredDiffPercentage), 40.0))));
+            BigDecimal.valueOf(requiredDiffPercentage), DIFF))));
     }
 
     @Test
@@ -190,7 +191,7 @@ class VisualTestingEngineTests
             () -> assertTrue(checkResult.isPassed()));
         verify(baselineRepository, never()).saveBaseline(any(), any());
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, BigDecimal.valueOf(50.0),
-                40.0))));
+                DIFF))));
     }
 
     @Test
@@ -209,7 +210,7 @@ class VisualTestingEngineTests
             () -> assertTrue(checkResult.isPassed()));
         verify(baselineRepository, never()).saveBaseline(any(), any());
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, BigDecimal.valueOf(0d),
-            0.0))));
+                new BigDecimal(0).setScale(3)))));
     }
 
     @Test
@@ -222,7 +223,7 @@ class VisualTestingEngineTests
         visualTestingEngine.compareAgainst(visualCheck);
         verify(baselineRepository).saveBaseline(argThat(s -> finalImage.equals(s.getImage())), eq(BASELINE));
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, BigDecimal.valueOf(0d),
-            40.0))));
+                DIFF))));
     }
 
     @Test
