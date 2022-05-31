@@ -26,10 +26,10 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.web.action.IAlertActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 

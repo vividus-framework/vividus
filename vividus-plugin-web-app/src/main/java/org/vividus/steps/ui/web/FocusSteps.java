@@ -21,9 +21,9 @@ import javax.inject.Inject;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
-import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.steps.ui.web.validation.FocusValidations;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
 @TakeScreenshotOnFailure

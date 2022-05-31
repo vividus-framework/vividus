@@ -35,7 +35,6 @@ import org.openqa.selenium.remote.RemoteWebElement;
 import org.vividus.mobileapp.configuration.MobileApplicationConfiguration;
 import org.vividus.mobileapp.model.SwipeCoordinates;
 import org.vividus.mobileapp.model.SwipeDirection;
-import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverUtils;
 import org.vividus.selenium.manager.GenericWebDriverManager;
@@ -48,7 +47,6 @@ import io.appium.java_client.touch.offset.ElementOption;
 import io.appium.java_client.touch.offset.PointOption;
 import ru.yandex.qatools.ashot.util.ImageTool;
 
-@TakeScreenshotOnFailure
 public class TouchActions
 {
     private static final int HEIGHT_DIVIDER = 3;

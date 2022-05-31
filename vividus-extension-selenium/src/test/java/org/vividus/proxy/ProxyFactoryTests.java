@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,20 +23,16 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ProxyFactoryTests
 {
-    @Mock
-    private IProxyServerFactory proxyServerFactory;
-
     @InjectMocks
     private ProxyFactory proxyFactory;
 
     @Test
-    void testCreateProxy() throws IllegalArgumentException, IllegalAccessException
+    void testCreateProxy() throws IllegalAccessException
     {
         String proxyHost = "somehost";
         proxyFactory.setProxyHost(proxyHost);

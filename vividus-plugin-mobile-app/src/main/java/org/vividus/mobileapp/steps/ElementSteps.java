@@ -24,13 +24,13 @@ import org.jbehave.core.annotations.When;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.selenium.WebDriverUtils;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.JavascriptActions;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 
 @TakeScreenshotOnFailure
 public class ElementSteps

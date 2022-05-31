@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,12 +138,11 @@ class ProxyStepsTests
             throws IOException
     {
         HttpMethod httpMethod = HttpMethod.POST;
-        byte[] data = mockHar(httpMethodInHar, statusCode);
+        mockHar(httpMethodInHar, statusCode);
         String message = String.format(REQUESTS_MATCHING_URL_ASSERTION_PATTERN, httpMethod, URL);
         proxySteps.captureRequestAndSaveURL(EnumSet.of(httpMethod), URL_PATTERN, HttpMessagePart.URL,
                 Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
         verifySizeAssertion(message, 0, ComparisonRule.EQUAL_TO, 1);
-        verify(attachmentPublisher).publishAttachment(data, "har.har");
         verifyNoInteractions(variableContext);
     }
 
@@ -275,7 +274,8 @@ class ProxyStepsTests
         when(request.protocolVersion()).thenReturn(HttpVersion.HTTP_1_1);
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
-        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, 200, new DataWrapper(content), headers);
+        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, HttpStatus.SC_OK, new DataWrapper(content),
+                headers);
 
         ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
         verify(proxy).addRequestFilter(filterCaptor.capture());
@@ -300,7 +300,7 @@ class ProxyStepsTests
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
         proxySteps.mockHttpRequests(Set.of(HttpMethod.GET, HttpMethod.POST), StringComparisonRule.CONTAINS,
-                URL, 200, new DataWrapper(VALUE1), headers);
+                URL, HttpStatus.SC_OK, new DataWrapper(VALUE1), headers);
         verifyResponse(request, messageInfo);
     }
 
@@ -315,7 +315,7 @@ class ProxyStepsTests
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
         proxySteps.mockHttpRequests(Set.of(HttpMethod.GET, HttpMethod.POST), StringComparisonRule.CONTAINS,
-                URL, 200, new DataWrapper(VALUE1), headers);
+                URL, HttpStatus.SC_OK, new DataWrapper(VALUE1), headers);
         ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
         verify(proxy).addRequestFilter(filterCaptor.capture());
         FullHttpResponse response = (FullHttpResponse) filterCaptor.getValue().filterRequest(request, null,
@@ -332,7 +332,7 @@ class ProxyStepsTests
         when(request.protocolVersion()).thenReturn(HttpVersion.HTTP_1_1);
         DefaultHttpHeaders headers = new DefaultHttpHeaders();
         headers.add(KEY1, VALUE2);
-        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, 200, headers);
+        proxySteps.mockHttpRequests(StringComparisonRule.CONTAINS, URL, HttpStatus.SC_OK, headers);
 
         ArgumentCaptor<RequestFilter> filterCaptor = ArgumentCaptor.forClass(RequestFilter.class);
         verify(proxy).addRequestFilter(filterCaptor.capture());

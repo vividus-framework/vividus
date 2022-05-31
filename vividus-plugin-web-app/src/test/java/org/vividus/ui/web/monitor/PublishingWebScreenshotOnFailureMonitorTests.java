@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.monitor;
+package org.vividus.ui.web.monitor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,7 +42,7 @@ import org.vividus.selenium.screenshot.WebScreenshotTaker;
 import org.vividus.ui.context.IUiContext;
 
 @ExtendWith(MockitoExtension.class)
-class WebScreenshotOnFailureMonitorTests
+class PublishingWebScreenshotOnFailureMonitorTests
 {
     private static final String SCREENSHOT_NAME = "screenshot-name";
 
@@ -52,7 +52,7 @@ class WebScreenshotOnFailureMonitorTests
     @Mock private IUiContext uiContext;
     @Mock private WebScreenshotTaker webScreenshotTaker;
     @Mock private Screenshot screenshotMock;
-    @InjectMocks private WebScreenshotOnFailureMonitor monitor;
+    @InjectMocks private PublishingWebScreenshotOnFailureMonitor monitor;
 
     @AfterEach
     void afterEach()
@@ -69,7 +69,7 @@ class WebScreenshotOnFailureMonitorTests
         when(webScreenshotTaker.takeScreenshot(SCREENSHOT_NAME, List.of(webElement)))
                 .thenReturn(Optional.of(screenshotMock));
 
-        Optional<Screenshot> screenshot = monitor.takeAssertionFailureScreenshot(SCREENSHOT_NAME);
+        Optional<Screenshot> screenshot = monitor.takeScreenshot(SCREENSHOT_NAME);
         assertTrue(screenshot.isPresent());
         assertEquals(screenshotMock, screenshot.get());
     }
@@ -85,7 +85,7 @@ class WebScreenshotOnFailureMonitorTests
         when(webScreenshotTaker.takeScreenshot(SCREENSHOT_NAME, List.of(webElement)))
                 .thenReturn(Optional.of(screenshotMock));
 
-        Optional<Screenshot> screenshot = monitor.takeAssertionFailureScreenshot(SCREENSHOT_NAME);
+        Optional<Screenshot> screenshot = monitor.takeScreenshot(SCREENSHOT_NAME);
         assertTrue(screenshot.isPresent());
         assertEquals(screenshotMock, screenshot.get());
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
@@ -30,6 +29,7 @@ import org.vividus.ui.action.IWaitActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 
 @TakeScreenshotOnFailure
 public class GenericWaitSteps
