@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Base64;
 import java.util.Optional;
 
@@ -93,7 +94,9 @@ public class VisualTestingEngine implements IVisualTestingEngine
             LOGGER.atInfo()
                   .addArgument(() -> inequalityCheck ? "required" : "acceptable")
                   .addArgument(BigDecimal.valueOf(diffPercentage))
-                  .addArgument(() -> Math.ceil((double) (diff.getDiffSize() * 100) / (double) comparisonImageSize))
+                  .addArgument(() -> BigDecimal.valueOf(
+                      (double) (diff.getDiffSize() * 100) / (double) comparisonImageSize).setScale(3,
+                          RoundingMode.CEILING))
                   .log("The {} visual difference percentage is {}% , but actual was {}%");
             if (overrideBaselines)
             {
