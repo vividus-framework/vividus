@@ -1,0 +1,290 @@
+= CLI
+
+In scope of this article the `task` term is a piece of work that is done on stories, scenarios, steps and other entities
+and that produces some output based on the work done.
+
+.The format of a task
+[source,shell]
+----
+./gradlew <task to perform>
+----
+
+.The format of a task with arguments
+[source,shell]
+----
+./gradlew <task to perform> --args='<arguments to pass into the task>'
+----
+
+NOTE: The tasks are available only through the `gradlew` command.
+
+== Run stories
+
+The task runs test stories based on current xref:ROOT:tests-configuration.adoc[tests configuration] and tests state
+on the file system.
+
+.macOS / Linux:
+[source,shell]
+----
+./gradlew runStories
+----
+
+.Windows:
+[source,shell]
+----
+gradlew runStories
+----
+
+Known issues occurred during stories run fail the overall test execution with the corresponding xref:ROOT:tests-configuration.adoc#_exit_codes[exit code] by default. Use the following property in order to not treat known issues as failures:
+
+.Enable treating of known issues as positive result for current stories run
+[source,shell]
+----
+./gradlew runStories -PtreatKnownIssuesOnlyAsPassed=true
+----
+
+The treating of known issues as passed can be enabled globally for project by adding the following line into the
+`build.gradle` file of the tests project:
+
+.Enable treating of known issues as positive result for stories runs at project level
+[source,gradle]
+----
+runStories.treatKnownIssuesOnlyAsPassed = true
+----
+
+== Debug stories
+
+The task runs test stories omitting VIVIDUS initialization check based on current xref:ROOT:tests-configuration.adoc[tests configuration]
+and tests state on the file system.
+
+.macOS / Linux:
+[source,shell]
+----
+./gradlew debugStories
+----
+
+.Windows:
+[source,shell]
+----
+gradlew debugStories
+----
+
+Known issues occurred during stories run fail the overall test execution with the corresponding xref:ROOT:tests-configuration.adoc#_exit_codes[exit code] by default. Use the following property in order to not treat known issues as failures:
+
+.Enable treating of known issues as positive result for current debug run
+[source,shell]
+----
+./gradlew debugStories -PtreatKnownIssuesOnlyAsPassed=true
+----
+
+The treating of known issues as passed can be enabled globally for project by adding the following line into the
+`build.gradle` file of the tests project:
+
+.Enable treating of known issues as positive result for debug runs at project level
+[source,gradle]
+----
+debugStories.treatKnownIssuesOnlyAsPassed = true
+----
+
+== Print available steps
+
+The task prints all the steps that are available for the xref:ROOT:tests-configuration.adoc[configured] profiles, environments and suites in the alphabetical order.
+
+.Options
+[cols="3,1,1,1", options="header"]
+|===
+
+|Description
+|Short notation
+|Full notation
+|Default value
+
+|Path to a file to save the list of the available steps
+|f
+|file
+|by default steps are printed into the console
+
+|===
+
+.macOS / Linux:
+[source,shell]
+----
+./gradlew printSteps --args='-f my-steps.txt'
+----
+
+.Windows:
+[source,shell]
+----
+gradlew printSteps --args='-f my-steps.txt'
+----
+
+.Output
+[source,gherkin]
+----
+vividus                                             Then `$value` matches `$regex`
+vividus-plugin-web-app                              When I switch back to the page
+vividus-plugin-web-app                              When I press $keys on keyboard
+                            COMPOSITE IN STEPS FILE Then an element with the name '$elementName' exists
+                            COMPOSITE IN STEPS FILE When I click on an image with the name '$imageName'
+
+----
+
+== Count steps
+
+The task counts steps in the specified tests folder and prints them in the descending order.
+
+.Options
+[cols="3,1,1,1", options="header"]
+|===
+
+|Description
+|Short notation
+|Full notation
+|Default value
+
+|Directory to count steps
+|d
+|dir
+|story
+
+|Number of steps to print
+|t
+|top
+|<no limits by default>
+
+|===
+
+.macOS / Linux:
+[source,shell]
+----
+./gradlew countSteps --args='-t 5 -d story/uat'
+----
+
+.Windows:
+[source,shell]
+----
+gradlew countSteps --args='-t 5 -d story/uat'
+----
+
+.Output
+[source,gherkin]
+----
+Top of the most used steps:                                                                  occurrence(s)
+Then `$variable1` is $comparisonRule `$variable2`                                                      330
+Given I am on a page with the URL '$pageURL'                                                           127
+Then number of elements found by `$locator` is $comparisonRule `$quantity`                             110
+When I initialize the $scopes variable `$variableName` with value `$variableValue`                      83
+When I change context to element located `$locator`                                                     59
+----
+
+== Count scenario
+
+The task counts and prints stories, scenarios and scenarios containing examples found in the specified tests folder.
+
+.Options
+[cols="3,1,1,1", options="header"]
+|===
+
+|Description
+|Short notation
+|Full notation
+|Default value
+
+|Directory to count stories and scenarios
+|d
+|dir
+|story
+
+|===
+
+.macOS / Linux:
+[source,shell]
+----
+./gradlew countScenarios --args='-d story/uat'
+----
+
+.Windows:
+[source,shell]
+----
+gradlew countScenarios --args='-d story/uat'
+----
+
+.Output
+[source]
+----
+5  | Stories
+13 | Scenarios
+6  | Scenarios with Examples
+----
+
+== Validate known issues configuration
+
+The task validates known issues format and prints the validated known issues into the console.
+
+.macOS / Linux:
+[source,shell]
+----
+./gradlew validateKnownIssues
+----
+
+.Windows:
+[source,shell]
+----
+./gradlew validateKnownIssues
+----
+
+.Output
+[source]
+----
+Known issues found:
+VVD-5
+VVD-6
+VVD-7
+VVD-8
+----
+
+== Find known issues by assertion pattern
+
+The task used to find known issues contained in the test project by one or more assertion patterns.
+
+.Options
+[cols="3,1,1,1", options="header"]
+|===
+
+|Description
+|Short notation
+|Full notation
+|Default value
+
+|Required path to a file that contains new-line-separated list of assertion patterns
+|f
+|file
+|<no default value>
+
+|===
+
+IMPORTANT: If you miss the file argument into the task it will behave as described per <<_validate_known_issues_configuration>>
+
+.assertion-patterns.txt
+[source]
+----
+.*Doctor Who.*
+----
+
+.macOS / Linux:
+[source,shell]
+----
+./gradlew validateKnownIssues --args='-f ./assertion-failures.txt'
+----
+
+.Windows:
+[source,shell]
+----
+gradlew validateKnownIssues --args='-f assertion-failures.txt'
+----
+
+.Output
+[source]
+----
+Known Issue | Assertion Error
+VVD-6       | .*Doctor Who.*
+----
