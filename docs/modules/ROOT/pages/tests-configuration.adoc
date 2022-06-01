@@ -13,7 +13,6 @@ Properties prefixed with `*configuration.*` could be specified in the following 
 * The `*overriding.properties*` file.
 ====
 
-
 === Suites
 
 The property `configuration.suites` defines the suites set. It is a comma separated set of suite file addresses:
