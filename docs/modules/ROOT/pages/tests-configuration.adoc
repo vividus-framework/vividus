@@ -6,11 +6,11 @@ VIVIDUS configuration includes the following parts: profiles, environments and s
 
 [WARNING]
 ====
-Properties prefixed with `_configuration._` should be specified in the following locations only:
+Properties prefixed with `*configuration.*` should be specified in the following locations only:
 
 * The system properties.
-* The `_configuration.properties_` file.
-* The `_overriding.properties_` file.
+* The `*configuration.properties*` file.
+* The `*overriding.properties*` file.
 ====
 
 === Suites
