@@ -18,6 +18,8 @@
         <property name="baselinesFolder" value="${ui.visual.baselines-folder}" />
     </bean>
 
+    <bean class="org.vividus.visual.engine.DiffMarkupPolicyFactory" />
+
     <util:list id="stepBeanNames-Visual">
         <idref bean="visualSteps" />
     </util:list>
