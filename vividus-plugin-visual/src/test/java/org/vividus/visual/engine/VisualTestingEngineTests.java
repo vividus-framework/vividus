@@ -53,6 +53,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
@@ -90,6 +91,8 @@ class VisualTestingEngineTests
     @Mock private ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
     @Mock private IBaselineRepository baselineRepository;
     @Mock private ScreenshotProvider screenshotProvider;
+    @Spy private DiffMarkupPolicyFactory diffMarkupPolicyFactory;
+
     @InjectMocks private VisualTestingEngine visualTestingEngine;
 
     private VisualCheckFactory factory;

@@ -16,7 +16,6 @@
 
 package org.vividus.visual.engine;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -34,28 +33,28 @@ import org.vividus.visual.screenshot.ScreenshotProvider;
 import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.comparison.ImageDiff;
 import ru.yandex.qatools.ashot.comparison.ImageDiffer;
-import ru.yandex.qatools.ashot.comparison.PointsMarkupPolicy;
 import ru.yandex.qatools.ashot.util.ImageTool;
 
-@SuppressWarnings("MagicNumber")
 public class VisualTestingEngine implements IVisualTestingEngine
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(VisualTestingEngine.class);
-
-    private static final Color DIFF_COLOR = new Color(238, 111, 238);
+    private static final int ONE_HUNDRED = 100;
+    private static final int SCALE = 3;
 
     private final ScreenshotProvider screenshotProvider;
     private final IBaselineRepository baselineRepository;
+    private final DiffMarkupPolicyFactory diffMarkupPolicyFactory;
 
     private double acceptableDiffPercentage;
     private double requiredDiffPercentage;
     private boolean overrideBaselines;
 
-    public VisualTestingEngine(ScreenshotProvider screenshotProvider,
-            IBaselineRepository baselineRepository)
+    public VisualTestingEngine(ScreenshotProvider screenshotProvider, IBaselineRepository baselineRepository,
+            DiffMarkupPolicyFactory diffMarkupPolicyFactory)
     {
         this.screenshotProvider = screenshotProvider;
         this.baselineRepository = baselineRepository;
+        this.diffMarkupPolicyFactory = diffMarkupPolicyFactory;
     }
 
     @Override
@@ -86,16 +85,17 @@ public class VisualTestingEngine implements IVisualTestingEngine
             comparisonResult.setBaseline(imageToBase64(baselineScreenshot.getImage()));
 
             boolean inequalityCheck = visualCheck.getAction() == VisualActionType.CHECK_INEQUALITY_AGAINST;
+            int height = Math.max(baselineScreenshot.getImage().getHeight(), checkpoint.getImage().getHeight());
+            int width = Math.max(baselineScreenshot.getImage().getWidth(), checkpoint.getImage().getWidth());
             double diffPercentage = calculateDiffPercentage(visualCheck, inequalityCheck);
-            int comparisonImageSize = calculateComparisonImageSize(baselineScreenshot, checkpoint);
-            ImageDiff diff = findImageDiff(baselineScreenshot, checkpoint, comparisonImageSize, diffPercentage);
+            ImageDiff diff = findImageDiff(baselineScreenshot, checkpoint, height, width, diffPercentage);
             comparisonResult.setPassed(!diff.hasDiff());
             comparisonResult.setDiff(imageToBase64(diff.getMarkedImage()));
             LOGGER.atInfo()
                   .addArgument(() -> inequalityCheck ? "required" : "acceptable")
                   .addArgument(BigDecimal.valueOf(diffPercentage))
                   .addArgument(() -> BigDecimal.valueOf(
-                      (double) (diff.getDiffSize() * 100) / (double) comparisonImageSize).setScale(3,
+                      (double) (diff.getDiffSize() * ONE_HUNDRED) / (width * height)).setScale(SCALE,
                           RoundingMode.CEILING))
                   .log("The {} visual difference percentage is {}% , but actual was {}%");
             if (overrideBaselines)
@@ -120,20 +120,12 @@ public class VisualTestingEngine implements IVisualTestingEngine
         return visualCheck.getAcceptableDiffPercentage().orElse(this.acceptableDiffPercentage);
     }
 
-    private ImageDiff findImageDiff(Screenshot expected, Screenshot actual, int comparisonImageSize,
+    private ImageDiff findImageDiff(Screenshot expected, Screenshot actual, int height, int width,
             double diffPercentage)
     {
-        PointsMarkupPolicy pointsMarkupPolicy = new PointsMarkupPolicy();
-        pointsMarkupPolicy.setDiffSizeTrigger((int) (comparisonImageSize * diffPercentage * 0.01));
-        ImageDiffer differ = new ImageDiffer().withDiffMarkupPolicy(pointsMarkupPolicy.withDiffColor(DIFF_COLOR));
+        ImageDiffer differ = new ImageDiffer().withDiffMarkupPolicy(
+            diffMarkupPolicyFactory.create(height, width, (int) diffPercentage));
         return differ.makeDiff(expected, actual);
-    }
-
-    private int calculateComparisonImageSize(Screenshot expected, Screenshot actual)
-    {
-        int width = Math.max(expected.getImage().getWidth(), actual.getImage().getWidth());
-        int height = Math.max(expected.getImage().getHeight(), actual.getImage().getHeight());
-        return width * height;
     }
 
     private String imageToBase64(BufferedImage image) throws IOException
