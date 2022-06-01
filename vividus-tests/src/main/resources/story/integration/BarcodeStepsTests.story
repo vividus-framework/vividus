@@ -6,3 +6,12 @@ Scenario: Verify steps: "When I scan a barcode from screen and save result to $s
 Given I am on a page with the URL '${vividus-test-site-url}/qrCode.html'
 When I scan barcode from screen and save result to scenario variable `qrCodeLink`
 Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
+
+Scenario: Verify steps: "When I scan barcode from context and save result to $scopes variable `$variableName`"
+Meta:
+    @requirementId 2687
+Given I am on a page with the URL '${vividus-test-site-url}/qrModal.html'
+When I click on element located `id(modalButton)`
+When I change context to element located `By.xpath(//div[@class='modal-content'])` in scope of current context
+When I scan barcode from context and save result to scenario variable `qrCodeLink`
+Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
