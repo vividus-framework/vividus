@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.monitor;
+package org.vividus.ui.monitor;
 
 import java.util.Optional;
 
@@ -25,11 +25,11 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
 
-public class GenericScreenshotOnFailureMonitor extends AbstractScreenshotOnFailureMonitor
+public class PublishingScreenshotOnFailureMonitor extends AbstractPublishingScreenshotOnFailureMonitor
 {
     private final ScreenshotTaker screenshotTaker;
 
-    public GenericScreenshotOnFailureMonitor(EventBus eventBus, RunContext runContext,
+    public PublishingScreenshotOnFailureMonitor(EventBus eventBus, RunContext runContext,
             IWebDriverProvider webDriverProvider, ScreenshotTaker screenshotTaker)
     {
         super(eventBus, runContext, webDriverProvider);
@@ -37,7 +37,7 @@ public class GenericScreenshotOnFailureMonitor extends AbstractScreenshotOnFailu
     }
 
     @Override
-    protected Optional<Screenshot> takeAssertionFailureScreenshot(String screenshotName)
+    protected Optional<Screenshot> takeScreenshot(String screenshotName)
     {
         return screenshotTaker.takeScreenshot(screenshotName);
     }

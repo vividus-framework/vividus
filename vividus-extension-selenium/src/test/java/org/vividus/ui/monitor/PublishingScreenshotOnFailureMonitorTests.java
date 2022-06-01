@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.monitor;
+package org.vividus.ui.monitor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,14 +36,14 @@ import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
 
 @ExtendWith(MockitoExtension.class)
-class GenericScreenshotOnFailureMonitorTests
+class PublishingScreenshotOnFailureMonitorTests
 {
     @Mock private EventBus eventBus;
     @Mock private RunContext runContext;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private ScreenshotTaker screenshotTaker;
     @Mock private Screenshot screenshotMock;
-    @InjectMocks private GenericScreenshotOnFailureMonitor monitor;
+    @InjectMocks private PublishingScreenshotOnFailureMonitor monitor;
 
     @Test
     void shouldTakeAssertionFailureScreenshot()
@@ -51,7 +51,7 @@ class GenericScreenshotOnFailureMonitorTests
         String screenshotName = "screenshot-name";
         when(screenshotTaker.takeScreenshot(screenshotName)).thenReturn(Optional.of(screenshotMock));
 
-        Optional<Screenshot> screenshot = monitor.takeAssertionFailureScreenshot(screenshotName);
+        Optional<Screenshot> screenshot = monitor.takeScreenshot(screenshotName);
 
         assertTrue(screenshot.isPresent());
         assertEquals(screenshotMock, screenshot.get());

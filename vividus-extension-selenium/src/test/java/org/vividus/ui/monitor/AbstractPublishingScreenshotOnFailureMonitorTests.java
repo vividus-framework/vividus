@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package org.vividus.monitor;
+package org.vividus.ui.monitor;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -69,7 +66,7 @@ import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.softassert.event.AssertionFailedEvent;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
-class AbstractScreenshotOnFailureMonitorTests
+class AbstractPublishingScreenshotOnFailureMonitorTests
 {
     private static final String INNER_WHEN_MODE_STEP = "innerWhenModeStep";
     private static final String I_DO_ACTION = "I do action";
@@ -81,9 +78,10 @@ class AbstractScreenshotOnFailureMonitorTests
     @Mock private RunContext runContext;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private EventBus eventBus;
-    @InjectMocks private TestScreenshotOnFailureMonitor monitor;
+    @InjectMocks private TestPublishingScreenshotOnFailureMonitor monitor;
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractScreenshotOnFailureMonitor.class);
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(
+            AbstractPublishingAttachmentOnFailureMonitor.class);
 
     @AfterEach
     void afterEach()
@@ -92,14 +90,14 @@ class AbstractScreenshotOnFailureMonitorTests
     }
 
     @TestFactory
-    Stream<DynamicTest> shouldProcessStepWithAnnotation() throws NoSuchMethodException
+    Stream<DynamicTest> factoryOfTestsThatShouldProcessStepWithAnnotation() throws NoSuchMethodException
     {
         return Stream.of(getTakingScreenshotMethod(),
                 TestSteps.class.getDeclaredMethod("innerWhenStep"))
                 .flatMap(method ->
                 {
                     reset(runContext);
-                    mockScenarioAndStoryMeta(EMPTY_META);
+                    mockScenarioAndStoryMeta();
                     return Stream.of(
                             dynamicTest("beforePerformingProcessesStepWithAnnotation",
                                 () -> monitor.beforePerforming(I_DO_ACTION, false, method)),
@@ -115,7 +113,7 @@ class AbstractScreenshotOnFailureMonitorTests
     }
 
     @TestFactory
-    Stream<DynamicTest> shouldIgnoreStepWithoutAnnotation() throws NoSuchMethodException
+    Stream<DynamicTest> factoryOfTestsThatShouldIgnoreStepWithoutAnnotation() throws NoSuchMethodException
     {
         return Stream.of(getClass().getDeclaredMethod("anotherWhenStep"), null)
                 .flatMap(method -> Stream.of(
@@ -127,7 +125,8 @@ class AbstractScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldNotTakeScreenshotIfMethodAnnotatedButStoryHasNoScreenshotOnFailure() throws NoSuchMethodException
+    void shouldNotTakeScreenshotIfMethodAnnotatedButStoryHasNoScreenshotOnFailure()
+            throws NoSuchMethodException
     {
         RunningStory runningStory = mock(RunningStory.class);
         mockStoryMeta(runningStory, new Meta(List.of(NO_SCREENSHOT_ON_FAILURE)));
@@ -148,7 +147,7 @@ class AbstractScreenshotOnFailureMonitorTests
     }
 
     @Test
-    void shouldEnableScreenshotsIfNoRunningSceanario() throws NoSuchMethodException
+    void shouldEnableScreenshotsIfNoRunningScenario() throws NoSuchMethodException
     {
         RunningStory runningStory = mock(RunningStory.class);
         mockStoryMeta(runningStory, EMPTY_META);
@@ -178,8 +177,8 @@ class AbstractScreenshotOnFailureMonitorTests
         enableScreenshotPublishing(true);
         String title = "2019-03-07_19-11-38_898-Assertion_Failure-chrome-1440x836";
         Screenshot screenshot = new Screenshot(title + ".png", new byte[] { 1 });
-        TestScreenshotOnFailureMonitor spy = spy(monitor);
-        doReturn(Optional.of(screenshot)).when(spy).takeAssertionFailureScreenshot(ASSERTION_FAILURE);
+        TestPublishingScreenshotOnFailureMonitor spy = spy(monitor);
+        doReturn(Optional.of(screenshot)).when(spy).takeScreenshot(ASSERTION_FAILURE);
         spy.onAssertionFailure(mock(AssertionFailedEvent.class));
         verify(eventBus).post(argThat((ArgumentMatcher<AttachmentPublishEvent>) event -> {
             Attachment attachment = event.getAttachment();
@@ -192,8 +191,8 @@ class AbstractScreenshotOnFailureMonitorTests
     void shouldTakeScreenshotOfAssertedElementsISearchContextIsPage() throws NoSuchMethodException
     {
         enableScreenshotPublishing(true);
-        TestScreenshotOnFailureMonitor spy = spy(monitor);
-        doReturn(Optional.empty()).when(spy).takeAssertionFailureScreenshot(ASSERTION_FAILURE);
+        TestPublishingScreenshotOnFailureMonitor spy = spy(monitor);
+        doReturn(Optional.empty()).when(spy).takeScreenshot(ASSERTION_FAILURE);
         spy.onAssertionFailure(mock(AssertionFailedEvent.class));
         assertThat(logger.getLoggingEvents(), empty());
     }
@@ -201,19 +200,19 @@ class AbstractScreenshotOnFailureMonitorTests
     @Test
     void shouldTakeScreenshotOfAssertedElementsWithDebugMode() throws NoSuchMethodException
     {
-        mockScenarioAndStoryMeta(EMPTY_META);
+        mockScenarioAndStoryMeta();
         monitor.setDebugModes(Arrays.asList("mode", "ui"));
         monitor.beforePerforming(I_DO_ACTION, false, TestWithModeSteps.class.getDeclaredMethod(INNER_WHEN_MODE_STEP));
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        TestScreenshotOnFailureMonitor spy = spy(monitor);
-        doReturn(Optional.empty()).when(spy).takeAssertionFailureScreenshot(ASSERTION_FAILURE);
+        TestPublishingScreenshotOnFailureMonitor spy = spy(monitor);
+        doReturn(Optional.empty()).when(spy).takeScreenshot(ASSERTION_FAILURE);
         spy.onAssertionFailure(mock(AssertionFailedEvent.class));
         assertThat(logger.getLoggingEvents(), empty());
     }
 
     static Stream<Arguments> debugMode()
     {
-        return Stream.of(Arguments.of(Arrays.asList("another")), null);
+        return Stream.of(Arguments.of(List.of("another")), null);
     }
 
     @ParameterizedTest
@@ -229,37 +228,26 @@ class AbstractScreenshotOnFailureMonitorTests
     @Test
     void shouldTakeScreenshotOfAssertedElementsWithoutDebugModeInAnnotation() throws NoSuchMethodException
     {
-        monitor.setDebugModes(Arrays.asList("anymode"));
+        monitor.setDebugModes(List.of("anymode"));
         enableScreenshotPublishing(true);
-        TestScreenshotOnFailureMonitor spy = spy(monitor);
-        doReturn(Optional.empty()).when(spy).takeAssertionFailureScreenshot(ASSERTION_FAILURE);
+        TestPublishingScreenshotOnFailureMonitor spy = spy(monitor);
+        doReturn(Optional.empty()).when(spy).takeScreenshot(ASSERTION_FAILURE);
         spy.onAssertionFailure(mock(AssertionFailedEvent.class));
         assertThat(logger.getLoggingEvents(), empty());
     }
 
-    @Test
-    void shouldLogErrorIfScreenshotTakingIsFailed() throws NoSuchMethodException
-    {
-        enableScreenshotPublishing(true);
-        IllegalStateException exception = new IllegalStateException();
-        TestScreenshotOnFailureMonitor spy = spy(monitor);
-        doThrow(exception).when(spy).takeAssertionFailureScreenshot(ASSERTION_FAILURE);
-        spy.onAssertionFailure(mock(AssertionFailedEvent.class));
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(error(exception, "Unable to take a screenshot"))));
-    }
-
     private void enableScreenshotPublishing(boolean webDriverInitialized) throws NoSuchMethodException
     {
-        mockScenarioAndStoryMeta(EMPTY_META);
+        mockScenarioAndStoryMeta();
         monitor.beforePerforming(I_DO_ACTION, false, getClass().getDeclaredMethod(WHEN_STEP_METHOD));
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(webDriverInitialized);
     }
 
-    private void mockScenarioAndStoryMeta(Meta meta)
+    private void mockScenarioAndStoryMeta()
     {
         RunningStory runningStory = mock(RunningStory.class);
-        mockStoryMeta(runningStory, meta);
-        mockScenarioMeta(runningStory, meta);
+        mockStoryMeta(runningStory, EMPTY_META);
+        mockScenarioMeta(runningStory, EMPTY_META);
     }
 
     private void mockStoryMeta(RunningStory runningStory, Meta meta)
@@ -315,16 +303,16 @@ class AbstractScreenshotOnFailureMonitorTests
         }
     }
 
-    static class TestScreenshotOnFailureMonitor extends AbstractScreenshotOnFailureMonitor
+    static class TestPublishingScreenshotOnFailureMonitor extends AbstractPublishingScreenshotOnFailureMonitor
     {
-        TestScreenshotOnFailureMonitor(EventBus eventBus, RunContext runContext,
+        TestPublishingScreenshotOnFailureMonitor(EventBus eventBus, RunContext runContext,
                 IWebDriverProvider webDriverProvider)
         {
             super(eventBus, runContext, webDriverProvider);
         }
 
         @Override
-        protected Optional<Screenshot> takeAssertionFailureScreenshot(String screenshotName)
+        protected Optional<Screenshot> takeScreenshot(String screenshotName)
         {
             throw new UnsupportedOperationException("The method is supposed to be mocked");
         }

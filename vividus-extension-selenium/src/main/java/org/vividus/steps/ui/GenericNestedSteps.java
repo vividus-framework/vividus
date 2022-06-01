@@ -22,7 +22,6 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.When;
-import org.vividus.monitor.TakeScreenshotOnFailure;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.SubSteps;
@@ -30,6 +29,7 @@ import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.context.SearchContextSetter;
+import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 
 @SuppressWarnings("MagicNumber")
 @TakeScreenshotOnFailure

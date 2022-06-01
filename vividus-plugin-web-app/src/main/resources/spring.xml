@@ -228,7 +228,8 @@
         <property name="windowsStrategy" value="${selenium.windows-strategy}" />
     </bean>
 
-    <bean class="org.vividus.monitor.WebScreenshotOnFailureMonitor" parent="abstractScreenshotOnFailureMonitor"/>
+    <bean class="org.vividus.ui.web.monitor.PublishingWebScreenshotOnFailureMonitor"
+          parent="abstractPublishingScreenshotOnFailureMonitor"/>
 
     <bean class="org.vividus.ui.web.listener.WebSourceCodePublishingOnFailureListener" parent="abstractSourceCodePublishngOnFailureListener" lazy-init="false" />
 

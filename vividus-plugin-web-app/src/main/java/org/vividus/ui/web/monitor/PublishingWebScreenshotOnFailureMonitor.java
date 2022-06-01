@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.monitor;
+package org.vividus.ui.web.monitor;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,13 +28,14 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.selenium.screenshot.WebScreenshotTaker;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.monitor.AbstractPublishingScreenshotOnFailureMonitor;
 
-public class WebScreenshotOnFailureMonitor extends AbstractScreenshotOnFailureMonitor
+public class PublishingWebScreenshotOnFailureMonitor extends AbstractPublishingScreenshotOnFailureMonitor
 {
     private final IUiContext uiContext;
     private final WebScreenshotTaker webScreenshotTaker;
 
-    public WebScreenshotOnFailureMonitor(EventBus eventBus, RunContext runContext,
+    public PublishingWebScreenshotOnFailureMonitor(EventBus eventBus, RunContext runContext,
             IWebDriverProvider webDriverProvider, IUiContext uiContext, WebScreenshotTaker webScreenshotTaker)
     {
         super(eventBus, runContext, webDriverProvider);
@@ -43,7 +44,7 @@ public class WebScreenshotOnFailureMonitor extends AbstractScreenshotOnFailureMo
     }
 
     @Override
-    protected Optional<Screenshot> takeAssertionFailureScreenshot(String screenshotName)
+    protected Optional<Screenshot> takeScreenshot(String screenshotName)
     {
         SearchContext searchContext = uiContext.getSearchContext();
         List<WebElement> webElements = searchContext instanceof WebElement ? List.of((WebElement) searchContext)
