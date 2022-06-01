@@ -133,7 +133,7 @@ public class BlobStorageSteps
     {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
         {
-            createBlobClient(blobName, containerName, storageAccountKey).download(outputStream);
+            createBlobClient(blobName, containerName, storageAccountKey).downloadStream(outputStream);
             variableContext.putVariable(scopes, variableName, outputStream.toString(StandardCharsets.UTF_8));
         }
     }
