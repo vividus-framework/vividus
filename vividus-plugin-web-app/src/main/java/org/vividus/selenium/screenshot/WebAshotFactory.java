@@ -16,8 +16,6 @@
 
 package org.vividus.selenium.screenshot;
 
-import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.cutting;
-
 import java.util.Optional;
 
 import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
@@ -38,7 +36,6 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
     private final ScreenshotDebugger screenshotDebugger;
     private final IScrollbarHandler scrollbarHandler;
     private final WebJavascriptActions javascriptActions;
-    private String screenshotShootingStrategy;
 
     protected WebAshotFactory(WebJavascriptActions javascriptActions, ScreenshotDebugger screenshotDebugger,
             IScrollbarHandler scrollbarHandler)
@@ -54,23 +51,19 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
         return screenshotParameters.map(ashotParameters -> ashotParameters.getShootingStrategy()
                                                                    .map(this::createAShot)
                                                                    .orElseGet(() -> createAShot(ashotParameters)))
-                      .orElseGet(() -> createAShot(screenshotShootingStrategy));
+                      .orElseGet(() -> createAShot(getScreenshotShootingStrategy()));
     }
 
     private AShot createAShot(WebScreenshotParameters screenshotParameters)
     {
         ShootingStrategy decorated = getBaseShootingStrategy();
 
-        decorated = configureNativePartialsToCut(screenshotParameters.getNativeHeaderToCut(),
-                screenshotParameters, decorated);
+        decorated = decorateWithFixedCutStrategy(decorated, screenshotParameters.getNativeHeaderToCut(),
+                screenshotParameters.getNativeFooterToCut());
 
         WebCutOptions webCutOptions = screenshotParameters.getWebCutOptions();
-        int footerToCut = webCutOptions.getWebFooterToCut();
-        int headerToCut = webCutOptions.getWebHeaderToCut();
-        if (anyNotZero(footerToCut, headerToCut))
-        {
-            decorated = cutting(decorated, new StickyHeaderCutStrategy(headerToCut, footerToCut));
-        }
+        decorated = decorateWithCutStrategy(decorated, webCutOptions.getWebHeaderToCut(),
+                webCutOptions.getWebFooterToCut(), StickyHeaderCutStrategy::new);
 
         decorated = ((DebuggingViewportPastingDecorator) decorateWithViewportPasting(decorated,
                 screenshotParameters))
@@ -109,10 +102,5 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
     protected double getDpr()
     {
         return javascriptActions.getDevicePixelRatio();
-    }
-
-    public void setScreenshotShootingStrategy(String screenshotShootingStrategy)
-    {
-        this.screenshotShootingStrategy = screenshotShootingStrategy;
     }
 }

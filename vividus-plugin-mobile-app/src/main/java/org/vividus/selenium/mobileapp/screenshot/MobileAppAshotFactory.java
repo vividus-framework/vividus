@@ -45,10 +45,9 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotParame
     @Override
     public AShot create(Optional<ScreenshotParameters> screenshotParameters)
     {
-        ScreenshotParameters ashotParameters = screenshotParameters.get();
-
-        ShootingStrategy strategy = getStrategyBy(ashotParameters.getShootingStrategy().get())
-            .getDecoratedShootingStrategy(getBaseShootingStrategy());
+        String strategyName = screenshotParameters.flatMap(ScreenshotParameters::getShootingStrategy)
+                .orElseGet(this::getScreenshotShootingStrategy);
+        ShootingStrategy strategy = getStrategyBy(strategyName).getDecoratedShootingStrategy(getBaseShootingStrategy());
         strategy = downscale ? scaling(strategy, (float) this.getDpr()) : strategy;
 
         int statusBarSize = mobileAppWebDriverManager.getStatusBarSize();
@@ -56,7 +55,8 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotParame
         {
             statusBarSize = CoordsUtils.scale(statusBarSize, getDpr());
         }
-        strategy = configureNativePartialsToCut(statusBarSize, ashotParameters, strategy);
+        int nativeFooterToCut = screenshotParameters.map(ScreenshotParameters::getNativeFooterToCut).orElse(0);
+        strategy = decorateWithFixedCutStrategy(strategy, statusBarSize, nativeFooterToCut);
         return new AShot().shootingStrategy(strategy).coordsProvider(coordsProvider);
     }
 
