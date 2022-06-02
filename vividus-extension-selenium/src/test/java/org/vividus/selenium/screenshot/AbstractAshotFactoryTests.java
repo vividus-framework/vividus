@@ -50,15 +50,8 @@ class AbstractAshotFactoryTests
         assertEquals(101f, FieldUtils.readDeclaredField(scaling, "dprX", true));
     }
 
-    @ParameterizedTest
-    @CsvSource({"0, 0, false", "1, 0, true", "0, 1, true", "-1, 1, true", "1, -1, true", "-1, -1, false"})
-    void shouldCheckIfAnyNonZero(int x, int y, boolean expected)
-    {
-        assertEquals(expected, factory.anyNotZero(x, y));
-    }
-
     @Test
-    void shouldThrowAnExpectionIfThereIsNoStrategyByTheName()
+    void shouldThrowAnExceptionIfThereIsNoStrategyByTheName()
     {
         factory.setStrategies(Map.of());
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -69,32 +62,48 @@ class AbstractAshotFactoryTests
     @Test
     void shouldReturnStrategyByName()
     {
-        ScreenshotShootingStrategy strategy = mock(ScreenshotShootingStrategy.class);
+        var strategy = mock(ScreenshotShootingStrategy.class);
         factory.setStrategies(Map.of(DEFAULT, strategy));
-        assertSame(strategy, factory.getStrategyBy(DEFAULT));
+        factory.setScreenshotShootingStrategy(DEFAULT);
+        factory.create(Optional.empty());
+        assertSame(strategy, factory.strategy);
     }
 
-    @Test
+    @ParameterizedTest
+    @CsvSource({
+            " 0,  0",
+            "-1, -1"
+    })
     void shouldNotConfigurePartialsToCut()
     {
         ShootingStrategy simple = ShootingStrategies.simple();
-        assertSame(simple, factory.configureNativePartialsToCut(0, new ScreenshotParameters(), simple));
+        assertSame(simple, factory.decorateWithFixedCutStrategy(simple, 0, 0));
     }
 
-    @Test
-    void shouldDecorateWithCutting()
+    @ParameterizedTest
+    @CsvSource({
+            "10,   0",
+            " 0,  10",
+            "-1,   1",
+            " 1,  -1"
+    })
+    void shouldDecorateWithCutting(int headerToCut, int footerToCut)
     {
-        assertThat(factory.configureNativePartialsToCut(10, new ScreenshotParameters(),
-                ShootingStrategies.simple()), instanceOf(CuttingDecorator.class));
+        assertThat(factory.decorateWithFixedCutStrategy(ShootingStrategies.simple(), headerToCut, footerToCut),
+                instanceOf(CuttingDecorator.class));
     }
 
     private static final class TestAshotFactory extends AbstractAshotFactory<ScreenshotParameters>
     {
         private static final double DPR = 101d;
+        private ScreenshotShootingStrategy strategy;
 
         @Override
         public AShot create(Optional<ScreenshotParameters> screenshotParameters)
         {
+            String strategyName = screenshotParameters.flatMap(ScreenshotParameters::getShootingStrategy)
+                    .orElseGet(this::getScreenshotShootingStrategy);
+            this.strategy = getStrategyBy(strategyName);
             return new AShot();
         }
 

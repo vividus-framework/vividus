@@ -19,6 +19,7 @@ package org.vividus.selenium.screenshot;
 import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.cutting;
 
 import java.util.Map;
+import java.util.function.BiFunction;
 
 import javax.inject.Inject;
 
@@ -28,33 +29,32 @@ import org.vividus.ui.screenshot.ScreenshotParameters;
 
 import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
+import ru.yandex.qatools.ashot.shooting.cutter.CutStrategy;
 import ru.yandex.qatools.ashot.shooting.cutter.FixedCutStrategy;
 
 public abstract class AbstractAshotFactory<T extends ScreenshotParameters> implements AshotFactory<T>
 {
     private Map<String, ScreenshotShootingStrategy> strategies;
+    private String screenshotShootingStrategy;
 
-    protected ShootingStrategy configureNativePartialsToCut(int headerToCut, T screenshotParameters,
-            ShootingStrategy decorated)
+    protected ShootingStrategy decorateWithFixedCutStrategy(ShootingStrategy original, int headerToCut, int footerToCut)
     {
-        int nativeFooterToCut = screenshotParameters.getNativeFooterToCut();
-        int nativeHeaderToCut = headerToCut;
-        return anyNotZero(nativeFooterToCut, nativeHeaderToCut)
-                ? cutting(decorated, new FixedCutStrategy(nativeHeaderToCut, nativeFooterToCut))
-                : decorated;
+        return decorateWithCutStrategy(original, headerToCut, footerToCut, FixedCutStrategy::new);
+    }
+
+    protected ShootingStrategy decorateWithCutStrategy(ShootingStrategy original, int headerToCut, int footerToCut,
+            BiFunction<Integer, Integer, CutStrategy> cutStrategyFactory)
+    {
+        return footerToCut > 0 || headerToCut > 0
+                ? cutting(original, cutStrategyFactory.apply(headerToCut, footerToCut))
+                : original;
     }
 
     protected ScreenshotShootingStrategy getStrategyBy(String strategyName)
     {
-        ScreenshotShootingStrategy screenshotShootingStrategy = strategies.get(strategyName);
-        Validate.isTrue(null != screenshotShootingStrategy, "Unable to find the strategy with the name: %s",
-                strategyName);
-        return screenshotShootingStrategy;
-    }
-
-    protected boolean anyNotZero(int first, int second)
-    {
-        return first > 0 || second > 0;
+        ScreenshotShootingStrategy strategy = strategies.get(strategyName);
+        Validate.isTrue(null != strategy, "Unable to find the strategy with the name: %s", strategyName);
+        return strategy;
     }
 
     protected ShootingStrategy getBaseShootingStrategy()
@@ -68,5 +68,15 @@ public abstract class AbstractAshotFactory<T extends ScreenshotParameters> imple
     public void setStrategies(Map<String, ScreenshotShootingStrategy> strategies)
     {
         this.strategies = strategies;
+    }
+
+    protected String getScreenshotShootingStrategy()
+    {
+        return screenshotShootingStrategy;
+    }
+
+    public void setScreenshotShootingStrategy(String screenshotShootingStrategy)
+    {
+        this.screenshotShootingStrategy = screenshotShootingStrategy;
     }
 }
