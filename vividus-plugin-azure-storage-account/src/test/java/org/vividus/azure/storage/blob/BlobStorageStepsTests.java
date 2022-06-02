@@ -119,7 +119,7 @@ class BlobStorageStepsTests
         runWithClient((steps, client) ->
         {
             BlobClient blobClient = mockBlobClient(client);
-            Mockito.doNothing().when(blobClient).download(argThat(s ->
+            Mockito.doNothing().when(blobClient).downloadStream(argThat(s ->
             {
                 try
                 {
