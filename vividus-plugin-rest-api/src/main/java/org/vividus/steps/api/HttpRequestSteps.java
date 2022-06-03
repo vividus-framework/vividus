@@ -21,7 +21,6 @@ import static java.util.stream.Collectors.toList;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -30,9 +29,8 @@ import java.util.function.Consumer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -83,26 +81,28 @@ public class HttpRequestSteps
 
     /**
      * Sets application/x-www-form-urlencoded request entity that will be used while executing request.
-     * HTTP request header with name 'Content-Type' and value 'application/x-www-form-urlencoded; charset=ISO-8859-1'
+     * HTTP request header with name 'Content-Type' and value 'application/x-www-form-urlencoded; charset=UTF-8'
      * is set.
      * <div>Example:</div>
      * <code>
      *   <br>Given form data for request body:
-     *   <br>|firstName|lastName|password  |
-     *   <br>|Ivan     |Ivanov  |!@3qwer   |
+     *   <br>|name      |value |
+     *   <br>|firstName |Ivan  |
+     *   <br>|lastName  |Ivanov|
      * </code>
      * <br>
      * <br>where
-     * @param parameters Any valid ExamplesTable
+     * @param parameters ExamplesTable representing list of parameters with columns "name" and "value" specifying
+     *                   form data request
      */
-    @Given("urlencoded request: $parameters")
+    @Given("form data request: $parameters")
     public void putUrlEncodedRequest(ExamplesTable parameters)
     {
-        List<NameValuePair> listOfParams = new ArrayList<>();
-        parameters.getRows().get(0).forEach((key, value) -> listOfParams.add(new BasicNameValuePair(key, value)));
+        List<BasicNameValuePair> listOfParams = parameters.getRowsAsParameters(true).stream()
+                .map(row -> new BasicNameValuePair(row.valueAs(NAME, String.class), row.valueAs(VALUE, String.class)))
+                .collect(toList());
         httpTestContext.putRequestEntity(
-                new StringEntity(URLEncodedUtils.format(listOfParams, StandardCharsets.UTF_8),
-                        ContentType.APPLICATION_FORM_URLENCODED));
+                new UrlEncodedFormEntity(listOfParams, StandardCharsets.UTF_8));
     }
 
     /**

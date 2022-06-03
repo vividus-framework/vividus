@@ -111,16 +111,19 @@ When I wait for response code `200` for `PT10S` duration retrying 3 times
 |When I send HTTP GET to the relative URL '${relativeURL}'                                                                    |
 Then `${responseCode}` is equal to `200`
 
-Scenario: Verify step "Given urlencoded request: $parameters"
+Scenario: Verify step "Given form data request: $parameters"
 Meta:
     @requirementId
-Given urlencoded request:
-|firstName     |lastName|password  |
-|Alice Marry   |Crewe   |!@3qwer   |
+Given form data request:
+|name     |value      |
+|firstName|Alice Marry|
+|lastName |Crewe      |
+|password |!@3qwer    |
 When I execute HTTP POST request for resource with URL `https://httpbin.org/post`
-Then JSON element by JSON path `$.headers.Content-Type` is equal to `"application/x-www-form-urlencoded; charset=ISO-8859-1"`
+Then JSON element by JSON path `$.headers.Content-Type` is equal to `"application/x-www-form-urlencoded; charset=UTF-8"`
 Then JSON element by JSON path `$.form` is equal to `{
   "firstName": "Alice Marry",
   "lastName": "Crewe",
   "password": "!@3qwer"
-}`
+}`ignoring extra fields
+

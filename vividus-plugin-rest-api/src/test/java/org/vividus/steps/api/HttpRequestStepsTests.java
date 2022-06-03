@@ -88,9 +88,9 @@ class HttpRequestStepsTests
     @Test
     void testUrlEncodedRequest()
     {
-        ExamplesTable parameters = new ExamplesTable("|name with space|name!|\n|value#|value^|");
+        ExamplesTable parameters = new ExamplesTable("|name|value|\n|first name|Ivan 1|\n|lastName|Ivan@of|");
         httpRequestSteps.putUrlEncodedRequest(parameters);
-        verifyPutRequestEntity("name+with+space=value%23&name%21=value%5E");
+        verifyPutRequestEntity("first+name=Ivan+1&lastName=Ivan%40of");
     }
 
     @SuppressWarnings({ "checkstyle:MultipleStringLiterals", "checkstyle:MultipleStringLiteralsExtended" })
