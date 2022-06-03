@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.toList;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -29,13 +30,16 @@ import java.util.function.Consumer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicNameValuePair;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
@@ -75,6 +79,30 @@ public class HttpRequestSteps
         HttpEntity requestEntity = data instanceof String ? new StringEntity((String) data, StandardCharsets.UTF_8)
                 : new ByteArrayEntity((byte[]) data);
         httpTestContext.putRequestEntity(requestEntity);
+    }
+
+    /**
+     * Sets application/x-www-form-urlencoded request entity that will be used while executing request.
+     * HTTP request header with name 'Content-Type' and value 'application/x-www-form-urlencoded; charset=ISO-8859-1'
+     * is set.
+     * <div>Example:</div>
+     * <code>
+     *   <br>Given form data for request body:
+     *   <br>|firstName|lastName|password  |
+     *   <br>|Ivan     |Ivanov  |!@3qwer   |
+     * </code>
+     * <br>
+     * <br>where
+     * @param parameters Any valid ExamplesTable
+     */
+    @Given("urlencoded request: $parameters")
+    public void putUrlEncodedRequest(ExamplesTable parameters)
+    {
+        List<NameValuePair> listOfParams = new ArrayList<>();
+        parameters.getRows().get(0).forEach((key, value) -> listOfParams.add(new BasicNameValuePair(key, value)));
+        httpTestContext.putRequestEntity(
+                new StringEntity(URLEncodedUtils.format(listOfParams, StandardCharsets.UTF_8),
+                        ContentType.APPLICATION_FORM_URLENCODED));
     }
 
     /**

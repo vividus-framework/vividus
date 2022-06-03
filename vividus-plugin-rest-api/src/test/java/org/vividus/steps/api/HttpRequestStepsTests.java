@@ -85,6 +85,14 @@ class HttpRequestStepsTests
         assertEquals(content, result);
     }
 
+    @Test
+    void testUrlEncodedRequest()
+    {
+        ExamplesTable parameters = new ExamplesTable("|name with space|name!|\n|value#|value^|");
+        httpRequestSteps.putUrlEncodedRequest(parameters);
+        verifyPutRequestEntity("name+with+space=value%23&name%21=value%5E");
+    }
+
     @SuppressWarnings({ "checkstyle:MultipleStringLiterals", "checkstyle:MultipleStringLiteralsExtended" })
     static Stream<Arguments> multipartRequests()
     {
