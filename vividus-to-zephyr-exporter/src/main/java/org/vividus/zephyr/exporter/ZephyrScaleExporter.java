@@ -18,22 +18,26 @@ package org.vividus.zephyr.exporter;
 
 import java.io.IOException;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Configuration;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
-import org.vividus.zephyr.facade.ZephyrFacadeFactory;
+import org.vividus.zephyr.facade.IZephyrFacade;
 import org.vividus.zephyr.model.ExecutionStatus;
 import org.vividus.zephyr.model.TestCase;
 import org.vividus.zephyr.model.ZephyrExecution;
 import org.vividus.zephyr.parser.TestCaseParser;
 
+@Configuration
+@ConditionalOnProperty(value = "zephyr.exporter.api-type", havingValue = "SCALE")
 public class ZephyrScaleExporter extends ZephyrExporter
 {
-    public ZephyrScaleExporter(JiraFacade jiraFacade, ZephyrFacadeFactory zephyrFacadeFactory,
+    public ZephyrScaleExporter(JiraFacade jiraFacade, IZephyrFacade zephyrFacade,
                                TestCaseParser testCaseParser, ZephyrExporterProperties zephyrExporterProperties)
     {
-        super(jiraFacade, zephyrFacadeFactory, testCaseParser, zephyrExporterProperties);
+        super(jiraFacade, zephyrFacade, testCaseParser, zephyrExporterProperties);
     }
 
     @Override
