@@ -28,6 +28,8 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Configuration;
 import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
@@ -40,6 +42,8 @@ import org.vividus.zephyr.configuration.ZephyrExporterConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.model.TestCaseStatus;
 
+@Configuration
+@ConditionalOnProperty(value = "zephyr.exporter.api-type", havingValue = "SQUAD")
 public class ZephyrFacade implements IZephyrFacade
 {
     private static final String ZAPI_ENDPOINT = "/rest/zapi/latest/";

@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Configuration;
 import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
@@ -30,6 +32,8 @@ import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 
+@Configuration
+@ConditionalOnProperty(value = "zephyr.exporter.api-type", havingValue = "SCALE")
 public class ZephyrScaleFacade implements IZephyrFacade
 {
     private static final String REST_ATM_ENDPOINT = "/rest/atm/1.0";
@@ -60,8 +64,7 @@ public class ZephyrScaleFacade implements IZephyrFacade
         String responseBody = getJiraClient().executePost(
                 REST_ATM_ENDPOINT + testCaseUrl,
                 "{}");
-        Integer executionId = JsonPathUtils.getData(responseBody, "$.id");
-        return executionId;
+        return JsonPathUtils.getData(responseBody, "$.id");
     }
 
     @Override

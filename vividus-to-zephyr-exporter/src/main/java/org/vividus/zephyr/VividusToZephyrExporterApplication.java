@@ -18,7 +18,6 @@ package org.vividus.zephyr;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -30,8 +29,6 @@ import org.vividus.jira.JiraConfigurationException;
 import org.vividus.zephyr.configuration.ZephyrExporterConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.exporter.ZephyrExporter;
-import org.vividus.zephyr.exporter.ZephyrScaleExporter;
-import org.vividus.zephyr.model.ZephyrApiType;
 
 @SpringBootApplication
 @Import(VividusExporterCommonConfiguration.class)
@@ -40,22 +37,10 @@ import org.vividus.zephyr.model.ZephyrApiType;
 @SuppressWarnings("checkstyle:hideutilityclassconstructor")
 public class VividusToZephyrExporterApplication
 {
-    @Value("${zephyr.exporter.api-type}")
-    private static ZephyrApiType zephyrApiType;
-
     public static void main(String[] args) throws IOException, JiraConfigurationException
     {
         ApplicationContext ctx = SpringApplication.run(VividusToZephyrExporterApplication.class, args);
-
-        ZephyrExporter exporter;
-        if (zephyrApiType == ZephyrApiType.SQUAD)
-        {
-            exporter = ctx.getBean(ZephyrExporter.class);
-        }
-        else
-        {
-            exporter = ctx.getBean(ZephyrScaleExporter.class);
-        }
+        ZephyrExporter exporter = ctx.getBean(ZephyrExporter.class);
         exporter.exportResults();
     }
 }

@@ -28,7 +28,6 @@ import java.util.Map;
 
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,7 +35,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
-import org.vividus.zephyr.facade.ZephyrFacadeFactory;
 import org.vividus.zephyr.facade.ZephyrScaleFacade;
 import org.vividus.zephyr.model.TestCase;
 import org.vividus.zephyr.model.TestCaseStatus;
@@ -51,7 +49,6 @@ class ZephyrScaleExporterTests
     private static final String PASSED_STATUS_ID = "101";
 
     @Mock private ZephyrScaleFacade zephyrScaleFacade;
-    @Mock private ZephyrFacadeFactory zephyrFacadeFactory;
     @Mock private TestCaseParser testCaseParser;
     @InjectMocks private ZephyrScaleExporter zephyrExporter;
 
@@ -67,12 +64,6 @@ class ZephyrScaleExporterTests
         zephyrExporter.exportResults();
         verify(zephyrScaleFacade).updateExecutionStatus(TEST_CASE_KEY1, STATUS_UPDATE_JSON);
         verify(zephyrScaleFacade).updateExecutionStatus(TEST_CASE_KEY2, "{\"status\":\"101\"}");
-    }
-
-    @BeforeEach
-    private void mockFacade()
-    {
-        when(zephyrFacadeFactory.getZephyrFacade()).thenReturn(zephyrScaleFacade);
     }
 
     private ZephyrConfiguration prepareTestConfiguration()

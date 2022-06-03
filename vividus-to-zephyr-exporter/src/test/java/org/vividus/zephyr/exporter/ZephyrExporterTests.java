@@ -35,7 +35,6 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,7 +46,6 @@ import org.vividus.jira.model.JiraEntity;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.facade.ZephyrFacade;
-import org.vividus.zephyr.facade.ZephyrFacadeFactory;
 import org.vividus.zephyr.model.TestCase;
 import org.vividus.zephyr.model.TestCaseStatus;
 import org.vividus.zephyr.parser.TestCaseParser;
@@ -67,7 +65,6 @@ class ZephyrExporterTests
 
     @Mock private JiraFacade jiraFacade;
     @Mock private ZephyrFacade zephyrFacade;
-    @Mock private ZephyrFacadeFactory zephyrFacadeFactory;
     @Mock private TestCaseParser testCaseParser;
     @Mock private ZephyrExporterProperties zephyrExporterProperties;
     @InjectMocks private ZephyrExporter zephyrExporter;
@@ -107,12 +104,6 @@ class ZephyrExporterTests
         verifyNoMoreInteractions(zephyrFacade);
         assertThat(testLogger.getLoggingEvents(), is(List.of(info("Test case result for {} was not exported, "
                 + "because execution does not exist", TEST_CASE_KEY2))));
-    }
-
-    @BeforeEach
-    private void mockFacade()
-    {
-        when(zephyrFacadeFactory.getZephyrFacade()).thenReturn(zephyrFacade);
     }
 
     private ZephyrConfiguration prepareTestConfiguration()

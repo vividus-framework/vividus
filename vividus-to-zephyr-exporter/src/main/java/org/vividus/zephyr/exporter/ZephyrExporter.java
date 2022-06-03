@@ -28,6 +28,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Configuration;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.JiraEntity;
@@ -35,28 +37,29 @@ import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.databind.TestCaseDeserializer;
 import org.vividus.zephyr.facade.IZephyrFacade;
-import org.vividus.zephyr.facade.ZephyrFacadeFactory;
 import org.vividus.zephyr.model.ExecutionStatus;
 import org.vividus.zephyr.model.TestCase;
 import org.vividus.zephyr.model.ZephyrExecution;
 import org.vividus.zephyr.parser.TestCaseParser;
 
+@Configuration
+@ConditionalOnProperty(value = "zephyr.exporter.api-type", havingValue = "SQUAD")
 public class ZephyrExporter
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZephyrExporter.class);
 
     private final JiraFacade jiraFacade;
 
-    private ZephyrFacadeFactory zephyrFacadeFactory;
+    private IZephyrFacade zephyrFacade;
     private TestCaseParser testCaseParser;
     private ZephyrExporterProperties zephyrExporterProperties;
     private final ObjectMapper objectMapper;
 
-    public ZephyrExporter(JiraFacade jiraFacade, ZephyrFacadeFactory zephyrFacadeFactory, TestCaseParser testCaseParser,
+    public ZephyrExporter(JiraFacade jiraFacade, IZephyrFacade zephyrFacade, TestCaseParser testCaseParser,
                           ZephyrExporterProperties zephyrExporterProperties)
     {
         this.jiraFacade = jiraFacade;
-        this.zephyrFacadeFactory = zephyrFacadeFactory;
+        this.zephyrFacade = zephyrFacade;
         this.testCaseParser = testCaseParser;
         this.zephyrExporterProperties = zephyrExporterProperties;
         this.objectMapper = JsonMapper.builder()
@@ -107,10 +110,10 @@ public class ZephyrExporter
 
     public IZephyrFacade getZephyrFacade()
     {
-        return zephyrFacadeFactory.getZephyrFacade();
+        return zephyrFacade;
     }
 
-    public ObjectMapper getObjectMapper()
+    protected ObjectMapper getObjectMapper()
     {
         return objectMapper;
     }
