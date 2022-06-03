@@ -84,15 +84,14 @@ public class HttpRequestSteps
      * Sets application/x-www-form-urlencoded request entity that will be used while executing request.
      * HTTP request header with name 'Content-Type' and value 'application/x-www-form-urlencoded; charset=UTF-8'
      * is set.
-     * <div>Example:</div>
+     * <br>Example:
      * <code>
      *   <br>Given form data request:
-     *   <br>|name      |value |
-     *   <br>|firstName |Ivan  |
-     *   <br>|lastName  |Ivanov|
+     *   <br>|name     |value |
+     *   <br>|firstName|Ivan  |
+     *   <br>|lastName |Ivanov|
      * </code>
      * <br>
-     * <br>where
      * @param parameters ExamplesTable representing list of parameters with columns "name" and "value" specifying
      *                   form data request
      */
