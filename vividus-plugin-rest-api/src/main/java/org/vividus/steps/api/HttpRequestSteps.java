@@ -85,7 +85,7 @@ public class HttpRequestSteps
      * is set.
      * <div>Example:</div>
      * <code>
-     *   <br>Given form data for request body:
+     *   <br>Given form data request:
      *   <br>|name      |value |
      *   <br>|firstName |Ivan  |
      *   <br>|lastName  |Ivanov|

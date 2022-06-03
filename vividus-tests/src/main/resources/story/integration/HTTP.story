@@ -126,4 +126,3 @@ Then JSON element by JSON path `$.form` is equal to `{
   "lastName": "Crewe",
   "password": "!@3qwer"
 }`ignoring extra fields
-
