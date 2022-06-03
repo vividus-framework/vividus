@@ -112,8 +112,6 @@ When I wait for response code `200` for `PT10S` duration retrying 3 times
 Then `${responseCode}` is equal to `200`
 
 Scenario: Verify step "Given form data request: $parameters"
-Meta:
-    @requirementId
 Given form data request:
 |name     |value      |
 |firstName|Alice Marry|

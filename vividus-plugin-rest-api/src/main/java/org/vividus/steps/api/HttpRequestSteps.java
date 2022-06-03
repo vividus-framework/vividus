@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -98,11 +99,11 @@ public class HttpRequestSteps
     @Given("form data request: $parameters")
     public void putUrlEncodedRequest(ExamplesTable parameters)
     {
-        List<BasicNameValuePair> listOfParams = parameters.getRowsAsParameters(true).stream()
+        UrlEncodedFormEntity requestEntity = parameters.getRowsAsParameters(true).stream()
                 .map(row -> new BasicNameValuePair(row.valueAs(NAME, String.class), row.valueAs(VALUE, String.class)))
-                .collect(toList());
-        httpTestContext.putRequestEntity(
-                new UrlEncodedFormEntity(listOfParams, StandardCharsets.UTF_8));
+                .collect(Collectors.collectingAndThen(toList(), params -> new UrlEncodedFormEntity(params,
+                        StandardCharsets.UTF_8)));
+        httpTestContext.putRequestEntity(requestEntity);
     }
 
     /**
