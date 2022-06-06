@@ -338,13 +338,13 @@ Given multipart request:
 
 === Set form data HTTP request
 
-Sets https://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.1[urlencoded] request entity that will be used while executing HTTP requests.
+Sets https://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.1[URL-encoded form data] request entity that will be used while executing HTTP requests.
 Default HTTP request header with name `Content-Type` and value `application/x-www-form-urlencoded; charset=UTF-8` is set.
 In case if `Content-Type` is `text/plain` <<Set HTTP request body>> should be used
 
 [source,gherkin]
 ----
-Given form data request: $parameters
+Given form data request:$parameters
 ----
 
 * `$parameters` -  `ExamplesTable` representing list of parameters with columns `name` and `value` specifying form data request.

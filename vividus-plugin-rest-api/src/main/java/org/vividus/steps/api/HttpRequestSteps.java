@@ -95,7 +95,7 @@ public class HttpRequestSteps
      * @param parameters ExamplesTable representing list of parameters with columns "name" and "value" specifying
      *                   form data request
      */
-    @Given("form data request: $parameters")
+    @Given("form data request:$parameters")
     public void putUrlEncodedRequest(ExamplesTable parameters)
     {
         UrlEncodedFormEntity requestEntity = parameters.getRowsAsParameters(true).stream()
