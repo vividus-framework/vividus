@@ -110,3 +110,21 @@ When I wait for response code `200` for `PT10S` duration retrying 3 times
 |When I initialize the scenario variable `relativeURL` with value `#{eval(stringUtils:substringBeforeLast(relativeURL, '-'))}`|
 |When I send HTTP GET to the relative URL '${relativeURL}'                                                                    |
 Then `${responseCode}` is equal to `200`
+
+Scenario: Verify step "Given form data request:$parameters"
+Given form data request:
+|name     |value      |
+|firstName|Alice Marry|
+|lastName |Crewe      |
+|password |!@3qwer    |
+When I execute HTTP POST request for resource with URL `https://httpbin.org/post`
+Then JSON element by JSON path `$` is equal to `{
+  "form": {
+    "firstName": "Alice Marry",
+    "lastName": "Crewe",
+    "password": "!@3qwer"
+  },
+  "headers": {
+     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+  }
+}`ignoring extra fields

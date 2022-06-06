@@ -85,6 +85,14 @@ class HttpRequestStepsTests
         assertEquals(content, result);
     }
 
+    @Test
+    void testUrlEncodedRequest()
+    {
+        ExamplesTable parameters = new ExamplesTable("|name|value|\n|first name|Ivan 1|\n|lastName|Ivan@of|");
+        httpRequestSteps.putUrlEncodedRequest(parameters);
+        verifyPutRequestEntity("first+name=Ivan+1&lastName=Ivan%40of");
+    }
+
     @SuppressWarnings({ "checkstyle:MultipleStringLiterals", "checkstyle:MultipleStringLiteralsExtended" })
     static Stream<Arguments> multipartRequests()
     {

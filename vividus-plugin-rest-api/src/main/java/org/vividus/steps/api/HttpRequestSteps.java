@@ -25,17 +25,20 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicNameValuePair;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
@@ -74,6 +77,31 @@ public class HttpRequestSteps
         Object data = content.getData();
         HttpEntity requestEntity = data instanceof String ? new StringEntity((String) data, StandardCharsets.UTF_8)
                 : new ByteArrayEntity((byte[]) data);
+        httpTestContext.putRequestEntity(requestEntity);
+    }
+
+    /**
+     * Sets application/x-www-form-urlencoded request entity that will be used while executing request.
+     * HTTP request header with name 'Content-Type' and value 'application/x-www-form-urlencoded; charset=UTF-8'
+     * is set.
+     * <br>Example:
+     * <code>
+     *   <br>Given form data request:
+     *   <br>|name     |value |
+     *   <br>|firstName|Ivan  |
+     *   <br>|lastName |Ivanov|
+     * </code>
+     * <br>
+     * @param parameters ExamplesTable representing list of parameters with columns "name" and "value" specifying
+     *                   form data request
+     */
+    @Given("form data request:$parameters")
+    public void putUrlEncodedRequest(ExamplesTable parameters)
+    {
+        UrlEncodedFormEntity requestEntity = parameters.getRowsAsParameters(true).stream()
+                .map(row -> new BasicNameValuePair(row.valueAs(NAME, String.class), row.valueAs(VALUE, String.class)))
+                .collect(Collectors.collectingAndThen(toList(), params -> new UrlEncodedFormEntity(params,
+                        StandardCharsets.UTF_8)));
         httpTestContext.putRequestEntity(requestEntity);
     }
 
