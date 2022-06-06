@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.testcontext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
@@ -44,8 +45,9 @@ class ThreadedTestContextTests
     @Test
     void testRemove()
     {
-        runContext.put(KEY, new Object());
-        runContext.remove(KEY);
+        var data = new Object();
+        runContext.put(KEY, data);
+        assertSame(data, runContext.remove(KEY));
         assertNull(runContext.get(KEY));
         assertEquals(0, runContext.size());
     }
