@@ -42,9 +42,9 @@ public class UiContextTestsBase
         }
 
         @Override
-        public void remove(Object key)
+        public Object remove(Object key)
         {
-            map.remove(key);
+            return map.remove(key);
         }
 
         @Override
