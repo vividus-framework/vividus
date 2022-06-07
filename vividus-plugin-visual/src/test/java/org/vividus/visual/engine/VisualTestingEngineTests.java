@@ -104,7 +104,7 @@ class VisualTestingEngineTests
         when(screenshotParametersFactory.create(Optional.empty())).thenReturn(Optional.empty());
         factory.setScreenshotIndexer(Optional.empty());
         factory.setIndexers(Map.of());
-        visualTestingEngine.setAcceptableDiffPercentage(0);
+        visualTestingEngine.setAcceptableDiffPercentage(0.0d);
     }
 
     @Test
@@ -160,6 +160,7 @@ class VisualTestingEngineTests
     void shouldCompareImagesUsingRequiredDiffPercentageForTheInequalComparison(
         double requiredDiffPercentage, boolean status) throws IOException
     {
+        visualTestingEngine.setRequiredDiffPercentage(0.000001);
         when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.CHECK_INEQUALITY_AGAINST);
         visualCheck.setRequiredDiffPercentage(OptionalDouble.of(requiredDiffPercentage));

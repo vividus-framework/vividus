@@ -138,12 +138,12 @@ public class VisualTestingEngine implements IVisualTestingEngine
         this.overrideBaselines = overrideBaselines;
     }
 
-    public void setAcceptableDiffPercentage(int acceptableDiffPercentage)
+    public void setAcceptableDiffPercentage(double acceptableDiffPercentage)
     {
         this.acceptableDiffPercentage = acceptableDiffPercentage;
     }
 
-    public void setRequiredDiffPercentage(int requiredDiffPercentage)
+    public void setRequiredDiffPercentage(double requiredDiffPercentage)
     {
         this.requiredDiffPercentage = requiredDiffPercentage;
     }
