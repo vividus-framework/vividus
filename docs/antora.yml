@@ -4,7 +4,7 @@ prerelease: false
 title: VIVIDUS
 asciidoc:
   attributes:
-    release-version: 'fasle'
+    release-version: 'false'
     base-version: 0.4.11
     current-version: 0.4.11-SNAPSHOT
     source-language: asciidoc@
