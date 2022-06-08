@@ -159,6 +159,24 @@ ${response}
 Then `${response}` matches `.+Home.+`
 ----
 
+=== Response code
+
+Provides the https://developer.mozilla.org/en-US/docs/Web/HTTP/Status[HTTP response status code].
+
+==== *Variable name*
+
+[source,gherkin]
+----
+${response-code}
+----
+
+.Validate response code
+[source,gherkin]
+----
+When I send HTTP GET to the relative URL '/get?name=Content'
+Then `${response-code}` is equal to `200`
+----
+
 === Response as binary data
 Provides payload of the latest response body as binary data.
 
