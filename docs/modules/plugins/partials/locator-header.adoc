@@ -50,7 +50,6 @@ Given I am on the main application page
 Then number of elements found by `anyAttOrText(attribute, with comma\, text)` is = `1`
 ----
 
-
 [cols="2,2,1,1", options="header"]
 |===
 
@@ -59,8 +58,12 @@ Then number of elements found by `anyAttOrText(attribute, with comma\, text)` is
 |Usage
 |Result
 
+|Single parameter doesn't require comma escaping.
+|`//*[@*='%1$s' or text()='%1$s']`
+|`customLocator(Hello, Vlad!)`
+|`//*[@*='Hello, Vlad!' or text()='Hello, Vlad!']`
 
-|The pattern with a single paramter referenced twice.
+|The pattern with a single parameter was referenced twice.
 |`//*[@*='%1$s' or text()='%1$s']`
 |`customLocator(text)`
 |`//*[@*='text' or text()='text']`
@@ -79,5 +82,10 @@ Then number of elements found by `anyAttOrText(attribute, with comma\, text)` is
 |`//input[@id="username"]`
 |`customLocator()`
 |`//input[@id="username"]`
+
+|The pattern with two parameter placeholders was used with invalid number of parameters.
+|`//*[@*='%s' or text()='%s']`
+|`customLocator(text)`
+|`Exception will be thrown!`
 
 |===

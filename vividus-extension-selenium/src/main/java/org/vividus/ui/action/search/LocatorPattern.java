@@ -16,19 +16,31 @@
 
 package org.vividus.ui.action.search;
 
+import java.beans.ConstructorProperties;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+
 public class LocatorPattern
 {
+    private static final Pattern PARAMS = Pattern.compile("%\\d+\\$s");
+
     private String locatorType;
     private String pattern;
+    private int parametersQuantity;
+
+    @ConstructorProperties({"locator-type", "pattern"})
+    public LocatorPattern(String locatorType, String pattern)
+    {
+        this.locatorType = locatorType;
+        this.pattern = pattern;
+        calculateParametersQuantity();
+    }
 
     public String getLocatorType()
     {
         return locatorType;
-    }
-
-    public void setLocatorType(String locatorType)
-    {
-        this.locatorType = locatorType;
     }
 
     public String getPattern()
@@ -36,8 +48,21 @@ public class LocatorPattern
         return pattern;
     }
 
-    public void setPattern(String pattern)
+    private void calculateParametersQuantity()
     {
-        this.pattern = pattern;
+        int references = PARAMS.matcher(this.pattern)
+                               .results()
+                               .map(MatchResult::group)
+                               .map(r -> StringUtils.substringBetween(r, "%", "$s"))
+                               .mapToInt(Integer::parseInt)
+                               .max()
+                               .orElse(0);
+        int placeholders = StringUtils.countMatches(pattern, "%s");
+        this.parametersQuantity = Math.max(references, placeholders);
+    }
+
+    public int getParametersQuantity()
+    {
+        return parametersQuantity;
     }
 }
