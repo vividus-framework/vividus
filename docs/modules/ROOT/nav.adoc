@@ -2,3 +2,4 @@
 * xref:glossary.adoc[Glossary]
 * xref:getting-started.adoc[Getting Started]
 * xref:tests-configuration.adoc[Configuration]
+** xref:reporting.adoc[Reporting]
