@@ -331,5 +331,7 @@
     </util:map>
 
     <bean id="current-page-url" class="org.vividus.ui.web.variable.CurrentPageUrlDynamicVariable"/>
+    <bean id="browser-window-height" class="org.vividus.ui.web.variable.BrowserWindowHeightDynamicVariable"/>
+    <bean id="browser-window-width" class="org.vividus.ui.web.variable.BrowserWindowWidthDynamicVariable"/>
 
  </beans>

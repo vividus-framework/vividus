@@ -205,6 +205,34 @@ include::partial$proxy-meta-tags.adoc[]
 
 == xref:commons:variables.adoc[Dynamic variables]
 
+=== Browser window dimension
+
+The set of dynamic variables provides ability to access height and width of the browser window.
+
+==== *Variable name*
+
+[cols="1,3", options="header"]
+|===
+
+|Variable name
+|Description
+
+|`browser-window-height`
+|the height of the browser window
+
+|`browser-window-width`
+|the width of the browser window
+
+|===
+
+.Check the dimension of the browser window
+[source,gherkin]
+----
+When I change window size to `800x600`
+Then `${browser-window-width}` is = `800`
+Then `${browser-window-height}` is = `600`
+----
+
 include::partial$dynamic-variables-ui.adoc[]
 
 == Profiles
