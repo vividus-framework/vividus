@@ -24,7 +24,7 @@ jobs:
       matrix:
         platform: [ubuntu-latest, macos-latest, windows-latest]
       fail-fast: false
-    
+
     env:
       TEST_APP_VERSION: 0.3.0
 
@@ -144,9 +144,10 @@ jobs:
         AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         AZURE_COSMOS_DB_KEY: ${{ secrets.AZURE_COSMOS_DB_KEY }}
+        GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
       shell: bash
       run: |
-        if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY && -n $MONGODB_USERNAME && -n $MONGODB_PASSWORD && -n $KAFKA_PASSWORD && -n $AWS_ACCESS_KEY_ID && -n $AWS_SECRET_ACCESS_KEY && -n $AWS_REGION && -n $AZURE_CLIENT_ID && -n $AZURE_CLIENT_SECRET && -n $AZURE_TENANT_ID && -n $AZURE_SUBSCRIPTION_ID && -n $AZURE_COSMOS_DB_KEY ]]; then
+        if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY && -n $APPLITOOLS_READ_KEY && -n $APPLITOOLS_READ_KEY && -n $MONGODB_USERNAME && -n $MONGODB_PASSWORD && -n $KAFKA_PASSWORD && -n $AWS_ACCESS_KEY_ID && -n $AWS_SECRET_ACCESS_KEY && -n $AWS_REGION && -n $AZURE_CLIENT_ID && -n $AZURE_CLIENT_SECRET && -n $AZURE_TENANT_ID && -n $AZURE_SUBSCRIPTION_ID && -n $AZURE_COSMOS_DB_KEY && -n $GMAIL_PASSWORD ]]; then
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/web,system/api \
                                                   -Pvividus.configuration.suites=system \
                                                   -Pvividus.configuration.profiles=browserstack/web,web/desktop/chrome \
@@ -161,7 +162,17 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="System tests report" \
-                                                  -Pvividus.azure.cosmos-db.account.vividus.key=${AZURE_COSMOS_DB_KEY}
+                                                  -Pvividus.azure.cosmos-db.account.vividus.key=${AZURE_COSMOS_DB_KEY} \
+                                                  -Pvividus.notifications.base.comment="VIVIDUS CI - System tests" \
+                                                  -Pvividus.notifications.base.report-link=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.notifications.base.project=vividus-tests \
+                                                  -Pvividus.notifications.mail.host=smtp.gmail.com \
+                                                  -Pvividus.notifications.mail.port=465 \
+                                                  -Pvividus.notifications.mail.username=vividus.team@gmail.com \
+                                                  -Pvividus.notifications.mail.password=${GMAIL_PASSWORD} \
+                                                  -Pvividus.notifications.mail.from=vividus.team@gmail.com \
+                                                  -Pvividus.notifications.mail.recipient="vividus.team@gmail.com, ivan@vividus.dev" \
+                                                  -Pvividus.notifications.mail.enable-ssl=true
         else
             echo No passwords/access keys are available, skipping system tests
         fi

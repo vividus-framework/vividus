@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.report.allure.model.AllureCategory;
+import org.vividus.report.allure.notification.NotificationsSender;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.util.property.IPropertyMapper;
@@ -71,16 +72,19 @@ public class AllureReportGenerator implements IAllureReportGenerator
     private final IPropertyMapper propertyMapper;
     private final ResourcePatternResolver resourcePatternResolver;
     private final AllurePluginsProvider allurePluginsProvider;
+    private final NotificationsSender notificationsSender;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private boolean started;
 
     public AllureReportGenerator(IPropertyMapper propertyMapper, ResourcePatternResolver resourcePatternResolver,
-            AllurePluginsProvider allurePluginsProvider)
+            AllurePluginsProvider allurePluginsProvider, NotificationsSender notificationsSender)
     {
         this.propertyMapper = propertyMapper;
         this.resourcePatternResolver = resourcePatternResolver;
         this.allurePluginsProvider = allurePluginsProvider;
+        this.notificationsSender = notificationsSender;
     }
 
     @Override
@@ -97,6 +101,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
         if (started)
         {
             generateReport();
+            notificationsSender.sendNotifications(reportDirectory);
         }
         started = false;
     }

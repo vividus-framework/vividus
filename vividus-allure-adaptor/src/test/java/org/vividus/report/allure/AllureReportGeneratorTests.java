@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.report.allure.adapter;
+package org.vividus.report.allure;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.debug;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
@@ -65,8 +65,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
-import org.vividus.report.allure.AllurePluginsProvider;
-import org.vividus.report.allure.AllureReportGenerator;
+import org.vividus.report.allure.notification.NotificationsSender;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.util.property.PropertyMapper;
@@ -99,6 +98,7 @@ class AllureReportGeneratorTests
     @Mock private PropertyMapper propertyMapper;
     @Mock private ResourcePatternResolver resourcePatternResolver;
     @Mock private AllurePluginsProvider allurePluginsProvider;
+    @Mock private NotificationsSender notificationsSender;
 
     private AllureReportGenerator allureReportGenerator;
 
@@ -110,7 +110,7 @@ class AllureReportGeneratorTests
         Files.createDirectories(resultsDirectory);
         System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
         allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver,
-                allurePluginsProvider);
+                allurePluginsProvider, notificationsSender);
     }
 
     @AfterEach
@@ -190,7 +190,7 @@ class AllureReportGeneratorTests
         resultsDirectory = tempDir.resolve("allure-results-to-be-created");
         System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
         allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver,
-                allurePluginsProvider);
+                allurePluginsProvider, notificationsSender);
         when(propertyMapper.readValue(ALLURE_EXECUTOR_PROPERTY_PREFIX, ExecutorInfo.class)).thenReturn(
                 Optional.empty());
         testEnd(reportDirectory);
@@ -202,6 +202,7 @@ class AllureReportGeneratorTests
             buildReportGeneratedLogEvent(tempDir)
         )));
         assertFalse(resultsDirectory.resolve(EXECUTOR_JSON).toFile().exists());
+        verify(notificationsSender).sendNotifications(reportDirectory);
     }
 
     private LoggingEvent buildCleanUpDirectoryLogEvent(String directoryDescription, File directory)
@@ -273,6 +274,7 @@ class AllureReportGeneratorTests
             verify(reportGenerator.constructed().get(0)).generate(any(Path.class), any(List.class));
             assertEnvironmentProperties();
             assertCategoriesJson();
+            verify(notificationsSender).sendNotifications(reportDirectory);
         }
     }
 

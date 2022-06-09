@@ -53,6 +53,9 @@
 
     <bean id="allureReportGenerator" class="org.vividus.report.allure.AllureReportGenerator"
         destroy-method="end">
+        <constructor-arg>
+            <bean class="org.vividus.report.allure.notification.NotificationsSender" />
+        </constructor-arg>
         <property name="reportDirectory" value="${allure.report-directory}" />
         <property name="historyDirectory" value="${allure.history-directory}" />
     </bean>
