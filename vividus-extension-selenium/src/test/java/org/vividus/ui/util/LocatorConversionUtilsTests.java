@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -106,34 +107,31 @@ class LocatorConversionUtilsTests
     @Test
     void shouldThrowAnExceptionIfDynamicLocatorUsesNotExistingType()
     {
-        var locatorPattern = new LocatorPattern();
-        locatorPattern.setLocatorType("dah-ro-fus");
-        locatorPattern.setPattern("111111");
+        var locatorPattern = new LocatorPattern("dah-ro-fus", "11111");
         when(dynamicLocators.getNullable("jquery")).thenReturn(Optional.of(locatorPattern));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> utils.convertToLocator("jquery(.a)"));
         assertEquals("Unsupported locator type: dah-ro-fus", exception.getMessage());
     }
 
-    @Test
-    void shouldCreateDynamicLocatorUsingBaseType()
+    @ParameterizedTest
+    @CsvSource(value = {
+            "By.searchFor(111122), Search for 111122",
+            "'By.searchFor(some, coma separated\\,value)', 'Search for some, coma separated\\,value'"})
+    void shouldCreateDynamicLocatorUsingBaseType(String locator, String actual)
     {
         lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
-        var locatorPattern = new LocatorPattern();
-        locatorPattern.setLocatorType(SEARCH);
-        locatorPattern.setPattern("Search for %s");
+        var locatorPattern = new LocatorPattern(SEARCH, "Search for %s");
         when(dynamicLocators.getNullable("searchfor")).thenReturn(Optional.of(locatorPattern));
-        assertEquals(createAttributes(TestLocatorType.SEARCH, "Search for 111122", Visibility.VISIBLE),
-                utils.convertToLocator("By.searchFor(111122)"));
+        assertEquals(createAttributes(TestLocatorType.SEARCH, actual, Visibility.VISIBLE),
+                utils.convertToLocator(locator));
     }
 
     @Test
     void shouldCreateDynamicLocatorUsingBaseTypeAndEscapedCommaInValues()
     {
         lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
-        var locatorPattern = new LocatorPattern();
-        locatorPattern.setLocatorType(SEARCH);
-        locatorPattern.setPattern("%s my dear %s%s");
+        var locatorPattern = new LocatorPattern(SEARCH, "%s my dear %s%s");
         when(dynamicLocators.getNullable("fusrodah")).thenReturn(Optional.of(locatorPattern));
         assertEquals(createAttributes(TestLocatorType.SEARCH, "Hello, my dear friend!", Visibility.VISIBLE),
                 utils.convertToLocator("By.fusRoDah(Hello\\,, friend,!)"));
@@ -143,23 +141,31 @@ class LocatorConversionUtilsTests
     void shouldCreateDynamicLocatorWithoutParameters()
     {
         lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
-        var locatorPattern = new LocatorPattern();
-        locatorPattern.setLocatorType(SEARCH);
         var pattern = "pattern";
-        locatorPattern.setPattern(pattern);
+        var locatorPattern = new LocatorPattern(SEARCH, pattern);
         when(dynamicLocators.getNullable("parameterless")).thenReturn(Optional.of(locatorPattern));
         assertEquals(createAttributes(TestLocatorType.SEARCH, pattern, Visibility.VISIBLE),
                 utils.convertToLocator("parameterLess()"));
     }
 
     @Test
+    void shouldFailIfPassedParametersNumberLessThanExpected()
+    {
+        lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
+        var pattern = "Just %s pattern to get %s tested";
+        var locatorPattern = new LocatorPattern(SEARCH, pattern);
+        when(dynamicLocators.getNullable("justtest")).thenReturn(Optional.of(locatorPattern));
+        var iae = assertThrows(IllegalArgumentException.class,
+            () -> utils.convertToLocator("justTest(xPath)"));
+        assertEquals("The pattern `Just %s pattern to get %s tested` expecting `2` parameters, but got `1`",
+            iae.getMessage());
+    }
+
+    @Test
     void shouldEscapeQuotesIfLocatorXpath()
     {
         lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.XPATH));
-        var locatorPattern = new LocatorPattern();
-        locatorPattern.setLocatorType("xpath");
-        var pattern = ".//*[@*='%s' or text()=\"%1$s\"]";
-        locatorPattern.setPattern(pattern);
+        var locatorPattern = new LocatorPattern("xpath", ".//*[@*='%s' or text()=\"%1$s\"]");
         when(dynamicLocators.getNullable("anyattribute")).thenReturn(Optional.of(locatorPattern));
         var actual = utils.convertToLocator("anyAttribute(Don't be a \"fool\")");
         assertEquals(".//*[@*[normalize-space()=concat(\"Don't be a \", '\"', \"fool\", '\"')] "

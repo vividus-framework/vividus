@@ -116,15 +116,30 @@ public class LocatorConversionUtils
 
     private String buildLocator(String searchValue, LocatorPattern locatorPattern)
     {
-        String[] params = PARAMS_SEPARATOR.split(searchValue);
-        params = searchValue.contains(ESCAPED_COMMA) ? Stream.of(params)
-                                                             .map(p -> p.replace(ESCAPED_COMMA, ","))
-                                                             .toArray(String[]::new)
-                                                     : params;
+        String[] parameters;
+        int parametersQuantity = locatorPattern.getParametersQuantity();
+        if (parametersQuantity == 1)
+        {
+            parameters = new String[] { searchValue };
+        }
+        else
+        {
+            parameters = PARAMS_SEPARATOR.split(searchValue);
+            parameters = searchValue.contains(ESCAPED_COMMA) ? Stream.of(parameters)
+                    .map(p -> p.replace(ESCAPED_COMMA, ","))
+                    .toArray(String[]::new)
+                    : parameters;
+        }
         String pattern = locatorPattern.getPattern();
+        if (parametersQuantity > parameters.length)
+        {
+            throw new IllegalArgumentException(
+                    String.format("The pattern `%s` expecting `%d` parameters, but got `%d`", pattern,
+                            parametersQuantity, parameters.length));
+        }
         return "xpath".equalsIgnoreCase(locatorPattern.getLocatorType())
-            ? XpathLocatorUtils.getXPath(pattern, params)
-            : String.format(pattern, params);
+            ? XpathLocatorUtils.getXPath(pattern, parameters)
+            : String.format(pattern, parameters);
     }
 
     private static Optional<LocatorType> findLocatorType(Set<LocatorType> locatorTypes, String type)
