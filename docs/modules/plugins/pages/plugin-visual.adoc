@@ -72,7 +72,7 @@ include::partial$establish.adoc[]
 
 Steps to establish baseline:
 
-. Run step `When I ESTABLISH baseline with `name``
+. Run step `When I ESTABLISH baseline with name `name``
 . Open report
 
 image::report_establish.png[Allure report with visual check on establish]
@@ -87,7 +87,7 @@ include::partial$compare-against.adoc[]
 
 Steps to compare baseline:
 
-. Run step `When I COMPARE_AGAINST baseline with `name``
+. Run step `When I COMPARE_AGAINST baseline with name `name``
 . Open report
 
 image::report_compare.png[Allure report with visual check on compare]
@@ -276,7 +276,7 @@ Establishes baseline or compares against existing one.
 
 [source,gherkin]
 ----
-When I $actionType baseline with `$name`
+When I $actionType baseline with name `$name`
 ----
 
 * `actionType` - {visual-testing-actions}
@@ -285,7 +285,7 @@ When I $actionType baseline with `$name`
 .Perform simple visual check on compare
 [source,gherkin]
 ----
-When I COMPARE_AGAINST baseline with `test`
+When I COMPARE_AGAINST baseline with name `test`
 ----
 
 === Run visual test with specified configuration
@@ -294,7 +294,7 @@ Establishes baseline or compares against existing one using the specified config
 
 [source,gherkin]
 ----
-When I $actionType baseline with `$name` using screenshot configuration:$screenshotConfiguration
+When I $actionType baseline with name `$name` using screenshot configuration:$screenshotConfiguration
 ----
 
 * `actionType` - The {visual-testing-actions}.
@@ -308,7 +308,7 @@ include::partial$mobile-screenshot-configuration.adoc[]
 .Perform visual check on establish with specified configuration
 [source,gherkin]
 ----
-When I ESTABLISH baseline with `test` using screenshot configuration:
+When I ESTABLISH baseline with name `test` using screenshot configuration:
 |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|
 |By.xpath(.//header)|100           |100           |CEILING       |
 ----
@@ -319,7 +319,7 @@ Establishes baseline or compares against existing one using the ignoring option.
 
 [source,gherkin]
 ----
-When I $actionType baseline with `$name` ignoring:$ignoredElements
+When I $actionType baseline with name `$name` ignoring:$ignoredElements
 ----
 
 * `actionType` - {visual-testing-actions}
@@ -340,7 +340,7 @@ Establishes baseline or compares against existing one using the ignoring option 
 
 [source,gherkin]
 ----
-When I $actionType baseline with `$name` ignoring:$ignoredElements using screenshot configuration:$screenshotConfiguration
+When I $actionType baseline with name `$name` ignoring:$ignoredElements using screenshot configuration:$screenshotConfiguration
 ----
 
 * `$actionType` - The {visual-testing-actions}.
@@ -355,7 +355,7 @@ include::partial$mobile-screenshot-configuration.adoc[]
 .Perform visual check on establish with ignoring options and specified configuration
 [source,gherkin]
 ----
-When I ESTABLISH baseline with `test` ignoring:
+When I ESTABLISH baseline with name `test` ignoring:
 |ELEMENT            |AREA                  |ACCEPTABLE_DIFF_PERCENTAGE|
 |By.xpath(.//header)|By.cssSelector(footer)|5                         |
 using screenshot configuration:

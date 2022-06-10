@@ -68,7 +68,7 @@ public class VisualSteps extends AbstractVisualSteps
      * @param actionType ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
      * @param name of baseline
      */
-    @When("I $actionType baseline with `$name`")
+    @When("I $actionType baseline with name `$name`")
     public void runVisualTests(VisualActionType actionType, String name)
     {
         performVisualAction(() -> visualCheckFactory.create(name, actionType));
@@ -83,7 +83,7 @@ public class VisualSteps extends AbstractVisualSteps
      * |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|<br>
      * |By.xpath(.//header)|100           |100           |CEILING       |
      */
-    @When("I $actionType baseline with `$name` using screenshot configuration:$screenshotConfiguration")
+    @When("I $actionType baseline with name `$name` using screenshot configuration:$screenshotConfiguration")
     public void runVisualTests(VisualActionType actionType, String name,
             ScreenshotConfiguration screenshotConfiguration)
     {
@@ -112,12 +112,12 @@ public class VisualSteps extends AbstractVisualSteps
      * @param actionType ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
      * @param name of baseline
      * @param checkSettings examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE`
-     *                      or `REQUIRED_DIFF_PERCANTAGE`<br>
+     *                      or `REQUIRED_DIFF_PERCENTAGE`<br>
      * Example:<br>
      * |ELEMENT            |AREA                  |<br>
      * |By.xpath(.//header)|By.cssSelector(footer)|
      */
-    @When("I $actionType baseline with `$name` ignoring:$checkSettings")
+    @When("I $actionType baseline with name `$name` ignoring:$checkSettings")
     public void runVisualTests(VisualActionType actionType, String name, ExamplesTable checkSettings)
     {
         runVisualTests(() -> visualCheckFactory.create(name, actionType), checkSettings);
@@ -137,7 +137,7 @@ public class VisualSteps extends AbstractVisualSteps
      * |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|<br>
      * |By.xpath(.//header)|100           |100           |CEILING       |
      */
-    @When(value = "I $actionType baseline with `$name` ignoring:$checkSettings using"
+    @When(value = "I $actionType baseline with name `$name` ignoring:$checkSettings using"
             + " screenshot configuration:$screenshotConfiguration", priority = 1)
     public void runVisualTests(VisualActionType actionType, String name, ExamplesTable checkSettings,
             ScreenshotConfiguration screenshotConfiguration)
