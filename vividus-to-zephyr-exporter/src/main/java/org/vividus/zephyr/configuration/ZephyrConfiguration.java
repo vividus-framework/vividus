@@ -26,7 +26,7 @@ public class ZephyrConfiguration
     private String versionId;
     private String cycleId;
     private String folderId;
-    private Map<TestCaseStatus, String> testStatusPerZephyrMapping;
+    private Map<TestCaseStatus, String> testStatusPerZephyrStatusMapping;
 
     public void setProjectId(String projectId)
     {
@@ -48,9 +48,9 @@ public class ZephyrConfiguration
         this.folderId = folderId;
     }
 
-    public void setTestStatusPerZephyrMapping(Map<TestCaseStatus, String> statusMap)
+    public void setTestStatusPerZephyrStatusMapping(Map<TestCaseStatus, String> statusMap)
     {
-        this.testStatusPerZephyrMapping = statusMap;
+        this.testStatusPerZephyrStatusMapping = statusMap;
     }
 
     public String getProjectId()
@@ -73,8 +73,8 @@ public class ZephyrConfiguration
         return folderId;
     }
 
-    public Map<TestCaseStatus, String> getTestStatusPerZephyrMapping()
+    public Map<TestCaseStatus, String> getTestStatusPerZephyrStatusMapping()
     {
-        return testStatusPerZephyrMapping;
+        return testStatusPerZephyrStatusMapping;
     }
 }
