@@ -22,9 +22,11 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -69,8 +71,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.azure.storage.StorageAccountEndpoint;
 import org.vividus.context.VariableContext;
 import org.vividus.steps.DataWrapper;
 import org.vividus.steps.StringComparisonRule;
@@ -91,13 +93,29 @@ class BlobStorageStepsTests
     private static final String KEY = "KEY";
     private static final String DATA = "data";
     private static final byte[] BYTES = DATA.getBytes(StandardCharsets.UTF_8);
+    private static final String ERROR_ON_MISSING_STORAGE_ACCOUNT = "Storage account with key '%s' is not configured "
+            + "in properties";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(BlobStorageSteps.class);
 
-    @Mock private PropertyMappedCollection<String> storageAccountEndpoints;
+    @Mock private PropertyMappedCollection<StorageAccountEndpoint> storageAccountEndpoints;
     @Mock private VariableContext variableContext;
     @Mock private JsonUtils jsonUtils;
     @Mock private TokenCredential tokenCredential;
+
+    @Test
+    void shouldFailWhenBlobServiceEndpointIsNotConfiguredInProperties()
+    {
+        var storageAccountEndpoint = new StorageAccountEndpoint();
+        storageAccountEndpoint.setBlobService(null);
+        when(storageAccountEndpoints.get(KEY, ERROR_ON_MISSING_STORAGE_ACCOUNT, KEY)).thenReturn(
+                storageAccountEndpoint);
+        var steps = new BlobStorageSteps(storageAccountEndpoints, null, null, null);
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> steps.downloadBlob(BLOB, CONTAINER, KEY, SCOPES, VARIABLE));
+        assertEquals("Blob Service endpoint is not configured for storage account with key 'KEY' in properties",
+                exception.getMessage());
+    }
 
     @Test
     void shouldRetrieveBlobServiceProperties()
@@ -119,7 +137,7 @@ class BlobStorageStepsTests
         runWithClient((steps, client) ->
         {
             BlobClient blobClient = mockBlobClient(client);
-            Mockito.doNothing().when(blobClient).downloadStream(argThat(s ->
+            doNothing().when(blobClient).downloadStream(argThat(s ->
             {
                 try
                 {
@@ -306,8 +324,10 @@ class BlobStorageStepsTests
     {
         BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
         String endpoint = "endpoint";
-        when(storageAccountEndpoints.get(KEY,
-                "Storage account with key '%s' is not configured in properties", KEY)).thenReturn(endpoint);
+        var storageAccountEndpoint = new StorageAccountEndpoint();
+        storageAccountEndpoint.setBlobService(endpoint);
+        when(storageAccountEndpoints.get(KEY, ERROR_ON_MISSING_STORAGE_ACCOUNT, KEY)).thenReturn(
+                storageAccountEndpoint);
         try (MockedConstruction<BlobServiceClientBuilder> serviceClientBuilder =
                 mockConstruction(BlobServiceClientBuilder.class, (mock, context) -> {
                     when(mock.credential(tokenCredential)).thenReturn(mock);
