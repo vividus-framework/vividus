@@ -17,11 +17,11 @@
         </bean>
 
         <bean id="scenario" class="org.vividus.visual.screenshot.ScenarioBasedIndexer" />
-
-        <bean id="visualCheckFactory" class="org.vividus.visual.VisualCheckFactory" >
+        <bean id="abstractVisualCheckFactory" class="org.vividus.visual.AbstractVisualCheckFactory" abstract="true">
             <constructor-arg index="0" ref="screenshotParametersFactory" />
             <property name="screenshotIndexer" value="${ui.visual.indexer}" />
         </bean>
+        <bean id="visualCheckFactory" class="org.vividus.visual.VisualCheckFactory" parent="abstractVisualCheckFactory"/>
 
         <util:list id="stepBeanNames-Visual-Hooks">
             <idref bean="scenario" />

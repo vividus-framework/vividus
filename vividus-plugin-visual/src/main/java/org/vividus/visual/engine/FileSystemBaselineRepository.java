@@ -35,7 +35,7 @@ import org.vividus.util.ResourceUtils;
 
 import ru.yandex.qatools.ashot.Screenshot;
 
-public class FileSystemBaselineRepository implements IBaselineRepository
+public class FileSystemBaselineRepository implements BaselineRepository
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemBaselineRepository.class);
 

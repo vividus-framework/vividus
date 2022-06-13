@@ -30,7 +30,7 @@ import org.vividus.selenium.screenshot.ScreenshotDebugger;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.screenshot.ScreenshotParameters;
-import org.vividus.visual.model.VisualCheck;
+import org.vividus.visual.model.AbstractVisualCheck;
 
 import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.coordinates.Coords;
@@ -59,7 +59,7 @@ public class AshotScreenshotProvider implements ScreenshotProvider
     }
 
     @Override
-    public Screenshot take(VisualCheck visualCheck)
+    public Screenshot take(AbstractVisualCheck visualCheck)
     {
         Screenshot screenshot = ashotScreenshotTaker.takeAshotScreenshot(visualCheck.getSearchContext(),
                 visualCheck.getScreenshotParameters());

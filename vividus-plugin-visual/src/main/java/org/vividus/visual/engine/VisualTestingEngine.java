@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Base64;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -42,19 +43,20 @@ public class VisualTestingEngine implements IVisualTestingEngine
     private static final int SCALE = 3;
 
     private final ScreenshotProvider screenshotProvider;
-    private final IBaselineRepository baselineRepository;
     private final DiffMarkupPolicyFactory diffMarkupPolicyFactory;
+    private final Map<String, BaselineRepository> baselineRepositories;
 
     private double acceptableDiffPercentage;
     private double requiredDiffPercentage;
     private boolean overrideBaselines;
+    private String baselineRepository;
 
-    public VisualTestingEngine(ScreenshotProvider screenshotProvider, IBaselineRepository baselineRepository,
-            DiffMarkupPolicyFactory diffMarkupPolicyFactory)
+    public VisualTestingEngine(ScreenshotProvider screenshotProvider, DiffMarkupPolicyFactory diffMarkupPolicyFactory,
+            Map<String, BaselineRepository> baselineRepositories)
     {
         this.screenshotProvider = screenshotProvider;
-        this.baselineRepository = baselineRepository;
         this.diffMarkupPolicyFactory = diffMarkupPolicyFactory;
+        this.baselineRepositories = baselineRepositories;
     }
 
     @Override
@@ -63,7 +65,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
         VisualCheckResult comparisonResult = new VisualCheckResult(visualCheck);
         Screenshot checkpoint = getCheckpointScreenshot(visualCheck);
         comparisonResult.setCheckpoint(imageToBase64(checkpoint.getImage()));
-        baselineRepository.saveBaseline(checkpoint, visualCheck.getBaselineName());
+        getBaselineRepository(visualCheck).saveBaseline(checkpoint, visualCheck.getBaselineName());
         return comparisonResult;
     }
 
@@ -78,7 +80,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
         VisualCheckResult comparisonResult = new VisualCheckResult(visualCheck);
         Screenshot checkpoint = getCheckpointScreenshot(visualCheck);
         comparisonResult.setCheckpoint(imageToBase64(checkpoint.getImage()));
-        Optional<Screenshot> baseline = baselineRepository.getBaseline(visualCheck.getBaselineName());
+        Optional<Screenshot> baseline = getBaselineRepository(visualCheck).getBaseline(visualCheck.getBaselineName());
         if (baseline.isPresent())
         {
             Screenshot baselineScreenshot = baseline.get();
@@ -100,7 +102,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
                   .log("The {} visual difference percentage is {}% , but actual was {}%");
             if (overrideBaselines)
             {
-                baselineRepository.saveBaseline(checkpoint, visualCheck.getBaselineName());
+                getBaselineRepository(visualCheck).saveBaseline(checkpoint, visualCheck.getBaselineName());
             }
         }
         else
@@ -109,6 +111,18 @@ public class VisualTestingEngine implements IVisualTestingEngine
         }
 
         return comparisonResult;
+    }
+
+    private BaselineRepository getBaselineRepository(VisualCheck visualCheck)
+    {
+        String baselineRepositoryName = visualCheck.getBaselineRepository().orElse(baselineRepository);
+        BaselineRepository baselineRepositoryToUse = baselineRepositories.get(baselineRepositoryName);
+        if (baselineRepositoryToUse == null)
+        {
+            throw new IllegalStateException("Unable to find baseline repository with name: " + baselineRepositoryName
+                    + ". Available baseline repositories: " + baselineRepositories.keySet());
+        }
+        return baselineRepositoryToUse;
     }
 
     private double calculateDiffPercentage(VisualCheck visualCheck, boolean inequalityCheck)
@@ -146,5 +160,10 @@ public class VisualTestingEngine implements IVisualTestingEngine
     public void setRequiredDiffPercentage(double requiredDiffPercentage)
     {
         this.requiredDiffPercentage = requiredDiffPercentage;
+    }
+
+    public void setBaselineRepository(String baselineRepository)
+    {
+        this.baselineRepository = baselineRepository;
     }
 }

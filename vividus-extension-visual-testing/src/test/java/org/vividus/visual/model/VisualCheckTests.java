@@ -17,36 +17,24 @@
 package org.vividus.visual.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalDouble;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.vividus.ui.screenshot.ScreenshotParameters;
 
 class VisualCheckTests
 {
     @Test
-    void shouldHaveDefaultParameters()
+    void shouldUseCorrectDefaultValues()
     {
-        var visualCheck = new VisualCheck();
-        Assertions.assertAll(
-            () -> assertEquals(OptionalDouble.empty(), visualCheck.getAcceptableDiffPercentage()),
-            () -> assertEquals(OptionalDouble.empty(), visualCheck.getRequiredDiffPercentage()),
-            () -> assertEquals(Map.of(), visualCheck.getElementsToIgnore()),
-            () -> assertEquals(Optional.empty(), visualCheck.getScreenshotParameters()));
-    }
-
-    @Test
-    void shouldVerifySetters()
-    {
-        var visualCheck = new VisualCheck();
-        var diff = OptionalDouble.of(1);
-        visualCheck.setRequiredDiffPercentage(diff);
-        visualCheck.setAcceptableDiffPercentage(diff);
-        Assertions.assertAll(
-            () -> assertEquals(diff, visualCheck.getAcceptableDiffPercentage()),
-            () -> assertEquals(diff, visualCheck.getRequiredDiffPercentage()));
+        var visualCheck = new AbstractVisualCheck() { };
+        assertEquals(Map.of(), visualCheck.getElementsToIgnore());
+        assertEquals(Optional.empty(), visualCheck.getScreenshotParameters());
+        var parameters = Optional.of(mock(ScreenshotParameters.class));
+        visualCheck.setScreenshotParameters(parameters);
+        assertEquals(parameters, visualCheck.getScreenshotParameters());
     }
 }

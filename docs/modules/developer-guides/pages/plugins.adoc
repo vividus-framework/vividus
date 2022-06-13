@@ -184,3 +184,53 @@ case will be available out of the box:
 Scenario: Validate with help of the custom dynamic variable
 Then `${myDynamicVaribale}` is equal to `my app specific value`
 ----
+
+== Baseline repositories
+
+Baseline reposity is a source of the baseline images used to perform visual checks in xref:plugins:plugin-visual.adoc[visual testing plugin]
+
+In order to create and register own baselines repository the following steps should be done
+
+. Create a new class that implements
+https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-visual/src/main/java/org/vividus/visual/engine/BaselineRepository.java[`org.vividus.visual.engine.BaselineRepository`]:
++
+./src/main/java/com/mycompany/visual/engine/AzureBaselineRepository.java
+[source,java]
+----
+package com.mycompany.visual.engine;
+
+import org.vividus.visual.engine.BaselineRepository;
+
+public class AzureBaselineRepository implements BaselineRepository
+{
+    @Override
+    public Optional<Screenshot> getBaseline(String baselineName) throws IOException
+    {
+        // gets the baseline screenshot
+    }
+
+    @Override
+    public void saveBaseline(Screenshot toSave, String baselineName) throws IOException
+    {
+        // saves the baseline screenshot
+    }
+
+}
+----
+
+. Register Spring bean where `id` is the name of the baseline repository which will
+be used in visual testing plugin:
++
+./src/main/resources/spring.xml
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="azure" class="com.mycompany.visual.engine.AzureBaselineRepository"/>
+
+</beans>
+----

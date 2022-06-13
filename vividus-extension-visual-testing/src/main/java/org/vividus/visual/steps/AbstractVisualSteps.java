@@ -24,8 +24,8 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.screenshot.ScreenshotPrecondtionMismatchException;
+import org.vividus.visual.model.AbstractVisualCheck;
 import org.vividus.visual.model.VisualActionType;
-import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 
 public abstract class AbstractVisualSteps
@@ -42,7 +42,7 @@ public abstract class AbstractVisualSteps
         this.softAssert = softAssert;
     }
 
-    protected <T extends VisualCheck> void execute(
+    protected <T extends AbstractVisualCheck> void execute(
             Function<T, VisualCheckResult> checkResultProvider,
             Supplier<T> visualCheckFactory, String templateName)
     {
