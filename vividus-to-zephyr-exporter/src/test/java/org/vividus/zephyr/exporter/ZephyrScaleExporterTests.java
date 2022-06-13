@@ -76,7 +76,7 @@ class ZephyrScaleExporterTests
         Map<TestCaseStatus, String> map = new EnumMap<>(TestCaseStatus.class);
         map.put(TestCaseStatus.SKIPPED, "-1");
         map.put(TestCaseStatus.PASSED, PASSED_STATUS_ID);
-        configuration.setTestStatusPerZephyrMapping(map);
+        configuration.setTestStatusPerZephyrStatusMapping(map);
         return configuration;
     }
 }

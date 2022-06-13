@@ -21,9 +21,7 @@ import java.io.IOException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.vividus.jira.JiraConfigurationException;
-import org.vividus.jira.JiraFacade;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
-import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.facade.IZephyrFacade;
 import org.vividus.zephyr.model.ExecutionStatus;
 import org.vividus.zephyr.model.TestCase;
@@ -32,12 +30,11 @@ import org.vividus.zephyr.parser.TestCaseParser;
 
 @Configuration
 @ConditionalOnProperty(value = "zephyr.exporter.api-type", havingValue = "SCALE")
-public class ZephyrScaleExporter extends ZephyrExporter
+public class ZephyrScaleExporter extends AbstractZephyrExporter
 {
-    public ZephyrScaleExporter(JiraFacade jiraFacade, IZephyrFacade zephyrFacade,
-                               TestCaseParser testCaseParser, ZephyrExporterProperties zephyrExporterProperties)
+    public ZephyrScaleExporter(IZephyrFacade zephyrFacade, TestCaseParser testCaseParser)
     {
-        super(jiraFacade, zephyrFacade, testCaseParser, zephyrExporterProperties);
+        super(zephyrFacade, testCaseParser);
     }
 
     @Override
@@ -47,7 +44,7 @@ public class ZephyrScaleExporter extends ZephyrExporter
         ZephyrExecution execution = new ZephyrExecution(configuration, testCase.getKey(), testCase.getStatus());
         getZephyrFacade().createExecution(testCase.getKey());
         String executionBody = getObjectMapper().writeValueAsString(new ExecutionStatus(
-                    configuration.getTestStatusPerZephyrMapping().get(execution.getTestCaseStatus())));
+                    configuration.getTestStatusPerZephyrStatusMapping().get(execution.getTestCaseStatus())));
         getZephyrFacade().updateExecutionStatus(testCase.getKey(), executionBody);
     }
 }

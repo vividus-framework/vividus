@@ -22,6 +22,11 @@ include::partial$jira-configuration.adoc[]
 |false
 |The type of Jira API (`SCALE`, `SQUAD`). The `SCALE` type is selected by default.
 
+Zephyr Squad (formerly "Zephyr for Jira") provides base functionality for test case management easy to start, easy to use. https://smartbear.com/test-management/zephyr-squad/[More info]
+
+Zephyr Scale (formerly "Test Management for Jira") provides advanced test case management capabilities, such as cross-project test management solution with
+advanced test planning, reporting, and reusability features. https://smartbear.com/test-management/zephyr-scale/[More info]
+
 |`zephyr.exporter.jira-instance-key`
 |false
 |The key of the configured JIRA instance, in case of missing value it will be evaluated automatically based on issue keys being exported
@@ -55,11 +60,6 @@ include::partial$jira-configuration.adoc[]
 |Folder name where new test executions should be created
 
 |===
-
-NOTE: Zephyr Squad (formerly "Zephyr for Jira") provides base functionality for test case management easy to start, easy to use. https://smartbear.com/test-management/zephyr-squad/[More info]
-
-NOTE: Zephyr Scale (formerly "Test Management for Jira") provides advanced test case management capabilities, such as cross-project test management solution with
-advanced test planning, reporting, and reusability features. https://smartbear.com/test-management/zephyr-scale/[More info]
 
 == Zephyr Execution Status Mapping
 

@@ -17,14 +17,7 @@
 package org.vividus.zephyr.exporter;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.OptionalInt;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +28,6 @@ import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
-import org.vividus.zephyr.databind.TestCaseDeserializer;
 import org.vividus.zephyr.facade.IZephyrFacade;
 import org.vividus.zephyr.model.ExecutionStatus;
 import org.vividus.zephyr.model.TestCase;
@@ -44,39 +36,19 @@ import org.vividus.zephyr.parser.TestCaseParser;
 
 @Configuration
 @ConditionalOnProperty(value = "zephyr.exporter.api-type", havingValue = "SQUAD")
-public class ZephyrExporter
+public class ZephyrSquadExporter extends AbstractZephyrExporter
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ZephyrExporter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZephyrSquadExporter.class);
 
     private final JiraFacade jiraFacade;
+    private final ZephyrExporterProperties zephyrExporterProperties;
 
-    private IZephyrFacade zephyrFacade;
-    private TestCaseParser testCaseParser;
-    private ZephyrExporterProperties zephyrExporterProperties;
-    private final ObjectMapper objectMapper;
-
-    public ZephyrExporter(JiraFacade jiraFacade, IZephyrFacade zephyrFacade, TestCaseParser testCaseParser,
-                          ZephyrExporterProperties zephyrExporterProperties)
+    public ZephyrSquadExporter(JiraFacade jiraFacade, IZephyrFacade zephyrFacade, TestCaseParser testCaseParser,
+                               ZephyrExporterProperties zephyrExporterProperties)
     {
+        super(zephyrFacade, testCaseParser);
         this.jiraFacade = jiraFacade;
-        this.zephyrFacade = zephyrFacade;
-        this.testCaseParser = testCaseParser;
         this.zephyrExporterProperties = zephyrExporterProperties;
-        this.objectMapper = JsonMapper.builder()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
-                .build()
-                .registerModule(new SimpleModule().addDeserializer(TestCase.class, new TestCaseDeserializer()));
-    }
-
-    public void exportResults() throws IOException, JiraConfigurationException
-    {
-        List<TestCase> testCasesForImporting = testCaseParser.createTestCases(objectMapper);
-        ZephyrConfiguration configuration = getZephyrFacade().prepareConfiguration();
-        for (TestCase testCase : testCasesForImporting)
-        {
-            exportTestExecution(testCase, configuration);
-        }
     }
 
     public void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
@@ -92,13 +64,14 @@ public class ZephyrExporter
         }
         else
         {
-            String createExecution = objectMapper.writeValueAsString(execution);
+            String createExecution = getObjectMapper().writeValueAsString(execution);
             executionId = OptionalInt.of(getZephyrFacade().createExecution(createExecution));
         }
         if (executionId.isPresent())
         {
-            String executionBody = objectMapper.writeValueAsString(new ExecutionStatus(
-                String.valueOf(configuration.getTestStatusPerZephyrMapping().get(execution.getTestCaseStatus()))));
+            String executionBody = getObjectMapper().writeValueAsString(new ExecutionStatus(
+                String.valueOf(configuration.getTestStatusPerZephyrStatusMapping()
+                        .get(execution.getTestCaseStatus()))));
             getZephyrFacade().updateExecutionStatus(String.valueOf(executionId.getAsInt()), executionBody);
         }
         else
@@ -106,15 +79,5 @@ public class ZephyrExporter
             LOGGER.atInfo().addArgument(testCase::getKey).log("Test case result for {} was not exported, "
                     + "because execution does not exist");
         }
-    }
-
-    public IZephyrFacade getZephyrFacade()
-    {
-        return zephyrFacade;
-    }
-
-    protected ObjectMapper getObjectMapper()
-    {
-        return objectMapper;
     }
 }

@@ -44,7 +44,7 @@ import org.vividus.zephyr.model.TestCaseStatus;
 
 @Configuration
 @ConditionalOnProperty(value = "zephyr.exporter.api-type", havingValue = "SQUAD")
-public class ZephyrFacade implements IZephyrFacade
+public class ZephyrSquadFacade implements IZephyrFacade
 {
     private static final String ZAPI_ENDPOINT = "/rest/zapi/latest/";
 
@@ -53,8 +53,9 @@ public class ZephyrFacade implements IZephyrFacade
     private final ZephyrExporterConfiguration zephyrExporterConfiguration;
     private final ZephyrExporterProperties zephyrExporterProperties;
 
-    public ZephyrFacade(JiraFacade jiraFacade, JiraClientProvider jiraClientProvider,
-            ZephyrExporterConfiguration zephyrExporterConfiguration, ZephyrExporterProperties zephyrExporterProperties)
+    public ZephyrSquadFacade(JiraFacade jiraFacade, JiraClientProvider jiraClientProvider,
+                             ZephyrExporterConfiguration zephyrExporterConfiguration,
+                             ZephyrExporterProperties zephyrExporterProperties)
     {
         this.jiraFacade = jiraFacade;
         this.jiraClientProvider = jiraClientProvider;
@@ -101,7 +102,7 @@ public class ZephyrFacade implements IZephyrFacade
         }
 
         Map<TestCaseStatus, String> statusIdMap = getExecutionStatuses();
-        zephyrConfiguration.setTestStatusPerZephyrMapping(statusIdMap);
+        zephyrConfiguration.setTestStatusPerZephyrStatusMapping(statusIdMap);
 
         return zephyrConfiguration;
     }

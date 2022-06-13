@@ -115,8 +115,8 @@ class ZephyrScaleFacadeTests
         ZephyrConfiguration actualConfiguration = zephyrScaleFacade.prepareConfiguration();
         assertEquals(PROJECT_ID, actualConfiguration.getProjectId());
         assertEquals(CYCLE_ID, actualConfiguration.getCycleId());
-        assertEquals(1, actualConfiguration.getTestStatusPerZephyrMapping().size());
-        assertEquals(TEST, actualConfiguration.getTestStatusPerZephyrMapping().get(TestCaseStatus.PASSED));
+        assertEquals(1, actualConfiguration.getTestStatusPerZephyrStatusMapping().size());
+        assertEquals(TEST, actualConfiguration.getTestStatusPerZephyrStatusMapping().get(TestCaseStatus.PASSED));
     }
 
     @Test
@@ -137,8 +137,8 @@ class ZephyrScaleFacadeTests
         assertEquals(PROJECT_ID, actualConfiguration.getProjectId());
         assertEquals(CYCLE_ID, actualConfiguration.getCycleId());
         assertNull(actualConfiguration.getFolderId());
-        assertEquals(1, actualConfiguration.getTestStatusPerZephyrMapping().size());
-        assertEquals(TEST, actualConfiguration.getTestStatusPerZephyrMapping().get(TestCaseStatus.PASSED));
+        assertEquals(1, actualConfiguration.getTestStatusPerZephyrStatusMapping().size());
+        assertEquals(TEST, actualConfiguration.getTestStatusPerZephyrStatusMapping().get(TestCaseStatus.PASSED));
     }
 
     @Test
