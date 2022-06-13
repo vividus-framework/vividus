@@ -238,6 +238,27 @@ class VisualTestingEngineTests
     }
 
     @Test
+    void shouldOverrideBaselineDuringComparisonAction() throws IOException
+    {
+        initObjectUnderTest();
+        visualTestingEngine.setOverrideBaselines(true);
+        when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
+        VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
+        var finalImage = mockGetCheckpointScreenshot(visualCheck, BASELINE);
+        VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
+        Assertions.assertAll(
+                () -> assertEquals(BASELINE_BASE64, checkResult.getBaseline()),
+                () -> assertEquals(BASELINE, checkResult.getBaselineName()),
+                () -> assertEquals(BASELINE_BASE64, checkResult.getCheckpoint()),
+                () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
+                () -> assertEquals(BASELINE_BASE64, checkResult.getDiff()),
+                () -> assertTrue(checkResult.isPassed()));
+        verify(baselineRepository).saveBaseline(argThat(s -> finalImage.equals(s.getImage())), eq(BASELINE));
+        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, BigDecimal.valueOf(0d),
+                new BigDecimal(0).setScale(3)))));
+    }
+
+    @Test
     void shouldThrowAnExceptionIfInvalidBaselineRepositorySet() throws IOException
     {
         initObjectUnderTest(Map.of(MEMORY, baselineRepository));
