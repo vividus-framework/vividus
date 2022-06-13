@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -177,6 +179,26 @@ class ImageVisualTestingServiceTests
             () -> assertTrue(result.isPassed())
         );
         verifyNoInteractions(httpClient);
+    }
+
+    @Test
+    void shouldLogWarningWhenUrlUnauthorized() throws IOException
+    {
+        ApplitoolsVisualCheck applitoolsVisualCheck = createCheck();
+        Eyes eyes = mockEyes(applitoolsVisualCheck);
+        mockTestResult(eyes);
+        mockScreenshot(applitoolsVisualCheck);
+        HttpResponse response = mock(HttpResponse.class);
+        when(httpClient.doHttpGet(BASELINE_IMAGE_URI)).thenReturn(response);
+        when(response.getStatusCode()).thenReturn(HttpStatus.SC_UNAUTHORIZED);
+
+        imageVisualTestingService.run(applitoolsVisualCheck);
+
+        assertThat(LOGGER.getLoggingEvents(),
+                is(List.of(LoggingEvent.warn("The \"readApiKey\" property is not set or incorrect. "
+                        + "Checkpoint and baseline images are not available in the attachment. "
+                        + "You can use the \"Step editor\" button to view them on Applitools."))));
+        verify(httpClient).doHttpGet(any(URI.class));
     }
 
     private BufferedImage mockScreenshot(ApplitoolsVisualCheck applitoolsVisualCheck)

@@ -23,14 +23,14 @@
     <#assign hasBaseline = result.baseline?hasContent>
         <h3>Baseline name: ${result.baselineName}</h3>
         <#if compare>
-            <#if hasBaseline>
-                <div class="col-md">
+            <div class="col-md">
+                <#if hasBaseline>
                     <label class="checkbox-inline">
                         <input id="diffCheckBox" type="checkbox" data-toggle="toggle" data-on="Diff" data-off="Checkpoint" data-onstyle="danger" data-offstyle="success">
                     </label>
-                    <@custom_controls />
-                </div>
-            </#if>
+                </#if>
+                <@custom_controls />
+            </div>
             <div class="col-md-6">
                 <p>Baseline</p>
                 <#if hasBaseline>
