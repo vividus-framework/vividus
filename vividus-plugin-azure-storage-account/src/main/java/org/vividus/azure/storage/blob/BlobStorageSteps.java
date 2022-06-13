@@ -41,10 +41,12 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.azure.storage.StorageAccountEndpoint;
 import org.vividus.context.VariableContext;
 import org.vividus.steps.DataWrapper;
 import org.vividus.steps.StringComparisonRule;
@@ -58,12 +60,12 @@ public class BlobStorageSteps
     private static final Logger LOGGER = LoggerFactory.getLogger(BlobStorageSteps.class);
     private static final int DEFAULT_MAX_RESULTS_PER_PAGE = 1000;
 
-    private final PropertyMappedCollection<String> storageAccountEndpoints;
+    private final PropertyMappedCollection<StorageAccountEndpoint> storageAccountEndpoints;
     private final TokenCredential credential;
     private final VariableContext variableContext;
     private final JsonUtils jsonUtils;
 
-    private final LoadingCache<String, BlobServiceClient> blobStorageClients = CacheBuilder.newBuilder()
+    private final LoadingCache<String, BlobServiceClient> blobServiceClients = CacheBuilder.newBuilder()
             .build(new CacheLoader<>()
             {
                 @Override
@@ -73,8 +75,8 @@ public class BlobStorageSteps
                 }
             });
 
-    public BlobStorageSteps(PropertyMappedCollection<String> storageAccountEndpoints, TokenCredential credential,
-            VariableContext variableContext, JsonUtils jsonUtils)
+    public BlobStorageSteps(PropertyMappedCollection<StorageAccountEndpoint> storageAccountEndpoints,
+            TokenCredential credential, VariableContext variableContext, JsonUtils jsonUtils)
     {
         this.storageAccountEndpoints = storageAccountEndpoints;
         this.credential = credential;
@@ -349,9 +351,13 @@ public class BlobStorageSteps
 
     private BlobServiceClient createBlobStorageClient(String storageAccountKey)
     {
-        String endpoint = storageAccountEndpoints.get(storageAccountKey,
+        StorageAccountEndpoint endpoint = storageAccountEndpoints.get(storageAccountKey,
                 "Storage account with key '%s' is not configured in properties", storageAccountKey);
-        return blobStorageClients.getUnchecked(endpoint);
+        String blobServiceEndpoint = endpoint.getBlobService();
+        Validate.isTrue(blobServiceEndpoint != null,
+                "Blob Service endpoint is not configured for storage account with key '%s' in properties",
+                storageAccountKey);
+        return blobServiceClients.getUnchecked(blobServiceEndpoint);
     }
 
     private BlobContainerClient createBlobContainerClient(String containerName, String storageAccountKey)

@@ -8,8 +8,9 @@
 
     <bean id="blobSteps" class="org.vividus.azure.storage.blob.BlobStorageSteps">
         <constructor-arg>
-            <bean factory-bean="propertyParser" factory-method="readValues">
+            <bean factory-bean="propertyMapper" factory-method="readValues">
                 <constructor-arg value="azure.storage-account." />
+                <constructor-arg value="org.vividus.azure.storage.StorageAccountEndpoint" />
             </bean>
         </constructor-arg>
     </bean>
