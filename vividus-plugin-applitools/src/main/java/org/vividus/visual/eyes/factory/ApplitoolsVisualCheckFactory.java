@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,19 @@
 package org.vividus.visual.eyes.factory;
 
 import java.net.URI;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import com.applitools.eyes.MatchLevel;
 
-import org.vividus.visual.IVisualCheckFactory;
+import org.vividus.ui.screenshot.ScreenshotParametersFactory;
+import org.vividus.visual.AbstractVisualCheckFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.model.VisualActionType;
 
-public class ApplitoolsVisualCheckFactory
+public class ApplitoolsVisualCheckFactory extends AbstractVisualCheckFactory<ApplitoolsVisualCheck>
 {
-    private final IVisualCheckFactory visualCheckFactory;
-
     private String executeApiKey;
     private String readApiKey;
     private String hostApp;
@@ -40,15 +40,17 @@ public class ApplitoolsVisualCheckFactory
     private String appName = "Application";
     private String baselineEnvName;
 
-    public ApplitoolsVisualCheckFactory(IVisualCheckFactory visualCheckFactory)
+    @SuppressWarnings("rawtypes")
+    public ApplitoolsVisualCheckFactory(
+        ScreenshotParametersFactory screenshotParametersFactory)
     {
-        this.visualCheckFactory = visualCheckFactory;
+        super(screenshotParametersFactory);
     }
 
     public ApplitoolsVisualCheck create(String batchName, String baselineName, VisualActionType action)
     {
-        ApplitoolsVisualCheck check = visualCheckFactory.create(baselineName, action,
-            (bn, ac) -> new ApplitoolsVisualCheck(batchName, bn, ac));
+        ApplitoolsVisualCheck check = new ApplitoolsVisualCheck(batchName, createIndexedBaseline(baselineName), action);
+        withScreenshotConfiguration(check, Optional.empty());
         check.setExecuteApiKey(executeApiKey);
         check.setReadApiKey(readApiKey);
         check.setBaselineEnvName(baselineEnvName);

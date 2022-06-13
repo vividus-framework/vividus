@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.vividus.visual.screenshot;
 
-import org.vividus.visual.model.VisualCheck;
+import org.vividus.visual.model.AbstractVisualCheck;
 
 import ru.yandex.qatools.ashot.Screenshot;
 
 public interface ScreenshotProvider
 {
-    Screenshot take(VisualCheck visualCheck);
+    Screenshot take(AbstractVisualCheck visualCheck);
 }

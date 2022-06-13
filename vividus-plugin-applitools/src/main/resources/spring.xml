@@ -19,7 +19,7 @@
         <constructor-arg index="2" ref="screenshotParametersFactory" />
     </bean>
 
-    <bean id="applitoolsVisualCheckFactory" class="org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory" >
+    <bean id="applitoolsVisualCheckFactory" class="org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory" parent="abstractVisualCheckFactory">
         <property name="executeApiKey" value="${ui.visual.applitools.execute-api-key}" />
         <property name="readApiKey" value="${ui.visual.applitools.read-api-key}" />
         <property name="hostApp" value="${ui.visual.applitools.host-app}" />

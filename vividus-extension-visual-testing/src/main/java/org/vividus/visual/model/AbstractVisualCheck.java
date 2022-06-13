@@ -18,7 +18,6 @@ package org.vividus.visual.model;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import java.util.Set;
 
 import org.openqa.selenium.SearchContext;
@@ -26,22 +25,20 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.visual.screenshot.IgnoreStrategy;
 
-public class VisualCheck
+public abstract class AbstractVisualCheck
 {
     private String baselineName;
     private VisualActionType action;
-    private OptionalDouble acceptableDiffPercentage = OptionalDouble.empty();
-    private OptionalDouble requiredDiffPercentage = OptionalDouble.empty();
     private Map<IgnoreStrategy, Set<Locator>> elementsToIgnore = Map.of();
     private Optional<ScreenshotParameters> screenshotParameters = Optional.empty();
     private SearchContext searchContext;
 
-    public VisualCheck()
+    protected AbstractVisualCheck()
     {
       // Necessary for JBehave object instantiation;
     }
 
-    public VisualCheck(String baselineName, VisualActionType action)
+    protected AbstractVisualCheck(String baselineName, VisualActionType action)
     {
         this.baselineName = baselineName;
         this.action = action;
@@ -60,16 +57,6 @@ public class VisualCheck
     public void setElementsToIgnore(Map<IgnoreStrategy, Set<Locator>> elementsToIgnore)
     {
         this.elementsToIgnore = elementsToIgnore;
-    }
-
-    public OptionalDouble getAcceptableDiffPercentage()
-    {
-        return acceptableDiffPercentage;
-    }
-
-    public void setAcceptableDiffPercentage(OptionalDouble acceptableDiffPercentage)
-    {
-        this.acceptableDiffPercentage = acceptableDiffPercentage;
     }
 
     public VisualActionType getAction()
@@ -95,15 +82,5 @@ public class VisualCheck
     public void setSearchContext(SearchContext searchContext)
     {
         this.searchContext = searchContext;
-    }
-
-    public OptionalDouble getRequiredDiffPercentage()
-    {
-        return requiredDiffPercentage;
-    }
-
-    public void setRequiredDiffPercentage(OptionalDouble requiredDiffPercentage)
-    {
-        this.requiredDiffPercentage = requiredDiffPercentage;
     }
 }

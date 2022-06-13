@@ -51,8 +51,8 @@ import org.vividus.selenium.screenshot.ScreenshotDebugger;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.util.ResourceUtils;
+import org.vividus.visual.model.AbstractVisualCheck;
 import org.vividus.visual.model.VisualActionType;
-import org.vividus.visual.model.VisualCheck;
 
 import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.coordinates.Coords;
@@ -100,7 +100,7 @@ class AshotScreenshotProviderTests
     void shouldTakeScreenshot()
     {
         SearchContext searchContext = mock(SearchContext.class);
-        VisualCheck visualCheck = mockSearchContext(searchContext);
+        var visualCheck = mockSearchContext(searchContext);
         Screenshot screenshot = mock(Screenshot.class);
         when(searchActions.findElements(aLocator)).thenReturn(List.of());
         when(screenshotTaker.takeAshotScreenshot(searchContext, Optional.empty())).thenReturn(screenshot);
@@ -109,9 +109,9 @@ class AshotScreenshotProviderTests
         verifyNoInteractions(screenshotDebugger);
     }
 
-    private VisualCheck mockSearchContext(SearchContext searchContext)
+    private AbstractVisualCheck mockSearchContext(SearchContext searchContext)
     {
-        VisualCheck visualCheck = new VisualCheck(BASELINE, VisualActionType.ESTABLISH);
+        var visualCheck = new AbstractVisualCheck(BASELINE, VisualActionType.ESTABLISH) { };
         visualCheck.setSearchContext(searchContext);
         return visualCheck;
     }
@@ -125,7 +125,7 @@ class AshotScreenshotProviderTests
                 IgnoreStrategy.AREA, Set.of(bLocator, areaLocator));
 
         SearchContext searchContext = mock(SearchContext.class);
-        VisualCheck visualCheck = mockSearchContext(searchContext);
+        var visualCheck = mockSearchContext(searchContext);
         visualCheck.setElementsToIgnore(stepLevelStrategies);
         screenshotProvider.setIgnoreStrategies(strategies);
         Screenshot screenshot = new Screenshot(loadImage("original"));

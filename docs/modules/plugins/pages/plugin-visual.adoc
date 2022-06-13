@@ -62,6 +62,11 @@ a|`true`
 |`<empty>`
 |The path to folder for saving debug screenshots. For example, `ui.screenshot.debug-directory=C:/temp/debug`
 
+|`ui.visual.baseline-repository`
+|Any available baseline repository name.
+|`filesystem`
+|Allows to override default xref:developer-guides:plugins.adoc#_baseline_repositories[baseline repository].
+
 |===
 
 == How to use
@@ -279,13 +284,32 @@ Establishes baseline or compares against existing one.
 When I $actionType baseline with name `$name`
 ----
 
-* `actionType` - {visual-testing-actions}
-* `name` - name of baseline
+* `$actionType` - The {visual-testing-actions}.
+* `$name` - Then name of baseline.
 
 .Perform simple visual check on compare
 [source,gherkin]
 ----
 When I COMPARE_AGAINST baseline with name `test`
+----
+
+=== Run simple visual test with custom baseline repository
+
+Establishes baseline or compares against existing one using xref:developer-guides:plugins.adoc#_baseline_repositories[baseline repository].
+
+[source,gherkin]
+----
+When I $actionType baseline with name `$name` using repository `$repository`
+----
+
+* `$actionType` - The {visual-testing-actions}.
+* `$name` - The name of baseline.
+* `$repository` - The name of repository. Ony `filesystem` available by the default.
+
+.Perform simple visual check using baseline repository
+[source,gherkin]
+----
+When I COMPARE_AGAINST baseline with name `test` using repository `azure`
 ----
 
 === Run visual test with specified configuration
@@ -297,8 +321,8 @@ Establishes baseline or compares against existing one using the specified config
 When I $actionType baseline with name `$name` using screenshot configuration:$screenshotConfiguration
 ----
 
-* `actionType` - The {visual-testing-actions}.
-* `name` - The name of baseline.
+* `$actionType` - The {visual-testing-actions}.
+* `$name` - The name of baseline.
 * `$screenshotConfiguration` - The screenshot configurations.
 
 include::partial$web-screenshot-configuration.adoc[]
@@ -313,6 +337,33 @@ When I ESTABLISH baseline with name `test` using screenshot configuration:
 |By.xpath(.//header)|100           |100           |CEILING       |
 ----
 
+=== Run visual test with specified configuration and baseline repository
+
+Establishes baseline or compares against existing one using the specified configuration and xref:developer-guides:plugins.adoc#_baseline_repositories[baseline repository].
+
+[source,gherkin]
+----
+When I $actionType baseline with name `$name` using repository `$repository` and screenshot configuration:$screenshotConfiguration
+----
+
+* `$actionType` - The {visual-testing-actions}.
+* `$name` - The name of baseline.
+* `$repository` - The name of repository. Ony `filesystem` available by the default.
+* `$screenshotConfiguration` - The screenshot configurations.
+
+include::partial$web-screenshot-configuration.adoc[]
+
+include::partial$mobile-screenshot-configuration.adoc[]
+
+.Perform visual check on establish with specified configuration and baseline repository
+[source,gherkin]
+----
+When I ESTABLISH baseline with name `test` using repository `azure` and screenshot configuration:
+|scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|
+|By.xpath(.//header)|100           |100           |CEILING       |
+----
+
+
 === Run visual test with ignoring option
 
 Establishes baseline or compares against existing one using the ignoring option.
@@ -322,14 +373,36 @@ Establishes baseline or compares against existing one using the ignoring option.
 When I $actionType baseline with name `$name` ignoring:$ignoredElements
 ----
 
-* `actionType` - {visual-testing-actions}
-* `name` - name of baseline
-* `checkSettings` - examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`
+* `$actionType` - {visual-testing-actions}.
+* `$name` - Then name of baseline.
+* `$checkSettings` - The examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`.
 
 .Perform visual check on compare with ignoring options
 [source,gherkin]
 ----
 When I COMPARE_AGAINST baseline with `test` ignoring:
+|ELEMENT            |AREA                  |ACCEPTABLE_DIFF_PERCENTAGE|
+|By.xpath(.//header)|By.cssSelector(footer)|5                         |
+----
+
+=== Run visual test with ignoring option and baseline repository
+
+Establishes baseline or compares against existing one using the ignoring option and xref:developer-guides:plugins.adoc#_baseline_repositories[baseline repository].
+
+[source,gherkin]
+----
+When I $actionType baseline with name `$name` using repository `$repository` and ignoring:$ignoredElements
+----
+
+* `$actionType` - The {visual-testing-actions}.
+* `$name` - The name of baseline.
+* `$repository` - The name of repository. Ony `filesystem` available by the default.
+* `$checkSettings` - The examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`.
+
+.Perform visual check on compare with ignoring options and baseline repository
+[source,gherkin]
+----
+When I COMPARE_AGAINST baseline with `test` using repository `azure` and ignoring:
 |ELEMENT            |AREA                  |ACCEPTABLE_DIFF_PERCENTAGE|
 |By.xpath(.//header)|By.cssSelector(footer)|5                         |
 ----
@@ -359,6 +432,36 @@ When I ESTABLISH baseline with name `test` ignoring:
 |ELEMENT            |AREA                  |ACCEPTABLE_DIFF_PERCENTAGE|
 |By.xpath(.//header)|By.cssSelector(footer)|5                         |
 using screenshot configuration:
+|scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|
+|By.xpath(.//header)|100           |100           |CEILING       |
+----
+
+=== Run visual test with ignoring option and specified configuration and baseline repository
+
+Establishes baseline or compares against existing one using the ignoring option, the specified configuration, and xref:developer-guides:plugins.adoc#_baseline_repositories[baseline repository]..
+
+[source,gherkin]
+----
+When I $actionType baseline with name `$name` using repository `$repository` and ignoring:$ignoredElements and screenshot configuration:$screenshotConfiguration
+----
+
+* `$actionType` - The {visual-testing-actions}.
+* `$name` - The name of baseline.
+* `$repository` - The name of repository. Ony `filesystem` available by the default.
+* `$checkSettings` - The examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`.
+* `$screenshotConfiguration` - The screenshot configurations.
+
+include::partial$web-screenshot-configuration.adoc[]
+
+include::partial$mobile-screenshot-configuration.adoc[]
+
+.Perform visual check on establish with ignoring options and specified configuration and baseline repository
+[source,gherkin]
+----
+When I ESTABLISH baseline with name `test` using repository `azure` and ignoring:
+|ELEMENT            |AREA                  |ACCEPTABLE_DIFF_PERCENTAGE|
+|By.xpath(.//header)|By.cssSelector(footer)|5                         |
+and screenshot configuration:
 |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|
 |By.xpath(.//header)|100           |100           |CEILING       |
 ----

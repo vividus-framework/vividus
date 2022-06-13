@@ -53,10 +53,10 @@ public class VisualSteps extends AbstractVisualSteps
     private static final String REQUIRED_DIFF_PERCENTAGE_COLUMN_NAME = "REQUIRED_DIFF_PERCENTAGE";
 
     private final IVisualTestingEngine visualTestingEngine;
-    private final IVisualCheckFactory visualCheckFactory;
+    private final VisualCheckFactory visualCheckFactory;
 
     public VisualSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher,
-            IVisualTestingEngine visualTestingEngine, ISoftAssert softAssert, IVisualCheckFactory visualCheckFactory)
+            IVisualTestingEngine visualTestingEngine, ISoftAssert softAssert, VisualCheckFactory visualCheckFactory)
     {
         super(uiContext, attachmentPublisher, softAssert);
         this.visualTestingEngine = visualTestingEngine;
@@ -65,8 +65,9 @@ public class VisualSteps extends AbstractVisualSteps
 
     /**
      * Step establishes baseline or compares against existing one.
+     *
      * @param actionType ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
-     * @param name of baseline
+     * @param name       The baseline name
      */
     @When("I $actionType baseline with name `$name`")
     public void runVisualTests(VisualActionType actionType, String name)
@@ -76,18 +77,61 @@ public class VisualSteps extends AbstractVisualSteps
 
     /**
      * Step establishes baseline or compares against existing one.
-     * @param actionType ESTABLISH, COMPARE_AGAINST, or CHECK_INEQUALITY_AGAINST
-     * @param name of baseline
+     *
+     * @param actionType ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
+     * @param name       The baseline name
+     * @param repository The baseline repository name
+     */
+    @When(value = "I $actionType baseline with name `$name` using repository `$repository`", priority = 1)
+    public void runVisualTests(VisualActionType actionType, String name, String repository)
+    {
+        performVisualAction(withRepository(() -> visualCheckFactory.create(name, actionType), repository));
+    }
+
+    private Supplier<VisualCheck> withRepository(Supplier<VisualCheck> visualCheckProvider, String repository)
+    {
+        return () -> {
+            VisualCheck visualCheck = visualCheckProvider.get();
+            visualCheck.setBaselineRepository(Optional.of(repository));
+            return visualCheck;
+        };
+    }
+
+    /**
+     * Step establishes baseline or compares against existing one.
+     *
+     * @param actionType              ESTABLISH, COMPARE_AGAINST, or CHECK_INEQUALITY_AGAINST
+     * @param name                    The baseline name
      * @param screenshotConfiguration configuration to make screenshot
-     * Example:<br>
-     * |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|<br>
-     * |By.xpath(.//header)|100           |100           |CEILING       |
+     *                                Example:<br>
+     *                                |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|<br>
+     *                                |By.xpath(.//header)|100           |100           |CEILING       |
      */
     @When("I $actionType baseline with name `$name` using screenshot configuration:$screenshotConfiguration")
     public void runVisualTests(VisualActionType actionType, String name,
             ScreenshotConfiguration screenshotConfiguration)
     {
         performVisualAction(() -> visualCheckFactory.create(name, actionType, Optional.of(screenshotConfiguration)));
+    }
+
+    /**
+     * Step establishes baseline or compares against existing one.
+     *
+     * @param actionType              ESTABLISH, COMPARE_AGAINST, or CHECK_INEQUALITY_AGAINST
+     * @param name                    The baseline name
+     * @param repository              The baseline repository name
+     * @param screenshotConfiguration configuration to make screenshot
+     *                                Example:<br>
+     *                                |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|<br>
+     *                                |By.xpath(.//header)|100           |100           |CEILING       |
+     */
+    @When(value = "I $actionType baseline with name `$name` using repository `$repository` and"
+            + " screenshot configuration:$screenshotConfiguration", priority = 1)
+    public void runVisualTests(VisualActionType actionType, String name, String repository,
+            ScreenshotConfiguration screenshotConfiguration)
+    {
+        performVisualAction(withRepository(() -> visualCheckFactory.create(name, actionType,
+                Optional.of(screenshotConfiguration)), repository));
     }
 
     private void performVisualAction(Supplier<VisualCheck> visualCheckFactory)
@@ -125,17 +169,37 @@ public class VisualSteps extends AbstractVisualSteps
 
     /**
      * Step establishes baseline or compares against existing one.
-     * @param actionType ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
-     * @param name of baseline
+     *
+     * @param actionType    ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
+     * @param name          of baseline
+     * @param repository    The baseline repository name
      * @param checkSettings examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE`
      *                      or `REQUIRED_DIFF_PERCENTAGE`<br>
-     * Example:<br>
-     * |ELEMENT            |AREA                  |<br>
-     * |By.xpath(.//header)|By.cssSelector(footer)|
+     *                      Example:<br>
+     *                      |ELEMENT            |AREA                  |<br>
+     *                      |By.xpath(.//header)|By.cssSelector(footer)|
+     */
+    @When(value = "I $actionType baseline with name `$name` using repository `$repository` and ignoring:$checkSettings",
+        priority = 1)
+    public void runVisualTests(VisualActionType actionType, String name, String repository, ExamplesTable checkSettings)
+    {
+        runVisualTests(withRepository(() -> visualCheckFactory.create(name, actionType), repository), checkSettings);
+    }
+
+    /**
+     * Step establishes baseline or compares against existing one.
+     *
+     * @param actionType              ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
+     * @param name                    The baseline name
+     * @param checkSettings           examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE`
+     *                                or `REQUIRED_DIFF_PERCENTAGE`<br>
+     *                                Example:<br>
+     *                                |ELEMENT            |AREA                  |<br>
+     *                                |By.xpath(.//header)|By.cssSelector(footer)|
      * @param screenshotConfiguration configuration to make screenshot
-     * Example:<br>
-     * |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|<br>
-     * |By.xpath(.//header)|100           |100           |CEILING       |
+     *                                Example:<br>
+     *                                |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|<br>
+     *                                |By.xpath(.//header)|100           |100           |CEILING       |
      */
     @When(value = "I $actionType baseline with name `$name` ignoring:$checkSettings using"
             + " screenshot configuration:$screenshotConfiguration", priority = 1)
@@ -144,6 +208,32 @@ public class VisualSteps extends AbstractVisualSteps
     {
         runVisualTests(() -> visualCheckFactory.create(name, actionType, Optional.of(screenshotConfiguration)),
                 checkSettings);
+    }
+
+    /**
+     * Step establishes baseline or compares against existing one.
+     *
+     * @param actionType              ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
+     * @param name                    The baseline name
+     * @param repository              The baseline repository name
+     * @param checkSettings           examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE`
+     *                                or `REQUIRED_DIFF_PERCENTAGE`<br>
+     *                                Example:<br>
+     *                                |ELEMENT            |AREA                  |<br>
+     *                                |By.xpath(.//header)|By.cssSelector(footer)|
+     * @param screenshotConfiguration configuration to make screenshot
+     *                                Example:<br>
+     *                                |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|<br>
+     *                                |By.xpath(.//header)|100           |100           |CEILING       |
+     */
+    @When(value = "I $actionType baseline with name `$name` using repository `$repository` and ignoring"
+            + ":$checkSettings and screenshot configuration:$screenshotConfiguration", priority = 2)
+    public void runVisualTests(VisualActionType actionType, String name, String repository, ExamplesTable checkSettings,
+            ScreenshotConfiguration screenshotConfiguration)
+    {
+        runVisualTests(
+                withRepository(() -> visualCheckFactory.create(name, actionType, Optional.of(screenshotConfiguration)),
+                        repository), checkSettings);
     }
 
     private void runVisualTests(Supplier<VisualCheck> visualCheckFactory, ExamplesTable checkSettings)

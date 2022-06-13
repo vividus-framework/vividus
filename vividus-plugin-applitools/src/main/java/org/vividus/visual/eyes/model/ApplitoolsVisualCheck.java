@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@ import java.util.Set;
 import com.applitools.eyes.MatchLevel;
 
 import org.vividus.ui.action.search.Locator;
+import org.vividus.visual.model.AbstractVisualCheck;
 import org.vividus.visual.model.VisualActionType;
-import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.screenshot.IgnoreStrategy;
 
-public class ApplitoolsVisualCheck extends VisualCheck
+public class ApplitoolsVisualCheck extends AbstractVisualCheck
 {
     private String executeApiKey;
     private String readApiKey;

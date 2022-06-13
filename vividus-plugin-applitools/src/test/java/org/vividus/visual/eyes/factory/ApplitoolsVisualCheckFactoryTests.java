@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@ package org.vividus.visual.eyes.factory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 import com.applitools.eyes.MatchLevel;
@@ -34,7 +36,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.visual.IVisualCheckFactory;
+import org.vividus.ui.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotParameters;
+import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.model.VisualActionType;
 
@@ -63,7 +67,8 @@ class ApplitoolsVisualCheckFactoryTests
 
     private static final String BASELINE_ENV_NAME = "baselineEnvName";
 
-    @Mock private IVisualCheckFactory visualCheckFactory;
+    @Mock
+    private ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
 
     @InjectMocks
     private ApplitoolsVisualCheckFactory factory;
@@ -79,16 +84,16 @@ class ApplitoolsVisualCheckFactoryTests
         factory.setReadApiKey(READ_API_KEY);
         factory.setServerUri(SERVER_URI);
         factory.setViewportSize(VIEWPORT_SIZE);
+        factory.setScreenshotIndexer(Optional.empty());
+        factory.setIndexers(Map.of());
     }
 
     @Test
     void shouldCreateApplitoolsVisualCheckAndSetDefaultProperties()
     {
-        ApplitoolsVisualCheck expected = new ApplitoolsVisualCheck(BATCH_NAME, BASELINE, ACTION);
-        when(visualCheckFactory.create(eq(BASELINE), eq(ACTION), factoryMatcher()))
-            .thenReturn(expected);
-        ApplitoolsVisualCheck applitoolsVisualCheck = factory.create(BATCH_NAME, BASELINE, ACTION);
-        assertSame(expected, applitoolsVisualCheck);
+        var screenshotParameters = mock(ScreenshotParameters.class);
+        when(screenshotParametersFactory.create(Optional.empty())).thenReturn(Optional.of(screenshotParameters));
+        var applitoolsVisualCheck = factory.create(BATCH_NAME, BASELINE, ACTION);
         Assertions.assertAll(
             () -> assertEquals(BASELINE, applitoolsVisualCheck.getBaselineName()),
             () -> assertEquals(ACTION, applitoolsVisualCheck.getAction()),
@@ -101,18 +106,19 @@ class ApplitoolsVisualCheckFactoryTests
             () -> assertEquals(SERVER_URI, applitoolsVisualCheck.getServerUri()),
             () -> assertEquals(VIEWPORT_SIZE, applitoolsVisualCheck.getViewportSize()),
             () -> assertEquals(BASELINE_ENV_NAME, applitoolsVisualCheck.getBaselineEnvName()),
-            () -> assertEquals("Application", applitoolsVisualCheck.getAppName()));
+            () -> assertEquals("Application", applitoolsVisualCheck.getAppName()),
+            () -> assertEquals(screenshotParameters, applitoolsVisualCheck.getScreenshotParameters().get()));
     }
 
     @Test
     void shouldUniteExistingPropertiesAndDefaultOnes()
     {
-        ApplitoolsVisualCheck applitoolsVisualCheck = new ApplitoolsVisualCheck(BATCH_NAME, BASELINE, ACTION);
-        MatchLevel matchLevel = MatchLevel.NONE;
+        var applitoolsVisualCheck = new ApplitoolsVisualCheck(BATCH_NAME, BASELINE, ACTION);
+        var matchLevel = MatchLevel.NONE;
         applitoolsVisualCheck.setMatchLevel(matchLevel);
-        String appName = "Application Under Test";
+        var appName = "Application Under Test";
         factory.setAppName(appName);
-        ApplitoolsVisualCheck actual = factory.unite(applitoolsVisualCheck);
+        var actual = factory.unite(applitoolsVisualCheck);
         assertSame(applitoolsVisualCheck, actual);
         Assertions.assertAll(
             () -> assertEquals(BASELINE, applitoolsVisualCheck.getBaselineName()),

@@ -42,8 +42,8 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.screenshot.ScreenshotPrecondtionMismatchException;
+import org.vividus.visual.model.AbstractVisualCheck;
 import org.vividus.visual.model.VisualActionType;
-import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,8 +60,8 @@ class VisualStepsTests
     @Test
     void shouldRecordAssertionWhenContextIsNull()
     {
-        Function<VisualCheck, VisualCheckResult> checkResultProvider = mock(Function.class);
-        Supplier<VisualCheck> visualCheckFactory = mock(Supplier.class);
+        Function<AbstractVisualCheck, VisualCheckResult> checkResultProvider = mock(Function.class);
+        Supplier<AbstractVisualCheck> visualCheckFactory = mock(Supplier.class);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.empty());
         visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE);
         verifyNoInteractions(visualCheckFactory, checkResultProvider, attachmentPublisher);
@@ -71,10 +71,10 @@ class VisualStepsTests
     void shouldNotPublishAttachmentWhenResultIsNull()
     {
         SearchContext searchContext = mock(SearchContext.class);
-        VisualCheck visualCheck = mock(VisualCheck.class);
+        AbstractVisualCheck visualCheck = mock(AbstractVisualCheck.class);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
-        Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> null;
-        Supplier<VisualCheck> visualCheckFactory = () -> visualCheck;
+        Function<AbstractVisualCheck, VisualCheckResult> checkResultProvider = check -> null;
+        Supplier<AbstractVisualCheck> visualCheckFactory = () -> visualCheck;
         visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE);
         verifyNoInteractions(attachmentPublisher);
         verify(visualCheck).setSearchContext(searchContext);
@@ -85,12 +85,12 @@ class VisualStepsTests
     void shouldPublishAttachment(boolean passed, VisualActionType action)
     {
         SearchContext searchContext = mock(SearchContext.class);
-        VisualCheck visualCheck = mock(VisualCheck.class);
+        AbstractVisualCheck visualCheck = mock(AbstractVisualCheck.class);
         VisualCheckResult visualCheckResult = mock(VisualCheckResult.class);
         when(visualCheckResult.getActionType()).thenReturn(action);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
-        Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> visualCheckResult;
-        Supplier<VisualCheck> visualCheckFactory = () -> visualCheck;
+        Function<AbstractVisualCheck, VisualCheckResult> checkResultProvider = check -> visualCheckResult;
+        Supplier<AbstractVisualCheck> visualCheckFactory = () -> visualCheck;
         when(visualCheckResult.isPassed()).thenReturn(passed);
         visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE);
         InOrder ordered = Mockito.inOrder(attachmentPublisher, visualCheckResult, softAssert);
@@ -112,9 +112,9 @@ class VisualStepsTests
     {
         SearchContext searchContext = mock(SearchContext.class);
         ScreenshotPrecondtionMismatchException exception = mock(ScreenshotPrecondtionMismatchException.class);
-        Supplier<VisualCheck> visualCheckFactory = mock(Supplier.class);
+        Supplier<AbstractVisualCheck> visualCheckFactory = mock(Supplier.class);
         doThrow(exception).when(visualCheckFactory).get();
-        Function<VisualCheck, VisualCheckResult> checkResultProvider = mock(Function.class);
+        Function<AbstractVisualCheck, VisualCheckResult> checkResultProvider = mock(Function.class);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
 
         visualSteps.execute(checkResultProvider, visualCheckFactory, TEMPLATE);

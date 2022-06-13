@@ -23,10 +23,12 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,7 +53,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -85,15 +86,17 @@ class VisualTestingEngineTests
 
     private static final String LOG_MESSAGE = "The {} visual difference percentage is {}% , but actual was {}%";
     private static final BigDecimal DIFF = BigDecimal.valueOf(40).setScale(3);
+    private static final String FILESYSTEM = "filesystem";
+    private static final String MEMORY = "MEMORY";
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(VisualTestingEngine.class);
 
     @Mock private ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
-    @Mock private IBaselineRepository baselineRepository;
+    @Mock private BaselineRepository baselineRepository;
     @Mock private ScreenshotProvider screenshotProvider;
     @Spy private DiffMarkupPolicyFactory diffMarkupPolicyFactory;
 
-    @InjectMocks private VisualTestingEngine visualTestingEngine;
+    private VisualTestingEngine visualTestingEngine;
 
     private VisualCheckFactory factory;
 
@@ -104,12 +107,25 @@ class VisualTestingEngineTests
         when(screenshotParametersFactory.create(Optional.empty())).thenReturn(Optional.empty());
         factory.setScreenshotIndexer(Optional.empty());
         factory.setIndexers(Map.of());
+    }
+
+    void initObjectUnderTest()
+    {
+        initObjectUnderTest(Map.of(FILESYSTEM, baselineRepository));
+    }
+
+    void initObjectUnderTest(Map<String, BaselineRepository> baselineRepositories)
+    {
+        visualTestingEngine = new VisualTestingEngine(screenshotProvider, diffMarkupPolicyFactory,
+                baselineRepositories);
         visualTestingEngine.setAcceptableDiffPercentage(0.0d);
+        visualTestingEngine.setBaselineRepository(FILESYSTEM);
     }
 
     @Test
     void shouldReturnOnlyCheckpointForEstablishAction() throws IOException
     {
+        initObjectUnderTest();
         VisualCheck visualCheck = createVisualCheck(VisualActionType.ESTABLISH);
         BufferedImage finalImage = mockGetCheckpointScreenshot(visualCheck);
         VisualCheckResult checkResult = visualTestingEngine.establish(visualCheck);
@@ -134,6 +150,7 @@ class VisualTestingEngineTests
     void shouldReturnVisualCheckResultWithDiffBaselineAndCheckpointDiffSensitivity(
         double acceptableDiffPercentage, boolean status) throws IOException
     {
+        initObjectUnderTest();
         when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
         visualCheck.setAcceptableDiffPercentage(OptionalDouble.of(acceptableDiffPercentage));
@@ -160,6 +177,7 @@ class VisualTestingEngineTests
     void shouldCompareImagesUsingRequiredDiffPercentageForTheInequalComparison(
         double requiredDiffPercentage, boolean status) throws IOException
     {
+        initObjectUnderTest();
         visualTestingEngine.setRequiredDiffPercentage(0.000001);
         when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.CHECK_INEQUALITY_AGAINST);
@@ -181,6 +199,7 @@ class VisualTestingEngineTests
     @Test
     void shouldReturnVisualCheckResultWithBaselineAndCheckpointUsingAcceptableDiffPercentage() throws IOException
     {
+        initObjectUnderTest();
         when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = factory.create(BASELINE, VisualActionType.COMPARE_AGAINST);
         visualCheck.setAcceptableDiffPercentage(OptionalDouble.of(50));
@@ -201,6 +220,7 @@ class VisualTestingEngineTests
     @Test
     void shouldReturnVisualCheckResultWithBaselineAndCheckpoint() throws IOException
     {
+        initObjectUnderTest();
         when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
         mockGetCheckpointScreenshot(visualCheck, BASELINE);
@@ -218,21 +238,23 @@ class VisualTestingEngineTests
     }
 
     @Test
-    void shouldOverrideBaselinesIfPropertySet() throws IOException
+    void shouldThrowAnExceptionIfInvalidBaselineRepositorySet() throws IOException
     {
-        visualTestingEngine.setOverrideBaselines(true);
-        when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
-        VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
-        BufferedImage finalImage = mockGetCheckpointScreenshot(visualCheck);
-        visualTestingEngine.compareAgainst(visualCheck);
-        verify(baselineRepository).saveBaseline(argThat(s -> finalImage.equals(s.getImage())), eq(BASELINE));
-        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, BigDecimal.valueOf(0d),
-                DIFF))));
+        initObjectUnderTest(Map.of(MEMORY, baselineRepository));
+        var visualCheck = createVisualCheck(VisualActionType.ESTABLISH);
+        visualCheck.setBaselineRepository(Optional.ofNullable(FILESYSTEM));
+        mockGetCheckpointScreenshot(visualCheck, BASELINE);
+        var ise = assertThrows(IllegalStateException.class,
+            () -> visualTestingEngine.establish(visualCheck));
+        assertEquals(
+                "Unable to find baseline repository with name: filesystem. Available baseline repositories: [MEMORY]",
+                ise.getMessage());
     }
 
     @Test
     void shouldReturnVisualCheckResultWithDiffAgainstEmptyImageAndCheckpoint() throws IOException
     {
+        initObjectUnderTest();
         when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.empty());
         VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
         mockGetCheckpointScreenshot(visualCheck);
@@ -244,6 +266,25 @@ class VisualTestingEngineTests
             () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
             () -> assertNull(checkResult.getDiff()),
             () -> assertFalse(checkResult.isPassed()));
+        assertThat(testLogger.getLoggingEvents(), is(empty()));
+    }
+
+    @Test
+    void shouldOverrideBaselineProviderViaCheckSettings() throws IOException
+    {
+        initObjectUnderTest(Map.of(FILESYSTEM, mock(BaselineRepository.class), MEMORY, baselineRepository));
+        when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.empty());
+        VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
+        visualCheck.setBaselineRepository(Optional.of(MEMORY));
+        mockGetCheckpointScreenshot(visualCheck);
+        VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
+        Assertions.assertAll(
+                () -> assertNull(checkResult.getBaseline()),
+                () -> assertEquals(BASELINE, checkResult.getBaselineName()),
+                () -> assertEquals(CHECKPOINT_BASE64, checkResult.getCheckpoint()),
+                () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
+                () -> assertNull(checkResult.getDiff()),
+                () -> assertFalse(checkResult.isPassed()));
         assertThat(testLogger.getLoggingEvents(), is(empty()));
     }
 
