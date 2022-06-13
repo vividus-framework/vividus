@@ -22,3 +22,8 @@ Then `${context-y-coordinate}`      is > `0`
 
 Scenario: Verify `source-code` dynamic variable
 Then `${source-code}` matches `.+Vividus Logo.+`
+
+Scenario: Verify browser windows size dynamic variables
+When I change window size to `600x500`
+Then `${browser-window-height}` is = `500`
+Then `${browser-window-width}`  is = `600`
