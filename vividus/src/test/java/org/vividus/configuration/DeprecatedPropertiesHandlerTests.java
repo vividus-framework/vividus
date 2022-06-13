@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -28,6 +27,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class DeprecatedPropertiesHandlerTests
@@ -173,36 +173,28 @@ class DeprecatedPropertiesHandlerTests
         verify(spy).replaceDeprecated(props, props);
     }
 
-    @Test
-    void shouldReplaceDeprecatedPropertyWithDynamicPart()
+    @ParameterizedTest
+    @CsvSource({
+        "!oldKey\\.data-(\\d+)\\.value, newKey.data-$1.value, oldKey.data-1.value, true,  newKey.data-1.value, false",
+        "!oldKey\\.data-(\\d+)\\.value, newKey.data-$1.value, oldKey.data-2.value, false, newKey.data-2.value, true",
+        "!oldKey\\.data-(\\d+)\\.value, newKey.data-$1.value, oldKey.data-x.value, false, oldKey.data-x.value, false",
+        "(a+)-value-(b+),               $1-new-value-$2,      aaaaaaa-value-b,     value, aaaaaaa-new-value-b, value",
+        "name\\.((?!keep$)[^.]+),       name.$1.key,          name.to-be-kept,     value, name.to-be-kept.key, value",
+        "name\\.((?!keep$)[^.]+),       name.$1.key,          name.keep,           value, name.keep,           value",
+        "name\\.((?!keep$)[^.]+),       name.$1.key,          name.keep,           value, name.keep.key,       "
+    })
+    void shouldReplaceDeprecatedPropertyWithDynamicPart(String deprecatedPropertyRegex, String newPropertyReplacement,
+            String oldPropertyName, String oldPropertyValue, String newPropertyName, String newPropertyValue)
     {
-        Properties deprecatedProperties = new Properties();
-        deprecatedProperties.put("!oldKey.data-(\\d+).value", "newKey.data-(\\d+).value");
-        deprecatedProperties.put("(a+)-value-(b+)", "(a+)-new-value-(b+)");
-        DeprecatedPropertiesHandler handler = new DeprecatedPropertiesHandler(deprecatedProperties, PLACEHOLDER_PREFIX,
-                PLACEHOLDER_SUFFIX);
-        Properties properties = new Properties();
-        properties.put("oldKey-data-1.value", TRUE);
-        properties.put("oldKey-data-2.value", FALSE);
-        properties.put("aaaaaaa-value-b", VALUE);
-        String dynamicArgumentNotMatches = "oldKey-data-x.value";
-        properties.put(dynamicArgumentNotMatches, FALSE);
-        handler.replaceDeprecated(properties, properties);
-        assertEquals(FALSE, properties.get("newKey.data-1.value"));
-        assertEquals(TRUE, properties.get("newKey.data-2.value"));
-        assertEquals(FALSE, properties.get(dynamicArgumentNotMatches));
-        assertEquals(VALUE, properties.get("aaaaaaa-new-value-b"));
-    }
+        var deprecatedProperties = new Properties();
+        deprecatedProperties.put(deprecatedPropertyRegex, newPropertyReplacement);
 
-    @Test
-    void shouldThrowAnExceptionIfNotAlignedNumberOfDynamicPartsPassed()
-    {
-        Properties deprecatedProperties = new Properties();
-        deprecatedProperties.put("key.(a+).value", "newKey.(a+).somemore.(b+).value");
-        IllegalArgumentException iae = assertThrows(IllegalArgumentException.class,
-                () -> new DeprecatedPropertiesHandler(deprecatedProperties, PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX));
-        assertEquals(
-            "Deprecated property: key.(a+).value and new property:"
-            + " newKey.(a+).somemore.(b+).value keys have different dynamic values number", iae.getMessage());
+        var properties = new Properties();
+        properties.put(oldPropertyName, oldPropertyValue);
+
+        var handler = new DeprecatedPropertiesHandler(deprecatedProperties, PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX);
+        handler.replaceDeprecated(properties, properties);
+
+        assertEquals(newPropertyValue, properties.get(newPropertyName));
     }
 }

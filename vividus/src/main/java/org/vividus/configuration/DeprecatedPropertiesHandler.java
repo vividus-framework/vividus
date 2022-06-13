@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import com.google.common.base.Splitter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +33,6 @@ public class DeprecatedPropertiesHandler
     private static final String FALSE = "false";
 
     private static final Pattern BOOLEAN = Pattern.compile("false|true");
-
-    private static final Splitter DYNAMIC_VALUE_SPLITTER = Splitter.on(Pattern.compile("\\([^)]+\\)"))
-            .omitEmptyStrings();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeprecatedPropertiesHandler.class);
 
@@ -167,15 +160,13 @@ public class DeprecatedPropertiesHandler
     private final class DynamicDeprecatedProperty extends DeprecatedProperty
     {
         private final Pattern regex;
-        private final Map<String, String> partsToReplace;
+        private final String replacement;
 
         private DynamicDeprecatedProperty(String oldKey, String newKey)
         {
             super(oldKey, newKey);
             this.regex = Pattern.compile(super.oldKey);
-            List<String> oldParts = DYNAMIC_VALUE_SPLITTER.splitToList(super.oldKey);
-            List<String> newParts = DYNAMIC_VALUE_SPLITTER.splitToList(super.newKey);
-            this.partsToReplace = toMap(super.oldKey, newKey, oldParts, newParts);
+            this.replacement = newKey;
         }
 
         @Override
@@ -184,33 +175,15 @@ public class DeprecatedPropertiesHandler
             return regex.matcher(key).matches();
         }
 
-        private Map<String, String> toMap(String oldKey, String newKey, List<String> keys, List<String> values)
-        {
-            if (keys.size() != values.size())
-            {
-                throw new IllegalArgumentException(String.format(
-                        "Deprecated property: %s and new property: %s keys have different dynamic values number",
-                        oldKey, newKey));
-            }
-            return IntStream.range(0, keys.size())
-                            .boxed()
-                            .collect(Collectors.toMap(keys::get, values::get));
-        }
-
         @Override
         protected String getNewKey(String oldKey)
         {
-            String result = oldKey;
-            for (Entry<String, String> part : partsToReplace.entrySet())
-            {
-                result = result.replaceFirst(part.getKey(), part.getValue());
-            }
-            return result;
+            return regex.matcher(oldKey).replaceFirst(replacement);
         }
     }
 
     @SuppressWarnings("FinalClass")
-    private class DeprecatedProperty
+    private static class DeprecatedProperty
     {
         private final String oldKey;
         private final String newKey;
