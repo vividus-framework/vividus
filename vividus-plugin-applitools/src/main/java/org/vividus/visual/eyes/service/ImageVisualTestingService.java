@@ -27,6 +27,7 @@ import com.applitools.eyes.StepInfo.ApiUrls;
 import com.applitools.eyes.TestResults;
 import com.applitools.eyes.images.Eyes;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,22 +86,31 @@ public class ImageVisualTestingService implements VisualTestingService
 
     private void setImages(String readKey, ApplitoolsVisualCheckResult visualCheckResult, StepInfo stepInfo)
     {
+        MutableBoolean apiUnauthorized = new MutableBoolean(false);
         ApiUrls apiUrls = stepInfo.getApiUrls();
-        visualCheckResult.setBaseline(getImageAsBase64(apiUrls.getBaselineImage(), readKey));
-        visualCheckResult.setCheckpoint(getImageAsBase64(apiUrls.getCheckpointImage(), readKey));
-        visualCheckResult.setDiff(getImageAsBase64(apiUrls.getDiffImage(), readKey));
+        visualCheckResult.setBaseline(getImageAsBase64(apiUrls.getBaselineImage(), readKey, apiUnauthorized));
+        visualCheckResult.setCheckpoint(getImageAsBase64(apiUrls.getCheckpointImage(), readKey, apiUnauthorized));
+        visualCheckResult.setDiff(getImageAsBase64(apiUrls.getDiffImage(), readKey, apiUnauthorized));
     }
 
-    private String getImageAsBase64(String url, String readKey)
+    private String getImageAsBase64(String url, String readKey, MutableBoolean apiUnauthorized)
     {
-        if (url != null)
+        if (url != null && apiUnauthorized.isFalse())
         {
             URI imageUrl = URI.create(addKeyToUrl(url, readKey));
             try
             {
                 HttpResponse response = httpClient.doHttpGet(imageUrl);
                 byte[] body = response.getResponseBody();
-                if (response.getStatusCode() == HttpStatus.SC_OK && body != null)
+                int statusCode = response.getStatusCode();
+                if (statusCode == HttpStatus.SC_UNAUTHORIZED)
+                {
+                    apiUnauthorized.setValue(true);
+                    LOGGER.warn("The \"readApiKey\" property is not set or incorrect. "
+                            + "Checkpoint and baseline images are not available in the attachment. "
+                            + "You can use the \"Step editor\" button to view them on Applitools.");
+                }
+                else if (statusCode == HttpStatus.SC_OK && body != null)
                 {
                     return Base64.getEncoder().encodeToString(body);
                 }
