@@ -12,25 +12,25 @@ The plugin provides functionality to interact with https://docs.microsoft.com/en
 implementation(group: 'org.vividus', name: 'vividus-plugin-azure-storage-account', version: '{current-version}')
 ----
 
-== Common configuration
-
-include::partial$azure-authentication.adoc[]
-
 == Blob storage
 
-=== Properties
+=== Configuration
+
+include::partial$azure-authentication.adoc[leveloffset=+1]
+
+==== Endpoints
 
 The blob storages endpoints are configured with the following property format:
 
 [source,properties]
 ----
-azure.storage-account.<key>=<endpoint>
+azure.storage-account.<key>.blob-service=<endpoint>
 ----
 
 where:
 
-. `key` - The logical key used to refer the blob storage in the steps.
-. `endpoint` - The blob service URL, e.g. `https://mystorage.blob.core.windows.net/`.
+. `key` - The logical key used to refer the storage account in the steps.
+. `endpoint` - The blob service URL, e.g. `https://mystorageaccount.blob.core.windows.net/`.
 It's allowed to use blob service https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview[SAS] URL here,
 in this case the authentication configuration is not required.
 
@@ -75,7 +75,7 @@ When I download blob with name `$blobName` from container `$containerName` of st
 .Download the blob
 [source,gherkin]
 ----
-When I download blob with name `raw/test.json` from container `vividus` of storage account `testaccount` and save its content to scenario variable `blob`
+When I download blob with name `raw/test.json` from container `vividus-container` of storage account `testaccount` and save its content to scenario variable `blob`
 ----
 
 ==== Download the blob to a temporary file
@@ -97,7 +97,7 @@ When I download blob with name `$blobName` from container `$containerName` of st
 .Download the blob to a temporary file
 [source,gherkin]
 ----
-When I download blob with name `raw/test.json` from container `vividus` of storage account `testaccount` to temporary file with name `test.json` and save path to scenario variable `$pathToBlob`
+When I download blob with name `raw/test.json` from container `vividus-container` of storage account `testaccount` to temporary file with name `test.json` and save path to scenario variable `pathToBlob`
 ----
 
 ==== Retrieve the blob properties
@@ -120,7 +120,7 @@ When I retrieve properties of blob with name `$blobName` from container `$contai
 .Retrieve the blob properties
 [source,gherkin]
 ----
-When I retrieve properties of blob with name `raw/test.json` from container `vividus` of storage account `testaccount` and save them to scenario variable `blob-properties`
+When I retrieve properties of blob with name `raw/test.json` from container `vividus-container` of storage account `testaccount` and save them to scenario variable `blob-properties`
 ----
 
 ==== Upload the blob
@@ -185,7 +185,7 @@ When I delete blob with name `$blobName` from container `$containerName` of stor
 .Delete the blob
 [source,gherkin]
 ----
-When I delete blob with name `raw/test.json` from container `vividus` of storage account `testaccount`
+When I delete blob with name `raw/test.json` from container `vividus-container` of storage account `testaccount`
 ----
 
 ==== Find blobs
@@ -262,6 +262,119 @@ When I filter blobs by:
 |matches           |.*_test            |images_for_testing_05.10.2021/images/|10           |
 in container `vividus` of storage account `testaccount` and save result to story variable `imagePathList`
 ----
+
+
+== File share
+
+=== Configuration
+
+==== Endpoints
+
+The file share endpoints are configured with the following property format:
+
+[source,properties]
+----
+azure.storage-account.<key>.file-service=<endpoint>
+----
+
+where:
+
+. `key` - The logical key used to refer the storage account in the steps.
+. `endpoint` - The file service URL, e.g. `https://mystorageaccount.file.core.windows.net/`.
+It's recommended to use file service https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview[SAS] URL here,
+because the authentication via https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals[Service Principals]
+is not available for file shares.
+
+=== Steps
+
+==== Download the file
+
+Downloads the file from the file share and saves its content as a text to a variable.
+
+[source,gherkin]
+----
+When I download file with path `$filePath` from file share `$shareName` of storage account `$storageAccountKey` and save its content to $scopes variable `$variableName`
+----
+
+* `$filePath` - The full path to the file in the file share.
+* `$shareName` - The name of the file share to point to.
+* `$storageAccountKey` - The key of the storage account file service endpoint from the configuration.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the file content.
+
+.Download the file
+[source,gherkin]
+----
+When I download file with path `data/file.json` from file share `vividus-file-share` of storage account `testaccount` and save its content to scenario variable `json-file`
+----
+
+==== Download the file to a temporary file
+
+Downloads the file from the file share into a temporary file with the specified name and saves the full path to the specified variable.
+
+[source,gherkin]
+----
+When I download file with path `$filePath` from file share `$shareName` of storage account `$storageAccountKey` to temporary file with name `$baseFileName` and save path to $scopes variable `$variableName`
+----
+
+* `$filePath` - The full path to the file in the file share.
+* `$shareName` - The name of the file share to point to.
+* `$storageAccountKey` - The key of the storage account file service endpoint from the configuration.
+* `$baseFileName` - The base file name used to generate the prefix and the suffix for the creating temporary file.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the path to the temporary file with the file content.
+
+.Download the file to a temporary file
+[source,gherkin]
+----
+When I download file with path `data/file.json` from file share `vividus-file-share` of storage account `testaccount` to temporary file with name `test.json` and save path to scenario variable `path-to-file`
+----
+
+==== Upload the file
+
+Uploads the file to the file share.
+
+[source,gherkin]
+----
+When I upload file with path `$filePath` and data `$data` to file share `$shareName` of storage account `$storageAccountKey`
+----
+
+* `$filePath` - The full path to the creating file in the file share.
+* `$data` - The data to store as a file.
+* `$shareName` - The name of the file share to point to.
+* `$storageAccountKey` - The key of the storage account file service endpoint from the configuration.
+
+.Upload the text file
+[source,gherkin]
+----
+When I upload file with path `data/file.json` and data `{"test":"data"}` to file share `vividus-file-share` of storage account `testaccount`
+----
+
+.Upload the binary file
+[source,gherkin]
+----
+When I upload file with path `images/file.jpg` and data `#{loadBinaryResource(/data/image.jpg)}` to file share `vividus-file-share` of storage account `testaccount`
+----
+
+==== Delete the file
+
+Deletes the specified file from the file share.
+
+[source,gherkin]
+----
+When I delete file with path `$filePath` from file share `$shareName` of storage account `$storageAccountKey`
+----
+
+* `$filePath` - The full path to the file in the file share.
+* `$shareName` - The name of the file share to point to.
+* `$storageAccountKey` - The key of the storage account file service endpoint from the configuration.
+
+.Delete the file
+[source,gherkin]
+----
+When I delete file with path `data/file.json` from file share `vividus-file-share` of storage account `testaccount`
+----
+
 
 == Storage account management
 

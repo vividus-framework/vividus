@@ -22,7 +22,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.argThat;
@@ -72,12 +71,11 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.azure.storage.StorageAccountEndpoint;
+import org.vividus.azure.storage.StorageAccountEndpointsManager;
 import org.vividus.context.VariableContext;
 import org.vividus.steps.DataWrapper;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.util.json.JsonUtils;
-import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -93,29 +91,13 @@ class BlobStorageStepsTests
     private static final String KEY = "KEY";
     private static final String DATA = "data";
     private static final byte[] BYTES = DATA.getBytes(StandardCharsets.UTF_8);
-    private static final String ERROR_ON_MISSING_STORAGE_ACCOUNT = "Storage account with key '%s' is not configured "
-            + "in properties";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(BlobStorageSteps.class);
 
-    @Mock private PropertyMappedCollection<StorageAccountEndpoint> storageAccountEndpoints;
+    @Mock private StorageAccountEndpointsManager storageAccountEndpointsManager;
     @Mock private VariableContext variableContext;
     @Mock private JsonUtils jsonUtils;
     @Mock private TokenCredential tokenCredential;
-
-    @Test
-    void shouldFailWhenBlobServiceEndpointIsNotConfiguredInProperties()
-    {
-        var storageAccountEndpoint = new StorageAccountEndpoint();
-        storageAccountEndpoint.setBlobService(null);
-        when(storageAccountEndpoints.get(KEY, ERROR_ON_MISSING_STORAGE_ACCOUNT, KEY)).thenReturn(
-                storageAccountEndpoint);
-        var steps = new BlobStorageSteps(storageAccountEndpoints, null, null, null);
-        var exception = assertThrows(IllegalArgumentException.class,
-                () -> steps.downloadBlob(BLOB, CONTAINER, KEY, SCOPES, VARIABLE));
-        assertEquals("Blob Service endpoint is not configured for storage account with key 'KEY' in properties",
-                exception.getMessage());
-    }
 
     @Test
     void shouldRetrieveBlobServiceProperties()
@@ -323,11 +305,8 @@ class BlobStorageStepsTests
     private void runWithStorageClient(FailableBiConsumer<BlobStorageSteps, BlobServiceClient, IOException> testToRun)
     {
         BlobServiceClient blobServiceClient = mock(BlobServiceClient.class);
-        String endpoint = "endpoint";
-        var storageAccountEndpoint = new StorageAccountEndpoint();
-        storageAccountEndpoint.setBlobService(endpoint);
-        when(storageAccountEndpoints.get(KEY, ERROR_ON_MISSING_STORAGE_ACCOUNT, KEY)).thenReturn(
-                storageAccountEndpoint);
+        var endpoint = "endpoint";
+        when(storageAccountEndpointsManager.getBlobServiceEndpoint(KEY)).thenReturn(endpoint);
         try (MockedConstruction<BlobServiceClientBuilder> serviceClientBuilder =
                 mockConstruction(BlobServiceClientBuilder.class, (mock, context) -> {
                     when(mock.credential(tokenCredential)).thenReturn(mock);
@@ -335,7 +314,7 @@ class BlobStorageStepsTests
                     when(mock.buildClient()).thenReturn(blobServiceClient);
                 }))
         {
-            BlobStorageSteps steps = new BlobStorageSteps(storageAccountEndpoints, tokenCredential, variableContext,
+            var steps = new BlobStorageSteps(storageAccountEndpointsManager, tokenCredential, variableContext,
                     jsonUtils);
             testToRun.accept(steps, blobServiceClient);
             assertThat(serviceClientBuilder.constructed(), hasSize(1));

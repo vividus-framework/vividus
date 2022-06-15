@@ -6,14 +6,18 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean id="blobSteps" class="org.vividus.azure.storage.blob.BlobStorageSteps">
+    <bean class="org.vividus.azure.storage.StorageAccountEndpointsManager">
         <constructor-arg>
             <bean factory-bean="propertyMapper" factory-method="readValues">
                 <constructor-arg value="azure.storage-account." />
-                <constructor-arg value="org.vividus.azure.storage.StorageAccountEndpoint" />
+                <constructor-arg value="org.vividus.azure.storage.StorageAccountEndpointsManager.StorageAccountEndpoint" />
             </bean>
         </constructor-arg>
     </bean>
+
+    <bean id="blobSteps" class="org.vividus.azure.storage.blob.BlobStorageSteps" />
+
+    <bean id="fileShareSteps" class="org.vividus.azure.storage.fileshare.FileShareSteps" />
 
     <bean id="storageAccountManagementSteps" class="org.vividus.azure.storage.StorageAccountManagementSteps">
         <constructor-arg>
@@ -27,6 +31,7 @@
 
     <util:list id="stepBeanNames-Azure-StorageAccount" value-type="java.lang.String">
         <idref bean="blobSteps" />
+        <idref bean="fileShareSteps" />
         <idref bean="storageAccountManagementSteps" />
     </util:list>
 </beans>
