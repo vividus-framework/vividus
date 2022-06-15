@@ -25,27 +25,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.http.rest.PagedResponse;
 import com.azure.core.util.BinaryData;
-import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobServiceClient;
-import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.BlobServiceProperties;
 import com.azure.storage.blob.models.ListBlobsOptions;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.azure.storage.StorageAccountEndpointsManager;
 import org.vividus.context.VariableContext;
 import org.vividus.steps.DataWrapper;
 import org.vividus.steps.StringComparisonRule;
@@ -58,26 +50,14 @@ public class BlobStorageSteps
     private static final Logger LOGGER = LoggerFactory.getLogger(BlobStorageSteps.class);
     private static final int DEFAULT_MAX_RESULTS_PER_PAGE = 1000;
 
-    private final StorageAccountEndpointsManager storageAccountEndpointsManager;
-    private final TokenCredential credential;
+    private final BlobServiceClientFactory blobServiceClientFactory;
     private final VariableContext variableContext;
     private final JsonUtils jsonUtils;
 
-    private final LoadingCache<String, BlobServiceClient> blobServiceClients = CacheBuilder.newBuilder()
-            .build(new CacheLoader<>()
-            {
-                @Override
-                public BlobServiceClient load(String endpoint)
-                {
-                    return new BlobServiceClientBuilder().credential(credential).endpoint(endpoint).buildClient();
-                }
-            });
-
-    public BlobStorageSteps(StorageAccountEndpointsManager storageAccountEndpointsManager,
-            TokenCredential credential, VariableContext variableContext, JsonUtils jsonUtils)
+    public BlobStorageSteps(BlobServiceClientFactory blobServiceClientFactory, VariableContext variableContext,
+            JsonUtils jsonUtils)
     {
-        this.storageAccountEndpointsManager = storageAccountEndpointsManager;
-        this.credential = credential;
+        this.blobServiceClientFactory = blobServiceClientFactory;
         this.variableContext = variableContext;
         this.jsonUtils = jsonUtils;
     }
@@ -103,7 +83,8 @@ public class BlobStorageSteps
             + " `$variableName`")
     public void retrieveBlobServiceProperties(String storageAccountKey, Set<VariableScope> scopes, String variableName)
     {
-        BlobServiceProperties properties = createBlobStorageClient(storageAccountKey).getProperties();
+        BlobServiceProperties properties = blobServiceClientFactory.createBlobStorageClient(storageAccountKey)
+                .getProperties();
         saveJsonVariable(scopes, variableName, properties);
     }
 
@@ -133,7 +114,8 @@ public class BlobStorageSteps
     {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
         {
-            createBlobClient(blobName, containerName, storageAccountKey).downloadStream(outputStream);
+            blobServiceClientFactory.createBlobClient(blobName, containerName, storageAccountKey)
+                    .downloadStream(outputStream);
             variableContext.putVariable(scopes, variableName, outputStream.toString(StandardCharsets.UTF_8));
         }
     }
@@ -167,7 +149,8 @@ public class BlobStorageSteps
             Set<VariableScope> scopes, String variableName) throws IOException
     {
         String tempFilePath = ResourceUtils.createTempFile(baseFileName).toAbsolutePath().toString();
-        createBlobClient(blobName, containerName, storageAccountKey).downloadToFile(tempFilePath, true);
+        blobServiceClientFactory.createBlobClient(blobName, containerName, storageAccountKey)
+                .downloadToFile(tempFilePath, true);
         variableContext.putVariable(scopes, variableName, tempFilePath);
     }
 
@@ -195,7 +178,8 @@ public class BlobStorageSteps
     public void retrieveBlobProperties(String blobName, String containerName, String storageAccountKey,
             Set<VariableScope> scopes, String variableName)
     {
-        BlobProperties properties = createBlobClient(blobName, containerName, storageAccountKey).getProperties();
+        BlobProperties properties = blobServiceClientFactory.createBlobClient(blobName, containerName,
+                storageAccountKey).getProperties();
         saveJsonVariable(scopes, variableName, properties);
     }
 
@@ -211,7 +195,8 @@ public class BlobStorageSteps
             + "`$storageAccountKey`")
     public void uploadBlob(String blobName, DataWrapper data, String containerName, String storageAccountKey)
     {
-        createBlobClient(blobName, containerName, storageAccountKey).upload(BinaryData.fromBytes(data.getBytes()));
+        blobServiceClientFactory.createBlobClient(blobName, containerName, storageAccountKey)
+                .upload(BinaryData.fromBytes(data.getBytes()));
     }
 
     /**
@@ -226,7 +211,7 @@ public class BlobStorageSteps
             + "`$storageAccountKey`")
     public void upsertBlob(String blobName, DataWrapper data, String containerName, String storageAccountKey)
     {
-        createBlobClient(blobName, containerName, storageAccountKey)
+        blobServiceClientFactory.createBlobClient(blobName, containerName, storageAccountKey)
                 .upload(BinaryData.fromBytes(data.getBytes()), true);
     }
 
@@ -240,7 +225,8 @@ public class BlobStorageSteps
     @When("I delete blob with name `$blobName` from container `$containerName` of storage account `$storageAccountKey`")
     public void deleteBlob(String blobName, String containerName, String storageAccountKey)
     {
-        createBlobClient(blobName, containerName, storageAccountKey).delete();
+        blobServiceClientFactory.createBlobClient(blobName, containerName, storageAccountKey)
+                .delete();
         LOGGER.info("The blob with name '{}' is successfully deleted from the container '{}'", blobName, containerName);
     }
 
@@ -269,7 +255,8 @@ public class BlobStorageSteps
     public void findBlobs(StringComparisonRule rule, String blobNameToMatch, String containerName,
             String storageAccountKey, Set<VariableScope> scopes, String variableName)
     {
-        BlobContainerClient blobContainerClient = createBlobContainerClient(containerName, storageAccountKey);
+        BlobContainerClient blobContainerClient =
+                blobServiceClientFactory.createBlobContainerClient(containerName, storageAccountKey);
         Matcher<String> nameMatcher = rule.createMatcher(blobNameToMatch);
         List<String> blobNames = blobContainerClient.listBlobs()
                                                     .stream()
@@ -320,7 +307,8 @@ public class BlobStorageSteps
     public void findBlobs(BlobFilter filter, String containerName, String storageAccountKey, Set<VariableScope> scopes,
             String variableName)
     {
-        BlobContainerClient blobContainerClient = createBlobContainerClient(containerName, storageAccountKey);
+        BlobContainerClient blobContainerClient =
+                blobServiceClientFactory.createBlobContainerClient(containerName, storageAccountKey);
 
         ListBlobsOptions options = new ListBlobsOptions();
         filter.getBlobNamePrefix().ifPresent(options::setPrefix);
@@ -345,22 +333,6 @@ public class BlobStorageSteps
                 .collect(Collectors.toList());
 
         variableContext.putVariable(scopes, variableName, result);
-    }
-
-    private BlobServiceClient createBlobStorageClient(String storageAccountKey)
-    {
-        String blobServiceEndpoint = storageAccountEndpointsManager.getBlobServiceEndpoint(storageAccountKey);
-        return blobServiceClients.getUnchecked(blobServiceEndpoint);
-    }
-
-    private BlobContainerClient createBlobContainerClient(String containerName, String storageAccountKey)
-    {
-        return createBlobStorageClient(storageAccountKey).getBlobContainerClient(containerName);
-    }
-
-    private BlobClient createBlobClient(String blobName, String containerName, String storageAccountKey)
-    {
-        return createBlobContainerClient(containerName, storageAccountKey).getBlobClient(blobName);
     }
 
     private void saveJsonVariable(Set<VariableScope> scopes, String variableName, Object data)
