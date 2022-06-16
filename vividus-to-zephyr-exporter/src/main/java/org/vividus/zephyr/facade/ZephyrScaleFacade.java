@@ -58,11 +58,11 @@ public class ZephyrScaleFacade implements IZephyrFacade
     @Override
     public Integer createExecution(String execution) throws IOException, JiraConfigurationException
     {
-        String testCaseUrl = String.format(TEST_RESULT_ENDPOINT,
+        String testCaseResultUrl = String.format(TEST_RESULT_ENDPOINT,
                 zephyrConfiguration.getCycleId(),
                 execution);
         String responseBody = getJiraClient().executePost(
-                testCaseUrl,
+                testCaseResultUrl,
                 "{}");
         return JsonPathUtils.getData(responseBody, "$.id");
     }
@@ -71,10 +71,10 @@ public class ZephyrScaleFacade implements IZephyrFacade
     public void updateExecutionStatus(String executionId, String executionBody)
             throws IOException, JiraConfigurationException
     {
-        String testCaseUrl = String.format(TEST_RESULT_ENDPOINT,
+        String testCaseResultUrl = String.format(TEST_RESULT_ENDPOINT,
                 zephyrConfiguration.getCycleId(),
                 executionId);
-        getJiraClient().executePut(testCaseUrl, executionBody);
+        getJiraClient().executePut(testCaseResultUrl, executionBody);
     }
 
     @Override

@@ -35,14 +35,6 @@ advanced test planning, reporting, and reusability features. https://smartbear.c
 |true
 |Path to directory with test execution JSON results.
 
-|`zephyr.exporter.update-execution-statuses-only`
-|false
-|Property for update existing executions statuses only.
-
-|`zephyr.exporter.statuses-of-test-cases-to-add-to-execution`
-|false
-|List of test case statuses for adding to execution.
-
 |`zephyr.project-key`
 |true
 |Key of a Jira project where new test executions should be created
@@ -58,6 +50,16 @@ advanced test planning, reporting, and reusability features. https://smartbear.c
 |`zephyr.folder-name`
 |false
 |Folder name where new test executions should be created
+
+3+^.^|_The following properties are applicable only for Squad_
+
+|`zephyr.exporter.statuses-of-test-cases-to-add-to-execution`
+|false
+|List of test case statuses for adding to execution.
+
+|`zephyr.exporter.update-execution-statuses-only`
+|false
+|Property for update existing executions statuses only.
 
 |===
 

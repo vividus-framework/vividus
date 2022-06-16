@@ -32,7 +32,7 @@ import org.vividus.zephyr.facade.IZephyrFacade;
 import org.vividus.zephyr.model.TestCase;
 import org.vividus.zephyr.parser.TestCaseParser;
 
-public abstract class AbstractZephyrExporter
+public abstract class AbstractZephyrExporter implements IZephyrExporter
 {
     private final IZephyrFacade zephyrFacade;
     private final TestCaseParser testCaseParser;
@@ -59,7 +59,7 @@ public abstract class AbstractZephyrExporter
         }
     }
 
-    public abstract void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
+    protected abstract void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
             throws IOException, JiraConfigurationException;
 
     protected IZephyrFacade getZephyrFacade()
