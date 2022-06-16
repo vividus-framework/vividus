@@ -38,7 +38,7 @@ public class ZephyrScaleExporter extends AbstractZephyrExporter
     }
 
     @Override
-    public void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
+    protected void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
             throws IOException, JiraConfigurationException
     {
         ZephyrExecution execution = new ZephyrExecution(configuration, testCase.getKey(), testCase.getStatus());

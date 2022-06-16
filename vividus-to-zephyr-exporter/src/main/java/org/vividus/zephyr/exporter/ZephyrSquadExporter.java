@@ -51,7 +51,7 @@ public class ZephyrSquadExporter extends AbstractZephyrExporter
         this.zephyrExporterProperties = zephyrExporterProperties;
     }
 
-    public void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
+    protected void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
             throws IOException, JiraConfigurationException
     {
         JiraEntity issue = jiraFacade.getIssue(testCase.getKey());
