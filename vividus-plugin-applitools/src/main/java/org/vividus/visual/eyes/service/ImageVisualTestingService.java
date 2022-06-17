@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Base64;
 
-import javax.inject.Named;
-
 import com.applitools.eyes.StepInfo;
 import com.applitools.eyes.StepInfo.ApiUrls;
 import com.applitools.eyes.TestResults;
@@ -33,25 +31,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
+import org.vividus.selenium.screenshot.AshotScreenshotTaker;
+import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.visual.eyes.factory.ImageEyesFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheckResult;
-import org.vividus.visual.screenshot.ScreenshotProvider;
 
-@Named
+import ru.yandex.qatools.ashot.Screenshot;
+
 public class ImageVisualTestingService implements VisualTestingService
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageVisualTestingService.class);
 
     private final ImageEyesFactory eyesFactory;
-    private final ScreenshotProvider screenshotProvider;
+    private final AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker;
     private final IHttpClient httpClient;
 
-    public ImageVisualTestingService(ImageEyesFactory eyesFactory, ScreenshotProvider screenshotProvider,
-            @Named("eyesHttpClient") IHttpClient httpClient)
+    public ImageVisualTestingService(ImageEyesFactory eyesFactory,
+            AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker, IHttpClient httpClient)
     {
         this.eyesFactory = eyesFactory;
-        this.screenshotProvider = screenshotProvider;
+        this.ashotScreenshotTaker = ashotScreenshotTaker;
         this.httpClient = httpClient;
     }
 
@@ -63,7 +63,9 @@ public class ImageVisualTestingService implements VisualTestingService
         try
         {
             eyes.open(applitoolsVisualCheck.getAppName(), applitoolsVisualCheck.getBaselineName());
-            eyes.checkImage(screenshotProvider.take(applitoolsVisualCheck).getImage());
+            Screenshot screenshot = ashotScreenshotTaker.takeAshotScreenshot(applitoolsVisualCheck.getSearchContext(),
+                    applitoolsVisualCheck.getScreenshotParameters());
+            eyes.checkImage(screenshot.getImage());
         }
         finally
         {

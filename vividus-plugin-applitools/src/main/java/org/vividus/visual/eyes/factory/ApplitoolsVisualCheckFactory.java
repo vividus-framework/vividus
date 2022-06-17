@@ -23,13 +23,18 @@ import java.util.function.Function;
 
 import com.applitools.eyes.MatchLevel;
 
+import org.vividus.ui.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
-import org.vividus.visual.AbstractVisualCheckFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.model.VisualActionType;
+import org.vividus.visual.screenshot.BaselineIndexer;
 
-public class ApplitoolsVisualCheckFactory extends AbstractVisualCheckFactory<ApplitoolsVisualCheck>
+public class ApplitoolsVisualCheckFactory
 {
+    private final ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
+    private final BaselineIndexer baselineIndexer;
+
     private String executeApiKey;
     private String readApiKey;
     private String hostApp;
@@ -40,17 +45,21 @@ public class ApplitoolsVisualCheckFactory extends AbstractVisualCheckFactory<App
     private String appName = "Application";
     private String baselineEnvName;
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public ApplitoolsVisualCheckFactory(
-        ScreenshotParametersFactory screenshotParametersFactory)
+        ScreenshotParametersFactory screenshotParametersFactory, BaselineIndexer baselineIndexer)
     {
-        super(screenshotParametersFactory);
+        this.screenshotParametersFactory = screenshotParametersFactory;
+        this.baselineIndexer = baselineIndexer;
     }
 
     public ApplitoolsVisualCheck create(String batchName, String baselineName, VisualActionType action)
     {
-        ApplitoolsVisualCheck check = new ApplitoolsVisualCheck(batchName, createIndexedBaseline(baselineName), action);
-        withScreenshotConfiguration(check, Optional.empty());
+        Optional<ScreenshotParameters> screenshotParameters = screenshotParametersFactory.create(Optional.empty());
+
+        ApplitoolsVisualCheck check = new ApplitoolsVisualCheck(batchName,
+                baselineIndexer.createIndexedBaseline(baselineName), action);
+        check.setScreenshotParameters(screenshotParameters);
         check.setExecuteApiKey(executeApiKey);
         check.setReadApiKey(readApiKey);
         check.setBaselineEnvName(baselineEnvName);

@@ -17,11 +17,11 @@
 package org.vividus.selenium.mobileapp.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
@@ -31,14 +31,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
-import org.vividus.ui.context.UiContext;
+import org.vividus.ui.context.IUiContext;
 
 import ru.yandex.qatools.ashot.coordinates.Coords;
 
@@ -49,8 +48,8 @@ class MobileAppCoordsProviderTests
     private static final Dimension DIMENSION = new Dimension(1, 1);
 
     @Mock private MobileAppWebDriverManager driverManager;
+    @Mock private IUiContext uiContext;
     @Mock private WebElement webElement;
-    @Spy private UiContext uiContext;
 
     @Test
     void shouldProvideAdjustedWithNativeHeaderHeightCoordinates()
@@ -59,29 +58,11 @@ class MobileAppCoordsProviderTests
         when(driverManager.getStatusBarSize()).thenReturn(100);
         when(webElement.getLocation()).thenReturn(new Point(0, 234));
         when(webElement.getSize()).thenReturn(DIMENSION);
-        doReturn(null).when(uiContext).getSearchContext();
         Coords coords = coordsProvider.ofElement(null, webElement);
         Assertions.assertAll(() -> assertEquals(0, coords.getX()),
                              () -> assertEquals(134, coords.getY()),
                              () -> assertEquals(1, coords.getWidth()),
                              () -> assertEquals(1, coords.getHeight()));
-    }
-
-    @Test
-    void shouldAdjustElementCoordsToTheCurrentSearchContext()
-    {
-        MobileAppCoordsProvider coordsProvider = new MobileAppCoordsProvider(true, driverManager, uiContext);
-        WebElement contextElement = mock(WebElement.class);
-        when(contextElement.getLocation()).thenReturn(POINT);
-        when(contextElement.getSize()).thenReturn(new Dimension(100, 50));
-        when(webElement.getLocation()).thenReturn(new Point(5, 15));
-        when(webElement.getSize()).thenReturn(new Dimension(150, 30));
-        doReturn(contextElement).when(uiContext).getSearchContext();
-        Coords coords = coordsProvider.ofElement(null, webElement);
-        Assertions.assertAll(() -> assertEquals(0, coords.getX()),
-                             () -> assertEquals(5, coords.getY()),
-                             () -> assertEquals(100, coords.getWidth()),
-                             () -> assertEquals(30, coords.getHeight()));
     }
 
     @Test
@@ -91,7 +72,6 @@ class MobileAppCoordsProviderTests
         WebElement contextElement = mock(WebElement.class);
         when(contextElement.getLocation()).thenReturn(POINT);
         when(contextElement.getSize()).thenReturn(new Dimension(100, 50));
-        doReturn(contextElement).when(uiContext).getSearchContext();
         Coords coords = coordsProvider.ofElement(null, contextElement);
         Assertions.assertAll(
                 () -> assertEquals(10, coords.getX()),
@@ -109,11 +89,70 @@ class MobileAppCoordsProviderTests
         WebElement element = mock(WebElement.class);
         when(element.getLocation()).thenReturn(POINT);
         when(element.getSize()).thenReturn(DIMENSION);
-        doReturn(element).when(uiContext).getSearchContext();
         lenient().when(driverManager.getDpr()).thenReturn(2.0);
 
         WebDriver driver = mock(WebDriver.class);
         assertEquals(expectedCoords, coordsDecorator.ofElement(driver, element));
+    }
+
+    @Test
+    void shouldScaleElementCoordsRelativelyToContextCoords()
+    {
+        WebElement contextElement = mock(WebElement.class);
+        mockCoords(contextElement, 0, 138, 768, 1046);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(contextElement));
+        WebElement element = mock(WebElement.class);
+        mockCoords(element, 0, 215, 768, 78);
+        when(driverManager.getStatusBarSize()).thenReturn(48);
+        when(driverManager.getDpr()).thenReturn(1.0810810327529907d);
+
+        MobileAppCoordsProvider coordsDecorator = new MobileAppCoordsProvider(false, driverManager, uiContext);
+        Coords coords = coordsDecorator.ofElement(null, element);
+        Assertions.assertAll(
+                () -> assertEquals(0, coords.getX()),
+                () -> assertEquals(182, coords.getY()),
+                () -> assertEquals(831, coords.getWidth()),
+                () -> assertEquals(85, coords.getHeight()));
+    }
+
+    @Test
+    void shouldNotAdjustCoordsForTheWebDriverSearchContext()
+    {
+        MobileAppCoordsProvider coordsDecorator = new MobileAppCoordsProvider(false, driverManager, uiContext);
+        WebElement element = mock(WebElement.class);
+        when(element.getLocation()).thenReturn(POINT);
+        when(element.getSize()).thenReturn(DIMENSION);
+        lenient().when(driverManager.getDpr()).thenReturn(2.0);
+        WebDriver webDriver = mock(WebDriver.class);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
+
+        assertEquals(new Coords(20, 20, 2, 2), coordsDecorator.ofElement(webDriver, element));
+    }
+
+    @Test
+    void shouldNotAdjustCoordsIfElementIsSearchContextElement()
+    {
+        MobileAppCoordsProvider coordsDecorator = new MobileAppCoordsProvider(false, driverManager, uiContext);
+        WebElement element = mock(WebElement.class);
+        when(element.getLocation()).thenReturn(POINT);
+        when(element.getSize()).thenReturn(DIMENSION);
+        lenient().when(driverManager.getDpr()).thenReturn(2.0);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(element));
+
+        WebDriver driver = mock(WebDriver.class);
+        assertEquals(new Coords(20, 20, 2, 2), coordsDecorator.ofElement(driver, element));
+    }
+
+    private void mockCoords(WebElement element, int x, int y, int w, int h)
+    {
+        Point point = mock(Point.class);
+        when(element.getLocation()).thenReturn(point);
+        when(point.getX()).thenReturn(x);
+        when(point.getY()).thenReturn(y);
+        Dimension dimension = mock(Dimension.class);
+        when(element.getSize()).thenReturn(dimension);
+        when(dimension.getWidth()).thenReturn(w);
+        when(dimension.getHeight()).thenReturn(h);
     }
 
     static Stream<Arguments> coordsSource()

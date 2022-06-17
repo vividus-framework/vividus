@@ -6,9 +6,12 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        default-lazy-init="true" profile="web,mobile_app">
 
-    <bean id="visualSteps" class="org.vividus.visual.VisualSteps" />
+    <bean id="visualSteps" class="org.vividus.visual.VisualSteps">
+        <constructor-arg ref="screenshotParametersFactory" />
+    </bean>
 
     <bean id="visualTestingEngine" class="org.vividus.visual.engine.VisualTestingEngine">
+        <constructor-arg index="0" ref="screenshotTaker" />
         <property name="acceptableDiffPercentage" value="${ui.visual.acceptable-diff-percentage}" />
         <property name="requiredDiffPercentage" value="${ui.visual.required-diff-percentage}" />
         <property name="overrideBaselines" value="${ui.visual.override-baselines}" />

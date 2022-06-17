@@ -17,11 +17,17 @@
 package org.vividus.ui.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.vividus.selenium.screenshot.IgnoreStrategy;
+import org.vividus.ui.action.search.Locator;
 
 class ScreenshotParametersTests
 {
@@ -32,5 +38,15 @@ class ScreenshotParametersTests
         Assertions.assertAll(() -> assertEquals(0, screenshotParameters.getNativeFooterToCut()),
                              () -> assertEquals(Optional.empty(),
                                      screenshotParameters.getShootingStrategy()));
+    }
+
+    @Test
+    void shouldGetAndSetIgnoreStrategies()
+    {
+        ScreenshotParameters screenshotParameters = new ScreenshotParameters();
+        assertNull(screenshotParameters.getIgnoreStrategies());
+        Locator locator = mock(Locator.class);
+        screenshotParameters.setIgnoreStrategies(Map.of(IgnoreStrategy.ELEMENT, Set.of(locator)));
+        assertEquals(Map.of(IgnoreStrategy.ELEMENT, Set.of(locator)), screenshotParameters.getIgnoreStrategies());
     }
 }

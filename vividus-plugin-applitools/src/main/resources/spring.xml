@@ -19,7 +19,8 @@
         <constructor-arg index="2" ref="screenshotParametersFactory" />
     </bean>
 
-    <bean id="applitoolsVisualCheckFactory" class="org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory" parent="abstractVisualCheckFactory">
+    <bean id="applitoolsVisualCheckFactory" class="org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory">
+        <constructor-arg ref="screenshotParametersFactory" />
         <property name="executeApiKey" value="${ui.visual.applitools.execute-api-key}" />
         <property name="readApiKey" value="${ui.visual.applitools.read-api-key}" />
         <property name="hostApp" value="${ui.visual.applitools.host-app}" />
@@ -51,6 +52,11 @@
                 <property name="httpResponseHandlers"><list/></property>
             </bean>
         </constructor-arg>
+    </bean>
+
+    <bean class="org.vividus.visual.eyes.service.ImageVisualTestingService">
+        <constructor-arg index="1" ref="screenshotTaker" />
+        <constructor-arg index="2" ref="eyesHttpClient" />
     </bean>
 
     <util:list id="stepBeanNames-Eyes-Visual">

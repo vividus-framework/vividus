@@ -17,11 +17,16 @@
 package org.vividus.ui.screenshot;
 
 import java.util.Optional;
+import java.util.Set;
+
+import org.vividus.ui.action.search.Locator;
 
 public class ScreenshotConfiguration
 {
     private int nativeFooterToCut;
     private Optional<String> shootingStrategy = Optional.empty();
+    private Set<Locator> elementsToIgnore = Set.of();
+    private Set<Locator> areasToIgnore = Set.of();
 
     public int getNativeFooterToCut()
     {
@@ -41,5 +46,25 @@ public class ScreenshotConfiguration
     public void setShootingStrategy(Optional<String> shootingStrategy)
     {
         this.shootingStrategy = shootingStrategy;
+    }
+
+    public Set<Locator> getElementsToIgnore()
+    {
+        return elementsToIgnore;
+    }
+
+    public void setElementsToIgnore(Set<Locator> elementsToIgnore)
+    {
+        this.elementsToIgnore = elementsToIgnore;
+    }
+
+    public Set<Locator> getAreasToIgnore()
+    {
+        return areasToIgnore;
+    }
+
+    public void setAreasToIgnore(Set<Locator> areasToIgnore)
+    {
+        this.areasToIgnore = areasToIgnore;
     }
 }

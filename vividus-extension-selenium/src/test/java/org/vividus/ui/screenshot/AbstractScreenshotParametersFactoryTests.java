@@ -23,10 +23,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BinaryOperator;
 
 import org.junit.jupiter.api.Test;
+import org.vividus.selenium.screenshot.IgnoreStrategy;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.util.property.PropertyMappedCollection;
 
 class AbstractScreenshotParametersFactoryTests
@@ -98,15 +102,31 @@ class AbstractScreenshotParametersFactoryTests
     @Test
     void shouldCreateConfigurationWithBaseParameters()
     {
+        Locator stepElementLocator = mock(Locator.class);
+        Locator stepAreaLocator = mock(Locator.class);
+
         ScreenshotConfiguration parameters = new ScreenshotConfiguration();
+        parameters.setElementsToIgnore(Set.of(stepElementLocator));
+        parameters.setAreasToIgnore(Set.of(stepAreaLocator));
         parameters.setShootingStrategy(Optional.of(DEFAULT));
         parameters.setNativeFooterToCut(1);
 
-        ScreenshotParameters configuration = factory.createWithBaseConfiguration(parameters,
-                ScreenshotParameters::new);
+        Locator commonElementLocator = mock(Locator.class);
+        Locator commonAreaLocator = mock(Locator.class);
+
+        factory.setIgnoreStrategies(Map.of(
+            IgnoreStrategy.ELEMENT, Set.of(commonElementLocator),
+            IgnoreStrategy.AREA, Set.of(commonAreaLocator)
+        ));
+
+        ScreenshotParameters configuration = factory.createWithBaseConfiguration(parameters);
 
         assertEquals(Optional.of(DEFAULT), configuration.getShootingStrategy());
         assertEquals(1, configuration.getNativeFooterToCut());
+        assertEquals(Map.of(
+            IgnoreStrategy.ELEMENT, Set.of(stepElementLocator, commonElementLocator),
+            IgnoreStrategy.AREA, Set.of(stepAreaLocator, commonAreaLocator)
+        ), configuration.getIgnoreStrategies());
     }
 
     private ScreenshotConfiguration createParametersWith(int nativeFooterToCut)
@@ -117,12 +137,24 @@ class AbstractScreenshotParametersFactoryTests
     }
 
     private static final class TestScreenshotParametersFactory
-            extends AbstractScreenshotParametersFactory<ScreenshotConfiguration>
+            extends AbstractScreenshotParametersFactory<ScreenshotConfiguration, ScreenshotParameters>
     {
         @Override
         public Optional<ScreenshotParameters> create(Optional<ScreenshotConfiguration> screenshotConfiguration)
         {
             return Optional.empty();
+        }
+
+        @Override
+        public Optional<ScreenshotParameters> create(Map<IgnoreStrategy, Set<Locator>> ignores)
+        {
+            return Optional.empty();
+        }
+
+        @Override
+        protected ScreenshotParameters createScreenshotParameters()
+        {
+            return new ScreenshotParameters();
         }
     }
 }

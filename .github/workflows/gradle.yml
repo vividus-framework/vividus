@@ -242,8 +242,8 @@ jobs:
         if [[ -n $SAUCELABS_USER && -n $SAUCELABS_KEY ]]; then
           declare -a profiles=( ipad )
           for profile in "${profiles[@]}"; do
-            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs \
-                                                  -Pvividus.configuration.suites=grid \
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs/${profile} \
+                                                  -Pvividus.configuration.suites=system/${profile} \
                                                   -Pvividus.configuration.profiles=saucelabs/web,web/tablet/${profile} \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY}

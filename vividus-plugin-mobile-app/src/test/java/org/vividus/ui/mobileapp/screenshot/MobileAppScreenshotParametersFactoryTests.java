@@ -19,17 +19,22 @@ package org.vividus.ui.mobileapp.screenshot;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.mock;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.selenium.screenshot.IgnoreStrategy;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.util.property.PropertyMappedCollection;
@@ -59,6 +64,7 @@ class MobileAppScreenshotParametersFactoryTests
         defaultConfiguration.setNativeFooterToCut(defaultFooter);
         defaultConfiguration.setShootingStrategy(defaultStrategy);
         factory.setShootingStrategy(SIMPLE);
+        factory.setIgnoreStrategies(Map.of());
         factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of(SIMPLE, defaultConfiguration)));
 
         ScreenshotConfiguration parameters = new ScreenshotConfiguration();
@@ -69,5 +75,25 @@ class MobileAppScreenshotParametersFactoryTests
         ScreenshotParameters configuration = createdConfiguration.get();
         assertEquals(Optional.of(SIMPLE), configuration.getShootingStrategy());
         assertEquals(TEN, configuration.getNativeFooterToCut());
+    }
+
+    @Test
+    void shouldCreateScreenshotConfigurationWithIgnores()
+    {
+        ScreenshotConfiguration defaultConfiguration = new ScreenshotConfiguration();
+        factory.setShootingStrategy(SIMPLE);
+        factory.setIgnoreStrategies(Map.of(IgnoreStrategy.ELEMENT, Set.of(), IgnoreStrategy.AREA, Set.of()));
+        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of(SIMPLE, defaultConfiguration)));
+
+        Locator locator = mock(Locator.class);
+        Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(
+            IgnoreStrategy.ELEMENT, Set.of(locator),
+            IgnoreStrategy.AREA, Set.of(locator)
+        );
+        Optional<ScreenshotParameters> createdConfiguration = factory.create(ignores);
+        assertTrue(createdConfiguration.isPresent());
+
+        ScreenshotParameters configuration = createdConfiguration.get();
+        assertEquals(ignores, configuration.getIgnoreStrategies());
     }
 }

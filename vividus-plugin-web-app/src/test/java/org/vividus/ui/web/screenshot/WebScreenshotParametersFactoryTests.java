@@ -19,11 +19,13 @@ package org.vividus.ui.web.screenshot;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.screenshot.CoordsProviderType;
+import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.screenshot.ScreenshotParameters;
@@ -56,6 +59,7 @@ class WebScreenshotParametersFactoryTests
         WebScreenshotConfiguration defaultConfiguration = new WebScreenshotConfiguration();
         factory.setShootingStrategy(SIMPLE);
         factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of(SIMPLE, defaultConfiguration)));
+        factory.setIgnoreStrategies(Map.of());
 
         WebScreenshotConfiguration userConfiguration = new WebScreenshotConfiguration();
         userConfiguration.setShootingStrategy(Optional.of(SIMPLE));
@@ -84,10 +88,30 @@ class WebScreenshotParametersFactoryTests
     }
 
     @Test
+    void shouldCreateScreenshotConfigurationWithIgnores()
+    {
+        WebScreenshotConfiguration defaultConfiguration = new WebScreenshotConfiguration();
+        factory.setShootingStrategy(SIMPLE);
+        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of(SIMPLE, defaultConfiguration)));
+        factory.setIgnoreStrategies(Map.of(IgnoreStrategy.ELEMENT, Set.of(), IgnoreStrategy.AREA, Set.of()));
+
+        Locator locator = mock(Locator.class);
+        Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(
+            IgnoreStrategy.ELEMENT, Set.of(locator),
+            IgnoreStrategy.AREA, Set.of(locator)
+        );
+        Optional<ScreenshotParameters> createdParameters = factory.create(ignores);
+        assertTrue(createdParameters.isPresent());
+        WebScreenshotParameters configuration = (WebScreenshotParameters) createdParameters.get();
+        assertEquals(ignores, configuration.getIgnoreStrategies());
+    }
+
+    @Test
     void shouldFailIfElementByLocatorDoesNotExist()
     {
         factory.setShootingStrategy(SIMPLE);
         factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of()));
+        factory.setIgnoreStrategies(Map.of());
 
         WebScreenshotConfiguration userParameters = new WebScreenshotConfiguration();
         userParameters.setScrollableElement(Optional.of(locator));

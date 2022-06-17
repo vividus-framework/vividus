@@ -9,7 +9,6 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
         default-lazy-init="true" profile="web">
 
-    <context:component-scan base-package="org.vividus.jackson.databind.ui.web"/>
     <context:component-scan base-package="org.vividus.converter.ui.web" />
 
     <bean id="timeoutConfigurer" class="org.vividus.selenium.TimeoutConfigurer">
@@ -23,9 +22,9 @@
         <property name="webDriverType" value="${selenium.browser}" />
     </bean>
 
-    <bean class="org.vividus.selenium.screenshot.WebAdjustingCoordsProvider" />
+    <bean class="org.vividus.selenium.screenshot.WebCoordsProvider" />
 
-    <bean class="org.vividus.selenium.screenshot.WebScreenshotTaker" parent="abstractScreenshotTaker">
+    <bean id="screenshotTaker" class="org.vividus.selenium.screenshot.WebScreenshotTaker" parent="abstractScreenshotTaker">
         <property name="fullPageScreenshots" value="${selenium.screenshot.full-page}" />
         <property name="indent" value="${selenium.screenshot.indent}" />
         <property name="highlighterType" value="${selenium.screenshot.highlighter}" />
@@ -33,7 +32,10 @@
 
     <bean class="org.vividus.selenium.screenshot.WebAshotFactory" parent="abstractAshotFactory" />
 
-    <bean id="screenshotParametersFactory" class="org.vividus.ui.web.screenshot.WebScreenshotParametersFactory">
+    <bean class="org.vividus.selenium.screenshot.WebScreenshotCropper" />
+
+    <bean id="screenshotParametersFactory" class="org.vividus.ui.web.screenshot.WebScreenshotParametersFactory"
+        parent="abstractScreenshotParametersFactory">
         <property name="shootingStrategy" value="${web.screenshot.strategy}" />
         <property name="screenshotConfigurations">
             <bean factory-bean="propertyMapper" factory-method="readValues">

@@ -16,9 +16,16 @@
 
 package org.vividus.ui.screenshot;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+
+import org.vividus.selenium.screenshot.IgnoreStrategy;
+import org.vividus.ui.action.search.Locator;
 
 public interface ScreenshotParametersFactory<C extends ScreenshotConfiguration>
 {
     Optional<ScreenshotParameters> create(Optional<C> screenshotConfiguration);
+
+    Optional<ScreenshotParameters> create(Map<IgnoreStrategy, Set<Locator>> ignores);
 }

@@ -26,10 +26,11 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.selenium.screenshot.AshotScreenshotTaker;
+import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
-import org.vividus.visual.screenshot.ScreenshotProvider;
 
 import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.comparison.ImageDiff;
@@ -42,7 +43,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
     private static final int ONE_HUNDRED = 100;
     private static final int SCALE = 3;
 
-    private final ScreenshotProvider screenshotProvider;
+    private final AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker;
     private final DiffMarkupPolicyFactory diffMarkupPolicyFactory;
     private final Map<String, BaselineRepository> baselineRepositories;
 
@@ -51,10 +52,10 @@ public class VisualTestingEngine implements IVisualTestingEngine
     private boolean overrideBaselines;
     private String baselineRepository;
 
-    public VisualTestingEngine(ScreenshotProvider screenshotProvider, DiffMarkupPolicyFactory diffMarkupPolicyFactory,
-            Map<String, BaselineRepository> baselineRepositories)
+    public VisualTestingEngine(AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker,
+            DiffMarkupPolicyFactory diffMarkupPolicyFactory, Map<String, BaselineRepository> baselineRepositories)
     {
-        this.screenshotProvider = screenshotProvider;
+        this.ashotScreenshotTaker = ashotScreenshotTaker;
         this.diffMarkupPolicyFactory = diffMarkupPolicyFactory;
         this.baselineRepositories = baselineRepositories;
     }
@@ -71,7 +72,8 @@ public class VisualTestingEngine implements IVisualTestingEngine
 
     private Screenshot getCheckpointScreenshot(VisualCheck visualCheck)
     {
-        return screenshotProvider.take(visualCheck);
+        return ashotScreenshotTaker.takeAshotScreenshot(visualCheck.getSearchContext(),
+                visualCheck.getScreenshotParameters());
     }
 
     @Override

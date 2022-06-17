@@ -16,42 +16,68 @@
 
 package org.vividus.selenium.mobileapp.screenshot;
 
+import java.util.Optional;
+
+import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
 import org.vividus.selenium.mobileapp.screenshot.util.CoordsUtils;
-import org.vividus.selenium.screenshot.AbstractAdjustingCoordsProvider;
 import org.vividus.ui.context.IUiContext;
 
 import ru.yandex.qatools.ashot.coordinates.Coords;
+import ru.yandex.qatools.ashot.coordinates.WebDriverCoordsProvider;
 
-public class MobileAppCoordsProvider extends AbstractAdjustingCoordsProvider
+public class MobileAppCoordsProvider extends WebDriverCoordsProvider
 {
     private static final long serialVersionUID = 2966521618709606533L;
 
     private final transient MobileAppWebDriverManager mobileAppWebDriverManager;
+    private final transient IUiContext uiContext;
     private final boolean downscale;
 
     public MobileAppCoordsProvider(boolean downscale, MobileAppWebDriverManager mobileAppWebDriverManager,
-        IUiContext uiContext)
+            IUiContext uiContext)
     {
-        super(uiContext);
         this.mobileAppWebDriverManager = mobileAppWebDriverManager;
+        this.uiContext = uiContext;
         this.downscale = downscale;
     }
 
     @Override
     public Coords ofElement(WebDriver driver, WebElement element)
     {
-        Coords coords = getCoords(element);
-        coords = element.equals(getUiContext().getSearchContext()) ? coords : adjustToSearchContext(coords);
-        return downscale ? coords : adjustToDpr(coords);
+        Coords coords = super.ofElement(null, element);
+        Coords barSizeAdjustedCoords = cutBarSize(coords);
+
+        if (downscale)
+        {
+            return barSizeAdjustedCoords;
+        }
+
+        Optional<SearchContext> searchContext = uiContext.getOptionalSearchContext();
+        if (searchContext.isPresent())
+        {
+            SearchContext context = searchContext.get();
+            if (!context.equals(element) && context instanceof WebElement)
+            {
+                Coords contextCoords = super.ofElement(null, (WebElement) context);
+                Coords adjustedContext = adjustToDpr(cutBarSize(contextCoords));
+
+                coords.width = adjustToDpr(coords.width);
+                coords.height = adjustToDpr(coords.height);
+                coords.x = adjustedContext.x + adjustToDpr(coords.x - contextCoords.x);
+                coords.y = adjustedContext.y + adjustToDpr(coords.y - contextCoords.y);
+
+                return coords;
+            }
+        }
+
+        return adjustToDpr(barSizeAdjustedCoords);
     }
 
-    @Override
-    protected Coords getCoords(WebElement element)
+    private Coords cutBarSize(Coords coords)
     {
-        Coords coords = super.ofElement(null, element);
         return new Coords(coords.x, coords.y - mobileAppWebDriverManager.getStatusBarSize(), coords.width,
                 coords.height);
     }
@@ -60,5 +86,11 @@ public class MobileAppCoordsProvider extends AbstractAdjustingCoordsProvider
     {
         double dpr = mobileAppWebDriverManager.getDpr();
         return CoordsUtils.scale(coords, dpr);
+    }
+
+    private int adjustToDpr(int value)
+    {
+        double dpr = mobileAppWebDriverManager.getDpr();
+        return CoordsUtils.scale(value, dpr);
     }
 }

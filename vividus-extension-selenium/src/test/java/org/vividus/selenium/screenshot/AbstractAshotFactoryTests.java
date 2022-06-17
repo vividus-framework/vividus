@@ -28,20 +28,28 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.selenium.screenshot.strategies.ScreenshotShootingStrategy;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.shooting.CuttingDecorator;
+import ru.yandex.qatools.ashot.shooting.ElementCroppingDecorator;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 
+@ExtendWith(MockitoExtension.class)
 class AbstractAshotFactoryTests
 {
     private static final String DEFAULT = "default";
-    private final TestAshotFactory factory = new TestAshotFactory();
+
+    @Mock private ScreenshotCropper screenshotCropper;
+    @InjectMocks private TestAshotFactory factory;
 
     @Test
     void shouldProvideScalingBaseStrategy() throws IllegalAccessException
@@ -93,10 +101,23 @@ class AbstractAshotFactoryTests
                 instanceOf(CuttingDecorator.class));
     }
 
+    @Test
+    void shouldDecorateWithCropping()
+    {
+        var strategy = mock(ShootingStrategy.class);
+        assertThat(factory.decorateWithCropping(strategy, Optional.empty()),
+                instanceOf(ElementCroppingDecorator.class));
+    }
+
     private static final class TestAshotFactory extends AbstractAshotFactory<ScreenshotParameters>
     {
         private static final double DPR = 101d;
         private ScreenshotShootingStrategy strategy;
+
+        TestAshotFactory(ScreenshotCropper screenshotCropper)
+        {
+            super(screenshotCropper);
+        }
 
         @Override
         public AShot create(Optional<ScreenshotParameters> screenshotParameters)

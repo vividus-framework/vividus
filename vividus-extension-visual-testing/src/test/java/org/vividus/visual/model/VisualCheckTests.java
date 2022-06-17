@@ -19,7 +19,6 @@ package org.vividus.visual.model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -31,7 +30,6 @@ class VisualCheckTests
     void shouldUseCorrectDefaultValues()
     {
         var visualCheck = new AbstractVisualCheck() { };
-        assertEquals(Map.of(), visualCheck.getElementsToIgnore());
         assertEquals(Optional.empty(), visualCheck.getScreenshotParameters());
         var parameters = Optional.of(mock(ScreenshotParameters.class));
         visualCheck.setScreenshotParameters(parameters);
