@@ -48,6 +48,6 @@ dependencies {
     implementation project(':vividus-plugin-xml')
 
     implementation(group: 'org.postgresql', name: 'postgresql', version: '42.4.0')
-    implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.39')
+    implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.40')
     implementation(group: 'com.h2database', name: 'h2', version: '2.1.214')
 }
