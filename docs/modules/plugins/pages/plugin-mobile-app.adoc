@@ -63,7 +63,7 @@ a|`tagName(android.widget.TextView)->filter.attribute(text=Hi)` - `android.widge
 |See {locator-strategy}[Accessibility ID] selector strategy
 |accessibilityId(menu-toggler) or By.accessibilityId(menu-toggler)
 
-|`ID`
+|`id`
 |any
 |See {locator-strategy}[ID] selector strategy
 |id(org.vividus:id/menu-toggler) or By.id(menu-toggler)
