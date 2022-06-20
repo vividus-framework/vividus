@@ -53,7 +53,7 @@ a|`tagName(android.widget.TextView)->filter.attribute(text=Hi)` - `android.widge
 |Description
 |Examples
 
-|`XPath`
+|`xPath`
 |any
 |Search the app XML source using xpath (not recommended, has {locator-strategy}[performance issues])
 |xpath(//android.widget.TextView[@text='Home']) or By.xpath(//XCUIElementTypeStaticText[@value='Home'])
