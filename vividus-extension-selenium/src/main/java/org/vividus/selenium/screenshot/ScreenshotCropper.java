@@ -49,7 +49,7 @@ public class ScreenshotCropper
         this.webDriverProvider = webDriverProvider;
     }
 
-    public BufferedImage getScreenshot(BufferedImage image, Optional<Coords> contextCoords,
+    public BufferedImage crop(BufferedImage image, Optional<Coords> contextCoords,
             Map<IgnoreStrategy, Set<Locator>> ignoreStrategies, int topAdjustment)
     {
         BufferedImage outputImage = image;

@@ -54,7 +54,7 @@ class ElementCroppingDecoratorTests
     void shouldGetScreenshot()
     {
         when(shootingStrategy.getScreenshot(webDriver)).thenReturn(image);
-        when(screenshotCropper.getScreenshot(image, Optional.empty(), Map.of(), 0)).thenReturn(image);
+        when(screenshotCropper.crop(image, Optional.empty(), Map.of(), 0)).thenReturn(image);
 
         BufferedImage result = decorator.getScreenshot(webDriver);
         assertEquals(image, result);
@@ -76,7 +76,7 @@ class ElementCroppingDecoratorTests
 
         when(shootingStrategy.getScreenshot(webDriver, Set.of(contextCoords))).thenReturn(image);
         when(shootingStrategy.prepareCoords(Set.of(contextCoords))).thenReturn(Set.of(preparedCoords));
-        when(screenshotCropper.getScreenshot(image, Optional.of(contextCoords), Map.of(), 2125)).thenReturn(image);
+        when(screenshotCropper.crop(image, Optional.of(contextCoords), Map.of(), 2125)).thenReturn(image);
 
         decorator = new ElementCroppingDecorator(shootingStrategy, screenshotCropper, Map.of());
         BufferedImage screenshot = decorator.getScreenshot(webDriver, Set.of(contextCoords));

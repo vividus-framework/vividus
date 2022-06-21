@@ -78,7 +78,7 @@ class ScreenshotCropperTests
         when(coordsProvider.ofElements(webDriver, List.of(area))).thenReturn(Set.of(new Coords(270, 311, 1139, 52)));
 
         BufferedImage originalImage = loadImage(ORIGINAL);
-        BufferedImage actual = cropper.getScreenshot(originalImage, Optional.empty(), Map.of(
+        BufferedImage actual = cropper.crop(originalImage, Optional.empty(), Map.of(
             IgnoreStrategy.ELEMENT, Set.of(elementLocator, emptyLocator),
             IgnoreStrategy.AREA, Set.of(areaLocator)
         ), 0);
@@ -93,7 +93,7 @@ class ScreenshotCropperTests
         when(searchActions.findElements(emptyLocator)).thenReturn(List.of());
 
         BufferedImage originalImage = loadImage(ORIGINAL);
-        BufferedImage actual = cropper.getScreenshot(originalImage, Optional.empty(), Map.of(
+        BufferedImage actual = cropper.crop(originalImage, Optional.empty(), Map.of(
             IgnoreStrategy.ELEMENT, Set.of(emptyLocator)
         ), 0);
 

@@ -16,9 +16,6 @@
 
 package org.vividus.selenium.mobileapp.screenshot;
 
-import java.util.Optional;
-
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
@@ -37,7 +34,7 @@ public class MobileAppCoordsProvider extends WebDriverCoordsProvider
     private final boolean downscale;
 
     public MobileAppCoordsProvider(boolean downscale, MobileAppWebDriverManager mobileAppWebDriverManager,
-            IUiContext uiContext)
+        IUiContext uiContext)
     {
         this.mobileAppWebDriverManager = mobileAppWebDriverManager;
         this.uiContext = uiContext;
@@ -55,25 +52,22 @@ public class MobileAppCoordsProvider extends WebDriverCoordsProvider
             return barSizeAdjustedCoords;
         }
 
-        Optional<SearchContext> searchContext = uiContext.getOptionalSearchContext();
-        if (searchContext.isPresent())
-        {
-            SearchContext context = searchContext.get();
-            if (!context.equals(element) && context instanceof WebElement)
-            {
-                Coords contextCoords = super.ofElement(null, (WebElement) context);
-                Coords adjustedContext = adjustToDpr(cutBarSize(contextCoords));
+        return uiContext.getOptionalSearchContext()
+                .filter(context -> !context.equals(element) && context instanceof WebElement)
+                .map(WebElement.class::cast)
+                .map(context -> super.ofElement(null, context))
+                .map(contextCoords ->
+                {
+                    Coords adjustedContext = adjustToDpr(cutBarSize(contextCoords));
 
-                coords.width = adjustToDpr(coords.width);
-                coords.height = adjustToDpr(coords.height);
-                coords.x = adjustedContext.x + adjustToDpr(coords.x - contextCoords.x);
-                coords.y = adjustedContext.y + adjustToDpr(coords.y - contextCoords.y);
+                    coords.width = adjustToDpr(coords.width);
+                    coords.height = adjustToDpr(coords.height);
+                    coords.x = adjustedContext.x + adjustToDpr(coords.x - contextCoords.x);
+                    coords.y = adjustedContext.y + adjustToDpr(coords.y - contextCoords.y);
 
-                return coords;
-            }
-        }
-
-        return adjustToDpr(barSizeAdjustedCoords);
+                    return coords;
+                })
+                .orElseGet(() -> adjustToDpr(barSizeAdjustedCoords));
     }
 
     private Coords cutBarSize(Coords coords)

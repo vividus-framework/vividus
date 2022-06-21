@@ -49,7 +49,7 @@ public class ElementCroppingDecorator extends ShootingDecorator
     public BufferedImage getScreenshot(WebDriver webDriver)
     {
         BufferedImage image = getShootingStrategy().getScreenshot(webDriver);
-        return screenshotCropper.getScreenshot(image, Optional.empty(), ignoreStrategies, 0);
+        return screenshotCropper.crop(image, Optional.empty(), ignoreStrategies, 0);
     }
 
     @Override
@@ -60,7 +60,7 @@ public class ElementCroppingDecorator extends ShootingDecorator
         int contextY = contextCoords.y;
         BufferedImage image = getShootingStrategy().getScreenshot(webDriver, coords);
         Set<Coords> preparedCoords = prepareCoords(Set.of(contextCoords));
-        return screenshotCropper.getScreenshot(image, Optional.of(originalCoords), ignoreStrategies,
+        return screenshotCropper.crop(image, Optional.of(originalCoords), ignoreStrategies,
                 contextY - preparedCoords.iterator().next().y);
     }
 

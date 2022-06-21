@@ -76,7 +76,7 @@ class WebScreenshotCropperTests
 
         Coords targetContext = new Coords(95, 95, 200, 200);
 
-        cropper.getScreenshot(image, Optional.of(targetContext),
+        cropper.crop(image, Optional.of(targetContext),
                 Map.of(IgnoreStrategy.ELEMENT, Set.of(elementLocator)), 0);
 
         verify(g2).clearRect(105, 105, 100, 100);
