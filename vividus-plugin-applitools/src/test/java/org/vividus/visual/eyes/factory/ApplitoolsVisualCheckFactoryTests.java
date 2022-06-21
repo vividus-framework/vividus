@@ -23,7 +23,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
@@ -41,6 +40,7 @@ import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.model.VisualActionType;
+import org.vividus.visual.screenshot.BaselineIndexer;
 
 @ExtendWith(MockitoExtension.class)
 class ApplitoolsVisualCheckFactoryTests
@@ -67,11 +67,9 @@ class ApplitoolsVisualCheckFactoryTests
 
     private static final String BASELINE_ENV_NAME = "baselineEnvName";
 
-    @Mock
-    private ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
-
-    @InjectMocks
-    private ApplitoolsVisualCheckFactory factory;
+    @Mock private ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
+    @Mock private BaselineIndexer baselineIndexer;
+    @InjectMocks private ApplitoolsVisualCheckFactory factory;
 
     @BeforeEach
     void setUp()
@@ -84,13 +82,12 @@ class ApplitoolsVisualCheckFactoryTests
         factory.setReadApiKey(READ_API_KEY);
         factory.setServerUri(SERVER_URI);
         factory.setViewportSize(VIEWPORT_SIZE);
-        factory.setScreenshotIndexer(Optional.empty());
-        factory.setIndexers(Map.of());
     }
 
     @Test
     void shouldCreateApplitoolsVisualCheckAndSetDefaultProperties()
     {
+        when(baselineIndexer.createIndexedBaseline(BASELINE)).thenReturn(BASELINE);
         var screenshotParameters = mock(ScreenshotParameters.class);
         when(screenshotParametersFactory.create(Optional.empty())).thenReturn(Optional.of(screenshotParameters));
         var applitoolsVisualCheck = factory.create(BATCH_NAME, BASELINE, ACTION);

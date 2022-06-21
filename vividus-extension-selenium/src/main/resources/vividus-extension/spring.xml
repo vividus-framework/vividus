@@ -9,6 +9,7 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
         default-lazy-init="true" profile="web,mobile_app">
 
+    <context:component-scan base-package="org.vividus.jackson.databind.ui"/>
     <context:component-scan base-package="org.vividus.converter.ui" >
          <context:exclude-filter type="regex" expression="org\.vividus\.converter\.ui\..*\..*"/>
     </context:component-scan>
@@ -156,6 +157,15 @@
 
     <bean id="abstractAshotFactory" class="org.vividus.selenium.screenshot.AbstractAshotFactory" abstract="true">
         <property name="screenshotShootingStrategy" value="${selenium.screenshot.strategy}" />
+    </bean>
+
+    <bean id="abstractScreenshotParametersFactory" class="org.vividus.ui.screenshot.AbstractScreenshotParametersFactory" abstract="true">
+        <property name="ignoreStrategies">
+             <util:map key-type="org.vividus.selenium.screenshot.IgnoreStrategy" map-class="java.util.LinkedHashMap">
+                 <entry key="ELEMENT" value="${ui.visual.ignored-elements}"/>
+                 <entry key="AREA" value="${ui.visual.ignored-areas}"/>
+             </util:map>
+         </property>
     </bean>
 
     <bean id="screenshotDebugger" class="org.vividus.selenium.screenshot.FilesystemScreenshotDebugger"

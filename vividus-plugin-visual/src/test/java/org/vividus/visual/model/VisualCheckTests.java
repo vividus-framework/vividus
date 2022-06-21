@@ -18,7 +18,6 @@ package org.vividus.visual.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
@@ -36,7 +35,6 @@ class VisualCheckTests
         Assertions.assertAll(
             () -> assertEquals(OptionalDouble.empty(), visualCheck.getAcceptableDiffPercentage()),
             () -> assertEquals(OptionalDouble.empty(), visualCheck.getRequiredDiffPercentage()),
-            () -> assertEquals(Map.of(), visualCheck.getElementsToIgnore()),
             () -> assertEquals(Optional.empty(), visualCheck.getScreenshotParameters()));
     }
 

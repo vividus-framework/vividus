@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
+import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
@@ -102,5 +105,23 @@ class VisualTestingStepsTests
         visualTestingSteps.performCheck(List.of(check, check), screenshotConfiguration);
         verifyVisualCheck(result, 2);
         verify(check, times(2)).setScreenshotParameters(Optional.of(screenshotParameters));
+    }
+
+    @Test
+    void shouldRunApplitoolsVisualCheckUsingApplitoolsConfiguration()
+    {
+        ApplitoolsVisualCheck check = mock(ApplitoolsVisualCheck.class);
+        ApplitoolsVisualCheckResult result = mock(ApplitoolsVisualCheckResult.class);
+        when(visualTestingService.run(check)).thenReturn(result);
+        WebScreenshotParameters screenshotParameters = mock(WebScreenshotParameters.class);
+        Locator locator = mock(Locator.class);
+        when(check.getElementsToIgnore()).thenReturn(Set.of(locator));
+        when(check.getAreasToIgnore()).thenReturn(Set.of(locator));
+        when(screenshotParametersFactory
+            .create(Map.of(IgnoreStrategy.AREA, Set.of(locator), IgnoreStrategy.ELEMENT, Set.of(locator))))
+                    .thenReturn(Optional.of(screenshotParameters));
+        visualTestingSteps.performCheck(List.of(check));
+        verifyVisualCheck(result, 1);
+        verify(check).setScreenshotParameters(Optional.of(screenshotParameters));
     }
 }

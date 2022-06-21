@@ -24,6 +24,7 @@ import java.util.Optional;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
 import org.vividus.selenium.mobileapp.screenshot.util.CoordsUtils;
 import org.vividus.selenium.screenshot.AbstractAshotFactory;
+import org.vividus.selenium.screenshot.ScreenshotCropper;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
 import ru.yandex.qatools.ashot.AShot;
@@ -36,8 +37,10 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotParame
     private final CoordsProvider coordsProvider;
     private boolean downscale;
 
-    public MobileAppAshotFactory(MobileAppWebDriverManager genericWebDriverManager, CoordsProvider coordsProvider)
+    public MobileAppAshotFactory(ScreenshotCropper screenshotCropper, MobileAppWebDriverManager genericWebDriverManager,
+            CoordsProvider coordsProvider)
     {
+        super(screenshotCropper);
         this.mobileAppWebDriverManager = genericWebDriverManager;
         this.coordsProvider = coordsProvider;
     }
@@ -57,6 +60,9 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotParame
         }
         int nativeFooterToCut = screenshotParameters.map(ScreenshotParameters::getNativeFooterToCut).orElse(0);
         strategy = decorateWithFixedCutStrategy(strategy, statusBarSize, nativeFooterToCut);
+
+        strategy = decorateWithCropping(strategy, screenshotParameters);
+
         return new AShot().shootingStrategy(strategy).coordsProvider(coordsProvider);
     }
 

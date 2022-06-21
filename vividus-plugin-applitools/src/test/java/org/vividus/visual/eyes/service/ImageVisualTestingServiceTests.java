@@ -53,11 +53,12 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
+import org.vividus.selenium.screenshot.AshotScreenshotTaker;
+import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.visual.eyes.factory.ImageEyesFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheckResult;
 import org.vividus.visual.model.VisualActionType;
-import org.vividus.visual.screenshot.ScreenshotProvider;
 
 import ru.yandex.qatools.ashot.Screenshot;
 
@@ -85,11 +86,12 @@ class ImageVisualTestingServiceTests
     private static final String BATCH_NAME = "batchName";
 
     private final ImageEyesFactory eyesFactory = mock(ImageEyesFactory.class);
-    private final ScreenshotProvider screenshotProvider = mock(ScreenshotProvider.class);
+    @SuppressWarnings("unchecked")
+    private final AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker = mock(AshotScreenshotTaker.class);
     private final IHttpClient httpClient = mock(IHttpClient.class);
 
     @InjectMocks private final ImageVisualTestingService imageVisualTestingService
-        = new ImageVisualTestingService(eyesFactory, screenshotProvider, httpClient);
+        = new ImageVisualTestingService(eyesFactory, ashotScreenshotTaker, httpClient);
 
     @Test
     void shouldRunVisualTestAndPublishResults() throws IOException
@@ -204,7 +206,8 @@ class ImageVisualTestingServiceTests
     private BufferedImage mockScreenshot(ApplitoolsVisualCheck applitoolsVisualCheck)
     {
         Screenshot screenshot = mock(Screenshot.class);
-        when(screenshotProvider.take(applitoolsVisualCheck)).thenReturn(screenshot);
+        when(ashotScreenshotTaker.takeAshotScreenshot(applitoolsVisualCheck.getSearchContext(),
+                applitoolsVisualCheck.getScreenshotParameters())).thenReturn(screenshot);
         BufferedImage image = mock(BufferedImage.class);
         when(screenshot.getImage()).thenReturn(image);
         return image;

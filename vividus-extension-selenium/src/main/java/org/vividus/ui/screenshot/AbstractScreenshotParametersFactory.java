@@ -16,31 +16,41 @@
 
 package org.vividus.ui.screenshot;
 
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BinaryOperator;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.Validate;
+import org.vividus.selenium.screenshot.IgnoreStrategy;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.util.property.PropertyMappedCollection;
 
-public abstract class AbstractScreenshotParametersFactory<C extends ScreenshotConfiguration>
-        implements ScreenshotParametersFactory<C>
+public abstract class AbstractScreenshotParametersFactory<C extends ScreenshotConfiguration,
+        P extends ScreenshotParameters> implements ScreenshotParametersFactory<C>
 {
     private PropertyMappedCollection<C> screenshotConfigurations;
     private String shootingStrategy;
+    private Map<IgnoreStrategy, Set<Locator>> ignoreStrategies;
+
+    protected Optional<C> getDefaultConfiguration()
+    {
+        return screenshotConfigurations.getNullable(shootingStrategy);
+    }
 
     protected Optional<C> getScreenshotConfiguration(Optional<C> screenshotConfiguration, BinaryOperator<C> merger)
     {
-        Optional<C> defaultConfiguration = screenshotConfigurations.getNullable(shootingStrategy);
+        Optional<C> defaultConfiguration = getDefaultConfiguration();
         if (screenshotConfiguration.isEmpty())
         {
             return defaultConfiguration;
         }
-        else if (defaultConfiguration.isPresent())
-        {
-            return Optional.of(merger.apply(screenshotConfiguration.get(), defaultConfiguration.get()));
-        }
-        return screenshotConfiguration;
+        return defaultConfiguration.map(c -> merger.apply(screenshotConfiguration.get(), c))
+                .or(() -> screenshotConfiguration);
     }
 
     protected int ensureValidCutSize(int value, String key)
@@ -49,13 +59,44 @@ public abstract class AbstractScreenshotParametersFactory<C extends ScreenshotCo
         return value;
     }
 
-    protected <R extends ScreenshotParameters> R createWithBaseConfiguration(ScreenshotConfiguration configuration,
-            Supplier<R> parametersFactory)
+    protected P createWithBaseConfiguration(ScreenshotConfiguration configuration)
     {
-        R parameters = parametersFactory.get();
+        Map<IgnoreStrategy, Set<Locator>> stepIgnores = Map.of(
+            IgnoreStrategy.ELEMENT, configuration.getElementsToIgnore(),
+            IgnoreStrategy.AREA, configuration.getAreasToIgnore()
+        );
+
+        return createWithBaseConfiguration(configuration, stepIgnores);
+    }
+
+    protected P createWithBaseConfiguration(ScreenshotConfiguration configuration,
+            Map<IgnoreStrategy, Set<Locator>> stepIgnores)
+    {
+        P parameters = createScreenshotParameters();
         parameters.setShootingStrategy(configuration.getShootingStrategy());
         parameters.setNativeFooterToCut(ensureValidCutSize(configuration.getNativeFooterToCut(), "native footer"));
+
+        Map<IgnoreStrategy, Set<Locator>> ignores = new EnumMap<>(IgnoreStrategy.class);
+
+        for (Map.Entry<IgnoreStrategy, Set<Locator>> ignoreStrategy : ignoreStrategies.entrySet())
+        {
+            IgnoreStrategy cropStrategy = ignoreStrategy.getKey();
+            Set<Locator> ignore = Stream.concat(
+                    getLocatorsStream(ignoreStrategy.getValue()),
+                    getLocatorsStream(stepIgnores.get(cropStrategy)))
+                    .collect(Collectors.toSet());
+            ignores.put(cropStrategy, ignore);
+        }
+        parameters.setIgnoreStrategies(ignores);
+
         return parameters;
+    }
+
+    protected abstract P createScreenshotParameters();
+
+    private Stream<Locator> getLocatorsStream(Set<Locator> locatorsSet)
+    {
+        return Optional.ofNullable(locatorsSet).stream().flatMap(Collection::stream);
     }
 
     public void setShootingStrategy(String shootingStrategy)
@@ -66,5 +107,10 @@ public abstract class AbstractScreenshotParametersFactory<C extends ScreenshotCo
     public void setScreenshotConfigurations(PropertyMappedCollection<C> screenshotConfigurations)
     {
         this.screenshotConfigurations = screenshotConfigurations;
+    }
+
+    public void setIgnoreStrategies(Map<IgnoreStrategy, Set<Locator>> ignoreStrategies)
+    {
+        this.ignoreStrategies = ignoreStrategies;
     }
 }

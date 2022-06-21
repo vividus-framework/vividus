@@ -19,6 +19,7 @@ package org.vividus.selenium.screenshot;
 import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.cutting;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 import javax.inject.Inject;
@@ -27,6 +28,7 @@ import org.apache.commons.lang3.Validate;
 import org.vividus.selenium.screenshot.strategies.ScreenshotShootingStrategy;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
+import ru.yandex.qatools.ashot.shooting.ElementCroppingDecorator;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 import ru.yandex.qatools.ashot.shooting.cutter.CutStrategy;
@@ -36,6 +38,13 @@ public abstract class AbstractAshotFactory<T extends ScreenshotParameters> imple
 {
     private Map<String, ScreenshotShootingStrategy> strategies;
     private String screenshotShootingStrategy;
+
+    private final ScreenshotCropper screenshotCropper;
+
+    protected AbstractAshotFactory(ScreenshotCropper screenshotCropper)
+    {
+        this.screenshotCropper = screenshotCropper;
+    }
 
     protected ShootingStrategy decorateWithFixedCutStrategy(ShootingStrategy original, int headerToCut, int footerToCut)
     {
@@ -48,6 +57,13 @@ public abstract class AbstractAshotFactory<T extends ScreenshotParameters> imple
         return footerToCut > 0 || headerToCut > 0
                 ? cutting(original, cutStrategyFactory.apply(headerToCut, footerToCut))
                 : original;
+    }
+
+    protected ShootingStrategy decorateWithCropping(ShootingStrategy strategy,
+            Optional<ScreenshotParameters> screenshotParameters)
+    {
+        return new ElementCroppingDecorator(strategy, screenshotCropper,
+                screenshotParameters.map(ScreenshotParameters::getIgnoreStrategies).orElse(Map.of()));
     }
 
     protected ScreenshotShootingStrategy getStrategyBy(String strategyName)

@@ -46,8 +46,11 @@ import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 
 import ru.yandex.qatools.ashot.AShot;
+import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 import ru.yandex.qatools.ashot.shooting.CuttingDecorator;
+import ru.yandex.qatools.ashot.shooting.ElementCroppingDecorator;
 import ru.yandex.qatools.ashot.shooting.ScalingDecorator;
+import ru.yandex.qatools.ashot.shooting.ScrollbarHidingDecorator;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 import ru.yandex.qatools.ashot.shooting.cutter.CutStrategy;
 import ru.yandex.qatools.ashot.shooting.cutter.FixedCutStrategy;
@@ -77,8 +80,10 @@ class WebAshotFactoryTests
         webAshotFactory.setStrategies(Map.of(VIEWPORT_PASTING, new ViewportPastingScreenshotShootingStrategy()));
         webAshotFactory.setScreenshotShootingStrategy(VIEWPORT_PASTING);
         AShot aShot = webAshotFactory.create(Optional.empty());
-        assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
-        assertThat(FieldUtils.readField(aShot, SHOOTING_STRATEGY, true),
+        validateCoordsProvider(aShot);
+        ShootingStrategy baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
+        assertThat(baseStrategy, instanceOf(ScrollbarHidingDecorator.class));
+        assertThat(FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true),
                 instanceOf(AdjustingViewportPastingDecorator.class));
     }
 
@@ -90,8 +95,10 @@ class WebAshotFactoryTests
         WebScreenshotParameters screenshotParameters = new WebScreenshotParameters();
         screenshotParameters.setShootingStrategy(Optional.of(VIEWPORT_PASTING));
         AShot aShot = webAshotFactory.create(Optional.of(screenshotParameters));
-        assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
-        assertThat(FieldUtils.readField(aShot, SHOOTING_STRATEGY, true),
+        validateCoordsProvider(aShot);
+        ShootingStrategy baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
+        assertThat(baseStrategy, instanceOf(ScrollbarHidingDecorator.class));
+        assertThat(FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true),
                 instanceOf(AdjustingViewportPastingDecorator.class));
     }
 
@@ -101,8 +108,11 @@ class WebAshotFactoryTests
         webAshotFactory.setStrategies(Map.of(SIMPLE, new SimpleScreenshotShootingStrategy()));
         webAshotFactory.setScreenshotShootingStrategy(SIMPLE);
         AShot aShot = webAshotFactory.create(Optional.empty());
-        assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
-        assertThat(FieldUtils.readField(aShot, SHOOTING_STRATEGY, true), instanceOf(ViewportShootingStrategy.class));
+        validateCoordsProvider(aShot);
+        ShootingStrategy baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
+        assertThat(baseStrategy, instanceOf(ScrollbarHidingDecorator.class));
+        assertThat(FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true),
+                instanceOf(ViewportShootingStrategy.class));
     }
 
     @Test
@@ -119,9 +129,16 @@ class WebAshotFactoryTests
 
         AShot aShot = webAshotFactory.create(Optional.of(screenshotParameters));
 
-        assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
-        ShootingStrategy viewportPastingDecorator = getShootingStrategy(aShot);
-        assertThat(viewportPastingDecorator, is(instanceOf(AdjustingViewportPastingDecorator.class)));
+        validateCoordsProvider(aShot);
+        ShootingStrategy baseStrategy = getShootingStrategy(aShot);
+        assertThat(baseStrategy, is(instanceOf(ElementCroppingDecorator.class)));
+
+        ShootingStrategy scrollbarHidingDecorator = (ShootingStrategy) FieldUtils.readField(baseStrategy,
+                SHOOTING_STRATEGY, true);
+        assertThat(scrollbarHidingDecorator, is(instanceOf(ScrollbarHidingDecorator.class)));
+
+        ShootingStrategy viewportPastingDecorator = (ShootingStrategy) FieldUtils.readField(scrollbarHidingDecorator,
+                SHOOTING_STRATEGY, true);
         assertEquals(500, (int) FieldUtils.readField(viewportPastingDecorator, "scrollTimeout", true));
         assertEquals(screenshotDebugger, FieldUtils.readField(viewportPastingDecorator, "screenshotDebugger", true));
 
@@ -160,15 +177,32 @@ class WebAshotFactoryTests
         screenshotParameters.setScrollTimeout(Duration.ofMillis(TEN));
         AShot aShot = webAshotFactory.create(Optional.of(screenshotParameters));
 
-        assertThat(FieldUtils.readField(aShot, COORDS_PROVIDER, true), is(instanceOf(CeilingJsCoordsProvider.class)));
-        ShootingStrategy scrollableElementAwareDecorator = getShootingStrategy(aShot);
+        validateCoordsProvider(aShot);
+        ShootingStrategy decorator = getShootingStrategy(aShot);
+        assertThat(decorator, is(instanceOf(ElementCroppingDecorator.class)));
+
+        ShootingStrategy scrollbarHidingDecorator = (ShootingStrategy) FieldUtils.readField(decorator,
+                SHOOTING_STRATEGY, true);
+        assertThat(scrollbarHidingDecorator, is(instanceOf(ScrollbarHidingDecorator.class)));
+
+        ShootingStrategy scrollableElementAwareDecorator = (ShootingStrategy) FieldUtils
+                .readField(scrollbarHidingDecorator, SHOOTING_STRATEGY, true);
         assertThat(scrollableElementAwareDecorator,
                 is(instanceOf(AdjustingScrollableElementAwareViewportPastingDecorator.class)));
+
         assertEquals(webElement, FieldUtils.readField(scrollableElementAwareDecorator, "scrollableElement", true));
 
         ShootingStrategy scalingDecorator = getShootingStrategy(scrollableElementAwareDecorator);
         assertThat(scalingDecorator, is(instanceOf(ScalingDecorator.class)));
         verifyDPR(scalingDecorator);
+    }
+
+    private void validateCoordsProvider(AShot aShot) throws IllegalAccessException
+    {
+        CoordsProvider coordsProvider = (CoordsProvider) FieldUtils.readField(aShot, COORDS_PROVIDER, true);
+        assertThat(coordsProvider, is(instanceOf(ScrollBarHidingCoordsProviderDecorator.class)));
+        coordsProvider = (CoordsProvider) FieldUtils.readField(coordsProvider, COORDS_PROVIDER, true);
+        assertThat(coordsProvider, is(instanceOf(CeilingJsCoordsProvider.class)));
     }
 
     private CutStrategy getCutStrategy(Object hasCutStrategy) throws IllegalAccessException

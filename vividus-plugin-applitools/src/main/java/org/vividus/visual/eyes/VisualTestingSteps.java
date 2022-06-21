@@ -17,12 +17,16 @@
 package org.vividus.visual.eyes;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import org.jbehave.core.annotations.When;
 import org.vividus.reporter.event.IAttachmentPublisher;
+import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParameters;
@@ -183,11 +187,27 @@ public class VisualTestingSteps extends AbstractVisualSteps
                 .forEach(visualCheck -> runApplitoolsTest(visualCheck, Optional.of(screenshotConfiguration)));
     }
 
-    private void runApplitoolsTest(ApplitoolsVisualCheck visualCheck, Optional<ScreenshotConfiguration> configuration)
+    private void runApplitoolsTest(ApplitoolsVisualCheck visualCheck,
+            Optional<ScreenshotConfiguration> screenshotConfiguration)
     {
         runApplitoolsTest(() ->
         {
-            Optional<ScreenshotParameters> screenshotParameters = screenshotParametersFactory.create(configuration);
+            Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(
+                    IgnoreStrategy.AREA, visualCheck.getAreasToIgnore(),
+                    IgnoreStrategy.ELEMENT, visualCheck.getElementsToIgnore()
+            );
+
+            Optional<ScreenshotParameters> screenshotParameters;
+            if (screenshotConfiguration.isPresent())
+            {
+                patchIgnores("applitools configuration", screenshotConfiguration.get(), ignores);
+                screenshotParameters = screenshotParametersFactory.create(screenshotConfiguration);
+            }
+            else
+            {
+                screenshotParameters = screenshotParametersFactory.create(ignores);
+            }
+
             visualCheck.setScreenshotParameters(screenshotParameters);
             return visualCheck;
         });
@@ -195,6 +215,6 @@ public class VisualTestingSteps extends AbstractVisualSteps
 
     void runApplitoolsTest(Supplier<ApplitoolsVisualCheck> applitoolsVisualCheckSupplier)
     {
-        execute(visualTestingService::run, applitoolsVisualCheckSupplier, "applitools-visual-comparison.ftl");
+        execute(applitoolsVisualCheckSupplier, visualTestingService::run, "applitools-visual-comparison.ftl");
     }
 }

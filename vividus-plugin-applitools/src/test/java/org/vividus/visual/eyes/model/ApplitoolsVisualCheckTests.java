@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,11 @@ package org.vividus.visual.eyes.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.search.WebLocatorType;
-import org.vividus.visual.screenshot.IgnoreStrategy;
 
 class ApplitoolsVisualCheckTests
 {
@@ -33,20 +31,18 @@ class ApplitoolsVisualCheckTests
     @Test
     void shouldUseEmptySetsAsDefaultIgnores()
     {
-        visualCheck.buildIgnores();
-        assertEquals(Map.of(IgnoreStrategy.AREA, Set.of(), IgnoreStrategy.ELEMENT, Set.of()),
-                visualCheck.getElementsToIgnore());
+        assertEquals(Set.of(), visualCheck.getElementsToIgnore());
+        assertEquals(Set.of(), visualCheck.getAreasToIgnore());
     }
 
     @Test
     void shouldFillElementsToIgnoreWithValues()
     {
-        Set<Locator> element = Set.of(new Locator(WebLocatorType.ID, "element"));
-        Set<Locator> area = Set.of(new Locator(WebLocatorType.ID, "area"));
-        visualCheck.setElementsToIgnore(element);
-        visualCheck.setAreasToIgnore(area);
-        visualCheck.buildIgnores();
-        assertEquals(Map.of(IgnoreStrategy.AREA, area, IgnoreStrategy.ELEMENT, element),
-                visualCheck.getElementsToIgnore());
+        Set<Locator> elements = Set.of(new Locator(WebLocatorType.ID, "element"));
+        Set<Locator> areas = Set.of(new Locator(WebLocatorType.ID, "area"));
+        visualCheck.setElementsToIgnore(elements);
+        visualCheck.setAreasToIgnore(areas);
+        assertEquals(elements, visualCheck.getElementsToIgnore());
+        assertEquals(areas, visualCheck.getAreasToIgnore());
     }
 }

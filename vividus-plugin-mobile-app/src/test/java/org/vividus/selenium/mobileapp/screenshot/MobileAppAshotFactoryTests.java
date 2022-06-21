@@ -39,6 +39,7 @@ import org.vividus.ui.screenshot.ScreenshotParameters;
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 import ru.yandex.qatools.ashot.shooting.CuttingDecorator;
+import ru.yandex.qatools.ashot.shooting.ElementCroppingDecorator;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
 import ru.yandex.qatools.ashot.shooting.cutter.CutStrategy;
 
@@ -50,9 +51,12 @@ class MobileAppAshotFactoryTests
     private static final String DIMPLE = "dimple";
     private static final String SIMPLE = "SIMPLE";
 
-    @Mock private MobileAppWebDriverManager mobileAppWebDriverManager;
-    @Mock private CoordsProvider coordsProvider;
-    @InjectMocks private MobileAppAshotFactory ashotFactory;
+    @Mock
+    private MobileAppWebDriverManager mobileAppWebDriverManager;
+    @Mock
+    private CoordsProvider coordsProvider;
+    @InjectMocks
+    private MobileAppAshotFactory ashotFactory;
 
     @Test
     void shouldProvideDpr()
@@ -63,16 +67,16 @@ class MobileAppAshotFactoryTests
 
     @SuppressWarnings("unchecked")
     @ParameterizedTest
-    @CsvSource({
-        "true,  1, ru.yandex.qatools.ashot.shooting.ScalingDecorator",
-        "false, 2, ru.yandex.qatools.ashot.shooting.SimpleShootingStrategy"
-    })
+    @CsvSource({ "true,  1, ru.yandex.qatools.ashot.shooting.ScalingDecorator",
+            "false, 2, ru.yandex.qatools.ashot.shooting.SimpleShootingStrategy" })
     void shouldCreateAshotWithTheMergedConfiguration(boolean downscale, int headerToCut, Class<?> strategyType)
             throws IllegalAccessException
     {
         mockAshotConfiguration(DIMPLE, downscale);
         AShot aShot = ashotFactory.create(createConfigurationWith(10, Optional.of(SIMPLE)));
-        CuttingDecorator strategy = (CuttingDecorator) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
+        ElementCroppingDecorator croppingDecorator = (ElementCroppingDecorator) FieldUtils.readField(aShot,
+                SHOOTING_STRATEGY, true);
+        CuttingDecorator strategy = (CuttingDecorator) FieldUtils.readField(croppingDecorator, SHOOTING_STRATEGY, true);
         ShootingStrategy baseStrategy = (ShootingStrategy) FieldUtils.readField(strategy, SHOOTING_STRATEGY, true);
         CutStrategy cutStrategy = (CutStrategy) FieldUtils.readField(strategy, CUT_STRATEGY, true);
         assertEquals(strategyType, baseStrategy.getClass());
@@ -85,7 +89,8 @@ class MobileAppAshotFactoryTests
     private void mockAshotConfiguration(String defaultStrategy, boolean downscale)
     {
         ashotFactory.setDownscale(downscale);
-        ashotFactory.setStrategies(Map.of(SIMPLE, new SimpleScreenshotShootingStrategy(), DIMPLE, s -> {
+        ashotFactory.setStrategies(Map.of(SIMPLE, new SimpleScreenshotShootingStrategy(), DIMPLE, s ->
+        {
             throw new IllegalStateException();
         }));
         when(mobileAppWebDriverManager.getDpr()).thenReturn(2d);

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -29,20 +30,25 @@ import java.util.stream.Stream;
 
 import com.google.gson.reflect.TypeToken;
 
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.steps.ConvertedParameters;
 import org.jbehave.core.steps.Parameters;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.resource.ResourceLoadException;
+import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotParameters;
+import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.visual.engine.IVisualTestingEngine;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
-import org.vividus.visual.screenshot.IgnoreStrategy;
+import org.vividus.visual.screenshot.BaselineIndexer;
 import org.vividus.visual.steps.AbstractVisualSteps;
 
 public class VisualSteps extends AbstractVisualSteps
@@ -53,14 +59,18 @@ public class VisualSteps extends AbstractVisualSteps
     private static final String REQUIRED_DIFF_PERCENTAGE_COLUMN_NAME = "REQUIRED_DIFF_PERCENTAGE";
 
     private final IVisualTestingEngine visualTestingEngine;
-    private final VisualCheckFactory visualCheckFactory;
+    private final ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
+    private final BaselineIndexer baselineIndexer;
 
     public VisualSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher,
-            IVisualTestingEngine visualTestingEngine, ISoftAssert softAssert, VisualCheckFactory visualCheckFactory)
+            IVisualTestingEngine visualTestingEngine, ISoftAssert softAssert,
+            ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory,
+            BaselineIndexer baselineIndexer)
     {
         super(uiContext, attachmentPublisher, softAssert);
         this.visualTestingEngine = visualTestingEngine;
-        this.visualCheckFactory = visualCheckFactory;
+        this.screenshotParametersFactory = screenshotParametersFactory;
+        this.baselineIndexer = baselineIndexer;
     }
 
     /**
@@ -72,7 +82,7 @@ public class VisualSteps extends AbstractVisualSteps
     @When("I $actionType baseline with name `$name`")
     public void runVisualTests(VisualActionType actionType, String name)
     {
-        performVisualAction(() -> visualCheckFactory.create(name, actionType));
+        performVisualAction(name, actionType, Optional.empty(), Optional.empty());
     }
 
     /**
@@ -85,16 +95,7 @@ public class VisualSteps extends AbstractVisualSteps
     @When(value = "I $actionType baseline with name `$name` using repository `$repository`", priority = 1)
     public void runVisualTests(VisualActionType actionType, String name, String repository)
     {
-        performVisualAction(withRepository(() -> visualCheckFactory.create(name, actionType), repository));
-    }
-
-    private Supplier<VisualCheck> withRepository(Supplier<VisualCheck> visualCheckProvider, String repository)
-    {
-        return () -> {
-            VisualCheck visualCheck = visualCheckProvider.get();
-            visualCheck.setBaselineRepository(Optional.of(repository));
-            return visualCheck;
-        };
+        performVisualAction(name, actionType, Optional.of(repository), Optional.empty());
     }
 
     /**
@@ -111,7 +112,7 @@ public class VisualSteps extends AbstractVisualSteps
     public void runVisualTests(VisualActionType actionType, String name,
             ScreenshotConfiguration screenshotConfiguration)
     {
-        performVisualAction(() -> visualCheckFactory.create(name, actionType, Optional.of(screenshotConfiguration)));
+        performVisualAction(name, actionType, Optional.empty(), Optional.of(screenshotConfiguration));
     }
 
     /**
@@ -130,25 +131,7 @@ public class VisualSteps extends AbstractVisualSteps
     public void runVisualTests(VisualActionType actionType, String name, String repository,
             ScreenshotConfiguration screenshotConfiguration)
     {
-        performVisualAction(withRepository(() -> visualCheckFactory.create(name, actionType,
-                Optional.of(screenshotConfiguration)), repository));
-    }
-
-    private void performVisualAction(Supplier<VisualCheck> visualCheckFactory)
-    {
-        execute(check -> {
-            try
-            {
-                return check.getAction() == VisualActionType.ESTABLISH
-                                         ? visualTestingEngine.establish(check)
-                                         : visualTestingEngine.compareAgainst(check);
-            }
-            catch (IOException | ResourceLoadException e)
-            {
-                getSoftAssert().recordFailedAssertion(e);
-            }
-            return null;
-        }, visualCheckFactory, "visual-comparison.ftl");
+        performVisualAction(name, actionType, Optional.of(repository), Optional.of(screenshotConfiguration));
     }
 
     /**
@@ -164,7 +147,7 @@ public class VisualSteps extends AbstractVisualSteps
     @When("I $actionType baseline with name `$name` ignoring:$checkSettings")
     public void runVisualTests(VisualActionType actionType, String name, ExamplesTable checkSettings)
     {
-        runVisualTests(() -> visualCheckFactory.create(name, actionType), checkSettings);
+        performVisualAction(checkSettings, name, actionType, Optional.empty(), Optional.empty());
     }
 
     /**
@@ -183,7 +166,7 @@ public class VisualSteps extends AbstractVisualSteps
         priority = 1)
     public void runVisualTests(VisualActionType actionType, String name, String repository, ExamplesTable checkSettings)
     {
-        runVisualTests(withRepository(() -> visualCheckFactory.create(name, actionType), repository), checkSettings);
+        performVisualAction(checkSettings, name, actionType, Optional.of(repository), Optional.empty());
     }
 
     /**
@@ -206,8 +189,7 @@ public class VisualSteps extends AbstractVisualSteps
     public void runVisualTests(VisualActionType actionType, String name, ExamplesTable checkSettings,
             ScreenshotConfiguration screenshotConfiguration)
     {
-        runVisualTests(() -> visualCheckFactory.create(name, actionType, Optional.of(screenshotConfiguration)),
-                checkSettings);
+        performVisualAction(checkSettings, name, actionType, Optional.empty(), Optional.of(screenshotConfiguration));
     }
 
     /**
@@ -231,55 +213,95 @@ public class VisualSteps extends AbstractVisualSteps
     public void runVisualTests(VisualActionType actionType, String name, String repository, ExamplesTable checkSettings,
             ScreenshotConfiguration screenshotConfiguration)
     {
-        runVisualTests(
-                withRepository(() -> visualCheckFactory.create(name, actionType, Optional.of(screenshotConfiguration)),
-                        repository), checkSettings);
+        performVisualAction(checkSettings, name, actionType, Optional.of(repository),
+                Optional.of(screenshotConfiguration));
     }
 
-    private void runVisualTests(Supplier<VisualCheck> visualCheckFactory, ExamplesTable checkSettings)
+    private void performVisualAction(ExamplesTable checkSettingsTable, String baselineName, VisualActionType actionType,
+            Optional<String> baselineRepository, Optional<ScreenshotConfiguration> screenshotConfiguration)
     {
-        int rowsSize = checkSettings.getRows().size();
-        if (rowsSize != 1)
-        {
-            throw new IllegalArgumentException("Only one row of locators to ignore supported, actual: "
-            + rowsSize);
-        }
-        Parameters rowAsParameters = checkSettings.getRowAsParameters(0);
-        Map<IgnoreStrategy, Set<Locator>> toIgnore = Stream.of(IgnoreStrategy.values())
-                                                      .collect(Collectors.toMap(Function.identity(),
-                                                          s -> getLocatorsSet(rowAsParameters, s)));
+        int rowsSize = checkSettingsTable.getRows().size();
+        Validate.isTrue(rowsSize == 1, "Only one row of locators to ignore supported, actual: %s", rowsSize);
+        Parameters checkSettings = checkSettingsTable.getRowAsParameters(0);
 
-        performVisualAction(() -> {
-            VisualCheck visualCheck = visualCheckFactory.get();
-            visualCheck.setElementsToIgnore(toIgnore);
-            setDiffPercentage(visualCheck, rowAsParameters);
+        performVisualAction(baselineName, actionType, baselineRepository, screenshotConfiguration, checkSettings);
+    }
+
+    private void performVisualAction(String baselineName, VisualActionType actionType,
+            Optional<String> baselineRepository, Optional<ScreenshotConfiguration> screenshotConfiguration)
+    {
+        performVisualAction(baselineName, actionType, baselineRepository, screenshotConfiguration,
+                new ConvertedParameters(Map.of(), null));
+    }
+
+    private void performVisualAction(String baselineName, VisualActionType actionType,
+            Optional<String> baselineRepository, Optional<ScreenshotConfiguration> screenshotConfiguration,
+            Parameters checkSettings)
+    {
+        Supplier<VisualCheck> visualCheckFactory = () -> {
+            Map<IgnoreStrategy, Set<Locator>> ignores = getIgnores(checkSettings);
+
+            Optional<ScreenshotParameters> screenshotParameters;
+            if (screenshotConfiguration.isPresent())
+            {
+                patchIgnores("ignores table", screenshotConfiguration.get(), ignores);
+                screenshotParameters = screenshotParametersFactory.create(screenshotConfiguration);
+            }
+            else
+            {
+                screenshotParameters = screenshotParametersFactory.create(ignores);
+            }
+            String indexedBaselineName = baselineIndexer.createIndexedBaseline(baselineName);
+
+            VisualCheck visualCheck = new VisualCheck(indexedBaselineName, actionType);
+            visualCheck.setScreenshotParameters(screenshotParameters);
+            visualCheck.setBaselineRepository(baselineRepository);
+            setDiffPercentage(visualCheck, checkSettings);
             return visualCheck;
-        });
+        };
+        Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> {
+            try
+            {
+                return check.getAction() == VisualActionType.ESTABLISH
+                        ? visualTestingEngine.establish(check)
+                        : visualTestingEngine.compareAgainst(check);
+            }
+            catch (IOException | ResourceLoadException e)
+            {
+                getSoftAssert().recordFailedAssertion(e);
+            }
+            return null;
+        };
+        execute(visualCheckFactory, checkResultProvider, "visual-comparison.ftl");
+    }
+
+    private Map<IgnoreStrategy, Set<Locator>> getIgnores(Parameters checkParameters)
+    {
+        return Stream.of(IgnoreStrategy.values()).collect(Collectors.toMap(Function.identity(),
+                s -> checkParameters.valueAs(s.name(), SET_BY, Set.of())));
     }
 
     private void setDiffPercentage(VisualCheck visualCheck, Parameters rowAsParameters)
     {
         if (visualCheck.getAction() == VisualActionType.CHECK_INEQUALITY_AGAINST)
         {
-            visualCheck.setRequiredDiffPercentage(getParameter(rowAsParameters, REQUIRED_DIFF_PERCENTAGE_COLUMN_NAME));
+            configureThresholdIfPresent(rowAsParameters, REQUIRED_DIFF_PERCENTAGE_COLUMN_NAME,
+                    visualCheck::setRequiredDiffPercentage);
         }
         else
         {
-            visualCheck.setAcceptableDiffPercentage(getParameter(rowAsParameters,
-                    ACCEPTABLE_DIFF_PERCENTAGE_COLUMN_NAME));
+            configureThresholdIfPresent(rowAsParameters, ACCEPTABLE_DIFF_PERCENTAGE_COLUMN_NAME,
+                    visualCheck::setAcceptableDiffPercentage);
         }
     }
 
-    private OptionalDouble getParameter(Parameters rowAsParameters, String paramterName)
+    private void configureThresholdIfPresent(Parameters rowAsParameters, String parameterName,
+            Consumer<OptionalDouble> thresholdSetter)
     {
-        return rowAsParameters.values().containsKey(paramterName)
-                ? OptionalDouble.of(rowAsParameters.valueAs(paramterName, Double.TYPE))
-                : OptionalDouble.empty();
-    }
-
-    private Set<Locator> getLocatorsSet(Parameters rowAsParameters, IgnoreStrategy s)
-    {
-        return rowAsParameters.valueAs(s.name(), SET_BY, Set.of());
+        if (rowAsParameters.values().containsKey(parameterName))
+        {
+            thresholdSetter.accept(OptionalDouble.of(rowAsParameters.valueAs(parameterName, Double.TYPE)));
+        }
     }
 
     @Override

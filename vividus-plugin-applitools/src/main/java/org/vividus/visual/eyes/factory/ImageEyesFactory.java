@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.vividus.visual.eyes.factory;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.inject.Named;
-
 import com.applitools.eyes.BatchInfo;
 import com.applitools.eyes.LogHandler;
 import com.applitools.eyes.RectangleSize;
@@ -29,7 +27,6 @@ import com.applitools.eyes.images.Eyes;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.model.VisualActionType;
 
-@Named
 public class ImageEyesFactory
 {
     private final LogHandler logHandler;

@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context"
     xmlns:util="http://www.springframework.org/schema/util"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
         https://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/context
-        https://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/util
         https://www.springframework.org/schema/util/spring-util.xsd" default-lazy-init="true" profile="web">
-
-    <context:annotation-config />
-    <context:component-scan base-package="org.vividus.visual.eyes" />
 
     <bean class="org.vividus.converter.ExamplesTableToApplitoolsVisualChecksConverter" />
 
@@ -19,7 +13,8 @@
         <constructor-arg index="2" ref="screenshotParametersFactory" />
     </bean>
 
-    <bean id="applitoolsVisualCheckFactory" class="org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory" parent="abstractVisualCheckFactory">
+    <bean id="applitoolsVisualCheckFactory" class="org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory">
+        <constructor-arg ref="screenshotParametersFactory" />
         <property name="executeApiKey" value="${ui.visual.applitools.execute-api-key}" />
         <property name="readApiKey" value="${ui.visual.applitools.read-api-key}" />
         <property name="hostApp" value="${ui.visual.applitools.host-app}" />
@@ -51,6 +46,14 @@
                 <property name="httpResponseHandlers"><list/></property>
             </bean>
         </constructor-arg>
+    </bean>
+
+    <bean class="org.vividus.visual.eyes.service.ImageVisualTestingService">
+        <constructor-arg index="0">
+            <bean class="org.vividus.visual.eyes.factory.ImageEyesFactory" />
+        </constructor-arg>
+        <constructor-arg index="1" ref="screenshotTaker" />
+        <constructor-arg index="2" ref="eyesHttpClient" />
     </bean>
 
     <util:list id="stepBeanNames-Eyes-Visual">

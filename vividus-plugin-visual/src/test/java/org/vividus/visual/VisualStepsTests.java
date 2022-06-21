@@ -49,23 +49,27 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.resource.ResourceLoadException;
+import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.visual.engine.IVisualTestingEngine;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
-import org.vividus.visual.screenshot.IgnoreStrategy;
+import org.vividus.visual.screenshot.BaselineIndexer;
 
 @ExtendWith(MockitoExtension.class)
 class VisualStepsTests
@@ -91,46 +95,43 @@ class VisualStepsTests
     @Mock private ISoftAssert softAssert;
     @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private VisualCheckResult visualCheckResult;
-    @Mock private VisualCheckFactory visualCheckFactory;
     @Mock private IUiContext uiContext;
+    @Mock private BaselineIndexer baselineIndexer;
+    @Captor private ArgumentCaptor<VisualCheck> visualCheckCaptor;
     @InjectMocks private VisualSteps visualSteps;
-
-    private VisualCheckFactory factory;
 
     @BeforeEach
     void init()
     {
-        factory = new VisualCheckFactory(screenshotParametersFactory);
+        lenient().when(baselineIndexer.createIndexedBaseline(BASELINE)).thenReturn(BASELINE);
         lenient().when(screenshotParametersFactory.create(Optional.empty())).thenReturn(Optional.empty());
-        factory.setScreenshotIndexer(Optional.empty());
-        factory.setIndexers(Map.of());
+        lenient().when(screenshotParametersFactory.create(Map.of())).thenReturn(Optional.empty());
     }
 
     @ParameterizedTest
     @CsvSource({"COMPARE_AGAINST", "CHECK_INEQUALITY_AGAINST"})
     void shouldAssertCheckResultForCompareAgainstActionAndPublishAttachment(VisualActionType action) throws IOException
     {
-        VisualCheck visualCheck = mockVisualCheckFactory(action);
         mockUiContext();
-        when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
+        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
         mockCheckResult();
         visualSteps.runVisualTests(action, BASELINE);
+        validateVisualCheck(visualCheckCaptor.getValue(), action);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
-        assertEquals(Map.of(), visualCheck.getElementsToIgnore());
         verifyCheckResultPublish();
     }
 
     @Test
     void shouldPerformVisualCheckWithBaselineRepository() throws IOException
     {
-        VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.ESTABLISH);
         mockUiContext();
-        when(visualTestingEngine.establish(visualCheck)).thenReturn(visualCheckResult);
+        when(visualTestingEngine.establish(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
         mockCheckResult();
         visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE, FILESYSTEM);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
-        assertEquals(Map.of(), visualCheck.getElementsToIgnore());
+        VisualCheck visualCheck = visualCheckCaptor.getValue();
         assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineRepository());
+        validateVisualCheck(visualCheck, VisualActionType.ESTABLISH);
         verifyCheckResultPublish();
     }
 
@@ -146,14 +147,13 @@ class VisualStepsTests
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
         mockUiContext();
         ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
-        VisualCheck visualCheck = factory.create(BASELINE, compareAgainst);
-        when(visualCheckFactory.create(BASELINE, compareAgainst, Optional.of(screenshotConfiguration)))
-                .thenReturn(visualCheck);
-        when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
+        Optional<ScreenshotParameters> screenshotParameters = Optional.of(mock(ScreenshotParameters.class));
+        when(screenshotParametersFactory.create(Optional.of(screenshotConfiguration))).thenReturn(screenshotParameters);
+        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
         mockCheckResult();
         visualSteps.runVisualTests(compareAgainst, BASELINE, screenshotConfiguration);
+        validateVisualCheck(visualCheckCaptor.getValue(), compareAgainst);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
-        assertEquals(Map.of(), visualCheck.getElementsToIgnore());
         verifyCheckResultPublish();
     }
 
@@ -163,29 +163,28 @@ class VisualStepsTests
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
         mockUiContext();
         ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
-        VisualCheck visualCheck = factory.create(BASELINE, compareAgainst);
-        when(visualCheckFactory.create(BASELINE, compareAgainst, Optional.of(screenshotConfiguration)))
-                .thenReturn(visualCheck);
-        when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
+        Optional<ScreenshotParameters> screenshotParameters = Optional.of(mock(ScreenshotParameters.class));
+        when(screenshotParametersFactory.create(Optional.of(screenshotConfiguration))).thenReturn(screenshotParameters);
+        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
         mockCheckResult();
         visualSteps.runVisualTests(compareAgainst, BASELINE, FILESYSTEM, screenshotConfiguration);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
-        assertEquals(Map.of(), visualCheck.getElementsToIgnore());
+        VisualCheck visualCheck = visualCheckCaptor.getValue();
         assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineRepository());
+        validateVisualCheck(visualCheck, compareAgainst);
         verifyCheckResultPublish();
     }
 
     @Test
     void shouldRecordFailedAssertionInCaseOfMissingBaseline() throws IOException
     {
-        VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.COMPARE_AGAINST);
         mockUiContext();
-        when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
+        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
         when(visualCheckResult.getBaselineName()).thenReturn(BASELINE);
         visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE);
         verify(softAssert, never()).assertTrue(VISUAL_CHECK_PASSED, false);
         verify(softAssert).recordFailedAssertion("Unable to find baseline with name: baseline");
-        assertEquals(Map.of(), visualCheck.getElementsToIgnore());
+        validateVisualCheck(visualCheckCaptor.getValue(), VisualActionType.COMPARE_AGAINST);
         verifyCheckResultPublish();
     }
 
@@ -214,14 +213,17 @@ class VisualStepsTests
         Set<Locator> elementsToIgnore = Set.of(A_LOCATOR);
         Set<Locator> areasToIgnore = Set.of(DIV_LOCATOR);
         mockRow(row, elementsToIgnore, areasToIgnore, 50, columnName);
-        VisualCheck visualCheck = mockVisualCheckFactory(actionType);
-        when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
+        Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore,
+                IgnoreStrategy.AREA, areasToIgnore);
+        Optional<ScreenshotParameters> screenshotParameters = Optional.of(mock(ScreenshotParameters.class));
+        when(screenshotParametersFactory.create(ignores)).thenReturn(screenshotParameters);
+        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
         mockCheckResult();
         visualSteps.runVisualTests(actionType, BASELINE, table);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
+        VisualCheck visualCheck = visualCheckCaptor.getValue();
         assertEquals(OptionalDouble.of(50), diffValueExtractor.apply(visualCheck));
-        assertEquals(Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore, IgnoreStrategy.AREA, areasToIgnore),
-                visualCheck.getElementsToIgnore());
+        validateVisualCheck(visualCheck, actionType);
         verifyCheckResultPublish();
     }
 
@@ -236,15 +238,19 @@ class VisualStepsTests
         Set<Locator> elementsToIgnore = Set.of(A_LOCATOR);
         Set<Locator> areasToIgnore = Set.of(DIV_LOCATOR);
         mockRow(row, elementsToIgnore, areasToIgnore, 50, ACCEPTABLE_DIFF_PERCENTAGE);
-        VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.COMPARE_AGAINST);
-        when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
+        Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore,
+                IgnoreStrategy.AREA, areasToIgnore);
+        Optional<ScreenshotParameters> screenshotParameters = Optional.of(mock(ScreenshotParameters.class));
+        when(screenshotParametersFactory.create(ignores)).thenReturn(screenshotParameters);
+
+        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
         mockCheckResult();
         visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE, FILESYSTEM, table);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
+        VisualCheck visualCheck = visualCheckCaptor.getValue();
         assertEquals(OptionalDouble.of(50), visualCheck.getAcceptableDiffPercentage());
         assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineRepository());
-        assertEquals(Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore, IgnoreStrategy.AREA, areasToIgnore),
-                visualCheck.getElementsToIgnore());
+        validateVisualCheck(visualCheck, VisualActionType.COMPARE_AGAINST);
         verifyCheckResultPublish();
     }
 
@@ -260,17 +266,16 @@ class VisualStepsTests
         Set<Locator> areasToIgnore = Set.of(DIV_LOCATOR);
         mockRow(row, elementsToIgnore, areasToIgnore);
         ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
+        Optional<ScreenshotParameters> screenshotParameters = Optional.of(mock(ScreenshotParameters.class));
+        when(screenshotParametersFactory.create(Optional.of(screenshotConfiguration))).thenReturn(screenshotParameters);
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
-        VisualCheck visualCheck = factory.create(BASELINE, compareAgainst);
-        when(visualCheckFactory.create(BASELINE, compareAgainst, Optional.of(screenshotConfiguration)))
-                .thenReturn(visualCheck);
-        when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
+        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
         mockCheckResult();
         visualSteps.runVisualTests(compareAgainst, BASELINE, table, screenshotConfiguration);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
+        VisualCheck visualCheck = visualCheckCaptor.getValue();
         assertEquals(OptionalDouble.empty(), visualCheck.getRequiredDiffPercentage());
-        assertEquals(Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore, IgnoreStrategy.AREA, areasToIgnore),
-                visualCheck.getElementsToIgnore());
+        validateVisualCheck(visualCheck, compareAgainst);
         verifyCheckResultPublish();
     }
 
@@ -287,31 +292,23 @@ class VisualStepsTests
         Set<Locator> areasToIgnore = Set.of(DIV_LOCATOR);
         mockRow(row, elementsToIgnore, areasToIgnore);
         ScreenshotConfiguration screenshotConfiguration = mock(ScreenshotConfiguration.class);
+        Optional<ScreenshotParameters> screenshotParameters = Optional.of(mock(ScreenshotParameters.class));
+        when(screenshotParametersFactory.create(Optional.of(screenshotConfiguration))).thenReturn(screenshotParameters);
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
-        VisualCheck visualCheck = factory.create(BASELINE, compareAgainst);
-        when(visualCheckFactory.create(BASELINE, compareAgainst, Optional.of(screenshotConfiguration)))
-                .thenReturn(visualCheck);
-        when(visualTestingEngine.compareAgainst(visualCheck)).thenReturn(visualCheckResult);
+        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
         mockCheckResult();
         visualSteps.runVisualTests(compareAgainst, BASELINE, FILESYSTEM, table, screenshotConfiguration);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
+        VisualCheck visualCheck = visualCheckCaptor.getValue();
         assertEquals(OptionalDouble.empty(), visualCheck.getRequiredDiffPercentage());
         assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineRepository());
-        assertEquals(Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore, IgnoreStrategy.AREA, areasToIgnore),
-                visualCheck.getElementsToIgnore());
+        validateVisualCheck(visualCheck, compareAgainst);
         verifyCheckResultPublish();
     }
 
     private void mockCheckResult()
     {
         when(visualCheckResult.getBaseline()).thenReturn(StringUtils.EMPTY);
-    }
-
-    private VisualCheck mockVisualCheckFactory(VisualActionType actionType)
-    {
-        VisualCheck visualCheck = factory.create(BASELINE, actionType);
-        when(visualCheckFactory.create(BASELINE, actionType)).thenReturn(visualCheck);
-        return visualCheck;
     }
 
     @Test
@@ -353,13 +350,12 @@ class VisualStepsTests
     void shouldNotAssertResultForEstablishAction() throws IOException
     {
         mockUiContext();
-        VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.ESTABLISH);
-        when(visualTestingEngine.establish(visualCheck)).thenReturn(visualCheckResult);
+        when(visualTestingEngine.establish(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
         when(visualCheckResult.getActionType()).thenReturn(VisualActionType.ESTABLISH);
         visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE);
         verifyNoMoreInteractions(softAssert);
         verifyCheckResultPublish();
-        assertEquals(Map.of(), visualCheck.getElementsToIgnore());
+        validateVisualCheck(visualCheckCaptor.getValue(), VisualActionType.ESTABLISH);
     }
 
     @Test
@@ -367,7 +363,7 @@ class VisualStepsTests
     {
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.empty());
         visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE);
-        verifyNoInteractions(visualCheckFactory, visualTestingEngine, attachmentPublisher);
+        verifyNoInteractions(visualTestingEngine, attachmentPublisher);
     }
 
     static Stream<Arguments> exceptionsToCatch()
@@ -385,12 +381,18 @@ class VisualStepsTests
 
     private void shouldRecordException(Exception exception) throws IOException
     {
-        VisualCheck visualCheck = mockVisualCheckFactory(VisualActionType.ESTABLISH);
-        when(visualTestingEngine.establish(visualCheck)).thenThrow(exception);
+        when(visualTestingEngine.establish(visualCheckCaptor.capture())).thenThrow(exception);
         visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE);
         verify(softAssert).recordFailedAssertion(exception);
         verifyNoInteractions(attachmentPublisher);
         verifyNoMoreInteractions(softAssert);
+        validateVisualCheck(visualCheckCaptor.getValue(), VisualActionType.ESTABLISH);
+    }
+
+    private void validateVisualCheck(VisualCheck visualCheck, VisualActionType type)
+    {
+        assertEquals(BASELINE, visualCheck.getBaselineName());
+        assertEquals(type, visualCheck.getAction());
     }
 
     private void verifyCheckResultPublish()

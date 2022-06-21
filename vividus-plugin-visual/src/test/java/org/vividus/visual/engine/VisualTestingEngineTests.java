@@ -48,7 +48,6 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -56,14 +55,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.ui.screenshot.ScreenshotConfiguration;
-import org.vividus.ui.screenshot.ScreenshotParametersFactory;
+import org.vividus.selenium.screenshot.AshotScreenshotTaker;
+import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.util.ResourceUtils;
-import org.vividus.visual.VisualCheckFactory;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
-import org.vividus.visual.screenshot.ScreenshotProvider;
 
 import ru.yandex.qatools.ashot.Screenshot;
 
@@ -91,23 +88,11 @@ class VisualTestingEngineTests
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(VisualTestingEngine.class);
 
-    @Mock private ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
     @Mock private BaselineRepository baselineRepository;
-    @Mock private ScreenshotProvider screenshotProvider;
+    @Mock private AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker;
     @Spy private DiffMarkupPolicyFactory diffMarkupPolicyFactory;
 
     private VisualTestingEngine visualTestingEngine;
-
-    private VisualCheckFactory factory;
-
-    @BeforeEach
-    void init()
-    {
-        factory = new VisualCheckFactory(screenshotParametersFactory);
-        when(screenshotParametersFactory.create(Optional.empty())).thenReturn(Optional.empty());
-        factory.setScreenshotIndexer(Optional.empty());
-        factory.setIndexers(Map.of());
-    }
 
     void initObjectUnderTest()
     {
@@ -116,7 +101,7 @@ class VisualTestingEngineTests
 
     void initObjectUnderTest(Map<String, BaselineRepository> baselineRepositories)
     {
-        visualTestingEngine = new VisualTestingEngine(screenshotProvider, diffMarkupPolicyFactory,
+        visualTestingEngine = new VisualTestingEngine(ashotScreenshotTaker, diffMarkupPolicyFactory,
                 baselineRepositories);
         visualTestingEngine.setAcceptableDiffPercentage(0.0d);
         visualTestingEngine.setBaselineRepository(FILESYSTEM);
@@ -142,7 +127,9 @@ class VisualTestingEngineTests
 
     private VisualCheck createVisualCheck(VisualActionType actionType)
     {
-        return factory.create(BASELINE, actionType);
+        VisualCheck check = new VisualCheck(BASELINE, actionType);
+        check.setScreenshotParameters(Optional.empty());
+        return check;
     }
 
     @ParameterizedTest
@@ -201,7 +188,7 @@ class VisualTestingEngineTests
     {
         initObjectUnderTest();
         when(baselineRepository.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
-        VisualCheck visualCheck = factory.create(BASELINE, VisualActionType.COMPARE_AGAINST);
+        VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
         visualCheck.setAcceptableDiffPercentage(OptionalDouble.of(50));
         mockGetCheckpointScreenshot(visualCheck);
         VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
@@ -313,7 +300,8 @@ class VisualTestingEngineTests
     {
         BufferedImage image = loadImage(imageName);
         Screenshot screenshot = new Screenshot(image);
-        when(screenshotProvider.take(visualCheck)).thenReturn(screenshot);
+        when(ashotScreenshotTaker.takeAshotScreenshot(visualCheck.getSearchContext(),
+                visualCheck.getScreenshotParameters())).thenReturn(screenshot);
         return image;
     }
 

@@ -16,20 +16,15 @@
 
 package org.vividus.visual.model;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.openqa.selenium.SearchContext;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.screenshot.ScreenshotParameters;
-import org.vividus.visual.screenshot.IgnoreStrategy;
 
 public abstract class AbstractVisualCheck
 {
     private String baselineName;
     private VisualActionType action;
-    private Map<IgnoreStrategy, Set<Locator>> elementsToIgnore = Map.of();
     private Optional<ScreenshotParameters> screenshotParameters = Optional.empty();
     private SearchContext searchContext;
 
@@ -47,16 +42,6 @@ public abstract class AbstractVisualCheck
     public String getBaselineName()
     {
         return baselineName;
-    }
-
-    public Map<IgnoreStrategy, Set<Locator>> getElementsToIgnore()
-    {
-        return elementsToIgnore;
-    }
-
-    public void setElementsToIgnore(Map<IgnoreStrategy, Set<Locator>> elementsToIgnore)
-    {
-        this.elementsToIgnore = elementsToIgnore;
     }
 
     public VisualActionType getAction()
