@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -39,13 +40,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.WebDriver;
 import org.vividus.context.VariableContext;
 import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.reporter.model.Attachment;
+import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.AshotScreenshotTaker;
-import org.vividus.selenium.screenshot.ScreenshotTaker;
+import org.vividus.selenium.screenshot.ScreenshotUtils;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.BarcodeActions;
 import org.vividus.ui.context.IUiContext;
@@ -63,7 +67,7 @@ class BarcodeStepsTests
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
 
     @Mock private IUiContext uiContext;
-    @Mock private ScreenshotTaker screenshotTaker;
+    @Mock private IWebDriverProvider webDriverProvider;
     @Mock private AshotScreenshotTaker ashotScreenshotTaker;
     @Mock private BarcodeActions barcodeActions;
     @Mock private VariableContext variableContext;
@@ -74,25 +78,35 @@ class BarcodeStepsTests
     @Test
     void shouldScanBarcodeSuccessfully() throws IOException, NotFoundException
     {
-        when(screenshotTaker.takeViewportScreenshot()).thenReturn(QR_CODE_IMAGE);
-        when(barcodeActions.scanBarcode(QR_CODE_IMAGE)).thenReturn(QR_CODE_VALUE);
+        WebDriver webDriver = mock(WebDriver.class);
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        try (MockedStatic<ScreenshotUtils> utils = mockStatic(ScreenshotUtils.class))
+        {
+            utils.when(() -> ScreenshotUtils.takeViewportScreenshot(webDriver)).thenReturn(QR_CODE_IMAGE);
+            when(barcodeActions.scanBarcode(QR_CODE_IMAGE)).thenReturn(QR_CODE_VALUE);
 
-        barCodeSteps.scanBarcode(VARIABLE_SCOPE, VARIABLE_NAME);
+            barCodeSteps.scanBarcode(VARIABLE_SCOPE, VARIABLE_NAME);
 
-        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, QR_CODE_VALUE);
+            verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, QR_CODE_VALUE);
+        }
     }
 
     @Test
     void whenIScanBarcodeAndBarcodeIsAbsent() throws IOException, NotFoundException
     {
-        when(screenshotTaker.takeViewportScreenshot()).thenReturn(QR_CODE_IMAGE);
-        var exception = NotFoundException.getNotFoundInstance();
-        when(barcodeActions.scanBarcode(QR_CODE_IMAGE)).thenThrow(exception);
+        WebDriver webDriver = mock(WebDriver.class);
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        try (MockedStatic<ScreenshotUtils> utils = mockStatic(ScreenshotUtils.class))
+        {
+            utils.when(() -> ScreenshotUtils.takeViewportScreenshot(webDriver)).thenReturn(QR_CODE_IMAGE);
+            var exception = NotFoundException.getNotFoundInstance();
+            when(barcodeActions.scanBarcode(QR_CODE_IMAGE)).thenThrow(exception);
 
-        barCodeSteps.scanBarcode(VARIABLE_SCOPE, VARIABLE_NAME);
+            barCodeSteps.scanBarcode(VARIABLE_SCOPE, VARIABLE_NAME);
 
-        verify(softAssert).recordFailedAssertion("There is no barcode on the screen", exception);
-        verifyScreenshotAttachment();
+            verify(softAssert).recordFailedAssertion("There is no barcode on the screen", exception);
+            verifyScreenshotAttachment();
+        }
     }
 
     @Test

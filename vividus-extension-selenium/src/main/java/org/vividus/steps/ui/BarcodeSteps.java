@@ -29,8 +29,9 @@ import org.openqa.selenium.SearchContext;
 import org.vividus.context.VariableContext;
 import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.reporter.model.Attachment;
+import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.AshotScreenshotTaker;
-import org.vividus.selenium.screenshot.ScreenshotTaker;
+import org.vividus.selenium.screenshot.ScreenshotUtils;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.BarcodeActions;
 import org.vividus.ui.context.IUiContext;
@@ -47,7 +48,7 @@ public class BarcodeSteps
             "There is no barcode on the selected context, page or screen";
 
     private final IUiContext uiContext;
-    private final ScreenshotTaker screenshotTaker;
+    private final IWebDriverProvider webDriverProvider;
     private final AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker;
     private final BarcodeActions barcodeActions;
     private final VariableContext variableContext;
@@ -55,12 +56,12 @@ public class BarcodeSteps
     private final EventBus eventBus;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public BarcodeSteps(IUiContext uiContext, ScreenshotTaker screenshotTaker,
+    public BarcodeSteps(IUiContext uiContext, IWebDriverProvider webDriverProvider,
             AshotScreenshotTaker ashotScreenshotTaker, BarcodeActions barcodeActions, VariableContext variableContext,
             ISoftAssert softAssert, EventBus eventBus)
     {
         this.uiContext = uiContext;
-        this.screenshotTaker = screenshotTaker;
+        this.webDriverProvider = webDriverProvider;
         this.ashotScreenshotTaker = ashotScreenshotTaker;
         this.barcodeActions = barcodeActions;
         this.variableContext = variableContext;
@@ -90,7 +91,7 @@ public class BarcodeSteps
     @When("I scan barcode from screen and save result to $scopes variable `$variableName`")
     public void scanBarcode(Set<VariableScope> scopes, String variableName) throws IOException
     {
-        BufferedImage viewportScreenshot = screenshotTaker.takeViewportScreenshot();
+        BufferedImage viewportScreenshot = ScreenshotUtils.takeViewportScreenshot(webDriverProvider.get());
 
         scanScreenshot(viewportScreenshot, scopes, variableName, NOT_FOUND_MESSAGE);
     }

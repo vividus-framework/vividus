@@ -9,6 +9,7 @@ project.description = 'Vividus plugin for testing mobile applications'
 
      implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
      implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
+     implementation(group: 'org.boofcv', name: 'boofcv-core', version: '0.40.1')
 
      testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
      testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')

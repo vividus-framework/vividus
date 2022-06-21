@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,12 @@ package io.appium.java_client;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -44,11 +48,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.vividus.mobileapp.action.TouchActions;
 import org.vividus.mobileapp.configuration.MobileApplicationConfiguration;
@@ -56,6 +62,7 @@ import org.vividus.mobileapp.model.SwipeDirection;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
+import org.vividus.selenium.screenshot.ScreenshotUtils;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -94,7 +101,7 @@ class TouchActionsTests
     @BeforeEach
     void init()
     {
-        when(webDriverProvider.getUnwrapped(PerformsTouchActions.class)).thenReturn(performsTouchActions);
+        lenient().when(webDriverProvider.getUnwrapped(PerformsTouchActions.class)).thenReturn(performsTouchActions);
     }
 
     @Test
@@ -174,85 +181,135 @@ class TouchActionsTests
     }
 
     @Test
-    void shouldSwipeUntilConditionIsTrue() throws IOException
+    void shouldSwipeUntilConditionIsTrue()
     {
-        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
-        when(stopCondition.getAsBoolean()).thenReturn(false)
-                                          .thenReturn(false)
-                                          .thenReturn(true);
-        when(screenshotTaker.takeViewportScreenshot()).thenReturn(getImage(BLACK_IMAGE))
-                                                      .thenReturn(getImage(WHITE_IMAGE));
+        try (MockedStatic<ScreenshotUtils> utils = mockStatic(ScreenshotUtils.class))
+        {
+            WebDriver driver = mock(WebDriver.class);
+            when(webDriverProvider.get()).thenReturn(driver);
 
-        touchActions.swipeUntil(SwipeDirection.UP, DURATION, SWIPE_AREA, stopCondition);
+            utils.when(() -> ScreenshotUtils.takeViewportScreenshot(driver)).thenReturn(getImage(BLACK_IMAGE))
+                                                                            .thenReturn(getImage(WHITE_IMAGE));
 
-        verifySwipe(3);
-        verifyConfiguration();
+            when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
+            when(stopCondition.getAsBoolean()).thenReturn(false)
+                                              .thenReturn(false)
+                                              .thenReturn(true);
+
+            touchActions.swipeUntil(SwipeDirection.UP, DURATION, SWIPE_AREA, stopCondition);
+
+            verifySwipe(3);
+            verifyConfiguration();
+        }
     }
 
     @Test
     void shouldNotExceedSwipeLimit() throws IOException
     {
-        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
-        when(stopCondition.getAsBoolean()).thenReturn(false);
-        when(screenshotTaker.takeViewportScreenshot()).thenReturn(getImage(BLACK_IMAGE))
-                                                      .thenReturn(getImage(WHITE_IMAGE))
-                                                      .thenReturn(getImage(BLACK_IMAGE))
-                                                      .thenReturn(getImage(WHITE_IMAGE))
-                                                      .thenReturn(getImage(BLACK_IMAGE))
-                                                      .thenReturn(getImage(WHITE_IMAGE));
+        try (MockedStatic<ScreenshotUtils> utils = mockStatic(ScreenshotUtils.class))
+        {
+            WebDriver driver = mock(WebDriver.class);
+            when(webDriverProvider.get()).thenReturn(driver);
 
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
-            () -> touchActions.swipeUntil(SwipeDirection.UP, DURATION, SWIPE_AREA, stopCondition));
+            utils.when(() -> ScreenshotUtils.takeViewportScreenshot(driver)).thenReturn(getImage(BLACK_IMAGE))
+                                                                            .thenReturn(getImage(WHITE_IMAGE))
+                                                                            .thenReturn(getImage(BLACK_IMAGE))
+                                                                            .thenReturn(getImage(WHITE_IMAGE))
+                                                                            .thenReturn(getImage(BLACK_IMAGE))
+                                                                            .thenReturn(getImage(WHITE_IMAGE));
 
-        assertEquals("Swiping is stopped due to exceeded swipe limit '5'", exception.getMessage());
-        verifySwipe(6);
-        verifyConfiguration();
+            when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
+            when(stopCondition.getAsBoolean()).thenReturn(false);
+
+            IllegalStateException exception = assertThrows(IllegalStateException.class,
+                () -> touchActions.swipeUntil(SwipeDirection.UP, DURATION, SWIPE_AREA, stopCondition));
+
+            assertEquals("Swiping is stopped due to exceeded swipe limit '5'", exception.getMessage());
+            verifySwipe(6);
+            verifyConfiguration();
+        }
     }
 
     @Test
     void shouldStopSwipeOnceEndOfPageIsReached() throws IOException
     {
-        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
-        when(stopCondition.getAsBoolean()).thenReturn(false);
-        when(screenshotTaker.takeViewportScreenshot()).thenReturn(getImage(BLACK_IMAGE))
-                                                      .thenReturn(getImage(WHITE_IMAGE))
-                                                      .thenReturn(getImage(BLACK_IMAGE))
-                                                      .thenReturn(getImage(BLACK_IMAGE));
+        try (MockedStatic<ScreenshotUtils> utils = mockStatic(ScreenshotUtils.class))
+        {
+            WebDriver driver = mock(WebDriver.class);
+            when(webDriverProvider.get()).thenReturn(driver);
 
-        touchActions.swipeUntil(SwipeDirection.UP, DURATION, SWIPE_AREA, stopCondition);
+            utils.when(() -> ScreenshotUtils.takeViewportScreenshot(driver)).thenReturn(getImage(BLACK_IMAGE))
+                                                                            .thenReturn(getImage(WHITE_IMAGE))
+                                                                            .thenReturn(getImage(BLACK_IMAGE))
+                                                                            .thenReturn(getImage(BLACK_IMAGE));
 
-        verifySwipe(4);
-        verifyConfiguration();
+            when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
+            when(stopCondition.getAsBoolean()).thenReturn(false);
+
+            touchActions.swipeUntil(SwipeDirection.UP, DURATION, SWIPE_AREA, stopCondition);
+
+            verifySwipe(4);
+            verifyConfiguration();
+        }
     }
 
     @Test
     void shouldWrapIOException() throws IOException
     {
-        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
-        IOException exception = mock(IOException.class);
+        try (MockedStatic<ScreenshotUtils> utils = mockStatic(ScreenshotUtils.class))
+        {
+            WebDriver driver = mock(WebDriver.class);
+            when(webDriverProvider.get()).thenReturn(driver);
 
-        when(stopCondition.getAsBoolean()).thenReturn(false);
-        doThrow(exception).when(screenshotTaker).takeViewportScreenshot();
+            IOException exception = mock(IOException.class);
+            utils.when(() -> ScreenshotUtils.takeViewportScreenshot(driver)).thenThrow(exception);
 
-        UncheckedIOException wrapper = assertThrows(UncheckedIOException.class,
-            () -> touchActions.swipeUntil(SwipeDirection.UP, DURATION, SWIPE_AREA, stopCondition));
+            when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
+            when(stopCondition.getAsBoolean()).thenReturn(false);
 
-        assertEquals(exception, wrapper.getCause());
+            UncheckedIOException wrapper = assertThrows(UncheckedIOException.class,
+                () -> touchActions.swipeUntil(SwipeDirection.UP, DURATION, SWIPE_AREA, stopCondition));
+
+            assertEquals(exception, wrapper.getCause());
+            verifySwipe(1);
+            verifyConfiguration();
+        }
+    }
+
+    @Test
+    void shouldPerformVerticalSwipeWithinArea()
+    {
+        touchActions.performVerticalSwipe(640, 160, SWIPE_AREA, DURATION);
         verifySwipe(1);
-        verifyConfiguration();
     }
 
     @Test
     void shouldPerformVerticalSwipe()
     {
-        touchActions.performVerticalSwipe(640, 160, SWIPE_AREA, DURATION);
+        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
+        touchActions.performVerticalSwipe(640, 160, DURATION);
         verifySwipe(1);
+    }
+
+    @Test
+    void shouldSwipeUntilEdge()
+    {
+        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
+        TouchActions spy = spy(touchActions);
+        doNothing().when(spy).swipeUntil(eq(SwipeDirection.UP), eq(DURATION), eq(SWIPE_AREA),
+                argThat(arg -> !((BooleanSupplier) arg).getAsBoolean()));
+
+        spy.swipeUntilEdge(SwipeDirection.UP, DURATION);
+
+        verify(spy).swipeUntil(eq(SwipeDirection.UP), eq(DURATION), eq(SWIPE_AREA),
+                argThat(arg -> !((BooleanSupplier) arg).getAsBoolean()));
     }
 
     private void verifySwipe(int times)
     {
         verify(performsTouchActions, times(times))
                 .performTouchAction(argThat(arg -> SCROLL_UP.equals(arg.getParameters().toString())));
+        verify(webDriverProvider, times(times)).getUnwrapped(PerformsTouchActions.class);
         verifyNoMoreInteractions(stopCondition, performsTouchActions, screenshotTaker, genericWebDriverManager,
                 webDriverProvider);
     }

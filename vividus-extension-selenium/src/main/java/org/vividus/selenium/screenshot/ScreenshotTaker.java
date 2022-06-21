@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.vividus.selenium.screenshot;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -24,8 +23,6 @@ import java.util.Optional;
 public interface ScreenshotTaker
 {
     Optional<Screenshot> takeScreenshot(String screenshotName);
-
-    BufferedImage takeViewportScreenshot() throws IOException;
 
     Path takeScreenshot(Path screenshotFilePath) throws IOException;
 }

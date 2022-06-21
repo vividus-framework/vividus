@@ -61,3 +61,15 @@ When I change context to element located `xpath(<scrollViewXpath>)`
 When I <action> baseline with name `${target-platform}-context-with-ignore` ignoring:
 |ELEMENT                   |
 |By.accessibilityId(header)|
+When I reset context
+
+
+Scenario: Verify full application view check
+Meta:
+    @requirementId 2005
+When I tap on element located `accessibilityId(menuToggler)`
+When I tap on element located `xpath(<menuShortScrollViewXpath>)`
+When I wait until element located `accessibilityId(body)` appears
+When I <action> baseline with `${target-platform}-full-app-view` using screenshot configuration:
+|shootingStrategy|
+|FULL            |
