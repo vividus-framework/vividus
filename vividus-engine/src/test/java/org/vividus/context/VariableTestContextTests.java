@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -96,6 +97,19 @@ class VariableTestContextTests
         assertEquals(VALUE, variables.getVariable(VARIABLE_KEY));
         assertThat(logger.getLoggingEvents(), equalTo(
                 List.of(info(SAVE_MESSAGE_TEMPLATE, VALUE, STEP, VARIABLE_KEY))));
+    }
+
+    @Test
+    void shouldPutBinaryDataIntoVariable()
+    {
+        Variables variables = new Variables(Map.of());
+        when(variablesFactory.createVariables()).thenReturn(variables);
+        variableTestContext.initStepVariables();
+        var bytes = VALUE.getBytes(StandardCharsets.UTF_8);
+        variableTestContext.putVariable(VariableScope.STEP, VARIABLE_KEY, bytes);
+        assertEquals(bytes, variables.getVariable(VARIABLE_KEY));
+        assertThat(logger.getLoggingEvents(), equalTo(
+                List.of(info("Saving {} kB of binary data into the {} variable '{}'", 0.005d, STEP, VARIABLE_KEY))));
     }
 
     @Test

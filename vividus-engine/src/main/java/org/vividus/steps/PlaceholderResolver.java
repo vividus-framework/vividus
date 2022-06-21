@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.steps;
 
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 
 public class PlaceholderResolver
 {
@@ -41,6 +42,10 @@ public class PlaceholderResolver
         Object adaptedValue = variableResolver.resolve(value);
         if (type == String.class || adaptedValue instanceof String)
         {
+            if (adaptedValue instanceof byte[])
+            {
+                adaptedValue = new String((byte[]) adaptedValue, StandardCharsets.UTF_8);
+            }
             adaptedValue = processExpressions(String.valueOf(adaptedValue));
             if (!value.equals(adaptedValue) && adaptedValue instanceof String)
             {

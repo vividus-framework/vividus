@@ -31,11 +31,13 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.jbehave.core.configuration.Configuration;
@@ -87,10 +89,21 @@ class ParameterConvertersDecoratorTests
     @Test
     void shouldReplaceVariables()
     {
+        shouldReplaceVariables(s -> s);
+    }
+
+    @Test
+    void shouldReplaceVariablesConvertingBytesToString()
+    {
+        shouldReplaceVariables(s -> s.getBytes(StandardCharsets.UTF_8));
+    }
+
+    void shouldReplaceVariables(Function<String, Object> variableTransformer)
+    {
         String value = "var${var}";
         String convertedValue = "Varvar\r\nVarvar2";
         Type type = String.class;
-        when(variableResolver.resolve(value)).thenReturn(convertedValue);
+        when(variableResolver.resolve(value)).thenReturn(variableTransformer.apply(convertedValue));
         when(expressionAdaptor.processRawExpression(convertedValue)).thenReturn(convertedValue);
         when(variableResolver.resolve(convertedValue)).thenReturn(convertedValue);
         String actual = (String) parameterConverters.convert(value, type);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.vividus.variable.Variables;
 
 public class VariableTestContext implements VariableContext
 {
+    private static final double THOUSAND = 1_000.0;
     private static final Logger LOGGER = LoggerFactory.getLogger(VariableTestContext.class);
     private static final Class<Variables> VARIABLES_KEY = Variables.class;
 
@@ -57,11 +58,23 @@ public class VariableTestContext implements VariableContext
     @Override
     public void putVariable(VariableScope variableScope, String variableKey, Object variableValue)
     {
-        LOGGER.atInfo()
-                .addArgument(variableValue)
-                .addArgument(() -> EnumUtils.toHumanReadableForm(variableScope))
-                .addArgument(variableKey)
-                .log("Saving a value '{}' into the {} variable '{}'");
+        if (variableValue instanceof byte[])
+        {
+            LOGGER.atInfo()
+                    .addArgument(() -> ((byte[]) variableValue).length / THOUSAND)
+                    .addArgument(() -> EnumUtils.toHumanReadableForm(variableScope))
+                    .addArgument(variableKey)
+                    .log("Saving {} kB of binary data into the {} variable '{}'");
+        }
+        else
+        {
+            LOGGER.atInfo()
+                  .addArgument(variableValue)
+                  .addArgument(() -> EnumUtils.toHumanReadableForm(variableScope))
+                  .addArgument(variableKey)
+                  .log("Saving a value '{}' into the {} variable '{}'");
+        }
+
         switch (variableScope)
         {
             case NEXT_BATCHES:
