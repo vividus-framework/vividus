@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,46 +50,46 @@ import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.util.ImageTool;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
-class FileSystemBaselineRepositoryTests
+class FileSystemBaselineStorageTests
 {
     private static final String BASELINE = "baseline";
     private static final File BASELINES_FOLDER = new File("./baselines");
     private static final String DEFAULT_EXTENSION = ".png";
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(FileSystemBaselineRepository.class);
-    private final FileSystemBaselineRepository fileSystemBaselineRepository = new FileSystemBaselineRepository();
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(FileSystemBaselineStorage.class);
+    private final FileSystemBaselineStorage fileSystemBaselineStorage = new FileSystemBaselineStorage();
 
     @Test
     void shouldLoadBaselineFromFileSystem() throws IOException
     {
-        fileSystemBaselineRepository.setBaselinesFolder(BASELINES_FOLDER);
+        fileSystemBaselineStorage.setBaselinesFolder(BASELINES_FOLDER);
         BufferedImage baseline = loadBaseline();
-        assertThat(fileSystemBaselineRepository.getBaseline(BASELINE).get().getImage(), ImageTool.equalImage(baseline));
+        assertThat(fileSystemBaselineStorage.getBaseline(BASELINE).get().getImage(), ImageTool.equalImage(baseline));
     }
 
     @Test
     void shouldReturnEmptyImageForMissingBaseline(@TempDir File baselineFolder) throws IOException
     {
-        fileSystemBaselineRepository.setBaselinesFolder(baselineFolder);
+        fileSystemBaselineStorage.setBaselinesFolder(baselineFolder);
         String baselineName = "missing_baseline";
-        assertEquals(fileSystemBaselineRepository.getBaseline(baselineName), Optional.empty());
+        assertEquals(fileSystemBaselineStorage.getBaseline(baselineName), Optional.empty());
         assertThat(logger.getLoggingEvents(), is(List.of(warn("Unable to find a baseline at the path: {}",
                 baselineFolder.toPath().resolve(baselineName + DEFAULT_EXTENSION).toFile()))));
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionForNotExistingFoler()
+    void shouldThrowIllegalArgumentExceptionForNotExistingFolder()
     {
-        fileSystemBaselineRepository.setBaselinesFolder(new File("no_such_folder"));
-        assertThrows(IllegalArgumentException.class, () -> fileSystemBaselineRepository.getBaseline(BASELINE));
+        fileSystemBaselineStorage.setBaselinesFolder(new File("no_such_folder"));
+        assertThrows(IllegalArgumentException.class, () -> fileSystemBaselineStorage.getBaseline(BASELINE));
     }
 
     @Test
     void shouldThrowExceptionWhenBaselineNotLoaded()
     {
-        fileSystemBaselineRepository.setBaselinesFolder(BASELINES_FOLDER);
+        fileSystemBaselineStorage.setBaselinesFolder(BASELINES_FOLDER);
         ResourceLoadException exception = assertThrows(ResourceLoadException.class,
-            () -> fileSystemBaselineRepository.getBaseline("corrupted_image").get().getImage());
+            () -> fileSystemBaselineStorage.getBaseline("corrupted_image").get().getImage());
         assertThat(exception.getMessage(), Matchers.matchesRegex("The baseline at the path "
                 + "'.+[\\\\/]baselines[\\\\/]corrupted_image.png' is broken or has unsupported format"));
     }
@@ -97,11 +97,11 @@ class FileSystemBaselineRepositoryTests
     @Test
     void shouldSaveBaselineIntoFolder(@TempDir File folder) throws IOException
     {
-        fileSystemBaselineRepository.setBaselinesFolder(folder);
+        fileSystemBaselineStorage.setBaselinesFolder(folder);
         Screenshot screenshot = mock(Screenshot.class);
         BufferedImage baseline = loadBaseline();
         when(screenshot.getImage()).thenReturn(baseline);
-        fileSystemBaselineRepository.saveBaseline(screenshot, BASELINE);
+        fileSystemBaselineStorage.saveBaseline(screenshot, BASELINE);
         File baselineFile = new File(folder, BASELINE + DEFAULT_EXTENSION);
         assertThat(baselineFile, FileMatchers.anExistingFile());
         assertThat(logger.getLoggingEvents(), is(List.of(info("Baseline saved to: {}",
@@ -114,7 +114,7 @@ class FileSystemBaselineRepositoryTests
         try
         {
             return ImageIO.read(
-                    ResourceUtils.loadFile(FileSystemBaselineRepositoryTests.class, "/baselines/baseline.png"));
+                    ResourceUtils.loadFile(FileSystemBaselineStorageTests.class, "/baselines/baseline.png"));
         }
         catch (IOException e)
         {

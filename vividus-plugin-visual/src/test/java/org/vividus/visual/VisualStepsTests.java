@@ -122,7 +122,7 @@ class VisualStepsTests
     }
 
     @Test
-    void shouldPerformVisualCheckWithBaselineRepository() throws IOException
+    void shouldPerformVisualCheckWithBaselineStorage() throws IOException
     {
         mockUiContext();
         when(visualTestingEngine.establish(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
@@ -130,7 +130,7 @@ class VisualStepsTests
         visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE, FILESYSTEM);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
         VisualCheck visualCheck = visualCheckCaptor.getValue();
-        assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineRepository());
+        assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineStorage());
         validateVisualCheck(visualCheck, VisualActionType.ESTABLISH);
         verifyCheckResultPublish();
     }
@@ -158,7 +158,7 @@ class VisualStepsTests
     }
 
     @Test
-    void shouldPerformVisualCheckWithCustomConfigurationAndBaselineRepository() throws IOException
+    void shouldPerformVisualCheckWithCustomConfigurationAndBaselineStorage() throws IOException
     {
         VisualActionType compareAgainst = VisualActionType.COMPARE_AGAINST;
         mockUiContext();
@@ -170,7 +170,7 @@ class VisualStepsTests
         visualSteps.runVisualTests(compareAgainst, BASELINE, FILESYSTEM, screenshotConfiguration);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
         VisualCheck visualCheck = visualCheckCaptor.getValue();
-        assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineRepository());
+        assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineStorage());
         validateVisualCheck(visualCheck, compareAgainst);
         verifyCheckResultPublish();
     }
@@ -228,7 +228,7 @@ class VisualStepsTests
     }
 
     @Test
-    void shouldAssertCheckResultUsingBaselineRepositoryAndUseStepLevelSettings() throws IOException
+    void shouldAssertCheckResultUsingBaselineStorageAndUseStepLevelSettings() throws IOException
     {
         mockUiContext();
         ExamplesTable table = mock(ExamplesTable.class);
@@ -249,7 +249,7 @@ class VisualStepsTests
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
         VisualCheck visualCheck = visualCheckCaptor.getValue();
         assertEquals(OptionalDouble.of(50), visualCheck.getAcceptableDiffPercentage());
-        assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineRepository());
+        assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineStorage());
         validateVisualCheck(visualCheck, VisualActionType.COMPARE_AGAINST);
         verifyCheckResultPublish();
     }
@@ -280,7 +280,7 @@ class VisualStepsTests
     }
 
     @Test
-    void shouldRunVisualTestWithBaselineRepositoryAndStepLevelExclusionsAndCustomScreenshotConfiguration()
+    void shouldRunVisualTestWithBaselineStorageAndStepLevelExclusionsAndCustomScreenshotConfiguration()
         throws IOException
     {
         mockUiContext();
@@ -301,7 +301,7 @@ class VisualStepsTests
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
         VisualCheck visualCheck = visualCheckCaptor.getValue();
         assertEquals(OptionalDouble.empty(), visualCheck.getRequiredDiffPercentage());
-        assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineRepository());
+        assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineStorage());
         validateVisualCheck(visualCheck, compareAgainst);
         verifyCheckResultPublish();
     }

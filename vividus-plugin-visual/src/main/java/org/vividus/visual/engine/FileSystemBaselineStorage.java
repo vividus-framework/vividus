@@ -35,9 +35,9 @@ import org.vividus.util.ResourceUtils;
 
 import ru.yandex.qatools.ashot.Screenshot;
 
-public class FileSystemBaselineRepository implements BaselineRepository
+public class FileSystemBaselineStorage implements BaselineStorage
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemBaselineRepository.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemBaselineStorage.class);
 
     private File baselinesFolder;
 
@@ -45,7 +45,7 @@ public class FileSystemBaselineRepository implements BaselineRepository
         if (!baselinesFolder.isAbsolute())
         {
             String replacement = "/";
-            return ResourceUtils.loadFile(FileSystemBaselineRepository.class,
+            return ResourceUtils.loadFile(FileSystemBaselineStorage.class,
                             StringUtils.removeStart(baselinesFolder.toString(), ".").replace("\\", replacement));
         }
         return baselinesFolder;

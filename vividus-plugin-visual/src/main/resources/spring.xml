@@ -15,10 +15,10 @@
         <property name="acceptableDiffPercentage" value="${ui.visual.acceptable-diff-percentage}" />
         <property name="requiredDiffPercentage" value="${ui.visual.required-diff-percentage}" />
         <property name="overrideBaselines" value="${ui.visual.override-baselines}" />
-        <property name="baselineRepository" value="${ui.visual.baseline-repository}" />
+        <property name="baselineStorage" value="${ui.visual.baseline-storage}" />
     </bean>
 
-    <bean id="filesystem" class="org.vividus.visual.engine.FileSystemBaselineRepository">
+    <bean id="filesystem" class="org.vividus.visual.engine.FileSystemBaselineStorage">
         <property name="baselinesFolder" value="${ui.visual.baselines-folder}" />
     </bean>
 

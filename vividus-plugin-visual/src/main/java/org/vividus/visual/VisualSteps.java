@@ -90,12 +90,12 @@ public class VisualSteps extends AbstractVisualSteps
      *
      * @param actionType ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
      * @param name       The baseline name
-     * @param repository The baseline repository name
+     * @param storage    The baseline storage name
      */
-    @When(value = "I $actionType baseline with name `$name` using repository `$repository`", priority = 1)
-    public void runVisualTests(VisualActionType actionType, String name, String repository)
+    @When(value = "I $actionType baseline with name `$name` using storage `$storage`", priority = 1)
+    public void runVisualTests(VisualActionType actionType, String name, String storage)
     {
-        performVisualAction(name, actionType, Optional.of(repository), Optional.empty());
+        performVisualAction(name, actionType, Optional.of(storage), Optional.empty());
     }
 
     /**
@@ -120,18 +120,18 @@ public class VisualSteps extends AbstractVisualSteps
      *
      * @param actionType              ESTABLISH, COMPARE_AGAINST, or CHECK_INEQUALITY_AGAINST
      * @param name                    The baseline name
-     * @param repository              The baseline repository name
+     * @param storage                 The baseline storage name
      * @param screenshotConfiguration configuration to make screenshot
      *                                Example:<br>
      *                                |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|<br>
      *                                |By.xpath(.//header)|100           |100           |CEILING       |
      */
-    @When(value = "I $actionType baseline with name `$name` using repository `$repository` and"
+    @When(value = "I $actionType baseline with name `$name` using storage `$storage` and"
             + " screenshot configuration:$screenshotConfiguration", priority = 1)
-    public void runVisualTests(VisualActionType actionType, String name, String repository,
+    public void runVisualTests(VisualActionType actionType, String name, String storage,
             ScreenshotConfiguration screenshotConfiguration)
     {
-        performVisualAction(name, actionType, Optional.of(repository), Optional.of(screenshotConfiguration));
+        performVisualAction(name, actionType, Optional.of(storage), Optional.of(screenshotConfiguration));
     }
 
     /**
@@ -154,19 +154,19 @@ public class VisualSteps extends AbstractVisualSteps
      * Step establishes baseline or compares against existing one.
      *
      * @param actionType    ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
-     * @param name          of baseline
-     * @param repository    The baseline repository name
+     * @param name          The name of baseline
+     * @param storage       The baseline storage name
      * @param checkSettings examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE`
      *                      or `REQUIRED_DIFF_PERCENTAGE`<br>
      *                      Example:<br>
      *                      |ELEMENT            |AREA                  |<br>
      *                      |By.xpath(.//header)|By.cssSelector(footer)|
      */
-    @When(value = "I $actionType baseline with name `$name` using repository `$repository` and ignoring:$checkSettings",
+    @When(value = "I $actionType baseline with name `$name` using storage `$storage` and ignoring:$checkSettings",
         priority = 1)
-    public void runVisualTests(VisualActionType actionType, String name, String repository, ExamplesTable checkSettings)
+    public void runVisualTests(VisualActionType actionType, String name, String storage, ExamplesTable checkSettings)
     {
-        performVisualAction(checkSettings, name, actionType, Optional.of(repository), Optional.empty());
+        performVisualAction(checkSettings, name, actionType, Optional.of(storage), Optional.empty());
     }
 
     /**
@@ -197,7 +197,7 @@ public class VisualSteps extends AbstractVisualSteps
      *
      * @param actionType              ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST
      * @param name                    The baseline name
-     * @param repository              The baseline repository name
+     * @param storage                 The baseline storage name
      * @param checkSettings           examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE`
      *                                or `REQUIRED_DIFF_PERCENTAGE`<br>
      *                                Example:<br>
@@ -208,34 +208,34 @@ public class VisualSteps extends AbstractVisualSteps
      *                                |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|<br>
      *                                |By.xpath(.//header)|100           |100           |CEILING       |
      */
-    @When(value = "I $actionType baseline with name `$name` using repository `$repository` and ignoring"
+    @When(value = "I $actionType baseline with name `$name` using storage `$storage` and ignoring"
             + ":$checkSettings and screenshot configuration:$screenshotConfiguration", priority = 2)
-    public void runVisualTests(VisualActionType actionType, String name, String repository, ExamplesTable checkSettings,
+    public void runVisualTests(VisualActionType actionType, String name, String storage, ExamplesTable checkSettings,
             ScreenshotConfiguration screenshotConfiguration)
     {
-        performVisualAction(checkSettings, name, actionType, Optional.of(repository),
+        performVisualAction(checkSettings, name, actionType, Optional.of(storage),
                 Optional.of(screenshotConfiguration));
     }
 
     private void performVisualAction(ExamplesTable checkSettingsTable, String baselineName, VisualActionType actionType,
-            Optional<String> baselineRepository, Optional<ScreenshotConfiguration> screenshotConfiguration)
+            Optional<String> baselineStorage, Optional<ScreenshotConfiguration> screenshotConfiguration)
     {
         int rowsSize = checkSettingsTable.getRows().size();
         Validate.isTrue(rowsSize == 1, "Only one row of locators to ignore supported, actual: %s", rowsSize);
         Parameters checkSettings = checkSettingsTable.getRowAsParameters(0);
 
-        performVisualAction(baselineName, actionType, baselineRepository, screenshotConfiguration, checkSettings);
+        performVisualAction(baselineName, actionType, baselineStorage, screenshotConfiguration, checkSettings);
     }
 
     private void performVisualAction(String baselineName, VisualActionType actionType,
-            Optional<String> baselineRepository, Optional<ScreenshotConfiguration> screenshotConfiguration)
+            Optional<String> baselineStorage, Optional<ScreenshotConfiguration> screenshotConfiguration)
     {
-        performVisualAction(baselineName, actionType, baselineRepository, screenshotConfiguration,
+        performVisualAction(baselineName, actionType, baselineStorage, screenshotConfiguration,
                 new ConvertedParameters(Map.of(), null));
     }
 
     private void performVisualAction(String baselineName, VisualActionType actionType,
-            Optional<String> baselineRepository, Optional<ScreenshotConfiguration> screenshotConfiguration,
+            Optional<String> baselineStorage, Optional<ScreenshotConfiguration> screenshotConfiguration,
             Parameters checkSettings)
     {
         Supplier<VisualCheck> visualCheckFactory = () -> {
@@ -255,7 +255,7 @@ public class VisualSteps extends AbstractVisualSteps
 
             VisualCheck visualCheck = new VisualCheck(indexedBaselineName, actionType);
             visualCheck.setScreenshotParameters(screenshotParameters);
-            visualCheck.setBaselineRepository(baselineRepository);
+            visualCheck.setBaselineStorage(baselineStorage);
             setDiffPercentage(visualCheck, checkSettings);
             return visualCheck;
         };

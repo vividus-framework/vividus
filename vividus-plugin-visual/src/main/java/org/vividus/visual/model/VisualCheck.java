@@ -23,7 +23,7 @@ public class VisualCheck extends AbstractVisualCheck
 {
     private OptionalDouble acceptableDiffPercentage = OptionalDouble.empty();
     private OptionalDouble requiredDiffPercentage = OptionalDouble.empty();
-    private Optional<String> baselineRepository = Optional.empty();
+    private Optional<String> baselineStorage = Optional.empty();
 
     public VisualCheck(String baselineName, VisualActionType action)
     {
@@ -50,13 +50,13 @@ public class VisualCheck extends AbstractVisualCheck
         this.requiredDiffPercentage = requiredDiffPercentage;
     }
 
-    public Optional<String> getBaselineRepository()
+    public Optional<String> getBaselineStorage()
     {
-        return baselineRepository;
+        return baselineStorage;
     }
 
-    public void setBaselineRepository(Optional<String> baselineRepository)
+    public void setBaselineStorage(Optional<String> baselineStorage)
     {
-        this.baselineRepository = baselineRepository;
+        this.baselineStorage = baselineStorage;
     }
 }

@@ -45,19 +45,19 @@ public class VisualTestingEngine implements IVisualTestingEngine
 
     private final AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker;
     private final DiffMarkupPolicyFactory diffMarkupPolicyFactory;
-    private final Map<String, BaselineRepository> baselineRepositories;
+    private final Map<String, BaselineStorage> baselineStorages;
 
     private double acceptableDiffPercentage;
     private double requiredDiffPercentage;
     private boolean overrideBaselines;
-    private String baselineRepository;
+    private String baselineStorage;
 
     public VisualTestingEngine(AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker,
-            DiffMarkupPolicyFactory diffMarkupPolicyFactory, Map<String, BaselineRepository> baselineRepositories)
+            DiffMarkupPolicyFactory diffMarkupPolicyFactory, Map<String, BaselineStorage> baselineStorages)
     {
         this.ashotScreenshotTaker = ashotScreenshotTaker;
         this.diffMarkupPolicyFactory = diffMarkupPolicyFactory;
-        this.baselineRepositories = baselineRepositories;
+        this.baselineStorages = baselineStorages;
     }
 
     @Override
@@ -66,7 +66,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
         VisualCheckResult comparisonResult = new VisualCheckResult(visualCheck);
         Screenshot checkpoint = getCheckpointScreenshot(visualCheck);
         comparisonResult.setCheckpoint(imageToBase64(checkpoint.getImage()));
-        getBaselineRepository(visualCheck).saveBaseline(checkpoint, visualCheck.getBaselineName());
+        getBaselineStorage(visualCheck).saveBaseline(checkpoint, visualCheck.getBaselineName());
         return comparisonResult;
     }
 
@@ -82,7 +82,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
         VisualCheckResult comparisonResult = new VisualCheckResult(visualCheck);
         Screenshot checkpoint = getCheckpointScreenshot(visualCheck);
         comparisonResult.setCheckpoint(imageToBase64(checkpoint.getImage()));
-        Optional<Screenshot> baseline = getBaselineRepository(visualCheck).getBaseline(visualCheck.getBaselineName());
+        Optional<Screenshot> baseline = getBaselineStorage(visualCheck).getBaseline(visualCheck.getBaselineName());
         if (baseline.isPresent())
         {
             Screenshot baselineScreenshot = baseline.get();
@@ -104,7 +104,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
                   .log("The {} visual difference percentage is {}% , but actual was {}%");
             if (overrideBaselines)
             {
-                getBaselineRepository(visualCheck).saveBaseline(checkpoint, visualCheck.getBaselineName());
+                getBaselineStorage(visualCheck).saveBaseline(checkpoint, visualCheck.getBaselineName());
             }
         }
         else
@@ -115,16 +115,16 @@ public class VisualTestingEngine implements IVisualTestingEngine
         return comparisonResult;
     }
 
-    private BaselineRepository getBaselineRepository(VisualCheck visualCheck)
+    private BaselineStorage getBaselineStorage(VisualCheck visualCheck)
     {
-        String baselineRepositoryName = visualCheck.getBaselineRepository().orElse(baselineRepository);
-        BaselineRepository baselineRepositoryToUse = baselineRepositories.get(baselineRepositoryName);
-        if (baselineRepositoryToUse == null)
+        String baselineStorageName = visualCheck.getBaselineStorage().orElse(baselineStorage);
+        BaselineStorage baselineStorageToUse = baselineStorages.get(baselineStorageName);
+        if (baselineStorageToUse == null)
         {
-            throw new IllegalStateException("Unable to find baseline repository with name: " + baselineRepositoryName
-                    + ". Available baseline repositories: " + baselineRepositories.keySet());
+            throw new IllegalStateException("Unable to find baseline storage with name: " + baselineStorageName
+                    + ". Available baseline storages: " + baselineStorages.keySet());
         }
-        return baselineRepositoryToUse;
+        return baselineStorageToUse;
     }
 
     private double calculateDiffPercentage(VisualCheck visualCheck, boolean inequalityCheck)
@@ -164,8 +164,8 @@ public class VisualTestingEngine implements IVisualTestingEngine
         this.requiredDiffPercentage = requiredDiffPercentage;
     }
 
-    public void setBaselineRepository(String baselineRepository)
+    public void setBaselineStorage(String baselineStorage)
     {
-        this.baselineRepository = baselineRepository;
+        this.baselineStorage = baselineStorage;
     }
 }
