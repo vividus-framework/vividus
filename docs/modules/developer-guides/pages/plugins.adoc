@@ -185,23 +185,23 @@ Scenario: Validate with help of the custom dynamic variable
 Then `${myDynamicVaribale}` is equal to `my app specific value`
 ----
 
-== Baseline repositories
+== Baseline storages
 
-Baseline reposity is a source of the baseline images used to perform visual checks in xref:plugins:plugin-visual.adoc[visual testing plugin]
+Baseline storage is a source of the baseline images used to perform visual checks in xref:plugins:plugin-visual.adoc[visual testing plugin]
 
-In order to create and register own baselines repository the following steps should be done
+In order to create and register own baselines storages the following steps should be done
 
 . Create a new class that implements
-https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-visual/src/main/java/org/vividus/visual/engine/BaselineRepository.java[`org.vividus.visual.engine.BaselineRepository`]:
+https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-visual/src/main/java/org/vividus/visual/engine/BaselineStorage.java[`org.vividus.visual.engine.BaselineStorage`]:
 +
-./src/main/java/com/mycompany/visual/engine/AzureBaselineRepository.java
+./src/main/java/com/mycompany/visual/engine/AzureBaselineStorage.java
 [source,java]
 ----
 package com.mycompany.visual.engine;
 
-import org.vividus.visual.engine.BaselineRepository;
+import org.vividus.visual.engine.BaselineStorage;
 
-public class AzureBaselineRepository implements BaselineRepository
+public class AzureBaselineStorage implements BaselineStorage
 {
     @Override
     public Optional<Screenshot> getBaseline(String baselineName) throws IOException
@@ -218,7 +218,7 @@ public class AzureBaselineRepository implements BaselineRepository
 }
 ----
 
-. Register Spring bean where `id` is the name of the baseline repository which will
+. Register Spring bean where `id` is the name of the baseline storage which will
 be used in visual testing plugin:
 +
 ./src/main/resources/spring.xml
@@ -230,7 +230,7 @@ be used in visual testing plugin:
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="azure" class="com.mycompany.visual.engine.AzureBaselineRepository"/>
+    <bean id="azure" class="com.mycompany.visual.engine.AzureBaselineStorage"/>
 
 </beans>
 ----

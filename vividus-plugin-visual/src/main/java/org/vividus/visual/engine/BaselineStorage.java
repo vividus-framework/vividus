@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import ru.yandex.qatools.ashot.Screenshot;
 
-public interface BaselineRepository
+public interface BaselineStorage
 {
     Optional<Screenshot> getBaseline(String baselineName) throws IOException;
 
