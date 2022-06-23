@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,12 @@ class ExpressionAdapterTests
 
     private static final String EXPRESSION_RESULT = "target result with \\ and $";
 
+    private static final String EXPRESSION_TRIM = "trim";
+
+    private static final String EXPRESSION_CAPITALIZE = "capitalize";
+
+    private static final String EXPRESSION_LOWER_CASE = "toLowerCase";
+
     private static final String UNSUPPORTED_EXPRESSION_KEYWORD = "unsupported";
 
     private static final String UNSUPPORTED_EXPRESSION = String.format(EXPRESSION_FORMAT,
@@ -99,9 +105,27 @@ class ExpressionAdapterTests
         String input = "#{capitalize(#{trim(#{toLowerCase( VIVIDUS )})})}";
         String output = "Vividus";
         IExpressionProcessor<String> processor = new DelegatingExpressionProcessor<>(List.of(
-            new UnaryExpressionProcessor("trim",        StringUtils::trim),
-            new UnaryExpressionProcessor("toLowerCase", StringUtils::lowerCase),
-            new UnaryExpressionProcessor("capitalize",  StringUtils::capitalize)
+            new UnaryExpressionProcessor(EXPRESSION_TRIM,        StringUtils::trim),
+            new UnaryExpressionProcessor(EXPRESSION_LOWER_CASE, StringUtils::lowerCase),
+            new UnaryExpressionProcessor(EXPRESSION_CAPITALIZE,  StringUtils::capitalize)
+        ));
+        expressionAdaptor.setProcessors(List.of(processor));
+        Object actual = expressionAdaptor.processRawExpression(input);
+        assertEquals(output, actual);
+    }
+
+    @Test
+    void testNestedExpressionWithoutParams()
+    {
+        String input = "#{capitalize(#{trim(#{target})})}";
+        String output = "Quetzalcoatlus";
+
+        UnaryExpressionProcessor mockedExpressionProcessor = mock(UnaryExpressionProcessor.class);
+        when(mockedExpressionProcessor.execute(EXPRESSION_KEYWORD)).thenReturn(Optional.of(" quetzalcoatlus "));
+        IExpressionProcessor<String> processor = new DelegatingExpressionProcessor<>(List.of(
+                new UnaryExpressionProcessor(EXPRESSION_TRIM,        StringUtils::trim),
+                new UnaryExpressionProcessor(EXPRESSION_CAPITALIZE,  StringUtils::capitalize),
+                mockedExpressionProcessor
         ));
         expressionAdaptor.setProcessors(List.of(processor));
         Object actual = expressionAdaptor.processRawExpression(input);
