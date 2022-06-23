@@ -16,122 +16,205 @@
 
 package org.vividus.ui.screenshot;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BinaryOperator;
 
+import com.github.valfirst.slf4jtest.LoggingEvent;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.util.property.PropertyMappedCollection;
 
+@ExtendWith(TestLoggerFactoryExtension.class)
 class AbstractScreenshotParametersFactoryTests
 {
     private static final String DEFAULT = "default";
+    private static final String IGNORES_TABLE = "ignores table";
+    private static final LoggingEvent WARNING_MESSAGE = warn("The passing of elements and areas to ignore through {}"
+            + " is deprecated, please use screenshot configuration instead", IGNORES_TABLE);
+
     private final TestScreenshotParametersFactory factory = new TestScreenshotParametersFactory();
 
+    private final TestLogger testLogger = TestLoggerFactory.getTestLogger(AbstractScreenshotParametersFactory.class);
+
     @Test
-    @SuppressWarnings("unchecked")
-    void shouldUseDefaultConfig()
+    void shouldUseDefaultConfiguration()
     {
-        PropertyMappedCollection<ScreenshotConfiguration> screenshotConfigurations = mock(
-                PropertyMappedCollection.class);
-        factory.setScreenshotConfigurations(screenshotConfigurations);
+        var nativeFooterToCut = 5;
+
+        factory.setScreenshotConfigurations(
+                new PropertyMappedCollection<>(Map.of(DEFAULT, createConfiguration(nativeFooterToCut))));
         factory.setShootingStrategy(DEFAULT);
-        int nativeFooterToCut = 5;
-        when(screenshotConfigurations.getNullable(DEFAULT))
-                .thenReturn(Optional.of(createParametersWith(nativeFooterToCut)));
-        BinaryOperator<ScreenshotConfiguration> merger = mock(BinaryOperator.class);
-        Optional<ScreenshotConfiguration> configuration = factory.getScreenshotConfiguration(Optional.empty(), merger);
-        assertEquals(nativeFooterToCut, configuration.get().getNativeFooterToCut());
-        verifyNoInteractions(merger);
+        factory.setIgnoreStrategies(createEmptyIgnores());
+
+        var parameters = factory.create(Optional.empty(), null, createEmptyIgnores());
+        assertEquals(nativeFooterToCut, parameters.getNativeFooterToCut());
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void shouldMergeUserDefinedAndDefaultConfiguration()
+    void shouldMergeUserDefinedAndDefaultConfigurations()
     {
-        PropertyMappedCollection<ScreenshotConfiguration> screenshotConfigurations = mock(
-                PropertyMappedCollection.class);
-        factory.setScreenshotConfigurations(screenshotConfigurations);
+        var nativeFooterToCut = 5;
+
+        factory.setScreenshotConfigurations(
+                new PropertyMappedCollection<>(Map.of(DEFAULT, createConfiguration(nativeFooterToCut))));
         factory.setShootingStrategy(DEFAULT);
-        int nativeFooterToCut = 5;
-        when(screenshotConfigurations.getNullable(DEFAULT))
-                .thenReturn(Optional.of(createParametersWith(nativeFooterToCut)));
-        Optional<ScreenshotConfiguration> configuration = factory
-                .getScreenshotConfiguration(Optional.of(createParametersWith(10)), (u, d) ->
-                {
-                    u.setNativeFooterToCut(u.getNativeFooterToCut() + d.getNativeFooterToCut());
-                    return u;
-                });
-        assertEquals(15, configuration.get().getNativeFooterToCut());
+        factory.setIgnoreStrategies(createEmptyIgnores());
+
+        var parameters = factory.create(Optional.of(createConfiguration(10)), null, createEmptyIgnores());
+        assertEquals(15, parameters.getNativeFooterToCut());
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void shouldReturnCustomConfigWhenDefaultIsMissing()
+    void shouldReturnCustomConfigurationWhenDefaultIsMissing()
     {
-        PropertyMappedCollection<ScreenshotConfiguration> screenshotConfigurations = mock(
-                PropertyMappedCollection.class);
-        factory.setScreenshotConfigurations(screenshotConfigurations);
+        var nativeFooterToCut = 5;
+
+        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of()));
         factory.setShootingStrategy(DEFAULT);
-        when(screenshotConfigurations.getNullable(DEFAULT))
-                .thenReturn(Optional.empty());
-        BinaryOperator<ScreenshotConfiguration> merger = mock(BinaryOperator.class);
-        Optional<ScreenshotConfiguration> configuration = Optional.of(createParametersWith(10));
-        assertSame(configuration, factory.getScreenshotConfiguration(configuration, merger));
-        verifyNoInteractions(merger);
+        factory.setIgnoreStrategies(createEmptyIgnores());
+
+        var parameters = factory.create(Optional.of(createConfiguration(nativeFooterToCut)), null,
+                createEmptyIgnores());
+        assertEquals(nativeFooterToCut, parameters.getNativeFooterToCut());
     }
 
     @Test
     void shouldFailOnInvalidCutSize()
     {
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-            () -> factory.ensureValidCutSize(-1, "header"));
+        var thrown = assertThrows(IllegalArgumentException.class, () -> factory.ensureValidCutSize(-1, "header"));
         assertEquals("The header to cut must be greater than or equal to zero", thrown.getMessage());
     }
 
     @Test
-    void shouldCreateConfigurationWithBaseParameters()
+    void shouldCreateParametersFromUserDefinedConfiguration()
     {
-        Locator stepElementLocator = mock(Locator.class);
-        Locator stepAreaLocator = mock(Locator.class);
+        var stepElementLocator = mock(Locator.class);
+        var stepAreaLocator = mock(Locator.class);
 
-        ScreenshotConfiguration parameters = new ScreenshotConfiguration();
-        parameters.setElementsToIgnore(Set.of(stepElementLocator));
-        parameters.setAreasToIgnore(Set.of(stepAreaLocator));
-        parameters.setShootingStrategy(Optional.of(DEFAULT));
-        parameters.setNativeFooterToCut(1);
+        var configuration = new ScreenshotConfiguration();
+        configuration.setElementsToIgnore(Set.of(stepElementLocator));
+        configuration.setAreasToIgnore(Set.of(stepAreaLocator));
+        configuration.setShootingStrategy(Optional.of(DEFAULT));
+        configuration.setNativeFooterToCut(1);
 
-        Locator commonElementLocator = mock(Locator.class);
-        Locator commonAreaLocator = mock(Locator.class);
+        var globalElementLocator = mock(Locator.class);
+        var globalAreaLocator = mock(Locator.class);
 
+        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(new HashMap<>()));
         factory.setIgnoreStrategies(Map.of(
-            IgnoreStrategy.ELEMENT, Set.of(commonElementLocator),
-            IgnoreStrategy.AREA, Set.of(commonAreaLocator)
+                IgnoreStrategy.ELEMENT, Set.of(globalElementLocator),
+                IgnoreStrategy.AREA, Set.of(globalAreaLocator)
         ));
 
-        ScreenshotParameters configuration = factory.createWithBaseConfiguration(parameters);
+        ScreenshotParameters parameters = factory.create(Optional.of(configuration), null, createEmptyIgnores());
 
-        assertEquals(Optional.of(DEFAULT), configuration.getShootingStrategy());
-        assertEquals(1, configuration.getNativeFooterToCut());
+        assertEquals(Optional.of(DEFAULT), parameters.getShootingStrategy());
+        assertEquals(1, parameters.getNativeFooterToCut());
         assertEquals(Map.of(
-            IgnoreStrategy.ELEMENT, Set.of(stepElementLocator, commonElementLocator),
-            IgnoreStrategy.AREA, Set.of(stepAreaLocator, commonAreaLocator)
-        ), configuration.getIgnoreStrategies());
+                IgnoreStrategy.ELEMENT, Set.of(stepElementLocator, globalElementLocator),
+                IgnoreStrategy.AREA, Set.of(stepAreaLocator, globalAreaLocator)
+            ),
+            parameters.getIgnoreStrategies()
+        );
+        assertThat(testLogger.getLoggingEvents(), equalTo(List.of()));
     }
 
-    private ScreenshotConfiguration createParametersWith(int nativeFooterToCut)
+    @Test
+    void shouldFailIfBothSourcesAreNotEmpty()
     {
-        ScreenshotConfiguration screenshotConfiguration = new ScreenshotConfiguration();
+        var locator = mock(Locator.class);
+
+        var screenshotConfiguration = new ScreenshotConfiguration();
+        screenshotConfiguration.setAreasToIgnore(Set.of(locator));
+        screenshotConfiguration.setElementsToIgnore(Set.of(locator));
+
+        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(new HashMap<>()));
+
+        Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(
+                IgnoreStrategy.AREA, Set.of(locator),
+                IgnoreStrategy.ELEMENT, Set.of(locator)
+        );
+        var configuration = Optional.of(screenshotConfiguration);
+        var thrown = assertThrows(IllegalArgumentException.class,
+                () -> factory.create(configuration, IGNORES_TABLE, ignores));
+        assertEquals("The elements and areas to ignore must be passed either through screenshot configuration"
+                        + " or ignores table", thrown.getMessage());
+    }
+
+    @Test
+    void shouldPatchIgnores()
+    {
+        var locator = mock(Locator.class);
+        var screenshotConfiguration = new ScreenshotConfiguration();
+
+        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(new HashMap<>()));
+        factory.setIgnoreStrategies(createEmptyIgnores());
+
+        Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(
+                IgnoreStrategy.AREA, Set.of(locator),
+                IgnoreStrategy.ELEMENT, Set.of(locator)
+        );
+
+        ScreenshotParameters parameters = factory.create(Optional.of(screenshotConfiguration), IGNORES_TABLE, ignores);
+
+        assertEquals(ignores, parameters.getIgnoreStrategies());
+        assertThat(testLogger.getLoggingEvents(), equalTo(List.of(WARNING_MESSAGE, WARNING_MESSAGE)));
+    }
+
+    @Test
+    void shouldReturnEmptyParametersWhenNoDefaultConfigurationIsAvailable()
+    {
+        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(new HashMap<>()));
+
+        Optional<ScreenshotParameters> parameters = factory.create();
+
+        assertEquals(Optional.empty(), parameters);
+    }
+
+    @Test
+    void shouldCreateParametersFromDefaultConfiguration()
+    {
+        var nativeFooterToCut = 5;
+
+        factory.setScreenshotConfigurations(
+                new PropertyMappedCollection<>(Map.of(DEFAULT, createConfiguration(nativeFooterToCut))));
+        factory.setShootingStrategy(DEFAULT);
+        factory.setIgnoreStrategies(createEmptyIgnores());
+
+        var parameters = factory.create();
+        assertTrue(parameters.isPresent());
+        assertEquals(nativeFooterToCut, parameters.get().getNativeFooterToCut());
+    }
+
+    private Map<IgnoreStrategy, Set<Locator>> createEmptyIgnores()
+    {
+        return Map.of(
+                IgnoreStrategy.ELEMENT, Set.of(),
+                IgnoreStrategy.AREA, Set.of()
+        );
+    }
+
+    private ScreenshotConfiguration createConfiguration(int nativeFooterToCut)
+    {
+        var screenshotConfiguration = new ScreenshotConfiguration();
         screenshotConfiguration.setNativeFooterToCut(nativeFooterToCut);
         return screenshotConfiguration;
     }
@@ -140,21 +223,31 @@ class AbstractScreenshotParametersFactoryTests
             extends AbstractScreenshotParametersFactory<ScreenshotConfiguration, ScreenshotParameters>
     {
         @Override
-        public Optional<ScreenshotParameters> create(Optional<ScreenshotConfiguration> screenshotConfiguration)
+        protected ScreenshotConfiguration createScreenshotConfiguration()
         {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<ScreenshotParameters> create(Map<IgnoreStrategy, Set<Locator>> ignores)
-        {
-            return Optional.empty();
+            return new ScreenshotConfiguration();
         }
 
         @Override
         protected ScreenshotParameters createScreenshotParameters()
         {
             return new ScreenshotParameters();
+        }
+
+        @Override
+        protected BinaryOperator<ScreenshotConfiguration> getConfigurationMerger()
+        {
+            return (currentConfig, defaultConfig) -> {
+                currentConfig.setNativeFooterToCut(
+                        currentConfig.getNativeFooterToCut() + defaultConfig.getNativeFooterToCut());
+                return currentConfig;
+            };
+        }
+
+        @Override
+        protected void configure(ScreenshotConfiguration config, ScreenshotParameters parameters)
+        {
+            // Do nothing
         }
     }
 }

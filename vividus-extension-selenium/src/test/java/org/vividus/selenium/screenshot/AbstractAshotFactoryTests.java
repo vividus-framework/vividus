@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.Map;
 import java.util.Optional;
@@ -105,8 +106,10 @@ class AbstractAshotFactoryTests
     void shouldDecorateWithCropping()
     {
         var strategy = mock(ShootingStrategy.class);
-        assertThat(factory.decorateWithCropping(strategy, Optional.empty()),
+        var screenshotParameters = mock(ScreenshotParameters.class);
+        assertThat(factory.decorateWithCropping(strategy, screenshotParameters),
                 instanceOf(ElementCroppingDecorator.class));
+        verify(screenshotParameters).getIgnoreStrategies();
     }
 
     private static final class TestAshotFactory extends AbstractAshotFactory<ScreenshotParameters>

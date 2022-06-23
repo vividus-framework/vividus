@@ -241,20 +241,12 @@ public class VisualSteps extends AbstractVisualSteps
         Supplier<VisualCheck> visualCheckFactory = () -> {
             Map<IgnoreStrategy, Set<Locator>> ignores = getIgnores(checkSettings);
 
-            Optional<ScreenshotParameters> screenshotParameters;
-            if (screenshotConfiguration.isPresent())
-            {
-                patchIgnores("ignores table", screenshotConfiguration.get(), ignores);
-                screenshotParameters = screenshotParametersFactory.create(screenshotConfiguration);
-            }
-            else
-            {
-                screenshotParameters = screenshotParametersFactory.create(ignores);
-            }
+            ScreenshotParameters screenshotParameters = screenshotParametersFactory.create(screenshotConfiguration,
+                    "ignores table", ignores);
             String indexedBaselineName = baselineIndexer.createIndexedBaseline(baselineName);
 
             VisualCheck visualCheck = new VisualCheck(indexedBaselineName, actionType);
-            visualCheck.setScreenshotParameters(screenshotParameters);
+            visualCheck.setScreenshotParameters(Optional.of(screenshotParameters));
             visualCheck.setBaselineStorage(baselineStorage);
             setDiffPercentage(visualCheck, checkSettings);
             return visualCheck;

@@ -16,13 +16,8 @@
 
 package org.vividus.ui.mobileapp.screenshot;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.BinaryOperator;
 
-import org.vividus.selenium.screenshot.IgnoreStrategy;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.screenshot.AbstractScreenshotParametersFactory;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParameters;
@@ -31,17 +26,9 @@ public class MobileAppScreenshotParametersFactory
         extends AbstractScreenshotParametersFactory<ScreenshotConfiguration, ScreenshotParameters>
 {
     @Override
-    public Optional<ScreenshotParameters> create(Optional<ScreenshotConfiguration> screenshotConfiguration)
+    protected ScreenshotConfiguration createScreenshotConfiguration()
     {
-        return getScreenshotConfiguration(screenshotConfiguration, getConfigurationMerger())
-                .map(this::createWithBaseConfiguration);
-    }
-
-    @Override
-    public Optional<ScreenshotParameters> create(Map<IgnoreStrategy, Set<Locator>> ignores)
-    {
-        ScreenshotConfiguration configuration = getDefaultConfiguration().orElseGet(ScreenshotConfiguration::new);
-        return Optional.of(createWithBaseConfiguration(configuration, ignores));
+        return new ScreenshotConfiguration();
     }
 
     @Override
@@ -50,19 +37,26 @@ public class MobileAppScreenshotParametersFactory
         return new ScreenshotParameters();
     }
 
-    private BinaryOperator<ScreenshotConfiguration> getConfigurationMerger()
+    @Override
+    protected BinaryOperator<ScreenshotConfiguration> getConfigurationMerger()
     {
-        return (p, b) ->
+        return (currentConfig, defaultConfig) ->
         {
-            if (p.getNativeFooterToCut() == 0)
+            if (currentConfig.getNativeFooterToCut() == 0)
             {
-                p.setNativeFooterToCut(b.getNativeFooterToCut());
+                currentConfig.setNativeFooterToCut(defaultConfig.getNativeFooterToCut());
             }
-            if (p.getShootingStrategy().isEmpty())
+            if (currentConfig.getShootingStrategy().isEmpty())
             {
-                p.setShootingStrategy(b.getShootingStrategy());
+                currentConfig.setShootingStrategy(defaultConfig.getShootingStrategy());
             }
-            return p;
+            return currentConfig;
         };
+    }
+
+    @Override
+    protected void configure(ScreenshotConfiguration config, ScreenshotParameters parameters)
+    {
+         // No changes are needed in ScreenshotParameters
     }
 }

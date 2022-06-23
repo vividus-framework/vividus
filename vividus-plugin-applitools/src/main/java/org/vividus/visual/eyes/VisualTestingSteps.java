@@ -197,18 +197,10 @@ public class VisualTestingSteps extends AbstractVisualSteps
                     IgnoreStrategy.ELEMENT, visualCheck.getElementsToIgnore()
             );
 
-            Optional<ScreenshotParameters> screenshotParameters;
-            if (screenshotConfiguration.isPresent())
-            {
-                patchIgnores("applitools configuration", screenshotConfiguration.get(), ignores);
-                screenshotParameters = screenshotParametersFactory.create(screenshotConfiguration);
-            }
-            else
-            {
-                screenshotParameters = screenshotParametersFactory.create(ignores);
-            }
+            ScreenshotParameters screenshotParameters = screenshotParametersFactory.create(screenshotConfiguration,
+                    "applitools configuration", ignores);
 
-            visualCheck.setScreenshotParameters(screenshotParameters);
+            visualCheck.setScreenshotParameters(Optional.of(screenshotParameters));
             return visualCheck;
         });
     }

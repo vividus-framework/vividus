@@ -27,8 +27,6 @@ import java.util.Optional;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,7 +38,9 @@ import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
 import ru.yandex.qatools.ashot.shooting.CuttingDecorator;
 import ru.yandex.qatools.ashot.shooting.ElementCroppingDecorator;
+import ru.yandex.qatools.ashot.shooting.ScalingDecorator;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
+import ru.yandex.qatools.ashot.shooting.SimpleShootingStrategy;
 import ru.yandex.qatools.ashot.shooting.cutter.CutStrategy;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,12 +51,9 @@ class MobileAppAshotFactoryTests
     private static final String DIMPLE = "dimple";
     private static final String SIMPLE = "SIMPLE";
 
-    @Mock
-    private MobileAppWebDriverManager mobileAppWebDriverManager;
-    @Mock
-    private CoordsProvider coordsProvider;
-    @InjectMocks
-    private MobileAppAshotFactory ashotFactory;
+    @Mock private MobileAppWebDriverManager mobileAppWebDriverManager;
+    @Mock private CoordsProvider coordsProvider;
+    @InjectMocks private MobileAppAshotFactory ashotFactory;
 
     @Test
     void shouldProvideDpr()
@@ -65,28 +62,36 @@ class MobileAppAshotFactoryTests
         verify(mobileAppWebDriverManager).getDpr();
     }
 
-    @SuppressWarnings("unchecked")
-    @ParameterizedTest
-    @CsvSource({ "true,  1, ru.yandex.qatools.ashot.shooting.ScalingDecorator",
-            "false, 2, ru.yandex.qatools.ashot.shooting.SimpleShootingStrategy" })
-    void shouldCreateAshotWithTheMergedConfiguration(boolean downscale, int headerToCut, Class<?> strategyType)
-            throws IllegalAccessException
+    @Test
+    void shouldCreateAshotWithTheMergedConfiguration() throws IllegalAccessException
     {
-        mockAshotConfiguration(DIMPLE, downscale);
-        AShot aShot = ashotFactory.create(createConfigurationWith(10, Optional.of(SIMPLE)));
+        mockAshotConfiguration(true);
+        int nativeFooterToCut = 10;
+        ScreenshotParameters parameters = new ScreenshotParameters();
+        parameters.setNativeFooterToCut(nativeFooterToCut);
+        parameters.setShootingStrategy(Optional.of(SIMPLE));
+        AShot aShot = ashotFactory.create(Optional.of(parameters));
         ElementCroppingDecorator croppingDecorator = (ElementCroppingDecorator) FieldUtils.readField(aShot,
                 SHOOTING_STRATEGY, true);
         CuttingDecorator strategy = (CuttingDecorator) FieldUtils.readField(croppingDecorator, SHOOTING_STRATEGY, true);
-        ShootingStrategy baseStrategy = (ShootingStrategy) FieldUtils.readField(strategy, SHOOTING_STRATEGY, true);
-        CutStrategy cutStrategy = (CutStrategy) FieldUtils.readField(strategy, CUT_STRATEGY, true);
-        assertEquals(strategyType, baseStrategy.getClass());
-        assertEquals(10, cutStrategy.getFooterHeight(null));
-        assertEquals(headerToCut, cutStrategy.getHeaderHeight(null));
-        assertSame(coordsProvider, FieldUtils.readField(aShot, "coordsProvider", true));
+        assertBaseStrategy(ScalingDecorator.class, strategy);
+        assertCutStrategy(strategy, 1, nativeFooterToCut);
+        assertCoordsProvider(aShot);
     }
 
-    @SuppressWarnings("unchecked")
-    private void mockAshotConfiguration(String defaultStrategy, boolean downscale)
+    @Test
+    void shouldCreateAshotWithDefaultConfiguration() throws IllegalAccessException
+    {
+        mockAshotConfiguration(false);
+        ashotFactory.setScreenshotShootingStrategy(SIMPLE);
+        AShot aShot = ashotFactory.create(Optional.empty());
+        CuttingDecorator strategy = (CuttingDecorator) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
+        assertBaseStrategy(SimpleShootingStrategy.class, strategy);
+        assertCutStrategy(strategy, 2, 0);
+        assertCoordsProvider(aShot);
+    }
+
+    private void mockAshotConfiguration(boolean downscale)
     {
         ashotFactory.setDownscale(downscale);
         ashotFactory.setStrategies(Map.of(SIMPLE, new SimpleScreenshotShootingStrategy(), DIMPLE, s ->
@@ -97,11 +102,22 @@ class MobileAppAshotFactoryTests
         when(mobileAppWebDriverManager.getStatusBarSize()).thenReturn(1);
     }
 
-    private Optional<ScreenshotParameters> createConfigurationWith(int nativeFooterToCut, Optional<String> strategy)
+    private void assertBaseStrategy(Class<?> expectedClass, CuttingDecorator strategy) throws IllegalAccessException
     {
-        ScreenshotParameters screenshotParameters = new ScreenshotParameters();
-        screenshotParameters.setNativeFooterToCut(nativeFooterToCut);
-        screenshotParameters.setShootingStrategy(strategy);
-        return Optional.of(screenshotParameters);
+        ShootingStrategy baseStrategy = (ShootingStrategy) FieldUtils.readField(strategy, SHOOTING_STRATEGY, true);
+        assertEquals(expectedClass, baseStrategy.getClass());
+    }
+
+    private void assertCutStrategy(CuttingDecorator strategy, int expectedHeaderHeight, int expectedFooterHeight)
+            throws IllegalAccessException
+    {
+        CutStrategy cutStrategy = (CutStrategy) FieldUtils.readField(strategy, CUT_STRATEGY, true);
+        assertEquals(expectedHeaderHeight, cutStrategy.getHeaderHeight(null));
+        assertEquals(expectedFooterHeight, cutStrategy.getFooterHeight(null));
+    }
+
+    private void assertCoordsProvider(AShot aShot) throws IllegalAccessException
+    {
+        assertSame(coordsProvider, FieldUtils.readField(aShot, "coordsProvider", true));
     }
 }

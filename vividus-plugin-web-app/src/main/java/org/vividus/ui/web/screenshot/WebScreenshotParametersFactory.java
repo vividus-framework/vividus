@@ -16,16 +16,12 @@
 
 package org.vividus.ui.web.screenshot;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
+import java.util.function.BinaryOperator;
 
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.ui.action.ISearchActions;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.screenshot.AbstractScreenshotParametersFactory;
-import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.ui.screenshot.ScreenshotPrecondtionMismatchException;
 
 public class WebScreenshotParametersFactory
@@ -39,17 +35,9 @@ public class WebScreenshotParametersFactory
     }
 
     @Override
-    public Optional<ScreenshotParameters> create(Optional<WebScreenshotConfiguration> screenshotConfiguration)
+    protected WebScreenshotConfiguration createScreenshotConfiguration()
     {
-        return getScreenshotConfiguration(screenshotConfiguration, (c, b) -> c).map(
-                cfg -> configure(cfg, createWithBaseConfiguration(cfg)));
-    }
-
-    @Override
-    public Optional<ScreenshotParameters> create(Map<IgnoreStrategy, Set<Locator>> ignores)
-    {
-        WebScreenshotConfiguration configuration = getDefaultConfiguration().orElseGet(WebScreenshotConfiguration::new);
-        return Optional.of(configure(configuration, createWithBaseConfiguration(configuration, ignores)));
+        return new WebScreenshotConfiguration();
     }
 
     @Override
@@ -58,7 +46,14 @@ public class WebScreenshotParametersFactory
         return new WebScreenshotParameters();
     }
 
-    private ScreenshotParameters configure(WebScreenshotConfiguration config, WebScreenshotParameters parameters)
+    @Override
+    protected BinaryOperator<WebScreenshotConfiguration> getConfigurationMerger()
+    {
+        return (currentConfig, defaultConfig) -> currentConfig;
+    }
+
+    @Override
+    protected void configure(WebScreenshotConfiguration config, WebScreenshotParameters parameters)
     {
         parameters.setNativeHeaderToCut(ensureValidCutSize(config.getNativeHeaderToCut(), "native header"));
 
@@ -77,7 +72,5 @@ public class WebScreenshotParametersFactory
 
         parameters.setCoordsProvider(config.getCoordsProvider());
         parameters.setScrollTimeout(config.getScrollTimeout());
-
-        return parameters;
     }
 }
