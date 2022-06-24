@@ -16,6 +16,7 @@
 
 package org.vividus.visual.eyes;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -53,6 +54,7 @@ class VisualTestingStepsTests
     private static final String BATCH_NAME = "batchName";
     private static final String TEST = "test";
     private static final VisualActionType ESTABLISH = VisualActionType.ESTABLISH;
+    private static final String APPLITOOLS_CONFIGURATION = "applitools configuration";
 
     @Mock private VisualTestingService visualTestingService;
     @Mock private ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
@@ -68,7 +70,7 @@ class VisualTestingStepsTests
     @BeforeEach
     void setUp()
     {
-        SearchContext searchContext = mock(SearchContext.class);
+        var searchContext = mock(SearchContext.class);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
         this.visualTestingSteps = new VisualTestingSteps(visualTestingService, applitoolsVisualCheckFactory,
                 screenshotParametersFactory, uiContext, attachmentPublisher, softAssert);
@@ -77,9 +79,9 @@ class VisualTestingStepsTests
     @Test
     void shouldRunApplitoolsVisualCheck()
     {
-        ApplitoolsVisualCheck check = mock(ApplitoolsVisualCheck.class);
+        var check = mock(ApplitoolsVisualCheck.class);
         when(applitoolsVisualCheckFactory.create(BATCH_NAME, TEST, ESTABLISH)).thenReturn(check);
-        ApplitoolsVisualCheckResult result = mock(ApplitoolsVisualCheckResult.class);
+        var result = mock(ApplitoolsVisualCheckResult.class);
         when(visualTestingService.run(check)).thenReturn(result);
         visualTestingSteps.performCheck(ESTABLISH, TEST, BATCH_NAME);
         verifyVisualCheck(result, 1);
@@ -95,14 +97,20 @@ class VisualTestingStepsTests
     @Test
     void shouldRunApplitoolsVisualCheckWithCustomConfiguration()
     {
-        ApplitoolsVisualCheck check = mock(ApplitoolsVisualCheck.class);
-        ApplitoolsVisualCheckResult result = mock(ApplitoolsVisualCheckResult.class);
+        var check = mock(ApplitoolsVisualCheck.class);
+        var result = mock(ApplitoolsVisualCheckResult.class);
         when(visualTestingService.run(check)).thenReturn(result);
-        WebScreenshotParameters screenshotParameters = mock(WebScreenshotParameters.class);
-        WebScreenshotConfiguration screenshotConfiguration = mock(WebScreenshotConfiguration.class);
-        when(screenshotParametersFactory.create(Optional.of(screenshotConfiguration)))
-                .thenReturn(Optional.of(screenshotParameters));
+        var screenshotConfiguration = mock(WebScreenshotConfiguration.class);
+        var screenshotParameters = mock(WebScreenshotParameters.class);
+        Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(
+                IgnoreStrategy.AREA, Set.of(),
+                IgnoreStrategy.ELEMENT, Set.of()
+        );
+        when(screenshotParametersFactory.create(Optional.of(screenshotConfiguration), APPLITOOLS_CONFIGURATION,
+                ignores)).thenReturn(screenshotParameters);
+
         visualTestingSteps.performCheck(List.of(check, check), screenshotConfiguration);
+
         verifyVisualCheck(result, 2);
         verify(check, times(2)).setScreenshotParameters(Optional.of(screenshotParameters));
     }
@@ -110,18 +118,24 @@ class VisualTestingStepsTests
     @Test
     void shouldRunApplitoolsVisualCheckUsingApplitoolsConfiguration()
     {
-        ApplitoolsVisualCheck check = mock(ApplitoolsVisualCheck.class);
-        ApplitoolsVisualCheckResult result = mock(ApplitoolsVisualCheckResult.class);
+        var locator = mock(Locator.class);
+        var check = new ApplitoolsVisualCheck();
+        check.setElementsToIgnore(Set.of(locator));
+        check.setAreasToIgnore(Set.of(locator));
+
+        var result = mock(ApplitoolsVisualCheckResult.class);
         when(visualTestingService.run(check)).thenReturn(result);
-        WebScreenshotParameters screenshotParameters = mock(WebScreenshotParameters.class);
-        Locator locator = mock(Locator.class);
-        when(check.getElementsToIgnore()).thenReturn(Set.of(locator));
-        when(check.getAreasToIgnore()).thenReturn(Set.of(locator));
-        when(screenshotParametersFactory
-            .create(Map.of(IgnoreStrategy.AREA, Set.of(locator), IgnoreStrategy.ELEMENT, Set.of(locator))))
-                    .thenReturn(Optional.of(screenshotParameters));
+        var screenshotParameters = mock(WebScreenshotParameters.class);
+        var ignores = Map.of(
+                IgnoreStrategy.AREA, Set.of(locator),
+                IgnoreStrategy.ELEMENT, Set.of(locator)
+        );
+        when(screenshotParametersFactory.create(Optional.empty(), APPLITOOLS_CONFIGURATION, ignores)).thenReturn(
+                screenshotParameters);
+
         visualTestingSteps.performCheck(List.of(check));
+
         verifyVisualCheck(result, 1);
-        verify(check).setScreenshotParameters(Optional.of(screenshotParameters));
+        assertEquals(Optional.of(screenshotParameters), check.getScreenshotParameters());
     }
 }

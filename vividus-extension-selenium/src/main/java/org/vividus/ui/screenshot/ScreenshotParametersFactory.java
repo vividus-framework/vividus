@@ -25,7 +25,8 @@ import org.vividus.ui.action.search.Locator;
 
 public interface ScreenshotParametersFactory<C extends ScreenshotConfiguration>
 {
-    Optional<ScreenshotParameters> create(Optional<C> screenshotConfiguration);
+    Optional<ScreenshotParameters> create();
 
-    Optional<ScreenshotParameters> create(Map<IgnoreStrategy, Set<Locator>> ignores);
+    ScreenshotParameters create(Optional<C> screenshotConfiguration, String sourceKey,
+            Map<IgnoreStrategy, Set<Locator>> ignores);
 }

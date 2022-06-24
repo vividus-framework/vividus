@@ -61,7 +61,10 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotParame
         int nativeFooterToCut = screenshotParameters.map(ScreenshotParameters::getNativeFooterToCut).orElse(0);
         strategy = decorateWithFixedCutStrategy(strategy, statusBarSize, nativeFooterToCut);
 
-        strategy = decorateWithCropping(strategy, screenshotParameters);
+        if (screenshotParameters.isPresent())
+        {
+            strategy = decorateWithCropping(strategy, screenshotParameters.get());
+        }
 
         return new AShot().shootingStrategy(strategy).coordsProvider(coordsProvider);
     }

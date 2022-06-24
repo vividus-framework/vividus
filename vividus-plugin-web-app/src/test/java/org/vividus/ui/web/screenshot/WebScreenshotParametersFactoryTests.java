@@ -18,11 +18,11 @@ package org.vividus.ui.web.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -37,7 +37,6 @@ import org.vividus.selenium.screenshot.CoordsProviderType;
 import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.ui.screenshot.ScreenshotPrecondtionMismatchException;
 import org.vividus.util.property.PropertyMappedCollection;
 
@@ -45,7 +44,7 @@ import org.vividus.util.property.PropertyMappedCollection;
 class WebScreenshotParametersFactoryTests
 {
     private static final String SIMPLE = "simple";
-    private static final int TEN = 10;
+    private static final String IGNORES_TABLE = "ignores table";
 
     @Mock private Locator locator;
     @Mock private WebElement scrollableElement;
@@ -53,57 +52,59 @@ class WebScreenshotParametersFactoryTests
     @Mock private ISearchActions searchActions;
     @InjectMocks private WebScreenshotParametersFactory factory;
 
+    private Map<IgnoreStrategy, Set<Locator>> createEmptyIgnores()
+    {
+        return Map.of(
+                IgnoreStrategy.ELEMENT, Set.of(),
+                IgnoreStrategy.AREA, Set.of()
+        );
+    }
+
     @Test
     void shouldCreateScreenshotConfiguration()
     {
-        WebScreenshotConfiguration defaultConfiguration = new WebScreenshotConfiguration();
         factory.setShootingStrategy(SIMPLE);
-        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of(SIMPLE, defaultConfiguration)));
+        factory.setScreenshotConfigurations(
+                new PropertyMappedCollection<>(Map.of(SIMPLE, new WebScreenshotConfiguration())));
         factory.setIgnoreStrategies(Map.of());
 
-        WebScreenshotConfiguration userConfiguration = new WebScreenshotConfiguration();
+        var userConfiguration = new WebScreenshotConfiguration();
         userConfiguration.setShootingStrategy(Optional.of(SIMPLE));
-        userConfiguration.setNativeHeaderToCut(TEN + 1);
-        userConfiguration.setNativeFooterToCut(TEN + 2);
-        userConfiguration.setWebHeaderToCut(TEN + 3);
-        userConfiguration.setWebFooterToCut(TEN + 4);
+        userConfiguration.setNativeHeaderToCut(11);
+        userConfiguration.setNativeFooterToCut(12);
+        userConfiguration.setWebHeaderToCut(13);
+        userConfiguration.setWebFooterToCut(14);
         userConfiguration.setScrollableElement(Optional.of(locator));
         when(searchActions.findElement(locator)).thenReturn(Optional.of(scrollableElement));
         userConfiguration.setCoordsProvider("WEB_DRIVER");
         userConfiguration.setScrollTimeout("PT1S");
 
-        Optional<ScreenshotParameters> createdParameters = factory.create(Optional.of(userConfiguration));
-        assertTrue(createdParameters.isPresent());
-        WebScreenshotParameters configuration = (WebScreenshotParameters) createdParameters.get();
+        var parameters = factory.create(Optional.of(userConfiguration), IGNORES_TABLE, createEmptyIgnores());
 
-        assertEquals(Optional.of(SIMPLE), configuration.getShootingStrategy());
-        assertEquals(TEN + 1, configuration.getNativeHeaderToCut());
-        assertEquals(TEN + 2, configuration.getNativeFooterToCut());
-        WebCutOptions webCutOptions = configuration.getWebCutOptions();
-        assertEquals(TEN + 3, webCutOptions.getWebHeaderToCut());
-        assertEquals(TEN + 4, webCutOptions.getWebFooterToCut());
-        assertEquals(Optional.of(scrollableElement), configuration.getScrollableElement());
-        assertEquals(CoordsProviderType.WEB_DRIVER, configuration.getCoordsProvider());
-        assertEquals(Duration.ofSeconds(1), configuration.getScrollTimeout());
+        assertEquals(Optional.of(SIMPLE), parameters.getShootingStrategy());
+        assertEquals(11, parameters.getNativeHeaderToCut());
+        assertEquals(12, parameters.getNativeFooterToCut());
+        assertEquals(13, parameters.getWebCutOptions().getWebHeaderToCut());
+        assertEquals(14, parameters.getWebCutOptions().getWebFooterToCut());
+        assertEquals(Optional.of(scrollableElement), parameters.getScrollableElement());
+        assertEquals(CoordsProviderType.WEB_DRIVER, parameters.getCoordsProvider());
+        assertEquals(Duration.ofSeconds(1), parameters.getScrollTimeout());
     }
 
     @Test
     void shouldCreateScreenshotConfigurationWithIgnores()
     {
-        WebScreenshotConfiguration defaultConfiguration = new WebScreenshotConfiguration();
         factory.setShootingStrategy(SIMPLE);
-        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of(SIMPLE, defaultConfiguration)));
+        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(new HashMap<>()));
         factory.setIgnoreStrategies(Map.of(IgnoreStrategy.ELEMENT, Set.of(), IgnoreStrategy.AREA, Set.of()));
 
-        Locator locator = mock(Locator.class);
-        Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(
-            IgnoreStrategy.ELEMENT, Set.of(locator),
-            IgnoreStrategy.AREA, Set.of(locator)
+        var locator = mock(Locator.class);
+        var ignores = Map.of(
+                IgnoreStrategy.ELEMENT, Set.of(locator),
+                IgnoreStrategy.AREA, Set.of(locator)
         );
-        Optional<ScreenshotParameters> createdParameters = factory.create(ignores);
-        assertTrue(createdParameters.isPresent());
-        WebScreenshotParameters configuration = (WebScreenshotParameters) createdParameters.get();
-        assertEquals(ignores, configuration.getIgnoreStrategies());
+        var parameters = factory.create(Optional.empty(), IGNORES_TABLE, ignores);
+        assertEquals(ignores, parameters.getIgnoreStrategies());
     }
 
     @Test
@@ -113,13 +114,14 @@ class WebScreenshotParametersFactoryTests
         factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of()));
         factory.setIgnoreStrategies(Map.of());
 
-        WebScreenshotConfiguration userParameters = new WebScreenshotConfiguration();
-        userParameters.setScrollableElement(Optional.of(locator));
+        var webScreenshotConfiguration = new WebScreenshotConfiguration();
+        webScreenshotConfiguration.setScrollableElement(Optional.of(locator));
         when(searchActions.findElement(locator)).thenReturn(Optional.empty());
-        Optional<WebScreenshotConfiguration> parameters = Optional.of(userParameters);
+        var configuration = Optional.of(webScreenshotConfiguration);
+        Map<IgnoreStrategy, Set<Locator>> ignores = createEmptyIgnores();
 
-        ScreenshotPrecondtionMismatchException thrown = assertThrows(ScreenshotPrecondtionMismatchException.class,
-            () -> factory.create(parameters));
+        var thrown = assertThrows(ScreenshotPrecondtionMismatchException.class,
+                () -> factory.create(configuration, IGNORES_TABLE, ignores));
         assertEquals("Scrollable element does not exist", thrown.getMessage());
     }
 }

@@ -17,35 +17,30 @@
 package org.vividus.ui.mobileapp.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
-import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.util.property.PropertyMappedCollection;
 
-@ExtendWith(MockitoExtension.class)
 class MobileAppScreenshotParametersFactoryTests
 {
     private static final String SIMPLE = "simple";
     private static final int TEN = 10;
 
-    @InjectMocks private MobileAppScreenshotParametersFactory factory;
+    private final MobileAppScreenshotParametersFactory factory = new MobileAppScreenshotParametersFactory();
 
     static Stream<Arguments> args()
     {
@@ -60,40 +55,37 @@ class MobileAppScreenshotParametersFactoryTests
     void shouldCreateScreenshotConfiguration(int defaultFooter, Optional<String> defaultStrategy, int userFooter,
             Optional<String> userStrategy)
     {
-        ScreenshotConfiguration defaultConfiguration = new ScreenshotConfiguration();
+        var defaultConfiguration = new ScreenshotConfiguration();
         defaultConfiguration.setNativeFooterToCut(defaultFooter);
         defaultConfiguration.setShootingStrategy(defaultStrategy);
         factory.setShootingStrategy(SIMPLE);
         factory.setIgnoreStrategies(Map.of());
         factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of(SIMPLE, defaultConfiguration)));
 
-        ScreenshotConfiguration parameters = new ScreenshotConfiguration();
-        parameters.setNativeFooterToCut(userFooter);
-        parameters.setShootingStrategy(userStrategy);
-        Optional<ScreenshotParameters> createdConfiguration = factory.create(Optional.of(parameters));
-        assertTrue(createdConfiguration.isPresent());
-        ScreenshotParameters configuration = createdConfiguration.get();
-        assertEquals(Optional.of(SIMPLE), configuration.getShootingStrategy());
-        assertEquals(TEN, configuration.getNativeFooterToCut());
+        var configuration = new ScreenshotConfiguration();
+        configuration.setNativeFooterToCut(userFooter);
+        configuration.setShootingStrategy(userStrategy);
+        Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(
+                IgnoreStrategy.ELEMENT, Set.of(),
+                IgnoreStrategy.AREA, Set.of()
+        );
+        var parameters = factory.create(Optional.of(configuration), null, ignores);
+        assertEquals(Optional.of(SIMPLE), parameters.getShootingStrategy());
+        assertEquals(TEN, parameters.getNativeFooterToCut());
     }
 
     @Test
     void shouldCreateScreenshotConfigurationWithIgnores()
     {
-        ScreenshotConfiguration defaultConfiguration = new ScreenshotConfiguration();
-        factory.setShootingStrategy(SIMPLE);
         factory.setIgnoreStrategies(Map.of(IgnoreStrategy.ELEMENT, Set.of(), IgnoreStrategy.AREA, Set.of()));
-        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of(SIMPLE, defaultConfiguration)));
+        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(new HashMap<>()));
 
-        Locator locator = mock(Locator.class);
-        Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(
+        var locator = mock(Locator.class);
+        var ignores = Map.of(
             IgnoreStrategy.ELEMENT, Set.of(locator),
             IgnoreStrategy.AREA, Set.of(locator)
         );
-        Optional<ScreenshotParameters> createdConfiguration = factory.create(ignores);
-        assertTrue(createdConfiguration.isPresent());
-
-        ScreenshotParameters configuration = createdConfiguration.get();
-        assertEquals(ignores, configuration.getIgnoreStrategies());
+        var parameters = factory.create(Optional.empty(), null, ignores);
+        assertEquals(ignores, parameters.getIgnoreStrategies());
     }
 }

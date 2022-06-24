@@ -55,7 +55,7 @@ public class ApplitoolsVisualCheckFactory
 
     public ApplitoolsVisualCheck create(String batchName, String baselineName, VisualActionType action)
     {
-        Optional<ScreenshotParameters> screenshotParameters = screenshotParametersFactory.create(Optional.empty());
+        Optional<ScreenshotParameters> screenshotParameters = screenshotParametersFactory.create();
 
         ApplitoolsVisualCheck check = new ApplitoolsVisualCheck(batchName,
                 baselineIndexer.createIndexedBaseline(baselineName), action);

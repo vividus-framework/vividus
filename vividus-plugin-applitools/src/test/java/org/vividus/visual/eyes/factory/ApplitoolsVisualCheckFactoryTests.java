@@ -18,13 +18,11 @@ package org.vividus.visual.eyes.factory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 import com.applitools.eyes.MatchLevel;
 
@@ -89,7 +87,7 @@ class ApplitoolsVisualCheckFactoryTests
     {
         when(baselineIndexer.createIndexedBaseline(BASELINE)).thenReturn(BASELINE);
         var screenshotParameters = mock(ScreenshotParameters.class);
-        when(screenshotParametersFactory.create(Optional.empty())).thenReturn(Optional.of(screenshotParameters));
+        when(screenshotParametersFactory.create()).thenReturn(Optional.of(screenshotParameters));
         var applitoolsVisualCheck = factory.create(BATCH_NAME, BASELINE, ACTION);
         Assertions.assertAll(
             () -> assertEquals(BASELINE, applitoolsVisualCheck.getBaselineName()),
@@ -130,18 +128,5 @@ class ApplitoolsVisualCheckFactoryTests
             () -> assertEquals(VIEWPORT_SIZE, applitoolsVisualCheck.getViewportSize()),
             () -> assertEquals(BASELINE_ENV_NAME, applitoolsVisualCheck.getBaselineEnvName()),
             () -> assertEquals(appName, applitoolsVisualCheck.getAppName()));
-    }
-
-    private BiFunction<String, VisualActionType, ApplitoolsVisualCheck> factoryMatcher()
-    {
-        return argThat(f ->
-        {
-            ApplitoolsVisualCheck visualCheck = f.apply(BASELINE, ACTION);
-            Assertions.assertAll(
-                () -> assertEquals(BASELINE, visualCheck.getBaselineName()),
-                () -> assertEquals(ACTION, visualCheck.getAction()),
-                () -> assertEquals(BATCH_NAME, visualCheck.getBatchName()));
-            return true;
-        });
     }
 }

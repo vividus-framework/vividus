@@ -75,7 +75,7 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
 
         decorated = decorateWithScrollbarHiding(decorated, screenshotParameters.getScrollableElement());
 
-        decorated = decorateWithCropping(decorated, Optional.of(screenshotParameters));
+        decorated = decorateWithCropping(decorated, screenshotParameters);
 
         CoordsProvider coordsProvider = screenshotParameters.getCoordsProvider().create(javascriptActions);
         CoordsProvider scrollBarHidingCoordsProvider = new ScrollBarHidingCoordsProviderDecorator(coordsProvider,

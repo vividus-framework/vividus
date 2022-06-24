@@ -19,7 +19,6 @@ package org.vividus.selenium.screenshot;
 import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.cutting;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiFunction;
 
 import javax.inject.Inject;
@@ -60,10 +59,9 @@ public abstract class AbstractAshotFactory<T extends ScreenshotParameters> imple
     }
 
     protected ShootingStrategy decorateWithCropping(ShootingStrategy strategy,
-            Optional<ScreenshotParameters> screenshotParameters)
+            ScreenshotParameters screenshotParameters)
     {
-        return new ElementCroppingDecorator(strategy, screenshotCropper,
-                screenshotParameters.map(ScreenshotParameters::getIgnoreStrategies).orElse(Map.of()));
+        return new ElementCroppingDecorator(strategy, screenshotCropper, screenshotParameters.getIgnoreStrategies());
     }
 
     protected ScreenshotShootingStrategy getStrategyBy(String strategyName)
