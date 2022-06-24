@@ -12,4 +12,5 @@ dependencies {
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'org.mockito', name: 'mockito-inline', version: versions.mockito)
 }
