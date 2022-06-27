@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
 import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.selenium.IWebDriverProvider;
@@ -42,7 +41,6 @@ import org.vividus.ui.web.event.PageLoadEndEvent;
 
 public class MouseActions implements IMouseActions
 {
-    private static final String COULD_NOT_MOVE_ERROR_MESSAGE = "Could not move to the element because of an error: ";
     private static final String COULD_NOT_CLICK_ERROR_MESSAGE = "Could not click on the element: ";
     private static final By BODY_XPATH_LOCATOR = By.xpath("//body");
 
@@ -200,14 +198,7 @@ public class MouseActions implements IMouseActions
             {
                 javascriptActions.scrollIntoView(element, true);
             }
-            try
-            {
-                new Actions(getWebDriver()).moveToElement(element).perform();
-            }
-            catch (MoveTargetOutOfBoundsException ex)
-            {
-                softAssert.recordFailedAssertion(COULD_NOT_MOVE_ERROR_MESSAGE + ex);
-            }
+            new Actions(getWebDriver()).moveToElement(element).perform();
         }
     }
 
