@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,12 +45,7 @@ import org.openqa.selenium.WebDriver.Navigation;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.HasInputDevices;
-import org.openqa.selenium.interactions.HasTouchScreen;
 import org.openqa.selenium.interactions.Interactive;
-import org.openqa.selenium.interactions.Keyboard;
-import org.openqa.selenium.interactions.Mouse;
-import org.openqa.selenium.interactions.TouchScreen;
 
 @ExtendWith(MockitoExtension.class)
 class DelegatingWebDriverTests
@@ -61,11 +56,8 @@ class DelegatingWebDriverTests
             + " javascript";
     private static final String SCRIPT = "testScript";
 
-    @Mock
-    private WebDriver wrappedDriver;
-
-    @InjectMocks
-    private DelegatingWebDriver delegatingWebDriver;
+    @Mock private WebDriver wrappedDriver;
+    @InjectMocks private DelegatingWebDriver delegatingWebDriver;
 
     @Test
     void testGet()
@@ -179,60 +171,6 @@ class DelegatingWebDriverTests
     void testGetWrappedDriver()
     {
         assertEquals(wrappedDriver, delegatingWebDriver.getWrappedDriver());
-    }
-
-    @Test
-    void testGetTouch()
-    {
-        WebDriver driverWithTouchScreen = Mockito.mock(WebDriver.class,
-                withSettings().extraInterfaces(HasTouchScreen.class));
-        TouchScreen touchScreen = Mockito.mock(TouchScreen.class);
-        when(((HasTouchScreen) driverWithTouchScreen).getTouch()).thenReturn(touchScreen);
-        assertEquals(touchScreen, new DelegatingWebDriver(driverWithTouchScreen).getTouch());
-    }
-
-    @Test
-    void testGetTouchUnsupportedOperationException()
-    {
-        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
-                delegatingWebDriver::getTouch);
-        assertEquals(ADVANCED_INTERACTION_NOT_SUPPORTED, exception.getMessage());
-    }
-
-    @Test
-    void testGetKeyboard()
-    {
-        WebDriver driverWithInputDevices = Mockito.mock(WebDriver.class,
-                withSettings().extraInterfaces(HasInputDevices.class));
-        Keyboard keyboard = Mockito.mock(Keyboard.class);
-        when(((HasInputDevices) driverWithInputDevices).getKeyboard()).thenReturn(keyboard);
-        assertEquals(keyboard, new DelegatingWebDriver(driverWithInputDevices).getKeyboard());
-    }
-
-    @Test
-    void testGetKeyboardUnsupportedOperationException()
-    {
-        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
-                delegatingWebDriver::getKeyboard);
-        assertEquals(ADVANCED_INTERACTION_NOT_SUPPORTED, exception.getMessage());
-    }
-
-    @Test
-    void testGetMouse()
-    {
-        WebDriver driverWithInputDevices = Mockito.mock(WebDriver.class,
-                withSettings().extraInterfaces(HasInputDevices.class));
-        Mouse mouse = Mockito.mock(Mouse.class);
-        when(((HasInputDevices) driverWithInputDevices).getMouse()).thenReturn(mouse);
-        assertEquals(mouse, new DelegatingWebDriver(driverWithInputDevices).getMouse());
-    }
-
-    @Test
-    void testGetMouseUnsupportedOperationException()
-    {
-        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
-                delegatingWebDriver::getMouse);
-        assertEquals(ADVANCED_INTERACTION_NOT_SUPPORTED, exception.getMessage());
     }
 
     @Test

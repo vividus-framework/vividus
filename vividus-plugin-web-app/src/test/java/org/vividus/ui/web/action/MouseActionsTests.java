@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,14 +35,18 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.google.common.eventbus.EventBus;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -53,11 +57,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsElement;
-import org.openqa.selenium.interactions.Coordinates;
-import org.openqa.selenium.interactions.HasInputDevices;
-import org.openqa.selenium.interactions.Locatable;
-import org.openqa.selenium.interactions.Mouse;
-import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
+import org.openqa.selenium.interactions.Interactive;
+import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.selenium.IWebDriverProvider;
@@ -76,46 +77,23 @@ class MouseActionsTests
     private static final String OTHER_ELEMENT_WOULD_RECEIVE_CLICK = ELEMENT_IS_NOT_CLICKABLE_AT_POINT
             + " (75, 975). Other element would receive the click: <div..";
     private static final String COULD_NOT_CLICK_ERROR_MESSAGE = "Could not click on the element: ";
-    private static final String COULD_NOT_MOVE_TO_ERROR_MESSAGE = "Could not move to the element because of an error: ";
 
-    @Mock
-    private IWebDriverProvider webDriverProvider;
+    private static final String BUTTON = "button";
+    private static final String TYPE = "type";
 
-    @Mock(extraInterfaces = Locatable.class)
-    private WebElement locatableWebElement;
-
-    @Mock(extraInterfaces = { HasCapabilities.class, HasInputDevices.class })
+    @Mock(extraInterfaces = { HasCapabilities.class, Interactive.class })
     private WebDriver webDriver;
-
-    @Mock
-    private WebJavascriptActions javascriptActions;
-
-    @Mock
-    private ISoftAssert softAssert;
-
-    @Mock
-    private Mouse mouse;
-
-    @Mock
-    private IWebDriverManager webDriverManager;
-
-    @Mock
-    private IWebWaitActions waitActions;
-
-    @Mock
-    private IAlertActions alertActions;
-
-    @Mock
-    private WebElement webElement;
-
-    @Mock
-    private EventBus eventBus;
-
-    @Mock
-    private IUiContext uiContext;
-
-    @InjectMocks
-    private MouseActions mouseActions;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private WebJavascriptActions javascriptActions;
+    @Mock private ISoftAssert softAssert;
+    @Mock private IWebDriverManager webDriverManager;
+    @Mock private IWebWaitActions waitActions;
+    @Mock private IAlertActions alertActions;
+    @Mock private WebElement webElement;
+    @Mock private EventBus eventBus;
+    @Mock private IUiContext uiContext;
+    @InjectMocks private MouseActions mouseActions;
+    @Captor private ArgumentCaptor<Collection<Sequence>> sequencesCaptor;
 
     private void verifyWebElement(int clickAttempts, boolean alertPresent, boolean newPageLoaded, ClickResult result)
     {
@@ -411,92 +389,98 @@ class MouseActionsTests
     }
 
     @Test
-    void clickInvisibleElementIsNull()
+    void shouldNotPerformActionsAtAttemptToClickNullElement()
     {
         mouseActions.moveToAndClick(null);
-        verifyNoInteractions(mouse);
+        verifyNoInteractions(webDriver);
     }
 
     @Test
     void clickInvisibleElement()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
-        when(((HasInputDevices) webDriver).getMouse()).thenReturn(mouse);
-        Coordinates coordinates = mock(Coordinates.class);
-        when(((Locatable) locatableWebElement).getCoordinates()).thenReturn(coordinates);
-        mouseActions.moveToAndClick(locatableWebElement);
-        verify(mouse).mouseMove(coordinates);
-        verify(mouse).click(null);
+        mouseActions.moveToAndClick(webElement);
+        verifyActionsWithMove(createClickActions(0));
     }
 
     @Test
-    void testContextClick()
+    void shouldPerformContextClick()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
-        when(((HasInputDevices) webDriver).getMouse()).thenReturn(mouse);
-        Coordinates coordinates = mock(Coordinates.class);
-        when(((Locatable) locatableWebElement).getCoordinates()).thenReturn(coordinates);
-        mouseActions.contextClick(locatableWebElement);
-        verify(mouse).contextClick(coordinates);
+        mouseActions.contextClick(webElement);
+        verifyActionsWithMove(createClickActions(2));
+    }
+
+    private List<Map<String, Object>> createClickActions(int button)
+    {
+        return List.of(
+                Map.of(BUTTON, button, TYPE, "pointerDown"),
+                Map.of(BUTTON, button, TYPE, "pointerUp")
+        );
     }
 
     @Test
     void testContextClickWebElementIsNull()
     {
         mouseActions.contextClick(null);
-        verifyNoInteractions(mouse);
+        verifyNoInteractions(webDriver);
     }
 
     @Test
-    void testMoveToElement()
+    void shouldMoveToElement()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
-        when(((HasInputDevices) webDriver).getMouse()).thenReturn(mouse);
-        Coordinates coordinates = mock(Coordinates.class);
-        when(((Locatable) locatableWebElement).getCoordinates()).thenReturn(coordinates);
-        mouseActions.moveToElement(locatableWebElement);
-        verify(mouse).mouseMove(coordinates);
+        mouseActions.moveToElement(webElement);
+        verifyActionsWithMove(List.of());
     }
 
     @Test
-    void testMoveToNullElement()
+    void shouldNotPerformActionsAtAttemptToMoveToNullElement()
     {
         mouseActions.moveToElement(null);
         verifyNoInteractions(webDriverProvider, javascriptActions, softAssert);
     }
 
     @Test
-    void testMoveToElementMoveTargetOutOfBoundsException()
+    void shouldMoveToElementOnMobileDevice()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
-        when(((HasInputDevices) webDriver).getMouse()).thenReturn(mouse);
-        MoveTargetOutOfBoundsException boundsException = new MoveTargetOutOfBoundsException(
-                COULD_NOT_MOVE_TO_ERROR_MESSAGE);
-        Coordinates coordinates = mock(Coordinates.class);
-        when(((Locatable) locatableWebElement).getCoordinates()).thenReturn(coordinates);
-        doThrow(boundsException).when(mouse).mouseMove(coordinates);
-        mouseActions.moveToElement(locatableWebElement);
-        verify(softAssert).recordFailedAssertion(COULD_NOT_MOVE_TO_ERROR_MESSAGE + boundsException);
-    }
-
-    @Test
-    void testMoveToElementOnMobile()
-    {
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(((HasInputDevices) webDriver).getMouse()).thenReturn(mouse);
         when(webDriverManager.isMobile()).thenReturn(true);
-        mouseActions.moveToElement(locatableWebElement);
-        verify(javascriptActions).scrollIntoView(locatableWebElement, true);
+        mouseActions.moveToElement(webElement);
+        verify(javascriptActions).scrollIntoView(webElement, true);
+        verifyActionsWithMove(List.of());
     }
 
     @Test
     void shouldScrollToElementOnBrowsersNotPerformingScrollAutomatically()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
-        when(((HasInputDevices) webDriver).getMouse()).thenReturn(mouse);
         when(webDriverManager.isMobile()).thenReturn(false);
         when(webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.FIREFOX)).thenReturn(true);
-        mouseActions.moveToElement(locatableWebElement);
-        verify(javascriptActions).scrollIntoView(locatableWebElement, true);
+        mouseActions.moveToElement(webElement);
+        verify(javascriptActions).scrollIntoView(webElement, true);
+        verifyActionsWithMove(List.of());
+    }
+
+    private void verifyActionsWithMove(List<Map<String, Object>> actions)
+    {
+        verify((Interactive) webDriver).perform(sequencesCaptor.capture());
+        Collection<Sequence> sequences = sequencesCaptor.getValue();
+        assertEquals(1, sequences.size());
+        List<Map<String, Object>> allActions = new ArrayList<>();
+        allActions.add(Map.of(
+                "duration", 100L,
+                "x", 0,
+                "y", 0,
+                TYPE, "pointerMove",
+                "origin", webElement));
+        allActions.addAll(actions);
+        assertEquals(Map.of(
+                "id", "default mouse",
+                TYPE, "pointer",
+                "parameters", Map.of("pointerType", "mouse"),
+                "actions", allActions
+            ), sequences.iterator().next().toJson()
+        );
     }
 }

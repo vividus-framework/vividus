@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,16 +30,11 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
-import org.openqa.selenium.interactions.HasInputDevices;
-import org.openqa.selenium.interactions.HasTouchScreen;
 import org.openqa.selenium.interactions.Interactive;
-import org.openqa.selenium.interactions.Keyboard;
-import org.openqa.selenium.interactions.Mouse;
 import org.openqa.selenium.interactions.Sequence;
-import org.openqa.selenium.interactions.TouchScreen;
 
-public class DelegatingWebDriver implements WebDriver, JavascriptExecutor, TakesScreenshot,
-        WrapsDriver, HasInputDevices, HasTouchScreen, HasCapabilities, Interactive
+public class DelegatingWebDriver implements WebDriver, JavascriptExecutor, TakesScreenshot, WrapsDriver,
+        HasCapabilities, Interactive
 {
     private static final String JAVASCRIPT_NOT_SUPPORTED = "Underlying driver instance does not support executing"
             + " javascript";
@@ -139,36 +134,6 @@ public class DelegatingWebDriver implements WebDriver, JavascriptExecutor, Takes
     public WebDriver getWrappedDriver()
     {
         return wrappedDriver;
-    }
-
-    @Override
-    public TouchScreen getTouch()
-    {
-        if (wrappedDriver instanceof HasTouchScreen)
-        {
-            return ((HasTouchScreen) wrappedDriver).getTouch();
-        }
-        throw new UnsupportedOperationException(ADVANCED_INTERACTION_NOT_SUPPORTED);
-    }
-
-    @Override
-    public Keyboard getKeyboard()
-    {
-        if (wrappedDriver instanceof HasInputDevices)
-        {
-            return ((HasInputDevices) wrappedDriver).getKeyboard();
-        }
-        throw new UnsupportedOperationException(ADVANCED_INTERACTION_NOT_SUPPORTED);
-    }
-
-    @Override
-    public Mouse getMouse()
-    {
-        if (wrappedDriver instanceof HasInputDevices)
-        {
-            return ((HasInputDevices) wrappedDriver).getMouse();
-        }
-        throw new UnsupportedOperationException(ADVANCED_INTERACTION_NOT_SUPPORTED);
     }
 
     @Override
