@@ -40,6 +40,90 @@ Generates a random integer value between the specified origin (`minInclusive`) a
 |`1`
 |===
 
+== Math calculations
+
+=== `round`
+
+Rounds a number with an approximate value based on specific rounding definitions.
+
+[source, subs="+quotes"]
+----
+#{round(*$value*, $maxFractionDigits, $roundingMode)}
+----
+
+* *`$value`* - any number to be processed
+* `$maxFractionDigits` - maximum number of digits after the decimal separator
+* `$roundingMode` - specifies a rounding behavior for numerical operations (more information https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/math/RoundingMode.html[here]):
++
+[cols="1, 1, 4", options="header"]
+|===
+|Rouding Mode |Readable |Description
+
+|UP
+|up
+|Rounds away from zero.
+
+|DOWN
+|down
+|Rounds towards zero.
+
+|CEILING
+|ceiling
+|Rounds towards positive infinity.
+
+|FLOOR
+|floor
+|Rounds towards negative infinity.
+
+|HALF_UP
+|half up
+|Rounds towards "nearest neighbor" unless both neighbors are equidistant, in which case round up.
+
+|HALF_DOWN
+|half down
+|Rounds towards "nearest neighbor" unless both neighbors are equidistant, in which case round down.
+
+|HALF_EVEN
+|half even
+|Rounds towards the "nearest neighbor" unless both neighbors are equidistant, in which case, round towards the even neighbor.
+
+|UNNECESSARY
+|unnecessary
+|Asserts that the requested operation has an exact result, hence no rounding is necessary.
+|===
+
+.Examples of rounding operations with different parameters
+|===
+|Expression |Result
+
+|`#{round(5.0)}`
+|`5`
+
+|`#{round(-5.9, 0)}`
+|`-6`
+
+|`#{round(5.551, 2)}`
+|`5.55`
+
+|`#{round(1.4, 0, ceiling)}`
+|`2`
+
+|`#{round(-1.4, 0, floor)}`
+|`-2`
+
+|`#{round(-5.5555, 3, half up)}`
+|`-5.556`
+
+|`#{round(-5.555, 2, half down)}`
+|`-5.55`
+
+|`#{round(-5.5, 0, half even)}`
+|`-6`
+
+|`#{round(-1.1, 2, unnecessary)}`
+|`-1.1`
+|===
+
 == String manipulations
 
 === `replaceFirstByRegExp` / `replaceAllByRegExp`
