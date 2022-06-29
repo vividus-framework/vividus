@@ -16,20 +16,13 @@
 
 package org.vividus.selenium.screenshot;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import javax.imageio.ImageIO;
-
 import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.OutputType;
 import org.openqa.selenium.SearchContext;
-import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
@@ -57,15 +50,6 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
         this.screenshotFileNameGenerator = screenshotFileNameGenerator;
         this.ashotFactory = ashotFactory;
         this.screenshotDebugger = screenshotDebugger;
-    }
-
-    @Override
-    public BufferedImage takeViewportScreenshot() throws IOException
-    {
-        try (InputStream inputStream = new ByteArrayInputStream(takeScreenshotAsByteArray()))
-        {
-            return ImageIO.read(inputStream);
-        }
     }
 
     @Override
@@ -117,7 +101,7 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
 
     protected byte[] takeScreenshotAsByteArray()
     {
-        return webDriverProvider.getUnwrapped(TakesScreenshot.class).getScreenshotAs(OutputType.BYTES);
+        return ScreenshotUtils.takeViewportScreenshotAsByteArray(getWebDriverProvider().get());
     }
 
     protected IWebDriverProvider getWebDriverProvider()

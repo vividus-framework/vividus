@@ -273,6 +273,27 @@ When I <action> baseline with `scrollable-element-context` using screenshot conf
 |51               |SIMPLE          |
 ----
 
+==== Strategies
+
+[cols="1,3", options="header"]
+|===
+
+|Name
+|Description
+
+|`SIMPLE`
+|Used to take a screenshot of current viewport. This strategy is used by default.
+
+|`FULL`
+|Used to take a screenshot of whole application view. The strategy starts shooting at the top position 
+of the application view and ends at the bottom position, once the shooting is done the initial top position 
+gets restored.
+
+For iOS platform make sure to set the `screenshotQuality` property to `0` to ensure screenshot pixels 
+consistensy, please see https://github.com/appium/appium-xcuitest-driver[XCUI capabililties] for more details.
+
+|===
+
 == Steps
 
 === Run simple visual test

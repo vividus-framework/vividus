@@ -38,7 +38,7 @@ import org.vividus.mobileapp.model.SwipeDirection;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverUtils;
 import org.vividus.selenium.manager.GenericWebDriverManager;
-import org.vividus.selenium.screenshot.ScreenshotTaker;
+import org.vividus.selenium.screenshot.ScreenshotUtils;
 import org.vividus.util.Sleeper;
 
 import io.appium.java_client.PerformsTouchActions;
@@ -53,15 +53,13 @@ public class TouchActions
 
     private final IWebDriverProvider webDriverProvider;
     private final GenericWebDriverManager genericWebDriverManager;
-    private final ScreenshotTaker screenshotTaker;
     private final MobileApplicationConfiguration mobileApplicationConfiguration;
 
     public TouchActions(IWebDriverProvider webDriverProvider, GenericWebDriverManager genericWebDriverManager,
-            ScreenshotTaker screenshotTaker, MobileApplicationConfiguration mobileApplicationConfiguration)
+            MobileApplicationConfiguration mobileApplicationConfiguration)
     {
         this.webDriverProvider = webDriverProvider;
         this.genericWebDriverManager = genericWebDriverManager;
-        this.screenshotTaker = screenshotTaker;
         this.mobileApplicationConfiguration = mobileApplicationConfiguration;
     }
 
@@ -130,7 +128,8 @@ public class TouchActions
      * <li>the end of mobile scroll view is reached</li>
      * <li>the swipe limit is exceeded</li>
      * </ul>
-     * @param direction     direction to swipe, either <b>UP</b> or <b>DOWN</b>
+     * @param direction     direction to swipe, either <b>UP</b> or <b>DOWN</b>, the <b>LEFT</b> and <b>RIGHT</b>
+     *                      directions are not supported
      * @param swipeDuration duration between a pointer moves from the start to the end of the swipe coordinates
      * @param swipeArea     the area to execute the swipe
      * @param stopCondition condition to stop swiping
@@ -183,7 +182,19 @@ public class TouchActions
     }
 
     /**
-     * Performs vertical swipe from <b>startY</b> to <b>endY</b> with <b>swipeDuration</b>
+     * Performs vertical swipe from <b>startY</b> to <b>endY</b> with <b>swipeDuration</b>.
+     *
+     * @param startY         start Y coordinate
+     * @param endY           end Y coordinate
+     * @param swipeDuration  swipe duration in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
+     */
+    public void performVerticalSwipe(int startY, int endY, Duration swipeDuration)
+    {
+        performVerticalSwipe(startY, endY, defaultSwipeArea(), swipeDuration);
+    }
+
+    /**
+     * Performs vertical swipe from <b>startY</b> to <b>endY</b> with <b>swipeDuration</b> within the area.
      *
      * @param startY        start Y coordinate
      * @param endY          end Y coordinate
@@ -196,11 +207,28 @@ public class TouchActions
                 mobileApplicationConfiguration.getSwipeVerticalXPosition(), swipeArea.getPoint()), swipeDuration);
     }
 
+    /**
+     * Swipes in <b>swipeDuration</b> direction until the edge of the application is reached
+     *
+     * @param direction     direction to swipe, either <b>UP</b> or <b>DOWN</b>, the <b>LEFT</b> and <b>RIGHT</b>
+     *                      directions are not supported
+     * @param swipeDuration duration between a pointer moves from the start to the end of the swipe coordinates
+     */
+    public void swipeUntilEdge(SwipeDirection direction, Duration swipeDuration)
+    {
+        swipeUntil(direction, swipeDuration, defaultSwipeArea(), () -> false);
+    }
+
+    private Rectangle defaultSwipeArea()
+    {
+        return new Rectangle(new Point(0, 0), genericWebDriverManager.getSize());
+    }
+
     private BufferedImage takeScreenshot()
     {
         try
         {
-            return screenshotTaker.takeViewportScreenshot();
+            return ScreenshotUtils.takeViewportScreenshot(webDriverProvider.get());
         }
         catch (IOException e)
         {

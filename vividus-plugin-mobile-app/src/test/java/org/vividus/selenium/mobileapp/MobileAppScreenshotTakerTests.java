@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.vividus.selenium.mobileapp;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -27,19 +28,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.mobileapp.screenshot.MobileAppAshotFactory;
 import org.vividus.selenium.screenshot.IScreenshotFileNameGenerator;
 import org.vividus.selenium.screenshot.Screenshot;
+import org.vividus.selenium.screenshot.ScreenshotUtils;
 
 @ExtendWith(MockitoExtension.class)
 class MobileAppScreenshotTakerTests
@@ -50,39 +52,44 @@ class MobileAppScreenshotTakerTests
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
-    @Mock private TakesScreenshot takesScreenshot;
     @Mock private MobileAppAshotFactory ashotFactory;
+    @Mock private WebDriver webDriver;
     @InjectMocks private MobileAppScreenshotTaker screenshotTaker;
 
-    @AfterEach
-    void afterEach()
+    @BeforeEach
+    void beforeEach()
     {
-        verifyNoMoreInteractions(webDriverProvider, screenshotFileNameGenerator, takesScreenshot);
+        when(webDriverProvider.get()).thenReturn(webDriver);
     }
 
     @Test
     void shouldTakeScreenshot()
     {
-        when(screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME)).thenReturn(FILE_NAME);
-        when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(takesScreenshot);
-        when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(DATA);
+        try (MockedStatic<ScreenshotUtils> utils = mockStatic(ScreenshotUtils.class))
+        {
+            utils.when(() -> ScreenshotUtils.takeViewportScreenshotAsByteArray(webDriver)).thenReturn(DATA);
 
-        Optional<Screenshot> takenScreenshot = screenshotTaker.takeScreenshot(SCREENSHOT_NAME);
-        assertTrue(takenScreenshot.isPresent());
-        Screenshot screenshot = takenScreenshot.get();
-        assertEquals(FILE_NAME, screenshot.getFileName());
-        assertArrayEquals(DATA, screenshot.getData());
-        verifyNoMoreInteractions(screenshotFileNameGenerator, webDriverProvider, takesScreenshot);
+            when(screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME)).thenReturn(FILE_NAME);
+
+            Optional<Screenshot> takenScreenshot = screenshotTaker.takeScreenshot(SCREENSHOT_NAME);
+            assertTrue(takenScreenshot.isPresent());
+            Screenshot screenshot = takenScreenshot.get();
+            assertEquals(FILE_NAME, screenshot.getFileName());
+            assertArrayEquals(DATA, screenshot.getData());
+            verifyNoMoreInteractions(screenshotFileNameGenerator, webDriverProvider);
+        }
     }
 
     @Test
     void shouldSaveScreenshotToAPath(@TempDir Path path) throws IOException
     {
-        when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(takesScreenshot);
-        when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(DATA);
+        try (MockedStatic<ScreenshotUtils> utils = mockStatic(ScreenshotUtils.class))
+        {
+            utils.when(() -> ScreenshotUtils.takeViewportScreenshotAsByteArray(webDriver)).thenReturn(DATA);
 
-        Path takenScreenshot = screenshotTaker.takeScreenshot(path.resolve(FILE_NAME));
-        assertArrayEquals(DATA, Files.readAllBytes(takenScreenshot));
-        verifyNoMoreInteractions(screenshotFileNameGenerator, webDriverProvider, takesScreenshot);
+            Path takenScreenshot = screenshotTaker.takeScreenshot(path.resolve(FILE_NAME));
+            assertArrayEquals(DATA, Files.readAllBytes(takenScreenshot));
+            verifyNoMoreInteractions(screenshotFileNameGenerator, webDriverProvider);
+        }
     }
 }

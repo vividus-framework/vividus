@@ -17,6 +17,7 @@
 package org.vividus.ui.util;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -24,12 +25,23 @@ import javax.imageio.ImageIO;
 
 public final class ImageUtils
 {
+    private static final String PNG_FORMAT_NAME = "png";
+
     private ImageUtils()
     {
     }
 
-    public static void writeAsPng(BufferedImage toWrite, File location) throws IOException
+    public static void writeAsPng(BufferedImage image, File location) throws IOException
     {
-        ImageIO.write(toWrite, "png", location);
+        ImageIO.write(image, PNG_FORMAT_NAME, location);
+    }
+
+    public static byte[] encodeAsPng(BufferedImage image) throws IOException
+    {
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream())
+        {
+            ImageIO.write(image, PNG_FORMAT_NAME, output);
+            return output.toByteArray();
+        }
     }
 }

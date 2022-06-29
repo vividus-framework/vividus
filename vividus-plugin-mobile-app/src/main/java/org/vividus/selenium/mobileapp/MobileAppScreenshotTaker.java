@@ -24,6 +24,7 @@ import org.vividus.selenium.screenshot.AshotFactory;
 import org.vividus.selenium.screenshot.IScreenshotFileNameGenerator;
 import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.selenium.screenshot.ScreenshotDebugger;
+import org.vividus.selenium.screenshot.ScreenshotUtils;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
 public class MobileAppScreenshotTaker extends AbstractScreenshotTaker<ScreenshotParameters>
@@ -39,6 +40,7 @@ public class MobileAppScreenshotTaker extends AbstractScreenshotTaker<Screenshot
     public Optional<Screenshot> takeScreenshot(String screenshotName)
     {
         String fileName = generateScreenshotFileName(screenshotName);
-        return Optional.of(new Screenshot(fileName, takeScreenshotAsByteArray()));
+        byte [] screenshotBody = ScreenshotUtils.takeViewportScreenshotAsByteArray(getWebDriverProvider().get());
+        return Optional.of(new Screenshot(fileName, screenshotBody));
     }
 }
