@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,11 @@ class ExcelSheetParserTests
     private static final String SHEET_NAME = "RepeatingData";
     private static final String OPEN_STATUS = "OPEN";
     private static final String NAME = "name";
+    private static final String ONE_AS_STRING = "1.0";
+    private static final String TWO_AS_STRING = "2.0";
+    private static final String THREE_AS_STRING = "3.0";
+    private static final String TRUE_AS_STRING = String.valueOf(true);
+    private static final String FALSE_AS_STRING = String.valueOf(false);
 
     private static final int TITLE_ROW_NUMBER = 2;
 
@@ -152,15 +157,15 @@ class ExcelSheetParserTests
     {
         List<List<String>> expectedStringData = new LinkedList<>();
         List<String> row1 = new LinkedList<>();
-        row1.add("true");
-        row1.add("1.0");
+        row1.add(TRUE_AS_STRING);
+        row1.add(ONE_AS_STRING);
         expectedStringData.add(row1);
         List<String> row2 = new LinkedList<>();
-        row2.add("false");
-        row2.add("2.0");
+        row2.add(FALSE_AS_STRING);
+        row2.add(TWO_AS_STRING);
         expectedStringData.add(row2);
         List<String> row3 = new LinkedList<>();
-        row3.add("3.0");
+        row3.add(THREE_AS_STRING);
         expectedStringData.add(row3);
 
         sheetParser = new ExcelSheetParser(extractor.getSheet(AS_STRING_SHEET).get());
@@ -214,6 +219,20 @@ class ExcelSheetParserTests
         Map<String, List<String>> expectedData = new HashMap<>();
         expectedData.put(NAME, List.of("First", "Second"));
         expectedData.put("status", List.of(OPEN_STATUS, OPEN_STATUS));
+        assertEquals(expectedData, data);
+    }
+
+    @Test
+    void testGetDataFromTableRangeWithDiffTypes()
+    {
+        Map<String, List<String>> expectedData = new LinkedHashMap<>();
+        expectedData.put("Boolean", List.of(TRUE_AS_STRING, FALSE_AS_STRING));
+        expectedData.put("Number", List.of(ONE_AS_STRING, TWO_AS_STRING));
+        expectedData.put("String", List.of("STRING", "string"));
+        expectedData.put("Formula", List.of(THREE_AS_STRING, ""));
+
+        sheetParser = new ExcelSheetParser(extractor.getSheet("DifferentTypes").get());
+        Map<String, List<String>> data = sheetParser.getDataAsTable("A1:D3");
         assertEquals(expectedData, data);
     }
 

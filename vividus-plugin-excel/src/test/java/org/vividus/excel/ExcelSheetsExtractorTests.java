@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ class ExcelSheetsExtractorTests
 {
     private static final String TEMPLATE_PATH = "/TestTemplate.xlsx";
 
-    private static final int EXPECTED_SHEETS_COUNT = 3;
+    private static final int EXPECTED_SHEETS_COUNT = 4;
 
     @Test
     void testGetSheetsFromFile() throws WorkbookParsingException

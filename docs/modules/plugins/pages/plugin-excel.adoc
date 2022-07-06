@@ -55,6 +55,9 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-excel', version: '{cu
 |value to substitute line breaks in cell values
 |===
 
+[NOTE]
+The following https://support.microsoft.com/en-us/office/data-types-in-data-models-e2388f62-6122-4e2b-bcad-053e3da9ba90[data types] can be used in cells: `NUMERIC` (whole and fractional numbers), `BOOLEAN`, `FORMULA`, `STRING`. Other types are converted to https://en.wikipedia.org/wiki/Empty_string[empty string].
+
 [IMPORTANT]
 `range` and `addresses` are competing parameters and only one can be specified in the transformer declaration at the same time.
 

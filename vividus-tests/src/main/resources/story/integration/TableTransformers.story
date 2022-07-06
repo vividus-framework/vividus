@@ -153,6 +153,15 @@ Then `<joined>` is equal to `line 1 line 2 line 3`
 Examples:
 {transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=Sheet1, addresses=A1, column=joined, \{lineBreakReplacement|VERBATIM\}= }
 
+Scenario: Check loading excel table with different data types using FROM_EXCEL transformer
+Meta:
+    @issueId 2908
+When I initialize scenario variable `expectedTable` with values:
+|StringValue|NumericValue|BooleanValue|FormulaValue|FormulaErrorValue|
+|City       |17.0        |false       |289.0       |                 |
+Then `${expectedTable}` is equal to table:
+{transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=DifferentTypes, range=A1:E2}
+
 Scenario: Verify ExamplesTable property value with space
 Meta:
     @issueId 767
