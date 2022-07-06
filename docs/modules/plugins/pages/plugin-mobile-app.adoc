@@ -371,6 +371,24 @@ Closes the mobile application and quits the remote session.
 When I close mobile application
 ----
 
+=== Run mobile application in background
+
+Runs mobile application in the backround for specific period of time and either activates the app after a certain amount of time, or leave the app deactivated (when PT-1S is used). See https://appium.io/docs/en/commands/device/app/background-app/[Appium docs] for more details.
+
+[source,gherkin]
+----
+When I send mobile application to background for `$period` period
+----
+
+* `$period` - The period of time in {iso-date-format-link} format.
+
+.Run app in background
+[source,gherkin]
+----
+When I send mobile application to background for `PT5S` period
+Then number of elements found by `accessibilityId(login-button)` is equal to `1`
+----
+
 
 === Change session settings
 
