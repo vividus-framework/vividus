@@ -18,8 +18,8 @@ package org.vividus.visual.engine;
 
 import java.awt.Color;
 
-import ru.yandex.qatools.ashot.comparison.DiffMarkupPolicy;
-import ru.yandex.qatools.ashot.comparison.PointsMarkupPolicy;
+import pazone.ashot.comparison.DiffMarkupPolicy;
+import pazone.ashot.comparison.PointsMarkupPolicy;
 
 public class DiffMarkupPolicyFactory
 {

@@ -46,8 +46,8 @@ import org.junit.jupiter.api.io.TempDir;
 import org.vividus.resource.ResourceLoadException;
 import org.vividus.util.ResourceUtils;
 
-import ru.yandex.qatools.ashot.Screenshot;
-import ru.yandex.qatools.ashot.util.ImageTool;
+import pazone.ashot.Screenshot;
+import pazone.ashot.util.ImageTool;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
 class FileSystemBaselineStorageTests

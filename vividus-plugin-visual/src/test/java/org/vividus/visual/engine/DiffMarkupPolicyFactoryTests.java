@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 
-import ru.yandex.qatools.ashot.comparison.PointsMarkupPolicy;
+import pazone.ashot.comparison.PointsMarkupPolicy;
 
 class DiffMarkupPolicyFactoryTests
 {

@@ -19,8 +19,8 @@ package org.vividus.selenium.screenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
-import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
+import pazone.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.CoordsProvider;
 
 public class ScrollBarHidingCoordsProviderDecorator extends CoordsProvider
 {

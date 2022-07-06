@@ -51,8 +51,8 @@ import org.vividus.ui.action.BarcodeActions;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.variable.VariableScope;
 
-import ru.yandex.qatools.ashot.Screenshot;
-import ru.yandex.qatools.ashot.util.ImageTool;
+import pazone.ashot.Screenshot;
+import pazone.ashot.util.ImageTool;
 
 @ExtendWith(MockitoExtension.class)
 class BarcodeStepsTests

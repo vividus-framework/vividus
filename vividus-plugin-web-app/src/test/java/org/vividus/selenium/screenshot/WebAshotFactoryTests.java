@@ -45,15 +45,15 @@ import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 
-import ru.yandex.qatools.ashot.AShot;
-import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
-import ru.yandex.qatools.ashot.shooting.CuttingDecorator;
-import ru.yandex.qatools.ashot.shooting.ElementCroppingDecorator;
-import ru.yandex.qatools.ashot.shooting.ScalingDecorator;
-import ru.yandex.qatools.ashot.shooting.ScrollbarHidingDecorator;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
-import ru.yandex.qatools.ashot.shooting.cutter.CutStrategy;
-import ru.yandex.qatools.ashot.shooting.cutter.FixedCutStrategy;
+import pazone.ashot.AShot;
+import pazone.ashot.CuttingDecorator;
+import pazone.ashot.ElementCroppingDecorator;
+import pazone.ashot.ScalingDecorator;
+import pazone.ashot.ScrollbarHidingDecorator;
+import pazone.ashot.ShootingStrategy;
+import pazone.ashot.coordinates.CoordsProvider;
+import pazone.ashot.cutter.CutStrategy;
+import pazone.ashot.cutter.FixedCutStrategy;
 
 @ExtendWith(MockitoExtension.class)
 class WebAshotFactoryTests

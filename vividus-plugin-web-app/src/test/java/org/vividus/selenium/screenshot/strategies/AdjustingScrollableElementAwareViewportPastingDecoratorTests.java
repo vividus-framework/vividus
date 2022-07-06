@@ -18,14 +18,18 @@ package org.vividus.selenium.screenshot.strategies;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
+
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptExecutor;
@@ -34,7 +38,10 @@ import org.openqa.selenium.WebElement;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
 
-import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
+import pazone.ashot.DebuggingViewportPastingDecorator;
+import pazone.ashot.PageDimensions;
+import pazone.ashot.ShootingStrategy;
+import pazone.ashot.util.InnerScript;
 
 @ExtendWith(MockitoExtension.class)
 class AdjustingScrollableElementAwareViewportPastingDecoratorTests
@@ -65,27 +72,26 @@ class AdjustingScrollableElementAwareViewportPastingDecoratorTests
     }
 
     @Test
-    void shouldDecreaseViewportHeightByFooterAndHeaderSize()
+    void shouldAdjustViewportAndPageHeight()
     {
-        WebDriver webDriver = mock(WebDriver.class, withSettings().extraInterfaces(JavascriptExecutor.class));
-        when(((JavascriptExecutor) webDriver).executeScript("return window.innerHeight ||"
-                + " document.documentElement.clientHeight || document.getElementsByTagName('body')[0].clientHeight;"))
-                .thenReturn(184);
-        assertEquals(100, strategy.getWindowHeight(webDriver));
-    }
-
-    @Test
-    void shouldIncreasePageSizeByHeaderAndFooterSizes()
-    {
-        WebDriver webDriver = mock(WebDriver.class);
-        when(javascriptActions.executeScript(
-                "return Math.max(document.body.scrollHeight,"
-              + "document.body.offsetHeight,"
-              + "document.documentElement.clientHeight,"
-              + "document.documentElement.scrollHeight,"
-              + "document.documentElement.offsetHeight,"
-              + "arguments[0].scrollHeight);", scrollableElement)).thenReturn(100);
-        assertEquals(184, strategy.getFullHeight(webDriver));
+        try (MockedStatic<InnerScript> innerScriptMock = mockStatic(InnerScript.class))
+        {
+            WebDriver webDriver = mock(WebDriver.class);
+            when(javascriptActions.executeScript(
+                    "return Math.max(document.body.scrollHeight,"
+                  + "document.body.offsetHeight,"
+                  + "document.documentElement.clientHeight,"
+                  + "document.documentElement.scrollHeight,"
+                  + "document.documentElement.offsetHeight,"
+                  + "arguments[0].scrollHeight);", scrollableElement)).thenReturn(100);
+            innerScriptMock
+                    .when(() -> InnerScript.execute(DebuggingViewportPastingDecorator.PAGE_DIMENSIONS_JS, webDriver))
+                    .thenReturn(Map.of("pageHeight", 200, "viewportWidth", 150, "viewportHeight", 184));
+            PageDimensions output = strategy.getPageDimensions(webDriver);
+            assertEquals(100, output.getViewportHeight());
+            assertEquals(184, output.getPageHeight());
+            assertEquals(150, output.getViewportWidth());
+        }
     }
 
     @Test

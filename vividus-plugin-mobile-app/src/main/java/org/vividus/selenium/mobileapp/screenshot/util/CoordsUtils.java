@@ -19,7 +19,7 @@ package org.vividus.selenium.mobileapp.screenshot.util;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.Coords;
 
 public final class CoordsUtils
 {

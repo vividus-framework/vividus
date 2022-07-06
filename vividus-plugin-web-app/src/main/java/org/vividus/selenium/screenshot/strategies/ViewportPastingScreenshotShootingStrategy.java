@@ -16,7 +16,7 @@
 
 package org.vividus.selenium.screenshot.strategies;
 
-import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
+import pazone.ashot.ShootingStrategy;
 
 public class ViewportPastingScreenshotShootingStrategy implements ScreenshotShootingStrategy
 {

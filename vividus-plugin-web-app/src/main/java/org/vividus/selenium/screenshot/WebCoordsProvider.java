@@ -21,8 +21,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.manager.IWebDriverManager;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
-import ru.yandex.qatools.ashot.coordinates.WebDriverCoordsProvider;
+import pazone.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.WebDriverCoordsProvider;
 
 public class WebCoordsProvider extends WebDriverCoordsProvider
 {

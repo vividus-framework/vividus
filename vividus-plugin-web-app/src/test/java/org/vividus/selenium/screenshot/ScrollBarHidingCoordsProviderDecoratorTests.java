@@ -30,8 +30,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
-import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
+import pazone.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.CoordsProvider;
 
 @ExtendWith(MockitoExtension.class)
 class ScrollBarHidingCoordsProviderDecoratorTests

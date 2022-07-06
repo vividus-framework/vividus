@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ru.yandex.qatools.ashot.shooting;
+package pazone.ashot;
 
 import java.awt.image.BufferedImage;
 import java.util.Map;
@@ -27,7 +27,7 @@ import org.vividus.selenium.screenshot.ScreenshotCropper;
 import org.vividus.ui.action.search.Locator;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import ru.yandex.qatools.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.Coords;
 
 public class ElementCroppingDecorator extends ShootingDecorator
 {

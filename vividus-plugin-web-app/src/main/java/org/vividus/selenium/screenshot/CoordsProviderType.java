@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.vividus.selenium.screenshot;
 
 import org.vividus.ui.web.action.WebJavascriptActions;
 
-import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
-import ru.yandex.qatools.ashot.coordinates.WebDriverCoordsProvider;
+import pazone.ashot.coordinates.CoordsProvider;
+import pazone.ashot.coordinates.WebDriverCoordsProvider;
 
 public enum CoordsProviderType
 {

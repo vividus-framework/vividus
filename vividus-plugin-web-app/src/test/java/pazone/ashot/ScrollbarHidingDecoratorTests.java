@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ru.yandex.qatools.ashot.shooting;
+package pazone.ashot;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -35,7 +35,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.screenshot.ScrollbarHandler;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.Coords;
 
 @ExtendWith(MockitoExtension.class)
 class ScrollbarHidingDecoratorTests

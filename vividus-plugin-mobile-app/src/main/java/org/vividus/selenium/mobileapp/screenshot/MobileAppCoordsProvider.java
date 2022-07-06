@@ -22,8 +22,8 @@ import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
 import org.vividus.selenium.mobileapp.screenshot.util.CoordsUtils;
 import org.vividus.ui.context.IUiContext;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
-import ru.yandex.qatools.ashot.coordinates.WebDriverCoordsProvider;
+import pazone.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.WebDriverCoordsProvider;
 
 public class MobileAppCoordsProvider extends WebDriverCoordsProvider
 {

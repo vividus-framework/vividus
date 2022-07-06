@@ -27,9 +27,9 @@ import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 
-import ru.yandex.qatools.ashot.AShot;
-import ru.yandex.qatools.ashot.cropper.indent.IndentCropper;
-import ru.yandex.qatools.ashot.util.ImageTool;
+import pazone.ashot.AShot;
+import pazone.ashot.cropper.indent.IndentCropper;
+import pazone.ashot.util.ImageTool;
 
 public class WebScreenshotTaker extends AbstractScreenshotTaker<WebScreenshotParameters>
 {

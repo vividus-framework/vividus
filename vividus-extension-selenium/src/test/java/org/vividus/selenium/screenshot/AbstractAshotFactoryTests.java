@@ -38,11 +38,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.selenium.screenshot.strategies.ScreenshotShootingStrategy;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
-import ru.yandex.qatools.ashot.AShot;
-import ru.yandex.qatools.ashot.shooting.CuttingDecorator;
-import ru.yandex.qatools.ashot.shooting.ElementCroppingDecorator;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
+import pazone.ashot.AShot;
+import pazone.ashot.CuttingDecorator;
+import pazone.ashot.ElementCroppingDecorator;
+import pazone.ashot.ShootingStrategies;
+import pazone.ashot.ShootingStrategy;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractAshotFactoryTests

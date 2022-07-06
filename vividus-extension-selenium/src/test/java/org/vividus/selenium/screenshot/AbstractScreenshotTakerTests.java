@@ -58,7 +58,7 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.util.ResourceUtils;
 
-import ru.yandex.qatools.ashot.AShot;
+import pazone.ashot.AShot;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class AbstractScreenshotTakerTests
@@ -140,7 +140,7 @@ class AbstractScreenshotTakerTests
         WebDriver webDriver = mock(WebDriver.class, withSettings().extraInterfaces(SearchContext.class));
         AShot ashot = mock(AShot.class);
         when(ashotFactory.create(Optional.empty())).thenReturn(ashot);
-        ru.yandex.qatools.ashot.Screenshot screenshot = mock(ru.yandex.qatools.ashot.Screenshot.class);
+        pazone.ashot.Screenshot screenshot = mock(pazone.ashot.Screenshot.class);
         when(ashot.takeScreenshot(webDriver)).thenReturn(screenshot);
         testScreenshotTaker.takeAshotScreenshot(webDriver, Optional.empty());
         verify(ashot).takeScreenshot(webDriver);
@@ -155,7 +155,7 @@ class AbstractScreenshotTakerTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         AShot ashot = mock(AShot.class);
         when(ashotFactory.create(Optional.empty())).thenReturn(ashot);
-        ru.yandex.qatools.ashot.Screenshot screenshot = mock(ru.yandex.qatools.ashot.Screenshot.class);
+        pazone.ashot.Screenshot screenshot = mock(pazone.ashot.Screenshot.class);
         when(ashot.takeScreenshot(webDriver, webElement)).thenReturn(screenshot);
         testScreenshotTaker.takeAshotScreenshot(webElement, Optional.empty());
         verify(ashot).takeScreenshot(webDriver, webElement);

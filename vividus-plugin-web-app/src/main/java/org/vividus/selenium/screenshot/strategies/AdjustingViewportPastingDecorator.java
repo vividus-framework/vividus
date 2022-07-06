@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,9 @@ package org.vividus.selenium.screenshot.strategies;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
-import ru.yandex.qatools.ashot.shooting.DebuggingViewportPastingDecorator;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
+import pazone.ashot.DebuggingViewportPastingDecorator;
+import pazone.ashot.PageDimensions;
+import pazone.ashot.ShootingStrategy;
 
 public class AdjustingViewportPastingDecorator extends DebuggingViewportPastingDecorator
 {
@@ -45,9 +46,11 @@ public class AdjustingViewportPastingDecorator extends DebuggingViewportPastingD
     }
 
     @Override
-    public int getWindowHeight(WebDriver driver)
+    protected PageDimensions getPageDimensions(WebDriver driver)
     {
-        return super.getWindowHeight(driver) - headerAdjustment - footerAdjustment;
+        PageDimensions pageDimension = super.getPageDimensions(driver);
+        return new PageDimensions(pageDimension.getPageHeight(), pageDimension.getViewportWidth(),
+                pageDimension.getViewportHeight() - headerAdjustment - footerAdjustment);
     }
 
     @Override

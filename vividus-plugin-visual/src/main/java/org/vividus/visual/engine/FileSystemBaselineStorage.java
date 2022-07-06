@@ -33,7 +33,7 @@ import org.vividus.resource.ResourceLoadException;
 import org.vividus.ui.util.ImageUtils;
 import org.vividus.util.ResourceUtils;
 
-import ru.yandex.qatools.ashot.Screenshot;
+import pazone.ashot.Screenshot;
 
 public class FileSystemBaselineStorage implements BaselineStorage
 {

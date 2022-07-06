@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import ru.yandex.qatools.ashot.cropper.indent.BlurFilter;
-import ru.yandex.qatools.ashot.cropper.indent.IndentCropper;
-import ru.yandex.qatools.ashot.cropper.indent.MonochromeFilter;
+import pazone.ashot.cropper.indent.BlurFilter;
+import pazone.ashot.cropper.indent.IndentCropper;
+import pazone.ashot.cropper.indent.MonochromeFilter;
 
 @ExtendWith(MockitoExtension.class)
 class HighlighterTypeTests

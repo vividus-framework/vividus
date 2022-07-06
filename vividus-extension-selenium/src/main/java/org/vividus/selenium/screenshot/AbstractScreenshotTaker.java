@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
-import ru.yandex.qatools.ashot.AShot;
+import pazone.ashot.AShot;
 
 public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
         implements ScreenshotTaker, AshotScreenshotTaker<T>
@@ -89,15 +89,15 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
     }
 
     @Override
-    public ru.yandex.qatools.ashot.Screenshot takeAshotScreenshot(SearchContext searchContext,
+    public pazone.ashot.Screenshot takeAshotScreenshot(SearchContext searchContext,
             Optional<T> screenshotConfiguration)
     {
         return takeScreenshot(searchContext, crateAshot(screenshotConfiguration));
     }
 
-    private ru.yandex.qatools.ashot.Screenshot takeScreenshot(SearchContext searchContext, AShot aShot)
+    private pazone.ashot.Screenshot takeScreenshot(SearchContext searchContext, AShot aShot)
     {
-        ru.yandex.qatools.ashot.Screenshot screenshot = searchContext instanceof WebDriver
+        pazone.ashot.Screenshot screenshot = searchContext instanceof WebDriver
                 ? aShot.takeScreenshot((WebDriver) searchContext)
                 : aShot.takeScreenshot(getWebDriverProvider().get(), (WebElement) searchContext);
 

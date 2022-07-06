@@ -32,7 +32,7 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.vividus.selenium.screenshot.IgnoreStrategy;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.Coords;
 
 class IgnoreStrategyTests
 {

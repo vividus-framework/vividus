@@ -32,10 +32,10 @@ import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 
-import ru.yandex.qatools.ashot.Screenshot;
-import ru.yandex.qatools.ashot.comparison.ImageDiff;
-import ru.yandex.qatools.ashot.comparison.ImageDiffer;
-import ru.yandex.qatools.ashot.util.ImageTool;
+import pazone.ashot.Screenshot;
+import pazone.ashot.comparison.ImageDiff;
+import pazone.ashot.comparison.ImageDiffer;
+import pazone.ashot.util.ImageTool;
 
 public class VisualTestingEngine implements IVisualTestingEngine
 {
