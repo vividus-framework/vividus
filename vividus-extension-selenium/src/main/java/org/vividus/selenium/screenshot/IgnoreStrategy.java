@@ -23,7 +23,7 @@ import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.Coords;
 
 public enum IgnoreStrategy
 {

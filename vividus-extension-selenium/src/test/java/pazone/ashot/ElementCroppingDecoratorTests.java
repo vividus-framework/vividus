@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ru.yandex.qatools.ashot.shooting;
+package pazone.ashot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -32,7 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.vividus.selenium.screenshot.ScreenshotCropper;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.Coords;
 
 @ExtendWith(MockitoExtension.class)
 class ElementCroppingDecoratorTests

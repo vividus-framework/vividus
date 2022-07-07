@@ -37,8 +37,8 @@ import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.variable.VariableScope;
 
-import ru.yandex.qatools.ashot.Screenshot;
-import ru.yandex.qatools.ashot.util.ImageTool;
+import pazone.ashot.Screenshot;
+import pazone.ashot.util.ImageTool;
 
 public class BarcodeSteps
 {

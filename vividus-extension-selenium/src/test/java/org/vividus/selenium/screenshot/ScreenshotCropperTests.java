@@ -45,9 +45,9 @@ import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.util.ResourceUtils;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
-import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
-import ru.yandex.qatools.ashot.util.ImageTool;
+import pazone.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.CoordsProvider;
+import pazone.ashot.util.ImageTool;
 
 @ExtendWith(MockitoExtension.class)
 class ScreenshotCropperTests

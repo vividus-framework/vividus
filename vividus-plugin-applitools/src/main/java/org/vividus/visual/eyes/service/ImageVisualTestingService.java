@@ -37,7 +37,7 @@ import org.vividus.visual.eyes.factory.ImageEyesFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheckResult;
 
-import ru.yandex.qatools.ashot.Screenshot;
+import pazone.ashot.Screenshot;
 
 public class ImageVisualTestingService implements VisualTestingService
 {

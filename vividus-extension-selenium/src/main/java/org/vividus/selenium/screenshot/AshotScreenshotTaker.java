@@ -23,6 +23,5 @@ import org.vividus.ui.screenshot.ScreenshotParameters;
 
 public interface AshotScreenshotTaker<T extends ScreenshotParameters>
 {
-    ru.yandex.qatools.ashot.Screenshot takeAshotScreenshot(SearchContext searchContext,
-            Optional<T> screenshotConfiguration);
+    pazone.ashot.Screenshot takeAshotScreenshot(SearchContext searchContext, Optional<T> screenshotConfiguration);
 }

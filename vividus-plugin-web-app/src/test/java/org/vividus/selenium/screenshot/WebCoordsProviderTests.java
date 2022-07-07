@@ -34,7 +34,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.manager.IWebDriverManager;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.Coords;
 
 @ExtendWith(MockitoExtension.class)
 class WebCoordsProviderTests

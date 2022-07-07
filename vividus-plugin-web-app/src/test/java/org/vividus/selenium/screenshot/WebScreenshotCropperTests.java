@@ -42,8 +42,8 @@ import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
-import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
+import pazone.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.CoordsProvider;
 
 @ExtendWith(MockitoExtension.class)
 class WebScreenshotCropperTests

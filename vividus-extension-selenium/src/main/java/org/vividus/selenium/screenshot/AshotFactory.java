@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
-import ru.yandex.qatools.ashot.AShot;
+import pazone.ashot.AShot;
 
 public interface AshotFactory<T extends ScreenshotParameters>
 {

@@ -59,8 +59,8 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 import org.vividus.util.ResourceUtils;
 
-import ru.yandex.qatools.ashot.AShot;
-import ru.yandex.qatools.ashot.util.ImageTool;
+import pazone.ashot.AShot;
+import pazone.ashot.util.ImageTool;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class WebScreenshotTakerTests
@@ -70,8 +70,7 @@ class WebScreenshotTakerTests
     private static final AShot ASHOT = mock(AShot.class);
     private static final String SCREENSHOT_NAME = "screenshotName";
     private static final String SCREENSHOT_NAME_GENERATED = SCREENSHOT_NAME + "Generated";
-    private static final ru.yandex.qatools.ashot.Screenshot SCREENSHOT =
-            new ru.yandex.qatools.ashot.Screenshot(IMAGE);
+    private static final pazone.ashot.Screenshot SCREENSHOT = new pazone.ashot.Screenshot(IMAGE);
 
     private final TestLogger testLogger = TestLoggerFactory.getTestLogger(AbstractScreenshotTaker.class);
 

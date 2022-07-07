@@ -16,7 +16,7 @@
 
 package org.vividus.selenium.screenshot;
 
-import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.cutting;
+import static pazone.ashot.ShootingStrategies.cutting;
 
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -27,11 +27,11 @@ import org.apache.commons.lang3.Validate;
 import org.vividus.selenium.screenshot.strategies.ScreenshotShootingStrategy;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
-import ru.yandex.qatools.ashot.shooting.ElementCroppingDecorator;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
-import ru.yandex.qatools.ashot.shooting.cutter.CutStrategy;
-import ru.yandex.qatools.ashot.shooting.cutter.FixedCutStrategy;
+import pazone.ashot.ElementCroppingDecorator;
+import pazone.ashot.ShootingStrategies;
+import pazone.ashot.ShootingStrategy;
+import pazone.ashot.cutter.CutStrategy;
+import pazone.ashot.cutter.FixedCutStrategy;
 
 public abstract class AbstractAshotFactory<T extends ScreenshotParameters> implements AshotFactory<T>
 {

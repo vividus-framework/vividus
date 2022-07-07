@@ -22,7 +22,8 @@ import org.openqa.selenium.WebElement;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
 
-import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
+import pazone.ashot.PageDimensions;
+import pazone.ashot.ShootingStrategy;
 
 public class AdjustingScrollableElementAwareViewportPastingDecorator extends AdjustingViewportPastingDecorator
 {
@@ -41,9 +42,10 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator extends Adj
     }
 
     @Override
-    public int getFullHeight(WebDriver driver)
+    protected PageDimensions getPageDimensions(WebDriver driver)
     {
-        return ((Number) javascriptActions.executeScript(
+        PageDimensions pageDimension = super.getPageDimensions(driver);
+        int fullHeight = ((Number) javascriptActions.executeScript(
                 "return Math.max(document.body.scrollHeight,"
               + "document.body.offsetHeight,"
               + "document.documentElement.clientHeight,"
@@ -51,6 +53,8 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator extends Adj
               + "document.documentElement.offsetHeight,"
               + "arguments[0].scrollHeight);", scrollableElement)).intValue()
               + getHeaderAdjustment() + getFooterAdjustment();
+        return new PageDimensions(fullHeight, pageDimension.getViewportWidth(),
+                pageDimension.getViewportHeight());
     }
 
     @Override

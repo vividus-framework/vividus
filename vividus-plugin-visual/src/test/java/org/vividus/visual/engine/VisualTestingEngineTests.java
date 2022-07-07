@@ -62,7 +62,7 @@ import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 
-import ru.yandex.qatools.ashot.Screenshot;
+import pazone.ashot.Screenshot;
 
 @ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class})
 class VisualTestingEngineTests

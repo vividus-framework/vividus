@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
-import ru.yandex.qatools.ashot.shooting.SimpleShootingStrategy;
+import pazone.ashot.SimpleShootingStrategy;
+import pazone.ashot.coordinates.Coords;
 
 @ExtendWith(MockitoExtension.class)
 class ViewportShootingStrategyTests

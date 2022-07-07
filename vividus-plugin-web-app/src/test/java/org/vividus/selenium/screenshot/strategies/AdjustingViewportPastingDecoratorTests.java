@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,23 @@
 package org.vividus.selenium.screenshot.strategies;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
+
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+
+import pazone.ashot.DebuggingViewportPastingDecorator;
+import pazone.ashot.PageDimensions;
+import pazone.ashot.util.InnerScript;
 
 @ExtendWith(MockitoExtension.class)
 class AdjustingViewportPastingDecoratorTests
@@ -51,10 +59,16 @@ class AdjustingViewportPastingDecoratorTests
     @Test
     void testOriginalWindowHeightIsAdjustedWithHeaderAndFooterCorrections()
     {
-        String script = "return window.innerHeight || document.documentElement.clientHeight "
-                + "|| document.getElementsByTagName('body')[0].clientHeight;";
-        when(((JavascriptExecutor) webDriver).executeScript(script)).thenReturn(WINDOW_HEIGHT);
-        assertEquals(WINDOW_HEIGHT - HEADER_ADJUSTMENT - FOOTER_ADJUSTMENT, decorator.getWindowHeight(webDriver));
+        try (MockedStatic<InnerScript> innerScriptMock = mockStatic(InnerScript.class))
+        {
+            innerScriptMock
+                    .when(() -> InnerScript.execute(DebuggingViewportPastingDecorator.PAGE_DIMENSIONS_JS, webDriver))
+                    .thenReturn(Map.of("pageHeight", 200, "viewportWidth", 150, "viewportHeight", WINDOW_HEIGHT));
+            PageDimensions output = decorator.getPageDimensions(webDriver);
+            assertEquals(WINDOW_HEIGHT - HEADER_ADJUSTMENT - FOOTER_ADJUSTMENT, output.getViewportHeight());
+            assertEquals(200, output.getPageHeight());
+            assertEquals(150, output.getViewportWidth());
+        }
     }
 
     @Test

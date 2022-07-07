@@ -60,7 +60,7 @@ import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheckResult;
 import org.vividus.visual.model.VisualActionType;
 
-import ru.yandex.qatools.ashot.Screenshot;
+import pazone.ashot.Screenshot;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ImageVisualTestingServiceTests

@@ -39,7 +39,7 @@ import org.openqa.selenium.WebElement;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
 import org.vividus.ui.context.IUiContext;
 
-import ru.yandex.qatools.ashot.coordinates.Coords;
+import pazone.ashot.coordinates.Coords;
 
 @ExtendWith(MockitoExtension.class)
 class MobileAppCoordsProviderTests

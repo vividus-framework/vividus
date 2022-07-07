@@ -45,7 +45,7 @@ import io.appium.java_client.PerformsTouchActions;
 import io.appium.java_client.TouchAction;
 import io.appium.java_client.touch.offset.ElementOption;
 import io.appium.java_client.touch.offset.PointOption;
-import ru.yandex.qatools.ashot.util.ImageTool;
+import pazone.ashot.util.ImageTool;
 
 public class TouchActions
 {

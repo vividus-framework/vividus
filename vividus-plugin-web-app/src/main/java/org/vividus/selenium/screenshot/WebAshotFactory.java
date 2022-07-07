@@ -28,11 +28,11 @@ import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 
-import ru.yandex.qatools.ashot.AShot;
-import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
-import ru.yandex.qatools.ashot.shooting.DebuggingViewportPastingDecorator;
-import ru.yandex.qatools.ashot.shooting.ScrollbarHidingDecorator;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
+import pazone.ashot.AShot;
+import pazone.ashot.DebuggingViewportPastingDecorator;
+import pazone.ashot.ScrollbarHidingDecorator;
+import pazone.ashot.ShootingStrategy;
+import pazone.ashot.coordinates.CoordsProvider;
 
 public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameters>
 {

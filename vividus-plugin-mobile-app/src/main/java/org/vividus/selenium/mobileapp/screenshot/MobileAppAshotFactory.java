@@ -16,8 +16,8 @@
 
 package org.vividus.selenium.mobileapp.screenshot;
 
-import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.scaling;
-import static ru.yandex.qatools.ashot.shooting.ShootingStrategies.simple;
+import static pazone.ashot.ShootingStrategies.scaling;
+import static pazone.ashot.ShootingStrategies.simple;
 
 import java.util.Optional;
 
@@ -27,9 +27,9 @@ import org.vividus.selenium.screenshot.AbstractAshotFactory;
 import org.vividus.selenium.screenshot.ScreenshotCropper;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
-import ru.yandex.qatools.ashot.AShot;
-import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
+import pazone.ashot.AShot;
+import pazone.ashot.ShootingStrategy;
+import pazone.ashot.coordinates.CoordsProvider;
 
 public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotParameters>
 {

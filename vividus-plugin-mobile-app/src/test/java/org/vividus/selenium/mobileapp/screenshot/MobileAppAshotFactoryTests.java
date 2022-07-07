@@ -34,14 +34,14 @@ import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
 import org.vividus.selenium.mobileapp.screenshot.strategies.SimpleScreenshotShootingStrategy;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
-import ru.yandex.qatools.ashot.AShot;
-import ru.yandex.qatools.ashot.coordinates.CoordsProvider;
-import ru.yandex.qatools.ashot.shooting.CuttingDecorator;
-import ru.yandex.qatools.ashot.shooting.ElementCroppingDecorator;
-import ru.yandex.qatools.ashot.shooting.ScalingDecorator;
-import ru.yandex.qatools.ashot.shooting.ShootingStrategy;
-import ru.yandex.qatools.ashot.shooting.SimpleShootingStrategy;
-import ru.yandex.qatools.ashot.shooting.cutter.CutStrategy;
+import pazone.ashot.AShot;
+import pazone.ashot.CuttingDecorator;
+import pazone.ashot.ElementCroppingDecorator;
+import pazone.ashot.ScalingDecorator;
+import pazone.ashot.ShootingStrategy;
+import pazone.ashot.SimpleShootingStrategy;
+import pazone.ashot.coordinates.CoordsProvider;
+import pazone.ashot.cutter.CutStrategy;
 
 @ExtendWith(MockitoExtension.class)
 class MobileAppAshotFactoryTests

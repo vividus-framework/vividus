@@ -19,7 +19,7 @@ package org.vividus.visual.engine;
 import java.io.IOException;
 import java.util.Optional;
 
-import ru.yandex.qatools.ashot.Screenshot;
+import pazone.ashot.Screenshot;
 
 public interface BaselineStorage
 {
