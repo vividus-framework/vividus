@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static io.appium.java_client.MobileCommand.prepareArguments;
 import static java.util.Map.entry;
 import static org.vividus.selenium.type.CapabilitiesValueTypeAdjuster.adjustType;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import org.vividus.selenium.manager.WebDriverManagerParameter;
 import org.vividus.util.property.PropertyParser;
 
 import io.appium.java_client.ExecutesMethod;
+import io.appium.java_client.InteractsWithApps;
 import io.appium.java_client.internal.CapabilityHelpers;
 
 public class ApplicationSteps
@@ -155,5 +157,16 @@ public class ApplicationSteps
                                   .toArray();
 
         execute(executesMethod, entry("setSettings", prepareArguments("settings", prepareArguments(params, values))));
+    }
+
+    /**
+     * Sends an application to background for given period of time.
+     * @param period  Total background run time according to
+     *                <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> standard
+     */
+    @When("I send mobile application to background for `$period` period")
+    public void sendToBackgroundFor(Duration period)
+    {
+        webDriverProvider.getUnwrapped(InteractsWithApps.class).runAppInBackground(period);
     }
 }

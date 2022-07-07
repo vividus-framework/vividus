@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +47,7 @@ import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 
 import io.appium.java_client.ExecutesMethod;
+import io.appium.java_client.InteractsWithApps;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ApplicationStepsTests
@@ -154,6 +156,16 @@ class ApplicationStepsTests
                 createSetting(KEY + 2, VALUE)));
 
         verify(executesMethod).execute(SET_SETTINGS, Map.of(SETTINGS, Map.of(KEY + 1, 50L, KEY + 2, VALUE)));
+    }
+
+    @Test
+    void shouldRunAppInBackground()
+    {
+        var appManager = mock(InteractsWithApps.class);
+        when(webDriverProvider.getUnwrapped(InteractsWithApps.class)).thenReturn(appManager);
+        var period = Duration.ofSeconds(1);
+        applicationSteps.sendToBackgroundFor(period);
+        verify(appManager).runAppInBackground(period);
     }
 
     private static NamedEntry createSetting(String settingName, String settingValue)

@@ -240,6 +240,19 @@ When I activate application with bundle identifier `${main-app}`
 When I wait until element located `accessibilityId(menuToggler)` appears
 
 
+Scenario: Verify step: 'When I send mobile application to background for `$period` period'
+When I tap on element located `accessibilityId(menuToggler)`
+When I tap on element located `xpath(<menuScrollViewXpath>)`
+Then number of elements found by `accessibilityId(header)` is equal to `1`
+Then number of elements found by `accessibilityId(footer)` is equal to `0`
+When I send mobile application to background for `PT-1S` period
+Then number of elements found by `accessibilityId(header)` is equal to `0`
+Then number of elements found by `accessibilityId(footer)` is equal to `0`
+When I activate application with bundle identifier `${main-app}`
+Then number of elements found by `accessibilityId(header)` is equal to `1`
+Then number of elements found by `accessibilityId(footer)` is equal to `0`
+
+
 Scenario: [iOS] Verify step: 'When I select $direction value with `$offset` offset in picker wheel located `$locator`'
 Meta:
     @targetPlatform ios
