@@ -17,8 +17,12 @@
 package org.vividus.zephyr.facade;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
@@ -101,8 +105,11 @@ public class ZephyrScaleFacade implements IZephyrFacade
                                    String projectKey,
                                    String folderName) throws IOException, JiraConfigurationException
     {
-        String testCycleFormat = "{\"name\": \"%s\", \"projectKey\": \"%s\",\"folder\": \"/%s\"}";
-        String body = String.format(testCycleFormat, cycleName, projectKey, folderName);
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", cycleName);
+        params.put("projectKey", projectKey);
+        params.put("folder", "/" + folderName);
+        String body = new ObjectMapper().writeValueAsString(params);
         String json = getJiraClient().executePost(BASE_ENDPOINT + "/testrun", body);
         return JsonPathUtils.getData(json, "$.key");
     }
@@ -111,7 +118,8 @@ public class ZephyrScaleFacade implements IZephyrFacade
     public OptionalInt findExecutionId(String issueId) throws IOException, JiraConfigurationException
     {
         // Execution ID is not applicable for Zephyr Scale. All interaction occurs using the id of the test case.
-        return OptionalInt.empty();
+        throw new UnsupportedOperationException("Execution ID is not applicable for Zephyr Scale."
+                + " All interaction occurs using the id of the test case");
     }
 
     private JiraClient getJiraClient() throws JiraConfigurationException
