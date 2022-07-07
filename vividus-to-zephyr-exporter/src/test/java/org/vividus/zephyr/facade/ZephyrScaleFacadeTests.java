@@ -18,6 +18,7 @@ package org.vividus.zephyr.facade;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,7 +27,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,7 +57,7 @@ class ZephyrScaleFacadeTests
     private static final String ISSUE_ID = "11114";
     private static final String TEST = "test";
     private static final String CYCLE_ID_RESPONSE = "{\"key\": \"" + CYCLE_ID + "\"}";
-    private static final String EXECUTION_FORMAT = "{\"name\": \"%s\", \"projectKey\": \"%s\",\"folder\": \"/%s\"}";
+    private static final String EXECUTION_FORMAT = "{\"projectKey\":\"%s\",\"folder\":\"/%s\",\"name\":\"%s\"}";
 
     @Mock private JiraFacade jiraFacade;
     @Mock private JiraClient client;
@@ -130,7 +130,7 @@ class ZephyrScaleFacadeTests
         statuses.put(TestCaseStatus.PASSED, TEST);
         when(zephyrExporterConfiguration.getStatuses()).thenReturn(statuses);
         mockJiraProjectRetrieve();
-        String execution = String.format(EXECUTION_FORMAT, TEST, TEST, "");
+        String execution = String.format(EXECUTION_FORMAT, TEST, "", TEST);
         when(client.executePost(ATM_TEST_RUN_ENDPOINT, execution))
                 .thenReturn(CYCLE_ID_RESPONSE);
         ZephyrConfiguration actualConfiguration = zephyrScaleFacade.prepareConfiguration();
@@ -144,7 +144,10 @@ class ZephyrScaleFacadeTests
     @Test
     void testFindExecutionId() throws IOException, JiraConfigurationException
     {
-        assertEquals(OptionalInt.empty(), zephyrScaleFacade.findExecutionId(ISSUE_ID));
+        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
+                () -> zephyrScaleFacade.findExecutionId(ISSUE_ID));
+        assertEquals("Execution ID is not applicable for Zephyr Scale."
+                + " All interaction occurs using the id of the test case", exception.getMessage());
     }
 
     private void mockJiraProjectRetrieve() throws IOException, JiraConfigurationException
