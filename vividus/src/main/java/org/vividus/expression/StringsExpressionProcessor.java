@@ -59,6 +59,7 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
         }
     });
 
+    @SuppressWarnings("checkstyle:SingleSpaceSeparator")
     public StringsExpressionProcessor(ILocationProvider locationProvider)
     {
         super(List.of(

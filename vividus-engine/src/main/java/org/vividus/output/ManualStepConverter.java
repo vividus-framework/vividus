@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,10 @@ public final class ManualStepConverter
     private static final String DATA_SIGN = "Data:";
     private static final String RESULT_SIGN = "Result:";
 
-    private static final String FORMAT_MESSAGE =  "Manual scenario rules:" + lineSeparator()
+    private static final String FORMAT_MESSAGE = "Manual scenario rules:" + lineSeparator()
         + "1. Manual scenario entries must be prepended with '!-- ' sequence" + lineSeparator()
         + "2. '" + STEP_SIGN + "' designator is required to be the first one in the manual step block" + lineSeparator()
-        + "3. '" + DATA_SIGN + "' and '" + RESULT_SIGN + "' designators are optional"  + lineSeparator()
+        + "3. '" + DATA_SIGN + "' and '" + RESULT_SIGN + "' designators are optional" + lineSeparator()
         + "4. '" + STEP_SIGN + "' designator is mandatory" + lineSeparator();
 
     private static final Pattern STEP_BLOCK_PATTERN = Pattern.compile(String.format("%1$s.*?(?=^%1$s|\\Z)", STEP_SIGN),

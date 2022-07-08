@@ -26,7 +26,7 @@ import org.vividus.ui.action.search.LocatorType;
 public enum TestLocatorType implements LocatorType
 {
     SEARCH("Search", TestElementSearch.class),
-    XPATH("XPath",  TestElementSearch.class),
+    XPATH("XPath", TestElementSearch.class),
     ADDITIONAL_SEARCH("Additional Search", ByLocatorSearch.class)
     {
         @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.springframework.web.util.UriUtils;
 @Named
 public class UriEncodingExpressionProcessors extends DelegatingExpressionProcessor<String>
 {
+    @SuppressWarnings("checkstyle:SingleSpaceSeparator")
     public UriEncodingExpressionProcessors()
     {
         super(List.of(

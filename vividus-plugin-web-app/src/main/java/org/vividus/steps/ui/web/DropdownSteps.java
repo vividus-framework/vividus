@@ -42,10 +42,8 @@ public class DropdownSteps
     private final ISoftAssert softAssert;
     private final IFieldActions fieldActions;
 
-    public DropdownSteps(IWebElementActions webElementActions,
-                         IBaseValidations   baseValidations,
-                         ISoftAssert        softAssert,
-                         IFieldActions      fieldActions)
+    public DropdownSteps(IWebElementActions webElementActions, IBaseValidations baseValidations, ISoftAssert softAssert,
+            IFieldActions fieldActions)
     {
         this.webElementActions = webElementActions;
         this.baseValidations = baseValidations;

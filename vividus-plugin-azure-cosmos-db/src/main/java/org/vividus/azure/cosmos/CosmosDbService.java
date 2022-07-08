@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,12 +47,12 @@ public class CosmosDbService
                         String accountKey = db.getAccountKey();
                         CosmosDbAccount account = accounts.get(accountKey,
                                 "Account configuration not found for the key: %s", accountKey);
-                        return  new CosmosClientBuilder().endpoint(account.getEndpoint())
-                                                         .key(account.getKey())
-                                                         .connectionSharingAcrossClientsEnabled(true)
-                                                         .buildClient()
-                                                         .getDatabase(db.getId())
-                                                         .getContainer(cosmosDbContainer.getId());
+                        return new CosmosClientBuilder().endpoint(account.getEndpoint())
+                                                        .key(account.getKey())
+                                                        .connectionSharingAcrossClientsEnabled(true)
+                                                        .buildClient()
+                                                        .getDatabase(db.getId())
+                                                        .getContainer(cosmosDbContainer.getId());
                     }
                 });
 
@@ -92,9 +92,9 @@ public class CosmosDbService
 
     public int upsert(CosmosDbContainer cosmosDbContainer, String data)
     {
-        return  containers.getUnchecked(cosmosDbContainer)
-                          .upsertItem(jsonUtils.readTree(data))
-                          .getStatusCode();
+        return containers.getUnchecked(cosmosDbContainer)
+                         .upsertItem(jsonUtils.readTree(data))
+                         .getStatusCode();
     }
 
     public int delete(CosmosDbContainer cosmosDbContainer, String data)

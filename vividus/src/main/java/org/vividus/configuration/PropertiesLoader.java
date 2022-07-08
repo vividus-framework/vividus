@@ -118,7 +118,7 @@ class PropertiesLoader
     {
         String[] locationParts = resourcePath.isEmpty() ? new String[] { resourcePath }
                                                         : StringUtils.split(resourcePath, DELIMITER);
-        return collectResources(failOnMissingResource, ROOT_LOCATION, "*.properties",  filter, locationParts);
+        return collectResources(failOnMissingResource, ROOT_LOCATION, "*.properties", filter, locationParts);
     }
 
     private List<Resource> collectResources(boolean failOnMissingResource, String root, String resourcePattern,

@@ -61,7 +61,7 @@ public abstract class AbstractJsonSteps
         return jsonContext.getJsonContext();
     }
 
-    protected  JsonContext getJsonContext()
+    protected JsonContext getJsonContext()
     {
         return jsonContext;
     }

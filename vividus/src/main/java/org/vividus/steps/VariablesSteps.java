@@ -141,7 +141,7 @@ public class VariablesSteps
         int rowCount = rows.size();
         isTrue(rowCount == 1, "Input ExamplesTable should contain 1 row, but was %d", rowCount);
 
-        Map<String, String> expectedMap =  rows.get(0).values();
+        Map<String, String> expectedMap = rows.get(0).values();
         List<EntryComparisonResult> results = ComparisonUtils.checkMapContainsSubMap(actualMap, expectedMap);
         publishMapComparisonResults(List.of(results));
         softAssert.assertTrue(TABLES_ARE_EQUAL, results.stream().allMatch(EntryComparisonResult::isPassed));
