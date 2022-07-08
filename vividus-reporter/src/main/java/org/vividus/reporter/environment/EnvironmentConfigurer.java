@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class EnvironmentConfigurer
     {
         Collection<DynamicEnvironmentConfigurationProperty> values = propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX,
                 DynamicEnvironmentConfigurationProperty.class).getData().values();
-        for (DynamicEnvironmentConfigurationProperty property: values)
+        for (DynamicEnvironmentConfigurationProperty property : values)
         {
             Pattern propertyRegex = property.getPropertyRegex();
             Map<String, String> matchedProperties = new TreeMap<>(propertyParser.getPropertiesByRegex(propertyRegex));

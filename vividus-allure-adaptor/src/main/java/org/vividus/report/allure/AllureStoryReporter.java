@@ -345,7 +345,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
             cause = verificationErrorAdapter.adapt((VerificationError) cause);
 
             List<Link> links = new ArrayList<>();
-            for (KnownIssue knownIssue: ((VerificationError) cause).getKnownIssues())
+            for (KnownIssue knownIssue : ((VerificationError) cause).getKnownIssues())
             {
                 if (!knownIssue.isPotentiallyKnown())
                 {
