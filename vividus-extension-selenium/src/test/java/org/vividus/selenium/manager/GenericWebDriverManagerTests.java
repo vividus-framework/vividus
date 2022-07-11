@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.withSettings;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -223,6 +226,7 @@ class GenericWebDriverManagerTests
         assertEquals(screenSize, driverManager.getSize());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void shouldGetScreenSizeForMobileApp()
     {
@@ -232,8 +236,9 @@ class GenericWebDriverManagerTests
         when(iOSDriver.getContext()).thenReturn(NATIVE_APP_CONTEXT);
         mockWebDriver(MobilePlatform.IOS);
         mockSizeRetrieval(iOSDriver, dimension);
+        when(webDriverManagerContext.get(eq(WebDriverManagerParameter.SCREEN_SIZE),
+                any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArguments()[1]).get());
         assertEquals(dimension, driverManager.getSize());
-        verify(webDriverManagerContext).putParameter(WebDriverManagerParameter.SCREEN_SIZE, dimension);
     }
 
     private void mockSizeRetrieval(WebDriver webDriver, Dimension screenSize)
@@ -245,12 +250,14 @@ class GenericWebDriverManagerTests
         when(window.getSize()).thenReturn(screenSize);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void testGetNativeApplicationViewportCached()
     {
         mockWebDriver(MobilePlatform.IOS);
         var dimension = new Dimension(375, 667);
-        when(webDriverManagerContext.getParameter(WebDriverManagerParameter.SCREEN_SIZE)).thenReturn(dimension);
+        when(webDriverManagerContext.get(eq(WebDriverManagerParameter.SCREEN_SIZE),
+                any(Supplier.class))).thenReturn(dimension);
         assertEquals(dimension, driverManager.getSize());
     }
 }

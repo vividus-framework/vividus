@@ -6,6 +6,17 @@ Examples:
 /data/tables/system/mobile_app/locators/${target-platform}.table
 
 
+Scenario: [iOS] Verify that dpr is not cached (dpr for iPhone 7 Simulator is 2.0)
+Meta:
+    @targetPlatform ios
+Given I start mobile application with capabilities:
+|name       |value             |
+|app        |${app-url}        |
+|deviceName |iPhone 7 Simulator|
+When I ESTABLISH baseline with name `ios-low-dpr`
+When I close mobile application
+
+
 Scenario: Verify step: 'Given I start mobile application with capabilities:$capabilities'
 Given I start mobile application with capabilities:
 |name|value     |

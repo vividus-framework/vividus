@@ -54,13 +54,8 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
         {
             return getSize(webDriverProvider.get());
         }
-        Dimension screenSize = webDriverManagerContext.getParameter(WebDriverManagerParameter.SCREEN_SIZE);
-        if (screenSize == null)
-        {
-            screenSize = runInNativeContext(this::getSize);
-            webDriverManagerContext.putParameter(WebDriverManagerParameter.SCREEN_SIZE, screenSize);
-        }
-        return screenSize;
+        return webDriverManagerContext.get(WebDriverManagerParameter.SCREEN_SIZE,
+                () -> runInNativeContext(this::getSize));
     }
 
     @Override
@@ -206,6 +201,11 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     protected IWebDriverProvider getWebDriverProvider()
     {
         return webDriverProvider;
+    }
+
+    protected IWebDriverManagerContext getWebDriverManagerContext()
+    {
+        return webDriverManagerContext;
     }
 
     public void setMobileApp(boolean mobileApp)
