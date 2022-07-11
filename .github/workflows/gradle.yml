@@ -172,7 +172,7 @@ jobs:
                                                   -Pvividus.notifications.mail.password=${GMAIL_PASSWORD} \
                                                   -Pvividus.notifications.mail.from=vividus.team@gmail.com \
                                                   -Pvividus.notifications.mail.recipient="vividus.team@gmail.com, ivan@vividus.dev" \
-                                                  -Pvividus.notifications.mail.enable-ssl=true
+                                                  -Pvividus.notifications.mail.security-protocol=SSL
         else
             echo No passwords/access keys are available, skipping system tests
         fi
@@ -522,6 +522,7 @@ jobs:
       env:
         BROWSERSTACK_USER: ${{ secrets.BROWSERSTACK_USER }}
         BROWSERSTACK_KEY: ${{ secrets.BROWSERSTACK_KEY }}
+        GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
       shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
@@ -540,7 +541,17 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="BrowserStack iOS System tests report" \
-                                                  -Pvividus.bdd.variables.global.app-url=bs://444bd0308813ae0dc236f8cd461c02d3afa7901d
+                                                  -Pvividus.bdd.variables.global.app-url=bs://444bd0308813ae0dc236f8cd461c02d3afa7901d \
+                                                  -Pvividus.notifications.base.comment="VIVIDUS CI - BrowserStack iOS System Tests" \
+                                                  -Pvividus.notifications.base.report-link=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                                  -Pvividus.notifications.base.project=vividus-tests \
+                                                  -Pvividus.notifications.mail.host=smtp.gmail.com \
+                                                  -Pvividus.notifications.mail.port=587 \
+                                                  -Pvividus.notifications.mail.username=vividus.team@gmail.com \
+                                                  -Pvividus.notifications.mail.password=${GMAIL_PASSWORD} \
+                                                  -Pvividus.notifications.mail.from=vividus.team@gmail.com \
+                                                  -Pvividus.notifications.mail.recipient="vividus.team@gmail.com, ivan@vividus.dev" \
+                                                  -Pvividus.notifications.mail.security-protocol=STARTTLS
         else
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY variables, System tests will be skipped
         fi

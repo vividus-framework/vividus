@@ -27,7 +27,6 @@ import org.vividus.util.property.IPropertyMapper;
 import guru.qa.allure.notifications.clients.Notification;
 import guru.qa.allure.notifications.config.Config;
 import guru.qa.allure.notifications.config.enums.Language;
-import guru.qa.allure.notifications.exceptions.MessagingException;
 
 public class NotificationsSender
 {
@@ -43,18 +42,10 @@ public class NotificationsSender
     public void sendNotifications(File reportDirectory)
     {
         parseConfiguration().ifPresent(config -> {
-            config.base().setAllureFolder(reportDirectory.getAbsolutePath());
-            config.base().setLanguage(Language.en);
-            config.base().setEnableChart(true);
-
-            try
-            {
-                Notification.send(config);
-            }
-            catch (MessagingException e)
-            {
-                LOGGER.error("Unable to send notifications", e);
-            }
+            config.getBase().setAllureFolder(reportDirectory.getAbsolutePath());
+            config.getBase().setLanguage(Language.en);
+            config.getBase().setEnableChart(true);
+            Notification.send(config);
         });
     }
 
