@@ -29,6 +29,7 @@ import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
 import org.vividus.model.ArchiveVariable;
 import org.vividus.model.NamedEntry;
+import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.DataWrapper;
 import org.vividus.steps.StringComparisonRule;
@@ -38,11 +39,14 @@ public class ArchiveSteps
 {
     private final ISoftAssert softAssert;
     private final VariableContext variableContext;
+    private final IAttachmentPublisher attachmentPublisher;
 
-    public ArchiveSteps(ISoftAssert softAssert, VariableContext variableContext)
+    public ArchiveSteps(ISoftAssert softAssert, VariableContext variableContext,
+            IAttachmentPublisher attachmentPublisher)
     {
         this.softAssert = softAssert;
         this.variableContext = variableContext;
+        this.attachmentPublisher = attachmentPublisher;
     }
 
     /**
@@ -106,22 +110,27 @@ public class ArchiveSteps
     public void verifyArchiveContainsEntries(DataWrapper archiveData, List<NamedEntry> parameters)
     {
         Set<String> entryNames = ZipUtils.readZipEntryNamesFromBytes(archiveData.getBytes());
-
-        parameters.forEach(entry ->
+        boolean verificationPassed = parameters.stream()
+                .map(entry -> assertArchiveEntry(entry, entryNames))
+                .reduce(true, (a, b) -> a && b);
+        if (!verificationPassed)
         {
-            String expectedName = entry.getName();
-            if (entry.getRule() != null)
-            {
-                StringComparisonRule comparisonRule = entry.getRule();
-                softAssert.assertThat(String.format(
-                        "The archive contains entry matching the comparison rule '%s' with name pattern '%s'",
-                        comparisonRule, expectedName), entryNames, hasItem(comparisonRule.createMatcher(expectedName)));
-            }
-            else
-            {
-                softAssert.assertThat("The archive contains entry with name " + expectedName, entryNames,
-                        hasItem(expectedName));
-            }
-        });
+            attachmentPublisher.publishAttachment("archive-entries-result-table.ftl",
+                    Map.of("entryNames", entryNames), "Archive entries");
+        }
+    }
+
+    private boolean assertArchiveEntry(NamedEntry expectedEntry, Set<String> entryNames)
+    {
+        String expectedName = expectedEntry.getName();
+        StringComparisonRule comparisonRule = expectedEntry.getRule();
+        if (comparisonRule != null)
+        {
+            return softAssert.assertThat(String.format(
+                    "The archive contains entry matching the comparison " + "rule '%s' with name pattern '%s'",
+                    comparisonRule, expectedName), entryNames, hasItem(comparisonRule.createMatcher(expectedName)));
+        }
+        return softAssert.assertThat("The archive contains entry with name " + expectedName, entryNames,
+                hasItem(expectedName));
     }
 }
