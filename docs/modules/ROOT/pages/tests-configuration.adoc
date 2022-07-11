@@ -90,7 +90,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 |`bdd.configuration.formats`
 |`JSON,XML`
-|Types of reports produced by JBehave
+|Available formats of the output files with test execution results
 
 |`statistics.print-failures`
 |`false`
