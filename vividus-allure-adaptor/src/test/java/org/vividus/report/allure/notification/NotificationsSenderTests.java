@@ -48,7 +48,6 @@ import guru.qa.allure.notifications.clients.Notification;
 import guru.qa.allure.notifications.config.Config;
 import guru.qa.allure.notifications.config.base.Base;
 import guru.qa.allure.notifications.config.enums.Language;
-import guru.qa.allure.notifications.exceptions.MessagingException;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class NotificationsSenderTests
@@ -73,19 +72,6 @@ class NotificationsSenderTests
     }
 
     @Test
-    void shouldLogErrorOnNotificationSendException() throws IOException
-    {
-        testNotificationSending((config, notification) ->
-        {
-            var messagingException = new MessagingException("notification send error", new IOException());
-            notification.when(() -> Notification.send(config)).thenThrow(messagingException);
-            notificationsSender.sendNotifications(reportDirectory);
-            assertThat(logger.getLoggingEvents(),
-                    is(List.of(error(messagingException, "Unable to send notifications"))));
-        });
-    }
-
-    @Test
     void shouldSendNotificationSuccessfully() throws IOException
     {
         testNotificationSending((config, notification) ->
@@ -104,15 +90,15 @@ class NotificationsSenderTests
 
         var base = new Base();
         var config = mock(Config.class);
-        when(config.base()).thenReturn(base);
+        when(config.getBase()).thenReturn(base);
 
         when(propertyMapper.readValue(PROPERTY_PREFIX, Config.class)).thenReturn(Optional.of(config));
         try (MockedStatic<Notification> notification = mockStatic(Notification.class))
         {
             test.accept(config, notification);
         }
-        assertEquals(absolutePath, base.allureFolder());
-        assertEquals(Language.en, base.language());
-        assertTrue(base.enableChart());
+        assertEquals(absolutePath, base.getAllureFolder());
+        assertEquals(Language.en, base.getLanguage());
+        assertTrue(base.getEnableChart());
     }
 }

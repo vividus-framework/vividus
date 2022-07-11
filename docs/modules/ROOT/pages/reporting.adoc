@@ -121,7 +121,7 @@ The following properties are used configure notification sending.
 
 NOTE: The properties marked with *bold* are mandatory.
 
-[cols="2,2,2", options="header"]
+[cols="4,3,3", options="header"]
 |===
 |Property name
 |Description
@@ -151,7 +151,13 @@ NOTE: The properties marked with *bold* are mandatory.
 |Comma-separated set the recipient addresses
 |`dl@my-company.com, test-results@my-company.com`
 
-|[subs=+quotes]`*notifications.mail.enable-ssl*`
-|If set to true, use SSL to connect
-|`true`
+|[subs=+quotes]`notifications.mail.security-protocol`
+a|One of the following security protocols:
+
+* `SSL` - use SSL to connect (make sure the SSL port is used).
+* `STARTTLS` - use of the STARTTLS command (if supported by the server) to switch the connection to
+  a TLS-protected connection before issuing any login commands. If the server does not support STARTTLS,
+  the connection continues without the use of TLS.
+
+|`SSL`
 |===
