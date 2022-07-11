@@ -1,0 +1,431 @@
+= Appium Setup
+
+== Intro
+
+Appium is an open-source test automation framework for use with native, hybrid, and mobile web apps.
+It drives iOS, Android, and Windows apps using the WebDriver protocol. http://appium.io/docs/en/about-appium/intro/[Learn more].
+
+You can run VIVIDUS automated scenarios on mobile devices using Appium tool.
+
+== Install Appium server
+
+Since Appium has a Client/Server Architecture, it is required to install and run Appium server to perform mobile tests.
+
+There are two ways of installing Appium server:
+
+
+.Application installation (Appium Desktop)
+[%collapsible]
+====
+Appium Desktop is a GUI wrapper around the Appium server that can be downloaded for any platform. It comes bundled with everything required to run the Appium server, so you don't need to worry about Node.
+
+https://github.com/appium/appium-desktop/releases/latest[Download] the latest version of Appium Desktop.
+====
+.Command line installation
+[%collapsible]
+====
+Appium is a server written in Node.js. It can be built and installed from source or installed directly from NPM:
+[source,shell]
+----
+npm install -g appium
+----
+To run Appium use the command:
+[source,shell]
+----
+appium
+----
+====
+
+== Environment setup
+
+Make sure you have installed:
+
+- https://www.java.com/en/download/manual.jsp[Java]
+- http://developer.android.com/sdk/index.html[Android SDK]
+- https://developer.apple.com/xcode/[Xcode (iOS)]
+
+And the following environment variables are set:
+
+- JAVA_HOME
+- ANDROID_HOME
+
+TIP: You can open "Edit configuration" to set the variables in Appium Desktop.
+
+Read more details for basic http://appium.io/docs/en/drivers/android-uiautomator2/[Android] and http://appium.io/docs/en/drivers/ios-xcuitest/[iOS] setup in Appium Guide.
+
+== Appium-Doctor (Optional)
+
+
+https://github.com/appium/appium-doctor[Appium-Doctor] diagnoses, reports and fixes common Node, iOS and Android configuration issues before starting Appium. It helps to make sure you have everything to start using Appium.
+
+Appium-doctor checks for:
+
+* Android:
+** Android sdk exists and configured properly;
+** Environment variables and path check;
+* iOS:
+** XCode is installed (with command line tools);
+** Dev tools security check;
+** Auth check;
+** Node binary check;
+
+== Appium Capabilities
+
+Desired Capabilities are just a set of keys and values that get sent to the Appium server during session initialization, that tell Appium what kind of thing we want to automate. The minimum set of required capabilities for any Appium driver should include:
+
+- *platformName*: the name of the platform to automate
+- *platformVersion*: the version of the platform to automate
+- *deviceName*: the kind of device to automate
+- *app*: the path to the app you want to automate (but use the browserName capability instead in the case of automating a web browser)
+- *automationName*: the name of the driver you wish to use
+
+There are lots of other capabilities. To find out more please see http://appium.io/docs/en/writing-running-appium/caps/index.html[Appium Capabilities Doc].
+
+=== Setting capabilities in VIVIDUS
+
+Before running VIVIDUS scenarios it is necessary to pass Desired Capabilities to Appium Server. Use them as properties with `selenium.grid.capabilities.` prefix. Then just put these capabilities into the appropriate `*.properties` file. Please see examples below:
+
+==== Basic properties
+
+.iOS properties
+[source, property]
+----
+selenium.grid.capabilities.platformName=iOS
+selenium.grid.capabilities.platformVersion=15.5
+selenium.grid.capabilities.deviceName=iPad Pro (9.7-inch)
+selenium.grid.capabilities.automationName=XCUITest
+selenium.grid.capabilities.app=/Users/myDirectory/application.ipa
+----
+
+.Android properties
+[source, property]
+----
+selenium.grid.capabilities.platformName=android
+selenium.grid.capabilities.platformVersion=11.0
+selenium.grid.capabilities.deviceName=Pixel 6
+selenium.grid.capabilities.automationName=UIAutomator2
+selenium.grid.capabilities.app=/Users/myDirectory/application.apk
+----
+
+==== Real devices properties
+
+While Android devices require only one additional property, for iOS you need to set three more.
+
+IMPORTANT: See the relevant sections for defining these properties for xref:appium-setup.adoc#_define_properties_for_running_a_real_apple_device[iOS] and xref:appium-setup.adoc#_android_device_udid[Android] 
+
+== Appium Inspector (Optional)
+
+https://github.com/appium/appium-inspector[Appium Inspector] is basically just an Appium client with a user interface. It allows to interact with application elements and Appium commands in a user friendly way.
+You can get the latest version of Inspector application following the https://github.com/appium/appium-inspector/releases[link].
+
+.Click to view capabilities set up in Inspector
+[%collapsible]
+====
+image::appium-inspector-capabilities-android.png[]    
+image::appium-inspector-capabilities-ios.png[]
+====
+
+== Running tests on Simulator/Emulator
+
+VIVIDUS Sample Tests is a https://github.com/vividus-framework/vividus-sample-tests[GitHub repository]. Its puropose is to demo VIVIDUS capabilities via sample tests. 
+
+Let's use it as an example for running mobile tests via Appium.
+
+. *Assumptions*
++
+You have installed and properly set up the following:
+
+* [*] IDE
+* [*] Appium Server
+* [*] AVD Manager (Android)
+* [*] Simulator application (iOS)
+
+. *Cloning and importing the repository*
++
+Clone vividus-sample-tests project using the following command:
++
+[source,shell]
+----
+git clone --recursive git@github.com:vividus-framework/vividus-sample-tests.git
+----
++
+Then use xref:ROOT:getting-started.adoc#_create_tests_project[this detailed guide] to proceed with importing and building the project.
+
+. *Overriding properties*
++
+Since we are only interested in the mobile application story, add the following properties to the overriding.properties file. Choose one of the platforms and make sure properties match with your simulator set up.
++
+.Click to expand overriding.properties
+[%collapsible]
+====
+.Minimum iOS setup
+[source, property]
+----
+selenium.grid.capabilities.appiumVersion=1.20.2
+selenium.grid.url=http://127.0.0.1:4723/wd/hub
+configuration.profiles=mobile_app/ios
+configuration.suites=mobile_app/ios
+configuration.environments=
+selenium.grid.capabilities.deviceName=iPad Pro (9.7-inch)
+selenium.grid.capabilities.platformName=iOS
+selenium.grid.capabilities.automationName=XCUITest
+----
+.Minimum Android setup
+[source, property]
+----
+selenium.grid.capabilities.appiumVersion=1.20.2
+selenium.grid.url=http://127.0.0.1:4723/wd/hub
+configuration.profiles=mobile_app/android
+configuration.suites=mobile_app/android
+configuration.environments=
+selenium.grid.capabilities.deviceName=Lenovo
+selenium.grid.capabilities.platformName=android
+selenium.grid.capabilities.automationName=UIAutomator2
+----
+====
++
+. *Start Appium Server*
++
+Make sure Appium Server is started.
++
+.Click to view screenshots
+[%collapsible]
+====
+*Appium-Desktop*
+
+image::appium-desktop.png[]
+image::appium-server-running.png[]
+
+*Appium in the terminal*
+
+image::appium-server-cli.png[]
+====
++
+. *Tests execution and expected results*
++
+Execute the test either via `./gradlew runStories` command or by clicking the `Run` button in the IDE.
++
+In case everything has been set up correctly you will see the following:
++
+.. Appium creates a new session;
+.. Testing application (Swag Labs Mobile) is installed on the simulator;
+.. Application is started;
+.. Credentials are entered into username and password fields;
+.. After successful login user sees the landing page;
+
+
+== Running tests on Real Devices
+
+Executing tests on real devices has some features and required different preparations depending on the platform.
+
+=== Android
+
+Firstly, make sure you have installed https://developer.android.com/studio/command-line/adb[Android Debug Bridge]. Simply enter in the command line `adb --version`. You should get some adb information in the output:
+
+[source,shell]
+----
+adb --version
+Android Debug Bridge version 1.0.41
+Version 31.0.3-7562133
+Installed as /usr/local/bin/adb
+----
+
+==== Android device UDID 
+Connect the device you want to interact with to your workstation. Use `adb devices` command to see the list of connected devices:
+
+[source,shell]
+----
+adb devices
+List of devices attached
+UKjeCe9Mr9 device
+----
+
+In this example `UKjeCe9Mr9` is the unique identifier of the device. Use that number as a udid capability (property) in VIVIDUS:
+
+[source,property]
+----
+selenium.grid.capabilities.udid=UKjeCe9Mr9
+----
+You are ready to run tests! Just add this property to your `*.properties` file and use xref:appium-setup.adoc#_running_tests_on_simulators[the same approach as for Simulators]
+
+=== iOS
+
+Automating a real device with XCUITest Driver(iOS) is considerably more complicated, due to Apple's restrictions around running apps on real devices.
+
+XCUITest driver installs a helper application called WebDriverAgent-Runner onto the device, and handles the application under test via it. While this is simple in theory, the hoops of code signing and provisioning applications for development and testing can make this a bit of a headache.
+
+==== WDA configuration
+There are two approaches for WebDriverAgent configuration:
+
+. *Automatic WDA configuration*.
+Proper work of the WDA requires signing it with a valid Apple Developer account. If you have a paid Apple Developer account, please see the following instructions on http://appium.io/docs/en/drivers/ios-xcuitest-real-devices/#basic-automatic-configuration[Appium Doc];
++
+. *Manual WDA configuration*.
+Using a "Free" developer account often leads to issues with the impossibility of creating a wildcard provisioning profile for the default application bundle.
+
+Follow the instructions below to handle this issue.
+
+==== Manual WDA configuration
+
+NOTE: The next steps are based on https://appium.io/docs/en/drivers/ios-xcuitest-real-devices/#basic-manual-configuration[Appium manual configuration doc]. 
+
+. Add a new Apple Development Certificate for your Apple ID;
++
+.Click to see details
+[%collapsible]
+====
+*Open Xcode and go to settings*
+
+image::appium-xcode-preferences.png[]
+
+*Click "+" to add an account and then Sign In with your Apple ID*
+
+image::appium-add-apple-id-account.png[]
+image::appium-apple-id-signed-in.png[]
+
+*Add a new Apple Development Certificate*
+
+image::appium-open-manage-certificates.png[]
+image::appium-add-a-new-certificate.png[]
+====
+. Build WebDriverAgent signed with your newly created certificate;
+.. Open WDA project in Xcode;
++
+TIP: Most common path to the project: `/Applications/Appium.app/Contents/Resources/app/node_modules/appium/node_modules/appium-webdriveragent/WebDriverAgent.xcodeproj`
++
+.. Come up with your unique *Bundle Identifier*. Use it for updating build parameters.
++
+.Click to see details
+[%collapsible]
+====
+*Make sure you've chosen correct device and parameters*
+image::appium-check-device-and-parameters.png[]
+
+*Create your unique BundleId and update build parameters*
+image::appium-update-build-parameters.png[]
+====
+
+.. Build the project
++
+.Click to see details
+[%collapsible]
+====
+image::appium-start-building.png[]
+image::appium-grant-access.png[]
+====
+
+==== Define properties for running a real apple device
+[source, property,subs=attributes+]
+----
+# iOS
+selenium.grid.capabilities.xcodeSigningId=Apple Development<1> 
+selenium.grid.capabilities.udid=b3f34105281bb345p980p824401d5913f13efe81<2>
+selenium.grid.capabilities.xcodeOrgId=5H8S64Q9G4<3>
+selenium.grid.capabilities.updatedWDABundleId=yourUniqueBundleId.WebDriverAgentRunner<4>
+----
+<1> *xcodeSigningId*
++
+For any Apple device use `Apple Development` as the `xcodeSigningId` property.
++
+<2> *UDID*
+.. Make sure your Apple device is connected;
+.. Open Finder and choose your device;
+.. Copy udid from the device information;
++
+.Click to view screenshots
+[%collapsible]
+====
+image::appium-finder-list-of-devices.png[]
+image::appium-finder-copy-udid.png[]
+====
++
+<3> *xcodeOrgId*
+.. Open KeyChain Access application;
+.. Go to `Default Keychains -> Login`;
+.. Open `My Certificates` tab and find certificated you have created recently;
+.. Open Certificate and use `Organisational Unit` parameter as `xcodeOrgId` property;
++
+.Click to view screenshots
+[%collapsible]
+====
+image::appium-find-keychain.png[]
+image::appium-keychain-certificates-list.png[]
+image::appium-certificate-details.png[]
+====
++
+<4> *updatedWDABundleId*
++
+Use your unique Bundle Identifier that was created previously as `updatedWDABundleId` property;
+
+==== First start
+When all tools are installed and set up and all desired capabilities are defined, we can start our tests.
+For the first time, Appium will install the WDA application on the Apple device. Since WDA is signed with an unknown Apple Developer account, we need to add it to the trust.
+
+Start the session either via Appium Inspector or by running an autotest. Once the WDA icon appears on the screen, do the following:
+
+. Go to Settings→General→Profile & Device Management (iOS 15 and higher - Settings→General→VPN & Device Management);
++
+. Tap on "Apple Development: "account name";
+. Choose "Trust";
+
+.Click to view screenshot
+[%collapsible]
+====
+image::appium-wda-on-device.png[]
+====
+
+You are ready to run tests! Just add properties from above to your `*.properties` file and use xref:appium-setup.adoc#_running_tests_on_simulators[the same approach as for Simulators]
+
+== F.A.Q.
+
+=== Why can’t I start the session with an Android device?
+
+. Make sure that the device is physically connected;
+. Check UDID capability(property). It should match the serial number of the device;
+. Make sure adb sees the device (`adb devices`). In case the device is not on the list, try restarting adb server via terminal:
+
+[source, shell]
+----
+adb kill-server && \
+adb start-server
+----
+
+=== Why can’t I start the session with an iOS device?
+
+. WDA is expired. This is the most common issue that appeared on iOS devices
+[example]
+Unable to launch WebDriverAgent because of xcodebuild failure: xcodebuild failed with code 65
++
+When it happens, the icon of the WebDriverAgent disappears from
+the device menu. To get it back on the device you should rebuild WDA for your device and add your developer account to trust again;
++
+TIP: Use xref:appium-setup.adoc#_its_quite_unhandy_to_add_an_apple_developer_account_to_trusted_every_time_wda_is_expired_is_there_a_more_convenient_way[this] guide to fix WDA expiration much faster
++
+. Make sure that the device is physically connected;
+. Check UDID capability(property). It should match the serial number of the device;
+
+=== It's quite unhandy to add an Apple Developer account to trusted every time WDA is expired. Is there a more convenient way?
+
+Yes. You can create the second application signed with your Apple Developer account. Once WebDriverAgent get expired, it will be deleted. But your second app will remain on the device and keep your Apple Developer account in the trusted list. You will only need to rebuild WDA in a click to get it back.
+
+.Click to expand steps
+[%collapsible]
+====
+. Make sure your device is connected to your workstation;
+. Open Xcode and create a new project;
+. Choose Application type "App" for your platform;
+. Enter Product Name, let's say "keeper";
+. Use the same Team and Organization Identifier that you used for WebDriverAgent;
+. Click Build;
+
+Now your mobile device has the keeper application installed. It will remain on the device even when WDA is deleted due to expiration. When it happens, just connect the device, open the WDA project and click build. After the build is successful you can start your Appium sessions again.
+====
+
+=== How to pair AppleTV with MacBook?
+
+. Make sure your computer and Apple TV are connected to the same Wi-FI network.;
+. On Apple TV go to Settings→Remotes and Devices→Remote App and Devices;
+. On your Mac open Xcode→Window→Devices and Simulators (⌘+2);
+. Click " + " on the tab "Devices" to add a new device.;
+. Choose your Apple TV from the list;
+. Enter the 6-digit passcode that appeared on the TV screen;
