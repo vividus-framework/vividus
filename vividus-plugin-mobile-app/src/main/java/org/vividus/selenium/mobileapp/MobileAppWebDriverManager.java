@@ -21,9 +21,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
-
-import com.google.common.base.Suppliers;
 
 import org.apache.commons.lang3.Validate;
 import org.openqa.selenium.OutputType;
@@ -33,6 +30,7 @@ import org.openqa.selenium.remote.Response;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
+import org.vividus.selenium.manager.WebDriverManagerParameter;
 import org.vividus.ui.action.JavascriptActions;
 
 import io.appium.java_client.ExecutesMethod;
@@ -44,7 +42,6 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
     private static final String HEIGHT = "height";
 
     private final JavascriptActions javascriptActions;
-    private final Supplier<Float> dpr = Suppliers.memoize(this::calculateDpr);
 
     public MobileAppWebDriverManager(IWebDriverProvider webDriverProvider,
             IWebDriverManagerContext webDriverManagerContext, JavascriptActions javascriptActions)
@@ -117,16 +114,16 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
 
     public double getDpr()
     {
-        return dpr.get();
+        return getWebDriverManagerContext().get(WebDriverManagerParameter.DEVICE_PIXEL_RATIO, this::calculateDpr);
     }
 
-    private float calculateDpr()
+    private double calculateDpr()
     {
         try
         {
             byte[] imageBytes = getUnwrappedDriver(TakesScreenshot.class).getScreenshotAs(OutputType.BYTES);
             BufferedImage image = ImageTool.toBufferedImage(imageBytes);
-            return image.getHeight() / (float) getSize().getHeight();
+            return image.getHeight() / (double) getSize().getHeight();
         }
         catch (IOException e)
         {

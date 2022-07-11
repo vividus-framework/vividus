@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.vividus.selenium;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -23,23 +25,24 @@ import static org.mockito.Mockito.verify;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 import org.vividus.testcontext.TestContext;
 
 @ExtendWith(MockitoExtension.class)
 class WebDriverManagerContextTests
 {
-    @Mock
-    private TestContext testContext;
+    private static final String ANY_VALYE = "value";
 
-    @InjectMocks
-    private WebDriverManagerContext webDriverManagerContext;
+    @Mock private TestContext testContext;
+    @InjectMocks private WebDriverManagerContext webDriverManagerContext;
 
     @Test
     void testGetParameter()
@@ -62,9 +65,8 @@ class WebDriverManagerContextTests
     void testPutParameter()
     {
         WebDriverManagerParameter param = WebDriverManagerParameter.SCREEN_SIZE;
-        String value = "value";
-        webDriverManagerContext.putParameter(param, value);
-        verify(testContext).put(param.getContextKey(), value);
+        webDriverManagerContext.putParameter(param, ANY_VALYE);
+        verify(testContext).put(param.getContextKey(), ANY_VALYE);
     }
 
     @Test
@@ -81,5 +83,33 @@ class WebDriverManagerContextTests
         WebDriverManagerParameter param = WebDriverManagerParameter.SCREEN_SIZE;
         webDriverManagerContext.reset(param);
         verify(testContext).remove(param.getContextKey());
+    }
+
+    @Test
+    void testGetWithNullInitialValueSupplier()
+    {
+        WebDriverManagerParameter param = WebDriverManagerParameter.DESIRED_CAPABILITIES;
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> webDriverManagerContext.get(param, () -> ANY_VALYE));
+        assertEquals("Initial value supplier for parameter '" + param.getContextKey() + "' is not null",
+                exception.getMessage());
+    }
+
+    @Test
+    void testGetWithInitialValueSupplier()
+    {
+        WebDriverManagerParameter param = WebDriverManagerParameter.DEVICE_PIXEL_RATIO;
+        Supplier<String> valueSupplier = () -> ANY_VALYE;
+        webDriverManagerContext.get(param, valueSupplier);
+        verify(testContext).get(param.getContextKey(), valueSupplier);
+    }
+
+    @Test
+    void testOnWebDriverQuit()
+    {
+        WebDriverManagerContext spy = Mockito.spy(webDriverManagerContext);
+        AfterWebDriverQuitEvent event = new AfterWebDriverQuitEvent(StringUtils.EMPTY);
+        spy.onWebDriverQuit(event);
+        verify(spy).reset();
     }
 }

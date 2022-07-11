@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,15 @@
 
 package org.vividus.selenium.manager;
 
+import java.util.function.Supplier;
+
 public interface IWebDriverManagerContext
 {
     <T> T getParameter(WebDriverManagerParameter parameter);
 
     <T> void putParameter(WebDriverManagerParameter parameter, T value);
+
+    <T> T get(WebDriverManagerParameter parameter, Supplier<T> initialValueSupplier);
 
     void reset();
 

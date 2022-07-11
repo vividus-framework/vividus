@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,22 +26,19 @@ import org.jbehave.core.model.Meta;
 import org.vividus.context.RunContext;
 import org.vividus.selenium.ControllingMetaTag;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
 
 public class WebDriverSetupSteps
 {
     private final WebDriverSessionScope webDriverSessionScope;
     private final IWebDriverProvider webDriverProvider;
-    private final IWebDriverManagerContext webDriverManagerContext;
     private final RunContext runContext;
 
     public WebDriverSetupSteps(WebDriverSessionScope webDriverSessionScope, IWebDriverProvider webDriverProvider,
-            IWebDriverManagerContext webDriverManagerContext, RunContext runContext)
+            RunContext runContext)
     {
         isTrue(webDriverSessionScope != null, "Application session scope is not set");
         this.webDriverSessionScope = webDriverSessionScope;
         this.webDriverProvider = webDriverProvider;
-        this.webDriverManagerContext = webDriverManagerContext;
         this.runContext = runContext;
     }
 
@@ -78,7 +75,6 @@ public class WebDriverSetupSteps
     private void stopWebDriver()
     {
         webDriverProvider.end();
-        webDriverManagerContext.reset();
     }
 
     private void processMeta(Meta meta)

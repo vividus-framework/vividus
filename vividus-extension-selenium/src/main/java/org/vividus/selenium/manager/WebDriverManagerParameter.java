@@ -24,7 +24,8 @@ public enum WebDriverManagerParameter
 {
     DESIRED_CAPABILITIES("desiredCapabilities", DesiredCapabilities::new),
     COMMAND_LINE_ARGUMENTS("commandLineArguments", null),
-    SCREEN_SIZE("screenSize", null);
+    SCREEN_SIZE("screenSize", null),
+    DEVICE_PIXEL_RATIO("dpr", null);
 
     private final String contextKey;
     private transient Supplier<?> initialValueSupplier;
