@@ -89,7 +89,7 @@ class HttpResponseValidationStepsTests
     private static final int RETRY_TIMES = 3;
     private static final int RESPONSE_CODE = 200;
     private static final int RESPONSE_CODE_ERROR = 404;
-    private static final Duration DURATION = Duration.ofSeconds(10);
+    private static final Duration DURATION = Duration.ofSeconds(9);
 
     @Mock
     private HttpTestContext httpTestContext;
