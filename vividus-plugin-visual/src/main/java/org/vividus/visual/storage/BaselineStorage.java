@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.visual.engine;
+package org.vividus.visual.storage;
 
 import java.io.IOException;
 import java.util.Optional;

@@ -30,12 +30,6 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-visual', version: '{c
 |`<empty>`
 |The comma-separated list of locators of elements to ignore page areas
 
-|`ui.visual.baselines-folder`
-|`string`
-|`./baseline`
-|The path to folder for saving baselines (root folder is `src/main/resources`).
-For example, `ui.visual.baselines-folder=C:/Workspace/vividus-tests/src/main/resources/baselines`
-
 |`ui.visual.indexer`
 |scenario
 |`<empty>`
@@ -465,3 +459,56 @@ and screenshot configuration:
 |scrollableElement  |webFooterToCut|webHeaderToCut|coordsProvider|
 |By.xpath(.//header)|100           |100           |CEILING       |
 ----
+
+== Baseline storages
+
+Used to store baseline images. User is allowed to xref:developer-guides:plugins.adoc#_baseline_storages[implement own baseline storages].
+
+=== filesystem
+
+The baseline storage is used by default. User is able to specify either embedded into repository baseline folder or any folder on the local filesystem.
+
+==== Properties
+
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`ui.visual.baseline-storage.filesystem.folder`
+|`string`
+|`./baseline`
+|The path to the folder for saving baselines (root folder is `src/main/resources`).
+For example, `ui.visual.baseline-storage.filesystem.folder=C:/Workspace/vividus-tests/src/main/resources/baselines`
+|===
+
+TIP: In order to store new baselines in the source folder use absolute path to the baselines folder.
+
+=== azure-blob-storage
+
+Uses Azure Blob Storage container as a baseline source. In order to use this storage you need to:
+
+. Install xref:plugins:plugin-azure-storage-account.adoc#_installation[Azure Storage Account plugin].
+. Configure storage account connection xref:plugins:plugin-azure-storage-account.adoc#_configuration[Azure Storage Account plugin].
+. Configure baseline storage using properties:
++
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`ui.visual.baseline-storage.azure-blob-storage.account-key`
+|`string`
+|Empty
+|The logical key used to refer to the storage account.
+
+|`ui.visual.baseline-storage.azure-blob-storage.container`
+|`string`
+|Empty
+|Describes the name of container with the baselines.
+
+|===
