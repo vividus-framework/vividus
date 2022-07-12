@@ -16,12 +16,8 @@
 
 package org.vividus.visual.storage;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Optional;
-
-import javax.imageio.ImageIO;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
@@ -57,7 +53,7 @@ public class AzureBlobStorageBaselineStorage implements BaselineStorage
         {
             BlobClient blobClient = blobServiceClientFactory.createBlobClient(blobName, container, storageAccountKey);
             byte[] baseline = blobClient.downloadContent().toBytes();
-            Screenshot screenshot = new Screenshot(toImage(baseline));
+            Screenshot screenshot = new Screenshot(ImageTool.toBufferedImage(baseline));
             return Optional.of(screenshot);
         }
         catch (BlobStorageException e)
@@ -74,14 +70,6 @@ public class AzureBlobStorageBaselineStorage implements BaselineStorage
             }
         }
         return Optional.empty();
-    }
-
-    private BufferedImage toImage(byte[] image) throws IOException
-    {
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(image))
-        {
-            return ImageIO.read(bais);
-        }
     }
 
     @Override

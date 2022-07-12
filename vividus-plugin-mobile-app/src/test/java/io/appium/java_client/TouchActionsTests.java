@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.util.function.BooleanSupplier;
-
-import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,6 +53,8 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
 import org.vividus.util.ResourceUtils;
+
+import pazone.ashot.util.ImageTool;
 
 @ExtendWith(MockitoExtension.class)
 class TouchActionsTests
@@ -267,10 +265,10 @@ class TouchActionsTests
 
     private BufferedImage getImage(String image)
     {
-        byte[] bytes = ResourceUtils.loadResourceAsByteArray(getClass(), image);
-        try (InputStream inputStream = new ByteArrayInputStream(bytes))
+        try
         {
-            return ImageIO.read(inputStream);
+            byte[] bytes = ResourceUtils.loadResourceAsByteArray(getClass(), image);
+            return ImageTool.toBufferedImage(bytes);
         }
         catch (IOException e)
         {

@@ -17,14 +17,10 @@
 package org.vividus.selenium.screenshot;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-
-import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
@@ -38,6 +34,7 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
 import pazone.ashot.AShot;
+import pazone.ashot.util.ImageTool;
 
 public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
         implements ScreenshotTaker, AshotScreenshotTaker<T>
@@ -62,10 +59,7 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
     @Override
     public BufferedImage takeViewportScreenshot() throws IOException
     {
-        try (InputStream inputStream = new ByteArrayInputStream(takeScreenshotAsByteArray()))
-        {
-            return ImageIO.read(inputStream);
-        }
+        return ImageTool.toBufferedImage(takeScreenshotAsByteArray());
     }
 
     @Override

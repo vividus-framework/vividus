@@ -17,15 +17,11 @@
 package org.vividus.selenium.mobileapp;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import javax.imageio.ImageIO;
 
 import com.google.common.base.Suppliers;
 
@@ -41,6 +37,7 @@ import org.vividus.ui.action.JavascriptActions;
 
 import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.android.HasAndroidDeviceDetails;
+import pazone.ashot.util.ImageTool;
 
 public class MobileAppWebDriverManager extends GenericWebDriverManager
 {
@@ -125,10 +122,10 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
 
     private float calculateDpr()
     {
-        byte[] imageBytes = getUnwrappedDriver(TakesScreenshot.class).getScreenshotAs(OutputType.BYTES);
-        try (InputStream is = new ByteArrayInputStream(imageBytes))
+        try
         {
-            BufferedImage image = ImageIO.read(is);
+            byte[] imageBytes = getUnwrappedDriver(TakesScreenshot.class).getScreenshotAs(OutputType.BYTES);
+            BufferedImage image = ImageTool.toBufferedImage(imageBytes);
             return image.getHeight() / (float) getSize().getHeight();
         }
         catch (IOException e)
