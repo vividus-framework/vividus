@@ -26,12 +26,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-
-import javax.imageio.ImageIO;
 
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
@@ -111,10 +108,8 @@ class AzureBlobStorageBaselineStorageTests
     {
         var blobClient = mock(BlobClient.class);
         when(blobServiceClientFactory.createBlobClient(BASELINE_PNG, CONTAINER, KEY)).thenReturn(blobClient);
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(IMAGE))
-        {
-            storage.saveBaseline(new Screenshot(ImageIO.read(bais)), BASELINE);
-        }
+        Screenshot baselineScreenshot = new Screenshot(ImageTool.toBufferedImage(IMAGE));
+        storage.saveBaseline(baselineScreenshot, BASELINE);
         verify(blobClient).upload(argThat(bd -> {
             assertArrayEquals(IMAGE, bd.toBytes());
             return true;
