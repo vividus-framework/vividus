@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.visual.engine;
+package org.vividus.visual.storage;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
@@ -85,11 +85,11 @@ class FileSystemBaselineStorageTests
     }
 
     @Test
-    void shouldThrowExceptionWhenBaselineNotLoaded()
+    void shouldThrowExceptionWhenBaselineNotLoaded() throws IOException
     {
         fileSystemBaselineStorage.setBaselinesFolder(BASELINES_FOLDER);
         ResourceLoadException exception = assertThrows(ResourceLoadException.class,
-            () -> fileSystemBaselineStorage.getBaseline("corrupted_image").get().getImage());
+            () -> fileSystemBaselineStorage.getBaseline("corrupted_image"));
         assertThat(exception.getMessage(), Matchers.matchesRegex("The baseline at the path "
                 + "'.+[\\\\/]baselines[\\\\/]corrupted_image.png' is broken or has unsupported format"));
     }

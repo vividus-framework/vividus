@@ -23,12 +23,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,7 +35,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
@@ -61,6 +58,9 @@ import org.vividus.util.ResourceUtils;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
+import org.vividus.visual.storage.BaselineStorage;
+import org.vividus.visual.storage.BaselineStorageProvider;
+import org.vividus.visual.storage.FileSystemBaselineStorage;
 
 import pazone.ashot.Screenshot;
 
@@ -90,19 +90,15 @@ class VisualTestingEngineTests
 
     @Mock private BaselineStorage baselineStorage;
     @Mock private AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker;
+    @Mock private BaselineStorageProvider baselineStorageProvider;
     @Spy private DiffMarkupPolicyFactory diffMarkupPolicyFactory;
 
     private VisualTestingEngine visualTestingEngine;
 
     void initObjectUnderTest()
     {
-        initObjectUnderTest(Map.of(FILESYSTEM, baselineStorage));
-    }
-
-    void initObjectUnderTest(Map<String, BaselineStorage> baselineStorages)
-    {
         visualTestingEngine = new VisualTestingEngine(ashotScreenshotTaker, diffMarkupPolicyFactory,
-                baselineStorages);
+                baselineStorageProvider);
         visualTestingEngine.setAcceptableDiffPercentage(0.0d);
         visualTestingEngine.setBaselineStorage(FILESYSTEM);
     }
@@ -111,6 +107,7 @@ class VisualTestingEngineTests
     void shouldReturnOnlyCheckpointForEstablishAction() throws IOException
     {
         initObjectUnderTest();
+        when(baselineStorageProvider.getBaselineStorage(FILESYSTEM)).thenReturn(baselineStorage);
         VisualCheck visualCheck = createVisualCheck(VisualActionType.ESTABLISH);
         BufferedImage finalImage = mockGetCheckpointScreenshot(visualCheck);
         VisualCheckResult checkResult = visualTestingEngine.establish(visualCheck);
@@ -138,6 +135,7 @@ class VisualTestingEngineTests
         double acceptableDiffPercentage, boolean status) throws IOException
     {
         initObjectUnderTest();
+        when(baselineStorageProvider.getBaselineStorage(FILESYSTEM)).thenReturn(baselineStorage);
         when(baselineStorage.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
         visualCheck.setAcceptableDiffPercentage(OptionalDouble.of(acceptableDiffPercentage));
@@ -165,6 +163,7 @@ class VisualTestingEngineTests
         double requiredDiffPercentage, boolean status) throws IOException
     {
         initObjectUnderTest();
+        when(baselineStorageProvider.getBaselineStorage(FILESYSTEM)).thenReturn(baselineStorage);
         visualTestingEngine.setRequiredDiffPercentage(0.000001);
         when(baselineStorage.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.CHECK_INEQUALITY_AGAINST);
@@ -187,6 +186,7 @@ class VisualTestingEngineTests
     void shouldReturnVisualCheckResultWithBaselineAndCheckpointUsingAcceptableDiffPercentage() throws IOException
     {
         initObjectUnderTest();
+        when(baselineStorageProvider.getBaselineStorage(FILESYSTEM)).thenReturn(baselineStorage);
         when(baselineStorage.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
         visualCheck.setAcceptableDiffPercentage(OptionalDouble.of(50));
@@ -208,6 +208,7 @@ class VisualTestingEngineTests
     void shouldReturnVisualCheckResultWithBaselineAndCheckpoint() throws IOException
     {
         initObjectUnderTest();
+        when(baselineStorageProvider.getBaselineStorage(FILESYSTEM)).thenReturn(baselineStorage);
         when(baselineStorage.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
         mockGetCheckpointScreenshot(visualCheck, BASELINE);
@@ -228,6 +229,7 @@ class VisualTestingEngineTests
     void shouldOverrideBaselineDuringComparisonAction() throws IOException
     {
         initObjectUnderTest();
+        when(baselineStorageProvider.getBaselineStorage(FILESYSTEM)).thenReturn(baselineStorage);
         visualTestingEngine.setOverrideBaselines(true);
         when(baselineStorage.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
         VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
@@ -246,23 +248,10 @@ class VisualTestingEngineTests
     }
 
     @Test
-    void shouldThrowAnExceptionIfInvalidBaselineStorageSet() throws IOException
-    {
-        initObjectUnderTest(Map.of(MEMORY, baselineStorage));
-        var visualCheck = createVisualCheck(VisualActionType.ESTABLISH);
-        visualCheck.setBaselineStorage(Optional.ofNullable(FILESYSTEM));
-        mockGetCheckpointScreenshot(visualCheck, BASELINE);
-        var ise = assertThrows(IllegalStateException.class,
-            () -> visualTestingEngine.establish(visualCheck));
-        assertEquals(
-                "Unable to find baseline storage with name: filesystem. Available baseline storages: [MEMORY]",
-                ise.getMessage());
-    }
-
-    @Test
     void shouldReturnVisualCheckResultWithDiffAgainstEmptyImageAndCheckpoint() throws IOException
     {
         initObjectUnderTest();
+        when(baselineStorageProvider.getBaselineStorage(FILESYSTEM)).thenReturn(baselineStorage);
         when(baselineStorage.getBaseline(BASELINE)).thenReturn(Optional.empty());
         VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
         mockGetCheckpointScreenshot(visualCheck);
@@ -280,7 +269,8 @@ class VisualTestingEngineTests
     @Test
     void shouldOverrideBaselineProviderViaCheckSettings() throws IOException
     {
-        initObjectUnderTest(Map.of(FILESYSTEM, mock(BaselineStorage.class), MEMORY, baselineStorage));
+        initObjectUnderTest();
+        when(baselineStorageProvider.getBaselineStorage(MEMORY)).thenReturn(baselineStorage);
         when(baselineStorage.getBaseline(BASELINE)).thenReturn(Optional.empty());
         VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
         visualCheck.setBaselineStorage(Optional.of(MEMORY));

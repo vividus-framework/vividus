@@ -1,5 +1,11 @@
 project.description = 'Vividus plugin for Visual Testing'
 
+java {
+    registerFeature('blobStorage') {
+        usingSourceSet(sourceSets.main)
+    }
+}
+
 dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-plugin-web-app')
@@ -7,6 +13,11 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
     implementation project(':vividus-extension-visual-testing')
+
+    blobStorageImplementation project(':vividus-plugin-azure-storage-account')
+    blobStorageImplementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
+    blobStorageImplementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.3')
+    blobStorageImplementation(group: 'com.azure', name: 'azure-storage-blob')
 
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 

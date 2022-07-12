@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Base64;
-import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -31,6 +30,8 @@ import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
+import org.vividus.visual.storage.BaselineStorage;
+import org.vividus.visual.storage.BaselineStorageProvider;
 
 import pazone.ashot.Screenshot;
 import pazone.ashot.comparison.ImageDiff;
@@ -45,7 +46,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
 
     private final AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker;
     private final DiffMarkupPolicyFactory diffMarkupPolicyFactory;
-    private final Map<String, BaselineStorage> baselineStorages;
+    private final BaselineStorageProvider baselineStorageProvider;
 
     private double acceptableDiffPercentage;
     private double requiredDiffPercentage;
@@ -53,11 +54,11 @@ public class VisualTestingEngine implements IVisualTestingEngine
     private String baselineStorage;
 
     public VisualTestingEngine(AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker,
-            DiffMarkupPolicyFactory diffMarkupPolicyFactory, Map<String, BaselineStorage> baselineStorages)
+            DiffMarkupPolicyFactory diffMarkupPolicyFactory, BaselineStorageProvider baselineStorageProvider)
     {
         this.ashotScreenshotTaker = ashotScreenshotTaker;
         this.diffMarkupPolicyFactory = diffMarkupPolicyFactory;
-        this.baselineStorages = baselineStorages;
+        this.baselineStorageProvider = baselineStorageProvider;
     }
 
     @Override
@@ -118,13 +119,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
     private BaselineStorage getBaselineStorage(VisualCheck visualCheck)
     {
         String baselineStorageName = visualCheck.getBaselineStorage().orElse(baselineStorage);
-        BaselineStorage baselineStorageToUse = baselineStorages.get(baselineStorageName);
-        if (baselineStorageToUse == null)
-        {
-            throw new IllegalStateException("Unable to find baseline storage with name: " + baselineStorageName
-                    + ". Available baseline storages: " + baselineStorages.keySet());
-        }
-        return baselineStorageToUse;
+        return baselineStorageProvider.getBaselineStorage(baselineStorageName);
     }
 
     private double calculateDiffPercentage(VisualCheck visualCheck, boolean inequalityCheck)
