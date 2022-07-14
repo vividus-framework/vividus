@@ -287,6 +287,26 @@ When I $actionType baseline with name `$name`
 When I COMPARE_AGAINST baseline with name `test`
 ----
 
+=== Run visual test using image
+
+Establishes baseline or compares against existing one using image.
+
+[source,gherkin]
+----
+When I $actionType baseline with name `$name` from image `$image`
+----
+
+* `$actionType` - The {visual-testing-actions}.
+* `$name` - Then name of baseline.
+* `$image` - The data of image.
+
+.Perform simple visual check on compare using image
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/vividus-framework/vividus/master/vividus-tests/src/main/resources/baselines/context.png`
+When I compare_against baseline with name `context` from image `${response-as-bytes}`
+----
+
 === Run simple visual test with custom baseline storage
 
 Establishes baseline or compares against existing one using xref:developer-guides:plugins.adoc#_baseline_storages[baseline storage].
@@ -304,6 +324,27 @@ When I $actionType baseline with name `$name` using storage `$storage`
 [source,gherkin]
 ----
 When I COMPARE_AGAINST baseline with name `test` using storage `azure`
+----
+
+=== Run simple visual test with custom baseline storage using image
+
+Establishes baseline or compares against existing one using xref:developer-guides:plugins.adoc#_baseline_storages[baseline storage].
+
+[source,gherkin]
+----
+When I $actionType baseline with name `$name` from image `$image` using storage `$storage`
+----
+
+* `$actionType` - The {visual-testing-actions}.
+* `$name` - The name of baseline.
+* `$image` - The data of image.
+* `$storage` - The name of storage. Ony `filesystem` available by the default.
+
+.Perform simple visual check using baseline storage
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/vividus-framework/vividus/master/vividus-tests/src/main/resources/baselines/context.png`
+When I compare_against baseline with name `context` from image `${response-as-bytes}` using storage `filesystem`
 ----
 
 === Run visual test with specified configuration
@@ -379,6 +420,31 @@ When I COMPARE_AGAINST baseline with `test` ignoring:
 |By.xpath(.//header)|By.cssSelector(footer)|5                         |
 ----
 
+=== Run visual test with ignoring option using image
+
+Establishes baseline or compares against existing one using the ignoring option.
+
+[source,gherkin]
+----
+When I $actionType baseline with name `$name` from `$image` ignoring:$ignoredElements
+----
+
+* `$actionType` - {visual-testing-actions}.
+* `$name` - Then name of baseline.
+* `$image` - The data of image.
+* `$checkSettings` - The examples table of `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`.
+
+WARNING: ELEMENT and AREA ignores not supported.
+
+.Perform visual check on compare with ignoring options
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/vividus-framework/vividus/master/vividus-tests/src/main/resources/baselines/context.png`
+When I compare_against baseline with name `context-element-with-acceptable-diff-percentage` from image `${response-as-bytes}` ignoring:
+|ACCEPTABLE_DIFF_PERCENTAGE|
+|20                       |
+----
+
 === Run visual test with ignoring option and baseline storage
 
 Establishes baseline or compares against existing one using the ignoring option and xref:developer-guides:plugins.adoc#_baseline_storages[baseline storage].
@@ -399,6 +465,32 @@ When I $actionType baseline with name `$name` using storage `$storage` and ignor
 When I COMPARE_AGAINST baseline with `test` using storage `azure` and ignoring:
 |ELEMENT            |AREA                  |ACCEPTABLE_DIFF_PERCENTAGE|
 |By.xpath(.//header)|By.cssSelector(footer)|5                         |
+----
+
+=== Run visual test using image and ignoring option and baseline storage
+
+Establishes baseline or compares against existing one using the ignoring option and xref:developer-guides:plugins.adoc#_baseline_storages[baseline storage].
+
+[source,gherkin]
+----
+When I $actionType baseline with name `$name` from image `$image` using storage `$storage` and ignoring:$ignoredElements
+----
+
+* `$actionType` - The {visual-testing-actions}.
+* `$name` - The name of baseline.
+* `$image` - The data of image.
+* `$storage` - The name of storage. Ony `filesystem` available by the default.
+* `$checkSettings` - The examples table of `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`.
+
+WARNING: ELEMENT and AREA ignores not supported.
+
+.Perform visual check on compare with ignoring options and baseline storage
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/vividus-framework/vividus/master/vividus-tests/src/main/resources/baselines/context.png`
+When I compare_against baseline with name `context-element-with-acceptable-diff-percentage` from image `${response-as-bytes}` using storage `filesystem` and ignoring:
+|ACCEPTABLE_DIFF_PERCENTAGE|
+|20                        |
 ----
 
 === Run visual test with ignoring option and specified configuration

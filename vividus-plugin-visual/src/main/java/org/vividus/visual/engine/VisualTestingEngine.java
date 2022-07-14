@@ -73,8 +73,9 @@ public class VisualTestingEngine implements IVisualTestingEngine
 
     private Screenshot getCheckpointScreenshot(VisualCheck visualCheck)
     {
-        return ashotScreenshotTaker.takeAshotScreenshot(visualCheck.getSearchContext(),
-                visualCheck.getScreenshotParameters());
+        return visualCheck.getScreenshot().orElseGet(
+                () -> ashotScreenshotTaker.takeAshotScreenshot(visualCheck.getSearchContext(),
+                        visualCheck.getScreenshotParameters()));
     }
 
     @Override

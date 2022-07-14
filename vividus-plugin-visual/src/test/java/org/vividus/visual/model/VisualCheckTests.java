@@ -35,7 +35,8 @@ class VisualCheckTests
         Assertions.assertAll(
             () -> assertEquals(OptionalDouble.empty(), visualCheck.getAcceptableDiffPercentage()),
             () -> assertEquals(OptionalDouble.empty(), visualCheck.getRequiredDiffPercentage()),
-            () -> assertEquals(Optional.empty(), visualCheck.getScreenshotParameters()));
+            () -> assertEquals(Optional.empty(), visualCheck.getScreenshotParameters()),
+            () -> assertEquals(Optional.empty(), visualCheck.getScreenshot()));
     }
 
     @Test

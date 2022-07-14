@@ -205,8 +205,14 @@ public class VisualTestingSteps extends AbstractVisualSteps
         });
     }
 
+    @Override
+    protected String getTemplateName()
+    {
+        return "applitools-visual-comparison.ftl";
+    }
+
     void runApplitoolsTest(Supplier<ApplitoolsVisualCheck> applitoolsVisualCheckSupplier)
     {
-        execute(applitoolsVisualCheckSupplier, visualTestingService::run, "applitools-visual-comparison.ftl");
+        execute(applitoolsVisualCheckSupplier, visualTestingService::run);
     }
 }

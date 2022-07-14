@@ -16,6 +16,7 @@
 
 package org.vividus.visual;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Map;
@@ -50,10 +52,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
@@ -71,6 +76,8 @@ import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 import org.vividus.visual.screenshot.BaselineIndexer;
+
+import pazone.ashot.util.ImageTool;
 
 @ExtendWith(MockitoExtension.class)
 class VisualStepsTests
@@ -90,17 +97,37 @@ class VisualStepsTests
     private static final String BASELINE = "baseline";
 
     private static final String FILESYSTEM = "filesystem";
+
+    private static final String FIFTY = "50";
+
+    private static final String ELEMENT = "ELEMENT";
+
+    private static final String AREA = "AREA";
+
     private static final String IGNORES_TABLE = "ignores table";
 
-    @Mock private ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
-    @Mock private IVisualTestingEngine visualTestingEngine;
-    @Mock private ISoftAssert softAssert;
-    @Mock private IAttachmentPublisher attachmentPublisher;
-    @Mock private VisualCheckResult visualCheckResult;
-    @Mock private IUiContext uiContext;
-    @Mock private BaselineIndexer baselineIndexer;
-    @Captor private ArgumentCaptor<VisualCheck> visualCheckCaptor;
-    @InjectMocks private VisualSteps visualSteps;
+    private static final byte[] IMAGE = { -119, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0,
+            0, 0, 1, 8, 6, 0, 0, 0, 31, 21, -60, -119, 0, 0, 0, 13, 73, 68, 65, 84, 120, 94, 99, 96, -8, -1, -65, 30, 0,
+            5, 127, 2, 126, 102, -25, 70, 104, 0, 0, 0, 0, 73, 69, 78, 68, -82, 66, 96, -126 };
+
+    @Mock
+    private ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
+    @Mock
+    private IVisualTestingEngine visualTestingEngine;
+    @Mock
+    private ISoftAssert softAssert;
+    @Mock
+    private IAttachmentPublisher attachmentPublisher;
+    @Mock
+    private VisualCheckResult visualCheckResult;
+    @Mock
+    private IUiContext uiContext;
+    @Mock
+    private BaselineIndexer baselineIndexer;
+    @Captor
+    private ArgumentCaptor<VisualCheck> visualCheckCaptor;
+    @InjectMocks
+    private VisualSteps visualSteps;
 
     @BeforeEach
     void init()
@@ -110,14 +137,11 @@ class VisualStepsTests
 
     private Map<IgnoreStrategy, Set<Locator>> createEmptyIgnores()
     {
-        return Map.of(
-                IgnoreStrategy.ELEMENT, Set.of(),
-                IgnoreStrategy.AREA, Set.of()
-        );
+        return Map.of(IgnoreStrategy.ELEMENT, Set.of(), IgnoreStrategy.AREA, Set.of());
     }
 
     @ParameterizedTest
-    @CsvSource({"COMPARE_AGAINST", "CHECK_INEQUALITY_AGAINST"})
+    @CsvSource({ "COMPARE_AGAINST", "CHECK_INEQUALITY_AGAINST" })
     void shouldAssertCheckResultForCompareAgainstActionAndPublishAttachment(VisualActionType action) throws IOException
     {
         mockUiContext();
@@ -209,18 +233,11 @@ class VisualStepsTests
 
     private static Stream<Arguments> diffMethodSource()
     {
-        return Stream.of(
-            arguments(
-                    VisualActionType.COMPARE_AGAINST,
-                    (Function<VisualCheck, OptionalDouble>) VisualCheck::getAcceptableDiffPercentage,
-                    ACCEPTABLE_DIFF_PERCENTAGE
-            ),
-            arguments(
-                    VisualActionType.CHECK_INEQUALITY_AGAINST,
-                    (Function<VisualCheck, OptionalDouble>) VisualCheck::getRequiredDiffPercentage,
-                    "REQUIRED_DIFF_PERCENTAGE"
-            )
-        );
+        return Stream.of(arguments(VisualActionType.COMPARE_AGAINST,
+                (Function<VisualCheck, OptionalDouble>) VisualCheck::getAcceptableDiffPercentage,
+                ACCEPTABLE_DIFF_PERCENTAGE), arguments(VisualActionType.CHECK_INEQUALITY_AGAINST,
+                (Function<VisualCheck, OptionalDouble>) VisualCheck::getRequiredDiffPercentage,
+                "REQUIRED_DIFF_PERCENTAGE"));
     }
 
     @ParameterizedTest
@@ -236,8 +253,7 @@ class VisualStepsTests
         var elementsToIgnore = Set.of(A_LOCATOR);
         var areasToIgnore = Set.of(DIV_LOCATOR);
         mockRow(row, elementsToIgnore, areasToIgnore, 50, columnName);
-        var ignores = Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore,
-                IgnoreStrategy.AREA, areasToIgnore);
+        var ignores = Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore, IgnoreStrategy.AREA, areasToIgnore);
         var screenshotParameters = mock(ScreenshotParameters.class);
         when(screenshotParametersFactory.create(Optional.empty(), IGNORES_TABLE, ignores)).thenReturn(
                 screenshotParameters);
@@ -262,8 +278,7 @@ class VisualStepsTests
         var elementsToIgnore = Set.of(A_LOCATOR);
         var areasToIgnore = Set.of(DIV_LOCATOR);
         mockRow(row, elementsToIgnore, areasToIgnore, 50, ACCEPTABLE_DIFF_PERCENTAGE);
-        var ignores = Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore,
-                IgnoreStrategy.AREA, areasToIgnore);
+        var ignores = Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore, IgnoreStrategy.AREA, areasToIgnore);
         var screenshotParameters = mock(ScreenshotParameters.class);
         when(screenshotParametersFactory.create(Optional.empty(), IGNORES_TABLE, ignores)).thenReturn(
                 screenshotParameters);
@@ -292,10 +307,7 @@ class VisualStepsTests
         mockRow(row, elementsToIgnore, areasToIgnore);
         var screenshotConfiguration = mock(ScreenshotConfiguration.class);
         var screenshotParameters = mock(ScreenshotParameters.class);
-        var ignores = Map.of(
-                IgnoreStrategy.ELEMENT, elementsToIgnore,
-                IgnoreStrategy.AREA, areasToIgnore
-        );
+        var ignores = Map.of(IgnoreStrategy.ELEMENT, elementsToIgnore, IgnoreStrategy.AREA, areasToIgnore);
         when(screenshotParametersFactory.create(Optional.of(screenshotConfiguration), IGNORES_TABLE,
                 ignores)).thenReturn(screenshotParameters);
         var compareAgainst = VisualActionType.COMPARE_AGAINST;
@@ -311,7 +323,7 @@ class VisualStepsTests
 
     @Test
     void shouldRunVisualTestWithBaselineStorageAndStepLevelExclusionsAndCustomScreenshotConfiguration()
-        throws IOException
+            throws IOException
     {
         mockUiContext();
         var table = mock(ExamplesTable.class);
@@ -348,8 +360,8 @@ class VisualStepsTests
     {
         var table = mock(ExamplesTable.class);
         when(table.getRows()).thenReturn(List.of(Map.of(K, V), Map.of(K, V)));
-        var exception = assertThrows(IllegalArgumentException.class, () ->
-            visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE, table));
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE, table));
         assertEquals("Only one row of locators to ignore supported, actual: 2", exception.getMessage());
         verify(table, never()).getRowAsParameters(0);
         verifyNoInteractions(softAssert, visualTestingEngine, attachmentPublisher);
@@ -357,25 +369,23 @@ class VisualStepsTests
 
     private static void mockRow(Parameters row, Set<Locator> elementIgnore, Set<Locator> areaIgnore)
     {
-        mockGettingValue(row, "ELEMENT", elementIgnore);
-        mockGettingValue(row, "AREA", areaIgnore);
+        mockGettingValue(row, ELEMENT, elementIgnore);
+        mockGettingValue(row, AREA, areaIgnore);
     }
 
     private static void mockRow(Parameters row, Set<Locator> elementIgnore, Set<Locator> areaIgnore,
             double acceptableDiffPercentage, String columnName)
     {
         mockRow(row, elementIgnore, areaIgnore);
-        doReturn(Map.of(columnName, "50")).when(row).values();
+        doReturn(Map.of(columnName, FIFTY)).when(row).values();
         doReturn(acceptableDiffPercentage).when(row).valueAs(columnName, Double.TYPE);
     }
 
     private static void mockGettingValue(Parameters row, String name, Set<Locator> result)
     {
         doReturn(result).when(row).valueAs(eq(name),
-                argThat(t -> t instanceof ParameterizedType
-                        && ((ParameterizedType) t).getRawType() == Set.class
-                        && ((ParameterizedType) t).getActualTypeArguments()[0] == Locator.class),
-                eq(Set.of()));
+                argThat(t -> t instanceof ParameterizedType && ((ParameterizedType) t).getRawType() == Set.class
+                        && ((ParameterizedType) t).getActualTypeArguments()[0] == Locator.class), eq(Set.of()));
     }
 
     @Test
@@ -385,8 +395,8 @@ class VisualStepsTests
         when(visualTestingEngine.establish(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
         when(visualCheckResult.getActionType()).thenReturn(VisualActionType.ESTABLISH);
         var screenshotParameters = mock(ScreenshotParameters.class);
-        when(screenshotParametersFactory.create(Optional.empty(), IGNORES_TABLE,
-                createEmptyIgnores())).thenReturn(screenshotParameters);
+        when(screenshotParametersFactory.create(Optional.empty(), IGNORES_TABLE, createEmptyIgnores())).thenReturn(
+                screenshotParameters);
         visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE);
         verifyNoMoreInteractions(softAssert);
         verifyCheckResultPublish();
@@ -422,12 +432,121 @@ class VisualStepsTests
         validateVisualCheck(visualCheckCaptor.getValue(), VisualActionType.ESTABLISH, screenshotParameters);
     }
 
+    @Test
+    void shouldPerformVisualCheckUsingImage() throws IOException
+    {
+        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
+        mockCheckResult();
+        visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE, IMAGE);
+        var visualCheck = visualCheckCaptor.getValue();
+        validateVisualCheck(visualCheck, VisualActionType.COMPARE_AGAINST, Optional.empty());
+        verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
+        assertArrayEquals(IMAGE, ImageTool.toByteArray(visualCheck.getScreenshot().get().getImage()));
+        verifyNoInteractions(screenshotParametersFactory, uiContext);
+        verifyCheckResultPublish();
+    }
+
+    @Test
+    void shouldThrowAnUncheckedIOInCaseOfIOException()
+    {
+        try (MockedStatic<ImageTool> imageTool = Mockito.mockStatic(ImageTool.class))
+        {
+            var ioe = new IOException();
+            imageTool.when(() -> ImageTool.toBufferedImage(IMAGE)).thenThrow(ioe);
+            assertThrows(UncheckedIOException.class,
+                    () -> visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE, IMAGE));
+        }
+    }
+
+    @Test
+    void shouldPerformVisualCheckUsingImageAndBaselineStorage() throws IOException
+    {
+        when(visualTestingEngine.establish(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
+        mockCheckResult();
+        visualSteps.runVisualTests(VisualActionType.ESTABLISH, BASELINE, IMAGE, FILESYSTEM);
+        verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
+        var visualCheck = visualCheckCaptor.getValue();
+        assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineStorage());
+        validateVisualCheck(visualCheck, VisualActionType.ESTABLISH, Optional.empty());
+        verifyNoInteractions(screenshotParametersFactory, uiContext);
+        assertArrayEquals(IMAGE, ImageTool.toByteArray(visualCheck.getScreenshot().get().getImage()));
+        verifyCheckResultPublish();
+    }
+
+    @ParameterizedTest
+    @MethodSource("diffMethodSource")
+    void shouldAssertCheckResultAndUseStepLevelSettingsUsingImage(VisualActionType actionType,
+            Function<VisualCheck, OptionalDouble> diffValueExtractor, String columnName) throws IOException
+    {
+        var table = mock(ExamplesTable.class);
+        var row = mock(Parameters.class);
+        when(table.getRows()).thenReturn(List.of(Map.of(K, V)));
+        when(table.getRowAsParameters(0)).thenReturn(row);
+        doReturn(Map.of(columnName, FIFTY)).when(row).values();
+        doReturn(50d).when(row).valueAs(columnName, Double.TYPE);
+        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
+        mockCheckResult();
+        visualSteps.runVisualTests(actionType, BASELINE, IMAGE, table);
+        verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
+        var visualCheck = visualCheckCaptor.getValue();
+        assertEquals(OptionalDouble.of(50), diffValueExtractor.apply(visualCheck));
+        validateVisualCheck(visualCheck, actionType, Optional.empty());
+        verifyNoInteractions(screenshotParametersFactory, uiContext);
+        assertArrayEquals(IMAGE, ImageTool.toByteArray(visualCheck.getScreenshot().get().getImage()));
+        verifyCheckResultPublish();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { ELEMENT, AREA })
+    void shouldThrowAnExceptionWhenIgnoresUsedForImageBaseChecks(String columnName)
+    {
+        var table = mock(ExamplesTable.class);
+        var row = mock(Parameters.class);
+        when(table.getRows()).thenReturn(List.of(Map.of(K, V)));
+        when(table.getRowAsParameters(0)).thenReturn(row);
+        doReturn(Map.of(columnName, FIFTY)).when(row).values();
+        var iae = assertThrows(IllegalArgumentException.class,
+                () -> visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE, IMAGE, table));
+        assertEquals("AREA and ELEMENT ignoring not supported for image based checks.", iae.getMessage());
+        verifyNoInteractions(screenshotParametersFactory, uiContext, softAssert, visualTestingEngine);
+    }
+
+    @ParameterizedTest
+    @MethodSource("diffMethodSource")
+    void shouldAssertCheckResultAndUseStepLevelSettingsUsingImageAndBaselineStorage(VisualActionType actionType,
+            Function<VisualCheck, OptionalDouble> diffValueExtractor, String columnName) throws IOException
+    {
+        var table = mock(ExamplesTable.class);
+        var row = mock(Parameters.class);
+        when(table.getRows()).thenReturn(List.of(Map.of(K, V)));
+        when(table.getRowAsParameters(0)).thenReturn(row);
+        doReturn(Map.of(columnName, FIFTY)).when(row).values();
+        doReturn(50d).when(row).valueAs(columnName, Double.TYPE);
+        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
+        mockCheckResult();
+        visualSteps.runVisualTests(actionType, BASELINE, IMAGE, FILESYSTEM, table);
+        verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
+        var visualCheck = visualCheckCaptor.getValue();
+        assertEquals(OptionalDouble.of(50), diffValueExtractor.apply(visualCheck));
+        validateVisualCheck(visualCheck, actionType, Optional.empty());
+        verifyNoInteractions(screenshotParametersFactory, uiContext);
+        assertEquals(FILESYSTEM, visualCheck.getBaselineStorage().get());
+        assertArrayEquals(IMAGE, ImageTool.toByteArray(visualCheck.getScreenshot().get().getImage()));
+        verifyCheckResultPublish();
+    }
+
     private void validateVisualCheck(VisualCheck visualCheck, VisualActionType type,
             ScreenshotParameters screenshotParameters)
     {
+        validateVisualCheck(visualCheck, type, Optional.of(screenshotParameters));
+    }
+
+    private void validateVisualCheck(VisualCheck visualCheck, VisualActionType type,
+            Optional<ScreenshotParameters> screenshotParameters)
+    {
         assertEquals(BASELINE, visualCheck.getBaselineName());
         assertEquals(type, visualCheck.getAction());
-        assertEquals(Optional.of(screenshotParameters), visualCheck.getScreenshotParameters());
+        assertEquals(screenshotParameters, visualCheck.getScreenshotParameters());
     }
 
     private void verifyCheckResultPublish()

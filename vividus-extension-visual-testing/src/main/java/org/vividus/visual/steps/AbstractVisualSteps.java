@@ -17,6 +17,7 @@
 package org.vividus.visual.steps;
 
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -43,22 +44,13 @@ public abstract class AbstractVisualSteps
     }
 
     protected <T extends AbstractVisualCheck> void execute(Supplier<T> visualCheckFactory,
-            Function<T, VisualCheckResult> checkResultProvider, String templateName)
+            Function<T, VisualCheckResult> checkResultProvider)
     {
         uiContext.getOptionalSearchContext().ifPresent(searchContext ->
         {
             try
             {
-                T visualCheck = visualCheckFactory.get();
-                visualCheck.setSearchContext(searchContext);
-
-                VisualCheckResult result = checkResultProvider.apply(visualCheck);
-
-                if (null != result)
-                {
-                    attachmentPublisher.publishAttachment(templateName, Map.of("result", result), "Visual comparison");
-                    verifyResult(result);
-                }
+                execute(visualCheckFactory, checkResultProvider, vc -> vc.setSearchContext(searchContext));
             }
             catch (ScreenshotPrecondtionMismatchException e)
             {
@@ -67,11 +59,33 @@ public abstract class AbstractVisualSteps
         });
     }
 
+    protected <T extends AbstractVisualCheck> void executeWithoutContext(Supplier<T> visualCheckFactory,
+            Function<T, VisualCheckResult> checkResultProvider)
+    {
+        execute(visualCheckFactory, checkResultProvider, vc -> { });
+    }
+
+    private <T extends AbstractVisualCheck> void execute(Supplier<T> visualCheckFactory,
+            Function<T, VisualCheckResult> checkResultProvider, Consumer<T> visualCheckConfigurer)
+    {
+        T visualCheck = visualCheckFactory.get();
+        visualCheckConfigurer.accept(visualCheck);
+        VisualCheckResult result = checkResultProvider.apply(visualCheck);
+
+        if (null != result)
+        {
+            attachmentPublisher.publishAttachment(getTemplateName(), Map.of("result", result), "Visual comparison");
+            verifyResult(result);
+        }
+    }
+
     protected void verifyResult(VisualCheckResult result)
     {
         boolean passed = result.isPassed() ^ result.getActionType() == VisualActionType.CHECK_INEQUALITY_AGAINST;
         softAssert.assertTrue("Visual check passed", passed);
     }
+
+    protected abstract String getTemplateName();
 
     protected ISoftAssert getSoftAssert()
     {

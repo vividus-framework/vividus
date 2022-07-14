@@ -19,11 +19,14 @@ package org.vividus.visual.model;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
+import pazone.ashot.Screenshot;
+
 public class VisualCheck extends AbstractVisualCheck
 {
     private OptionalDouble acceptableDiffPercentage = OptionalDouble.empty();
     private OptionalDouble requiredDiffPercentage = OptionalDouble.empty();
     private Optional<String> baselineStorage = Optional.empty();
+    private Optional<Screenshot> screenshot = Optional.empty();
 
     public VisualCheck(String baselineName, VisualActionType action)
     {
@@ -58,5 +61,15 @@ public class VisualCheck extends AbstractVisualCheck
     public void setBaselineStorage(Optional<String> baselineStorage)
     {
         this.baselineStorage = baselineStorage;
+    }
+
+    public Optional<Screenshot> getScreenshot()
+    {
+        return screenshot;
+    }
+
+    public void setScreenshot(Optional<Screenshot> screenshot)
+    {
+        this.screenshot = screenshot;
     }
 }

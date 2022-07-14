@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.awt.image.BufferedImage;
@@ -284,6 +285,30 @@ class VisualTestingEngineTests
                 () -> assertNull(checkResult.getDiff()),
                 () -> assertFalse(checkResult.isPassed()));
         assertThat(testLogger.getLoggingEvents(), is(empty()));
+    }
+
+    @Test
+    void shouldExecuteVisualCheckWithImage() throws IOException
+    {
+        initObjectUnderTest();
+        when(baselineStorageProvider.getBaselineStorage(FILESYSTEM)).thenReturn(baselineStorage);
+        when(baselineStorage.getBaseline(BASELINE)).thenReturn(Optional.of(new Screenshot(loadImage(BASELINE))));
+        VisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
+        BufferedImage image = loadImage(BASELINE);
+        Screenshot screenshot = new Screenshot(image);
+        visualCheck.setScreenshot(Optional.of(screenshot));
+        VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
+        Assertions.assertAll(
+                () -> assertEquals(BASELINE_BASE64, checkResult.getBaseline()),
+                () -> assertEquals(BASELINE, checkResult.getBaselineName()),
+                () -> assertEquals(BASELINE_BASE64, checkResult.getCheckpoint()),
+                () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
+                () -> assertEquals(BASELINE_BASE64, checkResult.getDiff()),
+                () -> assertTrue(checkResult.isPassed()));
+        verify(baselineStorage, never()).saveBaseline(any(), any());
+        verifyNoInteractions(ashotScreenshotTaker);
+        assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, BigDecimal.valueOf(0d),
+                new BigDecimal(0).setScale(3)))));
     }
 
     private BufferedImage mockGetCheckpointScreenshot(VisualCheck visualCheck, String imageName) throws IOException

@@ -17,6 +17,7 @@
 package org.vividus.visual.steps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -50,6 +51,12 @@ import org.vividus.visual.model.VisualCheckResult;
 class VisualStepsTests
 {
     private static final String TEMPLATE = "template";
+    private static final String BASELINE_NAME = "baseline name";
+    private static final String RESULT = "result";
+    private static final String VISUAL_COMPARISON = "Visual comparison";
+    private static final String VISUAL_CHECK_PASSED = "Visual check passed";
+    private static final String COMPARE_AGAINST = "true, COMPARE_AGAINST";
+    private static final String CHECK_INEQUALITY_AGAINST = "false, CHECK_INEQUALITY_AGAINST";
 
     @Mock private IUiContext uiContext;
     @Mock private IAttachmentPublisher attachmentPublisher;
@@ -63,7 +70,7 @@ class VisualStepsTests
         Function<AbstractVisualCheck, VisualCheckResult> checkResultProvider = mock(Function.class);
         Supplier<AbstractVisualCheck> visualCheckFactory = mock(Supplier.class);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.empty());
-        visualSteps.execute(visualCheckFactory, checkResultProvider, TEMPLATE);
+        visualSteps.execute(visualCheckFactory, checkResultProvider);
         verifyNoInteractions(visualCheckFactory, checkResultProvider, attachmentPublisher);
     }
 
@@ -73,17 +80,17 @@ class VisualStepsTests
         var searchContext = mock(SearchContext.class);
         var visualCheck = mock(AbstractVisualCheck.class);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
-        visualSteps.execute(() -> visualCheck, check -> null, TEMPLATE);
+        visualSteps.execute(() -> visualCheck, check -> null);
         verifyNoInteractions(attachmentPublisher);
         verify(visualCheck).setSearchContext(searchContext);
     }
 
     @ParameterizedTest
-    @CsvSource({"true, COMPARE_AGAINST", "false, CHECK_INEQUALITY_AGAINST"})
+    @CsvSource({ COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST })
     void shouldPublishAttachment(boolean passed, VisualActionType action)
     {
         var searchContext = mock(SearchContext.class);
-        var visualCheck = new AbstractVisualCheck("baseline name", action) { };
+        var visualCheck = new AbstractVisualCheck(BASELINE_NAME, action) { };
         var visualCheckResult = new VisualCheckResult(visualCheck);
 
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
@@ -92,11 +99,11 @@ class VisualStepsTests
             return visualCheckResult;
         };
 
-        visualSteps.execute(() -> visualCheck, checkResultProvider, TEMPLATE);
+        visualSteps.execute(() -> visualCheck, checkResultProvider);
         var ordered = inOrder(attachmentPublisher, softAssert);
-        ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE, Map.of("result", visualCheckResult),
-                "Visual comparison");
-        ordered.verify(softAssert).assertTrue("Visual check passed", true);
+        ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE, Map.of(RESULT, visualCheckResult),
+                VISUAL_COMPARISON);
+        ordered.verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, true);
         assertEquals(searchContext, visualCheck.getSearchContext());
     }
 
@@ -117,10 +124,30 @@ class VisualStepsTests
         Function<AbstractVisualCheck, VisualCheckResult> checkResultProvider = mock(Function.class);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
 
-        visualSteps.execute(visualCheckFactory, checkResultProvider, TEMPLATE);
+        visualSteps.execute(visualCheckFactory, checkResultProvider);
 
         verify(softAssert).recordFailedAssertion(exception);
         verifyNoInteractions(attachmentPublisher, checkResultProvider);
+    }
+
+    @ParameterizedTest
+    @CsvSource({ COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST })
+    void shouldPerformVisualCheckAndPublishAttachment(boolean passed, VisualActionType action)
+    {
+        var visualCheck = new AbstractVisualCheck(BASELINE_NAME, action) { };
+        var visualCheckResult = new VisualCheckResult(visualCheck);
+
+        var checkResultProvider = (Function<AbstractVisualCheck, VisualCheckResult>) check -> {
+            visualCheckResult.setPassed(passed);
+            return visualCheckResult;
+        };
+
+        visualSteps.executeWithoutContext(() -> visualCheck, checkResultProvider);
+        var ordered = inOrder(attachmentPublisher, softAssert);
+        ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE, Map.of(RESULT, visualCheckResult),
+                VISUAL_COMPARISON);
+        ordered.verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, true);
+        assertNull(visualCheck.getSearchContext());
     }
 
     private static final class TestVisualSteps extends AbstractVisualSteps
@@ -128,6 +155,12 @@ class VisualStepsTests
         private TestVisualSteps(IUiContext uiContext, IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
         {
             super(uiContext, attachmentPublisher, softAssert);
+        }
+
+        @Override
+        protected String getTemplateName()
+        {
+            return TEMPLATE;
         }
     }
 }

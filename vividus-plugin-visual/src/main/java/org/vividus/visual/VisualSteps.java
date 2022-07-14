@@ -17,6 +17,7 @@
 package org.vividus.visual;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,12 +53,16 @@ import org.vividus.visual.model.VisualCheckResult;
 import org.vividus.visual.screenshot.BaselineIndexer;
 import org.vividus.visual.steps.AbstractVisualSteps;
 
+import pazone.ashot.Screenshot;
+import pazone.ashot.util.ImageTool;
+
 public class VisualSteps extends AbstractVisualSteps
 {
     private static final Type SET_BY = new TypeToken<Set<Locator>>() { }.getType();
 
     private static final String ACCEPTABLE_DIFF_PERCENTAGE_COLUMN_NAME = "ACCEPTABLE_DIFF_PERCENTAGE";
     private static final String REQUIRED_DIFF_PERCENTAGE_COLUMN_NAME = "REQUIRED_DIFF_PERCENTAGE";
+    private static final ConvertedParameters EMPTY_CHECK_SETTINGS = new ConvertedParameters(Map.of(), null);
 
     private final IVisualTestingEngine visualTestingEngine;
     private final ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
@@ -217,41 +223,166 @@ public class VisualSteps extends AbstractVisualSteps
                 Optional.of(screenshotConfiguration));
     }
 
+    /**
+     * Step establishes baseline or compares against existing one.
+     *
+     * @param actionType   ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST.
+     * @param baselineName The baseline name.
+     * @param image        The image to check.
+     */
+    @When(value = "I $actionType baseline with name `$name` from image `$image`", priority = 1)
+    public void runVisualTests(VisualActionType actionType, String baselineName, byte[] image)
+    {
+        performVisualAction(baselineName, actionType, Optional.empty(), EMPTY_CHECK_SETTINGS, image);
+    }
+
+    /**
+     * Step establishes baseline or compares against existing one.
+     *
+     * @param actionType   ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST.
+     * @param baselineName The baseline name.
+     * @param image        The image to check.
+     * @param storage      The baseline storage name
+     */
+    @When(value = "I $actionType baseline with name `$name` from image `$image` using storage `$storage`", priority = 2)
+    public void runVisualTests(VisualActionType actionType, String baselineName, byte[] image, String storage)
+    {
+        performVisualAction(baselineName, actionType, Optional.of(storage), EMPTY_CHECK_SETTINGS, image);
+    }
+
+    /**
+     * Step establishes baseline or compares against existing one.
+     *
+     * @param actionType    ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST.
+     * @param baselineName  The baseline name.
+     * @param image         The image to check.
+     * @param checkSettings The examples table containing `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`<br>
+     *                      Example:<br>
+     *                      |ACCEPTABLE_DIFF_PERCENTAGE |REQUIRED_DIFF_PERCENTAGE|<br>
+     *                      |1                          |99                      |
+     */
+    @When(value = "I $actionType baseline with name `$name` from image `$image` ignoring:$checkSettings", priority = 2)
+    public void runVisualTests(VisualActionType actionType, String baselineName, byte[] image,
+            ExamplesTable checkSettings)
+    {
+        runVisualTests(actionType, baselineName, image, Optional.empty(), checkSettings);
+    }
+
+    /**
+     * Step establishes baseline or compares against existing one.
+     *
+     * @param actionType    ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST.
+     * @param baselineName  The baseline name.
+     * @param image         The image to check.
+     * @param storage       The baseline storage name
+     * @param checkSettings The examples table containing `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`<br>
+     *                      Example:<br>
+     *                      |ACCEPTABLE_DIFF_PERCENTAGE |REQUIRED_DIFF_PERCENTAGE|<br>
+     *                      |1                          |99                      |
+     */
+    @When(value = "I $actionType baseline with name `$name` from image `$image` using storage "
+        + "`$storage` and ignoring:$checkSettings", priority = 2)
+    public void runVisualTests(VisualActionType actionType, String baselineName, byte[] image, String storage,
+            ExamplesTable checkSettings)
+    {
+        runVisualTests(actionType, baselineName, image, Optional.of(storage), checkSettings);
+    }
+
+    private void runVisualTests(VisualActionType actionType, String baselineName, byte[] image,
+            Optional<String> storage, ExamplesTable checkSettings)
+    {
+        Parameters parameters = toParameters(checkSettings);
+        Map<String, String> values = parameters.values();
+        Validate.isTrue(!values.containsKey("AREA") && !values.containsKey("ELEMENT"),
+                "AREA and ELEMENT ignoring not supported for image based checks.");
+        performVisualAction(baselineName, actionType, storage, parameters, image);
+    }
+
+    private void performVisualAction(String baselineName, VisualActionType actionType,
+            Optional<String> baselineStorage, Parameters checkSettings, byte[] image)
+    {
+        performVisualAction(baselineName, actionType, baselineStorage, checkSettings, vc -> {
+            try
+            {
+                vc.setScreenshot(Optional.of(new Screenshot(ImageTool.toBufferedImage(image))));
+                return vc;
+            }
+            catch (IOException e)
+            {
+                throw new UncheckedIOException(e);
+            }
+        }, vc -> executeWithoutContext(vc, getCheckResultProvider()));
+    }
+
     private void performVisualAction(ExamplesTable checkSettingsTable, String baselineName, VisualActionType actionType,
             Optional<String> baselineStorage, Optional<ScreenshotConfiguration> screenshotConfiguration)
     {
-        int rowsSize = checkSettingsTable.getRows().size();
-        Validate.isTrue(rowsSize == 1, "Only one row of locators to ignore supported, actual: %s", rowsSize);
-        Parameters checkSettings = checkSettingsTable.getRowAsParameters(0);
+        Parameters checkSettings = toParameters(checkSettingsTable);
 
         performVisualAction(baselineName, actionType, baselineStorage, screenshotConfiguration, checkSettings);
     }
 
-    private void performVisualAction(String baselineName, VisualActionType actionType,
-            Optional<String> baselineStorage, Optional<ScreenshotConfiguration> screenshotConfiguration)
+    private Parameters toParameters(ExamplesTable checkSettingsTable)
     {
-        performVisualAction(baselineName, actionType, baselineStorage, screenshotConfiguration,
-                new ConvertedParameters(Map.of(), null));
+        int rowsSize = checkSettingsTable.getRows().size();
+        Validate.isTrue(rowsSize == 1, "Only one row of locators to ignore supported, actual: %s", rowsSize);
+        return checkSettingsTable.getRowAsParameters(0);
     }
 
     private void performVisualAction(String baselineName, VisualActionType actionType,
-            Optional<String> baselineStorage, Optional<ScreenshotConfiguration> screenshotConfiguration,
-            Parameters checkSettings)
+            Optional<String> baselineStorage, Optional<ScreenshotConfiguration> screenshotConfiguration)
     {
-        Supplier<VisualCheck> visualCheckFactory = () -> {
+        performVisualAction(baselineName, actionType, baselineStorage, screenshotConfiguration, EMPTY_CHECK_SETTINGS);
+    }
+
+    private void performVisualAction(String baselineName, VisualActionType actionType, Optional<String> baselineStorage,
+            Optional<ScreenshotConfiguration> screenshotConfiguration, Parameters checkSettings)
+    {
+        performVisualAction(baselineName, actionType, baselineStorage, checkSettings, vc -> {
             Map<IgnoreStrategy, Set<Locator>> ignores = getIgnores(checkSettings);
 
             ScreenshotParameters screenshotParameters = screenshotParametersFactory.create(screenshotConfiguration,
                     "ignores table", ignores);
-            String indexedBaselineName = baselineIndexer.createIndexedBaseline(baselineName);
+            vc.setScreenshotParameters(Optional.of(screenshotParameters));
+            return vc;
+        }, vc -> execute(vc, getCheckResultProvider()));
+    }
 
+    @Override
+    protected String getTemplateName()
+    {
+        return "visual-comparison.ftl";
+    }
+
+    private void performVisualAction(String baselineName, VisualActionType actionType,
+            Optional<String> baselineStorage, Parameters checkSettings, UnaryOperator<VisualCheck> configurer,
+            Consumer<Supplier<VisualCheck>> visualCheck)
+    {
+        Supplier<VisualCheck> visualCheckFactory = compose(configurer, initVisualCheck(baselineName,
+                actionType, baselineStorage, checkSettings));
+        visualCheck.accept(visualCheckFactory);
+    }
+
+    private Supplier<VisualCheck> initVisualCheck(String baselineName, VisualActionType actionType,
+            Optional<String> baselineStorage, Parameters checkSettings)
+    {
+        return () -> {
+            String indexedBaselineName = baselineIndexer.createIndexedBaseline(baselineName);
             VisualCheck visualCheck = new VisualCheck(indexedBaselineName, actionType);
-            visualCheck.setScreenshotParameters(Optional.of(screenshotParameters));
             visualCheck.setBaselineStorage(baselineStorage);
             setDiffPercentage(visualCheck, checkSettings);
             return visualCheck;
         };
-        Function<VisualCheck, VisualCheckResult> checkResultProvider = check -> {
+    }
+
+    private <T, R> Supplier<R> compose(Function<T, R> modifier, Supplier<T> initializer)
+    {
+        return () -> modifier.apply(initializer.get());
+    }
+
+    private Function<VisualCheck, VisualCheckResult> getCheckResultProvider()
+    {
+        return check -> {
             try
             {
                 return check.getAction() == VisualActionType.ESTABLISH
@@ -264,7 +395,6 @@ public class VisualSteps extends AbstractVisualSteps
             }
             return null;
         };
-        execute(visualCheckFactory, checkResultProvider, "visual-comparison.ftl");
     }
 
     private Map<IgnoreStrategy, Set<Locator>> getIgnores(Parameters checkParameters)
