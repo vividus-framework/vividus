@@ -60,8 +60,6 @@ public class VisualSteps extends AbstractVisualSteps
 {
     private static final Type SET_BY = new TypeToken<Set<Locator>>() { }.getType();
 
-    private static final String ACCEPTABLE_DIFF_PERCENTAGE_COLUMN_NAME = "ACCEPTABLE_DIFF_PERCENTAGE";
-    private static final String REQUIRED_DIFF_PERCENTAGE_COLUMN_NAME = "REQUIRED_DIFF_PERCENTAGE";
     private static final ConvertedParameters EMPTY_CHECK_SETTINGS = new ConvertedParameters(Map.of(), null);
 
     private final IVisualTestingEngine visualTestingEngine;
@@ -370,7 +368,18 @@ public class VisualSteps extends AbstractVisualSteps
             String indexedBaselineName = baselineIndexer.createIndexedBaseline(baselineName);
             VisualCheck visualCheck = new VisualCheck(indexedBaselineName, actionType);
             visualCheck.setBaselineStorage(baselineStorage);
-            setDiffPercentage(visualCheck, checkSettings);
+            if (visualCheck.getAction() == VisualActionType.CHECK_INEQUALITY_AGAINST)
+            {
+                visualCheck.setRequiredDiffPercentage(
+                        checkSettings.valueAs("REQUIRED_DIFF_PERCENTAGE", OptionalDouble.class,
+                                OptionalDouble.empty()));
+            }
+            else
+            {
+                visualCheck.setAcceptableDiffPercentage(
+                        checkSettings.valueAs("ACCEPTABLE_DIFF_PERCENTAGE", OptionalDouble.class,
+                                OptionalDouble.empty()));
+            }
             return visualCheck;
         };
     }
@@ -401,29 +410,6 @@ public class VisualSteps extends AbstractVisualSteps
     {
         return Stream.of(IgnoreStrategy.values()).collect(Collectors.toMap(Function.identity(),
                 s -> checkParameters.valueAs(s.name(), SET_BY, Set.of())));
-    }
-
-    private void setDiffPercentage(VisualCheck visualCheck, Parameters rowAsParameters)
-    {
-        if (visualCheck.getAction() == VisualActionType.CHECK_INEQUALITY_AGAINST)
-        {
-            configureThresholdIfPresent(rowAsParameters, REQUIRED_DIFF_PERCENTAGE_COLUMN_NAME,
-                    visualCheck::setRequiredDiffPercentage);
-        }
-        else
-        {
-            configureThresholdIfPresent(rowAsParameters, ACCEPTABLE_DIFF_PERCENTAGE_COLUMN_NAME,
-                    visualCheck::setAcceptableDiffPercentage);
-        }
-    }
-
-    private void configureThresholdIfPresent(Parameters rowAsParameters, String parameterName,
-            Consumer<OptionalDouble> thresholdSetter)
-    {
-        if (rowAsParameters.values().containsKey(parameterName))
-        {
-            thresholdSetter.accept(OptionalDouble.of(rowAsParameters.valueAs(parameterName, Double.TYPE)));
-        }
     }
 
     @Override
