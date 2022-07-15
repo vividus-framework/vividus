@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,16 @@
 
 package org.vividus.selenium;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import com.google.common.eventbus.Subscribe;
+
+import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManagerParameter;
 import org.vividus.testcontext.TestContext;
@@ -35,6 +40,14 @@ public class WebDriverManagerContext implements IWebDriverManagerContext
         String key = parameter.getContextKey();
         Supplier<T> initialValueSupplier = parameter.getInitialValueSupplier();
         return initialValueSupplier == null ? testContext.get(key) : testContext.get(key, initialValueSupplier);
+    }
+
+    @Override
+    public <T> T get(WebDriverManagerParameter parameter, Supplier<T> initialValueSupplier)
+    {
+        isTrue(parameter.getInitialValueSupplier() == null, "Initial value supplier for parameter '%s' is not null",
+                parameter.getContextKey());
+        return testContext.get(parameter.getContextKey(), initialValueSupplier);
     }
 
     @Override
@@ -53,5 +66,11 @@ public class WebDriverManagerContext implements IWebDriverManagerContext
     public void reset(WebDriverManagerParameter parameter)
     {
         testContext.remove(parameter.getContextKey());
+    }
+
+    @Subscribe
+    public void onWebDriverQuit(AfterWebDriverQuitEvent event)
+    {
+        reset();
     }
 }
