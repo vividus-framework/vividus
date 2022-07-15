@@ -8,6 +8,307 @@ NOTE: The expression parameters marked with *bold* are mandatory.
 
 == Data generation
 
+=== generate
+
+Generate expression allows to create various types of data using https://www.datafaker.net/documentation/getting-started/[Datafaker] library.
+
+[source, subs="+quotes"]
+----
+`#{generate(*<expression>*)}`
+----
+
+* *`$expression`* - data type from the chosen https://www.datafaker.net/documentation/providers/[data provider]. Specify its name, desired method and required parameters to get data you want
+
+Let's see the structure of the expression for the following example:
+[source, subs="+quotes"]
+----
+`#{generate(Internet.password '5', '10', 'true')}`
+----
+
+[source,expression]
+----
+#{generate                                       <1>
+          (Internet                              <2>
+                   .password                     <3>
+                             '5',                <4>
+                                  '10',          <4>
+                                        'true')} <4>
+----
+<1> Generate expression itself;
+<2> Data provider from the https://www.datafaker.net/documentation/providers/[list]. In this case - `Internet`. Click on its name to see the methods it contains;
+<3> One of the available https://s01.oss.sonatype.org/service/local/repositories/releases/archive/net/datafaker/datafaker/1.4.0/datafaker-1.4.0-javadoc.jar/!/net/datafaker/Internet.html[methods] within `Internet` data provider - `password`. There are multiple choices, we picked the fourth one;
+<4> Available parameters for the chosen https://s01.oss.sonatype.org/service/local/repositories/releases/archive/net/datafaker/datafaker/1.4.0/datafaker-1.4.0-javadoc.jar/!/net/datafaker/Internet.html#password-int-int-boolean-[method];
++
+There are three of them:
+
+ - int minimumLength - minimum number of symbols;
+ - int maximumLength - maximum number of symbols;
+ - boolean includeUppercase - `true` or `false` for Uppercase usage;
+
+In this way we created an *expression* that *generates* a *password* from *5* to *10* characters length *including* uppercase letters. +
+Possible output is `51gVj5aLZY`
+
+IMPORTANT: Below you can find a list of examples. Please keep in mind, that the list is not full, all the expressions you can find https://www.datafaker.net/documentation/providers/[here]. +
+On the DataFaker site click on the data provider name to see available methods and required parameters.
+
+[%collapsible]
+.Generate expressions
+====
+include::partial$data-generating.adoc[]
+====
+
+=== letterify
+
+Replaces `?` symbols with latin letters.
+[source, subs="+quotes"]
+----
+`#{generate(letterify '*$input*', '$isUpperCase')}`
+----
+
+* *`$input`* - any string containing `?` symbols to be replaced with letters
+* `$isUpperCase` - boolean, set it to `true` for uppercase option
+
+.letterify examples
+[cols="a,a"]
+|===
+|Expression |Result
+
+|
+[source, expression]
+----
+#{generate(letterify 'test????test')}
+----
+.^|testnjmytest
+
+|
+[source, expression"]
+----
+#{generate(letterify 'test????test', 'true')}
+----
+.^|testXQBMtest
+|===
+
+=== numerify
+
+Replaces `#` symbols with numbers.
+
+[source, subs="+quotes"]
+----
+`#{generate(numerify '*$input*')}`
+----
+
+* *`$input`* - any string containing `#` symbols to be replaced with numbers
+
+.numerify example
+[cols="a,a"]
+|===
+|Expression |Result
+
+|
+[source, expression]
+----
+#{generate(numerify 'test####test')}
+----
+.^|test5862test
+|===
+
+=== bothify
+
+Combination of letterify and numerify.
+
+[source, subs="+quotes"]
+----
+`#{generate(bothify '*$input*')}`
+----
+
+* *`$input`* - any string containing `#` and `?` symbols to be replaced with numbers and letters accordingly
+
+.bothify example
+[cols="a,a"]
+|===
+|Expression |Result
+
+|
+[source, expression]
+----
+#{generate(bothify 'test#?#?#?#test')}
+----
+.^|test2o7v0g9test
+|===
+
+=== templatify
+
+Replaces symbol mentioned in the second argument with one of the symbols mentioned after it.
+
+[source, subs="+quotes"]
+----
+`#{generate(templatify '*$input*', '*$whatToReplace*', '*$replacement1*', '$replacement2', '$replacement3')}`
+----
+
+* *`$input`* - any string to process
+* *`$whatToReplace`* - part of the string to be replaced
+* *`$replacement`* - replacement to use. Possible to use multiple options
+
+.templatify example
+[cols="a,a"]
+|===
+|Expression |Result
+
+.4+.^|
+[source, expression]
+----
+#{generate(templatify 'VIVIDUS', 'I', 'X', 'P')}`
+----
+|VPVPDUS
+
+|VXVPDUS
+
+|VPVXDUS
+
+|VXVXDUS
+|===
+
+=== examplify
+
+Replaces symbols by example: uppercase with uppercase, digit with digit, lowercase with lowercase.
+
+[source, subs="+quotes"]
+----
+`#{generate(examplify '*$input*')}`
+----
+
+* *`$input`* - any string to process
+
+.examplify example
+[cols="a,a"]
+|===
+|Expression |Result
+
+|
+[source, expression]
+----
+#{generate(examplify 'V1V1DUs')}
+----
+.^|R9Q7VTq
+|===
+
+=== regexify
+
+Allows generating output based on https://en.wikipedia.org/wiki/Regular_expression[regular expression].
+
+[source, subs="+quotes"]
+----
+`#{generate(regexify '*$regularExpression*')}`
+----
+
+* *`$regularExpression`* - regular expression that describes desired output
+
+.regexify example
+[cols="a,a"]
+|===
+|Expression |Result
+
+|
+[source, expression]
+----
+#{generate(regexify '\d{3}\w{1}')}
+----
+.^|409Y
+
+|
+[source, expression]
+----
+#{generate(regexify '[A-Z]{3}[a-z]{4}[2-8]{5}')}
+----
+.^|PQUlxdq66436
+|===
+
+=== options
+
+Returns any of provided items.
+
+[source, subs="+quotes"]
+----
+`#{generate(options.option '*$item1*', '*$item2*', '$item3')}`
+----
+
+* *`$item`* - option to choose from
+
+.options example
+[cols="6a,1a"]
+|===
+|Expression |Result
+
+|
+[source, expression]
+----
+#{generate(options.option 'V','I','V','I','D','U','S')}
+----
+.^|S
+|===
+
+=== generate JSON
+
+Generates JSON based on key-value pairs input.
+
+[source, subs="+quotes"]
+----
+`#{generate(json '*$key1*', '*$value1*', '$key2', '$value2')}`
+----
+
+.generate JSON example
+[%autowidth.stretch]
+[cols="~a,a"]
+|===
+|Expression |Result
+
+.^|
+[source, expression]
+----
+#{generate(json 'first_name','Bob','last_name','Dylan','profession','singer')}
+----
+|[source,JSON]
+----
+{"first_name": "Bob", "last_name": "Dylan", "profession": "singer"}
+----
+|===
+
+=== generate CSV
+
+Generates comma-separated values based on input.
+
+[source, subs="+quotes"]
+----
+`#{generate(csv, '*$rowsNumber*' '*$columnName1*', '*$value1*', '$columnName2', '$value2')}`
+----
+
+* *`$rowsNumber`* - number of rows to fill in
+* *`$columnName1`* - name of the first column
+* *`$value1`* - data to enter the first column
+* *`$columnName2`* - name of the second column
+* *`$value2`* - data to enter the second column
+
+.generate CSV example
+[%autowidth.stretch]
+[cols="~a,a"]
+|===
+|Expression |Result
+
+.^|
+[source, expression]
+----
+#{generate(csv '3', 'first_name','Bob','last_name','Dylan')}
+----
+|
+[source,CSV]
+----
+"first_name","last_name"
+"Bob","Dylan"
+"Bob","Dylan"
+"Bob","Dylan"
+----
+|===
+
 === `randomInt`
 
 Generates a random integer value between the specified origin (`minInclusive`) and the specified bound (`maxInclusive`).
