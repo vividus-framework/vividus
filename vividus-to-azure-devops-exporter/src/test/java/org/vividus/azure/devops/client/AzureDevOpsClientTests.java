@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ class AzureDevOpsClientTests
             + "{\"op\":\"add\",\"path\":\"path-2\",\"value\":\"value-2\"},"
             + "{\"op\":\"add\",\"path\":\"path-3\",\"value\":\"value-3\"}]";
     private static final String PAYLOAD_LOG = "Azure DevOps request: {}";
-    private static final String VERSION = "?api-version=6.1-preview.3";
+    private static final String VERSION = "?api-version=7.1-preview.2";
 
     @Captor private ArgumentCaptor<HttpUriRequest> requestCaptor;
     @Mock private HttpResponse httpResponse;
