@@ -28,7 +28,7 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-excel', version: '{cu
 
 |`path`
 |
-|the relative path to the Excel file
+|the xref:ROOT:glossary.adoc#_resource[Excel resource name] or the Excel file path
 
 |`sheet`
 |

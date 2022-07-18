@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.vividus.util.ResourceUtils;
 
 public class ExcelSheetsExtractor implements IExcelSheetsExtractor
 {
@@ -41,19 +39,6 @@ public class ExcelSheetsExtractor implements IExcelSheetsExtractor
     public ExcelSheetsExtractor(byte[] bytes) throws WorkbookParsingException
     {
         try (Workbook wb = WorkbookFactory.create(new ByteArrayInputStream(bytes)))
-        {
-            sheets = getAllSheetsFromWorkbook(wb);
-        }
-        catch (EncryptedDocumentException | IOException e)
-        {
-            throw new WorkbookParsingException(e);
-        }
-    }
-
-    public ExcelSheetsExtractor(String path) throws WorkbookParsingException
-    {
-        try (Workbook wb = WorkbookFactory
-                .create(ResourceUtils.loadFile(this.getClass(), StringUtils.prependIfMissing(path, "/"))))
         {
             sheets = getAllSheetsFromWorkbook(wb);
         }

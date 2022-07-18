@@ -19,6 +19,7 @@ package org.vividus.excel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -57,9 +58,12 @@ class ExcelSheetParserTests
     private List<String> expectedTitleRowData;
 
     @BeforeEach
-    void beforeEach() throws WorkbookParsingException
+    void beforeEach() throws WorkbookParsingException, IOException
     {
-        extractor = new ExcelSheetsExtractor("/TestTemplate.xlsx");
+        try (var inputStream = getClass().getResourceAsStream("/TestTemplate.xlsx"))
+        {
+            extractor = new ExcelSheetsExtractor(inputStream.readAllBytes());
+        }
         mappingSheet = extractor.getSheet("Mapping").get();
         sheetParser = new ExcelSheetParser(mappingSheet, true);
 
@@ -77,14 +81,14 @@ class ExcelSheetParserTests
     @Test
     void testGetRowTest()
     {
-        List<String> actualRowData = sheetParser.getRow(TITLE_ROW_NUMBER);
+        var actualRowData = sheetParser.getRow(TITLE_ROW_NUMBER);
         assertEquals(expectedTitleRowData, actualRowData);
     }
 
     @Test
     void testGetGetAllData()
     {
-        List<List<String>> actualData = sheetParser.getData();
+        var actualData = sheetParser.getData();
         assertEquals(5, actualData.size());
         assertEquals(expectedTitleRowData, actualData.get(TITLE_ROW_NUMBER));
     }
@@ -92,7 +96,7 @@ class ExcelSheetParserTests
     @Test
     void testGetGetDataFrom()
     {
-        List<List<String>> actualData = sheetParser.getData(4);
+        var actualData = sheetParser.getData(4);
         List<String> expectedRowData = new LinkedList<>();
         expectedRowData.add(PROD2);
         expectedRowData.add(PRICE2);
@@ -103,7 +107,7 @@ class ExcelSheetParserTests
     @Test
     void testGetGetDataFromWithSkipBottom()
     {
-        List<List<String>> actualData = sheetParser.getData(2, 2);
+        var actualData = sheetParser.getData(2, 2);
         assertEquals(1, actualData.size());
         assertEquals(expectedTitleRowData, actualData.get(0));
     }
@@ -121,7 +125,7 @@ class ExcelSheetParserTests
         expectedData.add(rowMap1);
         expectedData.add(rowMap2);
 
-        List<Map<String, String>> actualData = sheetParser.getDataWithTitle(TITLE_ROW_NUMBER);
+        var actualData = sheetParser.getDataWithTitle(TITLE_ROW_NUMBER);
         assertEquals(expectedData, actualData);
     }
 
@@ -134,7 +138,7 @@ class ExcelSheetParserTests
         rowMap1.put(TITLE_KEY_PRICE, PRICE1);
         expectedData.add(rowMap1);
 
-        List<Map<String, String>> actualData = sheetParser.getDataWithTitle(TITLE_ROW_NUMBER, 1);
+        var actualData = sheetParser.getDataWithTitle(TITLE_ROW_NUMBER, 1);
         assertEquals(expectedData, actualData);
     }
 
@@ -148,7 +152,7 @@ class ExcelSheetParserTests
         rowMap1.put(TITLE_KEY_PRICE, "Price1 ");
         expectedData.add(rowMap1);
 
-        List<Map<String, String>> actualData = sheetParser.getDataWithTitle(TITLE_ROW_NUMBER, 1);
+        var actualData = sheetParser.getDataWithTitle(TITLE_ROW_NUMBER, 1);
         assertEquals(expectedData, actualData);
     }
 
@@ -169,7 +173,7 @@ class ExcelSheetParserTests
         expectedStringData.add(row3);
 
         sheetParser = new ExcelSheetParser(extractor.getSheet(AS_STRING_SHEET).get());
-        List<List<String>> data = sheetParser.getData();
+        var data = sheetParser.getData();
         assertEquals(expectedStringData, data);
     }
 
@@ -189,9 +193,9 @@ class ExcelSheetParserTests
         row3.add("3");
         expectedStringData.add(row3);
 
-        DataFormatter dataFormatter = new DataFormatter();
+        var dataFormatter = new DataFormatter();
         sheetParser = new ExcelSheetParser(extractor.getSheet(AS_STRING_SHEET).get(), true, dataFormatter);
-        List<List<String>> data = sheetParser.getData();
+        var data = sheetParser.getData();
         assertEquals(expectedStringData, data);
     }
 
@@ -199,10 +203,10 @@ class ExcelSheetParserTests
     void testGetDataFromRange()
     {
         sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
-        List<CellValue> dataFromRange = sheetParser.getDataFromRange("B2:B7");
+        var dataFromRange = sheetParser.getDataFromRange("B2:B7");
         assertEquals(6, dataFromRange.size());
-        String openStatus = OPEN_STATUS;
-        String closedStatus = "CLOSED";
+        var openStatus = OPEN_STATUS;
+        var closedStatus = "CLOSED";
         assertCellValue(dataFromRange.get(0), openStatus, "B2");
         assertCellValue(dataFromRange.get(1), openStatus, "B3");
         assertCellValue(dataFromRange.get(2), openStatus, "B4");
@@ -215,7 +219,7 @@ class ExcelSheetParserTests
     void testGetDataFromTableRange()
     {
         sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
-        Map<String, List<String>> data = sheetParser.getDataAsTable("A1:B3");
+        var data = sheetParser.getDataAsTable("A1:B3");
         Map<String, List<String>> expectedData = new HashMap<>();
         expectedData.put(NAME, List.of("First", "Second"));
         expectedData.put("status", List.of(OPEN_STATUS, OPEN_STATUS));
@@ -232,7 +236,7 @@ class ExcelSheetParserTests
         expectedData.put("Formula", List.of(THREE_AS_STRING, ""));
 
         sheetParser = new ExcelSheetParser(extractor.getSheet("DifferentTypes").get());
-        Map<String, List<String>> data = sheetParser.getDataAsTable("A1:D3");
+        var data = sheetParser.getDataAsTable("A1:D3");
         assertEquals(expectedData, data);
     }
 
@@ -253,7 +257,7 @@ class ExcelSheetParserTests
     void testGetDataFromNotExistingCell()
     {
         sheetParser = new ExcelSheetParser(extractor.getSheet(SHEET_NAME).get());
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        var exception = assertThrows(IllegalArgumentException.class,
             () -> sheetParser.getDataFromCell("A1001"));
         assertEquals("Row at address 'A1001' doesn't exist", exception.getMessage());
     }
