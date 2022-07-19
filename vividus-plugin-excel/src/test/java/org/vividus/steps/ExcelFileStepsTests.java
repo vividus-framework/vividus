@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,25 +40,39 @@ import org.vividus.variable.VariableScope;
 @ExtendWith(MockitoExtension.class)
 class ExcelFileStepsTests
 {
+    private static final Set<VariableScope> SCOPES = Set.of(VariableScope.SCENARIO);
+    private static final String PATH = "path";
+    private static final ExamplesTable CONTENT = new ExamplesTable("|k1|\n|v1|");
+
     @Mock private VariableContext variableContext;
 
     @InjectMocks private ExcelFileSteps fileSteps;
 
     @Test
-    void testInitVariableUsingExcelFilePath() throws IOException
+    void shouldCreateExcelFileContainigSheetWithContent() throws IOException
     {
-        ExamplesTable content = new ExamplesTable("|k1|\n|v1|");
-        String pathVariable = "path";
-        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        fileSteps.initVariableUsingExcelFilePath(content, scopes, pathVariable);
-        verify(variableContext).putVariable(eq(scopes), eq(pathVariable), argThat(path ->
+        fileSteps.createExcelFileContainigSheetWithContent(CONTENT, SCOPES, PATH);
+        verifySheet("Sheet0");
+    }
+
+    @Test
+    void shouldCreateExcelFileContainigSheetWithNameAndContent() throws IOException
+    {
+        String sheetName = "my sheet name";
+        fileSteps.createExcelFileContainigSheetWithNameAndContent(sheetName, CONTENT, SCOPES, PATH);
+        verifySheet(sheetName);
+    }
+
+    private void verifySheet(String sheetName)
+    {
+        verify(variableContext).putVariable(eq(SCOPES), eq(PATH), argThat(path ->
         {
             try (XSSFWorkbook myExcelBook = new XSSFWorkbook(FileUtils.openInputStream(new File(path.toString()))))
             {
                 XSSFSheet myExcelSheet = myExcelBook.getSheetAt(0);
                 String header = myExcelSheet.getRow(0).getCell(0).getStringCellValue();
                 String values = header + myExcelSheet.getRow(1).getCell(0).getStringCellValue();
-                return "k1v1".equals(values);
+                return "k1v1".equals(values) && myExcelSheet.getSheetName().equals(sheetName);
             }
             catch (IOException e)
             {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import org.apache.poi.ss.usermodel.Row;
@@ -35,16 +36,17 @@ public final class ExcelSheetWriter
     }
 
     /**
-    * Create an excel document containing one sheet with specified content
+    * Create an excel document containing one sheet with the optional name and specified content
     * @param path path of temporary excel file
+    * @param sheetName sheet name, if not specified the default name will be determined by underlying excel library
     * @param content any valid ExamplesTable
     */
-    public static void createExcel(Path path, ExamplesTable content) throws IOException
+    public static void createExcel(Path path, Optional<String> sheetName, ExamplesTable content) throws IOException
     {
         try (XSSFWorkbook workbook = new XSSFWorkbook();
                 FileOutputStream fileOut = new FileOutputStream(path.toFile()))
         {
-            XSSFSheet sheet = workbook.createSheet();
+            XSSFSheet sheet = sheetName.map(workbook::createSheet).orElseGet(workbook::createSheet);
             fillData(content, sheet);
             workbook.write(fileOut);
         }
