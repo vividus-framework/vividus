@@ -19,6 +19,7 @@ package org.vividus.excel.transformer;
 import static java.util.Map.entry;
 import static org.apache.commons.lang3.Validate.notBlank;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.vividus.excel.WorkbookParsingException;
 import org.vividus.model.CellValue;
 import org.vividus.transformer.ExtendedTableTransformer;
 import org.vividus.util.ExamplesTableProcessor;
+import org.vividus.util.ResourceUtils;
 
 public class ExcelTableTransformer implements ExtendedTableTransformer
 {
@@ -51,7 +53,8 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
         String sheetName = properties.getMandatoryNonBlankProperty("sheet", String.class);
         try
         {
-            IExcelSheetsExtractor excelSheetsExtractor = new ExcelSheetsExtractor(path);
+            byte[] excelDocumentAsBytes = ResourceUtils.loadResourceOrFileAsByteArray(path);
+            IExcelSheetsExtractor excelSheetsExtractor = new ExcelSheetsExtractor(excelDocumentAsBytes);
             Optional<Sheet> sheet = excelSheetsExtractor.getSheet(sheetName);
             if (sheet.isEmpty())
             {
@@ -71,7 +74,7 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
             Map<String, List<String>> exactDataTable = excelSheetParser.getDataAsTable(range);
             return build(exactDataTable.keySet(), exactDataTable.values(), properties);
         }
-        catch (WorkbookParsingException e)
+        catch (WorkbookParsingException | IOException e)
         {
             throw new IllegalStateException("Error during parsing excel workbook", e);
         }
