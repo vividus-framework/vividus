@@ -56,3 +56,16 @@ When I initialize scenario variable `excel-data` with values:
 |value1|value2|
 Then `${excel-data}` is equal to table:
 {transformer=FROM_EXCEL, path=$\{path\}, sheet=Sheet0, range=A1:B2}
+
+Scenario: Step verification 'When I create temporary excel file containing sheet with name `$sheetName` and content:$content and put its path to $scopes variable `$variableName`'
+Meta:
+    @requirementId 2953
+When I create temporary excel file containing sheet with name `my-sheet-name` and content:
+|key1  |key2  |
+|value1|value2|
+and put its path to scenario variable `path`
+When I initialize scenario variable `excel-data` with values:
+|key1  |key2  |
+|value1|value2|
+Then `${excel-data}` is equal to table:
+{transformer=FROM_EXCEL, path=$\{path\}, sheet=my-sheet-name, range=A1:B2}

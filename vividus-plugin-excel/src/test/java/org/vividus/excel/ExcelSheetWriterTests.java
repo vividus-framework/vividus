@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,26 +24,33 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jbehave.core.model.ExamplesTable;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.vividus.util.ResourceUtils;
 
 class ExcelSheetWriterTests
 {
-    @Test
-    void testCreateExcel() throws IOException
+    @CsvSource({
+        "User-defined sheet name, User-defined sheet name",
+        ", Sheet0"
+    })
+    @ParameterizedTest
+    void shouldCreateExcel(String inputSheetName, String actualSheetName) throws IOException
     {
         IExcelSheetParser sheetParser;
         Path pathTemp = ResourceUtils.createTempFile("test", ".xlsx", null);
         ExamplesTable content = new ExamplesTable("|name|status|\n|First|OPEN|\n|Second|closed|");
-        ExcelSheetWriter.createExcel(pathTemp, content);
+        ExcelSheetWriter.createExcel(pathTemp, Optional.ofNullable(inputSheetName), content);
         try (XSSFWorkbook myExcelBook = new XSSFWorkbook(FileUtils.openInputStream(new File(pathTemp.toString()))))
         {
             XSSFSheet sheet = myExcelBook.getSheetAt(0);
+            assertEquals(sheet.getSheetName(), actualSheetName);
             sheetParser = new ExcelSheetParser(sheet);
             Map<String, List<String>> actualData = sheetParser.getDataAsTable("A1:B3");
             Map<String, List<String>> expectedData = new HashMap<>();
