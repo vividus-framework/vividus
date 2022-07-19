@@ -151,7 +151,7 @@ https://regex101.com/[Regex101] can be used to test and debug regular expression
 substrings, e.g. `$1` is a reference to the first group
 * *$input* - any string to be processed
 
-NOTE: The expression parameters containing commas must be surrounded with triple quotes: `"""`
+NOTE: The expression parameters containing commas or empty values must be surrounded with triple quotes: `"""`
 
 [cols="1, 2,1", options="header"]
 |===
@@ -166,7 +166,7 @@ NOTE: The expression parameters containing commas must be surrounded with triple
 |`author/21`
 
 |Extract password from the string with comma
-|`#{replaceFirstByRegExp(.*new password is (\d+), $1, """Updated, new password is qwe123""")}`
+|`#{replaceFirstByRegExp(.\*new password is (.*), $1, """Updated, new password is qwe123""")}`
 |`qwe123`
 
 |Replace whitespaces with dashes
