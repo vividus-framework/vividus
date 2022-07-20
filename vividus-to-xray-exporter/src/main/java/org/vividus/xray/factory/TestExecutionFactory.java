@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -90,10 +89,9 @@ public class TestExecutionFactory
 
     private static TestExecutionItemStatus calculateStatus(AbstractStepsContainer steps)
     {
-        return Stream.of(steps.getBeforeUserScenarioSteps(), steps.getSteps(), steps.getAfterUserScenarioSteps())
-                     .flatMap(List::stream)
-                     .allMatch(step -> "successful".equals(step.getOutcome())) ? TestExecutionItemStatus.PASS
-                             : TestExecutionItemStatus.FAIL;
+        return steps.createStreamOfAllSteps().allMatch(step -> "successful".equals(step.getOutcome()))
+                ? TestExecutionItemStatus.PASS
+                : TestExecutionItemStatus.FAIL;
     }
 
     private static String asOffsetDateTime(long millis)

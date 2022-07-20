@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -68,5 +71,15 @@ class DateUtilsTests
         ZonedDateTime actual = new DateUtils(ZERO_TIMEZONE).getCurrentDateTime();
         ZonedDateTime expected = ZonedDateTime.now(ZERO_TIMEZONE);
         assertThat(ChronoUnit.SECONDS.between(actual, expected), lessThan(10L));
+    }
+
+    @Test
+    void shouldReturnOffsetDateTime()
+    {
+        ZoneOffset offset = ZERO_TIMEZONE.getRules().getOffset(Instant.now());
+        OffsetDateTime offsetDateTime = OffsetDateTime.of(1977, 5, 25, 0, 0, 0, 0, offset);
+        OffsetDateTime actual = new DateUtils(ZERO_TIMEZONE)
+                .asOffsetDateTime(offsetDateTime.toInstant().toEpochMilli());
+        assertEquals(offsetDateTime, actual);
     }
 }
