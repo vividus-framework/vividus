@@ -752,8 +752,6 @@ d0d6e9d9e4adc4b952300a05fd993a7754e8d1 +
 .^|Internet.userAgentAny
 |Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
 
-|Internet.slug 'null','value'
-|error
 |Internet.slug
 |soluta_fuga
 
@@ -1180,25 +1178,25 @@ sgslalay487oosw929re0y
 |Pokemon.location
 |Four Island
 
-|Relationship.parent
+|Relationships.parent
 |Mother
 
-|Relationship.direct
-|error
+|Relationships.direct
+|father
 
-|Relationship.any
-|error
+|Relationships.any
+|Nephew
 
-|Relationship.extended
-|error
+|Relationships.extended
+|Nephew
 
-|Relationship.inLaw
+|Relationships.inLaw
 |Mother-in-law
 
-|Relationship.spouse
+|Relationships.spouse
 |Husband
 
-|Relationship.sibling
+|Relationships.sibling
 |Sister
 
 |Restaurant.name
@@ -1423,35 +1421,7 @@ a=rtpmap:0 PCMU/8000
 |Team.sport
 |golf
 
-|Time.between 'null','null'
-|error
 
-|Time.between 'null','null','value'
-|error
-
-|Time.future '5','null'
-|error
-
-|Time.future '5','null','value'
-|error
-
-|Time.future '5','5','null','value'
-|error
-
-|Time.future '5','5','null'
-|error
-
-|Time.past '5','5','null','value'
-|error
-
-|Time.past '5','null'
-|error
-
-|Time.past '5','5','null'
-|error
-
-|Time.past '5','null','value'
-|error
 
 |Touhou.characterName
 |Soga no Tojiko
@@ -1474,17 +1444,17 @@ a=rtpmap:0 PCMU/8000
 |Tron.character
 |bit
 
-|Tron.character 'null'
-|error
+|Tron.character 'PROGRAM'
+|Clu
 
 .^|Tron.quote
 |All Programs have a desire to be useful. But in moments, you will no longer seek communication with each other, or your superfluous Users. You will each be a part of me. And together, we will be complete.
 
-|Tron.quote 'null'
-|error
+|Tron.quote 'BIT'
+|No.
 
-|Tron.alternateCharacterSpelling 'null'
-|error
+|Tron.alternateCharacterSpelling 'CLU'
+|clue
 
 |Tron.alternateCharacterSpelling
 |alan
@@ -1501,10 +1471,6 @@ a=rtpmap:0 PCMU/8000
 |Twitter.userName
 |Alphazap
 
-|Twitter.text 'null','5','5'
-|error
-|Twitter.createdTime 'true','null','null'
-|error
 
 |Twitter.twitterId '5'
 |90875
