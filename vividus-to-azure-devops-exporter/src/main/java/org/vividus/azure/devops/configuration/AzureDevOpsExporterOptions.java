@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,9 @@ public class AzureDevOpsExporterOptions
     private String project;
     private String area;
     private SectionMapping sectionMapping;
+    private boolean createTestRun;
+
+    private TestRun testRun = new TestRun();
 
     public Path getJsonResultsDirectory()
     {
@@ -77,5 +80,46 @@ public class AzureDevOpsExporterOptions
     public void setSectionMapping(SectionMapping sectionMapping)
     {
         this.sectionMapping = sectionMapping;
+    }
+
+    public boolean isCreateTestRun()
+    {
+        return createTestRun;
+    }
+
+    public void setCreateTestRun(boolean createTestRun)
+    {
+        this.createTestRun = createTestRun;
+    }
+
+    public TestRun getTestRun()
+    {
+        return testRun;
+    }
+
+    public static class TestRun
+    {
+        private String name;
+        private Integer testPlanId;
+
+        public String getName()
+        {
+            return name;
+        }
+
+        public void setName(String name)
+        {
+            this.name = name;
+        }
+
+        public Integer getTestPlanId()
+        {
+            return testPlanId;
+        }
+
+        public void setTestPlanId(Integer testPlanId)
+        {
+            this.testPlanId = testPlanId;
+        }
     }
 }

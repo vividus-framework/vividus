@@ -4,7 +4,8 @@ Azure DevOps Exporter is a tool used to export test cases into https://azure.mic
 
 Features:
 
-* Create and update test cases
+* Create and update Test Cases. VIVIDUS scenarios are mapped to Azure DevOps Test Cases by using `testCaseId` meta tags.
+* Create automated Test Runs.
 
 == Azure DevOps Export Properties
 
@@ -47,6 +48,31 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |`AUTOMATED` or `MANUAL`
 |The scenario part to export into `Steps` section of `Test Case` work item, the remaining scenario part is exported into `Summary` section.
 
+|`azure-devops-exporter.create-test-run`
+|`false`
+|`true` or `false`
+a|Whether to create test run.
+
+In Azure DevOps only Test Cases with https://docs.microsoft.com/en-us/azure/devops/test/associate-automated-test-with-test-case?view=azure-devops[associated automation] can be included into automated Test Run. The associated automation is automatically added by exported only for <<_automated_test_cases, Automated Test Cases>>. Attempts to include <<_manual_test_cases, Manual Test Case>> into automated Test Run will fail the execution process.
+
+|`azure-devops-exporter.test-run.name`
+|
+|string
+a|The test run name.
+
+This property is mandatory when the test run creation is enabled, see `azure-devops-exporter.create-test-run` property for details.
+
+|`azure-devops-exporter.test-run.test-plan-id`
+|
+|number
+a|The ID of Azure DevOps Test Plan that the Azure DevOps Test Run belongs to.
+
+In Azure DevOps Test Plan is used to group individual Test Cases and Test Suites, in their turn Test Suites are used to group Test Cases into separate testing scenarios within a single Test Plan and also may include child Test Suites. Azure DevOps allows to have an individual Test Case to be included into several Test Suites and into the Test Plan, *BUT* this is not supported by the exporter which requires the Test Case to be linked to either Test Plan or only one Test Suite, the export process fails if this condition is not met.
+
+This property is mandatory when the test run creation is enabled, see `azure-devops-exporter.create-test-run` property for details.
+
+The ID can be found by opening appropriate Azure DevOps Test Plan in "Test Plans" and copying number value of the `planId` query parameter in the page URL, e.g. having URL `https://dev.azure.com/organization/project/_testPlans/define?planId=911` the plan ID is 911.
+
 |===
 
 == Authentication properties
@@ -78,7 +104,7 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |Description
 
 |`testCaseId`
-|`@testCaseId STUB-0`
+|`@testCaseId 911`
 |Map scenario to Azure DevOps test case in 1 to 1 relation
 
 |`azure-devops.skip-export`
@@ -86,6 +112,8 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |Skip test case while exporting
 
 |===
+
+include::partial$test-case-types.adoc[]
 
 :service-key: azure-devops
 :gh-packages-url: https://github.com/vividus-framework/vividus/packages/929350

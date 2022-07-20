@@ -1,0 +1,75 @@
+== Test Case Types
+
+This separation of automated and manual test cases by using special keywords is specific to VIVIDUS.
+
+=== Automated Test Cases
+
+Any scenario that doesn't correspond to the <<_manual_test_cases, manual test case rules>> is considered as automated test case.
+
+.Automated.story
+[source,gherkin]
+----
+Scenario: Verify link
+Meta: @testCaseId TEST-231
+
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+When I wait until the page has the title 'Links'
+Then number of elements found by `<locator>` is equal to `1`
+Examples:
+|locator                        |
+|By.linkUrl(#ElementId)         |
+|By.linkUrlPart(Element)        |
+|By.linkText(Link to an element)|
+----
+
+.AutomatedWithManualPart.story
+[source,gherkin]
+----
+Scenario: Verify link
+Meta: @testCaseId TEST-566
+
+!-- Step: Open main app page
+!-- Step: Wait for page with title is loaded
+!-- Step: Verify number of links
+!-- Data: * link url is '#ElementId'
+!-- * link url part is 'Element'
+!-- * link text is 'Link to an element'
+!-- Result: The number of links for all locators is equal to 1
+
+Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+When I wait until the page has the title 'Links'
+Then number of elements found by `<locator>` is equal to `1`
+Examples:
+|locator                        |
+|By.linkUrl(#ElementId)         |
+|By.linkUrlPart(Element)        |
+|By.linkText(Link to an element)|
+----
+
+=== Manual Test Cases
+
+* Scenario is considered as `Manual Test Case` if all of its lines start with `!--` prefix.
+* The `Manual Test Case` step must start with `Step:` used to specify action to perform and can optionally contain `Data:` and `Result:` for specifying action data and action expected result respectively.
+* The `Manual Test Case` step parts are allowed to have multiple lines.
+* The `JBehave Keywords` values (e.g. `Given`, `When`, `Then` ...) on new lines not prefixed with `Step:`, `Data:` or `Result` must be escaped with `-` sign.
+
+.Manual.story
+[source,gherkin]
+----
+Scenario: Buy an item
+Meta: @testCaseId TEST-435
+
+!-- Step: Go to the test item with the following id
+!-- Data: 39914061
+!-- Result: The current stock is 1
+
+!-- Step: Add the item to the shopping cart
+!-- Result: Shopping cart now displays one 39914061 item and no items in stock
+
+!-- Step: In the backoffice app update the stock to 0 on item
+
+!-- Step: Back in the browser, proceed to checkout.
+!-- Go through all the steps and confirm the payment method.
+!-- Result: Then you should get an error message mentioning that there are no more items in the stock.
+!-- - Then payment method was not made
+----

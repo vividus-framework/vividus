@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,13 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class for date parsing.
@@ -89,5 +91,18 @@ public class DateUtils
     {
         ZoneOffset zoneOffset = zoneId.getRules().getOffset(Instant.now());
         return LocalDateTime.ofEpochSecond(seconds, 0, zoneOffset);
+    }
+
+    /**
+     * Obtains an instance of {@code OffsetDateTime} using milliseconds from the
+     * epoch of 1970-01-01T00:00:00Z.
+     * @param millis the number of milliseconds from the epoch of 1970-01-01T00:00:00Z
+     * @return {@code OffsetDateTime} instance
+     */
+    public OffsetDateTime asOffsetDateTime(long millis)
+    {
+        long seconds = TimeUnit.SECONDS.convert(millis, TimeUnit.MILLISECONDS);
+        Instant instant = Instant.ofEpochSecond(seconds);
+        return OffsetDateTime.ofInstant(instant, zoneId);
     }
 }
