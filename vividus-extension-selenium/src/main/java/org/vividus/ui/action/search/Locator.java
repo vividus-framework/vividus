@@ -19,7 +19,6 @@ package org.vividus.ui.action.search;
 import static org.apache.commons.lang3.StringUtils.SPACE;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,6 @@ public class Locator
     private final LocatorType locatorType;
     private final SearchParameters searchParameters;
     private final Map<LocatorType, List<String>> filterAttributes = new LinkedHashMap<>();
-    private final List<Locator> childLocators = new ArrayList<>();
 
     public Locator(LocatorType locatorType, SearchParameters searchParameters)
     {
@@ -170,15 +168,5 @@ public class Locator
         return Objects.equals(locatorType, other.locatorType)
                 && Objects.equals(searchParameters, other.searchParameters)
                 && Objects.equals(filterAttributes, other.filterAttributes);
-    }
-
-    public List<Locator> getChildLocators()
-    {
-        return Collections.unmodifiableList(childLocators);
-    }
-
-    public void addChildLocator(Locator locator)
-    {
-        this.childLocators.add(locator);
     }
 }
