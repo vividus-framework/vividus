@@ -21,8 +21,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Base64;
+import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.screenshot.AshotScreenshotTaker;
@@ -31,7 +33,6 @@ import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 import org.vividus.visual.storage.BaselineStorage;
-import org.vividus.visual.storage.BaselineStorageProvider;
 
 import pazone.ashot.Screenshot;
 import pazone.ashot.comparison.ImageDiff;
@@ -46,7 +47,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
 
     private final AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker;
     private final DiffMarkupPolicyFactory diffMarkupPolicyFactory;
-    private final BaselineStorageProvider baselineStorageProvider;
+    private final Map<String, BaselineStorage> baselineStorages;
 
     private double acceptableDiffPercentage;
     private double requiredDiffPercentage;
@@ -54,11 +55,11 @@ public class VisualTestingEngine implements IVisualTestingEngine
     private String baselineStorage;
 
     public VisualTestingEngine(AshotScreenshotTaker<ScreenshotParameters> ashotScreenshotTaker,
-            DiffMarkupPolicyFactory diffMarkupPolicyFactory, BaselineStorageProvider baselineStorageProvider)
+            DiffMarkupPolicyFactory diffMarkupPolicyFactory, Map<String, BaselineStorage> baselineStorages)
     {
         this.ashotScreenshotTaker = ashotScreenshotTaker;
         this.diffMarkupPolicyFactory = diffMarkupPolicyFactory;
-        this.baselineStorageProvider = baselineStorageProvider;
+        this.baselineStorages = baselineStorages;
     }
 
     @Override
@@ -120,7 +121,11 @@ public class VisualTestingEngine implements IVisualTestingEngine
     private BaselineStorage getBaselineStorage(VisualCheck visualCheck)
     {
         String baselineStorageName = visualCheck.getBaselineStorage().orElse(baselineStorage);
-        return baselineStorageProvider.getBaselineStorage(baselineStorageName);
+        BaselineStorage baselineStorageToUse = baselineStorages.get(baselineStorageName);
+        Validate.isTrue(baselineStorageToUse != null,
+                "Unable to find baseline storage with name: %s. Available baseline storages: %s", baselineStorageName,
+                baselineStorages.keySet());
+        return baselineStorageToUse;
     }
 
     private double calculateDiffPercentage(VisualCheck visualCheck, boolean inequalityCheck)

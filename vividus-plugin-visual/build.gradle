@@ -18,6 +18,8 @@ dependencies {
     blobStorageImplementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
     blobStorageImplementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.3')
     blobStorageImplementation(group: 'com.azure', name: 'azure-storage-blob')
+    blobStorageImplementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
+    blobStorageImplementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
 
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 

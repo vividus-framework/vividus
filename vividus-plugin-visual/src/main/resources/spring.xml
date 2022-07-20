@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
+        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd"
        default-lazy-init="true" profile="web,mobile_app">
+
+    <context:component-scan base-package="org.vividus.visual.storage" />
 
     <bean id="visualSteps" class="org.vividus.visual.VisualSteps">
         <constructor-arg ref="screenshotParametersFactory" />
@@ -19,15 +22,8 @@
 
     <bean class="org.vividus.visual.engine.DiffMarkupPolicyFactory" />
 
-    <bean class="org.vividus.visual.storage.BaselineStorageProvider" init-method="init" />
-
     <bean id="filesystem" class="org.vividus.visual.storage.FileSystemBaselineStorage">
         <property name="baselinesFolder" value="${ui.visual.baseline-storage.filesystem.folder}" />
-    </bean>
-
-    <bean id="azure-blob-storage" class="org.vividus.visual.storage.AzureBlobStorageBaselineStorage">
-        <property name="storageAccountKey" value="${ui.visual.baseline-storage.azure-blob-storage.account-key:}" />
-        <property name="container" value="${ui.visual.baseline-storage.azure-blob-storage.container:}" />
     </bean>
 
     <util:list id="stepBeanNames-Visual">
