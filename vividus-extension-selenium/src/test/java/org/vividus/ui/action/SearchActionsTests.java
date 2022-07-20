@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -190,48 +189,5 @@ class SearchActionsTests
             info(FILTER_MESSAGE, 2, 2, TestLocatorType.ADDITIONAL_FILTER, filterThree)
         )));
         verifyNoMoreInteractions(testFilter, additionalFilter);
-    }
-
-    @Test
-    void testFindElementsWithChildrenSearchAndFilter()
-    {
-        TestElementSearch additionalTestSearch = mock(TestElementSearch.class);
-        when(elementActionService.find(TestLocatorType.ADDITIONAL_SEARCH))
-            .thenReturn(additionalTestSearch);
-        List<WebElement> webElements = new ArrayList<>();
-        webElements.add(webElement);
-        Locator locator = new Locator(TestLocatorType.SEARCH, VALUE);
-        Locator childAttributes = new Locator(TestLocatorType.ADDITIONAL_SEARCH,
-            VALUE);
-        childAttributes.addFilter(TestLocatorType.FILTER, VALUE);
-        locator.addChildLocator(childAttributes);
-        WebElement wrongElement = mock(WebElement.class);
-        webElements.add(wrongElement);
-        List<WebElement> list = List.of(webElement);
-        when(testSearch.search(eq(searchContext), any(SearchParameters.class))).thenReturn(webElements);
-        when(additionalTestSearch.search(eq(webElement), any(SearchParameters.class))).thenReturn(list);
-        when(((IElementFilterAction) testFilter).filter(list, VALUE)).thenReturn(list);
-        List<WebElement> foundElements = searchActions.findElements(searchContext, locator);
-        webElements.remove(wrongElement);
-        assertEquals(webElements, foundElements);
-    }
-
-    @Test
-    void testFindElementsWithChildrenEmptyResults()
-    {
-        TestElementSearch additionalTestSearch = mock(TestElementSearch.class);
-        when(elementActionService.find(TestLocatorType.ADDITIONAL_SEARCH))
-            .thenReturn(additionalTestSearch);
-        List<WebElement> webElements = new ArrayList<>();
-        webElements.add(webElement);
-        Locator locator = new Locator(TestLocatorType.SEARCH, VALUE);
-        Locator childAttributes = new Locator(TestLocatorType.ADDITIONAL_SEARCH,
-            VALUE);
-        locator.addChildLocator(childAttributes);
-        when(testSearch.search(eq(searchContext), any(SearchParameters.class))).thenReturn(webElements);
-        when(additionalTestSearch.search(eq(webElement), any(SearchParameters.class))).thenReturn(List.of());
-        List<WebElement> foundElements = searchActions.findElements(searchContext, locator);
-        assertEquals(List.of(), foundElements);
-        assertThat(logger.getLoggingEvents(), is(empty()));
     }
 }

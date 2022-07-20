@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.vividus.ui.action;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -70,11 +69,6 @@ public class SearchActions implements ISearchActions
                 foundElements = filteredElements;
             }
         }
-        List<Locator> childLocators = locator.getChildLocators();
-        for (Locator attributes : childLocators)
-        {
-            foundElements = searchInChildElements(foundElements, attributes);
-        }
         return foundElements;
     }
 
@@ -82,21 +76,6 @@ public class SearchActions implements ISearchActions
     public List<WebElement> findElements(Locator locator)
     {
         return findElements(uiContext.getSearchContext(), locator);
-    }
-
-    private List<WebElement> searchInChildElements(List<WebElement> foundElements, Locator attributes)
-    {
-        Iterator<WebElement> iterator = foundElements.iterator();
-        while (iterator.hasNext())
-        {
-            WebElement element = iterator.next();
-            List<WebElement> childElements = findElements(element, attributes);
-            if (childElements.isEmpty())
-            {
-                iterator.remove();
-            }
-        }
-        return foundElements;
     }
 
     @Override
