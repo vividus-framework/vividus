@@ -867,7 +867,7 @@ Then $storageType storage item with key `$key` exists
 .Check the session storage item is present
 [source,gherkin]
 ----
-Then session storage item with `token` exists
+Then session storage item with key `token` exists
 ----
 
 ==== Validate web storage item absence
