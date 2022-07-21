@@ -39,3 +39,15 @@ Then `<left>` is equal to `<right>`
 Examples:
 |left       |right     |
 |true       |true      |
+
+Scenario: This scenario with Examples in GivenStories
+GivenStories: /story/integration/Precondition4.story#{id:scenario-to-run}
+Then `true` is equal to `true`
+
+Scenario: This scenario with anchor meta filter and Examples that should be used in GivenStories
+GivenStories: /story/integration/Precondition4.story#{id:given1}
+Then `<expected>` is equal to `<actual>`
+Examples:
+|expected|actual|
+|1       |1     |
+|2       |2     |
