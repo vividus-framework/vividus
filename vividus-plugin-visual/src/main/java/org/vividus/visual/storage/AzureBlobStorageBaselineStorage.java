@@ -19,6 +19,8 @@ package org.vividus.visual.storage;
 import java.io.IOException;
 import java.util.Optional;
 
+import javax.inject.Named;
+
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.models.BlobStorageException;
@@ -26,18 +28,24 @@ import com.azure.storage.blob.models.BlobStorageException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Conditional;
 import org.vividus.azure.storage.blob.BlobServiceClientFactory;
 
 import pazone.ashot.Screenshot;
 import pazone.ashot.util.ImageTool;
 
+@Named("azure-blob-storage")
+@Conditional(BlobStorageCondition.class)
 public class AzureBlobStorageBaselineStorage implements BaselineStorage
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureBlobStorageBaselineStorage.class);
 
     private final BlobServiceClientFactory blobServiceClientFactory;
 
+    @Value("${ui.visual.baseline-storage.azure-blob-storage.container:}")
     private String container;
+    @Value("${ui.visual.baseline-storage.azure-blob-storage.account-key:}")
     private String storageAccountKey;
 
     public AzureBlobStorageBaselineStorage(BlobServiceClientFactory blobServiceClientFactory)
