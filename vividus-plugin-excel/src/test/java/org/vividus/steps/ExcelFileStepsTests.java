@@ -23,6 +23,8 @@ import static org.mockito.Mockito.verify;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Path;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
@@ -35,6 +37,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
+import org.vividus.excel.ExcelSheetWriter;
+import org.vividus.util.ResourceUtils;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,6 +47,7 @@ class ExcelFileStepsTests
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.SCENARIO);
     private static final String PATH = "path";
     private static final ExamplesTable CONTENT = new ExamplesTable("|k1|\n|v1|");
+    private static final String DEFAULT_SHEET_NAME = "Sheet0";
 
     @Mock private VariableContext variableContext;
 
@@ -52,7 +57,7 @@ class ExcelFileStepsTests
     void shouldCreateExcelFileContainigSheetWithContent() throws IOException
     {
         fileSteps.createExcelFileContainigSheetWithContent(CONTENT, SCOPES, PATH);
-        verifySheet("Sheet0");
+        verifySheet(DEFAULT_SHEET_NAME);
     }
 
     @Test
@@ -63,21 +68,40 @@ class ExcelFileStepsTests
         verifySheet(sheetName);
     }
 
+    @Test
+    void shouldAddSheetToExcelFile() throws IOException
+    {
+        Path excelFile = ResourceUtils.createTempFile("", ".xlsx", null);
+        ExcelSheetWriter.createExcel(excelFile, Optional.empty(), CONTENT);
+
+        String sheetA = "sheet a";
+        fileSteps.addSheetToExcelFile(sheetA, CONTENT, excelFile);
+        String sheetB = "sheet b";
+        fileSteps.addSheetToExcelFile(sheetB, CONTENT, excelFile);
+
+        validateSheet(excelFile, 0, DEFAULT_SHEET_NAME);
+        validateSheet(excelFile, 1, sheetA);
+        validateSheet(excelFile, 2, sheetB);
+    }
+
     private void verifySheet(String sheetName)
     {
-        verify(variableContext).putVariable(eq(SCOPES), eq(PATH), argThat(path ->
+        verify(variableContext).putVariable(eq(SCOPES), eq(PATH),
+                argThat(path -> validateSheet((Path) path, 0, sheetName)));
+    }
+
+    private boolean validateSheet(Path path, int index, String sheetName)
+    {
+        try (XSSFWorkbook myExcelBook = new XSSFWorkbook(FileUtils.openInputStream(new File(path.toString()))))
         {
-            try (XSSFWorkbook myExcelBook = new XSSFWorkbook(FileUtils.openInputStream(new File(path.toString()))))
-            {
-                XSSFSheet myExcelSheet = myExcelBook.getSheetAt(0);
-                String header = myExcelSheet.getRow(0).getCell(0).getStringCellValue();
-                String values = header + myExcelSheet.getRow(1).getCell(0).getStringCellValue();
-                return "k1v1".equals(values) && myExcelSheet.getSheetName().equals(sheetName);
-            }
-            catch (IOException e)
-            {
-                throw new UncheckedIOException(e);
-            }
-        }));
+            XSSFSheet myExcelSheet = myExcelBook.getSheetAt(index);
+            String header = myExcelSheet.getRow(0).getCell(0).getStringCellValue();
+            String values = header + myExcelSheet.getRow(1).getCell(0).getStringCellValue();
+            return "k1v1".equals(values) && myExcelSheet.getSheetName().equals(sheetName);
+        }
+        catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
     }
 }

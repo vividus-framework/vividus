@@ -57,7 +57,7 @@ When I initialize scenario variable `excel-data` with values:
 Then `${excel-data}` is equal to table:
 {transformer=FROM_EXCEL, path=$\{path\}, sheet=Sheet0, range=A1:B2}
 
-Scenario: Step verification 'When I create temporary excel file containing sheet with name `$sheetName` and content:$content and put its path to $scopes variable `$variableName`'
+Scenario: Steps verification 'When I create temporary excel file containing sheet with name `$sheetName` and content:$content and put its path to $scopes variable `$variableName`' and 'When I add sheet with name `$sheetName` and content $content to excel file at path `$path`'
 Meta:
     @requirementId 2953
 When I create temporary excel file containing sheet with name `my-sheet-name` and content:
@@ -67,5 +67,20 @@ and put its path to scenario variable `path`
 When I initialize scenario variable `excel-data` with values:
 |key1  |key2  |
 |value1|value2|
+
+When I add sheet with name `added-sheet` and content:
+|animal             |weight |
+|Komodo Dragon      |91 kg  |
+|Whale Shark        |21 ton |
+|Saltwater Crocodile|1075 kg|
+to excel file at path `${path}`
+When I initialize scenario variable `added-sheet-excel-data` with values:
+|animal             |weight |
+|Komodo Dragon      |91 kg  |
+|Whale Shark        |21 ton |
+|Saltwater Crocodile|1075 kg|
+
 Then `${excel-data}` is equal to table:
 {transformer=FROM_EXCEL, path=$\{path\}, sheet=my-sheet-name, range=A1:B2}
+Then `${added-sheet-excel-data}` is equal to table:
+{transformer=FROM_EXCEL, path=$\{path\}, sheet=added-sheet, range=A1:B4}

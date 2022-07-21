@@ -16,8 +16,10 @@
 
 package org.vividus.excel;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +38,8 @@ public final class ExcelSheetWriter
     }
 
     /**
-    * Create an excel document containing one sheet with the optional name and specified content
-    * @param path path of temporary excel file
+    * Create an excel document containing one sheet with the optional name and specified content.
+    * @param path path of excel file to create
     * @param sheetName sheet name, if not specified the default name will be determined by underlying excel library
     * @param content any valid ExamplesTable
     */
@@ -48,6 +50,23 @@ public final class ExcelSheetWriter
         {
             XSSFSheet sheet = sheetName.map(workbook::createSheet).orElseGet(workbook::createSheet);
             fillData(content, sheet);
+            workbook.write(fileOut);
+        }
+    }
+
+    /**
+    * Add a sheet with the specified name and content to the existing excel file.
+    * @param path path of existing excel file
+    * @param sheetName sheet name
+    * @param content any valid ExamplesTable
+    */
+    public static void addSheetToExcel(Path path, String sheetName, ExamplesTable content) throws IOException
+    {
+        try (InputStream fileInput = new FileInputStream(path.toFile());
+                XSSFWorkbook workbook = new XSSFWorkbook(fileInput);
+                FileOutputStream fileOut = new FileOutputStream(path.toFile()))
+        {
+            fillData(content, workbook.createSheet(sheetName));
             workbook.write(fileOut);
         }
     }

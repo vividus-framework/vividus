@@ -88,4 +88,17 @@ public class ExcelFileSteps
         ExcelSheetWriter.createExcel(pathTemporaryFile, Optional.ofNullable(sheetName), content);
         variableContext.putVariable(scopes, variableName, pathTemporaryFile);
     }
+
+    /**
+     * Adds a new sheet with the specified name and content to the existing excel file specified by path.
+     * @param sheetName The name of the sheet
+     * @param content Any valid ExamplesTable that will be written to the sheet
+     * @param path The path to an exiting excel file
+     * @throws IOException if an I/O exception of some sort has occurred
+     */
+    @When("I add sheet with name `$sheetName` and content:$content to excel file at path `$path`")
+    public void addSheetToExcelFile(String sheetName, ExamplesTable content, Path path) throws IOException
+    {
+        ExcelSheetWriter.addSheetToExcel(path, sheetName, content);
+    }
 }
