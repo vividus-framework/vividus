@@ -11,10 +11,10 @@ Examples:
 |session    |sessionKey|
 |local      |localKey  |
 
-Scenario: Verify step: "Then $storageType storage item with `$key` does not exist"
+Scenario: Verify step: "Then $storageType storage item with key `$key` does not exist"
 Then <storageType> storage item with key `<key>` does not exist
 
-Scenario: Verify step: "Then $storageType storage item with `$key` exists"
+Scenario: Verify step: "Then $storageType storage item with key `$key` exists"
 When I click on element located `id(set-<storageType>-storage-item)`
 Then <storageType> storage item with key `<key>` exists
 
