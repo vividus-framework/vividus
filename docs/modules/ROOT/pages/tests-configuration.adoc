@@ -2,7 +2,7 @@
 
 == `configuration.properties`
 
-VIVIDUS configuration includes the following parts: profiles, environments and suites.
+VIVIDUS configuration includes the following parts: xref:tests-configuration.adoc#_suites[suites], xref:ROOT:tests-configuration.adoc#_profiles[profiles] and xref:tests-configuration.adoc#_environments[environments].
 
 [WARNING]
 ====
@@ -100,6 +100,93 @@ NOTE: The properties marked with *bold* are mandatory.
 |`100`
 |Defines text threshold length to enable unified diff report publishing on failure, for variable comparisons. If you want to have this report despite the size of the compared data set 0.
 |===
+
+=== Profiles
+
+A profile defines the subject of the test, i.e. it answers the question "What are specifics of the browser/device I want to run tests on?".
+
+These specifics (properties) should be written in the `profile.properties` file. Path to this file is set in `configuration.properties` file:
+
+.configuration.properties
+[source,properties]
+----
+configuration.profiles=web
+----
+
+It's allowed to create multiple profiles. This can be useful for cross-browsing or cross-device testing: there is no need of changing all the properties, just switch the profile. +
+As well as the suites, profiles are loaded one by one starting from the last one in the sequence. This allows to reuse common properties and separate specific ones.
+
+==== Profiles setup
+
+Define the number of profiles you need to set up. In case of multiple profiles, distinguish common and specific properties and put them into `profile.properties` files in appropriate places.
+
+WARNING: Please keep in mind that running multiple profiles (e.g. for Chrome and Firefox simultaneously) is not supported. All the properties would be merged, but not iterated as separate profiles for scenario execution.
+
+Let's create an example. Imagine that our project contains automated scenarios for a couple of platforms: web and mobile. We will need to run autotests on different browsers and different devices. Therefore some of the properties would be common, but many of them should only belong to a certain subject. Let's see profiles structure for this case:
+
+[source,dir,subs=attributes+]
+----
+└─ src/main/resources/properties
+                            └─  profile <1>
+                                    ├─ web <2>
+                                        ├─ chrome <4>
+                                                └─ profile.properties <6>
+                                        ├─ firefox <4>
+                                                └─ profile.properties
+                                        └─ profile.properties <5>
+                                    ├─ mobile_app <2>
+                                            ├─ iOS <7>
+                                                └─ profile.properties
+                                            ├─ android <7>
+                                                └─ profile.properties <9>
+                                            └─ profile.properties <8>
+                                    └─ profile.properties <3>
+
+----
+<1> Profile directory which contains all the profiles properties;
+<2> General type of the profiles, either a browser or a mobile device;
+<3> The highest level of profile properties. Values written in this file will be applied to any browser or device;
+<4> Web browsers' profiles (directories);
+<5> Web-oriented properties. Values from this file will be applied for any web browser, but not for mobiles;
+<6> Chrome-specific profile. Any properties written here will not affect any other browsers or mobile devices;
+<7> Mobile profiles (directories);
+<8> Mobile-oriented properties. Values from this file will be applied for iOS and Android devices only;
+<9> Android-specific profile. Any properties written here will not affect iOS devices or any browser setup;
+
+By default, profile property is pointed to the `/src/main/resources/properties/profile` directory, so use the relative path starting from `profile` when you have nested directories:
+
+.configuration.properties
+[source,properties]
+----
+configuration.profiles=mobile_app/android
+----
+
+==== Built-in profiles
+
+Some of the plugins, like xref:plugins:plugin-web-app.adoc[web-app], have built-in profiles. You can find them in project explorer after installation by the following path:
+
+[source,dir]
+----
+Referenced Libraries -> vividus-plugin-name -> properties -> profile
+----
+
+=== Environments
+
+Depending on the stage of the project, you will likely need to run automated scenarios on different environments, such as development, testing, and production servers.
+
+Rather than using specific variables in each profile or suite, always updating them according to the currently selected server, and eventually making mistakes, we instead use the environment configuration.
+
+Environment configuration allows putting environment-related variables (e.g. host, API endpoint) into `environment.properties` file. The path to this file is set in `configuration.properties` file. Create as many property files as a number of environments you have and easily switch between them:
+
+.configuration.properties
+[source,properties]
+----
+configuration.environments=dev
+#configuration.environments=test
+#configuration.environments=prod
+----
+
+Environment variables can also be declared in multiple files. Define common and specific properties for your environments and take the xref:ROOT:tests-configuration.adoc#_profiles_setup[same approach] of reusing and separating values.
 
 == Known Issues
 
