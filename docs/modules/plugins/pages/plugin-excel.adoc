@@ -128,6 +128,30 @@ When I create temporary excel file containing sheet with name `movies` and conte
 and put its path to scenario variable `movies-path`
 ----
 
+=== Add sheet to existing excel file
+
+Add new sheet with the specified name and content to the existing excel file.
+
+[source,gherkin]
+----
+When I add sheet with name `$sheetName` and content:$content to excel file at path `$path`
+----
+
+* `$sheetName` - Then name of the sheet.
+* `$content` - The data to put into the sheet. Any valid ExamplesTable.
+* `$path` - The path to existing excel file.
+
+.Add sheet with pets
+[source,gherkin]
+----
+When I add sheet with name `pets` and content:
+|type|name      |
+|duck|DuckDuckGo|
+|fish|GlassFish |
+|dog |Datadog   |
+to excel file at path `/home/collection.xslx`
+----
+
 === Excel validations
 
 ==== By sheet name

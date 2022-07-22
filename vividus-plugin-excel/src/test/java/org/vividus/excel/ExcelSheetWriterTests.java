@@ -19,7 +19,9 @@ package org.vividus.excel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -30,12 +32,15 @@ import org.apache.commons.io.FileUtils;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jbehave.core.model.ExamplesTable;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.vividus.util.ResourceUtils;
 
 class ExcelSheetWriterTests
 {
+    private static final ExamplesTable CONTENT = new ExamplesTable("|name|status|\n|First|OPEN|\n|Second|closed|");
+
     @CsvSource({
         "User-defined sheet name, User-defined sheet name",
         ", Sheet0"
@@ -43,15 +48,41 @@ class ExcelSheetWriterTests
     @ParameterizedTest
     void shouldCreateExcel(String inputSheetName, String actualSheetName) throws IOException
     {
-        IExcelSheetParser sheetParser;
-        Path pathTemp = ResourceUtils.createTempFile("test", ".xlsx", null);
-        ExamplesTable content = new ExamplesTable("|name|status|\n|First|OPEN|\n|Second|closed|");
-        ExcelSheetWriter.createExcel(pathTemp, Optional.ofNullable(inputSheetName), content);
-        try (XSSFWorkbook myExcelBook = new XSSFWorkbook(FileUtils.openInputStream(new File(pathTemp.toString()))))
+        Path pathTemp = createExcelFile();
+        ExcelSheetWriter.createExcel(pathTemp, Optional.ofNullable(inputSheetName), CONTENT);
+        assertDataInSheet(pathTemp, 0, actualSheetName);
+    }
+
+    @Test
+    void shouldAddSheetToExcel() throws IOException
+    {
+        Path pathTemp = createExcelFile();
+        try (XSSFWorkbook workbook = new XSSFWorkbook(); OutputStream os = new FileOutputStream(pathTemp.toFile()))
         {
-            XSSFSheet sheet = myExcelBook.getSheetAt(0);
-            assertEquals(sheet.getSheetName(), actualSheetName);
-            sheetParser = new ExcelSheetParser(sheet);
+            workbook.write(os);
+        }
+
+        String sheetA = "sheet a";
+        ExcelSheetWriter.addSheetToExcel(pathTemp, sheetA, CONTENT);
+        String sheetB = "sheet b";
+        ExcelSheetWriter.addSheetToExcel(pathTemp, sheetB, CONTENT);
+
+        assertDataInSheet(pathTemp, 0, sheetA);
+        assertDataInSheet(pathTemp, 1, sheetB);
+    }
+
+    private Path createExcelFile() throws IOException
+    {
+        return ResourceUtils.createTempFile("test", ".xlsx", null);
+    }
+
+    private void assertDataInSheet(Path path, int index, String name) throws IOException
+    {
+        try (XSSFWorkbook myExcelBook = new XSSFWorkbook(FileUtils.openInputStream(new File(path.toString()))))
+        {
+            XSSFSheet sheet = myExcelBook.getSheetAt(index);
+            assertEquals(sheet.getSheetName(), name);
+            IExcelSheetParser sheetParser = new ExcelSheetParser(sheet);
             Map<String, List<String>> actualData = sheetParser.getDataAsTable("A1:B3");
             Map<String, List<String>> expectedData = new HashMap<>();
             expectedData.put("name", List.of("First", "Second"));
