@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,8 +43,6 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.ie.InternetExplorerOptions;
-import org.openqa.selenium.opera.OperaDriver;
-import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
@@ -209,7 +207,7 @@ class WebDriverTypeTests
     @Test
     void testGetOperaWebDriver()
     {
-        testGetOperaWebDriver(new WebDriverConfiguration(), new OperaOptions());
+        testGetOperaWebDriver(new WebDriverConfiguration(), new ChromeOptions());
     }
 
     @Test
@@ -220,20 +218,21 @@ class WebDriverTypeTests
         configuration.setBinaryPath(Optional.of(PATH));
         configuration.setCommandLineArguments(new String[] { ARGUMENT });
         configuration.setExperimentalOptions(singletonMap(MOBILE_EMULATION, experimentalOptionValue));
-        OperaOptions operaOptions = new OperaOptions();
+        ChromeOptions operaOptions = new ChromeOptions();
         operaOptions.setBinary(PATH);
         operaOptions.addArguments(ARGUMENT);
         operaOptions.setExperimentalOption(MOBILE_EMULATION, experimentalOptionValue);
         testGetOperaWebDriver(configuration, operaOptions);
     }
 
-    private static void testGetOperaWebDriver(WebDriverConfiguration configuration, OperaOptions operaOptions)
+    private static void testGetOperaWebDriver(WebDriverConfiguration configuration, ChromeOptions operaOptions)
     {
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        try (MockedConstruction<OperaDriver> operaDriverMock = mockConstruction(OperaDriver.class, (mock, context) -> {
-            assertEquals(1, context.getCount());
-            assertEquals(List.of(operaOptions), context.arguments());
-        }))
+        try (MockedConstruction<ChromeDriver> operaDriverMock = mockConstruction(ChromeDriver.class,
+                (mock, context) -> {
+                    assertEquals(1, context.getCount());
+                    assertEquals(List.of(operaOptions), context.arguments());
+                }))
         {
             WebDriver actual = WebDriverType.OPERA.getWebDriver(desiredCapabilities, configuration);
             assertEquals(operaDriverMock.constructed().get(0), actual);

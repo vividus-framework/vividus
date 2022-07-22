@@ -264,6 +264,16 @@ WARNING: Default selenium grid URL is set to `selenium.grid.url=http://localhost
 confgiguraiton.profiles=web/docker,web/desktop/chrome
 ----
 
+=== Opera browser
+For using Opera browser (web/desktop/opera) it is mandatory property:
+
+[source,properties]
+----
+web.driver.OPERA.binary-path=<path to opera>
+----
+
+* <path to opera> - path to the Opera browser (for example, "C:/Programs/Opera/opera.exe")
+
 == Steps
 
 :onbeforeunload-event: https://www.w3schools.com/jsref/event_onbeforeunload.asp[onbeforeunload]

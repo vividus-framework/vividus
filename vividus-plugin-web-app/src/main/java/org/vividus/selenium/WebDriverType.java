@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,9 +33,7 @@ import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.ie.InternetExplorerDriverService;
 import org.openqa.selenium.ie.InternetExplorerOptions;
-import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.opera.OperaDriverService;
-import org.openqa.selenium.opera.OperaOptions;
 import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
@@ -135,16 +133,16 @@ public enum WebDriverType
             return new SafariDriver(SafariOptions.fromCapabilities(desiredCapabilities));
         }
     },
-    OPERA(true, true, false, Set.of(OperaOptions.CAPABILITY), Browser.OPERA)
+    OPERA(true, true, false, Set.of(ChromeOptions.CAPABILITY), Browser.OPERA)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
-            OperaOptions options = new OperaOptions().merge(desiredCapabilities);
+            ChromeOptions options = new ChromeOptions().merge(desiredCapabilities);
             configuration.getBinaryPath().ifPresent(options::setBinary);
             options.addArguments(configuration.getCommandLineArguments());
             configuration.getExperimentalOptions().forEach(options::setExperimentalOption);
-            return new OperaDriver(options);
+            return new ChromeDriver(options);
         }
 
         @Override
