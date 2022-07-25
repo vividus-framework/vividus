@@ -22,11 +22,6 @@ spotbugsIntegrationTest.auxClassPaths += integrationTest.classpath
 check.dependsOn integrationTest
 integrationTest.mustRunAfter test
 
-configurations.all {
-    exclude group: 'commons-logging'
-    exclude group: 'org.springframework', module: 'spring-jcl'
-}
-
 configurations.testImplementation {
     exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j18-impl'
 }
