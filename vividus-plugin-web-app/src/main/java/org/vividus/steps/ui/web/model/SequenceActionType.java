@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,9 +224,17 @@ public enum SequenceActionType
     private static void buildKeysActions(List<String> keys, Consumer<CharSequence> actionBuilder)
     {
         notEmpty(keys, "At least one key should be provided");
-        keys.stream()
-            .peek(key -> isTrue(EnumUtils.isValidEnum(Keys.class, key), "The '%s' is not allowed as a key", key))
-            .map(Keys::valueOf)
-            .forEach(actionBuilder);
+        for (String key : keys)
+        {
+            if (key.length() == 1)
+            {
+                actionBuilder.accept(key);
+            }
+            else
+            {
+                isTrue(EnumUtils.isValidEnum(Keys.class, key), "The '%s' is not allowed as a key", key);
+                actionBuilder.accept(Keys.valueOf(key));
+            }
+        }
     }
 }

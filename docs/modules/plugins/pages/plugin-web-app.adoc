@@ -451,22 +451,21 @@ Executes the sequence of web actions
 When I execute sequence of actions: $actions
 ----
 * `$actions` - table of actions to execute
-
-==== Possible actions
-
++
+.Possible actions
 [cols="1,5,3", options="header"]
 |===
 
-|Type
-|Argument
-|Example
+|`type`
+|`argument`
+|Argument example
 
 |DOUBLE_CLICK
-|Search attribute or empty value
+|Element locator or empty
 |By.linkUrl(http://httpbin.org)
 
 |CLICK_AND_HOLD
-|Search attribute or empty value
+|Element locator or empty
 |By.linkText(Click me)
 
 |MOVE_BY_OFFSET
@@ -474,36 +473,36 @@ When I execute sequence of actions: $actions
 |(10, 15) where *x* is 10 and *y* is 15
 
 |RELEASE
-|Search attribute or empty value
+|Element locator or empty
 |By.tagName(div)
 
 |ENTER_TEXT
-|Text
+|Text to type
 |Minsk City
 
 |CLICK
-|Search attribute or empty value
+|Element locator or empty
 |By.caseSensitiveText(Done)
 
 |PRESS_KEYS
-|Press https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys]
+|Press and release any of https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys]
 |BACK_SPACE
 
 |KEY_DOWN
-|Press https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] SHIFT, ALT or CONTROL simultaneously
+|Press any of https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] one by one
 |CONTROL,SHIFT,ALT
 
 |KEY_UP
-|Release https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] SHIFT, ALT or CONTROL simultaneously
+|Release any of https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] one by one
 |CONTROL,SHIFT,ALT
 
 |MOVE_TO
-|Search attribute
+|Element locator
 |By.id(username)
 
 |===
 
-.ActionSteps.story
+.Execute various web-actions
 [source,gherkin]
 ----
 When I execute sequence of actions:
@@ -523,6 +522,31 @@ When I execute sequence of actions:
 |KEY_UP        |CONTROL,SHIFT                           |
 |MOVE_TO       |By.id(name)                             |
 ----
+
+[TIP]
+====
+This step can be used to perform clipboard interactions.
+
+.Select all text in the focused field and copy it to the clipboard on Windows
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type      |argument  |
+|KEY_DOWN  |CONTROL, a|
+|KEY_UP    |a, CONTROL|
+|KEY_DOWN  |CONTROL, c|
+|KEY_UP    |c, CONTROL|
+----
+
+.Paste text from the clipboard to the focused field on MacOS
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type      |argument  |
+|KEY_DOWN  |COMMAND, v|
+|KEY_UP    |v, COMMAND|
+----
+====
 
 include::partial$generic-ui-steps.adoc[]
 

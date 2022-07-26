@@ -45,95 +45,53 @@ public class ActionSteps
      * Executes the sequence of web actions
      * <div><b>Example:</b></div>
      * <pre>
-     * <code>
      * When I execute sequence of actions:
-     * <br> |type          |argument                                |
-     * <br> |DOUBLE_CLICK  |By.fieldText(Hello World)               |
-     * <br> |DOUBLE_CLICK  |                                        |
-     * <br> |CLICK_AND_HOLD|By.xpath(//signature-pad-control/canvas)|
-     * <br> |CLICK_AND_HOLD|                                        |
-     * <br> |MOVE_BY_OFFSET|(-300, 0)                               |
-     * <br> |RELEASE       |By.xpath(//signature-pad-control/canvas)|
-     * <br> |RELEASE       |                                        |
-     * <br> |ENTER_TEXT    |Text                                    |
-     * <br> |CLICK         |By.placeholder(Enter your password)     |
-     * <br> |CLICK         |                                        |
-     * <br> |PRESS_KEYS    |BACK_SPACE                              |
-     * <br> |KEY_DOWN      |CONTROL,SHIFT                           |
-     * <br> |KEY_UP        |CONTROL,SHIFT                           |
-     * <br> |MOVE_TO       |By.id(name)                             |
-     * </code>
+     * |type          |argument                                |
+     * |DOUBLE_CLICK  |By.fieldText(Hello World)               |
+     * |DOUBLE_CLICK  |                                        |
+     * |CLICK_AND_HOLD|By.xpath(//signature-pad-control/canvas)|
+     * |CLICK_AND_HOLD|                                        |
+     * |MOVE_BY_OFFSET|(-300, 0)                               |
+     * |RELEASE       |By.xpath(//signature-pad-control/canvas)|
+     * |RELEASE       |                                        |
+     * |ENTER_TEXT    |Text                                    |
+     * |CLICK         |By.placeholder(Enter your password)     |
+     * |CLICK         |                                        |
+     * |PRESS_KEYS    |BACK_SPACE                              |
+     * |KEY_DOWN      |CONTROL,SHIFT                           |
+     * |KEY_UP        |CONTROL,SHIFT                           |
+     * |MOVE_TO       |By.id(name)                             |
      * </pre>
-     * where
-     * <ul>
-     * <li><code>type</code> can be taken from the following table:
+     * where <code>type</code> and <code>argument</code> can be taken from the following table:
      * <table border="1" style="border-collapse: collapse; border: 1px solid black">
      * <caption style="display: none">Arguments for action types</caption>
-     * <tr>
-     * <th>type</th>
-     * <th>argument</th>
-     * <th>example</th>
-     * </tr>
-     * <tr>
-     * <td>DOUBLE_CLICK</td>
-     * <td>search attribute or empty value</td>
-     * <td>By.linkUrl(/examples)</td>
-     * </tr>
-     * <tr>
-     * <td>CLICK_AND_HOLD</td>
-     * <td>search attribute or empty value</td>
-     * <td>By.linkText(Click me)</td>
-     * </tr>
-     * <tr>
-     * <td>MOVE_BY_OFFSET</td>
-     * <td>point</td>
-     * <td>(10, 15) where <b>x</b> is 10 and <b>y</b> is 15</td>
-     * </tr>
-     * <tr>
-     * <td>RELEASE</td>
-     * <td>search attribute or empty value</td>
-     * <td>By.tagName(div)</td>
-     * </tr>
-     * <tr>
-     * <td>ENTER_TEXT</td>
-     * <td>text</td>
-     * <td>Minsk City</td>
-     * </tr>
-     * <tr>
-     * <td>CLICK</td>
-     * <td>search attribute or empty value</td>
-     * <td>By.caseSensitiveText(Done)</td>
-     * </tr>
+     * <tr><th>type</th><th>argument</th><th>example</th></tr>
+     * <tr><td>DOUBLE_CLICK</td><td>element locator or empty</td><td>By.linkUrl(/examples)</td></tr>
+     * <tr><td>CLICK_AND_HOLD</td><td>element locator or empty</td><td>By.linkText(Click me)</td></tr>
+     * <tr><td>MOVE_BY_OFFSET</td><td>point</td><td>(10, 15) where <b>x</b> is 10 and <b>y</b> is 15</td></tr>
+     * <tr><td>RELEASE</td><td>element locator or empty</td><td>By.tagName(div)</td></tr>
+     * <tr><td>ENTER_TEXT</td><td>text</td><td>Minsk City</td></tr>
+     * <tr><td>CLICK</td><td>element locator or empty</td><td>By.caseSensitiveText(Done)</td></tr>
      * <tr>
      * <td>PRESS_KEYS</td>
-     * <td><a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a></td>
+     * <td>Press and release any of
+     * <a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a></td>
      * <td>BACK_SPACE</td>
      * </tr>
      * <tr>
      * <td>KEY_DOWN</td>
-     * <td>
-     *     key – Either <a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a>
-     *     SHIFT, ALT or CONTROL.
-     * </td>
+     * <td>Press any of <a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a>
+     *  one by one</td>
      * <td>CONTROL,SHIFT</td>
      * </tr>
      * <tr>
      * <td>KEY_UP</td>
-     * <td>
-     *     key – Either <a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a>
-     *     SHIFT, ALT or CONTROL.
-     * </td>
+     * <td>Release any of <a href="https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html">Keys</a>
+     * one by one</td>
      * <td>CONTROL,SHIFT</td>
      * </tr>
-     * <tr>
-     * <td>MOVE_TO</td>
-     * <td>search attribute</td>
-     * <td>By.id(username)</td>
-     * </tr>
+     * <tr><td>MOVE_TO</td><td>element locator</td><td>By.id(username)</td></tr>
      * </table>
-     * </li>
-     * <li><code>argument</code> either text or search attribute or point</li>
-     * </ul>
      * @param actions table of actions to execute
      */
     @When("I execute sequence of actions: $actions")

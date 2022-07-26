@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,16 +40,14 @@ import org.openqa.selenium.interactions.Actions;
 class SequenceActionTypeTests
 {
     private static final String VALUE = "value";
-    private static final String CHAR = "a";
-    private static final List<String> KEY_LIST = List.of("CONTROL");
+    private static final String STRING = "str";
+    private static final String COPY_SHORTCUT_KEY = "c";
+    private static final List<String> KEY_LIST = List.of("CONTROL", COPY_SHORTCUT_KEY);
     private static final String EMPTY_KEY_LIST_EXCEPTION = "At least one key should be provided";
     private static final String WRONG_KEY_LIST_VALUE_EXCEPTION_FORMAT = "The '%s' is not allowed as a key";
 
-    @Mock
-    private Actions baseAction;
-
-    @Mock
-    private WebElement element;
+    @Mock private Actions baseAction;
+    @Mock private WebElement element;
 
     @Test
     void testDoubleClick()
@@ -94,8 +92,8 @@ class SequenceActionTypeTests
     @Test
     void testMoveByOffset()
     {
-        int offset = 10;
-        Point point = spy(new Point(offset, offset));
+        var offset = 10;
+        var point = spy(new Point(offset, offset));
         SequenceActionType.MOVE_BY_OFFSET.addAction(baseAction, point);
         verify(baseAction).moveByOffset(offset, offset);
         verify(point).getX();
@@ -140,15 +138,17 @@ class SequenceActionTypeTests
     {
         SequenceActionType.KEY_DOWN.addAction(baseAction, KEY_LIST);
         verify(baseAction).keyDown(Keys.CONTROL);
+        verify(baseAction).keyDown(COPY_SHORTCUT_KEY);
         verifyNoMoreInteractions(baseAction);
     }
 
     @Test
     void testKeyDownWrongKey()
     {
-        Exception exception = assertThrows(IllegalArgumentException.class, () ->
-                SequenceActionType.KEY_DOWN.addAction(baseAction, List.of(CHAR)));
-        String expectedExceptionMessage = String.format(WRONG_KEY_LIST_VALUE_EXCEPTION_FORMAT, CHAR);
+        List<String> argument = List.of(STRING);
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> SequenceActionType.KEY_DOWN.addAction(baseAction, argument));
+        var expectedExceptionMessage = String.format(WRONG_KEY_LIST_VALUE_EXCEPTION_FORMAT, STRING);
         assertEquals(expectedExceptionMessage, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
     }
@@ -156,8 +156,9 @@ class SequenceActionTypeTests
     @Test
     void testKeyDownWithEmptyList()
     {
-        Exception exception = assertThrows(IllegalArgumentException.class, () ->
-                SequenceActionType.KEY_DOWN.addAction(baseAction, List.of()));
+        var argument = List.of();
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> SequenceActionType.KEY_DOWN.addAction(baseAction, argument));
         assertEquals(EMPTY_KEY_LIST_EXCEPTION, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
     }
@@ -167,15 +168,17 @@ class SequenceActionTypeTests
     {
         SequenceActionType.KEY_UP.addAction(baseAction, KEY_LIST);
         verify(baseAction).keyUp(Keys.CONTROL);
+        verify(baseAction).keyUp(COPY_SHORTCUT_KEY);
         verifyNoMoreInteractions(baseAction);
     }
 
     @Test
     void testKeyUpWrongKey()
     {
-        Exception exception = assertThrows(IllegalArgumentException.class, () ->
-                SequenceActionType.KEY_UP.addAction(baseAction, List.of(CHAR)));
-        String expectedExceptionMessage = String.format(WRONG_KEY_LIST_VALUE_EXCEPTION_FORMAT, CHAR);
+        var argument = List.of(STRING);
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> SequenceActionType.KEY_UP.addAction(baseAction, argument));
+        var expectedExceptionMessage = String.format(WRONG_KEY_LIST_VALUE_EXCEPTION_FORMAT, STRING);
         assertEquals(expectedExceptionMessage, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
     }
@@ -183,8 +186,9 @@ class SequenceActionTypeTests
     @Test
     void testKeyUpWithEmptyList()
     {
-        Exception exception = assertThrows(IllegalArgumentException.class, () ->
-                SequenceActionType.KEY_UP.addAction(baseAction, List.of()));
+        var argument = List.of();
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> SequenceActionType.KEY_UP.addAction(baseAction, argument));
         assertEquals(EMPTY_KEY_LIST_EXCEPTION, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
     }
@@ -209,10 +213,10 @@ class SequenceActionTypeTests
     @ParameterizedTest
     void testWrongArgType(SequenceActionType type)
     {
-        Object dummy = mock(Object.class);
-        Exception excepton = assertThrows(IllegalArgumentException.class, () -> type.addAction(baseAction, dummy));
+        var dummy = mock(Object.class);
+        var exception = assertThrows(IllegalArgumentException.class, () -> type.addAction(baseAction, dummy));
         assertEquals(String.format("Argument for %s action must be of type %s", type.name(), type.getArgumentType()),
-                excepton.getMessage());
+                exception.getMessage());
         verifyNoMoreInteractions(baseAction, element);
     }
 }

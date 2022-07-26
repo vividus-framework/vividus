@@ -124,9 +124,9 @@ When I find = `1` elements `By.xpath(//div[@id='output' and text()!='mark'])` an
 |!PRESS_KEYS!BACK_SPACE !                                        |
 Then number of elements found by `By.xpath(//div[@id='output' and text()='mark'])` is equal to `1`
 
-Scenario: Action verification KEY_DOWN and KEY_UP combiantion
+Scenario: Action verification KEY_DOWN and KEY_UP combination
 Meta:
-    @requirementId 686
+    @requirementId 686, 2992
 Given I am on a page with the URL '${vividus-test-site-url}/inputs.html'
 When I initialize the scenario variable `inputText` with value `mark#{generate(regexify '[a-z]{10}')}`
 When I initialize the scenario variable `inputLocator` with value `By.id(text)`
@@ -134,9 +134,21 @@ When I enter `${inputText}` in field located `${inputLocator}`
 Then field value is `${inputText}`
 When I click on element located `${inputLocator}`
 When I execute sequence of actions:
+|type      |argument  |
+|KEY_DOWN  |CONTROL, a|
+|KEY_UP    |a, CONTROL|
+|KEY_DOWN  |CONTROL   |
+|PRESS_KEYS|c         |
+|KEY_UP    |CONTROL   |
+When I execute sequence of actions:
 |type      |argument|
 |KEY_DOWN  |CONTROL |
 |PRESS_KEYS|a       |
 |KEY_UP    |CONTROL |
 |PRESS_KEYS|DELETE  |
 Then field value is ``
+When I execute sequence of actions:
+|type      |argument  |
+|KEY_DOWN  |CONTROL, v|
+|KEY_UP    |v, CONTROL|
+Then field value is `${inputText}`
