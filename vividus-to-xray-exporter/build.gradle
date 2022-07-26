@@ -1,6 +1,7 @@
 project.description = 'Vividus to Xray exporter'
 
 apply from: "$rootDir/vividus-exporter-commons/dependencies.gradle"
+apply from: "$rootDir/vividus-exporter-commons/logging.gradle"
 
 dependencies {
     implementation project(':vividus-util')

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.apache.commons.lang3.function.FailableBiFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.model.jbehave.NotUniqueMetaValueException;
 import org.vividus.model.jbehave.Scenario;
@@ -43,7 +42,6 @@ import org.vividus.output.OutputReader;
 import org.vividus.output.SyntaxException;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.converter.CucumberScenarioConverter;
-import org.vividus.xray.converter.CucumberScenarioConverter.CucumberScenario;
 import org.vividus.xray.facade.AbstractTestCaseParameters;
 import org.vividus.xray.facade.CucumberTestCaseParameters;
 import org.vividus.xray.facade.ManualTestCaseParameters;
@@ -55,12 +53,12 @@ import org.vividus.xray.model.AbstractTestCase;
 import org.vividus.xray.model.TestCaseType;
 import org.vividus.xray.model.TestExecution;
 
-@Component
 public class XrayExporter
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(XrayExporter.class);
 
-    @Autowired private XrayExporterOptions xrayExporterOptions;
+    @Autowired
+    private XrayExporterOptions xrayExporterOptions;
     @Autowired private XrayFacade xrayFacade;
     @Autowired private TestCaseFactory testCaseFactory;
     @Autowired private TestExecutionFactory testExecutionFactory;
@@ -76,6 +74,15 @@ public class XrayExporter
         TestCaseType.MANUAL, this::createManualTestCaseParameters,
         TestCaseType.CUCUMBER, (title, scenario) -> createCucumberTestCaseParameters(scenario)
     );
+
+    public XrayExporter(XrayExporterOptions xrayExporterOptions, XrayFacade xrayFacade, TestCaseFactory testCaseFactory,
+                        TestExecutionFactory testExecutionFactory)
+    {
+        this.xrayExporterOptions = xrayExporterOptions;
+        this.xrayFacade = xrayFacade;
+        this.testCaseFactory = testCaseFactory;
+        this.testExecutionFactory = testExecutionFactory;
+    }
 
     public void exportResults() throws IOException
     {
@@ -187,7 +194,7 @@ public class XrayExporter
     {
         CucumberTestCaseParameters parameters = new CucumberTestCaseParameters();
         fillTestCaseParameters(parameters, TestCaseType.CUCUMBER, scenario);
-        CucumberScenario cucumberScenario = CucumberScenarioConverter.convert(scenario);
+        CucumberScenarioConverter.CucumberScenario cucumberScenario = CucumberScenarioConverter.convert(scenario);
         parameters.setScenarioType(cucumberScenario.getType());
         parameters.setScenario(cucumberScenario.getScenario());
         return parameters;
@@ -226,10 +233,7 @@ public class XrayExporter
             throws IOException, NotUniqueMetaValueException, JiraConfigurationException
     {
         Optional<String> requirementId = scenario.getUniqueMetaValue("requirementId");
-        if (requirementId.isPresent())
-        {
-            xrayFacade.createTestsLink(testCaseId, requirementId.get());
-        }
+        xrayFacade.createTestsLink(testCaseId, requirementId);
     }
 
     @FunctionalInterface

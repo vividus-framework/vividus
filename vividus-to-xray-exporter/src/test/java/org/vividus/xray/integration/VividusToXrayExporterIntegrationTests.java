@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.vividus.xray.VividusToXrayExporterApplication;
 import org.vividus.xray.configuration.XrayExporterOptions;
@@ -42,10 +42,10 @@ import org.vividus.xray.factory.TestCaseFactory;
 })
 class VividusToXrayExporterIntegrationTests
 {
-    @MockBean private XrayExporterOptions xrayExporterOptions;
+    @Mock private XrayExporterOptions xrayExporterOptions;
     @SpyBean private XrayFacade xrayFacade;
     @SpyBean private TestCaseFactory testCaseFactory;
-    @Autowired private XrayExporter xrayExporter;
+    @InjectMocks private XrayExporter xrayExporter;
 
     @Test
     void shouldStartContext(@TempDir Path tempDirectory) throws IOException

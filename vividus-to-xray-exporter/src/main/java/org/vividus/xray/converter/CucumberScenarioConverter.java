@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,15 @@ package org.vividus.xray.converter;
 
 import static java.lang.System.lineSeparator;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
-import org.vividus.model.jbehave.Parameters;
+import org.vividus.exporter.converter.CucumberExamplesConverter;
 import org.vividus.model.jbehave.Scenario;
 import org.vividus.model.jbehave.Step;
 
 public final class CucumberScenarioConverter
 {
     private static final String COMMENT_KEYWORD = "!-- ";
-    private static final String CUCUMBER_SEPARATOR = "|";
 
     private CucumberScenarioConverter()
     {
@@ -42,7 +40,7 @@ public final class CucumberScenarioConverter
             return new CucumberScenario("Scenario", cucumberScenario);
         }
         String cucumberScenarioOutline = cucumberScenario + lineSeparator()
-                + buildScenarioExamplesTable(scenario.getExamples().getParameters());
+                + CucumberExamplesConverter.buildScenarioExamplesTable(scenario.getExamples().getParameters());
         return new CucumberScenario("Scenario Outline", cucumberScenarioOutline);
     }
 
@@ -58,22 +56,6 @@ public final class CucumberScenarioConverter
     private static String replaceCommentSign(String step)
     {
         return step.startsWith(COMMENT_KEYWORD) ? step.replace(COMMENT_KEYWORD, "# ") : step;
-    }
-
-    private static String buildScenarioExamplesTable(Parameters parameters)
-    {
-        return new StringBuilder("Examples:").append(lineSeparator())
-                                             .append(joinTableRow(parameters.getNames()))
-                                             .append(parameters.getValues().stream()
-                                                                           .map(CucumberScenarioConverter::joinTableRow)
-                                                                           .collect(Collectors.joining()))
-                                             .toString();
-    }
-
-    private static String joinTableRow(List<String> values)
-    {
-        return values.stream().collect(
-                Collectors.joining(CUCUMBER_SEPARATOR, CUCUMBER_SEPARATOR, CUCUMBER_SEPARATOR + lineSeparator()));
     }
 
     public static class CucumberScenario

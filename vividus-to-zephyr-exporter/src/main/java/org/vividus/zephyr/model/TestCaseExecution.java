@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,18 @@ package org.vividus.zephyr.model;
 
 import java.util.List;
 
-public class TestCase
+public class TestCaseExecution
 {
     private List<String> keys;
     private TestCaseStatus status;
 
-    public TestCase(List<String> keys, String status)
+    public TestCaseExecution(List<String> keys, String status)
     {
         this.keys = keys;
         this.status = TestCaseStatus.valueOf(status.toUpperCase());
     }
 
-    public TestCase(String key, TestCaseStatus status)
+    public TestCaseExecution(String key, TestCaseStatus status)
     {
         this.keys = List.of(key);
         this.status = status;

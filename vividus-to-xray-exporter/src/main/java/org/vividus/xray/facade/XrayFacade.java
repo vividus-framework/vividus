@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.exporter.facade.ExporterFacade;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
@@ -118,6 +119,12 @@ public class XrayFacade
                 requestBody);
     }
 
+    public void createTestsLink(String testCaseId, Optional<String> requirementId)
+            throws IOException, JiraConfigurationException
+    {
+        ExporterFacade.createTestsLink(testCaseId, requirementId, jiraFacade);
+    }
+
     private void checkIfIssueEditable(String issueKey)
             throws IOException, NonEditableIssueStatusException, JiraConfigurationException
     {
@@ -127,16 +134,6 @@ public class XrayFacade
         {
             throw new NonEditableIssueStatusException(issueKey, status);
         }
-    }
-
-    public void createTestsLink(String testCaseId, String requirementId) throws IOException, JiraConfigurationException
-    {
-        String linkType = "Tests";
-        LOGGER.atInfo().addArgument(linkType)
-                       .addArgument(testCaseId)
-                       .addArgument(requirementId)
-                       .log("Create '{}' link from {} to {}");
-        jiraFacade.createIssueLink(testCaseId, requirementId, linkType);
     }
 
     public static final class NonEditableIssueStatusException extends Exception

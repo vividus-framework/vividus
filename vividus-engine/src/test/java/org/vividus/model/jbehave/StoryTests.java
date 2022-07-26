@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -67,6 +68,8 @@ class StoryTests
     private static final String SCENARIO_KEY = "scenario-key-";
     private static final String SCENARIO_VALUE = "scenario-val-";
     private static final String STORY = "story.json";
+    private static final String META = "meta";
+    private static final String VALUE = "value";
 
     private static final org.jbehave.core.model.Story TEST_STORY = new org.jbehave.core.model.Story(STORY_PATH);
     private static final org.jbehave.core.model.Scenario TEST_SCENARIO = new org.jbehave.core.model.Scenario(
@@ -219,6 +222,22 @@ class StoryTests
         ), params.getValues());
     }
 
+    @Test
+    void shouldCheckIfStoryHasMetaWithEmptyValues()
+    {
+        Story story = new Story();
+        story.setMeta(List.of(createMeta("")));
+        assertThat(story.getMetaValues(META), hasSize(0));
+    }
+
+    @Test
+    void shouldCheckIfStoryHasMetaWithName()
+    {
+        Story story = new Story();
+        story.setMeta(List.of(createMeta(VALUE)));
+        assertTrue(story.hasMetaWithName(META));
+    }
+
     private static void reportStep(StoryReporter reporter, Stage stage, ExecutionType type)
     {
         reporter.beforeScenarioSteps(stage, type);
@@ -289,5 +308,13 @@ class StoryTests
         {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private static Meta createMeta(String value)
+    {
+        Meta meta = new Meta();
+        meta.setName(META);
+        meta.setValue(value);
+        return meta;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
-import org.vividus.zephyr.databind.TestCaseDeserializer;
-import org.vividus.zephyr.model.TestCase;
+import org.vividus.zephyr.databind.TestCaseExecutionDeserializer;
+import org.vividus.zephyr.model.TestCaseExecution;
 import org.vividus.zephyr.model.TestCaseStatus;
 
 import uk.org.lidalia.slf4jext.Level;
@@ -78,7 +78,7 @@ class TestCaseParserTests
         Files.createDirectory(emptyDirectoryPath);
         when(zephyrExporterProperties.getSourceDirectory()).thenReturn(emptyDirectoryPath);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> testCaseParser.createTestCases(objectMapper));
+            () -> testCaseParser.createTestExecutions(objectMapper));
         assertEquals("Folder '" + emptyDirectoryPath + "' does not contain needed json files",
                 exception.getMessage());
         assertThat(testLogger.getLoggingEvents(), empty());
@@ -91,7 +91,7 @@ class TestCaseParserTests
         Path sourceDirectory = Paths.get(getClass().getResource("/emptyKey/test-cases").toURI());
         when(zephyrExporterProperties.getSourceDirectory()).thenReturn(sourceDirectory);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> testCaseParser.createTestCases(objectMapper));
+            () -> testCaseParser.createTestExecutions(objectMapper));
         List<File> files = List.of(sourceDirectory.resolve("emptyKey.json").toFile());
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(JSON_FILES_STRING, files))));
         assertEquals("There are not any test cases for exporting", exception.getMessage());
@@ -104,7 +104,7 @@ class TestCaseParserTests
         Path sourceDirectory = Paths.get(getClass().getResource("/exception/test-cases").toURI());
         when(zephyrExporterProperties.getSourceDirectory()).thenReturn(sourceDirectory);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> testCaseParser.createTestCases(objectMapper));
+            () -> testCaseParser.createTestExecutions(objectMapper));
         assertThat(exception.getMessage(), matchesRegex("Problem with reading values from json file .*"));
         List<File> files = List.of(sourceDirectory.resolve("readingException.json").toFile());
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(JSON_FILES_STRING, files))));
@@ -118,8 +118,8 @@ class TestCaseParserTests
         when(zephyrExporterProperties.getSourceDirectory()).thenReturn(sourceDirectory);
         when(zephyrExporterProperties.getStatusesOfTestCasesToAddToExecution())
             .thenReturn(List.of(TestCaseStatus.SKIPPED, TestCaseStatus.PASSED));
-        List<TestCase> testCases = testCaseParser.createTestCases(objectMapper);
-        assertEquals(testCases.size(), 2);
+        List<TestCaseExecution> testCaseExecutions = testCaseParser.createTestExecutions(objectMapper);
+        assertEquals(testCaseExecutions.size(), 2);
         List<LoggingEvent> events = testLogger.getLoggingEvents();
         assertThat(events.get(0).getMessage(), is(JSON_FILES_STRING));
         assertThat(events.get(0).getLevel(), is(Level.INFO));
@@ -138,14 +138,14 @@ class TestCaseParserTests
         when(zephyrExporterProperties.getSourceDirectory()).thenReturn(sourceDirectory);
         when(zephyrExporterProperties.getStatusesOfTestCasesToAddToExecution())
             .thenReturn(List.of(TestCaseStatus.PASSED));
-        List<TestCase> testCases = testCaseParser.createTestCases(objectMapper);
-        assertEquals(testCases.size(), 1);
+        List<TestCaseExecution> testCaseExecutions = testCaseParser.createTestExecutions(objectMapper);
+        assertEquals(testCaseExecutions.size(), 1);
         List<LoggingEvent> events = testLogger.getLoggingEvents();
         assertThat(events.get(0).getMessage(), is(JSON_FILES_STRING));
         assertThat(events.get(0).getLevel(), is(Level.INFO));
         assertThat(events.get(1).getMessage(), is(TEST_CASES_STRING));
         assertThat(events.get(1).getLevel(), is(Level.INFO));
-        assertThat(events.get(2), is(info(FOR_EXPORTING_STRING, testCases)));
+        assertThat(events.get(2), is(info(FOR_EXPORTING_STRING, testCaseExecutions)));
         assertThat(events.size(), equalTo(3));
     }
 
@@ -155,6 +155,7 @@ class TestCaseParserTests
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
                 .build()
-                .registerModule(new SimpleModule().addDeserializer(TestCase.class, new TestCaseDeserializer()));
+                .registerModule(new SimpleModule()
+                        .addDeserializer(TestCaseExecution.class, new TestCaseExecutionDeserializer()));
     }
 }
