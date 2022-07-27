@@ -110,5 +110,5 @@ UPDATE test.students SET firstname='Mary' WHERE lastname='Miller';
 When I execute SQL query `
 SELECT * FROM test.students
 ` against `testh2db` and save result to scenario variable `h2-records`
-Then `${h2-records}` is equal to `[{firstname=Mary, lastname=Miller}, {firstname=Alex, lastname=Magnus}]`
+Then `${h2-records}` is equal to `[{FIRSTNAME=Mary, LASTNAME=Miller}, {FIRSTNAME=Alex, LASTNAME=Magnus}]`
 ----
