@@ -201,7 +201,7 @@ a|The command line (CLI) arguments to use when starting browser.
 
 |===
 
-==== How to configure user preferences for Chrome browser?
+=== How to configure user preferences for Chrome browser?
 In addition to the command line arguments, user preferences (see the _Preferences_ file in Chrome's user data directory or open `chrome://prefs-internals/` link in Chrome browser for examples) can be customised.
 
 Here is an example how to configure third-party cookies behaviour.

@@ -264,7 +264,7 @@ Then `${preprod-data}` is = `${prod-data}`
 
 === Execute steps N times
 
-Step is designed to execute specified steps while counter with a certain limit matches a comparison rule. On each iteration the counter is increased on specified value, which is allowed to be either positive or negative. The seed value is used as a starting point for iteration. Current iteration index is available within steps to execute as `${iterationVariable}`.
+Step is designed to execute specified steps while counter with a certain limit matches a comparison rule. On each iteration the counter is increased on specified value, which is allowed to be either positive or negative. The seed value is used as a starting point for iteration. Current iteration index is available within steps to execute as `$\{iterationVariable}`.
 
 [source,gherkin]
 ----
