@@ -26,6 +26,7 @@ import java.util.function.BiConsumer;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.profile.AzureProfile;
+import com.azure.core.util.Context;
 import com.azure.resourcemanager.datafactory.DataFactoryManager;
 import com.azure.resourcemanager.datafactory.fluent.models.PipelineRunInner;
 import com.azure.resourcemanager.datafactory.models.PipelineRun;
@@ -109,7 +110,7 @@ public class DataFactorySteps
         Map<String, Object> parameters = StringUtils.isNotBlank(inputParametersJson) ? jsonUtils.toObject(
                 inputParametersJson, Map.class) : null;
         String runId = dataFactoryManager.pipelines().createRunWithResponse(resourceGroupName, factoryName,
-                pipelineName, null, null, null, null, parameters, null).getValue().runId();
+                pipelineName, null, null, null, null, parameters, Context.NONE).getValue().runId();
         LOGGER.info("The ID of the created pipeline run is {}", runId);
         PipelineRun pipelineRun = new DurationBasedWaiter(new WaitMode(waitTimeout, RETRY_TIMES)).wait(
                 () -> getPipelineRun(resourceGroupName, factoryName, runId),
