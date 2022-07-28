@@ -55,6 +55,8 @@ public class GoogleAnalyticsFacade
 
     private static final String MEASUREMENT_API_VERSION = "v";
 
+    private static final String UNIX_ROOT_DIRECTORY = "/";
+
     private static final Pattern PROJECT_NAME_PATTERN = Pattern.compile("(.+)(-\\d.+)?(\\\\|/)?");
 
     private static final int MAX_EVENTS_PER_BATCH = 20;
@@ -84,7 +86,9 @@ public class GoogleAnalyticsFacade
     private static String cid()
     {
         String[] pathParts = System.getProperty("user.dir").split("\\\\|/");
-        String projectName = pathParts[pathParts.length - 1];
+        String projectName = pathParts.length > 0
+                           ? pathParts[pathParts.length - 1]
+                           : UNIX_ROOT_DIRECTORY;
         if ("scripts".equals(projectName))
         {
             projectName = PROJECT_NAME_PATTERN.matcher(pathParts[pathParts.length - 2]).replaceFirst("$1");

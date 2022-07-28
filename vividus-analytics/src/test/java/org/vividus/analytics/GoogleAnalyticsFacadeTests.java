@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -45,7 +47,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -70,8 +73,16 @@ class GoogleAnalyticsFacadeTests
 
     private static final int MAX_EVENTS_PER_BATCH = 20;
 
-    private static final String ENCODED_EVENT = "v=1&t=event&tid=UA-123456789-1&"
-            + "cid=b1a66498-4c8e-3fe7-86c8-a55d68007da6&k=v%25";
+    private static final String ENCODED_EVENT_WITHOUT_CID = "v=1&t=event&tid=UA-123456789-1&%s&k=v%%25";
+
+    private static final String ENCODED_EVENT = String.format(ENCODED_EVENT_WITHOUT_CID,
+            "cid=b1a66498-4c8e-3fe7-86c8-a55d68007da6");
+
+    private static final String ENCODED_EVENT_ROOT_UNIX = String.format(ENCODED_EVENT_WITHOUT_CID,
+            "cid=eaa09d16-1123-3c3b-8b72-29a0b5c1bcab");
+
+    private static final String ENCODED_EVENT_ROOT_WINDOWS = String.format(ENCODED_EVENT_WITHOUT_CID,
+            "cid=deaa210c-f8c5-3217-9819-5cae96aec595");
 
     private static final String DEFAULT_DIR = "/root/some/folders/here-we-go-tests";
 
@@ -99,16 +110,25 @@ class GoogleAnalyticsFacadeTests
         System.setProperty(USER_DIR, userDir);
     }
 
+    static Stream<Arguments> expectedEncodedEventsProvider()
+    {
+        return Stream.of(
+                arguments(DEFAULT_DIR,                                              ENCODED_EVENT),
+                arguments("/",                                                      ENCODED_EVENT_ROOT_UNIX),
+                arguments("/root/some/folders/here-we-go-tests/",                   ENCODED_EVENT),
+                arguments("/root/some/folders/here-we-go-tests/scripts",            ENCODED_EVENT),
+                arguments("/root/some/folders/here-we-go-tests/scripts/",           ENCODED_EVENT),
+                arguments("c:\\",                                                   ENCODED_EVENT_ROOT_WINDOWS),
+                arguments("c:\\windows\\is\\my\\love\\here-we-go-tests\\",          ENCODED_EVENT),
+                arguments("c:\\windows\\is\\my\\love\\here-we-go-tests",            ENCODED_EVENT),
+                arguments("c:\\windows\\is\\my\\love\\here-we-go-tests\\scripts\\", ENCODED_EVENT),
+                arguments("c:\\windows\\is\\my\\love\\here-we-go-tests\\scripts",   ENCODED_EVENT)
+        );
+    }
+
     @ParameterizedTest
-    @CsvSource({ DEFAULT_DIR,
-                 "/root/some/folders/here-we-go-tests/",
-                 "/root/some/folders/here-we-go-tests/scripts",
-                 "/root/some/folders/here-we-go-tests/scripts/",
-                 "c:\\windows\\is\\my\\love\\here-we-go-tests\\",
-                 "c:\\windows\\is\\my\\love\\here-we-go-tests",
-                 "c:\\windows\\is\\my\\love\\here-we-go-tests\\scripts\\",
-                 "c:\\windows\\is\\my\\love\\here-we-go-tests\\scripts"})
-    void shouldPostEvent(String userDir) throws IOException
+    @MethodSource("expectedEncodedEventsProvider")
+    void shouldPostEvent(String userDir, String expectedEncodedEvent) throws IOException
     {
         useUserDir(userDir);
         googleAnalyticsFacade.init();
@@ -121,7 +141,7 @@ class GoogleAnalyticsFacadeTests
             () -> assertEquals("User-Agent: ", request.getFirstHeader("User-Agent").toString()),
             () -> assertEquals("POST https://www.google-analytics.com/batch HTTP/1.1",
                     request.getRequestLine().toString()),
-            () -> assertEquals(ENCODED_EVENT + System.lineSeparator() + ENCODED_EVENT,
+            () -> assertEquals(expectedEncodedEvent + System.lineSeparator() + expectedEncodedEvent,
                     EntityUtils.toString(request.getEntity(), StandardCharsets.UTF_8))
         );
     }
