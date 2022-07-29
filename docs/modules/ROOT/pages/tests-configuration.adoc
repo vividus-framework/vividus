@@ -163,7 +163,7 @@ configuration.profiles=mobile_app/android
 
 ==== Built-in profiles
 
-Some of the plugins, like xref:plugins:plugin-web-app.adoc[web-app], have built-in profiles. You can find them in project explorer after installation by the following path:
+Some of the plugins, like xref:plugins:plugin-web-app.adoc#_profiles[web-app], have built-in profiles. You can find them in project explorer after installation by the following path:
 
 [source,dir]
 ----
