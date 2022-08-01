@@ -87,6 +87,8 @@ class HeadlessCrawlerTableTransformerTests
 
     private static final String OUTGOING_ABSOLUT_URL = "http://some.url/path";
 
+    private static final String EXCLUDE_EXTENSIONS_REGEX = "js|css";
+
     private final TestLogger logger = TestLoggerFactory.getTestLogger(HeadlessCrawlerTableTransformer.class);
 
     @Mock private ICrawlControllerFactory crawlControllerFactory;
@@ -116,6 +118,7 @@ class HeadlessCrawlerTableTransformerTests
                                   List<String> expectedSeedRelativeUrls) throws IOException, InterruptedException
     {
         transformer.setSeedRelativeUrls(seedRelativeUrlsProperty);
+        transformer.setExcludeExtensionsRegex(EXCLUDE_EXTENSIONS_REGEX);
         Set<String> urls = testFetchUrls(mainAppPageRelativeUrl, expectedSeedRelativeUrls);
         assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
         verifyNoInteractions(redirectsProvider);

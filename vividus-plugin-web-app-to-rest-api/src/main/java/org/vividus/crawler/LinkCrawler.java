@@ -16,10 +16,15 @@
 
 package org.vividus.crawler;
 
-import java.net.URI;
-import java.util.Set;
+import static org.apache.commons.io.FilenameUtils.getExtension;
 
-import org.apache.commons.lang3.StringUtils;
+import java.net.URI;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.util.UriUtils;
@@ -33,14 +38,16 @@ public class LinkCrawler extends WebCrawler
 {
     private static final Logger LINK_CRAWLER_LOGGER = LoggerFactory.getLogger(LinkCrawler.class);
 
-    private static final String[] EXCLUDED_EXTENSIONS = { ".css", ".gif", ".gz", ".ico", ".jpeg", ".jpg", ".js",
-            ".mp3", ".mp4", ".pdf", ".png", ".zip" };
-
     private final LinkCrawlerData linkCrawlerData;
 
-    public LinkCrawler(LinkCrawlerData linkCrawlerData)
+    private final Optional<Pattern> excludeExtensionsPattern;
+
+    private final Set<String> urlsWithInvalidRedirects = new HashSet<>();
+
+    public LinkCrawler(LinkCrawlerData linkCrawlerData, String excludeExtensionsRegex)
     {
         this.linkCrawlerData = linkCrawlerData;
+        this.excludeExtensionsPattern = Optional.ofNullable(excludeExtensionsRegex).map(Pattern::compile);
     }
 
     @Override
@@ -69,14 +76,53 @@ public class LinkCrawler extends WebCrawler
         }
     }
 
-    private static boolean isAllowedUrl(Page referringPage, WebURL url)
+    private boolean isAllowedUrl(Page referringPage, WebURL url)
     {
-        return isNotFile(url) && isFromTheSameSite(referringPage.getWebURL().getURL(), url.getURL());
+        return isNotFileWithForbiddenExtension(url)
+                && isFromTheSameSite(referringPage.getWebURL().getURL(), url.getURL());
     }
 
-    private static boolean isNotFile(WebURL url)
+    private boolean isNotFileWithForbiddenExtension(WebURL url)
     {
-        return !StringUtils.endsWithAny(url.getPath().toLowerCase(), EXCLUDED_EXTENSIONS);
+        boolean excluded = isExcluded(url.getPath());
+        if (excluded)
+        {
+            LINK_CRAWLER_LOGGER.info("Skip crawling for URL {}", url.getURL());
+        }
+        return !excluded;
+    }
+
+    @Override
+    protected void onRedirectedStatusCode(Page page)
+    {
+        String redirectedPage = page.getRedirectedToUrl();
+        URI redirectedUri = UriUtils.createUri(redirectedPage);
+        redirectedUri = UriUtils.removeQuery(redirectedUri);
+
+        if (isExcluded(redirectedUri.getPath()))
+        {
+            String url = page.getWebURL().getURL();
+            urlsWithInvalidRedirects.add(url);
+            LINK_CRAWLER_LOGGER.info(
+                    "URL {} redirects to the URL with a forbidden extension ({}) and will be excluded from the result.",
+                    url, redirectedPage);
+        }
+    }
+
+    @Override
+    public void onBeforeExit()
+    {
+        linkCrawlerData.getAbsoluteUrls().removeAll(urlsWithInvalidRedirects);
+    }
+
+    private boolean isExcluded(String path)
+    {
+        String fileExtensionFromPath = getExtension(path).toLowerCase();
+
+        return !fileExtensionFromPath.isEmpty()
+                && excludeExtensionsPattern.map(p -> p.matcher(fileExtensionFromPath))
+                .map(Matcher::matches)
+                .orElse(false);
     }
 
     private static boolean isFromTheSameSite(String pageUrl, String urlToCheck)

@@ -122,6 +122,13 @@ Examples:
 |
 |List of relative URLs, a seed URL is a URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
 
+|`transformer.from-headless-crawling.exclude-extensions-regex`
+|Regular expression
+|`(css\|gif\|gz\|ico\|jpeg\|jpg\|js\|mp3\|mp4\|pdf\|png\|zip\|woff2\|woff\|ttf\|doc\|docx)`
+|The regular expression to match extensions in URLs.
+The crawler will ignore all URLs referring to files with extensions matching the given regular expression.
+URLs without extensions will always be crawled.
+
 |`transformer.from-headless-crawling.filter-redirects`
 a|`true`
 `false`
