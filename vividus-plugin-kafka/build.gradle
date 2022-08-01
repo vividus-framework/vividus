@@ -1,6 +1,6 @@
 project.description = 'Vividus plugin for Apache Kafka'
 
-ext.springKafkaVersion = '2.8.8'
+ext.springKafkaVersion = '2.9.0'
 
 dependencies {
     api project(':vividus-engine')
