@@ -36,7 +36,7 @@ class LinkCrawlerFactoryTests
     void testNewInstance()
     {
         LinkCrawlerData linkCrawlerData = new LinkCrawlerData();
-        LinkCrawlerFactory factory = new LinkCrawlerFactory(linkCrawlerData);
+        LinkCrawlerFactory factory = new LinkCrawlerFactory(linkCrawlerData, "");
         LinkCrawler crawler = factory.newInstance();
         Page page = new Page(createWebUrl(PAGE_URL));
         HtmlParseData htmlParseData = new HtmlParseData();

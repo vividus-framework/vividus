@@ -22,14 +22,17 @@ public class LinkCrawlerFactory implements WebCrawlerFactory<LinkCrawler>
 {
     private final LinkCrawlerData linkCrawlerData;
 
-    public LinkCrawlerFactory(LinkCrawlerData linkCrawlerData)
+    private final String excludeExtensionsRegex;
+
+    public LinkCrawlerFactory(LinkCrawlerData linkCrawlerData, String excludeExtensionsRegex)
     {
         this.linkCrawlerData = linkCrawlerData;
+        this.excludeExtensionsRegex = excludeExtensionsRegex;
     }
 
     @Override
     public LinkCrawler newInstance()
     {
-        return new LinkCrawler(linkCrawlerData);
+        return new LinkCrawler(linkCrawlerData, excludeExtensionsRegex);
     }
 }

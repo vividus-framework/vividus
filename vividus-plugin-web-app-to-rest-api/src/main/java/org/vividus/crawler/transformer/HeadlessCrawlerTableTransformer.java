@@ -40,6 +40,8 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
 
     private Set<String> seedRelativeUrls;
 
+    private String excludeExtensionsRegex;
+
     private final Supplier<Set<String>> urlsProvider = Suppliers.memoize(() ->
     {
         URI mainApplicationPage = getMainApplicationPageUri();
@@ -48,7 +50,7 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
         addSeeds(mainApplicationPage, controller);
 
         LinkCrawlerData linkCrawlerData = new LinkCrawlerData();
-        controller.start(new LinkCrawlerFactory(linkCrawlerData), NUMBER_OF_CRAWLERS);
+        controller.start(new LinkCrawlerFactory(linkCrawlerData, excludeExtensionsRegex), NUMBER_OF_CRAWLERS);
         Set<String> absoluteUrls = linkCrawlerData.getAbsoluteUrls();
         return filterResults(absoluteUrls.stream());
     });
@@ -96,5 +98,10 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
     public void setSeedRelativeUrls(Set<String> seedRelativeUrls)
     {
         this.seedRelativeUrls = seedRelativeUrls;
+    }
+
+    public void setExcludeExtensionsRegex(String excludeExtensionsRegex)
+    {
+        this.excludeExtensionsRegex = excludeExtensionsRegex;
     }
 }
