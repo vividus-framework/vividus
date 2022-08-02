@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,15 @@ public final class DurationBasedWaiter extends Waiter
         T value;
         do
         {
+            long iterationStartTime = System.currentTimeMillis();
             value = valueProvider.get();
-            Sleeper.sleep(getPollingTimeoutMillis(), TimeUnit.MILLISECONDS);
+            long iterationEndTime = System.currentTimeMillis();
+
+            long iterationPollingTimeout = getPollingTimeoutMillis() - (iterationEndTime - iterationStartTime);
+            if (iterationPollingTimeout > 0)
+            {
+                Sleeper.sleep(iterationPollingTimeout, TimeUnit.MILLISECONDS);
+            }
         }
         while (!stopCondition.test(value) && System.currentTimeMillis() <= endTime);
         return value;
