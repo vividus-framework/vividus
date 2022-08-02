@@ -8,8 +8,8 @@ dependencies {
     implementation(group: 'org.springframework', name: 'spring-websocket', version: versions.spring)
     implementation(group: 'org.eclipse.jetty.websocket', name: 'websocket-client', version: '9.4.48.v20220622')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
-    testImplementation(group: 'org.mockito', name: 'mockito-inline', version: versions.mockito)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.6.1')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-inline')
 }

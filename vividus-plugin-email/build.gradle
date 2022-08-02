@@ -13,16 +13,15 @@ dependencies {
     implementation(group: 'com.sun.mail', name: 'javax.mail', version: mailVersion)
     implementation(group: 'com.sun.mail', name: 'imap', version: mailVersion)
 
-    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+    implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.6.1')
     testImplementation(group: 'com.icegreen', name: 'greenmail', version: '1.6.10')
     testImplementation(group: 'com.sun.mail', name: 'smtp', version: mailVersion)
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '2.4.1')
 }

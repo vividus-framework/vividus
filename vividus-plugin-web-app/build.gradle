@@ -21,20 +21,20 @@ dependencies {
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-ie-driver', version: "${seleniumVersion}")
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-safari-driver', version: "${seleniumVersion}")
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-opera-driver', version: "${seleniumVersion}")
-    implementation(group: 'junit', name: 'junit', version: versions.junit4)
+    implementation(group: 'junit', name: 'junit', version: '4.13.2')
     implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '5.2.2') {
         exclude group: 'com.github.docker-java'
     }
     implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
-    implementation(group: 'org.apache.commons', name: 'commons-text', version: versions.commonsText)
+    implementation(group: 'org.apache.commons', name: 'commons-text', version: '1.9')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
-    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
+    implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
-    testImplementation(group: 'org.mockito', name: 'mockito-inline', version: versions.mockito)
-    testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2')
+    testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.6.1')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-inline')
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '2.4.1')
     testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.10.1')
 }

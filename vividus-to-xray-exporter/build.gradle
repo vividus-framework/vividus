@@ -8,7 +8,7 @@ dependencies {
     implementation project(':vividus-facade-jira')
     implementation project(':vividus-exporter-commons')
 
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
-    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonsCollections4)
-    testImplementation(group: 'org.mockito', name: 'mockito-inline', version: versions.mockito)
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')
+    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.4')
+    testImplementation(group: 'org.mockito', name: 'mockito-inline', version: '4.6.1')
 }
