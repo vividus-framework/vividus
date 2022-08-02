@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.time.Duration;
 import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.junit.jupiter.api.Test;
+import org.vividus.util.Sleeper;
 
 @SuppressWarnings("unchecked")
 class DurationBasedWaiterTests
@@ -57,5 +58,20 @@ class DurationBasedWaiterTests
         FailableRunnable<IOException> failableRunnable = mock(FailableRunnable.class);
         new DurationBasedWaiter(Duration.ZERO, Duration.ZERO).wait(failableRunnable, Boolean.TRUE::booleanValue);
         verify(failableRunnable, times(1)).run();
+    }
+
+    @Test
+    void shouldDecreasePollingTimeoutAccordinglyAfterLongRunningRunnable() throws IOException
+    {
+        FailableSupplier<Boolean, IOException> valueProvider = mock(FailableSupplier.class);
+        when(valueProvider.get())
+                .thenAnswer(invocation -> {
+                    Sleeper.sleep(Duration.ofSeconds(5));
+                    return false;
+                })
+                .thenReturn(true)
+                .thenReturn(false);
+        assertTrue(new DurationBasedWaiter(new WaitMode(Duration.ofSeconds(10), 10))
+                .wait(valueProvider, Boolean::booleanValue));
     }
 }
