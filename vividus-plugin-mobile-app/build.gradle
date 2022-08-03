@@ -10,7 +10,7 @@ project.description = 'Vividus plugin for testing mobile applications'
      implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
      implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
 
-     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2')
+     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.9.0')
      testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.6.1')
      testImplementation(group: 'org.mockito', name: 'mockito-inline', version: '4.6.1')
      testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '2.4.1')
