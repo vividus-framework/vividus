@@ -53,7 +53,8 @@ dependencies {
     implementation(group: 'org.apache.groovy', name: 'groovy', version: '4.0.4')
 
     // Spring
-    implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
+    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.22')
+    implementation(group: 'org.springframework', name: 'spring-context')
     implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
     implementation(group: 'commons-cli', name: 'commons-cli', version: '1.5.0')
     // jasypt
@@ -73,7 +74,7 @@ dependencies {
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-inline')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '2.6.1')
-    testImplementation(group: 'org.springframework', name: 'spring-test', version: versions.spring)
+    testImplementation(group: 'org.springframework', name: 'spring-test')
 
     integrationTestImplementation project(':vividus-plugin-azure-data-factory')
     integrationTestImplementation project(':vividus-plugin-avro')

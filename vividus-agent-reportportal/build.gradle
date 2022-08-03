@@ -5,7 +5,8 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-reporter')
     implementation(group: 'com.google.guava', name: 'guava', version: '31.1-jre')
-    implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
+    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.22')
+    implementation(group: 'org.springframework', name: 'spring-context')
 
     // ReportPortal
     implementation(group: 'com.epam.reportportal', name: 'logger-java-log4j', version: '5.1.5')

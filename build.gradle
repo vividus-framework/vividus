@@ -67,7 +67,6 @@ ext {
         allure:                 '2.18.1',
         jbehave:                '5.0.1-alpha.2',
         slf4j:                  '2.0.0-alpha2',
-        spring:                 '5.3.22',
         powermock:              'a0be5c4bbe'
     ]
 }

@@ -15,10 +15,10 @@ dependencies {
     implementation project(':vividus-extension-visual-testing')
 
     blobStorageImplementation project(':vividus-plugin-azure-storage-account')
-    blobStorageImplementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
+    blobStorageImplementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.22')
+    blobStorageImplementation(group: 'org.springframework', name: 'spring-context')
     blobStorageImplementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.4')
     blobStorageImplementation(group: 'com.azure', name: 'azure-storage-blob')
-    blobStorageImplementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
     blobStorageImplementation(group: 'javax.inject', name: 'javax.inject', version: '1')
 
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)

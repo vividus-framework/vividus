@@ -6,7 +6,8 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation(group: 'org.springframework', name: 'spring-jdbc', version: versions.spring)
+    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.22')
+    implementation(group: 'org.springframework', name: 'spring-jdbc')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'com.google.guava', name: 'guava', version: '31.1-jre')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')

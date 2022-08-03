@@ -25,7 +25,8 @@ dependencies {
     implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '5.2.2') {
         exclude group: 'com.github.docker-java'
     }
-    implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
+    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.22')
+    implementation(group: 'org.springframework', name: 'spring-context')
     implementation(group: 'org.apache.commons', name: 'commons-text', version: '1.9')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
