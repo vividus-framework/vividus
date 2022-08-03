@@ -7,7 +7,7 @@ dependencies {
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'com.google.guava', name: 'guava', version: '31.1-jre')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.8.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.0')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: '4.6.1')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '2.6.1')
