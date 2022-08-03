@@ -6,9 +6,9 @@ dependencies {
     implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-eventhubs', version: '2.17.0')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
-    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
-    testImplementation(group: 'org.mockito', name: 'mockito-inline', version: versions.mockito)
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.8.2')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.6.1')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-inline')
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '2.4.1')
 }

@@ -7,6 +7,6 @@ dependencies {
     implementation project(':vividus-facade-jira')
     implementation project(':vividus-exporter-commons')
 
-    implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+    implementation(group: 'com.google.guava', name: 'guava', version: '31.1-jre')
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')
 }
