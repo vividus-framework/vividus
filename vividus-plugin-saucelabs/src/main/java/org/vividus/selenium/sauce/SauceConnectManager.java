@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.saucelabs.ci.sauceconnect.SauceTunnelManager;
+import com.saucelabs.saucerest.DataCenter;
 
 import org.vividus.selenium.tunnel.TunnelManager;
 import org.vividus.testcontext.TestContext;
@@ -31,12 +32,24 @@ public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
 {
     private static final Object KEY = SauceConnectDescriptor.class;
 
-    private SauceTunnelManager sauceTunnelManager;
-    private String sauceLabsUsername;
-    private String sauceLabsAccessKey;
+    private final String sauceLabsUsername;
+    private final String sauceLabsAccessKey;
+    private final DataCenter sauceLabsDataCenter;
+
+    private final SauceTunnelManager sauceTunnelManager;
+    private final TestContext testContext;
 
     private final Map<SauceConnectOptions, SauceConnectDescriptor> activeConnections = new HashMap<>();
-    private TestContext testContext;
+
+    public SauceConnectManager(String sauceLabsUsername, String sauceLabsAccessKey, DataCenter sauceLabsDataCenter,
+            SauceTunnelManager sauceTunnelManager, TestContext testContext)
+    {
+        this.sauceLabsUsername = sauceLabsUsername;
+        this.sauceLabsAccessKey = sauceLabsAccessKey;
+        this.sauceLabsDataCenter = sauceLabsDataCenter;
+        this.sauceTunnelManager = sauceTunnelManager;
+        this.testContext = testContext;
+    }
 
     @Override
     public String start(SauceConnectOptions sauceConnectOptions)
@@ -61,7 +74,7 @@ public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
                 }
                 synchronized (sauceTunnelManager)
                 {
-                    sauceTunnelManager.openConnection(sauceLabsUsername, sauceLabsAccessKey,
+                    sauceTunnelManager.openConnection(sauceLabsUsername, sauceLabsAccessKey, sauceLabsDataCenter.name(),
                             sauceConnectDescriptor.getPort(), null, sauceConnectDescriptor.getOptions(), null,
                             Boolean.TRUE, null);
                 }
@@ -107,26 +120,6 @@ public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
         {
             sauceTunnelManager.closeTunnelsForPlan(sauceLabsUsername, descriptor.getOptions(), null);
         }
-    }
-
-    public void setSauceTunnelManager(SauceTunnelManager sauceTunnelManager)
-    {
-        this.sauceTunnelManager = sauceTunnelManager;
-    }
-
-    public void setSauceLabsUsername(String sauceLabsUsername)
-    {
-        this.sauceLabsUsername = sauceLabsUsername;
-    }
-
-    public void setSauceLabsAccessKey(String sauceLabsAccessKey)
-    {
-        this.sauceLabsAccessKey = sauceLabsAccessKey;
-    }
-
-    public void setTestContext(TestContext testContext)
-    {
-        this.testContext = testContext;
     }
 
     public SauceConnectDescriptor getSauceConnectDescriptor()
