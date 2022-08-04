@@ -151,3 +151,6 @@ Then `#{escapeHTML(M&Ms)}` is = `M&amp;Ms`
 
 Scenario: Should quote regular expression
 Then `Customer(Username)` matches `#{quoteRegExp(Customer(Username))}`
+
+Scenario: Verify 'loadFile' expression
+Then `#{loadFile(src/main/resources/data/file.txt)}` is equal to `data from file`

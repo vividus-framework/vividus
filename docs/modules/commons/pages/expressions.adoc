@@ -779,6 +779,43 @@ Calculates the {resource-info}[resource] or file hash using the specified hashin
 |`0a05ba6064ae7e5d6ee9818f85b666ad`
 |===
 
+== Files
+:file-path-parameter: pass:quotes[*`filePath`* - the path to the file]
+
+=== `loadFile`
+
+Loads the file by its path and replaces the expression with the content of the file.
+
+[source, subs="+quotes"]
+----
+#{loadFile(*$filePath*)}
+----
+
+* {file-path-parameter}
+
+.Load data from the file
+[source,gherkin]
+----
+When I initialize the scenario variable `my-data` with value `#{loadFile(data/body.txt)}`
+----
+
+=== `loadBinaryFile`
+
+Loads the file by its path as bytes
+
+[source, subs="+quotes"]
+----
+#{loadBinaryFile(*$filePath*)}
+----
+
+* {file-path-parameter}
+
+.Load data from the file as bytes
+[source,gherkin]
+----
+When I initialize the scenario variable `my-data` with value `#{loadBinaryFile(data/body.txt)}`
+----
+
 == Resources
 :resource-name-parameter: pass:quotes[*`$resourceName`* - the name of the xref:ROOT:glossary.adoc#_resource[resource] to load]
 

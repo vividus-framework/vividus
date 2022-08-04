@@ -21,6 +21,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
@@ -83,7 +85,8 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
             new UnaryExpressionProcessor("anyOf",                  StringsExpressionProcessor::anyOf),
             new UnaryExpressionProcessor("toBase64Gzip",           StringsExpressionProcessor::toBase64Gzip),
             new UnaryExpressionProcessor("escapeHTML",             StringEscapeUtils::escapeHtml4),
-            new UnaryExpressionProcessor("quoteRegExp",            Pattern::quote)
+            new UnaryExpressionProcessor("quoteRegExp",            Pattern::quote),
+            new UnaryExpressionProcessor("loadFile",               StringsExpressionProcessor::loadFile)
         ));
     }
 
@@ -131,5 +134,17 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
     private static String generate(Locale locale, String input)
     {
         return FAKERS.getUnchecked(locale).expression(String.format("#{%s}", input));
+    }
+
+    private static String loadFile(String path)
+    {
+        try
+        {
+            return Files.readString(Path.of(path));
+        }
+        catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
     }
 }
