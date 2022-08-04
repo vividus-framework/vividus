@@ -236,7 +236,6 @@ class SauceConnectOptionsTests
 
     private Path mockPac(MockedStatic<ResourceUtils> mock, String matchCondition)
     {
-        System.out.println(matchCondition);
         Path pacPath = mock(Path.class);
         mock.when(() -> ResourceUtils.createTempFile(PAC_TEST_TUNNEL, DOT_JS, String.format(PAC_DATA, matchCondition)))
                 .thenReturn(pacPath);
