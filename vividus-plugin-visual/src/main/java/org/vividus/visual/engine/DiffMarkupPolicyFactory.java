@@ -26,10 +26,10 @@ public class DiffMarkupPolicyFactory
     private static final Color DIFF_COLOR = new Color(238, 111, 238);
     private static final int ONE_HUNDRED = 100;
 
-    public DiffMarkupPolicy create(int imageHeight, int imageWidth, int diffPercentage)
+    public DiffMarkupPolicy create(int imageHeight, int imageWidth, double diffPercentage)
     {
         PointsMarkupPolicy pointsMarkupPolicy = new PointsMarkupPolicy();
-        pointsMarkupPolicy.setDiffSizeTrigger(imageHeight * imageWidth * diffPercentage / ONE_HUNDRED);
+        pointsMarkupPolicy.setDiffSizeTrigger((int) (imageHeight * imageWidth * diffPercentage / ONE_HUNDRED));
         return pointsMarkupPolicy.withDiffColor(DIFF_COLOR);
     }
 }
