@@ -36,11 +36,11 @@ class DiffMarkupPolicyFactoryTests
         try (MockedConstruction<PointsMarkupPolicy> mockedConstruction = Mockito.mockConstruction(
                 PointsMarkupPolicy.class))
         {
-            new DiffMarkupPolicyFactory().create(2, 3, 50);
+            new DiffMarkupPolicyFactory().create(1000, 1000, 0.01d);
             var constructed = mockedConstruction.constructed();
             MatcherAssert.assertThat(constructed, hasSize(1));
             var vlad = constructed.get(0);
-            verify(vlad).setDiffSizeTrigger(3);
+            verify(vlad).setDiffSizeTrigger(100);
             verify(vlad).withDiffColor(new Color(238, 111, 238));
         }
     }
