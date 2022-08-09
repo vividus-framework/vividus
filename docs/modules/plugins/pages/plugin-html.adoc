@@ -38,7 +38,7 @@ Then number of elements found by $locatorType `$locator` in HTML `$html` is $com
 .Validate starfield release date
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'https://bethesda.net/en/game/starfield'
+When I execute HTTP GET request for resource with URL `https://bethesda.net/en/game/starfield`
 Then number of elements found by XPath `//h3[contains(., '111122')]` in HTML `${response}` is = `1`
 ----
 
@@ -59,7 +59,7 @@ Then element found by $locatorType `$locator` in HTML `$html` contains text `$ex
 .Validate starfield release date
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'https://bethesda.net/en/game/starfield'
+When I execute HTTP GET request for resource with URL `https://bethesda.net/en/game/starfield`
 Then element found by XPath `//h3` in HTML `${response}` contains text `111122`
 ----
 

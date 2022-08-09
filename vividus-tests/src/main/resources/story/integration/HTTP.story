@@ -4,7 +4,7 @@ Meta:
     @epic vividus-plugin-rest-api
 
 Scenario: Verify method DEBUG is supported; accidental space is trimmed in httpMethod enum
-When I issue a HTTP DEBUG  request for a resource with the URL 'http://example.org/'
+When I execute HTTP DEBUG request for resource with URL `http://example.org/`
 Then `${response-code}` is equal to `405`
 
 Scenario: Verify handling of plus character in URL query
@@ -42,7 +42,7 @@ Scenario: Validate HTTP retry on service unavailability
 Meta:
     @requirementId 214
 When I initialize the scenario variable `uuid` with value `#{generate(Internet.uuid)}`
-When I issue a HTTP GET request for a resource with the URL '${vividus-test-site-url}/api/teapot?clientId=${uuid}'
+When I execute HTTP GET request for resource with URL `${vividus-test-site-url}/api/teapot?clientId=${uuid}`
 Then `${responseCode}` is equal to `200`
 
 Scenario: Validate HTTP methods with missing optional request body and zero content-length

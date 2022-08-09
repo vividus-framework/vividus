@@ -6,7 +6,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-When I issue a HTTP GET request for a resource with the URL 'http://jsonpath.herokuapp.com/json/goessner.json'
+When I execute HTTP GET request for resource with URL `http://jsonpath.herokuapp.com/json/goessner.json`
 Then `${responseCode}` matches `20\d`
 Examples:
 |URL                                             |jsonPath             |booksNumber|

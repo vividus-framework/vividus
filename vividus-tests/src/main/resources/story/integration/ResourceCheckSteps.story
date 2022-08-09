@@ -9,7 +9,7 @@ Examples:
 |${vividus-test-site-url}|
 
 Scenario: Verification of Then all resources by selector $cssSelector from $html are valid; Source from HTTP response
-When I issue a HTTP GET request for a resource with the URL '<pageToValidate>'
+When I execute HTTP GET request for resource with URL `<pageToValidate>`
 Then all resources by selector `a` from ${response} are valid
 
 Scenario: Verification of Then all resources by selector $cssSelector are valid on:$pages
