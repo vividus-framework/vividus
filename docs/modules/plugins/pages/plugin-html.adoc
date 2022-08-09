@@ -131,7 +131,7 @@ When I initialize the story variable `html` with value
 </html>
 `
 When I save data of element found by <locatorType> `<script>` in HTML `${html}` to scenario variable `data`
-When I save text of element found by <locatorType> `<script>` in HTML `${html}` to scenario variable `text`
+When I save text of element found by <locatorType> `<header>` in HTML `${html}` to scenario variable `text`
 Then `${data}` is equal to `//<![CDATA[Here comes the data//]]>`
 Then `${text}` is equal to `This is a Heading`
 Examples:
