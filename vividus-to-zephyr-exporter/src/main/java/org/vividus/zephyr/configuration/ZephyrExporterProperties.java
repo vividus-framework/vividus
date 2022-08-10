@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,19 @@ package org.vividus.zephyr.configuration;
 import java.nio.file.Path;
 import java.util.List;
 
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 import org.vividus.zephyr.model.TestCaseStatus;
 
+@Validated
 @ConfigurationProperties("zephyr.exporter")
 public class ZephyrExporterProperties
 {
     private String jiraInstanceKey;
 
-    @NotBlank(message = "Property 'zephyr.exporter.source-directory' must not be blank")
+    @NotNull(message = "Property 'zephyr.exporter.source-directory' must be set")
     private Path sourceDirectory;
 
     private boolean updateExecutionStatusesOnly;
