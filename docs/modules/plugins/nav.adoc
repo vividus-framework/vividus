@@ -22,7 +22,7 @@
 ** xref:plugin-excel.adoc[Excel]
 ** xref:plugin-html.adoc[HTML]
 ** xref:plugin-json.adoc[JSON]
-** xref:plugin-parquet.adoc[Parquet*]
+** xref:plugin-parquet.adoc[Parquet]
 ** xref:plugin-xml.adoc[XML]
 * Remoting
 ** xref:plugin-ssh.adoc[SSH]
