@@ -64,6 +64,23 @@ NOTE: The scopes names are case-insensitive.
 |`next_batches`
 |Variables are available in the next batches. `next_batches`-scoped variable is not available in batch it's declared within.
 
+|`batch`
+a|Such variables are declared only via suite properties with bdd.variables.batch-<batch-number>. prefix and available throughout the execution of the batch in the suite. An attempt to create the batch scoped variables during test execution leads to an error.
+
+.Declaring batch variable `locale`
+[source,properties]
+----
+bdd.variables.batch-1.locale=/us/en/
+bdd.variables.batch-2.locale=/uk/en/
+----
+
+.Using batch variable `locale`
+[source,gherkin]
+----
+Given I am on the main application page
+When I go to the relative URL '${locale}'
+----
+
 |`global`
 a|Such variables are declared only via properties with `bdd.variables.global.` prefix and available throughout the entire execution. An attempt to create the globally scoped variables during test execution leads to an error.
 
@@ -125,6 +142,7 @@ Regular variables are resolved using the chain having the following order:
 * `scenario`-scoped variables,
 * `story`-scoped variables,
 * `next_batches`-scoped variables,
+* `batch`-scoped variables,
 * `global`-scoped variables.
 
 If variable is resolved, the resolution process is stopped, it means the narrower-scoped variables may override the wider-scoped variables in narrow scope lifetime. For example:
