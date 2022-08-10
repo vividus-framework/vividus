@@ -499,11 +499,6 @@ Here one could find description of general HTTP properties applied across all th
 
 4+^.^|[#_authentication]_Authentication_
 
-|Property Name
-|Acceptable values
-|Default
-|Description
-
 |`http.auth.username`
 |character sequence
 |`<empty>`
