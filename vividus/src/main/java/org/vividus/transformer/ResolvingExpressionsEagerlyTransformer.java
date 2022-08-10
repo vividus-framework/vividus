@@ -17,7 +17,6 @@
 package org.vividus.transformer;
 
 import java.util.List;
-import java.util.Map;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTable.TableRows;
@@ -38,14 +37,14 @@ public class ResolvingExpressionsEagerlyTransformer implements ExtendedTableTran
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         TableRows tableRows = tableParsers.parseRows(tableAsString, properties);
-        List<Map<String, String>> rows = tableRows.getRows();
+        List<List<String>> rows = tableRows.getRows();
         resolveExpressions(rows);
         return ExamplesTableProcessor.buildExamplesTable(tableRows.getHeaders(), rows, properties);
     }
 
-    private void resolveExpressions(List<Map<String, String>> list)
+    private void resolveExpressions(List<List<String>> rows)
     {
-        list.forEach(map -> map.entrySet().forEach(
-                entry -> entry.setValue(String.valueOf(expressionAdaptor.processRawExpression(entry.getValue())))));
+        rows.forEach(row -> row.replaceAll(
+                expression -> String.valueOf(expressionAdaptor.processRawExpression(expression))));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -46,8 +46,18 @@ public abstract class AbstractFilteringTableTransformer implements ExtendedTable
         return filtered;
     }
 
-    protected void filterRowsByColumnNames(List<Map<String, String>> rows, List<String> columnNames)
+    protected void filterRowsByColumnNames(List<String> allColumnNames, List<List<String>> rows,
+            List<String> columnNamesToKeep)
     {
-        rows.forEach(row -> row.keySet().retainAll(columnNames));
+        int[] indexesToRemove = IntStream.range(0, allColumnNames.size())
+                .filter(i -> !columnNamesToKeep.contains(allColumnNames.get(i)))
+                .sorted()
+                .toArray();
+        rows.forEach(row -> {
+            for (int i = indexesToRemove.length - 1; i >= 0; i--)
+            {
+                row.remove(indexesToRemove[i]);
+            }
+        });
     }
 }
