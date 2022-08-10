@@ -18,7 +18,6 @@ package org.vividus.transformer;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,7 +38,7 @@ public class SortingTableTransformer implements ExtendedTableTransformer
         List<String> columnsToCompare = Stream.of(StringUtils.split(byColumns, '|'))
                 .map(String::trim)
                 .collect(Collectors.toList());
-        List<Map<String, String>> rows = tableRows.getRows().stream()
+        List<List<String>> rows = tableRows.getRows().stream()
                 .sorted((r1, r2) ->
                 {
                     int result = 0;
@@ -47,9 +46,10 @@ public class SortingTableTransformer implements ExtendedTableTransformer
                     while (result == 0 && columnIterator.hasNext())
                     {
                         String column = columnIterator.next();
-                        if (headerValues.contains(column))
+                        int indexOfColumn = headerValues.indexOf(column);
+                        if (indexOfColumn > -1)
                         {
-                            result = r1.get(column).compareTo(r2.get(column));
+                            result = r1.get(indexOfColumn).compareTo(r2.get(indexOfColumn));
                         }
                     }
                     return result;

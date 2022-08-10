@@ -18,11 +18,13 @@ package org.vividus.transformer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -48,8 +50,18 @@ public class ResolvingSelfReferencesEagerlyTransformer implements ExtendedTableT
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
     {
         TableRows tableRows = tableParsers.parseRows(tableAsString, properties);
-        return ExamplesTableProcessor.buildExamplesTable(tableRows.getHeaders(), resolveRows(tableRows.getRows()),
-                properties, true);
+        List<String> headers = tableRows.getHeaders();
+        Validate.isTrue(headers.stream().distinct().count() == headers.size(),
+                "ExamplesTable contains non-distinct columns");
+        List<List<String>> rows = tableRows.getRows();
+        List<Map<String, String>> namedRows = new ArrayList<>();
+        for (List<String> row : rows)
+        {
+            Map<String, String> namedRow = new LinkedHashMap<>();
+            IntStream.range(0, row.size()).forEach(i -> namedRow.put(headers.get(i), row.get(i)));
+            namedRows.add(namedRow);
+        }
+        return ExamplesTableProcessor.buildExamplesTable(headers, resolveRows(namedRows), properties, true);
     }
 
     private List<List<String>> resolveRows(List<Map<String, String>> rows)

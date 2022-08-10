@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.steps.ParameterControls;
 import org.jbehave.core.steps.ParameterConverters;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -31,8 +32,6 @@ class ResolvingSelfReferencesEagerlyTransformerTests
 {
     private final ResolvingSelfReferencesEagerlyTransformer transformer = new ResolvingSelfReferencesEagerlyTransformer(
             new ParameterControls());
-    private final Keywords keywords = new Keywords();
-    private final ParameterConverters parameterConverters = new ParameterConverters();
 
     @ParameterizedTest
     @CsvSource({
@@ -57,7 +56,7 @@ class ResolvingSelfReferencesEagerlyTransformerTests
     })
     void shouldFailWhenSelfReferenceIsDetected(String input, String chain)
     {
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> transform(input));
+        var exception = assertThrows(IllegalStateException.class, () -> transform(input));
         assertEquals("Circular chain of references is found: " + chain, exception.getMessage());
     }
 
@@ -68,13 +67,24 @@ class ResolvingSelfReferencesEagerlyTransformerTests
     })
     void shouldFailWhenChainOfReferencesIsDetected(String input)
     {
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> transform(input));
+        var exception = assertThrows(IllegalStateException.class, () -> transform(input));
         assertEquals("Circular self reference is found in column 'A'", exception.getMessage());
+    }
+
+    @Test
+    void shouldFailWhenTableContainsDuplicateColumns()
+    {
+        var input = "|a|b|a|\n|a1|b1|a2|";
+        var exception = assertThrows(IllegalArgumentException.class, () -> transform(input));
+        assertEquals("ExamplesTable contains non-distinct columns", exception.getMessage());
     }
 
     private String transform(String beforeTransform)
     {
-        return transformer.transform(beforeTransform, new TableParsers(parameterConverters),
-                new TableProperties("", keywords, parameterConverters));
+        Keywords keywords = new Keywords();
+        ParameterConverters parameterConverters = new ParameterConverters();
+        TableParsers tableParsers = new TableParsers(parameterConverters);
+        TableProperties tableProperties = new TableProperties("", keywords, parameterConverters);
+        return transformer.transform(beforeTransform, tableParsers, tableProperties);
     }
 }
