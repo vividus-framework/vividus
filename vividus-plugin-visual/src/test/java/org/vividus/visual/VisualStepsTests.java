@@ -31,6 +31,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.ParameterizedType;
@@ -39,8 +40,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.ExamplesTable;
@@ -71,14 +75,17 @@ import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.ui.web.action.search.WebLocatorType;
+import org.vividus.util.ResourceUtils;
 import org.vividus.visual.engine.IVisualTestingEngine;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.model.VisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 import org.vividus.visual.screenshot.BaselineIndexer;
+import org.vividus.visual.storage.FileSystemBaselineStorage;
 
 import pazone.ashot.util.ImageTool;
 
+@SuppressWarnings("MethodCount")
 @ExtendWith(MockitoExtension.class)
 class VisualStepsTests
 {
@@ -98,6 +105,8 @@ class VisualStepsTests
     private static final String AREA = "AREA";
 
     private static final String IGNORES_TABLE = "ignores table";
+
+    private static final String DIFF_METHOD_SOURCE = "diffMethodSource";
 
     private static final byte[] IMAGE = { -119, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0,
             0, 0, 1, 8, 6, 0, 0, 0, 31, 21, -60, -119, 0, 0, 0, 13, 73, 68, 65, 84, 120, 94, 99, 96, -8, -1, -65, 30, 0,
@@ -232,7 +241,7 @@ class VisualStepsTests
     }
 
     @ParameterizedTest
-    @MethodSource("diffMethodSource")
+    @MethodSource(DIFF_METHOD_SOURCE)
     void shouldAssertCheckResultAndUseStepLevelSettings(VisualActionType actionType,
             Function<VisualCheck, OptionalDouble> diffValueExtractor, String columnName) throws IOException
     {
@@ -437,47 +446,104 @@ class VisualStepsTests
     }
 
     @ParameterizedTest
-    @MethodSource("diffMethodSource")
-    void shouldAssertCheckResultAndUseStepLevelSettingsUsingImage(VisualActionType actionType,
-            Function<VisualCheck, OptionalDouble> diffValueExtractor, String columnName) throws IOException
+    @MethodSource(DIFF_METHOD_SOURCE)
+    void shouldAssertCheckResultAndUseStepLevelSettingsUsingImage(VisualActionType actionType, Function<VisualCheck,
+            OptionalDouble> diffValueExtractor, String columnName) throws IOException
     {
-        var table = mock(ExamplesTable.class);
-        var row = mock(Parameters.class);
-        when(table.getRows()).thenReturn(List.of(Map.of(K, V)));
-        when(table.getRowAsParameters(0)).thenReturn(row);
-        OptionalDouble diffPercentage = OptionalDouble.of(50d);
-        doReturn(diffPercentage).when(row).valueAs(columnName, OptionalDouble.class, OptionalDouble.empty());
-        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
-        mockCheckResult();
-        visualSteps.runVisualTests(actionType, BASELINE, IMAGE, table);
-        verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
-        var visualCheck = visualCheckCaptor.getValue();
-        assertEquals(diffPercentage, diffValueExtractor.apply(visualCheck));
-        validateVisualCheck(visualCheck, actionType, Optional.empty());
-        verifyNoInteractions(screenshotParametersFactory, uiContext);
-        assertArrayEquals(IMAGE, ImageTool.toByteArray(visualCheck.getScreenshot().get().getImage()));
-        verifyCheckResultPublish();
+        shouldAssertCheckResultAndUseStepLevelSettingsUsingImageFile(actionType, diffValueExtractor, columnName,
+                table -> visualSteps.runVisualTests(actionType, BASELINE, IMAGE, table), IMAGE);
     }
 
     @ParameterizedTest
     @ValueSource(strings = { ELEMENT, AREA })
     void shouldThrowAnExceptionWhenIgnoresUsedForImageBaseChecks(String columnName)
     {
-        var table = mock(ExamplesTable.class);
-        var row = mock(Parameters.class);
-        when(table.getRows()).thenReturn(List.of(Map.of(K, V)));
-        when(table.getRowAsParameters(0)).thenReturn(row);
-        doReturn(Map.of(columnName, "50")).when(row).values();
-        var iae = assertThrows(IllegalArgumentException.class,
-                () -> visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE, IMAGE, table));
-        assertEquals("AREA and ELEMENT ignoring not supported for image based checks.", iae.getMessage());
-        verifyNoInteractions(screenshotParametersFactory, uiContext, softAssert, visualTestingEngine);
+        shouldThrowAnExceptionWhenIgnoresUsedForImageBaseChecks(columnName,
+                table -> visualSteps.runVisualTests(VisualActionType.COMPARE_AGAINST, BASELINE, IMAGE, table));
     }
 
     @ParameterizedTest
-    @MethodSource("diffMethodSource")
+    @MethodSource(DIFF_METHOD_SOURCE)
     void shouldAssertCheckResultAndUseStepLevelSettingsUsingImageAndBaselineStorage(VisualActionType actionType,
             Function<VisualCheck, OptionalDouble> diffValueExtractor, String columnName) throws IOException
+    {
+        shouldAssertCheckResultAndUseStepLevelSettingsUsingImageAndBaselineStorage(actionType, diffValueExtractor,
+                columnName, table -> visualSteps.runVisualTests(actionType, BASELINE, IMAGE, FILESYSTEM, table), IMAGE);
+    }
+
+    @Test
+    void shouldPerformVisualCheckUsingImageFile() throws IOException
+    {
+        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
+        mockCheckResult();
+        visualSteps.runVisualTestsUsingImageFile(VisualActionType.COMPARE_AGAINST, BASELINE, getImageFilePath());
+        var visualCheck = visualCheckCaptor.getValue();
+        validateVisualCheck(visualCheck, VisualActionType.COMPARE_AGAINST, Optional.empty());
+        verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
+        assertArrayEquals(getImageAsBytes(), ImageTool.toByteArray(visualCheck.getScreenshot().get().getImage()));
+        verifyNoInteractions(screenshotParametersFactory, uiContext);
+        verifyCheckResultPublish();
+    }
+
+    @Test
+    void shouldThrowAnUncheckedIOInCaseOfIOExceptionForVisualCheckUsingImageFile()
+    {
+        try (MockedStatic<ImageIO> imageTool = Mockito.mockStatic(ImageIO.class))
+        {
+            imageTool.when(() -> ImageIO.read(new File(getImageFilePath()))).thenThrow(new IOException());
+            assertThrows(UncheckedIOException.class,
+                    () -> visualSteps.runVisualTestsUsingImageFile(VisualActionType.COMPARE_AGAINST, BASELINE,
+                            getImageFilePath()));
+        }
+    }
+
+    @Test
+    void shouldPerformVisualCheckUsingImageFileAndBaselineStorage() throws IOException
+    {
+        when(visualTestingEngine.establish(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
+        mockCheckResult();
+        visualSteps.runVisualTestsUsingImageFile(VisualActionType.ESTABLISH, BASELINE, getImageFilePath(), FILESYSTEM);
+        verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
+        var visualCheck = visualCheckCaptor.getValue();
+        assertEquals(Optional.of(FILESYSTEM), visualCheck.getBaselineStorage());
+        validateVisualCheck(visualCheck, VisualActionType.ESTABLISH, Optional.empty());
+        verifyNoInteractions(screenshotParametersFactory, uiContext);
+        assertArrayEquals(getImageAsBytes(), ImageTool.toByteArray(visualCheck.getScreenshot().get().getImage()));
+        verifyCheckResultPublish();
+    }
+
+    @ParameterizedTest
+    @MethodSource(DIFF_METHOD_SOURCE)
+    void shouldAssertCheckResultAndUseStepLevelSettingsUsingImageFile(VisualActionType actionType,
+            Function<VisualCheck, OptionalDouble> diffValueExtractor, String columnName) throws IOException
+    {
+        shouldAssertCheckResultAndUseStepLevelSettingsUsingImageFile(actionType, diffValueExtractor, columnName,
+                table -> visualSteps.runVisualTestsUsingImageFile(actionType, BASELINE, getImageFilePath(), table),
+                getImageAsBytes());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { ELEMENT, AREA })
+    void shouldThrowAnExceptionWhenIgnoresUsedForImageFileBasedChecks(String columnName)
+    {
+        shouldThrowAnExceptionWhenIgnoresUsedForImageBaseChecks(columnName, table ->
+                visualSteps.runVisualTestsUsingImageFile(VisualActionType.COMPARE_AGAINST, BASELINE, getImageFilePath(),
+                        table));
+    }
+
+    @ParameterizedTest
+    @MethodSource(DIFF_METHOD_SOURCE)
+    void shouldAssertCheckResultAndUseStepLevelSettingsUsingImageFileAndBaselineStorage(VisualActionType actionType,
+            Function<VisualCheck, OptionalDouble> diffValueExtractor, String columnName) throws IOException
+    {
+        shouldAssertCheckResultAndUseStepLevelSettingsUsingImageAndBaselineStorage(actionType, diffValueExtractor,
+                columnName, table -> visualSteps.runVisualTestsUsingImageFile(actionType, BASELINE, getImageFilePath(),
+                        FILESYSTEM, table), getImageAsBytes());
+    }
+
+    void shouldAssertCheckResultAndUseStepLevelSettingsUsingImageFile(VisualActionType actionType,
+            Function<VisualCheck, OptionalDouble> diffValueExtractor, String columnName,
+            Consumer<ExamplesTable> visualTest, byte[] imageAsBytes) throws IOException
     {
         var table = mock(ExamplesTable.class);
         var row = mock(Parameters.class);
@@ -487,15 +553,50 @@ class VisualStepsTests
         doReturn(diffPercentage).when(row).valueAs(columnName, OptionalDouble.class, OptionalDouble.empty());
         when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
         mockCheckResult();
-        visualSteps.runVisualTests(actionType, BASELINE, IMAGE, FILESYSTEM, table);
+        visualTest.accept(table);
+        verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
+        var visualCheck = visualCheckCaptor.getValue();
+        assertEquals(diffPercentage, diffValueExtractor.apply(visualCheck));
+        validateVisualCheck(visualCheck, actionType, Optional.empty());
+        verifyNoInteractions(screenshotParametersFactory, uiContext);
+        assertArrayEquals(imageAsBytes, ImageTool.toByteArray(visualCheck.getScreenshot().get().getImage()));
+        verifyCheckResultPublish();
+    }
+
+    void shouldAssertCheckResultAndUseStepLevelSettingsUsingImageAndBaselineStorage(VisualActionType actionType,
+            Function<VisualCheck, OptionalDouble> diffValueExtractor, String columnName,
+            Consumer<ExamplesTable> visualTest, byte[] imageAsBytes) throws IOException
+    {
+        var table = mock(ExamplesTable.class);
+        var row = mock(Parameters.class);
+        when(table.getRows()).thenReturn(List.of(Map.of(K, V)));
+        when(table.getRowAsParameters(0)).thenReturn(row);
+        OptionalDouble diffPercentage = OptionalDouble.of(50d);
+        doReturn(diffPercentage).when(row).valueAs(columnName, OptionalDouble.class, OptionalDouble.empty());
+        when(visualTestingEngine.compareAgainst(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
+        mockCheckResult();
+        visualTest.accept(table);
         verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, false);
         var visualCheck = visualCheckCaptor.getValue();
         assertEquals(diffPercentage, diffValueExtractor.apply(visualCheck));
         validateVisualCheck(visualCheck, actionType, Optional.empty());
         verifyNoInteractions(screenshotParametersFactory, uiContext);
         assertEquals(FILESYSTEM, visualCheck.getBaselineStorage().get());
-        assertArrayEquals(IMAGE, ImageTool.toByteArray(visualCheck.getScreenshot().get().getImage()));
+        assertArrayEquals(imageAsBytes, ImageTool.toByteArray(visualCheck.getScreenshot().get().getImage()));
         verifyCheckResultPublish();
+    }
+
+    void shouldThrowAnExceptionWhenIgnoresUsedForImageBaseChecks(String columnName,
+            Consumer<ExamplesTable> visualTest)
+    {
+        var table = mock(ExamplesTable.class);
+        var row = mock(Parameters.class);
+        when(table.getRows()).thenReturn(List.of(Map.of(K, V)));
+        when(table.getRowAsParameters(0)).thenReturn(row);
+        doReturn(Map.of(columnName, "50")).when(row).values();
+        var iae = assertThrows(IllegalArgumentException.class, () -> visualTest.accept(table));
+        assertEquals("AREA and ELEMENT ignoring not supported for image based checks.", iae.getMessage());
+        verifyNoInteractions(screenshotParametersFactory, uiContext, softAssert, visualTestingEngine);
     }
 
     private void validateVisualCheck(VisualCheck visualCheck, VisualActionType type,
@@ -516,5 +617,15 @@ class VisualStepsTests
     {
         verify(attachmentPublisher).publishAttachment("visual-comparison.ftl", Map.of("result", visualCheckResult),
                 "Visual comparison");
+    }
+
+    private static String getImageFilePath()
+    {
+        return ResourceUtils.findResource(FileSystemBaselineStorage.class, "/baselines/baseline.png").getPath();
+    }
+
+    private byte[] getImageAsBytes() throws IOException
+    {
+        return ImageTool.toByteArray(ImageIO.read(new File(getImageFilePath())));
     }
 }

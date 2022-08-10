@@ -16,6 +16,7 @@
 
 package org.vividus.visual;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
@@ -29,6 +30,8 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.imageio.ImageIO;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -286,14 +289,105 @@ public class VisualSteps extends AbstractVisualSteps
         runVisualTests(actionType, baselineName, image, Optional.of(storage), checkSettings);
     }
 
+
+    /**
+     * Step establishes baseline or compares against existing one.
+     *
+     * @param actionType   ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST.
+     * @param baselineName The baseline name.
+     * @param filePath     The path to the image file.
+     */
+    @When(value = "I $actionType baseline with name `$name` from image out of file `$filePath`", priority = 1)
+    public void runVisualTestsUsingImageFile(VisualActionType actionType, String baselineName, String filePath)
+    {
+        performVisualAction(baselineName, actionType, Optional.empty(), EMPTY_CHECK_SETTINGS, filePath);
+    }
+
+    /**
+     * Step establishes baseline or compares against existing one.
+     *
+     * @param actionType   ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST.
+     * @param baselineName The baseline name.
+     * @param filePath     The path to the image file.
+     * @param storage      The baseline storage name
+     */
+    @When(value = "I $actionType baseline with name `$name` from image out of file `$filePath` using storage"
+                  + " `$storage`", priority = 2)
+    public void runVisualTestsUsingImageFile(VisualActionType actionType, String baselineName, String filePath,
+            String storage)
+    {
+        performVisualAction(baselineName, actionType, Optional.of(storage), EMPTY_CHECK_SETTINGS, filePath);
+    }
+
+    /**
+     * Step establishes baseline or compares against existing one.
+     *
+     * @param actionType    ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST.
+     * @param baselineName  The baseline name.
+     * @param filePath      The path to the image file.
+     * @param checkSettings The examples table containing `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`<br>
+     *                      Example:<br>
+     *                      |ACCEPTABLE_DIFF_PERCENTAGE |REQUIRED_DIFF_PERCENTAGE|<br>
+     *                      |1                          |99                      |
+     */
+    @When(value = "I $actionType baseline with name `$name` from image out of file `$filePath` ignoring:$checkSettings",
+            priority = 2)
+    public void runVisualTestsUsingImageFile(VisualActionType actionType, String baselineName, String filePath,
+            ExamplesTable checkSettings)
+    {
+        runVisualTests(actionType, baselineName, filePath, Optional.empty(), checkSettings);
+    }
+
+    /**
+     * Step establishes baseline or compares against existing one.
+     *
+     * @param actionType    ESTABLISH, COMPARE_AGAINST, CHECK_INEQUALITY_AGAINST.
+     * @param baselineName  The baseline name.
+     * @param filePath      The path to the image file.
+     * @param storage       The baseline storage name
+     * @param checkSettings The examples table containing `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`<br>
+     *                      Example:<br>
+     *                      |ACCEPTABLE_DIFF_PERCENTAGE |REQUIRED_DIFF_PERCENTAGE|<br>
+     *                      |1                          |99                      |
+     */
+    @When(value = "I $actionType baseline with name `$name` from image out of file `$filePath` using storage "
+                  + "`$storage` and ignoring:$checkSettings", priority = 2)
+    public void runVisualTestsUsingImageFile(VisualActionType actionType, String baselineName, String filePath,
+            String storage, ExamplesTable checkSettings)
+    {
+        runVisualTests(actionType, baselineName, filePath, Optional.of(storage), checkSettings);
+    }
+
+    private void runVisualTests(VisualActionType actionType, String baselineName, String filePath,
+            Optional<String> storage, ExamplesTable checkSettings)
+    {
+        Parameters parameters = toParameters(checkSettings);
+        validateImageBasedCheckParameters(parameters);
+        performVisualAction(baselineName, actionType, storage, parameters, filePath);
+    }
+
     private void runVisualTests(VisualActionType actionType, String baselineName, byte[] image,
             Optional<String> storage, ExamplesTable checkSettings)
     {
         Parameters parameters = toParameters(checkSettings);
-        Map<String, String> values = parameters.values();
-        Validate.isTrue(!values.containsKey("AREA") && !values.containsKey("ELEMENT"),
-                "AREA and ELEMENT ignoring not supported for image based checks.");
+        validateImageBasedCheckParameters(parameters);
         performVisualAction(baselineName, actionType, storage, parameters, image);
+    }
+
+    private void performVisualAction(String baselineName, VisualActionType actionType,
+            Optional<String> baselineStorage, Parameters checkSettings, String filePath)
+    {
+        performVisualAction(baselineName, actionType, baselineStorage, checkSettings, vc -> {
+            try
+            {
+                vc.setScreenshot(Optional.of(new Screenshot(ImageIO.read(new File(filePath)))));
+                return vc;
+            }
+            catch (IOException e)
+            {
+                throw new UncheckedIOException(e);
+            }
+        }, vc -> executeWithoutContext(vc, getCheckResultProvider()));
     }
 
     private void performVisualAction(String baselineName, VisualActionType actionType,
@@ -325,6 +419,13 @@ public class VisualSteps extends AbstractVisualSteps
         int rowsSize = checkSettingsTable.getRows().size();
         Validate.isTrue(rowsSize == 1, "Only one row of locators to ignore supported, actual: %s", rowsSize);
         return checkSettingsTable.getRowAsParameters(0);
+    }
+
+    private void validateImageBasedCheckParameters(Parameters parameters)
+    {
+        Map<String, String> values = parameters.values();
+        Validate.isTrue(!values.containsKey("AREA") && !values.containsKey("ELEMENT"),
+                "AREA and ELEMENT ignoring not supported for image based checks.");
     }
 
     private void performVisualAction(String baselineName, VisualActionType actionType,
