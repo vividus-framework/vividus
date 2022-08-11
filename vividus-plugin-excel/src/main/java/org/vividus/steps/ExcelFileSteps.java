@@ -55,10 +55,10 @@ public class ExcelFileSteps
      * @throws IOException if an I/O exception of some sort has occurred
      */
     @When("I create temporary excel file with content:$content and put path to $scopes variable `$variableName`")
-    public void createExcelFileContainigSheetWithContent(ExamplesTable content, Set<VariableScope> scopes,
+    public void createExcelFileContainingSheetWithContent(ExamplesTable content, Set<VariableScope> scopes,
             String variableName) throws IOException
     {
-        createExcelFileContainigSheetWithNameAndContent(null, content, scopes, variableName);
+        createExcelFileContainingSheetWithNameAndContent(null, content, scopes, variableName);
     }
 
     /**
@@ -81,7 +81,7 @@ public class ExcelFileSteps
      */
     @When("I create temporary excel file containing sheet with name `$sheetName` and content:$content and put its"
             + " path to $scopes variable `$variableName`")
-    public void createExcelFileContainigSheetWithNameAndContent(String sheetName, ExamplesTable content,
+    public void createExcelFileContainingSheetWithNameAndContent(String sheetName, ExamplesTable content,
             Set<VariableScope> scopes, String variableName) throws IOException
     {
         Path pathTemporaryFile = ResourceUtils.createTempFile("", ".xlsx", null);
