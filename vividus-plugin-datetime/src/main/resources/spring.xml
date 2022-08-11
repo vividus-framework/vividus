@@ -7,7 +7,7 @@
        default-lazy-init="true">
 
     <bean class="org.vividus.expression.DateExpressionProcessor">
-        <property name="locale" value="${bdd.date-expression-processor.locale}" />
+        <property name="locale" value="${expression.generate-date.locale}" />
     </bean>
 
     <bean id="dateValidationSteps" class="org.vividus.steps.DateValidationSteps">
