@@ -127,7 +127,7 @@ the columns.
 
 == REPEATING
 
-`REPEATING` transformer generates `ExamplesTable` by copy-pasting the initial table the deisred number of times.
+`REPEATING` transformer generates `ExamplesTable` by copy-pasting the initial table the desired number of times.
 
 [cols="1,3", options="header"]
 |===
@@ -219,6 +219,42 @@ In case if `byColumnNames` contains nonexistent table columns the exception with
 |value4|value5|value6|
 |value7|value8|value9|
 ----
+
+== DISTINCTING
+
+`DISTINCTING` transformer generates `ExamplesTable` from the specified columns, deleting the rows with repeating values.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description 
+
+|`byColumnNames`
+|the names of the columns to keep separated by semicolon
+|===
+
+The following `DISTINCTING` transformer:
+
+[source,gherkin]
+----
+{transformer=DISTINCTING, byColumnNames=column1;column2}
+|column1|column2|column3|
+|A      |C      |0      |
+|B      |D      |1      |
+|A      |C      |1      |
+|A      |C      |0      |
+|B      |D      |1      |
+----
+
+will result in the following `ExamplesTable`:
+
+[source,gherkin]
+----
+|column1|column2|
+|A      |C      |
+|B      |D      |
+----
+
 == MERGING
 
 `MERGING` transformer merges several tables into one.
