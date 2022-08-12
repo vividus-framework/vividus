@@ -39,6 +39,27 @@ Generates the date using current date as a baseline.
 * *`period`* - the period in {iso-date-format-link} format
 * `outputFormat` - the output format based on {java-date-time-formatter-link}
 
+==== Properties
+
+[cols="4,3,1,4", options="header"]
+|===
+|Property name
+|Acceptable values
+|Default
+|Description
+
+|`expression.generate-date.locale`
+|https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes[2-letter language code] followed by underscore `_` and then https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2[2-letter country code]
+|`en_US`
+a|The locale used for the resulting date. +
+
+For example, the date '2022-08-11' with format 'EEE, dd MMM yyyy' will be displayed as
+
+* 'Mon, 15 Aug 2022' for `en_US` locale
+* 'lun., 15 août 2022' for `fr_FR` locale
+
+|===
+
 Let's imagine the current date is `2020-11-23` and the time is `00:10:01`. Here is a set of examples with the results and comments.
 
 .Examples of the expressions generating dates
