@@ -83,6 +83,7 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
             new UnaryExpressionProcessor("anyOf",                  StringsExpressionProcessor::anyOf),
             new UnaryExpressionProcessor("toBase64Gzip",           StringsExpressionProcessor::toBase64Gzip),
             new UnaryExpressionProcessor("escapeHTML",             StringEscapeUtils::escapeHtml4),
+            new UnaryExpressionProcessor("escapeJSON",             StringEscapeUtils::escapeJson),
             new UnaryExpressionProcessor("quoteRegExp",            Pattern::quote)
         ));
     }

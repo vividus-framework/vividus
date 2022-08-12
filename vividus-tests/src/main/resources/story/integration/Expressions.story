@@ -151,3 +151,10 @@ Then `#{escapeHTML(M&Ms)}` is = `M&amp;Ms`
 
 Scenario: Should quote regular expression
 Then `Customer(Username)` matches `#{quoteRegExp(Customer(Username))}`
+
+Scenario: Should escape JSON
+Meta:
+    @requirementId 3056
+When I initialize the scenario variable `word` with value `"cowabunga"`
+When I initialize the scenario variable `json` with value `{"question":"what is #{escapeJson(${word})}?"}`
+Then `${json}` is equal to `{"question":"what is \"cowabunga\"?"}`
