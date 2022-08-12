@@ -268,9 +268,9 @@ class AllureStoryReporterTests
         testBeforeStory(BASE_STORY, false);
         verifyNoInteractions(allureReportGenerator);
         assertEquals(6, storyLabels.size());
-        assertLabel(LabelName.PARENT_SUITE, BATCH_NAME, storyLabels.get(0));
-        assertLabel(LabelName.SUITE, BASE_STORY, storyLabels.get(1));
-        assertLabel(LabelName.STORY, BASE_STORY, storyLabels.get(2));
+        assertLabel(LabelName.PARENT_SUITE, BATCH_NAME, storyLabels.get(4));
+        assertLabel(LabelName.SUITE, BASE_STORY, storyLabels.get(5));
+        assertLabel(LabelName.STORY, BASE_STORY, storyLabels.get(3));
     }
 
     @Test
@@ -282,9 +282,9 @@ class AllureStoryReporterTests
         testBeforeStory(GIVEN_STORY, true);
         verifyNoInteractions(allureReportGenerator);
         assertEquals(7, storyLabels.size());
-        assertLabel(LabelName.PARENT_SUITE, BATCH_NAME, storyLabels.get(0));
-        assertLabel(LabelName.SUITE, BASE_STORY, storyLabels.get(1));
-        assertLabel(LabelName.SUB_SUITE, "Given Story: " + GIVEN_STORY, storyLabels.get(2));
+        assertLabel(LabelName.PARENT_SUITE, BATCH_NAME, storyLabels.get(4));
+        assertLabel(LabelName.SUITE, BASE_STORY, storyLabels.get(5));
+        assertLabel(LabelName.SUB_SUITE, "Given Story: " + GIVEN_STORY, storyLabels.get(6));
         assertLabel(LabelName.STORY, GIVEN_STORY, storyLabels.get(3));
     }
 
@@ -363,8 +363,8 @@ class AllureStoryReporterTests
         List<Label> story1Labels = new ArrayList<>();
         List<Label> story2Labels = new ArrayList<>();
         startStoriesWithSameName(story1Labels, story2Labels);
-        assertLabel(LabelName.SUITE, STORY_NAME, story1Labels.get(1));
-        assertLabel(LabelName.SUITE, STORY_NAME, story2Labels.get(1));
+        assertLabel(LabelName.SUITE, STORY_NAME, story1Labels.get(5));
+        assertLabel(LabelName.SUITE, STORY_NAME, story2Labels.get(5));
     }
 
     private void assertLabel(LabelName expectedName, String expectedValue, Label actual)
