@@ -189,6 +189,30 @@ jdbc:oracle:thin:user/password@//host:port/service
 ----
 ====
 
+.DB2
+[%collapsible]
+====
+.build.gradle
+[source,gradle]
+----
+implementation(group: 'com.ibm.db2.jcc', name: 'db2jcc', version: 'db2jcc4')
+----
+
+.environment.properties
+[source,properties]
+----
+db.connection.vividus.url=jdbc:db2://localhost:50000/my_db
+db.connection.vividus.username=vividus
+db.connection.vividus.password=pa$$w0rd
+----
+
+.https://www.ibm.com/docs/en/db2-for-zos/11?topic=cdsudidsdjs-url-format-data-server-driver-jdbc-sqlj-type-4-connectivity[URL template]
+[source,properties]
+----
+jdbc:db2://<host>:<port>/<database_name>
+----
+====
+
 .CSV
 [%collapsible]
 ====
