@@ -10,7 +10,7 @@ dependencies {
     implementation(group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1')
     implementation(group: 'javax.jws', name: 'javax.jws-api', version: '1.1')
     implementation(group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.1')
-    implementation(group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.3.6')
+    implementation(group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '4.0.0')
     implementation(group: 'com.sun.xml.ws', name: 'jaxws-rt', version: '2.3.5')
     implementation(group: 'com.sun.activation', name: 'javax.activation', version: '1.2.0')
 
