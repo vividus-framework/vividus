@@ -10,5 +10,5 @@ dependencies {
 
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')
     implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.4')
-    testImplementation(group: 'org.mockito', name: 'mockito-inline', version: '4.6.1')
+    testImplementation(group: 'org.mockito', name: 'mockito-inline', version: '4.7.0')
 }
