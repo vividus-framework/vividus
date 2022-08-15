@@ -110,6 +110,7 @@ import io.qameta.allure.model.Status;
 import io.qameta.allure.model.StatusDetails;
 import io.qameta.allure.model.StepResult;
 import io.qameta.allure.model.TestResult;
+import io.qameta.allure.util.ResultsUtils;
 
 @SuppressWarnings("MethodCount")
 @ExtendWith(MockitoExtension.class)
@@ -972,14 +973,15 @@ class AllureStoryReporterTests
         mockScenarioUid(true);
         boolean givenStory = false;
         mockStoryStart(givenStory);
-        Properties meta = getScenarioMeta(false);
-        Properties scenarioMeta = putTestCaseMetaProperties(meta, EXPECTED_SCENARIO_TEST_CASE_ID,
-                EXPECTED_SCENARIO_REQUIREMENT_ID);
-        meta.put("issueId.dev", "VVD-1");
+        Properties scenarioMeta = getScenarioMeta(false);
+        putDefaultTestCaseMetaProperties(scenarioMeta);
+        scenarioMeta.put("issueId.dev", "VVD-1");
+        scenarioMeta.put("check-override", "scenario");
         Scenario scenario1 = createScenario(scenarioMeta, List.of());
         Scenario scenario2 = createScenario(scenarioMeta, List.of());
         RunningScenario runningScenario = getRunningScenario(scenario1, 0);
-        Story story = new Story(STORY_NAME, null, new Meta(new Properties()), null, List.of(scenario1, scenario2));
+        Meta storyMeta = new Meta(List.of("check-override story"));
+        Story story = new Story(STORY_NAME, null, storyMeta, null, List.of(scenario1, scenario2));
         RunningStory runningStory = getRunningStory(story, runningScenario);
         runTestContext.putRunningStory(runningStory, false);
         allureStoryReporter.beforeStory(story, givenStory);
@@ -996,6 +998,13 @@ class AllureStoryReporterTests
         assertEquals("https://vividus.dev/VVD-1", issue.getUrl());
         assertEquals("issue", issue.getType());
         assertEquals(Status.PASSED, captured.getStatus());
+
+        List<Label> labels = captured.getLabels();
+        assertEquals(6, labels.size());
+
+        assertEquals(ResultsUtils.createTagLabel("@check-override scenario"), labels.get(3));
+        assertEquals(ResultsUtils.createTagLabel("@scenario-meta-1d"), labels.get(4));
+        assertEquals(ResultsUtils.createTagLabel("@scenario-meta-2d scenario-meta-value"), labels.get(5));
     }
 
     @Test
@@ -1005,10 +1014,8 @@ class AllureStoryReporterTests
         boolean givenStory = false;
         mockStoryStart(givenStory);
         RunningStory runningStory = mockRunningStory(
-                putTestCaseMetaProperties(new Properties(), EXPECTED_SCENARIO_TEST_CASE_ID,
-                        EXPECTED_SCENARIO_REQUIREMENT_ID),
-                putTestCaseMetaProperties(getScenarioMeta(false), EXPECTED_SCENARIO_TEST_CASE_ID,
-                        EXPECTED_SCENARIO_REQUIREMENT_ID), List.of());
+                putDefaultTestCaseMetaProperties(new Properties()),
+                putDefaultTestCaseMetaProperties(getScenarioMeta(false)), List.of());
         Story story = runningStory.getStory();
         allureStoryReporter.beforeStory(story, givenStory);
         allureStoryReporter.beforeScenario(story.getScenarios().get(0));
@@ -1159,7 +1166,8 @@ class AllureStoryReporterTests
     private Properties getScenarioMeta(boolean useSeverity)
     {
         Properties scenarioMeta = new Properties();
-        scenarioMeta.setProperty("scenarioMetaKey", "scenarioMetaValue");
+        scenarioMeta.setProperty("scenario-meta-1d", "");
+        scenarioMeta.setProperty("scenario-meta-2d", "scenario-meta-value");
         if (useSeverity)
         {
             scenarioMeta.setProperty("severity", "2");
@@ -1183,10 +1191,10 @@ class AllureStoryReporterTests
         return storyMeta;
     }
 
-    private Properties putTestCaseMetaProperties(final Properties meta, String testCaseId, String requirementId)
+    private Properties putDefaultTestCaseMetaProperties(final Properties meta)
     {
-        meta.setProperty(TEST_CASE_ID, testCaseId);
-        meta.setProperty(REQUIREMENT_ID, requirementId);
+        meta.setProperty(TEST_CASE_ID, EXPECTED_SCENARIO_TEST_CASE_ID);
+        meta.setProperty(REQUIREMENT_ID, EXPECTED_SCENARIO_REQUIREMENT_ID);
         return meta;
     }
 

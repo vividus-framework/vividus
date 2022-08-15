@@ -588,24 +588,14 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
                     .collect(Collectors.toMap(Function.identity(),
                         label -> label.extractMetaValues(storyMeta, scenarioMeta), (l, r) -> l, LinkedHashMap::new));
 
-            List<Link> links = metaLabels.entrySet().stream()
-                    .flatMap(e -> e.getValue().stream().map(v -> e.getKey().createLink(v)))
-                    .flatMap(Optional::stream)
-                    .collect(Collectors.toList());
-
-            List<Label> labels = metaLabels.entrySet().stream()
-                    .flatMap(e -> e.getValue().stream().map(v -> e.getKey().createLabel(v)))
-                    .collect(Collectors.toList());
-            labels.addAll(allureRunContext.getCurrentStoryLabels());
-
             int index = runningScenario.getIndex();
             String scenarioId = scenario.getId() + (index != -1 ? "[" + index + "]" : "");
             lifecycle.scheduleTestCase(new TestResult()
                     .setHistoryId(getHistoryId(runningStory, runningScenario))
                     .setUuid(scenarioId)
                     .setName(runningScenario.getTitle())
-                    .setLabels(labels)
-                    .setLinks(links)
+                    .setLabels(createLabels(storyMeta, scenarioMeta, metaLabels))
+                    .setLinks(createLinks(metaLabels))
                     .setStatus(Status.getLowest().getAllureStatus()));
             lifecycle.startTestCase(scenarioId);
             putCurrentStepId(scenarioId);
@@ -615,6 +605,44 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
             startStep(runningScenario.getTitle());
         }
         allureRunContext.setStoryExecutionStage(storyExecutionStage);
+    }
+
+    private static List<Link> createLinks(Map<VividusLabel, Set<Entry<String, String>>> metaLabels)
+    {
+        return metaLabels.entrySet().stream()
+                .flatMap(e -> e.getValue().stream().map(v -> e.getKey().createLink(v)))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
+    }
+
+    private List<Label> createLabels(Meta storyMeta, Meta scenarioMeta,
+            Map<VividusLabel, Set<Entry<String, String>>> metaLabels)
+    {
+        List<Label> labels = metaLabels.entrySet().stream()
+                .flatMap(e -> e.getValue().stream().map(v -> e.getKey().createLabel(v)))
+                .collect(Collectors.toList());
+        labels.addAll(allureRunContext.getCurrentStoryLabels());
+
+        Set<String> metaLabelsNames = metaLabels.values().stream()
+                .flatMap(Set::stream)
+                .map(Entry::getKey)
+                .collect(Collectors.toSet());
+
+        Meta mergedMeta = scenarioMeta.inheritFrom(storyMeta);
+        Set<String> tagNames = mergedMeta.getPropertyNames();
+        tagNames.removeAll(metaLabelsNames);
+
+        tagNames.stream().map(name -> {
+            String value = mergedMeta.getProperty(name);
+            StringBuilder tag = new StringBuilder("@").append(name);
+            if (!value.isEmpty())
+            {
+                tag.append(' ').append(value);
+            }
+            return tag.toString();
+        }).map(ResultsUtils::createTagLabel).forEach(labels::add);
+
+        return labels;
     }
 
     private String getHistoryId(RunningStory runningStory, RunningScenario runningScenario)
