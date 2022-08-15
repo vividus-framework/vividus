@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,9 @@
 package org.vividus.report.allure;
 
 import static java.util.Map.entry;
-import static org.vividus.model.MetaWrapper.META_VALUES_SEPARATOR;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
@@ -52,7 +50,7 @@ public enum VividusLabel
                     .map(Integer::parseInt)
                     .map(severity -> SeverityLevel.values()[severity - 1])
                     .map(SeverityLevel::value)
-                    .map(s -> Map.entry(getMetaName(), s))
+                    .map(s -> entry(getMetaName(), s))
                     .map(Set::of)
                     .orElseGet(Set::of);
         }
@@ -81,9 +79,7 @@ public enum VividusLabel
                 .map(MetaWrapper::new)
                 .map(meta -> meta.getPropertiesByKey(k -> k.startsWith(metaName)).entrySet())
                 .flatMap(Collection::stream)
-                .flatMap(e -> Stream.of(StringUtils.split(e.getValue(), META_VALUES_SEPARATOR))
-                                    .map(String::trim)
-                                    .map(m -> entry(e.getKey(), m)))
+                .flatMap(e -> MetaWrapper.parsePropertyValues(e.getValue()).stream().map(m -> entry(e.getKey(), m)))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
