@@ -25,16 +25,14 @@ import io.qameta.allure.plugin.DefaultPlugin;
 
 public class EmbeddedPlugin extends DefaultPlugin
 {
-    protected static final String STYLES_CSS = "styles.css";
-
     public EmbeddedPlugin(String id, List<String> jsFiles, Extension extension)
     {
         super(new PluginConfiguration().setId(id).setJsFiles(jsFiles), List.of(extension), null);
     }
 
-    public EmbeddedPlugin(String id, List<String> cssFiles)
+    public EmbeddedPlugin(String id)
     {
-        super(new PluginConfiguration().setId(id).setCssFiles(cssFiles), List.of(), null);
+        super(new PluginConfiguration().setId(id).setCssFiles(List.of("styles.css")), List.of(), null);
     }
 
     public EmbeddedPlugin(String id, Extension extension)
