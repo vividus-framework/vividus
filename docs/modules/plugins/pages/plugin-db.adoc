@@ -99,7 +99,7 @@ jdbc:mysql://host:port/database?parameters
 .build.gradle
 [source,gradle]
 ----
-implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '10.2.0.jre11')
+implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '11.2.0.jre11')
 ----
 
 .environment.properties
@@ -123,7 +123,7 @@ jdbc:sqlserver://serverName\instanceName:portNumber;parameter1=value1;parameter2
 .build.gradle
 [source,gradle]
 ----
-implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '10.2.0.jre11')
+implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '11.2.0.jre11')
 ----
 
 .environment.properties
