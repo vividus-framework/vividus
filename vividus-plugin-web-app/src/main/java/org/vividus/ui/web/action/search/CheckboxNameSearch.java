@@ -20,6 +20,7 @@ import static org.vividus.ui.util.XpathLocatorUtils.getXPathLocator;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
@@ -32,6 +33,8 @@ public class CheckboxNameSearch extends AbstractWebElementSearchAction implement
 {
     private static final String CHECKBOX_LOCATOR = "input[@type='checkbox']";
     private static final String PRECEDING_SIBLING_CHECKBOX_LOCATOR = "preceding-sibling::" + CHECKBOX_LOCATOR;
+    private static final String FOLLOWING_SIBLING_CHECKBOX_LOCATOR = "following-sibling::" + CHECKBOX_LOCATOR;
+    private static final String CHILD_CHECKBOX_LOCATOR = "child::" + CHECKBOX_LOCATOR;
     private static final String CHECKBOX_LABEL_FORMAT = ".//label[text()='%s'"
             + " and (preceding-sibling::input or following-sibling::input or child::input)]";
     private static final String CHECKBOX_LABEL_DEEP = "label[preceding-sibling::input or following-sibling::input"
@@ -77,7 +80,10 @@ public class CheckboxNameSearch extends AbstractWebElementSearchAction implement
             }
             else
             {
-                checkboxes = label.findElements(getXPathLocator(PRECEDING_SIBLING_CHECKBOX_LOCATOR));
+                checkboxes = Stream
+                        .of(PRECEDING_SIBLING_CHECKBOX_LOCATOR, FOLLOWING_SIBLING_CHECKBOX_LOCATOR,
+                                CHILD_CHECKBOX_LOCATOR)
+                        .flatMap(e -> label.findElements(getXPathLocator(e)).stream()).collect(Collectors.toList());
             }
             if (!checkboxes.isEmpty())
             {
