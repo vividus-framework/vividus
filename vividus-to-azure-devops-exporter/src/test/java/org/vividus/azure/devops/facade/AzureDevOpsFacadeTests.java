@@ -260,16 +260,21 @@ class AzureDevOpsFacadeTests
         verifyCreateTestCaseLog();
     }
 
-    @Test
-    void shouldUpdateTestCase() throws IOException, SyntaxException
+    @CsvSource({
+        "area, project\\area",
+        ", project"
+    })
+    @ParameterizedTest
+    void shouldUpdateTestCase(String area, String path) throws IOException, SyntaxException
     {
         SectionMapping mapping = new SectionMapping();
         mapping.setSteps(ScenarioPart.AUTOMATED);
         options.setSectionMapping(mapping);
+        options.setArea(area);
         facade.updateTestCase(TEST_CASE_ID, SUITE_TITLE, createScenario(List.of(createStep(WHEN_STEP))));
         verify(client).updateTestCase(eq(TEST_CASE_ID), operationsCaptor.capture());
         assertOperations(5, ops -> assertAll(
-            () -> assertAreaPath(ops.get(0)),
+            () -> assertAreaPath(ops.get(0), path),
             () -> assertTitle(ops.get(1)),
             () -> assertSteps(ops.get(2), STEPS),
             () -> assertAutomatedTestName(ops.get(3)),
@@ -412,7 +417,12 @@ class AzureDevOpsFacadeTests
 
     private void assertAreaPath(AddOperation operation)
     {
-        assertOperation(operation, "/fields/System.AreaPath", PROJECT + '\\' + AREA);
+        assertAreaPath(operation, PROJECT + '\\' + AREA);
+    }
+
+    private void assertAreaPath(AddOperation operation, String value)
+    {
+        assertOperation(operation, "/fields/System.AreaPath", value);
     }
 
     private void assertTitle(AddOperation operation)
