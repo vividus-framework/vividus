@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,5 +50,25 @@ public class DeviceSteps
 
         String fileName = FilenameUtils.getName(filePath);
         deviceActions.pushFile(Paths.get(folderForFileUpload, fileName).toString(), filePath);
+    }
+
+    /**
+     * Deletes a file by <b>filePath</b> from the device
+     * Example:
+     * <br>
+     * <code>
+     * When I delete file /sdcard/myfile.txt from device
+     * </code>
+     *
+     * @param filePath the path to an existing remote file on the device. This variable can be predefined with bundle
+     * id to delete file inside an application bundle.
+     * <p>See details for
+     * <a href="https://github.com/appium/appium-xcuitest-driver#mobile-deletefile">iOS</a>,
+     * <a href="https://github.com/appium/appium-uiautomator2-driver#mobile-deletefile">Android</a>
+     */
+    @When("I delete file `$filePath` from device")
+    public void deleteFileFromDevice(String filePath)
+    {
+        deviceActions.deleteFile(filePath);
     }
 }

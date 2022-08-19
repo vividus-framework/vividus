@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 class DeviceStepsTests
 {
     private static final String DEVICE_FOLDER = "/device/folder";
+    private static final String DEVICE_FILE_PATH = "device-file-path";
 
     @Mock private DeviceActions deviceActions;
     private DeviceSteps deviceSteps;
@@ -55,7 +56,7 @@ class DeviceStepsTests
     }
 
     @Test
-    void shoulUploadFileToDevice()
+    void shouldUploadFileToDevice()
     {
         String fileName = "file.txt";
         String filePath = Paths.get("/local/fs/", fileName).toString();
@@ -66,5 +67,12 @@ class DeviceStepsTests
         assertThat(logger.getLoggingEvents(), is(List.of(
             info("Uploading file '{}' to a device at '{}' folder", filePath, DEVICE_FOLDER)
         )));
+    }
+
+    @Test
+    void shouldDeleteFileFromDevice()
+    {
+        deviceSteps.deleteFileFromDevice(DEVICE_FILE_PATH);
+        verify(deviceActions).deleteFile(DEVICE_FILE_PATH);
     }
 }

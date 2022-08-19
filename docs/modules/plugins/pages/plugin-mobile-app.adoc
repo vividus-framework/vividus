@@ -428,6 +428,51 @@ When I upload file `images/avatar.png` to device
 Then the avatar icon is displayed with the uploaded image
 ----
 
+=== Delete a file from the device
+
+Deletes a file from the device/emulator/simulator.
+
+[source,gherkin]
+----
+When I delete file `$filePath` from device
+----
+
+[cols="1,1,2,1", options="header"]
+
+|===
+
+|Argument
+|Platform
+|Description
+|Examples
+
+.2+.^| `$filePath`
+|iOS
+|The path to an existing remote file on the device. This variable can be prefixed with bundle id, so then the file will be deleted from the corresponding application container instead of the default media folder. Use `@<app_bundle_id>:<optional_container_type>/<path_to_the_file_or_folder_inside_container>` format to delete a file or a folder from an application container of the given type. The only supported container type is 'documents'. If the container type is not set explicitly for a bundle id, then the default application container is going to be mounted (aka --container ifuse argument) e.g. If `@com.myapp.bla:documents/111.png` is provided, `On My iPhone/<app name>` in Files app will be mounted to the host machine. `@com.myapp.bla:documents/ means On My iPhone/<app name>.
+|`/DCIM/100APPLE/image.png` or `@com.mycompany.myapp:documents/myfile.txt`
+
+|Android
+|The full path to the remote file or a file inside an application bundle
+|`/sdcard/myfile.txt` or `@my.app.id/path/in/bundle`
+
+|===
+
+.Delete file
+[source,gherkin]
+----
+When I delete file `/sdcard/Pictures/avatar.png` from device
+----
+
+IMPORTANT: On iOS real device to add or delete photo or video to/from "Camera Roll" you need upload/delete photos or
+videos to/from */DCIM/100APPLE/* folder and then trigger a rebuild of the "Camera Roll" database by deleting the old
+databases. You can accomplish it by deleting following files: */PhotoData/Photos.sqlite*, */PhotoData/Photos.sqlite-shm*,
+*/PhotoData/Photos.sqlite-wal*. Restart device is necessary after that.
+
+IMPORTANT: On iOS simulator to delete photo or video from "Camera Roll" you need to delete photo or video from
+*/Media/DCIM/100APPLE/* and then trigger a rebuild of the "Camera Roll" database by deleting the old databases. You can
+accomplish it by deleting following files: */Media/PhotoData/Photos.sqlite*, */Media/PhotoData/Photos.sqlite-shm*,
+*/Media/PhotoData/Photos.sqlite-wal*. And then restart simulator.
+
 :web-view-info: (see http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information)
 
 === Switch to Web view by index
