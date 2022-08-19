@@ -281,8 +281,12 @@ public class AzureDevOpsFacade
     private List<AddOperation> createCommonOperations(String testTitle)
     {
         List<AddOperation> operations = new ArrayList<>();
-        operations.add(new AddOperation("/fields/System.AreaPath", format("%s\\%s", options.getProject(),
-                options.getArea())));
+        String areaPath = options.getProject();
+        if (options.getArea() != null)
+        {
+            areaPath += "\\" + options.getArea();
+        }
+        operations.add(new AddOperation("/fields/System.AreaPath", areaPath));
         operations.add(new AddOperation("/fields/System.Title", testTitle));
         return operations;
     }

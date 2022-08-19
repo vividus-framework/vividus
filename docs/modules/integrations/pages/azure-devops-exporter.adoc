@@ -38,10 +38,12 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |string
 |Project ID or project name.
 
-|`*azure-devops-exporter.area*`
+|`azure-devops-exporter.area`
 |
 |string
-|The area of the product which a test case is associated with.
+a|The area of the product which a test case is associated with.
+
+If the Area name is inherited from the Project name in AzureDevOps this property should be empty. You can check this by making a request for any https://docs.microsoft.com/en-us/rest/api/azure/devops/wit/work-items/get-work-item?view=azure-devops-rest-7.1&tabs=HTTP[Work Item] within current Area and checking if the `System.AreaPath` contains any data besides the Project name.
 
 |`azure-devops-exporter.section-mapping.steps`
 |`AUTOMATED`
