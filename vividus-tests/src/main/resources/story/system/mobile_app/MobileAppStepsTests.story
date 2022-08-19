@@ -363,9 +363,11 @@ Examples:
 Scenario: Verify step: 'When I long press $key key'
 Meta:
     @targetPlatform android
-When I long press POWER key
-When I reset context
-Then number of elements found by `xpath(//*[@text = 'Power off'])` is = `1`
+When I wait until element located `accessibilityId(menuToggler)` appears
+When I long press HOME key
+When I wait until element located `accessibilityId(menuToggler)` disappears
+When I activate application with bundle identifier `${main-app}`
+When I wait until element located `accessibilityId(menuToggler)` appears
 
 
 Scenario: Verify step: 'When I long press $key key'
