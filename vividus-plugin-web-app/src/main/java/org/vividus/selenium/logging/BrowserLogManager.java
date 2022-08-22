@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,10 +73,6 @@ public final class BrowserLogManager
     private static Stream<LogEntry> filter(LogEntries log, Level level)
     {
         int levelValue = level.intValue();
-        return log.getAll().stream().filter(logEntry ->
-        {
-            int logEntryLevel = logEntry.getLevel().intValue();
-            return logEntryLevel >= levelValue && logEntryLevel <= levelValue;
-        });
+        return log.getAll().stream().filter(logEntry -> levelValue == logEntry.getLevel().intValue());
     }
 }

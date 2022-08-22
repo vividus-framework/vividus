@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -52,14 +53,9 @@ public class JsValidationSteps
      * @param regex Regular expression to filter log entries
      */
     @Then("there are browser console $logEntries by regex `$regex`")
-    public void checkThereAreLogEntriesOnOpenedPageFiltredByRegExp(List<BrowserLogLevel> logEntries, String regex)
+    public void checkThereAreLogEntriesOnOpenedPageFilteredByRegExp(List<BrowserLogLevel> logEntries, Pattern regex)
     {
-        WebDriver webDriver = webDriverProvider.get();
-        Set<LogEntry> filteredLogEntries = BrowserLogManager.getFilteredLog(webDriver, logEntries).stream()
-                .filter(logEntry -> logEntry.getMessage().matches(regex))
-                .collect(Collectors.toSet());
-
-        publishAttachment(Map.of(webDriver.getCurrentUrl(), filteredLogEntries));
+        Set<LogEntry> filteredLogEntries = getLogEntries(logEntries, regex);
         softAssert.assertFalse(String.format("Current page contains JavaScript %s by regex '%s'",
                 toString(logEntries), regex), filteredLogEntries.isEmpty());
     }
@@ -77,8 +73,8 @@ public class JsValidationSteps
     @Then("there are no browser console $logEntries")
     public void checkJsLogEntriesOnOpenedPage(List<BrowserLogLevel> logEntries)
     {
-        checkFilteredJsEntries(logEntries,
-            e -> includeBrowserExtensionLogEntries || !e.getMessage().contains("extension"));
+        checkLogMessagesAbsence(getLogEntries(logEntries,
+            e -> includeBrowserExtensionLogEntries || !e.getMessage().contains("extension")), logEntries);
     }
 
     /**
@@ -93,21 +89,31 @@ public class JsValidationSteps
      * @param regex Regular expression to filter log entries
      */
     @Then(value = "there are no browser console $logEntries by regex '$regex'", priority = 1)
-    public void checkJsLogEntriesOnOpenedPageFiltredByRegExp(List<BrowserLogLevel> logEntries, String regex)
+    public void checkJsLogEntriesOnOpenedPageFilteredByRegExp(List<BrowserLogLevel> logEntries, Pattern regex)
     {
-        checkFilteredJsEntries(logEntries, logEntry -> logEntry.getMessage().matches(regex));
+        checkLogMessagesAbsence(getLogEntries(logEntries, regex), logEntries);
     }
 
-    private void checkFilteredJsEntries(List<BrowserLogLevel> logLevels, Predicate<? super LogEntry> filter)
+    private void checkLogMessagesAbsence(Set<LogEntry> logEntries, List<BrowserLogLevel> logLevels)
+    {
+        softAssert.assertEquals("Current page contains no JavaScript " + toString(logLevels), 0,
+                logEntries.size());
+    }
+
+    private Set<LogEntry> getLogEntries(List<BrowserLogLevel> logEntries, Predicate<? super LogEntry> filter)
     {
         WebDriver webDriver = webDriverProvider.get();
-        Set<LogEntry> filteredLogEntries = BrowserLogManager.getFilteredLog(webDriver, logLevels).stream()
-                .filter(filter)
+        Set<LogEntry> filteredLogEntries = BrowserLogManager.getFilteredLog(webDriver, logEntries).stream()
+                .filter(filter::test)
                 .collect(Collectors.toSet());
 
         publishAttachment(Map.of(webDriver.getCurrentUrl(), filteredLogEntries));
-        softAssert.assertEquals("Current page contains no JavaScript " + toString(logLevels), 0,
-                filteredLogEntries.size());
+        return filteredLogEntries;
+    }
+
+    private Set<LogEntry> getLogEntries(List<BrowserLogLevel> logEntries, Pattern regex)
+    {
+        return getLogEntries(logEntries, message -> regex.matcher(message.getMessage()).matches());
     }
 
     private void publishAttachment(Map<String, Set<LogEntry>> results)

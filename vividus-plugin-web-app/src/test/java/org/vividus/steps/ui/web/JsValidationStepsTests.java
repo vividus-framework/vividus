@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +53,9 @@ class JsValidationStepsTests
 {
     private static final String URL = "url";
     private static final String ERROR_MESSAGE = "error message";
+    private static final Pattern ERROR_MESSAGE_PATTERN = Pattern.compile(ERROR_MESSAGE);
     private static final String EXTENSION = "extension ";
+    private static final Pattern EXTENSION_PATTERN = Pattern.compile(EXTENSION);
     private static final String ERRORS_ASSERTION_DESCRIPTION = "Current page contains no JavaScript errors";
 
     @Mock
@@ -68,11 +71,11 @@ class JsValidationStepsTests
     private JsValidationSteps jsValidationSteps;
 
     @Test
-    void testCheckThereAreLogEntriesOnOpenedPageFiltredByRegExp()
+    void testCheckThereAreLogEntriesOnOpenedPageFilteredByRegExp()
     {
         Map<String, Set<LogEntry>> expectedResults = testCheckJsErrors(ERROR_MESSAGE, () -> jsValidationSteps
-                .checkThereAreLogEntriesOnOpenedPageFiltredByRegExp(singletonList(BrowserLogLevel.ERRORS),
-                        ERROR_MESSAGE));
+                .checkThereAreLogEntriesOnOpenedPageFilteredByRegExp(singletonList(BrowserLogLevel.ERRORS),
+                        ERROR_MESSAGE_PATTERN));
         InOrder inOrder = inOrder(attachmentPublisher, softAssert);
         verifyAttachmentPublisher(expectedResults, inOrder);
         inOrder.verify(softAssert).assertFalse(String.format("Current page contains JavaScript %s by regex '%s'",
@@ -91,7 +94,8 @@ class JsValidationStepsTests
     void testCheckJsErrorsOnPageByRegExpNoMatch()
     {
         testCheckJsErrors(ERROR_MESSAGE, () -> jsValidationSteps
-                .checkJsLogEntriesOnOpenedPageFiltredByRegExp(singletonList(BrowserLogLevel.ERRORS), EXTENSION));
+                .checkJsLogEntriesOnOpenedPageFilteredByRegExp(singletonList(BrowserLogLevel.ERRORS),
+                    EXTENSION_PATTERN));
         verifyTestActions(Map.of(URL, Collections.emptySet()), ERRORS_ASSERTION_DESCRIPTION);
     }
 
