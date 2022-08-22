@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,12 @@ import static org.mockito.Mockito.withSettings;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
@@ -71,13 +75,21 @@ class BrowserLogManagerTests
         assertEquals(emptySet(), filteredLog);
     }
 
-    @Test
-    void shouldNotReturnLogsForFirefox()
+    static Stream<Arguments> notSupportedBrowsers()
     {
-        WebDriver webDriver = mockBrowserName(Browser.FIREFOX.browserName());
+        return Stream.of(Arguments.of(Browser.IE),
+                         Arguments.of(Browser.SAFARI),
+                         Arguments.of(Browser.FIREFOX));
+    }
+
+    @ParameterizedTest
+    @MethodSource("notSupportedBrowsers")
+    void shouldFailWhenBrowserDoesntSupportsLogs(Browser browser)
+    {
+        WebDriver webDriver = mockBrowserName(browser.browserName());
         IllegalStateException exception = assertThrows(IllegalStateException.class,
             () -> BrowserLogManager.getLog(webDriver));
-        assertEquals("Firefox does not support retrieval of browser logs", exception.getMessage());
+        assertEquals("Browser does not support retrieval of browser logs", exception.getMessage());
     }
 
     @Test
