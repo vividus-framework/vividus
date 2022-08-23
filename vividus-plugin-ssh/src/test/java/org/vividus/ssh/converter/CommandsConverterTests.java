@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package org.vividus.converter;
+package org.vividus.ssh.converter;
 
-import javax.inject.Named;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
-import org.vividus.ssh.Commands;
+import org.junit.jupiter.api.Test;
 
-@Named
-public class CommandsConverter extends FunctionalParameterConverter<String, Commands>
+class CommandsConverterTests
 {
-    public CommandsConverter()
+    @Test
+    void shouldConvertValue()
     {
-        super(Commands::new);
+        String commands = "cd path;";
+        assertEquals(commands, new CommandsConverter().convertValue(commands, null).getJoinedCommands());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package org.vividus.context;
+package org.vividus.ssh.context;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.vividus.ssh.SshConnectionParameters;
 import org.vividus.ssh.exec.SshOutput;
 import org.vividus.testcontext.SimpleTestContext;
 
@@ -30,7 +34,7 @@ class SshTestContextTests
     @Test
     void shouldSaveSshOutput()
     {
-        SshOutput sshOutput = new SshOutput();
+        var sshOutput = new SshOutput();
         sshTestContext.putSshOutput(sshOutput);
         assertEquals(sshOutput, sshTestContext.getSshOutput());
     }
@@ -39,5 +43,20 @@ class SshTestContextTests
     void shouldReturnNullSshOutputWhenNothingIsSavedBefore()
     {
         assertNull(sshTestContext.getSshOutput());
+    }
+
+    @Test
+    void shouldProvideNoConnectionIfNoConnectionIsConfiguredBefore()
+    {
+        assertEquals(Optional.empty(), sshTestContext.getDynamicConnectionParameters("missing"));
+    }
+
+    @Test
+    void shouldProvideConfiguredConnection()
+    {
+        var key = "new-connection";
+        var sshConnectionParameters = mock(SshConnectionParameters.class);
+        sshTestContext.addDynamicConnectionParameters(key, sshConnectionParameters);
+        assertEquals(Optional.of(sshConnectionParameters), sshTestContext.getDynamicConnectionParameters(key));
     }
 }

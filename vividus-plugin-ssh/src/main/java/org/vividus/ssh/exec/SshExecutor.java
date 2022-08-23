@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,16 +30,16 @@ import com.jcraft.jsch.JSchException;
 import org.apache.commons.io.IOUtils;
 import org.vividus.ssh.Commands;
 import org.vividus.ssh.JSchExecutor;
-import org.vividus.ssh.ServerConfiguration;
+import org.vividus.ssh.SshConnectionParameters;
 import org.vividus.util.Sleeper;
 
 public abstract class SshExecutor<T extends Channel> extends JSchExecutor<T, SshOutput>
 {
     @Override
-    protected SshOutput executeCommand(ServerConfiguration serverConfiguration, Commands commands, T channel)
+    protected SshOutput executeCommand(SshConnectionParameters sshConnectionParameters, Commands commands, T channel)
             throws JSchException, IOException
     {
-        configureChannel(channel, serverConfiguration);
+        configureChannel(channel, sshConnectionParameters);
         SshOutput executionOutput = new SshOutput();
         try (ByteArrayOutputStream errorStream = new ByteArrayOutputStream())
         {
@@ -47,13 +47,13 @@ public abstract class SshExecutor<T extends Channel> extends JSchExecutor<T, Ssh
             channel.setExtOutputStream(errorStream);
             channel.connect();
             executionOutput.setOutputStream(readChannelInputStream(channel));
-            executionOutput.setErrorStream(new String(errorStream.toByteArray(), StandardCharsets.UTF_8));
+            executionOutput.setErrorStream(errorStream.toString(StandardCharsets.UTF_8));
             executionOutput.setExitStatus(channel.getExitStatus());
         }
         return executionOutput;
     }
 
-    protected abstract void configureChannel(T channel, ServerConfiguration serverConfiguration);
+    protected abstract void configureChannel(T channel, SshConnectionParameters sshConnectionParameters);
 
     protected abstract void setupCommands(T channel, Commands commands);
 
