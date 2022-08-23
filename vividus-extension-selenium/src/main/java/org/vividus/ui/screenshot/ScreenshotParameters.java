@@ -25,18 +25,52 @@ import org.vividus.ui.action.search.Locator;
 
 public class ScreenshotParameters
 {
-    private int nativeFooterToCut;
+    private int cutTop;
+    private int cutBottom;
+    private int cutLeft;
+    private int cutRight;
+
     private Optional<String> shootingStrategy = Optional.empty();
     private Map<IgnoreStrategy, Set<Locator>> ignoreStrategies;
 
-    public int getNativeFooterToCut()
+    public int getCutTop()
     {
-        return nativeFooterToCut;
+        return cutTop;
     }
 
-    public void setNativeFooterToCut(int nativeFooterToCut)
+    public void setCutTop(int cutTop)
     {
-        this.nativeFooterToCut = nativeFooterToCut;
+        this.cutTop = cutTop;
+    }
+
+    public int getCutBottom()
+    {
+        return cutBottom;
+    }
+
+    public void setCutBottom(int cutBottom)
+    {
+        this.cutBottom = cutBottom;
+    }
+
+    public int getCutLeft()
+    {
+        return cutLeft;
+    }
+
+    public void setCutLeft(int cutLeft)
+    {
+        this.cutLeft = cutLeft;
+    }
+
+    public int getCutRight()
+    {
+        return cutRight;
+    }
+
+    public void setCutRight(int cutRight)
+    {
+        this.cutRight = cutRight;
     }
 
     public Optional<String> getShootingStrategy()

@@ -1,0 +1,14 @@
+** `shootingStrategy` - The shooting strategy to use.
+** `webHeaderToCut` - The header to cut on each screenshot segment during scroll e.g. sticky header. *(Web only)*
+** `webFooterToCut` - The footer to cut on each screenshot segment during scroll e.g. sticky footer. *(Web only)*
+** `nativeHeaderToCut` - The native header to cut (e.g. system/browser bars). *(Web on mobile only)*
+** `nativeFooterToCut` - The native footer to cut (e.g. system/browser bars). *(Web on mobile only)*
+** `cutTop` - The header to cut on final screenshot.
+** `cutLeft` - The left bar to cut on final screenshot.
+** `cutRight` - The right bar to cut on final screenshot.
+** `cutBottom` - The footer to cut on final screenshot.
+** `coordsProvider` - The coords provider used to get ignoring elements position during scroll. *(Web only)*
+*** `CEILING` - Based on JS API. *(Web only)*
+*** `WEB_DRIVER` - Based on WebDriver API. *(Web only)*
+** `scrollableElement` - The element to scroll. *(Web only)*
+** `scrollTimeout` - The scroll timeout. *(Web only)*

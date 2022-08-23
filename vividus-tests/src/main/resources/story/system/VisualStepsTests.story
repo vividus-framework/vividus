@@ -6,7 +6,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/stickyHeader.html'
+Given I am on a page with the URL '${vividus-test-site-url}/stickyHeader.html'
 Examples:
 |action         |firstP             |
 |COMPARE_AGAINST|By.xpath((.//p)[1])|
@@ -65,6 +65,7 @@ When I <action> baseline with `full-page-element-cut` ignoring:
 |ELEMENT |
 |<firstP>|
 
+
 Scenario: Validation of step When I $actionType baseline with name `$name` ignoring:$ignoredElements for full page with area cut
 When I <action> baseline with name `full-page-area-cut` ignoring:
 |AREA    |
@@ -96,6 +97,7 @@ When I <action> baseline with `not-viewport-context-element-cut` ignoring:
 |ELEMENT            |
 |By.cssSelector(img)|
 
+
 Scenario: Validation of step When I $actionType baseline with name `$name` for full page with element/area cut
 When I change context to the page
 When I <action> baseline with name `full-page-with-scroll-element-area-cut` ignoring:
@@ -107,8 +109,18 @@ When I <action> baseline with `full-page-with-scroll-element-area-cut` ignoring:
 |By.xpath(//p[position() mod 2 = 1 and position() > 10])|By.xpath(//p[position() mod 2 = 1 and position() < 10])|
 
 
+Scenario: Validation of cut for whole page and context
+When I <action> baseline with name `cuts-full-page` using screenshot configuration:
+|cutTop  |cutBottom  |cutLeft|cutRight|webHeaderToCut|
+|1200    |1300       |600     |1000   |100           |
+When I change context to element located `<firstP>`
+When I <action> baseline with name `cuts-context` using screenshot configuration:
+|cutTop|cutBottom|cutLeft|cutRight|
+|50    |60       |800    |1000    |
+
+
 Scenario: Validation of contextual visual testing on a page with scrollable element
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com//visualTestIntegration.html'
+Given I am on a page with the URL '${vividus-test-site-url}/visualTestIntegration.html'
 When I <action> baseline with name `scrollable-element-context` using screenshot configuration:
 |scrollableElement|webHeaderToCut|webFooterToCut|scrollTimeout|
 |By.id(scrollable)|10            |0             |PT1S         |
