@@ -83,10 +83,20 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
     }
 
     @Override
-    public pazone.ashot.Screenshot takeAshotScreenshot(SearchContext searchContext,
-            Optional<T> screenshotConfiguration)
+    public pazone.ashot.Screenshot takeAshotScreenshot(SearchContext searchContext, Optional<T> screenshotParameters)
     {
-        return takeScreenshot(searchContext, crateAshot(screenshotConfiguration));
+        pazone.ashot.Screenshot screenshot = takeScreenshot(searchContext, crateAshot(screenshotParameters));
+        screenshotParameters.filter(p -> p.getCutBottom() > 0
+                                      || p.getCutTop() > 0
+                                      || p.getCutLeft() > 0
+                                      || p.getCutRight() > 0)
+                            .ifPresent(p -> {
+                                BufferedImage bufferedImage = screenshot.getImage();
+                                screenshot.setImage(bufferedImage.getSubimage(p.getCutLeft(), p.getCutTop(),
+                                        bufferedImage.getWidth() - p.getCutLeft() - p.getCutRight(),
+                                        bufferedImage.getHeight() - p.getCutTop() - p.getCutBottom()));
+                            });
+        return screenshot;
     }
 
     private pazone.ashot.Screenshot takeScreenshot(SearchContext searchContext, AShot aShot)

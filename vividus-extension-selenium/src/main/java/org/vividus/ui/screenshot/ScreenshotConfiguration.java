@@ -23,19 +23,78 @@ import org.vividus.ui.action.search.Locator;
 
 public class ScreenshotConfiguration
 {
+    private int cutTop;
+    private int cutBottom;
+    private int cutLeft;
+    private int cutRight;
+    /**
+     * @deprecated use {@link ScreenshotConfiguration#cutTop} instead.
+     */
+    @Deprecated(since = "0.4.16", forRemoval = true)
     private int nativeFooterToCut;
+
     private Optional<String> shootingStrategy = Optional.empty();
     private Set<Locator> elementsToIgnore = Set.of();
     private Set<Locator> areasToIgnore = Set.of();
 
+    /**
+     * @deprecated use {@link ScreenshotConfiguration#getCutTop()} instead.
+     * @return Native footer to cut.
+     */
+    @Deprecated(since = "0.4.16", forRemoval = true)
     public int getNativeFooterToCut()
     {
         return nativeFooterToCut;
     }
 
+    /**
+     * @deprecated use {@link ScreenshotConfiguration#setCutTop(int)} instead.
+     * @param nativeFooterToCut The native footer to cut in pixels.
+     */
+    @Deprecated(since = "0.4.16", forRemoval = true)
     public void setNativeFooterToCut(int nativeFooterToCut)
     {
         this.nativeFooterToCut = nativeFooterToCut;
+    }
+
+    public int getCutTop()
+    {
+        return cutTop;
+    }
+
+    public void setCutTop(int cutTop)
+    {
+        this.cutTop = cutTop;
+    }
+
+    public int getCutBottom()
+    {
+        return cutBottom;
+    }
+
+    public void setCutBottom(int cutBottom)
+    {
+        this.cutBottom = cutBottom;
+    }
+
+    public int getCutLeft()
+    {
+        return cutLeft;
+    }
+
+    public void setCutLeft(int cutLeft)
+    {
+        this.cutLeft = cutLeft;
+    }
+
+    public int getCutRight()
+    {
+        return cutRight;
+    }
+
+    public void setCutRight(int cutRight)
+    {
+        this.cutRight = cutRight;
     }
 
     public Optional<String> getShootingStrategy()

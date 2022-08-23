@@ -41,6 +41,16 @@ Scenario: Step verification: When I $actionType baseline with name `$name`
 When I <action> baseline with name `${target-platform}-full-page`
 
 
+Scenario: Verify cuts for full-page and context
+When I <action> baseline with name `${target-platform}-cuts-full-page` using screenshot configuration:
+|cutTop|cutBottom|cutLeft|cutRight|
+|400   |300      |200    |100     |
+When I change context to element located `${element-to-ignore}`
+When I <action> baseline with name `${target-platform}-cuts-context` using screenshot configuration:
+|cutTop|cutBottom|cutLeft|cutRight|
+|400   |200      |100    |200     |
+
+
 Scenario: Step verification: When I $actionType baseline with name `$name` for the context
 When I change context to element located `${element-to-ignore}`
 When I <action> baseline with name `${target-platform}-context`
@@ -60,8 +70,8 @@ Examples:
 
 Scenario: Step verification: When I $actionType baseline with name `$name` using screenshot configuration:$screenshotConfiguration
 When I <action> baseline with name `${target-platform}-custom-config` using screenshot configuration:
-|nativeFooterToCut|
-|100              |
+|cutBottom|
+|100      |
 
 
 Scenario: Step verification: When I $actionType baseline with `$name` ignoring:$checkSettings using screenshot configuration:$screenshotConfiguration
@@ -69,8 +79,8 @@ When I <action> baseline with `${target-platform}-custom-config-<cut-type>-ignor
 |<cut-type>          |
 |${element-to-ignore}|
 using screenshot configuration:
-|nativeFooterToCut|
-|33               |
+|cutBottom|
+|33       |
 
 Examples:
 |cut-type|
