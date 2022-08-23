@@ -1117,3 +1117,62 @@ xhr.onreadystatechange = function() {
 xhr.send();` and save result to scenario variable `response`
 Then `${response}` matcher `.+`
 ----
+
+=== Browser logs steps
+
+This set of steps allows to validate the https://developer.mozilla.org/en-US/docs/Web/API/console[browser console logging messages].
+
+:log-levels: List of the comma-separated messages levels. The supported levels are: ERRORS, WARNINGS.
+
+==== Validate log entries absence
+
+Validates the absence of log entries of the desired level in the browser console.
+
+[source,gherkin]
+----
+Then there are no browser console $logLevels
+----
+* `$logLevels` - {log-levels}
+
+.Validate absence of JS errors
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Then there are no browser console ERRORS
+----
+
+==== Validate specific log entries absence
+
+Validates the absence of specific log entries of the desired level in the browser console.
+
+[source,gherkin]
+----
+Then there are no browser console $logLevels by regex '$pattern'
+----
+* `$logLevels` - {log-levels}
+* `$pattern` - The regular expression to match log entry messages.
+
+.Validate absence of JS error referencing user
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Then there are no browser console ERRORS by regex '.*user.*'
+----
+
+==== Validate specific log entries presence
+
+Validates the presence of specific log entries of the desired level in the browser console.
+
+[source,gherkin]
+----
+Then there are browser console $logLevels by regex '$pattern'
+----
+* `$logLevels` - {log-levels}
+* `$pattern` - The regular expression to match log entry messages.
+
+.Validate presence of JS errors referencing user
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Then there are browser console ERRORS by regex '.*user.*'
+----
