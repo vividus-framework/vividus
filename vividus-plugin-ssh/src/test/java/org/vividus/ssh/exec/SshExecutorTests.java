@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.vividus.ssh.Commands;
-import org.vividus.ssh.ServerConfiguration;
+import org.vividus.ssh.SshConnectionParameters;
 
 class SshExecutorTests
 {
@@ -47,7 +47,7 @@ class SshExecutorTests
         }
 
         @Override
-        protected void configureChannel(ChannelExec channel, ServerConfiguration serverConfiguration)
+        protected void configureChannel(ChannelExec channel, SshConnectionParameters sshConnectionParameters)
         {
             channel.setPty(true);
         }
@@ -75,9 +75,9 @@ class SshExecutorTests
         }).thenReturn(Boolean.TRUE);
         int exitStatus = 1;
         when(channel.getExitStatus()).thenReturn(exitStatus);
-        ServerConfiguration serverConfiguration = new ServerConfiguration();
+        SshConnectionParameters sshConnectionParameters = new SshConnectionParameters();
         String commands = "ssh-command";
-        SshOutput sshOutput = sshExecutor.executeCommand(serverConfiguration, new Commands(commands), channel);
+        SshOutput sshOutput = sshExecutor.executeCommand(sshConnectionParameters, new Commands(commands), channel);
         assertEquals(commandOutput + commandOutput, sshOutput.getOutputStream());
         assertEquals(errorOutput, sshOutput.getErrorStream());
         assertEquals(exitStatus, sshOutput.getExitStatus());

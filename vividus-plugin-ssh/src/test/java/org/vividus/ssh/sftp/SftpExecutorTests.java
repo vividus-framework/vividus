@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,22 +28,18 @@ import com.jcraft.jsch.SftpException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ssh.Commands;
-import org.vividus.ssh.ServerConfiguration;
+import org.vividus.ssh.SshConnectionParameters;
 
 @ExtendWith(MockitoExtension.class)
 class SftpExecutorTests
 {
-    @Mock
-    private ISoftAssert softAssert;
-
-    @InjectMocks
-    private SftpExecutor sftpExecutor;
+    @Mock private ISoftAssert softAssert;
+    @InjectMocks private SftpExecutor sftpExecutor;
 
     @Test
     void shouldReturnExecChannelType()
@@ -54,18 +50,18 @@ class SftpExecutorTests
     @Test
     void testExecuteCommandsViaSftpSuccessfully() throws Exception
     {
-        ChannelSftp channel = mock(ChannelSftp.class);
-        String pwd = "/Users";
+        var channel = mock(ChannelSftp.class);
+        var pwd = "/Users";
         when(channel.pwd()).thenReturn(pwd).thenReturn(pwd);
-        ServerConfiguration serverConfiguration = new ServerConfiguration();
-        serverConfiguration.setAgentForwarding(true);
-        serverConfiguration.setPseudoTerminalEnabled(true);
-        Commands commands = new Commands("pwd; cd ~; pwd");
-        SftpOutput sftpOutput = sftpExecutor.executeCommand(serverConfiguration, commands, channel);
+        var sshConnectionParameters = new SshConnectionParameters();
+        sshConnectionParameters.setAgentForwarding(true);
+        sshConnectionParameters.setPseudoTerminalEnabled(true);
+        var commands = new Commands("pwd; cd ~; pwd");
+        var sftpOutput = sftpExecutor.executeCommand(sshConnectionParameters, commands, channel);
         assertEquals(pwd + System.lineSeparator() + pwd, sftpOutput.getResult());
-        InOrder ordered = inOrder(channel);
-        ordered.verify(channel).setAgentForwarding(serverConfiguration.isAgentForwarding());
-        ordered.verify(channel).setPty(serverConfiguration.isPseudoTerminalEnabled());
+        var ordered = inOrder(channel);
+        ordered.verify(channel).setAgentForwarding(sshConnectionParameters.isAgentForwarding());
+        ordered.verify(channel).setPty(sshConnectionParameters.isPseudoTerminalEnabled());
         ordered.verify(channel).connect();
         ordered.verify(channel).pwd();
         ordered.verify(channel).cd("~");
@@ -77,17 +73,17 @@ class SftpExecutorTests
     @Test
     void testPopulateErrorStreamOnSftpError() throws Exception
     {
-        ChannelSftp channel = mock(ChannelSftp.class);
-        SftpException sftpException = new SftpException(0, "error");
+        var channel = mock(ChannelSftp.class);
+        var sftpException = new SftpException(0, "error");
         doThrow(sftpException).when(channel).pwd();
-        ServerConfiguration serverConfiguration = new ServerConfiguration();
-        serverConfiguration.setAgentForwarding(true);
-        serverConfiguration.setPseudoTerminalEnabled(true);
-        SftpOutput sftpOutput = sftpExecutor.executeCommand(serverConfiguration, new Commands("pwd"), channel);
+        var sshConnectionParameters = new SshConnectionParameters();
+        sshConnectionParameters.setAgentForwarding(true);
+        sshConnectionParameters.setPseudoTerminalEnabled(true);
+        var sftpOutput = sftpExecutor.executeCommand(sshConnectionParameters, new Commands("pwd"), channel);
         assertEquals("", sftpOutput.getResult());
-        InOrder ordered = inOrder(channel, softAssert);
-        ordered.verify(channel).setAgentForwarding(serverConfiguration.isAgentForwarding());
-        ordered.verify(channel).setPty(serverConfiguration.isPseudoTerminalEnabled());
+        var ordered = inOrder(channel, softAssert);
+        ordered.verify(channel).setAgentForwarding(sshConnectionParameters.isAgentForwarding());
+        ordered.verify(channel).setPty(sshConnectionParameters.isPseudoTerminalEnabled());
         ordered.verify(channel).connect();
         ordered.verify(channel).pwd();
         ordered.verify(softAssert).recordFailedAssertion("SFTP command error", sftpException);

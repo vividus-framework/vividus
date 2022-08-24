@@ -16,7 +16,7 @@
 
 package org.vividus.ssh.variable;
 
-import org.vividus.context.SshTestContext;
+import org.vividus.ssh.context.SshTestContext;
 
 public class SshExitStatusDynamicVariable extends AbstractSshDynamicVariable
 {

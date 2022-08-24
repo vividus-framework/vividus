@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,16 +18,30 @@ package org.vividus.ssh;
 
 import java.util.Optional;
 
-public class ServerConfiguration
+import org.jbehave.core.annotations.AsParameters;
+import org.jbehave.core.annotations.Parameter;
+
+@AsParameters
+public class SshConnectionParameters
 {
     private String username;
     private String password;
     private String host;
     private int port;
+
+    @Parameter(name = "channel-type")
     private Optional<String> channelType = Optional.empty();
+
+    @Parameter(name = "agent-forwarding")
     private boolean agentForwarding;
+
+    @Parameter(name = "pseudo-terminal-enabled")
     private boolean pseudoTerminalEnabled;
+
+    @Parameter(name = "private-key")
     private String privateKey;
+
+    @Parameter(name = "public-key")
     private String publicKey;
     private String passphrase;
 

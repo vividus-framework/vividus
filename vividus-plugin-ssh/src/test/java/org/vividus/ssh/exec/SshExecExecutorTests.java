@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import com.jcraft.jsch.ChannelExec;
 
 import org.junit.jupiter.api.Test;
 import org.vividus.ssh.Commands;
-import org.vividus.ssh.ServerConfiguration;
+import org.vividus.ssh.SshConnectionParameters;
 
 class SshExecExecutorTests
 {
@@ -40,10 +40,10 @@ class SshExecExecutorTests
     void shouldConfigureChannel()
     {
         ChannelExec channel = mock(ChannelExec.class);
-        ServerConfiguration serverConfiguration = new ServerConfiguration();
-        serverConfiguration.setAgentForwarding(true);
-        serverConfiguration.setPseudoTerminalEnabled(true);
-        sshExecExecutor.configureChannel(channel, serverConfiguration);
+        SshConnectionParameters sshConnectionParameters = new SshConnectionParameters();
+        sshConnectionParameters.setAgentForwarding(true);
+        sshConnectionParameters.setPseudoTerminalEnabled(true);
+        sshExecExecutor.configureChannel(channel, sshConnectionParameters);
         verify(channel).setAgentForwarding(true);
         verify(channel).setPty(true);
     }

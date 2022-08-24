@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.vividus.ssh.Commands;
-import org.vividus.ssh.ServerConfiguration;
+import org.vividus.ssh.SshConnectionParameters;
 
 class SshShellExecutorTests
 {
@@ -46,10 +46,10 @@ class SshShellExecutorTests
     void shouldConfigureChannel()
     {
         ChannelShell channel = mock(ChannelShell.class);
-        ServerConfiguration serverConfiguration = new ServerConfiguration();
-        serverConfiguration.setAgentForwarding(true);
-        serverConfiguration.setPseudoTerminalEnabled(true);
-        sshShellExecutor.configureChannel(channel, serverConfiguration);
+        SshConnectionParameters sshConnectionParameters = new SshConnectionParameters();
+        sshConnectionParameters.setAgentForwarding(true);
+        sshConnectionParameters.setPseudoTerminalEnabled(true);
+        sshShellExecutor.configureChannel(channel, sshConnectionParameters);
         verify(channel).setAgentForwarding(true);
         verify(channel).setPty(true);
     }

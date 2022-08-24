@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import javax.inject.Named;
 
 import org.vividus.ssh.CommandExecutionManager;
 import org.vividus.ssh.CommandExecutor;
-import org.vividus.ssh.ServerConfiguration;
+import org.vividus.ssh.SshConnectionParameters;
 
 @Named("SFTP")
 public class SftpExecutionManager extends CommandExecutionManager<SftpOutput>
@@ -34,7 +34,7 @@ public class SftpExecutionManager extends CommandExecutionManager<SftpOutput>
     }
 
     @Override
-    protected CommandExecutor<SftpOutput> getCommandExecutor(ServerConfiguration serverConfiguration)
+    protected CommandExecutor<SftpOutput> getCommandExecutor(SshConnectionParameters sshConnectionParameters)
     {
         return sftpExecutor;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,13 @@ public abstract class JSchExecutor<T extends Channel, R> implements CommandExecu
     private static final int CONNECT_TIMEOUT = 30_000;
 
     @Override
-    public R execute(ServerConfiguration serverConfiguration, Commands commands) throws CommandExecutionException
+    public R execute(SshConnectionParameters sshConnectionParameters, Commands commands)
+            throws CommandExecutionException
     {
         try
         {
-            JSch jSch = createJSchInstance(serverConfiguration);
-            return execute(jSch, serverConfiguration, commands);
+            JSch jSch = createJSchInstance(sshConnectionParameters);
+            return execute(jSch, sshConnectionParameters, commands);
         }
         catch (JSchException | AgentProxyException e)
         {
@@ -46,22 +47,22 @@ public abstract class JSchExecutor<T extends Channel, R> implements CommandExecu
         }
     }
 
-    private R execute(JSch jSch, ServerConfiguration serverConfiguration, Commands commands)
+    private R execute(JSch jSch, SshConnectionParameters sshConnectionParameters, Commands commands)
             throws JSchException, CommandExecutionException
     {
-        Session session = jSch.getSession(serverConfiguration.getUsername(), serverConfiguration.getHost(),
-                serverConfiguration.getPort());
+        Session session = jSch.getSession(sshConnectionParameters.getUsername(),
+                sshConnectionParameters.getHost(), sshConnectionParameters.getPort());
         try
         {
             session.setConfig("StrictHostKeyChecking", "no");
             session.setConfig("PreferredAuthentications", "publickey,password");
-            session.setPassword(serverConfiguration.getPassword());
+            session.setPassword(sshConnectionParameters.getPassword());
             session.connect(CONNECT_TIMEOUT);
             @SuppressWarnings("unchecked")
             T channel = (T) session.openChannel(getChannelType());
             try
             {
-                return executeCommand(serverConfiguration, commands, channel);
+                return executeCommand(sshConnectionParameters, commands, channel);
             }
             catch (JSchException | IOException e)
             {
@@ -84,22 +85,23 @@ public abstract class JSchExecutor<T extends Channel, R> implements CommandExecu
 
     public abstract String getChannelType();
 
-    protected abstract R executeCommand(ServerConfiguration serverConfig, Commands commands, T channel)
+    protected abstract R executeCommand(SshConnectionParameters serverConfig, Commands commands, T channel)
             throws JSchException, IOException;
 
-    private JSch createJSchInstance(ServerConfiguration server) throws AgentProxyException, JSchException
+    private JSch createJSchInstance(SshConnectionParameters sshConnectionParameters)
+            throws AgentProxyException, JSchException
     {
         JSch jSch = new JSch();
-        if (server.isAgentForwarding())
+        if (sshConnectionParameters.isAgentForwarding())
         {
             Connector connector = ConnectorFactory.getDefault().createConnector();
             jSch.setIdentityRepository(new RemoteIdentityRepository(connector));
         }
-        else if (server.getPrivateKey() != null && server.getPublicKey() != null)
+        else if (sshConnectionParameters.getPrivateKey() != null && sshConnectionParameters.getPublicKey() != null)
         {
-            String passphrase = server.getPassphrase();
-            jSch.addIdentity("default", getBytes(server.getPrivateKey()), getBytes(server.getPublicKey()),
-                    passphrase != null ? getBytes(passphrase) : null);
+            String passphrase = sshConnectionParameters.getPassphrase();
+            jSch.addIdentity("default", getBytes(sshConnectionParameters.getPrivateKey()),
+                    getBytes(sshConnectionParameters.getPublicKey()), passphrase != null ? getBytes(passphrase) : null);
         }
         return jSch;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import com.jcraft.jsch.Channel;
 
 import org.vividus.ssh.CommandExecutionManager;
 import org.vividus.ssh.CommandExecutor;
-import org.vividus.ssh.ServerConfiguration;
+import org.vividus.ssh.SshConnectionParameters;
 
 @Named("SSH")
 public class SshExecutionManager extends CommandExecutionManager<SshOutput>
@@ -38,9 +38,9 @@ public class SshExecutionManager extends CommandExecutionManager<SshOutput>
     }
 
     @Override
-    protected CommandExecutor<SshOutput> getCommandExecutor(ServerConfiguration serverConfiguration)
+    protected CommandExecutor<SshOutput> getCommandExecutor(SshConnectionParameters sshConnectionParameters)
     {
-        String channelType = serverConfiguration.getChannelType().orElse("exec");
+        String channelType = sshConnectionParameters.getChannelType().orElse("exec");
         return sshExecutors.stream()
                            .filter(e -> channelType.equals(e.getChannelType()))
                            .findFirst()

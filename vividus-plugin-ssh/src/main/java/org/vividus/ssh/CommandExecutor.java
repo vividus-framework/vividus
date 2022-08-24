@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,5 +18,5 @@ package org.vividus.ssh;
 
 public interface CommandExecutor<R>
 {
-    R execute(ServerConfiguration serverConfiguration, Commands commands) throws CommandExecutionException;
+    R execute(SshConnectionParameters sshConnectionParameters, Commands commands) throws CommandExecutionException;
 }
