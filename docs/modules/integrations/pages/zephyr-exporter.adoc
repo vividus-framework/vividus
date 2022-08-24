@@ -2,7 +2,13 @@
 
 Zephyr Exporter is a tool used for exporting test execution results into Jira Zephyr Plugin.
 
-Features:
+Zephyr `Scale` Features:
+
+* Create test executions
+* Set test execution statuses
+* Update statuses for existent execution
+
+Zephyr `Squad` Features:
 
 * Create test executions
 * Set test execution statuses
@@ -67,29 +73,38 @@ advanced test planning, reporting, and reusability features. https://smartbear.c
 
 The Zephyr plugin for Jira has own configurable execution statuses. testExecutionStatus endpoint is used to get the detailed information about the statuses, like: https://jira.example.com/rest/zapi/latest/util/testExecutionStatus. The following properties are used to setup a mapping between Vividus and Zephyr execution statuses.
 
-[cols="1,2", options="header"]
+This approach is similar for both API types (Scale and Squad), the major differences are Zephyr Scale has fewer test case statuses by default and the status representation during import (for Scale status transmitted in text format, like: Failed (Fail), but for Squad it transmitted in number format (status code), like: 7).
+
+[cols="1,2,3", options="header"]
 |===
 
 |Vividus execution status property name
-|Zephyr execution status value (by default)
+|Zephyr Squad execution status value (by default)
+|Zephyr Scale execution status value
 
 |`zephyr.statuses.FAILED`
 |FAILED
+|Fail
 
 |`zephyr.statuses.BROKEN`
 |TEST NEEDS REWORK
+|Fail
 
 |`zephyr.statuses.PENDING`
 |TEST NEEDS REWORK
+|In Progress
 
 |`zephyr.statuses.UNKNOWN`
 |PASSED WITH REMARKS
+|Pass
 
 |`zephyr.statuses.SKIPPED`
 |SCHEDULED
+|Not Executed
 
 |`zephyr.statuses.PASSED`
 |PASSED
+|Pass
 
 |===
 
