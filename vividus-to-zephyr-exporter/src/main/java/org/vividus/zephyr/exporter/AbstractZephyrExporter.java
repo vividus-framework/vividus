@@ -32,7 +32,7 @@ import org.vividus.zephyr.facade.IZephyrFacade;
 import org.vividus.zephyr.model.TestCase;
 import org.vividus.zephyr.parser.TestCaseParser;
 
-public abstract class AbstractZephyrExporter implements IZephyrExporter
+public abstract class AbstractZephyrExporter implements ZephyrExporter
 {
     private final IZephyrFacade zephyrFacade;
     private final TestCaseParser testCaseParser;

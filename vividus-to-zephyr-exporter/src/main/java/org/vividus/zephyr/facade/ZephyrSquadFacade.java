@@ -44,22 +44,19 @@ import org.vividus.zephyr.model.TestCaseStatus;
 
 @Configuration
 @ConditionalOnProperty(value = "zephyr.exporter.api-type", havingValue = "SQUAD")
-public class ZephyrSquadFacade implements IZephyrFacade
+public class ZephyrSquadFacade extends AbstractZephyrFacade
 {
     private static final String ZAPI_ENDPOINT = "/rest/zapi/latest/";
 
-    private final JiraFacade jiraFacade;
     private final JiraClientProvider jiraClientProvider;
-    private final ZephyrExporterConfiguration zephyrExporterConfiguration;
     private final ZephyrExporterProperties zephyrExporterProperties;
 
     public ZephyrSquadFacade(JiraFacade jiraFacade, JiraClientProvider jiraClientProvider,
                              ZephyrExporterConfiguration zephyrExporterConfiguration,
                              ZephyrExporterProperties zephyrExporterProperties)
     {
-        this.jiraFacade = jiraFacade;
+        super(jiraFacade, zephyrExporterConfiguration);
         this.jiraClientProvider = jiraClientProvider;
-        this.zephyrExporterConfiguration = zephyrExporterConfiguration;
         this.zephyrExporterProperties = zephyrExporterProperties;
     }
 
@@ -83,9 +80,8 @@ public class ZephyrSquadFacade implements IZephyrFacade
     {
         ZephyrConfiguration zephyrConfiguration = new ZephyrConfiguration();
 
-        Project project = jiraFacade.getProject(zephyrExporterConfiguration.getProjectKey());
+        Project project = getJiraFacade().getProject(getZephyrExporterConfiguration().getProjectKey());
         String projectId = project.getId();
-        zephyrConfiguration.setProjectId(projectId);
 
         String versionId = findVersionId(project);
         zephyrConfiguration.setVersionId(versionId);
@@ -93,16 +89,16 @@ public class ZephyrSquadFacade implements IZephyrFacade
         String projectAndVersionUrlQuery = String.format("projectId=%s&versionId=%s", projectId, versionId);
 
         String cycleId = findCycleId(projectAndVersionUrlQuery);
-        zephyrConfiguration.setCycleId(cycleId);
 
-        if (StringUtils.isNotBlank(zephyrExporterConfiguration.getFolderName()))
+        if (StringUtils.isNotBlank(getZephyrExporterConfiguration().getFolderName()))
         {
             String folderId = findFolderId(cycleId, projectAndVersionUrlQuery);
             zephyrConfiguration.setFolderId(folderId);
         }
 
         Map<TestCaseStatus, String> statusIdMap = getExecutionStatuses();
-        zephyrConfiguration.setTestStatusPerZephyrStatusMapping(statusIdMap);
+
+        prepareBaseConfiguration(zephyrConfiguration, cycleId, statusIdMap);
 
         return zephyrConfiguration;
     }
@@ -111,11 +107,11 @@ public class ZephyrSquadFacade implements IZephyrFacade
     {
         return project.getVersions()
                 .stream()
-                .filter(v -> zephyrExporterConfiguration.getVersionName().equals(v.getName()))
+                .filter(v -> getZephyrExporterConfiguration().getVersionName().equals(v.getName()))
                 .findFirst()
                 .map(Version::getId)
                 .orElseThrow(() -> new IllegalArgumentException(String.format(
-                        "Version with name '%s' does not exist", zephyrExporterConfiguration.getVersionName())));
+                        "Version with name '%s' does not exist", getZephyrExporterConfiguration().getVersionName())));
     }
 
     private String findCycleId(String projectAndVersionUrlQuery) throws IOException, JiraConfigurationException
@@ -128,13 +124,13 @@ public class ZephyrSquadFacade implements IZephyrFacade
         while (itr.hasNext())
         {
             Map.Entry<String, Map<String, String>> map = itr.next();
-            if (map.getValue().get("name").equals(zephyrExporterConfiguration.getCycleName()))
+            if (map.getValue().get("name").equals(getZephyrExporterConfiguration().getCycleName()))
             {
                 cycleId = map.getKey();
                 break;
             }
         }
-        notBlank(cycleId, "Cycle with name '%s' does not exist", zephyrExporterConfiguration.getCycleName());
+        notBlank(cycleId, "Cycle with name '%s' does not exist", getZephyrExporterConfiguration().getCycleName());
         return cycleId;
     }
 
@@ -144,8 +140,8 @@ public class ZephyrSquadFacade implements IZephyrFacade
         String json = getJiraClient()
                 .executeGet(ZAPI_ENDPOINT + "cycle/" + cycleId + "/folders?" + projectAndVersionUrlQuery);
         List<Integer> folderId = JsonPathUtils.getData(json, String.format("$.[?(@.folderName=='%s')].folderId",
-                zephyrExporterConfiguration.getFolderName()));
-        notEmpty(folderId, "Folder with name '%s' does not exist", zephyrExporterConfiguration.getFolderName());
+                getZephyrExporterConfiguration().getFolderName()));
+        notEmpty(folderId, "Folder with name '%s' does not exist", getZephyrExporterConfiguration().getFolderName());
         return folderId.get(0).toString();
     }
 
@@ -153,7 +149,7 @@ public class ZephyrSquadFacade implements IZephyrFacade
     {
         String json = getJiraClient().executeGet(ZAPI_ENDPOINT + "util/testExecutionStatus");
         Map<TestCaseStatus, String> testStatusPerZephyrIdMapping = new EnumMap<>(TestCaseStatus.class);
-        zephyrExporterConfiguration.getStatuses().entrySet().forEach(s ->
+        getZephyrExporterConfiguration().getStatuses().entrySet().forEach(s ->
         {
             List<Integer> statusId = JsonPathUtils.getData(json, String.format("$.[?(@.name=='%s')].id", s.getValue()));
             notEmpty(statusId, "Status '%s' does not exist", s.getValue());
@@ -167,16 +163,16 @@ public class ZephyrSquadFacade implements IZephyrFacade
     {
         String json = getJiraClient().executeGet(ZAPI_ENDPOINT + "execution?issueId=" + issueId);
         String jsonpath;
-        if (StringUtils.isNotBlank(zephyrExporterConfiguration.getFolderName()))
+        if (StringUtils.isNotBlank(getZephyrExporterConfiguration().getFolderName()))
         {
             jsonpath = String.format("$..[?(@.versionName=='%s' && @.cycleName=='%s' && @.folderName=='%s')].id",
-                zephyrExporterConfiguration.getVersionName(), zephyrExporterConfiguration.getCycleName(),
-                zephyrExporterConfiguration.getFolderName());
+                    getZephyrExporterConfiguration().getVersionName(), getZephyrExporterConfiguration().getCycleName(),
+                    getZephyrExporterConfiguration().getFolderName());
         }
         else
         {
             jsonpath = String.format("$..[?(@.versionName=='%s' && @.cycleName=='%s')].id",
-                    zephyrExporterConfiguration.getVersionName(), zephyrExporterConfiguration.getCycleName());
+                    getZephyrExporterConfiguration().getVersionName(), getZephyrExporterConfiguration().getCycleName());
         }
         List<Integer> executionId = JsonPathUtils.getData(json, jsonpath);
         return executionId.size() != 0 ? OptionalInt.of(executionId.get(0)) : OptionalInt.empty();

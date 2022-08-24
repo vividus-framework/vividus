@@ -28,7 +28,7 @@ import org.vividus.exporter.config.VividusExporterCommonConfiguration;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.zephyr.configuration.ZephyrExporterConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
-import org.vividus.zephyr.exporter.IZephyrExporter;
+import org.vividus.zephyr.exporter.ZephyrExporter;
 
 @SpringBootApplication
 @Import(VividusExporterCommonConfiguration.class)
@@ -40,7 +40,7 @@ public class VividusToZephyrExporterApplication
     public static void main(String[] args) throws IOException, JiraConfigurationException
     {
         ApplicationContext ctx = SpringApplication.run(VividusToZephyrExporterApplication.class, args);
-        IZephyrExporter exporter = ctx.getBean(IZephyrExporter.class);
+        ZephyrExporter exporter = ctx.getBean(ZephyrExporter.class);
         exporter.exportResults();
     }
 }

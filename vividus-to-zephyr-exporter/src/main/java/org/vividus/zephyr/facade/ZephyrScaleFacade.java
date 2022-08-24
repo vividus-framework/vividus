@@ -30,7 +30,6 @@ import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
-import org.vividus.jira.model.Project;
 import org.vividus.util.json.JsonPathUtils;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterConfiguration;
@@ -38,14 +37,12 @@ import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 
 @Configuration
 @ConditionalOnProperty(value = "zephyr.exporter.api-type", havingValue = "SCALE")
-public class ZephyrScaleFacade implements IZephyrFacade
+public class ZephyrScaleFacade extends AbstractZephyrFacade
 {
     private static final String BASE_ENDPOINT = "/rest/atm/1.0";
     private static final String TEST_RESULT_ENDPOINT = BASE_ENDPOINT + "/testrun/%s/testcase/%s/testresult";
 
-    private final JiraFacade jiraFacade;
     private final JiraClientProvider jiraClientProvider;
-    private final ZephyrExporterConfiguration zephyrExporterConfiguration;
     private final ZephyrExporterProperties zephyrExporterProperties;
     private ZephyrConfiguration zephyrConfiguration;
 
@@ -53,9 +50,8 @@ public class ZephyrScaleFacade implements IZephyrFacade
                              ZephyrExporterConfiguration zephyrExporterConfiguration,
                              ZephyrExporterProperties zephyrExporterProperties)
     {
-        this.jiraFacade = jiraFacade;
+        super(jiraFacade, zephyrExporterConfiguration);
         this.jiraClientProvider = jiraClientProvider;
-        this.zephyrExporterConfiguration = zephyrExporterConfiguration;
         this.zephyrExporterProperties = zephyrExporterProperties;
     }
 
@@ -86,17 +82,12 @@ public class ZephyrScaleFacade implements IZephyrFacade
     {
         zephyrConfiguration = new ZephyrConfiguration();
 
-        Project project = jiraFacade.getProject(zephyrExporterConfiguration.getProjectKey());
-        String projectId = project.getId();
-        zephyrConfiguration.setProjectId(projectId);
-
         String cycleId = createTestCycle(
-                zephyrExporterConfiguration.getCycleName(),
-                zephyrExporterConfiguration.getProjectKey(),
-                zephyrExporterConfiguration.getFolderName());
-        zephyrConfiguration.setCycleId(cycleId);
+                getZephyrExporterConfiguration().getCycleName(),
+                getZephyrExporterConfiguration().getProjectKey(),
+                getZephyrExporterConfiguration().getFolderName());
 
-        zephyrConfiguration.setTestStatusPerZephyrStatusMapping(zephyrExporterConfiguration.getStatuses());
+        prepareBaseConfiguration(zephyrConfiguration, cycleId, getZephyrExporterConfiguration().getStatuses());
 
         return zephyrConfiguration;
     }
