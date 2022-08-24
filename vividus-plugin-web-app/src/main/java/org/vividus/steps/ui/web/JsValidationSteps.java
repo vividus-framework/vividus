@@ -49,7 +49,7 @@ public class JsValidationSteps
      * is enabled).</p>
      * <p>Step passes if console logs were found, otherwise it fails. All found logs are available in
      * report step's attachment</p>
-     * @param logEntries Log entries to check: "errors", "warnings", "errors, warnings" or "warnings, errors"
+     * @param logEntries Comma-separated list of entries to check. Possible values: "errors", "warnings", "infos".
      * @param regex Regular expression to filter log entries
      */
     @Then("there are browser console $logEntries by regex `$regex`")
@@ -68,7 +68,7 @@ public class JsValidationSteps
      * is enabled).</p>
      * <p>Step passes if no errors were found, otherwise it fails. All found errors are available in
      * report step's attachment</p>
-     * @param logEntries Log entries to check: "errors", "warnings", "errors, warnings" or "warnings, errors"
+     * @param logEntries Comma-separated list of entries to check. Possible values: "errors", "warnings", "infos".
      */
     @Then("there are no browser console $logEntries")
     public void checkJsLogEntriesOnOpenedPage(List<BrowserLogLevel> logEntries)
@@ -85,7 +85,7 @@ public class JsValidationSteps
      * is enabled).</p>
      * <p>Step passes if no errors were found, otherwise it fails. All found errors are available in
      * report step's attachment</p>
-     * @param logEntries Log entries to check: "errors", "warnings", "errors, warnings" or "warnings, errors"
+     * @param logEntries Comma-separated list of entries to check. Possible values: "errors", "warnings", "infos".
      * @param regex Regular expression to filter log entries
      */
     @Then(value = "there are no browser console $logEntries by regex '$regex'", priority = 1)

@@ -7,10 +7,13 @@ When I execute javascript `console.error('error')` with arguments:
 Then there are browser console ERRORS by regex `.*error.*`
 When I execute javascript `console.warn('warninig')` with arguments:
 Then there are browser console WARNINGS by regex `.*warninig.*`
+When I execute javascript `console.log('info')` with arguments:
+Then there are browser console INFOS by regex `.*info.*`
 
 
 Scenario: Verify step: Then there are no browser console $logEntries
 When I execute javascript `console.warn('warninig')` with arguments:
+Then there are no browser console INFOS
 Then there are no browser console ERRORS
 
 
