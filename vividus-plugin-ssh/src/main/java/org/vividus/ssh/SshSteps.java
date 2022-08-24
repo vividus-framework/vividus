@@ -112,7 +112,7 @@ public class SshSteps
      *                      <li><b>STORY</b> - the variable will be available within the whole story,
      *                      <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      *                      </ul>.
-     * @param variableName  The name of the variable to save the SFTP commands execution result,
+     * @param variableName  The name of the variable to save the SFTP commands execution result.
      * @return SFTP command execution result
      * @throws CommandExecutionException if any error happens during commands execution
      */
