@@ -27,25 +27,25 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.lang3.function.FailableBiFunction;
 import org.apache.commons.lang3.function.FailableConsumer;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.context.DynamicConfigurationManager;
 import org.vividus.context.VariableContext;
 import org.vividus.ssh.context.SshTestContext;
 import org.vividus.ssh.exec.SshOutput;
 import org.vividus.ssh.sftp.SftpCommand;
 import org.vividus.ssh.sftp.SftpOutput;
-import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,9 +55,11 @@ class SshStepsTests
     private static final String SERVER = "my-server";
     private static final SshConnectionParameters SSH_CONNECTION_PARAMETERS = new SshConnectionParameters();
 
+    @Mock private DynamicConfigurationManager<SshConnectionParameters> sshConnectionParameters;
     @Mock private VariableContext variableContext;
     @Mock private Map<String, CommandExecutionManager<?>> commandExecutionManagers;
     @Mock private SshTestContext sshTestContext;
+    @InjectMocks private SshSteps sshSteps;
 
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
     @Test
@@ -65,11 +67,11 @@ class SshStepsTests
     {
         var connectionParametersTable = new ExamplesTable("|username |host       |port|password|\n"
                         + "|admin    |10.10.10.10|22  |Pa$$w0rd|");
-        var steps = new SshSteps(null, variableContext, commandExecutionManagers, sshTestContext);
         var key = "new-connection";
-        steps.configureSshConnection(key, connectionParametersTable);
+        sshSteps.configureSshConnection(key, connectionParametersTable);
         var sshConnectionParametersArgumentCaptor = ArgumentCaptor.forClass(SshConnectionParameters.class);
-        verify(sshTestContext).addDynamicConnectionParameters(eq(key), sshConnectionParametersArgumentCaptor.capture());
+        verify(sshConnectionParameters).addDynamicConfiguration(eq(key),
+                sshConnectionParametersArgumentCaptor.capture());
         var parameters = sshConnectionParametersArgumentCaptor.getValue();
         assertAll(
                 () -> assertEquals("admin", parameters.getUsername()),
@@ -95,33 +97,23 @@ class SshStepsTests
     @Test
     void shouldExecuteSshCommands() throws CommandExecutionException
     {
-        testSshCommandsExecution(Map.of(SERVER, SSH_CONNECTION_PARAMETERS), SERVER);
-    }
+        CommandExecutionManager<SshOutput> executionManager = mockGettingOfCommandExecutionManager(Protocol.SSH);
+        var commands = new Commands("ssh-command");
+        var output = new SshOutput();
+        when(executionManager.run(SSH_CONNECTION_PARAMETERS, commands)).thenReturn(output);
+        when(sshConnectionParameters.getConfiguration(SERVER)).thenReturn(SSH_CONNECTION_PARAMETERS);
 
-    @Test
-    void shouldThrowAnErrorOnMissingConnectionConfiguration()
-    {
-        var commands = mock(Commands.class);
-        var steps = new SshSteps(new PropertyMappedCollection<>(Map.of()), variableContext, commandExecutionManagers,
-                sshTestContext);
-        var exception = assertThrows(IllegalArgumentException.class,
-                () -> steps.executeCommands(commands, SERVER, Protocol.SSH));
-        assertEquals("SSH connection with key 'my-server' is not configured in the current story nor in properties",
-                exception.getMessage());
-    }
+        var steps = new SshSteps(sshConnectionParameters, variableContext, commandExecutionManagers, sshTestContext);
+        var actual = steps.executeCommands(commands, SERVER, Protocol.SSH);
 
-    @Test
-    void shouldExecuteSshCommandsUsingDynamicConnection() throws CommandExecutionException
-    {
-        var key = "dynamic";
-        when(sshTestContext.getDynamicConnectionParameters(key)).thenReturn(Optional.of(SSH_CONNECTION_PARAMETERS));
-        testSshCommandsExecution(Map.of(), key);
+        assertEquals(output, actual);
+        verify(sshTestContext).putSshOutput(output);
     }
 
     @Test
     void shouldExecuteSftpCommands() throws CommandExecutionException
     {
-        testSftpExecution((steps, commands) -> steps.executeCommands(commands, SERVER, Protocol.SFTP));
+        testSftpExecution(commands -> sshSteps.executeCommands(commands, SERVER, Protocol.SFTP));
     }
 
     @Test
@@ -129,8 +121,7 @@ class SshStepsTests
     {
         var scopes = Set.of(VariableScope.SCENARIO);
         var variableName = "sftp-result";
-        var sftpOutput = testSftpExecution(
-            (steps, commands) -> steps.saveSftpResult(commands, SERVER, scopes, variableName));
+        var sftpOutput = testSftpExecution(commands -> sshSteps.saveSftpResult(commands, SERVER, scopes, variableName));
         verify(variableContext).putVariable(scopes, variableName, sftpOutput.getResult());
     }
 
@@ -149,25 +140,10 @@ class SshStepsTests
             steps -> steps.copyFileOverSftp(filePath, DESTINATION_PATH, SERVER));
     }
 
-    private void testSshCommandsExecution(Map<String, SshConnectionParameters> staticConnections, String connectionKey)
-            throws CommandExecutionException
-    {
-        CommandExecutionManager<SshOutput> executionManager = mockGettingOfCommandExecutionManager(Protocol.SSH);
-        var commands = new Commands("ssh-command");
-        var output = new SshOutput();
-        when(executionManager.run(SSH_CONNECTION_PARAMETERS, commands)).thenReturn(output);
-
-        var steps = new SshSteps(new PropertyMappedCollection<>(staticConnections), variableContext,
-                commandExecutionManagers, sshTestContext);
-        var actual = steps.executeCommands(commands, connectionKey, Protocol.SSH);
-
-        assertEquals(output, actual);
-        verify(sshTestContext).putSshOutput(output);
-    }
-
     private void testPutFile(SftpCommand command, String parameter,
             FailableConsumer<SshSteps, CommandExecutionException> stepExecutor) throws CommandExecutionException
     {
+        when(sshConnectionParameters.getConfiguration(SERVER)).thenReturn(SSH_CONNECTION_PARAMETERS);
         CommandExecutionManager<SftpOutput> executionManager = mockGettingOfCommandExecutionManager(Protocol.SFTP);
         when(executionManager.run(eq(SSH_CONNECTION_PARAMETERS), argThat(commands -> {
             var singleCommands = commands.getSingleCommands(null);
@@ -180,26 +156,22 @@ class SshStepsTests
             return false;
         }))).thenReturn(new SftpOutput());
 
-        var sshSteps = new SshSteps(new PropertyMappedCollection<>(Map.of(SERVER, SSH_CONNECTION_PARAMETERS)),
-                variableContext, commandExecutionManagers, sshTestContext);
         stepExecutor.accept(sshSteps);
 
         verify(sshTestContext).putSshOutput(null);
     }
 
-    private SftpOutput testSftpExecution(
-            FailableBiFunction<SshSteps, Commands, Object, CommandExecutionException> commandExecutor)
+    private SftpOutput testSftpExecution(FailableFunction<Commands, Object, CommandExecutionException> commandExecutor)
             throws CommandExecutionException
     {
+        when(sshConnectionParameters.getConfiguration(SERVER)).thenReturn(SSH_CONNECTION_PARAMETERS);
         CommandExecutionManager<SftpOutput> executionManager = mockGettingOfCommandExecutionManager(Protocol.SFTP);
         var commands = new Commands("sftp-command");
         var output = new SftpOutput();
         output.setResult("sftp-output");
         when(executionManager.run(SSH_CONNECTION_PARAMETERS, commands)).thenReturn(output);
 
-        var sshSteps = new SshSteps(new PropertyMappedCollection<>(Map.of(SERVER, SSH_CONNECTION_PARAMETERS)),
-                variableContext, commandExecutionManagers, sshTestContext);
-        var actual = commandExecutor.apply(sshSteps, commands);
+        var actual = commandExecutor.apply(commands);
 
         assertEquals(output, actual);
         verify(sshTestContext).putSshOutput(null);

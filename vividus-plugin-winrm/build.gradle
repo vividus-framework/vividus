@@ -6,7 +6,6 @@ dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')
-    implementation project(':vividus-util')
 
     // The latest WinRm4J release (0.12.3) has a bug when certificate checks can't be disabled for Basic Authentication.
     // This bug is fixed in `master` branch: https://github.com/cloudsoft/winrm4j/commit/42c704c19cb3b15bc46030d0dc54cc1df09d3720.

@@ -18,50 +18,36 @@ winrm.server.my-server
 ```
 where `my-server` is a key used to refer WinRm connection in the steps. The key is defined by users, must be unique and can't contain dots.
 
-NOTE: The properties marked with *bold* are mandatory.
-
-[cols="3,1,1,3", options="header"]
-|===
-|Property Name
-|Acceptable values
-|Default
-|Description
-
-|[subs=+quotes]`*winrm.server.<key>.address*`
-|<string>
-|
-|Either full endpoint URL (e.g. `https://10.240.1.1:5986/wsman`) or hostname and port separated by colon (e.g. `10.240.1.1:5986`)
-
-|[subs=+quotes]`*winrm.server.<key>.username*`
-|<string>
-|
-|The name of the user logging in
-
-|[subs=+quotes]`*winrm.server.<key>.password*`
-|<string>
-|
-|The password of the user logging in
-
-
-|`winrm.server.<key>.authentication-scheme`
-a|`Basic` +
-`Digest` +
-`NTLM` +
-`Negotiate` +
-`Kerberos` +
-`CredSSP`
-|`NTLM`
-|Authentication scheme
-
-|`winrm.server.<key>.disable-certificate-checks`
-a|`true` +
-`false`
-|`false`
-|Disable/enable HTTPS certificates validation
-
-|===
+:connection-parameters-prefix: winrm.server.<key>.
+:parameters-name: properties
+include::partial$winrm-connection-parameters.adoc[]
 
 == Steps
+
+=== Configure dynamic WinRM connection
+
+Creates a new dynamic WinRM connection from the provided parameters, the
+connection is available only within the story creating the connection.
+
+[source,gherkin]
+----
+When I configure WinRM connection with key `$connectionKey` and parameters:$connectionParameters
+----
+
+* `$connectionKey` - The key to assign to the creating WinRM connection. In case if the key conflicts with a global connection key, the dynamic connection will take precedence within the story.
+* `$connectionParameters` - `ExamplesTable` with WinRM connection parameters.
++
+:connection-parameters-prefix:
+:parameters-name: parameters
+include::partial$winrm-connection-parameters.adoc[]
+
+.Configure WinRM connection dynamically
+[source,gherkin]
+----
+When I configure WinRM connection with key `my-connection` and parameters:
+|address         |username |password|authentication-scheme|
+|10.10.10.10:5985|admin    |Pa$$w0rd|Basic                |
+----
 
 === Execute batch command
 
@@ -69,11 +55,11 @@ Executes a https://en.wikibooks.org/wiki/Windows_Batch_Scripting[native Windows 
 
 [source,gherkin]
 ----
-When I execute batch command `$command` on server `$server` using WinRM and save result to $scopes variable `$variableName`
+When I execute batch command `$command` on server `$connectionKey` using WinRM and save result to $scopes variable `$variableName`
 ----
 
 * `$command` - The batch command limited to 8096 bytes. The maximum length of the command can be even less depending on the https://support.microsoft.com/en-us/kb/830473[platform].
-* `$server` - The WinRM server key matching one configured in the properties.
+* `$connectionKey` - The WinRM connection key matching any of configured ones.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store the command execution results. The the data will be stored under the following keys:
 +
@@ -96,11 +82,11 @@ Executes a PowerShell[https://docs.microsoft.com/en-us/powershell/scripting/over
 
 [source,gherkin]
 ----
-When I execute PowerShell command `$command` on server `$server` using WinRM and save result to $scopes variable `$variableName`
+When I execute PowerShell command `$command` on server `$connectionKey` using WinRM and save result to $scopes variable `$variableName`
 ----
 
 * `$command` - The PowerShell command.
-* `$server` - The WinRM server key matching one configured in the properties.
+* `$connectionKey` - The WinRM connection key matching any of configured ones.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to store the command execution results. The the data will be stored under the following keys:
 +

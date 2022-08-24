@@ -16,12 +16,20 @@
 
 package org.vividus.winrm;
 
-public class ServerConfiguration
+import org.jbehave.core.annotations.AsParameters;
+import org.jbehave.core.annotations.Parameter;
+
+@AsParameters
+public class WinRmConnectionParameters
 {
     private String address;
     private String username;
     private String password;
+
+    @Parameter(name = "authentication-scheme")
     private String authenticationScheme;
+
+    @Parameter(name = "disable-certificate-checks")
     private boolean disableCertificateChecks;
 
     public String getAddress()
