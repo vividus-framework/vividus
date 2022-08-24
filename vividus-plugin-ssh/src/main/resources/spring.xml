@@ -17,9 +17,10 @@
 
     <bean id="sshSteps" class="org.vividus.ssh.SshSteps">
         <constructor-arg index="0">
-            <bean factory-bean="propertyMapper" factory-method="readValues">
-                <constructor-arg value="ssh.server." />
-                <constructor-arg value="org.vividus.ssh.SshConnectionParameters"/>
+            <bean class="org.vividus.context.DynamicConfigurationManager">
+                <constructor-arg index="0" value="SSH connection" />
+                <constructor-arg index="1" value="ssh.server." />
+                <constructor-arg index="2" value="org.vividus.ssh.SshConnectionParameters"/>
             </bean>
         </constructor-arg>
     </bean>

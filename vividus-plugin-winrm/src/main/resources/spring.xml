@@ -9,10 +9,11 @@
 
 
     <bean id="winRmSteps" class="org.vividus.winrm.WinRmSteps">
-        <constructor-arg>
-            <bean factory-bean="propertyMapper" factory-method="readValues">
-                <constructor-arg value="winrm.server." />
-                <constructor-arg value="org.vividus.winrm.ServerConfiguration"/>
+        <constructor-arg index="0">
+            <bean class="org.vividus.context.DynamicConfigurationManager">
+                <constructor-arg index="0" value="WinRM connection" />
+                <constructor-arg index="1" value="winrm.server." />
+                <constructor-arg index="2" value="org.vividus.winrm.WinRmConnectionParameters"/>
             </bean>
         </constructor-arg>
     </bean>

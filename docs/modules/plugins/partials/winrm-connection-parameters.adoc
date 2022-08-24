@@ -1,0 +1,42 @@
+NOTE: The {parameters-name} marked with *bold* are mandatory.
+
+[cols="3,1,1,3", options="header"]
+|===
+|Name
+|Acceptable values
+|Default
+|Description
+
+|[subs=+quotes]`*{connection-parameters-prefix}address*`
+|<string>
+|
+|Either full endpoint URL (e.g. `https://10.240.1.1:5986/wsman`) or hostname and port separated by colon (e.g. `10.240.1.1:5986`)
+
+|[subs=+quotes]`*{connection-parameters-prefix}username*`
+|<string>
+|
+|The name of the user logging in
+
+|[subs=+quotes]`*{connection-parameters-prefix}password*`
+|<string>
+|
+|The password of the user logging in
+
+
+|`{connection-parameters-prefix}authentication-scheme`
+a|`Basic` +
+`Digest` +
+`NTLM` +
+`Negotiate` +
+`Kerberos` +
+`CredSSP`
+|`NTLM`
+|Authentication scheme
+
+|`{connection-parameters-prefix}disable-certificate-checks`
+a|`true` +
+`false`
+|`false`
+|Disable/enable HTTPS certificates validation
+
+|===

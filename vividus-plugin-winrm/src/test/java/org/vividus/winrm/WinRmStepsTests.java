@@ -16,9 +16,14 @@
 
 package org.vividus.winrm;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -27,14 +32,18 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import org.apache.http.client.config.AuthSchemes;
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.context.DynamicConfigurationManager;
 import org.vividus.context.VariableContext;
-import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.variable.VariableScope;
 
 import io.cloudsoft.winrm4j.client.WinRmClientContext;
@@ -48,9 +57,41 @@ class WinRmStepsTests
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.SCENARIO);
     private static final String VARIABLE_NAME = "result";
 
-    @Mock private PropertyMappedCollection<ServerConfiguration> serverConfigurations;
+    @Mock private DynamicConfigurationManager<WinRmConnectionParameters> winRmConnectionParameters;
     @Mock private VariableContext variableContext;
-    @InjectMocks private WinRmSteps winRmSteps;
+    @InjectMocks private WinRmSteps steps;
+
+    @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
+    @Test
+    void shouldConfigureDynamicConnection()
+    {
+        var connectionParametersTable = new ExamplesTable(
+                "|address         |username |password|authentication-scheme|\n"
+                + "|10.10.10.10:5985|admin    |Pa$$w0rd|Basic                |");
+        var key = "new-connection";
+        steps.configureWinRmConnection(key, connectionParametersTable);
+        var winRmConnectionParametersArgumentCaptor = ArgumentCaptor.forClass(WinRmConnectionParameters.class);
+        verify(winRmConnectionParameters).addDynamicConfiguration(eq(key),
+                winRmConnectionParametersArgumentCaptor.capture());
+        var parameters = winRmConnectionParametersArgumentCaptor.getValue();
+        assertAll(
+                () -> assertEquals("10.10.10.10:5985", parameters.getAddress()),
+                () -> assertEquals("admin", parameters.getUsername()),
+                () -> assertEquals("Pa$$w0rd", parameters.getPassword())
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "", "|any|\n|1|\n|2|" })
+    void shouldFailToConfigureDynamicConnection(String tableAsString)
+    {
+        var connectionParametersTable = new ExamplesTable(tableAsString);
+        var key = "invalid-connection";
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> steps.configureWinRmConnection(key, connectionParametersTable));
+        assertEquals("Exactly one row with WinRM connection parameters is expected in ExamplesTable, but found "
+                + connectionParametersTable.getRowCount(), exception.getMessage());
+    }
 
     @Test
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
@@ -67,7 +108,7 @@ class WinRmStepsTests
             var command = "echo hello cmd";
             var stdout = "hello cmd";
             when(winRmTool.executeCommand(command)).thenReturn(new WinRmToolResponse(stdout, "", 0));
-            winRmSteps.executeBatchCommand(command, SERVER, SCOPES, VARIABLE_NAME);
+            steps.executeBatchCommand(command, SERVER, SCOPES, VARIABLE_NAME);
             return stdout;
         }, (ordered, builder) -> {
             ordered.verify(builder).disableCertificateChecks(disableCertificateChecks);
@@ -85,24 +126,22 @@ class WinRmStepsTests
             var command = "echo hello ps";
             var stdout = "hello ps";
             when(winRmTool.executePs(command)).thenReturn(new WinRmToolResponse(stdout, "", 0));
-            winRmSteps.executePowerShellCommand(command, SERVER, SCOPES, VARIABLE_NAME);
+            steps.executePowerShellCommand(command, SERVER, SCOPES, VARIABLE_NAME);
             return stdout;
         }, (ordered, builder) -> { });
     }
 
-    void shouldExecuteCommandUsingWinRm(ServerConfiguration serverConfiguration, Function<WinRmTool, String> test,
-            BiConsumer<InOrder, WinRmTool.Builder> verifier)
+    void shouldExecuteCommandUsingWinRm(WinRmConnectionParameters connectionParameters,
+            Function<WinRmTool, String> test, BiConsumer<InOrder, WinRmTool.Builder> verifier)
     {
-        when(serverConfigurations.get(SERVER, "WinRM server connection with key '%s' is not configured in properties",
-                SERVER)).thenReturn(serverConfiguration);
+        when(winRmConnectionParameters.getConfiguration(SERVER)).thenReturn(connectionParameters);
 
         try (var builderStaticMock = mockStatic(WinRmTool.Builder.class);
                 var contextStaticMock = mockStatic(WinRmClientContext.class))
         {
             var builder = mock(WinRmTool.Builder.class);
-            builderStaticMock.when(
-                    () -> WinRmTool.Builder.builder(serverConfiguration.getAddress(), serverConfiguration.getUsername(),
-                            serverConfiguration.getPassword())).thenReturn(builder);
+            builderStaticMock.when(() -> WinRmTool.Builder.builder(connectionParameters.getAddress(),
+                    connectionParameters.getUsername(), connectionParameters.getPassword())).thenReturn(builder);
 
             var context = mock(WinRmClientContext.class);
             contextStaticMock.when(WinRmClientContext::newInstance).thenReturn(context);
@@ -128,9 +167,9 @@ class WinRmStepsTests
         }
     }
 
-    private static ServerConfiguration createServerConfiguration(String address)
+    private static WinRmConnectionParameters createServerConfiguration(String address)
     {
-        var serverConfiguration = new ServerConfiguration();
+        var serverConfiguration = new WinRmConnectionParameters();
         serverConfiguration.setAddress(address);
         serverConfiguration.setUsername("user");
         serverConfiguration.setPassword("pa$$w0rd");

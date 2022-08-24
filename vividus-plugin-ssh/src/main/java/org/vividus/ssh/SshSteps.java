@@ -24,22 +24,22 @@ import java.util.function.Function;
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
+import org.vividus.context.DynamicConfigurationManager;
 import org.vividus.context.VariableContext;
 import org.vividus.ssh.context.SshTestContext;
 import org.vividus.ssh.exec.SshOutput;
 import org.vividus.ssh.sftp.SftpCommand;
 import org.vividus.ssh.sftp.SftpOutput;
-import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.variable.VariableScope;
 
 public class SshSteps
 {
-    private final PropertyMappedCollection<SshConnectionParameters> sshConnectionParameters;
+    private final DynamicConfigurationManager<SshConnectionParameters> sshConnectionParameters;
     private final VariableContext variableContext;
     private final Map<String, CommandExecutionManager<?>> commandExecutionManagers;
     private final SshTestContext sshTestContext;
 
-    public SshSteps(PropertyMappedCollection<SshConnectionParameters> sshConnectionParameters,
+    public SshSteps(DynamicConfigurationManager<SshConnectionParameters> sshConnectionParameters,
             VariableContext variableContext, Map<String, CommandExecutionManager<?>> commandExecutionManagers,
             SshTestContext sshTestContext)
     {
@@ -65,7 +65,7 @@ public class SshSteps
                 "Exactly one row with SSH connection parameters is expected in ExamplesTable, but found %d", rowCount);
         SshConnectionParameters sshConnectionParametersToAdd = connectionParameters.getRowsAsParameters(true).get(0)
                 .mapTo(SshConnectionParameters.class);
-        sshTestContext.addDynamicConnectionParameters(connectionKey, sshConnectionParametersToAdd);
+        sshConnectionParameters.addDynamicConfiguration(connectionKey, sshConnectionParametersToAdd);
     }
 
     /**
@@ -86,12 +86,7 @@ public class SshSteps
     public Object executeCommands(Commands commands, String connectionKey, Protocol protocol)
             throws CommandExecutionException
     {
-        SshConnectionParameters connectionParameters = sshTestContext.getDynamicConnectionParameters(connectionKey)
-                .orElseGet(() -> {
-                    String messageFormat = "SSH connection with key '%s' is not configured in the current "
-                            + "story nor in properties";
-                    return sshConnectionParameters.get(connectionKey, messageFormat, connectionKey);
-                });
+        SshConnectionParameters connectionParameters = sshConnectionParameters.getConfiguration(connectionKey);
         CommandExecutionManager<?> commandExecutionManager = commandExecutionManagers.get(protocol.toString());
         Object output = commandExecutionManager.run(connectionParameters, commands);
         sshTestContext.putSshOutput(Protocol.SSH == protocol ? (SshOutput) output : null);
@@ -112,7 +107,7 @@ public class SshSteps
      *                      <li><b>STORY</b> - the variable will be available within the whole story,
      *                      <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      *                      </ul>.
-     * @param variableName  The name of the variable to save the SFTP commands execution result,
+     * @param variableName  The name of the variable to save the SFTP commands execution result.
      * @return SFTP command execution result
      * @throws CommandExecutionException if any error happens during commands execution
      */

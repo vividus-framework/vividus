@@ -16,11 +16,6 @@
 
 package org.vividus.ssh.context;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import org.vividus.ssh.SshConnectionParameters;
 import org.vividus.ssh.exec.SshOutput;
 import org.vividus.testcontext.TestContext;
 
@@ -33,16 +28,6 @@ public class SshTestContext
     public SshTestContext(TestContext testContext)
     {
         this.testContext = testContext;
-    }
-
-    public void addDynamicConnectionParameters(String connectionKey, SshConnectionParameters sshConnectionParameters)
-    {
-        getData().dynamicConnectionParameters.put(connectionKey, sshConnectionParameters);
-    }
-
-    public Optional<SshConnectionParameters> getDynamicConnectionParameters(String connectionKey)
-    {
-        return Optional.ofNullable(getData().dynamicConnectionParameters.get(connectionKey));
     }
 
     public SshOutput getSshOutput()
@@ -62,8 +47,6 @@ public class SshTestContext
 
     private static class SshTestContextData
     {
-        private final Map<String, SshConnectionParameters> dynamicConnectionParameters = new HashMap<>();
-
         private SshOutput sshOutput;
     }
 }
