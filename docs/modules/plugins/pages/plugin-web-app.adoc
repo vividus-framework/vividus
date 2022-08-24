@@ -1122,7 +1122,24 @@ Then `${response}` matcher `.+`
 
 This set of steps allows to validate the https://developer.mozilla.org/en-US/docs/Web/API/console[browser console logging messages].
 
-:log-levels: List of the comma-separated messages levels. The supported levels are: ERRORS, WARNINGS.
+:log-levels: List of the comma-separated messages levels. The supported levels are: ERRORS, WARNINGS, INFOS.
+
+[TIP]
+=====
+In order to configure availability of the INFO level messages use following properties:
+[cols="1,2"]
+|===
+
+|Browser
+|Property to enable INFO logs
+
+|Google Chrome
+|`selenium.capabilities.goog\:loggingPrefs.browser=INFO`
+
+|Microsoft Edge Chromium
+|]selenium.capabilities.ms\:loggingPrefs.browser=INFO`
+|===
+=====
 
 ==== Validate log entries absence
 
