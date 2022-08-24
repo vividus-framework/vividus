@@ -20,7 +20,7 @@ import java.io.IOException;
 
 import org.vividus.jira.JiraConfigurationException;
 
-public interface IZephyrExporter
+public interface ZephyrExporter
 {
     void exportResults() throws IOException, JiraConfigurationException;
 }
