@@ -175,7 +175,7 @@ public class ZephyrSquadFacade extends AbstractZephyrFacade
                     getZephyrExporterConfiguration().getVersionName(), getZephyrExporterConfiguration().getCycleName());
         }
         List<Integer> executionId = JsonPathUtils.getData(json, jsonpath);
-        return executionId.size() != 0 ? OptionalInt.of(executionId.get(0)) : OptionalInt.empty();
+        return executionId.isEmpty() ? OptionalInt.empty() : OptionalInt.of(executionId.get(0));
     }
 
     private JiraClient getJiraClient() throws JiraConfigurationException
