@@ -288,10 +288,13 @@ class AzureDevOpsFacadeTests
 
     @ParameterizedTest
     @CsvSource({
-        "successful, Passed",
-        "failed, Failed"
+        "successful, successful, successful, Passed",
+        "successful, failed, successful, Failed",
+        "successful, successful, failed, Failed",
+        "failed, successful, successful, Failed"
     })
-    void shouldCreateTestRun(String stepOutcome, String resultOutcome) throws IOException
+    void shouldCreateTestRun(String systemBeforeStepOutcome, String stepOutcome, String systemAfterStepOutcome,
+            String resultOutcome) throws IOException
     {
         options.getTestRun().setTestPlanId(TEST_PLAN_ID);
         options.getTestRun().setName(RUN_NAME);
@@ -312,6 +315,12 @@ class AzureDevOpsFacadeTests
         Step successfulStep = createStep(WHEN_STEP);
         successfulStep.setOutcome(stepOutcome);
         Scenario scenario = createScenario(List.of(successfulStep));
+        Step systemBeforeStep = createStep(WHEN_STEP);
+        systemBeforeStep.setOutcome(systemBeforeStepOutcome);
+        scenario.setBeforeSystemScenarioSteps(List.of(systemBeforeStep));
+        Step systemAfterStep = createStep(WHEN_STEP);
+        systemAfterStep.setOutcome(systemAfterStepOutcome);
+        scenario.setAfterSystemScenarioSteps(List.of(systemAfterStep));
 
         facade.createTestRun(Map.of(TEST_CASE_ID, scenario));
 
