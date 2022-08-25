@@ -1193,3 +1193,25 @@ Then there are browser console $logLevels by regex '$pattern'
 Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
 Then there are browser console ERRORS by regex '.*user.*'
 ----
+
+==== Wait for console log entries and save them
+
+Waits for the appearance of the console log entries with the expected level and which match regular expression and saves all the entries (including awaited ones) of the expected level gathered during the wait to the scoped variable.
+
+NOTE: Wait uses generic UI timeouts specified by the properties `ui.wait.timeout` and `ui.wait.polling-period`. See <<_properties>> section for more details.
+
+[source,gherkin]
+----
+When I wait until browser console $logEntries by regex `$regex` appear and save all entries into $scopes variable `$variableName`
+----
+* `$logLevels` - {log-levels}
+* `$pattern` - The regular expression to match log entry messages.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the value of the barcode.
+
+.Wait for application readiness
+----
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+When I wait until browser console infos by regex `.*Application ready.*` appear and save all entries into scenario variable `logs`
+Then `${logs}` matches `.*Application ready in \d+ seconds.*`
+----
