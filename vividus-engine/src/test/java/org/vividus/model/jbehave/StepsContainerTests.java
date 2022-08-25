@@ -31,16 +31,22 @@ class StepsContainerTests
     {
         AbstractStepsContainer container = new AbstractStepsContainer() { };
 
-        Step beforeStep = mock(Step.class);
-        container.setBeforeUserScenarioSteps(List.of(beforeStep));
+        Step beforeSystemStep = mock(Step.class);
+        container.setBeforeSystemScenarioSteps(List.of(beforeSystemStep));
+
+        Step beforeUserStep = mock(Step.class);
+        container.setBeforeUserScenarioSteps(List.of(beforeUserStep));
 
         Step step = mock(Step.class);
         container.setSteps(List.of(step));
 
-        Step afterStep = mock(Step.class);
-        container.setAfterUserScenarioSteps(List.of(afterStep));
+        Step afterUserStep = mock(Step.class);
+        container.setAfterUserScenarioSteps(List.of(afterUserStep));
 
-        assertEquals(List.of(beforeStep, step, afterStep),
+        Step afterSystemStep = mock(Step.class);
+        container.setAfterSystemScenarioSteps(List.of(afterSystemStep));
+
+        assertEquals(List.of(beforeSystemStep, beforeUserStep, step, afterUserStep, afterSystemStep),
                 container.createStreamOfAllSteps().collect(Collectors.toList()));
     }
 }
