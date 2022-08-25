@@ -38,7 +38,7 @@ public abstract class AbstractZephyrExporter implements ZephyrExporter
     private final TestCaseParser testCaseParser;
     private final ObjectMapper objectMapper;
 
-    public AbstractZephyrExporter(IZephyrFacade zephyrFacade, TestCaseParser testCaseParser)
+    protected AbstractZephyrExporter(IZephyrFacade zephyrFacade, TestCaseParser testCaseParser)
     {
         this.zephyrFacade = zephyrFacade;
         this.testCaseParser = testCaseParser;
