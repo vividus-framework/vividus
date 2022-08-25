@@ -24,13 +24,11 @@ import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalInt;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
-import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
@@ -48,16 +46,10 @@ public class ZephyrSquadFacade extends AbstractZephyrFacade
 {
     private static final String ZAPI_ENDPOINT = "/rest/zapi/latest/";
 
-    private final JiraClientProvider jiraClientProvider;
-    private final ZephyrExporterProperties zephyrExporterProperties;
-
     public ZephyrSquadFacade(JiraFacade jiraFacade, JiraClientProvider jiraClientProvider,
-                             ZephyrExporterConfiguration zephyrExporterConfiguration,
-                             ZephyrExporterProperties zephyrExporterProperties)
+            ZephyrExporterConfiguration zephyrExporterConfiguration, ZephyrExporterProperties zephyrExporterProperties)
     {
-        super(jiraFacade, zephyrExporterConfiguration);
-        this.jiraClientProvider = jiraClientProvider;
-        this.zephyrExporterProperties = zephyrExporterProperties;
+        super(jiraFacade, jiraClientProvider, zephyrExporterConfiguration, zephyrExporterProperties);
     }
 
     @Override
@@ -149,11 +141,11 @@ public class ZephyrSquadFacade extends AbstractZephyrFacade
     {
         String json = getJiraClient().executeGet(ZAPI_ENDPOINT + "util/testExecutionStatus");
         Map<TestCaseStatus, String> testStatusPerZephyrIdMapping = new EnumMap<>(TestCaseStatus.class);
-        getZephyrExporterConfiguration().getStatuses().entrySet().forEach(s ->
+        getZephyrExporterConfiguration().getStatuses().forEach((testCaseStatus, statusName) ->
         {
-            List<Integer> statusId = JsonPathUtils.getData(json, String.format("$.[?(@.name=='%s')].id", s.getValue()));
-            notEmpty(statusId, "Status '%s' does not exist", s.getValue());
-            testStatusPerZephyrIdMapping.put(s.getKey(), String.valueOf(statusId.get(0)));
+            List<Integer> statusId = JsonPathUtils.getData(json, String.format("$.[?(@.name=='%s')].id", statusName));
+            notEmpty(statusId, "Status '%s' does not exist", statusName);
+            testStatusPerZephyrIdMapping.put(testCaseStatus, String.valueOf(statusId.get(0)));
         });
         return testStatusPerZephyrIdMapping;
     }
@@ -176,11 +168,5 @@ public class ZephyrSquadFacade extends AbstractZephyrFacade
         }
         List<Integer> executionId = JsonPathUtils.getData(json, jsonpath);
         return executionId.isEmpty() ? OptionalInt.empty() : OptionalInt.of(executionId.get(0));
-    }
-
-    private JiraClient getJiraClient() throws JiraConfigurationException
-    {
-        return jiraClientProvider
-                .getByJiraConfigurationKey(Optional.ofNullable(zephyrExporterProperties.getJiraInstanceKey()));
     }
 }

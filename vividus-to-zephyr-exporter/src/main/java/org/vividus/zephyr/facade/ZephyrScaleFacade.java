@@ -19,14 +19,12 @@ package org.vividus.zephyr.facade;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalInt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
-import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
@@ -42,17 +40,12 @@ public class ZephyrScaleFacade extends AbstractZephyrFacade
     private static final String BASE_ENDPOINT = "/rest/atm/1.0";
     private static final String TEST_RESULT_ENDPOINT = BASE_ENDPOINT + "/testrun/%s/testcase/%s/testresult";
 
-    private final JiraClientProvider jiraClientProvider;
-    private final ZephyrExporterProperties zephyrExporterProperties;
     private ZephyrConfiguration zephyrConfiguration;
 
     public ZephyrScaleFacade(JiraFacade jiraFacade, JiraClientProvider jiraClientProvider,
-                             ZephyrExporterConfiguration zephyrExporterConfiguration,
-                             ZephyrExporterProperties zephyrExporterProperties)
+            ZephyrExporterConfiguration zephyrExporterConfiguration, ZephyrExporterProperties zephyrExporterProperties)
     {
-        super(jiraFacade, zephyrExporterConfiguration);
-        this.jiraClientProvider = jiraClientProvider;
-        this.zephyrExporterProperties = zephyrExporterProperties;
+        super(jiraFacade, jiraClientProvider, zephyrExporterConfiguration, zephyrExporterProperties);
     }
 
     @Override
@@ -106,16 +99,10 @@ public class ZephyrScaleFacade extends AbstractZephyrFacade
     }
 
     @Override
-    public OptionalInt findExecutionId(String issueId) throws IOException, JiraConfigurationException
+    public OptionalInt findExecutionId(String issueId)
     {
         // Execution ID is not applicable for Zephyr Scale. All interaction occurs using the id of the test case.
         throw new UnsupportedOperationException("Execution ID is not applicable for Zephyr Scale."
                 + " All interaction occurs using the id of the test case");
-    }
-
-    private JiraClient getJiraClient() throws JiraConfigurationException
-    {
-        return jiraClientProvider
-                .getByJiraConfigurationKey(Optional.ofNullable(zephyrExporterProperties.getJiraInstanceKey()));
     }
 }

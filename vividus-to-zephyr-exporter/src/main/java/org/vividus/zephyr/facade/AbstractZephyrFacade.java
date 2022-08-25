@@ -18,46 +18,58 @@ package org.vividus.zephyr.facade;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
+import org.vividus.jira.JiraClient;
+import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.Project;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterConfiguration;
+import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.model.TestCaseStatus;
 
 public abstract class AbstractZephyrFacade implements ZephyrFacade
 {
     private final JiraFacade jiraFacade;
+    private final JiraClientProvider jiraClientProvider;
     private final ZephyrExporterConfiguration zephyrExporterConfiguration;
+    private final ZephyrExporterProperties zephyrExporterProperties;
 
-    protected AbstractZephyrFacade(JiraFacade jiraFacade, ZephyrExporterConfiguration zephyrExporterConfiguration)
+    protected AbstractZephyrFacade(JiraFacade jiraFacade, JiraClientProvider jiraClientProvider,
+            ZephyrExporterConfiguration zephyrExporterConfiguration,
+            ZephyrExporterProperties zephyrExporterProperties)
     {
         this.jiraFacade = jiraFacade;
+        this.jiraClientProvider = jiraClientProvider;
         this.zephyrExporterConfiguration = zephyrExporterConfiguration;
+        this.zephyrExporterProperties = zephyrExporterProperties;
     }
 
-    public ZephyrConfiguration prepareBaseConfiguration(ZephyrConfiguration zephyrConfiguration,
-                                                        String cycleId,
-                                                        Map<TestCaseStatus, String> statusMap)
-            throws IOException, JiraConfigurationException
+    protected void prepareBaseConfiguration(ZephyrConfiguration zephyrConfiguration, String cycleId,
+            Map<TestCaseStatus, String> statusMap) throws IOException, JiraConfigurationException
     {
         Project project = jiraFacade.getProject(zephyrExporterConfiguration.getProjectKey());
         String projectId = project.getId();
         zephyrConfiguration.setProjectId(projectId);
         zephyrConfiguration.setCycleId(cycleId);
         zephyrConfiguration.setTestStatusPerZephyrStatusMapping(statusMap);
-
-        return zephyrConfiguration;
     }
 
-    public JiraFacade getJiraFacade()
+    protected JiraFacade getJiraFacade()
     {
         return jiraFacade;
     }
 
-    public ZephyrExporterConfiguration getZephyrExporterConfiguration()
+    protected ZephyrExporterConfiguration getZephyrExporterConfiguration()
     {
         return zephyrExporterConfiguration;
+    }
+
+    protected JiraClient getJiraClient() throws JiraConfigurationException
+    {
+        return jiraClientProvider
+                .getByJiraConfigurationKey(Optional.ofNullable(zephyrExporterProperties.getJiraInstanceKey()));
     }
 }
