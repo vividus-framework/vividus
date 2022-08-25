@@ -48,7 +48,7 @@ public abstract class AbstractZephyrExporter implements ZephyrExporter
                 .build()
                 .registerModule(new SimpleModule().addDeserializer(TestCase.class, new TestCaseDeserializer()));
     }
-@Override
+    @Override
     public void exportResults() throws IOException, JiraConfigurationException
     {
         List<TestCase> testCasesForImporting = testCaseParser.createTestCases(objectMapper);
