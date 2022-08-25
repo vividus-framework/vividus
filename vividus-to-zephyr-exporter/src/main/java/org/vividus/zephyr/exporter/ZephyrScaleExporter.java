@@ -22,7 +22,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
-import org.vividus.zephyr.facade.IZephyrFacade;
+import org.vividus.zephyr.facade.ZephyrFacade;
 import org.vividus.zephyr.model.ExecutionStatus;
 import org.vividus.zephyr.model.TestCase;
 import org.vividus.zephyr.model.ZephyrExecution;
@@ -32,7 +32,7 @@ import org.vividus.zephyr.parser.TestCaseParser;
 @ConditionalOnProperty(value = "zephyr.exporter.api-type", havingValue = "SCALE")
 public class ZephyrScaleExporter extends AbstractZephyrExporter
 {
-    public ZephyrScaleExporter(IZephyrFacade zephyrFacade, TestCaseParser testCaseParser)
+    public ZephyrScaleExporter(ZephyrFacade zephyrFacade, TestCaseParser testCaseParser)
     {
         super(zephyrFacade, testCaseParser);
     }

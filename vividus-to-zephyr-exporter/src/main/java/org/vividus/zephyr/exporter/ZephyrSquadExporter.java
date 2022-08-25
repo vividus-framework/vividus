@@ -28,7 +28,7 @@ import org.vividus.jira.JiraFacade;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterProperties;
-import org.vividus.zephyr.facade.IZephyrFacade;
+import org.vividus.zephyr.facade.ZephyrFacade;
 import org.vividus.zephyr.model.ExecutionStatus;
 import org.vividus.zephyr.model.TestCase;
 import org.vividus.zephyr.model.ZephyrExecution;
@@ -43,7 +43,7 @@ public class ZephyrSquadExporter extends AbstractZephyrExporter
     private final JiraFacade jiraFacade;
     private final ZephyrExporterProperties zephyrExporterProperties;
 
-    public ZephyrSquadExporter(JiraFacade jiraFacade, IZephyrFacade zephyrFacade, TestCaseParser testCaseParser,
+    public ZephyrSquadExporter(JiraFacade jiraFacade, ZephyrFacade zephyrFacade, TestCaseParser testCaseParser,
                                ZephyrExporterProperties zephyrExporterProperties)
     {
         super(zephyrFacade, testCaseParser);
@@ -51,6 +51,7 @@ public class ZephyrSquadExporter extends AbstractZephyrExporter
         this.zephyrExporterProperties = zephyrExporterProperties;
     }
 
+    @Override
     protected void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
             throws IOException, JiraConfigurationException
     {

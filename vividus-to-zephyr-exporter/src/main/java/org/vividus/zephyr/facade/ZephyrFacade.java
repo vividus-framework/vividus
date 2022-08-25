@@ -22,7 +22,7 @@ import java.util.OptionalInt;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 
-public interface IZephyrFacade
+public interface ZephyrFacade
 {
     ZephyrConfiguration prepareConfiguration() throws IOException, JiraConfigurationException;
 

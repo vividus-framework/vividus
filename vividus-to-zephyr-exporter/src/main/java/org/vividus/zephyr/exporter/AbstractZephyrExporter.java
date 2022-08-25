@@ -28,17 +28,17 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.databind.TestCaseDeserializer;
-import org.vividus.zephyr.facade.IZephyrFacade;
+import org.vividus.zephyr.facade.ZephyrFacade;
 import org.vividus.zephyr.model.TestCase;
 import org.vividus.zephyr.parser.TestCaseParser;
 
 public abstract class AbstractZephyrExporter implements ZephyrExporter
 {
-    private final IZephyrFacade zephyrFacade;
+    private final ZephyrFacade zephyrFacade;
     private final TestCaseParser testCaseParser;
     private final ObjectMapper objectMapper;
 
-    protected AbstractZephyrExporter(IZephyrFacade zephyrFacade, TestCaseParser testCaseParser)
+    protected AbstractZephyrExporter(ZephyrFacade zephyrFacade, TestCaseParser testCaseParser)
     {
         this.zephyrFacade = zephyrFacade;
         this.testCaseParser = testCaseParser;
@@ -63,7 +63,7 @@ public abstract class AbstractZephyrExporter implements ZephyrExporter
     protected abstract void exportTestExecution(TestCase testCase, ZephyrConfiguration configuration)
             throws IOException, JiraConfigurationException;
 
-    protected IZephyrFacade getZephyrFacade()
+    protected ZephyrFacade getZephyrFacade()
     {
         return zephyrFacade;
     }

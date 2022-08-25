@@ -26,7 +26,7 @@ import org.vividus.zephyr.configuration.ZephyrConfiguration;
 import org.vividus.zephyr.configuration.ZephyrExporterConfiguration;
 import org.vividus.zephyr.model.TestCaseStatus;
 
-public abstract class AbstractZephyrFacade implements IZephyrFacade
+public abstract class AbstractZephyrFacade implements ZephyrFacade
 {
     private final JiraFacade jiraFacade;
     private final ZephyrExporterConfiguration zephyrExporterConfiguration;
