@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ public class ZephyrConfiguration
     private String versionId;
     private String cycleId;
     private String folderId;
-    private Map<TestCaseStatus, Integer> testStatusPerZephyrIdMapping;
+    private Map<TestCaseStatus, String> testStatusPerZephyrStatusMapping;
 
     public void setProjectId(String projectId)
     {
@@ -48,9 +48,9 @@ public class ZephyrConfiguration
         this.folderId = folderId;
     }
 
-    public void setTestStatusPerZephyrIdMapping(Map<TestCaseStatus, Integer> statusIdMap)
+    public void setTestStatusPerZephyrStatusMapping(Map<TestCaseStatus, String> statusMap)
     {
-        this.testStatusPerZephyrIdMapping = statusIdMap;
+        this.testStatusPerZephyrStatusMapping = statusMap;
     }
 
     public String getProjectId()
@@ -73,8 +73,8 @@ public class ZephyrConfiguration
         return folderId;
     }
 
-    public Map<TestCaseStatus, Integer> getTestStatusPerZephyrIdMapping()
+    public Map<TestCaseStatus, String> getTestStatusPerZephyrStatusMapping()
     {
-        return testStatusPerZephyrIdMapping;
+        return testStatusPerZephyrStatusMapping;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ import org.vividus.zephyr.configuration.ZephyrExporterProperties;
 import org.vividus.zephyr.model.TestCaseStatus;
 
 @ExtendWith(MockitoExtension.class)
-class ZephyrFacadeTests
+class ZephyrSquadFacadeTests
 {
     private static final String ZAPI_ENDPOINT = "/rest/zapi/latest/";
     private static final String GET_CYCLE_ID_ENDPOINT = ZAPI_ENDPOINT + "cycle?projectId=%s&versionId=%s";
@@ -66,17 +66,19 @@ class ZephyrFacadeTests
     private static final String FOLDER_ID = "11114";
     private static final String ISSUE_ID = "111";
     private static final String TEST = "test";
+    private static final String EXECUTION_ID = "11116";
+    private static final String PASSED_STATUS_ID = "1";
 
     @Mock private JiraFacade jiraFacade;
     @Mock private JiraClient client;
     @Mock private JiraClientProvider jiraClientProvider;
     @Mock private ZephyrExporterConfiguration zephyrExporterConfiguration;
-    @InjectMocks private ZephyrFacade zephyrFacade;
+    @InjectMocks private ZephyrSquadFacade zephyrSquadFacade;
 
     @BeforeEach
     void init()
     {
-        zephyrFacade = new ZephyrFacade(jiraFacade, jiraClientProvider, zephyrExporterConfiguration,
+        zephyrSquadFacade = new ZephyrSquadFacade(jiraFacade, jiraClientProvider, zephyrExporterConfiguration,
                 new ZephyrExporterProperties());
     }
 
@@ -88,7 +90,7 @@ class ZephyrFacadeTests
                 + "\"versionId\": \"11112\",\"folderId\": 11114}";
         when(client.executePost(ZAPI_ENDPOINT + "execution/", execution)).thenReturn(
                 "{\"11116\": {\"id\": 11116,\"executionStatus\": \"-1\"}}");
-        assertEquals(11_116, zephyrFacade.createExecution(execution));
+        assertEquals(11_116, zephyrSquadFacade.createExecution(execution));
     }
 
     @Test
@@ -96,8 +98,8 @@ class ZephyrFacadeTests
     {
         when(jiraClientProvider.getByJiraConfigurationKey(Optional.empty())).thenReturn(client);
         String executionBody = "{\"status\": \"1\"}";
-        zephyrFacade.updateExecutionStatus(11_116, executionBody);
-        verify(client).executePut(String.format(ZAPI_ENDPOINT + "execution/%s/execute", "11116"), executionBody);
+        zephyrSquadFacade.updateExecutionStatus(EXECUTION_ID, executionBody);
+        verify(client).executePut(String.format(ZAPI_ENDPOINT + "execution/%s/execute", EXECUTION_ID), executionBody);
     }
 
     @Test
@@ -113,7 +115,7 @@ class ZephyrFacadeTests
         project.setVersions(List.of(version));
         when(jiraFacade.getProject(TEST)).thenReturn(project);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                zephyrFacade::prepareConfiguration);
+                zephyrSquadFacade::prepareConfiguration);
         assertEquals("Version with name 'test' does not exist", exception.getMessage());
     }
 
@@ -128,7 +130,7 @@ class ZephyrFacadeTests
         when(client.executeGet(String.format(GET_CYCLE_ID_ENDPOINT, PROJECT_ID, VERSION_ID))).
                 thenReturn("{\"-1\":{\"name\":\"test1\"},\"recordsCount\":1}");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                zephyrFacade::prepareConfiguration);
+                zephyrSquadFacade::prepareConfiguration);
         assertEquals("Cycle with name 'test' does not exist", exception.getMessage());
     }
 
@@ -146,7 +148,7 @@ class ZephyrFacadeTests
         when(client.executeGet(String.format(GET_FOLDER_ID_ENDPOINT, CYCLE_ID, PROJECT_ID, VERSION_ID)))
             .thenReturn("[{\"folderId\":0,\"folderName\":\"test1\"}]");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                zephyrFacade::prepareConfiguration);
+                zephyrSquadFacade::prepareConfiguration);
         assertEquals("Folder with name 'test' does not exist", exception.getMessage());
     }
 
@@ -162,7 +164,7 @@ class ZephyrFacadeTests
             .thenReturn(GET_FOLDER_ID_RESPONSE);
         when(client.executeGet(GET_STATUSES_ENDPOINT)).thenReturn("[{\"id\": 1, \"name\": \"PASSED\"}]");
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                zephyrFacade::prepareConfiguration);
+                zephyrSquadFacade::prepareConfiguration);
         assertEquals("Status 'test' does not exist", exception.getMessage());
     }
 
@@ -177,13 +179,14 @@ class ZephyrFacadeTests
         when(client.executeGet(String.format(GET_FOLDER_ID_ENDPOINT, CYCLE_ID, PROJECT_ID, VERSION_ID)))
                 .thenReturn(GET_FOLDER_ID_RESPONSE);
         when(client.executeGet(GET_STATUSES_ENDPOINT)).thenReturn(GET_STATUSES_ID_RESPONSE);
-        ZephyrConfiguration actualConfiguration = zephyrFacade.prepareConfiguration();
+        ZephyrConfiguration actualConfiguration = zephyrSquadFacade.prepareConfiguration();
         assertEquals(PROJECT_ID, actualConfiguration.getProjectId());
         assertEquals(VERSION_ID, actualConfiguration.getVersionId());
         assertEquals(CYCLE_ID, actualConfiguration.getCycleId());
         assertEquals(FOLDER_ID, actualConfiguration.getFolderId());
-        assertEquals(1, actualConfiguration.getTestStatusPerZephyrIdMapping().size());
-        assertEquals(1, actualConfiguration.getTestStatusPerZephyrIdMapping().get(TestCaseStatus.PASSED));
+        assertEquals(1, actualConfiguration.getTestStatusPerZephyrStatusMapping().size());
+        assertEquals(PASSED_STATUS_ID, actualConfiguration.getTestStatusPerZephyrStatusMapping()
+                .get(TestCaseStatus.PASSED));
     }
 
     @Test
@@ -201,13 +204,14 @@ class ZephyrFacadeTests
         when(client.executeGet(String.format(GET_CYCLE_ID_ENDPOINT, PROJECT_ID, VERSION_ID)))
             .thenReturn(GET_CYCLE_ID_RESPONSE);
         when(client.executeGet(GET_STATUSES_ENDPOINT)).thenReturn(GET_STATUSES_ID_RESPONSE);
-        ZephyrConfiguration actualConfiguration = zephyrFacade.prepareConfiguration();
+        ZephyrConfiguration actualConfiguration = zephyrSquadFacade.prepareConfiguration();
         assertEquals(PROJECT_ID, actualConfiguration.getProjectId());
         assertEquals(VERSION_ID, actualConfiguration.getVersionId());
         assertEquals(CYCLE_ID, actualConfiguration.getCycleId());
         assertNull(actualConfiguration.getFolderId());
-        assertEquals(1, actualConfiguration.getTestStatusPerZephyrIdMapping().size());
-        assertEquals(1, actualConfiguration.getTestStatusPerZephyrIdMapping().get(TestCaseStatus.PASSED));
+        assertEquals(1, actualConfiguration.getTestStatusPerZephyrStatusMapping().size());
+        assertEquals(PASSED_STATUS_ID, actualConfiguration.getTestStatusPerZephyrStatusMapping()
+                .get(TestCaseStatus.PASSED));
     }
 
     @Test
@@ -218,7 +222,7 @@ class ZephyrFacadeTests
         when(zephyrExporterConfiguration.getCycleName()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getFolderName()).thenReturn(TEST);
         when(client.executeGet(GET_EXECUTION_ID_ENDPOINT)).thenReturn(GET_EXECUTION_ID_RESPONSE);
-        assertEquals(OptionalInt.of(1001), zephyrFacade.findExecutionId(ISSUE_ID));
+        assertEquals(OptionalInt.of(1001), zephyrSquadFacade.findExecutionId(ISSUE_ID));
     }
 
     @Test
@@ -230,7 +234,7 @@ class ZephyrFacadeTests
         when(zephyrExporterConfiguration.getFolderName()).thenReturn("");
         when(client.executeGet(GET_EXECUTION_ID_ENDPOINT)).thenReturn("{\"issueId\": 111,\"executions\":"
                 + "[{\"id\": 1003,\"cycleName\": \"test\",\"versionName\": \"test\"}]}");
-        assertEquals(OptionalInt.of(1003), zephyrFacade.findExecutionId(ISSUE_ID));
+        assertEquals(OptionalInt.of(1003), zephyrSquadFacade.findExecutionId(ISSUE_ID));
     }
 
     @Test
@@ -241,7 +245,7 @@ class ZephyrFacadeTests
         when(zephyrExporterConfiguration.getCycleName()).thenReturn(TEST);
         when(zephyrExporterConfiguration.getFolderName()).thenReturn("test2");
         when(client.executeGet(GET_EXECUTION_ID_ENDPOINT)).thenReturn(GET_EXECUTION_ID_RESPONSE);
-        assertEquals(OptionalInt.empty(), zephyrFacade.findExecutionId(ISSUE_ID));
+        assertEquals(OptionalInt.empty(), zephyrSquadFacade.findExecutionId(ISSUE_ID));
     }
 
     private void mockJiraProjectRetrieve() throws IOException, JiraConfigurationException
