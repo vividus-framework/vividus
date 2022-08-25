@@ -31,7 +31,7 @@ public abstract class AbstractZephyrFacade implements IZephyrFacade
     private final JiraFacade jiraFacade;
     private final ZephyrExporterConfiguration zephyrExporterConfiguration;
 
-    public AbstractZephyrFacade(JiraFacade jiraFacade, ZephyrExporterConfiguration zephyrExporterConfiguration)
+    protected AbstractZephyrFacade(JiraFacade jiraFacade, ZephyrExporterConfiguration zephyrExporterConfiguration)
     {
         this.jiraFacade = jiraFacade;
         this.zephyrExporterConfiguration = zephyrExporterConfiguration;
