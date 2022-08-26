@@ -52,8 +52,8 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.Response;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
-import org.vividus.selenium.manager.WebDriverManagerParameter;
+import org.vividus.selenium.session.WebDriverSessionAttributes;
+import org.vividus.selenium.session.WebDriverSessionInfo;
 import org.vividus.ui.action.JavascriptActions;
 
 import io.appium.java_client.ExecutesMethod;
@@ -79,7 +79,7 @@ class MobileAppWebDriverManagerTests
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private JavascriptActions javascriptActions;
-    @Mock private IWebDriverManagerContext webDriverManagerContext;
+    @Mock private WebDriverSessionInfo webDriverSessionInfo;
     @InjectMocks private MobileAppWebDriverManager driverManager;
 
     private int mockStatusBarHeightRetrieval()
@@ -188,7 +188,7 @@ class MobileAppWebDriverManagerTests
     void shouldProvideDpr()
     {
         MobileAppWebDriverManager spyingDriverManager = new MobileAppWebDriverManager(webDriverProvider,
-                webDriverManagerContext, javascriptActions)
+                webDriverSessionInfo, javascriptActions)
         {
             @Override
             public Dimension getSize()
@@ -199,7 +199,7 @@ class MobileAppWebDriverManagerTests
         TakesScreenshot taker = mock(TakesScreenshot.class);
         when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(taker);
         when(taker.getScreenshotAs(OutputType.BYTES)).thenReturn(IMAGE);
-        when(webDriverManagerContext.get(eq(WebDriverManagerParameter.DEVICE_PIXEL_RATIO),
+        when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.DEVICE_PIXEL_RATIO),
                 any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArguments()[1]).get());
         assertEquals(1d, spyingDriverManager.getDpr());
         verify(webDriverProvider).getUnwrapped(TakesScreenshot.class);
@@ -210,7 +210,7 @@ class MobileAppWebDriverManagerTests
     void shouldProvideDprWithoutCalculation()
     {
         double dpr = 3d;
-        when(webDriverManagerContext.get(eq(WebDriverManagerParameter.DEVICE_PIXEL_RATIO),
+        when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.DEVICE_PIXEL_RATIO),
                 any(Supplier.class))).thenReturn(dpr);
         assertEquals(dpr, driverManager.getDpr());
     }
@@ -225,7 +225,7 @@ class MobileAppWebDriverManagerTests
             TakesScreenshot taker = mock(TakesScreenshot.class);
             when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(taker);
             when(taker.getScreenshotAs(OutputType.BYTES)).thenReturn(IMAGE);
-            when(webDriverManagerContext.get(eq(WebDriverManagerParameter.DEVICE_PIXEL_RATIO),
+            when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.DEVICE_PIXEL_RATIO),
                     any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArguments()[1]).get());
             assertThrows(UncheckedIOException.class, driverManager::getDpr);
         }

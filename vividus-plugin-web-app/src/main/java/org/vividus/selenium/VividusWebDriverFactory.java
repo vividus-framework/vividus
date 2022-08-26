@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.context.RunContext;
 import org.vividus.proxy.IProxy;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
 
 public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
 {
@@ -35,11 +34,11 @@ public class VividusWebDriverFactory extends AbstractVividusWebDriverFactory
 
     private List<WebDriverEventListener> webDriverEventListeners;
 
-    public VividusWebDriverFactory(boolean remoteExecution, IWebDriverManagerContext webDriverManagerContext,
+    public VividusWebDriverFactory(boolean remoteExecution, WebDriverStartContext webDriverStartContext,
             RunContext runContext, Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers,
             IWebDriverFactory webDriverFactory, IProxy proxy)
     {
-        super(remoteExecution, webDriverManagerContext, runContext, proxy, desiredCapabilitiesConfigurers);
+        super(remoteExecution, webDriverStartContext, runContext, proxy, desiredCapabilitiesConfigurers);
         this.webDriverFactory = webDriverFactory;
     }
 

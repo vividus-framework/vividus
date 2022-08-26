@@ -43,8 +43,8 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.mobileapp.action.ApplicationActions;
 import org.vividus.mobileapp.model.NamedEntry;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
-import org.vividus.selenium.manager.WebDriverManagerParameter;
+import org.vividus.selenium.WebDriverStartContext;
+import org.vividus.selenium.WebDriverStartParameters;
 
 import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.InteractsWithApps;
@@ -66,7 +66,7 @@ class ApplicationStepsTests
 
     @Mock private HasCapabilities hasCapabilities;
     @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private IWebDriverManagerContext webDriverManagerContext;
+    @Mock private WebDriverStartContext webDriverStartContext;
     @Mock private ApplicationActions applicationActions;
     @InjectMocks private ApplicationSteps applicationSteps;
 
@@ -87,7 +87,7 @@ class ApplicationStepsTests
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities(Map.of(KEY, VALUE));
 
         mockCommons();
-        when(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES))
+        when(webDriverStartContext.get(WebDriverStartParameters.DESIRED_CAPABILITIES))
                 .thenReturn(desiredCapabilities);
 
         NamedEntry capability = new NamedEntry();
@@ -96,9 +96,9 @@ class ApplicationStepsTests
 
         applicationSteps.startMobileApplicationWithCapabilities(List.of(capability));
 
-        verify(webDriverManagerContext).putParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES,
+        verify(webDriverStartContext).put(WebDriverStartParameters.DESIRED_CAPABILITIES,
                 new DesiredCapabilities(Map.of(KEY, VALUE, CAPABILITY_NAME, CAPABILITY_VALUE)));
-        verifyNoMoreInteractions(webDriverProvider, hasCapabilities, webDriverManagerContext);
+        verifyNoMoreInteractions(webDriverProvider, hasCapabilities, webDriverStartContext);
         verifyLogs();
     }
 

@@ -55,6 +55,8 @@ import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Window;
 import org.openqa.selenium.remote.CapabilityType;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.session.WebDriverSessionAttributes;
+import org.vividus.selenium.session.WebDriverSessionInfo;
 
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.MobilePlatform;
@@ -67,7 +69,7 @@ class GenericWebDriverManagerTests
     private static final String WEBVIEW_CONTEXT = "WEBVIEW_1";
 
     @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private IWebDriverManagerContext webDriverManagerContext;
+    @Mock private WebDriverSessionInfo webDriverSessionInfo;
     @InjectMocks private GenericWebDriverManager driverManager;
 
     private WebDriver mockWebDriver(Object platform)
@@ -236,7 +238,7 @@ class GenericWebDriverManagerTests
         when(iOSDriver.getContext()).thenReturn(NATIVE_APP_CONTEXT);
         mockWebDriver(MobilePlatform.IOS);
         mockSizeRetrieval(iOSDriver, dimension);
-        when(webDriverManagerContext.get(eq(WebDriverManagerParameter.SCREEN_SIZE),
+        when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.SCREEN_SIZE),
                 any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArguments()[1]).get());
         assertEquals(dimension, driverManager.getSize());
     }
@@ -256,7 +258,7 @@ class GenericWebDriverManagerTests
     {
         mockWebDriver(MobilePlatform.IOS);
         var dimension = new Dimension(375, 667);
-        when(webDriverManagerContext.get(eq(WebDriverManagerParameter.SCREEN_SIZE),
+        when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.SCREEN_SIZE),
                 any(Supplier.class))).thenReturn(dimension);
         assertEquals(dimension, driverManager.getSize());
     }

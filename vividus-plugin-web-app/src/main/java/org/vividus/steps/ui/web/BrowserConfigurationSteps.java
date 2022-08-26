@@ -17,16 +17,16 @@
 package org.vividus.steps.ui.web;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
-import org.vividus.selenium.manager.WebDriverManagerParameter;
+import org.vividus.selenium.WebDriverStartContext;
+import org.vividus.selenium.WebDriverStartParameters;
 
 public class BrowserConfigurationSteps
 {
-    private final IWebDriverManagerContext webDriverManagerContext;
+    private final WebDriverStartContext webDriverStartContext;
 
-    public BrowserConfigurationSteps(IWebDriverManagerContext webDriverManagerContext)
+    public BrowserConfigurationSteps(WebDriverStartContext webDriverStartContext)
     {
-        this.webDriverManagerContext = webDriverManagerContext;
+        this.webDriverStartContext = webDriverStartContext;
     }
 
     /**
@@ -46,6 +46,6 @@ public class BrowserConfigurationSteps
     @When("I set browser command line arguments to `$argsString`")
     public void setWebDriverCliArguments(String argsString)
     {
-        webDriverManagerContext.putParameter(WebDriverManagerParameter.COMMAND_LINE_ARGUMENTS, argsString);
+        webDriverStartContext.put(WebDriverStartParameters.COMMAND_LINE_ARGUMENTS, argsString);
     }
 }
