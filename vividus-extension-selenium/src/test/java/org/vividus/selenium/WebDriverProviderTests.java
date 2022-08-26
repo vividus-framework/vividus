@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ import org.vividus.proxy.IProxy;
 import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
 import org.vividus.selenium.event.WebDriverCreateEvent;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
 
@@ -149,10 +148,10 @@ class WebDriverProviderTests
 
     private static class TestVividusDriverFactory extends AbstractVividusWebDriverFactory
     {
-        TestVividusDriverFactory(RunContext runContext, IWebDriverManagerContext webDriverManagerContext,
+        TestVividusDriverFactory(RunContext runContext, WebDriverStartContext webDriverStartContext,
                 IProxy proxy)
         {
-            super(true, webDriverManagerContext, runContext, proxy, Optional.empty());
+            super(true, webDriverStartContext, runContext, proxy, Optional.empty());
         }
 
         @Override

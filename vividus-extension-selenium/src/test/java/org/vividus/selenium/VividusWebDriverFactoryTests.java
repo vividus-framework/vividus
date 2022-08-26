@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,6 @@ import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
 import org.vividus.proxy.IProxy;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
-import org.vividus.selenium.manager.WebDriverManagerParameter;
 
 @ExtendWith(MockitoExtension.class)
 class VividusWebDriverFactoryTests
@@ -63,7 +61,7 @@ class VividusWebDriverFactoryTests
     private static final String INNER_KEY = "inner-key";
 
     @Mock private WebDriver webDriver;
-    @Mock private IWebDriverManagerContext webDriverManagerContext;
+    @Mock private WebDriverStartContext webDriverStartContext;
     @Mock private RunContext runContext;
     @Mock private IProxy proxy;
 
@@ -90,7 +88,7 @@ class VividusWebDriverFactoryTests
             OUTER_KEY, Map.of(INNER_KEY, parameterValue)
         );
 
-        when(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES))
+        when(webDriverStartContext.get(WebDriverStartParameters.DESIRED_CAPABILITIES))
                 .thenReturn(new DesiredCapabilities(parameterCapabilities));
 
         RunningStory runningStory = mock(RunningStory.class);
@@ -111,7 +109,7 @@ class VividusWebDriverFactoryTests
         when(proxy.isStarted()).thenReturn(true);
         when(proxy.createSeleniumProxy()).thenReturn(proxyMock);
 
-        TestVividusWebDriverFactory factory = new TestVividusWebDriverFactory(true, webDriverManagerContext,
+        TestVividusWebDriverFactory factory = new TestVividusWebDriverFactory(true, webDriverStartContext,
                 runContext, proxy, Optional.of(Set.of(firstCapabilitiesConfigurer, secondCapabilitiesConfigurer,
                         thirdCapabilitiesConfigurer, fourthCapabilitiesConfigurer)));
 
@@ -128,11 +126,10 @@ class VividusWebDriverFactoryTests
                             CapabilityType.PROXY, proxyMock,
                             OUTER_KEY, Map.of(INNER_KEY, parameterValue)),
                 vividusWebDriver.getDesiredCapabilities().asMap());
-        InOrder ordered = Mockito.inOrder(webDriverManagerContext, runContext);
-        ordered.verify(webDriverManagerContext).getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES);
-        ordered.verify(webDriverManagerContext).reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
+        InOrder ordered = Mockito.inOrder(webDriverStartContext, runContext);
+        ordered.verify(webDriverStartContext).get(WebDriverStartParameters.DESIRED_CAPABILITIES);
         ordered.verify(runContext).getRunningStory();
-        verifyNoMoreInteractions(webDriverManagerContext);
+        verifyNoMoreInteractions(webDriverStartContext);
         assertSame(webDriver, vividusWebDriver.getWrappedDriver());
     }
 
@@ -140,21 +137,20 @@ class VividusWebDriverFactoryTests
     void shouldCreateDriverWithoutMetaCapabilities()
     {
         String value = "value1";
-        when(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES))
+        when(webDriverStartContext.get(WebDriverStartParameters.DESIRED_CAPABILITIES))
                 .thenReturn(new DesiredCapabilities(Map.of(KEY1, value)));
 
-        TestVividusWebDriverFactory factory = new TestVividusWebDriverFactory(false, webDriverManagerContext,
+        TestVividusWebDriverFactory factory = new TestVividusWebDriverFactory(false, webDriverStartContext,
                 runContext, proxy, Optional.empty());
 
         VividusWebDriver vividusWebDriver = factory.create();
 
         assertFalse(vividusWebDriver.isRemote());
         assertEquals(Map.of(KEY1, value), vividusWebDriver.getDesiredCapabilities().asMap());
-        InOrder ordered = Mockito.inOrder(webDriverManagerContext, runContext);
-        ordered.verify(webDriverManagerContext).getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES);
-        ordered.verify(webDriverManagerContext).reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
+        InOrder ordered = Mockito.inOrder(webDriverStartContext, runContext);
+        ordered.verify(webDriverStartContext).get(WebDriverStartParameters.DESIRED_CAPABILITIES);
         ordered.verify(runContext).getRunningStory();
-        verifyNoMoreInteractions(webDriverManagerContext);
+        verifyNoMoreInteractions(webDriverStartContext);
         assertSame(webDriver, vividusWebDriver.getWrappedDriver());
         verify(runContext).getRunningStory();
     }
@@ -162,7 +158,7 @@ class VividusWebDriverFactoryTests
     @Test
     void shouldReturnRemoteExecution()
     {
-        TestVividusWebDriverFactory factory = new TestVividusWebDriverFactory(true, webDriverManagerContext,
+        TestVividusWebDriverFactory factory = new TestVividusWebDriverFactory(true, webDriverStartContext,
                 runContext, proxy, Optional.empty());
         assertTrue(factory.isRemoteExecution());
     }
@@ -174,11 +170,11 @@ class VividusWebDriverFactoryTests
 
     private final class TestVividusWebDriverFactory extends AbstractVividusWebDriverFactory
     {
-        private TestVividusWebDriverFactory(boolean remoteExecution, IWebDriverManagerContext webDriverManagerContext,
+        private TestVividusWebDriverFactory(boolean remoteExecution, WebDriverStartContext webDriverStartContext,
                 RunContext runContext, IProxy proxy,
                 Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers)
         {
-            super(remoteExecution, webDriverManagerContext, runContext, proxy, desiredCapabilitiesConfigurers);
+            super(remoteExecution, webDriverStartContext, runContext, proxy, desiredCapabilitiesConfigurers);
         }
 
         @Override

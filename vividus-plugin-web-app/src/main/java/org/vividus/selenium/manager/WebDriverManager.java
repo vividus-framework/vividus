@@ -27,15 +27,16 @@ import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.session.WebDriverSessionInfo;
 
 public class WebDriverManager extends GenericWebDriverManager implements IWebDriverManager
 {
     private boolean electronApp;
     private Dimension remoteScreenResolution;
 
-    public WebDriverManager(IWebDriverProvider webDriverProvider, IWebDriverManagerContext webDriverManagerContext)
+    public WebDriverManager(IWebDriverProvider webDriverProvider, WebDriverSessionInfo webDriverSessionInfo)
     {
-        super(webDriverProvider, webDriverManagerContext);
+        super(webDriverProvider, webDriverSessionInfo);
     }
 
     @Override

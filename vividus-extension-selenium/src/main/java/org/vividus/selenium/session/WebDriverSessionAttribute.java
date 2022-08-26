@@ -14,19 +14,8 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.manager;
+package org.vividus.selenium.session;
 
-import java.util.function.Supplier;
-
-public interface IWebDriverManagerContext
+public interface WebDriverSessionAttribute
 {
-    <T> T getParameter(WebDriverManagerParameter parameter);
-
-    <T> void putParameter(WebDriverManagerParameter parameter, T value);
-
-    <T> T get(WebDriverManagerParameter parameter, Supplier<T> initialValueSupplier);
-
-    void reset();
-
-    void reset(WebDriverManagerParameter parameter);
 }

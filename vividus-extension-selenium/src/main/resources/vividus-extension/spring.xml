@@ -32,7 +32,8 @@
         <property name="testContext" ref="testContext" />
     </bean>
 
-    <bean id="webDriverManagerContext" class="org.vividus.selenium.WebDriverManagerContext" lazy-init="false" />
+    <bean class="org.vividus.selenium.session.WebDriverSessionInfo" lazy-init="false" />
+    <bean class="org.vividus.selenium.WebDriverStartContext" lazy-init="false" />
 
     <bean id="waitActions" class="org.vividus.ui.action.WaitActions" />
 

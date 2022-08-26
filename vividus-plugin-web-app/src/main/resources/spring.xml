@@ -243,8 +243,6 @@
         <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers"/>
     </bean>
 
-    <bean id="webDriverManagerContext" class="org.vividus.selenium.WebDriverManagerContext" />
-
     <bean id="delegatingWebApplicationListener-WebApplicationListeners" class="org.vividus.spring.ListMergerFactoryBean">
         <property name="lists">
             <list>

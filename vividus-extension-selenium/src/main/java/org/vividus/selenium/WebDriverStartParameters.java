@@ -14,34 +14,26 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.manager;
+package org.vividus.selenium;
 
 import java.util.function.Supplier;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
 
-public enum WebDriverManagerParameter
+public enum WebDriverStartParameters implements WebDriverStartParameter
 {
-    DESIRED_CAPABILITIES("desiredCapabilities", DesiredCapabilities::new),
-    COMMAND_LINE_ARGUMENTS("commandLineArguments", null),
-    SCREEN_SIZE("screenSize", null),
-    DEVICE_PIXEL_RATIO("dpr", null);
+    DESIRED_CAPABILITIES(DesiredCapabilities::new),
+    COMMAND_LINE_ARGUMENTS(null);
 
-    private final String contextKey;
     private transient Supplier<?> initialValueSupplier;
 
-    <T> WebDriverManagerParameter(String contextKey, Supplier<T> initialValueSupplier)
+    <T> WebDriverStartParameters(Supplier<T> initialValueSupplier)
     {
-        this.contextKey = "WebDriverManagerContextParam-" + contextKey;
         this.initialValueSupplier = initialValueSupplier;
     }
 
-    public String getContextKey()
-    {
-        return contextKey;
-    }
-
     @SuppressWarnings("unchecked")
+    @Override
     public <T> Supplier<T> getInitialValueSupplier()
     {
         return (Supplier<T>) initialValueSupplier;
