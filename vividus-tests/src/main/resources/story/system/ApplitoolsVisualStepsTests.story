@@ -25,7 +25,7 @@ When I change context to element located `<firstP>`
 When I CHECK_INEQUALITY_AGAINST baseline `full-page` in batch `<batchName>` with Applitools
 
 Scenario: Validation of step: 'When I run visual test with Applitools using:$applitoolsConfigurations' for full page with element cut
-When I change context to the page
+When I reset context
 When I run visual test with Applitools using:
 |baselineName          |batchName  |action  |elementsToIgnore|
 |full-page-element-cut |<batchName>|<action>|<firstP>        |
@@ -52,7 +52,7 @@ When I run visual test with Applitools using:
 
 
 Scenario: Validation of step: 'When I run visual test with Applitools using:$applitoolsConfigurations' for full page with element/area cut
-When I change context to the page
+When I reset context
 When I run visual test with Applitools using:
 |baselineName                           |batchName  |action  |elementsToIgnore                                       |areasToIgnore                                          |
 |full-page-with-scroll-element-area-cut |<batchName>|<action>|By.xpath(//p[position() mod 2 = 1 and position() > 10])|By.xpath(//p[position() mod 2 = 1 and position() < 10])|

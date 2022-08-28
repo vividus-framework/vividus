@@ -26,7 +26,7 @@ When I change context to element located `<firstP>`
 When I <action> baseline with name `context`
 !-- Deprecated step test
 When I <action> baseline with `context`
-When I change context to the page
+When I reset context
 
 
 Scenario: Validation of CHECK_INEQUALITY_AGAINST action
@@ -34,7 +34,7 @@ When I change context to element located `<firstP>`
 When I CHECK_INEQUALITY_AGAINST baseline with name `full-page`
 !-- Deprecated step test
 When I CHECK_INEQUALITY_AGAINST baseline with `full-page`
-When I change context to the page
+When I reset context
 
 
 Scenario: Validation of CHECK_INEQUALITY_AGAINST action with step level parameters
@@ -53,7 +53,7 @@ When I CHECK_INEQUALITY_AGAINST baseline with name `full-page` using repository 
 When I CHECK_INEQUALITY_AGAINST baseline with `full-page` ignoring:
 |REQUIRED_DIFF_PERCENTAGE|
 |85                      |
-When I change context to the page
+When I reset context
 
 
 Scenario: Validation of step When I $actionType baseline with name `$name` ignoring:$ignoredElements for full page with element cut
@@ -99,7 +99,7 @@ When I <action> baseline with `not-viewport-context-element-cut` ignoring:
 
 
 Scenario: Validation of step When I $actionType baseline with name `$name` for full page with element/area cut
-When I change context to the page
+When I reset context
 When I <action> baseline with name `full-page-with-scroll-element-area-cut` ignoring:
 |ELEMENT                                                |AREA                                                   |
 |By.xpath(//p[position() mod 2 = 1 and position() > 10])|By.xpath(//p[position() mod 2 = 1 and position() < 10])|
