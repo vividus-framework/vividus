@@ -13,12 +13,8 @@ Examples:
 |http://jsonpath.herokuapp.com/json/goessner.json|$.store.book.length()|4          |
 
 
-Scenario: Verify composite step 'When I save a JSON element from response by JSON path '$jsonPath' to $scopes variable '$variableName''
-When I save a JSON element from response by JSON path '<jsonPath>' to scenario variable 'numberOfBooks'
-Then `${numberOfBooks}` is equal to `<booksNumber>`
-
-Scenario: Verify composite step 'When I save JSON element from response by JSON path `$jsonPath` to $scopes variable `$variableName`'
-When I save JSON element from response by JSON path `<jsonPath>` to scenario variable `numberOfBooks`
+Scenario: Verify step 'When I save JSON element from `$json` by JSON path `$jsonPath` to $scopes variable `$variableName`'
+When I save JSON element from `${response}` by JSON path `<jsonPath>` to scenario variable `numberOfBooks`
 Then `${numberOfBooks}` is equal to `<booksNumber>`
 
 Scenario: Verify step "Then JSON element from `$json` by JSON path `$jsonPath` is equal to `$expectedData`$options"
