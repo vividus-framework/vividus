@@ -1,7 +1,7 @@
 project.description = 'Vividus extension for selenium'
 
  ext {
-     seleniumVersion = '4.3.0'
+     seleniumVersion = '4.4.0'
      browserupProxyVersion = '2.2.2'
 }
 
