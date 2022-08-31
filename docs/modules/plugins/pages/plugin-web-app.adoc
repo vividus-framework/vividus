@@ -1286,7 +1286,7 @@ In order to configure availability of the INFO level messages use following prop
 |`selenium.capabilities.goog\:loggingPrefs.browser=INFO`
 
 |Microsoft Edge Chromium
-|]selenium.capabilities.ms\:loggingPrefs.browser=INFO`
+|`selenium.capabilities.ms\:loggingPrefs.browser=INFO`
 |===
 =====
 
