@@ -16,7 +16,7 @@ project.description = 'Vividus extension for selenium'
      api(group: 'org.seleniumhq.selenium', name: 'selenium-api', version: "${seleniumVersion}")
      api(group: 'org.seleniumhq.selenium', name: 'selenium-support', version: "${seleniumVersion}")
      api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver', version: "${seleniumVersion}")
-     api(group: 'io.appium', name: 'java-client', version: '8.1.1')
+     api(group: 'io.appium', name: 'java-client', version: '8.2.0')
 
      api(group: 'com.github.pazone', name: 'ashot', version: 'a8335db')
 
