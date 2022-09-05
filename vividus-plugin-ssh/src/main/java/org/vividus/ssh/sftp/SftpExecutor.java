@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import com.jcraft.jsch.SftpException;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ssh.Commands;
 import org.vividus.ssh.JSchExecutor;
-import org.vividus.ssh.ServerConfiguration;
 import org.vividus.ssh.SingleCommand;
+import org.vividus.ssh.SshConnectionParameters;
 
 @Named
 public class SftpExecutor extends JSchExecutor<ChannelSftp, SftpOutput>
@@ -47,11 +47,11 @@ public class SftpExecutor extends JSchExecutor<ChannelSftp, SftpOutput>
     }
 
     @Override
-    protected SftpOutput executeCommand(ServerConfiguration serverConfiguration, Commands commands, ChannelSftp channel)
-            throws JSchException, IOException
+    protected SftpOutput executeCommand(SshConnectionParameters sshConnectionParameters, Commands commands,
+            ChannelSftp channel) throws JSchException, IOException
     {
-        channel.setAgentForwarding(serverConfiguration.isAgentForwarding());
-        channel.setPty(serverConfiguration.isPseudoTerminalEnabled());
+        channel.setAgentForwarding(sshConnectionParameters.isAgentForwarding());
+        channel.setPty(sshConnectionParameters.isPseudoTerminalEnabled());
         channel.connect();
         SftpOutput executionOutput = new SftpOutput();
         StringBuilder output = new StringBuilder();

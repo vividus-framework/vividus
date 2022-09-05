@@ -29,6 +29,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverUtils;
+import org.vividus.selenium.session.WebDriverSessionAttributes;
+import org.vividus.selenium.session.WebDriverSessionInfo;
 
 import io.appium.java_client.remote.MobilePlatform;
 import io.appium.java_client.remote.SupportsContextSwitching;
@@ -36,15 +38,15 @@ import io.appium.java_client.remote.SupportsContextSwitching;
 public class GenericWebDriverManager implements IGenericWebDriverManager
 {
     private final IWebDriverProvider webDriverProvider;
-    private final IWebDriverManagerContext webDriverManagerContext;
+    private final WebDriverSessionInfo webDriverSessionInfo;
 
     private boolean mobileApp;
 
     public GenericWebDriverManager(IWebDriverProvider webDriverProvider,
-            IWebDriverManagerContext webDriverManagerContext)
+            WebDriverSessionInfo webDriverSessionInfo)
     {
         this.webDriverProvider = webDriverProvider;
-        this.webDriverManagerContext = webDriverManagerContext;
+        this.webDriverSessionInfo = webDriverSessionInfo;
     }
 
     @Override
@@ -54,7 +56,7 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
         {
             return getSize(webDriverProvider.get());
         }
-        return webDriverManagerContext.get(WebDriverManagerParameter.SCREEN_SIZE,
+        return webDriverSessionInfo.get(WebDriverSessionAttributes.SCREEN_SIZE,
                 () -> runInNativeContext(this::getSize));
     }
 
@@ -203,9 +205,9 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
         return webDriverProvider;
     }
 
-    protected IWebDriverManagerContext getWebDriverManagerContext()
+    protected WebDriverSessionInfo getWebDriverSessionInfo()
     {
-        return webDriverManagerContext;
+        return webDriverSessionInfo;
     }
 
     public void setMobileApp(boolean mobileApp)

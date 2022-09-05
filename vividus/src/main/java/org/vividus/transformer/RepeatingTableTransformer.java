@@ -18,7 +18,6 @@ package org.vividus.transformer;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTable.TableRows;
@@ -32,14 +31,14 @@ public class RepeatingTableTransformer implements ExtendedTableTransformer
     {
         TableRows tableRows = tableParsers.parseRows(tableAsString, properties);
         int times = properties.getMandatoryNonBlankProperty("times", int.class);
-        List<Map<String, String>> rows = nCopies(times, tableRows);
+        List<List<String>> rows = nCopies(times, tableRows);
         return ExamplesTableProcessor.buildExamplesTable(tableRows.getHeaders(), rows, properties);
     }
 
-    private List<Map<String, String>> nCopies(int times, TableRows tableRows)
+    private List<List<String>> nCopies(int times, TableRows tableRows)
     {
-        List<Map<String, String>> examplesTableRows = tableRows.getRows();
-        List<Map<String, String>> rows = new LinkedList<>();
+        List<List<String>> examplesTableRows = tableRows.getRows();
+        List<List<String>> rows = new LinkedList<>();
         for (int i = 0; i < times; i++)
         {
             rows.addAll(examplesTableRows);

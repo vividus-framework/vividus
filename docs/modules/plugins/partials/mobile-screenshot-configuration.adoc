@@ -1,4 +1,0 @@
-Mobile screenshot configuration fields:
-
-* `shootingStrategy` - The shooting strategy to use.
-* `nativeFooterToCut` - The footer to cut on final screenshot.

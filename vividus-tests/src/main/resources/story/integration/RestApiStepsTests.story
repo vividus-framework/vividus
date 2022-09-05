@@ -25,9 +25,6 @@ Scenario: Verify steps "Given request body: $content" and "When I send HTTP $htt
 Given request body: ${request-body}
 When I send HTTP PUT to the relative URL '/put'
 
-Scenario: Verify step "When I send HTTP $httpMethod to the relative URL '$relativeURL' with content: '$content'"
-When I send HTTP POST to the relative URL '/post' with content: '${request-body}'
-
 Scenario: Verify steps "Given request body: $content" and "When I execute HTTP $httpMethod request for resource with URL `$url`"
 Given request body: ${request-body}
 When I execute HTTP DELETE request for resource with URL `https://httpbin.org/delete`

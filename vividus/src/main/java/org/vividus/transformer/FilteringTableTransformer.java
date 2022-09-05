@@ -30,6 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -69,6 +70,7 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
                 BY_ROW_INDEXES_PROPERTY, BY_RANDOM_ROWS_PROPERTY);
 
         TableRows tableRows = tableParsers.parseRows(tableAsString, tableProperties);
+        List<String> allColumnNames = tableRows.getHeaders();
         if (!columnFilters.isEmpty())
         {
             isTrue(allNull(byMaxColumns, byColumnNames, byMaxRows, byRowIndexes, byRandomRows),
@@ -78,7 +80,7 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
                     BY_RANDOM_ROWS_PROPERTY);
 
             return ExamplesTableProcessor.buildExamplesTable(tableRows.getHeaders(),
-                    filterRows(columnFilters, tableRows.getRows(), properties), tableProperties);
+                    filterRows(columnFilters, allColumnNames, tableRows.getRows(), properties), tableProperties);
         }
 
         isTrue(anyNull(byMaxColumns, byColumnNames), CONFLICTING_PROPERTIES_MESSAGE,
@@ -93,15 +95,14 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
         isTrue(anyNull(byRandomRows, byMaxRows), CONFLICTING_PROPERTIES_MESSAGE,
                 BY_RANDOM_ROWS_PROPERTY, BY_MAX_ROWS_PROPERTY);
 
-        List<String> filteredColumnNames = filterColumnNames(byMaxColumns, byColumnNames, tableRows.getHeaders());
-        List<Map<String, String>> filteredRows = filterRows(byMaxRows, byRowIndexes, byRandomRows, tableRows.getRows());
-        filterRowsByColumnNames(filteredRows, filteredColumnNames);
+        List<String> filteredColumnNames = filterColumnNames(byMaxColumns, byColumnNames, allColumnNames);
+        List<List<String>> filteredRows = filterRows(byMaxRows, byRowIndexes, byRandomRows, tableRows.getRows());
+        filterRowsByColumnNames(allColumnNames, filteredRows, filteredColumnNames);
 
         return ExamplesTableProcessor.buildExamplesTable(filteredColumnNames, filteredRows, tableProperties);
     }
 
-    private List<Map<String, String>> filterRows(String byMaxRows, String byRowIndexes, String byRandomRows,
-            List<Map<String, String>> rows)
+    private <T> List<T> filterRows(String byMaxRows, String byRowIndexes, String byRandomRows, List<T> rows)
     {
         if (byRowIndexes == null && byRandomRows == null)
         {
@@ -155,12 +156,13 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
                 .collect(Collectors.toSet());
     }
 
-    private List<Map<String, String>> filterRows(Set<String> columnFilters, List<Map<String, String>> rows,
-            Properties properties)
+    private List<List<String>> filterRows(Set<String> columnFilters, List<String> allColumnNames,
+            List<List<String>> rows, Properties properties)
     {
         return columnFilters.stream().collect(
                 Collectors.collectingAndThen(Collectors.toMap(k -> StringUtils.substringAfter(k, COLUMN_PREFIX),
-                        k -> createFilter(properties.getProperty(k))), filters -> filterRows(rows, filters)));
+                        k -> createFilter(properties.getProperty(k))),
+                        filters -> filterRows(allColumnNames, rows, filters)));
     }
 
     private static Predicate<String> createFilter(String regex)
@@ -168,22 +170,21 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
         return Pattern.compile(regex).asPredicate();
     }
 
-    public static List<Map<String, String>> filterRows(List<Map<String, String>> rows,
+    public static List<List<String>> filterRows(List<String> allColumnNames, List<List<String>> rows,
             Map<String, Predicate<String>> columnFilters)
     {
         return rows.stream()
-                   .filter(row -> row.entrySet()
-                                     .stream()
-                                     .allMatch(applyFilters(columnFilters)))
+                   .filter(row -> applyFilters(allColumnNames, row, columnFilters))
                    .collect(Collectors.toList());
     }
 
-    private static Predicate<Map.Entry<String, String>> applyFilters(Map<String, Predicate<String>> columnFilters)
+    private static boolean applyFilters(List<String> allColumnNames, List<String> row,
+            Map<String, Predicate<String>> columnFilters)
     {
-        return col ->
-        {
-            Predicate<String> filter = columnFilters.get(col.getKey());
-            return Optional.ofNullable(filter).map(f -> f.test(col.getValue())).orElse(true);
-        };
+        return IntStream.range(0, allColumnNames.size()).allMatch(i -> {
+            String columnName = allColumnNames.get(i);
+            Predicate<String> filter = columnFilters.get(columnName);
+            return Optional.ofNullable(filter).map(f -> f.test(row.get(i))).orElse(true);
+        });
     }
 }

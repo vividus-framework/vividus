@@ -11,15 +11,18 @@
 
     <context:component-scan base-package="org.vividus.ssh" />
 
-    <bean class="org.vividus.context.SshTestContext" />
+    <bean class="org.vividus.ssh.converter.CommandsConverter" />
 
-    <bean id="sshSteps" class="org.vividus.steps.ssh.SshSteps">
-        <property name="serverConfigurations">
-            <bean factory-bean="propertyMapper" factory-method="readValues">
-                <constructor-arg value="ssh.server." />
-                <constructor-arg value="org.vividus.ssh.ServerConfiguration"/>
+    <bean class="org.vividus.ssh.context.SshTestContext" />
+
+    <bean id="sshSteps" class="org.vividus.ssh.SshSteps">
+        <constructor-arg index="0">
+            <bean class="org.vividus.context.DynamicConfigurationManager">
+                <constructor-arg index="0" value="SSH connection" />
+                <constructor-arg index="1" value="ssh.server." />
+                <constructor-arg index="2" value="org.vividus.ssh.SshConnectionParameters"/>
             </bean>
-        </property>
+        </constructor-arg>
     </bean>
 
     <util:list id="stepBeanNames-Ssh" value-type="java.lang.String">

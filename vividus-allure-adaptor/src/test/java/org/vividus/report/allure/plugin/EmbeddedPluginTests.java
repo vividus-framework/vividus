@@ -50,10 +50,10 @@ class EmbeddedPluginTests
     @Test
     void testInitializationPluginWithCss()
     {
-        EmbeddedPlugin plugin = new EmbeddedPlugin(ID, RESOURCE_LIST);
+        EmbeddedPlugin plugin = new EmbeddedPlugin(ID);
 
         assertEquals(ID, plugin.getConfig().getId());
-        assertEquals(RESOURCE_LIST, plugin.getConfig().getCssFiles());
+        assertEquals(List.of("styles.css"), plugin.getConfig().getCssFiles());
     }
 
     @Test

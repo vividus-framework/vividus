@@ -45,25 +45,22 @@ class MobileAppScreenshotParametersFactoryTests
     static Stream<Arguments> args()
     {
         return Stream.of(
-                    arguments(TEN, Optional.of(SIMPLE), 0,   Optional.empty()),
-                    arguments(0,   Optional.empty(),    TEN, Optional.of(SIMPLE))
+                    arguments(Optional.of(SIMPLE), Optional.empty()),
+                    arguments(Optional.empty(),    Optional.of(SIMPLE))
                 );
     }
 
     @ParameterizedTest
     @MethodSource("args")
-    void shouldCreateScreenshotConfiguration(int defaultFooter, Optional<String> defaultStrategy, int userFooter,
-            Optional<String> userStrategy)
+    void shouldCreateScreenshotConfiguration(Optional<String> defaultStrategy, Optional<String> userStrategy)
     {
         var defaultConfiguration = new ScreenshotConfiguration();
-        defaultConfiguration.setNativeFooterToCut(defaultFooter);
         defaultConfiguration.setShootingStrategy(defaultStrategy);
         factory.setShootingStrategy(SIMPLE);
         factory.setIgnoreStrategies(Map.of());
         factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of(SIMPLE, defaultConfiguration)));
 
         var configuration = new ScreenshotConfiguration();
-        configuration.setNativeFooterToCut(userFooter);
         configuration.setShootingStrategy(userStrategy);
         Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(
                 IgnoreStrategy.ELEMENT, Set.of(),
@@ -71,7 +68,6 @@ class MobileAppScreenshotParametersFactoryTests
         );
         var parameters = factory.create(Optional.of(configuration), null, ignores);
         assertEquals(Optional.of(SIMPLE), parameters.getShootingStrategy());
-        assertEquals(TEN, parameters.getNativeFooterToCut());
     }
 
     @Test

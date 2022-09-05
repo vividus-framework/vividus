@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.jbehave.core.model.Meta;
 
 public class MetaWrapper
 {
-    public static final char META_VALUES_SEPARATOR = ';';
+    private static final char META_VALUES_SEPARATOR = ';';
 
     private final Meta meta;
 
@@ -58,8 +58,13 @@ public class MetaWrapper
 
     public Set<String> getPropertyValues(String propertyName)
     {
-        return Stream.of(StringUtils.split(meta.getProperty(propertyName), META_VALUES_SEPARATOR))
-                .map(StringUtils::trim)
+        return parsePropertyValues(meta.getProperty(propertyName));
+    }
+
+    public static Set<String> parsePropertyValues(String propertyValues)
+    {
+        return Stream.of(StringUtils.split(propertyValues.trim(), META_VALUES_SEPARATOR))
+                .map(String::trim)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 

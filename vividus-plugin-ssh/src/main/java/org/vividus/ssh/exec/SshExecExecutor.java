@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import javax.inject.Named;
 import com.jcraft.jsch.ChannelExec;
 
 import org.vividus.ssh.Commands;
-import org.vividus.ssh.ServerConfiguration;
+import org.vividus.ssh.SshConnectionParameters;
 
 @Named
 public class SshExecExecutor extends SshExecutor<ChannelExec>
@@ -33,10 +33,10 @@ public class SshExecExecutor extends SshExecutor<ChannelExec>
     }
 
     @Override
-    protected void configureChannel(ChannelExec channel, ServerConfiguration serverConfiguration)
+    protected void configureChannel(ChannelExec channel, SshConnectionParameters sshConnectionParameters)
     {
-        channel.setAgentForwarding(serverConfiguration.isAgentForwarding());
-        channel.setPty(serverConfiguration.isPseudoTerminalEnabled());
+        channel.setAgentForwarding(sshConnectionParameters.isAgentForwarding());
+        channel.setPty(sshConnectionParameters.isPseudoTerminalEnabled());
     }
 
     @Override

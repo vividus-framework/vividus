@@ -57,43 +57,45 @@ class AbstractScreenshotParametersFactoryTests
     @Test
     void shouldUseDefaultConfiguration()
     {
-        var nativeFooterToCut = 5;
+        var cutBottom = 5;
 
         factory.setScreenshotConfigurations(
-                new PropertyMappedCollection<>(Map.of(DEFAULT, createConfiguration(nativeFooterToCut))));
+                new PropertyMappedCollection<>(Map.of(DEFAULT, createConfiguration(cutBottom))));
         factory.setShootingStrategy(DEFAULT);
         factory.setIgnoreStrategies(createEmptyIgnores());
 
         var parameters = factory.create(Optional.empty(), null, createEmptyIgnores());
-        assertEquals(nativeFooterToCut, parameters.getNativeFooterToCut());
+        assertEquals(cutBottom, parameters.getCutBottom());
+        assertEquals(1, parameters.getCutTop());
+        assertEquals(2, parameters.getCutLeft());
+        assertEquals(3, parameters.getCutRight());
     }
 
     @Test
     void shouldMergeUserDefinedAndDefaultConfigurations()
     {
-        var nativeFooterToCut = 5;
-
         factory.setScreenshotConfigurations(
-                new PropertyMappedCollection<>(Map.of(DEFAULT, createConfiguration(nativeFooterToCut))));
+                new PropertyMappedCollection<>(Map.of(DEFAULT, createConfiguration(5))));
         factory.setShootingStrategy(DEFAULT);
         factory.setIgnoreStrategies(createEmptyIgnores());
 
         var parameters = factory.create(Optional.of(createConfiguration(10)), null, createEmptyIgnores());
-        assertEquals(15, parameters.getNativeFooterToCut());
+        assertEquals(15, parameters.getCutBottom());
     }
 
     @Test
     void shouldReturnCustomConfigurationWhenDefaultIsMissing()
     {
-        var nativeFooterToCut = 5;
+        var cutBottom = 5;
 
         factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of()));
         factory.setShootingStrategy(DEFAULT);
         factory.setIgnoreStrategies(createEmptyIgnores());
 
-        var parameters = factory.create(Optional.of(createConfiguration(nativeFooterToCut)), null,
+        var parameters = factory.create(Optional.of(createConfiguration(cutBottom)), null,
                 createEmptyIgnores());
-        assertEquals(nativeFooterToCut, parameters.getNativeFooterToCut());
+        assertEquals(cutBottom, parameters.getCutBottom());
+        assertEquals(1, parameters.getCutTop());
     }
 
     @Test
@@ -127,7 +129,6 @@ class AbstractScreenshotParametersFactoryTests
         ScreenshotParameters parameters = factory.create(Optional.of(configuration), null, createEmptyIgnores());
 
         assertEquals(Optional.of(DEFAULT), parameters.getShootingStrategy());
-        assertEquals(1, parameters.getNativeFooterToCut());
         assertEquals(Map.of(
                 IgnoreStrategy.ELEMENT, Set.of(stepElementLocator, globalElementLocator),
                 IgnoreStrategy.AREA, Set.of(stepAreaLocator, globalAreaLocator)
@@ -201,7 +202,6 @@ class AbstractScreenshotParametersFactoryTests
 
         var parameters = factory.create();
         assertTrue(parameters.isPresent());
-        assertEquals(nativeFooterToCut, parameters.get().getNativeFooterToCut());
     }
 
     private Map<IgnoreStrategy, Set<Locator>> createEmptyIgnores()
@@ -212,10 +212,13 @@ class AbstractScreenshotParametersFactoryTests
         );
     }
 
-    private ScreenshotConfiguration createConfiguration(int nativeFooterToCut)
+    private ScreenshotConfiguration createConfiguration(int cutBottom)
     {
         var screenshotConfiguration = new ScreenshotConfiguration();
-        screenshotConfiguration.setNativeFooterToCut(nativeFooterToCut);
+        screenshotConfiguration.setCutTop(1);
+        screenshotConfiguration.setCutBottom(cutBottom);
+        screenshotConfiguration.setCutLeft(2);
+        screenshotConfiguration.setCutRight(3);
         return screenshotConfiguration;
     }
 
@@ -238,8 +241,7 @@ class AbstractScreenshotParametersFactoryTests
         protected BinaryOperator<ScreenshotConfiguration> getConfigurationMerger()
         {
             return (currentConfig, defaultConfig) -> {
-                currentConfig.setNativeFooterToCut(
-                        currentConfig.getNativeFooterToCut() + defaultConfig.getNativeFooterToCut());
+                currentConfig.setCutBottom(currentConfig.getCutBottom() + defaultConfig.getCutBottom());
                 return currentConfig;
             };
         }

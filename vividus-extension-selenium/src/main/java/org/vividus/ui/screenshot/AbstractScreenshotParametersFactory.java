@@ -118,8 +118,10 @@ public abstract class AbstractScreenshotParametersFactory<C extends ScreenshotCo
     {
         P parameters = createScreenshotParameters();
         parameters.setShootingStrategy(configuration.getShootingStrategy());
-        parameters.setNativeFooterToCut(ensureValidCutSize(configuration.getNativeFooterToCut(), "native footer"));
-
+        parameters.setCutTop(configuration.getCutTop());
+        parameters.setCutBottom(configuration.getCutBottom());
+        parameters.setCutLeft(configuration.getCutLeft());
+        parameters.setCutRight(configuration.getCutRight());
         Map<IgnoreStrategy, Set<Locator>> allIgnores = new EnumMap<>(IgnoreStrategy.class);
 
         for (Map.Entry<IgnoreStrategy, Set<Locator>> globalIgnores : ignoreStrategies.entrySet())

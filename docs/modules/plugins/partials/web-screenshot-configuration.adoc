@@ -6,7 +6,19 @@ Web screenshot configuration fields:
 * `nativeHeaderToCut` - The header to cut on final screenshot.
 * `nativeFooterToCut` - The footer to cut on final screenshot.
 * `coordsProvider` - The coords provider used to get ignoring elements position during scroll.
+* `cutTop` - The size in pixels of top part of the image to cut.
+* `cutLeft` - The size in pixels of left part of the image to cut.
+* `cutRight` - The size in pixels of right part of the image to cut.
+* `cutBottom` - The size in pixels of bottom part of the image to cut.
 ** `CEILING` - Based on JS API.
 ** `WEB_DRIVER` - Based on WebDriver API.
 * `scrollableElement` - The element to scroll.
 * `scrollTimeout` - The scroll timeout.
+
+Mobile app screenshot configuration fields:
+
+* `shootingStrategy` - The shooting strategy to use.
+* `cutTop` - The size in pixels of top part of the image to cut.
+* `cutLeft` - The size in pixels of left part of the image to cut.
+* `cutRight` - The size in pixels of right part of the image to cut.
+* `cutBottom` - The size in pixels of bottom part of the image to cut.

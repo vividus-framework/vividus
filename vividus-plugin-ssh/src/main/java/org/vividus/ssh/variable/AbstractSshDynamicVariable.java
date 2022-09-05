@@ -19,7 +19,7 @@ package org.vividus.ssh.variable;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.vividus.context.SshTestContext;
+import org.vividus.ssh.context.SshTestContext;
 import org.vividus.ssh.exec.SshOutput;
 import org.vividus.variable.DynamicVariable;
 import org.vividus.variable.DynamicVariableCalculationResult;

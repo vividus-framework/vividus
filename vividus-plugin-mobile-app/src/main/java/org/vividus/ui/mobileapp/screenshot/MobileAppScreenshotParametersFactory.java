@@ -42,10 +42,6 @@ public class MobileAppScreenshotParametersFactory
     {
         return (currentConfig, defaultConfig) ->
         {
-            if (currentConfig.getNativeFooterToCut() == 0)
-            {
-                currentConfig.setNativeFooterToCut(defaultConfig.getNativeFooterToCut());
-            }
             if (currentConfig.getShootingStrategy().isEmpty())
             {
                 currentConfig.setShootingStrategy(defaultConfig.getShootingStrategy());

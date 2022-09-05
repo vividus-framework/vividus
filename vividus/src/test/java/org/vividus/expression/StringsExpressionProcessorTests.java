@@ -84,6 +84,7 @@ class StringsExpressionProcessorTests
                 arguments("anyOf(\\,)",                                                    ","),
                 arguments("toBase64Gzip(vividus)",                                         "H4sIAAAAAAAA/yvLLMtMKS0GANIHCdkHAAAA"),
                 arguments("escapeHTML(M&Ms)",                                              "M&amp;Ms"),
+                arguments("escapeJSON(\"abc\"\n\"xyz\")",                                  "\\\"abc\\\"\\n\\\"xyz\\\""),
                 arguments("quoteRegExp(Customer(Username))",                               "\\QCustomer(Username)\\E")
         );
         // CHECKSTYLE:ON

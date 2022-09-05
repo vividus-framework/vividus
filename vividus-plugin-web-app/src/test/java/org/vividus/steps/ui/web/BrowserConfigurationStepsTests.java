@@ -23,22 +23,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
-import org.vividus.selenium.manager.WebDriverManagerParameter;
+import org.vividus.selenium.WebDriverStartContext;
+import org.vividus.selenium.WebDriverStartParameters;
 
 @ExtendWith(MockitoExtension.class)
 class BrowserConfigurationStepsTests
 {
     private static final String COMMAND_LINE_ARGS = "args";
 
-    @Mock private IWebDriverManagerContext webDriverManagerContext;
+    @Mock private WebDriverStartContext webDriverStartContext;
     @InjectMocks private BrowserConfigurationSteps browserConfigurationSteps;
 
     @Test
     void testSetWebDriverCliArguments()
     {
         browserConfigurationSteps.setWebDriverCliArguments(COMMAND_LINE_ARGS);
-        verify(webDriverManagerContext).putParameter(
-                WebDriverManagerParameter.COMMAND_LINE_ARGUMENTS, COMMAND_LINE_ARGS);
+        verify(webDriverStartContext).put(
+                WebDriverStartParameters.COMMAND_LINE_ARGUMENTS, COMMAND_LINE_ARGS);
     }
 }

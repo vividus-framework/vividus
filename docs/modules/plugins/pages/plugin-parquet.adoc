@@ -1,1 +1,61 @@
-include::ROOT:page$under-construction.adoc[]
+= Paquet Plugin
+
+The plugin provides the ability to create https://parquet.apache.org/[Parquet] files.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-parquet', version: '{current-version}')
+----
+
+== Properties
+
+:csv-format-base-url: https://commons.apache.org/proper/commons-csv/apidocs/org/apache/commons/csv/CSVFormat.html#
+
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`expression.csv-to-parquet.csv-format`
+a|* {csv-format-base-url}DEFAULT[DEFAULT]
+* {csv-format-base-url}EXCEL[EXCEL]
+* {csv-format-base-url}INFORMIX_UNLOAD[INFORMIX_UNLOAD]
+* {csv-format-base-url}INFORMIX_UNLOAD_CSV[INFORMIX_UNLOAD_CSV]
+* {csv-format-base-url}MYSQL[MYSQL]
+* {csv-format-base-url}RFC4180[RFC4180]
+* {csv-format-base-url}ORACLE[ORACLE]
+* {csv-format-base-url}POSTGRESQL_CSV[POSTGRESQL_CSV]
+* {csv-format-base-url}POSTGRESQL_TEXT[POSTGRESQL_TEXT]
+* {csv-format-base-url}TDF[TDF]
+|{csv-format-base-url}DEFAULT[DEFAULT]
+|Specifies the format of a CSV file to create a Parquet file from.
+
+|===
+
+== Expressions
+
+NOTE: The expression parameters marked with *bold* are mandatory.
+
+=== `convertCsvToParquetFile`
+
+Creates temporary Parquet file, writes CSV data records to the file using https://avro.apache.org/docs/1.11.1/specification/_print/[Avro schema]
+and returns its path.
+
+[source, subs="+quotes"]
+----
+#{convertCsvToParquetFile(*$csv-resource-path*, *$avro-schema-resource-path*)}
+----
+
+* *`$csv-resource-path`* - The path to a resource containig CSV data.
+* *`$avro-schema-resource-path`* - The path to a resource containig https://avro.apache.org/docs/1.11.1/specification/_print/[Avro schema].
+
+.Initialize a variable with a path to a Parquet file
+[source,gherkin]
+----
+When I initialize the scenario variable `parquet-path` with value `#{convertCsvToParquetFile(data/pets.csv, data/pets-schema.avsc)}`
+----

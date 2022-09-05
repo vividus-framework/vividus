@@ -260,16 +260,21 @@ class AzureDevOpsFacadeTests
         verifyCreateTestCaseLog();
     }
 
-    @Test
-    void shouldUpdateTestCase() throws IOException, SyntaxException
+    @CsvSource({
+        "area, project\\area",
+        ", project"
+    })
+    @ParameterizedTest
+    void shouldUpdateTestCase(String area, String path) throws IOException, SyntaxException
     {
         SectionMapping mapping = new SectionMapping();
         mapping.setSteps(ScenarioPart.AUTOMATED);
         options.setSectionMapping(mapping);
+        options.setArea(area);
         facade.updateTestCase(TEST_CASE_ID, SUITE_TITLE, createScenario(List.of(createStep(WHEN_STEP))));
         verify(client).updateTestCase(eq(TEST_CASE_ID), operationsCaptor.capture());
         assertOperations(5, ops -> assertAll(
-            () -> assertAreaPath(ops.get(0)),
+            () -> assertAreaPath(ops.get(0), path),
             () -> assertTitle(ops.get(1)),
             () -> assertSteps(ops.get(2), STEPS),
             () -> assertAutomatedTestName(ops.get(3)),
@@ -283,10 +288,13 @@ class AzureDevOpsFacadeTests
 
     @ParameterizedTest
     @CsvSource({
-        "successful, Passed",
-        "failed, Failed"
+        "successful, successful, successful, Passed",
+        "successful, failed, successful, Failed",
+        "successful, successful, failed, Failed",
+        "failed, successful, successful, Failed"
     })
-    void shouldCreateTestRun(String stepOutcome, String resultOutcome) throws IOException
+    void shouldCreateTestRun(String systemBeforeStepOutcome, String stepOutcome, String systemAfterStepOutcome,
+            String resultOutcome) throws IOException
     {
         options.getTestRun().setTestPlanId(TEST_PLAN_ID);
         options.getTestRun().setName(RUN_NAME);
@@ -307,6 +315,12 @@ class AzureDevOpsFacadeTests
         Step successfulStep = createStep(WHEN_STEP);
         successfulStep.setOutcome(stepOutcome);
         Scenario scenario = createScenario(List.of(successfulStep));
+        Step systemBeforeStep = createStep(WHEN_STEP);
+        systemBeforeStep.setOutcome(systemBeforeStepOutcome);
+        scenario.setBeforeSystemScenarioSteps(List.of(systemBeforeStep));
+        Step systemAfterStep = createStep(WHEN_STEP);
+        systemAfterStep.setOutcome(systemAfterStepOutcome);
+        scenario.setAfterSystemScenarioSteps(List.of(systemAfterStep));
 
         facade.createTestRun(Map.of(TEST_CASE_ID, scenario));
 
@@ -412,7 +426,12 @@ class AzureDevOpsFacadeTests
 
     private void assertAreaPath(AddOperation operation)
     {
-        assertOperation(operation, "/fields/System.AreaPath", PROJECT + '\\' + AREA);
+        assertAreaPath(operation, PROJECT + '\\' + AREA);
+    }
+
+    private void assertAreaPath(AddOperation operation, String value)
+    {
+        assertOperation(operation, "/fields/System.AreaPath", value);
     }
 
     private void assertTitle(AddOperation operation)

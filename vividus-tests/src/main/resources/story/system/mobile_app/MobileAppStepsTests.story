@@ -224,6 +224,22 @@ When I tap on element located `xpath((//XCUIElementTypeCell[contains(@name, "Pho
 Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` is equal to `1`
 
 
+Scenario: [Android] Verify step: 'When I delete file `$filePath` from device'
+Meta:
+    @targetPlatform android
+When I delete file `/sdcard/Pictures/mobile-upload-image.png` from device
+When I tap on element located `accessibilityId(selectImage)`
+When I wait until element located `xpath(//android.widget.TextView[@text='Pictures'])` disappears
+
+
+Scenario: [iOS] Verify step: 'When I delete file `$filePath` from device'
+Meta:
+    @targetPlatform ios
+When I delete file `/Media/DCIM/100APPLE/IMG_0001.JPG` from device
+!-- The validation is not possible for this scenario yet. To see the changes in "Camera roll" after deleting image, it
+!-- is necessary to delete old photo database and restart device, which is not possible.
+
+
 Scenario: Verify step: 'When I activate application with bundle identifier `$bundleId`'
 When I activate application with bundle identifier `${browser-app}`
 When I wait until element located `accessibilityId(menuToggler)` disappears
@@ -363,9 +379,11 @@ Examples:
 Scenario: Verify step: 'When I long press $key key'
 Meta:
     @targetPlatform android
-When I long press POWER key
-When I reset context
-Then number of elements found by `xpath(//*[@text = 'Power off'])` is = `1`
+When I wait until element located `accessibilityId(menuToggler)` appears
+When I long press HOME key
+When I wait until element located `accessibilityId(menuToggler)` disappears
+When I activate application with bundle identifier `${main-app}`
+When I wait until element located `accessibilityId(menuToggler)` appears
 
 
 Scenario: Verify step: 'When I long press $key key'

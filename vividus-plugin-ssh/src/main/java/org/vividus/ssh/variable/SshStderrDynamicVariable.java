@@ -16,7 +16,7 @@
 
 package org.vividus.ssh.variable;
 
-import org.vividus.context.SshTestContext;
+import org.vividus.ssh.context.SshTestContext;
 import org.vividus.ssh.exec.SshOutput;
 
 public class SshStderrDynamicVariable extends AbstractSshDynamicVariable

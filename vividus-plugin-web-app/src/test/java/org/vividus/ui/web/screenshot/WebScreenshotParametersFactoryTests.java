@@ -124,4 +124,15 @@ class WebScreenshotParametersFactoryTests
                 () -> factory.create(configuration, IGNORES_TABLE, ignores));
         assertEquals("Scrollable element does not exist", thrown.getMessage());
     }
+
+    @Test
+    void shouldFailOnInvalidFooterCutSize()
+    {
+        var config = new WebScreenshotConfiguration();
+        var screenshotParameters =  new WebScreenshotParameters();
+        config.setNativeFooterToCut(-1);
+        var thrown = assertThrows(IllegalArgumentException.class, () -> factory.configure(config,
+            screenshotParameters));
+        assertEquals("The native footer to cut must be greater than or equal to zero", thrown.getMessage());
+    }
 }

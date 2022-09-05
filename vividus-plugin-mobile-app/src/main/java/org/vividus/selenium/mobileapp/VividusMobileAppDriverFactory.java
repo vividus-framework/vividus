@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,17 +26,17 @@ import org.vividus.proxy.IProxy;
 import org.vividus.selenium.AbstractVividusWebDriverFactory;
 import org.vividus.selenium.DesiredCapabilitiesConfigurer;
 import org.vividus.selenium.IGenericWebDriverFactory;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
+import org.vividus.selenium.WebDriverStartContext;
 
 public class VividusMobileAppDriverFactory extends AbstractVividusWebDriverFactory
 {
     private final IGenericWebDriverFactory driverFactory;
 
-    public VividusMobileAppDriverFactory(IWebDriverManagerContext webDriverManagerContext, RunContext runContext,
+    public VividusMobileAppDriverFactory(WebDriverStartContext webDriverStartContext, RunContext runContext,
             IProxy proxy, Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers,
             IGenericWebDriverFactory driverFactory)
     {
-        super(true, webDriverManagerContext, runContext, proxy, desiredCapabilitiesConfigurers);
+        super(true, webDriverStartContext, runContext, proxy, desiredCapabilitiesConfigurers);
         this.driverFactory = driverFactory;
     }
 

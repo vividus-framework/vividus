@@ -1,8 +1,8 @@
 project.description = 'Vividus extension for selenium'
 
  ext {
-     seleniumVersion = '4.3.0'
-     browserupProxyVersion = '2.2.1'
+     seleniumVersion = '4.4.0'
+     browserupProxyVersion = '2.2.2'
 }
 
  dependencies {
@@ -16,9 +16,9 @@ project.description = 'Vividus extension for selenium'
      api(group: 'org.seleniumhq.selenium', name: 'selenium-api', version: "${seleniumVersion}")
      api(group: 'org.seleniumhq.selenium', name: 'selenium-support', version: "${seleniumVersion}")
      api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver', version: "${seleniumVersion}")
-     api(group: 'io.appium', name: 'java-client', version: '8.1.1')
+     api(group: 'io.appium', name: 'java-client', version: '8.2.0')
 
-     api(group: 'com.github.pazone', name: 'ashot', version: '4f3d928')
+     api(group: 'com.github.pazone', name: 'ashot', version: 'a8335db')
 
      api(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-core', version: "${browserupProxyVersion}")
      implementation(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-mitm', version: "${browserupProxyVersion}")
@@ -38,7 +38,7 @@ project.description = 'Vividus extension for selenium'
      testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.0')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
      testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
-     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.6.1')
+     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.7.0')
      testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
      testImplementation(group: 'org.mockito', name: 'mockito-inline')
      testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '2.6.1')

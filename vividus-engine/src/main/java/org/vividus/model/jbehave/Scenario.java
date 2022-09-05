@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.vividus.model.jbehave;
 
-import static org.vividus.model.MetaWrapper.META_VALUES_SEPARATOR;
-
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -26,7 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
+import org.vividus.model.MetaWrapper;
 
 public class Scenario extends AbstractStepsContainer
 {
@@ -143,11 +142,7 @@ public class Scenario extends AbstractStepsContainer
     {
         return getMetaStream().filter(m -> metaName.equals(m.getName()))
                               .map(Meta::getValue)
-                              .filter(StringUtils::isNotEmpty)
-                              .map(String::trim)
-                              .map(value -> StringUtils.splitPreserveAllTokens(value, META_VALUES_SEPARATOR))
-                              .flatMap(Stream::of)
-                              .map(String::trim)
+                              .flatMap(value -> MetaWrapper.parsePropertyValues(value).stream())
                               .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
@@ -169,8 +164,6 @@ public class Scenario extends AbstractStepsContainer
 
     private Stream<Meta> getMetaStream()
     {
-        return Optional.ofNullable(getMeta())
-                       .map(List::stream)
-                       .orElseGet(Stream::empty);
+        return Optional.ofNullable(getMeta()).stream().flatMap(Collection::stream);
     }
 }

@@ -56,6 +56,7 @@ public class WebScreenshotParametersFactory
     protected void configure(WebScreenshotConfiguration config, WebScreenshotParameters parameters)
     {
         parameters.setNativeHeaderToCut(ensureValidCutSize(config.getNativeHeaderToCut(), "native header"));
+        parameters.setNativeFooterToCut(ensureValidCutSize(config.getNativeFooterToCut(), "native footer"));
 
         WebCutOptions webCutOptions = new WebCutOptions(
                 ensureValidCutSize(config.getWebHeaderToCut(), "web header"),

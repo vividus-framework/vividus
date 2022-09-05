@@ -35,7 +35,10 @@ class ScreenshotParametersTests
     void shouldProvideDefalutValues()
     {
         ScreenshotParameters screenshotParameters = new ScreenshotParameters();
-        Assertions.assertAll(() -> assertEquals(0, screenshotParameters.getNativeFooterToCut()),
+        Assertions.assertAll(() -> assertEquals(0, screenshotParameters.getCutTop()),
+                             () -> assertEquals(0, screenshotParameters.getCutLeft()),
+                             () -> assertEquals(0, screenshotParameters.getCutTop()),
+                             () -> assertEquals(0, screenshotParameters.getCutBottom()),
                              () -> assertEquals(Optional.empty(),
                                      screenshotParameters.getShootingStrategy()));
     }

@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -38,8 +37,8 @@ public final class ExcelSheetWriter
     }
 
     /**
-    * Create an excel document containing one sheet with the optional name and specified content.
-    * @param path path of excel file to create
+    * Create an Excel document containing one sheet with the optional name and specified content.
+    * @param path path of Excel file to create
     * @param sheetName sheet name, if not specified the default name will be determined by underlying excel library
     * @param content any valid ExamplesTable
     */
@@ -56,7 +55,7 @@ public final class ExcelSheetWriter
 
     /**
     * Add a sheet with the specified name and content to the existing excel file.
-    * @param path path of existing excel file
+    * @param path path of existing Excel file
     * @param sheetName sheet name
     * @param content any valid ExamplesTable
     */
@@ -73,18 +72,16 @@ public final class ExcelSheetWriter
 
     private static void fillData(ExamplesTable content, XSSFSheet sheet)
     {
-        List<String> headers = content.getHeaders();
-        fillRow(sheet, headers, 0, null);
-        IntStream.rangeClosed(1, content.getRows().size()).forEach(rowIndex -> {
-            Map<String, String> values = content.getRowAsParameters(rowIndex - 1, true).values();
-            fillRow(sheet, headers, rowIndex, values);
+        fillRow(sheet, 0, content.getHeaders());
+        IntStream.range(0, content.getRowCount()).forEach(rowIndex -> {
+            List<String> cells = content.getRowValues(rowIndex, true);
+            fillRow(sheet, rowIndex + 1, cells);
         });
     }
 
-    private static void fillRow(XSSFSheet sheet, List<String> headers, int rowIndex, Map<String, String> values)
+    private static void fillRow(XSSFSheet sheet, int rowIndex, List<String> cells)
     {
         Row row = sheet.createRow(rowIndex);
-        IntStream.range(0, headers.size()).forEach(index -> row.createCell(index).
-            setCellValue(values == null ? headers.get(index) : values.get(headers.get(index))));
+        IntStream.range(0, cells.size()).forEach(index -> row.createCell(index).setCellValue(cells.get(index)));
     }
 }
