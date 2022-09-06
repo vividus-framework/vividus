@@ -23,10 +23,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.Validate;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.Response;
+import org.vividus.converter.ui.web.StringToDimensionParameterConverter;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.selenium.session.WebDriverSessionAttributes;
@@ -115,6 +118,18 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
     public double getDpr()
     {
         return getWebDriverSessionInfo().get(WebDriverSessionAttributes.DEVICE_PIXEL_RATIO, this::calculateDpr);
+    }
+
+    protected Dimension getSize(WebDriver webDriver)
+    {
+        if (isAndroid())
+        {
+            return Optional.ofNullable(getSessionDetail("deviceScreenSize"))
+                           .map(String.class::cast)
+                           .map(StringToDimensionParameterConverter::convert)
+                           .orElseGet(() -> super.getSize(webDriver));
+        }
+        return super.getSize(webDriver);
     }
 
     private double calculateDpr()

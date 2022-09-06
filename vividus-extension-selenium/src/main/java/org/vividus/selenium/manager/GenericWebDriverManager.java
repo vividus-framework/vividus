@@ -69,7 +69,7 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
         });
     }
 
-    private Dimension getSize(WebDriver webDriver)
+    protected Dimension getSize(WebDriver webDriver)
     {
         return webDriver.manage().window().getSize();
     }
