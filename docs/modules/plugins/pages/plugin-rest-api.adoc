@@ -190,7 +190,7 @@ ${response-as-bytes}
 .Save excel into temp folder
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true'
+When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true`
 Then the response code is = '200'
 When I create temporary file with name `excel` and content `${response-as-bytes}` and put path to SCENARIO variable `excelPath`
 ----
@@ -475,7 +475,7 @@ When I wait for presence of element by `$.data.testData` with `PT5S` polling int
 |{headerSeparator=!,valueSeparator=!}  |
 |!name          !value                !|
 |!Authorization !${accessToken}       !|
-|When I issue a HTTP GET request for a resource with the URL '${requestUrl}'|
+|When I execute HTTP GET request for resource with URL `${requestUrl}`|
 ----
 
 === Validate secure protocols supported by server
@@ -572,7 +572,7 @@ When I save content of `$archiveData` archive entries to variables:$parameters
 ** [subs=+quotes]`*path*` - The path to the archive entry.
 ** [subs=+quotes]`*variable*` - The name of variable to save the data.
 ** [subs=+quotes]`*scopes*` -  xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-** [subs=+quotes]`*outputFormat*` - Defines output format of the entriy, either `TEXT` or `BASE64`.
+** [subs=+quotes]`*outputFormat*` - Defines output format of the entry, either `TEXT` or `BASE64`.
 
 .Save archive entries
 [source,gherkin]
@@ -675,7 +675,7 @@ When I save value of HTTP cookie with name `$cookieName` to $scopes variable `$v
 .Get cookie with name `cookieName` and save its value to scenario variable `value`
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'https://httpbin.org/cookies/set/cookieName/cookieValue'
+When I execute HTTP GET request for resource with URL `https://httpbin.org/cookies/set/cookieName/cookieValue`
 When I save value of HTTP cookie with name `cookieName` to scenario variable `value`
 Then '${value}' is equal to 'cookieValue'
 ----

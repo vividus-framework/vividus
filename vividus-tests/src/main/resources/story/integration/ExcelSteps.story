@@ -4,7 +4,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-When I issue a HTTP GET request for a resource with the URL 'https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true'
+When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true`
 Then the response code is = '200'
 
 Scenario: Step verification 'Then response contains excel sheet with index `$index` and records:$records'

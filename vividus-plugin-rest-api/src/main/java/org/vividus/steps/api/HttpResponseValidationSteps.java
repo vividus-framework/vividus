@@ -205,7 +205,7 @@ public class HttpResponseValidationSteps
 
     /**
      * This step should be preceded with the step
-     * 'When I issue a HTTP GET request for a resource with the URL '$url''
+     * 'When I execute HTTP GET request for resource with URL `$url`'
      * Step is validating the response time in milliseconds
      * @param responseTimeThresholdMs maximum response time in milliseconds
      */
