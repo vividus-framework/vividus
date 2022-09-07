@@ -234,7 +234,6 @@
     <bean class="org.vividus.ui.web.listener.WebSourceCodePublishingOnFailureListener" parent="abstractSourceCodePublishngOnFailureListener" lazy-init="false" />
 
     <bean class="org.vividus.selenium.BrowserWindowSizeListener" lazy-init="false">
-        <property name="runContext" ref="runContext" />
          <property name="webDriverManager" ref="webDriverManager" />
     </bean>
 

@@ -19,7 +19,6 @@ package org.vividus.selenium.manager;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.Capabilities;
@@ -68,18 +67,7 @@ public class WebDriverManager extends GenericWebDriverManager implements IWebDri
     }
 
     @Override
-    public Optional<Boolean> checkWindowFitsScreen(Dimension desiredWindowSize,
-            BiConsumer<Boolean, Dimension> resultHandler)
-    {
-        return getScreenResolution().map(screenResolution -> {
-            boolean fitsScreen = desiredWindowSize.getWidth() <= screenResolution.getWidth()
-                    && desiredWindowSize.getHeight() <= screenResolution.getHeight();
-            resultHandler.accept(fitsScreen, screenResolution);
-            return fitsScreen;
-        });
-    }
-
-    private Optional<Dimension> getScreenResolution()
+    public Optional<Dimension> getScreenResolution()
     {
         if (getWebDriverProvider().isRemoteExecution())
         {
