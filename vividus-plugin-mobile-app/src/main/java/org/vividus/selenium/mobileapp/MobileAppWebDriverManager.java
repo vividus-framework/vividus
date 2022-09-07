@@ -119,6 +119,14 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
 
     private double calculateDpr()
     {
+        if (isAndroidNativeApp())
+        {
+            // On Android platform the ratio between the device window size and taken screenshot size is equal to 1
+            // regardless of the device's display density.
+            // Also see https://github.com/appium/appium-base-driver/pull/306 for details.
+            return 1D;
+        }
+
         try
         {
             byte[] imageBytes = getUnwrappedDriver(TakesScreenshot.class).getScreenshotAs(OutputType.BYTES);
