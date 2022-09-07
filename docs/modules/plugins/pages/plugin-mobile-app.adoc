@@ -475,28 +475,6 @@ accomplish it by deleting following files: */Media/PhotoData/Photos.sqlite*, */M
 
 :web-view-info: (see http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information)
 
-=== Switch to Web view by index
-
-[WARNING]
-This step is deprecated and will be removed in VIVIDUS 0.5.0. The replacement is <<_switch_to_web_view_by_name>>.
-
-Switches context to a web view by the index, it starts from 1 {web-view-info}.
-
-[source,gherkin]
-----
-When I switch to web view with index `$index`
-----
-
-* `$index` - The index of the web view.
-
-.Switch to web view by index
-[source,gherkin]
-----
-Then number of elements found by `xpath(html)` is equal to `0`
-When I switch to web view with index `1`
-Then number of elements found by `xpath(html)` is equal to `1`
-----
-
 
 === Switch to Web view by name
 
