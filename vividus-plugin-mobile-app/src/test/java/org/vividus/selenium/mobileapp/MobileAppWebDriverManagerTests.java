@@ -45,6 +45,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.HasCapabilities;
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -84,12 +85,8 @@ class MobileAppWebDriverManagerTests
 
     private int mockStatusBarHeightRetrieval()
     {
-        ExecutesMethod executingMethodDriver = mock(ExecutesMethod.class);
-        when(webDriverProvider.getUnwrapped(ExecutesMethod.class)).thenReturn(executingMethodDriver);
-        Response response = new Response();
         long height = 101L;
-        response.setValue(Map.of(STAT_BAR_HEIGHT, height));
-        when(executingMethodDriver.execute(GET_SESSION_COMMAND)).thenReturn(response);
+        mockGetSession(Map.of(STAT_BAR_HEIGHT, height));
         return (int) height;
     }
 
@@ -138,12 +135,7 @@ class MobileAppWebDriverManagerTests
     void shouldPerformJsRequestForStatBarHeightWhenSessionDetailsStatBarHeightIsNullForIos()
     {
         mockCapabilities(MobilePlatform.IOS);
-        ExecutesMethod executingMethodDriver = mock(ExecutesMethod.class);
-        when(webDriverProvider.getUnwrapped(ExecutesMethod.class)).thenReturn(executingMethodDriver);
-
-        Response response = new Response();
-        response.setValue(Collections.EMPTY_MAP);
-        when(executingMethodDriver.execute(GET_SESSION_COMMAND)).thenReturn(response);
+        mockGetSession(Collections.EMPTY_MAP);
         when(javascriptActions.executeScript(MOBILE_DEVICE_SCREEN_INFO_JS)).thenReturn(STATUS_BAR_SIZE);
         assertEquals(44, driverManager.getStatusBarSize());
     }
@@ -177,15 +169,14 @@ class MobileAppWebDriverManagerTests
     {
         WebDriver webDriver = mock(WebDriver.class, withSettings().extraInterfaces(HasCapabilities.class));
         when(webDriverProvider.get()).thenReturn(webDriver);
-        Capabilities capabilitiesMock = mock(Capabilities.class);
-        when(((HasCapabilities) webDriver).getCapabilities()).thenReturn(capabilitiesMock);
+        Capabilities capabilities = new MutableCapabilities(Map.of(CapabilityType.PLATFORM_NAME, platform));
+        when(((HasCapabilities) webDriver).getCapabilities()).thenReturn(capabilities);
         driverManager.setMobileApp(true);
-        when(capabilitiesMock.getCapability(CapabilityType.PLATFORM_NAME)).thenReturn(platform);
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    void shouldProvideDpr()
+    void shouldProvideDprForAndroidNativeApp()
     {
         MobileAppWebDriverManager spyingDriverManager = new MobileAppWebDriverManager(webDriverProvider,
                 webDriverSessionInfo, javascriptActions)
@@ -202,6 +193,27 @@ class MobileAppWebDriverManagerTests
         when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.DEVICE_PIXEL_RATIO),
                 any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArguments()[1]).get());
         assertEquals(1d, spyingDriverManager.getDpr());
+        mockCapabilities(MobilePlatform.ANDROID);
+        when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.DEVICE_PIXEL_RATIO),
+                any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArguments()[1]).get());
+
+        assertEquals(1d, driverManager.getDpr());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldProvideDprForIOS()
+    {
+        mockCapabilities(MobilePlatform.IOS);
+        when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.DEVICE_PIXEL_RATIO),
+                any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArguments()[1]).get());
+        when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.SCREEN_SIZE), any(Supplier.class)))
+                .thenReturn(new Dimension(1, 1));
+
+        TakesScreenshot taker = mock(TakesScreenshot.class);
+        when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(taker);
+        when(taker.getScreenshotAs(OutputType.BYTES)).thenReturn(IMAGE);
+        assertEquals(1d, driverManager.getDpr());
         verify(webDriverProvider).getUnwrapped(TakesScreenshot.class);
     }
 
@@ -221,6 +233,7 @@ class MobileAppWebDriverManagerTests
     {
         try (MockedStatic<ImageIO> imageIo = Mockito.mockStatic(ImageIO.class))
         {
+            mockCapabilities(MobilePlatform.IOS);
             imageIo.when(() -> ImageIO.read(any(InputStream.class))).thenThrow(new IOException("io is oi"));
             TakesScreenshot taker = mock(TakesScreenshot.class);
             when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(taker);
@@ -229,5 +242,14 @@ class MobileAppWebDriverManagerTests
                     any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArguments()[1]).get());
             assertThrows(UncheckedIOException.class, driverManager::getDpr);
         }
+    }
+
+    private void mockGetSession(Object value)
+    {
+        ExecutesMethod executingMethodDriver = mock(ExecutesMethod.class);
+        when(webDriverProvider.getUnwrapped(ExecutesMethod.class)).thenReturn(executingMethodDriver);
+        Response response = new Response();
+        response.setValue(value);
+        when(executingMethodDriver.execute(GET_SESSION_COMMAND)).thenReturn(response);
     }
 }
