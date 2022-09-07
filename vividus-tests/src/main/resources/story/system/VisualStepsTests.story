@@ -15,8 +15,6 @@ Examples:
 Scenario: Validation of step When I $actionType baseline with name `$name` for full page
 When I <action> baseline with name `full-page`
 When I <action> baseline with name `full-page` using storage `filesystem`
-!-- Deprecated step test
-When I <action> baseline with name `full-page` using repository `filesystem`
 
 
 Scenario: Validation of step When I $actionType baseline with name `$name` for context element
@@ -37,10 +35,6 @@ When I CHECK_INEQUALITY_AGAINST baseline with name `full-page` ignoring:
 |REQUIRED_DIFF_PERCENTAGE|
 |85                      |
 When I CHECK_INEQUALITY_AGAINST baseline with name `full-page` using storage `filesystem` and ignoring:
-|REQUIRED_DIFF_PERCENTAGE|
-|85                      |
-!-- Deprecated step test
-When I CHECK_INEQUALITY_AGAINST baseline with name `full-page` using repository `filesystem` and ignoring:
 |REQUIRED_DIFF_PERCENTAGE|
 |85                      |
 When I reset context
@@ -97,10 +91,6 @@ When I <action> baseline with name `scrollable-element-context` using screenshot
 When I <action> baseline with name `scrollable-element-context` using storage `filesystem` and screenshot configuration:
 |scrollableElement|webHeaderToCut|webFooterToCut|scrollTimeout|
 |By.id(scrollable)|10            |0             |PT1S         |
-!-- Deprecated step test
-When I <action> baseline with name `scrollable-element-context` using repository `filesystem` and screenshot configuration:
-|scrollableElement|webHeaderToCut|webFooterToCut|scrollTimeout|
-|By.id(scrollable)|10            |0             |PT1S         |
 
 
 Scenario: Validation of full-page visual testing on a page with scrollable element with ignores
@@ -111,13 +101,6 @@ using screenshot configuration:
 |scrollableElement|webHeaderToCut|webFooterToCut|scrollTimeout|
 |By.id(scrollable)|10            |0             |PT1S         |
 When I <action> baseline with name `scrollable-element-fullpage-with-ignores` using storage `filesystem` and ignoring:
-|ELEMENT                  |AREA                                   |
-|By.xpath(//a[position() mod 2 = 1 and position() > 7])|By.xpath(//a[position() mod 2 = 1 and position() < 7])|
-and screenshot configuration:
-|scrollableElement|webHeaderToCut|webFooterToCut|scrollTimeout|
-|By.id(scrollable)|10            |0             |PT1S         |
-!-- Deprecated step test
-When I <action> baseline with name `scrollable-element-fullpage-with-ignores` using repository `filesystem` and ignoring:
 |ELEMENT                  |AREA                                   |
 |By.xpath(//a[position() mod 2 = 1 and position() > 7])|By.xpath(//a[position() mod 2 = 1 and position() < 7])|
 and screenshot configuration:
