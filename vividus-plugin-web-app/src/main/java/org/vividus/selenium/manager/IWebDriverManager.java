@@ -17,7 +17,6 @@
 package org.vividus.selenium.manager;
 
 import java.util.Optional;
-import java.util.function.BiConsumer;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.remote.Browser;
@@ -28,5 +27,5 @@ public interface IWebDriverManager extends IGenericWebDriverManager
 
     boolean isBrowserAnyOf(Browser... browsers);
 
-    Optional<Boolean> checkWindowFitsScreen(Dimension desiredWindowSize, BiConsumer<Boolean, Dimension> resultHandler);
+    Optional<Dimension> getScreenResolution();
 }

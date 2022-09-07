@@ -20,8 +20,6 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -40,6 +38,8 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -82,29 +82,25 @@ class WindowStepsTests
         var screenSize = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
         var assertionMessage = String.format(ASSERTION_PATTERN, WIDTH, HEIGHT);
         var window = mockWindow();
-        when(webDriverManager.checkWindowFitsScreen(eq(targetSize), argThat(consumer -> {
-            consumer.accept(true, screenSize);
-            return true;
-        }))).thenReturn(Optional.of(true));
+        when(webDriverManager.getScreenResolution()).thenReturn(Optional.of(screenSize));
+        when(softAssert.assertTrue(assertionMessage, true)).thenReturn(true);
         windowSteps.resizeCurrentWindow(targetSize);
-        verify(softAssert).assertTrue(assertionMessage, true);
         verify(window).setSize(targetSize);
     }
 
-    @Test
-    void testResizeCurrentWindowSmallScreen()
+    @ParameterizedTest
+    @CsvSource({
+            "1441, 1080",
+            "1440, 901"
+    })
+    void testResizeCurrentWindowSmallScreen(int targetWidth, int targetHeight)
     {
-        int width = 2048;
-        int height = 1080;
-        var targetSize = new Dimension(width, height);
+        var targetSize = new Dimension(targetWidth, targetHeight);
         var screenSize = new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT);
-        var assertionMessage = String.format(ASSERTION_PATTERN, width, height);
-        when(webDriverManager.checkWindowFitsScreen(eq(targetSize), argThat(consumer -> {
-            consumer.accept(false, screenSize);
-            return true;
-        }))).thenReturn(Optional.of(false));
+        var assertionMessage = String.format(ASSERTION_PATTERN, targetWidth, targetHeight);
+        when(webDriverManager.getScreenResolution()).thenReturn(Optional.of(screenSize));
+        when(softAssert.assertTrue(assertionMessage, false)).thenReturn(false);
         windowSteps.resizeCurrentWindow(targetSize);
-        verify(softAssert).assertTrue(assertionMessage, false);
         verifyNoInteractions(webDriverProvider);
     }
 
@@ -113,8 +109,7 @@ class WindowStepsTests
     {
         var targetSize = new Dimension(WIDTH, HEIGHT);
         var window = mockWindow();
-        when(webDriverManager.checkWindowFitsScreen(eq(targetSize), argThat(consumer -> true))).thenReturn(
-                Optional.empty());
+        when(webDriverManager.getScreenResolution()).thenReturn(Optional.empty());
         windowSteps.resizeCurrentWindow(targetSize);
         verifyNoInteractions(softAssert);
         verify(window).setSize(targetSize);
@@ -124,7 +119,7 @@ class WindowStepsTests
     void testCloseCurrentWindow()
     {
         mockWindowHandles();
-        WebDriver.TargetLocator mockedTargetLocator = mock(WebDriver.TargetLocator.class);
+        var mockedTargetLocator = mock(WebDriver.TargetLocator.class);
         when(driver.switchTo()).thenReturn(mockedTargetLocator);
         windowSteps.closeCurrentWindow();
         verify(driver).close();
@@ -134,7 +129,7 @@ class WindowStepsTests
     @Test
     void testCloseCurrentWindowNoAdditionalWindowIsOpened()
     {
-        String currentWindow = CURRENT_WINDOW_GUID;
+        var currentWindow = CURRENT_WINDOW_GUID;
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getWindowHandle()).thenReturn(currentWindow);
         when(driver.getWindowHandles()).thenReturn(Set.of(currentWindow));
@@ -159,7 +154,7 @@ class WindowStepsTests
     void testCloseCurrentWindowWithoutAlerts()
     {
         mockWindowHandles();
-        WebDriver.TargetLocator mockedTargetLocator = mock(WebDriver.TargetLocator.class);
+        var mockedTargetLocator = mock(WebDriver.TargetLocator.class);
         when(driver.switchTo()).thenReturn(mockedTargetLocator);
         when(alertActions.isAlertPresent()).thenReturn(false);
         windowSteps.closeCurrentWindowWithAlertsHandling();
@@ -169,18 +164,18 @@ class WindowStepsTests
 
     private Window mockWindow()
     {
-        WebDriver mockedWebDriver = mock(WebDriver.class);
+        var mockedWebDriver = mock(WebDriver.class);
         when(webDriverProvider.get()).thenReturn(mockedWebDriver);
-        Options mockedOptions = mock(Options.class);
+        var mockedOptions = mock(Options.class);
         when(mockedWebDriver.manage()).thenReturn(mockedOptions);
-        Window mockedWindow = mock(Window.class);
+        var mockedWindow = mock(Window.class);
         when(mockedOptions.window()).thenReturn(mockedWindow);
         return mockedWindow;
     }
 
     private void mockWindowHandles()
     {
-        String currentWindow = CURRENT_WINDOW_GUID;
+        var currentWindow = CURRENT_WINDOW_GUID;
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getWindowHandle()).thenReturn(currentWindow);
         Set<String> windowHandles = new LinkedHashSet<>(List.of(currentWindow, WINDOW_TO_SWITCH_TO));
