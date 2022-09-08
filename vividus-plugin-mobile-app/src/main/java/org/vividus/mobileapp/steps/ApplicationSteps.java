@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
@@ -83,12 +84,12 @@ public class ApplicationSteps
     @Given("I start mobile application")
     public void startMobileApplication()
     {
-        HasCapabilities driverWithCapabilities = webDriverProvider.getUnwrapped(HasCapabilities.class);
-        LOGGER.atInfo()
-                .addArgument(
-                        () -> CapabilityHelpers.getCapability(driverWithCapabilities.getCapabilities(), "app",
-                                String.class))
-                .log("Started application located at {}");
+        Capabilities capabilities = webDriverProvider.getUnwrapped(HasCapabilities.class).getCapabilities();
+        String appCapability = CapabilityHelpers.getCapability(capabilities, "app", String.class);
+        if (appCapability != null)
+        {
+            LOGGER.info("Started application located at {}", appCapability);
+        }
     }
 
     /**
