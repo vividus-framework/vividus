@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,8 @@ public class BrowserStackAutomateClient extends BrowserStackClient
             }
             catch (BrowserStackException e)
             {
-                if (e.getMessage().contains("404 Not Found"))
+                String errorMessage = e.getMessage();
+                if (errorMessage.contains("404 Not Found") || errorMessage.contains("403 Forbidden"))
                 {
                     return StringUtils.EMPTY;
                 }
