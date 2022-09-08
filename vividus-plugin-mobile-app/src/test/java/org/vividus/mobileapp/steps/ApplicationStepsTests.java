@@ -18,6 +18,7 @@ package org.vividus.mobileapp.steps;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -39,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.MutableCapabilities;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.mobileapp.action.ApplicationActions;
 import org.vividus.mobileapp.model.NamedEntry;
@@ -64,16 +66,20 @@ class ApplicationStepsTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ApplicationSteps.class);
 
-    @Mock private HasCapabilities hasCapabilities;
+    @Mock(extraInterfaces = HasCapabilities.class)
+    private WebDriver webDriverWithCapabilities;
+
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private WebDriverStartContext webDriverStartContext;
     @Mock private ApplicationActions applicationActions;
     @InjectMocks private ApplicationSteps applicationSteps;
 
-    private void mockCommons()
+    private void mockCommons(Map<String, String> capabilities)
     {
-        when(hasCapabilities.getCapabilities()).thenReturn(new MutableCapabilities(Map.of(APP, APP_NAME)));
-        when(webDriverProvider.getUnwrapped(HasCapabilities.class)).thenReturn(hasCapabilities);
+        when(((HasCapabilities) webDriverWithCapabilities).getCapabilities()).thenReturn(
+                new MutableCapabilities(capabilities));
+        when(webDriverProvider.getUnwrapped(HasCapabilities.class)).thenReturn(
+                (HasCapabilities) webDriverWithCapabilities);
     }
 
     private void verifyLogs()
@@ -86,7 +92,7 @@ class ApplicationStepsTests
     {
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities(Map.of(KEY, VALUE));
 
-        mockCommons();
+        mockCommons(Map.of(APP, APP_NAME));
         when(webDriverStartContext.get(WebDriverStartParameters.DESIRED_CAPABILITIES))
                 .thenReturn(desiredCapabilities);
 
@@ -98,19 +104,30 @@ class ApplicationStepsTests
 
         verify(webDriverStartContext).put(WebDriverStartParameters.DESIRED_CAPABILITIES,
                 new DesiredCapabilities(Map.of(KEY, VALUE, CAPABILITY_NAME, CAPABILITY_VALUE)));
-        verifyNoMoreInteractions(webDriverProvider, hasCapabilities, webDriverStartContext);
+        verifyNoMoreInteractions(webDriverProvider, webDriverWithCapabilities, webDriverStartContext);
         verifyLogs();
     }
 
     @Test
     void shouldStartMobileApplication()
     {
-        mockCommons();
+        mockCommons(Map.of(APP, APP_NAME));
 
         applicationSteps.startMobileApplication();
 
-        verifyNoMoreInteractions(webDriverProvider, hasCapabilities);
+        verifyNoMoreInteractions(webDriverProvider, webDriverWithCapabilities);
         verifyLogs();
+    }
+
+    @Test
+    void shouldStartMobileApplicationWithoutAppCapabilityReturned()
+    {
+        mockCommons(Map.of());
+
+        applicationSteps.startMobileApplication();
+
+        verifyNoMoreInteractions(webDriverProvider, webDriverWithCapabilities);
+        assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
     @Test
