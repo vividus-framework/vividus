@@ -164,52 +164,6 @@ public class ProxySteps
     }
 
     /**
-     * Saves the URL query parameters, the request body and the response status code from the message with given
-     * request  URL-pattern into the variable with specified name and the scopes.
-     * <p>
-     * This step requires proxy to be turned on. It can be done in properties or by switching on <code>@proxy</code>
-     * meta tag at the story level.
-     * </p>
-     * The actions performed by the step:
-     * <ul>
-     * <li>extract HTTP messages from the recorded proxy archive</li>
-     * <li>filter out the HTTP messages with the response status code `302 Moved Temporarily`</li>
-     * <li>find HTTP requests matching the provided HTTP methods and the URL regular expression</li>
-     * <li>check that total number of the found HTTP messages is equal to 1</li>
-     * <li>save the HTTP message data to the specified variable</li>
-     * </ul>
-     * In case of failure the full HTTP archive (HAR) is attached to the report.
-     *
-     * @param httpMethods  The "or"-separated set of HTTP methods to filter by, e.g. 'GET or POST or PUT'
-     * @param urlPattern   The regular expression to match HTTP request URL
-     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     *                     <i>Available scopes:</i>
-     *                     <ul>
-     *                     <li><b>STEP</b> - the variable will be available only within the step,
-     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     *                     <li><b>STORY</b> - the variable will be available within the whole story,
-     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     *                     </ul>
-     * @param variableName The variable name to store results. If the variable name is my-var, the following
-     *                     variables will be created:
-     *                     <ul>
-     *                     <li>${my-var.query} - The URL query is stored as a collection of key and value pairs,
-     *                     where key is the name of the query parameter and value is the list of query parameter
-     *                     values. The query parameter values are accessible via zero-based index.</li>
-     *                     <li>${my-var.requestBody.mimeType} - The MIME type of posted data, the variable will not
-     *                     be created if MIME type is not present.</li>
-     *                     <li>${my-var.requestBody.text} - The posted data as plain text, the variable will not be
-     *                     created if the request body is not present.</li>
-     *                     <li>${my-var.requestBodyParameters} - The form data parameters are stored as a collection
-     *                     of key and value pairs, where key is the name of the form parameter and value is the list
-     *                     of form parameter values. The form parameter values are accessible via zero-based index.</li>
-     *                     <li>${my-var.responseStatus} - The response status, the variable will not be created if
-     *                     the response is not present.</li>
-     *                     </ul>
-     * @throws IOException If any error happens during operation
-     */
-
-    /**
      * Waits for appearance of HTTP request matched <b>httpMethod</b> and <b>urlPattern</b> in proxy log
      * @param httpMethods The "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
      * @param urlPattern  The regular expression to match HTTP request URL
