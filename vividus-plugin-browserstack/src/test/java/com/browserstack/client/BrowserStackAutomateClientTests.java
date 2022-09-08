@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ import com.google.api.client.http.HttpRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -59,13 +61,17 @@ class BrowserStackAutomateClientTests
     private final BrowserStackAutomateClient client = spy(
             new BrowserStackAutomateClient("endpoint", "username", "access-key", new JsonUtils()));
 
-    @Test
-    void shouldGetNetworkLogs() throws BrowserStackException
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "404 Not Found",
+            "403 Forbidden"
+    })
+    void shouldGetNetworkLogs(String firstErrorMessage) throws BrowserStackException
     {
         mockCommons();
-        BrowserStackException browserStackException = mock(BrowserStackException.class);
+        var browserStackException = mock(BrowserStackException.class);
 
-        when(browserStackException.getMessage()).thenReturn("404 Not Found");
+        when(browserStackException.getMessage()).thenReturn(firstErrorMessage);
         when(browserStackRequest.asString()).thenThrow(browserStackException).thenReturn(EMPTY_JSON);
 
         assertEquals(EMPTY_JSON, client.getNetworkLogs(SESSION_ID));
@@ -76,11 +82,11 @@ class BrowserStackAutomateClientTests
     void shouldNotGetNetworkLogsIfErrorOccurred() throws BrowserStackException
     {
         mockCommons();
-        BrowserStackException browserStackException = new BrowserStackException(StringUtils.EMPTY);
+        var browserStackException = new BrowserStackException(StringUtils.EMPTY);
 
         doThrow(browserStackException).when(browserStackRequest).asString();
 
-        BrowserStackException exception = assertThrows(BrowserStackException.class,
+        var exception = assertThrows(BrowserStackException.class,
             () -> client.getNetworkLogs(SESSION_ID));
         assertEquals(browserStackException, exception);
         verifyMocks();
@@ -91,14 +97,14 @@ class BrowserStackAutomateClientTests
     {
         doReturn(browserStackRequest).when(client).newRequest(Method.PUT, "/sessions/{sessionId}.json");
         when(browserStackRequest.routeParam("sessionId", SESSION_ID)).thenReturn(browserStackRequest);
-        ArgumentCaptor<ByteArrayContent> captor = ArgumentCaptor.forClass(ByteArrayContent.class);
+        var captor = ArgumentCaptor.forClass(ByteArrayContent.class);
         when(browserStackRequest.body(captor.capture())).thenReturn(browserStackRequest);
 
         client.updateSessionStatus(SESSION_ID, "passed");
 
         verify(browserStackRequest).asString();
 
-        ByteArrayContent content = captor.getValue();
+        var content = captor.getValue();
         assertEquals(19, content.getLength());
     }
 
