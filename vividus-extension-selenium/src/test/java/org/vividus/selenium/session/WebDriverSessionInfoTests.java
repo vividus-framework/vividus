@@ -51,6 +51,15 @@ class WebDriverSessionInfoTests
     }
 
     @Test
+    void shouldResetAddedAttribute()
+    {
+        webDriverSessionInfo.put(attribute, ANY_VALUE);
+        assertEquals(ANY_VALUE, webDriverSessionInfo.get(attribute));
+        webDriverSessionInfo.reset(attribute);
+        assertNull(webDriverSessionInfo.get(attribute));
+    }
+
+    @Test
     void shouldGetAttributeWithInitialValue()
     {
         assertEquals(ANY_VALUE, webDriverSessionInfo.get(attribute, () -> ANY_VALUE));

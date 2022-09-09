@@ -396,6 +396,11 @@ When I wait until element located `accessibilityId(menuToggler)` disappears
 When I activate application with bundle identifier `${main-app}`
 When I wait until element located `accessibilityId(menuToggler)` appears
 
+Scenario: Verify step: 'When I change device screen orientation to $orientation'
+When I save `${size-attribute}` attribute value of element located `accessibilityId(menuToggler)` to scenario variable `portraitSize`
+When I change device screen orientation to LANDSCAPE
+When I save `${size-attribute}` attribute value of element located `accessibilityId(menuToggler)` to scenario variable `landscapeSize`
+Then `${portraitSize}` is not equal to `${landscapeSize}`
 
 Scenario: Verify step: 'When I close mobile application'
 When I close mobile application

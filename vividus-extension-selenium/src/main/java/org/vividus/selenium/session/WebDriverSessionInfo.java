@@ -29,6 +29,13 @@ public class WebDriverSessionInfo extends AbstractWebDriverManagerContext<WebDri
         super(testContext, WebDriverSessionInfo.class);
     }
 
+    @SuppressWarnings("PMD.UselessOverridingMethod")
+    @Override
+    public void reset(WebDriverSessionAttribute key)
+    {
+        super.reset(key);
+    }
+
     @Subscribe
     public void onWebDriverQuit(AfterWebDriverQuitEvent event)
     {

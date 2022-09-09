@@ -54,6 +54,11 @@ public abstract class AbstractWebDriverManagerContext<K> implements WebDriverMan
         getData().clear();
     }
 
+    protected void reset(K key)
+    {
+        getData().remove(key);
+    }
+
     private SimpleTestContext getData()
     {
         return testContext.get(storageType, SimpleTestContext::new);

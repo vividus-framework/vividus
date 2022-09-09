@@ -1002,3 +1002,20 @@ When I turn OFF `WIFI` network connection
 When I turn OFF `WIFI` network connection
 When I activate application with bundle identifier `my-aplication-bundle-id`
 ----
+
+=== Change device screen orientation
+
+Changes the device screen orientation.
+
+[source,gherkin]
+----
+When I change device screen orientation to $orientation
+----
+
+* `$orientation` - The device screen orientation, either `portrait` or `landscape`.
+
+.Change the device screen orientation
+[source,gherkin]
+----
+When I change device screen orientation to portrait
+----

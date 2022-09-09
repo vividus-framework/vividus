@@ -20,18 +20,24 @@ import java.util.Base64;
 import java.util.Map;
 
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.ScreenOrientation;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.session.WebDriverSessionAttributes;
+import org.vividus.selenium.session.WebDriverSessionInfo;
 import org.vividus.util.ResourceUtils;
 
 import io.appium.java_client.PushesFiles;
+import io.appium.java_client.remote.SupportsRotation;
 
 public class DeviceActions
 {
     private final IWebDriverProvider webDriverProvider;
+    private final WebDriverSessionInfo webDriverSessionInfo;
 
-    public DeviceActions(IWebDriverProvider webDriverProvider)
+    public DeviceActions(IWebDriverProvider webDriverProvider, WebDriverSessionInfo webDriverSessionInfo)
     {
         this.webDriverProvider = webDriverProvider;
+        this.webDriverSessionInfo = webDriverSessionInfo;
     }
 
     /**
@@ -58,5 +64,21 @@ public class DeviceActions
     {
         Map<String, Object> args = Map.of("remotePath", deviceFilePath);
         webDriverProvider.getUnwrapped(JavascriptExecutor.class).executeScript("mobile:deleteFile", args);
+    }
+
+    /**
+     * Sets the current screen orientation
+     * @param orientation The screen orientation
+     */
+    public void rotate(ScreenOrientation orientation)
+    {
+        try
+        {
+            webDriverProvider.getUnwrapped(SupportsRotation.class).rotate(orientation);
+        }
+        finally
+        {
+            webDriverSessionInfo.reset(WebDriverSessionAttributes.SCREEN_SIZE);
+        }
     }
 }
