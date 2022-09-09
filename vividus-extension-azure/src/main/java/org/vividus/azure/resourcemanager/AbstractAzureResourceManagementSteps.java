@@ -26,7 +26,7 @@ import com.azure.core.http.HttpRequest;
 import com.azure.core.http.HttpResponse;
 
 import org.vividus.context.VariableContext;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -35,11 +35,11 @@ public abstract class AbstractAzureResourceManagementSteps
 {
     private final HttpPipeline httpPipeline;
     private final String resourceManagerEndpoint;
-    private final SoftAssert softAssert;
+    private final ISoftAssert softAssert;
     private final VariableContext variableContext;
 
     protected AbstractAzureResourceManagementSteps(HttpPipeline httpPipeline, String resourceManagerEndpoint,
-            SoftAssert softAssert, VariableContext variableContext)
+            ISoftAssert softAssert, VariableContext variableContext)
     {
         this.httpPipeline = httpPipeline;
         this.resourceManagerEndpoint = resourceManagerEndpoint;

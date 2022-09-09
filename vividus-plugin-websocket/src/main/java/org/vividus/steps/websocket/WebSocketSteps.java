@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.vividus.context.VariableContext;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.testcontext.TestContext;
 import org.vividus.util.wait.DurationBasedWaiter;
@@ -56,11 +56,11 @@ public class WebSocketSteps
     private final Map<String, URI> webSocketConnections;
     private final TestContext testContext;
     private final VariableContext variableContext;
-    private final SoftAssert softAssert;
+    private final ISoftAssert softAssert;
     private final JettyWebSocketClient webSocketClient;
 
     public WebSocketSteps(Map<String, URI> webSocketConnections, TestContext testContext,
-            VariableContext variableContext, SoftAssert softAssert)
+            VariableContext variableContext, ISoftAssert softAssert)
     {
         this.webSocketConnections = webSocketConnections;
         this.testContext = testContext;

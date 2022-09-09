@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.function.Function;
 import org.jbehave.core.annotations.When;
 import org.vividus.azure.cosmos.model.CosmosDbContainer;
 import org.vividus.context.VariableContext;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.variable.VariableScope;
 
@@ -35,10 +35,10 @@ public class CosmosDbSteps
     private final VariableContext variableContext;
     private final PropertyMappedCollection<CosmosDbContainer> containers;
     private final CosmosDbService cosmosDbService;
-    private final SoftAssert softAssert;
+    private final ISoftAssert softAssert;
 
     public CosmosDbSteps(VariableContext variableContext, PropertyMappedCollection<CosmosDbContainer> containers,
-            CosmosDbService cosmosDbService, SoftAssert softAssert)
+            CosmosDbService cosmosDbService, ISoftAssert softAssert)
     {
         this.variableContext = variableContext;
         this.containers = containers;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,13 +35,13 @@ import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.http.validation.model.AbstractResourceValidation;
 import org.vividus.http.validation.model.CheckStatus;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 
 public class ResourceValidator<T extends AbstractResourceValidation<T>>
 {
     private final IHttpClient httpClient;
 
-    private final SoftAssert softAssert;
+    private final ISoftAssert softAssert;
 
     private final Set<Integer> allowedStatusCodes = Set.of(HttpStatus.SC_OK);
     private final Set<Integer> notAllowedHeadStatusCodes = Set.of(HttpStatus.SC_METHOD_NOT_ALLOWED,
@@ -51,7 +51,7 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
 
     private final Map<URI, T> cache = new ConcurrentHashMap<>();
 
-    public ResourceValidator(IHttpClient httpClient, SoftAssert softAssert)
+    public ResourceValidator(IHttpClient httpClient, ISoftAssert softAssert)
     {
         this.httpClient = httpClient;
         this.softAssert = softAssert;
