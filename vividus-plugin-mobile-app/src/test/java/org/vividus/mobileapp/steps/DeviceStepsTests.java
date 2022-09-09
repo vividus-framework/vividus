@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.ScreenOrientation;
 import org.vividus.mobileapp.action.DeviceActions;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -74,5 +75,12 @@ class DeviceStepsTests
     {
         deviceSteps.deleteFileFromDevice(DEVICE_FILE_PATH);
         verify(deviceActions).deleteFile(DEVICE_FILE_PATH);
+    }
+
+    @Test
+    void shouldChangeDeviceScreenOrientation()
+    {
+        deviceSteps.changeDeviceScreenOrientation(ScreenOrientation.LANDSCAPE);
+        verify(deviceActions).rotate(ScreenOrientation.LANDSCAPE);
     }
 }

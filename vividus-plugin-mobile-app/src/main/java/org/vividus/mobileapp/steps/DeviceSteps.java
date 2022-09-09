@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 
 import org.apache.commons.io.FilenameUtils;
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.ScreenOrientation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.mobileapp.action.DeviceActions;
@@ -70,5 +71,16 @@ public class DeviceSteps
     public void deleteFileFromDevice(String filePath)
     {
         deviceActions.deleteFile(filePath);
+    }
+
+    /**
+     * Changes the device screen orientation to the specified value.
+     *
+     * @param orientation The device screen orientation, either <b>landscape</b> or <b>portrait</b>.
+     */
+    @When("I change device screen orientation to $orientation")
+    public void changeDeviceScreenOrientation(ScreenOrientation orientation)
+    {
+        deviceActions.rotate(orientation);
     }
 }

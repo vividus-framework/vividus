@@ -29,9 +29,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.ScreenOrientation;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.session.WebDriverSessionAttributes;
+import org.vividus.selenium.session.WebDriverSessionInfo;
 
 import io.appium.java_client.PushesFiles;
+import io.appium.java_client.remote.SupportsRotation;
 
 @ExtendWith(MockitoExtension.class)
 class DeviceActionsTests
@@ -41,6 +45,7 @@ class DeviceActionsTests
     private static final byte[] RESOURCE_BODY = { 79, 105, 107, 75 };
 
     @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private WebDriverSessionInfo webDriverSessionInfo;
     @InjectMocks private DeviceActions deviceActions;
 
     @Test
@@ -65,5 +70,17 @@ class DeviceActionsTests
         deviceActions.deleteFile(DEVICE_FILE_PATH);
         verify(javascriptExecutor).executeScript("mobile:deleteFile", Map.of("remotePath", DEVICE_FILE_PATH));
         verifyNoMoreInteractions(webDriverProvider);
+    }
+
+    @Test
+    void shouldRotate()
+    {
+        SupportsRotation supportsRotation = mock(SupportsRotation.class);
+        when(webDriverProvider.getUnwrapped(SupportsRotation.class)).thenReturn(supportsRotation);
+
+        deviceActions.rotate(ScreenOrientation.LANDSCAPE);
+
+        verify(supportsRotation).rotate(ScreenOrientation.LANDSCAPE);
+        verify(webDriverSessionInfo).reset(WebDriverSessionAttributes.SCREEN_SIZE);
     }
 }
