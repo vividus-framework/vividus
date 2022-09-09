@@ -42,7 +42,7 @@ import org.vividus.model.ArchiveVariable;
 import org.vividus.model.NamedEntry;
 import org.vividus.model.OutputFormat;
 import org.vividus.reporter.event.IAttachmentPublisher;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.DataWrapper;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.util.ResourceUtils;
@@ -59,7 +59,7 @@ class ArchiveStepsTests
     private static final String CONTAINS_ENTRY_WITH_NAME = "The archive contains entry with name ";
     private static final String CONTAINS_ENTRY_WITH_RULE = "The archive contains entry matching the "
             + "comparison rule '%s' with name pattern '%s'";
-    @Mock private SoftAssert softAssert;
+    @Mock private ISoftAssert softAssert;
     @Mock private VariableContext variableContext;
     @Mock private IAttachmentPublisher attachmentPublisher;
 

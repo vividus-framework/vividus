@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
 import org.vividus.context.VariableContext;
-import org.vividus.steps.ui.validation.BaseValidations;
+import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.web.action.VideoPlayerActions;
@@ -31,11 +31,11 @@ import org.vividus.variable.VariableScope;
 @TakeScreenshotOnFailure
 public class VideoPlayerSteps
 {
-    private final BaseValidations baseValidations;
+    private final IBaseValidations baseValidations;
     private final VideoPlayerActions videoPlayerActions;
     private final VariableContext variableContext;
 
-    public VideoPlayerSteps(BaseValidations baseValidation, VideoPlayerActions videoPlayerActions,
+    public VideoPlayerSteps(IBaseValidations baseValidation, VideoPlayerActions videoPlayerActions,
             VariableContext variableContext)
     {
         this.baseValidations = baseValidation;

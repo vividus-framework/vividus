@@ -25,14 +25,14 @@ import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
 public class ResourceManagementSteps extends AbstractAzureResourceManagementSteps
 {
     private final AzureProfile azureProfile;
 
-    public ResourceManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential, SoftAssert softAssert,
+    public ResourceManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential, ISoftAssert softAssert,
             VariableContext variableContext)
     {
         super(HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile),

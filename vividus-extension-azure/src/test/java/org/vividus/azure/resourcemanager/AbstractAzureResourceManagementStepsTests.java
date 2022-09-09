@@ -37,7 +37,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
 import reactor.core.publisher.Mono;
@@ -53,7 +53,7 @@ class AbstractAzureResourceManagementStepsTests
     private static final String REQUEST_BODY = "{\"azure-resource\":\"body\"}";
 
     @Mock private HttpPipeline httpPipeline;
-    @Mock private SoftAssert softAssert;
+    @Mock private ISoftAssert softAssert;
     @Mock private VariableContext variableContext;
 
     @Test
@@ -130,7 +130,7 @@ class AbstractAzureResourceManagementStepsTests
 
     private static class TestSteps extends AbstractAzureResourceManagementSteps
     {
-        protected TestSteps(HttpPipeline httpPipeline, String resourceManagerEndpoint, SoftAssert softAssert,
+        protected TestSteps(HttpPipeline httpPipeline, String resourceManagerEndpoint, ISoftAssert softAssert,
                 VariableContext variableContext)
         {
             super(httpPipeline, resourceManagerEndpoint, softAssert, variableContext);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.vividus.context.VariableContext;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.kafka.KafkaSteps.QueueOperation;
 import org.vividus.testcontext.SimpleTestContext;
@@ -87,7 +87,7 @@ class KafkaStepsIntegrationTests
 
     @Mock private IPropertyParser propertyParser;
     @Mock private VariableContext variableContext;
-    @Mock private SoftAssert softAssert;
+    @Mock private ISoftAssert softAssert;
     private KafkaSteps kafkaSteps;
 
     @BeforeEach

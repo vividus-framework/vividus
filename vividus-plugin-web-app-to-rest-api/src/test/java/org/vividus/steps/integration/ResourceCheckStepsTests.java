@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import org.vividus.http.client.HttpResponse;
 import org.vividus.http.validation.ResourceValidator;
 import org.vividus.http.validation.model.CheckStatus;
 import org.vividus.reporter.event.AttachmentPublisher;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.testcontext.ContextCopyingExecutor;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.util.Sleeper;
@@ -151,7 +151,7 @@ class ResourceCheckStepsTests
     @Mock
     private HttpTestContext httpTestContext;
     @Mock
-    private SoftAssert softAssert;
+    private ISoftAssert softAssert;
     @Mock
     private WebApplicationConfiguration webApplicationConfiguration;
     @Mock
