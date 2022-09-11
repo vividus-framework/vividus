@@ -19,7 +19,7 @@ dependencies {
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
     testCompileOnly(group: 'junit', name: 'junit', version: '4.13.2')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.7.0')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.8.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-inline')
     testImplementation(group: 'com.github.powermock.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
