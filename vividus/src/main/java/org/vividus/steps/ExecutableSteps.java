@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Alias;
@@ -53,26 +54,30 @@ public class ExecutableSteps
     }
 
     /**
-     * Steps designed to perform steps if condition is true
-     * <b>if</b> condition is true
-     * Performs all steps. No steps will be performed
-     * in case of condition is false
+     * Steps designed to perform steps if condition is "true". No steps will be performed
+     * if condition is "false".
      * <br> Usage example:
      * <code>
-     * <br>When the condition 'true' is true I do
-     * <br>|step|
-     * <br>|When I compare against baseline with name 'test_composit1_step'|
-     * <br>|When I click on all elements by xpath './/a[@title='Close']'|
+     * <br>When the condition `true` is true I do
+     * <br>|step                    |
+     * <br>|When I do something     |
+     * <br>|When I do something else|
      * </code>
-     * @param condition verifiable condition
+     *
+     * @param condition      Supported conditions are: 'true', 'on', 'y', 't', 'yes', '1', 'false', 'off', 'n', 'f',
+     *                       'no' or '0' (case insensitive)
      * @param stepsToExecute examples table with steps to execute if condition is true
      */
     @SuppressWarnings("MagicNumber")
     @When(value = "the condition `$condition` is true I do$stepsToExecute", priority = 5)
     @Alias("the condition '$condition' is true I do$stepsToExecute")
-    public void performAllStepsIfConditionIsTrue(boolean condition, SubSteps stepsToExecute)
+    public void performAllStepsIfConditionIsTrue(String condition, SubSteps stepsToExecute)
     {
-        if (condition)
+        Boolean parsedCondition = BooleanUtils.toBooleanObject(condition.trim());
+        isTrue(parsedCondition != null,
+                "Invalid condition `%s`, supported conditions are: 'true', 'on', 'y', 't', 'yes', '1', 'false', "
+                        + "'off', 'n', 'f', 'no' or '0' (case insensitive)", condition);
+        if (parsedCondition)
         {
             stepsToExecute.execute(Optional.empty());
         }

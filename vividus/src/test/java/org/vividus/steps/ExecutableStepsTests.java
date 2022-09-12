@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,17 +53,32 @@ class ExecutableStepsTests
     @Mock private SubSteps subSteps;
     @InjectMocks private ExecutableSteps executableSteps;
 
-    @Test
-    void testTrue()
+    @ParameterizedTest
+    @ValueSource(strings = {"1", "t", "T", "true", " true", "true ", "TRUE", "on", "ON", "yes", "YES", "Y", "y"})
+    void testTrue(String condition)
     {
-        executableSteps.performAllStepsIfConditionIsTrue(true, subSteps);
+        executableSteps.performAllStepsIfConditionIsTrue(condition, subSteps);
         verify(subSteps).execute(Optional.empty());
     }
 
-    @Test
-    void testFalse()
+    @ParameterizedTest
+    @ValueSource(strings = {"0", "f", "F", "false", " false",  "FALSE", "FALSE ", "off", "OFF", "no", "NO", "N", "n"})
+    void testFalse(String condition)
     {
-        executableSteps.performAllStepsIfConditionIsTrue(false, subSteps);
+        executableSteps.performAllStepsIfConditionIsTrue(condition, subSteps);
+        verifyNoInteractions(subSteps);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"00", "fa", "Fa", "falsee", " ffalse", "o", "OF", "noo", "ONO", "NN", "11", "tr", "TRU",
+        "ye", "yyy", "sure", "np", "ok", "nope", "no way", "agree", "disagree", "approved", "not", "of"})
+    void shouldThrowAnExceptionInCaseOfUnSupportedCondition(String condition)
+    {
+        IllegalArgumentException iae =
+            assertThrows(IllegalArgumentException.class,
+                () -> executableSteps.performAllStepsIfConditionIsTrue(condition, subSteps));
+        assertEquals("Invalid condition `" + condition + "`, supported conditions are: 'true', 'on', 'y', 't', 'yes',"
+            + " '1', 'false', 'off', 'n', 'f', 'no' or '0' (case insensitive)", iae.getMessage());
         verifyNoInteractions(subSteps);
     }
 
