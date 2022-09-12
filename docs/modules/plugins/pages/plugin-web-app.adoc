@@ -330,7 +330,6 @@ web.driver.OPERA.binary-path=<path to opera>
 ----
 * <path to opera> - path to the Opera browser (for example, "C:/Programs/Opera/opera.exe")
 
-
 .^|web/desktop/safari
 |
 [source, properties]
