@@ -26,6 +26,7 @@ import org.vividus.ui.screenshot.ScreenshotParameters;
 public class WebScreenshotParameters extends ScreenshotParameters
 {
     private int nativeHeaderToCut;
+    private int nativeFooterToCut;
     private WebCutOptions webCutOptions;
     private Optional<WebElement> scrollableElement = Optional.empty();
     private CoordsProviderType coordsProvider;
@@ -76,8 +77,18 @@ public class WebScreenshotParameters extends ScreenshotParameters
         return nativeHeaderToCut;
     }
 
-    protected void setNativeHeaderToCut(int nativeHeaderToCut)
+    public void setNativeHeaderToCut(int nativeHeaderToCut)
     {
         this.nativeHeaderToCut = nativeHeaderToCut;
+    }
+
+    public int getNativeFooterToCut()
+    {
+        return nativeFooterToCut;
+    }
+
+    public void setNativeFooterToCut(int nativeFooterToCut)
+    {
+        this.nativeFooterToCut = nativeFooterToCut;
     }
 }

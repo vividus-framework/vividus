@@ -22,11 +22,6 @@ spotbugsIntegrationTest.auxClassPaths += integrationTest.classpath
 check.dependsOn integrationTest
 integrationTest.mustRunAfter test
 
-configurations.all {
-    exclude group: 'commons-logging'
-    exclude group: 'org.springframework', module: 'spring-jcl'
-}
-
 configurations.testImplementation {
     exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j18-impl'
 }
@@ -55,30 +50,32 @@ dependencies {
     implementation(group: 'org.slf4j', name: 'jul-to-slf4j', version: versions.slf4j)
 
     // Meta filters based on Groovy
-    implementation(group: 'org.apache.groovy', name: 'groovy', version: '4.0.4')
+    implementation(group: 'org.apache.groovy', name: 'groovy', version: '4.0.5')
 
     // Spring
-    implementation(group: 'org.springframework', name: 'spring-context', version: versions.spring)
-    implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
+    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.22')
+    implementation(group: 'org.springframework', name: 'spring-context')
+    implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
     implementation(group: 'commons-cli', name: 'commons-cli', version: '1.5.0')
     // jasypt
     implementation(group: 'org.jasypt', name: 'jasypt-spring4', version: '1.9.3')
 
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
-    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: versions.commonsCollections4)
-    implementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
-    implementation(group: 'com.google.guava', name: 'guava', version: versions.guava)
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')
+    implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.4')
+    implementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
+    implementation(group: 'com.google.guava', name: 'guava', version: '31.1-jre')
     implementation(group: 'io.github.classgraph', name: 'classgraph', version: '4.8.147')
     implementation(group:  'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.12')
     implementation(group: 'org.apache.commons', name: 'commons-jexl3', version: '3.2.1')
-    implementation(group: 'net.datafaker', name: 'datafaker', version: '1.4.0')
+    implementation(group: 'net.datafaker', name: 'datafaker', version: '1.5.0')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.0')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
-    testImplementation(group: 'org.mockito', name: 'mockito-inline', version: versions.mockito)
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
-    testImplementation(group: 'org.springframework', name: 'spring-test', version: versions.spring)
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.8.0')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-inline')
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '2.6.1')
+    testImplementation(group: 'org.springframework', name: 'spring-test')
 
     integrationTestImplementation project(':vividus-plugin-azure-data-factory')
     integrationTestImplementation project(':vividus-plugin-avro')
@@ -93,7 +90,8 @@ dependencies {
     integrationTestImplementation project(':vividus-plugin-visual')
     integrationTestImplementation project(':vividus-plugin-web-app-to-rest-api')
     integrationTestImplementation project(':vividus-plugin-web-app')
+    integrationTestImplementation project(':vividus-plugin-winrm')
     integrationTestImplementation project(':vividus-plugin-xml')
-    integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.8.2')
     integrationTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
 }

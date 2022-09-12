@@ -47,7 +47,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
 import reactor.core.publisher.Mono;
@@ -63,7 +63,7 @@ class EventGridManagementStepsTests
     private static final String VAR_NAME = "varName";
 
     @Mock private TokenCredential tokenCredential;
-    @Mock private SoftAssert softAssert;
+    @Mock private ISoftAssert softAssert;
     @Mock private VariableContext variableContext;
 
     private Stream<Named<BiConsumer<Consumer<EventGridManagementSteps>, String>>> createStreamOfTests()

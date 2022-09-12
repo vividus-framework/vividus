@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jasypt.encryption.StringEncryptor;
+import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 
 public class PropertiesDecryptor
 {
@@ -41,7 +42,17 @@ public class PropertiesDecryptor
             Object value = entry.getValue();
             if (value instanceof String)
             {
-                entry.setValue(decrypt((String) value));
+                String stringValue = (String) value;
+                try
+                {
+                    entry.setValue(decrypt(stringValue));
+                }
+                catch (EncryptionOperationNotPossibleException e)
+                {
+                    String errorMessage = String.format("Unable to decrypt the value '%s' of property with name '%s'",
+                            stringValue, entry.getKey());
+                    throw new DecryptionFailedException(errorMessage, e);
+                }
             }
         }
         return properties;

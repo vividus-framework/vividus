@@ -156,11 +156,29 @@ where:
 |`SIMPLE` `VIEWPORT_PASTING`
 |Screenshot shooting strategy name (`VIEWPORT_PASTING` by default)
 
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-top`
+|size in pixels
+|The size of top part of the final screenshot to cut.
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-bottom`
+|size in pixels
+|The size of bottom part of the final screenshot to cut.
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-left`
+|size in pixels
+|The size of left part of the final screenshot to cut.
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-right`
+|size in pixels
+|The size of right part of the final screenshot to cut.
+
 |`web.screenshot.strategy=YOUR_STRATEGY_NAME`
 |string
 |After configuration necessary properties use this one to enable your custom strategy
 
 |===
+
+IMPORTANT: Mind that `cut-***` modifications applied to the final screenshot, for example final stitched screenshot will be cut for the viewport-pasting strategy.
 
 ==== Step based configuration
 
@@ -176,16 +194,16 @@ When I $visualAction baseline with `$baselineName` using screenshot configuratio
 When I $visualAction baseline with `$baselineName` ignoring:$ignoringElement using screenshot configuration:$screenshotConfiguration
 ----
 
-==== *Examples of usage property based configuration:*
+==== *Examples of usage property based web configuration:*
 
 [source,gherkin]
 ----
-web.screenshot.strategy.bombaysapphire.web-header-to-cut=80
-web.screenshot.strategy.bombaysapphire.web-footer-to-cut=0
-web.screenshot.strategy.bombaysapphire.scrollable-element=By.cssSelector(.page__inner)
-web.screenshot.strategy.bombaysapphire.scroll-timeout=PT1S
-web.screenshot.strategy.bombaysapphire.shooting-strategy=SIMPLE
-web.screenshot.strategy=bombaysapphire
+web.screenshot.strategy.custom.web-header-to-cut=80
+web.screenshot.strategy.custom.web-footer-to-cut=0
+web.screenshot.strategy.custom.scrollable-element=By.cssSelector(.page__inner)
+web.screenshot.strategy.custom.scroll-timeout=PT1S
+web.screenshot.strategy.custom.shooting-strategy=SIMPLE
+web.screenshot.strategy=custom
 ----
 
 ==== *Examples of usage step based configuration:*
@@ -216,6 +234,7 @@ image::example.png[Difference between native/web footer/header image]
 |`boolean`
 |`true`
 |Downscale checkpoint image according to a device https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio[DPR] value
+
 |===
 
 Please see the image to get a clue about difference between original and downscaled images.
@@ -235,9 +254,25 @@ where:
 |Acceptable values
 |Description
 
-|`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-footer-to-cut`
+|~`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-footer-to-cut`~
+|~size in pixels~
+|~Native footer to cut.~ *DEPRECATED* use `mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-bottom`.
+
+|`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-top`
 |size in pixels
-|Native footer to cut
+|The size of top part of the final screenshot to cut.
+
+|`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-bottom`
+|size in pixels
+|The size of bottom part of the final screenshot to cut.
+
+|`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-left`
+|size in pixels
+|The size of left part of the final screenshot to cut.
+
+|`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-right`
+|size in pixels
+|The size of right part of the final screenshot to cut.
 
 |`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.shooting-strategy`
 |`SIMPLE`
@@ -254,8 +289,12 @@ where:
 [source,gherkin]
 ----
 mobile.screenshot.strategy.bombaysapphire.native-footer-to-cut=100
-mobile.screenshot.strategy.bombaysapphire.shooting-strategy=SIMPLE
-mobile.screenshot.strategy=bombaysapphire
+mobile.screenshot.strategy.custom.cut-top=100
+mobile.screenshot.strategy.custom.cut-left=100
+mobile.screenshot.strategy.custom.cut-right=100
+mobile.screenshot.strategy.custom.cut-bottom=100
+mobile.screenshot.strategy.custom.shooting-strategy=SIMPLE
+mobile.screenshot.strategy=custom
 ----
 
 ==== *Examples of usage step based configuration:*
@@ -263,7 +302,7 @@ mobile.screenshot.strategy=bombaysapphire
 [source,gherkin]
 ----
 When I <action> baseline with `scrollable-element-context` using screenshot configuration:
-|nativeFooterToCut|shootingStrategy|
+|cutTop           |shootingStrategy|
 |51               |SIMPLE          |
 ----
 
@@ -358,11 +397,9 @@ When I $actionType baseline with name `$name` using screenshot configuration:$sc
 
 * `$actionType` - The {visual-testing-actions}.
 * `$name` - The name of baseline.
-* `$screenshotConfiguration` - The screenshot configurations.
+* `$screenshotConfiguration` - The screenshot configuration:
 
-include::partial$web-screenshot-configuration.adoc[]
-
-include::partial$mobile-screenshot-configuration.adoc[]
+include::partial$screenshot-configuration.adoc[]
 
 .Perform visual check on establish with specified configuration
 [source,gherkin]
@@ -384,11 +421,9 @@ When I $actionType baseline with name `$name` using storage `$storage` and scree
 * `$actionType` - The {visual-testing-actions}.
 * `$name` - The name of baseline.
 * `$storage` - The name of storage. Ony `filesystem` available by the default.
-* `$screenshotConfiguration` - The screenshot configurations.
+* `$screenshotConfiguration` - The screenshot configuration:
 
-include::partial$web-screenshot-configuration.adoc[]
-
-include::partial$mobile-screenshot-configuration.adoc[]
+include::partial$screenshot-configuration.adoc[]
 
 .Perform visual check on establish with specified configuration and baseline storage
 [source,gherkin]
@@ -505,11 +540,9 @@ When I $actionType baseline with name `$name` ignoring:$ignoredElements using sc
 * `$actionType` - The {visual-testing-actions}.
 * `$name` - The name of baseline.
 * `$checkSettings` - The examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`.
-* `$screenshotConfiguration` - The screenshot configurations.
+* `$screenshotConfiguration` - The screenshot configuration:
 
-include::partial$web-screenshot-configuration.adoc[]
-
-include::partial$mobile-screenshot-configuration.adoc[]
+include::partial$screenshot-configuration.adoc[]
 
 .Perform visual check on establish with ignoring options and specified configuration
 [source,gherkin]
@@ -537,9 +570,7 @@ When I $actionType baseline with name `$name` using storage `$storage` and ignor
 * `$checkSettings` - The examples table of `ELEMENT`, `AREA`, `ACCEPTABLE_DIFF_PERCENTAGE` or `REQUIRED_DIFF_PERCENTAGE`.
 * `$screenshotConfiguration` - The screenshot configurations.
 
-include::partial$web-screenshot-configuration.adoc[]
-
-include::partial$mobile-screenshot-configuration.adoc[]
+include::partial$screenshot-configuration.adoc[]
 
 .Perform visual check on establish with ignoring options and specified configuration and baseline storage
 [source,gherkin]

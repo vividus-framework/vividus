@@ -234,7 +234,6 @@
     <bean class="org.vividus.ui.web.listener.WebSourceCodePublishingOnFailureListener" parent="abstractSourceCodePublishngOnFailureListener" lazy-init="false" />
 
     <bean class="org.vividus.selenium.BrowserWindowSizeListener" lazy-init="false">
-        <property name="runContext" ref="runContext" />
          <property name="webDriverManager" ref="webDriverManager" />
     </bean>
 
@@ -242,8 +241,6 @@
         <constructor-arg index="0" value="${selenium.grid.enabled}"/>
         <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers"/>
     </bean>
-
-    <bean id="webDriverManagerContext" class="org.vividus.selenium.WebDriverManagerContext" />
 
     <bean id="delegatingWebApplicationListener-WebApplicationListeners" class="org.vividus.spring.ListMergerFactoryBean">
         <property name="lists">

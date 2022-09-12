@@ -21,9 +21,21 @@ import java.util.stream.Stream;
 
 public abstract class AbstractStepsContainer
 {
+    private List<Step> beforeSystemScenarioSteps;
     private List<Step> beforeUserScenarioSteps;
     private List<Step> steps;
     private List<Step> afterUserScenarioSteps;
+    private List<Step> afterSystemScenarioSteps;
+
+    public List<Step> getBeforeSystemScenarioSteps()
+    {
+        return beforeSystemScenarioSteps;
+    }
+
+    public void setBeforeSystemScenarioSteps(List<Step> beforeSystemScenarioSteps)
+    {
+        this.beforeSystemScenarioSteps = beforeSystemScenarioSteps;
+    }
 
     public List<Step> getBeforeUserScenarioSteps()
     {
@@ -55,8 +67,19 @@ public abstract class AbstractStepsContainer
         this.afterUserScenarioSteps = afterScenarioSteps;
     }
 
+    public List<Step> getAfterSystemScenarioSteps()
+    {
+        return afterSystemScenarioSteps;
+    }
+
+    public void setAfterSystemScenarioSteps(List<Step> afterSystemScenarioSteps)
+    {
+        this.afterSystemScenarioSteps = afterSystemScenarioSteps;
+    }
+
     public Stream<Step> createStreamOfAllSteps()
     {
-        return Stream.of(getBeforeUserScenarioSteps(), getSteps(), getAfterUserScenarioSteps()).flatMap(List::stream);
+        return Stream.of(getBeforeSystemScenarioSteps(), getBeforeUserScenarioSteps(), getSteps(),
+                getAfterUserScenarioSteps(), getAfterSystemScenarioSteps()).flatMap(List::stream);
     }
 }

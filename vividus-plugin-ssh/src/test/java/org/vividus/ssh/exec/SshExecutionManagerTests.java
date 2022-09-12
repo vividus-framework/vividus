@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.vividus.ssh.CommandExecutionException;
 import org.vividus.ssh.Commands;
-import org.vividus.ssh.ServerConfiguration;
+import org.vividus.ssh.SshConnectionParameters;
 
 class SshExecutionManagerTests
 {
@@ -49,14 +49,14 @@ class SshExecutionManagerTests
     {
         SshExecutor<? extends Channel> executor = mock(executorClass);
         when(executor.getChannelType()).thenCallRealMethod();
-        ServerConfiguration serverConfiguration = new ServerConfiguration();
-        serverConfiguration.setChannelType(Optional.ofNullable(channelType));
+        SshConnectionParameters sshConnectionParameters = new SshConnectionParameters();
+        sshConnectionParameters.setChannelType(Optional.ofNullable(channelType));
 
         SshOutput sshOutput = new SshOutput();
-        when(executor.execute(serverConfiguration, COMMANDS)).thenReturn(sshOutput);
+        when(executor.execute(sshConnectionParameters, COMMANDS)).thenReturn(sshOutput);
         SshOutputPublisher outputPublisher = mock(SshOutputPublisher.class);
         SshExecutionManager executionManager = new SshExecutionManager(List.of(executor), outputPublisher);
-        SshOutput actual = executionManager.run(serverConfiguration, COMMANDS);
+        SshOutput actual = executionManager.run(sshConnectionParameters, COMMANDS);
         assertEquals(sshOutput, actual);
         verify(outputPublisher).publishOutput(sshOutput);
     }
@@ -66,14 +66,14 @@ class SshExecutionManagerTests
     {
         SshShellExecutor executor = mock(SshShellExecutor.class);
         when(executor.getChannelType()).thenReturn("invalid");
-        ServerConfiguration serverConfiguration = new ServerConfiguration();
+        SshConnectionParameters sshConnectionParameters = new SshConnectionParameters();
 
         SshOutput sshOutput = new SshOutput();
-        when(executor.execute(serverConfiguration, COMMANDS)).thenReturn(sshOutput);
+        when(executor.execute(sshConnectionParameters, COMMANDS)).thenReturn(sshOutput);
         SshOutputPublisher outputPublisher = mock(SshOutputPublisher.class);
         SshExecutionManager executionManager = new SshExecutionManager(List.of(executor), outputPublisher);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> executionManager.run(serverConfiguration, COMMANDS));
+                () -> executionManager.run(sshConnectionParameters, COMMANDS));
         assertEquals("Unsupported channel type: exec", exception.getMessage());
         verifyNoInteractions(outputPublisher);
     }

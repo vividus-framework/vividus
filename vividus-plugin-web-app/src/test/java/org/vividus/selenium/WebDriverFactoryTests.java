@@ -70,8 +70,6 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.driver.TextFormattingWebDriver;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
-import org.vividus.selenium.manager.WebDriverManagerParameter;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
 
@@ -119,7 +117,7 @@ class WebDriverFactoryTests
     private IProxy proxy;
 
     @Mock
-    private IWebDriverManagerContext webDriverManagerContext;
+    private WebDriverStartContext webDriverStartContext;
 
     private WebDriverFactory webDriverFactory;
 
@@ -127,7 +125,7 @@ class WebDriverFactoryTests
     void beforeEach()
     {
         webDriverFactory = new WebDriverFactory(remoteWebDriverFactory, propertyParser,
-                new JsonUtils(), timeoutConfigurer, proxy, webDriverManagerContext);
+                new JsonUtils(), timeoutConfigurer, proxy, webDriverStartContext);
     }
 
     @ParameterizedTest
@@ -230,7 +228,7 @@ class WebDriverFactoryTests
         webDriverFactory.setWebDriverType(webDriverType);
         lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
                 .thenReturn(null);
-        when(webDriverManagerContext.getParameter(WebDriverManagerParameter.COMMAND_LINE_ARGUMENTS))
+        when(webDriverStartContext.get(WebDriverStartParameters.COMMAND_LINE_ARGUMENTS))
                 .thenReturn(ARGS);
         DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
         when(webDriverType.getWebDriver(eq(new DesiredCapabilities()),
@@ -251,7 +249,7 @@ class WebDriverFactoryTests
         when(webDriverType.isCommandLineArgumentsSupported()).thenReturn(Boolean.FALSE);
         lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
                 .thenReturn(null);
-        when(webDriverManagerContext.getParameter(WebDriverManagerParameter.COMMAND_LINE_ARGUMENTS)).thenReturn(ARG_1);
+        when(webDriverStartContext.get(WebDriverStartParameters.COMMAND_LINE_ARGUMENTS)).thenReturn(ARG_1);
         DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
             () -> webDriverFactory.getWebDriver(desiredCapabilities));

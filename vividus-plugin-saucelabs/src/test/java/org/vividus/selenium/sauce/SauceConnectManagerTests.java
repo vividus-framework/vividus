@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,35 +30,26 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 import com.saucelabs.ci.sauceconnect.SauceTunnelManager;
+import com.saucelabs.saucerest.DataCenter;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.verification.VerificationMode;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
 
 @RunWith(PowerMockRunner.class)
-@PowerMockRunnerDelegate(MockitoJUnitRunner.class)
 public class SauceConnectManagerTests
 {
     private static final String OPTIONS = "options";
     private static final String USERNAME = "user%";
     private static final String USERKEY = "key";
+    private static final String DATA_CENTER = "EU";
 
-    @Mock
     private SauceTunnelManager sauceTunnelManager;
-
-    @Mock
-    private SauceConnectOptions options;
-
-    @InjectMocks
     private SauceConnectManager sauceConnectManager;
 
     private final TestContext context = new SimpleTestContext();
@@ -66,9 +57,8 @@ public class SauceConnectManagerTests
     @Before
     public void before()
     {
-        sauceConnectManager.setSauceLabsUsername(USERNAME);
-        sauceConnectManager.setSauceLabsAccessKey(USERKEY);
-        sauceConnectManager.setTestContext(context);
+        sauceTunnelManager = mock(SauceTunnelManager.class);
+        sauceConnectManager = new SauceConnectManager(USERNAME, USERKEY, DataCenter.EU, sauceTunnelManager, context);
     }
 
     @Test
@@ -76,19 +66,21 @@ public class SauceConnectManagerTests
     public void testStart() throws Exception
     {
         mockSocket();
+        var options = mock(SauceConnectOptions.class);
         when(options.build(anyString())).thenReturn(OPTIONS);
         sauceConnectManager.start(options);
-        verify(sauceTunnelManager).openConnection(USERNAME, USERKEY, 1, null, OPTIONS, null, Boolean.TRUE, null);
+        verify(sauceTunnelManager).openConnection(USERNAME, USERKEY, DATA_CENTER, 1, null, OPTIONS, null, Boolean.TRUE,
+                null);
     }
 
     @Test
     @PrepareForTest(SauceConnectManager.class)
     public void testStartWhenErrorAtPortAllocation() throws Exception
     {
-        IOException ioException = new IOException();
+        var options = mock(SauceConnectOptions.class);
+        var ioException = new IOException();
         whenNew(ServerSocket.class).withArguments(0).thenThrow(ioException);
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
-            () -> sauceConnectManager.start(options));
+        var exception = assertThrows(IllegalStateException.class, () -> sauceConnectManager.start(options));
         assertEquals(ioException, exception.getCause());
     }
 
@@ -97,10 +89,10 @@ public class SauceConnectManagerTests
     public void testStartTwice() throws Exception
     {
         mockSocket();
-        startConnection();
-        String tunnelId = sauceConnectManager.start(options);
-        verify(sauceTunnelManager, times(1)).openConnection(USERNAME, USERKEY, 1, null, OPTIONS, null, Boolean.TRUE,
-                null);
+        var options = startConnection();
+        var tunnelId = sauceConnectManager.start(options);
+        verify(sauceTunnelManager, times(1)).openConnection(USERNAME, USERKEY, DATA_CENTER, 1, null, OPTIONS, null,
+                Boolean.TRUE, null);
         assertEquals(tunnelId, sauceConnectManager.start(options));
     }
 
@@ -110,9 +102,8 @@ public class SauceConnectManagerTests
     {
         mockSocket();
         startConnection();
-        SauceConnectOptions options2 = mock(SauceConnectOptions.class);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> sauceConnectManager.start(options2));
+        var options2 = mock(SauceConnectOptions.class);
+        var exception = assertThrows(IllegalArgumentException.class, () -> sauceConnectManager.start(options2));
         assertEquals("Only one SauceConnect tunnel is allowed within one thread", exception.getMessage());
     }
 
@@ -149,20 +140,24 @@ public class SauceConnectManagerTests
     public void testStartStopStart() throws Exception
     {
         mockSocket();
+        var options = mock(SauceConnectOptions.class);
         when(options.build(anyString())).thenReturn(OPTIONS);
         sauceConnectManager.start(options);
         sauceConnectManager.stop();
         sauceConnectManager.start(options);
-        verify(sauceTunnelManager, times(2)).openConnection(USERNAME, USERKEY, 1, null, OPTIONS, null, Boolean.TRUE,
-                null);
+        verify(sauceTunnelManager, times(2)).openConnection(USERNAME, USERKEY, DATA_CENTER, 1, null, OPTIONS, null,
+                Boolean.TRUE, null);
         verifyStop(times(1));
     }
 
-    private void startConnection() throws IOException
+    private SauceConnectOptions startConnection() throws IOException
     {
+        var options = mock(SauceConnectOptions.class);
         when(options.build(anyString())).thenReturn(OPTIONS);
         sauceConnectManager.start(options);
-        verify(sauceTunnelManager).openConnection(USERNAME, USERKEY, 1, null, OPTIONS, null, Boolean.TRUE, null);
+        verify(sauceTunnelManager).openConnection(USERNAME, USERKEY, DATA_CENTER, 1, null, OPTIONS, null, Boolean.TRUE,
+                null);
+        return options;
     }
 
     private void verifyStop(VerificationMode mode)
@@ -172,7 +167,7 @@ public class SauceConnectManagerTests
 
     private void mockSocket() throws Exception
     {
-        ServerSocket socket = mock(ServerSocket.class);
+        var socket = mock(ServerSocket.class);
         whenNew(ServerSocket.class).withArguments(0).thenReturn(socket);
         when(socket.getLocalPort()).thenReturn(1);
     }

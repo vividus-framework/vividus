@@ -56,7 +56,7 @@ class ExcelFileStepsTests
     @Test
     void shouldCreateExcelFileContainigSheetWithContent() throws IOException
     {
-        fileSteps.createExcelFileContainigSheetWithContent(CONTENT, SCOPES, PATH);
+        fileSteps.createExcelFileContainingSheetWithContent(CONTENT, SCOPES, PATH);
         verifySheet(DEFAULT_SHEET_NAME);
     }
 
@@ -64,7 +64,7 @@ class ExcelFileStepsTests
     void shouldCreateExcelFileContainigSheetWithNameAndContent() throws IOException
     {
         String sheetName = "my sheet name";
-        fileSteps.createExcelFileContainigSheetWithNameAndContent(sheetName, CONTENT, SCOPES, PATH);
+        fileSteps.createExcelFileContainingSheetWithNameAndContent(sheetName, CONTENT, SCOPES, PATH);
         verifySheet(sheetName);
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,23 +29,21 @@ import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
 import org.vividus.proxy.IProxy;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
-import org.vividus.selenium.manager.WebDriverManagerParameter;
 
 public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriverFactory
 {
     private final boolean remoteExecution;
-    private final IWebDriverManagerContext webDriverManagerContext;
+    private final WebDriverStartContext webDriverStartContext;
     private final RunContext runContext;
     private final IProxy proxy;
     private final Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers;
 
-    public AbstractVividusWebDriverFactory(boolean remoteExecution, IWebDriverManagerContext webDriverManagerContext,
+    protected AbstractVividusWebDriverFactory(boolean remoteExecution, WebDriverStartContext webDriverStartContext,
             RunContext runContext, IProxy proxy,
             Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers)
     {
         this.remoteExecution = remoteExecution;
-        this.webDriverManagerContext = webDriverManagerContext;
+        this.webDriverStartContext = webDriverStartContext;
         this.runContext = runContext;
         this.proxy = proxy;
         this.desiredCapabilitiesConfigurers = desiredCapabilitiesConfigurers;
@@ -74,9 +72,8 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
             configurers -> configurers.forEach(configurer -> configurer.configure(desiredCapabilities)));
 
         DesiredCapabilities mergedCapabilities = merge(desiredCapabilities,
-                webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES));
+                webDriverStartContext.get(WebDriverStartParameters.DESIRED_CAPABILITIES));
 
-        webDriverManagerContext.reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
         RunningStory runningStory = runContext.getRunningStory();
         if (runningStory != null)
         {

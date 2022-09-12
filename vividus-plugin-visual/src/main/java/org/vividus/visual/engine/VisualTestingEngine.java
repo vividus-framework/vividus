@@ -141,7 +141,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
             double diffPercentage)
     {
         ImageDiffer differ = new ImageDiffer().withDiffMarkupPolicy(
-            diffMarkupPolicyFactory.create(height, width, (int) diffPercentage));
+            diffMarkupPolicyFactory.create(height, width, diffPercentage));
         return differ.makeDiff(expected, actual);
     }
 

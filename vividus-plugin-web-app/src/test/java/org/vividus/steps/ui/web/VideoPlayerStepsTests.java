@@ -32,7 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
 import org.vividus.context.VariableContext;
-import org.vividus.steps.ui.validation.BaseValidations;
+import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.web.action.VideoPlayerActions;
 
@@ -42,7 +42,7 @@ class VideoPlayerStepsTests
     private static final String VIDEO_PLAYER = "Video player";
     private static final Locator LOCATOR = mock(Locator.class);
 
-    @Mock private BaseValidations baseValidations;
+    @Mock private IBaseValidations baseValidations;
 
     @Mock private VideoPlayerActions videoPlayerActions;
 

@@ -1,8 +1,8 @@
 project.description = 'Vividus extension for selenium'
 
  ext {
-     seleniumVersion = '4.3.0'
-     browserupProxyVersion = '2.2.1'
+     seleniumVersion = '4.4.0'
+     browserupProxyVersion = '2.2.2'
 }
 
  dependencies {
@@ -16,9 +16,9 @@ project.description = 'Vividus extension for selenium'
      api(group: 'org.seleniumhq.selenium', name: 'selenium-api', version: "${seleniumVersion}")
      api(group: 'org.seleniumhq.selenium', name: 'selenium-support', version: "${seleniumVersion}")
      api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver', version: "${seleniumVersion}")
-     api(group: 'io.appium', name: 'java-client', version: '8.1.1')
+     api(group: 'io.appium', name: 'java-client', version: '8.2.0')
 
-     api(group: 'com.github.pazone', name: 'ashot', version: '4f3d928')
+     api(group: 'com.github.pazone', name: 'ashot', version: 'a8335db')
 
      api(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-core', version: "${browserupProxyVersion}")
      implementation(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-mitm', version: "${browserupProxyVersion}")
@@ -27,17 +27,19 @@ project.description = 'Vividus extension for selenium'
      implementation(group: 'com.google.zxing', name: 'core')
      implementation(group: 'com.google.zxing', name: 'javase')
 
-     implementation(group: 'javax.inject', name: 'javax.inject', version: versions.javaxInject)
+     implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
      implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
-     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
-     implementation(group: 'org.springframework', name: 'spring-core', version: versions.spring)
+     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')
+     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.22')
+     implementation(group: 'org.springframework', name: 'spring-core')
 
      compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
-     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
-     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
-     testImplementation(group: 'org.mockito', name: 'mockito-inline', version: versions.mockito)
-     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
-     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.0')
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
+     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.8.0')
+     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+     testImplementation(group: 'org.mockito', name: 'mockito-inline')
+     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '2.6.1')
  }

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.context.SshTestContext;
+import org.vividus.ssh.context.SshTestContext;
 import org.vividus.ssh.exec.SshOutput;
 import org.vividus.variable.DynamicVariableCalculationResult;
 

@@ -201,7 +201,7 @@ a|The command line (CLI) arguments to use when starting browser.
 
 |===
 
-==== How to configure user preferences for Chrome browser?
+=== How to configure user preferences for Chrome browser?
 In addition to the command line arguments, user preferences (see the _Preferences_ file in Chrome's user data directory or open `chrome://prefs-internals/` link in Chrome browser for examples) can be customised.
 
 Here is an example how to configure third-party cookies behaviour.
@@ -253,6 +253,117 @@ include::partial$dynamic-variables-ui.adoc[]
 
 == Profiles
 
+Profiles allow to choose or parameterize browser that tests run on. See more details on the profiles and nesting strategy on the xref:ROOT:tests-configuration.adoc#_profiles[configuration page].
+
+Web-application plugin contains significant amount of built-in profiles. They can be found after plugin installation by the following path in Eclipse IDE:
+[source, DIR]
+----
+Referenced Libraries -> vividus-plugin-web-app-X.Y.Z -> properties -> profile -> web
+----
+
+Let's go through the structure and review its content.
+
+=== Desktop
+
+General place for web profiles. Each of the directory contains browser related properties. This is a place for adjustments for your browser. Add there any properties you need: screen resolution, path to webdriver or to a custom browser.
+[cols="~a,~a", options="header"]
+|===
+|Profile
+|Example of properties
+
+.^|web/desktop/chrome
+|
+[source, properties]
+----
+selenium.browser=chrome
+selenium.grid.platform-name=Windows
+selenium.grid.platform-version=10
+web.driver.chrome.command-line-arguments=--disable-auto-reload
+web.driver.chrome.binary-path=/path/to/custom/chrome
+----
+
+.^|web/desktop/edge.chromium
+|
+[source, properties]
+----
+selenium.browser=edge_chromium
+selenium.grid.platform-name=macOS
+selenium.grid.platform-version=12.5
+selenium.grid.capabilities.browserName=MicrosoftEdge
+----
+
+.^|web/desktop/firefox
+|
+[source, properties]
+----
+selenium.browser=firefox
+selenium.grid.platform-name=Windows
+selenium.grid.platform-version=10
+web.driver.firefox.command-line-arguments=--turbo
+----
+
+.^|web/desktop/iexplore
+|
+[source, properties]
+----
+selenium.browser=iexplore
+selenium.grid.capabilities.browserName=internet explorer
+web.driver.iexplore.command-line-arguments=-private
+selenium.grid.capabilities.iedriverVersion=3.141.0
+selenium.grid.platform-name=Windows
+selenium.grid.platform-version=7
+----
+
+.^|web/desktop/opera
+|
+[source, properties]
+----
+selenium.browser=opera
+selenium.grid.screen-resolution=1920x1080
+selenium.grid.platform-name=Windows
+selenium.grid.platform-version=10
+----
+To run tests in Opera browser locally it is required to set the following property:
+[source,properties]
+----
+web.driver.OPERA.binary-path=<path to opera>
+----
+* <path to opera> - path to the Opera browser (for example, "C:/Programs/Opera/opera.exe")
+
+
+.^|web/desktop/safari
+|
+[source, properties]
+----
+selenium.browser=safari
+selenium.grid.platform-name=macOS
+selenium.grid.platform-version=11.00
+----
+
+|===
+
+==== Mobile emulation
+
+. Built-in devices
++
+Chrome allows to emulate view on mobile devices using https://developer.chrome.com/docs/devtools/device-mode/[Device mode]. Such feature is reflected in `mobile_emulation` subdirectory in Profiles. Use device-name property to mention target device:
++
+[source, properties]
+----
+web.driver.CHROME.mobile-emulation.device-name=DEVICE_NAME
+----
+Available for emulation devices you can find in the https://developer.chrome.com/docs/devtools/device-mode/#device[Dimensions list] in chrome.
+
+. Custom devices
++
+In case you need to use https://developer.chrome.com/docs/devtools/device-mode/#responsive[Responsive Viewport Mode] and set up your own device, update the screen resolution in the following properties:
++
+[source, properties]
+----
+web.driver.CHROME.mobile-emulation.width=1440
+web.driver.CHROME.mobile-emulation.height=900
+----
+
 === Docker
 The profile can be enabled by adding `web/docker` to `configuration.profiles` property. The profile should be used together with the browser profile.
 
@@ -264,15 +375,50 @@ WARNING: Default selenium grid URL is set to `selenium.grid.url=http://localhost
 confgiguraiton.profiles=web/docker,web/desktop/chrome
 ----
 
-=== Opera browser
-For using Opera browser (web/desktop/opera) it is mandatory property:
+=== Headless
 
-[source,properties]
-----
-web.driver.OPERA.binary-path=<path to opera>
-----
+https://en.wikipedia.org/wiki/Headless_browser[Headless mode] is a functionality that allows the execution of a full version of the browser while controlling it programmatically. It can be used without dedicated graphics or display, meaning that it runs without its “head”, the Graphical User Interface (GUI). Update properties in this directory to adjust your headless automation.
 
-* <path to opera> - path to the Opera browser (for example, "C:/Programs/Opera/opera.exe")
+=== Phone
+
+Contains phone related properties, for android and iOS devices, including portrait and landscape orientations.
+
+[cols="~a,~a", options="header"]
+|===
+|Profile
+|Example of properties
+
+.^|web/phone
+|
+[source, properties]
+----
+selenium.grid.capabilities.platform=Android
+selenium.grid.capabilities.platformVersion=11.0
+selenium.grid.capabilities.deviceOrientation=portrait
+selenium.grid.capabilities.appiumVersion=1.21.1
+----
+|===
+
+=== Tablet
+
+Similar to the xref:plugins:plugin-web-app.adoc#_phone[Phone] directory, but is designed for tablets properties.
+
+[cols="~a,~a", options="header"]
+|===
+|Profile
+|Example of properties
+
+.^|web/tablet
+|
+[source, properties]
+----
+selenium.grid.capabilities.platformName=iOS
+selenium.grid.capabilities.platformVersion=14.0
+selenium.grid.capabilities.deviceName=iPad
+selenium.grid.capabilities.deviceOrientation=landscape
+selenium.grid.capabilities.appiumVersion=1.21.1
+----
+|===
 
 == Steps
 
@@ -461,22 +607,21 @@ Executes the sequence of web actions
 When I execute sequence of actions: $actions
 ----
 * `$actions` - table of actions to execute
-
-==== Possible actions
-
++
+.Possible actions
 [cols="1,5,3", options="header"]
 |===
 
-|Type
-|Argument
-|Example
+|`type`
+|`argument`
+|Argument example
 
 |DOUBLE_CLICK
-|Search attribute or empty value
+|Element locator or empty
 |By.linkUrl(http://httpbin.org)
 
 |CLICK_AND_HOLD
-|Search attribute or empty value
+|Element locator or empty
 |By.linkText(Click me)
 
 |MOVE_BY_OFFSET
@@ -484,36 +629,36 @@ When I execute sequence of actions: $actions
 |(10, 15) where *x* is 10 and *y* is 15
 
 |RELEASE
-|Search attribute or empty value
+|Element locator or empty
 |By.tagName(div)
 
 |ENTER_TEXT
-|Text
+|Text to type
 |Minsk City
 
 |CLICK
-|Search attribute or empty value
+|Element locator or empty
 |By.caseSensitiveText(Done)
 
 |PRESS_KEYS
-|Press https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys]
+|Press and release any of https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys]
 |BACK_SPACE
 
 |KEY_DOWN
-|Press https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] SHIFT, ALT or CONTROL simultaneously
+|Press any of https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] one by one
 |CONTROL,SHIFT,ALT
 
 |KEY_UP
-|Release https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] SHIFT, ALT or CONTROL simultaneously
+|Release any of https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] one by one
 |CONTROL,SHIFT,ALT
 
 |MOVE_TO
-|Search attribute
+|Element locator
 |By.id(username)
 
 |===
 
-.ActionSteps.story
+.Execute various web-actions
 [source,gherkin]
 ----
 When I execute sequence of actions:
@@ -533,6 +678,31 @@ When I execute sequence of actions:
 |KEY_UP        |CONTROL,SHIFT                           |
 |MOVE_TO       |By.id(name)                             |
 ----
+
+[TIP]
+====
+This step can be used to perform clipboard interactions.
+
+.Select all text in the focused field and copy it to the clipboard on Windows
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type      |argument  |
+|KEY_DOWN  |CONTROL, a|
+|KEY_UP    |a, CONTROL|
+|KEY_DOWN  |CONTROL, c|
+|KEY_UP    |c, CONTROL|
+----
+
+.Paste text from the clipboard to the focused field on MacOS
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type      |argument  |
+|KEY_DOWN  |COMMAND, v|
+|KEY_UP    |v, COMMAND|
+----
+====
 
 include::partial$generic-ui-steps.adoc[]
 
@@ -688,7 +858,7 @@ Then cookie with name `JSESSIONID` is not set
 
 ==== Set cookies
 
-Adds the cookies provided in the input ExamplesTable. It's allowed to add the
+Adds the cookies provided in the input xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]. It's allowed to add the
 cookies for the current domain only: make sure the web browser is opened at the
 expected domain. The actions performed by the step:
 
@@ -699,7 +869,7 @@ expected domain. The actions performed by the step:
 ----
 When I set all cookies for current domain:$parameters
 ----
-* `$parameters` - The parameters of the cookies to set as ExamplesTable:
+* `$parameters` - The parameters of the cookies to set as xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
 +
 [cols="1,2", options="header"]
 |===
@@ -1010,7 +1180,7 @@ When I find $comparisonRule '$number' elements by $locator and for each element 
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
 * `$number` - The number of elements to find.
 * `$locator` - <<_locator>>.
-* `$stepsToExecute` - The `ExamplesTable` with a single column containing the steps to execute.
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
 
 .Script type check
 [source,gherkin]
@@ -1056,25 +1226,6 @@ Given I am on the main application page
 ----
 
 === Code steps
-==== Execute JavaScript and save result.
-
-https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html[Executes JavaScript] code and saves result into variable.
-
-[source,gherkin]
-----
-When I execute javascript `$jsCode` and save result to $scopes variable `$variableName`
-----
-* `$jsCode` - Any JavaScript code. In order to save a result https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/return[return] statement should be used.
-* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to save the cookie value.
-
-.Validate timings
-[source,gherkin]
-----
-Given I am on a page with the URL 'http://vividus-test-site.herokuapp.com/mouseEvents.html'
-When I execute javascript `return JSON.stringify(window.performance.timing)` and save result to scenario variable `timings`
-Then number of JSON elements from `${timings}` by JSON path `$.connectStart` is = 1
-----
 
 ==== Execute async JavaScript and save result.
 
@@ -1102,4 +1253,102 @@ xhr.onreadystatechange = function() {
 };
 xhr.send();` and save result to scenario variable `response`
 Then `${response}` matcher `.+`
+----
+
+=== Browser logs steps
+
+This set of steps allows to validate the https://developer.mozilla.org/en-US/docs/Web/API/console[browser console logging messages].
+
+:log-levels: List of the comma-separated messages levels. The supported levels are: ERRORS, WARNINGS, INFOS.
+
+[TIP]
+=====
+In order to configure availability of the INFO level messages use following properties:
+[cols="1,2"]
+|===
+
+|Browser
+|Property to enable INFO logs
+
+|Google Chrome
+|`selenium.capabilities.goog\:loggingPrefs.browser=INFO`
+
+|Microsoft Edge Chromium
+|`selenium.capabilities.ms\:loggingPrefs.browser=INFO`
+|===
+=====
+
+==== Validate log entries absence
+
+Validates the absence of log entries of the desired level in the browser console.
+
+[source,gherkin]
+----
+Then there are no browser console $logLevels
+----
+* `$logLevels` - {log-levels}
+
+.Validate absence of JS errors
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Then there are no browser console ERRORS
+----
+
+==== Validate specific log entries absence
+
+Validates the absence of specific log entries of the desired level in the browser console.
+
+[source,gherkin]
+----
+Then there are no browser console $logLevels by regex '$pattern'
+----
+* `$logLevels` - {log-levels}
+* `$pattern` - The regular expression to match log entry messages.
+
+.Validate absence of JS error referencing user
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Then there are no browser console ERRORS by regex '.*user.*'
+----
+
+==== Validate specific log entries presence
+
+Validates the presence of specific log entries of the desired level in the browser console.
+
+[source,gherkin]
+----
+Then there are browser console $logLevels by regex '$pattern'
+----
+* `$logLevels` - {log-levels}
+* `$pattern` - The regular expression to match log entry messages.
+
+.Validate presence of JS errors referencing user
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Then there are browser console ERRORS by regex '.*user.*'
+----
+
+==== Wait for console log entries and save them
+
+Waits for the appearance of the console log entries with the expected level and which match regular expression and saves all the entries (including awaited ones) of the expected level gathered during the wait to the scoped variable.
+
+NOTE: Wait uses generic UI timeouts specified by the properties `ui.wait.timeout` and `ui.wait.polling-period`. See <<_properties>> section for more details.
+
+[source,gherkin]
+----
+When I wait until browser console $logEntries by regex `$regex` appear and save all entries into $scopes variable `$variableName`
+----
+* `$logLevels` - {log-levels}
+* `$pattern` - The regular expression to match log entry messages.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the value of the barcode.
+
+.Wait for application readiness
+----
+Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+When I wait until browser console infos by regex `.*Application ready.*` appear and save all entries into scenario variable `logs`
+Then `${logs}` matches `.*Application ready in \d+ seconds.*`
 ----

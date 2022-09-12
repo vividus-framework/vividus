@@ -29,8 +29,8 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.Response;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
-import org.vividus.selenium.manager.WebDriverManagerParameter;
+import org.vividus.selenium.session.WebDriverSessionAttributes;
+import org.vividus.selenium.session.WebDriverSessionInfo;
 import org.vividus.ui.action.JavascriptActions;
 
 import io.appium.java_client.ExecutesMethod;
@@ -44,9 +44,9 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
     private final JavascriptActions javascriptActions;
 
     public MobileAppWebDriverManager(IWebDriverProvider webDriverProvider,
-            IWebDriverManagerContext webDriverManagerContext, JavascriptActions javascriptActions)
+            WebDriverSessionInfo webDriverSessionInfo, JavascriptActions javascriptActions)
     {
-        super(webDriverProvider, webDriverManagerContext);
+        super(webDriverProvider, webDriverSessionInfo);
         this.javascriptActions = javascriptActions;
     }
 
@@ -114,11 +114,19 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
 
     public double getDpr()
     {
-        return getWebDriverManagerContext().get(WebDriverManagerParameter.DEVICE_PIXEL_RATIO, this::calculateDpr);
+        return getWebDriverSessionInfo().get(WebDriverSessionAttributes.DEVICE_PIXEL_RATIO, this::calculateDpr);
     }
 
     private double calculateDpr()
     {
+        if (isAndroidNativeApp())
+        {
+            // On Android platform the ratio between the device window size and taken screenshot size is equal to 1
+            // regardless of the device's display density.
+            // Also see https://github.com/appium/appium-base-driver/pull/306 for details.
+            return 1D;
+        }
+
         try
         {
             byte[] imageBytes = getUnwrappedDriver(TakesScreenshot.class).getScreenshotAs(OutputType.BYTES);

@@ -22,8 +22,11 @@
 ** xref:plugin-excel.adoc[Excel]
 ** xref:plugin-html.adoc[HTML]
 ** xref:plugin-json.adoc[JSON]
-** xref:plugin-parquet.adoc[Parquet*]
+** xref:plugin-parquet.adoc[Parquet]
 ** xref:plugin-xml.adoc[XML]
+* Remoting
+** xref:plugin-ssh.adoc[SSH]
+** xref:plugin-winrm.adoc[WinRM]
 * Testing Clouds
 ** xref:plugin-browserstack.adoc[BrowserStack]
 ** xref:plugin-lambda-test.adoc[LambdaTest]
@@ -39,7 +42,6 @@
 * xref:plugin-mongodb.adoc[MongoDB]
 * xref:plugin-db.adoc[Relational Database]
 * xref:plugin-rest-api.adoc[REST API]
-* xref:plugin-ssh.adoc[SSH]
 * xref:plugin-visual.adoc[Visual Testing]
 * xref:plugin-web-app.adoc[Web Application]
 * xref:plugin-web-app-to-rest-api.adoc[Web Application & REST API Integration]

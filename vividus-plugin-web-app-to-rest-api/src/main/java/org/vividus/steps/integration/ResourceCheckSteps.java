@@ -43,7 +43,7 @@ import org.vividus.http.HttpTestContext;
 import org.vividus.http.validation.ResourceValidator;
 import org.vividus.http.validation.model.CheckStatus;
 import org.vividus.reporter.event.AttachmentPublisher;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.testcontext.ContextCopyingExecutor;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.validator.model.WebPageResourceValidation;
@@ -57,7 +57,7 @@ public class ResourceCheckSteps
     private final ResourceValidator<WebPageResourceValidation> resourceValidator;
     private final AttachmentPublisher attachmentPublisher;
     private final HttpRequestExecutor httpRequestExecutor;
-    private final SoftAssert softAssert;
+    private final ISoftAssert softAssert;
     private final WebApplicationConfiguration webApplicationConfiguration;
     private final ContextCopyingExecutor executor;
     private final HttpTestContext httpTestContext;
@@ -66,7 +66,7 @@ public class ResourceCheckSteps
     private Optional<String> uriToIgnoreRegex;
 
     public ResourceCheckSteps(ResourceValidator<WebPageResourceValidation> resourceValidator,
-            AttachmentPublisher attachmentPublisher, HttpRequestExecutor httpRequestExecutor, SoftAssert softAssert,
+            AttachmentPublisher attachmentPublisher, HttpRequestExecutor httpRequestExecutor, ISoftAssert softAssert,
             WebApplicationConfiguration webApplicationConfiguration, ContextCopyingExecutor executor,
             HttpTestContext httpTestContext)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,18 +61,27 @@ class TestExecutionFactoryTests
     void shouldCreateTestExecution()
     {
         List<Entry<String, Scenario>> scenarios = List.of(
-            entry("PLAIN_SUCCESS", createPlainScenario(SUCCESS, List.of(), List.of())),
-            entry("PLAIN_FAILED", createPlainScenario(FAILED, List.of(), List.of())),
+            entry("PLAIN_SUCCESS", createPlainScenario(SUCCESS, List.of(), List.of(), List.of(), List.of())),
+            entry("PLAIN_FAILED", createPlainScenario(FAILED, List.of(), List.of(), List.of(), List.of())),
             entry("MANUAL", createManualScenario()),
-            entry("EXAMPLE_SUCCESS", createExamplesScenario(SUCCESS, List.of(), List.of())),
-            entry("EXAMPLE_FAILED", createExamplesScenario(FAILED, List.of(), List.of())),
-            entry("PLAIN_FAILED_IN_AFTER_STEPS", createPlainScenario(SUCCESS, List.of(), List.of(createStep(FAILED)))),
-            entry("PLAIN_FAILED_IN_BEFORE_STEPS", createPlainScenario(SUCCESS, List.of(createStep(FAILED)),
-                    List.of())),
-            entry("EXAMPLE_FAILED_IN_AFTER_STEPS", createExamplesScenario(SUCCESS, List.of(),
+            entry("EXAMPLE_SUCCESS", createExamplesScenario(SUCCESS, List.of(), List.of(), List.of(), List.of())),
+            entry("EXAMPLE_FAILED", createExamplesScenario(FAILED, List.of(), List.of(), List.of(), List.of())),
+            entry("PLAIN_FAILED_IN_AFTER_USER_STEPS", createPlainScenario(SUCCESS, List.of(), List.of(),
+                    List.of(createStep(FAILED)), List.of())),
+            entry("PLAIN_FAILED_IN_BEFORE_USER_STEPS", createPlainScenario(SUCCESS, List.of(),
+                    List.of(createStep(FAILED)), List.of(), List.of())),
+            entry("EXAMPLE_FAILED_IN_AFTER_USER_STEPS", createExamplesScenario(SUCCESS, List.of(), List.of(),
+                    List.of(createStep(FAILED)), List.of())),
+            entry("EXAMPLE_FAILED_IN_BEFORE_USER_STEPS", createExamplesScenario(SUCCESS, List.of(),
+                    List.of(createStep(FAILED)), List.of(), List.of())),
+            entry("EXAMPLE_FAILED_IN_AFTER_SYSTEM_STEPS", createExamplesScenario(SUCCESS, List.of(), List.of(),
+                    List.of(), List.of(createStep(FAILED)))),
+            entry("PLAIN_FAILED_IN_AFTER_SYSTEM_STEPS", createPlainScenario(SUCCESS, List.of(), List.of(), List.of(),
                     List.of(createStep(FAILED)))),
-            entry("EXAMPLE_FAILED_IN_BEFORE_STEPS", createExamplesScenario(SUCCESS, List.of(createStep(FAILED)),
-                    List.of()))
+            entry("EXAMPLE_FAILED_IN_BEFORE_SYSTEM_STEPS", createExamplesScenario(SUCCESS, List.of(createStep(FAILED)),
+                    List.of(), List.of(), List.of())),
+            entry("PLAIN_FAILED_IN_BEFORE_SYSTEM_STEPS", createPlainScenario(SUCCESS, List.of(createStep(FAILED)),
+                    List.of(), List.of(), List.of()))
         );
         xrayExporterOptions.setTestExecutionKey(KEY);
 
@@ -80,7 +89,7 @@ class TestExecutionFactoryTests
 
         assertEquals(KEY, execution.getTestExecutionKey());
         List<TestExecutionItem> tests = execution.getTests();
-        assertThat(tests, hasSize(9));
+        assertThat(tests, hasSize(13));
         assertExecutedItem(tests.get(0), TestExecutionItemStatus.PASS);
         assertExecutedItem(tests.get(1), TestExecutionItemStatus.FAIL);
         assertItem(tests.get(2), TestExecutionItemStatus.TODO, null, null);
@@ -90,6 +99,10 @@ class TestExecutionFactoryTests
         assertExecutedItem(tests.get(6), TestExecutionItemStatus.FAIL);
         assertExecutedItem(tests.get(7), TestExecutionItemStatus.FAIL);
         assertExecutedItem(tests.get(8), TestExecutionItemStatus.FAIL);
+        assertExecutedItem(tests.get(9), TestExecutionItemStatus.FAIL);
+        assertExecutedItem(tests.get(10), TestExecutionItemStatus.FAIL);
+        assertExecutedItem(tests.get(11), TestExecutionItemStatus.FAIL);
+        assertExecutedItem(tests.get(12), TestExecutionItemStatus.FAIL);
     }
 
     private static void assertExecutedItem(TestExecutionItem item, TestExecutionItemStatus status)
@@ -104,13 +117,15 @@ class TestExecutionFactoryTests
         assertEquals(finish, item.getFinish());
     }
 
-    private static Scenario createPlainScenario(String outcome, List<Step> beforeScenarioSteps,
-            List<Step> afterScenarioSteps)
+    private static Scenario createPlainScenario(String outcome, List<Step> beforeSystemScenarioSteps,
+            List<Step> beforeUserScenarioSteps, List<Step> afterUserScenarioSteps, List<Step> afterSystemScenarioSteps)
     {
         Scenario scenario = createScenario();
-        scenario.setBeforeUserScenarioSteps(beforeScenarioSteps);
+        scenario.setBeforeSystemScenarioSteps(beforeSystemScenarioSteps);
+        scenario.setBeforeUserScenarioSteps(beforeUserScenarioSteps);
         scenario.setSteps(List.of(createStep(SUCCESS), createStep(outcome)));
-        scenario.setAfterUserScenarioSteps(afterScenarioSteps);
+        scenario.setAfterUserScenarioSteps(afterUserScenarioSteps);
+        scenario.setAfterSystemScenarioSteps(afterSystemScenarioSteps);
         return scenario;
     }
 
@@ -121,22 +136,26 @@ class TestExecutionFactoryTests
         return scenario;
     }
 
-    private static Scenario createExamplesScenario(String outcome, List<Step> beforeScenarioSteps,
-            List<Step> afterScenarioSteps)
+    private static Scenario createExamplesScenario(String outcome, List<Step> beforeSystemScenarioSteps,
+            List<Step> beforeUserScenarioSteps, List<Step> afterUserScenarioSteps, List<Step> afterSystemScenarioSteps)
     {
         Scenario scenario = createScenario();
         Examples examples = new Examples();
         scenario.setExamples(examples);
 
         Example example1 = new Example();
-        example1.setBeforeUserScenarioSteps(beforeScenarioSteps);
+        example1.setBeforeSystemScenarioSteps(beforeSystemScenarioSteps);
+        example1.setBeforeUserScenarioSteps(beforeUserScenarioSteps);
         example1.setSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
         example1.setAfterUserScenarioSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
+        example1.setAfterSystemScenarioSteps(afterSystemScenarioSteps);
 
         Example example2 = new Example();
+        example2.setBeforeSystemScenarioSteps(beforeSystemScenarioSteps);
         example2.setBeforeUserScenarioSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
         example2.setSteps(List.of(createStep(SUCCESS), createStep(outcome)));
-        example2.setAfterUserScenarioSteps(afterScenarioSteps);
+        example2.setAfterUserScenarioSteps(afterUserScenarioSteps);
+        example2.setAfterSystemScenarioSteps(afterSystemScenarioSteps);
 
         examples.setExamples(List.of(example1, example2));
         return scenario;

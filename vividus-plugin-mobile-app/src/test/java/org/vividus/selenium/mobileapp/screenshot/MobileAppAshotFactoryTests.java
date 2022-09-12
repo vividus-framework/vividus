@@ -66,16 +66,14 @@ class MobileAppAshotFactoryTests
     void shouldCreateAshotWithTheMergedConfiguration() throws IllegalAccessException
     {
         mockAshotConfiguration(true);
-        int nativeFooterToCut = 10;
         ScreenshotParameters parameters = new ScreenshotParameters();
-        parameters.setNativeFooterToCut(nativeFooterToCut);
         parameters.setShootingStrategy(Optional.of(SIMPLE));
         AShot aShot = ashotFactory.create(Optional.of(parameters));
         ElementCroppingDecorator croppingDecorator = (ElementCroppingDecorator) FieldUtils.readField(aShot,
                 SHOOTING_STRATEGY, true);
         CuttingDecorator strategy = (CuttingDecorator) FieldUtils.readField(croppingDecorator, SHOOTING_STRATEGY, true);
         assertBaseStrategy(ScalingDecorator.class, strategy);
-        assertCutStrategy(strategy, 1, nativeFooterToCut);
+        assertCutStrategy(strategy, 1, 0);
         assertCoordsProvider(aShot);
     }
 

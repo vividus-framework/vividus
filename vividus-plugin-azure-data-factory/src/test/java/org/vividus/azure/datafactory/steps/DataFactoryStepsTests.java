@@ -41,6 +41,7 @@ import java.util.function.Consumer;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.rest.Response;
 import com.azure.core.management.profile.AzureProfile;
+import com.azure.core.util.Context;
 import com.azure.resourcemanager.datafactory.DataFactoryManager;
 import com.azure.resourcemanager.datafactory.fluent.models.PipelineRunInner;
 import com.azure.resourcemanager.datafactory.fluent.models.PipelineRunsQueryResponseInner;
@@ -174,7 +175,7 @@ class DataFactoryStepsTests
 
             var pipelines = mock(Pipelines.class);
             when(pipelines.createRunWithResponse(RESOURCE_GROUP_NAME, FACTORY_NAME, PIPELINE_NAME, null, null, null,
-                    null, expectedParameters, null)).thenReturn(response);
+                    null, expectedParameters, Context.NONE)).thenReturn(response);
 
             when(dataFactoryManager.pipelines()).thenReturn(pipelines);
 

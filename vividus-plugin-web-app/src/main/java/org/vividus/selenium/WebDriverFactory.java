@@ -28,9 +28,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.proxy.IProxy;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
 import org.vividus.selenium.manager.WebDriverManager;
-import org.vividus.selenium.manager.WebDriverManagerParameter;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
 
@@ -40,19 +38,19 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
 
     private final TimeoutConfigurer timeoutConfigurer;
     private final IProxy proxy;
-    private final IWebDriverManagerContext webDriverManagerContext;
+    private final WebDriverStartContext webDriverStartContext;
     private WebDriverType webDriverType;
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
 
     public WebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
             JsonUtils jsonUtils, TimeoutConfigurer timeoutConfigurer, IProxy proxy,
-            IWebDriverManagerContext webDriverManagerContext)
+            WebDriverStartContext webDriverStartContext)
     {
         super(remoteWebDriverFactory, propertyParser, jsonUtils);
         this.timeoutConfigurer = timeoutConfigurer;
         this.proxy = proxy;
-        this.webDriverManagerContext = webDriverManagerContext;
+        this.webDriverStartContext = webDriverStartContext;
     }
 
     @Override
@@ -125,8 +123,8 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
             }
             return configuration;
         });
-        String overrideCommandLineArguments = webDriverManagerContext.getParameter(
-                WebDriverManagerParameter.COMMAND_LINE_ARGUMENTS);
+        String overrideCommandLineArguments = webDriverStartContext.get(
+                WebDriverStartParameters.COMMAND_LINE_ARGUMENTS);
         if (overrideCommandLineArguments != null)
         {
             checkCommandLineArgumentsSupported(webDriverType);

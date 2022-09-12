@@ -58,8 +58,7 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotParame
         {
             statusBarSize = CoordsUtils.scale(statusBarSize, getDpr());
         }
-        int nativeFooterToCut = screenshotParameters.map(ScreenshotParameters::getNativeFooterToCut).orElse(0);
-        strategy = decorateWithFixedCutStrategy(strategy, statusBarSize, nativeFooterToCut);
+        strategy = decorateWithFixedCutStrategy(strategy, statusBarSize, 0);
 
         if (screenshotParameters.isPresent())
         {

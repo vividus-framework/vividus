@@ -1,0 +1,104 @@
+= WinRM Plugin
+
+The plugin provides functionality to execute commands via https://docs.microsoft.com/en-us/windows/win32/winrm/portal[WinRM].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-winrm', version: '{current-version}')
+----
+
+== Properties
+
+It's allowed to configure unlimited number of WinRM connections via mechanism of the dynamic properties. The properties prefix example is:
+```properties
+winrm.server.my-server
+```
+where `my-server` is a key used to refer WinRm connection in the steps. The key is defined by users, must be unique and can't contain dots.
+
+:connection-parameters-prefix: winrm.server.<key>.
+:parameters-name: properties
+include::partial$winrm-connection-parameters.adoc[]
+
+== Steps
+
+=== Configure dynamic WinRM connection
+
+Creates a new dynamic WinRM connection from the provided parameters, the
+connection is available only within the story creating the connection.
+
+[source,gherkin]
+----
+When I configure WinRM connection with key `$connectionKey` and parameters:$connectionParameters
+----
+
+* `$connectionKey` - The key to assign to the creating WinRM connection. In case if the key conflicts with a global connection key, the dynamic connection will take precedence within the story.
+* `$connectionParameters` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with WinRM connection parameters.
++
+:connection-parameters-prefix:
+:parameters-name: parameters
+include::partial$winrm-connection-parameters.adoc[]
+
+.Configure WinRM connection dynamically
+[source,gherkin]
+----
+When I configure WinRM connection with key `my-connection` and parameters:
+|address         |username |password|authentication-scheme|
+|10.10.10.10:5985|admin    |Pa$$w0rd|Basic                |
+----
+
+=== Execute batch command
+
+Executes a https://en.wikibooks.org/wiki/Windows_Batch_Scripting[native Windows command]. A new session is created on the destination host for each step invocation.
+
+[source,gherkin]
+----
+When I execute batch command `$command` on server `$connectionKey` using WinRM and save result to $scopes variable `$variableName`
+----
+
+* `$command` - The batch command limited to 8096 bytes. The maximum length of the command can be even less depending on the https://support.microsoft.com/en-us/kb/830473[platform].
+* `$connectionKey` - The WinRM connection key matching any of configured ones.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the command execution results. The the data will be stored under the following keys:
++
+  - `$variableName.stdout` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)[command standard output stream];
+  - `$variableName.stderr` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)[command standard error stream];
+  - `$variableName.exit-status` - the https://en.wikipedia.org/wiki/Exit_status[exit status (a.k.a exit code)] of the command.
+
+.Check batch command result
+[source,gherkin]
+----
+When I execute batch command `echo hello cmd` on server `my-server` using WinRM and save result as JSON to scenario variable `cmd-result`
+Then `${cmd-result.stdout}` is equal to `hello cmd`
+Then `${cmd-result.stderr}` is equal to ``
+Then `${cmd-result.exit-status}` is equal to `0`
+----
+
+=== Execute PowerShell command
+
+Executes a PowerShell[https://docs.microsoft.com/en-us/powershell/scripting/overview] command. A new session is created on the destination host for each step invocation.
+
+[source,gherkin]
+----
+When I execute PowerShell command `$command` on server `$connectionKey` using WinRM and save result to $scopes variable `$variableName`
+----
+
+* `$command` - The PowerShell command.
+* `$connectionKey` - The WinRM connection key matching any of configured ones.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the command execution results. The the data will be stored under the following keys:
++
+  - `$variableName.stdout` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)[command standard output stream];
+  - `$variableName.stderr` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)[command standard error stream];
+  - `$variableName.exit-status` - the https://en.wikipedia.org/wiki/Exit_status[exit status (a.k.a exit code)] of the command.
+
+.Check PowerShell command result
+[source,gherkin]
+----
+When I execute PowerShell command `echo hello ps` on server `my-server` using WinRM and save result to scenario variable `ps-result`
+Then `${ps-result.stdout}` is equal to `hello ps`
+Then `${ps-result.stderr}` is equal to ``
+Then `${ps-result.exit-status}` is equal to `0`
+----

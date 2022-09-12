@@ -19,13 +19,11 @@ package org.vividus.excel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
@@ -39,7 +37,9 @@ import org.vividus.util.ResourceUtils;
 
 class ExcelSheetWriterTests
 {
-    private static final ExamplesTable CONTENT = new ExamplesTable("|name|status|\n|First|OPEN|\n|Second|closed|");
+    private static final ExamplesTable CONTENT = new ExamplesTable("|name|status|name|\n"
+            + "|First |OPEN   |MoreFirst|\n"
+            + "|Second|closed|MoreSecond|");
 
     @CsvSource({
         "User-defined sheet name, User-defined sheet name",
@@ -57,7 +57,7 @@ class ExcelSheetWriterTests
     void shouldAddSheetToExcel() throws IOException
     {
         Path pathTemp = createExcelFile();
-        try (XSSFWorkbook workbook = new XSSFWorkbook(); OutputStream os = new FileOutputStream(pathTemp.toFile()))
+        try (XSSFWorkbook workbook = new XSSFWorkbook(); OutputStream os = Files.newOutputStream(pathTemp))
         {
             workbook.write(os);
         }
@@ -76,6 +76,7 @@ class ExcelSheetWriterTests
         return ResourceUtils.createTempFile("test", ".xlsx", null);
     }
 
+    @SuppressWarnings("checkstyle:MultipleStringLiteralsExtended")
     private void assertDataInSheet(Path path, int index, String name) throws IOException
     {
         try (XSSFWorkbook myExcelBook = new XSSFWorkbook(FileUtils.openInputStream(new File(path.toString()))))
@@ -83,10 +84,12 @@ class ExcelSheetWriterTests
             XSSFSheet sheet = myExcelBook.getSheetAt(index);
             assertEquals(sheet.getSheetName(), name);
             IExcelSheetParser sheetParser = new ExcelSheetParser(sheet);
-            Map<String, List<String>> actualData = sheetParser.getDataAsTable("A1:B3");
-            Map<String, List<String>> expectedData = new HashMap<>();
-            expectedData.put("name", List.of("First", "Second"));
-            expectedData.put("status", List.of("OPEN", "closed"));
+            List<List<String>> actualData = sheetParser.getData();
+            List<List<String>> expectedData = List.of(
+                    List.of("name", "status", "name"),
+                    List.of("First", "OPEN", "MoreFirst"),
+                    List.of("Second", "closed", "MoreSecond")
+            );
             assertEquals(expectedData, actualData);
         }
     }

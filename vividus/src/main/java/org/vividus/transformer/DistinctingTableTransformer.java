@@ -16,13 +16,9 @@
 
 package org.vividus.transformer;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTable.TableRows;
@@ -36,13 +32,12 @@ public class DistinctingTableTransformer extends AbstractFilteringTableTransform
     {
         String byColumnNames = tableProperties.getMandatoryNonBlankProperty(BY_COLUMNS_NAMES_PROPERTY, String.class);
         TableRows tableRows = tableParsers.parseRows(tableAsString, tableProperties);
-        List<String> filteredColumnNames = filterColumnNames(tableRows.getHeaders(), byColumnNames);
-        List<Map<String, String>> rows = tableRows.getRows();
-        filterRowsByColumnNames(rows, filteredColumnNames);
+        List<String> allColumnNames = tableRows.getHeaders();
+        List<String> filteredColumnNames = filterColumnNames(allColumnNames, byColumnNames);
+        List<List<String>> rows = tableRows.getRows();
+        filterRowsByColumnNames(allColumnNames, rows, filteredColumnNames);
 
-        Collection<Map<String, String>> distinctRows = rows.stream().collect(
-                Collectors.toMap(row -> Objects.hash(row.values().toArray()), Function.identity(), (v1, v2) -> v1,
-                        LinkedHashMap::new)).values();
+        Set<List<String>> distinctRows = new LinkedHashSet<>(rows);
 
         return ExamplesTableProcessor.buildExamplesTable(filteredColumnNames, distinctRows, tableProperties);
     }

@@ -16,12 +16,9 @@
 
 package org.vividus.util;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -65,19 +62,10 @@ public final class ExamplesTableProcessor
      * @param properties table properties
      * @return examples table as string
      */
-    public static String buildExamplesTable(Collection<String> headers, Collection<Map<String, String>> rows,
+    public static String buildExamplesTable(Collection<String> headers, Collection<List<String>> rows,
             TableProperties properties)
     {
-        return buildExamplesTable(headers, asDataRows(rows), properties, false, false);
-    }
-
-    private static List<List<String>> asDataRows(Collection<Map<String, String>> rows)
-    {
-        return rows.stream()
-                .map(LinkedHashMap::new)
-                .map(Map::values)
-                .map(ArrayList::new)
-                .collect(Collectors.toList());
+        return buildExamplesTable(headers, rows, properties, false, false);
     }
 
     public static String buildExamplesTable(Collection<String> header, List<List<String>> data,
@@ -86,7 +74,7 @@ public final class ExamplesTableProcessor
         return buildExamplesTable(header, data, properties, checkForValueSeparator, false);
     }
 
-    public static String buildExamplesTable(Collection<String> header, List<List<String>> data,
+    public static String buildExamplesTable(Collection<String> header, Collection<List<String>> data,
             TableProperties properties, boolean checkForValueSeparator, boolean appendTableProperties)
     {
         String valueSeparator = checkForValueSeparator ? determineValueSeparator(data, properties)
@@ -134,7 +122,7 @@ public final class ExamplesTableProcessor
         examplesTable.append(valueSeparator);
     }
 
-    private static String determineValueSeparator(List<List<String>> data, TableProperties properties)
+    private static String determineValueSeparator(Collection<List<String>> data, TableProperties properties)
     {
         List<String> valueSeparators = List.of(properties.getValueSeparator(), DEFAULT_SEPARATOR_VALUE,
                 "!", "?", "$", "#", "%", "*");

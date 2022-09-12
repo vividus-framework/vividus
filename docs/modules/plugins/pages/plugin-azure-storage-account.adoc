@@ -221,7 +221,7 @@ NOTE: At least one rule is required.
 When I filter blobs by:$filter in container `$containerName` of storage account `$storageAccountKey` and save result to $scopes variable `$variableName`
 ----
 
-* `$filter` - `ExamplesTable` with filter rules to apply on blob names.
+* `$filter` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with filter rules to apply on blob names.
 +
 .The supported filter rules
 [cols="1,2,1", options="header"]

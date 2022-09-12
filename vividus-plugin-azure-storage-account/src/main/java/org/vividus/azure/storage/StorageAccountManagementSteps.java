@@ -25,7 +25,7 @@ import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider
 import org.jbehave.core.annotations.When;
 import org.vividus.azure.resourcemanager.AbstractAzureResourceManagementSteps;
 import org.vividus.context.VariableContext;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
 public class StorageAccountManagementSteps extends AbstractAzureResourceManagementSteps
@@ -35,7 +35,7 @@ public class StorageAccountManagementSteps extends AbstractAzureResourceManageme
     private final AzureProfile azureProfile;
 
     public StorageAccountManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential,
-            SoftAssert softAssert, VariableContext variableContext)
+            ISoftAssert softAssert, VariableContext variableContext)
     {
         super(HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile),
                 azureProfile.getEnvironment().getResourceManagerEndpoint(), softAssert, variableContext);

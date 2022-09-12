@@ -1,18 +1,292 @@
 = Relational Database Plugin
 
 The plugin provides capabilities to work with relational databases via
-https://en.wikipedia.org/wiki/Java_Database_Connectivity[JDBC] and contains
-a set of the steps for comparison of data tables.
+JDBC and contains a set of the steps for comparison of data tables.
+
+Java Database Connectivity (https://en.wikipedia.org/wiki/Java_Database_Connectivity[JDBC])
+is an application programming interface for Java, which defines how a client may
+access a database. Every JDBC requires using specific driver. JDBC drivers are
+client-side adapters (installed on the client machine, not on the server) that
+convert requests from Java programs to a protocol that the database management
+system (DBMS) can understand.
 
 == Installation
 
+. Add plugin dependency into `build.gradle` file:
++
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
 implementation(group: 'org.vividus', name: 'vividus-plugin-db', version: '{current-version}')
 ----
 
+. Define your JDBC driver and add appropriate dependency. Let's take PostgreSQL as an example:
++
+- Open JDBC page on https://mvnrepository.com/open-source/jdbc-drivers[maven repository];
+- Find driver for your database and open details (https://mvnrepository.com/artifact/org.postgresql/postgresql[PostgreSQL JDBC Driver]);
+- Choose and open version (https://mvnrepository.com/artifact/org.postgresql/postgresql/42.4.0[42.4.0]);
+- Go to the Gradle tab and copy implementation string;
+- Paste chosen dependency into your build.gradle file:
++
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.postgresql', name: 'postgresql', version: '42.4.0')
+----
++
+NOTE: In case Maven repository does not contain driver you need, please refer to the documentation of your database to define suitable JDBC driver.
+
 == Configuration
+
+=== Database connection
+
+For database interaction, you will need to set related properties. They have
+`db.connection.` prefix followed by the database connection name (`vividus` in
+the example). Come up with your own database name to use within the tests. Put
+properties into the `environment.properties` file:
+
+.environment.properties
+[source,properties,subs="attributes+"]
+----
+db.connection.vividus.url=jdbc:dbms://databaseUrl:port/databaseName?parameter1=true&parameter2=value <1>
+db.connection.vividus.username= <2>
+db.connection.vividus.password= <2>
+db.connection.vividus.driver-class-name=<3>
+----
+<1> Database address. Consists of:
+    - `jdbc:` - reference to JDBC;
+    - `dbms:` - Database Management System, e.g. `postgresql`;
+    - `//databaseUrl` - address to your database;
+    - `:port` - port number, e.g. `5432`;
+    - `/databaseName` - name of your database;
+    - `parameters` - any additional driver parameters you need to pass;
++
+IMPORTANT: URL structure slightly changes depending on the database management system. You can find templates for different DBMS in xref:plugins:plugin-db.adoc#_setup_examples[setup examples].
+<2> Credentials for given database connection;
+<3> Driver class name (Optional), e.g. `org.postgresql.Driver`. You might need it to specify the driver name for the exact database.
+
+==== Setup examples
+
+Here are some examples of setting different databases connection for most popular DBMS-s.
+
+.MySQL
+[%collapsible]
+====
+.build.gradle
+[source,gradle]
+----
+implementation(group: 'mysql', name: 'mysql-connector-java', version: '8.0.29')
+----
+
+.environment.properties
+[source,properties]
+----
+db.connection.vividus.url=jdbc:mysql://mysql.db.server:3306/my_database?useSSL=false&serverTimezone=UTC
+db.connection.vividus.username=vividus
+db.connection.vividus.password=pa$$w0rd
+----
+
+.https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-jdbc-url-format.html[URL template]
+[source,properties]
+----
+jdbc:mysql://host:port/database?parameters
+----
+====
+
+.Microsoft SQL Server
+[%collapsible]
+====
+.build.gradle
+[source,gradle]
+----
+implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '11.2.0.jre11')
+----
+
+.environment.properties
+[source,properties]
+----
+db.connection.vividus.url=jdbc:sqlserver://mssql.db.server:1433\mssql_instance;databaseName=my_database
+db.connection.vividus.username=vividus
+db.connection.vividus.password=pa$$w0rd
+----
+
+.https://docs.microsoft.com/en-us/sql/connect/jdbc/building-the-connection-url[URL template]
+[source,properties]
+----
+jdbc:sqlserver://serverName\instanceName:portNumber;parameter1=value1;parameter2=value2
+----
+====
+
+.Azure SQL
+[%collapsible]
+====
+.build.gradle
+[source,gradle]
+----
+implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '11.2.0.jre11')
+----
+
+.environment.properties
+[source,properties]
+----
+db.connection.vividus.url=jdbc:sqlserver://vividusdb.database.windows.net:1433;database=demo;encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;
+db.connection.vividus.username=vividus
+db.connection.vividus.password=pa$$w0rd
+----
+
+.https://docs.microsoft.com/en-us/azure/azure-sql/database/connect-query-java?view=azuresql#prepare-a-configuration-file-to-connect-to-azure-sql-database[URL template]
+[source,properties]
+----
+jdbc:sqlserver://serverName:portNumber;parameter1=value1;parameter2=value2
+----
+====
+
+.PostgreSQL
+[%collapsible]
+====
+.build.gradle
+[source,gradle]
+----
+implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.0')
+----
+
+.environment.properties
+[source,properties]
+----
+db.connection.vividus.url=jdbc:postgresql://postgresql.db.server:5432/my_database?ssl=true&loglevel=2
+db.connection.vividus.username=vividus
+db.connection.vividus.password=pa$$w0rd
+----
+
+.https://jdbc.postgresql.org/documentation/head/connect.html[URL template]
+[source,properties]
+----
+jdbc:postgresql://host:port/database?parameters
+----
+====
+
+.Oracle Database
+[%collapsible]
+====
+.build.gradle
+[source,gradle]
+----
+implementation(group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.15.0.0.1')
+----
+
+.environment.properties
+[source,properties]
+----
+db.connection.vividus.url=jdbc:oracle:thin:@//myoracle.db.server:1521/my_servicename
+db.connection.vividus.username=vividus
+db.connection.vividus.password=pa$$w0rd
+----
+
+.http://www.orafaq.com/wiki/JDBC#Thin_driver[URL template] based on the services approach
+[source,properties]
+----
+jdbc:oracle:thin:user/password@//host:port/service
+----
+====
+
+.DB2
+[%collapsible]
+====
+.build.gradle
+[source,gradle]
+----
+implementation(group: 'com.ibm.db2.jcc', name: 'db2jcc', version: 'db2jcc4')
+----
+
+.environment.properties
+[source,properties]
+----
+db.connection.vividus.url=jdbc:db2://localhost:50000/my_db
+db.connection.vividus.username=vividus
+db.connection.vividus.password=pa$$w0rd
+----
+
+.https://www.ibm.com/docs/en/db2-for-zos/11?topic=cdsudidsdjs-url-format-data-server-driver-jdbc-sqlj-type-4-connectivity[URL template]
+[source,properties]
+----
+jdbc:db2://<host>:<port>/<database_name>
+----
+====
+
+.CSV
+[%collapsible]
+====
+It is possible to perform SQL queries against CSV resources.
+Please see the xref:user-guides:execute-sql-against-csv.adoc[step-by-step guide] for more details.
+
+.build.gradle
+[source,gradle]
+----
+implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.40')
+----
+
+.environment.properties
+[source,properties]
+----
+db.connection.csv-data.url=jdbc:relique:csv:classpath:path/to/csv/data
+----
+
+.URL template
+[source,properties]
+----
+jdbc:relique:csv:classpath:path/to/resources?parameters
+----
+====
+
+.H2
+[%collapsible]
+====
+VIVIDUS allows using in-memory databases during test execution. Such databases
+are created at the beginning of the tests and are dropped after the run is
+finished. Please see the xref:user-guides:use-in-memory-db-to-manage-test-data.adoc[detailed guide].
+
+.build.gradle
+[source,gradle]
+----
+implementation(group: 'com.h2database', name: 'h2', version: '2.1.214')
+----
+
+.environment.properties
+[source,properties]
+----
+db.connection.csv-data.url=jdbc:relique:csv:classpath:path/to/csv/data
+----
+
+.https://h2database.com/html/features.html#database_url[URL template] for in-memory named database
+[source,properties]
+----
+jdbc:h2:mem:databaseName
+----
+====
+
+.Snowflake
+[%collapsible]
+====
+.build.gradle
+[source,gradle]
+----
+implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.13.21')
+----
+
+.environment.properties
+[source,properties]
+----
+db.connection.vividus.url=jdbc:snowflake://myinstance.west-europe.azure.snowflakecomputing.com/?role=DEVELOPER&warehouse=WAREHOUSE&db=MY_DB
+db.connection.vividus.username=vividus
+db.connection.vividus.password=pa$$w0rd
+----
+
+.https://docs.snowflake.com/en/user-guide/jdbc-configure.html#syntax[URL template]
+[source,properties]
+----
+jdbc:snowflake://account_identifier.snowflakecomputing.com/?connection_parameters
+----
+====
 
 === Data Comparison
 

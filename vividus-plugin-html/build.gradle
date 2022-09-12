@@ -1,14 +1,15 @@
 project.description = 'Vividus plugin for HTML testing'
 
 dependencies {
-    api(group: 'org.jsoup', name: 'jsoup', version: '1.15.2')
+    api(group: 'org.jsoup', name: 'jsoup', version: '1.15.3')
 
     implementation project(':vividus-engine')
     implementation project(':vividus-soft-assert')
 
     testImplementation project(':vividus-util')
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.0')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
-    testImplementation(group: 'org.mockito', name: 'mockito-inline', version: versions.mockito)
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.8.0')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-inline')
 }

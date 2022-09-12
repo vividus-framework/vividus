@@ -21,9 +21,6 @@ import static org.hamcrest.Matchers.containsString;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
-
-import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,9 +31,8 @@ import org.openqa.selenium.WebElement;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
+import org.vividus.steps.ui.AbstractExecuteScriptSteps;
 import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.steps.ui.web.model.JsArgument;
-import org.vividus.steps.ui.web.model.JsArgumentType;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
@@ -45,43 +41,21 @@ import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.variable.VariableScope;
 
-public class CodeSteps
+public class CodeSteps extends AbstractExecuteScriptSteps
 {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    @Inject private IBaseValidations baseValidations;
-    @Inject private WebJavascriptActions javascriptActions;
-    @Inject private ISoftAssert softAssert;
-    @Inject private VariableContext variableContext;
+    private final IBaseValidations baseValidations;
+    private final WebJavascriptActions javascriptActions;
+    private final ISoftAssert softAssert;
 
-    /**
-     * Executes JavaScript code with specified arguments
-     * @param jsCode JavaScript code
-     * @param args A table containing JS command argument value and type (one of <i>STRING</i> or <i>OBJECT</i>)<br>
-     * Example:
-     * <p>
-     * <code>
-     * When I execute javaScript `remote:throttle` with arguments:<br>
-     * |value                |type  |<br>
-     * |{"condition": "Wifi"}|object|
-     * </code>
-     * </p>
-     */
-    @When("I execute javascript `$jsCode` with arguments:$args")
-    public void executeJavascriptWithArguments(String jsCode, List<JsArgument> args)
+    public CodeSteps(WebJavascriptActions javascriptActions, VariableContext variableContext, ISoftAssert softAssert,
+            IBaseValidations baseValidations)
     {
-        javascriptActions.executeScript(jsCode, args.stream().map(this::convertRowToArgument).toArray());
-    }
-
-    private Object convertRowToArgument(JsArgument arg)
-    {
-        JsArgumentType type = arg.getType();
-        String value = arg.getValue();
-        if (type == null || value == null)
-        {
-            throw new IllegalArgumentException("Please, specify command argument values and types");
-        }
-        return type.convert(value);
+        super(softAssert, variableContext);
+        this.baseValidations = baseValidations;
+        this.javascriptActions = javascriptActions;
+        this.softAssert = softAssert;
     }
 
     /**
@@ -173,28 +147,6 @@ public class CodeSteps
 
 
     /**
-     * Executes passed JavaScript code on the opened page
-     * and saves returned value into the <b>variable</b>
-     *
-     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     *                     <i>Available scopes:</i>
-     *                     <ul>
-     *                     <li><b>STEP</b> - the variable will be available only within the step,
-     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     *                     <li><b>STORY</b> - the variable will be available within the whole story,
-     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     *                     </ul>
-     * @param variableName A name under which the value should be saved
-     * @param jsCode       Code in javascript that returns some value as result
-     *                     (e.g. var a=1; return a;)
-     */
-    @When("I execute javascript `$jsCode` and save result to $scopes variable `$variableName`")
-    public void saveValueFromJS(String jsCode, Set<VariableScope> scopes, String variableName)
-    {
-        assertAndSaveResult(() -> javascriptActions.executeScript(jsCode), scopes, variableName);
-    }
-
-    /**
      * Executes passed async javascript code on the opened page
      * and saves returned value into the <b>variable</b>
      * See {@link org.openqa.selenium.JavascriptExecutor#executeAsyncScript(String, Object[])}
@@ -216,29 +168,5 @@ public class CodeSteps
     public void saveValueFromAsyncJS(String jsCode, Set<VariableScope> scopes, String variableName)
     {
         assertAndSaveResult(() -> javascriptActions.executeAsyncScript(jsCode), scopes, variableName);
-    }
-
-    private void assertAndSaveResult(Supplier<Object> resultProvider, Set<VariableScope> scopes, String variableName)
-    {
-        Object result = resultProvider.get();
-        if (softAssert.assertNotNull("Returned result is not null", result))
-        {
-            variableContext.putVariable(scopes, variableName, result);
-        }
-    }
-
-    public void setJavascriptActions(WebJavascriptActions javascriptActions)
-    {
-        this.javascriptActions = javascriptActions;
-    }
-
-    public void setBaseValidations(IBaseValidations baseValidations)
-    {
-        this.baseValidations = baseValidations;
-    }
-
-    public void setSoftAssert(ISoftAssert softAssert)
-    {
-        this.softAssert = softAssert;
     }
 }

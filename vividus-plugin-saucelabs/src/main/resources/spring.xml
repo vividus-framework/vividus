@@ -7,23 +7,16 @@
        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        profile="saucelabs" default-lazy-init="true">
 
-    <bean id="sauceRest" class="com.saucelabs.saucerest.SauceREST">
+    <bean id="sauceConnectManager" class="org.vividus.selenium.sauce.SauceConnectManager">
         <constructor-arg index="0" value="${selenium.grid.username}" />
         <constructor-arg index="1" value="${selenium.grid.password}" />
         <constructor-arg index="2" value="${saucelabs.data-center}" />
-    </bean>
-
-    <bean id="sauceConnectManager" class="org.vividus.selenium.sauce.SauceConnectManager">
-        <property name="sauceLabsUsername" value="${selenium.grid.username}"/>
-        <property name="sauceLabsAccessKey" value="${selenium.grid.password}"/>
-        <property name="testContext" ref="testContext"/>
-        <property name="sauceTunnelManager">
+        <constructor-arg>
             <bean class="com.saucelabs.ci.sauceconnect.SauceConnectFourManager">
                 <constructor-arg value="false"/>
                 <property name="useLatestSauceConnect" value="${saucelabs.sauce-connect.use-latest-version}"/>
-                <property name="sauceRest" ref="sauceRest" />
             </bean>
-        </property>
+        </constructor-arg>
     </bean>
 
     <bean id="sauceLabsLinkPublisher" class="org.vividus.saucelabs.SauceLabsTestLinkPublisher">
@@ -34,7 +27,7 @@
 
     <bean class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer">
         <property name="tunnellingEnabled" value="${saucelabs.sauce-connect.enabled}"/>
-        <property name="restUrl" value="#{sauceRest.getRestApiEndpoint()}" />
+        <property name="restUrl" value="#{T(com.saucelabs.saucerest.DataCenter).fromString('${saucelabs.data-center}').apiServer() + 'rest/v1'}" />
         <property name="sauceConnectArguments" value="${saucelabs.sauce-connect.command-line-arguments}" />
         <property name="skipHostGlobPatterns" value="${saucelabs.sauce-connect.skip-host-glob-patterns}" />
     </bean>

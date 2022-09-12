@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.vividus.mobileapp.steps;
 import static java.util.function.Predicate.not;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -57,36 +56,6 @@ public class SetContextSteps
     }
 
     /**
-     * Switches context to a web view by the index, it starts from 1
-     * @param index index of web view
-     * @deprecated Use step:
-     * When I switch to web view with name that $comparisonRule `$value`
-     */
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    @When("I switch to web view with index `$index`")
-    public void switchToWebViewByIndex(int index)
-    {
-        LOGGER.warn("This step is deprecated and will be removed in VIVIDUS 0.5.0. The replacement is "
-                + "\"When I switch to web view with name that $comparisonRule `$value`\"");
-        performOnWebViews(webViews ->
-        {
-            int webViewIndex = index - 1;
-            int size = webViews.size();
-            if (webViewIndex >= 0 && webViewIndex < size)
-            {
-                String webview = webViews.get(webViewIndex);
-                LOGGER.atInfo().addArgument(webview::toString)
-                               .addArgument(index)
-                               .log("Switching to '{}' web view found by the index {}");
-                getContextAware().context(webview);
-                return;
-            }
-
-            softAssert.recordFailedAssertion(String.format("Web view with index %s does not exist", index));
-        });
-    }
-
-    /**
      * Switches context to a web view where name matches the rule
      *
      * @param rule  The web view name comparison rule: "is equal to", "contains", "does not contain" or "matches"
@@ -95,32 +64,10 @@ public class SetContextSteps
     @When("I switch to web view with name that $comparisonRule `$value`")
     public void switchToWebViewByName(StringComparisonRule rule, String value)
     {
-        performOnWebViews(webViews ->
-        {
-            Matcher<String> webViewMatcher = rule.createMatcher(value);
-            Predicate<String> webViewFilter = webViewMatcher::matches;
-
-            List<String> matchedWebViews = webViews.stream()
-                                                   .filter(webViewFilter)
-                                                   .collect(Collectors.toList());
-
-            if (matchedWebViews.size() == 1)
-            {
-                String webView = matchedWebViews.get(0);
-                LOGGER.atInfo().addArgument(webView).log("Switching to web view with the name '{}'");
-                getContextAware().context(webView);
-                return;
-            }
-
-            softAssert.recordFailedAssertion(
-                    String.format("The number of web views with name that %s '%s' is expected to be 1, but got %d",
-                            EnumUtils.toHumanReadableForm(rule), value, matchedWebViews.size()));
-        });
-    }
-
-    private void performOnWebViews(Consumer<List<String>> webViewConsumer)
-    {
-        List<String> webViews = getWebViews();
+        List<String> webViews = getContextAware().getContextHandles()
+                .stream()
+                .filter(not(IGenericWebDriverManager.NATIVE_APP_CONTEXT::equals))
+                .collect(Collectors.toList());
         if (webViews.isEmpty())
         {
             softAssert.recordFailedAssertion("No web views found");
@@ -129,15 +76,23 @@ public class SetContextSteps
 
         LOGGER.atInfo().addArgument(webViews::toString).log("Web views found: {}");
 
-        webViewConsumer.accept(webViews);
-    }
+        Matcher<String> webViewMatcher = rule.createMatcher(value);
+        Predicate<String> webViewFilter = webViewMatcher::matches;
 
-    private List<String> getWebViews()
-    {
-        return getContextAware().getContextHandles()
-                                .stream()
-                                .filter(not(IGenericWebDriverManager.NATIVE_APP_CONTEXT::equals))
-                                .collect(Collectors.toList());
+        List<String> matchedWebViews = webViews.stream().filter(webViewFilter).collect(Collectors.toList());
+
+        if (matchedWebViews.size() != 1)
+        {
+            softAssert.recordFailedAssertion(
+                    String.format("The number of web views with name that %s '%s' is expected to be 1, but got %d",
+                            EnumUtils.toHumanReadableForm(rule), value, matchedWebViews.size()));
+        }
+        else
+        {
+            String webView = matchedWebViews.get(0);
+            LOGGER.atInfo().addArgument(webView).log("Switching to web view with the name '{}'");
+            getContextAware().context(webView);
+        }
     }
 
     private ContextAware getContextAware()

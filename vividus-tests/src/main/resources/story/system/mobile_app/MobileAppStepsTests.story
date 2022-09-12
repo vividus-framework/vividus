@@ -14,6 +14,10 @@ Given I start mobile application with capabilities:
 |app |${app-url}|
 
 
+Scenario: VerifyStep: 'When I execute javascript `$wcript` and save result to $scopes variable `$variableName`'
+When I execute javascript `mobile: deviceInfo` and save result to scenario variable `deviceInfo`
+Then `${deviceInfo}` matches `.*timeZone.*`
+
 Scenario: Verify step: 'When I reinstall mobile application with bundle identifier `$bundleId`'
 Meta:
     @requirementId 2073
@@ -224,6 +228,22 @@ When I tap on element located `xpath((//XCUIElementTypeCell[contains(@name, "Pho
 Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` is equal to `1`
 
 
+Scenario: [Android] Verify step: 'When I delete file `$filePath` from device'
+Meta:
+    @targetPlatform android
+When I delete file `/sdcard/Pictures/mobile-upload-image.png` from device
+When I tap on element located `accessibilityId(selectImage)`
+When I wait until element located `xpath(//android.widget.TextView[@text='Pictures'])` disappears
+
+
+Scenario: [iOS] Verify step: 'When I delete file `$filePath` from device'
+Meta:
+    @targetPlatform ios
+When I delete file `/Media/DCIM/100APPLE/IMG_0001.JPG` from device
+!-- The validation is not possible for this scenario yet. To see the changes in "Camera roll" after deleting image, it
+!-- is necessary to delete old photo database and restart device, which is not possible.
+
+
 Scenario: Verify step: 'When I activate application with bundle identifier `$bundleId`'
 When I activate application with bundle identifier `${browser-app}`
 When I wait until element located `accessibilityId(menuToggler)` disappears
@@ -297,9 +317,41 @@ Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` i
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
 When I reset context
 
-Examples:
-|firstItemAccessibilityId|secondItemAccessibilityId|
-|Item 1                  |Item 2                   |
+
+Scenario: Verify step: 'When I execute javascript `$script` with arguments:$args' on iOS
+Meta:
+    @targetPlatform ios
+When I execute javascript `mobile: swipe` with arguments:
+|value                 |type  |
+|{"direction" : "left"}|object|
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
+When I execute javascript `mobile: swipe` with arguments:
+|value                  |type  |
+|{"direction" : "right"}|object|
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
+
+
+Scenario: Verify step: 'When I execute javascript `$script` with arguments:$args' on Android
+Meta:
+    @targetPlatform android
+When I change context to element located `xpath(//android.view.ViewGroup[./android.widget.TextView[@content-desc="<firstItemAccessibilityId>"]])`
+When I initialize the scenario variable `x` with value `${context-x-coordinate}`
+When I initialize the scenario variable `y` with value `${context-y-coordinate}`
+When I initialize the scenario variable `width` with value `${context-width}`
+When I initialize the scenario variable `height` with value `#{eval(${context-height} / 3 )}`
+When I reset context
+When I execute javascript `mobile: swipeGesture` with arguments:
+|value                                                                                                                  |type  |
+|{"left": ${x}, "top": ${y}, "width": ${width}, "height": ${height}, "direction": "left", "percent": 1.0, "speed" : 300}|object|
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
+When I execute javascript `mobile: swipeGesture` with arguments:
+|value                                                                                                                    |type  |
+|{"left": ${x}, "top": ${y}, "width": ${width}, "height": ${height}, "direction": "right", "percent":  1.0, "speed" : 300}|object|
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
 
 
 Scenario: Verify steps: "When I scan barcode from screen and save result to $scopes variable `$variableName`"
@@ -363,9 +415,11 @@ Examples:
 Scenario: Verify step: 'When I long press $key key'
 Meta:
     @targetPlatform android
-When I long press POWER key
-When I reset context
-Then number of elements found by `xpath(//*[@text = 'Power off'])` is = `1`
+When I wait until element located `accessibilityId(menuToggler)` appears
+When I long press HOME key
+When I wait until element located `accessibilityId(menuToggler)` disappears
+When I activate application with bundle identifier `${main-app}`
+When I wait until element located `accessibilityId(menuToggler)` appears
 
 
 Scenario: Verify step: 'When I long press $key key'
@@ -378,6 +432,11 @@ When I wait until element located `accessibilityId(menuToggler)` disappears
 When I activate application with bundle identifier `${main-app}`
 When I wait until element located `accessibilityId(menuToggler)` appears
 
+Scenario: Verify step: 'When I change device screen orientation to $orientation'
+When I save `${size-attribute}` attribute value of element located `accessibilityId(menuToggler)` to scenario variable `portraitSize`
+When I change device screen orientation to LANDSCAPE
+When I save `${size-attribute}` attribute value of element located `accessibilityId(menuToggler)` to scenario variable `landscapeSize`
+Then `${portraitSize}` is not equal to `${landscapeSize}`
 
 Scenario: Verify step: 'When I close mobile application'
 When I close mobile application

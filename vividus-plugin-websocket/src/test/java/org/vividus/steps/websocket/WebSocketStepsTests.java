@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.vividus.context.VariableContext;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.util.UriUtils;
@@ -71,7 +71,7 @@ class WebSocketStepsTests
 
     @Spy private SimpleTestContext testContext;
     @Mock private VariableContext variableContext;
-    @Mock private SoftAssert softAssert;
+    @Mock private ISoftAssert softAssert;
 
     private WebSocketSteps webSocketSteps;
 

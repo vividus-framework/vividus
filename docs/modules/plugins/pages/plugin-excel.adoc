@@ -90,7 +90,7 @@ Create temporary excel file with specified content and save the path to the vari
 When I create temporary excel file with content:$content and put path to $scopes variable `$variableName`
 ----
 
-* `$content` - The data to be put to the excel file. Any valid ExamplesTable
+* `$content` - The data to be put to the excel file. Any valid xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name
 
@@ -113,7 +113,7 @@ When I create temporary excel file containing sheet with name `$sheetName` and c
 ----
 
 * `$sheetName` - Then name of the Excel sheet.
-* `$content` - The data to be put to the excel file. Any valid ExamplesTable
+* `$content` - The data to be put to the excel file. Any valid xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name
 
@@ -138,7 +138,7 @@ When I add sheet with name `$sheetName` and content:$content to excel file at pa
 ----
 
 * `$sheetName` - Then name of the sheet.
-* `$content` - The data to put into the sheet. Any valid ExamplesTable.
+* `$content` - The data to put into the sheet. Any valid xref:ROOT:glossary.adoc#_examplestable[ExamplesTable].
 * `$path` - The path to existing excel file.
 
 .Add sheet with pets
@@ -170,7 +170,7 @@ Then `$excelDocument` contains excel sheet with name `$name` and records:$record
 .Validate excel sheet by name
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true'
+When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true`
 Then the response code is = '200'
 Then `${response-as-bytes}` contains excel sheet with name `Mapping` and records:
 {valueSeparator=!}
@@ -196,7 +196,7 @@ Then `$excelDocument` contains excel sheet with index `$index` and records:$reco
 .Validate excel sheet by index
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true'
+When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true`
 Then the response code is = '200'
 Then `${response-as-bytes}` contains excel sheet with index `0` and records:
 {valueSeparator=!}

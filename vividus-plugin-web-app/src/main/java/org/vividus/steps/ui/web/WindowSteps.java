@@ -19,6 +19,7 @@ package org.vividus.steps.ui.web;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.not;
 
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import org.jbehave.core.annotations.When;
@@ -64,7 +65,20 @@ public class WindowSteps
     @When("I change window size to `$targetSize`")
     public void resizeCurrentWindow(Dimension targetSize)
     {
-        if (canTryToResize(targetSize))
+        boolean resizingPossible = true;
+        Optional<Dimension> optionalScreenResolution = webDriverManager.getScreenResolution();
+        if (optionalScreenResolution.isPresent())
+        {
+            Dimension screenResolution = optionalScreenResolution.get();
+
+            boolean fitsScreen = targetSize.getWidth() <= screenResolution.getWidth()
+                    && targetSize.getHeight() <= screenResolution.getHeight();
+            String assertionDescription = String.format(
+                    "The desired browser window size %dx%d fits the screen size (%dx%d)", targetSize.getWidth(),
+                    targetSize.getHeight(), screenResolution.getWidth(), screenResolution.getHeight());
+            resizingPossible = softAssert.assertTrue(assertionDescription, fitsScreen);
+        }
+        if (resizingPossible)
         {
             getWebDriver().manage().window().setSize(targetSize);
         }
@@ -154,16 +168,6 @@ public class WindowSteps
         }
         softAssert.assertThat("Current window has been closed", driver.getWindowHandles(),
                 not(contains(currentWindow)));
-    }
-
-    private boolean canTryToResize(Dimension targetSize)
-    {
-        return webDriverManager.checkWindowFitsScreen(targetSize, (fitsScreen, size) -> {
-            String assertionDescription = String.format(
-                    "The desired browser window size %dx%d fits the screen size (%dx%d)", targetSize.getWidth(),
-                    targetSize.getHeight(), size.getWidth(), size.getHeight());
-            softAssert.assertTrue(assertionDescription, fitsScreen);
-        }).orElse(true);
     }
 
     private WebDriver getWebDriver()

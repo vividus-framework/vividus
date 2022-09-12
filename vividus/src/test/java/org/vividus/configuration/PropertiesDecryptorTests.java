@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,71 +17,94 @@
 package org.vividus.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Properties;
 
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
-import org.junit.jupiter.api.Test;
+import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class PropertiesDecryptorTests
 {
+    private static final String ALGORITHM = "PBEWithMD5AndDES";
+    private static final String PASSWORD = "I test VIVIDUS encryption features";
     private static final String PROPERTY_KEY = "key";
-    private static final String ENCRYPTED_VALUE = "encrypted";
-    private static final String DECRYPTED_VALUE = "decrypted";
+    private static final String ENCRYPTED_VALUE = "ENC(KixcztydWWB6e3EYz4tzZg==)";
+    private static final String DECRYPTED_VALUE = "hello";
 
-    @Mock private StandardPBEStringEncryptor standardPBEStringEncryptor;
-
-    @InjectMocks
-    private PropertiesDecryptor propertiesDecryptor;
-
-    @Test
-    void shouldDecryptProperties()
+    private StandardPBEStringEncryptor createEncryptor()
     {
-        Properties properties = new Properties();
-        properties.setProperty(PROPERTY_KEY, "ENC(" + ENCRYPTED_VALUE + ")");
-        when(standardPBEStringEncryptor.decrypt(ENCRYPTED_VALUE)).thenReturn(DECRYPTED_VALUE);
-        Properties propertiesDecrypted = propertiesDecryptor.decryptProperties(properties);
-        assertEquals(DECRYPTED_VALUE, propertiesDecrypted.getProperty(PROPERTY_KEY));
+        return createEncryptor(PASSWORD);
     }
 
-    @Test
-    void shouldKeepNonEncryptedPropertiesAsIs()
+    private StandardPBEStringEncryptor createEncryptor(String password)
     {
-        var propertyValue = "any";
-        Properties properties = new Properties();
-        properties.setProperty(PROPERTY_KEY, propertyValue);
-        Properties propertiesDecrypted = propertiesDecryptor.decryptProperties(properties);
-        assertEquals(propertyValue, propertiesDecrypted.getProperty(PROPERTY_KEY));
-        verifyNoInteractions(standardPBEStringEncryptor);
+        var standardPBEStringEncryptor = new StandardPBEStringEncryptor();
+        standardPBEStringEncryptor.setAlgorithm(ALGORITHM);
+        standardPBEStringEncryptor.setPassword(password);
+        return standardPBEStringEncryptor;
     }
 
-    @Test
-    void shouldKeepNonStringPropertiesAsIs()
+    @ParameterizedTest
+    @CsvSource({
+            ENCRYPTED_VALUE + ", " + DECRYPTED_VALUE,
+            "username=open password=" + ENCRYPTED_VALUE + " secret-key=" + ENCRYPTED_VALUE + ", username=open password="
+                    + DECRYPTED_VALUE + " secret-key=" + DECRYPTED_VALUE
+    })
+    void shouldDecryptProperties(String encryptedValue, String decryptedValue)
     {
-        var propertyValue = new Object();
-        Properties properties = new Properties();
+        var properties = new Properties();
+        properties.setProperty(PROPERTY_KEY, encryptedValue);
+        var propertiesDecrypted = new PropertiesDecryptor(createEncryptor()).decryptProperties(properties);
+        assertEquals(decryptedValue, propertiesDecrypted.getProperty(PROPERTY_KEY));
+    }
+
+    static List<Object> propertiesToDoNotDecrypt()
+    {
+        return List.of(
+                "any",
+                new Object()
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("propertiesToDoNotDecrypt")
+    void shouldKeepNonStringPropertiesAsIs(Object propertyValue)
+    {
+        var standardPBEStringEncryptor = mock(StandardPBEStringEncryptor.class);
+
+        var properties = new Properties();
         properties.put(PROPERTY_KEY, propertyValue);
-        Properties propertiesDecrypted = propertiesDecryptor.decryptProperties(properties);
+        var propertiesDecrypted = new PropertiesDecryptor(standardPBEStringEncryptor).decryptProperties(properties);
         assertEquals(propertyValue, propertiesDecrypted.get(PROPERTY_KEY));
         verifyNoInteractions(standardPBEStringEncryptor);
     }
 
-    @Test
-    void shouldDecryptPartsOfValue()
+    @ParameterizedTest
+    @CsvSource({
+            ENCRYPTED_VALUE + ", invalid password",
+            "ENC(invalidvalue), " + PASSWORD
+    })
+    void shouldThrowExceptionOnInvalidValues(String propertyValue, String password)
     {
-        var decryptedFullValue = "username=open password=decrypted secret-key=decrypted";
-        var encryptedFullValue = "username=open password=ENC(encrypted) secret-key=ENC(encrypted)";
-        Properties properties = new Properties();
-        properties.setProperty(PROPERTY_KEY, encryptedFullValue);
-        when(standardPBEStringEncryptor.decrypt(ENCRYPTED_VALUE)).thenReturn(DECRYPTED_VALUE);
-        Properties propertiesDecrypted = propertiesDecryptor.decryptProperties(properties);
-        assertEquals(decryptedFullValue, propertiesDecrypted.getProperty(PROPERTY_KEY));
+        var properties = new Properties();
+        properties.setProperty(PROPERTY_KEY, propertyValue);
+        var decryptor = new PropertiesDecryptor(createEncryptor(password));
+        var exception = assertThrows(DecryptionFailedException.class, () -> decryptor.decryptProperties(properties));
+        assertEquals("Unable to decrypt the value '" + propertyValue + "' of property with name 'key'",
+                exception.getMessage());
+        var cause = exception.getCause();
+        assertEquals(EncryptionOperationNotPossibleException.class, cause.getClass());
+        assertNull(cause.getMessage());
     }
 }

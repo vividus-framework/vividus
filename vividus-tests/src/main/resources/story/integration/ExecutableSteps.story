@@ -44,6 +44,50 @@ When the condition `true` is true I do
 !|When I initialize the STORY variable `iterator` with value `#{eval(${iterator} + 1)}`|!
 Then `${iterator}` is = `2`
 
+Scenario: Verify step: "When the condition `$condition` is true I do$steps" (TRUE conditions)
+Meta:
+    @issueId 1746
+When I initialize the scenario variable `conditional-variable` with value `value`
+When the condition `<condition>` is true I do
+|step|
+|When I initialize the scenario variable `conditional-variable` with value `conditional-value`|
+Then `${conditional-variable}` is = `conditional-value`
+Examples:
+|condition|
+|1        |
+|t        |
+|T        |
+|true     |
+|TRUE     |
+|on       |
+|ON       |
+|yes      |
+|YES      |
+|Y        |
+|y        |
+
+Scenario: Verify step: "When the condition `$condition` is true I do$steps" (FALSE conditions)
+Meta:
+    @issueId 1746
+When I initialize the scenario variable `conditional-variable` with value `value`
+When the condition `<condition>` is true I do
+|step|
+|When I initialize the scenario variable `conditional-variable` with value `conditional-value`|
+Then `${conditional-variable}` is = `value`
+Examples:
+|condition|
+|0        |
+|f        |
+|F        |
+|false    |
+|FALSE    |
+|off      |
+|OFF      |
+|no       |
+|NO       |
+|N        |
+|n        |
+
 
 Scenario: Verify step: When variable `$name` is not set I do:$stepsToExecute
 

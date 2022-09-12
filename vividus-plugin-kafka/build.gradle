@@ -1,6 +1,6 @@
 project.description = 'Vividus plugin for Apache Kafka'
 
-ext.springKafkaVersion = '2.8.8'
+ext.springKafkaVersion = '2.9.0'
 
 dependencies {
     api project(':vividus-engine')
@@ -10,10 +10,11 @@ dependencies {
     implementation(group: 'org.springframework.kafka', name: 'spring-kafka', version: "${springKafkaVersion}")
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.0')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
-    testImplementation(group: 'org.mockito', name: 'mockito-inline', version: versions.mockito)
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.8.0')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-inline')
     testImplementation(group: 'org.springframework.kafka', name: 'spring-kafka-test', version: "${springKafkaVersion}")
-    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: versions.slf4jTest)
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '2.6.1')
 }

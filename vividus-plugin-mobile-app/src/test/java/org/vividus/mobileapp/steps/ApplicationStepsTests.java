@@ -18,6 +18,7 @@ package org.vividus.mobileapp.steps;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -39,12 +40,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.MutableCapabilities;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.mobileapp.action.ApplicationActions;
 import org.vividus.mobileapp.model.NamedEntry;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
-import org.vividus.selenium.manager.WebDriverManagerParameter;
+import org.vividus.selenium.WebDriverStartContext;
+import org.vividus.selenium.WebDriverStartParameters;
 
 import io.appium.java_client.ExecutesMethod;
 import io.appium.java_client.InteractsWithApps;
@@ -64,16 +66,20 @@ class ApplicationStepsTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ApplicationSteps.class);
 
-    @Mock private HasCapabilities hasCapabilities;
+    @Mock(extraInterfaces = HasCapabilities.class)
+    private WebDriver webDriverWithCapabilities;
+
     @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private IWebDriverManagerContext webDriverManagerContext;
+    @Mock private WebDriverStartContext webDriverStartContext;
     @Mock private ApplicationActions applicationActions;
     @InjectMocks private ApplicationSteps applicationSteps;
 
-    private void mockCommons()
+    private void mockCommons(Map<String, String> capabilities)
     {
-        when(hasCapabilities.getCapabilities()).thenReturn(new MutableCapabilities(Map.of(APP, APP_NAME)));
-        when(webDriverProvider.getUnwrapped(HasCapabilities.class)).thenReturn(hasCapabilities);
+        when(((HasCapabilities) webDriverWithCapabilities).getCapabilities()).thenReturn(
+                new MutableCapabilities(capabilities));
+        when(webDriverProvider.getUnwrapped(HasCapabilities.class)).thenReturn(
+                (HasCapabilities) webDriverWithCapabilities);
     }
 
     private void verifyLogs()
@@ -86,8 +92,8 @@ class ApplicationStepsTests
     {
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities(Map.of(KEY, VALUE));
 
-        mockCommons();
-        when(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES))
+        mockCommons(Map.of(APP, APP_NAME));
+        when(webDriverStartContext.get(WebDriverStartParameters.DESIRED_CAPABILITIES))
                 .thenReturn(desiredCapabilities);
 
         NamedEntry capability = new NamedEntry();
@@ -96,21 +102,32 @@ class ApplicationStepsTests
 
         applicationSteps.startMobileApplicationWithCapabilities(List.of(capability));
 
-        verify(webDriverManagerContext).putParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES,
+        verify(webDriverStartContext).put(WebDriverStartParameters.DESIRED_CAPABILITIES,
                 new DesiredCapabilities(Map.of(KEY, VALUE, CAPABILITY_NAME, CAPABILITY_VALUE)));
-        verifyNoMoreInteractions(webDriverProvider, hasCapabilities, webDriverManagerContext);
+        verifyNoMoreInteractions(webDriverProvider, webDriverWithCapabilities, webDriverStartContext);
         verifyLogs();
     }
 
     @Test
     void shouldStartMobileApplication()
     {
-        mockCommons();
+        mockCommons(Map.of(APP, APP_NAME));
 
         applicationSteps.startMobileApplication();
 
-        verifyNoMoreInteractions(webDriverProvider, hasCapabilities);
+        verifyNoMoreInteractions(webDriverProvider, webDriverWithCapabilities);
         verifyLogs();
+    }
+
+    @Test
+    void shouldStartMobileApplicationWithoutAppCapabilityReturned()
+    {
+        mockCommons(Map.of());
+
+        applicationSteps.startMobileApplication();
+
+        verifyNoMoreInteractions(webDriverProvider, webDriverWithCapabilities);
+        assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
     @Test

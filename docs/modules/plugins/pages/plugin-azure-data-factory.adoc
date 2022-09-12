@@ -81,7 +81,7 @@ When I collect runs of pipeline `$pipelineName` filtered by:$filters in Data Fac
 ----
 
 * `$pipelineName` - The name of the pipeline to find runs.
-* `$filters` - The ExamplesTable with filters to be applied to the pipeline runs to limit the resulting set.
+* `$filters` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with filters to be applied to the pipeline runs to limit the resulting set.
 +
 .The supported filter types
 [cols="1,1,2", options="header"]

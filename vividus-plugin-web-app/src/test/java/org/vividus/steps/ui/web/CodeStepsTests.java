@@ -17,8 +17,6 @@
 package org.vividus.steps.ui.web;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,20 +26,12 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.node.TextNode;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,8 +40,6 @@ import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.steps.ui.web.model.JsArgument;
-import org.vividus.steps.ui.web.model.JsArgumentType;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
@@ -65,8 +53,6 @@ class CodeStepsTests
 {
     private static final String JS_RESULT_ASSERTION_MESSAGE = "Returned result is not null";
     private static final String JS_CODE = "return 'value'";
-    private static final String JS_ARGUMENT_ERROR_MESSAGE = "Please, specify command argument values and types";
-    private static final String BODY = "body";
     private static final String FAVICON = "Favicon";
     private static final String FIELD_VALUE_FROM_THE_JSON_OBJECT_IS_EQUAL_TO_VALUE =
             "Field value from the JSON object is equal to 'value'";
@@ -183,63 +169,6 @@ class CodeStepsTests
                 1, ComparisonRule.EQUAL_TO);
     }
 
-    static Stream<Arguments> executeJavascriptWithArguments()
-    {
-        // CHECKSTYLE:OFF
-        return Stream.of(
-            Arguments.of("document.querySelector(arguments[0])", createJsArgument(JsArgumentType.STRING, BODY),                        BODY                       ),
-            Arguments.of("remote:throttle",                      createJsArgument(JsArgumentType.OBJECT, "{\"condition\": \"Wifi\"}"), Map.of("condition", "Wifi"))
-        );
-        // CHECKSTYLE:ON
-    }
-
-    @ParameterizedTest
-    @MethodSource("executeJavascriptWithArguments")
-    void testExecuteJavascriptWithStringArguments(String jsCode, JsArgument argument, Object arg)
-    {
-        codeSteps.executeJavascriptWithArguments(jsCode, Collections.singletonList(argument));
-        verify(javascriptActions).executeScript(jsCode, arg);
-    }
-
-    @Test
-    void testExecuteJavascriptWithEmptyArguments()
-    {
-        String jsCode = "document.readyState";
-        codeSteps.executeJavascriptWithArguments(jsCode, List.of());
-        verify(javascriptActions).executeScript(jsCode);
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-        ",       body",
-        "OBJECT,     "
-    })
-    void testExecuteJavascriptWithArgumentsNoType(JsArgumentType type, String value)
-    {
-        JsArgument argument = createJsArgument(type, value);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> codeSteps.executeJavascriptWithArguments("document.querySelector(arguments[0])",
-                    Collections.singletonList(argument)));
-        assertEquals(JS_ARGUMENT_ERROR_MESSAGE, exception.getMessage());
-    }
-
-    @Test
-    void testGettingValueFromJS()
-    {
-        when(javascriptActions.executeScript(JS_CODE)).thenReturn(VALUE);
-        when(softAssert.assertNotNull(JS_RESULT_ASSERTION_MESSAGE, VALUE)).thenReturn(true);
-        codeSteps.saveValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
-        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, VALUE);
-    }
-
-    @Test
-    void testGettingValueFromJSNullIsReturned()
-    {
-        codeSteps.saveValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
-        verify(softAssert).assertNotNull(JS_RESULT_ASSERTION_MESSAGE, null);
-        verifyNoInteractions(variableContext);
-    }
-
     @Test
     void testGettingValueFromAsyncJS()
     {
@@ -255,14 +184,6 @@ class CodeStepsTests
         codeSteps.saveValueFromAsyncJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
         verify(softAssert).assertNotNull(JS_RESULT_ASSERTION_MESSAGE, null);
         verifyNoInteractions(variableContext);
-    }
-
-    private static JsArgument createJsArgument(JsArgumentType type, String value)
-    {
-        JsArgument argument = new JsArgument();
-        argument.setType(type);
-        argument.setValue(value);
-        return argument;
     }
 
     private void mockScriptActions(boolean isValueExist)

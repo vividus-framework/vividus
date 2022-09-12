@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
@@ -36,8 +37,8 @@ import org.slf4j.LoggerFactory;
 import org.vividus.mobileapp.action.ApplicationActions;
 import org.vividus.mobileapp.model.NamedEntry;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
-import org.vividus.selenium.manager.WebDriverManagerParameter;
+import org.vividus.selenium.WebDriverStartContext;
+import org.vividus.selenium.WebDriverStartParameters;
 import org.vividus.util.property.PropertyParser;
 
 import io.appium.java_client.ExecutesMethod;
@@ -49,14 +50,14 @@ public class ApplicationSteps
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationSteps.class);
 
     private final IWebDriverProvider webDriverProvider;
-    private final IWebDriverManagerContext webDriverManagerContext;
+    private final WebDriverStartContext webDriverStartContext;
     private final ApplicationActions applicationActions;
 
-    public ApplicationSteps(IWebDriverProvider webDriverProvider, IWebDriverManagerContext webDriverManagerContext,
+    public ApplicationSteps(IWebDriverProvider webDriverProvider, WebDriverStartContext webDriverStartContext,
             ApplicationActions applicationActions)
     {
         this.webDriverProvider = webDriverProvider;
-        this.webDriverManagerContext = webDriverManagerContext;
+        this.webDriverStartContext = webDriverStartContext;
         this.applicationActions = applicationActions;
     }
 
@@ -68,11 +69,11 @@ public class ApplicationSteps
     @Given("I start mobile application with capabilities:$capabilities")
     public void startMobileApplicationWithCapabilities(List<NamedEntry> capabilities)
     {
-        DesiredCapabilities desiredCapabilities = webDriverManagerContext
-                .getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES);
+        DesiredCapabilities desiredCapabilities = webDriverStartContext
+                .get(WebDriverStartParameters.DESIRED_CAPABILITIES);
         Map<String, Object> capabilitiesContainer = new HashMap<>(desiredCapabilities.asMap());
         capabilities.forEach(c -> PropertyParser.putByPath(capabilitiesContainer, c.getName(), c.getValue()));
-        webDriverManagerContext.putParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES,
+        webDriverStartContext.put(WebDriverStartParameters.DESIRED_CAPABILITIES,
                 new DesiredCapabilities(capabilitiesContainer));
         startMobileApplication();
     }
@@ -83,12 +84,12 @@ public class ApplicationSteps
     @Given("I start mobile application")
     public void startMobileApplication()
     {
-        HasCapabilities driverWithCapabilities = webDriverProvider.getUnwrapped(HasCapabilities.class);
-        LOGGER.atInfo()
-                .addArgument(
-                        () -> CapabilityHelpers.getCapability(driverWithCapabilities.getCapabilities(), "app",
-                                String.class))
-                .log("Started application located at {}");
+        Capabilities capabilities = webDriverProvider.getUnwrapped(HasCapabilities.class).getCapabilities();
+        String appCapability = CapabilityHelpers.getCapability(capabilities, "app", String.class);
+        if (appCapability != null)
+        {
+            LOGGER.info("Started application located at {}", appCapability);
+        }
     }
 
     /**

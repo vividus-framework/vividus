@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,170 +16,19 @@
 
 package org.vividus.zephyr.facade;
 
-import static org.apache.commons.lang3.Validate.notBlank;
-import static org.apache.commons.lang3.Validate.notEmpty;
-
 import java.io.IOException;
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalInt;
 
-import org.apache.commons.lang3.StringUtils;
-import org.vividus.jira.JiraClient;
-import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
-import org.vividus.jira.JiraFacade;
-import org.vividus.jira.model.Project;
-import org.vividus.jira.model.Version;
-import org.vividus.util.json.JsonPathUtils;
 import org.vividus.zephyr.configuration.ZephyrConfiguration;
-import org.vividus.zephyr.configuration.ZephyrExporterConfiguration;
-import org.vividus.zephyr.configuration.ZephyrExporterProperties;
-import org.vividus.zephyr.model.TestCaseStatus;
 
-public class ZephyrFacade implements IZephyrFacade
+public interface ZephyrFacade
 {
-    private static final String ZAPI_ENDPOINT = "/rest/zapi/latest/";
+    ZephyrConfiguration prepareConfiguration() throws IOException, JiraConfigurationException;
 
-    private final JiraFacade jiraFacade;
-    private final JiraClientProvider jiraClientProvider;
-    private final ZephyrExporterConfiguration zephyrExporterConfiguration;
-    private final ZephyrExporterProperties zephyrExporterProperties;
+    Integer createExecution(String execution) throws IOException, JiraConfigurationException;
 
-    public ZephyrFacade(JiraFacade jiraFacade, JiraClientProvider jiraClientProvider,
-            ZephyrExporterConfiguration zephyrExporterConfiguration, ZephyrExporterProperties zephyrExporterProperties)
-    {
-        this.jiraFacade = jiraFacade;
-        this.jiraClientProvider = jiraClientProvider;
-        this.zephyrExporterConfiguration = zephyrExporterConfiguration;
-        this.zephyrExporterProperties = zephyrExporterProperties;
-    }
+    void updateExecutionStatus(String executionId, String executionBody) throws IOException, JiraConfigurationException;
 
-    @Override
-    public Integer createExecution(String execution) throws IOException, JiraConfigurationException
-    {
-        String responseBody = getJiraClient().executePost(ZAPI_ENDPOINT + "execution/", execution);
-        List<Integer> executionId = JsonPathUtils.getData(responseBody, "$..id");
-        return executionId.get(0);
-    }
-
-    @Override
-    public void updateExecutionStatus(int executionId, String executionBody)
-            throws IOException, JiraConfigurationException
-    {
-        getJiraClient().executePut(String.format(ZAPI_ENDPOINT + "execution/%s/execute", executionId), executionBody);
-    }
-
-    @Override
-    public ZephyrConfiguration prepareConfiguration() throws IOException, JiraConfigurationException
-    {
-        ZephyrConfiguration zephyrConfiguration = new ZephyrConfiguration();
-
-        Project project = jiraFacade.getProject(zephyrExporterConfiguration.getProjectKey());
-        String projectId = project.getId();
-        zephyrConfiguration.setProjectId(projectId);
-
-        String versionId = findVersionId(project);
-        zephyrConfiguration.setVersionId(versionId);
-
-        String projectAndVersionUrlQuery = String.format("projectId=%s&versionId=%s", projectId, versionId);
-
-        String cycleId = findCycleId(projectAndVersionUrlQuery);
-        zephyrConfiguration.setCycleId(cycleId);
-
-        if (StringUtils.isNotBlank(zephyrExporterConfiguration.getFolderName()))
-        {
-            String folderId = findFolderId(cycleId, projectAndVersionUrlQuery);
-            zephyrConfiguration.setFolderId(folderId);
-        }
-
-        Map<TestCaseStatus, Integer> statusIdMap = getExecutionStatuses();
-        zephyrConfiguration.setTestStatusPerZephyrIdMapping(statusIdMap);
-
-        return zephyrConfiguration;
-    }
-
-    private String findVersionId(Project project)
-    {
-        return project.getVersions()
-                .stream()
-                .filter(v -> zephyrExporterConfiguration.getVersionName().equals(v.getName()))
-                .findFirst()
-                .map(Version::getId)
-                .orElseThrow(() -> new IllegalArgumentException(String.format(
-                        "Version with name '%s' does not exist", zephyrExporterConfiguration.getVersionName())));
-    }
-
-    private String findCycleId(String projectAndVersionUrlQuery) throws IOException, JiraConfigurationException
-    {
-        String json = getJiraClient().executeGet(ZAPI_ENDPOINT + "cycle?" + projectAndVersionUrlQuery);
-        Map<String, Map<String, String>> cycles = JsonPathUtils.getData(json, "$");
-        cycles.remove("recordsCount");
-        Iterator<Map.Entry<String, Map<String, String>>> itr = cycles.entrySet().iterator();
-        String cycleId = "";
-        while (itr.hasNext())
-        {
-            Map.Entry<String, Map<String, String>> map = itr.next();
-            if (map.getValue().get("name").equals(zephyrExporterConfiguration.getCycleName()))
-            {
-                cycleId = map.getKey();
-                break;
-            }
-        }
-        notBlank(cycleId, "Cycle with name '%s' does not exist", zephyrExporterConfiguration.getCycleName());
-        return cycleId;
-    }
-
-    private String findFolderId(String cycleId, String projectAndVersionUrlQuery)
-            throws IOException, JiraConfigurationException
-    {
-        String json = getJiraClient()
-                .executeGet(ZAPI_ENDPOINT + "cycle/" + cycleId + "/folders?" + projectAndVersionUrlQuery);
-        List<Integer> folderId = JsonPathUtils.getData(json, String.format("$.[?(@.folderName=='%s')].folderId",
-                zephyrExporterConfiguration.getFolderName()));
-        notEmpty(folderId, "Folder with name '%s' does not exist", zephyrExporterConfiguration.getFolderName());
-        return folderId.get(0).toString();
-    }
-
-    private Map<TestCaseStatus, Integer> getExecutionStatuses() throws IOException, JiraConfigurationException
-    {
-        String json = getJiraClient().executeGet(ZAPI_ENDPOINT + "util/testExecutionStatus");
-        Map<TestCaseStatus, Integer> testStatusPerZephyrIdMapping = new EnumMap<>(TestCaseStatus.class);
-        zephyrExporterConfiguration.getStatuses().entrySet().forEach(s ->
-        {
-            List<Integer> statusId = JsonPathUtils.getData(json, String.format("$.[?(@.name=='%s')].id", s.getValue()));
-            notEmpty(statusId, "Status '%s' does not exist", s.getValue());
-            testStatusPerZephyrIdMapping.put(s.getKey(), statusId.get(0));
-        });
-        return testStatusPerZephyrIdMapping;
-    }
-
-    @Override
-    public OptionalInt findExecutionId(String issueId) throws IOException, JiraConfigurationException
-    {
-        String json = getJiraClient().executeGet(ZAPI_ENDPOINT + "execution?issueId=" + issueId);
-        String jsonpath;
-        if (StringUtils.isNotBlank(zephyrExporterConfiguration.getFolderName()))
-        {
-            jsonpath = String.format("$..[?(@.versionName=='%s' && @.cycleName=='%s' && @.folderName=='%s')].id",
-                zephyrExporterConfiguration.getVersionName(), zephyrExporterConfiguration.getCycleName(),
-                zephyrExporterConfiguration.getFolderName());
-        }
-        else
-        {
-            jsonpath = String.format("$..[?(@.versionName=='%s' && @.cycleName=='%s')].id",
-                    zephyrExporterConfiguration.getVersionName(), zephyrExporterConfiguration.getCycleName());
-        }
-        List<Integer> executionId = JsonPathUtils.getData(json, jsonpath);
-        return executionId.size() != 0 ? OptionalInt.of(executionId.get(0)) : OptionalInt.empty();
-    }
-
-    private JiraClient getJiraClient() throws JiraConfigurationException
-    {
-        return jiraClientProvider
-                .getByJiraConfigurationKey(Optional.ofNullable(zephyrExporterProperties.getJiraInstanceKey()));
-    }
+    OptionalInt findExecutionId(String issueId) throws IOException, JiraConfigurationException;
 }

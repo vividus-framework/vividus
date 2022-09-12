@@ -190,7 +190,7 @@ ${response-as-bytes}
 .Save excel into temp folder
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true'
+When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true`
 Then the response code is = '200'
 When I create temporary file with name `excel` and content `${response-as-bytes}` and put path to SCENARIO variable `excelPath`
 ----
@@ -294,7 +294,7 @@ Then '${responseStatusCode}' is = '200'
 === Set HTTP request body
 
 Sets HTTP request body that will be used while executing the request. In the case of textual content the default HTTP
-request header with name `Content-Type` and value `text/plain; charset=UTF-8` is set. 
+request header with name `Content-Type` and value `text/plain; charset=UTF-8` is set.
 
 WARNING: No HTTP request header is set in the case of binary content.
 
@@ -330,7 +330,7 @@ Sets https://tools.ietf.org/html/rfc7578[multipart] request entity that will be 
 Given multipart request:$requestParts
 ----
 
-where `requestParts` is `ExamplesTable` representing the list of the request parts with the following columns:
+where `requestParts` is xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing the list of the request parts with the following columns:
 
 * `type` - One of request part types: `STRING`, `FILE`, `BINARY`.
 * `name` - The request part name.
@@ -365,9 +365,9 @@ In case if `Content-Type` is `text/plain` <<Set HTTP request body>> should be us
 Given form data request:$parameters
 ----
 
-* `$parameters` -  `ExamplesTable` representing list of parameters with columns `name` and `value` specifying form data request.
+* `$parameters` -  The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing list of parameters with columns `name` and `value` specifying form data request.
 
-.Set ExamplesTable HTTP request body
+.Set form data HTTP request body
 [source,gherkin]
 ----
 Given form data request:
@@ -387,7 +387,7 @@ Adds https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields[HTT
 When I add request headers:$headers
 ----
 
-* `headers` - `ExamplesTable` representing the list of the headers with columns `name` and `value` specifying HTTP header
+* `headers` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing the list of the headers with columns `name` and `value` specifying HTTP header
 
 .Add request header with name Accept-Language and value en-ru
 [source,gherkin]
@@ -475,7 +475,7 @@ When I wait for presence of element by `$.data.testData` with `PT5S` polling int
 |{headerSeparator=!,valueSeparator=!}  |
 |!name          !value                !|
 |!Authorization !${accessToken}       !|
-|When I issue a HTTP GET request for a resource with the URL '${requestUrl}'|
+|When I execute HTTP GET request for resource with URL `${requestUrl}`|
 ----
 
 === Validate secure protocols supported by server
@@ -572,7 +572,7 @@ When I save content of `$archiveData` archive entries to variables:$parameters
 ** [subs=+quotes]`*path*` - The path to the archive entry.
 ** [subs=+quotes]`*variable*` - The name of variable to save the data.
 ** [subs=+quotes]`*scopes*` -  xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-** [subs=+quotes]`*outputFormat*` - Defines output format of the entriy, either `TEXT` or `BASE64`.
+** [subs=+quotes]`*outputFormat*` - Defines output format of the entry, either `TEXT` or `BASE64`.
 
 .Save archive entries
 [source,gherkin]
@@ -675,7 +675,7 @@ When I save value of HTTP cookie with name `$cookieName` to $scopes variable `$v
 .Get cookie with name `cookieName` and save its value to scenario variable `value`
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'https://httpbin.org/cookies/set/cookieName/cookieValue'
+When I execute HTTP GET request for resource with URL `https://httpbin.org/cookies/set/cookieName/cookieValue`
 When I save value of HTTP cookie with name `cookieName` to scenario variable `value`
 Then '${value}' is equal to 'cookieValue'
 ----

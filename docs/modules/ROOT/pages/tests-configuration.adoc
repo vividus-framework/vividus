@@ -163,7 +163,7 @@ configuration.profiles=mobile_app/android
 
 ==== Built-in profiles
 
-Some of the plugins, like xref:plugins:plugin-web-app.adoc[web-app], have built-in profiles. You can find them in project explorer after installation by the following path:
+Some of the plugins, like xref:plugins:plugin-web-app.adoc#_profiles[web-app], have built-in profiles. You can find them in project explorer after installation by the following path:
 
 [source,dir]
 ----
@@ -360,12 +360,6 @@ bdd.all-meta-filters=groovy: !this['test-stand']
 |Used to specify layout, using which marked story or scenario should be executed. In case if this meta tag is not specified, default (`desktop`) value is used for web applications.
 |`@layout desktop`
 
-|@browserWindowSize
-|Any browser window size in pixels, e.g. `800x600`. Note: browser window size should be smaller than the current screen resolution.
-a|WARNING: This meta tag is deprecated and will be removed in VIVIDUS 0.5.0. The replacement is the xref:plugins:plugin-web-app.adoc#_resize_the_current_browser_window[step resizing browser window].
-
-Used to specify browser window size. It can be applied on both story and scenario levels. In case, if browser size differs between adjacent scenarios, browser window will be simply resized to desired values, browser session will not be restarted. If the tag is not set for story or scenario, the browser window will be maximized to the screen size during local test execution.
-|`@browserWindowSize 1024x768`
 |===
 
 == Story Prioritization
@@ -400,23 +394,6 @@ Meta: @story_priority 15
 
 Scenario: Time consuming test
 When I perform highly time consuming task
-----
-
-== ExamplesTable
-
-=== Mapping values to `null`-s
-
-By default all empty values in `ExamplesTable` are treated as empty strings. However
-it might be required to map certain values to `null`-s. It can be done at the step
-implementation level or by applying the generic approach at the table level:
-
-[source,gherkin]
-----
-{nullPlaceholder=NULL}
-|header |
-|value 1|
-|NULL   |
-|value 3|
 ----
 
 == Exit codes
@@ -498,11 +475,6 @@ Here one could find description of general HTTP properties applied across all th
 |The name of the https://hc.apache.org/httpcomponents-client-4.5.x/current/tutorial/html/statemgmt.html#d5e515[cookie specification] to be used for HTTP state management
 
 4+^.^|[#_authentication]_Authentication_
-
-|Property Name
-|Acceptable values
-|Default
-|Description
 
 |`http.auth.username`
 |character sequence

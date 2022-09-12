@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.azure.cosmos.model.CosmosDbContainer;
 import org.vividus.context.VariableContext;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.variable.VariableScope;
 
@@ -53,7 +53,7 @@ class CosmosDbStepsTests
     @Mock private VariableContext variableContext;
     @Mock private PropertyMappedCollection<CosmosDbContainer> containers;
     @Mock private CosmosDbService cosmosDbService;
-    @Mock private SoftAssert softAssert;
+    @Mock private ISoftAssert softAssert;
 
     @InjectMocks private CosmosDbSteps dbSteps;
 

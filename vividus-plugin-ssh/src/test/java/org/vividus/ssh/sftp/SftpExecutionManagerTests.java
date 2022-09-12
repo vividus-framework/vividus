@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.Test;
 import org.vividus.ssh.CommandExecutionException;
 import org.vividus.ssh.Commands;
-import org.vividus.ssh.ServerConfiguration;
+import org.vividus.ssh.SshConnectionParameters;
 
 class SftpExecutionManagerTests
 {
@@ -32,13 +32,13 @@ class SftpExecutionManagerTests
     void shouldRunExecution() throws CommandExecutionException
     {
         SftpExecutor executor = mock(SftpExecutor.class);
-        ServerConfiguration serverConfiguration = new ServerConfiguration();
+        SshConnectionParameters sshConnectionParameters = new SshConnectionParameters();
         Commands commands = new Commands("sftp-command");
         SftpOutput sftpOutput = new SftpOutput();
-        when(executor.execute(serverConfiguration, commands)).thenReturn(sftpOutput);
+        when(executor.execute(sshConnectionParameters, commands)).thenReturn(sftpOutput);
         SftpOutputPublisher outputPublisher = mock(SftpOutputPublisher.class);
         SftpExecutionManager executionManager = new SftpExecutionManager(executor, outputPublisher);
-        SftpOutput actual = executionManager.run(serverConfiguration, commands);
+        SftpOutput actual = executionManager.run(sshConnectionParameters, commands);
         assertEquals(sftpOutput, actual);
         verify(outputPublisher).publishOutput(sftpOutput);
     }

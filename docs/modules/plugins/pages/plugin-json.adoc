@@ -42,7 +42,7 @@ When I save JSON element value from context by JSON path `$jsonPath` to $scopes 
 .Validate the author of the first book
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'http://jsonpath.herokuapp.com/json/goessner.json'
+When I execute HTTP GET request for resource with URL `http://jsonpath.herokuapp.com/json/goessner.json`
 When I save JSON element value from context by JSON path `$.store.book[0].author` to scenario variable `author-of-first-book`
 Then `${author-of-first-book}` is equal to `Nigel Rees`
 ----
@@ -65,7 +65,7 @@ When I save JSON element value from `$json` by JSON path `$jsonPath` to $scopes 
 .Validate the title of the second book
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'http://jsonpath.herokuapp.com/json/goessner.json'
+When I execute HTTP GET request for resource with URL `http://jsonpath.herokuapp.com/json/goessner.json`
 When I save JSON element value from `${response}` by JSON path `$.store.book[1].title` to scenario variable `title-of-second-book`
 Then `${title-of-second-book}` is equal to `Sword of Honour`
 ----
@@ -91,7 +91,7 @@ Then JSON element value from context by JSON path `$jsonPath` $comparisonRule `$
 .Validate the price of the third book is less than 9
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'http://jsonpath.herokuapp.com/json/goessner.json'
+When I execute HTTP GET request for resource with URL `http://jsonpath.herokuapp.com/json/goessner.json`
 Then JSON element value from context by JSON path `$.store.book[2].price` is less than `9`
 ----
 
@@ -114,10 +114,10 @@ Then JSON element value from `$json` by JSON path `$jsonPath` $comparisonRule `$
   ** `array` and `object` are complex types and must be validated using another steps dedicated for JSON elements.
 * `$expectedValue` - The expected value of JSON element to match according to the comparison rule.
 
-.Validate the price of the fouth book is greater than 22.50
+.Validate the price of the fourth book is greater than 22.50
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'http://jsonpath.herokuapp.com/json/goessner.json'
+When I execute HTTP GET request for resource with URL `http://jsonpath.herokuapp.com/json/goessner.json`
 Then JSON element value from `${response}` by JSON path `$.store.book[3].price` is greater than `22.50`
 ----
 
@@ -158,7 +158,7 @@ When I convert JSON `$json` to $scopes variable `$variableName`
 .Validate the title of the second book
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'http://jsonpath.herokuapp.com/json/goessner.json'
+When I execute HTTP GET request for resource with URL `http://jsonpath.herokuapp.com/json/goessner.json`
 When I convert JSON `${response}` to scenario variable `jsonData`
 Then `${jsonData.store.book[1].title}` is equal to `Sword of Honour`
 ----
@@ -178,7 +178,7 @@ When I convert JSON from context to $scopes variable `$variableName`
 .Validate the price of the second book
 [source,gherkin]
 ----
-When I issue a HTTP GET request for a resource with the URL 'http://jsonpath.herokuapp.com/json/goessner.json'
+When I execute HTTP GET request for resource with URL `http://jsonpath.herokuapp.com/json/goessner.json`
 When I convert JSON from context to scenario variable `jsonData`
 Then `${jsonData.store.book[1].price}` is = `12.99`
 ----

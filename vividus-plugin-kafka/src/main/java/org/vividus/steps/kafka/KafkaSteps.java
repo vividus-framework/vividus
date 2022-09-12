@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import org.springframework.kafka.listener.GenericMessageListenerContainer;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
 import org.vividus.context.VariableContext;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.testcontext.TestContext;
 import org.vividus.util.property.IPropertyParser;
@@ -78,10 +78,10 @@ public class KafkaSteps
 
     private final TestContext testContext;
     private final VariableContext variableContext;
-    private final SoftAssert softAssert;
+    private final ISoftAssert softAssert;
 
     public KafkaSteps(IPropertyParser propertyParser, TestContext testContext, VariableContext variableContext,
-            SoftAssert softAssert)
+            ISoftAssert softAssert)
     {
         this.kafkaTemplates = convert("kafka.producer.", propertyParser, config -> {
             config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.selenium;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -44,8 +43,6 @@ import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
 import org.vividus.proxy.IProxy;
-import org.vividus.selenium.manager.IWebDriverManagerContext;
-import org.vividus.selenium.manager.WebDriverManagerParameter;
 
 @ExtendWith(MockitoExtension.class)
 class VividusWebDriverFactoryTests
@@ -55,7 +52,7 @@ class VividusWebDriverFactoryTests
     private static final String STORY_FILE = TEST + ".story";
 
     @Mock private RunContext runContext;
-    @Mock private IWebDriverManagerContext webDriverManagerContext;
+    @Mock private WebDriverStartContext webDriverStartContext;
     @Mock private IWebDriverFactory webDriverFactory;
     @Mock private WebDriverEventListener webDriverEventListener;
     @Mock private IProxy proxy;
@@ -67,7 +64,7 @@ class VividusWebDriverFactoryTests
     @BeforeEach
     public void beforeEach()
     {
-        vividusWebDriverFactory = new VividusWebDriverFactory(true, webDriverManagerContext, runContext,
+        vividusWebDriverFactory = new VividusWebDriverFactory(true, webDriverStartContext, runContext,
                 Optional.empty(), webDriverFactory, proxy);
     }
 
@@ -81,7 +78,7 @@ class VividusWebDriverFactoryTests
         List<WebDriverEventListener> eventListeners = List.of(webDriverEventListener);
         vividusWebDriverFactory.setWebDriverEventListeners(eventListeners);
 
-        when(webDriverManagerContext.getParameter(WebDriverManagerParameter.DESIRED_CAPABILITIES))
+        when(webDriverStartContext.get(WebDriverStartParameters.DESIRED_CAPABILITIES))
                 .thenReturn(new DesiredCapabilities());
         when(runContext.getRunningStory()).thenReturn(runningStory);
         VividusWebDriver vividusWebDriver = vividusWebDriverFactory.create();
@@ -89,7 +86,6 @@ class VividusWebDriverFactoryTests
         assertEquals(driver, ((WrapsDriver) eventFiringDriver).getWrappedDriver());
         assertEquals(eventListeners, FieldUtils.readField(eventFiringDriver, "eventListeners", true));
         assertEquals(remoteExecution, vividusWebDriver.isRemote());
-        verify(webDriverManagerContext).reset(WebDriverManagerParameter.DESIRED_CAPABILITIES);
     }
 
     private static RunningStory createRunningStory(String browserName)

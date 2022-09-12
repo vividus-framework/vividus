@@ -6,11 +6,12 @@ dependencies {
     implementation project(':vividus-soft-assert')
 
     api(group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.2')
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: versions.commonsLang3)
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: versions.junit)
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.0')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: versions.hamcrest)
-    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter', version: versions.mockito)
-    testImplementation(group: 'org.mockito', name: 'mockito-inline', version: versions.mockito)
+    testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.8.0')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation(group: 'org.mockito', name: 'mockito-inline')
 }

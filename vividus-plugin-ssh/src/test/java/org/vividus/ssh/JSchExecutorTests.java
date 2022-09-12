@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,6 @@ import com.jcraft.jsch.agentproxy.RemoteIdentityRepository;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
-import org.mockito.MockedConstruction;
-import org.mockito.MockedStatic;
 import org.vividus.ssh.exec.SshOutput;
 
 class JSchExecutorTests
@@ -53,17 +51,17 @@ class JSchExecutorTests
     @Test
     void shouldExecuteSuccessfullyWithoutAgentForwarding() throws JSchException, CommandExecutionException
     {
-        ServerConfiguration server = getDefaultServerConfiguration();
-        Session session = mock(Session.class);
-        try (MockedConstruction<JSch> jSchMock = mockConstruction(JSch.class,
+        var server = getDefaultServerConfiguration();
+        var session = mock(Session.class);
+        try (var jSchMock = mockConstruction(JSch.class,
                 (mock, context) -> when(mock.getSession(server.getUsername(), server.getHost(), server.getPort()))
                         .thenReturn(session)))
         {
-            ChannelExec channelExec = mockChannelOpening(session);
-            SshOutput actual = new TestJSchExecutor().execute(server, COMMANDS);
+            var channelExec = mockChannelOpening(session);
+            var actual = new TestJSchExecutor().execute(server, COMMANDS);
             assertEquals(SSH_OUTPUT, actual);
-            JSch jSch = jSchMock.constructed().get(0);
-            InOrder ordered = inOrder(jSch, session, channelExec);
+            var jSch = jSchMock.constructed().get(0);
+            var ordered = inOrder(jSch, session, channelExec);
             ordered.verify(jSch).addIdentity(IDENTITY_NAME, server.getPrivateKey().getBytes(StandardCharsets.UTF_8),
                     server.getPublicKey().getBytes(StandardCharsets.UTF_8),
                     server.getPassphrase().getBytes(StandardCharsets.UTF_8));
@@ -75,28 +73,29 @@ class JSchExecutorTests
     void shouldExecuteSuccessfullyWithAgentForwarding()
             throws AgentProxyException, JSchException, CommandExecutionException
     {
-        ServerConfiguration server = getDefaultServerConfiguration();
+        var server = getDefaultServerConfiguration();
         server.setAgentForwarding(true);
-        Session session = mock(Session.class);
-        Connector connector = mock(Connector.class);
-        try (MockedStatic<ConnectorFactory> connectorFactoryMock = mockStatic(ConnectorFactory.class);
-                MockedConstruction<JSch> jSchMock = mockConstruction(JSch.class, (mock, context) -> when(
-                        mock.getSession(server.getUsername(), server.getHost(), server.getPort())).thenReturn(session));
-                MockedConstruction<RemoteIdentityRepository> remoteIdentityRepositoryMock = mockConstruction(
-                        RemoteIdentityRepository.class, (mock, context) -> {
-                            assertEquals(1, context.getCount());
-                            assertEquals(List.of(connector), context.arguments());
-                        })
+        var session = mock(Session.class);
+        var connector = mock(Connector.class);
+        try (var connectorFactoryMock = mockStatic(ConnectorFactory.class);
+            var jSchMock = mockConstruction(JSch.class, (mock, context) -> when(
+                mock.getSession(server.getUsername(), server.getHost(), server.getPort())).thenReturn(session)
+            );
+            var remoteIdentityRepositoryMock = mockConstruction(
+                    RemoteIdentityRepository.class, (mock, context) -> {
+                        assertEquals(1, context.getCount());
+                        assertEquals(List.of(connector), context.arguments());
+                })
         )
         {
-            ConnectorFactory connectorFactory = mock(ConnectorFactory.class);
+            var connectorFactory = mock(ConnectorFactory.class);
             connectorFactoryMock.when(ConnectorFactory::getDefault).thenReturn(connectorFactory);
             when(connectorFactory.createConnector()).thenReturn(connector);
-            ChannelExec channelExec = mockChannelOpening(session);
-            SshOutput actual = new TestJSchExecutor().execute(server, COMMANDS);
+            var channelExec = mockChannelOpening(session);
+            var actual = new TestJSchExecutor().execute(server, COMMANDS);
             assertEquals(SSH_OUTPUT, actual);
-            JSch jSch = jSchMock.constructed().get(0);
-            InOrder ordered = inOrder(jSch, session, channelExec);
+            var jSch = jSchMock.constructed().get(0);
+            var ordered = inOrder(jSch, session, channelExec);
             ordered.verify(jSch).setIdentityRepository(remoteIdentityRepositoryMock.constructed().get(0));
             verifyFullConnection(ordered, server, session, channelExec);
         }
@@ -105,28 +104,28 @@ class JSchExecutorTests
     @Test
     void shouldFailOnCommandExecutionError() throws JSchException
     {
-        ServerConfiguration server = getDefaultServerConfiguration();
+        var server = getDefaultServerConfiguration();
         server.setPublicKey(null);
-        Session session = mock(Session.class);
-        try (MockedConstruction<JSch> jSchMock = mockConstruction(JSch.class,
+        var session = mock(Session.class);
+        try (var jSchMock = mockConstruction(JSch.class,
                 (mock, context) -> when(mock.getSession(server.getUsername(), server.getHost(), server.getPort()))
                         .thenReturn(session)))
         {
-            ChannelExec channelExec = mockChannelOpening(session);
-            JSchException jSchException = new JSchException();
-            CommandExecutionException exception = assertThrows(CommandExecutionException.class,
+            var channelExec = mockChannelOpening(session);
+            var jSchException = new JSchException();
+            var exception = assertThrows(CommandExecutionException.class,
                     () -> new TestJSchExecutor()
                     {
                         @Override
-                        protected SshOutput executeCommand(ServerConfiguration serverConfig, Commands commands,
+                        protected SshOutput executeCommand(SshConnectionParameters serverConfig, Commands commands,
                                 ChannelExec channel) throws JSchException
                         {
                             throw jSchException;
                         }
                     }.execute(server, COMMANDS));
             assertEquals(jSchException, exception.getCause());
-            JSch jSch = jSchMock.constructed().get(0);
-            InOrder ordered = inOrder(jSch, session, channelExec);
+            var jSch = jSchMock.constructed().get(0);
+            var ordered = inOrder(jSch, session, channelExec);
             verifyFullConnection(ordered, server, session, channelExec);
         }
     }
@@ -134,65 +133,66 @@ class JSchExecutorTests
     @Test
     void shouldFailOnChannelOpeningError() throws JSchException
     {
-        ServerConfiguration server = getDefaultServerConfiguration();
+        var server = getDefaultServerConfiguration();
         server.setPrivateKey(null);
-        Session session = mock(Session.class);
-        try (MockedConstruction<JSch> jSchMock = mockConstruction(JSch.class,
+        var session = mock(Session.class);
+        try (var jSchMock = mockConstruction(JSch.class,
                 (mock, context) -> when(mock.getSession(server.getUsername(), server.getHost(), server.getPort()))
                         .thenReturn(session)))
         {
-            JSchException jSchException = new JSchException();
+            var jSchException = new JSchException();
             when(session.openChannel(EXEC)).thenThrow(jSchException);
-            CommandExecutionException exception = assertThrows(CommandExecutionException.class,
+            var exception = assertThrows(CommandExecutionException.class,
                     () -> new TestJSchExecutor().execute(server, COMMANDS));
             assertEquals(jSchException, exception.getCause());
-            JSch jSch = jSchMock.constructed().get(0);
-            InOrder ordered = inOrder(jSch, session);
+            var jSch = jSchMock.constructed().get(0);
+            var ordered = inOrder(jSch, session);
             verifySessionConnection(ordered, server, session);
             ordered.verify(session).openChannel(EXEC);
             ordered.verify(session).disconnect();
         }
     }
 
+    @SuppressWarnings("try")
     @Test
     void shouldFailOnJSchConfigurationError()
     {
-        ServerConfiguration server = getDefaultServerConfiguration();
+        var server = getDefaultServerConfiguration();
         server.setPassphrase(null);
-        JSchException jSchException = new JSchException();
-        try (MockedConstruction<JSch> ignored = mockConstruction(JSch.class,
+        var jSchException = new JSchException();
+        try (var ignored = mockConstruction(JSch.class,
                 (mock, context) -> doThrow(jSchException).when(mock).addIdentity(IDENTITY_NAME,
                         server.getPrivateKey().getBytes(StandardCharsets.UTF_8),
                         server.getPublicKey().getBytes(StandardCharsets.UTF_8), null)))
         {
-            CommandExecutionException exception = assertThrows(CommandExecutionException.class,
+            var exception = assertThrows(CommandExecutionException.class,
                     () -> new TestJSchExecutor().execute(server, COMMANDS));
             assertEquals(jSchException, exception.getCause());
         }
     }
 
-    private ServerConfiguration getDefaultServerConfiguration()
+    private SshConnectionParameters getDefaultServerConfiguration()
     {
-        ServerConfiguration serverConfiguration = new ServerConfiguration();
-        serverConfiguration.setAgentForwarding(false);
-        serverConfiguration.setPassphrase("passphrase");
-        serverConfiguration.setPrivateKey("privatekey");
-        serverConfiguration.setPublicKey("publickey");
-        serverConfiguration.setUsername("username");
-        serverConfiguration.setHost("host");
-        serverConfiguration.setPort(22);
-        serverConfiguration.setPassword("password");
-        return serverConfiguration;
+        var sshConnectionParameters = new SshConnectionParameters();
+        sshConnectionParameters.setAgentForwarding(false);
+        sshConnectionParameters.setPassphrase("passphrase");
+        sshConnectionParameters.setPrivateKey("privatekey");
+        sshConnectionParameters.setPublicKey("publickey");
+        sshConnectionParameters.setUsername("username");
+        sshConnectionParameters.setHost("host");
+        sshConnectionParameters.setPort(22);
+        sshConnectionParameters.setPassword("password");
+        return sshConnectionParameters;
     }
 
     private ChannelExec mockChannelOpening(Session session) throws JSchException
     {
-        ChannelExec channelExec = mock(ChannelExec.class);
+        var channelExec = mock(ChannelExec.class);
         when(session.openChannel(EXEC)).thenReturn(channelExec);
         return channelExec;
     }
 
-    private void verifyFullConnection(InOrder ordered, ServerConfiguration server, Session session,
+    private void verifyFullConnection(InOrder ordered, SshConnectionParameters server, Session session,
             ChannelExec channelExec) throws JSchException
     {
         verifySessionConnection(ordered, server, session);
@@ -201,7 +201,7 @@ class JSchExecutorTests
         ordered.verify(session).disconnect();
     }
 
-    private void verifySessionConnection(InOrder ordered, ServerConfiguration server, Session session)
+    private void verifySessionConnection(InOrder ordered, SshConnectionParameters server, Session session)
             throws JSchException
     {
         ordered.verify(session).setConfig("StrictHostKeyChecking", "no");
@@ -220,7 +220,7 @@ class JSchExecutorTests
         }
 
         @Override
-        protected SshOutput executeCommand(ServerConfiguration serverConfig, Commands commands, ChannelExec channel)
+        protected SshOutput executeCommand(SshConnectionParameters serverConfig, Commands commands, ChannelExec channel)
                 throws JSchException
         {
             return SSH_OUTPUT;

@@ -25,7 +25,7 @@ import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider
 import org.jbehave.core.annotations.When;
 import org.vividus.azure.resourcemanager.AbstractAzureResourceManagementSteps;
 import org.vividus.context.VariableContext;
-import org.vividus.softassert.SoftAssert;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
 public class KeyVaultManagementSteps extends AbstractAzureResourceManagementSteps
@@ -34,7 +34,7 @@ public class KeyVaultManagementSteps extends AbstractAzureResourceManagementStep
 
     private final AzureProfile azureProfile;
 
-    public KeyVaultManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential, SoftAssert softAssert,
+    public KeyVaultManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential, ISoftAssert softAssert,
             VariableContext variableContext)
     {
         super(HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile),
