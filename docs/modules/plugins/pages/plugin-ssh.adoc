@@ -34,7 +34,7 @@ When I configure SSH connection with key `$connectionKey` and parameters:$connec
 ----
 
 * `$connectionKey` - The key to assign to the creating SSH connection. In case if the key conflicts with a global connection key, the dynamic connection will take precedence within the story.
-* `$connectionParameters` - `ExamplesTable` with SSH connection parameters.
+* `$connectionParameters` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with SSH connection parameters.
 +
 :connection-parameters-prefix:
 :parameters-name: parameters

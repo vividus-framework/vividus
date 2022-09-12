@@ -81,7 +81,7 @@ Collects a list of the S3 objects keys in the specified bucket. Because buckets 
 When I collect objects keys filtered by:$filters in S3 bucket `$bucketName` and save result to $scopes variable `$variableName`
 ----
 
-- `$filters` - The ExamplesTable with filters to be applied to the objects to limit the resulting set.
+- `$filters` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with filters to be applied to the objects to limit the resulting set.
 +
 .The supported filter types
 [cols="1,1,2", options="header"]

@@ -19,7 +19,7 @@ corresponding plugins articles).
 
 == RESOLVING_EXPRESSIONS_EAGERLY
 
-`RESOLVING_EXPRESSIONS_EAGERLY` transformer processes expressions which are used inside `ExamplesTable` eagerly, i.e. at the table loading stage.
+`RESOLVING_EXPRESSIONS_EAGERLY` transformer processes expressions which are used inside xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] eagerly, i.e. at the table loading stage.
 If expressions generating random data are used in the table with `RESOLVING_EXPRESSIONS_EAGERLY` transfomer, the random data will be generated once
 and each placeholder will be replaced with this value.  While in regular flow placeholders are replaced with the expression and data is generated
 at step execution stage, in other words the same placeholders will be replaced by different randomly generated datasets.
@@ -34,7 +34,7 @@ at step execution stage, in other words the same placeholders will be replaced b
 
 == RESOLVING_SELF_REFERENCES_EAGERLY
 
-`RESOLVING_SELF_REFERENCES_EAGERLY` transformer enables eagerly resolution of references to one column from another column within single `ExamplesTable` ("eagerly" means at the table loading stage). Circular references will result in error.
+`RESOLVING_SELF_REFERENCES_EAGERLY` transformer enables eagerly resolution of references to one column from another column within single xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] ("eagerly" means at the table loading stage). Circular references will result in error.
 
 .Usage of RESOLVING_SELF_REFERENCES_EAGERLY transformer
 [source,gherkin]
@@ -127,12 +127,12 @@ the columns.
 
 == REPEATING
 
-`REPEATING` transformer generates `ExamplesTable` by copy-pasting the initial table the desired number of times.
+`REPEATING` transformer generates xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] by copy-pasting the initial table the desired number of times.
 
 [cols="1,3", options="header"]
 |===
 |Parameter
-|Description 
+|Description
 
 |`times`
 |the number of times to copy-paste the initial table
@@ -148,7 +148,7 @@ The following `REPEATING` transformer:
 |B      |D      |
 ----
 
-will result in the following `ExamplesTable`:
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
 
 [source,gherkin]
 ----
@@ -222,12 +222,12 @@ In case if `byColumnNames` contains nonexistent table columns the exception with
 
 == DISTINCTING
 
-`DISTINCTING` transformer generates `ExamplesTable` from the specified columns, deleting the rows with repeating values.
+`DISTINCTING` transformer generates xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] from the specified columns, deleting the rows with repeating values.
 
 [cols="1,3", options="header"]
 |===
 |Parameter
-|Description 
+|Description
 
 |`byColumnNames`
 |the names of the columns to keep separated by semicolon
@@ -246,7 +246,7 @@ The following `DISTINCTING` transformer:
 |B      |D      |1      |
 ----
 
-will result in the following `ExamplesTable`:
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
 
 [source,gherkin]
 ----
