@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,31 @@
 
 package org.vividus.steps.ui.web.model;
 
-import java.util.Map;
+import org.jbehave.core.annotations.AsParameters;
 
-import org.vividus.util.json.JsonUtils;
-
-public enum JsArgumentType
+@AsParameters
+public class JsArgument
 {
-    STRING
-    {
-        @Override
-        public Object convert(String object)
-        {
-            return object;
-        }
-    },
-    OBJECT
-    {
-        private final transient JsonUtils jsonUtils = new JsonUtils();
+    private String value;
+    private JsArgumentType type;
 
-        @Override
-        public Object convert(String object)
-        {
-            return jsonUtils.toObject(object, Map.class);
-        }
-    };
+    public String getValue()
+    {
+        return value;
+    }
 
-    public abstract Object convert(String object);
+    public void setValue(String value)
+    {
+        this.value = value;
+    }
+
+    public JsArgumentType getType()
+    {
+        return type;
+    }
+
+    public void setType(JsArgumentType type)
+    {
+        this.type = type;
+    }
 }

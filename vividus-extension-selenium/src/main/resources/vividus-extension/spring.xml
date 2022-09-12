@@ -174,7 +174,10 @@
         <property name="debugScreenshotsLocation" value="${ui.screenshot.debug-directory}" />
     </bean>
 
+    <bean id="executeScriptSteps" class="org.vividus.steps.ui.ExecuteScriptSteps" />
+
     <util:list id="stepBeanNames-UI" value-type="java.lang.String">
+        <idref bean="executeScriptSteps" />
         <idref bean="genericElementSteps" />
         <idref bean="genericWaitSteps" />
         <idref bean="genericSetVariableSteps" />

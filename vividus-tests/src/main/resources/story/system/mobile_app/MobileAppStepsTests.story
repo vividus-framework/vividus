@@ -14,6 +14,10 @@ Given I start mobile application with capabilities:
 |app |${app-url}|
 
 
+Scenario: VerifyStep: 'When I execute javascript `$wcript` and save result to $scopes variable `$variableName`'
+When I execute javascript `mobile: deviceInfo` and save result to scenario variable `deviceInfo`
+Then `${deviceInfo}` matches `.*timeZone.*`
+
 Scenario: Verify step: 'When I reinstall mobile application with bundle identifier `$bundleId`'
 Meta:
     @requirementId 2073
@@ -313,9 +317,41 @@ Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` i
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
 When I reset context
 
-Examples:
-|firstItemAccessibilityId|secondItemAccessibilityId|
-|Item 1                  |Item 2                   |
+
+Scenario: Verify step: 'When I execute javascript `$script` with arguments:$args' on iOS
+Meta:
+    @targetPlatform ios
+When I execute javascript `mobile: swipe` with arguments:
+|value                 |type  |
+|{"direction" : "left"}|object|
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
+When I execute javascript `mobile: swipe` with arguments:
+|value                  |type  |
+|{"direction" : "right"}|object|
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
+
+
+Scenario: Verify step: 'When I execute javascript `$script` with arguments:$args' on Android
+Meta:
+    @targetPlatform android
+When I change context to element located `xpath(//android.view.ViewGroup[./android.widget.TextView[@content-desc="<firstItemAccessibilityId>"]])`
+When I initialize the scenario variable `x` with value `${context-x-coordinate}`
+When I initialize the scenario variable `y` with value `${context-y-coordinate}`
+When I initialize the scenario variable `width` with value `${context-width}`
+When I initialize the scenario variable `height` with value `#{eval(${context-height} / 3 )}`
+When I reset context
+When I execute javascript `mobile: swipeGesture` with arguments:
+|value                                                                                                                  |type  |
+|{"left": ${x}, "top": ${y}, "width": ${width}, "height": ${height}, "direction": "left", "percent": 1.0, "speed" : 300}|object|
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
+When I execute javascript `mobile: swipeGesture` with arguments:
+|value                                                                                                                    |type  |
+|{"left": ${x}, "top": ${y}, "width": ${width}, "height": ${height}, "direction": "right", "percent":  1.0, "speed" : 300}|object|
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
 
 
 Scenario: Verify steps: "When I scan barcode from screen and save result to $scopes variable `$variableName`"
