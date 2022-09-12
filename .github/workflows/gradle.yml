@@ -285,6 +285,7 @@ jobs:
                                                   -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/ios \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
+                                                  -Pvividus.mobile.screenshot.downscale=true \
                                                   -Pvividus.allure.history-directory=output/history/sl-ios-system-tests-downscaled \
                                                   -Pvividus.allure.report-directory=output/reports/sl-ios-allure-downscaled \
                                                   -Pvividus.allure.executor.name="Github Actions (Vividus)" \
@@ -332,7 +333,6 @@ jobs:
                                                   -Pvividus.allure.executor.report-name="SauceLabs iOS System tests report (Original)" \
                                                   -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-ios-$TEST_APP_VERSION.zip \
                                                   -Pvividus.statistics.print-failures=true \
-                                                  -Pvividus.mobile.screenshot.downscale=false \
                                                   -Pvividus.ui.visual.baselines-folder=./baselines/original \
                                                   -Pvividus.ui.context.self-healing=true
         else
@@ -397,6 +397,7 @@ jobs:
                                                   -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/android \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
+                                                  -Pvividus.mobile.screenshot.downscale=true \
                                                   -Pvividus.allure.history-directory=output/history/sl-android-system-tests-downscaled \
                                                   -Pvividus.allure.report-directory=output/reports/sl-android-allure-downscaled \
                                                   -Pvividus.allure.executor.name="Github Actions (Vividus)" \
@@ -445,7 +446,6 @@ jobs:
                                                   -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-android-$TEST_APP_VERSION.zip \
                                                   -Pvividus.statistics.print-failures=true \
                                                   -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=VisualTesting.story \
-                                                  -Pvividus.mobile.screenshot.downscale=false \
                                                   -Pvividus.ui.visual.baselines-folder=./baselines/original
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
