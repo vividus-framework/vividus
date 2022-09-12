@@ -303,9 +303,9 @@ When I execute steps while counter is less than or equal to `10` with increment 
 !|When I click on element located `By.caseSensitiveText(CLICK ME EIGHT TIMES)`            |!
 ----
 
-=== Execute steps if a condition is true
+=== Execute steps if a condition is "true"
 
-Steps designed to execute specified steps if result of a condition is true.
+Steps designed to execute specified steps if result of a condition is "true".
 
 [source,gherkin]
 ----
@@ -318,9 +318,29 @@ Alias:
 When the condition '$condition' is true I do$stepsToExecute
 ----
 
-* `$condition` - The verifiable condition.
-  If result of the `$condition` is `true` - performs all specified steps. No steps will be performed if result of the `$condition` `false` or contains any non-boolean value.
+* `$condition` - The verifiable condition (Case-insensitive).
++
+[cols="1,1" options="header"]
+|===
+
+|Steps are performed|Steps are not performed
+
+|1|0
+
+|true|false
+
+|t|f
+
+|on|off
+
+|yes|no
+
+|y|n
+
+|===
 * `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column `step` containing the steps to execute if the result of the `$condition` is true.
+
+WARNING: The error will stop steps execution in case if unsupported condition value is provided.
 
 .Click on the element if parent element is found
 [source,gherkin]
