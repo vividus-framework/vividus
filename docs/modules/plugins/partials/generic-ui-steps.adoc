@@ -432,6 +432,7 @@ When I execute javascript `document.querySelector('#assistant').remove()` with a
 When I execute javascript `sauce:inject-image` with arguments:
 |value                                                                                       |type  |
 |iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=|string|
+----
 
 .Throttle CPU
 [source,gherkin]
