@@ -15,3 +15,5 @@
 |textFieldValueAttribute    |text                                                                     |
 |scrollableMenuXpath        |//android.widget.ScrollView                                              |
 |qrCodeContainerXpath       |//android.view.ViewGroup[@resource-id='RNE__Image__children__container'] |
+|firstItemAccessibilityId   |Item 1                                                                   |
+|secondItemAccessibilityId  |Item 2                                                                   |

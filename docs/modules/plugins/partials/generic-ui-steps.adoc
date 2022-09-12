@@ -405,3 +405,58 @@ When I find >= `0` elements `xpath(//*[@class='menu enabled'])` and while they e
 |step                                         |
 |When I click on element located `id(disable)`|
 ----
+
+=== Execute JavaScript with arguments
+
+Executes JavaScript via https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html[JavascriptExecutor]. Step executes the script either without any arguments or with `String` or `Object` argument types.
+
+[source,gherkin]
+----
+When I execute javascript `$script` with arguments:$arguments
+----
+
+* `$script` - The JavaScript code to execute.
+* `$arguments` - The examples table with set of arguments and their type:
+** [subs=+quotes]`*value*` -  The value of the argument.
+** [subs=+quotes]`*type*` -  The type of the argument. Either `string` or `object`.
+
+.Remove noisy assistant
+[source,gherkin]
+----
+When I execute javascript `document.querySelector('#assistant').remove()` with arguments:
+----
+
+.Inject image
+[source,gherkin]
+----
+When I execute javascript `sauce:inject-image` with arguments:
+|value                                                                                       |type  |
+|iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=|string|
+
+.Throttle CPU
+[source,gherkin]
+----
+When I execute javascript `sauce:throttleCPU` with arguments:
+|value                                                                                       |type  |
+|{"rate" : 4}|object|
+----
+
+==== Execute JavaScript and save result.
+
+https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html[Executes JavaScript] code and saves result into variable.
+
+[source,gherkin]
+----
+When I execute javascript `$jsCode` and save result to $scopes variable `$variableName`
+----
+* `$jsCode` - Any JavaScript code. In order to save a result https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/return[return] statement should be used.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to script execution result.
+
+.Validate timings
+[source,gherkin]
+----
+Given I am on a page with the URL 'http://vividus-test-site.herokuapp.com/mouseEvents.html'
+When I execute javascript `return JSON.stringify(window.performance.timing)` and save result to scenario variable `timings`
+Then number of JSON elements from `${timings}` by JSON path `$.connectStart` is = 1
+----

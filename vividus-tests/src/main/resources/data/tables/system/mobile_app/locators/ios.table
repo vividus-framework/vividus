@@ -16,3 +16,5 @@
 |keyboardLocator            |xpath(//XCUIElementTypeKeyboard)                                |
 |scrollableMenuXpath        |//XCUIElementTypeScrollView                                     |
 |qrCodeContainerXpath       |//XCUIElementTypeOther[@name='RNE__Image__children__container'] |
+|firstItemAccessibilityId   |Item 1                                                          |
+|secondItemAccessibilityId  |Item 2                                                          |

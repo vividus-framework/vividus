@@ -1219,25 +1219,6 @@ Given I am on the main application page
 ----
 
 === Code steps
-==== Execute JavaScript and save result.
-
-https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html[Executes JavaScript] code and saves result into variable.
-
-[source,gherkin]
-----
-When I execute javascript `$jsCode` and save result to $scopes variable `$variableName`
-----
-* `$jsCode` - Any JavaScript code. In order to save a result https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/return[return] statement should be used.
-* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to save the cookie value.
-
-.Validate timings
-[source,gherkin]
-----
-Given I am on a page with the URL 'http://vividus-test-site.herokuapp.com/mouseEvents.html'
-When I execute javascript `return JSON.stringify(window.performance.timing)` and save result to scenario variable `timings`
-Then number of JSON elements from `${timings}` by JSON path `$.connectStart` is = 1
-----
 
 ==== Execute async JavaScript and save result.
 
