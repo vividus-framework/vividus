@@ -1,4 +1,4 @@
-]Description: Integration tests for mobile app steps
+Description: Integration tests for mobile app steps
 
 Meta:
     @epic vividus-plugin-mobile-app
