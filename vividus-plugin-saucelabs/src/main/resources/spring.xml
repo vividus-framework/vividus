@@ -27,7 +27,7 @@
 
     <bean class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer">
         <property name="tunnellingEnabled" value="${saucelabs.sauce-connect.enabled}"/>
-        <property name="restUrl" value="#{T(com.saucelabs.saucerest.DataCenter).fromString('${saucelabs.data-center}').server() + 'rest/v1/'}" />
+        <property name="restUrl" value="#{T(com.saucelabs.saucerest.DataCenter).fromString('${saucelabs.data-center}').apiServer() + 'rest/v1'}" />
         <property name="sauceConnectArguments" value="${saucelabs.sauce-connect.command-line-arguments}" />
         <property name="skipHostGlobPatterns" value="${saucelabs.sauce-connect.skip-host-glob-patterns}" />
     </bean>
