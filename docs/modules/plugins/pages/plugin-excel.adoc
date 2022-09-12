@@ -90,7 +90,7 @@ Create temporary excel file with specified content and save the path to the vari
 When I create temporary excel file with content:$content and put path to $scopes variable `$variableName`
 ----
 
-* `$content` - The data to be put to the excel file. Any valid ExamplesTable
+* `$content` - The data to be put to the excel file. Any valid xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name
 
@@ -113,7 +113,7 @@ When I create temporary excel file containing sheet with name `$sheetName` and c
 ----
 
 * `$sheetName` - Then name of the Excel sheet.
-* `$content` - The data to be put to the excel file. Any valid ExamplesTable
+* `$content` - The data to be put to the excel file. Any valid xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name
 
@@ -138,7 +138,7 @@ When I add sheet with name `$sheetName` and content:$content to excel file at pa
 ----
 
 * `$sheetName` - Then name of the sheet.
-* `$content` - The data to put into the sheet. Any valid ExamplesTable.
+* `$content` - The data to put into the sheet. Any valid xref:ROOT:glossary.adoc#_examplestable[ExamplesTable].
 * `$path` - The path to existing excel file.
 
 .Add sheet with pets

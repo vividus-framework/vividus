@@ -35,7 +35,7 @@ When I configure WinRM connection with key `$connectionKey` and parameters:$conn
 ----
 
 * `$connectionKey` - The key to assign to the creating WinRM connection. In case if the key conflicts with a global connection key, the dynamic connection will take precedence within the story.
-* `$connectionParameters` - `ExamplesTable` with WinRM connection parameters.
+* `$connectionParameters` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with WinRM connection parameters.
 +
 :connection-parameters-prefix:
 :parameters-name: parameters

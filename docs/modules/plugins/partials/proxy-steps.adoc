@@ -138,7 +138,7 @@ When I add headers to proxied requests with URL pattern which $comparisonRule `$
 ----
 * `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
 * `$url` - The input value of URL to filter by
-* `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
+* `$headers` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
 
 .Add headers to the proxied HTTP request
 [source,gherkin,subs="attributes+"]
@@ -215,7 +215,7 @@ When I mock HTTP $httpMethods responses with request URL which $comparisonRule `
 * `$url` - The input value of URL to filter by
 * `$code` - The response status code
 * `$content` - The content to send within a response
-* `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
+* `$headers` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
 
 .Hijack a page
 [source,gherkin]
@@ -243,7 +243,7 @@ When I mock HTTP responses with request URL which $comparisonRule `$url` using r
 * `$url` - The input value of URL to filter by
 * `$code` - The response status code
 * `$content` - The content to send within a response
-* `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
+* `$headers` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
 
 .Hijack a page
 [source,gherkin]
@@ -270,7 +270,7 @@ When I mock HTTP responses with request URL which $comparisonRule `$url` using r
 * `$rule` - xref:parameters:string-comparison-rule.adoc[String comparison rule]
 * `$url` - The input value of URL to filter by
 * `$code` - The response status code
-* `$headers` - ExamplesTable representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
+* `$headers` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing the list of the headers with columns "name" and "value" specifying HTTP header names and values respectively
 
 .404 page
 [source,gherkin]

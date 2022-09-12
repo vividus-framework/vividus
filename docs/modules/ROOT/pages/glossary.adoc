@@ -2,6 +2,121 @@
 
 This glossary contains the descriptions for terms and abbreviations that are used in the documentation.
 
+== ExamplesTable
+*Synonyms*: examples table, data table.
+
+`ExamplesTable` represents a tabular structure that holds rows of example data for
+parameters named via the column headers:
+
+[source,gherkin]
+----
+|header 1|header 2| .... |header n|
+|value 11|value 12| .... |value 1n|
+...
+|value m1|value m2| .... |value mn|
+----
+
+Rows starting with an ignorable separator (defaults to `|--`) are allowed and ignored:
+
+[source,gherkin]
+----
+|header 1|header 2| .... |header n|
+|-- A commented row --|
+|value 11|value 12| .... |value 1n|
+...
+|-- Another commented row --|
+|value m1|value m2| .... |value mn|
+----
+
+The separators are also configurable via inlined properties:
+
+[source,gherkin]
+----
+{ignorableSeparator=!--,headerSeparator=!,valueSeparator=!}
+!header 1!header 2! .... !header n!
+!-- A commented row --!
+!value 11!value 12! .... !value 1n!
+...
+!-- Another commented row --!
+!value m1!value m2! .... !value mn!
+----
+
+Comments in column values are supported via the `commentSeparator` inlined
+property:
+
+[source,gherkin]
+----
+{commentSeparator=#}
+| header 1#comment | header 2 | .... | header n |
+| value 11#comment | value 12 | .... | value 1n |
+----
+
+Comments including the separator are stripped.
+
+=== Preserving whitespace
+
+By default all column values are trimmed. To avoid trimming the values, use
+the `trim` inlined property:
+
+[source,gherkin]
+----
+{trim=false}
+| header 1 | header 2 | .... | header n |
+| value 11 | value 12 | .... | value 1n |
+----
+
+=== Mapping values to `null`-s
+
+By default, all empty values in `ExamplesTable` are treated as empty strings. However,
+it might be required to map certain values to `null`-s. This can be done at the step
+implementation level or by applying the generic approach at the table level:
+
+[source,gherkin]
+----
+{nullPlaceholder=NULL}
+|header |
+|value 1|
+|NULL   |
+|value 3|
+----
+
+=== Using values with line breaks
+
+Line break is a default separator for rows in `ExamplesTable`, that's why they
+can't be added as is to the data. In order to put value with line breaks to
+`ExamplesTable` escape sequences (a character preceded by a backslash `\` is
+an escape sequence) must be used.
+
+[cols="1,5", options="header"]
+|===
+|Escape Sequence
+|Description
+
+|\n<
+|Insert a newline in the value at this point.
+
+|\r
+|Insert a carriage return in the text at this point.
+
+|\\
+|Insert a backslash character in the text at this point.
+
+|===
+
+The inlined property `processEscapeSequences` defines whether escape sequences
+should be replaced in the data. It’s `false` by default (no property is declared
+explicitly). The allowed values are `true` and `false`, any other values are
+considered invalid and will lead to parsing error.
+
+[source,gherkin]
+----
+{processEscapeSequences=true, commentSeparator=#}
+|header          |
+|line 1\nline 2  |# The value with a newline
+|line 1\r\nline 2|# The value with a carriage return and a newline
+|line 1\\nline 2 |# The value with an escaped escape sequence, the result will be "line 1\nline 2"
+----
+
 == Expression
 *Synonyms*: VIVIDUS expression.
 
@@ -49,9 +164,9 @@ The name of a resource is independent of the used operating system;
 in particular, the path separator is always a slash `/`.
 
 == Table Transformer
-*Synonyms*: transformer, ExampleTable transformer.
+*Synonyms*: transformer, ExamplesTable transformer.
 
-ExampleTable enables the transformation of its string representation via the
+<<ExamplesTable>> enables the transformation of its string representation via the
 "transformer" inlined property. It's allowed to define a chain of transformers,
 in this case the transformers are applied sequentially from top to bottom:
 

@@ -294,7 +294,7 @@ Then '${responseStatusCode}' is = '200'
 === Set HTTP request body
 
 Sets HTTP request body that will be used while executing the request. In the case of textual content the default HTTP
-request header with name `Content-Type` and value `text/plain; charset=UTF-8` is set. 
+request header with name `Content-Type` and value `text/plain; charset=UTF-8` is set.
 
 WARNING: No HTTP request header is set in the case of binary content.
 
@@ -330,7 +330,7 @@ Sets https://tools.ietf.org/html/rfc7578[multipart] request entity that will be 
 Given multipart request:$requestParts
 ----
 
-where `requestParts` is `ExamplesTable` representing the list of the request parts with the following columns:
+where `requestParts` is xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing the list of the request parts with the following columns:
 
 * `type` - One of request part types: `STRING`, `FILE`, `BINARY`.
 * `name` - The request part name.
@@ -365,9 +365,9 @@ In case if `Content-Type` is `text/plain` <<Set HTTP request body>> should be us
 Given form data request:$parameters
 ----
 
-* `$parameters` -  `ExamplesTable` representing list of parameters with columns `name` and `value` specifying form data request.
+* `$parameters` -  The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing list of parameters with columns `name` and `value` specifying form data request.
 
-.Set ExamplesTable HTTP request body
+.Set form data HTTP request body
 [source,gherkin]
 ----
 Given form data request:
@@ -387,7 +387,7 @@ Adds https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields[HTT
 When I add request headers:$headers
 ----
 
-* `headers` - `ExamplesTable` representing the list of the headers with columns `name` and `value` specifying HTTP header
+* `headers` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing the list of the headers with columns `name` and `value` specifying HTTP header
 
 .Add request header with name Accept-Language and value en-ru
 [source,gherkin]

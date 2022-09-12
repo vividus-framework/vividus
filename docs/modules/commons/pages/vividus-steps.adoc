@@ -13,7 +13,7 @@ Executes the steps located in the table.
 When I execute steps:$stepsToExecute
 ----
 
-* `$stepsToExecute` - The ExamplesTable with a single column containing the steps to execute.
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
 
 .Check and increment the value of a variable
 [source,gherkin]
@@ -48,7 +48,7 @@ When I execute steps at most $max times while variable '$variableName' is $compa
 * `$variableName` - The name of the variable to check
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule]
 * `$expectedValue` - The expected value of the variable
-* `$stepsToExecute` - The ExamplesTable with a single column containing the steps to execute
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute
 
 .Click button 5 times
 [source,gherkin]
@@ -86,7 +86,7 @@ When I execute steps with delay '$delay' at most $max times while variable '$var
 * `$variableName` - The name of the variable to check
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule]
 * `$expectedValue` - The expected value of the variable
-* `$stepsToExecute` - The ExamplesTable with a single column containing the steps to execute
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute
 
 .Click button 5 times with 1 second delay
 [source,gherkin]
@@ -214,7 +214,7 @@ When I create temporary file with name `.table` and content `
 ` and put path to NEXT_BATCHES variable `examples-table-temporary-file`
 ----
 
-.Batch 2 - Use the temporary file as `ExamplesTable`
+.Batch 2 - Use the temporary file as xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]
 [source,gherkin]
 ----
 Then `<column>` is equal to `value`
@@ -281,7 +281,7 @@ When I execute steps while counter is $comparisonRule '$limit' with increment '$
 * `$limit` - The counter limit.
 * `$increment` - The number to add to the counter on each iteration.
 * `$seed` - The initial counter value.
-* `$stepsToExecute` - The ExamplesTable with a single column `step` containing the steps to execute.
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column `step` containing the steps to execute.
 
 .Press the button four times
 [source,gherkin]
@@ -320,7 +320,7 @@ When the condition '$condition' is true I do$stepsToExecute
 
 * `$condition` - The verifiable condition.
   If result of the `$condition` is `true` - performs all specified steps. No steps will be performed if result of the `$condition` `false` or contains any non-boolean value.
-* `$stepsToExecute` - The ExamplesTable with a single column `step` containing the steps to execute if the result of the `$condition` is true.
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column `step` containing the steps to execute if the result of the `$condition` is true.
 
 .Click on the element if parent element is found
 [source,gherkin]
@@ -360,7 +360,7 @@ When variable '$name' is not set I do:$stepsToExecute
 ----
 
 * `$name` - The variable name to check.
-* `$stepsToExecute` - The ExamplesTable with a single column `step` containing the steps to execute if variable `$name` is not set.
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column `step` containing the steps to execute if variable `$name` is not set.
 
 .Initialize variable `token` if it is not already initialized
 [source,gherkin]

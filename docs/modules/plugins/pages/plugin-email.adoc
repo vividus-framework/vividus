@@ -64,7 +64,7 @@ When I fetch email message from `$serverKey` server filtered by $filters and sav
 ----
 
 * `$serverKey` - The server `configuration` to identify a server to fetch a message from.
-* `$filters` - The `ExamplesTable` with filters to be applied to emails to limit the resulting set. The `ExamplesTable` columns are:
+* `$filters` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with filters to be applied to emails to limit the resulting set. The table columns are:
 ** `parameter`
 +
 :date-parameter: pass:quotes[Date in {iso-date-format-link} format e.g. `1970-01-01T00:00:00.000Z`]

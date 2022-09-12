@@ -396,7 +396,7 @@ When I find $comparisonRule '$number' elements $locator and while they exist do 
 * `$number` - The number of elements to find.
 * `$locator` - <<_locator>>.
 * `$iterationLimit` - The maximum number of iterations to perform.
-* `$stepsToExecute` - The `ExamplesTable` with a single column containing the steps to execute.
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
 
 .Disable menus
 [source,gherkin]
