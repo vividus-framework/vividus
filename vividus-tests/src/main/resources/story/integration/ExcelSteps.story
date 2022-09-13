@@ -7,24 +7,6 @@ Scope: STORY
 When I execute HTTP GET request for resource with URL `https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-excel/src/test/resources/TestTemplate.xlsx?raw=true`
 Then the response code is = '200'
 
-Scenario: Step verification 'Then response contains excel sheet with index `$index` and records:$records'
-!-- Deprecated
-Then response contains excel sheet with index `0` and records:
-{valueSeparator=!}
-|cellsRange|valueRegex             |
-!A4:B5     !(Product|Price)\d+\s*  !
-!B3        !Price                  !
-!C1:C5     !                       !
-
-Scenario: Step verification 'Then response contains excel sheet with name `$name` and records:$records'
-!-- Deprecated
-Then response contains excel sheet with name `Mapping` and records:
-{valueSeparator=!}
-|cellsRange|valueRegex             |
-!A4:B5     !(Product|Price)\d+\s*  !
-!B3        !Price                  !
-!C1:C5     !                       !
-
 Scenario: Step verification 'Then `$excelDocument` contains excel sheet with index `$index` and records:$records'
 Then `${response-as-bytes}` contains excel sheet with index `0` and records:
 {valueSeparator=!}
