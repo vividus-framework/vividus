@@ -38,10 +38,10 @@ Then the text matches '\d+'
 Scenario: Scroll BOTTOM for page Verify step: When I scroll context to $scrollDirection edge
 Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/scrollablePage.html'
 When I scroll context to BOTTOM edge
-When I perform javascript 'return document.documentElement.scrollTop' and save result to the 'scenario' variable 'scroll'
+When I execute javascript `return document.documentElement.scrollTop` and save result to scenario variable `scroll`
 Then `${scroll}` is > `0`
 
 Scenario: Scroll TOP for page Verify step: When I scroll context to $scrollDirection edge
 When I scroll context to TOP edge
-When I perform javascript 'return document.documentElement.scrollTop' and save result to the 'scenario' variable 'scroll'
+When I execute javascript `return document.documentElement.scrollTop` and save result to scenario variable `scroll`
 Then `${scroll}` is = `0`

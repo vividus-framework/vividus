@@ -40,10 +40,10 @@ Then the page title is equal to '<windowsTitle>'
 Scenario: Verify step: "When I switch to frame located `$locator`"
 Given I am on a page with the URL '${vividus-test-site-url}/nestedFrames.html'
 When I change context to element located `id(toRemove):a`
-When I perform javascript '
+When I execute javascript `
 document.querySelector('#toRemove').remove();
 return [];
-' and save result to the 'scenario' variable 'result'
+` and save result to scenario variable `result`
 When I switch to frame located `id(parent)`
 When I switch to frame located `id(exampleCom)`
 When I click on element located `By.xpath(//a)`
