@@ -1,7 +1,0 @@
-Composite: Then response contains excel sheet with index `$index` and records:$records
-!-- WARNING: The step "Then response contains excel sheet with index `$index` and records:$records" is deprecated and will be removed in VIVIDUS 0.5.0
-Then `${response-as-bytes}` contains excel sheet with index `<index>` and records:<records>
-
-Composite: Then response contains excel sheet with name `$name` and records:$records
-!-- WARNING: The step "Then response contains excel sheet with name `$name` and records:$records" is deprecated and will be removed in VIVIDUS 0.5.0
-Then `${response-as-bytes}` contains excel sheet with name `<name>` and records:<records>
