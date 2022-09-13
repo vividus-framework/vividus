@@ -323,6 +323,12 @@ selenium.grid.screen-resolution=1920x1080
 selenium.grid.platform-name=Windows
 selenium.grid.platform-version=10
 ----
+To run tests in Opera browser locally it is required to set the following property:
+[source,properties]
+----
+web.driver.OPERA.binary-path=<path to opera>
+----
+* <path to opera> - path to the Opera browser (for example, "C:/Programs/Opera/opera.exe")
 
 .^|web/desktop/safari
 |
