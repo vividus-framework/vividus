@@ -387,7 +387,7 @@ public class HttpResponseValidationSteps
      * </p>
      * <p>
      * <code>
-     * Then the response archive contains entries with the names:$parameters<br>
+     * Then response archive contains entries with names:$parameters<br>
      * |rule      |name                                    |<br>
      * |contains  |2011-11-11/skyrim.json                  |<br>
      * |matches   |files/2011-11-11/logs/papyrus\.\d+\.log |<br>
