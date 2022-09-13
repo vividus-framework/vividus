@@ -273,8 +273,6 @@
     <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
         <property name="converters">
             <set>
-                <bean class="org.vividus.spring.StringToSeleniumLocatorSetConverter" />
-                <bean class="org.vividus.spring.StringToSeleniumLocatorConverter" />
                 <bean class="org.vividus.spring.StringToLocatorConverter" />
                 <bean class="org.vividus.spring.StringToLocatorSetConverter" />
                 <bean class="org.vividus.spring.StringToDateTimeFormatterConverter" />
