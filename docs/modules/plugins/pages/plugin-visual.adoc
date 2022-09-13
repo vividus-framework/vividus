@@ -232,7 +232,7 @@ image::example.png[Difference between native/web footer/header image]
 
 |`mobile.screenshot.downscale`
 |`boolean`
-|`true`
+|`false`
 |Downscale checkpoint image according to a device https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio[DPR] value
 
 |===
