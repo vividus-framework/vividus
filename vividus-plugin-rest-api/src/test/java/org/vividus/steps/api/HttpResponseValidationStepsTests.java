@@ -27,15 +27,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.vividus.steps.StringComparisonRule.CONTAINS;
-import static org.vividus.steps.StringComparisonRule.DOES_NOT_CONTAIN;
 import static org.vividus.steps.StringComparisonRule.IS_EQUAL_TO;
-import static org.vividus.steps.StringComparisonRule.MATCHES;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -56,13 +52,9 @@ import org.vividus.context.VariableContext;
 import org.vividus.http.ConnectionDetails;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
-import org.vividus.model.ArchiveVariable;
-import org.vividus.model.NamedEntry;
-import org.vividus.model.OutputFormat;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ByteArrayValidationRule;
 import org.vividus.steps.ComparisonRule;
-import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.SubSteps;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
@@ -82,10 +74,7 @@ class HttpResponseValidationStepsTests
     private static final String HTTP_RESPONSE_IS_NOT_NULL = "HTTP response is not null";
     private static final String TLS_V1_2 = "TLSv1.2";
     private static final String CONNECTION_SECURE_ASSERTION = "Connection is secure";
-    private static final String FILE_JSON = "file.json";
-    private static final String IMAGE_PNG = "images/image.png";
     private static final String HTTP_RESPONSE_STATUS_CODE = "HTTP response status code";
-    private static final String DUMMY = "dummy";
     private static final int RETRY_TIMES = 3;
     private static final int RESPONSE_CODE = 200;
     private static final int RESPONSE_CODE_ERROR = 404;
@@ -416,87 +405,6 @@ class HttpResponseValidationStepsTests
     }
 
     @Test
-    void testSaveFilesContentToVariables()
-    {
-        mockHttpResponseWithArchive();
-
-        String json = "json";
-        String image = "image";
-        String base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7EAAAOxAGVK"
-                + "w4bAAAACklEQVQImWNgAAAAAgAB9HFkpgAAAABJRU5ErkJggg==";
-
-        httpResponseValidationSteps.saveFilesContentToVariables(
-                List.of(createVariable(IMAGE_PNG, image, OutputFormat.BASE64),
-                        createVariable(FILE_JSON, json, OutputFormat.TEXT)));
-        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        verify(variableContext).putVariable(scopes, image, base64);
-        verify(variableContext).putVariable(scopes, json,
-                "{\"plugin\": \"vividus-plugin-rest-api\"}\n");
-        verifyNoInteractions(softAssert);
-        verifyNoMoreInteractions(variableContext);
-    }
-
-    @Test
-    void testSaveFilesContentToVariablesInvalidPath()
-    {
-        mockHttpResponseWithArchive();
-
-        String path = "path";
-        httpResponseValidationSteps.saveFilesContentToVariables(
-                List.of(createVariable(path, path, OutputFormat.BASE64)));
-        verify(softAssert).recordFailedAssertion(
-                String.format("Unable to find entry by name %s in response archive", path));
-        verifyNoInteractions(variableContext);
-        verifyNoMoreInteractions(softAssert);
-    }
-
-    @Test
-    void testVerifyArchiveContainsEntries()
-    {
-        mockHttpResponseWithArchive();
-        Set<String> archiveEntries = Set.of(IMAGE_PNG, FILE_JSON);
-        String message = "The response archive contains entry with name ";
-        httpResponseValidationSteps.verifyArchiveContainsEntries(List.of(
-                createEntry(FILE_JSON, null),
-                createEntry(IMAGE_PNG, null),
-                createEntry(DUMMY, null)
-        ));
-        verify(softAssert).assertThat(eq(message + FILE_JSON), eq(archiveEntries),
-                argThat(e -> e.matches(archiveEntries)));
-        verify(softAssert).assertThat(eq(message + IMAGE_PNG), eq(archiveEntries),
-                argThat(e -> e.matches(archiveEntries)));
-        verify(softAssert).assertThat(eq(message + DUMMY), eq(archiveEntries),
-                argThat(e -> !e.matches(archiveEntries)));
-        verifyNoMoreInteractions(softAssert);
-    }
-
-    @Test
-    void testVerifyArchiveContainsEntriesWithUserRules()
-    {
-        String matchesPattern = ".+\\.png";
-        String containsPattern = "file";
-
-        mockHttpResponseWithArchive();
-        Set<String> archiveEntries = Set.of(IMAGE_PNG, FILE_JSON);
-        String message = "The response archive contains entry matching the comparison rule '%s' with name pattern '%s'";
-        httpResponseValidationSteps.verifyArchiveContainsEntries(List.of(
-                createEntry(matchesPattern, MATCHES),
-                createEntry(containsPattern, CONTAINS),
-                createEntry(DUMMY, IS_EQUAL_TO),
-                createEntry(DUMMY, DOES_NOT_CONTAIN)
-        ));
-        verify(softAssert).assertThat(eq(String.format(message, MATCHES, matchesPattern)), eq(archiveEntries),
-                argThat(e -> e.matches(archiveEntries)));
-        verify(softAssert).assertThat(eq(String.format(message, CONTAINS, containsPattern)), eq(archiveEntries),
-                argThat(e -> e.matches(archiveEntries)));
-        verify(softAssert).assertThat(eq(String.format(message, IS_EQUAL_TO, DUMMY)), eq(archiveEntries),
-                argThat(e -> !e.matches(archiveEntries)));
-        verify(softAssert).assertThat(eq(String.format(message, DOES_NOT_CONTAIN, DUMMY)), eq(archiveEntries),
-                argThat(e -> e.matches(archiveEntries)));
-        verifyNoMoreInteractions(softAssert);
-    }
-
-    @Test
     void testWaitForResponseCode()
     {
         mockHttpResponse();
@@ -529,33 +437,6 @@ class HttpResponseValidationStepsTests
         httpResponseValidationSteps.waitForResponseCode(RESPONSE_CODE, DURATION, RETRY_TIMES, stepsToExecute);
         verify(stepsToExecute, times(3)).execute(Optional.empty());
         verify(softAssert).assertEquals(HTTP_RESPONSE_STATUS_CODE, RESPONSE_CODE_ERROR, RESPONSE_CODE);
-    }
-
-    private static NamedEntry createEntry(String name, StringComparisonRule rule)
-    {
-        NamedEntry entry = new NamedEntry();
-        entry.setName(name);
-        entry.setRule(rule);
-        return entry;
-    }
-
-    private void mockHttpResponseWithArchive()
-    {
-        byte[] data = ResourceUtils.loadResourceAsByteArray(getClass(), "/org/vividus/steps/api/archive.zip");
-        HttpResponse response = mock(HttpResponse.class);
-        when(httpTestContext.getResponse()).thenReturn(response);
-        when(response.getResponseBody()).thenReturn(data);
-    }
-
-    private static ArchiveVariable createVariable(String path, String variableName, OutputFormat outputFormat)
-    {
-        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        ArchiveVariable variable = new ArchiveVariable();
-        variable.setPath(path);
-        variable.setOutputFormat(outputFormat);
-        variable.setScopes(scopes);
-        variable.setVariableName(variableName);
-        return variable;
     }
 
     private String mockHeaderRetrieval()

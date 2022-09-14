@@ -17,12 +17,10 @@
 package org.vividus.steps.api;
 
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasItem;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -38,30 +36,23 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vividus.context.VariableContext;
 import org.vividus.http.ConnectionDetails;
 import org.vividus.http.HttpTestContext;
 import org.vividus.http.client.HttpResponse;
-import org.vividus.model.ArchiveVariable;
-import org.vividus.model.NamedEntry;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ByteArrayValidationRule;
 import org.vividus.steps.ComparisonRule;
-import org.vividus.steps.DataWrapper;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.SubSteps;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.WaitMode;
-import org.vividus.util.zip.ZipUtils;
 import org.vividus.variable.VariableScope;
 
 public class HttpResponseValidationSteps
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpResponseValidationSteps.class);
     private static final String HTTP_RESPONSE_STATUS_CODE = "HTTP response status code";
     private static final Tika TIKA = new Tika();
 
@@ -343,95 +334,6 @@ public class HttpResponseValidationSteps
     }
 
     /**
-     * Saves content of a file from archive in response to context variable in specified format
-     * Example:
-     * <p>
-     * <code>
-     * When I save files content from the response archive into variables with parameters:<br>
-     * |path                        |variableName|scopes   |outputFormat|
-     * |files/2011-11-11/skyrim.json|entityJson  |SCENARIO |TEXT        |
-     * </code>
-     * </p>
-     * Currently available types are TEXT and BASE64
-     *
-     * @param parameters describes saving parameters
-     * @deprecated Use instead:
-     * {@link org.vividus.archive.steps.ArchiveSteps#saveArchiveEntriesToVariables(DataWrapper, List)}
-     */
-    @When("I save content of the response archive entries to the variables:$parameters")
-    @Deprecated(since = "0.4.10", forRemoval = true)
-    public void saveFilesContentToVariables(List<ArchiveVariable> parameters)
-    {
-        LOGGER.warn("The step: \"When I save content of the response archive entries to the variables:$parameters\""
-                + " is deprecated and will be removed in VIVIDUS 0.5.0."
-                + " Use instead: When I save content of `$archiveData` archive entries to variables:$parameters");
-        List<String> expectedEntries = parameters.stream().map(ArchiveVariable::getPath).collect(Collectors.toList());
-        Map<String, byte[]> zipEntries = ZipUtils.readZipEntriesFromBytes(getResponseBody(), expectedEntries::contains);
-        parameters.forEach(arcVar ->
-        {
-            String path = arcVar.getPath();
-            Optional.ofNullable(zipEntries.get(path)).ifPresentOrElse(
-                data -> variableContext.putVariable(arcVar.getScopes(), arcVar.getVariableName(),
-                        arcVar.getOutputFormat().convert(data)),
-                () -> softAssert.recordFailedAssertion(
-                        String.format("Unable to find entry by name %s in response archive", path)));
-        });
-    }
-
-    /**
-     * Verifies that at least one (or no one) entry in a response archive matches the specified string comparison rule.
-     * If comparison rule column does not exist,
-     * the verification that archive entries have the specified names is performed.
-     * <p>
-     * Usage example:
-     * </p>
-     * <p>
-     * <code>
-     * Then the response archive contains entries with the names:$parameters<br>
-     * |rule      |name                                    |<br>
-     * |contains  |2011-11-11/skyrim.json                  |<br>
-     * |matches   |files/2011-11-11/logs/papyrus\.\d+\.log |<br>
-     * </code>
-     * </p>
-     *
-     * @param parameters The ExampleTable that contains specified string comparison <b>rule</b> and entry <b>name</b>
-     *                   pattern that should be found using current <b>rule</b>. Available columns:
-     *                   <ul>
-     *                   <li>rule - String comparison rule: "is equal to", "contains", "does not contain", "matches"
-     *                   .</li>
-     *                   <li>name - Desired entry name pattern used with current <b>rule</b>.</li>
-     *                   </ul>
-     * @deprecated Use instead:
-     *             {@link org.vividus.archive.steps.ArchiveSteps#verifyArchiveContainsEntries(DataWrapper, List)}
-     */
-    @Then("response archive contains entries with names:$parameters")
-    @Deprecated(since = "0.4.10", forRemoval = true)
-    public void verifyArchiveContainsEntries(List<NamedEntry> parameters)
-    {
-        LOGGER.warn("The step: \"Then response archive contains entries with names:$parameters\" is deprecated and will"
-                  + " be removed in VIVIDUS 0.5.0."
-                  + " Use instead: Then `$archiveData` archive contains entries with names:$parameters");
-        Set<String> entryNames = ZipUtils.readZipEntryNamesFromBytes(getResponseBody());
-
-        parameters.forEach(entry ->
-        {
-            String expectedName = entry.getName();
-            if (entry.getRule() != null)
-            {
-                StringComparisonRule comparisonRule = entry.getRule();
-                softAssert.assertThat(String.format(
-                        "The response archive contains entry matching the comparison rule '%s' with name pattern '%s'",
-                        comparisonRule, expectedName), entryNames, hasItem(comparisonRule.createMatcher(expectedName)));
-            }
-            else
-            {
-                softAssert.assertThat("The response archive contains entry with name " + expectedName, entryNames,
-                        hasItem(expectedName));
-            }
-        });
-    }
-
-    /**
      * Waits for the specified number of times until HTTP response code is equal to what is expected.
      * <p>
      * <b>Actions performed:</b>
@@ -476,19 +378,9 @@ public class HttpResponseValidationSteps
         return header;
     }
 
-    private HttpResponse getResponse()
-    {
-        return httpTestContext.getResponse();
-    }
-
-    private byte[] getResponseBody()
-    {
-        return getResponse().getResponseBody();
-    }
-
     private void performIfHttpResponseIsPresent(Consumer<HttpResponse> responseConsumer)
     {
-        HttpResponse response = getResponse();
+        HttpResponse response = httpTestContext.getResponse();
         if (softAssert.assertNotNull("HTTP response is not null", response))
         {
             responseConsumer.accept(response);
