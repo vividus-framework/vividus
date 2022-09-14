@@ -586,42 +586,6 @@ Then `${text}` is = `Response text from ZIP archive`
 Then `${base64}` is = `UmVzcG9uc2UgdGV4dCBmcm9tIFpJUCBhcmNoaXZl`
 ----
 
-=== Validate archive from response body
-
-WARNING: Step is deprecated and will be removed in VIVIDUS 0.5.0. Use instead <<_validate_zip_archive>>
-
-Verifies that at least one (or no one) entry in a response archive matches the specified xref:parameters:string-comparison-rule.adoc[string comparison rule].
-If comparison rule column does not exist, the verification that archive entries have the specified names is performed.
-
-[source,gherkin]
-----
-Then response archive contains entries with names:$parameters
-----
-
-* `$parameters` - The ExampleTable that contains specified string comparison `rule` and entry `name` pattern that should be found using current `rule`. Available columns:
-** [subs=+quotes]`*rule*` - xref:parameters:string-comparison-rule.adoc[The string comparison rule].
-** [subs=+quotes]`*name*` - Desired entry name pattern used with current `rule`.
-
-NOTE: Entry name in archive is not always the same as file name. Entry name reflects the full relative path from archive root.
-
-.Submit a GET request and check that response archive has file with extension 'data' in 'data' folder but don't contain any data file with name 'restrictedData'
-[source,gherkin]
-----
-When I execute HTTP GET request for resource with URL `https://example.com/get-zip-archive`
-Then response archive contains entries with names:
-|rule             |name                     |
-|matches          |data/.+\.data            |
-|does not contain |restrictedData.data      |
-----
-.Submit a GET request and check that response archive has file with name `responseTextFromZipArchive.txt`
-[source,gherkin]
-----
-When I execute HTTP GET request for resource with URL `https://example.com/get-zip-archive`
-Then response archive contains entries with names:
-|name                           |
-|responseTextFromZipArchive.txt |
-----
-
 === Validate ZIP archive
 
 Verifies that at least one (or no one) entry in an archive matches the specified xref:parameters:string-comparison-rule.adoc[string comparison rule].
