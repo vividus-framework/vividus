@@ -1,20 +1,3 @@
-Composite: When I $actionType baseline with `$name`
-!-- WARNING: The step "When I $actionType baseline with `$name`" is deprecated and will be removed in VIVIDUS 0.5.0
-When I <actionType> baseline with name `<name>`
-
-Composite: When I $actionType baseline with `$name` using screenshot configuration:$screenshotConfiguration
-!-- WARNING: The step "When I $actionType baseline with `$name` using screenshot configuration:$screenshotConfiguration" is deprecated and will be removed in VIVIDUS 0.5.0
-When I <actionType> baseline with name `<name>` using screenshot configuration:<screenshotConfiguration>
-
-Composite: When I $actionType baseline with `$name` ignoring:$checkSettings
-!-- WARNING: The step "When I $actionType baseline with `$name` ignoring:$checkSettings" is deprecated and will be removed in VIVIDUS 0.5.0
-When I <actionType> baseline with name `<name>` ignoring:<checkSettings>
-
-Composite: When I $actionType baseline with `$name` ignoring:$checkSettings using screenshot configuration:$screenshotConfiguration
-Priority:1
-!-- WARNING: The step "When I $actionType baseline with `$name` ignoring:$checkSettings using screenshot configuration:$screenshotConfiguration" is deprecated and will be removed in VIVIDUS 0.5.0
-When I <actionType> baseline with name `<name>` ignoring:<checkSettings> using screenshot configuration:<screenshotConfiguration>
-
 Composite: When I $actionType baseline with name `$name` using repository `$repository`
 Priority:1
 !-- WARNING: The step "When I $actionType baseline with name `$name` using repository `$repository`" is deprecated and will be removed in VIVIDUS 0.5.0

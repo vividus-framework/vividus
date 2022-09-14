@@ -74,8 +74,8 @@ When I <action> baseline with name `${target-platform}-custom-config` using scre
 |100      |
 
 
-Scenario: Step verification: When I $actionType baseline with `$name` ignoring:$checkSettings using screenshot configuration:$screenshotConfiguration
-When I <action> baseline with `${target-platform}-custom-config-<cut-type>-ignore` ignoring:
+Scenario: Step verification: When I $actionType baseline with name `$name` ignoring:$checkSettings using screenshot configuration:$screenshotConfiguration
+When I <action> baseline with name `${target-platform}-custom-config-<cut-type>-ignore` ignoring:
 |<cut-type>          |
 |${element-to-ignore}|
 using screenshot configuration:
