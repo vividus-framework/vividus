@@ -11,19 +11,6 @@ Then `${response-as-bytes}` archive contains entries with names:
 |txtFileFromZipArchive.txt    |
 |emptyDataFromZipArchive.data |
 
-Scenario: Verify step: "Then the response archive contains entries with the names:$parameters"
-Meta:
-    @requirementId 2545
-!-- Deprecated
-Then the response archive contains entries with the names:
-|rule             |name                |
-|MATCHES          |.+\.data            |
-|DOES_NOT_CONTAIN |restrictedData.data |
-Then the response archive contains entries with the names:
-|name                         |
-|txtFileFromZipArchive.txt    |
-|emptyDataFromZipArchive.data |
-
 Scenario: Verify step: "When I save content of `$archiveData` archive entries to variables:$parameters"
 When I save content of `${response-as-bytes}` archive entries to variables:
 |path                     |variableName|scopes  |outputFormat|

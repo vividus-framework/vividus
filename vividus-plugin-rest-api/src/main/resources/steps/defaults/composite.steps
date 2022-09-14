@@ -1,3 +1,0 @@
-Composite: Then the response archive contains entries with the names:$parameters
-!-- WARNING: The step "Then the response archive contains entries with the names:$parameters" is deprecated and will be removed in VIVIDUS 0.5.0
-Then response archive contains entries with names:<parameters>
