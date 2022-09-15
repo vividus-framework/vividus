@@ -57,6 +57,7 @@ import org.jbehave.core.failures.BeforeOrAfterFailed;
 import org.jbehave.core.failures.UUIDExceptionWrapper;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.GivenStories;
+import org.jbehave.core.model.Lifecycle;
 import org.jbehave.core.model.Lifecycle.ExecutionType;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
@@ -80,6 +81,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.batch.BatchExecutionConfiguration;
@@ -928,6 +930,38 @@ class AllureStoryReporterTests
     }
 
     @Test
+    void shouldReportSystemAfterStoryStepInCaseOfFailure()
+    {
+        Story story = new Story();
+        RunningStory runningStory = new RunningStory();
+        runningStory.setStory(story);
+        runTestContext.putRunningStory(runningStory, false);
+        mockRunningBatchName();
+        when(allureRunContext.isStepInProgress()).thenReturn(false);
+        when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.SYSTEM_AFTER_STORY_STEPS);
+        var throwable = new IllegalStateException();
+
+        allureStoryReporter.failed(GIVEN_STEP, throwable);
+
+        var ordered = Mockito.inOrder(next, allureLifecycle, allureRunContext);
+        ordered.verify(next).failed(GIVEN_STEP, throwable);
+        ordered.verify(allureLifecycle).scheduleTestCase(
+            argThat(tr -> "System After Story step: Given step".equals(tr.getName())));
+        var testCaseUuidCaptor = ArgumentCaptor.forClass(String.class);
+        ordered.verify(allureLifecycle).startTestCase(testCaseUuidCaptor.capture());
+        var testCaseUuid = testCaseUuidCaptor.getValue();
+        ordered.verify(allureRunContext).setStoryExecutionStage(StoryExecutionStage.SYSTEM_AFTER_STORY_STEPS);
+        var stepUuidCaptor = ArgumentCaptor.forClass(String.class);
+        ordered.verify(allureLifecycle).startStep(eq(testCaseUuid), stepUuidCaptor.capture(),
+                argThat(r -> Status.PASSED == r.getStatus()));
+        ordered.verify(allureRunContext).startStep();
+        ordered.verify(allureLifecycle).stopStep(stepUuidCaptor.getValue());
+        ordered.verify(allureRunContext).stopStep();
+        ordered.verify(allureLifecycle).stopTestCase(testCaseUuid);
+        ordered.verify(allureLifecycle).writeTestCase(testCaseUuid);
+    }
+
+    @Test
     void testFailedCreateBeforeScenarioStep()
     {
         when(allureRunContext.getScenarioExecutionStage()).thenReturn(ScenarioExecutionStage.BEFORE_STEPS);
@@ -1084,6 +1118,17 @@ class AllureStoryReporterTests
         AssertionFailedEvent assertionFailedEvent = mockSoftAssertionError(knownIssue);
         allureStoryReporter.onAssertionFailure(assertionFailedEvent);
         verify(stepResult).setStatus(Status.FAILED);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"BEFORE, SYSTEM, 0", "BEFORE, USER, 0", "AFTER, SYSTEM, 1", "AFTER, USER, 0"})
+    void shouldDetectSystemAfterStorySteps(Stage stage, Lifecycle.ExecutionType type, int stageSet)
+    {
+        allureStoryReporter.beforeStorySteps(stage, type);
+        var ordered = Mockito.inOrder(next, allureRunContext);
+        ordered.verify(allureRunContext, times(stageSet))
+            .setStoryExecutionStage(StoryExecutionStage.SYSTEM_AFTER_STORY_STEPS);
+        ordered.verify(next).beforeStorySteps(stage, type);
     }
 
     private StepResult mockCurrentStep(Status initialStepStatus)

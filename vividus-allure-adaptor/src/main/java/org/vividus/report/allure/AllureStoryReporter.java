@@ -122,6 +122,16 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     }
 
     @Override
+    public void beforeStorySteps(Stage stage, Lifecycle.ExecutionType type)
+    {
+        if (Stage.AFTER == stage && Lifecycle.ExecutionType.SYSTEM == type)
+        {
+            allureRunContext.setStoryExecutionStage(StoryExecutionStage.SYSTEM_AFTER_STORY_STEPS);
+        }
+        super.beforeStorySteps(stage, type);
+    }
+
+    @Override
     public void beforeStoriesSteps(Stage stage)
     {
         if (stage == Stage.BEFORE)
@@ -352,7 +362,18 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
             }
             lifecycle.updateTestCase(getRootStepId(), result -> result.getLinks().addAll(links));
         }
-        stopStep(Status.from(cause), getStatusDetailsFromThrowable(cause));
+
+        if (allureRunContext.getStoryExecutionStage() == StoryExecutionStage.SYSTEM_AFTER_STORY_STEPS)
+        {
+            startTestCase("System After Story step: " + step, StoryExecutionStage.SYSTEM_AFTER_STORY_STEPS);
+            startStep(step);
+            stopStep(Status.from(cause), getStatusDetailsFromThrowable(cause));
+            stopTestCase();
+        }
+        else
+        {
+            stopStep(Status.from(cause), getStatusDetailsFromThrowable(cause));
+        }
     }
 
     @Override
