@@ -2,3 +2,4 @@
 * xref:extension-points.adoc[Extension points]
 ** xref:extensions.adoc[Extensions]
 ** xref:plugins.adoc[Plugins]
+** xref:custom-modules.adoc[Custom modules]
