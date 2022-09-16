@@ -175,6 +175,16 @@ NOTE: The properties marked with *bold* are mandatory.
 |Default
 |Description
 
+|`selenium.grid.platform-name`
+|Valid target platform name
+|empty
+|Identifies the operating system for the testing. e.g. `Windows`
+
+|`selenium.grid.platform-version`
+|Valid target platform version
+|empty
+|Identifies the operating system version for the testing. e.g. `10`
+
 include::partial$selenium-properties.adoc[]
 include::partial$proxy-properties.adoc[]
 
