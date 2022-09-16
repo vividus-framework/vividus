@@ -24,6 +24,17 @@ include::partial$azure-profile-and-subscription.adoc[leveloffset=+1]
 
 ==== Retrieve the Key Vault properties
 
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0. The replacement is
+xref:plugins:plugin-azure-resource-manager.adoc#_get_information_about_azure_resource[the generic step retrieving information about Azure resources].
+The replacement pattern is:
+[source,gherkin]
+----
+When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.KeyVault/vaults/<keyVaultName>` using API version `2021-10-01` and save it to <scopes> variable `<variableName>`
+----
+====
+
 Retrieves the properties of the specified Azure key vault and saves them as JSON
 to a variable. For more information, see the
 https://docs.microsoft.com/en-us/rest/api/keyvault/keyvault/vaults/get[Azure Docs].

@@ -24,6 +24,17 @@ include::partial$azure-profile-and-subscription.adoc[leveloffset=+1]
 
 ==== Collect SQL Servers info
 
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0. The replacement is
+xref:plugins:plugin-azure-resource-manager.adoc#_get_information_about_azure_resource[the generic step retrieving information about Azure resources].
+The replacement pattern is:
+[source,gherkin]
+----
+When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.Sql/servers` using API version `2021-08-01-preview` and save it to <scopes> variable `<variableName>`
+----
+====
+
 Collects the info about all the SQL Servers under the specified resource group
 and saves it as JSON to a variable. For more information, see the
 https://docs.microsoft.com/en-us/rest/api/sql/2021-08-01-preview/servers/list-by-resource-group[Azure Docs].
@@ -44,6 +55,17 @@ When I collect SQL Servers from resource group `TEST-SQL` and save them as JSON 
 ----
 
 ==== Collect SQL Databases info
+
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0. The replacement is
+xref:plugins:plugin-azure-resource-manager.adoc#_get_information_about_azure_resource[the generic step retrieving information about Azure resources].
+The replacement pattern is:
+[source,gherkin]
+----
+When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.Sql/servers/<sqlServerName>/databases` using API version `2021-08-01-preview` and save it to <scopes> variable `<variableName>`
+----
+====
 
 Collects the info about all the databases belonging to the identified SQL Server
 under the specified resource group and saves it as JSON to a variable. For more
@@ -67,6 +89,17 @@ When I collect databases from SQL Server `geography-server` from resource group 
 ----
 
 ==== Retrieve the SQL Database properties
+
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0. The replacement is
+xref:plugins:plugin-azure-resource-manager.adoc#_get_information_about_azure_resource[the generic step retrieving information about Azure resources].
+The replacement pattern is:
+[source,gherkin]
+----
+When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.Sql/servers/<sqlServerName>/databases/<databaseName>` using API version `2021-08-01-preview` and save it to <scopes> variable `<variableName>`
+----
+====
 
 Retrieves the properties of the specified SQL Database belonging to the
 identified SQL Server and saves them as JSON to a variable. For more
