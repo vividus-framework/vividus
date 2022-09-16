@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,5 +18,9 @@ package org.vividus.report.allure.model;
 
 public enum StoryExecutionStage
 {
-    LIFECYCLE_BEFORE_STORY_STEPS, BEFORE_SCENARIO, AFTER_SCENARIO, LIFECYCLE_AFTER_STORY_STEPS
+    BEFORE_SCENARIO,
+    AFTER_SCENARIO,
+    LIFECYCLE_BEFORE_STORY_STEPS,
+    LIFECYCLE_AFTER_STORY_STEPS,
+    SYSTEM_AFTER_STORY_STEPS
 }
