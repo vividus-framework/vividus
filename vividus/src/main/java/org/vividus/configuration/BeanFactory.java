@@ -29,6 +29,7 @@ public final class BeanFactory
     private static final String[] LOCATIONS = {
         "classpath*:/org/vividus/spring.xml",
         "classpath*:/vividus-extension/spring.xml",
+        "classpath*:/vividus-plugin/spring.xml",
         "classpath*:/spring.xml"
     };
 

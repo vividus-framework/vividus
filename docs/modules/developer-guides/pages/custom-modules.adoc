@@ -1,0 +1,13 @@
+= Custom Modules
+
+Custom modules are extensible and flexible mechanism for development and represent project-specific
+logic (steps, transformers, expressions, etc.). The custom modules may depend on extensions and/or plugins,
+may not have dependencies at all, also they may override default behaviour of plugins and extensions if needed,
+but note that overriding of behaviour of other custom modules can yield undetermenistic behaviours.
+
+:path: spring.xml
+:key: custom module
+
+include::partial$configuration.adoc[]
+
+include::partial$features.adoc[]

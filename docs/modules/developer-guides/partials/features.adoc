@@ -1,0 +1,211 @@
+== xref:ROOT:glossary.adoc#_table_transformer[Table Transformers]
+
+In order to create and register own table transformer the following steps should
+be done.
+
+. Create a new class that implements
+https://javadoc.io/doc/org.jbehave/jbehave-core/latest/org/jbehave/core/model/TableTransformers.TableTransformer.html[`org.jbehave.core.model.TableTransformers.TableTransformer`]:
++
+./src/main/java/com/mycompany/transformer/MyTableTransformer.java
+[source,java]
+----
+package com.mycompany.transformer;
+
+import org.jbehave.core.model.TableTransformers.TableTransformer;
+
+public class MyTableTransformer implements TableTransformer
+{
+    @Override
+    public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
+    {
+        String transformedTable = ...; // Table transformation logic
+        // ...
+        return transformedTable;
+    }
+}
+----
+
+. Register Spring bean where `id` is the name of the transformer which will
+be used to refer it in tests:
++
+./src/main/resources/spring.xml
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="MY_TRANSFORMER" class="com.mycompany.transformer.MyTableTransformer"/>
+
+</beans>
+----
+
+. Use new transformer in tests:
++
+./src/main/resources/story/MyStory.story
+[source,gherkin]
+----
+Scenario: Use the custom tramsfomer to modify ExamplesTable
+Given ...
+When ...
+Then ...
+Examples:
+{transformer=MY_TRANSFORMER}
+|header |
+|value 1|
+|value 2|
+----
+
+[NOTE]
+====
+It's recommended to stick to the following naming conventions:
+
+* `SCREAMING_SNAKE_CASE` for transfomer names:
++
+[source,gherkin]
+----
+{transformer=MY_TRANSFORMER}
+----
+* `lowerCamelCase` for transformer parameters:
++
+[source,gherkin]
+----
+{transformer=MY_TRANSFORMER, transformerParameter=value}
+----
+* `kebab-case` with dot `.` as a separator for transformer bean properties:
++
+[source,properties]
+----
+transformer.my-transformer.my-property=value
+----
++
+Pay attention to the property format:
++
+[source,properties]
+----
+transformer.<custom-transform-name>.<property-name>=<property-value>
+----
+====
+
+
+== Dynamic variables
+
+In order to create and register own dynamic variable the following steps should
+be done.
+
+. Create a new class that implements
+https://github.com/vividus-framework/vividus/blob/master/vividus-engine/src/main/java/org/vividus/variable/DynamicVariable.java[`org.vividus.variable.DynamicVariable`]:
++
+./src/main/java/com/mycompany/variable/MyDynamicVariable.java
+[source,java]
+----
+package com.mycompany.variable;
+
+import org.vividus.variable.DynamicVariable;
+import org.vividus.variable.DynamicVariableCalculationResult;
+
+public class MyDynamicVariable implements DynamicVariable
+{
+    @Override
+    public DynamicVariableCalculationResult calculateValue()
+    {
+        try
+        {
+            String value = ...; // Variable value calcualtion
+            return DynamicVariableCalculationResult.withValue(value);
+        }
+        catch (MyException e)
+        {
+            return DynamicVariableCalculationResult.withError(e.getMessage());
+        }
+    }
+}
+----
+
+. Register Spring bean where `id` is the name of the dynamic variable which will
+be used to refer it in tests:
++
+./src/main/resources/spring.xml
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="my-dynamic-varibale" class="com.mycompany.variable.MyDynamicVariable"/>
+
+</beans>
+----
+
+. Use new variable in tests:
++
+./src/main/resources/story/MyStory.story
+[source,gherkin]
+----
+Scenario: Validate with help of the custom dynamic variable
+Then `${my-dynamic-varibale}` is equal to `my app specific value`
+----
++
+Keep in mind the alias for the dynamic variable with name in lower camel
+case will be available out of the box:
++
+./src/main/resources/story/MyStory.story
+[source,gherkin]
+----
+Scenario: Validate with help of the custom dynamic variable
+Then `${myDynamicVaribale}` is equal to `my app specific value`
+----
+
+== Baseline storages
+
+Baseline storage is a source of the baseline images used to perform visual checks in xref:plugins:plugin-visual.adoc[visual testing plugin]
+
+In order to create and register own baselines storages the following steps should be done
+
+. Create a new class that implements
+https://github.com/vividus-framework/vividus/blob/master/vividus-plugin-visual/src/main/java/org/vividus/visual/engine/BaselineStorage.java[`org.vividus.visual.engine.BaselineStorage`]:
++
+./src/main/java/com/mycompany/visual/engine/AzureBaselineStorage.java
+[source,java]
+----
+package com.mycompany.visual.engine;
+
+import org.vividus.visual.engine.BaselineStorage;
+
+public class AzureBaselineStorage implements BaselineStorage
+{
+    @Override
+    public Optional<Screenshot> getBaseline(String baselineName) throws IOException
+    {
+        // gets the baseline screenshot
+    }
+
+    @Override
+    public void saveBaseline(Screenshot toSave, String baselineName) throws IOException
+    {
+        // saves the baseline screenshot
+    }
+
+}
+----
+
+. Register Spring bean where `id` is the name of the baseline storage which will
+be used in visual testing plugin:
++
+./src/main/resources/spring.xml
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="azure" class="com.mycompany.visual.engine.AzureBaselineStorage"/>
+
+</beans>
+----
