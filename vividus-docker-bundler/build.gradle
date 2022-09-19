@@ -53,6 +53,15 @@ dependencies {
     implementation project(':vividus-plugin-websocket')
     implementation project(':vividus-plugin-winrm')
     implementation project(':vividus-plugin-xml')
+
+    implementation(group: 'mysql', name: 'mysql-connector-java', version: '8.0.30')
+    implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '11.2.1.jre11')
+    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.0')
+    implementation(group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.16.0.0')
+    implementation(group: 'com.ibm.db2.jcc', name: 'db2jcc', version: 'db2jcc4')
+    implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.40')
+    implementation(group: 'com.h2database', name: 'h2', version: '2.1.214')
+    implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.13.22')
 }
 
 task copyRuntimeLibs(type: Copy) {
