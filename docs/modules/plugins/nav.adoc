@@ -24,6 +24,7 @@
 ** xref:plugin-json.adoc[JSON]
 ** xref:plugin-parquet.adoc[Parquet]
 ** xref:plugin-xml.adoc[XML]
+** xref:plugin-yaml.adoc[YAML]
 * Remoting
 ** xref:plugin-ssh.adoc[SSH]
 ** xref:plugin-winrm.adoc[WinRM]
