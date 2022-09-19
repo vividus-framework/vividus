@@ -146,6 +146,7 @@ class AllureStoryReporterTests
 
     private static final String LIFECYCLE_BEFORE_STORY = "Lifecycle: Before story";
     private static final String LIFECYCLE_AFTER_STORY = "Lifecycle: After story";
+    private static final String COMMENT_STEP = "!-- Comment";
 
     private static final String TEST_CASE_ID = "testCaseId";
     private static final String REQUIREMENT_ID = "requirementId";
@@ -884,15 +885,44 @@ class AllureStoryReporterTests
     @Test
     void testComment()
     {
-        String step = "!-- Comment";
         mockStepUid();
-        allureStoryReporter.comment(step);
+        allureStoryReporter.comment(COMMENT_STEP);
         verify(testContext, never()).get(ScenarioExecutionStage.class, ScenarioExecutionStage.class);
         verify(testContext, never()).put(eq(ScenarioExecutionStage.class), any(ScenarioExecutionStage.class));
-        verify(next).comment(step);
+        verify(next).comment(COMMENT_STEP);
         verify(allureLifecycle).updateStep(eq(STEP_UID), anyStepResultConsumer());
         verify(allureLifecycle).stopStep(STEP_UID);
         verify(allureLifecycle, never()).updateTestCase(eq(SCENARIO_UID), anyTestResultConsumer());
+    }
+
+    @Test
+    void testCommentDoesNotAffectTestCaseStatusIfOtherStepsArePresent()
+    {
+        mockEnableReporting();
+        RunningStory runningStory = mockRunningStoryWithSeverity(true);
+        Scenario scenario = createScenario(SCENARIO, getScenarioMeta(true),
+                List.of());
+        runningStory.setRunningScenario(getRunningScenario(scenario, 0));
+        runningStory.setRunningScenario(getRunningScenario(scenario, 0));
+        Story story = runningStory.getStory();
+        boolean givenStory = false;
+        mockStoryStart(givenStory);
+        mockScenarioUid(true);
+        allureStoryReporter.beforeStory(story, givenStory);
+        allureStoryReporter.beforeScenario(scenario);
+
+        mockStepUid();
+        allureStoryReporter.successful(GIVEN_STEP);
+        verify(allureLifecycle, times(2)).updateStep(eq(STEP_UID), anyStepResultConsumer());
+        verify(allureLifecycle, times(1)).updateTestCase(eq(SCENARIO_UID), anyTestResultConsumer());
+
+        allureStoryReporter.beforeScenario(scenario);
+        String commentStepUID = STEP_UID + "_comment";
+        linkedQueueItem = linkedQueueItem.attachItem(commentStepUID);
+        mockScenarioUid(false);
+        allureStoryReporter.comment(COMMENT_STEP);
+        verify(allureLifecycle, times(1)).updateStep(eq(commentStepUID), anyStepResultConsumer());
+        verify(allureLifecycle, times(1)).updateTestCase(eq(SCENARIO_UID), anyTestResultConsumer());
     }
 
     @Test
