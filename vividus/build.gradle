@@ -92,6 +92,7 @@ dependencies {
     integrationTestImplementation project(':vividus-plugin-web-app')
     integrationTestImplementation project(':vividus-plugin-winrm')
     integrationTestImplementation project(':vividus-plugin-xml')
+    integrationTestImplementation project(':vividus-plugin-yaml')
     integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.8.2')
     integrationTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
 }

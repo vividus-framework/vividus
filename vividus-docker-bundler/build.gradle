@@ -53,6 +53,7 @@ dependencies {
     implementation project(':vividus-plugin-websocket')
     implementation project(':vividus-plugin-winrm')
     implementation project(':vividus-plugin-xml')
+    implementation project(':vividus-plugin-yaml')
 
     implementation(group: 'mysql', name: 'mysql-connector-java', version: '8.0.30')
     implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '11.2.1.jre11')

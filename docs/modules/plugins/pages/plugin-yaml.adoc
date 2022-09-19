@@ -1,0 +1,42 @@
+= YAML Plugin
+
+The plugin provides a set of actions for validation of YAML data.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-yaml', version: '{current-version}')
+----
+
+== Steps
+
+:yaml-path: https://github.com/yaml-path/YamlPath#usage[YAML Path]
+
+The steps syntax uses internal (VIVIDUS-only) term:
+
+ * "YAML element value" or "value of YAML element" - scalar values like
+   `string`, `integer`, `float`, `boolean` (`true` or `false`) and `null`.
+
+=== Save YAML element value from input
+
+Saves a value of YAML element found in the given YAML into the variable with
+the specified name and scope.
+
+[source,gherkin]
+----
+When I save YAML element value from `$yaml` by YAML path `$yamlPath` to $scopes variable `$variableName`
+----
+
+* `$yaml` - The YAML used to find YAML element value.
+* `$yamlPath` - The {yaml-path} used to find YAML element value.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the found YAML element value.
+
+.Validate the title of the second book
+[source,gherkin]
+----
+When I save YAML element value from `${response}` by YAML path `store.book[1].title` to scenario variable `title-of-second-book`
+Then `${title-of-second-book}` is equal to `Sword of Honour`
+----
