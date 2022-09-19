@@ -16,9 +16,16 @@
 
 package org.vividus.azure.resourcemanager;
 
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.azure.core.credential.TokenCredential;
+import com.azure.core.http.ContentType;
+import com.azure.core.http.HttpMethod;
+import com.azure.core.http.HttpPipeline;
+import com.azure.core.http.HttpRequest;
+import com.azure.core.http.HttpResponse;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.resourcemanager.resources.fluentcore.utils.HttpPipelineProvider;
 
@@ -28,15 +35,21 @@ import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
-public class ResourceManagementSteps extends AbstractAzureResourceManagementSteps
+import io.netty.handler.codec.http.HttpResponseStatus;
+
+public class ResourceManagementSteps
 {
+    private final HttpPipeline httpPipeline;
+    private final ISoftAssert softAssert;
+    private final VariableContext variableContext;
     private final AzureProfile azureProfile;
 
     public ResourceManagementSteps(AzureProfile azureProfile, TokenCredential tokenCredential, ISoftAssert softAssert,
             VariableContext variableContext)
     {
-        super(HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile),
-                azureProfile.getEnvironment().getResourceManagerEndpoint(), softAssert, variableContext);
+        this.httpPipeline = HttpPipelineProvider.buildHttpPipeline(tokenCredential, azureProfile);
+        this.softAssert = softAssert;
+        this.variableContext = variableContext;
         this.azureProfile = azureProfile;
     }
 
@@ -75,8 +88,8 @@ public class ResourceManagementSteps extends AbstractAzureResourceManagementStep
     public void saveAzureResourceAsVariable(String azureResourceIdentifier, String apiVersion,
             Set<VariableScope> scopes, String variableName)
     {
-        String urlPath = buildUrlPath(azureResourceIdentifier);
-        saveHttpGetResponseAsVariable(urlPath, apiVersion, scopes, variableName);
+        executeHttpRequest(HttpMethod.GET, azureResourceIdentifier, apiVersion, Optional.empty(),
+                responseBody -> variableContext.putVariable(scopes, variableName, responseBody));
     }
 
     /**
@@ -110,13 +123,14 @@ public class ResourceManagementSteps extends AbstractAzureResourceManagementStep
      *                                 </ul>
      * @param variableName             The variable name to store the result of Azure operation execution.
      */
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
     @When("I execute Azure operation with identifier `$azureOperationIdentifier` using API version `$apiVersion` and "
             + "body `$azureOperationBody` and save result to $scopes variable `$variableName`")
     public void executeOperationAtAzureResource(String azureOperationIdentifier, String apiVersion,
             String azureOperationBody, Set<VariableScope> scopes, String variableName)
     {
-        String urlPath = buildUrlPath(azureOperationIdentifier);
-        saveHttpPostResponseAsVariable(urlPath, apiVersion, azureOperationBody, scopes, variableName);
+        executeHttpRequest(HttpMethod.POST, azureOperationIdentifier, apiVersion, Optional.of(azureOperationBody),
+                responseBody -> variableContext.putVariable(scopes, variableName, responseBody));
     }
 
     /**
@@ -144,8 +158,8 @@ public class ResourceManagementSteps extends AbstractAzureResourceManagementStep
             + "API version `$apiVersion`")
     public void configureAzureResource(String azureResourceIdentifier, String azureResourceBody, String apiVersion)
     {
-        String urlPath = buildUrlPath(azureResourceIdentifier);
-        executeHttpPut(urlPath, apiVersion, azureResourceBody);
+        executeHttpRequest(HttpMethod.PUT, azureResourceIdentifier, apiVersion, Optional.of(azureResourceBody),
+                responseBody -> { });
     }
 
     /**
@@ -170,13 +184,34 @@ public class ResourceManagementSteps extends AbstractAzureResourceManagementStep
     @When("I delete Azure resource with identifier `$azureResourceIdentifier` using API version `$apiVersion`")
     public void deleteAzureResource(String azureResourceIdentifier, String apiVersion)
     {
-        String urlPath = buildUrlPath(azureResourceIdentifier);
-        executeHttpDelete(urlPath, apiVersion);
+        executeHttpRequest(HttpMethod.DELETE, azureResourceIdentifier, apiVersion, Optional.empty(),
+                responseBody -> { });
     }
 
-    private String buildUrlPath(String azureResourceIdentifier)
+    private void executeHttpRequest(HttpMethod method, String azureResourceIdentifier, String apiVersion,
+            Optional<String> azureResourceBody, Consumer<String> responseBodyConsumer)
     {
-        return "subscriptions/" + azureProfile.getSubscriptionId() + StringUtils.prependIfMissing(
-                azureResourceIdentifier, "/");
+        String url = String.format("%ssubscriptions/%s%s?api-version=%s",
+                azureProfile.getEnvironment().getResourceManagerEndpoint(), azureProfile.getSubscriptionId(),
+                StringUtils.prependIfMissing(azureResourceIdentifier, "/"), apiVersion);
+
+        HttpRequest httpRequest = new HttpRequest(method, url);
+        azureResourceBody.ifPresent(requestBody -> {
+            httpRequest.setBody(requestBody);
+            httpRequest.setHeader("Content-Type", ContentType.APPLICATION_JSON);
+        });
+
+        try (HttpResponse httpResponse = httpPipeline.send(httpRequest).block())
+        {
+            String responseBody = httpResponse.getBodyAsString().block();
+            if (httpResponse.getStatusCode() == HttpResponseStatus.OK.code())
+            {
+                responseBodyConsumer.accept(responseBody);
+            }
+            else
+            {
+                softAssert.recordFailedAssertion("Azure REST API HTTP request execution is failed: " + responseBody);
+            }
+        }
     }
 }

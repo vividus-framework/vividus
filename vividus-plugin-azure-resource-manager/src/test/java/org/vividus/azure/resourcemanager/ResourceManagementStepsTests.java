@@ -92,7 +92,7 @@ class ResourceManagementStepsTests
 
     @TestFactory
     @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
-    Stream<DynamicTest> shouldSaveAzureResourceAsVariable()
+    Stream<DynamicTest> testSavingOfAzureResourceAsVariable()
     {
         return DynamicTest.stream(createTestsCreatingResources(), test -> test.accept(
                 steps -> steps.saveAzureResourceAsVariable(AZURE_RESOURCE_IDENTIFIER, API_VERSION, SCOPES, VAR_NAME),
@@ -120,7 +120,7 @@ class ResourceManagementStepsTests
 
     @TestFactory
     @SetSystemProperty(key = SUBSCRIPTION_ID_PROPERTY_NAME, value = SUBSCRIPTION_ID_PROPERTY_VALUE)
-    Stream<DynamicTest> shouldExecuteOperationAtAzureResource()
+    Stream<DynamicTest> testExecutionOfOperationAtAzureResource()
     {
         return DynamicTest.stream(createTestsExecutionOperations(), test -> test.accept(
                 steps -> steps.executeOperationAtAzureResource(AZURE_RESOURCE_IDENTIFIER, API_VERSION, REQUEST_BODY,

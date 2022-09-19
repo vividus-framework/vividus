@@ -1,0 +1,3 @@
+Composite: When I collect system topics in resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`
+!-- WARNING: The step "When I collect system topics in resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`" is deprecated and will be removed in VIVIDUS 0.6.0
+When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.EventGrid/systemTopics` using API version `2021-12-01` and save it to <scopes> variable `<variableName>`

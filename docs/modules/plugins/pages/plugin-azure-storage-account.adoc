@@ -386,6 +386,17 @@ include::partial$azure-profile-and-subscription.adoc[leveloffset=+1]
 
 ==== Collect storage accounts info
 
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0. The replacement is
+xref:plugins:plugin-azure-resource-manager.adoc#_get_information_about_azure_resource[the generic step retrieving information about Azure resources].
+The replacement pattern is:
+[source,gherkin]
+----
+When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.Storage/storageAccounts` using API version `2021-08-01` and save it to <scopes> variable `<variableName>`
+----
+====
+
 Collects storage accounts info in the specified resource group and saves it as
 JSON to a variable. For more information, see the
 https://docs.microsoft.com/en-us/rest/api/storagerp/storage-accounts/list[Azure Docs].
@@ -412,6 +423,17 @@ When I collect storage accounts in resource group `TEST-SA` and save them as JSO
 ----
 
 ==== Retrieve the blob service properties
+
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0. The replacement is
+xref:plugins:plugin-azure-resource-manager.adoc#_get_information_about_azure_resource[the generic step retrieving information about Azure resources].
+The replacement pattern is:
+[source,gherkin]
+----
+When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.Storage/storageAccounts/<storageAccountName>/blobServices/default` using API version `2021-08-01` and save it to <scopes> variable `<variableName>`
+----
+====
 
 Retrieves the properties of a storage account’s Blob service, including
 properties for Storage Analytics and CORS (Cross-Origin Resource Sharing) rules,
