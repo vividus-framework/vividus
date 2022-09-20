@@ -14,9 +14,7 @@ dependencies {
 
     api project(':vividus-extension-selenium')
 
-    implementation(group: 'com.codeborne', name: 'selenide', version: '6.7.4') {
-        exclude module: 'slf4j-api'
-    }
+    implementation(group: 'com.codeborne', name: 'selenide', version: '6.7.4')
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-chrome-driver', version: "${seleniumVersion}")
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-edge-driver', version: "${seleniumVersion}")
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-firefox-driver', version: "${seleniumVersion}")
