@@ -317,7 +317,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     public void comment(String step)
     {
         super.comment(step);
-        updateStepStatus(Status.SKIPPED);
+        updateStepStatus(getLinkedStep().getValue(), Status.SKIPPED);
         stopStep();
     }
 
