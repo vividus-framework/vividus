@@ -37,8 +37,6 @@ expensive: 10
 `
 
 Scenario: Step verification 'When I save YAML element value from `$yaml` by YAML path `$yamlPath` to $scopes variable `$variableName`'
-Meta:
-    @requirementId 2114
 When I save YAML element value from `${yaml}` by YAML path `<yamlPath>` to scenario variable `yamlElementValue`
 Then `${yamlElementValue}` is equal to `<expected>`
 Examples:
