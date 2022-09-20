@@ -23,6 +23,8 @@ import javax.inject.Inject;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
@@ -31,11 +33,15 @@ import org.vividus.ui.web.action.search.WebLocatorType;
 @TakeScreenshotOnFailure
 public class LinkSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LinkSteps.class);
+
     private static final String TEXT = "text";
 
     @Inject private IBaseValidations baseValidations;
 
     /**
+     * @deprecated Use step: "Then number of elements found by `$locator` is $comparisonRule `$quantity`"
+     *
      * Checks that searchContext contains <b>linkItems</b> with expected text and url
      * (<b>text</b> and <b>href attribute</b> values):
      * <table border="1" style="width:10%">
@@ -64,9 +70,13 @@ public class LinkSteps
      * </table>
      * @param expectedLinkItems A table of expected <b>link</b> items
      */
+    @Deprecated(since = "0.5.0", forRemoval = true)
     @Then(value = "context contains list of link items with the text and link: $expectedLinkItems", priority = 1)
     public void ifLinkItemsWithTextAndLink(ExamplesTable expectedLinkItems)
     {
+        LOGGER.warn("The step: \"Then context contains list of link items with the text and link: $expectedLinkItems\""
+                + " is deprecated and will be removed in VIVIDUS 0.6.0. Use step: "
+                + "\"Then number of elements found by `$locator` is $comparisonRule `$quantity`\"");
         for (Parameters row : expectedLinkItems.getRowsAsParameters(true))
         {
             String text = row.valueAs(TEXT, String.class);
@@ -78,6 +88,8 @@ public class LinkSteps
     }
 
     /**
+     * @deprecated Use step: "Then number of elements found by `$locator` is $comparisonRule `$quantity`"
+     *
      * Checks that searchContext contains <b>linkItems</b> with expected text
      * <p>
      * A <b>menu</b> is defined by a {@literal <nav>} tag, which contains a list of <b>menu items</b>. The first level
@@ -99,9 +111,13 @@ public class LinkSteps
      * </table>
      * @param expectedLinkItems A table of expected <b>link</b> items (<b>text</b> values):
      */
+    @Deprecated(since = "0.5.0", forRemoval = true)
     @Then("context contains list of link items with the text: $expectedLinkItems")
     public void ifLinkItemsWithTextExists(ExamplesTable expectedLinkItems)
     {
+        LOGGER.warn("The step: \"Then context contains list of link items with the text: $expectedLinkItems\""
+                + " is deprecated and will be removed in VIVIDUS 0.6.0."
+                + " Use step: \"Then number of elements found by `$locator` is $comparisonRule `$quantity`\"");
         expectedLinkItems.getRowsAsParameters(true).stream()
                 .<String>map(row -> row.valueAs(TEXT, String.class))
                 .forEach(text -> {
