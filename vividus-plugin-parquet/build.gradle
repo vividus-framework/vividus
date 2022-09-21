@@ -21,7 +21,7 @@ dependencies {
     implementation(group: 'org.apache.parquet', name: 'parquet-avro', version: '1.12.3')
     implementation(group: 'org.apache.hadoop', name: 'hadoop-common', version: "${hadoopVersion}")
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.0')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.1')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
     testImplementation(group: 'org.apache.hadoop', name: 'hadoop-mapreduce-client-core', version: "${hadoopVersion}")
