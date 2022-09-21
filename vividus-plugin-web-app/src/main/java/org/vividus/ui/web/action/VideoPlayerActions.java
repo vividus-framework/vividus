@@ -58,7 +58,8 @@ public class VideoPlayerActions
     }
 
     /**
-     * @param videoPlayer
+     * Returns the video player properties
+     * @param videoPlayer video player element
      * @return Map of video player properties: duration, src, currentTime, networkState
      */
     public Map<String, Object> getInfo(WebElement videoPlayer)
