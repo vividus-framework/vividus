@@ -122,6 +122,7 @@ public class WaitSteps
         String elementXpath = XpathLocatorUtils.getXPathByTagNameAndAttribute(elementTag, attributeType,
             attributeValue);
         Locator locator = new Locator(WebLocatorType.XPATH, elementXpath);
+        locator.getSearchParameters().setWaitForElement(false);
         List<WebElement> elements = searchActions.findElements(locator);
         if (!elements.isEmpty())
         {
