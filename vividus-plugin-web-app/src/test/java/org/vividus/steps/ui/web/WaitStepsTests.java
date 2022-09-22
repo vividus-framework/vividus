@@ -154,6 +154,7 @@ class WaitStepsTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         List<WebElement> elements = List.of(webElement);
         Locator locator = new Locator(WebLocatorType.XPATH, ELEMENT_WITH_TAG);
+        locator.getSearchParameters().setWaitForElement(false);
         when(searchActions.findElements(locator)).thenReturn(elements);
         waitSteps.waitTillElementDisappears(ELEMENT_TAG, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
         verify(waitActions).wait(eq(webDriver),
@@ -166,6 +167,7 @@ class WaitStepsTests
     {
         Locator locator = new Locator(WebLocatorType.XPATH, ELEMENT_WITH_TAG);
         when(searchActions.findElements(locator)).thenReturn(List.of());
+        locator.getSearchParameters().setWaitForElement(false);
         waitSteps.waitTillElementDisappears(ELEMENT_TAG, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
         verifyNoInteractions(waitActions);
         verify(softAssert).recordPassedAssertion(
