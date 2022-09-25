@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,15 @@
 
 package org.vividus.ui.web.action.search;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -42,7 +39,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
@@ -50,14 +46,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.action.ElementActions;
-import org.vividus.ui.action.IExpectedConditions;
-import org.vividus.ui.action.IExpectedSearchContextCondition;
-import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.AbstractElementAction;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
-import org.vividus.ui.web.action.WebJavascriptActions;
-import org.vividus.ui.web.action.WebWaitActions;
 
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class LinkUrlSearchTests
@@ -76,7 +67,6 @@ class LinkUrlSearchTests
     private static final String PART = "#part";
     private static final By LINK_URL_LOCATOR_CASE_INSENSITIVE = By.xpath(".//a[normalize-space(translate(@href,"
             + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))=\"" + URL.toLowerCase() + "\"" + "]");
-    private static final Duration TIMEOUT = Duration.ofSeconds(0);
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementAction.class);
 
@@ -84,11 +74,8 @@ class LinkUrlSearchTests
     @Mock private WebElement webElement;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private SearchContext searchContext;
-    @Mock private WebWaitActions waitActions;
     @Mock private ElementActions elementActions;
-    @Mock private IExpectedConditions<By> expectedSearchContextConditions;
-
-    @InjectMocks private LinkUrlSearch search;
+    @InjectMocks private LinkUrlSearch linkUrlSearch;
 
     static Stream<Arguments> hrefProvider()
     {
@@ -109,65 +96,49 @@ class LinkUrlSearchTests
     void testGetCurrentHrefDifferentScheme(String expected, String href, String currentUrl)
     {
         when(webElement.getAttribute(HREF)).thenReturn(href);
-        search.setCaseSensitiveSearch(true);
+        linkUrlSearch.setCaseSensitiveSearch(true);
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriver.getCurrentUrl()).thenReturn(currentUrl);
-        List<WebElement> webElements = List.of(webElement);
-        List<WebElement> foundElements = search.filter(webElements, expected);
+        var webElements = List.of(webElement);
+        var foundElements = linkUrlSearch.filter(webElements, expected);
         assertEquals(webElements, foundElements);
-    }
-
-    @Test
-    void testFindLinksByTextByLinkTextHeightWidthPositive()
-    {
-        testJavascriptActionsWasCalled();
-        verifyLogging();
-    }
-
-    @Test
-    void testFindLinksByTextByLinkTextHeightWidthNegative()
-    {
-        testJavascriptActionsWasCalled();
-        verifyLogging();
-    }
-
-    private void verifyLogging()
-    {
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(
-            info("Total number of elements found {} is {}", LOCATOR, 1),
-            info("Number of {} elements is {}", Visibility.VISIBLE.getDescription(), 1)
-        )));
     }
 
     @Test
     void testFindLinksByTextByLinkText()
     {
-        search.setCaseSensitiveSearch(true);
-        LinkUrlSearch spy = Mockito.spy(search);
-        SearchParameters parameters = new SearchParameters(URL, Visibility.ALL, false);
-        List<WebElement> webElements = List.of(webElement);
+        linkUrlSearch.setCaseSensitiveSearch(true);
+        var parameters = new SearchParameters(URL, Visibility.VISIBLE, false);
+        var webElements = List.of(webElement);
         when(searchContext.findElements(LOCATOR)).thenReturn(webElements);
-        List<WebElement> foundElements = spy.search(searchContext, parameters);
+        when(elementActions.isElementVisible(webElement)).thenReturn(true);
+        var foundElements = linkUrlSearch.search(searchContext, parameters);
         assertEquals(webElements, foundElements);
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+                info("Total number of elements found {} is {}", LOCATOR, 1),
+                info("Number of {} elements is {}", Visibility.VISIBLE.getDescription(), 1)
+        )));
     }
 
     @Test
     void testFindLinksByCaseInsensitiveUrl()
     {
-        search.setCaseSensitiveSearch(false);
-        LinkUrlSearch spy = Mockito.spy(search);
-        SearchParameters parameters = new SearchParameters(URL, Visibility.ALL, false);
-        List<WebElement> webElements = List.of(webElement);
+        linkUrlSearch.setCaseSensitiveSearch(false);
+        var parameters = new SearchParameters(URL, Visibility.ALL, false);
+        var webElements = List.of(webElement);
         when(searchContext.findElements(LINK_URL_LOCATOR_CASE_INSENSITIVE)).thenReturn(webElements);
-        List<WebElement> foundElements = spy.search(searchContext, parameters);
+        var foundElements = linkUrlSearch.search(searchContext, parameters);
         assertEquals(webElements, foundElements);
     }
 
     @Test
     void testFindLinksByTextNullSearchContext()
     {
-        List<WebElement> foundElements = search.search(null, new SearchParameters(URL));
+        var foundElements = linkUrlSearch.search(null, new SearchParameters(URL));
         assertEquals(List.of(), foundElements);
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+                error("Unable to locate elements, because search context is not set")
+        )));
     }
 
     @Test
@@ -175,8 +146,8 @@ class LinkUrlSearchTests
     {
         when(webElement.getAttribute(HREF)).thenReturn(null);
         mockGetCurrentUrl();
-        List<WebElement> webElements = List.of(webElement);
-        List<WebElement> foundElements = search.filter(webElements, URL_PATH);
+        var webElements = List.of(webElement);
+        var foundElements = linkUrlSearch.filter(webElements, URL_PATH);
         assertEquals(List.of(), foundElements);
     }
 
@@ -184,11 +155,11 @@ class LinkUrlSearchTests
     void testFilterLinksByHttpsUrl()
     {
         when(webElement.getAttribute(HREF)).thenReturn(SIMPLE_URL_WITH_PATH);
-        search.setCaseSensitiveSearch(true);
+        linkUrlSearch.setCaseSensitiveSearch(true);
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriver.getCurrentUrl()).thenReturn(SIMPLE_URL);
-        List<WebElement> webElements = List.of(webElement);
-        List<WebElement> foundElements = search.filter(webElements, "https://example.com/someUrl");
+        var webElements = List.of(webElement);
+        var foundElements = linkUrlSearch.filter(webElements, "https://example.com/someUrl");
         assertEquals(List.of(), foundElements);
     }
 
@@ -198,111 +169,95 @@ class LinkUrlSearchTests
         when(webElement.getAttribute(HREF)).thenReturn(URL);
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriver.getCurrentUrl()).thenReturn("data,;");
-        List<WebElement> webElements = List.of(webElement);
-        assertThrows(IllegalStateException.class, () -> search.filter(webElements, URL_PATH));
+        var webElements = List.of(webElement);
+        assertThrows(IllegalStateException.class, () -> linkUrlSearch.filter(webElements, URL_PATH));
     }
 
     @Test
     void testSearchLinksByUrlPartNotMatchCaseInsensitive()
     {
-        search.setCaseSensitiveSearch(false);
+        linkUrlSearch.setCaseSensitiveSearch(false);
         when(webElement.getAttribute(HREF)).thenReturn(SIMPLE_URL);
         mockGetCurrentUrl();
-        List<WebElement> foundElements = search.filter(List.of(webElement), URL_PATH);
+        var foundElements = linkUrlSearch.filter(List.of(webElement), URL_PATH);
         assertTrue(foundElements.isEmpty());
     }
 
     @Test
     void testSearchLinksByUrlPartNotMatch()
     {
-        search.setCaseSensitiveSearch(true);
+        linkUrlSearch.setCaseSensitiveSearch(true);
         when(webElement.getAttribute(HREF)).thenReturn(SIMPLE_URL);
         mockGetCurrentUrl();
-        List<WebElement> foundElements = search.filter(List.of(webElement), URL_PATH);
+        var foundElements = linkUrlSearch.filter(List.of(webElement), URL_PATH);
         assertTrue(foundElements.isEmpty());
     }
 
     @Test
     void testSearchLinksByUrlNoLinkUrl()
     {
-        List<WebElement> foundElements = search.filter(List.of(webElement), null);
+        var foundElements = linkUrlSearch.filter(List.of(webElement), null);
         assertTrue(foundElements.isEmpty());
     }
 
     @Test
     void testSearchLinksByUrlHrefEqualLinkUrl()
     {
-        search.setCaseSensitiveSearch(true);
+        linkUrlSearch.setCaseSensitiveSearch(true);
         when(webElement.getAttribute(HREF)).thenReturn(URL);
         mockGetCurrentUrl();
-        List<WebElement> webElements = List.of(webElement);
-        List<WebElement> foundElements = search.filter(webElements, URL);
+        var webElements = List.of(webElement);
+        var foundElements = linkUrlSearch.filter(webElements, URL);
         assertEquals(webElements, foundElements);
     }
 
     @Test
     void testSearchLinksByUrlHrefEqualLinkUrlCaseInsensitive()
     {
-        search.setCaseSensitiveSearch(false);
+        linkUrlSearch.setCaseSensitiveSearch(false);
         when(webElement.getAttribute(HREF)).thenReturn(URL);
         mockGetCurrentUrl();
-        List<WebElement> webElements = List.of(webElement);
-        List<WebElement> foundElements = search.filter(webElements, URL);
+        var webElements = List.of(webElement);
+        var foundElements = linkUrlSearch.filter(webElements, URL);
         assertEquals(webElements, foundElements);
     }
 
     @Test
     void testSearchLinksByUrlHrefEqualLinkUrlAbsolute()
     {
-        search.setCaseSensitiveSearch(true);
+        linkUrlSearch.setCaseSensitiveSearch(true);
         when(webElement.getAttribute(HREF)).thenReturn(URL_WITH_SLASH);
         mockGetCurrentUrl();
-        List<WebElement> foundElements = search.filter(List.of(webElement), SIMPLE_URL);
+        var foundElements = linkUrlSearch.filter(List.of(webElement), SIMPLE_URL);
         assertEquals(List.of(webElement), foundElements);
     }
 
     @Test
     void testSearchLinksByUrlHrefEqualLinkUrlWithQuery()
     {
-        search.setCaseSensitiveSearch(true);
+        linkUrlSearch.setCaseSensitiveSearch(true);
         when(webElement.getAttribute(HREF)).thenReturn(URL_WITH_QUERY);
         mockGetCurrentUrl();
-        List<WebElement> webElements = List.of(webElement);
-        List<WebElement> foundElements = search.filter(webElements, URL_WITH_QUERY);
+        var webElements = List.of(webElement);
+        var foundElements = linkUrlSearch.filter(webElements, URL_WITH_QUERY);
         assertEquals(webElements, foundElements);
     }
 
     @Test
     void testSearchLinksByUrlHrefEqualLinkUrlOpaque()
     {
-        search.setCaseSensitiveSearch(true);
+        linkUrlSearch.setCaseSensitiveSearch(true);
         when(webElement.getAttribute(HREF)).thenReturn(URL_OPAQUE);
         mockGetCurrentUrl();
-        List<WebElement> webElements = List.of(webElement);
-        List<WebElement> foundElements = search.filter(webElements, URL_OPAQUE);
+        var webElements = List.of(webElement);
+        var foundElements = linkUrlSearch.filter(webElements, URL_OPAQUE);
         assertEquals(webElements, foundElements);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void testJavascriptActionsWasCalled()
-    {
-        IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
-        search.setWaitForElementTimeout(TIMEOUT);
-        when(expectedSearchContextConditions.presenceOfAllElementsLocatedBy(LOCATOR)).thenReturn(condition);
-        when(elementActions.isElementVisible(webElement)).thenReturn(true);
-        WaitResult<List<WebElement>> result = mock(WaitResult.class);
-        when(waitActions.wait(searchContext, TIMEOUT, condition, false)).thenReturn(result);
-        when(result.getData()).thenReturn(List.of(webElement));
-        search.setCaseSensitiveSearch(true);
-        search.search(searchContext, new SearchParameters(URL));
-        WebJavascriptActions javascriptActions = mock(WebJavascriptActions.class);
-        verify(javascriptActions, never()).scrollIntoView(webElement, true);
     }
 
     @Test
     void shouldThrowExceptionIfMatchesIsInvoked()
     {
-        assertThrows(UnsupportedOperationException.class, () -> search.matches(null, null));
+        assertThrows(UnsupportedOperationException.class, () -> linkUrlSearch.matches(null, null));
     }
 
     private void mockGetCurrentUrl()

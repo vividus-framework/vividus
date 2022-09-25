@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.ui.action.search;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -29,7 +30,7 @@ import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.ui.action.ElementActions;
-import org.vividus.ui.action.IExpectedConditions;
+import org.vividus.ui.action.IExpectedSearchContextCondition;
 import org.vividus.ui.action.IWaitActions;
 
 public abstract class AbstractElementAction implements IElementAction
@@ -37,7 +38,6 @@ public abstract class AbstractElementAction implements IElementAction
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractElementAction.class);
 
     private IWaitActions waitActions;
-    @Inject private IExpectedConditions<By> expectedConditions;
     @Inject private ElementActions elementActions;
     private Duration waitForElementTimeout;
     private boolean retrySearchIfStale;
@@ -59,37 +59,36 @@ public abstract class AbstractElementAction implements IElementAction
     {
         if (searchContext != null)
         {
-            return findElements(searchContext, locator, parameters, false);
+            return findElements(searchContext, locator, parameters.getVisibility(), parameters.isWaitForElement(),
+                    false);
         }
         LOGGER.error(IElementAction.NOT_SET_CONTEXT);
         return List.of();
     }
 
-    private List<WebElement> findElements(SearchContext searchContext, By locator, SearchParameters parameters,
-            boolean retry)
+    private List<WebElement> findElements(SearchContext searchContext, By locator, Visibility visibility,
+            boolean waitForElement, boolean retry)
     {
-        List<WebElement> elements = parameters.isWaitForElement()
-                ? waitForElement(searchContext, locator)
-                : searchContext.findElements(locator);
-        boolean elementsFound = null != elements;
-        LOGGER.atInfo().addArgument(locator)
-                       .addArgument(() -> elementsFound ? elements.size() : 0)
-                       .log("Total number of elements found {} is {}");
-        if (elementsFound)
+        if (waitForElement)
         {
-            Visibility visibility = parameters.getVisibility();
-            try
-            {
-                return Visibility.ALL == visibility
-                        ? elements
-                        : filterElementsByVisibility(elements, visibility, retry);
-            }
-            catch (StaleElementReferenceException e)
-            {
-                return findElements(searchContext, locator, parameters, true);
-            }
+            List<WebElement> value = waitForElement(searchContext, locator, visibility);
+            return Objects.requireNonNullElseGet(value, List::of);
         }
-        return List.of();
+        List<WebElement> elements = searchContext.findElements(locator);
+        LOGGER.atInfo()
+                .addArgument(locator)
+                .addArgument(elements::size)
+                .log("Total number of elements found {} is {}");
+        try
+        {
+            return Visibility.ALL == visibility || elements.isEmpty()
+                    ? elements
+                    : filterElementsByVisibility(elements, visibility, retry);
+        }
+        catch (StaleElementReferenceException e)
+        {
+            return findElements(searchContext, locator, visibility, false, true);
+        }
     }
 
     protected List<WebElement> filterElementsByVisibility(List<WebElement> elements, Visibility visibility,
@@ -119,10 +118,19 @@ public abstract class AbstractElementAction implements IElementAction
         }));
     }
 
-    private List<WebElement> waitForElement(SearchContext searchContext, By locator)
+    private List<WebElement> waitForElement(SearchContext searchContext, By locator, Visibility visibility)
     {
-        return waitActions.wait(searchContext, waitForElementTimeout,
-                expectedConditions.presenceOfAllElementsLocatedBy(locator), false).getData();
+        IExpectedSearchContextCondition<List<WebElement>> condition = new IExpectedSearchContextCondition<>()
+        {
+            @Override
+            @SuppressWarnings("checkstyle:NoNullForCollectionReturn")
+            public List<WebElement> apply(SearchContext searchContext)
+            {
+                List<WebElement> elements = findElements(searchContext, locator, visibility, false, false);
+                return !elements.isEmpty() ? elements : null;
+            }
+        };
+        return waitActions.wait(searchContext, waitForElementTimeout, condition, false).getData();
     }
 
     public void setWaitActions(IWaitActions waitActions)
