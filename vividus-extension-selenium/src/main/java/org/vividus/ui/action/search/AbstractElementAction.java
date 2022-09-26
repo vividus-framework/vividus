@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -36,6 +37,10 @@ import org.vividus.ui.action.IWaitActions;
 public abstract class AbstractElementAction implements IElementAction
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractElementAction.class);
+
+    private static final String NUMBER_OF_ELEMENTS_MESSAGE = "The total number of elements found by \"{}\" is {}";
+    private static final String NUMBER_OF_FILTERED_ELEMENTS_MESSAGE =
+            NUMBER_OF_ELEMENTS_MESSAGE + ", the number of {} elements is {}";
 
     private IWaitActions waitActions;
     @Inject private ElementActions elementActions;
@@ -75,20 +80,35 @@ public abstract class AbstractElementAction implements IElementAction
             return Objects.requireNonNullElseGet(value, List::of);
         }
         List<WebElement> elements = searchContext.findElements(locator);
-        LOGGER.atInfo()
-                .addArgument(locator)
-                .addArgument(elements::size)
-                .log("Total number of elements found {} is {}");
+
+        if (Visibility.ALL == visibility || elements.isEmpty())
+        {
+            LOGGER.atInfo()
+                    .addArgument(() -> convertLocatorToReadableForm(locator))
+                    .addArgument(elements::size)
+                    .log(NUMBER_OF_ELEMENTS_MESSAGE);
+            return elements;
+        }
         try
         {
-            return Visibility.ALL == visibility || elements.isEmpty()
-                    ? elements
-                    : filterElementsByVisibility(elements, visibility, retry);
+            List<WebElement> filteredElements = filterElementsByVisibility(elements, visibility, retry);
+            LOGGER.atInfo()
+                    .addArgument(() -> convertLocatorToReadableForm(locator))
+                    .addArgument(elements::size)
+                    .addArgument(visibility::getDescription)
+                    .addArgument(filteredElements::size)
+                    .log(NUMBER_OF_FILTERED_ELEMENTS_MESSAGE);
+            return filteredElements;
         }
         catch (StaleElementReferenceException e)
         {
             return findElements(searchContext, locator, visibility, false, true);
         }
+    }
+
+    private static String convertLocatorToReadableForm(By locator)
+    {
+        return StringUtils.removeStart(locator.toString(), "By.");
     }
 
     protected List<WebElement> filterElementsByVisibility(List<WebElement> elements, Visibility visibility,
@@ -109,13 +129,7 @@ public abstract class AbstractElementAction implements IElementAction
                 LOGGER.warn(e.getMessage(), e);
                 return false;
             }
-        }).collect(Collectors.collectingAndThen(Collectors.toList(), list ->
-        {
-            LOGGER.atInfo().addArgument(visibility::getDescription)
-                           .addArgument(list::size)
-                           .log("Number of {} elements is {}");
-            return list;
-        }));
+        }).collect(Collectors.toList());
     }
 
     private List<WebElement> waitForElement(SearchContext searchContext, By locator, Visibility visibility)

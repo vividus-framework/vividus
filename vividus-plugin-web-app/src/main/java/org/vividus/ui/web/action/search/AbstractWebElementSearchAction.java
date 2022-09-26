@@ -54,7 +54,7 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
         if (elements.isEmpty())
         {
             String text = parameters.getValue();
-            By newLocator = generateCaseInsensitiveLocator(text, tagNames);
+            By newLocator = By.xpath(generateCaseInsensitiveXpath(text, tagNames));
             return findElements(searchContext, newLocator, parameters)
                     .stream()
                     .filter(element -> matchesToText(element, text))
@@ -63,7 +63,7 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
         return elements;
     }
 
-    protected static By generateCaseInsensitiveLocator(String text, String... tagNames)
+    protected static String generateCaseInsensitiveXpath(String text, String... tagNames)
     {
         @SuppressWarnings("PMD.InsufficientStringBufferDeclaration")
         StringBuilder locator = new StringBuilder();
@@ -77,7 +77,7 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
                     .append(ELEMENT_WITH_ANY_ATTRIBUTE_OR_TEXT_CASE_INSENSITIVE)
                     .append("])]|");
         }
-        return XpathLocatorUtils.getXPathLocator(locator.substring(0, locator.length() - 1), text.toLowerCase());
+        return XpathLocatorUtils.getXPath(locator.substring(0, locator.length() - 1), text.toLowerCase());
     }
 
     protected boolean matchesToText(WebElement element, final String text)

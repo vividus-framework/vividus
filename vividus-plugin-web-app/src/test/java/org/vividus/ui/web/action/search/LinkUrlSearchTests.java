@@ -57,7 +57,6 @@ class LinkUrlSearchTests
     private static final String URL_PATH = "/urlPath";
     private static final String SIMPLE_URL = "http://example.com";
     private static final String URL = SIMPLE_URL + URL_PATH;
-    private static final By LOCATOR = By.xpath(".//a[normalize-space(@href)=\"" + URL + "\"]");
     private static final String URL_WITH_SLASH = SIMPLE_URL + "/";
     private static final String URL_WITH_QUERY = SIMPLE_URL + "/?q=uri";
     private static final String URL_OPAQUE = "tel:1234567";
@@ -110,13 +109,14 @@ class LinkUrlSearchTests
         linkUrlSearch.setCaseSensitiveSearch(true);
         var parameters = new SearchParameters(URL, Visibility.VISIBLE, false);
         var webElements = List.of(webElement);
-        when(searchContext.findElements(LOCATOR)).thenReturn(webElements);
+        String xpath = ".//a[normalize-space(@href)=\"" + URL + "\"]";
+        when(searchContext.findElements(By.xpath(xpath))).thenReturn(webElements);
         when(elementActions.isElementVisible(webElement)).thenReturn(true);
         var foundElements = linkUrlSearch.search(searchContext, parameters);
         assertEquals(webElements, foundElements);
         assertThat(logger.getLoggingEvents(), equalTo(List.of(
-                info("Total number of elements found {} is {}", LOCATOR, 1),
-                info("Number of {} elements is {}", Visibility.VISIBLE.getDescription(), 1)
+                info("The total number of elements found by \"{}\" is {}, the number of {} elements is {}",
+                        "xpath: " + xpath, 1, Visibility.VISIBLE.getDescription(), 1)
         )));
     }
 

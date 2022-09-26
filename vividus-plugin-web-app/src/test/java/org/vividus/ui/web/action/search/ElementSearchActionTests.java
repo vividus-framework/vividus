@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
-import static org.vividus.ui.web.action.search.AbstractWebElementSearchAction.generateCaseInsensitiveLocator;
+import static org.vividus.ui.web.action.search.AbstractWebElementSearchAction.generateCaseInsensitiveXpath;
 
 import java.util.List;
 
@@ -52,9 +52,11 @@ class ElementSearchActionTests
     private static final String ANY_TEXT = "*";
     private static final String TEXT_TRANSFORM = "text-transform";
     private static final String TEXT = "Text";
-    private static final By ELEMENT_BY_TEXT_LOCATOR = By.xpath(".//*[contains(normalize-space(text()), 'Text')]");
-    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is {}";
+    private static final String ELEMENT_BY_TEXT_XPATH = ".//*[contains(normalize-space(text()), 'Text')]";
+    private static final By ELEMENT_BY_TEXT_LOCATOR = By.xpath(ELEMENT_BY_TEXT_XPATH);
+    private static final String TOTAL_NUMBER_OF_ELEMENTS = "The total number of elements found by \"{}\" is {}";
     private static final String NOT_SET_CONTEXT = "Unable to locate elements, because search context is not set";
+    private static final String XPATH_LOCATOR_PREFIX = "xpath: ";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementAction.class);
 
@@ -86,7 +88,7 @@ class ElementSearchActionTests
                 new SearchParameters(TEXT).setVisibility(Visibility.ALL).setWaitForElement(false), ANY_TEXT);
         assertEquals(List.of(webElement), foundElements);
         assertThat(logger.getLoggingEvents(), equalTo(List.of(
-                info(TOTAL_NUMBER_OF_ELEMENTS, ELEMENT_BY_TEXT_LOCATOR, 1)
+                info(TOTAL_NUMBER_OF_ELEMENTS, XPATH_LOCATOR_PREFIX + ELEMENT_BY_TEXT_XPATH, 1)
         )));
     }
 
@@ -113,15 +115,15 @@ class ElementSearchActionTests
             List<WebElement> expected)
     {
         lenient().when(searchContext.findElements(ELEMENT_BY_TEXT_LOCATOR)).thenReturn(List.of());
-        lenient().when(searchContext.findElements(generateCaseInsensitiveLocator(value, ANY_TEXT))).thenReturn(
-                List.of(webElement));
+        String caseInsensitiveXpath = generateCaseInsensitiveXpath(value, ANY_TEXT);
+        lenient().when(searchContext.findElements(By.xpath(caseInsensitiveXpath))).thenReturn(List.of(webElement));
         when(webElementActions.getCssValue(webElement, TEXT_TRANSFORM)).thenReturn(cssTextTransform);
         var foundElements = elementSearchAction.findElementsByText(searchContext, ELEMENT_BY_TEXT_LOCATOR,
                 new SearchParameters(value).setVisibility(Visibility.ALL).setWaitForElement(false), ANY_TEXT);
         assertEquals(expected, foundElements);
         assertThat(logger.getLoggingEvents(), equalTo(List.of(
-                info(TOTAL_NUMBER_OF_ELEMENTS, ELEMENT_BY_TEXT_LOCATOR, 0),
-                info(TOTAL_NUMBER_OF_ELEMENTS, generateCaseInsensitiveLocator(value, ANY_TEXT), 1)
+                info(TOTAL_NUMBER_OF_ELEMENTS, XPATH_LOCATOR_PREFIX + ELEMENT_BY_TEXT_XPATH, 0),
+                info(TOTAL_NUMBER_OF_ELEMENTS, XPATH_LOCATOR_PREFIX + caseInsensitiveXpath, 1)
         )));
     }
 }
