@@ -61,6 +61,13 @@ Scenario: Verify step: 'Then element located `$locator` exists for `$duration` d
 Then element located `id(button-hide)` exists for `PT1S` duration
 Then number of elements found by `id(button-hide)` is equal to `1`
 
+Scenario: Verify step 'Then element located `$locator` exists for `$duration` duration' waits for element appearance
+Meta:
+    @issueId 2750
+When I click on element located `id(button-show)`
+Then element located `id(element-to-show)` exists for `PT1S` duration
+Then number of elements found by `id(element-to-show)` is equal to `1`
+
 Scenario: Verify step: 'When I set page load timeout to `$duration`'
 Meta:
     @requirementId 2122

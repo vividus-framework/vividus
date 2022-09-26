@@ -103,20 +103,29 @@ public class BaseValidations implements IBaseValidations
     @Override
     public Optional<WebElement> assertElementExists(String description, Locator locator)
     {
-        return uiContext.getOptionalSearchContext().map(searchContext ->
+        return uiContext.getOptionalSearchContext().map(
+                searchContext -> assertElementExistsImpl(description, searchContext, locator));
+    }
+
+    @Override
+    public Optional<WebElement> assertElementExists(String description, SearchContext searchContext, Locator locator)
+    {
+        return Optional.ofNullable(assertElementExistsImpl(description, searchContext, locator));
+    }
+
+    private WebElement assertElementExistsImpl(String description, SearchContext searchContext, Locator locator)
+    {
+        List<WebElement> elements = searchActions.findElements(searchContext, locator);
+        if (elements.size() > 1)
         {
-            List<WebElement> elements = searchActions.findElements(searchContext, locator);
-            if (elements.size() > 1)
-            {
-                String assertionFormat = "The number of elements found by the locator %s is %d, but expected 1";
-                softAssert.recordFailedAssertion(String.format(assertionFormat, locator, elements.size()));
-            }
-            else if (doesOnlyOneElementExist(description, locator, elements))
-            {
-                return elements.get(0);
-            }
-            return null;
-        });
+            String assertionFormat = "The number of elements found by the locator %s is %d, but expected 1";
+            softAssert.recordFailedAssertion(String.format(assertionFormat, locator, elements.size()));
+        }
+        else if (doesOnlyOneElementExist(description, locator, elements))
+        {
+            return elements.get(0);
+        }
+        return null;
     }
 
     private boolean doesOnlyOneElementExist(String description, Locator locator, List<WebElement> elements)

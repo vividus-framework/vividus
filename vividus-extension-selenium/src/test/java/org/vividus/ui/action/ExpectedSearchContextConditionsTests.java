@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,30 +50,6 @@ class ExpectedSearchContextConditionsTests
     private static final String ELEMENT_SELECTION_STATE_TO_BE_TO_STRING = "element located by %s to %sbe selected";
 
     private final ExpectedSearchContextConditions expectedConditions = new ExpectedSearchContextConditions();
-
-    @Test
-    void testPresenceOfAllElementsLocatedByAllSuccess()
-    {
-        WebElement webElement1 = mock(WebElement.class);
-        WebElement webElement2 = mock(WebElement.class);
-        SearchContext searchContext = mock(SearchContext.class);
-        List<WebElement> elements = mockFoundElements(webElement1, webElement2, searchContext);
-        assertEquals(elements, expectedConditions.presenceOfAllElementsLocatedBy(XPATH_LOCATOR).apply(searchContext));
-    }
-
-    @Test
-    void testPresenceOfAllElementsLocatedByNoElements()
-    {
-        SearchContext searchContext = mock(SearchContext.class);
-        assertNull(expectedConditions.presenceOfAllElementsLocatedBy(XPATH_LOCATOR).apply(searchContext));
-    }
-
-    @Test
-    void testPresenceOfAllElementsLocatedByToString()
-    {
-        assertEquals("presence of any elements located by " + XPATH_LOCATOR,
-                expectedConditions.presenceOfAllElementsLocatedBy(XPATH_LOCATOR).toString());
-    }
 
     @Test
     void testTextToBePresentInElementLocatedSuccessContainsValidText()

@@ -232,22 +232,30 @@ Then number of elements found by `By.xpath(html)` is equal to `1`
 ----
 
 
-=== Element exists for duration
+=== Element existence during the time period
 
-Verifies that an element located by locator exists for given duration.
+Validates the element located by the locator has existed for the period
+specified by the duration.
+
+The actions performed by the step:
+
+* check the search context is set,
+* search for the element to validate existence (this search may include wait for
+  element appearance if it's configured),
+* validate the element has presented for the period specified by the duration.
 
 [source,gherkin]
 ----
 Then element located `$locator` exists for `$duration` duration
 ----
 
-* `$locator` - <<_locator>>.
-* `$duration` - The duration in {iso-date-format-link} format.
+* `$locator` - The <<_locator>> to find an element.
+* `$duration` - The period of time the element should have existed in {iso-date-format-link} format.
 
-.Element should exists for 5 second
+.The element should have existed for 5 second
 [source,gherkin]
 ----
-Then element located `id(banner)` exists for `PT5S` duration
+Then element located `By.id(banner)` exists for `PT5S` duration
 ----
 
 
