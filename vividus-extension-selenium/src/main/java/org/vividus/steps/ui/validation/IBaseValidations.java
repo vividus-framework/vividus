@@ -57,11 +57,22 @@ public interface IBaseValidations
 
     /**
      * Asserts that an element located by the <b>locator</b> exists
-     * @param description description of the element being validated, must not be {@code null}
-     * @param locator locator to find element, must not be {@code null}
-     * @return the element being validated wrapped in an {@link Optional}
+     *
+     * @param description The description of the element being validated, must not be {@code null}.
+     * @param locator     The locator to find element, must not be {@code null}.
+     * @return The element being validated wrapped in an {@link Optional}.
      */
     Optional<WebElement> assertElementExists(String description, Locator locator);
+
+    /**
+     * Asserts that an element located by the <b>locator</b> exists within the provided search context
+     *
+     * @param description   The description of the element being validated, must not be {@code null}.
+     * @param searchContext The search context to find the element within.
+     * @param locator       The locator to find element, must not be {@code null}.
+     * @return the element being validated wrapped in an {@link Optional}
+     */
+    Optional<WebElement> assertElementExists(String description, SearchContext searchContext, Locator locator);
 
     WebElement assertIfElementExists(String businessDescription, SearchContext searchContext, Locator locator);
 

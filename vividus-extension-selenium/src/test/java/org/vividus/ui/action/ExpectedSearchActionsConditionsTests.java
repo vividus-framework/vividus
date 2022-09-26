@@ -79,29 +79,6 @@ class ExpectedSearchActionsConditionsTests
     }
 
     @Test
-    void testPresenceOfAllElementsLocatedByNoElements()
-    {
-        IExpectedSearchContextCondition<List<WebElement>> condition = expectedSearchActionsConditions
-                .presenceOfAllElementsLocatedBy(locator);
-        mockFindElements();
-        List<WebElement> actual = condition.apply(searchContext);
-        assertNull(actual);
-        validateSearchParameters();
-    }
-
-    @Test
-    void testPresenceOfAllElementsLocatedBy()
-    {
-        when(locator.toString()).thenReturn(TEXT);
-        mockFindElements(webElement);
-        IExpectedSearchContextCondition<List<WebElement>> condition = expectedSearchActionsConditions
-                .presenceOfAllElementsLocatedBy(locator);
-        assertToString("presence of any elements " + LOCATOR_PLUS_TEXT, condition);
-        assertEquals(List.of(webElement), condition.apply(searchContext));
-        validateSearchParameters();
-    }
-
-    @Test
     void testTextToBePresentInElementLocatedNoElements()
     {
         when(locator.toString()).thenReturn(TEXT);

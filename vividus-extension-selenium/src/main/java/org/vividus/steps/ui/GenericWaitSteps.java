@@ -23,8 +23,10 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
+import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.IWaitActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
@@ -37,15 +39,20 @@ public class GenericWaitSteps
     private final IWaitActions waitActions;
     private final IUiContext uiContext;
     private final IExpectedConditions<Locator> expectedSearchActionsConditions;
+    private final ISearchActions searchActions;
     private final ISoftAssert softAssert;
+    private final IBaseValidations baseValidations;
 
     public GenericWaitSteps(IWaitActions waitActions, IUiContext uiContext,
-            IExpectedConditions<Locator> expectedSearchActionsConditions, ISoftAssert softAssert)
+            IExpectedConditions<Locator> expectedSearchActionsConditions, ISearchActions searchActions,
+            ISoftAssert softAssert, IBaseValidations baseValidations)
     {
         this.waitActions = waitActions;
         this.uiContext = uiContext;
         this.expectedSearchActionsConditions = expectedSearchActionsConditions;
+        this.searchActions = searchActions;
         this.softAssert = softAssert;
+        this.baseValidations = baseValidations;
     }
 
     /**
@@ -69,23 +76,40 @@ public class GenericWaitSteps
     }
 
     /**
-     * Checks that element located by <b>locator</b> exists during the <b>duration</b>
-     * @param locator locator to find an element
-     * @param duration total waiting time according to <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>
-     * standard
+     * Validates the element located by the locator has existed for the period specified by the duration.
+     * The actions performed by the step:
+     * <ul>
+     * <li>check the search context is set,</li>
+     * <li>search for the element to validate existence (this search may include wait for element appearance if it's
+     * configured),</li>
+     * <li>validate the element has presented for the period specified by the duration.</li>
+     * </ul>
+     *
+     * @param locator  The locator to find an element.
+     * @param duration The period of time the element should have existed in
+     *                 <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>
+     *                 format.
      */
     @Then("element located `$locator` exists for `$duration` duration")
     public void doesElementByLocatorExistsForDuration(Locator locator, Duration duration)
     {
-        String prettyDuration = formatDuration(duration);
+        String prettyPrintedDuration = formatDuration(duration);
+        uiContext.getOptionalSearchContext().ifPresent(searchContext ->
+        {
+            if (baseValidations.assertElementExists("The element to validate existence", searchContext, locator)
+                    .isPresent())
+            {
+                locator.getSearchParameters().setWaitForElement(false);
 
-        WaitResult<Boolean> result = waitActions.wait(uiContext.getSearchContext(), duration,
-                expectedSearchActionsConditions
-                        .not(expectedSearchActionsConditions.presenceOfAllElementsLocatedBy(locator)), false);
+                IExpectedSearchContextCondition<Boolean> condition = context -> searchActions.findElements(context,
+                        locator).isEmpty();
+                WaitResult<Boolean> result = waitActions.wait(searchContext, duration, condition, false);
 
-        String assertionMessage = String.format("Element located by locator %s has existed for %s",
-                locator.toHumanReadableString(), prettyDuration);
-        softAssert.assertFalse(assertionMessage, result.isWaitPassed());
+                String assertionMessage = String.format("Element located by locator %s has existed for %s",
+                        locator.toHumanReadableString(), prettyPrintedDuration);
+                softAssert.assertTrue(assertionMessage, !result.isWaitPassed());
+            }
+        });
     }
 
     private String formatDuration(Duration duration)

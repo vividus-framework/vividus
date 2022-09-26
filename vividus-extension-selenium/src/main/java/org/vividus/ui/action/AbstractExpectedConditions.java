@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,33 +33,6 @@ public abstract class AbstractExpectedConditions<T> implements IExpectedConditio
     protected abstract WebElement findElement(SearchContext searchContext, T searchCriteria);
 
     protected abstract String toStringParameters(T searchCriteria);
-
-    /**
-     * An expectation for checking that is at least one element present
-     * within the search context
-     * @param searchCriteria used to find elements
-     * @return the list of WebElements once they are located
-     */
-    @Override
-    @SuppressWarnings("checkstyle:nonullforcollectionreturn")
-    public IExpectedSearchContextCondition<List<WebElement>> presenceOfAllElementsLocatedBy(final T searchCriteria)
-    {
-        return new IExpectedSearchContextCondition<>()
-        {
-            @Override
-            public List<WebElement> apply(SearchContext searchContext)
-            {
-                List<WebElement> elements = findElements(searchContext, searchCriteria);
-                return !elements.isEmpty() ? elements : null;
-            }
-
-            @Override
-            public String toString()
-            {
-                return "presence of any elements " + toStringParameters(searchCriteria);
-            }
-        };
-    }
 
     /**
      * An expectation for checking if the given text is present in the found element.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,6 @@ import org.openqa.selenium.WebElement;
 
 public interface IExpectedConditions<T>
 {
-    /**
-     * An expectation for checking that is at least one element present
-     * within the search context
-     * @param searchCriteria used to find elements
-     * @return the list of WebElements once they are located
-     */
-    IExpectedSearchContextCondition<List<WebElement>> presenceOfAllElementsLocatedBy(T searchCriteria);
-
     /**
      * An expectation for checking if the given text is present in the found element.
      * @param searchCriteria used to find elements
