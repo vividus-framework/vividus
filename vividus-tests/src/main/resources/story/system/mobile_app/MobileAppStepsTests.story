@@ -222,9 +222,8 @@ When I tap on element located `accessibilityId(menuToggler)`
 When I tap on element located `iosClassChain(**/XCUIElementTypeButton[$name == "Image"$])`
 When I upload file `/data/mobile-upload-image.png` to device
 When I tap on element located `accessibilityId(selectImage)`
-When I wait until element located `accessibilityId(Recents)` appears
-When I tap on element located `accessibilityId(Recents)`
-When I tap on element located `xpath((//XCUIElementTypeCell[contains(@name, "Photo")])[last()])`
+When I wait until element located `accessibilityId(Photos)` appears
+When I tap on element located `xpath((//XCUIElementTypeImage[contains(@name, "Photo")])[1])`
 Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` is equal to `1`
 
 
