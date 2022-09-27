@@ -52,10 +52,9 @@ class LinkUrlPartSearchTests
     private static final String URL_PART = "urlPart";
     private static final String URL = "url" + URL_PART;
     private static final String OTHER_URL = "otherUrl";
-    private static final By LINK_URL_PART_LOCATOR = By.xpath(".//a[contains (translate(@href,"
-            + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), \"urlpart\")]");
     private static final String LINK_WITH_PART_URL_PATTERN = ".//a[contains(@href, %s)]";
-    private static final String TOTAL_NUMBER_OF_ELEMENTS = "Total number of elements found {} is {}";
+    private static final String TOTAL_NUMBER_OF_ELEMENTS = "The total number of elements found by \"{}\" is {}";
+    private static final String XPATH_LOCATOR_PREFIX = "xpath: ";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractElementAction.class);
 
@@ -114,10 +113,12 @@ class LinkUrlPartSearchTests
     {
         SearchParameters parameters = new SearchParameters(URL_PART, Visibility.ALL, false);
         search.setCaseSensitiveSearch(true);
-        By locator = XpathLocatorUtils.getXPathLocator(LINK_WITH_PART_URL_PATTERN, URL_PART);
-        when(searchContext.findElements(locator)).thenReturn(webElements);
+        String xpath = XpathLocatorUtils.getXPath(LINK_WITH_PART_URL_PATTERN, URL_PART);
+        when(searchContext.findElements(By.xpath(xpath))).thenReturn(webElements);
         assertEquals(webElements, search.search(searchContext, parameters));
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, locator, 1))));
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+                info(TOTAL_NUMBER_OF_ELEMENTS, XPATH_LOCATOR_PREFIX + xpath, 1)
+        )));
     }
 
     @Test
@@ -125,10 +126,13 @@ class LinkUrlPartSearchTests
     {
         SearchParameters parameters = new SearchParameters(URL_PART, Visibility.ALL, false);
         search.setCaseSensitiveSearch(false);
-        when(searchContext.findElements(LINK_URL_PART_LOCATOR)).thenReturn(webElements);
+        String linkUrlPartXpath = ".//a[contains (translate(@href,"
+                + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), \"urlpart\")]";
+        when(searchContext.findElements(By.xpath(linkUrlPartXpath))).thenReturn(webElements);
         assertEquals(webElements, search.search(searchContext, parameters));
-        assertThat(logger.getLoggingEvents(),
-                equalTo(List.of(info(TOTAL_NUMBER_OF_ELEMENTS, LINK_URL_PART_LOCATOR, 1))));
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+                info(TOTAL_NUMBER_OF_ELEMENTS, XPATH_LOCATOR_PREFIX + linkUrlPartXpath, 1)
+        )));
     }
 
     @Test

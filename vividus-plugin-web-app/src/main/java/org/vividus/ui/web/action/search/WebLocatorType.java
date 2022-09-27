@@ -43,7 +43,7 @@ public enum WebLocatorType implements LocatorType
         @Override
         public By buildBy(String value)
         {
-            return AbstractWebElementSearchAction.generateCaseInsensitiveLocator(value.toLowerCase(), "*");
+            return By.xpath(AbstractWebElementSearchAction.generateCaseInsensitiveXpath(value.toLowerCase(), "*"));
         }
     },
     TOOLTIP("Tooltip", TooltipFilter.class)
