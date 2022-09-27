@@ -246,7 +246,7 @@ In this example `UKjeCe9Mr9` is the unique identifier of the device. Use that nu
 ----
 selenium.grid.capabilities.udid=UKjeCe9Mr9
 ----
-You are ready to run tests! Just add this property to your `*.properties` file and use xref:appium-setup.adoc#_running_tests_on_simulators[the same approach as for Simulators]
+You are ready to run tests! Just add this property to your `*.properties` file and use xref:appium-setup.adoc#_running_tests_on_simulatoremulator[the same approach as for Emulators]
 
 === iOS
 
@@ -374,7 +374,7 @@ Start the session either via Appium Inspector or by running an autotest. Once th
 image::appium-wda-on-device.png[]
 ====
 
-You are ready to run tests! Just add properties from above to your `*.properties` file and use xref:appium-setup.adoc#_running_tests_on_simulators[the same approach as for Simulators]
+You are ready to run tests! Just add properties from above to your `*.properties` file and use xref:appium-setup.adoc#_running_tests_on_simulatoremulator[the same approach as for Simulators]
 
 == F.A.Q.
 
