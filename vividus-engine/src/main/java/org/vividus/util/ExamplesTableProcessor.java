@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
+import org.jbehave.core.model.ExamplesTableStringBuilder;
 
 public final class ExamplesTableProcessor
 {
@@ -79,27 +80,26 @@ public final class ExamplesTableProcessor
     {
         String valueSeparator = checkForValueSeparator ? determineValueSeparator(data, properties)
                 : properties.getValueSeparator();
+        properties.getProperties().setProperty(VALUE_SEPARATOR_KEY, valueSeparator);
         StringBuilder examplesTableBuilder = new StringBuilder();
-        String rowSeparator = properties.getRowSeparator();
         if (appendTableProperties)
         {
-            appendTableProperties(examplesTableBuilder, properties, rowSeparator);
+            appendTableProperties(examplesTableBuilder, properties, properties.getRowSeparator());
         }
-        appendRow(examplesTableBuilder, header, properties.getHeaderSeparator());
-        data.forEach(row ->
-        {
-            examplesTableBuilder.append(rowSeparator);
-            appendRow(examplesTableBuilder, row, valueSeparator);
-        });
-        return examplesTableBuilder.toString();
+        String stringExampleTable = ExamplesTableStringBuilder.buildExamplesTableString(properties, List.copyOf(header),
+                List.copyOf(data)).trim();
+        return examplesTableBuilder.length() > 0 ? examplesTableBuilder.append(stringExampleTable).toString()
+                : stringExampleTable;
     }
 
     private static void appendTableProperties(StringBuilder examplesTableBuilder, TableProperties properties,
             String rowSeparator)
     {
         StringBuilder propertiesStringBuilder = new StringBuilder();
-        appendIfNonDefaultSeparator(propertiesStringBuilder, properties.getHeaderSeparator(), "headerSeparator");
-        appendIfNonDefaultSeparator(propertiesStringBuilder, properties.getValueSeparator(), VALUE_SEPARATOR_KEY);
+        appendIfNonDefaultSeparator(propertiesStringBuilder, properties, properties.getHeaderSeparator(),
+                "headerSeparator");
+        appendIfNonDefaultSeparator(propertiesStringBuilder, properties, properties.getValueSeparator(),
+                VALUE_SEPARATOR_KEY);
         int propertiesStringLength = propertiesStringBuilder.length();
         if (propertiesStringLength > 0)
         {
@@ -108,18 +108,14 @@ public final class ExamplesTableProcessor
         }
     }
 
-    private static void appendIfNonDefaultSeparator(StringBuilder propertiesStringBuilder, String separator, String key)
+    private static void appendIfNonDefaultSeparator(StringBuilder propertiesStringBuilder, TableProperties properties,
+            String separator, String key)
     {
         if (!DEFAULT_SEPARATOR_VALUE.equals(separator))
         {
+            properties.getProperties().setProperty(key, separator);
             propertiesStringBuilder.append(key).append('=').append(separator).append(',');
         }
-    }
-
-    private static void appendRow(StringBuilder examplesTable, Collection<String> row, String valueSeparator)
-    {
-        row.forEach(cell -> examplesTable.append(valueSeparator).append(cell));
-        examplesTable.append(valueSeparator);
     }
 
     private static String determineValueSeparator(Collection<List<String>> data, TableProperties properties)
