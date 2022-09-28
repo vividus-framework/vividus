@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
@@ -162,7 +163,15 @@ class MobileAppWebDriverManagerTests
         mockCapabilities(MobilePlatform.TVOS);
         assertEquals(0, driverManager.getStatusBarSize());
         verify(webDriverProvider).get();
-        verifyNoMoreInteractions(webDriverProvider);
+        verifyNoMoreInteractions(webDriverProvider, javascriptActions);
+    }
+
+    @Test
+    void shouldReturnZeroHeightStatusBarSizeIfTheAppIsFullscreen()
+    {
+        driverManager.setFullscreenApp(true);
+        assertEquals(0, driverManager.getStatusBarSize());
+        verifyNoInteractions(webDriverProvider);
     }
 
     private void mockCapabilities(String platform)

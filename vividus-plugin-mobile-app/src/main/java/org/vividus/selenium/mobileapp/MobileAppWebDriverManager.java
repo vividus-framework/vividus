@@ -42,6 +42,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
     private static final String HEIGHT = "height";
 
     private final JavascriptActions javascriptActions;
+    private boolean fullscreenApp;
 
     public MobileAppWebDriverManager(IWebDriverProvider webDriverProvider,
             WebDriverSessionInfo webDriverSessionInfo, JavascriptActions javascriptActions)
@@ -61,7 +62,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
     @SuppressWarnings("unchecked")
     public int getStatusBarSize()
     {
-        if (isTvOS())
+        if (isTvOS() || fullscreenApp)
         {
             return 0;
         }
@@ -149,5 +150,10 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
     private Long getStatBarHeightUnsafely()
     {
         return getSessionDetail("statBarHeight");
+    }
+
+    public void setFullscreenApp(boolean fullscreenApp)
+    {
+        this.fullscreenApp = fullscreenApp;
     }
 }

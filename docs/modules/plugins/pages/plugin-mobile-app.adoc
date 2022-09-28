@@ -119,6 +119,13 @@ a|Defines automation engine to use
 !http://appium.io/docs/en/drivers/ios-xcuitest/[XCUITest]
 !===
 
+|`mobile-application.full-screen`
+a|`true`
+
+`false`
+|`false`
+|Set to `true` if mobile application is running in full-screen mode and system status bar is not displayed.
+
 |`mobile-environment.real-device`
 a|`true`
 
