@@ -39,11 +39,11 @@ a|`true` +
 |Password to be used to create a new session
 
 |`ui.wait.timeout`
-||{iso-date-format-link} format
+|{iso-date-format-link} format
 |`PT1M`
 |Total duration to wait for UI condition
 
 |`ui.wait.polling-period`
-||{iso-date-format-link} format
+|{iso-date-format-link} format
 |`PT2S`
 |Used together with `ui.wait.timeout`. Total duration of time between two iterations of UI condition check
