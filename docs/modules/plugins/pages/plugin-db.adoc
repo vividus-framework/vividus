@@ -270,7 +270,7 @@ jdbc:h2:mem:databaseName
 .build.gradle
 [source,gradle]
 ----
-implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.13.22')
+implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.13.23')
 ----
 
 .environment.properties
