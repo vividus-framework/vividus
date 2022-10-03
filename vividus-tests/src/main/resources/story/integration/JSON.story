@@ -149,3 +149,26 @@ When I find > `1` JSON elements in context by `$.store.book` and until variable 
 |step                                                                                           |
 |When I save JSON element value from context by JSON path `$.title` to scenario variable `title`|
 Then `Sayings of the Century` is = `${title}`
+
+
+Scenario: Verify step "Then JSON element from `$json` by JSON path `$jsonPath` is equal to `$expectedData`$options"
+When I initialize the scenario variable `current-date` with value `#{generateDate(P, yyyy-MM-DD)}`
+Given I initialize the scenario variable `expected-json` using template `/data/json-validation-template.ftl` with parameters:
+|currentDate   |
+|${current-date}|
+Then JSON element from `
+{
+    "currentDateWithAnyTime": "${current-date}T22:20:35+07:00",
+    "fieldToBeIgnored": "valueToBeIgnored"
+}
+` by JSON path `$` is equal to `${expected-json}` ignoring extra fields
+
+
+Scenario: Verify step 'When I find $comparisonRule `$elementsNumber` JSON elements from `$json` by `$jsonPath` and for each element do$stepsToExecute' with zero elements
+When I find <= `1` JSON elements from `{}` by `$.name` and for each element do
+|step                    |
+|Then `0` is equal to `1`|
+
+
+Scenario: Verify JSON validator can successfully compare int vs float numbers
+Then JSON element from `{"number":0.0}` by JSON path `$.number` is equal to `0`

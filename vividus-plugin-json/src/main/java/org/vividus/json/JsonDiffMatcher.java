@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.diff;
+package org.vividus.json;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +61,7 @@ public class JsonDiffMatcher extends AbstractJsonPatchMatcher<JsonDiffMatcher> i
         mismatchDescription.appendText(null != differences ? differences : item.toString());
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void _dont_implement_Matcher___instead_extend_BaseMatcher_()
     {

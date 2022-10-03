@@ -17,12 +17,8 @@ dependencies {
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')
     implementation(group: 'com.jayway.jsonpath', name: 'json-path-assert', version: "${jsonPathVersion}")
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
-    implementation(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '2.35.0')
     implementation(group: 'com.google.guava', name: 'guava', version: '31.1-jre')
     implementation(group: 'org.apache.tika', name: 'tika-core', version: '2.4.1')
-    implementation(group: 'io.qameta.allure', name: 'allure-jsonunit', version: versions.allure) {
-        exclude (group: 'io.qameta.allure')
-    }
     implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.1')

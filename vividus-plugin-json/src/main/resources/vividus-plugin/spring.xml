@@ -7,21 +7,21 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean id="jsonSoftAssert" class="org.vividus.json.softassert.JsonSoftAssert" parent="softAssert" />
+    <bean class="org.vividus.json.converter.FluentEnumListConverter" />
+    <bean class="org.vividus.json.converter.JsonComparisonOptionsConverter" />
+
+    <bean id="json-context" class="org.vividus.json.variable.JsonContextVariable" />
 
     <bean id="jsonSteps" class="org.vividus.json.steps.JsonSteps">
-        <property name="softAssert" ref="jsonSoftAssert" />
+        <constructor-arg>
+            <bean class="org.vividus.json.softassert.JsonSoftAssert" parent="softAssert" />
+        </constructor-arg>
     </bean>
 
     <bean id="jsonPatchSteps" class="org.vividus.json.steps.JsonPatchSteps" />
 
-    <bean id="jsonNestedSteps" class="org.vividus.json.steps.JsonNestedSteps">
-        <constructor-arg type="org.vividus.softassert.ISoftAssert" ref="jsonSoftAssert" />
-    </bean>
-
     <util:list id="stepBeanNames-Json">
         <idref bean="jsonSteps" />
         <idref bean="jsonPatchSteps" />
-        <idref bean="jsonNestedSteps" />
     </util:list>
 </beans>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.converter;
+package org.vividus.json.converter;
 
 import java.lang.reflect.Type;
 import java.util.HashSet;
@@ -22,15 +22,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Named;
-
 import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.jbehave.core.steps.ParameterConverters.FromStringParameterConverter;
 
 import net.javacrumbs.jsonunit.core.Option;
 import net.javacrumbs.jsonunit.core.internal.Options;
 
-@Named
 public class JsonComparisonOptionsConverter extends FromStringParameterConverter<Options>
 {
     private final FluentEnumListConverter fluentEnumListConverter;

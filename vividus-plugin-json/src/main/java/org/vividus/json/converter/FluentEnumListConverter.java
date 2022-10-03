@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,16 @@
  * limitations under the License.
  */
 
-package org.vividus.converter;
-
-import javax.inject.Inject;
-import javax.inject.Named;
+package org.vividus.json.converter;
 
 import org.jbehave.core.steps.ParameterConverters;
 import org.jbehave.core.steps.ParameterConverters.AbstractListParameterConverter;
+import org.vividus.converter.FluentTrimmedEnumConverter;
 
-@Named
 public class FluentEnumListConverter extends AbstractListParameterConverter<Enum<?>>
 {
-    @Inject
     public FluentEnumListConverter(FluentTrimmedEnumConverter enumConverter)
     {
-        this(ParameterConverters.DEFAULT_COLLECTION_SEPARATOR, enumConverter);
-    }
-
-    public FluentEnumListConverter(String valueSeparator, FluentTrimmedEnumConverter enumConverter)
-    {
-        super(valueSeparator, enumConverter);
+        super(ParameterConverters.DEFAULT_COLLECTION_SEPARATOR, enumConverter);
     }
 }
