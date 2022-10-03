@@ -84,7 +84,9 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
             new UnaryExpressionProcessor("toBase64Gzip",           StringsExpressionProcessor::toBase64Gzip),
             new UnaryExpressionProcessor("escapeHTML",             StringEscapeUtils::escapeHtml4),
             new UnaryExpressionProcessor("escapeJSON",             StringEscapeUtils::escapeJson),
-            new UnaryExpressionProcessor("quoteRegExp",            Pattern::quote)
+            new UnaryExpressionProcessor("quoteRegExp",            Pattern::quote),
+            new UnaryExpressionProcessor("substringBefore",        StringsExpressionProcessor.substring(true)),
+            new UnaryExpressionProcessor("substringAfter",         StringsExpressionProcessor.substring(false))
         ));
     }
 
@@ -132,5 +134,15 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
     private static String generate(Locale locale, String input)
     {
         return FAKERS.getUnchecked(locale).expression(String.format("#{%s}", input));
+    }
+
+    private static UnaryOperator<String> substring(boolean before)
+    {
+        return input ->
+        {
+            String[] inputParts = input.split(",");
+            assert inputParts.length == 2;
+            return before ? StringUtils.substringBefore(inputParts[0].trim(), inputParts[1].trim()) : StringUtils.substringAfter(inputParts[0].trim(), inputParts[1].trim());
+        };
     }
 }
