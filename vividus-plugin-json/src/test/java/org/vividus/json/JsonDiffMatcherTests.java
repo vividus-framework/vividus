@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.diff;
+package org.vividus.json;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -46,24 +46,22 @@ class JsonDiffMatcherTests
     private static final String ACTUAL_DATA = "actual";
     private static final String JSON = "{\"version\": 1}";
 
-    @Mock
-    private IAttachmentPublisher attachmentPublisher;
+    @Mock private IAttachmentPublisher attachmentPublisher;
 
     @Test
     void testRender()
     {
-        String patch = "patch";
-        DiffModel diffModel = new DiffModel(ACTUAL_DATA, EXPECTED_DATA, patch);
-        JsonPatchListener listener = mock(JsonPatchListener.class);
+        var patch = "patch";
+        var diffModel = new DiffModel(ACTUAL_DATA, EXPECTED_DATA, patch);
+        var listener = mock(JsonPatchListener.class);
         when(listener.getDiffModel()).thenReturn(diffModel);
-        JsonDiffMatcher matcher = spy(createMatcher(EXPECTED_DATA));
+        var matcher = spy(createMatcher(EXPECTED_DATA));
         matcher.render(listener);
         verify(listener).getDiffModel();
         verify(matcher).render(listener);
         verify(attachmentPublisher).publishAttachment(eq("tpl/diff.ftl"), argThat(e ->
         {
-            @SuppressWarnings("unchecked")
-            DiffModel diff = ((Map<String, DiffModel>) e).get("data");
+            @SuppressWarnings("unchecked") var diff = ((Map<String, DiffModel>) e).get("data");
             return Objects.equals(diff.getActual(), ACTUAL_DATA)
                     && Objects.equals(diff.getExpected(), EXPECTED_DATA)
                     && Objects.equals(diff.getPatch(), patch);
@@ -80,9 +78,9 @@ class JsonDiffMatcherTests
     @Test
     void testDescribeMismatch()
     {
-        Description description = mock(Description.class);
-        Object object = mock(Object.class);
-        JsonDiffMatcher matcher = createMatcher(EXPECTED_DATA);
+        var description = mock(Description.class);
+        var object = mock(Object.class);
+        var matcher = createMatcher(EXPECTED_DATA);
         matcher.matches(JSON);
         matcher.describeMismatch(object, description);
         verify(description).appendText("JSON documents are different:\nDifferent value found in node \"\", expected:"
@@ -93,9 +91,9 @@ class JsonDiffMatcherTests
     @Test
     void testDescribeMismatchItemMatches()
     {
-        Description description = mock(Description.class);
+        var description = mock(Description.class);
         Object object = JSON;
-        JsonDiffMatcher matcher = createMatcher(JSON);
+        var matcher = createMatcher(JSON);
         matcher.matches(JSON);
         matcher.describeMismatch(object, description);
         verify(description).appendText(JSON);
@@ -105,15 +103,16 @@ class JsonDiffMatcherTests
     @Test
     void testUnsupportedDeprecatedOperation()
     {
+        var matcher = createMatcher(EXPECTED_DATA);
         assertThrows(UnsupportedOperationException.class,
-            () -> createMatcher(EXPECTED_DATA)._dont_implement_Matcher___instead_extend_BaseMatcher_());
+                matcher::_dont_implement_Matcher___instead_extend_BaseMatcher_);
     }
 
     @Test
     void testDescribeTo()
     {
-        Description description = mock(Description.class);
-        JsonDiffMatcher matcher = spy(createMatcher(EXPECTED_DATA));
+        var description = mock(Description.class);
+        var matcher = spy(createMatcher(EXPECTED_DATA));
         matcher.describeTo(description);
         verify(description).appendText(EXPECTED_DATA);
         verify(matcher).describeTo(description);

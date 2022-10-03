@@ -38,9 +38,7 @@
 
     <bean id="httpResourceValidationSteps" class="org.vividus.steps.http.HttpResourceValidationSteps" />
 
-    <bean id="jsonResponseValidationSteps" class="org.vividus.steps.api.JsonResponseValidationSteps">
-        <constructor-arg type="org.vividus.softassert.ISoftAssert" ref="jsonSoftAssert" />
-    </bean>
+    <bean id="jsonResponseValidationSteps" class="org.vividus.steps.api.JsonResponseValidationSteps" />
 
     <bean id="sslSteps" class="org.vividus.steps.ssl.SslSteps" />
 

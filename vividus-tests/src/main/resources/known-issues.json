@@ -27,7 +27,7 @@
     "type": "Internal",
     "assertionPattern": "HTTP response body is not present",
     "scenarioPattern": "Verify failure in step .*",
-    "storyPattern": "JsonResponseValidationSteps"
+    "storyPattern": "JSON - Wait for data in HTTP response"
   },
   "VVD-6": {
     "type": "Internal",

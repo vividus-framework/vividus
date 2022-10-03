@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package org.vividus.converter;
+package org.vividus.json.converter;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.junit.jupiter.api.Test;
+import org.vividus.converter.FluentTrimmedEnumConverter;
 
 import net.javacrumbs.jsonunit.core.Option;
 
@@ -34,11 +34,11 @@ class FluentEnumListConverterTests
     @SuppressWarnings("rawtypes")
     void testConvertValue()
     {
-        FluentEnumListConverter fluentEnumListConverter = new FluentEnumListConverter(new FluentTrimmedEnumConverter());
-        Type type = new TypeLiteral<List<Option>>() { }.getType();
+        var fluentEnumListConverter = new FluentEnumListConverter(new FluentTrimmedEnumConverter());
+        var type = new TypeLiteral<List<Option>>() { }.getType();
 
         assertTrue(fluentEnumListConverter.canConvertTo(type));
-        List list = fluentEnumListConverter.convertValue("ignoring extra fields, ignoring values", type);
+        List list = fluentEnumListConverter.convertValue(" ignoring extra fields, ignoring values", type);
         assertIterableEquals(Arrays.asList(Option.IGNORING_EXTRA_FIELDS, Option.IGNORING_VALUES), list);
     }
 }
