@@ -24,12 +24,16 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
+import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.vividus.mobileapp.configuration.MobileApplicationConfiguration;
@@ -38,7 +42,8 @@ import org.vividus.mobileapp.model.SwipeDirection;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverUtils;
 import org.vividus.selenium.manager.GenericWebDriverManager;
-import org.vividus.selenium.screenshot.ScreenshotTaker;
+import org.vividus.selenium.mobileapp.MobileAppScreenshotTaker;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.util.Sleeper;
 
 import io.appium.java_client.PerformsTouchActions;
@@ -53,16 +58,19 @@ public class TouchActions
 
     private final IWebDriverProvider webDriverProvider;
     private final GenericWebDriverManager genericWebDriverManager;
-    private final ScreenshotTaker screenshotTaker;
+    private final MobileAppScreenshotTaker screenshotTaker;
     private final MobileApplicationConfiguration mobileApplicationConfiguration;
+    private final IUiContext uiContext;
 
     public TouchActions(IWebDriverProvider webDriverProvider, GenericWebDriverManager genericWebDriverManager,
-            ScreenshotTaker screenshotTaker, MobileApplicationConfiguration mobileApplicationConfiguration)
+            MobileAppScreenshotTaker screenshotTaker,
+            MobileApplicationConfiguration mobileApplicationConfiguration, IUiContext uiContext)
     {
         this.webDriverProvider = webDriverProvider;
         this.genericWebDriverManager = genericWebDriverManager;
         this.screenshotTaker = screenshotTaker;
         this.mobileApplicationConfiguration = mobileApplicationConfiguration;
+        this.uiContext = uiContext;
     }
 
     /**
@@ -150,35 +158,59 @@ public class TouchActions
          * - payload is {"strategy": "accessibility id", "selector": "selector"}
          * - see https://appium.io/docs/en/commands/mobile-command/#android-uiautomator2-only
          * */
+        uiContext.getOptionalSearchContext()
+                 .map(this::createScreenShooter)
+                 .ifPresent(screenShooter -> {
+                     Duration stabilizationDuration = mobileApplicationConfiguration.getSwipeStabilizationDuration();
+                     int swipeLimit = mobileApplicationConfiguration.getSwipeLimit();
+                     BufferedImage previousFrame = null;
+                     SwipeCoordinates swipeCoordinates = direction.calculateCoordinates(swipeArea,
+                             mobileApplicationConfiguration);
+                     for (int count = 0; count <= swipeLimit; count++)
+                     {
+                         swipe(swipeCoordinates, swipeDuration);
+                         Sleeper.sleep(stabilizationDuration);
+                         if (stopCondition.getAsBoolean())
+                         {
+                             break;
+                         }
+                         BufferedImage currentFrame = screenShooter.get();
+                         if (previousFrame != null && ImageTool.equalImage(currentFrame).matches(previousFrame))
+                         {
+                             break;
+                         }
+                         previousFrame = currentFrame;
+                         if (count == swipeLimit)
+                         {
+                             throw new IllegalStateException(
+                                     String.format("Swiping is stopped due to exceeded swipe limit '%d'", swipeLimit));
+                         }
+                     }
+                 });
+    }
 
-        int screenshotHeightToCompare = genericWebDriverManager.getSize().getHeight() / HEIGHT_DIVIDER;
-        int heightOffset = screenshotHeightToCompare * 2;
-
-        Duration stabilizationDuration = mobileApplicationConfiguration.getSwipeStabilizationDuration();
-        int swipeLimit = mobileApplicationConfiguration.getSwipeLimit();
-        BufferedImage previousFrame = null;
-        SwipeCoordinates swipeCoordinates = direction.calculateCoordinates(swipeArea, mobileApplicationConfiguration);
-        for (int count = 0; count <= swipeLimit; count++)
+    private Supplier<BufferedImage> createScreenShooter(SearchContext searchContext)
+    {
+        if (searchContext instanceof WebDriver)
         {
-            swipe(swipeCoordinates, swipeDuration);
-            Sleeper.sleep(stabilizationDuration);
-            if (stopCondition.getAsBoolean())
-            {
-                break;
-            }
-            BufferedImage area = takeScreenshot();
-            BufferedImage currentFrame = area.getSubimage(0, area.getHeight() - heightOffset, area.getWidth(),
-                    screenshotHeightToCompare);
-            if (previousFrame != null && ImageTool.equalImage(currentFrame).matches(previousFrame))
-            {
-                break;
-            }
-            previousFrame = currentFrame;
-            if (count == swipeLimit)
-            {
-                throw new IllegalStateException(
-                        String.format("Swiping is stopped due to exceeded swipe limit '%d'", swipeLimit));
-            }
+            int screenshotHeightToCompare = genericWebDriverManager.getSize().getHeight() / HEIGHT_DIVIDER;
+            int heightOffset = screenshotHeightToCompare * 2;
+            return () -> {
+                try
+                {
+                    BufferedImage area = screenshotTaker.takeViewportScreenshot();
+                    return area.getSubimage(0, area.getHeight() - heightOffset, area.getWidth(),
+                            screenshotHeightToCompare);
+                }
+                catch (IOException e)
+                {
+                    throw new UncheckedIOException(e);
+                }
+            };
+        }
+        else
+        {
+            return () -> screenshotTaker.takeAshotScreenshot(searchContext, Optional.empty()).getImage();
         }
     }
 
@@ -194,18 +226,6 @@ public class TouchActions
     {
         swipe(SwipeDirection.createCoordinates(startY, endY, swipeArea.getWidth(),
                 mobileApplicationConfiguration.getSwipeVerticalXPosition(), swipeArea.getPoint()), swipeDuration);
-    }
-
-    private BufferedImage takeScreenshot()
-    {
-        try
-        {
-            return screenshotTaker.takeViewportScreenshot();
-        }
-        catch (IOException e)
-        {
-            throw new UncheckedIOException(e);
-        }
     }
 
     private void swipe(SwipeCoordinates coordinates, Duration swipeDuration)

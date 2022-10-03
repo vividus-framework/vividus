@@ -18,11 +18,14 @@ package io.appium.java_client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -30,9 +33,9 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,20 +43,24 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.vividus.mobileapp.action.TouchActions;
 import org.vividus.mobileapp.configuration.MobileApplicationConfiguration;
 import org.vividus.mobileapp.model.SwipeDirection;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
-import org.vividus.selenium.screenshot.ScreenshotTaker;
+import org.vividus.selenium.mobileapp.MobileAppScreenshotTaker;
+import org.vividus.ui.context.IUiContext;
 import org.vividus.util.ResourceUtils;
 
+import pazone.ashot.Screenshot;
 import pazone.ashot.util.ImageTool;
 
 @ExtendWith(MockitoExtension.class)
@@ -85,12 +92,12 @@ class TouchActionsTests
     @Mock private RemoteWebElement element;
     @Mock private PerformsTouchActions performsTouchActions;
     @Mock private GenericWebDriverManager genericWebDriverManager;
-    @Mock private ScreenshotTaker screenshotTaker;
+    @Mock private IUiContext uiContext;
+    @Mock private MobileAppScreenshotTaker screenshotTaker;
     @Mock private BooleanSupplier stopCondition;
     @InjectMocks private TouchActions touchActions;
 
-    @BeforeEach
-    void init()
+    private void mockPerformsTouchActions()
     {
         when(webDriverProvider.getUnwrapped(PerformsTouchActions.class)).thenReturn(performsTouchActions);
     }
@@ -98,6 +105,7 @@ class TouchActionsTests
     @Test
     void shouldTapOnVisibleElement()
     {
+        mockPerformsTouchActions();
         when(element.isDisplayed()).thenReturn(true);
         when(element.getId()).thenReturn(ELEMENT_ID);
 
@@ -115,6 +123,7 @@ class TouchActionsTests
     @Test
     void shouldTapOnInvisibleElement()
     {
+        mockPerformsTouchActions();
         when(element.isDisplayed()).thenReturn(false);
         when(element.getLocation()).thenReturn(new Point(1, 3));
         when(element.getSize()).thenReturn(new Dimension(2, 4));
@@ -138,6 +147,7 @@ class TouchActionsTests
     })
     void shouldTapOnInvisibleElementOutsideViewport(int x, int y)
     {
+        mockPerformsTouchActions();
         when(element.isDisplayed()).thenReturn(false);
         when(element.getLocation()).thenReturn(new Point(x, y));
         when(element.getSize()).thenReturn(new Dimension(2, 4));
@@ -158,6 +168,7 @@ class TouchActionsTests
     @Test
     void shouldTapOnVisibleElementWithoutWaitIfDurationIsZero()
     {
+        mockPerformsTouchActions();
         when(element.getId()).thenReturn(ELEMENT_ID);
         when(element.isDisplayed()).thenReturn(true);
 
@@ -174,6 +185,9 @@ class TouchActionsTests
     @Test
     void shouldSwipeUntilConditionIsTrue() throws IOException
     {
+        mockPerformsTouchActions();
+        var context = mock(AppiumDriver.class);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
         when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
         when(stopCondition.getAsBoolean()).thenReturn(false)
                                           .thenReturn(false)
@@ -188,8 +202,64 @@ class TouchActionsTests
     }
 
     @Test
+    void shouldNotCropElementContextScreenshot()
+    {
+        mockPerformsTouchActions();
+        var context = mock(WebElement.class);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
+        when(stopCondition.getAsBoolean()).thenReturn(false)
+                .thenReturn(false)
+                .thenReturn(true);
+        var blackImage = Mockito.spy(getImage(BLACK_IMAGE));
+        var whiteImage = Mockito.spy(getImage(WHITE_IMAGE));
+        var blackScreenshot = new Screenshot(blackImage);
+        var whiteScreenshot = new Screenshot(whiteImage);
+
+        when(screenshotTaker.takeAshotScreenshot(context, Optional.empty())).thenReturn(blackScreenshot)
+            .thenReturn(whiteScreenshot);
+
+        touchActions.swipeUntil(SwipeDirection.UP, DURATION, SWIPE_AREA, stopCondition);
+
+        verifySwipe(3);
+        verifyNoMoreInteractions(genericWebDriverManager);
+        verify(blackImage, never()).getSubimage(anyInt(), anyInt(), anyInt(), anyInt());
+        verify(whiteImage, never()).getSubimage(anyInt(), anyInt(), anyInt(), anyInt());
+        verifyConfiguration();
+    }
+
+    @Test
+    void shouldNotDoAnythingWhenContextIsNotSet()
+    {
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.empty());
+        touchActions.swipeUntil(SwipeDirection.UP, DURATION, SWIPE_AREA, stopCondition);
+        verifyNoInteractions(genericWebDriverManager, screenshotTaker, performsTouchActions);
+    }
+
+    @Test
+    void shouldWrapIOException() throws IOException
+    {
+        mockPerformsTouchActions();
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mock(AppiumDriver.class)));
+        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
+        IOException exception = mock(IOException.class);
+
+        when(stopCondition.getAsBoolean()).thenReturn(false);
+        doThrow(exception).when(screenshotTaker).takeViewportScreenshot();
+
+        UncheckedIOException wrapper = assertThrows(UncheckedIOException.class,
+                () -> touchActions.swipeUntil(SwipeDirection.UP, DURATION, SWIPE_AREA, stopCondition));
+
+        assertEquals(exception, wrapper.getCause());
+        verifySwipe(1);
+        verifyConfiguration();
+    }
+
+    @Test
     void shouldNotExceedSwipeLimit() throws IOException
     {
+        mockPerformsTouchActions();
+        var context = mock(AppiumDriver.class);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
         when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
         when(stopCondition.getAsBoolean()).thenReturn(false);
         when(screenshotTaker.takeViewportScreenshot()).thenReturn(getImage(BLACK_IMAGE))
@@ -210,6 +280,9 @@ class TouchActionsTests
     @Test
     void shouldStopSwipeOnceEndOfPageIsReached() throws IOException
     {
+        mockPerformsTouchActions();
+        var context = mock(AppiumDriver.class);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
         when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
         when(stopCondition.getAsBoolean()).thenReturn(false);
         when(screenshotTaker.takeViewportScreenshot()).thenReturn(getImage(BLACK_IMAGE))
@@ -224,25 +297,9 @@ class TouchActionsTests
     }
 
     @Test
-    void shouldWrapIOException() throws IOException
-    {
-        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
-        IOException exception = mock(IOException.class);
-
-        when(stopCondition.getAsBoolean()).thenReturn(false);
-        doThrow(exception).when(screenshotTaker).takeViewportScreenshot();
-
-        UncheckedIOException wrapper = assertThrows(UncheckedIOException.class,
-            () -> touchActions.swipeUntil(SwipeDirection.UP, DURATION, SWIPE_AREA, stopCondition));
-
-        assertEquals(exception, wrapper.getCause());
-        verifySwipe(1);
-        verifyConfiguration();
-    }
-
-    @Test
     void shouldPerformVerticalSwipe()
     {
+        mockPerformsTouchActions();
         touchActions.performVerticalSwipe(640, 160, SWIPE_AREA, DURATION);
         verifySwipe(1);
     }
