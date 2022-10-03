@@ -62,7 +62,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
     @SuppressWarnings("unchecked")
     public int getStatusBarSize()
     {
-        if (isTvOS() || fullscreenApp)
+        if (fullscreenApp)
         {
             return 0;
         }

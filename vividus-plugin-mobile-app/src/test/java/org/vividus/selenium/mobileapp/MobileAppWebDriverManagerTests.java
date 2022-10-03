@@ -23,7 +23,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -155,15 +154,6 @@ class MobileAppWebDriverManagerTests
         when(executingMethodDriver.execute(GET_SESSION_COMMAND)).thenReturn(response);
         var exception = assertThrows(IllegalStateException.class, driverManager::getStatusBarSize);
         assertEquals("Unable to receive status bar height. Received value is null", exception.getMessage());
-    }
-
-    @Test
-    void shouldProviderStatusBarHeightForTvOS()
-    {
-        mockCapabilities(MobilePlatform.TVOS);
-        assertEquals(0, driverManager.getStatusBarSize());
-        verify(webDriverProvider).get();
-        verifyNoMoreInteractions(webDriverProvider, javascriptActions);
     }
 
     @Test
