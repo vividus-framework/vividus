@@ -451,6 +451,27 @@ When I open URL `$URL` in new window
 When I open URL `https://docs.vividus.dev` in new window
 ----
 
+=== Wait for window and switch
+
+Waits for the windows with desired title and switches to it.
+
+[source,gherkin]
+----
+When I wait `$duration` until window with title that $comparisonRule `$windowTitile` appears and switch to it
+----
+
+* `$duration` - The timout duration to wait for a window in {iso-date-format-link} format.
+* `$comparisonRule` - The window title xref:parameters:string-comparison-rule.adoc[comparison rule].
+* `$windowTitle` - The expected window title.
+
+.Wait for window and switch to it
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://vividus-tests-site.herokuapp.com/windows.html'
+When I click on element located `id(timeout)`
+When I wait `PT3S` until window with title that is equal to `Vividus test site` appears and switch to it
+----
+
 === Close current window
 
 Closes the current window and switches to the previous window.
