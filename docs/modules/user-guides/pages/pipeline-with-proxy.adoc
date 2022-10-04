@@ -5,17 +5,17 @@ def vividusNetwork = 'vividus-grid'<1>
 def vividusHub = 'vividus-hub'<2>
 def vividusBrowser = 'vividus-browser'<3>
 def vividusProxyHost = 'vividus-proxy-host'<4>
-def seleniumVersion = '3.141.59-20210804'<5>
+def seleniumVersion = '4.5.0'<5>
 def overridings = """
                         proxy.host=${vividusProxyHost}<4>
                         proxy.connectable-host=${vividusProxyHost}<4>
-                        selenium.grid.enabled=true
+                        configuration.suites=web_app
+                        configuration.profiles=web/docker,web/desktop/chrome
                         selenium.grid.url=http://${vividusHub}:4444/wd/hub<2>
-                        selenium.grid.capabilities.platformName=LINUX
                   """
-def projectName = 'vividus-test-project'<6>
+def projectName = 'vividus-sample-tests'<6>
 def scmCredentialId = 'vividus'<7>
-def gitUrl = 'git@github.com:vividus/vividus-test-project.git'<8>
+def gitUrl = 'git@github.com:vividus-framework/vividus-sample-tests.git'<8>
 
 pipeline {
   agent {
@@ -27,14 +27,14 @@ pipeline {
         steps {
            sh "docker network create ${vividusNetwork}"<1>
            sh "docker run -d --net ${vividusNetwork} --name ${vividusHub} selenium/hub:${seleniumVersion}"<2>
-           sh "docker run -d --net ${vividusNetwork} -e HUB_HOST=${vividusHub} -e SCREEN_WIDTH=1920 -e SCREEN_HEIGHT=1080 --shm-size=2g --name ${vividusBrowser} selenium/node-chrome:${seleniumVersion}"<3><5>
+           sh "docker run -d --net ${vividusNetwork} -e SE_EVENT_BUS_HOST=${vividusHub} -e SE_EVENT_BUS_PUBLISH_PORT=4442 -e SE_EVENT_BUS_SUBSCRIBE_PORT=4443 -e SCREEN_WIDTH=1920 -e SCREEN_HEIGHT=1080 --shm-size=2g --name ${vividusBrowser} selenium/node-chrome:${seleniumVersion}"<3><5>
         }
     }
 
     stage('Load Source') {
         steps {
             checkout([$class: 'GitSCM',
-                branches: [[name: 'master']],
+                branches: [[name: 'main']],
                 doGenerateSubmoduleConfigurations: false,
                 extensions: [
                     [$class: 'RelativeTargetDirectory', relativeTargetDir: projectName],<6>
@@ -53,7 +53,7 @@ pipeline {
     stage('Run Tests Using Docker') {
         steps {
                 sh "docker ps -a"
-                withDockerContainer(image: 'openjdk:16.0.2-oraclelinux8', args: "--net ${vividusNetwork} --name ${vividusProxyHost}") {<1> <4>
+                withDockerContainer(image: 'eclipse-temurin:17', args: "--net ${vividusNetwork} --name ${vividusProxyHost}") {<1> <4>
                 dir(projectName) {<6>
                     sh """ <9>
                         echo -e "${overridings}" > overriding.properties
