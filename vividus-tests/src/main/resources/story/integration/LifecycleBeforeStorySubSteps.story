@@ -7,8 +7,8 @@ Lifecycle:
 Before:
 Scope: STORY
 When the condition `true` is true I do
-|step                                                            |
-|When I initialize the STORY variable `name` with value `Ulad`|
+|step                                                      |
+|Given I initialize story variable `name` with value `Ulad`|
 
 Scenario: Should pass comparison
 Then `${name}` is equal to `Ulad`

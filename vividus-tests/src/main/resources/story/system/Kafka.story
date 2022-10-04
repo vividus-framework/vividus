@@ -3,8 +3,8 @@ Meta:
     @requirementId 1049
 
 Scenario: Produce/consume data to/from Kafka
-When I initialize the scenario variable `message` with value `message-from-system-vividus-test-#{generate(regexify '[a-z]{8}')}`
-When I initialize the story variable `topic` with value `l6eo4ztm-default`
+Given I initialize scenario variable `message` with value `message-from-system-vividus-test-#{generate(regexify '[a-z]{8}')}`
+Given I initialize story variable `topic` with value `l6eo4ztm-default`
 When I start consuming messages from `vividus` Kafka topics `${topic}`
 When I send data `${message}` to `vividus` Kafka topic `${topic}`
 When I wait with `PT30S` timeout until count of consumed `vividus` Kafka messages is equal to `1`

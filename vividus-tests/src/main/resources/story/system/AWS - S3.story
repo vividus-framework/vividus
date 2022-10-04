@@ -3,9 +3,9 @@ Meta:
     @requirementId 1175
 
 Scenario: Create new object
-When I initialize the story variable `start-time` with value `#{generateDate(PT0S)}`
-When I initialize the story variable `prefix` with value `folder/object-key-#{generate(regexify '[a-z]{2}')}`
-When I initialize the story variable `object-key` with value `${prefix}#{generate(regexify '[a-z]{2}')}.txt`
+Given I initialize story variable `start-time` with value `#{generateDate(PT0S)}`
+Given I initialize story variable `prefix` with value `folder/object-key-#{generate(regexify '[a-z]{2}')}`
+Given I initialize story variable `object-key` with value `${prefix}#{generate(regexify '[a-z]{2}')}.txt`
 When I upload data `Hello from Vividus!` with key `${object-key}` and content type `text/plain` to S3 bucket `vividus-bucket`
 
 Scenario: Fetch the created object

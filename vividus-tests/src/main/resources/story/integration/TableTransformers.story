@@ -28,7 +28,7 @@ Examples:
 |B      |D      |
 
 Scenario: Declare story variable to be used in the next scenario
-When I initialize the story variable `for-merging-transformer` with value `X`
+Given I initialize story variable `for-merging-transformer` with value `X`
 
 Scenario: Verify MERGING transformer with table body
 Then `<column1>` is equal to `A`
@@ -41,11 +41,11 @@ Examples:
 
 
 Scenario: Create a counter
-When I initialize the STORY variable `updatedNumber` with value `0`
+Given I initialize story variable `updatedNumber` with value `0`
 
 
 Scenario: Update the counter through ITERATING with a global variable
-When I initialize the STORY variable `updatedNumber` with value `#{eval(${updatedNumber} + 1)}`
+Given I initialize story variable `updatedNumber` with value `#{eval(${updatedNumber} + 1)}`
 Examples:
 {transformer=ITERATING, limit=$\{iterationLimit\}}
 
@@ -170,7 +170,7 @@ Examples:
 {transformer=FROM_EXCEL, path=/data/excel with spaces in name.xlsx, sheet=Sheet1, addresses=A1, column=joined, \{lineBreakReplacement|VERBATIM\}= }
 
 Scenario: Verify nested transformers
-When I initialize the story variable `table-row-number` with value `#{eval(${table-row-number:0} + 1)}`
+Given I initialize story variable `table-row-number` with value `#{eval(${table-row-number:0} + 1)}`
 Then `<repeated>` is equal to `/to/be/repeated/for/each/row/`
 Then `<repeated2>` is equal to `one-more-repeated-value`
 Then `<repeated3>` is equal to `we need more repetitions`

@@ -72,7 +72,7 @@ When I click on element located `By.xpath(//a[contains(text(), 'More')])`
 
 Scenario: Step verification When I enter `$text` in field located `$locator` using keyboard
 Given I am on a page with the URL '${vividus-test-site-url}/inputs.html'
-When I initialize the scenario variable `text` with value `#{generate(regexify '[a-z]{15}')}`
+Given I initialize scenario variable `text` with value `#{generate(regexify '[a-z]{15}')}`
 When I enter `${text}` in field located `By.id(text)` using keyboard
 Then the text '${text}' exists
 

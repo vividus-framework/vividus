@@ -151,8 +151,8 @@ If variable is resolved, the resolution process is stopped, it means the narrowe
 [source,gherkin]
 ----
 Scenario: First scenario
-When I initialize the scenario variable `var` with value `scenario`
-When I initialize the story variable `var` with value `story`
+Given I initialize scenario variable `var` with value `scenario`
+Given I initialize story variable `var` with value `story`
 Then `${var}` is equal to `scenario`
 
 Scenario: Second scenario

@@ -82,7 +82,7 @@ When I save `$attributeName` attribute value of element found by $locatorType `$
 .Validate paragraph title
 [source,gherkin]
 ----
-When I initialize the story variable `html` with value
+Given I initialize story variable `html` with value
 `
 <html>
   <head>
@@ -117,7 +117,7 @@ When I save $dataType of element found by $locatorType `$locator` in HTML `$html
 .Validate data/text
 [source,gherkin]
 ----
-When I initialize the story variable `html` with value
+Given I initialize story variable `html` with value
 `
 <html>
   <head>

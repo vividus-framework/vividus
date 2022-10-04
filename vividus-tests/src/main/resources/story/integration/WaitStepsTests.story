@@ -5,7 +5,7 @@ Meta:
 
 Scenario: Step verification I wait until element located '$locator' disappears
 Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
-When I initialize the scenario variable `disappearing-locator` with value `By.id(element-to-hide)`
+Given I initialize scenario variable `disappearing-locator` with value `By.id(element-to-hide)`
 Then number of elements found by `${disappearing-locator}` is equal to `1`
 When I click on element located `By.id(button-hide)`
 When I wait until element located `${disappearing-locator}` disappears

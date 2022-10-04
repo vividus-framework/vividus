@@ -3,9 +3,9 @@ When I execute javascript `return document.querySelector('#text').value` and sav
 Then `${fieldValue}` is equal to `<expected>`
 
 Composite: When I run composite step with comment
-When I initialize the scenario variable `before-comment` with value `before`
+Given I initialize scenario variable `before-comment` with value `before`
 !-- comment
-When I initialize the scenario variable `after-comment` with value `after`
+Given I initialize scenario variable `after-comment` with value `after`
 
 Composite: When I use composite step in known-issues
 Then `0` is = `1`

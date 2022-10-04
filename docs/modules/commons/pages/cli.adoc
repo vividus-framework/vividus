@@ -172,7 +172,7 @@ Top of the most used steps:                                                     
 Then `$variable1` is $comparisonRule `$variable2`                                                      330
 Given I am on a page with the URL '$pageURL'                                                           127
 Then number of elements found by `$locator` is $comparisonRule `$quantity`                             110
-When I initialize the $scopes variable `$variableName` with value `$variableValue`                      83
+Given I initialize $scopes variable `$variableName` with value `$variableValue`                         83
 When I change context to element located `$locator`                                                     59
 ----
 

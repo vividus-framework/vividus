@@ -5,7 +5,7 @@ Meta:
     @requirementId 435
 
 Scenario: Set up
-When I initialize the STORY variable `collectionName` with value `#{generate(regexify '[a-z]{15}')}`
+Given I initialize story variable `collectionName` with value `#{generate(regexify '[a-z]{15}')}`
 When I execute command `{ create: "${collectionName}", collation: { locale: "en" } }` against `${db-name}` database on `${instance-key}` MongoDB instance and save result to SCENARIO variable `create`
 Then `${create.ok}` is equal to `1.0`
 When I execute command `
@@ -53,7 +53,7 @@ When I execute command `
 }
 ` against `${db-name}` database on `${instance-key}` MongoDB instance and save result to SCENARIO variable `insert`
 Then `${insert.ok}` is equal to `1.0`
-When I initialize the STORY variable `tableName` with value `#{generate(regexify '[a-z]{15}')}`
+Given I initialize story variable `tableName` with value `#{generate(regexify '[a-z]{15}')}`
 When I execute SQL query `
 CREATE TABLE ${tableName}(
     name VARCHAR (50) NOT NULL,

@@ -815,7 +815,7 @@ Loads the resource by its name and replaces the expression with the content of t
 .Load data from the project resource
 [source,gherkin]
 ----
-When I initialize the scenario variable `my-data` with value `#{loadResource(/data/body.txt)}`
+Given I initialize scenario variable `my-data` with value `#{loadResource(/data/body.txt)}`
 ----
 
 === `loadBinaryResource`
@@ -852,7 +852,7 @@ Finds the resource by its name and replaces the expression with the content of t
 .Load data as Base64 from the project resource
 [source,gherkin]
 ----
-When I initialize the scenario variable `my-data` with value `#{resourceToBase64(/data/body.txt)}`
+Given I initialize scenario variable `my-data` with value `#{resourceToBase64(/data/body.txt)}`
 ----
 
 == Script evaluation
@@ -938,7 +938,7 @@ NOTE: Null expression can only be evaluated separately. Strings or other express
 .Validation of JSON element with `null` value
 [source,gherkin]
 ----
-When I initialize the scenario variable `json` with value `
+Given I initialize scenario variable `json` with value `
 {
     "persons": {
         "nemo": null

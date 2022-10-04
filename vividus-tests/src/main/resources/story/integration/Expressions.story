@@ -5,19 +5,19 @@ Meta:
     @feature expressions
 
 Scenario: [Deprecated] Verify date generation and format
-When I initialize the scenario variable `currentDate` with value `#{generateDate(P)}`
+Given I initialize scenario variable `currentDate` with value `#{generateDate(P)}`
 Then `#{formatDateTo(${currentDate}, yyyy-MM-dd, yyyy)}` is equal to `#{generateDate(P, yyyy)}`
 
 Scenario: Verify date generation and format
 Then `#{formatDateTo(#{generateDate(P)}, yyyy-MM-dd, yyyy)}` is equal to `#{generateDate(P, yyyy)}`
 
 Scenario: Verify epoch generation and conversion
-When I initialize the SCENARIO variable `date` with value `#{generateDate(P, yyyy-MM-dd'T'HH:mm:ss)}`
-When I initialize the SCENARIO variable `epoch` with value `#{toEpochSecond(${date})}`
+Given I initialize scenario variable `date` with value `#{generateDate(P, yyyy-MM-dd'T'HH:mm:ss)}`
+Given I initialize scenario variable `epoch` with value `#{toEpochSecond(${date})}`
 Then `${date}` is equal to `#{fromEpochSecond(${epoch})}`
 
 Scenario: Verify epoch generation with timezone
-When I initialize the SCENARIO variable `epoch` with value `#{toEpochSecond(2020-12-11T18:43:05+05:30)}`
+Given I initialize scenario variable `epoch` with value `#{toEpochSecond(2020-12-11T18:43:05+05:30)}`
 Then `${epoch}` is equal to `1607692385`
 
 Scenario: Verify anyOf expression
@@ -47,7 +47,7 @@ Examples:
 Scenario: Verify eval has an access to a variable context
 Meta:
     @requirementId 696
-When I initialize the story variable `someVar` with value `<contextVar>`
+Given I initialize story variable `someVar` with value `<contextVar>`
 Then `#{<expression>}` is = `<expected>`
 Examples:
 |expected|expression                          |contextVar|
@@ -73,7 +73,7 @@ A B C
 )}` is equal to `A B C`
 
 Scenario: Verify 'randomInt' expression with another string
-When I initialize the scenario variable `var` with value `#{randomInt(42, 42)} and 24`
+Given I initialize scenario variable `var` with value `#{randomInt(42, 42)} and 24`
 Then `${var}` is equal to `42 and 24`
 
 Scenario: Verify 'toBase64Gzip' expression
@@ -84,7 +84,7 @@ Then `#{toBase64Gzip(vividus)}` is equal to `H4sIAAAAAAAA/yvLLMtMKS0GANIHCdkHAAA
 Scenario: Use expressions in template
 Meta:
     @requirementId 1545
-Given I initialize the SCENARIO variable `data` using template `data/expressions.ftl` with parameters:
+Given I initialize scenario variable `data` using template `data/expressions.ftl` with parameters:
 |param|
 |value|
 Then `${data}` is equal to `Vividus Expressions
@@ -137,7 +137,7 @@ Then `1` is = `${vividus-expression}`
 Scenario: Verify expression generating null
 Meta:
     @requirementId 2345
-When I initialize the scenario variable `json` with value `
+Given I initialize scenario variable `json` with value `
 {
     "persons": {
         "nemo": null
@@ -155,6 +155,6 @@ Then `Customer(Username)` matches `#{quoteRegExp(Customer(Username))}`
 Scenario: Should escape JSON
 Meta:
     @requirementId 3056
-When I initialize the scenario variable `word` with value `"cowabunga"`
-When I initialize the scenario variable `json` with value `{"question":"what is #{escapeJson(${word})}?"}`
+Given I initialize scenario variable `word` with value `"cowabunga"`
+Given I initialize scenario variable `json` with value `{"question":"what is #{escapeJson(${word})}?"}`
 Then `${json}` is equal to `{"question":"what is \"cowabunga\"?"}`

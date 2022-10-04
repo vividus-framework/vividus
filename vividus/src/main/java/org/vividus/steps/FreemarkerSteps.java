@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ public class FreemarkerSteps
      * @throws IOException in case of any error happened at I/O operations
      * @throws TemplateException in case of any error at template processing
      */
-    @Given("I initialize the $scopes variable `$variableName` using template `$templatePath` with parameters:"
+    @Given("I initialize $scopes variable `$variableName` using template `$templatePath` with parameters:"
             + "$templateParameters")
     public void initVariableUsingTemplate(Set<VariableScope> scopes, String variableName, String templatePath,
             List<Map<String, String>> templateParameters) throws IOException, TemplateException
