@@ -9,4 +9,4 @@ Then `vividus` matches `[A-Z]+`
 Scenario: Should be performed
 !-- Make sure the previous story "Known issues.story" doesn't affect the execution of the next story in the same thread
 !-- Here we rely on the assumption that stories are executed in alphabetical order
-When I initialize the next batches variable `from-next-known-issue-story` with value `scenario-executed`
+Given I initialize next batches variable `from-next-known-issue-story` with value `scenario-executed`

@@ -5,10 +5,10 @@ Meta:
     @feature JWT
 
 Scenario: Decode/encode JWTs, validate extracked jsons
-When I initialize the scenario variable `JWT` with value `#{loadResource(JWT.txt)}`
-When I initialize the scenario variable `header` with value `#{decodeFromBase64(#{eval(`${JWT}`.replaceFirst("([^.]+).*", "$1"))})}`
-When I initialize the scenario variable `payload` with value `#{decodeFromBase64(#{eval(`${JWT}`.replaceFirst(".*(?<=\.)(.*?)(?=\.).*", "$1"))})}`
-When I initialize the scenario variable `encodedSignature` with value `#{eval(`${JWT}`.replaceFirst(".*(?<=\.)([^.]+)$", "$1"))}`
+Given I initialize scenario variable `JWT` with value `#{loadResource(JWT.txt)}`
+Given I initialize scenario variable `header` with value `#{decodeFromBase64(#{eval(`${JWT}`.replaceFirst("([^.]+).*", "$1"))})}`
+Given I initialize scenario variable `payload` with value `#{decodeFromBase64(#{eval(`${JWT}`.replaceFirst(".*(?<=\.)(.*?)(?=\.).*", "$1"))})}`
+Given I initialize scenario variable `encodedSignature` with value `#{eval(`${JWT}`.replaceFirst(".*(?<=\.)([^.]+)$", "$1"))}`
 When I save JSON element from `${header}` by JSON path `alg` to scenario variable `alg`
 Then `#{removeWrappingDoubleQuotes(${alg})}` is = `HS256`
 Then number of JSON elements from `${header}` by JSON path `typ` is = 1

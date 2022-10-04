@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
@@ -92,8 +93,8 @@ public class VariablesSteps
      * @param variableName A name under which the value should be saved
      * @param variableValue A value to be saved
      */
-    @When("I initialize the $scopes variable `$variableName` with value `$variableValue`")
-    public void initVariableWithGivenValue(Set<VariableScope> scopes, String variableName, String variableValue)
+    @Given("I initialize $scopes variable `$variableName` with value `$variableValue`")
+    public void initializeVariableWithValue(Set<VariableScope> scopes, String variableName, String variableValue)
     {
         variableContext.putVariable(scopes, variableName, variableValue);
     }

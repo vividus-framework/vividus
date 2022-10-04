@@ -41,7 +41,7 @@ Then JSON element by JSON path `$.cookies` is equal to `{}`
 Scenario: Validate HTTP retry on service unavailability
 Meta:
     @requirementId 214
-When I initialize the scenario variable `uuid` with value `#{generate(Internet.uuid)}`
+Given I initialize scenario variable `uuid` with value `#{generate(Internet.uuid)}`
 When I execute HTTP GET request for resource with URL `${vividus-test-site-url}/api/teapot?clientId=${uuid}`
 Then `${responseCode}` is equal to `200`
 
@@ -79,7 +79,7 @@ Then JSON element by JSON path `$.headers.Language` is equal to `"en-ru"`
 Scenario: Verify step "Given multipart request:$requestParts"
 Meta:
     @requirementId 2106
-When I initialize the scenario variable `temp-file-content` with value `Your first and last stop for No-Code Test Automation!`
+Given I initialize scenario variable `temp-file-content` with value `Your first and last stop for No-Code Test Automation!`
 When I create temporary file with name `abc.txt` and content `${temp-file-content}` and put path to scenario variable `temp-file-path`
 Given multipart request:
 |type  |name      |value            |contentType|fileName       |
@@ -104,11 +104,11 @@ When I send HTTP POST to the relative URL '/post'
 Then `${responseCode}` is equal to `200`
 
 Scenario: Verify step "When I wait for response code $responseCode for $duration duration retrying $retryTimes times $stepsToExecute"
-When I initialize the scenario variable `relativeURL` with value `get-wrong-wrong-wrong`
+Given I initialize scenario variable `relativeURL` with value `get-wrong-wrong-wrong`
 When I wait for response code `200` for `PT10S` duration retrying 3 times
-|step                                                                                                                         |
-|When I initialize the scenario variable `relativeURL` with value `#{eval(stringUtils:substringBeforeLast(relativeURL, '-'))}`|
-|When I send HTTP GET to the relative URL '${relativeURL}'                                                                    |
+|step                                                                                                                      |
+|Given I initialize scenario variable `relativeURL` with value `#{eval(stringUtils:substringBeforeLast(relativeURL, '-'))}`|
+|When I send HTTP GET to the relative URL '${relativeURL}'                                                                 |
 Then `${responseCode}` is equal to `200`
 
 Scenario: Verify step "Given form data request:$parameters"

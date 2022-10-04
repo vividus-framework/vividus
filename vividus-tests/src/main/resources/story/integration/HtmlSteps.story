@@ -6,7 +6,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-When I initialize the story variable `html` with value
+Given I initialize story variable `html` with value
 `
 <html>
   <head>

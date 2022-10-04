@@ -26,7 +26,7 @@ Then `${result}` matching rows using `id` from `vividus` is equal to data from:
 |3 |Ivan                     |
 
 Scenario: Verify step: 'When I wait for '$duration' duration retrying $retryTimes times while data from `$sqlQuery` executed against `$dbKey` is equal to data from:$table"'
-When I initialize the SCENARIO variable `sqlQuery` with value `
+Given I initialize scenario variable `sqlQuery` with value `
    SELECT id, name
    FROM vividus`
 When I wait for 'PT10S' duration retrying 1 times while data from `${sqlQuery}` executed against `vividus` is equal to data from:

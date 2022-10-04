@@ -14,6 +14,13 @@ Then `:I:am:here:` is = `${not-exists::I:am:here:}`
 Scenario: Verify batch scope has higher priority than global scope
 Then `${scope-priority-check}` is equal to `should be batch`
 
+Scenario: Validate variable initialization
+Given I initialize scenario variable `java` with value `NIO`
+Then `${java}` is equal to `NIO`
+!-- Deprecated
+When I initialize the scenario variable `java` with value `IO`
+Then `${java}` is equal to `IO`
+
 Scenario: Verify step for saving examples table to variable as list of maps
 When I initialize SCENARIO variable `testMap` with values:
 |key1  |key2  |
@@ -37,16 +44,16 @@ Then `${a.b:NULL}` is equal to `NULL`
 Then `${foo:${bar}}` is equal to `${foo:${bar}}`
 Then `${baz#{eval(0 + 2)}:${foo#{eval(0 + 1)}}}` is equal to `${baz2:${foo1}}`
 
-When I initialize the scenario variable `vAr` with value `vAl`
-When I initialize the scenario variable `foo` with value `foo`
-When I initialize the scenario variable `foo1` with value `foo1`
-When I initialize the scenario variable `v.ar` with value `v.al`
-When I initialize the scenario variable `var[0]` with value `val[0]`
-When I initialize the scenario variable `v[0].ar` with value `v[0].al`
-When I initialize the scenario variable `v.ar[0]` with value `v.al[0]`
-When I initialize the scenario variable `v:ar` with value `v:al`
-When I initialize the scenario variable `` with value `val`
-When I initialize the scenario variable `a.b` with value `a.b-value`
+Given I initialize scenario variable `vAr` with value `vAl`
+Given I initialize scenario variable `foo` with value `foo`
+Given I initialize scenario variable `foo1` with value `foo1`
+Given I initialize scenario variable `v.ar` with value `v.al`
+Given I initialize scenario variable `var[0]` with value `val[0]`
+Given I initialize scenario variable `v[0].ar` with value `v[0].al`
+Given I initialize scenario variable `v.ar[0]` with value `v.al[0]`
+Given I initialize scenario variable `v:ar` with value `v:al`
+Given I initialize scenario variable `` with value `val`
+Given I initialize scenario variable `a.b` with value `a.b-value`
 Then `${vAr}`                      is equal to `vAl`
 Then `${v.ar}`                     is equal to `v.al`
 Then `${var[0]}`                   is equal to `val[0]`
@@ -66,8 +73,8 @@ Then `${not-existing:}`            is equal to ``
 Scenario: Verify that expression can be used as a part of variable name and vice versa
 Meta:
     @issueId 691
-When I initialize the scenario variable `var1` with value `2`
-When I initialize the scenario variable `var3` with value `3`
+Given I initialize scenario variable `var1` with value `2`
+Given I initialize scenario variable `var3` with value `3`
 Then `${var#{eval(${var#{eval(<iterator> + 1)}} + 1)}}` is = `3`
 Examples:
 {transformer=ITERATING, limit=1}
@@ -75,15 +82,15 @@ Examples:
 Scenario: Verify that circular variable references are resolved without StackOverflowError
 Meta:
     @issueId 691
-When I initialize the scenario variable `value` with value `#{removeWrappingDoubleQuotes(${value})}`
+Given I initialize scenario variable `value` with value `#{removeWrappingDoubleQuotes(${value})}`
 Then `${value}` is equal to `${value}`
 Then `before-${value}-after` is equal to `before-${value}-after`
 
 Scenario: Verify that variables are resolved in examples table used as a parameter for a step
 Meta:
     @issueId 692
-When I initialize the scenario variable `var` with value `val`
-Given I initialize the scenario variable `template-result` using template `/data/simple-template.ftl` with parameters:
+Given I initialize scenario variable `var` with value `val`
+Given I initialize scenario variable `template-result` using template `/data/simple-template.ftl` with parameters:
 /data/table-with-scenario-level-variables.table
 Then `${template-result}` is equal to `passed: variable is resolved`
 
@@ -92,7 +99,7 @@ When I initialize scenario variable `table` with values:
 |country     |capital   |
 |Belarus     |Minsk     |
 |Netherlands |Amsterdam |
-Given I initialize the scenario variable `countries-json` using template `/data/complex-template.ftl` with parameters:
+Given I initialize scenario variable `countries-json` using template `/data/complex-template.ftl` with parameters:
 ${table}
 Then JSON element from `${countries-json}` by JSON path `$` is equal to `
 [
@@ -110,28 +117,28 @@ Scenario: Verify that variables of different nesting step-levels are cleaned up 
 Meta:
     @issueId 763
 When I execute steps while counter is <= `1` with increment `1` starting from `1`:
-|step                                                                             |
-|When I initialize the scenario variable `test1` with value `${iterationVariable}`|
-|When the condition 'true' is true I do                                           |
-|{headerSeparator=!,valueSeparator=!}                                             |
-|!step                                                             !              |
-|!When I initialize the scenario variable `value` with value `test`!              |
-|When I initialize the scenario variable `test2` with value `${iterationVariable}`|
-|Then `${test1}` is equal to `${test2}`                                           |
+|step                                                                          |
+|Given I initialize scenario variable `test1` with value `${iterationVariable}`|
+|When the condition 'true' is true I do                                        |
+|{headerSeparator=!,valueSeparator=!}                                          |
+|!step                                                          !              |
+|!Given I initialize scenario variable `value` with value `test`!              |
+|Given I initialize scenario variable `test2` with value `${iterationVariable}`|
+|Then `${test1}` is equal to `${test2}`                                        |
 
 Scenario: Verify that variables of different nesting step-levels don't affect each other
 Meta:
     @issueId 763
 When I execute steps while counter is <= `1` with increment `1` starting from `1`:
-|step                                                                               |
-|When I initialize the scenario variable `test1` with value `${iterationVariable}`  |
-|When the condition 'true' is true I do                                             |
-|{headerSeparator=!,valueSeparator=!}                                               |
-|!step                                                                             !|
-|!Then `${test1}` is equal to `1`                                                  !|
-|!When I initialize the scenario variable `iterationVariable` with value `42`      !|
-|!When I initialize the scenario variable `test2` with value `${iterationVariable}`!|
-|Then `${test2}` is equal to `1`                                                    |
+|step                                                                            |
+|Given I initialize scenario variable `test1` with value `${iterationVariable}`  |
+|When the condition 'true' is true I do                                          |
+|{headerSeparator=!,valueSeparator=!}                                            |
+|!step                                                                          !|
+|!Then `${test1}` is equal to `1`                                               !|
+|!Given I initialize scenario variable `iterationVariable` with value `42`      !|
+|!Given I initialize scenario variable `test2` with value `${iterationVariable}`!|
+|Then `${test2}` is equal to `1`                                                 |
 Then `${iterationVariable}` is equal to `42`
 
 Scenario: Pass ExamplesTable as variable to composite step accepting ExamplesTable
@@ -147,11 +154,11 @@ Then `${table-from-composite-step[0].column}` is equal to `value`
 Scenario: Use variables as part of names of another variables
 Meta:
     @issueId 1181
-When I initialize the scenario variable `variable` with value `Variable`
-When I initialize the scenario variable `Variable` with value `nested`
-When I initialize the scenario variable `compositeVariable` with value `expected`
-When I initialize the scenario variable `expected` with value `nested-expected`
-When I initialize the scenario variable `complex` with value `[{ids=2}, {ids=0}, {ids=7}, {ids=7}]`
+Given I initialize scenario variable `variable` with value `Variable`
+Given I initialize scenario variable `Variable` with value `nested`
+Given I initialize scenario variable `compositeVariable` with value `expected`
+Given I initialize scenario variable `expected` with value `nested-expected`
+Given I initialize scenario variable `complex` with value `[{ids=2}, {ids=0}, {ids=7}, {ids=7}]`
 Then `${composite${variable}}`                                            is equal to `expected`
 Then `${${variable}}`                                                     is equal to `nested`
 Then `${${variable}} and ${${variable}}`                                  is equal to `nested and nested`
@@ -162,10 +169,10 @@ Then `#{replaceAllByRegExp("""\},\s\{ids=""", """""", """${complex}""")}` is equ
 Scenario: Use variables in template
 Meta:
     @requirementId 1545
-When I initialize the scenario variable `scenarioVar` with value `1`
-When I initialize the scenario variable `overrideVar` with value `-1`
-When I initialize the story variable `storyVar` with value `2`
-Given I initialize the scenario variable `numbers` using template `data/resolve-variables.ftl` with parameters:
+Given I initialize scenario variable `scenarioVar` with value `1`
+Given I initialize scenario variable `overrideVar` with value `-1`
+Given I initialize story variable `storyVar` with value `2`
+Given I initialize scenario variable `numbers` using template `data/resolve-variables.ftl` with parameters:
 |exampleParam|overrideVar|
 |3           |4          |
 Then `#{trim(${numbers})}` is equal to `12345`

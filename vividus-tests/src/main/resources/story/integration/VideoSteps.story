@@ -18,7 +18,7 @@ When I save info from video player located `<videoLocator>` to SCENARIO variable
 Then `${details.currentTime}` is > `0`
 When I pause video in video player located `<videoLocator>`
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
-When I initialize the scenario variable `pausedTime` with value `${details.currentTime}`
+Given I initialize scenario variable `pausedTime` with value `${details.currentTime}`
 Then element located `<videoLocator>` exists for `PT1S` duration
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
 Then `${details.currentTime}` is = `${pausedTime}`
@@ -27,7 +27,7 @@ Then `${details.currentTime}` is = `${pausedTime}`
 Scenario: Verify step: "When I rewind time to `$time` seconds in video player located `$locator`"
 When I rewind time to `777` seconds in video player located `<videoLocator>`
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
-When I initialize the scenario variable `rewindTime` with value `${details.currentTime}`
+Given I initialize scenario variable `rewindTime` with value `${details.currentTime}`
 Then `${rewindTime}` is > `${pausedTime}`
 
 

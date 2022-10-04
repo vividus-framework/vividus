@@ -114,7 +114,7 @@ When I tap on element located `accessibilityId(menuToggler)`
 When I tap on element located `xpath(<menuInputXpath>)`
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `0`
 When I tap on element located `accessibilityId(nameInput)`
-When I initialize the story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
+Given I initialize story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
 When I type text `${text}`
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 When I clear field located `accessibilityId(nameInput)`
@@ -123,7 +123,7 @@ When I navigate back
 
 
 Scenario: Verify step: 'When I type `$text` in field located `$locator`'
-When I initialize the story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
+Given I initialize story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
 When I tap on element located `accessibilityId(menuToggler)`
 When I tap on element located `xpath(<menuInputXpath>)`
 When I type `${text}` in field located `accessibilityId(nameInput)`
@@ -149,7 +149,7 @@ Meta:
     @requirementId 1927
     @targetPlatform ios
 !-- Typing on android emulator doesn't shows a keyboard.
-When I initialize the story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
+Given I initialize story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
 When I type `${text}` in field located `accessibilityId(nameInput)` and keep keyboard opened
 When I save `<textFieldValueAttribute>` attribute value of element located `accessibilityId(nameInput)` to scenario variable `typedText`
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
@@ -336,10 +336,10 @@ Scenario: Verify step: 'When I execute javascript `$script` with arguments:$args
 Meta:
     @targetPlatform android
 When I change context to element located `xpath(//android.view.ViewGroup[./android.widget.TextView[@content-desc="<firstItemAccessibilityId>"]])`
-When I initialize the scenario variable `x` with value `${context-x-coordinate}`
-When I initialize the scenario variable `y` with value `${context-y-coordinate}`
-When I initialize the scenario variable `width` with value `${context-width}`
-When I initialize the scenario variable `height` with value `#{eval(${context-height} / 3 )}`
+Given I initialize scenario variable `x` with value `${context-x-coordinate}`
+Given I initialize scenario variable `y` with value `${context-y-coordinate}`
+Given I initialize scenario variable `width` with value `${context-width}`
+Given I initialize scenario variable `height` with value `#{eval(${context-height} / 3 )}`
 When I reset context
 When I execute javascript `mobile: swipeGesture` with arguments:
 |value                                                                                                                  |type  |

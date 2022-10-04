@@ -340,7 +340,7 @@ parameter is not allowed for `STRING` part type, but it's required for `BINARY` 
 .Init HTTP request consisting of 4 different parts
 [source,gherkin]
 ----
-When I initialize the scenario variable `temp-file-content` with value `Your first and last stop for No-Code Test Automation!`
+Given I initialize scenario variable `temp-file-content` with value `Your first and last stop for No-Code Test Automation!`
 When I create temporary file with name `abc.txt` and content `${temp-file-content}` and put path to scenario variable `temp-file-path`
 Given multipart request:
 |type  |name      |value            |contentType|fileName       |

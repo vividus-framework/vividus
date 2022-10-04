@@ -31,7 +31,7 @@ When I create temporary excel file with content:
 |key1  |key2  |
 |value1|value2|
 and put path to scenario variable `path`
-When I initialize the scenario variable `fileExists` with value `#{evalGroovy(return path.toFile().exists())}`
+Given I initialize scenario variable `fileExists` with value `#{evalGroovy(return path.toFile().exists())}`
 Then `${fileExists}` is = `true`
 When I initialize scenario variable `excel-data` with values:
 |key1  |key2  |

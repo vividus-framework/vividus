@@ -106,10 +106,10 @@ class VariablesStepsTests
     }
 
     @Test
-    void testInitVariableWithGivenValue()
+    void shouldInitialzeVariableWithValue()
     {
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        variablesSteps.initVariableWithGivenValue(scopes, VALUE_1, VALUE_1);
+        variablesSteps.initializeVariableWithValue(scopes, VALUE_1, VALUE_1);
         verify(variableContext).putVariable(scopes, VALUE_1, VALUE_1);
     }
 

@@ -57,5 +57,5 @@ and returns its path.
 .Initialize a variable with a path to a Parquet file
 [source,gherkin]
 ----
-When I initialize the scenario variable `parquet-path` with value `#{convertCsvToParquetFile(data/pets.csv, data/pets-schema.avsc)}`
+Given I initialize scenario variable `parquet-path` with value `#{convertCsvToParquetFile(data/pets.csv, data/pets-schema.avsc)}`
 ----

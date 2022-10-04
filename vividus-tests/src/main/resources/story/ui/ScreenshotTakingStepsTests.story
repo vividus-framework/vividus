@@ -7,7 +7,7 @@ When I execute steps:
 
 
 Scenario: Verify screenshot taking steps
-When I initialize the scenario variable `numberOfScreenshots` with value `#{evalGroovy(def files = java.nio.file.Path.of($/${screenshot-directory}/$).toFile()?.listFiles(); return files?.length?:0)}`
+Given I initialize scenario variable `numberOfScreenshots` with value `#{evalGroovy(def files = java.nio.file.Path.of($/${screenshot-directory}/$).toFile()?.listFiles(); return files?.length?:0)}`
 When I execute steps:
 |step           |
 |<stepUnderTest>|

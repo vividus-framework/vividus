@@ -31,17 +31,17 @@ When I find greater than `1` JSON elements by `$.store.book` and for each elemen
 
 Scenario: Verify step "When I wait for presence of element by `$jsonPath` for `$duration` duration retrying $retryTimes times$stepsToExecute"
 When I wait for presence of element by `$.json.iteration3` for `PT15S` duration retrying 3 times
-|step                                                                                        |
-|When I initialize the scenario variable `iteration` with value `#{eval(${iteration:0} + 1)}`|
-|When I set request headers:                                                                 |
-|{headerSeparator=!,valueSeparator=!}                                                        |
-|!name         !value            !                                                           |
-|!Content-Type !application/json !                                                           |
-|Given request body: {                                                                       |
-|  "iteration${iteration}": ${iteration}                                                     |
-|}                                                                                           |
-|When I send HTTP POST to the relative URL '/post'                                           |
-|Then JSON element by JSON path `$.headers.Content-Type` is equal to `"application/json"`    |
+|step                                                                                     |
+|Given I initialize scenario variable `iteration` with value `#{eval(${iteration:0} + 1)}`|
+|When I set request headers:                                                              |
+|{headerSeparator=!,valueSeparator=!}                                                     |
+|!name         !value            !                                                        |
+|!Content-Type !application/json !                                                        |
+|Given request body: {                                                                    |
+|  "iteration${iteration}": ${iteration}                                                  |
+|}                                                                                        |
+|When I send HTTP POST to the relative URL '/post'                                        |
+|Then JSON element by JSON path `$.headers.Content-Type` is equal to `"application/json"` |
 
 Scenario: Verify failure in step "When I wait for presence of element by `$jsonPath` for `$duration` duration retrying $retryTimes times$stepsToExecute"
 When I wait for presence of element by `$.non-existing` for `PT1S` duration retrying 1 times

@@ -4,7 +4,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-When I initialize the story variable `json` with value `
+Given I initialize story variable `json` with value `
 {
     "store": {
         "book": [
@@ -152,8 +152,8 @@ Then `Sayings of the Century` is = `${title}`
 
 
 Scenario: Verify step "Then JSON element from `$json` by JSON path `$jsonPath` is equal to `$expectedData`$options"
-When I initialize the scenario variable `current-date` with value `#{generateDate(P, yyyy-MM-DD)}`
-Given I initialize the scenario variable `expected-json` using template `/data/json-validation-template.ftl` with parameters:
+Given I initialize scenario variable `current-date` with value `#{generateDate(P, yyyy-MM-DD)}`
+Given I initialize scenario variable `expected-json` using template `/data/json-validation-template.ftl` with parameters:
 |currentDate   |
 |${current-date}|
 Then JSON element from `

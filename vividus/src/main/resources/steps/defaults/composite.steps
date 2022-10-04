@@ -1,0 +1,10 @@
+Composite: When I initialize the $scopes variable `$variableName` with value `$variableValue`
+Priority: 1
+!-- WARNING: The step "When I initialize the $scopes variable `$variableName` with value `$variableValue`" is deprecated and will be removed in VIVIDUS 0.6.0
+Given I initialize <scopes> variable `<variableName>` with value `<variableValue>`
+
+
+Composite: Given I initialize the $scopes variable `$variableName` using template `$templatePath` with parameters:$templateParameters
+Priority: 1
+!-- WARNING: The step "Given I initialize the $scopes variable `$variableName` using template `$templatePath` with parameters:$templateParameters" is deprecated and will be removed in VIVIDUS 0.6.0
+Given I initialize <scopes> variable `<variableName>` using template `<templatePath>` with parameters:<templateParameters>

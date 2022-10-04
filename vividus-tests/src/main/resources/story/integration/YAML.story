@@ -4,7 +4,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-When I initialize the story variable `yaml` with value `
+Given I initialize story variable `yaml` with value `
 ---
 store:
   book:
