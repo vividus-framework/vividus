@@ -1,1 +1,62 @@
-include::ROOT:page$under-construction.adoc[]
+= Electron Plugin
+
+The plugin provides the ability to test https://www.electronjs.org/[Electron]-based desktop applications.
+VIVIDUS uses https://www.electronjs.org/docs/latest/tutorial/automated-testing[ChromeDriver] functionality to interact with the application.
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-electron', version: '{current-version}')
+----
+
+== Steps
+
+In order to interact with the user interface one can use the steps from xref:plugins:plugin-web-app.adoc[Web Application Plugin].
+
+=== Start application
+
+Starts the application under tests.
+
+[WARNING]
+====
+Before tests execution make sure you set the path to the application executable via `web.driver.CHROME.binary-path` property.
+====
+
+[source,gherkin]
+----
+Given I start electron application
+----
+
+.Start the electron application
+[source,gherkin]
+----
+Given I start electron application
+When I wait `PT1M` until window with title that contains ` | Microsoft Teams` appears and switch to it
+When I wait until element located `id(searchInputField)` appears
+----
+
+[TIP]
+====
+Electron based applications may have one or more windows at the same time. Consider usage of the xref:plugins:plugin-web-app.adoc#_wait_for_window_and_switch[window waiting step] to manipulate with the windows during testing.
+====
+
+You could also find the complete example for Elector-based desktop application tests https://github.com/vividus-framework/vividus-sample-tests/tree/main#list-of-the-available-samples[here].
+
+== How to debug electron-based applications
+
+When you are writing tests for the electron based application you have few options to use DevTools. The first one relies on the embedded DevTools. The second option is to use https://developers.google.com/cast/docs/debugging/remote_debugger[remote DevTools debugging].
+The simplest way is to start your application with `--remote-debugging-port=<port>` flag. Once the port is passed as an argument, DevTools will be available at `http://localhost:<port>`
+
+.Available Application Windows
+image::dev-tools-available-windows.png[]
+
+.Start electron app with the flag
+[source,gherkin]
+----
+/Applications/Visual\ Studio\ Code.app/Contents/MacOS/Electron --remote-debugging-port=9222
+----
+
+.DevTools view
+image::dev-tools.png[]
