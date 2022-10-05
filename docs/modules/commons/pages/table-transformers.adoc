@@ -110,19 +110,27 @@ the columns.
 
 `ITERATING` transformer generates simple one-column table with header `iterator` and numbers as values: 0, 1, 2... .
 
-[cols="1,3", options="header"]
+[cols="1,3a", options="header"]
 |===
 |Parameter
 |Description
 
 |`limit`
-|threshold value, so values are generated from 0 to (`limit` - 1)
+|WARNING: The property is deprecated and will be removed in VIVIDUS 0.6.0. Use `startInclusive` and `endInclusive` instead
+
+threshold value, so values are generated from 0 to (`limit` - 1).
+
+|`startInclusive`
+|value specifying which number to start generating values from, it should be less than or equal to `endInclusive` value
+
+|`endInclusive`
+|threshold value specifying at which number to stop generating values, it should be greater than or equal to `startInclusive` value
 |===
 
 .Usage of ITERATING transformer
 [source,gherkin]
 ----
-{transformer=ITERATING, limit=5}
+{transformer=ITERATING, startInclusive=0, endInclusive=4}
 ----
 
 == REPEATING

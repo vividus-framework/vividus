@@ -73,11 +73,11 @@ Then `${not-existing:}`            is equal to ``
 Scenario: Verify that expression can be used as a part of variable name and vice versa
 Meta:
     @issueId 691
-Given I initialize scenario variable `var1` with value `2`
-Given I initialize scenario variable `var3` with value `3`
-Then `${var#{eval(${var#{eval(<iterator> + 1)}} + 1)}}` is = `3`
+Given I initialize scenario variable `var3` with value `4`
+Given I initialize scenario variable `var5` with value `5`
+Then `${var#{eval(${var#{eval(<iterator> + 1)}} + 1)}}` is = `5`
 Examples:
-{transformer=ITERATING, limit=1}
+{transformer=ITERATING, startInclusive=2, endInclusive=2}
 
 Scenario: Verify that circular variable references are resolved without StackOverflowError
 Meta:
