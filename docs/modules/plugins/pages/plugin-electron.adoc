@@ -11,6 +11,47 @@ VIVIDUS uses https://www.electronjs.org/docs/latest/tutorial/automated-testing[C
 implementation(group: 'org.vividus', name: 'vividus-plugin-electron', version: '{current-version}')
 ----
 
+== Profile
+
+The available profile is `desktop/electron`. It should be used together with `web/desktop/chrome`.
+
+.configuration.properties
+[source,properties]
+----
+configuration.profiles=desktop/electron,web/desktop/chrome
+----
+
+== Properties
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="6,3,2,6", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|*`electron-app.binary-path`*
+|An absolute file path.
+|
+|The path to the executable file of the application under test.
+
+|*`electron-app.chromium-version`*
+|The version string, e.g. `102`
+|
+a|The chromium version used to build the application. The simplest way to determine the version is to run the tests without this property and then you should receive error message like this one:
+
+image::chrome-driver-version.png[]
+
+TIP: Use major version e.g. `102.0`
+
+|`electron-app.comamand-line-arguments`
+|The space-separated list of arguments e.g. `--remote-debugging-port=9515 --user-dir=/Users/testtestius/temp`.
+|<empty>
+|The list of command line arguments for the application.
+|===
+
 == Steps
 
 In order to interact with the user interface one can use the steps from xref:plugins:plugin-web-app.adoc[Web Application Plugin].
@@ -18,11 +59,6 @@ In order to interact with the user interface one can use the steps from xref:plu
 === Start application
 
 Starts the application under tests.
-
-[WARNING]
-====
-Before tests execution make sure you set the path to the application executable via `web.driver.CHROME.binary-path` property.
-====
 
 [source,gherkin]
 ----
