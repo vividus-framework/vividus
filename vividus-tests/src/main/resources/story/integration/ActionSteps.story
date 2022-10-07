@@ -104,7 +104,7 @@ Scenario: Action verification ENTER_TEXT
 Given I am on a page with the URL '${vividus-test-site-url}/inputs.html'
 Given I initialize scenario variable `input` with value `#{generate(regexify '[a-z]{15}')}`
 Then the text '${input}' does not exist
-When I click on element located `By.xpath(//label[@for='text'])`
+When I click on element located by `xpath(//label[@for='text'])`
 When I execute sequence of actions:
 |type      |argument|
 |ENTER_TEXT|${input}|
@@ -115,7 +115,7 @@ Given I am on a page with the URL '${vividus-test-site-url}/inputs.html'
 Given I initialize scenario variable `input` with value `mark#{generate(regexify '[a-z]{10}')}`
 When I enter `${input}` in field located `By.id(text)`
 Then the text '${input}' exists
-When I click on element located `By.xpath(//label[@for='text'])`
+When I click on element located by `xpath(//label[@for='text'])`
 When I find = `1` elements `By.xpath(//div[@id='output' and text()!='mark'])` and while they exist do up to 11 iteration of
 |step                                                            |
 |When I execute sequence of actions:                             |
@@ -132,7 +132,7 @@ Given I initialize scenario variable `inputText` with value `mark#{generate(rege
 Given I initialize scenario variable `inputLocator` with value `By.id(text)`
 When I enter `${inputText}` in field located `${inputLocator}`
 Then field value is `${inputText}`
-When I click on element located `${inputLocator}`
+When I click on element located by `${inputLocator}`
 When I execute sequence of actions:
 |type      |argument  |
 |KEY_DOWN  |CONTROL, a|

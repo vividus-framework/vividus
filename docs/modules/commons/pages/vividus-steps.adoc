@@ -80,7 +80,7 @@ When I execute steps at most $max times while variable '$variableName' is $compa
 ----
 When I execute steps at most 5 times while variable `var` is less than `3`:
 |step                                                                                                                   |
-|When I click on element located `id(counter)`                                                                          |
+|When I click on element located by `id(counter)`                                                                       |
 |When I find <= `1` elements by `xpath(//div[@id='clickResult' and (text()='3' or text()='4')])` and for each element do|
 |{headerSeparator=!,valueSeparator=!}                                                                                   |
 |!step!                                                                                                                 |
@@ -118,7 +118,7 @@ When I execute steps with delay '$delay' at most $max times while variable '$var
 ----
 When I execute steps with delay `PT1S` at most 5 times while variable `var` is less than `3`:
 |step                                                                                                                   |
-|When I click on element located `id(counter)`                                                                          |
+|When I click on element located by `id(counter)`                                                                       |
 |When I find <= `1` elements by `xpath(//div[@id='clickResult' and (text()='3' or text()='4')])` and for each element do|
 |{headerSeparator=!,valueSeparator=!}                                                                                   |
 |!step!                                                                                                                 |
@@ -313,7 +313,7 @@ When I execute steps while counter is $comparisonRule '$limit' with increment '$
 ----
 When I execute steps while counter is less than or equal to `10` with increment `3` starting from `1`:
 |step                                                                         |
-|When I click on element located `By.caseSensitiveText(CLICK ME FOUR TIMES!)` |
+|When I click on element located by `caseSensitiveText(CLICK ME FOUR TIMES!)` |
 ----
 
 .Press one button four times and press the second button from the nested step eight times
@@ -322,10 +322,10 @@ When I execute steps while counter is less than or equal to `10` with increment 
 When I execute steps while counter is less than or equal to `10` with increment `3` starting from `1`:
 {headerSeparator=!, valueSeparator=!}
 !step                                                                                      !
-!When I click on element located `By.caseSensitiveText(CLICK ME FOUR TIMES)`               !
+!When I click on element located by `caseSensitiveText(CLICK ME FOUR TIMES)`               !
 !When I execute steps while counter is less than '2' with increment '1' starting from '0': !
 !|step                                                                                    |!
-!|When I click on element located `By.caseSensitiveText(CLICK ME EIGHT TIMES)`            |!
+!|When I click on element located by `caseSensitiveText(CLICK ME EIGHT TIMES)`            |!
 ----
 
 === Execute steps if a condition is "true"
@@ -373,7 +373,7 @@ WARNING: The error will stop steps execution in case if unsupported condition va
 When I save number of elements located `By.xpath(//*[@class='outerElement'])` to SCENARIO variable `numberOfOuterElements`
 When the condition `#{eval(${numberOfOuterElements} == 1)}` is true I do
 |step                                                                   |
-|When I click on element located `By.xpath(//*[@class='innerElement'])` |
+|When I click on element located by `xpath(//*[@class='innerElement'])` |
 ----
 
 .Click on the element if parent element is found and the element itself is presented on the page
@@ -386,7 +386,7 @@ When the condition `#{eval(${numberOfOuterElements} == 1)}` is true I do
 !When I save number of elements located `By.xpath(//*[@class='innerElement'])` to SCENARIO variable `numberOfInnerElements` !
 !When the condition '#{eval(${numberOfInnerElements} == 1)}' is true I do                                                   !
 !|step                                                                                                                     |!
-!|When I click on element located `By.xpath(//*[@class='innerElement'])`                                                   |!
+!|When I click on element located by `xpath(//*[@class='innerElement'])`                                                   |!
 ----
 
 === Execute steps if a variable is not set

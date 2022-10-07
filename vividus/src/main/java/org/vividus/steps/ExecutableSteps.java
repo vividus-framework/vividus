@@ -125,7 +125,7 @@ public class ExecutableSteps
      * <code>
      * When I execute steps at most 5 times while `var` is &lt; `3`:<br>
      * |step                                                                        |<br>
-     * |When I click on element located `id(counter)`                               |<br>
+     * |When I click on element located by `id(counter)`                            |<br>
      * |When I set the text found in search context to the 'scenario' variable 'var'|<br>
      * </code>
      *
@@ -165,7 +165,7 @@ public class ExecutableSteps
      * <code>
      * When I execute steps with delay `PT10S` at most 5 times while `var` is &lt; `3`:<br>
      * |step                                                                        |<br>
-     * |When I click on element located `id(counter)`                               |<br>
+     * |When I click on element located by `id(counter)`                            |<br>
      * |When I set the text found in search context to the 'scenario' variable 'var'|<br>
      * </code>
      *

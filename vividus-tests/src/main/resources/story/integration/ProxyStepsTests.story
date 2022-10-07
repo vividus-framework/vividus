@@ -33,7 +33,7 @@ Meta:
     @requirementId 1772
 Given I am on a page with the URL 'http://httpbin.org/forms/post'
 When I check checkbox located by `By.xpath(//input[@value='cheese'])`
-When I click on element located `By.xpath(//button)`
+When I click on element located by `xpath(//button)`
 When I capture HTTP POST request with URL pattern `http://httpbin\.org/post` and save request data to SCENARIO variable `requestData`
 Then `${requestData.query}` is equal to `{}`
 Then `${requestData.requestBodyParameters}` is equal to `{delivery=[], custtel=[], comments=[], custemail=[], topping=[cheese], custname=[]}`

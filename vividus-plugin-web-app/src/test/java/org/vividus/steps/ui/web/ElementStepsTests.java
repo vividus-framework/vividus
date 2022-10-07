@@ -16,9 +16,13 @@
 
 package org.vividus.steps.ui.web;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
@@ -38,6 +42,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +54,7 @@ import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -66,7 +75,7 @@ import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.WebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ElementStepsTests
 {
     private static final String PARENT_ELEMENT_HAS_CHILD = "Parent element has number of child elements which";
@@ -95,6 +104,9 @@ class ElementStepsTests
     private static final String CHILD_XPATH = "childXpath";
     private static final String THE_NUMBER_OF_PARENT_ELEMENTS = "The number of parent elements";
     private static final String ELEMENTS_TO_CLICK = "The elements to click";
+    private static final String ELEMENT_TO_CLICK = "Element to click";
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(ElementSteps.class);
 
     @Mock private IBaseValidations baseValidations;
     @Mock private IMouseActions mouseActions;
@@ -120,13 +132,41 @@ class ElementStepsTests
     }
 
     @Test
-    void testClickOnElementByLocator()
+    void shouldClickOnElementWithoutRetry()
     {
         Locator locator = new Locator(WebLocatorType.ELEMENT_NAME, ELEMENT_NAME);
         when(baseValidations.assertIfElementExists(AN_ELEMENT_WITH_THE_ATTRIBUTES, locator))
                 .thenReturn(webElement);
-        elementSteps.clickOnElement(locator);
+        elementSteps.clickOnElementWithoutRetry(locator);
         verify(mouseActions).click(webElement);
+        assertThat(logger.getLoggingEvents(), is(List.of(warn("The step: \"When I click on element located `$locator`\""
+                + " is deprecated and will be removed in VIVIDUS 0.6.0. Use step: \"When I click on element located by "
+                + "`$locator`\""))));
+    }
+
+    @Test
+    void shouldClickOnElement()
+    {
+        Locator locator = mock(Locator.class);
+        when(baseValidations.assertElementExists(ELEMENT_TO_CLICK, locator)).thenReturn(Optional.of(webElement));
+
+        elementSteps.clickOnElement(locator);
+
+        verify(mouseActions).click(webElement);
+    }
+
+    @Test
+    void shouldRetryClickOnElementIfStaleElementReferenceExceptionIsThrown()
+    {
+        StaleElementReferenceException exception = mock(StaleElementReferenceException.class);
+        Locator locator = mock(Locator.class);
+        when(baseValidations.assertElementExists(ELEMENT_TO_CLICK, locator)).thenReturn(Optional.of(webElement));
+        doThrow(exception).doReturn(new ClickResult()).when(mouseActions).click(webElement);
+
+        elementSteps.clickOnElement(locator);
+
+        verify(mouseActions, times(2)).click(webElement);
+        verify(baseValidations, times(2)).assertElementExists(ELEMENT_TO_CLICK, locator);
     }
 
     @Test
