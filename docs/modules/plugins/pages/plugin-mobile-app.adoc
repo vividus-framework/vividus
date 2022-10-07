@@ -520,6 +520,7 @@ Then number of elements found by `xpath(html)` is equal to `0`
 Taps on the element located by the locator.
 
 The atomic actions performed are:
+
 * press on the element;
 * release.
 
@@ -542,6 +543,7 @@ When I tap on element located `accessibilityId(menu-toggler)`
 Taps on the element located by the locator with the specified duration.
 
 The atomic actions performed are:
+
 * press on the element;
 * wait for the duration;
 * release.
@@ -651,6 +653,7 @@ Types the text into the element located by the locator.
 WARNING: The existing text is re-written by the text passed into the step.
 
 The atomic actions performed are:
+
 * type text into the element;
 * hide keyboard.
 
@@ -699,6 +702,7 @@ When I type `Bob` in field located `accessibilityId(username)` and keep keyboard
 Clears the field located by the locator.
 
 The atomic actions performed are:
+
 * clear the field;
 * hide keyboard.
 
