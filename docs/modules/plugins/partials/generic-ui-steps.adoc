@@ -320,7 +320,7 @@ Then elements located `$locator` are sorted by text in $sortingOrder order
 [source,gherkin]
 ----
 Given I am on a page with the URL 'https://grocery.by'
-When I click on element located `By.id(a-z)`
+When I click on element located by `id(a-z)`
 Then elements located `By.xpath(//span[@id='item-to-purchase'])` are sorted by text in ascending order
 ----
 
@@ -410,8 +410,8 @@ When I find $comparisonRule '$number' elements $locator and while they exist do 
 [source,gherkin]
 ----
 When I find >= `0` elements `xpath(//*[@class='menu enabled'])` and while they exist do up to 10 iteration of
-|step                                         |
-|When I click on element located `id(disable)`|
+|step                                            |
+|When I click on element located by `id(disable)`|
 ----
 
 === Execute JavaScript with arguments

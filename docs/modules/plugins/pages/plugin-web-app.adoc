@@ -435,6 +435,57 @@ selenium.grid.capabilities.appiumVersion=1.21.1
 :popup-alert: https://www.w3schools.com/js/js_popup.asp
 :close-spec: https://w3c.github.io/webdriver/webdriver-spec.html#close-window[close]
 
+=== Click on element
+
+Clicks on an element found by the locator.
+
+The atomic actions performed are:
+
+* find an element by the locator;
+* click on the element if it's found, otherwise fail the step;
+* the first two actions are retried once if the https://www.selenium.dev/exceptions/#stale_element_reference[StaleElementReferenceException] is thrown during their execution.
+
+[source,gherkin]
+----
+When I click on element located by `$locator`
+----
+
+* `$locator` - <<_locator>>
+
+.Click on element
+[source,gherkin]
+----
+When I click on element located by `name(Submit)`
+----
+
+=== Click on element without retry
+
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0.
+The replacement is <<_click_on_element>>.
+The replacement pattern is:
+[source,gherkin]
+----
+When I click on element located by `<locator>`
+----
+====
+
+Clicks on an element found by the locator.
+
+[source,gherkin]
+----
+When I click on element located `$locator`
+----
+
+* `$locator` - <<_locator>>
+
+.Click on element
+[source,gherkin]
+----
+When I click on element located `name(Submit)`
+----
+
 === Open URL in a new tab
 
 Opens a new tab, switches to the opened tab and loads the given URL
@@ -468,7 +519,7 @@ When I wait `$duration` until window with title that $comparisonRule `$windowTit
 [source,gherkin]
 ----
 Given I am on a page with the URL 'https://vividus-tests-site.herokuapp.com/windows.html'
-When I click on element located `id(timeout)`
+When I click on element located by `id(timeout)`
 When I wait `PT3S` until window with title that is equal to `Vividus test site` appears and switch to it
 ----
 
@@ -514,7 +565,7 @@ NOTE: If you confirm window close in {popup-alert}[alert], the window will be cl
 ----
 Given I am on a page with the URL 'https://example.com/'
 When I open URL `https://example.com/form` in new window
-When I click on element located `By.xpath(//*[@id='form-edit'])`
+When I click on element located by `xpath(//*[@id='form-edit'])`
 When I execute sequence of actions:
 |type      |argument    |
 |ENTER_TEXT|changed text|

@@ -27,9 +27,12 @@ import javax.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -49,9 +52,12 @@ import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
+@SuppressWarnings("PMD.ExcessiveImports")
 @TakeScreenshotOnFailure
 public class ElementSteps implements ResourceLoaderAware
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElementSteps.class);
+
     private static final String AN_ELEMENT_TO_CLICK = "An element to click";
     private static final String AN_ELEMENT_WITH_ATTRIBUTES = "An element with attributes%1$s";
     private static final String AN_ELEMENT = "An element";
@@ -280,15 +286,49 @@ public class ElementSteps implements ResourceLoaderAware
     }
 
     /**
-     * Clicks on <b>element</b> located by <b>locator</b>
-     * @param locator to locate element
+     * Clicks on an <b>element</b> found by the <b>locator</b>
+     * @param locator The locator to find an element.
+     * @deprecated Use step: "When I click on element located by `$locator`"
      */
+    @Deprecated(since = "0.5.0", forRemoval = true)
     @When("I click on element located `$locator`")
-    public void clickOnElement(Locator locator)
+    public void clickOnElementWithoutRetry(Locator locator)
     {
+        LOGGER.warn("The step: \"When I click on element located `$locator`\" is deprecated and will be removed in "
+                + "VIVIDUS 0.6.0. Use step: \"When I click on element located by `$locator`\"");
         WebElement webElement =
                 baseValidations.assertIfElementExists(String.format(AN_ELEMENT_WITH_ATTRIBUTES, locator), locator);
         mouseActions.click(webElement);
+    }
+
+    /**
+     * Clicks on an <b>element</b> found by the <b>locator</b>
+     * <p>The atomic actions performed are:</p>
+     * <ul>
+     * <li>find an element by the locator;</li>
+     * <li>click on the element if it's found, otherwise fail the step;</li>
+     * <li>the first two actions are retried once if the
+     * <a href="https://www.selenium.dev/exceptions/#stale_element_reference">StaleElementReferenceException</a>
+     * is thrown during their execution.</li>
+     * </ul>
+     * @param locator The locator to find an element.
+     */
+    @When("I click on element located by `$locator`")
+    public void clickOnElement(Locator locator)
+    {
+        try
+        {
+            findAndClick(locator);
+        }
+        catch (StaleElementReferenceException thrown)
+        {
+            findAndClick(locator);
+        }
+    }
+
+    private void findAndClick(Locator locator)
+    {
+        baseValidations.assertElementExists("Element to click", locator).ifPresent(mouseActions::click);
     }
 
     /**

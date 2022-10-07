@@ -123,13 +123,13 @@ Composite: Then a [$state] element with the tag '$elementTag' exists
 Then number of elements found by `By.tagName(<elementTag>)->filter.state(<state>)` is equal to `1`
 
 Composite: When I click on an element by the xpath '$xpath'
-When I click on element located `By.xpath(<xpath>)`
+When I click on element located by `xpath(<xpath>)`
 
 Composite: When I click on an element with the attribute '$attributeType'='$attributeValue'
-When I click on element located `By.xpath(.//*[@<attributeType>='<attributeValue>'])`
+When I click on element located by `xpath(.//*[@<attributeType>='<attributeValue>'])`
 
 Composite: When I click on an element with the text '$text'
-When I click on element located `By.caseSensitiveText(<text>)`
+When I click on element located by `caseSensitiveText(<text>)`
 
 Composite: When I click on all elements by xpath '$xpath'
 When I click on all elements located `By.xpath(<xpath>)`
@@ -174,10 +174,10 @@ Composite: When I hover a mouse over a button with the name '$buttonName'
 When I hover mouse over element located `By.buttonName(<buttonName>)`
 
 Composite: When I click on a button with the name '$buttonName'
-When I click on element located `By.buttonName(<buttonName>)`
+When I click on element located by `buttonName(<buttonName>)`
 
 Composite: When I click on a button with the image src '$imageSrc'
-When I click on element located `By.xpath(.//button[./img[@src='<imageSrc>']])`
+When I click on element located by `xpath(.//button[./img[@src='<imageSrc>']])`
 
 Composite: Then a [$state] button with the name '$buttonName' exists
 Then number of elements found by `By.buttonName(<buttonName>)->filter.state(<state>)` is equal to `1`

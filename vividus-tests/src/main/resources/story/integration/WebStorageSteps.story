@@ -15,7 +15,7 @@ Scenario: Verify step: "Then $storageType storage item with key `$key` does not 
 Then <storageType> storage item with key `<key>` does not exist
 
 Scenario: Verify step: "Then $storageType storage item with key `$key` exists"
-When I click on element located `id(set-<storageType>-storage-item)`
+When I click on element located by `id(set-<storageType>-storage-item)`
 Then <storageType> storage item with key `<key>` exists
 
 Scenario: Verify step: "When I save $storageType storage item with key `$key` to $scopes variable `$variable`"

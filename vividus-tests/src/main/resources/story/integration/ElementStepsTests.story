@@ -3,12 +3,19 @@ Description: Integration tests for ElementSteps class.
 Meta:
     @epic vividus-plugin-web-app
 
-Scenario: Step verification Then number of elements found by `$locator` is $comparisonRule `$quantity` and When I click on element located `$locator`
+Scenario: Step verification Then number of elements found by `$locator` is $comparisonRule `$quantity` and When I click on element located by `$locator`
+Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
+Then number of elements found by `id(element-to-hide)` is equal to `1`
+When I click on element located by `id(button-hide)`
+When I wait until element located `id(element-to-hide)` disappears
+Then number of elements found by `id(element-to-hide)` is equal to `0`
+
+Scenario: Deprecated step verification When I click on element located `$locator`
+!-- Deprecated
 Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
 Then number of elements found by `id(element-to-hide)` is equal to `1`
 When I click on element located `id(button-hide)`
 When I wait until element located `id(element-to-hide)` disappears
-Then number of elements found by `id(element-to-hide)` is equal to `0`
 
 Scenario: Step verification When I click on all elements located `$locator`
 Given I am on a page with the URL '${vividus-test-site-url}/checkboxes.html'
@@ -60,13 +67,13 @@ Then the context element has the CSS property 'color' containing '(0, 0, 0, 1)'
 Scenario: Step verification When I select an element '$locator' and upload the file '$filePath'
 Given I am on a page with the URL 'http://demo.guru99.com/test/upload/'
 When I select element located `By.id(uploadfile_0)` and upload file `/data/file_for_upload_step.png`
-When I click on element located `By.name(send)`
+When I click on element located by `name(send)`
 Then the text 'has been successfully uploaded' exists
 
 Scenario: Should not fail click step when element in Cross-Origin frame
 Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
 When I switch to frame located `By.id(exampleCom)`
-When I click on element located `By.xpath(//a[contains(text(), 'More')])`
+When I click on element located by `xpath(//a[contains(text(), 'More')])`
 
 !-- Composites down there
 
