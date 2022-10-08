@@ -2,6 +2,11 @@ Meta:
     @epic vividus-core
     @feature examples-table
 
+Lifecycle:
+Examples:
+|a|
+|y|
+
 Scenario: Use ExamplesTable key with whitespace
 Meta:
     @issueId 2255
@@ -16,3 +21,9 @@ Examples:
 {processEscapeSequences=true}
 |header        |
 |line 1\nline 2|
+
+Scenario: Resolve story-level ExamplesTable placeholders in scenario-level ExamplesTable placeholder name
+Then `<x<a>z>` is equal to `hello`
+Examples:
+|xyz  |
+|hello|
