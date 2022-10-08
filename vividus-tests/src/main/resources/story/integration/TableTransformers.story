@@ -270,3 +270,17 @@ Meta:
 Then `<relativeUrl>` matches `.*links.*`
 Examples:
 {transformer=FROM_HEADLESS_CRAWLING, column=relativeUrl}
+
+Scenario: Verify FROM_SITEMAP transformer
+When I initialize scenario variable `sitemapTransformerTable` with values:
+{transformer=FROM_SITEMAP, siteMapRelativeUrl=/sitemap.xml, column=sitemapUrl}
+Then `${sitemapTransformerTable}` is equal to table:
+|sitemapUrl       |
+|/checkboxes.html |
+|/index.html      |
+
+Scenario: Verify FROM_SITEMAP transformer ignoring sitemap parsing errors
+When I initialize scenario variable `sitemapTransformerTable` with values:
+{transformer=FROM_SITEMAP, siteMapRelativeUrl=/index.html, column=sitemapUrl, ignoreErrors=true}
+Then `${sitemapTransformerTable}` is equal to table:
+|sitemapUrl |
