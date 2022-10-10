@@ -440,7 +440,7 @@ Establishes baseline or compares against existing one using the ignoring option.
 
 [source,gherkin]
 ----
-When I $actionType baseline with name `$name` ignoring:$ignoredElements
+When I $actionType baseline with name `$name` ignoring:$checkSettings
 ----
 
 * `$actionType` - {visual-testing-actions}.
@@ -461,7 +461,7 @@ Establishes baseline or compares against existing one using the ignoring option.
 
 [source,gherkin]
 ----
-When I $actionType baseline with name `$name` from `$image` ignoring:$ignoredElements
+When I $actionType baseline with name `$name` from `$image` ignoring:$checkSettings
 ----
 
 * `$actionType` - {visual-testing-actions}.
@@ -486,7 +486,7 @@ Establishes baseline or compares against existing one using the ignoring option 
 
 [source,gherkin]
 ----
-When I $actionType baseline with name `$name` using storage `$storage` and ignoring:$ignoredElements
+When I $actionType baseline with name `$name` using storage `$storage` and ignoring:$checkSettings
 ----
 
 * `$actionType` - The {visual-testing-actions}.
@@ -508,7 +508,7 @@ Establishes baseline or compares against existing one using the ignoring option 
 
 [source,gherkin]
 ----
-When I $actionType baseline with name `$name` from image `$image` using storage `$storage` and ignoring:$ignoredElements
+When I $actionType baseline with name `$name` from image `$image` using storage `$storage` and ignoring:$checkSettings
 ----
 
 * `$actionType` - The {visual-testing-actions}.
@@ -534,7 +534,7 @@ Establishes baseline or compares against existing one using the ignoring option 
 
 [source,gherkin]
 ----
-When I $actionType baseline with name `$name` ignoring:$ignoredElements using screenshot configuration:$screenshotConfiguration
+When I $actionType baseline with name `$name` ignoring:$checkSettings using screenshot configuration:$screenshotConfiguration
 ----
 
 * `$actionType` - The {visual-testing-actions}.
@@ -561,7 +561,7 @@ Establishes baseline or compares against existing one using the ignoring option,
 
 [source,gherkin]
 ----
-When I $actionType baseline with name `$name` using storage `$storage` and ignoring:$ignoredElements and screenshot configuration:$screenshotConfiguration
+When I $actionType baseline with name `$name` using storage `$storage` and ignoring:$checkSettings and screenshot configuration:$screenshotConfiguration
 ----
 
 * `$actionType` - The {visual-testing-actions}.
