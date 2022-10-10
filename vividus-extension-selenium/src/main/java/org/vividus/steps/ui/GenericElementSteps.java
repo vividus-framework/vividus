@@ -50,9 +50,10 @@ public class GenericElementSteps
     }
 
     /**
-     * Checks whether the context contains exact amount of elements by locator
+     * Checks whether the context contains exact number of elements by locator
+     *
      * @param locator        Locator to locate element
-     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
+     * @param comparisonRule The rule to match the number of elements. The supported rules:
      *                       <ul>
      *                       <li>less than (&lt;)</li>
      *                       <li>less than or equal to (&lt;=)</li>
@@ -61,14 +62,13 @@ public class GenericElementSteps
      *                       <li>equal to (=)</li>
      *                       <li>not equal to (!=)</li>
      *                       </ul>
-     * @param quantity       Desired amount of elements
+     * @param number         The expected number of elements
      * @return list of Web elements
      */
-    @Then("number of elements found by `$locator` is $comparisonRule `$quantity`")
-    public List<WebElement> assertElementsNumber(Locator locator, ComparisonRule comparisonRule,
-            int quantity)
+    @Then("number of elements found by `$locator` is $comparisonRule `$number`")
+    public List<WebElement> assertElementsNumber(Locator locator, ComparisonRule comparisonRule, int number)
     {
-        return baseValidations.assertIfNumberOfElementsFound("The number of found elements", locator, quantity,
+        return baseValidations.assertIfNumberOfElementsFound("The number of found elements", locator, number,
                 comparisonRule);
     }
 
@@ -78,11 +78,12 @@ public class GenericElementSteps
      * Step intended to verify strictly either number of elements and their state
      * <p><i>In case when locator's visibility and checked state are equal (For an example ':i' and 'NOT_VISIBLE')
      * exception will be thrown. In such cases please use step:
-     * 'Then number of elements found by `$locator` is $comparisonRule `$quantity`'.
+     * 'Then number of elements found by `$locator` is $comparisonRule `$number`'.
      * Contradictory visibility parameters (locator - ':i' and checked state - 'VISIBLE') are also not allowed.</i></p>
+     *
      * @param state          Desired state of an element
      * @param locator        Locator to locate element
-     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
+     * @param comparisonRule The rule to match the number of elements. The supported rules:
      *                       <ul>
      *                       <li>less than (&lt;)</li>
      *                       <li>less than or equal to (&lt;=)</li>
@@ -91,10 +92,10 @@ public class GenericElementSteps
      *                       <li>equal to (=)</li>
      *                       <li>not equal to (!=)</li>
      *                       </ul>
-     * @param quantity       Desired amount of elements
+     * @param number         The expected number of elements
      */
-    @Then("number of $state elements found by `$locator` is $comparisonRule `$quantity`")
-    public void assertElementsNumberInState(State state, Locator locator, ComparisonRule comparisonRule, int quantity)
+    @Then("number of $state elements found by `$locator` is $comparisonRule `$number`")
+    public void assertElementsNumberInState(State state, Locator locator, ComparisonRule comparisonRule, int number)
     {
         Visibility visibility = locator.getSearchParameters().getVisibility();
         if (visibility != Visibility.ALL && (state == State.VISIBLE || state == State.NOT_VISIBLE))
@@ -109,7 +110,7 @@ public class GenericElementSteps
         }
 
         String description = "Element is " + state;
-        assertElementsNumber(locator, comparisonRule, quantity)
+        assertElementsNumber(locator, comparisonRule, number)
                 .forEach(e -> baseValidations.assertElementState(description, state, e));
     }
 

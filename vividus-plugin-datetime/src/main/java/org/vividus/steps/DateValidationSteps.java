@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class DateValidationSteps
     }
 
     /**
-     * <p>Checks that the difference between given date and current is less than specified amount of seconds.
+     * <p>Checks that the difference between given date and current is less than specified number of seconds.
      * The date should be in ISO-8601 format.</p>
      * <p>Note that ISO-8601 is not fully supported, if the step fails to parse date, try to use
      * {@link DateValidationSteps#doesDateConformRule(String, String, ComparisonRule, long)} step,
@@ -56,7 +56,7 @@ public class DateValidationSteps
      *                       <li>equal to (=)</li>
      *                       <li>not equal to (!=)</li>
      *                       </ul>
-     * @param seconds        An amount of seconds
+     * @param seconds        The expected number of seconds between the current instant and the provided date.
      */
     @Then("the date '$date' is $comparisonRule current for $seconds seconds")
     public void doesDateConformRule(String date, ComparisonRule comparisonRule, long seconds)
@@ -65,7 +65,7 @@ public class DateValidationSteps
     }
 
     /**
-     * <p>Checks that the difference between given date and current is less than specified amount of seconds.</p>
+     * <p>Checks that the difference between given date and current is less than specified number of seconds.</p>
      * @param date           A date text string
      * @param format         A date format that can be described using standard Java format for DateTimeFormatter
      * (https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html - Patterns for Formatting and
@@ -79,7 +79,7 @@ public class DateValidationSteps
      *                       <li>equal to (=)</li>
      *                       <li>not equal to (!=)</li>
      *                       </ul>
-     * @param seconds        An amount of seconds
+     * @param seconds        The expected number of seconds between the current instant and the provided date.
      */
     @Then(value = "the date '$date' in the format '$format' is $comparisonRule current for $seconds seconds",
             priority = 1)
