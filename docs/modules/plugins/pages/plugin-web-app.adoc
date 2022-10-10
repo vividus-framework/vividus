@@ -511,7 +511,7 @@ Waits for the windows with desired title and switches to it.
 When I wait `$duration` until window with title that $comparisonRule `$windowTitile` appears and switch to it
 ----
 
-* `$duration` - The timout duration to wait for a window in {iso-date-format-link} format.
+* `$duration` - The timeout duration to wait for a window in {iso-date-format-link} format.
 * `$comparisonRule` - The window title xref:parameters:string-comparison-rule.adoc[comparison rule].
 * `$windowTitle` - The expected window title.
 
@@ -1432,4 +1432,57 @@ When I wait until browser console $logEntries by regex `$regex` appear and save 
 Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
 When I wait until browser console infos by regex `.*Application ready.*` appear and save all entries into scenario variable `logs`
 Then `${logs}` matches `.*Application ready in \d+ seconds.*`
+----
+
+=== Element wait steps
+
+:disappearance-check-note: If the element doesn't exist on the page/context, the step will immediately complete successfully. Checking the element on the page (if needed) should be done in a separate step (e.g. <<_wait_for_element_appearance>> or xref:plugin-html.adoc#_validate_elements[Validate elements]).
+
+=== Wait for disappearance of an element with a tag
+
+Waits for an element with the specified tag, attribute type and value disappearance.
+
+Actions performed by step:
+
+* Searches for an element with the specified attribute and tag within search context
+* If there are no elements by specified attribute and tag, step provides passed assertion and don't check disappearance of an element
+* If there are elements by specified attribute and tag, waits until this element becomes not visible
+
+NOTE: {disappearance-check-note}
+
+[source,gherkin]
+----
+When I wait until an element with the tag '$elementTag' and attribute '$attributeType'='$attributeValue' disappears
+----
+
+* `$elementTag` - Type of the https://www.w3schools.com/TAgs/default.asp[html tag] (e.g. `div` or `iframe`).
+* `$attributeType` - Type of the https://www.w3schools.com/html/html_attributes.asp[tag attribute] (e.g. `name` or `id`).
+* `$attributeValue` - Value of the attribute.
+
+.Click on the button and waiting for disappearance of the `div` element with a certain attribute and value
+[source,gherkin]
+----
+When I click on a button with the name 'Toggle element visibility with delay'
+When I wait until an element with the tag 'div' and attribute 'id'='delayed' disappears
+----
+
+=== Wait for element disappearance with timeout
+
+Waits for element disappearance with desired timeout in seconds.
+
+NOTE: {disappearance-check-note}
+
+[source,gherkin]
+----
+Then element located '$locator' disappears in '$timeout'
+----
+
+* `$locator` - <<_locator>>.
+* `$timeout` - The maximum time to wait for the element disappearance in {iso-date-format-link} format.
+
+.Click on the button and waiting for disappearance of the element for 3 seconds
+[source,gherkin]
+----
+When I click on a button with the name 'Toggle element visibility with delay'
+Then element located 'By.xpath(//div[@id='delayed'])' disappears in 'PT3S'
 ----
