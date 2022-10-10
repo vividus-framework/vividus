@@ -40,26 +40,26 @@ When I CHECK_INEQUALITY_AGAINST baseline with name `full-page` using storage `fi
 When I reset context
 
 
-Scenario: Validation of step When I $actionType baseline with name `$name` ignoring:$ignoredElements for full page with element cut
+Scenario: Validation of step "When I $actionType baseline with name `$name` ignoring:$checkSettings" for full page with element cut
 When I <action> baseline with name `full-page-element-cut` ignoring:
 |ELEMENT |
 |<firstP>|
 
 
-Scenario: Validation of step When I $actionType baseline with name `$name` ignoring:$ignoredElements for full page with area cut
+Scenario: Validation of step "When I $actionType baseline with name `$name` ignoring:$checkSettings" for full page with area cut
 When I <action> baseline with name `full-page-area-cut` ignoring:
 |AREA    |
 |<firstP>|
 
 
-Scenario: Validation of step When I $actionType baseline with name `$name` ignoring:$ignoredElements for context element with element cut
+Scenario: Validation of step "When I $actionType baseline with name `$name` ignoring:$checkSettings" for context element with element cut
 When I change context to element located `By.xpath(.//body)`
 When I <action> baseline with name `context-element-cut` ignoring:
 |ELEMENT |
 |<firstP>|
 
 
-Scenario: Validation of step When I $actionType baseline with `$name` ignoring:$ignoredElements for context element not in viewport with element cut
+Scenario: Validation of step "When I $actionType baseline with `$name` ignoring:$checkSettings" for context element not in viewport with element cut
 When I change context to element located `By.xpath(.//p[last()])`
 When I <action> baseline with name `not-viewport-context-element-cut` ignoring:
 |ELEMENT            |
