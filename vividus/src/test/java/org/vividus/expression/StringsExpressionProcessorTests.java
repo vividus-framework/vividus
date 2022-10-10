@@ -87,7 +87,9 @@ class StringsExpressionProcessorTests
                 arguments("escapeJSON(\"abc\"\n\"xyz\")",                                  "\\\"abc\\\"\\n\\\"xyz\\\""),
                 arguments("quoteRegExp(Customer(Username))",                               "\\QCustomer(Username)\\E"),
                 arguments("substringBefore(123, 2)",                                       "1"),
-                arguments("substringAfter(123, 2)",                                        "3")
+                arguments("substringAfter(123, 2)",                                        "3"),
+                arguments("substringAfter(Hello\\, world, Hello\\,)",                      " world"),
+                arguments("substringAfter(Hello\\, world, Hello\\, )",                     "world")
         );
         // CHECKSTYLE:ON
     }

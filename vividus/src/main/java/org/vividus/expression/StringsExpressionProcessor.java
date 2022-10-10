@@ -24,6 +24,7 @@ import java.io.UncheckedIOException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -85,8 +86,8 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
             new UnaryExpressionProcessor("escapeHTML",             StringEscapeUtils::escapeHtml4),
             new UnaryExpressionProcessor("escapeJSON",             StringEscapeUtils::escapeJson),
             new UnaryExpressionProcessor("quoteRegExp",            Pattern::quote),
-            new UnaryExpressionProcessor("substringBefore",        StringsExpressionProcessor.substring(true)),
-            new UnaryExpressionProcessor("substringAfter",         StringsExpressionProcessor.substring(false))
+            new UnaryExpressionProcessor("substringBefore",        StringsExpressionProcessor.substringBefore()),
+            new UnaryExpressionProcessor("substringAfter",         StringsExpressionProcessor.substringAfter())
         ));
     }
 
@@ -136,13 +137,25 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
         return FAKERS.getUnchecked(locale).expression(String.format("#{%s}", input));
     }
 
-    private static UnaryOperator<String> substring(boolean before)
+    private static UnaryOperator<String> substringAfter()
+    {
+        return substring(StringUtils::substringAfter);
+    }
+
+    private static UnaryOperator<String> substringBefore()
+    {
+        return substring(StringUtils::substringBefore);
+    }
+
+    private static UnaryOperator<String> substring(BiFunction<String, String, String> substringFunction)
     {
         return input ->
         {
-            String[] inputParts = input.split(",");
+            String[] inputParts = COMMA_SEPARATED.split(input);
             assert inputParts.length == 2;
-            return before ? StringUtils.substringBefore(inputParts[0].trim(), inputParts[1].trim()) : StringUtils.substringAfter(inputParts[0].trim(), inputParts[1].trim());
+            String str = inputParts[0];
+            String separator = inputParts[1].stripLeading();
+            return substringFunction.apply(str, separator);
         };
     }
 }
