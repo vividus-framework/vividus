@@ -172,12 +172,13 @@ public class ElementSteps implements ResourceLoaderAware
      * <p>Actions performed at this step:</p>
      * <ul>
      * <li>Finds all parent elements matching the 'elementXpath'
-     * <li>Finds in each patent element all child element matching the 'childXpath' an verifies their amount
+     * <li>Finds in each patent element all child element matching the 'childXpath' an verifies their number
      * </ul>
+     *
      * @param elementLocator locator for the parent element
-     * @param number An amount of child elements (Every positive integer from 0)
-     * @param childLocator locator for the child element
-    */
+     * @param number         The number of child elements (Every positive integer from 0)
+     * @param childLocator   locator for the child element
+     */
     @Then("each element with locator `$elementLocator` has `$number` child elements with locator `$childLocator`")
     public void doesEachElementByLocatorHaveChildWithLocator(Locator elementLocator, int number,
             Locator childLocator)

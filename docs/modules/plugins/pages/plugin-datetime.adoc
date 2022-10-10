@@ -301,7 +301,7 @@ Then the date '$date' is $comparisonRule current for $seconds seconds
 
 * `$date` - The date in the {iso-date-format-link} format.
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `$seconds` - The amount of seconds between the current instant and the provided date.
+* `$seconds` - The expected number of seconds between the current instant and the provided date.
 
 
 .Validate the date is less than current for 10 seconds
@@ -343,7 +343,7 @@ Then the date '$date' in the format '$format' is $comparisonRule current for $se
 * `$date` - The date to validate.
 * `$format` - {java-date-time-formatter-link}.
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `$seconds` - The amount of seconds between the current instant and the provided date.
+* `$seconds` - The expected number of seconds between the current instant and the provided date.
 
 .Validate the date is greater than current for 10 seconds
 [source,gherkin]

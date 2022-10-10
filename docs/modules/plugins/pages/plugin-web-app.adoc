@@ -265,7 +265,7 @@ include::partial$dynamic-variables-ui.adoc[]
 
 Profiles allow to choose or parameterize browser that tests run on. See more details on the profiles and nesting strategy on the xref:ROOT:tests-configuration.adoc#_profiles[configuration page].
 
-Web-application plugin contains significant amount of built-in profiles. They can be found after plugin installation by the following path in Eclipse IDE:
+Web-application plugin contains significant number of built-in profiles. They can be found after plugin installation by the following path in Eclipse IDE:
 [source, DIR]
 ----
 Referenced Libraries -> vividus-plugin-web-app-X.Y.Z -> properties -> profile -> web
