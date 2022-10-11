@@ -269,20 +269,6 @@ class WebDriverTypeTests
 
     @ParameterizedTest
     @CsvSource({
-        "FIREFOX,       true",
-        "IEXPLORE,      true",
-        "CHROME,        false",
-        "SAFARI,        false",
-        "EDGE_CHROMIUM, false",
-        "OPERA,         false"
-    })
-    void testIsUseW3C(WebDriverType type, boolean useW3C)
-    {
-        assertEquals(useW3C, type.isUseW3C());
-    }
-
-    @ParameterizedTest
-    @CsvSource({
         "FIREFOX,       false",
         "IEXPLORE,      false",
         "CHROME,        false",
