@@ -120,7 +120,7 @@ public class GenericElementSteps
      * @param sortingOrder sorting order, can be either <b>ASCENDING</b> or <b>DESCENDING</b> or
      * <b>CASE_INSENSITIVE_ASCENDING</b> or <b>CASE_INSENSITIVE_DESCENDING</b>
      */
-    @Then("elements located `$locator` are sorted by text in $sortingOrder order")
+    @Then("elements located by `$locator` are sorted by text in $sortingOrder order")
     public void areElementSorted(Locator locator, StringSortingOrder sortingOrder)
     {
         ComparisonRule rule = ComparisonRule.GREATER_THAN;
