@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,7 +128,7 @@ class FieldActionsTests
     @Test
     void testSelectItemInDDLSelectPresentOptionDoesntExist()
     {
-        when(webElement.getTagName()).thenReturn(SELECT);
+        mockSelectElement();
         when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(false));
         Select select = new Select(webElement);
         addOptionsToSelect(select, "anotherOne");
@@ -150,7 +150,7 @@ class FieldActionsTests
     @Test
     void testSelectItemInDDLSingleSelectAdditable()
     {
-        when(webElement.getTagName()).thenReturn(SELECT);
+        mockSelectElement();
         when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(false));
         Select select = new Select(webElement);
         fieldActions.selectItemInDropDownList(select, TEXT, true);
@@ -174,10 +174,16 @@ class FieldActionsTests
 
     private Select findDropDownListWithParameters(boolean isMultiple)
     {
-        when(webElement.getTagName()).thenReturn(SELECT);
+        mockSelectElement();
         when(webElement.getAttribute(INDEX)).thenReturn("0");
         when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(isMultiple));
         return new Select(webElement);
+    }
+
+    private void mockSelectElement()
+    {
+        when(webElement.getTagName()).thenReturn(SELECT);
+        when(webElement.isEnabled()).thenReturn(true);
     }
 
     private void addOptionsToSelect(Select select, String selectText)
