@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -113,5 +115,12 @@ class StringsExpressionProcessorTests
     {
         assertThat(processor.execute("anyOf(one,two, three\\, or,, four)").get(),
                 anyOf(equalTo("one"), equalTo("two"), equalTo("three, or"), equalTo("four"), emptyString()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"substringBefore(1, 2, 3)", "substringAfter(1, 2, 3)"})
+    void shouldAssertParametersNumberWhenSubstring(String expression)
+    {
+        assertThrows(AssertionError.class, () -> processor.execute(expression));
     }
 }
