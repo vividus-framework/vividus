@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ class DropdownStepsTests
     void shouldVerifySelectWithSelectedOptionExists(String text)
     {
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
-        when(webElement.getTagName()).thenReturn(SELECT);
+        mockSelectElement();
         List<WebElement> options = List.of(mock(WebElement.class));
         when(softAssert.assertTrue(SELECTED_OPTIONS_ARE_PRESENT_IN_DROP_DOWN, true)).thenReturn(Boolean.TRUE);
         WebElement firstSelectedOption = options.get(0);
@@ -103,7 +103,7 @@ class DropdownStepsTests
     void shouldFailIfNoOptionsSelected()
     {
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
-        when(webElement.getTagName()).thenReturn(SELECT);
+        mockSelectElement();
         when(softAssert.assertTrue(SELECTED_OPTIONS_ARE_PRESENT_IN_DROP_DOWN, false)).thenReturn(Boolean.FALSE);
         when(webElement.findElements(By.tagName(OPTION))).thenReturn(List.of());
         dropdownSteps.doesDropdownHaveFirstSelectedOption(LOCATOR, TEXT);
@@ -122,7 +122,7 @@ class DropdownStepsTests
     void testSelectItemInDDLSingleSelectAdditable()
     {
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
-        when(webElement.getTagName()).thenReturn(SELECT);
+        mockSelectElement();
         when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(false));
         WebElement element = webElement;
         dropdownSteps.addOptionInDropdown(TEXT, LOCATOR);
@@ -135,7 +135,7 @@ class DropdownStepsTests
     {
         ExamplesTable dropDownItems = new ExamplesTable(DROPDOWN_EXAMPLES_TABLE);
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
-        when(webElement.getTagName()).thenReturn(SELECT);
+        mockSelectElement();
         when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(true));
         WebElement element = webElement;
         addOptionsToSelect(element, TEXT);
@@ -165,7 +165,7 @@ class DropdownStepsTests
     {
         ExamplesTable dropDownItems = new ExamplesTable(DROPDOWN_EXAMPLES_TABLE);
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
-        when(webElement.getTagName()).thenReturn(SELECT);
+        mockSelectElement();
         when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(true));
         WebElement element = webElement;
         addOptionsToSelect(element, "itemValue");
@@ -182,7 +182,7 @@ class DropdownStepsTests
     void testSelectTextFromDropDownByLocatorXpath()
     {
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
-        when(webElement.getTagName()).thenReturn(SELECT);
+        mockSelectElement();
         dropdownSteps.selectOptionInDropdown(TEXT, LOCATOR);
         verify(fieldActions).selectItemInDropDownList(any(Select.class), eq(TEXT), eq(false));
     }
@@ -192,6 +192,12 @@ class DropdownStepsTests
     {
         dropdownSteps.selectOptionInDropdown(TEXT, LOCATOR);
         verifyNoInteractions(fieldActions);
+    }
+
+    private void mockSelectElement()
+    {
+        when(webElement.getTagName()).thenReturn(SELECT);
+        when(webElement.isEnabled()).thenReturn(true);
     }
 
     private void addOptionsToSelect(WebElement element, String selectText)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ class DropDownTextFilterTests
     @Test
     void testTextFilter()
     {
-        stubDropDown();
+        mockSelectElement();
         List<WebElement> webElements = List.of(webElement);
         List<WebElement> foundElements = fieldTextFilter.filter(webElements, SOME_TEXT);
         assertEquals(webElements, foundElements);
@@ -60,6 +60,7 @@ class DropDownTextFilterTests
         WebElement option = mock(WebElement.class);
         List<WebElement> options = List.of(option);
         when(webElement.getTagName()).thenReturn(SELECT);
+        when(webElement.isEnabled()).thenReturn(true);
         when(webElement.findElements(By.tagName(OPTION))).thenReturn(options);
         when(option.isSelected()).thenReturn(false);
         List<WebElement> webElements = List.of(webElement);
@@ -70,7 +71,7 @@ class DropDownTextFilterTests
     @Test
     void testTextFilterWrongOptionText()
     {
-        stubDropDown();
+        mockSelectElement();
         List<WebElement> webElements = List.of(webElement);
         List<WebElement> foundElements = fieldTextFilter.filter(webElements, "Wrong text");
         assertNotEquals(webElements, foundElements);
@@ -98,11 +99,12 @@ class DropDownTextFilterTests
         assertEquals(WebLocatorType.DROP_DOWN_TEXT, fieldTextFilter.getType());
     }
 
-    private void stubDropDown()
+    private void mockSelectElement()
     {
         WebElement option = mock(WebElement.class);
         List<WebElement> options = Collections.singletonList(option);
         when(webElement.getTagName()).thenReturn(SELECT);
+        when(webElement.isEnabled()).thenReturn(true);
         when(webElement.findElements(By.tagName(OPTION))).thenReturn(options);
         when(option.getText()).thenReturn(SOME_TEXT);
         when(option.isSelected()).thenReturn(true);
