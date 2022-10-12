@@ -28,7 +28,7 @@ Examples:
 |xyz  |
 |hello|
 
-Scenario: Resolve ExamplesTable placeholders with dot character.
+Scenario: Resolve ExamplesTable placeholders with dot character
 Then `<<x>>` is equal to `hello`
 Examples:
 |x   |xy.z |
