@@ -301,7 +301,7 @@ class WebDriverTypeTests
         "IEXPLORE,      webdriver.ie.driver",
         "CHROME,        webdriver.chrome.driver",
         "EDGE_CHROMIUM, webdriver.edge.driver",
-        "OPERA,         webdriver.opera.driver"
+        "OPERA,         webdriver.chrome.driver"
     })
     void testSetDriverExecutablePath(WebDriverType type, String propertyName)
     {

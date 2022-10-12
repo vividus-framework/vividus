@@ -33,7 +33,6 @@ import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.ie.InternetExplorerDriverService;
 import org.openqa.selenium.ie.InternetExplorerOptions;
-import org.openqa.selenium.opera.OperaDriverService;
 import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
@@ -148,7 +147,7 @@ public enum WebDriverType
         @Override
         void setDriverExecutablePath(Optional<String> driverExecutablePath)
         {
-            setDriverExecutablePathImpl(driverExecutablePath, OperaDriverService.OPERA_DRIVER_EXE_PROPERTY,
+            setDriverExecutablePathImpl(driverExecutablePath, ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY,
                     WebDriverManager::operadriver);
         }
     },
