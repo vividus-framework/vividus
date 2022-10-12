@@ -27,3 +27,9 @@ Then `<x<a>z>` is equal to `hello`
 Examples:
 |xyz  |
 |hello|
+
+Scenario: Resolve ExamplesTable placeholders with dot character
+Then `<<x>>` is equal to `hello`
+Examples:
+|x   |xy.z |
+|xy.z|hello|
