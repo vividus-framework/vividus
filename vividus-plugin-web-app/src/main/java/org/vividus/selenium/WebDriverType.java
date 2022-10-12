@@ -42,7 +42,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 
 public enum WebDriverType
 {
-    FIREFOX(true, true, true, Set.of(FirefoxOptions.FIREFOX_OPTIONS), Browser.FIREFOX)
+    FIREFOX(true, true, Set.of(FirefoxOptions.FIREFOX_OPTIONS), Browser.FIREFOX)
     {
         @Override
         public void prepareCapabilities(DesiredCapabilities desiredCapabilities)
@@ -73,7 +73,7 @@ public enum WebDriverType
                     WebDriverManager::firefoxdriver);
         }
     },
-    IEXPLORE(false, true, true, Set.of(WebDriverType.IE_OPTIONS), Browser.IE)
+    IEXPLORE(false, true, Set.of(WebDriverType.IE_OPTIONS), Browser.IE)
     {
         @Override
         public void prepareCapabilities(DesiredCapabilities desiredCapabilities)
@@ -104,7 +104,7 @@ public enum WebDriverType
                     WebDriverManager::iedriver);
         }
     },
-    CHROME(true, true, false, Set.of(ChromeOptions.CAPABILITY), Browser.CHROME)
+    CHROME(true, true, Set.of(ChromeOptions.CAPABILITY), Browser.CHROME)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
@@ -123,8 +123,7 @@ public enum WebDriverType
                     WebDriverManager::chromedriver);
         }
     },
-    SAFARI(false, false, false, Set.of("safari:automaticInspection", "safari:automaticProfiling"),
-        Browser.SAFARI)
+    SAFARI(false, false, Set.of("safari:automaticInspection", "safari:automaticProfiling"), Browser.SAFARI)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
@@ -132,7 +131,7 @@ public enum WebDriverType
             return new SafariDriver(SafariOptions.fromCapabilities(desiredCapabilities));
         }
     },
-    OPERA(true, true, false, Set.of(ChromeOptions.CAPABILITY), Browser.OPERA)
+    OPERA(true, true, Set.of(ChromeOptions.CAPABILITY), Browser.OPERA)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
@@ -151,7 +150,7 @@ public enum WebDriverType
                     WebDriverManager::operadriver);
         }
     },
-    EDGE_CHROMIUM(false, false, false, Set.of(), Browser.EDGE)
+    EDGE_CHROMIUM(false, false, Set.of(), Browser.EDGE)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
@@ -172,16 +171,14 @@ public enum WebDriverType
 
     private final boolean binaryPathSupported;
     private final boolean commandLineArgumentsSupported;
-    private final boolean useW3C;
     private final Set<String> driverSpecificCapabilities;
     private final Browser browser;
 
-    WebDriverType(boolean binaryPathSupported, boolean commandLineArgumentsSupported, boolean useW3C,
+    WebDriverType(boolean binaryPathSupported, boolean commandLineArgumentsSupported,
             Set<String> driverSpecificCapabilities, Browser browser)
     {
         this.binaryPathSupported = binaryPathSupported;
         this.commandLineArgumentsSupported = commandLineArgumentsSupported;
-        this.useW3C = useW3C;
         this.driverSpecificCapabilities = driverSpecificCapabilities;
         this.browser = browser;
     }
@@ -210,11 +207,6 @@ public enum WebDriverType
     public boolean isCommandLineArgumentsSupported()
     {
         return commandLineArgumentsSupported;
-    }
-
-    public boolean isUseW3C()
-    {
-        return useW3C;
     }
 
     public Set<String> getDriverSpecificCapabilities()
