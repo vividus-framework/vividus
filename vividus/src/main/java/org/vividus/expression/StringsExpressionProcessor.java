@@ -115,19 +115,9 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
 
     private static String anyOf(String input)
     {
-        String[] arguments = COMMA_SEPARATED.split(input);
+        String[] arguments = parseArguments(input);
         int length = arguments.length;
-        if (length == 0)
-        {
-            return "";
-        }
-        int randomIndex = RandomUtils.nextInt(0, length);
-        String result = arguments[randomIndex];
-        if (randomIndex != 0)
-        {
-            result = result.stripLeading();
-        }
-        return unescapeComma(result);
+        return length == 0 ? "" : arguments[RandomUtils.nextInt(0, length)];
     }
 
     private static UnaryOperator<String> generateLocalized()
@@ -151,18 +141,22 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
     {
         return input ->
         {
-            String[] arguments = COMMA_SEPARATED.split(input);
+            String[] arguments = parseArguments(input);
             int argumentsNumber = arguments.length;
             Validate.isTrue(argumentsNumber == 2,
                     "The expected number of arguments for substring-expression is 2, but found %d", argumentsNumber);
-            String str = unescapeComma(arguments[0]);
-            String separator = unescapeComma(arguments[1].stripLeading());
-            return substringFunction.apply(str, separator);
+            return substringFunction.apply(arguments[0], arguments[1]);
         };
     }
 
-    private static String unescapeComma(String text)
+    private static String[] parseArguments(String input)
     {
-        return StringUtils.replace(text, "\\,", COMMA);
+        String[] arguments = COMMA_SEPARATED.split(input);
+        for (int i = 0; i < arguments.length; i++)
+        {
+            String argument = i > 0 ? arguments[i].stripLeading() : arguments[i];
+            arguments[i] = StringUtils.replace(argument, "\\,", COMMA);
+        }
+        return arguments;
     }
 }
