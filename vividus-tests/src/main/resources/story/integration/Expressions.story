@@ -103,6 +103,30 @@ Examples:
 |uncapitalizeFirstWord(ABc)   |aBc       |
 |uncapitalizeWords(ABc DEf)   |aBc dEf   |
 
+Scenario: Validate substringBefore/substringAfter expressions
+Meta:
+    @requirementId 3118
+Then `#{<expression>}` is = `<expected>`
+Examples:
+|expression                        |expected|
+|substringBefore(, a)              |        |
+|substringBefore(abc, a)           |        |
+|substringBefore(abcba, b)         |a       |
+|substringBefore(abcba,b)          |a       |
+|substringBefore(abc, c)           |ab      |
+|substringBefore(abc, d)           |abc     |
+|substringBefore(abc, )            |        |
+|substringBefore(a\,b\,c\,b\,a, c) |a,b,    |
+|substringAfter(, a)               |        |
+|substringAfter(abc, a)            |bc      |
+|substringAfter(abcba, b)          |cba     |
+|substringAfter(abcba,b)           |cba     |
+|substringAfter(abc, c)            |        |
+|substringAfter(abc, d)            |        |
+|substringAfter(abc, )             |abc     |
+|substringAfter(a\,b\,c\,b\,a, c)  |,b,a    |
+
+
 Scenario: Verify hash expressions
 Meta:
     @requirementId 1647

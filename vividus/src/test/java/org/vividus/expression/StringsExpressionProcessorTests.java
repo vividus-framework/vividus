@@ -34,8 +34,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -83,15 +83,29 @@ class StringsExpressionProcessorTests
                 arguments("anyOf(123)",                                                    "123"),
                 arguments("anyOf()",                                                       EMPTY),
                 arguments("anyOf(,)",                                                      EMPTY),
+                arguments("anyOf(, )",                                                     EMPTY),
+                arguments("anyOf( )",                                                      " "),
                 arguments("anyOf(\\,)",                                                    ","),
                 arguments("toBase64Gzip(vividus)",                                         "H4sIAAAAAAAA/yvLLMtMKS0GANIHCdkHAAAA"),
                 arguments("escapeHTML(M&Ms)",                                              "M&amp;Ms"),
                 arguments("escapeJSON(\"abc\"\n\"xyz\")",                                  "\\\"abc\\\"\\n\\\"xyz\\\""),
                 arguments("quoteRegExp(Customer(Username))",                               "\\QCustomer(Username)\\E"),
-                arguments("substringBefore(123, 2)",                                       "1"),
-                arguments("substringAfter(123, 2)",                                        "3"),
-                arguments("substringAfter(Hello\\, world, Hello\\,)",                      " world"),
-                arguments("substringAfter(Hello\\, world, Hello\\, )",                     "world")
+                arguments("substringBefore(, a)",                                          ""),
+                arguments("substringBefore(abc, a)",                                       ""),
+                arguments("substringBefore(abcba, b)",                                     "a"),
+                arguments("substringBefore(abcba,b)",                                      "a"),
+                arguments("substringBefore(abc, c)",                                       "ab"),
+                arguments("substringBefore(abc, d)",                                       "abc"),
+                arguments("substringBefore(abc, )",                                        ""),
+                arguments("substringBefore(a\\,b\\,c\\,b\\,a, c)",                         "a,b,"),
+                arguments("substringAfter(, a)",                                           ""),
+                arguments("substringAfter(abc, a)",                                        "bc"),
+                arguments("substringAfter(abcba, b)",                                      "cba"),
+                arguments("substringAfter(abcba,b)",                                       "cba"),
+                arguments("substringAfter(abc, c)",                                        ""),
+                arguments("substringAfter(abc, d)",                                        ""),
+                arguments("substringAfter(abc, )",                                         "abc"),
+                arguments("substringAfter(a\\,b\\,c\\,b\\,a, c)",                          ",b,a")
         );
         // CHECKSTYLE:ON
     }
@@ -118,9 +132,17 @@ class StringsExpressionProcessorTests
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"substringBefore(1, 2, 3)", "substringAfter(1, 2, 3)"})
-    void shouldAssertParametersNumberWhenSubstring(String expression)
+    @CsvSource({
+        "'substringBefore(1, 2, 3)', 3",
+        "'substringAfter(1, 2, 3)',  3",
+        "substringBefore(1),         1",
+        "substringAfter(1),          1"
+    })
+    void shouldAssertParametersNumberWhenSubstring(String expression, int actualNumberOfArguments)
     {
-        assertThrows(AssertionError.class, () -> processor.execute(expression));
+        var exception = assertThrows(IllegalArgumentException.class, () -> processor.execute(expression));
+        assertEquals(
+                "The expected number of arguments for substring-expression is 2, but found " + actualNumberOfArguments,
+                exception.getMessage());
     }
 }

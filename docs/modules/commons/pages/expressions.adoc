@@ -631,6 +631,64 @@ Trims an input string (removes control characters (chars with code less than or 
 |`a b c`
 |===
 
+=== `substringBefore`
+
+Gets the substring before the first occurrence of a separator. The separator is not included in the result.
+
+[source, subs="+quotes"]
+----
+#{substringBefore(*$input*, *$separator*)}
+----
+
+* *`$input`* - any string to get a substring from
+* *`$separator`* - the string to search for
+
+TIP: Since the arguments of the expression are comma-separated, meaningful commas (in `$input` or/and `$separator`) must be escaped with `\`
+
+.Examples of the expressions getting the substring
+|===
+|Expression                             |Result
+
+|`#{substringBefore(, a)}`              |
+|`#{substringBefore(abc, a)}`           |
+|`#{substringBefore(abcba, b)}`         |`a`
+|`#{substringBefore(abcba,b)}`          |`a`
+|`#{substringBefore(abc, c)}`           |`ab`
+|`#{substringBefore(abc, d)}`           |`abc`
+|`#{substringBefore(abc, )}`            |
+|`#{substringBefore(a\,b\,c\,b\,a, c)}` |`a,b,`
+
+|===
+
+=== `substringAfter`
+
+Gets the substring after the first occurrence of a separator. The separator is not included in the result.
+
+[source, subs="+quotes"]
+----
+#{substringAfter(*$input*, *$separator*)}
+----
+
+* *`$input`* - any string to get a substring from
+* *`$separator`* - the string to search for
+
+TIP: Since the arguments of the expression are comma-separated, meaningful commas (in `$input` or/and `$separator`) must be escaped with `\`
+
+.Examples of the expressions getting the substring
+|===
+|Expression                             |Result
+
+|`#{substringAfter(, a)}`              |
+|`#{substringAfter(abc, a)}`           |`bc`
+|`#{substringAfter(abcba, b)}`         |`cba`
+|`#{substringAfter(abcba,b)}`          |`cba`
+|`#{substringAfter(abc, c)}`           |
+|`#{substringAfter(abc, d)}`           |
+|`#{substringAfter(abc, )}`            |`abc`
+|`#{substringAfter(a\,b\,c\,b\,a, c)}` |`,b,a`
+
+|===
+
 === `encodeToBase64`
 
 Encode the input string to Base64 format
