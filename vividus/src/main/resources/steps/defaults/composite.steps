@@ -8,3 +8,8 @@ Composite: Given I initialize the $scopes variable `$variableName` using templat
 Priority: 1
 !-- WARNING: The step "Given I initialize the $scopes variable `$variableName` using template `$templatePath` with parameters:$templateParameters" is deprecated and will be removed in VIVIDUS 0.6.0
 Given I initialize <scopes> variable `<variableName>` using template `<templatePath>` with parameters:<templateParameters>
+
+
+Composite: Then elements located `$locator` are sorted by text in $sortingOrder order
+!-- WARNING: The step "Then elements located `$locator` are sorted by text in $sortingOrder order" is deprecated and will be removed in VIVIDUS 0.6.0.
+Then elements located by `<locator>` are sorted by text in <sortingOrder> order

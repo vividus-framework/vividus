@@ -194,5 +194,9 @@ Given I am on a page with the URL '${vividus-test-site-url}'
 Then number of VISIBLE elements found by `tagName(img):a` is = `1`
 
 Scenario: Step verification Then elements located `$locator` are sorted by text in $sortingOrder order
+!-- Deprecated
 Given I am on a page with the URL '${vividus-test-site-url}/sortedListOfElement.html'
-Then elements located `By.xpath(//div//h3)` are sorted by text in ASCENDING order
+Then elements located `By.tagName(h3)` are sorted by text in ASCENDING order
+
+Scenario: Step verification Then elements located by `$locator` are sorted by text in $sortingOrder order
+Then elements located by `tagName(h3)` are sorted by text in ASCENDING order
