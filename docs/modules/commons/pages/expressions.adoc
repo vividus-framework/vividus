@@ -10,14 +10,28 @@ NOTE: The expression parameters marked with *bold* are mandatory.
 
 === generate
 
-Generate expression allows to create various types of data using https://www.datafaker.net/documentation/getting-started/[Datafaker] library.
+Generates random data from various domain areas.
 
 [source, subs="+quotes"]
 ----
 `#{generate(*<expression>*)}`
 ----
 
-* *`$expression`* - data type from the chosen https://www.datafaker.net/documentation/providers/[data provider]. Specify its name, desired method and required parameters to get data you want
+* *`$expression`* - one of the https://www.datafaker.net/documentation/providers/[data providers],
+its dot-separated method and space separated parameters wrapped into single
+quptes (for majority of cases parameters are not needed, their number and
+possible values depend on the chosen data provider method).
+
+Below you can find a complete list of the supported expressions with results
+exmaples. Descriptions of the data providers and their parameters can be found
+https://www.datafaker.net/documentation/providers/[in DataFaker documentation]:
+click on the data provider name to find details.
+
+[%collapsible]
+.#Click here to view the complete list of the supported expressions#
+====
+include::partial$data-generating.adoc[]
+====
 
 Let's see the structure of the expression for the following example:
 [source, subs="+quotes"]
@@ -34,10 +48,10 @@ Let's see the structure of the expression for the following example:
                                   '10',          <4>
                                         'true')} <4>
 ----
-<1> Generate expression itself;
-<2> Data provider from the https://www.datafaker.net/documentation/providers/[list]. In this case - `Internet`. Click on its name to see the methods it contains;
-<3> One of the available https://s01.oss.sonatype.org/service/local/repositories/releases/archive/net/datafaker/datafaker/1.4.0/datafaker-1.4.0-javadoc.jar/!/net/datafaker/Internet.html[methods] within `Internet` data provider - `password`. There are multiple choices, we picked the fourth one;
-<4> Available parameters for the chosen https://s01.oss.sonatype.org/service/local/repositories/releases/archive/net/datafaker/datafaker/1.4.0/datafaker-1.4.0-javadoc.jar/!/net/datafaker/Internet.html#password-int-int-boolean-[method];
+<1> Generate expression itself.
+<2> Data provider from the https://www.datafaker.net/documentation/providers/[list]. In this case - `Internet`. Click on its name to see the methods it contains.
+<3> One of the available https://s01.oss.sonatype.org/service/local/repositories/releases/archive/net/datafaker/datafaker/1.6.0/datafaker-1.6.0-javadoc.jar/!/net/datafaker/Internet.html[methods] within `Internet` data provider - `password`. There are multiple choices, we picked the fourth one.
+<4> Available parameters for the chosen https://s01.oss.sonatype.org/service/local/repositories/releases/archive/net/datafaker/datafaker/1.6.0/datafaker-1.6.0-javadoc.jar/!/net/datafaker/Internet.html#password-int-int-boolean-[method].
 +
 There are three of them:
 
@@ -48,14 +62,6 @@ There are three of them:
 In this way we created an *expression* that *generates* a *password* from *5* to *10* characters length *including* uppercase letters. +
 Possible output is `51gVj5aLZY`
 
-IMPORTANT: Below you can find a list of examples. Please keep in mind, that the list is not full, all the expressions you can find https://www.datafaker.net/documentation/providers/[here]. +
-On the DataFaker site click on the data provider name to see available methods and required parameters.
-
-[%collapsible]
-.Generate expressions
-====
-include::partial$data-generating.adoc[]
-====
 
 === letterify
 
