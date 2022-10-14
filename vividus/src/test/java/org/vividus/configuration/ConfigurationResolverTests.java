@@ -16,8 +16,10 @@
 
 package org.vividus.configuration;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -33,19 +35,20 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Predicate;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
@@ -55,6 +58,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 class ConfigurationResolverTests
 {
     private static final String DESKTOP_CHROME = "desktop/chrome";
+    private static final String DEPRECATED_PROFILE = "web/phone/iphone/landscape";
     private static final String CONFIGURATION = "configuration";
     private static final String PROPERTY_1 = "property1";
     private static final String PROPERTY_2 = "property2";
@@ -78,7 +82,7 @@ class ConfigurationResolverTests
     private static final String ENVIRONMENTS = "environments";
     private static final String SUITES = "suites";
     private static final String UAT = "uat";
-    private static final String ACTIVE_PROFILES = "desktop/chrome,nosecurity";
+    private static final String ACTIVE_PROFILES = DEPRECATED_PROFILE + ",desktop/chrome,nosecurity";
     private static final String HTTP_CLIENT_DEFAULT = "org/vividus/http/client";
     private static final String UTIL_DEFAULT = "org/vividus/util";
     private static final String PROFILE = "profile";
@@ -91,13 +95,16 @@ class ConfigurationResolverTests
 
     @Mock private ResourcePatternResolver resourcePatternResolver;
 
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(ConfigurationResolver.class);
+
+    @SuppressWarnings({ "unchecked", "PMD.ExcessiveMethodLength", "PMD.NcssCount" })
     @Test
     void shouldLoadProperties() throws IOException
     {
-        try (MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
-             MockedConstruction<DeprecatedPropertiesHandler> newDeprecatedPropertiesHandler = mockConstruction(
-                 DeprecatedPropertiesHandler.class, withSettings().useConstructor(new Properties(), "${", "}"));
-             MockedConstruction<PropertiesLoader> newPropertiesLoaders = mockConstruction(PropertiesLoader.class,
+        try (var beanFactory = mockStatic(BeanFactory.class);
+             var newDeprecatedPropertiesHandler = mockConstruction(DeprecatedPropertiesHandler.class,
+                 withSettings().useConstructor(new Properties(), "${", "}"));
+             var newPropertiesLoaders = mockConstruction(PropertiesLoader.class,
                  withSettings().useConstructor(resourcePatternResolver), (mock, context) -> {
                      when(mock.loadConfigurationProperties()).thenReturn(toProperties(
                          Map.of(CONFIGURATION_PROFILES, ACTIVE_PROFILES,
@@ -147,6 +154,9 @@ class ConfigurationResolverTests
                                                                   PROPERTY_6, DESKTOP_CHROME,
                                                                   PROPERTY_7, DESKTOP_CHROME)));
 
+                     when(mock.loadFromResourceTreeRecursively(true, PROFILE, DEPRECATED_PROFILE))
+                                  .thenReturn(new Properties());
+
                      when(mock.loadFromResourceTreeRecursively(true, ENVIRONMENT, UAT))
                          .thenReturn(toProperties(Map.of(PROPERTY_5, ENVIRONMENTS,
                                                          PROPERTY_6, ENVIRONMENTS)));
@@ -160,9 +170,8 @@ class ConfigurationResolverTests
             beanFactory.when(BeanFactory::getResourcePatternResolver).thenReturn(resourcePatternResolver);
             ConfigurationResolver.getInstance();
             var propertiesLoader = verifySingeConstruction(newPropertiesLoaders);
-            var deprecatedPropertiesHandler =
-                    verifySingeConstruction(newDeprecatedPropertiesHandler);
-            InOrder ordered = Mockito.inOrder(propertiesLoader, deprecatedPropertiesHandler);
+            var deprecatedPropertiesHandler = verifySingeConstruction(newDeprecatedPropertiesHandler);
+            var ordered = Mockito.inOrder(propertiesLoader, deprecatedPropertiesHandler);
             ordered.verify(propertiesLoader).loadConfigurationProperties();
             ordered.verify(propertiesLoader).loadOverridingProperties();
             ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(false, DEPRECATED);
@@ -170,12 +179,13 @@ class ConfigurationResolverTests
             ordered.verify(propertiesLoader).loadDefaultProperties(HTTP_CLIENT_DEFAULT);
             ordered.verify(propertiesLoader).loadDefaultProperties(UTIL_DEFAULT);
             ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(true, DEFAULTS);
-            Resource resource = mock(Resource.class);
+            var resource = mock(Resource.class);
             when(resource.getFilename()).thenReturn("configuration.properties");
             ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(eq(true),
                 argThat((ArgumentMatcher<Predicate<Resource>>) argument -> !argument.test(resource)), eq(EMPTY_STRING));
             ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(true, PROFILE, NOSECURITY);
             ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(true, PROFILE, DESKTOP_CHROME);
+            ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(true, PROFILE, DEPRECATED_PROFILE);
             ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(true, ENVIRONMENT, UAT);
             ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(false, SUITE, EMPTY_STRING);
             ordered.verify(deprecatedPropertiesHandler).replaceDeprecated(any(Properties.class));
@@ -185,7 +195,7 @@ class ConfigurationResolverTests
             ordered.verify(deprecatedPropertiesHandler).removeDeprecated(any(Properties.class));
             verifyNoMoreInteractions(deprecatedPropertiesHandler, propertiesLoader);
             var configurationResolver = ConfigurationResolver.getInstance();
-            Properties properties = configurationResolver.getProperties();
+            var properties = configurationResolver.getProperties();
             assertAll(
                 () -> assertEquals("Поехали!",      properties.getProperty(ENCRYPTED)),
                 () -> assertEquals(OVERRIDING,      properties.getProperty(PROPERTY_1)),
@@ -203,6 +213,8 @@ class ConfigurationResolverTests
                 () -> assertEquals(EMPTY_STRING,    properties.getProperty(CONFIGURATION_SUITES)),
                 () -> assertEquals(ACTIVE_PROFILES, properties.getProperty(CONFIGURATION_PROFILES)),
                 () -> assertEquals(UAT,             properties.getProperty(CONFIGURATION_ENVIRONMENTS)));
+            assertThat(logger.getLoggingEvents(), is(List.of(
+                    warn("`{}` profile is deprecated and will be removed in VIVIDUS 0.6.0", DEPRECATED_PROFILE))));
             ConfigurationResolver.reset();
             var ise = assertThrows(IllegalStateException.class, configurationResolver::getProperties);
             assertEquals("ConfigurationResolver has not been initialized after the reset", ise.getMessage());
