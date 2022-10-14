@@ -65,6 +65,7 @@ public final class ConfigurationResolver
     // solid solution requires much time and effort and the solution will become useless with removal of the deprecated
     // profiles (in general deprecation of the profile is a very rare case). Summing up this is an acceptable trade-off.
     private static final Set<String> DEPRECATED_PROFILES = Set.of(
+            "web/desktop/edge/chromium",
             "web/phone/iphone/landscape",
             "web/phone/iphone/portrait",
             "web/tablet/ipad/landscape",

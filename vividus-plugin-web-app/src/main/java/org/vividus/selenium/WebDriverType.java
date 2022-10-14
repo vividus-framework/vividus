@@ -128,7 +128,7 @@ public enum WebDriverType
             return new ChromeDriver(options);
         }
     },
-    EDGE_CHROMIUM(false, false, Set.of(), Browser.EDGE, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY,
+    EDGE(false, false, Set.of(), Browser.EDGE, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY,
         WebDriverManager::edgedriver)
     {
         @Override

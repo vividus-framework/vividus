@@ -187,7 +187,7 @@ class WebDriverTypeTests
     }
 
     @Test
-    void testGetEdgeChromiumWebDriver()
+    void testGetEdgeWebDriver()
     {
         var desiredCapabilities = new DesiredCapabilities();
         var edgeOptions = new EdgeOptions();
@@ -197,7 +197,7 @@ class WebDriverTypeTests
             assertEquals(List.of(edgeOptions), context.arguments());
         }))
         {
-            var actual = WebDriverType.EDGE_CHROMIUM.getWebDriver(desiredCapabilities,
+            var actual = WebDriverType.EDGE.getWebDriver(desiredCapabilities,
                     new WebDriverConfiguration());
             assertEquals(edgeDriverMock.constructed().get(0), actual);
         }
@@ -244,7 +244,7 @@ class WebDriverTypeTests
         "IEXPLORE,      false",
         "CHROME,        true",
         "SAFARI,        false",
-        "EDGE_CHROMIUM, false",
+        "EDGE,          false",
         "OPERA,         true"
     })
     void testIsBinaryPathSupported(WebDriverType type, boolean binaryPathSupported)
@@ -258,7 +258,7 @@ class WebDriverTypeTests
         "IEXPLORE,      true",
         "CHROME,        true",
         "SAFARI,        false",
-        "EDGE_CHROMIUM, false",
+        "EDGE,          false",
         "OPERA,         true"
     })
     void testIsCommandLineArgumentsSupported(WebDriverType type, boolean commandLineArgumentsSupported)
@@ -272,7 +272,7 @@ class WebDriverTypeTests
         "IEXPLORE,      false",
         "CHROME,        false",
         "SAFARI,        false",
-        "EDGE_CHROMIUM, true",
+        "EDGE,          true",
         "OPERA,         false"
     })
     void testGetDriverSpecificCapabilities(WebDriverType type, boolean empty)
@@ -286,7 +286,7 @@ class WebDriverTypeTests
         "IEXPLORE,      webdriver.ie.driver",
         "CHROME,        webdriver.chrome.driver",
         "SAFARI,        webdriver.safari.driver",
-        "EDGE_CHROMIUM, webdriver.edge.driver",
+        "EDGE,          webdriver.edge.driver",
         "OPERA,         webdriver.chrome.driver"
     })
     void testSetDriverExecutablePath(WebDriverType type, String propertyName)
@@ -303,7 +303,7 @@ class WebDriverTypeTests
                 arguments(WebDriverType.CHROME, (Supplier<WebDriverManager>) WebDriverManager::chromedriver),
                 arguments(WebDriverType.SAFARI, (Supplier<WebDriverManager>) WebDriverManager::safaridriver),
                 arguments(WebDriverType.OPERA, (Supplier<WebDriverManager>) WebDriverManager::operadriver),
-                arguments(WebDriverType.EDGE_CHROMIUM, (Supplier<WebDriverManager>) WebDriverManager::edgedriver)
+                arguments(WebDriverType.EDGE, (Supplier<WebDriverManager>) WebDriverManager::edgedriver)
         );
     }
 
