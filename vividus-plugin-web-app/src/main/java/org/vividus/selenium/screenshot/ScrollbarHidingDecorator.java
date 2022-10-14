@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package pazone.ashot;
+package org.vividus.selenium.screenshot;
 
 import java.awt.image.BufferedImage;
 import java.util.Optional;
@@ -23,8 +23,9 @@ import java.util.function.Supplier;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.screenshot.IScrollbarHandler;
 
+import pazone.ashot.ShootingDecorator;
+import pazone.ashot.ShootingStrategy;
 import pazone.ashot.coordinates.Coords;
 
 public class ScrollbarHidingDecorator extends ShootingDecorator

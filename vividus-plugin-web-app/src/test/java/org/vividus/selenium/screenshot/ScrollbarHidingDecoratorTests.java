@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package pazone.ashot;
+package org.vividus.selenium.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -33,8 +33,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.screenshot.ScrollbarHandler;
 
+import pazone.ashot.ShootingStrategy;
 import pazone.ashot.coordinates.Coords;
 
 @ExtendWith(MockitoExtension.class)

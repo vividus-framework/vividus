@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package pazone.ashot;
+package org.vividus.selenium.screenshot;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -25,9 +25,11 @@ import java.util.Set;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.vividus.selenium.screenshot.ScreenshotDebugger;
 import org.vividus.util.Sleeper;
 
+import pazone.ashot.PageDimensions;
+import pazone.ashot.ShootingDecorator;
+import pazone.ashot.ShootingStrategy;
 import pazone.ashot.coordinates.Coords;
 import pazone.ashot.util.InnerScript;
 

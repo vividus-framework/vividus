@@ -49,7 +49,6 @@ import pazone.ashot.AShot;
 import pazone.ashot.CuttingDecorator;
 import pazone.ashot.ElementCroppingDecorator;
 import pazone.ashot.ScalingDecorator;
-import pazone.ashot.ScrollbarHidingDecorator;
 import pazone.ashot.ShootingStrategy;
 import pazone.ashot.coordinates.CoordsProvider;
 import pazone.ashot.cutter.CutStrategy;

@@ -30,8 +30,8 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.vividus.selenium.screenshot.DebuggingViewportPastingDecorator;
 
-import pazone.ashot.DebuggingViewportPastingDecorator;
 import pazone.ashot.PageDimensions;
 import pazone.ashot.util.InnerScript;
 
