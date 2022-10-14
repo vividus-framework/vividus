@@ -36,13 +36,15 @@ import org.openqa.selenium.ie.InternetExplorerOptions;
 import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.safari.SafariDriver;
+import org.openqa.selenium.safari.SafariDriverService;
 import org.openqa.selenium.safari.SafariOptions;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 public enum WebDriverType
 {
-    FIREFOX(true, true, Set.of(FirefoxOptions.FIREFOX_OPTIONS), Browser.FIREFOX)
+    FIREFOX(true, true, Set.of(FirefoxOptions.FIREFOX_OPTIONS), Browser.FIREFOX,
+            GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, WebDriverManager::firefoxdriver)
     {
         @Override
         public void prepareCapabilities(DesiredCapabilities desiredCapabilities)
@@ -65,15 +67,9 @@ public enum WebDriverType
             }
             return new FirefoxDriver(options);
         }
-
-        @Override
-        void setDriverExecutablePath(Optional<String> driverExecutablePath)
-        {
-            setDriverExecutablePathImpl(driverExecutablePath, GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY,
-                    WebDriverManager::firefoxdriver);
-        }
     },
-    IEXPLORE(false, true, Set.of(WebDriverType.IE_OPTIONS), Browser.IE)
+    IEXPLORE(false, true, Set.of(WebDriverType.IE_OPTIONS), Browser.IE,
+        InternetExplorerDriverService.IE_DRIVER_EXE_PROPERTY, WebDriverManager::iedriver)
     {
         @Override
         public void prepareCapabilities(DesiredCapabilities desiredCapabilities)
@@ -96,15 +92,9 @@ public enum WebDriverType
             }
             return new InternetExplorerDriver(options);
         }
-
-        @Override
-        void setDriverExecutablePath(Optional<String> driverExecutablePath)
-        {
-            setDriverExecutablePathImpl(driverExecutablePath, InternetExplorerDriverService.IE_DRIVER_EXE_PROPERTY,
-                    WebDriverManager::iedriver);
-        }
     },
-    CHROME(true, true, Set.of(ChromeOptions.CAPABILITY), Browser.CHROME)
+    CHROME(true, true, Set.of(ChromeOptions.CAPABILITY), Browser.CHROME,
+        ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, WebDriverManager::chromedriver)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
@@ -115,15 +105,9 @@ public enum WebDriverType
             configuration.getExperimentalOptions().forEach(options::setExperimentalOption);
             return new ChromeDriver(options);
         }
-
-        @Override
-        void setDriverExecutablePath(Optional<String> driverExecutablePath)
-        {
-            setDriverExecutablePathImpl(driverExecutablePath, ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY,
-                    WebDriverManager::chromedriver);
-        }
     },
-    SAFARI(false, false, Set.of("safari:automaticInspection", "safari:automaticProfiling"), Browser.SAFARI)
+    SAFARI(false, false, Set.of("safari:automaticInspection", "safari:automaticProfiling"), Browser.SAFARI,
+        SafariDriverService.SAFARI_DRIVER_EXE_PROPERTY, WebDriverManager::safaridriver)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
@@ -131,7 +115,8 @@ public enum WebDriverType
             return new SafariDriver(SafariOptions.fromCapabilities(desiredCapabilities));
         }
     },
-    OPERA(true, true, Set.of(ChromeOptions.CAPABILITY), Browser.OPERA)
+    OPERA(true, true, Set.of(ChromeOptions.CAPABILITY), Browser.OPERA,
+        ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, WebDriverManager::operadriver)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
@@ -142,28 +127,15 @@ public enum WebDriverType
             configuration.getExperimentalOptions().forEach(options::setExperimentalOption);
             return new ChromeDriver(options);
         }
-
-        @Override
-        void setDriverExecutablePath(Optional<String> driverExecutablePath)
-        {
-            setDriverExecutablePathImpl(driverExecutablePath, ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY,
-                    WebDriverManager::operadriver);
-        }
     },
-    EDGE_CHROMIUM(false, false, Set.of(), Browser.EDGE)
+    EDGE_CHROMIUM(false, false, Set.of(), Browser.EDGE, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY,
+        WebDriverManager::edgedriver)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
             EdgeOptions options = new EdgeOptions().merge(desiredCapabilities);
             return new EdgeDriver(options);
-        }
-
-        @Override
-        void setDriverExecutablePath(Optional<String> driverExecutablePath)
-        {
-            setDriverExecutablePathImpl(driverExecutablePath, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY,
-                    WebDriverManager::edgedriver);
         }
     };
 
@@ -173,14 +145,19 @@ public enum WebDriverType
     private final boolean commandLineArgumentsSupported;
     private final Set<String> driverSpecificCapabilities;
     private final Browser browser;
+    private final String driverExePropertyName;
+    private final Supplier<WebDriverManager> webDriverManagerSupplier;
 
     WebDriverType(boolean binaryPathSupported, boolean commandLineArgumentsSupported,
-            Set<String> driverSpecificCapabilities, Browser browser)
+            Set<String> driverSpecificCapabilities, Browser browser, String driverExePropertyName,
+            Supplier<WebDriverManager> webDriverManagerSupplier)
     {
         this.binaryPathSupported = binaryPathSupported;
         this.commandLineArgumentsSupported = commandLineArgumentsSupported;
         this.driverSpecificCapabilities = driverSpecificCapabilities;
         this.browser = browser;
+        this.driverExePropertyName = driverExePropertyName;
+        this.webDriverManagerSupplier = webDriverManagerSupplier;
     }
 
     public void prepareCapabilities(@SuppressWarnings("unused") DesiredCapabilities desiredCapabilities)
@@ -193,10 +170,10 @@ public enum WebDriverType
 
     void setDriverExecutablePath(Optional<String> driverExecutablePath)
     {
-        if (driverExecutablePath.isPresent())
-        {
-            throw new UnsupportedOperationException();
-        }
+        driverExecutablePath.ifPresentOrElse(
+            path -> System.setProperty(driverExePropertyName, path),
+            () -> webDriverManagerSupplier.get().setup()
+        );
     }
 
     public boolean isBinaryPathSupported()
@@ -217,12 +194,5 @@ public enum WebDriverType
     public Browser getBrowser()
     {
         return browser;
-    }
-
-    private static void setDriverExecutablePathImpl(Optional<String> driverExecutablePath, String driverExePropertyName,
-            Supplier<WebDriverManager> webDriverManagerSupplier)
-    {
-        driverExecutablePath.ifPresentOrElse(path -> System.setProperty(driverExePropertyName, path),
-            () -> webDriverManagerSupplier.get().setup());
     }
 }

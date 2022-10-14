@@ -275,7 +275,28 @@ Let's go through the structure and review its content.
 
 === Desktop
 
-General place for web profiles. Each of the directory contains browser related properties. This is a place for adjustments for your browser. Add there any properties you need: screen resolution, path to webdriver or to a custom browser.
+General place for web profiles. Each of the directory contains browser related properties. This is a place for adjustments for your browser. Add there any properties you need: screen resolution, path to driver or to a custom browser.
+
+While executing tests on the local machine it is allowed to use custom browser
+driver. This approach first requires manually downloading the driver (See
+https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/#quick-reference[Quick Reference Section]
+for download links). The path to the downloaded binary should be configured
+using the following property:
+
+[source, properties]
+----
+web.driver.<browser>.driver-executable-path=/path/to/driver/executable
+----
+
+where `<browser>` is one of the following values:
+
+- `chrome`
+- `firefox`
+- `safari`
+- `iexplore`
+- `edge_chromium`
+- `opera`
+
 [cols="~a,~a", options="header"]
 |===
 |Profile
@@ -285,18 +306,16 @@ General place for web profiles. Each of the directory contains browser related p
 |
 [source, properties]
 ----
-selenium.browser=chrome
 selenium.grid.platform-name=Windows
 selenium.grid.platform-version=10
 web.driver.chrome.command-line-arguments=--disable-auto-reload
 web.driver.chrome.binary-path=/path/to/custom/chrome
 ----
 
-.^|web/desktop/edge.chromium
+.^|web/desktop/edge/chromium
 |
 [source, properties]
 ----
-selenium.browser=edge_chromium
 selenium.grid.platform-name=macOS
 selenium.grid.platform-version=12.5
 selenium.grid.capabilities.browserName=MicrosoftEdge
@@ -306,7 +325,6 @@ selenium.grid.capabilities.browserName=MicrosoftEdge
 |
 [source, properties]
 ----
-selenium.browser=firefox
 selenium.grid.platform-name=Windows
 selenium.grid.platform-version=10
 web.driver.firefox.command-line-arguments=--turbo
@@ -316,7 +334,6 @@ web.driver.firefox.command-line-arguments=--turbo
 |
 [source, properties]
 ----
-selenium.browser=iexplore
 selenium.grid.capabilities.browserName=internet explorer
 web.driver.iexplore.command-line-arguments=-private
 selenium.grid.capabilities.iedriverVersion=3.141.0
@@ -328,7 +345,6 @@ selenium.grid.platform-version=7
 |
 [source, properties]
 ----
-selenium.browser=opera
 selenium.grid.screen-resolution=1920x1080
 selenium.grid.platform-name=Windows
 selenium.grid.platform-version=10
@@ -344,7 +360,6 @@ web.driver.OPERA.binary-path=<path to opera>
 |
 [source, properties]
 ----
-selenium.browser=safari
 selenium.grid.platform-name=macOS
 selenium.grid.platform-version=11.00
 ----
