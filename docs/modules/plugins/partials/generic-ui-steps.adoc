@@ -28,7 +28,7 @@ If you describe number condition as equal to 5 in case if there are 10 elements 
 The first one about number condition violation. The second one about state check failure.
 
 [WARNING]
-In case when xref:plugins:plugin-web-app.adoc#_visibility_types[locator's visibility] and checked state are equal (For an example ':i' and 'NOT_VISIBLE') exception will be thrown. In such cases please use step: <<_verify_elements_number>>.
+In case when <<_visibility_types>> are used and checked state are equal (For an example ':i' and 'NOT_VISIBLE') exception will be thrown. In such cases please use step: <<_verify_elements_number>>.
 Contradictory visibility parameters (locator - ':i' and checked state - 'VISIBLE') are also not allowed.
 
 [source,gherkin]
