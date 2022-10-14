@@ -112,7 +112,7 @@ class KeyboardActionsTests
         WebDriver context = mock(WebDriver.class);
         WebElement returnButton = mock(WebElement.class);
 
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(genericWebDriverManager.isIOS()).thenReturn(true);
         enableOnScreenKeyboard(true);
         when(webDriverProvider.get()).thenReturn(context);
         when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of(returnButton));
@@ -129,7 +129,7 @@ class KeyboardActionsTests
 
         WebDriver context = mock(WebDriver.class);
 
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(genericWebDriverManager.isIOS()).thenReturn(true);
         enableOnScreenKeyboard(true);
         when(webDriverProvider.get()).thenReturn(context);
         when(searchActions.findElements(context, KEYBOARD_RETURN_LOCATOR)).thenReturn(List.of());
@@ -143,7 +143,7 @@ class KeyboardActionsTests
     void shouldNotCloseKeyboardIfElementIsTypeTextView()
     {
         init(true);
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(genericWebDriverManager.isIOS()).thenReturn(true);
         enableOnScreenKeyboard(true);
         when(element.getTagName()).thenReturn(XCUIELEMENT_TYPE_TEXT_VIEW);
 
@@ -158,7 +158,7 @@ class KeyboardActionsTests
     void shouldCloseKeyboardIfElementIsTypeTextViewForSimulator()
     {
         init(false);
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(genericWebDriverManager.isIOS()).thenReturn(true);
         enableOnScreenKeyboard(true);
         when(webDriverProvider.getUnwrapped(HidesKeyboard.class)).thenReturn(hidesKeyboard);
         when(element.getTagName()).thenReturn(XCUIELEMENT_TYPE_TEXT_VIEW);
@@ -176,7 +176,7 @@ class KeyboardActionsTests
         WebDriver context = mock(WebDriver.class);
         WebElement returnButton = mock(WebElement.class);
 
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(genericWebDriverManager.isIOS()).thenReturn(true);
         enableOnScreenKeyboard(true);
         when(element.getTagName()).thenThrow(new StaleElementReferenceException("Stale"));
         when(webDriverProvider.get()).thenReturn(context);

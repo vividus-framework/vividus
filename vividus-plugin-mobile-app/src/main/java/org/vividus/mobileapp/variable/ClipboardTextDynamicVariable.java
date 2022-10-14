@@ -43,7 +43,7 @@ public class ClipboardTextDynamicVariable extends AbstractWebDriverDynamicVariab
             ApplicationActions applicationActions, MobileEnvironment mobileEnvironment)
     {
         super(webDriverProvider, webDriver -> {
-            if (mobileEnvironment.isRealDevice() && mobileAppWebDriverManager.isIOSNativeApp())
+            if (mobileEnvironment.isRealDevice() && mobileAppWebDriverManager.isIOS())
             {
                 String webDriverAgentBundleId = mobileEnvironment.getWebDriverAgentBundleId();
                 isTrue(webDriverAgentBundleId != null, "WebDriverAgent bundle ID is not specified");

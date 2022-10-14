@@ -53,7 +53,7 @@
         <property name="webDriverProvider" ref="webDriverProvider" />
     </bean>
 
-    <bean id="webDriverManager" class="org.vividus.selenium.manager.WebDriverManager" parent="genericWebDriverManager" >
+    <bean id="webDriverManager" class="org.vividus.selenium.manager.WebDriverManager">
         <property name="electronApp" value="${desktop-electron-app}" />
         <property name="remoteScreenResolution" value="${selenium.grid.screen-resolution}" />
     </bean>

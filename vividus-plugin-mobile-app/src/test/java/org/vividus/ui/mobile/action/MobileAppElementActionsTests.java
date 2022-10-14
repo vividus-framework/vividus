@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ class MobileAppElementActionsTests
     void shouldNotCheckVisibilityUsingAttributeOnNotIOSNativeApps()
     {
         when(webElement.isDisplayed()).thenReturn(false);
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(genericWebDriverManager.isIOS()).thenReturn(false);
 
         assertFalse(elementActions.isElementVisible(webElement));
     }
@@ -72,7 +72,7 @@ class MobileAppElementActionsTests
     void shouldCheckIfElementIsVisibleOnIOSNativeAppsUsingAttribute(Boolean visible)
     {
         when(webElement.isDisplayed()).thenReturn(false);
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(genericWebDriverManager.isIOS()).thenReturn(true);
         when(webElement.getAttribute("visible")).thenReturn(visible.toString());
 
         assertEquals(visible, elementActions.isElementVisible(webElement));

@@ -61,7 +61,7 @@ public class ElementSteps
     @When("I select $direction value with `$offset` offset in picker wheel located `$locator`")
     public void selectPickerWheelValue(PickerWheelDirection direction, double offset, Locator locator)
     {
-        isTrue(genericWebDriverManager.isIOSNativeApp(), "Picker wheel selection is supported only for iOS platform");
+        isTrue(genericWebDriverManager.isIOS(), "Picker wheel selection is supported only for iOS platform");
         baseValidations.assertElementExists("Picker wheel", locator)
                        .filter(element ->
                        {
@@ -90,7 +90,7 @@ public class ElementSteps
     @When("I set value of Android slider located `$locator` to `$number`")
     public void setAndroidSliderValue(Locator locator, double number)
     {
-        isTrue(genericWebDriverManager.isAndroidNativeApp(), "The step is supported only for Android platform");
+        isTrue(genericWebDriverManager.isAndroid(), "The step is supported only for Android platform");
         isTrue(number >= 0, "The target slider number must be greater than or equal to 0, but got %s", number);
         setSliderValue(locator, number);
     }
@@ -109,7 +109,7 @@ public class ElementSteps
     @When("I set value of iOS slider located `$locator` to `$percent` percents")
     public void setIOSSliderValue(Locator locator, int percent)
     {
-        isTrue(genericWebDriverManager.isIOSNativeApp(), "The step is supported only for iOS platform");
+        isTrue(genericWebDriverManager.isIOS(), "The step is supported only for iOS platform");
         isTrue(percent >= 0 && percent <= 100,
                 "The target slider percent value must be between 0 and 100 inclusively, but got %s", percent);
         setSliderValue(locator, percent / PERCENT);

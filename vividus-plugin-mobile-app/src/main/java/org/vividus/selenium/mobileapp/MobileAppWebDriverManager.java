@@ -65,7 +65,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
         {
             return 0;
         }
-        if (isIOSNativeApp())
+        if (isIOS())
         {
             Number statBarHeight;
             try
@@ -119,7 +119,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
 
     private double calculateDpr()
     {
-        if (isAndroidNativeApp())
+        if (isAndroid())
         {
             // On Android platform the ratio between the device window size and taken screenshot size is equal to 1
             // regardless of the device's display density.

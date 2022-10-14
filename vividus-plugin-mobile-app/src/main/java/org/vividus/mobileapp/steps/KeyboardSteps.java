@@ -182,7 +182,7 @@ public class KeyboardSteps
     @When("I long press $key key")
     public void longPressKey(String key)
     {
-        if (genericWebDriverManager.isAndroidNativeApp())
+        if (genericWebDriverManager.isAndroid())
         {
             pressOnAndroid(p -> p::longPressKey, List.of(key));
         }
@@ -236,7 +236,7 @@ public class KeyboardSteps
 
     private void pressKeys(List<String> keys)
     {
-        if (genericWebDriverManager.isIOSNativeApp() || genericWebDriverManager.isTvOS())
+        if (genericWebDriverManager.isIOS() || genericWebDriverManager.isTvOS())
         {
             keys.forEach(key -> pressButton(key, Optional.empty()));
         }
