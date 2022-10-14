@@ -24,6 +24,7 @@ import java.io.UncheckedIOException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -36,6 +37,7 @@ import com.google.common.cache.LoadingCache;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.text.WordUtils;
 import org.vividus.util.ILocationProvider;
@@ -46,8 +48,7 @@ import net.datafaker.Faker;
 @Named
 public class StringsExpressionProcessor extends DelegatingExpressionProcessor<String>
 {
-    private static final Pattern COMMA_SEPARATED = Pattern.compile("(?<!\\\\), ?");
-    private static final Pattern ESCAPED_COMMA = Pattern.compile("\\\\,");
+    private static final Pattern COMMA_SEPARATED = Pattern.compile("(?<!\\\\),");
     private static final String COMMA = ",";
 
     private static final LoadingCache<Locale, Faker> FAKERS = CacheBuilder.newBuilder().build(new CacheLoader<>()
@@ -84,7 +85,9 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
             new UnaryExpressionProcessor("toBase64Gzip",           StringsExpressionProcessor::toBase64Gzip),
             new UnaryExpressionProcessor("escapeHTML",             StringEscapeUtils::escapeHtml4),
             new UnaryExpressionProcessor("escapeJSON",             StringEscapeUtils::escapeJson),
-            new UnaryExpressionProcessor("quoteRegExp",            Pattern::quote)
+            new UnaryExpressionProcessor("quoteRegExp",            Pattern::quote),
+            new UnaryExpressionProcessor("substringBefore",        substring(StringUtils::substringBefore)),
+            new UnaryExpressionProcessor("substringAfter",         substring(StringUtils::substringAfter))
         ));
     }
 
@@ -112,9 +115,9 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
 
     private static String anyOf(String input)
     {
-        String[] parts = COMMA_SEPARATED.split(input);
-        int length = parts.length;
-        return length == 0 ? "" : ESCAPED_COMMA.matcher(parts[RandomUtils.nextInt(0, length)]).replaceAll(COMMA);
+        String[] arguments = parseArguments(input);
+        int length = arguments.length;
+        return length == 0 ? "" : arguments[RandomUtils.nextInt(0, length)];
     }
 
     private static UnaryOperator<String> generateLocalized()
@@ -132,5 +135,28 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
     private static String generate(Locale locale, String input)
     {
         return FAKERS.getUnchecked(locale).expression(String.format("#{%s}", input));
+    }
+
+    private static UnaryOperator<String> substring(BiFunction<String, String, String> substringFunction)
+    {
+        return input ->
+        {
+            String[] arguments = parseArguments(input);
+            int argumentsNumber = arguments.length;
+            Validate.isTrue(argumentsNumber == 2,
+                    "The expected number of arguments for substring-expression is 2, but found %d", argumentsNumber);
+            return substringFunction.apply(arguments[0], arguments[1]);
+        };
+    }
+
+    private static String[] parseArguments(String input)
+    {
+        String[] arguments = COMMA_SEPARATED.split(input);
+        for (int i = 0; i < arguments.length; i++)
+        {
+            String argument = i > 0 ? arguments[i].stripLeading() : arguments[i];
+            arguments[i] = StringUtils.replace(argument, "\\,", COMMA);
+        }
+        return arguments;
     }
 }
