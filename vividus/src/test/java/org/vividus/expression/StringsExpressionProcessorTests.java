@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -36,6 +37,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -115,6 +117,17 @@ class StringsExpressionProcessorTests
     void testExecute(String expression, String expected)
     {
         assertEquals(expected, processor.execute(expression).get());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "Address.streetAddress",
+            "Company.name"
+    })
+    void shouldExecuteLocalizedExpressions(String expression)
+    {
+        String result = processor.execute("generateLocalized(" + expression + ", ru-RU)").get();
+        assertThat(result, matchesPattern("[А-яёЁ0-9 ,.-]+"));
     }
 
     @Test
