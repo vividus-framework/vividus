@@ -52,6 +52,8 @@ Then number of VISIBLE elements found by `tagName(img)` is = `1`
 
 Waits for appearance of an element by the locator.
 
+WARNING: It's forbidden to use <<_visibility_types>> in the locator.
+
 [source,gherkin]
 ----
 When I wait until element located `$locator` appears
@@ -72,6 +74,8 @@ Waits for disappearance of an element by the locator.
 
 NOTE: If the element doesn't exist on the page/context, the step will immediately complete successfully.
 Checking the element on the page (if needed) should be done in a separate step (e.g. <<_wait_for_element_appearance>> or xref:plugin-html.adoc#_validate_elements[Validate elements]).
+
+WARNING: It's forbidden to use <<_visibility_types>> in the locator.
 
 [source,gherkin]
 ----
