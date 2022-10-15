@@ -35,10 +35,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.vividus.selenium.screenshot.DebuggingViewportPastingDecorator;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
 
-import pazone.ashot.DebuggingViewportPastingDecorator;
 import pazone.ashot.PageDimensions;
 import pazone.ashot.ShootingStrategy;
 import pazone.ashot.util.InnerScript;

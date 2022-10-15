@@ -18,8 +18,8 @@ package org.vividus.selenium.screenshot.strategies;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.vividus.selenium.screenshot.DebuggingViewportPastingDecorator;
 
-import pazone.ashot.DebuggingViewportPastingDecorator;
 import pazone.ashot.PageDimensions;
 import pazone.ashot.ShootingStrategy;
 

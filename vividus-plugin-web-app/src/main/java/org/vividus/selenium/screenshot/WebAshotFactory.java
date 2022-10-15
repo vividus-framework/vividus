@@ -29,8 +29,6 @@ import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 
 import pazone.ashot.AShot;
-import pazone.ashot.DebuggingViewportPastingDecorator;
-import pazone.ashot.ScrollbarHidingDecorator;
 import pazone.ashot.ShootingStrategy;
 import pazone.ashot.coordinates.CoordsProvider;
 
