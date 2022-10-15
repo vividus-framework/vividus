@@ -1,6 +1,6 @@
 project.description = 'Vividus plugin for WinRM (Windows Remote Management)'
 
-ext.cxfVersion = '3.5.3'
+ext.cxfVersion = '3.5.4'
 
 dependencies {
     implementation project(':vividus-engine')
