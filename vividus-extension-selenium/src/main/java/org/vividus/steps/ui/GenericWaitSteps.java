@@ -17,6 +17,7 @@
 package org.vividus.steps.ui;
 
 import java.time.Duration;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -30,6 +31,7 @@ import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.IWaitActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 
@@ -57,22 +59,35 @@ public class GenericWaitSteps
 
     /**
      * Waits for appearance of an <b><i>element</i></b> with the specified <b>locator</b>
+     * Step supports only <b>VISIBLE</b> elements waiting. If locator will be configured to <b>ALL</b>
+     * or <b>INVISIBLE</b> exception will be thrown.
      * @param locator locator to locate element
      */
     @When("I wait until element located `$locator` appears")
     public void waitForElementAppearance(Locator locator)
     {
-        waitForCondition(expectedSearchActionsConditions.visibilityOfElement(locator));
+        waitForConditionValidatingVisibility(locator, expectedSearchActionsConditions::visibilityOfElement);
     }
 
     /**
      * Waits for disappearance of an <b><i>element</i></b> with the specified <b>locator</b>
+     * Step supports only <b>VISIBLE</b> elements waiting. If locator will be configured to <b>ALL</b>
+     * or <b>INVISIBLE</b> exception will be thrown.
      * @param locator locator to locate element
      */
     @When("I wait until element located `$locator` disappears")
     public void waitForElementDisappearance(Locator locator)
     {
-        waitForCondition(expectedSearchActionsConditions.invisibilityOfElement(locator));
+        waitForConditionValidatingVisibility(locator, expectedSearchActionsConditions::invisibilityOfElement);
+    }
+
+    private <T> void waitForConditionValidatingVisibility(Locator locator,
+            Function<Locator, IExpectedSearchContextCondition<T>> conditionFactory)
+    {
+        Validate.isTrue(Visibility.VISIBLE == locator.getSearchParameters().getVisibility(),
+            "The step supports locators with VISIBLE visibility settings only, but the locator is `%s`",
+                locator.toHumanReadableString());
+        waitForCondition(conditionFactory.apply(locator));
     }
 
     /**

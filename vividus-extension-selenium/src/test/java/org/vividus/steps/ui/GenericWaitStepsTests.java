@@ -53,6 +53,8 @@ import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.IWaitActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 
 @ExtendWith(MockitoExtension.class)
@@ -87,6 +89,26 @@ class GenericWaitStepsTests
         when(expectedSearchActionsConditions.visibilityOfElement(LOCATOR)).thenReturn(condition);
         waitSteps.waitForElementAppearance(LOCATOR);
         verify(waitActions).wait(searchContext, condition);
+    }
+
+    @Test
+    void shouldThrowAnExceptionInCaseOfIncorrectVisibilityUsedForAppearanceWait()
+    {
+        Locator locator = new Locator(TestLocatorType.SEARCH, new SearchParameters(VALUE, Visibility.ALL));
+        var iae = assertThrows(IllegalArgumentException.class, () -> waitSteps.waitForElementAppearance(locator));
+        assertEquals("The step supports locators with VISIBLE visibility settings only, but the locator is "
+                + "`search 'value' (visible or invisible)`", iae.getMessage());
+        verifyNoInteractions(expectedSearchActionsConditions, waitActions);
+    }
+
+    @Test
+    void shouldThrowAnExceptionInCaseOfIncorrectVisibilityUsedForDisappearanceWait()
+    {
+        Locator locator = new Locator(TestLocatorType.SEARCH, new SearchParameters(VALUE, Visibility.INVISIBLE));
+        var iae = assertThrows(IllegalArgumentException.class, () -> waitSteps.waitForElementAppearance(locator));
+        assertEquals("The step supports locators with VISIBLE visibility settings only, but the locator is `search"
+                + " 'value' (invisible)`", iae.getMessage());
+        verifyNoInteractions(expectedSearchActionsConditions, waitActions);
     }
 
     @SuppressWarnings("unchecked")
