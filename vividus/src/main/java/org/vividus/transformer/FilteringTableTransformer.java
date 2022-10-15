@@ -104,21 +104,23 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
 
     private <T> List<T> filterRows(String byMaxRows, String byRowIndexes, String byRandomRows, List<T> rows)
     {
+        int numberOfRows = rows.size();
         if (byRowIndexes == null && byRandomRows == null)
         {
             return Optional.ofNullable(byMaxRows)
                     .map(Integer::parseInt)
-                    .filter(m -> m < rows.size())
+                    .filter(m -> m < numberOfRows)
                     .map(m -> rows.subList(0, m))
                     .orElse(rows);
         }
         else if (byRandomRows != null)
         {
             int randomRowsCount = Integer.parseInt(byRandomRows);
-            isTrue(randomRowsCount <= rows.size(),
-                    "'byRandomRows' must be less than or equal to the number of table rows");
+            isTrue(randomRowsCount <= numberOfRows,
+                    "'byRandomRows' is %d, but it must be less than or equal to %d (the number of table rows)",
+                    randomRowsCount, numberOfRows);
             return ThreadLocalRandom.current()
-                    .ints(0, rows.size())
+                    .ints(0, numberOfRows)
                     .distinct()
                     .limit(randomRowsCount)
                     .mapToObj(rows::get)
