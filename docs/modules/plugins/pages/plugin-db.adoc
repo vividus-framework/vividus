@@ -75,7 +75,7 @@ Here are some examples of setting different databases connection for most popula
 .build.gradle
 [source,gradle]
 ----
-implementation(group: 'mysql', name: 'mysql-connector-java', version: '8.0.30')
+implementation(group: 'com.mysql', name: 'mysql-connector-j', version: '8.0.31')
 ----
 
 .environment.properties
