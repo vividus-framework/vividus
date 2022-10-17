@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,7 +185,7 @@ public class EmailSteps
                 + "TO Recipients:\t%s%n"
                 + "Reply to:\t%s%n";
 
-        String emailMessage = "";
+        StringBuilder emailMessage = new StringBuilder();
         for (int index = 0; index < messages.size(); index++)
         {
             EmailMessage message = messages.get(index);
@@ -194,10 +194,10 @@ public class EmailSteps
                     join(message.getFrom()), join(message.getRecipients(RecipientType.CC)),
                     join(message.getRecipients(RecipientType.BCC)), join(message.getRecipients(RecipientType.TO)),
                     join(message.getReplyTo()));
-            emailMessage += messageAsString;
+            emailMessage.append(messageAsString);
         }
 
-        return emailMessage;
+        return emailMessage.toString();
     }
 
     private static String join(Address[] addresses)
