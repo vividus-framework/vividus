@@ -294,7 +294,7 @@ where `<browser>` is one of the following values:
 - `firefox`
 - `safari`
 - `iexplore`
-- `edge_chromium`
+- `edge`
 - `opera`
 
 [cols="~a,~a", options="header"]
@@ -302,7 +302,7 @@ where `<browser>` is one of the following values:
 |Profile
 |Example of properties
 
-.^|web/desktop/chrome
+.^|`web/desktop/chrome`
 |
 [source, properties]
 ----
@@ -312,7 +312,15 @@ web.driver.chrome.command-line-arguments=--disable-auto-reload
 web.driver.chrome.binary-path=/path/to/custom/chrome
 ----
 
-.^|web/desktop/edge/chromium
+.^|`web/desktop/edge` +
+[WARNING]
+====
+`web/desktop/edge/chromium` profile is deprecated in favor of `web/desktop/edge` and will be removed in VIVIDUS 0.6.0.
+
+EdgeHTML was https://techcommunity.microsoft.com/t5/microsoft-365-blog/new-microsoft-edge-to-replace-microsoft-edge-legacy-with-april-s/ba-p/2114224[retired] some time ago,
+so only Chromium backed Edge is available now, thus there is no need to distinguish Edge builds anymore.
+====
+
 |
 [source, properties]
 ----
@@ -321,7 +329,7 @@ selenium.grid.platform-version=12.5
 selenium.grid.capabilities.browserName=MicrosoftEdge
 ----
 
-.^|web/desktop/firefox
+.^|`web/desktop/firefox`
 |
 [source, properties]
 ----
@@ -330,7 +338,7 @@ selenium.grid.platform-version=10
 web.driver.firefox.command-line-arguments=--turbo
 ----
 
-.^|web/desktop/iexplore
+.^|`web/desktop/iexplore`
 |
 [source, properties]
 ----
@@ -341,7 +349,7 @@ selenium.grid.platform-name=Windows
 selenium.grid.platform-version=7
 ----
 
-.^|web/desktop/opera
+.^|`web/desktop/opera`
 |
 [source, properties]
 ----
@@ -356,7 +364,7 @@ web.driver.OPERA.binary-path=<path to opera>
 ----
 * <path to opera> - path to the Opera browser (for example, "C:/Programs/Opera/opera.exe")
 
-.^|web/desktop/safari
+.^|`web/desktop/safari`
 |
 [source, properties]
 ----
