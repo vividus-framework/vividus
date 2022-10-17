@@ -36,6 +36,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.variable.VariableScope;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import reactor.core.publisher.Mono;
 
 public class ResourceManagementSteps
 {
@@ -203,15 +204,18 @@ public class ResourceManagementSteps
 
         try (HttpResponse httpResponse = httpPipeline.send(httpRequest).block())
         {
-            String responseBody = httpResponse.getBodyAsString().block();
-            if (httpResponse.getStatusCode() == HttpResponseStatus.OK.code())
-            {
-                responseBodyConsumer.accept(responseBody);
-            }
-            else
-            {
-                softAssert.recordFailedAssertion("Azure REST API HTTP request execution is failed: " + responseBody);
-            }
+            Optional.ofNullable(httpResponse).map(HttpResponse::getBodyAsString).map(Mono::block).ifPresent(
+                    responseBody -> {
+                        if (httpResponse.getStatusCode() == HttpResponseStatus.OK.code())
+                        {
+                            responseBodyConsumer.accept(responseBody);
+                        }
+                        else
+                        {
+                            softAssert.recordFailedAssertion(
+                                    "Azure REST API HTTP request execution is failed: " + responseBody);
+                        }
+                    });
         }
     }
 }

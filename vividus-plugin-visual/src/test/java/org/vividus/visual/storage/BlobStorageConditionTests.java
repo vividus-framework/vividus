@@ -17,8 +17,12 @@
 package org.vividus.visual.storage;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 
 class BlobStorageConditionTests
 {
@@ -27,6 +31,9 @@ class BlobStorageConditionTests
     @Test
     void shouldReturnTrueIfClassIsAvailable()
     {
-        assertTrue(blobStorageCondition.matches(null, null));
+        var context = mock(ConditionContext.class);
+        var metadata = mock(AnnotatedTypeMetadata.class);
+        assertTrue(blobStorageCondition.matches(context, metadata));
+        verifyNoInteractions(context, metadata);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,14 +73,19 @@ class TestCaseParserTests
     @Test
     void testConfigurationWithEmptyResultsToExport(@TempDir Path tempDir) throws IOException
     {
-        var objectMapper = new ObjectMapper();
-        Path emptyDirectoryPath = tempDir.resolve("empty");
+        var startDirectoryPath = tempDir.resolve("start");
+        Files.createDirectory(startDirectoryPath);
+        var emptyDirectoryPath = startDirectoryPath.resolve("empty");
         Files.createDirectory(emptyDirectoryPath);
-        when(zephyrExporterProperties.getSourceDirectory()).thenReturn(emptyDirectoryPath);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        var textFilePath = startDirectoryPath.resolve("text.txt");
+        Files.createFile(textFilePath);
+        var jsonFilePath = startDirectoryPath.resolve("json.json");
+        Files.createFile(jsonFilePath);
+        var objectMapper = new ObjectMapper();
+        when(zephyrExporterProperties.getSourceDirectory()).thenReturn(startDirectoryPath);
+        var exception = assertThrows(IllegalArgumentException.class,
             () -> testCaseParser.createTestCases(objectMapper));
-        assertEquals("Folder '" + emptyDirectoryPath + "' does not contain needed json files",
-                exception.getMessage());
+        assertEquals("Folder '" + startDirectoryPath + "' does not contain needed json files", exception.getMessage());
         assertThat(testLogger.getLoggingEvents(), empty());
     }
 

@@ -32,6 +32,6 @@ public abstract class AbstractBooleanPropertyCondition implements Condition
     @Override
     public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata)
     {
-        return context.getEnvironment().getProperty(propertyName, boolean.class);
+        return Boolean.TRUE.equals(context.getEnvironment().getProperty(propertyName, Boolean.class));
     }
 }
