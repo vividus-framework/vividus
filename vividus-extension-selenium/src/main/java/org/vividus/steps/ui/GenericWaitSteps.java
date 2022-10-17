@@ -21,9 +21,12 @@ import java.util.function.Function;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.SearchContext;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
@@ -88,6 +91,45 @@ public class GenericWaitSteps
             "The step supports locators with VISIBLE visibility settings only, but the locator is `%s`",
                 locator.toHumanReadableString());
         waitForCondition(conditionFactory.apply(locator));
+    }
+
+    /**
+     * Waits for expected number of elements.
+     * @param locator        The locator to find elements.
+     * @param comparisonRule The rule to match the variable value. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param number         The expected number of elements.
+     */
+    @When("I wait until number of elements located by `$locator` is $comparisonRule $number")
+    public void waitForElementNumber(Locator locator, ComparisonRule comparisonRule, int number)
+    {
+        uiContext.getOptionalSearchContext().ifPresent(context -> {
+            locator.getSearchParameters().setWaitForElement(false);
+            Matcher<Integer> rule = comparisonRule.getComparisonRule(number);
+            IExpectedSearchContextCondition<Boolean> condition = new IExpectedSearchContextCondition<>()
+            {
+                @Override
+                public Boolean apply(SearchContext searchContext)
+                {
+                    return rule.matches(searchActions.findElements(context, locator).size());
+                }
+
+                @Override
+                public String toString()
+                {
+                    return "number of elements located by \"" + locator.toHumanReadableString() + "\" is "
+                            + comparisonRule + " " + number;
+                }
+            };
+            waitActions.wait(context, condition);
+        });
     }
 
     /**

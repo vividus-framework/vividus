@@ -45,6 +45,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.testdouble.TestLocatorType;
 import org.vividus.ui.action.IExpectedConditions;
@@ -189,5 +190,30 @@ class GenericWaitStepsTests
         var exception = assertThrows(IllegalArgumentException.class,
             () -> waitSteps.doesElementByLocatorExistsForDuration(LOCATOR, nanos));
         assertEquals("Unable to convert duration PT0.000000001S", exception.getMessage());
+    }
+
+    @Test
+    void shouldNotWaitIfContextIsNotSet()
+    {
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.empty());
+        waitSteps.waitForElementNumber(null, null, 0);
+        verifyNoInteractions(waitActions, searchActions);
+    }
+
+    @Test
+    void shouldWaitForNumberOfElements()
+    {
+        var searchContext = mock(SearchContext.class);
+        var searchParameters = new SearchParameters(VALUE, Visibility.VISIBLE, true);
+        var locator = new Locator(TestLocatorType.SEARCH, searchParameters);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
+        when(searchActions.findElements(searchContext, locator)).thenReturn(List.of(mock(WebElement.class)));
+        waitSteps.waitForElementNumber(locator, ComparisonRule.EQUAL_TO, 1);
+        assertFalse(searchParameters.isWaitForElement());
+        verify(waitActions).wait(eq(searchContext), argThat(f -> {
+            assertEquals("number of elements located by \"search 'value' (visible)\" is equal to 1", f.toString());
+            assertTrue((boolean) f.apply(searchContext));
+            return true;
+        }));
     }
 }

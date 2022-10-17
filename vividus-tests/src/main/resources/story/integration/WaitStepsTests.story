@@ -75,3 +75,10 @@ Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
 When I set page load timeout to `PT15S`
 When I open URL `${vividus-test-site-url}/delayedLoading?imageTimeout=10000` in new window
 When I set page load timeout to `PT10S`
+
+Scenario: Verify step: 'When I wait until number of elements located by `$locator` is $comparisonRule $number'
+Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
+When I wait until number of elements located by `id(element-to-show):i` is = 1
+When I click on element located by `id(button-show)`
+When I wait until number of elements located by `id(element-to-show):i` is equal to 0
+Then number of elements found by `id(element-to-show)` is equal to `1`
