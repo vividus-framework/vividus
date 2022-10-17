@@ -1,3 +1,30 @@
+=== Wait for expected elements number
+
+Waits for the expected number of elements located by locator.
+
+TIP: In order to wait for invisible elements one rely on <<_visibility_types>>.
+ 
+[source,gherkin]
+----
+When I wait until number of elements located by `$locator` is $comparisonRule $number
+----
+
+* `$locator` - <<_locator>>.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$number` - The expected number of the elements.
+
+.Wait for the visible elements
+[source,gherkin]
+----
+When I wait until number of elements located by `tagName(img)` is equal to `5`
+----
+
+.Wait for the invisible elements
+[source,gherkin]
+----
+When I wait until number of elements located by `tagName(img):1` is equal to `5`
+----
+
 === Verify elements number
 
 Verifies if the number of elements located by locator matches the desired number.
