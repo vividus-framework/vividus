@@ -189,16 +189,29 @@ class WebDriverTypeTests
     @Test
     void testGetEdgeWebDriver()
     {
-        var desiredCapabilities = new DesiredCapabilities();
-        var edgeOptions = new EdgeOptions();
-        edgeOptions.merge(desiredCapabilities);
+        var expected = new EdgeOptions();
+        var configuration = new WebDriverConfiguration();
+        testGetEdgeWebDriver(configuration, expected);
+    }
+
+    @Test
+    void testGetEdgeWebDriverWithBinaryPath()
+    {
+        var expected = new EdgeOptions();
+        expected.setBinary(PATH);
+        var configuration = new WebDriverConfiguration();
+        configuration.setBinaryPath(Optional.of(PATH));
+        testGetEdgeWebDriver(configuration, expected);
+    }
+
+    private static void testGetEdgeWebDriver(WebDriverConfiguration configuration, EdgeOptions expected)
+    {
         try (var edgeDriverMock = mockConstruction(EdgeDriver.class, (mock, context) -> {
             assertEquals(1, context.getCount());
-            assertEquals(List.of(edgeOptions), context.arguments());
+            assertEquals(List.of(expected), context.arguments());
         }))
         {
-            var actual = WebDriverType.EDGE.getWebDriver(desiredCapabilities,
-                    new WebDriverConfiguration());
+            var actual = WebDriverType.EDGE.getWebDriver(new DesiredCapabilities(), configuration);
             assertEquals(edgeDriverMock.constructed().get(0), actual);
         }
     }
@@ -244,7 +257,7 @@ class WebDriverTypeTests
         "IEXPLORE,      false",
         "CHROME,        true",
         "SAFARI,        false",
-        "EDGE,          false",
+        "EDGE,          true",
         "OPERA,         true"
     })
     void testIsBinaryPathSupported(WebDriverType type, boolean binaryPathSupported)
