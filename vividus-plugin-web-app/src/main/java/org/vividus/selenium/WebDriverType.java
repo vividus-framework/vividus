@@ -128,13 +128,14 @@ public enum WebDriverType
             return new ChromeDriver(options);
         }
     },
-    EDGE(false, false, Set.of(), Browser.EDGE, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY,
+    EDGE(true, false, Set.of(), Browser.EDGE, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY,
         WebDriverManager::edgedriver)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
             EdgeOptions options = new EdgeOptions().merge(desiredCapabilities);
+            configuration.getBinaryPath().ifPresent(options::setBinary);
             return new EdgeDriver(options);
         }
     };
