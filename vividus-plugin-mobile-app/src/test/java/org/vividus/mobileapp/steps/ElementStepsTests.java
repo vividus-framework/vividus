@@ -75,7 +75,7 @@ class ElementStepsTests
         String elementId = "element-id";
         RemoteWebElement remoteElement = mock(RemoteWebElement.class);
 
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(genericWebDriverManager.isIOS()).thenReturn(true);
         when(baseValidations.assertElementExists(PICKER_WHEEL, locator)).thenReturn(Optional.of(remoteElement));
         when(remoteElement.getId()).thenReturn(elementId);
         when(remoteElement.getTagName()).thenReturn("XCUIElementTypePickerWheel");
@@ -91,7 +91,7 @@ class ElementStepsTests
     {
         RemoteWebElement remoteElement = mock(RemoteWebElement.class);
 
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(genericWebDriverManager.isIOS()).thenReturn(true);
         when(baseValidations.assertElementExists(PICKER_WHEEL, locator)).thenReturn(Optional.of(remoteElement));
         when(remoteElement.getTagName()).thenReturn("XCUIElementTypeOther");
 
@@ -104,7 +104,7 @@ class ElementStepsTests
     @Test
     void shouldNotSelectPickerWheelValueOnAndroid()
     {
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(genericWebDriverManager.isIOS()).thenReturn(false);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> elementSteps.selectPickerWheelValue(PickerWheelDirection.NEXT, OFFSET, locator));
         assertEquals("Picker wheel selection is supported only for iOS platform", exception.getMessage());
@@ -116,7 +116,7 @@ class ElementStepsTests
         @Test
         void shouldSetValue()
         {
-            when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+            when(genericWebDriverManager.isIOS()).thenReturn(true);
             WebElement slider = mock(WebElement.class);
             when(baseValidations.assertElementExists(SLIDER, locator)).thenReturn(Optional.of(slider));
             Integer number = 50;
@@ -131,7 +131,7 @@ class ElementStepsTests
         @Test
         void shouldNotSetValueIfSliderIsMissing()
         {
-            when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+            when(genericWebDriverManager.isIOS()).thenReturn(true);
             when(baseValidations.assertElementExists(SLIDER, locator)).thenReturn(Optional.empty());
 
             elementSteps.setIOSSliderValue(locator, 1);
@@ -143,7 +143,7 @@ class ElementStepsTests
         @Test
         void shouldFailToSetValueIfNotIOSPlatform()
         {
-            when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+            when(genericWebDriverManager.isIOS()).thenReturn(false);
             IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
                 () -> elementSteps.setIOSSliderValue(locator, 1));
             assertEquals("The step is supported only for iOS platform", thrown.getMessage());
@@ -154,7 +154,7 @@ class ElementStepsTests
         @ValueSource(ints = { -1, 101 })
         void shouldFailToSetValueIfItsBetweenZeroAndHundred(int value)
         {
-            when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+            when(genericWebDriverManager.isIOS()).thenReturn(true);
             IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
                 () -> elementSteps.setIOSSliderValue(locator, value));
             assertEquals("The target slider percent value must be between 0 and 100 inclusively, but got " + value,
@@ -169,7 +169,7 @@ class ElementStepsTests
         @Test
         void shouldSetValue()
         {
-            when(genericWebDriverManager.isAndroidNativeApp()).thenReturn(true);
+            when(genericWebDriverManager.isAndroid()).thenReturn(true);
             WebElement slider = mock(WebElement.class);
             when(baseValidations.assertElementExists(SLIDER, locator)).thenReturn(Optional.of(slider));
             Double number = 50.0;
@@ -184,7 +184,7 @@ class ElementStepsTests
         @Test
         void shouldNotSetValueIfSliderIsMissing()
         {
-            when(genericWebDriverManager.isAndroidNativeApp()).thenReturn(true);
+            when(genericWebDriverManager.isAndroid()).thenReturn(true);
             when(baseValidations.assertElementExists(SLIDER, locator)).thenReturn(Optional.empty());
 
             elementSteps.setAndroidSliderValue(locator, 1);
@@ -196,7 +196,7 @@ class ElementStepsTests
         @Test
         void shouldFailToSetValueIfNotAndroidPlatform()
         {
-            when(genericWebDriverManager.isAndroidNativeApp()).thenReturn(false);
+            when(genericWebDriverManager.isAndroid()).thenReturn(false);
             IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
                 () -> elementSteps.setAndroidSliderValue(locator, 1));
             assertEquals("The step is supported only for Android platform", thrown.getMessage());
@@ -206,7 +206,7 @@ class ElementStepsTests
         @Test
         void shouldFailToSetValueIfItsNegative()
         {
-            when(genericWebDriverManager.isAndroidNativeApp()).thenReturn(true);
+            when(genericWebDriverManager.isAndroid()).thenReturn(true);
             IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
                 () -> elementSteps.setAndroidSliderValue(locator, -1));
             assertEquals("The target slider number must be greater than or equal to 0, but got -1.0",

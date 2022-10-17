@@ -171,15 +171,22 @@ class MobileAppWebDriverManagerTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         Capabilities capabilities = new MutableCapabilities(Map.of(CapabilityType.PLATFORM_NAME, platform));
         when(((HasCapabilities) webDriver).getCapabilities()).thenReturn(capabilities);
-        driverManager.setMobileApp(true);
     }
 
     @SuppressWarnings("unchecked")
     @Test
     void shouldProvideDprForAndroidNativeApp()
     {
-        MobileAppWebDriverManager spyingDriverManager = new MobileAppWebDriverManager(webDriverProvider,
-                webDriverSessionInfo, javascriptActions)
+        var capabilities = new MutableCapabilities(Map.of(CapabilityType.PLATFORM_NAME, MobilePlatform.IOS));
+        var webDriver = mock(WebDriver.class,
+                withSettings().extraInterfaces(HasCapabilities.class, TakesScreenshot.class));
+        when(((HasCapabilities) webDriver).getCapabilities()).thenReturn(capabilities);
+        when(((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES)).thenReturn(IMAGE);
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn((TakesScreenshot) webDriver);
+        when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.DEVICE_PIXEL_RATIO),
+                any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArguments()[1]).get());
+        var webDriverManager = new MobileAppWebDriverManager(webDriverProvider, webDriverSessionInfo, javascriptActions)
         {
             @Override
             public Dimension getSize()
@@ -187,12 +194,7 @@ class MobileAppWebDriverManagerTests
                 return new Dimension(1, 1);
             }
         };
-        TakesScreenshot taker = mock(TakesScreenshot.class);
-        when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(taker);
-        when(taker.getScreenshotAs(OutputType.BYTES)).thenReturn(IMAGE);
-        when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.DEVICE_PIXEL_RATIO),
-                any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArguments()[1]).get());
-        assertEquals(1d, spyingDriverManager.getDpr());
+        assertEquals(1d, webDriverManager.getDpr());
         mockCapabilities(MobilePlatform.ANDROID);
         when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.DEVICE_PIXEL_RATIO),
                 any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArguments()[1]).get());

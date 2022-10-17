@@ -22,10 +22,6 @@
         <constructor-arg value="${selenium.grid.use-w3c}" />
     </bean>
 
-    <bean id="genericWebDriverManager" class="org.vividus.selenium.manager.GenericWebDriverManager" abstract="true">
-        <property name="mobileApp" value="${mobile-app}" />
-    </bean>
-
     <bean id="webDriverProvider" class="org.vividus.selenium.WebDriverProvider"
           destroy-method="destroy">
         <property name="vividusWebDriverFactory" ref="vividusWebDriverFactory" />

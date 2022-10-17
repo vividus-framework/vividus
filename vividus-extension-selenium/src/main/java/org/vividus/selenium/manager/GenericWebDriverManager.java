@@ -40,8 +40,6 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     private final IWebDriverProvider webDriverProvider;
     private final WebDriverSessionInfo webDriverSessionInfo;
 
-    private boolean mobileApp;
-
     public GenericWebDriverManager(IWebDriverProvider webDriverProvider,
             WebDriverSessionInfo webDriverSessionInfo)
     {
@@ -168,18 +166,6 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     }
 
     @Override
-    public boolean isIOSNativeApp()
-    {
-        return mobileApp && isIOS();
-    }
-
-    @Override
-    public boolean isAndroidNativeApp()
-    {
-        return mobileApp && isAndroid();
-    }
-
-    @Override
     public Capabilities getCapabilities()
     {
         return getCapabilities(webDriverProvider.get());
@@ -208,10 +194,5 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     protected WebDriverSessionInfo getWebDriverSessionInfo()
     {
         return webDriverSessionInfo;
-    }
-
-    public void setMobileApp(boolean mobileApp)
-    {
-        this.mobileApp = mobileApp;
     }
 }

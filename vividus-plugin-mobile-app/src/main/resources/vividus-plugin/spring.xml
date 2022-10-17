@@ -117,7 +117,7 @@
         <property name="shootingStrategy" value="${mobile.screenshot.strategy}" />
     </bean>
 
-    <bean id="mobileAppWebDriverManager" class="org.vividus.selenium.mobileapp.MobileAppWebDriverManager" parent="genericWebDriverManager"/>
+    <bean class="org.vividus.selenium.mobileapp.MobileAppWebDriverManager" />
 
     <bean class="org.vividus.selenium.mobileapp.screenshot.MobileAppCoordsProvider">
         <constructor-arg index="0" value="${mobile.screenshot.downscale}" />

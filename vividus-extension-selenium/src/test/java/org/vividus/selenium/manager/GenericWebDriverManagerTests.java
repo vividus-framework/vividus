@@ -17,7 +17,6 @@
 package org.vividus.selenium.manager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
@@ -179,44 +178,6 @@ class GenericWebDriverManagerTests
     {
         mockWebDriver(platform);
         assertEquals(expected, test.test(driverManager));
-    }
-
-    static Stream<Arguments> mobileNativeArguments()
-    {
-        // CHECKSTYLE:OFF
-        return Stream.of(
-                arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isAndroidNativeApp, MobilePlatform.ANDROID, true),
-                arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isAndroidNativeApp, MobilePlatform.IOS, false),
-                arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isIOSNativeApp, MobilePlatform.IOS, true),
-                arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isIOSNativeApp, "ios", true),
-                arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isIOSNativeApp, MobilePlatform.ANDROID, false)
-        );
-        // CHECKSTYLE:ON
-    }
-
-    @ParameterizedTest
-    @MethodSource("mobileNativeArguments")
-    void testIsMobileNativeApp(Predicate<GenericWebDriverManager> test, Object platform, boolean expected)
-    {
-        driverManager.setMobileApp(true);
-        mockWebDriver(platform);
-        assertEquals(expected, test.test(driverManager));
-    }
-
-    static Stream<Arguments> notMobileNativeArguments()
-    {
-        return Stream.of(
-                arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isAndroidNativeApp),
-                arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isIOSNativeApp)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("notMobileNativeArguments")
-    void testIsNotMobileNativeApp(Predicate<GenericWebDriverManager> test)
-    {
-        driverManager.setMobileApp(false);
-        assertFalse(test.test(driverManager));
     }
 
     @Test

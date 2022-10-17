@@ -126,7 +126,7 @@ class KeyboardStepsTests
     @Test
     void shouldPressKeyOnIOS()
     {
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(genericWebDriverManager.isIOS()).thenReturn(true);
 
         performPressdKeyTest();
     }
@@ -134,7 +134,7 @@ class KeyboardStepsTests
     @Test
     void shouldPressIOSKeyOnTvOS()
     {
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(genericWebDriverManager.isIOS()).thenReturn(false);
         when(genericWebDriverManager.isTvOS()).thenReturn(true);
 
         performPressdKeyTest();
@@ -143,7 +143,7 @@ class KeyboardStepsTests
     @Test
     void shouldTypeIOSKeyOnTvOS()
     {
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(genericWebDriverManager.isIOS()).thenReturn(false);
         when(genericWebDriverManager.isTvOS()).thenReturn(true);
         InOrder ordered = Mockito.inOrder(javascriptActions);
         keyboardSteps.typeKeys("home");
@@ -194,7 +194,7 @@ class KeyboardStepsTests
     {
         ArgumentCaptor<KeyEvent> keyCaptor = ArgumentCaptor.forClass(KeyEvent.class);
         PressesKey pressesKey = mock(PressesKey.class);
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(genericWebDriverManager.isIOS()).thenReturn(false);
         when(genericWebDriverManager.isTvOS()).thenReturn(false);
         when(webDriverProvider.getUnwrapped(PressesKey.class)).thenReturn(pressesKey);
 
@@ -210,7 +210,7 @@ class KeyboardStepsTests
     void shouldNotPressUnsupportedAndroidKey()
     {
         PressesKey pressesKey = mock(PressesKey.class);
-        when(genericWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(genericWebDriverManager.isIOS()).thenReturn(false);
         when(webDriverProvider.getUnwrapped(PressesKey.class)).thenReturn(pressesKey);
         when(genericWebDriverManager.isTvOS()).thenReturn(false);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -226,7 +226,7 @@ class KeyboardStepsTests
         ArgumentCaptor<KeyEvent> keyCaptor = ArgumentCaptor.forClass(KeyEvent.class);
         PressesKey pressesKey = mock(PressesKey.class);
         when(webDriverProvider.getUnwrapped(PressesKey.class)).thenReturn(pressesKey);
-        when(genericWebDriverManager.isAndroidNativeApp()).thenReturn(true);
+        when(genericWebDriverManager.isAndroid()).thenReturn(true);
         keyboardSteps.longPressKey(HOME);
 
         verify(pressesKey).longPressKey(keyCaptor.capture());

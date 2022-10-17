@@ -66,7 +66,7 @@ class ClipboardTextDynamicVariableTests
     {
         init(true, null);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(mobileAppWebDriverManager.isIOSNativeApp()).thenReturn(false);
+        when(mobileAppWebDriverManager.isIOS()).thenReturn(false);
         mockGetClipboardText();
 
         assertEquals(DynamicVariableCalculationResult.withValue(VALUE), dynamicVariable.calculateValue());
@@ -78,7 +78,7 @@ class ClipboardTextDynamicVariableTests
         var wdaBundleId = "wda-bundle-id";
         init(true, wdaBundleId);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(mobileAppWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(mobileAppWebDriverManager.isIOS()).thenReturn(true);
 
         mockGetClipboardText();
 
@@ -96,7 +96,7 @@ class ClipboardTextDynamicVariableTests
     {
         init(true, null);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(mobileAppWebDriverManager.isIOSNativeApp()).thenReturn(true);
+        when(mobileAppWebDriverManager.isIOS()).thenReturn(true);
 
         var thrown = assertThrows(IllegalArgumentException.class, dynamicVariable::calculateValue);
 
