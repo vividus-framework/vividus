@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -508,14 +508,14 @@ class DatabaseStepsTests
     {
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
 
+        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
+        when(dataSource.getUrl()).thenReturn(DB_URL);
+        when(dataSourceManager.getDataSource(DB_KEY)).thenReturn(dataSource);
         JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
         when(dataSourceManager.getJdbcTemplate(DB_KEY)).thenReturn(jdbcTemplate);
         when(jdbcTemplate.queryForList(QUERY))
                 .thenReturn(List.of(Map.of(COL1, VAL1)))
                 .thenReturn(List.of(Map.of(COL1, VAL2)));
-        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
-        when(jdbcTemplate.getDataSource()).thenReturn(dataSource);
-        when(dataSource.getUrl()).thenReturn(DB_URL);
 
         when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
         databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, TABLE);
@@ -529,14 +529,14 @@ class DatabaseStepsTests
     {
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
 
+        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
+        when(dataSource.getUrl()).thenReturn(DB_URL);
+        when(dataSourceManager.getDataSource(DB_KEY)).thenReturn(dataSource);
         JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
         when(dataSourceManager.getJdbcTemplate(DB_KEY)).thenReturn(jdbcTemplate);
         when(jdbcTemplate.queryForList(QUERY))
                 .thenReturn(List.of(Map.of(COL1, VAL1)))
                 .thenReturn(List.of(Map.of(COL1, VAL3)));
-        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
-        when(jdbcTemplate.getDataSource()).thenReturn(dataSource);
-        when(dataSource.getUrl()).thenReturn(DB_URL);
 
         databaseSteps.waitForDataAppearance(Duration.ofSeconds(2), 2, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO,
                 TABLE);
@@ -617,12 +617,13 @@ class DatabaseStepsTests
 
     private void mockQueryForList(String query, String dbKey, List<Map<String, Object>> result)
     {
-        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
-        when(dataSourceManager.getJdbcTemplate(dbKey)).thenReturn(jdbcTemplate);
         DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
-        lenient().when(jdbcTemplate.getDataSource()).thenReturn(dataSource);
         lenient().when(dataSource.getUrl()).thenReturn(DB_URL);
+        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
+        lenient().when(jdbcTemplate.getDataSource()).thenReturn(dataSource);
         when(jdbcTemplate.queryForList(query)).thenReturn(result);
+        when(dataSourceManager.getJdbcTemplate(dbKey)).thenReturn(jdbcTemplate);
+        when(dataSourceManager.getDataSource(dbKey)).thenReturn(dataSource);
     }
 
     private void configureTimeout()

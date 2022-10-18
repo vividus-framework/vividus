@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ public class ZephyrFileVisitor extends SimpleFileVisitor<Path>
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
     {
-        String path = file.toString();
-        if (file.getFileName().toString().endsWith(JSON_FILE_SUFFIX) && path.contains(TEST_CASES_DIRECTORY))
+        String filePath = file.toString();
+        if (filePath.endsWith(JSON_FILE_SUFFIX) && filePath.contains(TEST_CASES_DIRECTORY))
         {
             files.add(file.toFile());
         }

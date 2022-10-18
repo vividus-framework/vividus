@@ -42,7 +42,7 @@ class ReportPortalEnableConditionTests
         ConditionContext context = mock(ConditionContext.class);
         AnnotatedTypeMetadata metadata = mock(AnnotatedTypeMetadata.class);
         when(context.getEnvironment()).thenReturn(environment);
-        when(environment.getProperty(RP_ENABLE_PROPERTY, boolean.class)).thenReturn(rpEnabled);
+        when(environment.getProperty(RP_ENABLE_PROPERTY, Boolean.class)).thenReturn(rpEnabled);
         ReportPortalEnablePropertyCondition condition = new ReportPortalEnablePropertyCondition();
         assertEquals(rpEnabled, condition.matches(context, metadata));
         verifyNoInteractions(metadata);

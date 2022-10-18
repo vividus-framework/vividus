@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.vividus.steps.db;
 
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 public final class DataSourceStatistics
@@ -26,22 +25,21 @@ public final class DataSourceStatistics
     private final QueryStatistic left;
     private final QueryStatistic right;
 
-    DataSourceStatistics(JdbcTemplate leftJdbcTemplate)
+    DataSourceStatistics(DriverManagerDataSource leftDataSource)
     {
-        left = createQueryStatistic(leftJdbcTemplate);
+        left = createQueryStatistic(leftDataSource);
         right = new QueryStatistic(null);
     }
 
-    DataSourceStatistics(JdbcTemplate leftJdbcTemplate, JdbcTemplate rightJdbcTemplate)
+    DataSourceStatistics(DriverManagerDataSource leftDataSource, DriverManagerDataSource rightDataSource)
     {
-        left = createQueryStatistic(leftJdbcTemplate);
-        right = createQueryStatistic(rightJdbcTemplate);
+        left = createQueryStatistic(leftDataSource);
+        right = createQueryStatistic(rightDataSource);
     }
 
-    private QueryStatistic createQueryStatistic(JdbcTemplate jdbcTemplate)
+    private QueryStatistic createQueryStatistic(DriverManagerDataSource dataSource)
     {
-        String url = ((DriverManagerDataSource) jdbcTemplate.getDataSource()).getUrl();
-        return new QueryStatistic(url);
+        return new QueryStatistic(dataSource.getUrl());
     }
 
     public long getMismatched()

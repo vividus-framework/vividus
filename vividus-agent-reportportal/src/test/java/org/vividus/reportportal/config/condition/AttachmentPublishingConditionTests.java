@@ -40,7 +40,7 @@ class AttachmentPublishingConditionTests
         var context = mock(ConditionContext.class);
         var metadata = mock(AnnotatedTypeMetadata.class);
         when(context.getEnvironment()).thenReturn(environment);
-        when(environment.getProperty(ATTACHMENT_PROPERTY, boolean.class)).thenReturn(attachmentsEnabled);
+        when(environment.getProperty(ATTACHMENT_PROPERTY, Boolean.class)).thenReturn(attachmentsEnabled);
         var condition = new AttachmentPublishingPropertyCondition();
         assertEquals(attachmentsEnabled, condition.matches(context, metadata));
         verifyNoInteractions(metadata);

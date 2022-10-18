@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,17 +242,16 @@ public class DatabaseSteps
             String rightSqlQuery, String rightDbKey, Set<String> keys)
             throws InterruptedException, ExecutionException, TimeoutException
     {
-        JdbcTemplate leftJdbcTemplate = dataSourceManager.getJdbcTemplate(leftDbKey);
-        JdbcTemplate rightJdbcTemplate = dataSourceManager.getJdbcTemplate(rightDbKey);
-        DataSourceStatistics dataSourceStatistics = new DataSourceStatistics(leftJdbcTemplate, rightJdbcTemplate);
+        DataSourceStatistics dataSourceStatistics = new DataSourceStatistics(dataSourceManager.getDataSource(leftDbKey),
+                dataSourceManager.getDataSource(rightDbKey));
         QueryStatistic left = dataSourceStatistics.getLeft();
         left.setQuery(leftSqlQuery);
         QueryStatistic right = dataSourceStatistics.getRight();
         right.setQuery(rightSqlQuery);
         CompletableFuture<ListMultimap<Object, Map<String, Object>>> leftData =
-                createCompletableRequest(leftJdbcTemplate, leftSqlQuery, keys, left);
+                createCompletableRequest(dataSourceManager.getJdbcTemplate(leftDbKey), leftSqlQuery, keys, left);
         CompletableFuture<ListMultimap<Object, Map<String, Object>>> rightData =
-                createCompletableRequest(rightJdbcTemplate, rightSqlQuery, keys, right);
+                createCompletableRequest(dataSourceManager.getJdbcTemplate(rightDbKey), rightSqlQuery, keys, right);
 
         List<List<EntryComparisonResult>> result = leftData.thenCombine(rightData,
                 (leftResult, rightResult) -> compareData(comparisonRule, dataSourceStatistics, leftResult, rightResult))
@@ -286,12 +285,12 @@ public class DatabaseSteps
     public void waitForDataAppearance(Duration duration, int retryTimes, String leftSqlQuery, String leftDbKey,
             DataSetComparisonRule comparisonRule, List<Map<String, String>> rightTable)
     {
-        JdbcTemplate leftJdbcTemplate = dataSourceManager.getJdbcTemplate(leftDbKey);
-        DataSourceStatistics statistic = new DataSourceStatistics(leftJdbcTemplate);
+        DataSourceStatistics statistic = new DataSourceStatistics(dataSourceManager.getDataSource(leftDbKey));
         statistic.getLeft().setQuery(leftSqlQuery);
         ListMultimap<Object, Map<String, Object>> rightData = hashMap(Set.of(), rightTable);
         statistic.getRight().setRowsQuantity(rightData.size());
 
+        JdbcTemplate leftJdbcTemplate = dataSourceManager.getJdbcTemplate(leftDbKey);
         DurationBasedWaiter waiter = new DurationBasedWaiter(new WaitMode(duration, retryTimes));
         List<List<EntryComparisonResult>> comparisonResult = waiter.wait(
             () -> {
@@ -347,8 +346,7 @@ public class DatabaseSteps
     public void compareData(List<Map<String, Object>> leftData, Set<String> keys, String leftDbKey,
             DataSetComparisonRule comparisonRule, List<Map<String, String>> rightTable)
     {
-        JdbcTemplate leftJdbcTemplate = dataSourceManager.getJdbcTemplate(leftDbKey);
-        DataSourceStatistics statistics = new DataSourceStatistics(leftJdbcTemplate);
+        DataSourceStatistics statistics = new DataSourceStatistics(dataSourceManager.getDataSource(leftDbKey));
         statistics.getLeft().setRowsQuantity(leftData.size());
         ListMultimap<Object, Map<String, Object>> left = hashMap(keys,
                 leftData.stream().map(this::convertValuesToString));

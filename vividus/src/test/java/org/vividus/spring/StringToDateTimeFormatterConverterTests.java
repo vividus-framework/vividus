@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.spring;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.format.DateTimeFormatter;
@@ -32,8 +33,9 @@ class StringToDateTimeFormatterConverterTests
     void testConvert()
     {
         String format = "hh:mm";
-        assertEquals(DateTimeFormatter.ofPattern(format).toString(),
-                stringToDateTimeFormatterConverter.convert(format).toString());
+        DateTimeFormatter actual = stringToDateTimeFormatterConverter.convert(format);
+        assertNotNull(actual);
+        assertEquals(DateTimeFormatter.ofPattern(format).toString(), actual.toString());
     }
 
     @Test
