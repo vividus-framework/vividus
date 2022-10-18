@@ -40,10 +40,10 @@ When I wait for presence of element by `$.json.iteration3` for `PT15S` duration 
 |Given request body: {                                                                    |
 |  "iteration${iteration}": ${iteration}                                                  |
 |}                                                                                        |
-|When I send HTTP POST to the relative URL '/post'                                        |
+|When I execute HTTP POST request for resource with relative URL `/post`                  |
 |Then JSON element by JSON path `$.headers.Content-Type` is equal to `"application/json"` |
 
 Scenario: Verify failure in step "When I wait for presence of element by `$jsonPath` for `$duration` duration retrying $retryTimes times$stepsToExecute"
 When I wait for presence of element by `$.non-existing` for `PT1S` duration retrying 1 times
-|step                                                                                          |
-|When I send HTTP GET to the relative URL '/status/204'                                        |
+|step                                                                        |
+|When I execute HTTP GET request for resource with relative URL `status/204` |

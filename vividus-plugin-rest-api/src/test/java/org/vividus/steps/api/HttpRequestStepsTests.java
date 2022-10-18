@@ -172,10 +172,10 @@ class HttpRequestStepsTests
     }
 
     @Test
-    void testWhenIDoHttpRequestToRelativeURL() throws IOException
+    void shouldExecuteHttpRequestToRelativeUrl() throws IOException
     {
         httpRequestSteps.setApiEndpoint(URL);
-        httpRequestSteps.whenIDoHttpRequestToRelativeURL(HttpMethod.GET, RELATIVE_URL);
+        httpRequestSteps.executeHttpRequestToRelativeURL(HttpMethod.GET, RELATIVE_URL);
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, URL, Optional.of(RELATIVE_URL));
     }
 

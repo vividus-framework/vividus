@@ -178,8 +178,8 @@ public class HttpRequestSteps
      * set HTTP headers and request body. The response HTTP headers, response status code and response body can be
      * accessed by the corresponding steps and dynamic variables.
      *
-     * @param httpMethod The HTTP method.
-     * @param url        The server URL.
+     * @param httpMethod The <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods">HTTP method</a>
+     * @param url        The URL of the resource on the server
      * @throws IOException If an input or output exception occurred
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/">The HTTP methods.</a>
      */
@@ -190,17 +190,17 @@ public class HttpRequestSteps
     }
 
     /**
-     * Step is sending HTTP request for the given <b>relative URL</b> and saving HTTP response into Scenario-level
-     * variable.<br> This step can use the request body that was set before. Request body shouldn't be set for methods
-     * that can't contain body (GET, HEAD, OPTIONS, TRACE), and should be set for methods that must contain body (PATCH,
-     * POST, PUT).
-     * @param httpMethod HTTP method type. Parameter accepts the following HTTP methods: <ul> <li>GET</li> <li>HEAD</li>
-     * <li>POST</li> <li>PUT</li> <li>OPTIONS</li> <li>DELETE</li> <li>TRACE</li> <li>PATCH</li> </ul>
-     * @param relativeURL relative URL
+     * Executes the HTTP request for a resource identified by the URL relative to the base URL specified by the
+     * <b>rest-api.http.endpoint</b> property. The step uses previously set HTTP headers and request body. The
+     * HTTP response headers, status code and body can be accessed via the corresponding steps and dynamic variables.
+     *
+     * @param httpMethod  The <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods">HTTP method</a>
+     * @param relativeURL The relative URL of the resource on the server
      * @throws IOException If an input or output exception occurred
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/">The HTTP methods.</a>
      */
-    @When("I send HTTP $httpMethod to the relative URL '$relativeURL'")
-    public void whenIDoHttpRequestToRelativeURL(HttpMethod httpMethod, String relativeURL) throws IOException
+    @When("I execute HTTP $httpMethod request for resource with relative URL `$relativeURL`")
+    public void executeHttpRequestToRelativeURL(HttpMethod httpMethod, String relativeURL) throws IOException
     {
         httpRequestExecutor.executeHttpRequest(httpMethod, apiEndpoint, Optional.of(relativeURL));
     }

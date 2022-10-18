@@ -16,7 +16,11 @@
 
 package org.vividus.steps.api;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
+import static java.lang.String.format;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,8 +36,13 @@ import static org.vividus.steps.StringComparisonRule.IS_EQUAL_TO;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -60,10 +69,12 @@ import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 @SuppressWarnings("checkstyle:MethodCount")
 class HttpResponseValidationStepsTests
 {
+    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(HttpResponseValidationSteps.class);
+
     private static final String SET_COOKIES_HEADER_NAME = "Set-Cookies";
     private static final String HEADER_IS_PRESENT = " header is present";
     private static final String RESPONSE_BODY = "testResponse";
@@ -71,14 +82,21 @@ class HttpResponseValidationStepsTests
     private static final String VARIABLE_NAME = "variableName";
     private static final String NUMBER_RESPONSE_HEADERS_WITH_NAME =
             "The number of the response headers with the name '%s'";
+    private static final String NUMBER_OF_RESPONSE_HEADERS = "Number of the response headers with name '%s'";
     private static final String HTTP_RESPONSE_IS_NOT_NULL = "HTTP response is not null";
-    private static final String TLS_V1_2 = "TLSv1.2";
+    private static final String TLS_V1_3 = "TLSv1.3";
     private static final String CONNECTION_SECURE_ASSERTION = "Connection is secure";
     private static final String HTTP_RESPONSE_STATUS_CODE = "HTTP response status code";
     private static final int RETRY_TIMES = 3;
     private static final int RESPONSE_CODE = 200;
     private static final int RESPONSE_CODE_ERROR = 404;
     private static final Duration DURATION = Duration.ofSeconds(9);
+    private static final String RESPONSE_WITH_NO_BODY = "The response does not contain body";
+    private static final String SECURITY_PROTOCOL = "Security protocol";
+    private static final String HEADER_VALUE = "'%s' header value";
+    private static final String EQUAL_ARRAYS = "Expected and actual arrays are equal";
+    private static final String ARRAY_SIZE = "Arrays size";
+    private static final String RESPONSE_BODY_TXT = "/requestBody.txt";
 
     @Mock
     private HttpTestContext httpTestContext;
@@ -112,9 +130,11 @@ class HttpResponseValidationStepsTests
         ExamplesTable attribute = new ExamplesTable("|attribute|\n|HTTPOnly|/|");
         httpResponseValidationSteps.assertHeaderContainsAttributes(SET_COOKIES_HEADER_NAME, attribute);
         verify(softAssert).assertThat(
-                eq(SET_COOKIES_HEADER_NAME + " header contains " + headerAttributeName + " attribute"),
+                eq(format("%s header contains %s attribute", SET_COOKIES_HEADER_NAME, headerAttributeName)),
                 eq(Collections.singletonList(headerAttributeName)),
                 argThat(matcher -> matcher.toString().equals(Matchers.contains(headerAttributeName).toString())));
+        validateDeprecateMessage("Then response header '$httpHeaderName' contains attribute: $attributes",
+                "Then response header `$headerName` contains elements:$elements");
     }
 
     @Test
@@ -137,6 +157,45 @@ class HttpResponseValidationStepsTests
     }
 
     @Test
+    void shouldCheckThatHeaderWithNameContainsElements()
+    {
+        mockHttpResponse();
+        Header header = mock(Header.class);
+        when(header.getName()).thenReturn(SET_COOKIES_HEADER_NAME);
+        httpResponse.setResponseHeaders(header);
+        HeaderElement headerElement = mock(HeaderElement.class);
+        when(header.getElements()).thenReturn(new HeaderElement[] { headerElement });
+        when(softAssert.assertTrue(SET_COOKIES_HEADER_NAME + HEADER_IS_PRESENT, true)).thenReturn(true);
+        String headerAttributeName = "charset";
+        when(headerElement.getName()).thenReturn(headerAttributeName);
+        ExamplesTable attribute = new ExamplesTable("|element|\n|charset|/|");
+        httpResponseValidationSteps.checkHeaderContainsElements(SET_COOKIES_HEADER_NAME, attribute);
+        verify(softAssert).assertThat(
+                eq(format("%s header contains %s element", SET_COOKIES_HEADER_NAME, headerAttributeName)),
+                eq(Collections.singletonList(headerAttributeName)),
+                argThat(matcher -> matcher.toString().equals(Matchers.contains(headerAttributeName).toString())));
+    }
+
+    @Test
+    void shouldNotCheckHeaderElementsIfHeaderWithNameIsNotFound()
+    {
+        mockHttpResponse();
+        Header header = mock(Header.class);
+        when(header.getName()).thenReturn("Accept");
+        httpResponse.setResponseHeaders(header);
+        ExamplesTable attribute = new ExamplesTable("|element|\n|value|/|");
+        httpResponseValidationSteps.checkHeaderContainsElements(SET_COOKIES_HEADER_NAME, attribute);
+        verify(softAssert).assertTrue(SET_COOKIES_HEADER_NAME + HEADER_IS_PRESENT, false);
+    }
+
+    @Test
+    void shouldNotCheckHeaderElementsIfHttpCallWasNotPerformed()
+    {
+        httpResponseValidationSteps.checkHeaderContainsElements(SET_COOKIES_HEADER_NAME, ExamplesTable.empty());
+        verifyNoHttpResponse();
+    }
+
+    @Test
     void testThenTheResponseTimeShouldBeLessThan()
     {
         mockHttpResponse();
@@ -145,12 +204,32 @@ class HttpResponseValidationStepsTests
         httpResponseValidationSteps.thenTheResponseTimeShouldBeLessThan(responseTime);
         verify(softAssert).assertThat(eq("The response time is less than response time threshold."),
                 eq(responseTime), argThat(matcher -> lessThan(responseTime).toString().equals(matcher.toString())));
+        validateDeprecateMessage("Then the response time should be less than '$responseTimeThresholdMs' milliseconds",
+                "Then response time is $comparisonRule `$responseTime` milliseconds");
     }
 
     @Test
     void testThenTheResponseTimeShouldBeLessThanNoHttpResponse()
     {
         httpResponseValidationSteps.thenTheResponseTimeShouldBeLessThan(1000L);
+        verifyNoHttpResponse();
+    }
+
+    @Test
+    void shouldValidateResponseTime()
+    {
+        mockHttpResponse();
+        long responseTime = 1000L;
+        httpResponse.setResponseTimeInMs(responseTime);
+        httpResponseValidationSteps.validateResponseTime(ComparisonRule.LESS_THAN, responseTime);
+        verify(softAssert).assertThat(eq("HTTP response time"), eq(responseTime),
+                argThat(matcher -> lessThan(responseTime).toString().equals(matcher.toString())));
+    }
+
+    @Test
+    void shouldNotValidateResponseTimeIfHttpCallWasNotPerfmed()
+    {
+        httpResponseValidationSteps.validateResponseTime(ComparisonRule.EQUAL_TO, 100L);
         verifyNoHttpResponse();
     }
 
@@ -181,14 +260,34 @@ class HttpResponseValidationStepsTests
         int validCode = 200;
         httpResponse.setStatusCode(validCode);
         httpResponseValidationSteps.assertResponseCode(ComparisonRule.EQUAL_TO, validCode);
-        verify(softAssert).assertThat(eq(HTTP_RESPONSE_STATUS_CODE), eq(validCode),
-                argThat(matcher -> matcher.toString().equals("a value equal to <" + validCode + ">")));
+        verify(softAssert).assertThat(eq(HTTP_RESPONSE_STATUS_CODE), eq(validCode), argThat(
+                matcher -> matcher.toString().equals(ComparisonRule.EQUAL_TO.getComparisonRule(validCode).toString())));
+        validateDeprecateMessage("Then the response code is $comparisonRule '$responseCode'",
+                "Then response code is $comparisonRule `$responseCode`");
     }
 
     @Test
     void testThenTheResponseCodeShouldBeEqualToNoHttpResponse()
     {
         httpResponseValidationSteps.assertResponseCode(ComparisonRule.EQUAL_TO, 200);
+        verifyNoHttpResponse();
+    }
+
+    @Test
+    void shouldValidateResponseCode()
+    {
+        mockHttpResponse();
+        int validCode = 200;
+        httpResponse.setStatusCode(validCode);
+        httpResponseValidationSteps.validateResponseCode(ComparisonRule.EQUAL_TO, validCode);
+        verify(softAssert).assertThat(eq(HTTP_RESPONSE_STATUS_CODE), eq(validCode), argThat(
+                matcher -> matcher.toString().equals(ComparisonRule.EQUAL_TO.getComparisonRule(validCode).toString())));
+    }
+
+    @Test
+    void shouldNotValidateResponseCodeIfHttpCallWasNotPerformed()
+    {
+        httpResponseValidationSteps.validateResponseCode(ComparisonRule.EQUAL_TO, 200);
         verifyNoHttpResponse();
     }
 
@@ -201,6 +300,10 @@ class HttpResponseValidationStepsTests
         httpResponseValidationSteps.doesResponseBodyMatch(IS_EQUAL_TO, body);
         verify(softAssert).assertThat(eq(HTTP_RESPONSE_BODY), eq(body),
                 argThat(arg -> arg.toString().equals("\"testResponse\"")));
+        assertThat(LOGGER.getLoggingEvents(), is(List.of(warn(
+                "The step: \"Then the response body $comparisonRule '$content'\" is deprecated and will be removed in"
+                + " VIVIDUS 0.6.0. Use ${response} dynamic variable with \"Then `$variable1` is $comparisonRule "
+                + "`$variable2`\" step"))));
     }
 
     @Test
@@ -214,17 +317,37 @@ class HttpResponseValidationStepsTests
     void testDoesResponseBodyMatchResource()
     {
         mockHttpResponse();
-        when(softAssert.assertEquals("Arrays size", 6, 6)).thenReturn(true);
+        when(softAssert.assertEquals(ARRAY_SIZE, 6, 6)).thenReturn(true);
         httpResponse.setResponseBody(new byte[] { 123, 98, 111, 100, 121, 125 });
         httpResponseValidationSteps.doesResponseBodyMatchResource(ByteArrayValidationRule.IS_EQUAL_TO,
-                "/requestBody.txt");
-        verify(softAssert).recordPassedAssertion("Expected and actual arrays are equal");
+                RESPONSE_BODY_TXT);
+        verify(softAssert).recordPassedAssertion(EQUAL_ARRAYS);
+        validateDeprecateMessage("Then the response body $validationRule resource at '$resourcePath'",
+                "Then response body $validationRule resource at `$resourcePath`");
     }
 
     @Test
     void testDoesResponseBodyMatchResourceNoHttpResponse()
     {
         httpResponseValidationSteps.doesResponseBodyMatchResource(ByteArrayValidationRule.IS_EQUAL_TO, "body.txt");
+        verifyNoHttpResponse();
+    }
+
+    @Test
+    void shouldCompareResponseBodyAgainstResourceByPath()
+    {
+        mockHttpResponse();
+        when(softAssert.assertEquals(ARRAY_SIZE, 6, 6)).thenReturn(true);
+        httpResponse.setResponseBody(new byte[] { 123, 98, 111, 100, 121, 125 });
+        httpResponseValidationSteps.compareResponseBodyAgainstResource(ByteArrayValidationRule.IS_EQUAL_TO,
+                RESPONSE_BODY_TXT);
+        verify(softAssert).recordPassedAssertion(EQUAL_ARRAYS);
+    }
+
+    @Test
+    void shouldNotCompareResponseBodyAgainstResourceByPathIfHttpCallWasNotPerformed()
+    {
+        httpResponseValidationSteps.compareResponseBodyAgainstResource(ByteArrayValidationRule.IS_EQUAL_TO, "data.txt");
         verifyNoHttpResponse();
     }
 
@@ -273,6 +396,9 @@ class HttpResponseValidationStepsTests
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
         httpResponseValidationSteps.saveHeaderValue(SET_COOKIES_HEADER_NAME, scopes, VARIABLE_NAME);
         verify(variableContext).putVariable(scopes, VARIABLE_NAME, headerValue);
+        validateDeprecateMessage(
+                "When I save response header '$httpHeaderName' value to $scopes variable '$variableName'",
+                "When I save response header `$headerName` value to $scopes variable `$variableName`");
     }
 
     @Test
@@ -284,20 +410,58 @@ class HttpResponseValidationStepsTests
     }
 
     @Test
+    void shouldSaveHeaderValueToVariable()
+    {
+        mockHttpResponse();
+        String headerValue = mockHeaderRetrieval();
+        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
+        httpResponseValidationSteps.saveHeaderValueToVariable(SET_COOKIES_HEADER_NAME, scopes, VARIABLE_NAME);
+        verify(variableContext).putVariable(scopes, VARIABLE_NAME, headerValue);
+    }
+
+    @Test
+    void shouldNotSaveHeaderValueToVariableIfHttpCallWasNotPerformed()
+    {
+        httpResponseValidationSteps.saveHeaderValueToVariable(SET_COOKIES_HEADER_NAME, Set.of(VariableScope.SCENARIO),
+                VARIABLE_NAME);
+        verifyNoHttpResponse();
+    }
+
+    @Test
     void testDoesHeaderEqualToValue()
     {
         mockHttpResponse();
         String headerValue = mockHeaderRetrieval();
         httpResponseValidationSteps.doesHeaderMatch(SET_COOKIES_HEADER_NAME, IS_EQUAL_TO,
                 headerValue);
-        verify(softAssert).assertThat(eq("'" + SET_COOKIES_HEADER_NAME + "' header value"), eq(headerValue),
+        verify(softAssert).assertThat(eq(format(HEADER_VALUE, SET_COOKIES_HEADER_NAME)), eq(headerValue),
                 argThat(matcher -> matcher.toString().equals(equalTo(headerValue).toString())));
+        validateDeprecateMessage("Then the value of the response header '$httpHeaderName' $comparisonRule '$value'",
+                "Then value of response header `$headerName` $comparisonRule `$value`");
     }
 
     @Test
     void testDoesHeaderEqualToValueNoHttpResponse()
     {
         httpResponseValidationSteps.doesHeaderMatch(SET_COOKIES_HEADER_NAME, IS_EQUAL_TO, "value");
+        verifyNoHttpResponse();
+    }
+
+    @Test
+    void shouldValidateHeaderValue()
+    {
+        mockHttpResponse();
+        String headerValue = mockHeaderRetrieval();
+        httpResponseValidationSteps.validateHeaderValue(SET_COOKIES_HEADER_NAME, IS_EQUAL_TO,
+                headerValue);
+        verify(softAssert).assertThat(eq(format(HEADER_VALUE, SET_COOKIES_HEADER_NAME)), eq(headerValue),
+                argThat(matcher -> matcher.toString().equals(equalTo(headerValue).toString())));
+    }
+
+    @Test
+    void shouldNotValidateHeaderValueIfHttpCallWasNotPerfor()
+    {
+        httpResponseValidationSteps.validateHeaderValue(SET_COOKIES_HEADER_NAME, IS_EQUAL_TO, "header value");
         verifyNoHttpResponse();
     }
 
@@ -313,12 +477,33 @@ class HttpResponseValidationStepsTests
     }
 
     @Test
+    void shouldNotSaveHeaderValueIfHeaderByNameIsNotFound()
+    {
+        mockHttpResponse();
+        httpResponse.setResponseHeaders();
+        httpResponseValidationSteps.saveHeaderValueToVariable(SET_COOKIES_HEADER_NAME, Set.of(VariableScope.SCENARIO),
+                VARIABLE_NAME);
+        verify(softAssert).assertTrue(SET_COOKIES_HEADER_NAME + HEADER_IS_PRESENT, false);
+        verifyNoInteractions(variableContext);
+    }
+
+    @Test
     void testDoesResponseNotContainBody()
     {
         mockHttpResponse();
         httpResponse.setResponseBody(null);
         httpResponseValidationSteps.doesResponseNotContainBody();
-        verify(softAssert).assertNull("The response does not contain body", null);
+        verify(softAssert).assertNull(RESPONSE_WITH_NO_BODY, null);
+        validateDeprecateMessage("Then the response does not contain body", "Then response does not contain body");
+    }
+
+    @Test
+    void shouldCheckThatTheResponseDoesNotContainABody()
+    {
+        mockHttpResponse();
+        httpResponse.setResponseBody(null);
+        httpResponseValidationSteps.doesResponseContainNoBody();
+        verify(softAssert).assertNull(RESPONSE_WITH_NO_BODY, null);
     }
 
     @Test
@@ -329,19 +514,9 @@ class HttpResponseValidationStepsTests
     }
 
     @Test
-    void testSaveResponseBody()
+    void shouldNotCheckResponseIfHttpCallWasNotPerformed()
     {
-        mockHttpResponse();
-        httpResponse.setResponseBody(RESPONSE_BODY.getBytes(StandardCharsets.UTF_8));
-        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        httpResponseValidationSteps.saveResponseBody(scopes, VARIABLE_NAME);
-        verify(variableContext).putVariable(scopes, VARIABLE_NAME, RESPONSE_BODY);
-    }
-
-    @Test
-    void testSaveResponseBodyNoHttpResponse()
-    {
-        httpResponseValidationSteps.saveResponseBody(Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
+        httpResponseValidationSteps.doesResponseContainNoBody();
         verifyNoHttpResponse();
     }
 
@@ -367,6 +542,9 @@ class HttpResponseValidationStepsTests
         verify(softAssert).assertThat(eq(String.format(NUMBER_RESPONSE_HEADERS_WITH_NAME,
                 SET_COOKIES_HEADER_NAME)), eq(2),
                 argThat(m -> ComparisonRule.EQUAL_TO.getComparisonRule(2).toString().equals(m.toString())));
+        validateDeprecateMessage(
+                "Then the number of the response headers with the name '$headerName' is $comparisonRule $value",
+                "Then number of response headers with name `$headerName` is $comparisonRule $number");
     }
 
     @Test
@@ -377,18 +555,78 @@ class HttpResponseValidationStepsTests
     }
 
     @Test
-    void shouldValidateSecuredConnection()
+    void shouldFailIfResponseDoesntContainDesiredNumberOfHeaders()
+    {
+        mockHttpResponse();
+        httpResponse.setResponseHeaders();
+        httpResponseValidationSteps.validateNumberOfResponseHeaders(SET_COOKIES_HEADER_NAME, ComparisonRule.EQUAL_TO,
+                1);
+        verify(softAssert).assertThat(eq(String.format(NUMBER_OF_RESPONSE_HEADERS, SET_COOKIES_HEADER_NAME)), eq(0),
+                argThat(m -> ComparisonRule.EQUAL_TO.getComparisonRule(1).toString().equals(m.toString())));
+    }
+
+    @Test
+    void shouldValidateNumberOfHeadersInResponse()
+    {
+        mockHttpResponse();
+        Header header = mock(Header.class);
+        when(header.getName()).thenReturn(SET_COOKIES_HEADER_NAME);
+        httpResponse.setResponseHeaders(header, header);
+        httpResponseValidationSteps.validateNumberOfResponseHeaders(SET_COOKIES_HEADER_NAME, ComparisonRule.EQUAL_TO,
+                2);
+        verify(softAssert).assertThat(eq(String.format(NUMBER_OF_RESPONSE_HEADERS, SET_COOKIES_HEADER_NAME)), eq(2),
+                argThat(m -> ComparisonRule.EQUAL_TO.getComparisonRule(2).toString().equals(m.toString())));
+    }
+
+    @Test
+    void shouldNotValidateNumberOfHeadersInResponseIfHttpCallWasNotPerformed()
+    {
+        httpResponseValidationSteps.validateNumberOfResponseHeaders(SET_COOKIES_HEADER_NAME, ComparisonRule.EQUAL_TO,
+                1);
+        verifyNoHttpResponse();
+    }
+
+    @Test
+    void shouldValidateSecuredConnectionDeprecated()
     {
         boolean secure = true;
-        String actualProtocol = "TLSv1.3";
         ConnectionDetails connectionDetails = new ConnectionDetails();
         connectionDetails.setSecure(secure);
-        connectionDetails.setSecurityProtocol(actualProtocol);
+        connectionDetails.setSecurityProtocol(TLS_V1_3);
 
         when(httpTestContext.getConnectionDetails()).thenReturn(connectionDetails);
         when(softAssert.assertTrue(CONNECTION_SECURE_ASSERTION, secure)).thenReturn(Boolean.TRUE);
-        httpResponseValidationSteps.isConnectionSecured(TLS_V1_2);
-        verify(softAssert).assertEquals("Security protocol", TLS_V1_2, actualProtocol);
+        httpResponseValidationSteps.isConnectionSecured(TLS_V1_3);
+        verify(softAssert).assertEquals(SECURITY_PROTOCOL, TLS_V1_3, TLS_V1_3);
+        validateDeprecateMessage("Then the connection is secured using $securityProtocol protocol",
+                "Then connection is secured using $securityProtocol protocol");
+    }
+
+    @Test
+    void shouldValidateNonSecuredConnectionDeprecated()
+    {
+        boolean secure = false;
+        ConnectionDetails connectionDetails = new ConnectionDetails();
+        connectionDetails.setSecure(secure);
+
+        when(httpTestContext.getConnectionDetails()).thenReturn(connectionDetails);
+        when(softAssert.assertTrue(CONNECTION_SECURE_ASSERTION, secure)).thenReturn(Boolean.FALSE);
+        httpResponseValidationSteps.validateConnectionIsSecured(TLS_V1_3);
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldValidateSecuredConnection()
+    {
+        boolean secure = true;
+        ConnectionDetails connectionDetails = new ConnectionDetails();
+        connectionDetails.setSecure(secure);
+        connectionDetails.setSecurityProtocol(TLS_V1_3);
+
+        when(httpTestContext.getConnectionDetails()).thenReturn(connectionDetails);
+        when(softAssert.assertTrue(CONNECTION_SECURE_ASSERTION, secure)).thenReturn(Boolean.TRUE);
+        httpResponseValidationSteps.validateConnectionIsSecured(TLS_V1_3);
+        verify(softAssert).assertEquals(SECURITY_PROTOCOL, TLS_V1_3, TLS_V1_3);
     }
 
     @Test
@@ -400,7 +638,7 @@ class HttpResponseValidationStepsTests
 
         when(httpTestContext.getConnectionDetails()).thenReturn(connectionDetails);
         when(softAssert.assertTrue(CONNECTION_SECURE_ASSERTION, secure)).thenReturn(Boolean.FALSE);
-        httpResponseValidationSteps.isConnectionSecured(TLS_V1_2);
+        httpResponseValidationSteps.validateConnectionIsSecured(TLS_V1_3);
         verifyNoMoreInteractions(softAssert);
     }
 
@@ -460,5 +698,13 @@ class HttpResponseValidationStepsTests
     {
         verify(softAssert).assertNotNull(HTTP_RESPONSE_IS_NOT_NULL, null);
         verifyNoMoreInteractions(softAssert);
+    }
+
+    private void validateDeprecateMessage(String deprecatedStep, String newStep)
+    {
+        assertThat(LOGGER.getLoggingEvents(),
+                is(List.of(warn(
+                        "The step \"{}\" is deprecated and will be removed in VIVIDUS 0.6.0. Please use step \"{}\"",
+                        deprecatedStep, newStep))));
     }
 }

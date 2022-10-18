@@ -21,7 +21,11 @@ Then the response code is equal to '200'
 Then JSON element by JSON path `$.json` is equal to `${request-body}`
 Then JSON element by JSON path `$.headers.Content-Type` is equal to `"application/json"`
 
-Scenario: Verify steps "Given request body: $content" and "When I send HTTP $httpMethod to the relative URL '$relativeURL'"
+Scenario: Verify steps "Given request body: $content" and "When I execute HTTP $httpMethod request for resource with relative URL `$relativeURL`"
+Given request body: ${request-body}
+When I execute HTTP PUT request for resource with relative URL `/put`
+
+Scenario: Verify deprecated step "When I send HTTP $httpMethod to the relative URL '$relativeURL'"
 Given request body: ${request-body}
 When I send HTTP PUT to the relative URL '/put'
 
@@ -32,11 +36,6 @@ When I execute HTTP DELETE request for resource with URL `https://httpbin.org/de
 Scenario: Verify steps "When I execute HTTP $httpMethod request for resource with URL `$url`"
 Given request body: ${request-body}
 When I execute HTTP POST request for resource with URL `https://httpbin.org/post`
-
-Scenario: Verify step "Then the connection is secured using $securityProtocol protocol"
-Given request body: ${request-body}
-When I send HTTP DELETE to the relative URL '/delete'
-Then the connection is secured using TLSv1.2 protocol
 
 Scenario: Verify step "Then HTTP resources are valid:$resources"
 Then HTTP resources are valid:
