@@ -176,8 +176,10 @@ When I create temporary file with name `excel` and content `${response-as-bytes}
 ----
 
 === HTTP response code
-The variable provides the https://developer.mozilla.org/en-US/docs/Web/HTTP/Status[HTTP response status code]
-of the latest executed HTTP call.
+
+:http-status-code: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status[HTTP response status code]
+
+The variable provides the {http-status-code} of the latest executed HTTP call.
 
 [source,gherkin]
 ----
@@ -471,13 +473,11 @@ When I send HTTP GET to the relative URL '/get?name=Content'
 Then a JSON element by the JSON path '$.headers.Accept-Language' is equal to '"en-ru"'
 ----
 
-=== Execute HTTP request
+=== Execute HTTP request with absolute URL
 
-Executes the HTTP request to access a resource on the server identified by the URL.
-
-The step uses previously set HTTP headers and request body.
-
-The response HTTP headers, response status code and response body can be accessed by the corresponding steps and dynamic variables.
+Executes the HTTP request for a resource identified by the absolute URL. The step uses previously set HTTP headers
+and request body. The HTTP response headers, status code and body can be accessed by the corresponding steps and
+dynamic variables.
 
 [source,gherkin]
 ----
@@ -491,6 +491,197 @@ When I execute HTTP $httpMethod request for resource with URL `$url`
 [source,gherkin]
 ----
 When I execute HTTP GET request for resource with URL `https://example.com`
+----
+
+=== Execute HTTP request with relative URL
+
+Executes the HTTP request for a resource identified by the URL relative to the base URL specified by the `rest-api.http.endpoint`
+property. The step uses previously set HTTP headers and request body. The HTTP response headers, status code and body can be
+accessed via the corresponding steps and dynamic variables.
+
+[source,gherkin]
+----
+When I execute HTTP $httpMethod request for resource with relative URL `$relativeURL`
+----
+
+* `$httpMethod` - The https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods[HTTP method].
+* `$relativeURL` - The relative URL of the resource on the server.
+
+.Configuration
+[source,properties]
+----
+rest-api.http.endpoint=https://httpbin.org
+----
+
+.Execute HTTP GET request
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with relative URL `/image/jpeg`
+----
+
+=== Compare HTTP response body against resource
+
+Compares the HTTP response body against the xref:ROOT:glossary.adoc#_resource[resource] data according to the provided rule.
+
+[source,gherkin]
+----
+Then response body $validationRule resource at `$resourcePath`
+----
+
+* `$validationRule` - The valdation rule, either `is equal to` or `is not equal to`.
+* `$resourcePath` - The xref:ROOT:glossary.adoc#_resource[resource] path.
+
+.Compare images
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/image/png`
+Then response body is equal to resource at `/images/pig.png`
+----
+
+=== Validate HTTP response code
+
+Compares the {http-status-code} against the expected number.
+
+[source,gherkin]
+----
+Then response code is $comparisonRule `$responseCode`
+----
+
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$responseCode` - The expected {http-status-code}.
+
+.Validate the resource is not found
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/cfa2fdbc`
+Then response code is equal to `404`
+----
+
+=== Validate HTTP response time
+
+Compares the HTTP response time against the expected number in milliseconds.
+
+[source,gherkin]
+----
+Then response time is $comparisonRule `$responseTime` milliseconds
+----
+
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$responseTime` - The expected response time in milliseconds.
+
+.Check HTTP response time
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://example.com`
+Then response time is less than `1000` milliseconds
+----
+
+=== Valdate number of HTTP response headers
+
+:http-response-header: https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Response_fields[HTTP response header]
+
+Validates the number of HTTP response headers filtered by the specified name.
+
+[source,gherkin]
+----
+Then number of response headers with name `$headerName` is $comparisonRule $number
+----
+
+* `$headerName` - The {http-response-header} name.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$number` - The expected number of headers.
+
+.Check the browser is forced to use a secure web connection
+[source,gherkin]
+----
+Then number of response headers with name `Strict-Transport-Security` is equal to 1
+----
+
+=== Validate HTTP response header value
+
+Compares the header value against the expected value according to the comparison rule.
+
+[source,gherkin]
+----
+Then value of response header `$headerName` $comparisonRule `$value`
+----
+
+* `$headerName` - The {http-response-header} name.
+* `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[The string comparison rule].
+* `$number` - The expected HTTP header value.
+
+.Check HTTP response content type
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/robots.txt`
+Then value of response header `Content-Type` is equal to `text/plain`
+----
+
+=== Validate HTTP response header elements
+
+Validates that the response header with the specified name contains elements. Might be useful to verify such HTTP
+headers as `Set-Cookie` that have values that can be decomposed into multiple elements.
+
+.HTTP header with elements format
+[source]
+----
+header = [ element ] *( "," [ element ] )
+----
+
+[source,gherkin]
+----
+Then response header `$headerName` contains elements:$elements
+----
+
+* `$headerName` - The {http-response-header} name.
+* `$attributes` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with expected elements.
+
+.Check attributes of Set-Cookie header
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/authenticate`
+Then response header `Set-Cookie` contains elements:
+|element |
+|JSESSION|
+|clientId|
+----
+
+=== Save HTTP response header value
+
+Saves the HTTP response header value into a variable.
+
+[source,gherkin]
+----
+When I save response header `$headerName` value to $scopes variable `$variableName`
+----
+
+* `$headerName` - The {http-response-header} name.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the header value.
+
+.Save Content-Length header value
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/brotli`
+When I save response header `Content-Length` value to scenario variable `length`
+----
+
+=== Validate connection security
+
+Validates that the HTTP connection is secured with the defined security protocol.
+
+[source,gherkin]
+----
+Then connection is secured using $securityProtocol protocol
+----
+
+* `$securityProtocol` - The expected security protocol, e.g. `TLSv1.2`, `TLSv1.3`
+
+.Check that the httpbin is secured
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/`
+Then connection is secured using TLSv1.2 protocol
 ----
 
 === Wait for JSON element in the HTTP response
@@ -610,6 +801,22 @@ Then content type of response body $comparisonRule `$contentType`
 ----
 When I execute HTTP GET request for resource with URL `https://httpbin.org/json`
 Then content type of response body is equal to `application/json`
+----
+
+=== Validate absence of reponse body
+
+Validates that the HTTP response does not contain a body.
+
+[source,gherkin]
+----
+Then response does not contain body
+----
+
+.Submit a POST request and check that response body is absent
+[source,gherkin]
+----
+When I execute HTTP POST request for resource with URL `https://httpbin.org/json`
+Then response does not contain body
 ----
 
 === Validate size of response body
@@ -937,3 +1144,50 @@ The step xref:plugins:plugin-json.adoc#_save_number_of_json_elements[is moved] t
 The step is still available via `vividus-plugin-rest-api`, but it'll be required
 to install `vividus-plugin-json` explicitly starting from VIVIDUS 0.6.0.
 ====
+
+== Tips & Tricks
+
+=== Validate HTTP response body
+
+In order to validate the body of the latest HTTP response use the <<_response>> dynamic variable to access the body
+data in conjunction with any step responsible for data validation like data comparison, JSON, XML and other steps.
+
+.Validate response body
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/json`
+Then JSON element from `${response}` by JSON path `$.slideshow` is equal to `
+{
+  "author": "Yours Truly", 
+  "date": "date of publication", 
+  "slides": [
+    {
+      "title": "Wake up to WonderWidgets!", 
+      "type": "all"
+    }, 
+    {
+      "items": [
+        "Why <em>WonderWidgets</em> are great", 
+        "Who <em>buys</em> WonderWidgets"
+      ], 
+      "title": "Overview", 
+      "type": "all"
+    }
+  ], 
+  "title": "Sample Slide Show"
+}
+`
+----
+
+=== Save HTTP response body into variable
+
+The HTTP response body can be saved into static variable by using the xref:commons:vividus-steps.adoc#_initialize_variable[init variable step]
+in conjunction with the <<_response>> dynamic variable, it might be useful if you want to preserve the data for further computations since each
+subsequent HTTP call rewrites previously received response data.
+
+.Save response body into variable
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/json`
+When I initialize the scenario variable `json` with value `${response}`
+----

@@ -1,0 +1,7 @@
+Composite: When I send HTTP $httpMethod to the relative URL '$relativeURL'
+!-- WARNING: The step "When I send HTTP $httpMethod to the relative URL '$relativeURL'" is deprecated and will be removed in VIVIDUS 0.6.0
+When I execute HTTP <httpMethod> request for resource with relative URL `<relativeURL>`
+
+Composite: When I save response body to the $scopes variable '$variableName'
+!-- WARNING: The step "When I save response body to the $scopes variable '$variableName'" is deprecated and will be removed in VIVIDUS 0.6.0
+Given I initialize ${response} variable `<variableName>` with value `<variableValue>`
