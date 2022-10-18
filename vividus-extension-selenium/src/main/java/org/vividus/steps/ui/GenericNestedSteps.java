@@ -64,7 +64,7 @@ public class GenericNestedSteps
      * number persists do up to 5 iteration of
      * <br>|step|
      * <br>|When I compare against baseline with name 'test_composit1_step'|
-     * <br>|When I click on all elements by xpath './/a[@title='Close']'|
+     * <br>|When I click on all elements located `By.xpath(.//a[@title='Close'])`|
      * </code>
      * @param comparisonRule The rule to match the quantity of elements. The supported rules:
      *                       <ul>
