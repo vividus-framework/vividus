@@ -8,10 +8,11 @@ Then response does not contain body
 Then the response does not contain body
 
 
-Scenario: Verify deprecated step: "Then the response body $comparisonRule '$content'"
+Scenario: Verify deprecated steps: "Then the response body $comparisonRule '$content'" & "When I save response body to the $scopes variable '$variableName'"
 When I execute HTTP GET request for resource with URL `https://httpbin.org/xml`
 Then the response body contains 'Date of publication'
-
+When I save response body to the scenario variable 'my-super-response'
+Then `${my-super-response}` matches `.*Date of publication.*`
 
 Scenario: Verify step: "Then response code is $comparisonRule `$responseCode`"
 When I execute HTTP GET request for resource with URL `https://httpbin.org/status/<statusCode>`
