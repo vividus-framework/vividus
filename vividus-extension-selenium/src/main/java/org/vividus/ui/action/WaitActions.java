@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.openqa.selenium.support.ui.Wait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.util.Sleeper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -109,12 +108,6 @@ public class WaitActions implements IWaitActions
         }
         result.setWaitPassed(softAssert.assertNotNull("The input value to pass to the wait condition", input));
         return result;
-    }
-
-    @Override
-    public void sleepForTimeout(Duration time)
-    {
-        Sleeper.sleep(time);
     }
 
     private boolean recordFailedAssertion(Wait<?> wait, WebDriverException e)

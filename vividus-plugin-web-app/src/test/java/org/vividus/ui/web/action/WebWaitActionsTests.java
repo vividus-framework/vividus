@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.HasCapabilities;
@@ -49,6 +50,7 @@ import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.DescriptiveWait;
 import org.vividus.ui.action.IWaitFactory;
+import org.vividus.util.Sleeper;
 
 @ExtendWith(MockitoExtension.class)
 class WebWaitActionsTests
@@ -159,8 +161,11 @@ class WebWaitActionsTests
         Mockito.lenient().when(targetLocator.alert()).thenThrow(new NoAlertPresentException());
         mockDescriptiveWait(ChronoUnit.DAYS);
         when(javascriptActions.executeScript(SCRIPT_READY_STATE)).thenReturn(COMPLETE);
-        spy.waitForPageLoad();
-        verify(spy).sleepForTimeout(TIMEOUT_MILLIS);
+        try (MockedStatic<Sleeper> sleeper = mockStatic(Sleeper.class))
+        {
+            spy.waitForPageLoad();
+            sleeper.verify(() -> Sleeper.sleep(TIMEOUT_MILLIS));
+        }
     }
 
     @Test
@@ -194,8 +199,11 @@ class WebWaitActionsTests
         mockDescriptiveWait(ChronoUnit.DAYS);
         when(javascriptActions.executeScript(SCRIPT_READY_STATE)).thenReturn("").thenReturn(COMPLETE);
         Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(Boolean.TRUE);
-        spy.waitForPageLoad();
-        verify(spy, never()).sleepForTimeout(Duration.ofDays(TIMEOUT_VALUE));
+        try (MockedStatic<Sleeper> sleeper = mockStatic(Sleeper.class))
+        {
+            spy.waitForPageLoad();
+            sleeper.verifyNoInteractions();
+        }
     }
 
     private void mockDescriptiveWait(TemporalUnit timeunit)
