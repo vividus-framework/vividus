@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.action.WaitActions;
+import org.vividus.util.Sleeper;
 
 public class WebWaitActions extends WaitActions implements IWebWaitActions
 {
@@ -56,7 +57,7 @@ public class WebWaitActions extends WaitActions implements IWebWaitActions
             if ((webDriverManager.isBrowserAnyOf(Browser.CHROME) || webDriverManager.isIOS())
                     && checkDocumentReadyState(webDriver, internetExplorer))
             {
-                sleepForTimeout(pageStartsToLoadTimeout);
+                Sleeper.sleep(pageStartsToLoadTimeout);
             }
             wait(webDriver, new Function<WebDriver, Boolean>()
             {
