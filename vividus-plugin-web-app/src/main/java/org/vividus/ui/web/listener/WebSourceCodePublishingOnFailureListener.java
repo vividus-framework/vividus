@@ -99,7 +99,7 @@ public class WebSourceCodePublishingOnFailureListener extends AbstractSourceCode
     {
         try
         {
-            return ((WebElement) searchContext).getAttribute("innerHTML");
+            return webJavascriptActions.executeScript("return arguments[0].outerHTML;", searchContext);
         }
         catch (StaleElementReferenceException exception)
         {

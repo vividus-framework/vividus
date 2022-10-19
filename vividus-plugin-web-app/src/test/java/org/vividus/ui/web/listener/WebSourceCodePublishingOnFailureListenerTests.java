@@ -19,7 +19,6 @@ package org.vividus.ui.web.listener;
 import static com.github.valfirst.slf4jtest.LoggingEvent.debug;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -45,7 +44,7 @@ import org.vividus.ui.web.action.WebJavascriptActions;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class})
 class WebSourceCodePublishingOnFailureListenerTests
 {
-    private static final String INNER_HTML = "innerHTML";
+    private static final String OUTER_HTML_SCRIPT = "return arguments[0].outerHTML;";
     private static final String SHADOW_DOM_SCRIPT = CssSelectorFactory.CSS_SELECTOR_FACTORY_SCRIPT
             + "const sources = new Map();\n"
             + "function getShadowSource(element) {\n"
@@ -72,37 +71,38 @@ class WebSourceCodePublishingOnFailureListenerTests
     @Test
     void shouldReturnWholePageForDriverContext()
     {
-        WebDriver webDriver = mock(WebDriver.class);
+        var webDriver = mock(WebDriver.class);
         when(uiContext.getSearchContext()).thenReturn(webDriver);
-        String pageSource = "<html/>";
+        var pageSource = "<html/>";
         when(webDriver.getPageSource()).thenReturn(pageSource);
         var sourceTitle = "Shadow dom sources. Selector: div";
-        when(webJavascriptActions.executeScript(eq(String.format(SHADOW_DOM_SCRIPT, "document.documentElement")),
-            any())).thenReturn(Map.of(sourceTitle, pageSource));
+        when(webJavascriptActions.executeScript(
+                String.format(SHADOW_DOM_SCRIPT, "document.documentElement"))).thenReturn(
+                Map.of(sourceTitle, pageSource));
         assertEquals(Map.of(APPLICATION_SOURCE_CODE, pageSource, sourceTitle, pageSource), listener.getSourceCode());
     }
 
     @Test
     void shouldReturnElementSourceForElementContext()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         when(uiContext.getSearchContext()).thenReturn(webElement);
-        String elementSource = "<div/>";
+        var elementSource = "<div/>";
         var sourceTitle = "Shadow dom sources. Selector: a";
-        when(webJavascriptActions.executeScript(eq(String.format(SHADOW_DOM_SCRIPT, "arguments[0]")),
-                any())).thenReturn(Map.of(sourceTitle, elementSource));
-        when(webElement.getAttribute(INNER_HTML)).thenReturn(elementSource);
+        mockShadowDomSourcesRetrieval(webElement, Map.of(sourceTitle, elementSource));
+        when(webJavascriptActions.executeScript(OUTER_HTML_SCRIPT, webElement)).thenReturn(elementSource);
         assertEquals(Map.of(APPLICATION_SOURCE_CODE, elementSource, sourceTitle, elementSource),
-            listener.getSourceCode());
+                listener.getSourceCode());
     }
 
     @Test
     void shouldHandleStaleElementsCorrectly()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         when(uiContext.getSearchContext()).thenReturn(webElement);
-        when(webElement.getAttribute(INNER_HTML)).thenThrow(StaleElementReferenceException.class);
-        when(webJavascriptActions.executeScript(any(String.class), any())).thenReturn(Map.of());
+        when(webJavascriptActions.executeScript(OUTER_HTML_SCRIPT, webElement)).thenThrow(
+                StaleElementReferenceException.class);
+        mockShadowDomSourcesRetrieval(webElement, Map.of());
         assertEquals(Map.of(), listener.getSourceCode());
         assertEquals(logger.getLoggingEvents(), List.of(debug("Unable to get sources of the stale element")));
     }
@@ -113,5 +113,11 @@ class WebSourceCodePublishingOnFailureListenerTests
         when(uiContext.getSearchContext()).thenReturn(null);
         when(webJavascriptActions.executeScript(any(String.class), any())).thenReturn(Map.of());
         assertEquals(Map.of(), listener.getSourceCode());
+    }
+
+    private void mockShadowDomSourcesRetrieval(WebElement webElement, Map<String, String> sources)
+    {
+        when(webJavascriptActions.executeScript(String.format(SHADOW_DOM_SCRIPT, "arguments[0]"),
+                webElement)).thenReturn(sources);
     }
 }
