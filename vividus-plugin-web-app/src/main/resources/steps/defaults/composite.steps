@@ -13,12 +13,15 @@ Priority: 1
 Then the page title contains '<text>'
 
 Composite: Then invisible element by xpath '$xpath' exists
+!-- WARNING: The step "Then invisible element by xpath '$xpath' exists" is deprecated and will be removed in VIVIDUS 0.6.0
 Then number of invisible elements `By.xpath(<xpath>)` is = `1`
 
 Composite: When I set the number of elements found by xpath '$xpath' to the '$scopes' variable '$variableName'
+!-- WARNING: The step "When I set the number of elements found by xpath '$xpath' to the '$scopes' variable '$variableName'" is deprecated and will be removed in VIVIDUS 0.6.0
 When I save number of elements located `By.xpath(<xpath>)` to <scopes> variable `<variableName>`
 
 Composite: Then the number of elements found by the xpath '$xpath' is $comparisonRule '$quantity'
+!-- WARNING: The step "Then the number of elements found by the xpath '$xpath' is $comparisonRule '$quantity'" is deprecated and will be removed in VIVIDUS 0.6.0
 Then number of elements found by `By.xpath(<xpath>)` is <comparisonRule> `<quantity>`
 
 Composite: Then a field with the name '$fieldName' exists
@@ -34,15 +37,18 @@ Composite: When I add '$text' to a field with the name '$fieldName'
 When I add `<text>` to field located `By.fieldName(<fieldName>)`
 
 Composite: When I add '$text' to a field by the xpath '$xpath'
+!-- WARNING: The step "When I add '$text' to a field by the xpath '$xpath'" is deprecated and will be removed in VIVIDUS 0.6.0
 When I add `<text>` to field located `By.xpath(<xpath>)`
 
 Composite: When I enter '$text' in a field with the name '$fieldName'
 When I enter `<text>` in field located `By.fieldName(<fieldName>)`
 
 Composite: When I clear a field by the xpath '$xpath'
+!-- WARNING: The step "When I clear a field by the xpath '$xpath'" is deprecated and will be removed in VIVIDUS 0.6.0
 When I clear field located `By.xpath(<xpath>)`
 
 Composite: When I clear a field by the xpath '$xpath' using keyboard
+!-- WARNING: The step "When I clear a field by the xpath '$xpath' using keyboard" is deprecated and will be removed in VIVIDUS 0.6.0
 When I clear field located `By.xpath(<xpath>)` using keyboard
 
 Composite: Then a field with the name '$fieldName' and text containing '$textpart' exists
@@ -79,6 +85,7 @@ Composite: Then a [$state] field with the name '$fieldName' exists
 Then field located `By.fieldName(<fieldName>):a->filter.state(<state>)` exists
 
 Composite: When I enter '$text' in a field by the xpath '$xpath'
+!-- WARNING: The step "When I enter '$text' in a field by the xpath '$xpath'" is deprecated and will be removed in VIVIDUS 0.6.0
 When I enter `<text>` in field located `By.xpath(<xpath>)`
 
 Composite: When I enter `$text` in field located `$locator` using keyboard
@@ -88,6 +95,7 @@ When I execute sequence of actions:
 |ENTER_TEXT|<text>   |
 
 Composite: When I select '$text' from a drop down by the xpath '$xpath'
+!-- WARNING: The step "When I select '$text' from a drop down by the xpath '$xpath'" is deprecated and will be removed in VIVIDUS 0.6.0
 When I select `<text>` from drop down located `By.xpath(<xpath>)`
 
 Composite: Then an element with the name '$elementName' containing text '$text' exists
@@ -108,6 +116,7 @@ Composite: Then an element with the name '$elementName' does not exist
 Then number of elements found by `By.elementName(<elementName>)` is equal to `0`
 
 Composite: Then an element by the xpath '$xpath' does not exist
+!-- WARNING: The step "Then an element by the xpath '$xpath' does not exist" is deprecated and will be removed in VIVIDUS 0.6.0
 Then number of elements found by `By.xpath(<xpath>)` is equal to `0`
 
 Composite: Then a [$state] element with the name '$elementName' exists
@@ -123,6 +132,7 @@ Composite: Then a [$state] element with the tag '$elementTag' exists
 Then number of elements found by `By.tagName(<elementTag>)->filter.state(<state>)` is equal to `1`
 
 Composite: When I click on an element by the xpath '$xpath'
+!-- WARNING: The step "When I click on an element by the xpath '$xpath'" is deprecated and will be removed in VIVIDUS 0.6.0
 When I click on element located by `xpath(<xpath>)`
 
 Composite: When I click on an element with the attribute '$attributeType'='$attributeValue'
@@ -132,6 +142,7 @@ Composite: When I click on an element with the text '$text'
 When I click on element located by `caseSensitiveText(<text>)`
 
 Composite: When I click on all elements by xpath '$xpath'
+!-- WARNING: The step "When I click on all elements by xpath '$xpath'" is deprecated and will be removed in VIVIDUS 0.6.0
 When I click on all elements located `By.xpath(<xpath>)`
 
 Composite: Then an element with the attribute '$attributeType'='$attributeValue' exists
@@ -147,27 +158,33 @@ Composite: Then an element with the attribute '$attributeType' containing '$attr
 Then number of elements found by `By.xpath(.//*[contains(@<attributeType>, '<attributeValue>')])` is equal to `1`
 
 Composite: Then each element by the xpath '$xpath' has same '$dimension'
+!-- WARNING: The step "Then each element by the xpath '$xpath' has same '$dimension'" is deprecated and will be removed in VIVIDUS 0.6.0
 Then each element located `By.xpath(<xpath>)` has same `<dimension>`
 
 Composite: Then each element by the xpath '$elementXpath' has '$number' child elements by the xpath '$childXpath'
+!-- WARNING: The step "Then each element by the xpath '$elementXpath' has '$number' child elements by the xpath '$childXpath'" is deprecated and will be removed in VIVIDUS 0.6.0
 Then each element with locator `By.xpath(<elementXpath>)` has `<number>` child elements with locator `By.xpath(<childXpath>)`
 
 Composite: Then at least one element by the xpath '$xpath' exists
+!-- WARNING: The step "Then at least one element by the xpath '$xpath' exists" is deprecated and will be removed in VIVIDUS 0.6.0
 Then number of elements found by `By.xpath(<xpath>)` is greater than or equal to `1`
 
 Composite: Then at least one element with the attribute '$attributeType'='$attributeValue' exists
 Then number of elements found by `By.xpath(.//*[@<attributeType>='<attributeValue>'])` is greater than or equal to `1`
 
 Composite: Then an element by the xpath '$xpath' exists
+!-- WARNING: The step "Then an element by the xpath '$xpath' exists" is deprecated and will be removed in VIVIDUS 0.6.0
 Then number of elements found by `By.xpath(<xpath>)` is equal to `1`
 
 Composite: Then an element by the cssSelector '$cssSelector' exists
 Then number of elements found by `By.cssSelector(<cssSelector>)` is equal to `1`
 
 Composite: When I hover a mouse over an element with the xpath '$xpath'
+!-- WARNING: The step "When I hover a mouse over an element with the xpath '$xpath'" is deprecated and will be removed in VIVIDUS 0.6.0
 When I hover mouse over element located `By.xpath(<xpath>)`
 
 Composite: When I perform right click on an element by the xpath '$xpath'
+!-- WARNING: The step "When I perform right click on an element by the xpath '$xpath'" is deprecated and will be removed in VIVIDUS 0.6.0
 When I perform right click on element located `By.xpath(<xpath>)`
 
 Composite: When I hover a mouse over a button with the name '$buttonName'
@@ -207,9 +224,11 @@ Composite: When I wait until an element with the name '$elementName' appears
 When I wait until element located `By.elementName(<elementName>)` appears
 
 Composite: When I wait until an element with the xpath '$xpath' appears
+!-- WARNING: The step "When I wait until an element with the xpath '$xpath' appears" is deprecated and will be removed in VIVIDUS 0.6.0
 When I wait until element located `By.xpath(<xpath>)` appears
 
 Composite: When I wait until an element with the xpath '$xpath' disappeares
+!-- WARNING: The step "When I wait until an element with the xpath '$xpath' disappeares" is deprecated and will be removed in VIVIDUS 0.6.0
 When I wait until element located `By.xpath(<xpath>)` disappears
 
 Composite: When I wait until the state of an element with the name '$elementName' becomes [$state]

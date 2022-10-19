@@ -66,7 +66,7 @@ public class NestedSteps
      * <br>When I find equal to 1 elements by By.xpath(.//*[contains(@class,'fancybox-wrap')]) and for each element do
      * <br>|step|
      * <br>|When I compare against baseline with name 'test_composit1_step'|
-     * <br>|When I click on all elements by xpath './/a[@title='Close']'|
+     * <br>|When I click on all elements located `By.xpath(.//a[@title='Close'])`|
      * </code>
      * @param comparisonRule The rule to match the quantity of elements. The supported rules:
      *                       <ul>

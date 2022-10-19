@@ -91,7 +91,6 @@ public class ExecutableSteps
      * <br>When I execute steps:
      * <br>|step                                                           |
      * <br>|When I compare against baseline with name 'test_composit1_step'|
-     * <br>|When I click on all elements by xpath './/a[@title='Close']'   |
      * </code>
      * @param stepsToExecute ExamplesTable with steps to execute
      */
