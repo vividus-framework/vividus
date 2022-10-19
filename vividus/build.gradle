@@ -14,6 +14,7 @@ task integrationTest(type: Test) {
     group = 'verification'
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
+    jvmArgs '--add-opens=java.base/java.util=ALL-UNNAMED'
 }
 
 // https://github.com/spotbugs/spotbugs-gradle-plugin/issues/115
@@ -95,4 +96,5 @@ dependencies {
     integrationTestImplementation project(':vividus-plugin-yaml')
     integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.1')
     integrationTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    integrationTestImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '1.7.1')
 }

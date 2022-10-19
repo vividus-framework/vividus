@@ -43,6 +43,8 @@ public final class ConfigurationResolver
     static final String CONFIGURATION_PROPERTY_FAMILY = "configuration.";
 
     private static final String VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY = "vividus.encryptor.password";
+    private static final String VIVIDUS_ENCRYPTOR_PASSWORD_ENV_VARIABLE = "VIVIDUS_ENCRYPTOR_PASSWORD";
+
     private static final String DEFAULT_ENCRYPTOR_ALGORITHM = "PBEWithMD5AndDES";
     private static final String DEFAULT_ENCRYPTOR_PASSWORD = "82=thuMUH@";
 
@@ -161,14 +163,14 @@ public final class ConfigurationResolver
 
     private static StringEncryptor createStringEncryptor(Properties properties)
     {
-        String password = System.getProperty(VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY);
-        if (password == null)
-        {
-            password = properties.getProperty("system." + VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY);
-        }
+        String password = Optional.ofNullable(System.getProperty(VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY))
+                .or(() -> Optional.ofNullable(properties.getProperty("system." + VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY)))
+                .or(() -> Optional.ofNullable(System.getenv(VIVIDUS_ENCRYPTOR_PASSWORD_ENV_VARIABLE)))
+                .orElse(DEFAULT_ENCRYPTOR_PASSWORD);
+
         StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
         encryptor.setAlgorithm(DEFAULT_ENCRYPTOR_ALGORITHM);
-        encryptor.setPassword(password != null ? password : DEFAULT_ENCRYPTOR_PASSWORD);
+        encryptor.setPassword(password);
         return encryptor;
     }
 
