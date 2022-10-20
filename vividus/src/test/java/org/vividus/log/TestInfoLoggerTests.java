@@ -54,10 +54,13 @@ import org.vividus.util.ResourceUtils;
 @ExtendWith(TestLoggerFactoryExtension.class)
 class TestInfoLoggerTests
 {
-    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(TestInfoLogger.class);
-    private static final String FORMAT = "{}={}";
+    private static final String FORMAT = "Properties and environment variables:{}";
+    private static final String NEW_LINE = System.lineSeparator();
+    private static final char EQUAL_SIGN = '=';
     private static final String MESSAGE = "This is a very long message that should be wrapped to defined cell size "
             + "and with special char: %";
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(TestInfoLogger.class);
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -73,7 +76,7 @@ class TestInfoLoggerTests
         var properties = new Properties();
         properties.put(key, "value");
         TestInfoLogger.logPropertiesSecurely(properties);
-        assertThat(LOGGER.getLoggingEvents(), is(List.of(info(FORMAT, key, "****"))));
+        assertThat(logger.getLoggingEvents(), is(List.of(info(FORMAT, NEW_LINE + key + EQUAL_SIGN + "****"))));
     }
 
     @Test
@@ -87,9 +90,8 @@ class TestInfoLoggerTests
         properties.put(keyString, valueString);
         properties.put(keyInt, valueInt);
         TestInfoLogger.logPropertiesSecurely(properties);
-        assertThat(LOGGER.getLoggingEvents(), is(List.of(
-                info(FORMAT, keyString, valueString),
-                info(FORMAT, keyInt, valueInt)
+        assertThat(logger.getLoggingEvents(), is(List.of(info(FORMAT,
+                NEW_LINE + keyString + EQUAL_SIGN + valueString + NEW_LINE + keyInt + EQUAL_SIGN + valueInt)
         )));
     }
 
@@ -134,7 +136,7 @@ class TestInfoLoggerTests
         );
         when(statisticsProvider.getFailures()).thenReturn(failures);
         new TestInfoLogger(statisticsProvider).logTestExecutionResults();
-        var loggingEvents = LOGGER.getLoggingEvents();
+        var loggingEvents = logger.getLoggingEvents();
         assertThat(loggingEvents, hasSize(1));
         assertThat(loggingEvents.get(0).getMessage(), matchesRegex(
                   "(?s)\\s+"
@@ -164,12 +166,12 @@ class TestInfoLoggerTests
                   + failuresMessage));
     }
 
-    private static Failure createFailure(String storyName, String scenatioTitle, String step, String message)
+    private static Failure createFailure(String storyName, String scenarioTitle, String step, String message)
     {
         var runningStory = mock(RunningStory.class);
         var runningScenario = mock(RunningScenario.class);
         when(runningStory.getRunningScenario()).thenReturn(runningScenario);
-        when(runningScenario.getTitle()).thenReturn(scenatioTitle);
+        when(runningScenario.getTitle()).thenReturn(scenarioTitle);
         when(runningStory.getName()).thenReturn(storyName);
         when(runningStory.getRunningSteps()).thenReturn(new LinkedList<>(List.of(step)));
         return Failure.from(runningStory, message);
@@ -179,7 +181,7 @@ class TestInfoLoggerTests
     void shouldPrintBanner()
     {
         TestInfoLogger.drawBanner();
-        assertThat(LOGGER.getLoggingEvents(), is(List.of(info("\n{}", ResourceUtils.loadResource("banner.vividus")))));
+        assertThat(logger.getLoggingEvents(), is(List.of(info("\n{}", ResourceUtils.loadResource("banner.vividus")))));
     }
 
     @Test
@@ -192,7 +194,7 @@ class TestInfoLoggerTests
 
         TestInfoLogger.logExecutionPlan(executionPlan);
 
-        var loggingEvents = LOGGER.getLoggingEvents();
+        var loggingEvents = logger.getLoggingEvents();
         assertThat(loggingEvents, hasSize(1));
         assertThat(loggingEvents.get(0).getMessage(), matchesRegex(
                 "(?s)\\s*"

@@ -194,19 +194,18 @@ public final class TestInfoLogger
 
     public static void logPropertiesSecurely(Properties properties)
     {
-        properties.entrySet()
-                .stream()
-                .map(e -> Map.entry((String) e.getKey(), e.getValue()))
-                .sorted(Entry.comparingByKey())
-                .forEach(TestInfoLogger::logPropertySecurely);
-    }
-
-    private static void logPropertySecurely(Entry<String, Object> entry)
-    {
-        String key = entry.getKey();
-        LOGGER.atInfo()
-                .addArgument(key)
-                .addArgument(() -> SECURE_KEY_PATTERN.matcher(key).matches() ? "****" : entry.getValue())
-                .log("{}={}");
+        try (Formatter message = new Formatter())
+        {
+            properties.entrySet()
+                    .stream()
+                    .map(e -> Map.entry((String) e.getKey(), e.getValue()))
+                    .sorted(Entry.comparingByKey())
+                    .forEach(property -> {
+                        String key = property.getKey();
+                        Object value = SECURE_KEY_PATTERN.matcher(key).matches() ? "****" : property.getValue();
+                        message.format("%n%s=%s", key, value);
+                    });
+            LOGGER.atInfo().addArgument(message::toString).log("Properties and environment variables:{}");
+        }
     }
 }
