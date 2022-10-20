@@ -16,6 +16,8 @@
 
 package org.vividus.log;
 
+import static org.apache.commons.text.WordUtils.wrap;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
@@ -28,7 +30,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-import org.apache.commons.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
@@ -46,7 +47,9 @@ import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
 
 public final class TestInfoLogger
 {
-    private static final int MAX_CELL_WIDTH = 50;
+    private static final int REGULAR_COLUMN_MAX_WIDTH = 36;
+    private static final int ERROR_COLUMN_MAX_WIDTH = 50;
+
     private static final int MARGIN = 3;
     private static final String HYPHEN = "-";
     private static final int HEADER_SIZE = 40;
@@ -179,22 +182,18 @@ public final class TestInfoLogger
         table.addRule();
         table.addRow("STORY", "SCENARIO", "STEP", "ERROR MESSAGE");
         table.addRule();
-        failures.forEach(
-                f -> table.addRow(
-                    f.getStory(), wrap(f.getScenario()), f.getStep().replaceAll("\n|\r\n", "<br>"), wrap(f.getMessage())
-                )
-        );
+        failures.forEach(f -> table.addRow(
+                wrap(f.getStory(), REGULAR_COLUMN_MAX_WIDTH),
+                wrap(f.getScenario(), REGULAR_COLUMN_MAX_WIDTH),
+                wrap(f.getStep().replaceAll("\n|\r\n", "<br>"), REGULAR_COLUMN_MAX_WIDTH),
+                wrap(f.getMessage(), ERROR_COLUMN_MAX_WIDTH)
+        ));
         table.addRule();
         table.setRenderer(AT_Renderer.create().setCWC(new CWC_LongestLine()));
         table.setPaddingLeftRight(1);
         table.setPaddingBottom(1);
         table.setTextAlignment(TextAlignment.LEFT);
         message.format("%s", table.render());
-    }
-
-    private static String wrap(String words)
-    {
-        return WordUtils.wrap(words, MAX_CELL_WIDTH);
     }
 
     public static void logPropertiesSecurely(Properties properties)
