@@ -24,7 +24,6 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -43,6 +42,7 @@ import de.vandermeer.asciitable.AT_Context;
 import de.vandermeer.asciitable.AT_Renderer;
 import de.vandermeer.asciitable.AsciiTable;
 import de.vandermeer.asciitable.CWC_LongestLine;
+import de.vandermeer.asciithemes.a7.A7_Grids;
 import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
 
 public final class TestInfoLogger
@@ -155,17 +155,11 @@ public final class TestInfoLogger
         message.format(rowsSeparator);
         message.format(row, "TOTAL", story.getTotal(), scenario.getTotal(), step.getTotal());
         message.format(rowsSeparator);
-        addFailureTable(message);
+        resultsProvider.getFailures().ifPresent(failures -> addFailureTable(message, failures));
     }
 
-    private void addFailureTable(Formatter message)
+    private void addFailureTable(Formatter message, List<Failure> failures)
     {
-        Optional<List<Failure>> failureMessages = resultsProvider.getFailures();
-        if (failureMessages.isEmpty())
-        {
-            return;
-        }
-        List<Failure> failures = failureMessages.get();
         if (failures.isEmpty())
         {
             message.format("%n%n No Failures & Errors!");
@@ -178,8 +172,9 @@ public final class TestInfoLogger
         );
         message.format("%n%n Failures & Errors:%n");
         AT_Context context = new AT_Context();
-        AsciiTable table = new AsciiTable(context);
         context.setFrameLeftMargin(MARGIN);
+        context.setGrid(A7_Grids.minusBarPlus());
+        AsciiTable table = new AsciiTable(context);
         table.addRule();
         table.addRow("STORY", "SCENARIO", "STEP", "ERROR MESSAGE");
         table.addRule();
