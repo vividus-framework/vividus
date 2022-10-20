@@ -98,7 +98,7 @@ class TestInfoLoggerTests
     {
         return Stream.of(
                 Arguments.of("", Optional.empty()),
-                Arguments.of(String.format("%n   No Failures & Errors!"), Optional.of(List.of())),
+                Arguments.of(String.format("%n%n No Failures & Errors!"), Optional.of(List.of())),
                 Arguments.of(
         "\\s+ Failures & Errors:\\s+"
         + "┌───────┬───────────────────────────────────┬───────────┬────────────────────────────────────────────────────┐\\s+"
@@ -111,7 +111,7 @@ class TestInfoLoggerTests
         + "│       │                                   │           │                                                    │\\s+"
         + "│ first │ verify                            │ do        │ failure                                            │\\s+"
         + "│       │                                   │           │                                                    │\\s+"
-        + "└───────┴───────────────────────────────────┴───────────┴────────────────────────────────────────────────────┘",
+        + "└───────┴───────────────────────────────────┴───────────┴────────────────────────────────────────────────────┘\\s+",
                         Optional.of(Arrays.asList(createFailure("first", "verify", "do", "failure"),
                                       createFailure("aaaaa", MESSAGE, "When I do\n\r|k|\n|v|", MESSAGE)))));
     }
@@ -138,15 +138,15 @@ class TestInfoLoggerTests
         assertThat(loggingEvents, hasSize(1));
         assertThat(loggingEvents.get(0).getMessage(), matchesRegex(
                   "(?s)\\s+"
-                  + "-{60}\\s+"
+                  + "-{80}\\s+"
                   + " Configuration:\\s+"
-                  + "-{60}\\s+"
+                  + "-{80}\\s+"
                   + " Profile:\\s+"
-                  + "-{60}\\s+"
+                  + "-{80}\\s+"
                   + " Suite:\\s+"
-                  + "-{60}\\s+"
+                  + "-{80}\\s+"
                   + " Environment:\\s+"
-                  + "-{60}\\s+"
+                  + "-{80}\\s+"
                   + " Vividus:.*"
                   + " Execution statistics:\\s+.+"
                   + "-{40}\\s+"
@@ -159,7 +159,8 @@ class TestInfoLoggerTests
                   + "Pending           0          0        0\\s+"
                   + "Skipped           0          0        0\\s+"
                   + "-{40}\\s+"
-                  + "TOTAL             4          4        4"
+                  + "TOTAL             4          4        4\\s+"
+                  + "-{40}"
                   + failuresMessage));
     }
 
@@ -195,7 +196,7 @@ class TestInfoLoggerTests
         assertThat(loggingEvents, hasSize(1));
         assertThat(loggingEvents.get(0).getMessage(), matchesRegex(
                 "(?s)\\s*"
-                + "-{60}\\s+"
+                + "-{80}\\s+"
                 + " Execution plan \\(before filtering by meta\\):\\s*"
                 + "   batch-1:\\s*"
                 + "     path1\\s*"
@@ -204,6 +205,6 @@ class TestInfoLoggerTests
                 + "     path3\\s*"
                 + "   batch-3:\\s*"
                 + "     \\[no stories found\\]\\s*"
-                + "-{60}"));
+                + "-{80}"));
     }
 }
