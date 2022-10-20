@@ -215,13 +215,13 @@ When I tap on element located `xpath((//android.view.ViewGroup[contains(@content
 Then number of elements found by `xpath(//android.widget.TextView[@text='228x228'])` is equal to `1`
 
 
-Scenario: [iOS] Verify step: 'When I upload file `$filePath` to device' AND 'iosClassChain' locator
+Scenario: [iOS] Verify step: 'When I upload file `$filePath` to device' AND 'iosClassChain' locator AND 'iosNsPredicate' locator
 Meta:
     @targetPlatform ios
 When I tap on element located `accessibilityId(menuToggler)`
 When I tap on element located `iosClassChain(**/XCUIElementTypeButton[$name == "Image"$])`
 When I upload file `/data/mobile-upload-image.png` to device
-When I tap on element located `accessibilityId(selectImage)`
+When I tap on element located `iosNsPredicate(name == 'selectImage')`
 When I wait until element located `accessibilityId(Photos)` appears
 When I tap on element located `xpath((//XCUIElementTypeImage[contains(@name, "Photo")])[1])`
 Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` is equal to `1`

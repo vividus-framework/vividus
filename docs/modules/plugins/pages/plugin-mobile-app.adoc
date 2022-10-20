@@ -73,6 +73,12 @@ a|`tagName(android.widget.TextView)->filter.attribute(text=Hi)` - `android.widge
 |See https://github.com/facebookarchive/WebDriverAgent/wiki/Class-Chain-Queries-Construction-Rules[Class Chain Queries] for more details
 |+iosClassChain(**/XCUIElementTypeCell[$name BEGINSWITH "A"$])+ or +By.iosClassChain(**/XCUIElementTypeCell[$name BEGINSWITH "B"$])+
 
+|`iosNsPredicate`
+|`iOS`
+|See https://github.com/appium/appium-xcuitest-driver/blob/master/docs/ios/ios-predicate.md[iOS Predicate Syntax] for more details
+|+iosNsPredicate(name BEGINSWITH 'A')+ or +By.iosNsPredicate(name BEGINSWITH 'B')+
+
+
 |===
 
 include::partial$visibility-types.adoc[]

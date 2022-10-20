@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,14 @@ public enum AppiumLocatorType implements LocatorType
         public By buildBy(String value)
         {
             return AppiumBy.iOSClassChain(value);
+        }
+    },
+    IOS_NS_PREDICATE("iOS NS Predicate", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return AppiumBy.iOSNsPredicateString(value);
         }
     },
     ID("Id", ByLocatorSearch.class)
