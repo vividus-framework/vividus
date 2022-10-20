@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ class AppiumLocatorTypeTests
             "By.xpath:,                 XPATH",
             "AppiumBy.accessibilityId:, ACCESSIBILITY_ID",
             "AppiumBy.iOSClassChain:,   IOS_CLASS_CHAIN",
+            "AppiumBy.iOSNsPredicate:,  IOS_NS_PREDICATE",
             "By.id:,                    ID"
     })
     void shouldBuildBy(String prefix, AppiumLocatorType locatorType)
@@ -56,6 +57,7 @@ class AppiumLocatorTypeTests
         "Appium XPath    , XPATH           ",
         "Accessibility Id, ACCESSIBILITY_ID",
         "iOS Class Chain , IOS_CLASS_CHAIN ",
+        "iOS NS Predicate, IOS_NS_PREDICATE",
         "Id              , ID              "
     })
     void testAppiumLocatorType(String attributeName, AppiumLocatorType locatorType)

@@ -83,6 +83,9 @@
         <constructor-arg value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).IOS_CLASS_CHAIN}" />
     </bean>
     <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).IOS_NS_PREDICATE}" />
+    </bean>
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
         <constructor-arg value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).ID}" />
     </bean>
 
