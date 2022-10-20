@@ -101,17 +101,17 @@ class TestInfoLoggerTests
                 Arguments.of(String.format("%n   No Failures & Errors!"), Optional.of(List.of())),
                 Arguments.of(
         "\\s+ Failures & Errors:\\s+"
-        + "┌───────┬────────────────────────────────────────────────────┬───────────┬────────────────────────────────────────────────────┐\\s+"
-        + "\\│ STORY \\│ SCENARIO                                           \\│ STEP      \\│ ERROR MESSAGE                                      \\│\\s+"
-        + "\\│       \\│                                                    \\│           \\│                                                    \\│\\s+"
-        + "├───────┼────────────────────────────────────────────────────┼───────────┼────────────────────────────────────────────────────┤\\s+"
-        + "\\│ aaaaa \\│ This is a very long message that should be wrapped \\│ When I do \\│ This is a very long message that should be wrapped \\│\\s+"
-        + "\\│       \\│ to defined cell size and with special char: %      \\│ \\|k\\|       \\│ to defined cell size and with special char: %      \\│\\s+"
-        + "\\│       \\│                                                    \\│ \\|v\\|       \\│                                                    \\│\\s+"
-        + "\\│       \\│                                                    \\│           \\│                                                    \\│\\s+"
-        + "\\│ first \\│ verify                                             \\│ do        \\│ failure                                            \\│\\s+"
-        + "\\│       \\│                                                    \\│           \\│                                                    \\│\\s+"
-        + "└───────┴────────────────────────────────────────────────────┴───────────┴────────────────────────────────────────────────────┘",
+        + "┌───────┬───────────────────────────────────┬───────────┬────────────────────────────────────────────────────┐\\s+"
+        + "│ STORY │ SCENARIO                          │ STEP      │ ERROR MESSAGE                                      │\\s+"
+        + "│       │                                   │           │                                                    │\\s+"
+        + "├───────┼───────────────────────────────────┼───────────┼────────────────────────────────────────────────────┤\\s+"
+        + "│ aaaaa │ This is a very long message that  │ When I do │ This is a very long message that should be wrapped │\\s+"
+        + "│       │ should be wrapped to defined cell │ \\|k\\|       │ to defined cell size and with special char: %      │\\s+"
+        + "│       │ size and with special char: %     │ \\|v\\|       │                                                    │\\s+"
+        + "│       │                                   │           │                                                    │\\s+"
+        + "│ first │ verify                            │ do        │ failure                                            │\\s+"
+        + "│       │                                   │           │                                                    │\\s+"
+        + "└───────┴───────────────────────────────────┴───────────┴────────────────────────────────────────────────────┘",
                         Optional.of(Arrays.asList(createFailure("first", "verify", "do", "failure"),
                                       createFailure("aaaaa", MESSAGE, "When I do\n\r|k|\n|v|", MESSAGE)))));
     }
