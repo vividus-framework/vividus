@@ -84,7 +84,7 @@ class TestInfoLoggerTests
     {
         var keyString = "simple.ignore-failure";
         var valueString = "string";
-        var keyInt = "simple.int";
+        var keyInt = "simple.keys-int";
         int valueInt = 2;
         var properties = new Properties();
         properties.put(keyString, valueString);
