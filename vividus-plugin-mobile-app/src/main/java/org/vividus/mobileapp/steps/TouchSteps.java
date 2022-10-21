@@ -98,7 +98,7 @@ public class TouchSteps
      * Swipes to element in <b>direction</b> direction with duration <b>duration</b>
      * The step takes into account current context. If you need to perform swipe on the element,
      * you need to switch the context to this element.
-     * @param direction direction to swipe, either <b>UP</b> or <b>DOWN</b>
+     * @param direction direction to swipe, either <b>UP</b> or <b>DOWN</b> or <b>LEFT</b> or <b>RIGHT</b>
      * @param locator locator to find an element
      * @param swipeDuration swipe duration in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
      */
@@ -112,14 +112,18 @@ public class TouchSteps
         {
             touchActions.swipeUntil(direction, swipeDuration, swipeArea.get(), () ->
             {
-                elements.addAll(searchActions.findElements(locator));
-                return !elements.isEmpty();
+                if (elements.isEmpty())
+                {
+                    elements.addAll(searchActions.findElements(locator));
+                }
+                return !elements.isEmpty()
+                        && isElementBoundaryVisible(elements.get(0).getRect(), swipeArea.get(), direction);
             });
         }
         if (baseValidations.assertElementsNumber(String.format("The element by locator %s exists", locator), elements,
                 ComparisonRule.EQUAL_TO, 1) && (SwipeDirection.UP == direction || SwipeDirection.DOWN == direction))
         {
-            adjustVerticalPosition(elements.get(0), swipeArea.get(), swipeDuration);
+            adjustVerticalPosition(elements.get(0), direction, swipeArea.get(), swipeDuration);
         }
     }
 
@@ -134,7 +138,8 @@ public class TouchSteps
         return () -> new Rectangle(new Point(0, 0), genericWebDriverManager.getSize());
     }
 
-    private void adjustVerticalPosition(WebElement element, Rectangle swipeArea, Duration swipeDuration)
+    private void adjustVerticalPosition(WebElement element, SwipeDirection direction, Rectangle swipeArea,
+            Duration swipeDuration)
     {
         int swipeAreaSizeHeight = swipeArea.getHeight();
         int swipeAreaCenterY = swipeAreaSizeHeight / 2;
@@ -144,7 +149,7 @@ public class TouchSteps
         int visibilityY = swipeAreaSizeHeight - bottomVisibilityIndent;
         if (elementTopCoordinateY > visibilityY)
         {
-            touchActions.performVerticalSwipe(swipeAreaCenterY,
+            touchActions.performSwipe(direction, swipeAreaCenterY,
                     swipeAreaCenterY - (elementTopCoordinateY - visibilityY), swipeArea, swipeDuration);
             return;
         }
@@ -152,7 +157,7 @@ public class TouchSteps
         int topVisibilityIndent = (int) (VISIBILITY_TOP_INDENT_COEFFICIENT * swipeAreaSizeHeight);
         if (elementTopCoordinateY < topVisibilityIndent)
         {
-            touchActions.performVerticalSwipe(swipeAreaCenterY,
+            touchActions.performSwipe(direction, swipeAreaCenterY,
                     swipeAreaCenterY + topVisibilityIndent - elementTopCoordinateY, swipeArea, swipeDuration);
         }
     }
@@ -160,5 +165,30 @@ public class TouchSteps
     private Optional<WebElement> findElementToTap(Locator locator)
     {
         return baseValidations.assertElementExists("The element to tap", locator);
+    }
+
+    private boolean isElementBoundaryVisible(Rectangle elementRectangle, Rectangle swipeArea,
+            SwipeDirection direction)
+    {
+        int elementBoundaryCoordinate = getBoundaryCoordinate(elementRectangle, direction,
+                direction.isBackward());
+        int swipeAreaBoundaryCoordinate = getBoundaryCoordinate(swipeArea, direction, !direction.isBackward());
+        if (direction.isBackward())
+        {
+            return elementBoundaryCoordinate < swipeAreaBoundaryCoordinate;
+        }
+        return elementBoundaryCoordinate > swipeAreaBoundaryCoordinate;
+    }
+
+    private int getBoundaryCoordinate(Rectangle elementRectangle,
+            SwipeDirection direction, boolean isBackward)
+    {
+        if (direction.isVertical())
+        {
+            return isBackward ? elementRectangle.getY()
+                    : elementRectangle.getY() + elementRectangle.getHeight();
+        }
+        return isBackward ? elementRectangle.getX()
+                : elementRectangle.getX() + elementRectangle.getWidth();
     }
 }

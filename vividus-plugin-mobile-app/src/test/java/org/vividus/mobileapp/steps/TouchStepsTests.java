@@ -58,7 +58,7 @@ import org.vividus.ui.context.IUiContext;
 @ExtendWith(MockitoExtension.class)
 class TouchStepsTests
 {
-    private static final Dimension DIMENSION = new Dimension(0, 1184);
+    private static final Dimension DIMENSION = new Dimension(100, 1184);
 
     private static final String ELEMENT_TO_TAP = "The element to tap";
 
@@ -119,6 +119,7 @@ class TouchStepsTests
         WebElement element = mock(WebElement.class);
         mockAssertElementsNumber(List.of(element), true);
         when(element.getLocation()).thenReturn(new Point(-1, elementY));
+        when(element.getRect()).thenReturn(new Rectangle(-1, elementY, 10, 10));
         SearchParameters parameters = initSwipeMocks();
 
         when(searchActions.findElements(locator)).thenReturn(new ArrayList<>())
@@ -136,8 +137,40 @@ class TouchStepsTests
         touchSteps.swipeToElement(SwipeDirection.UP, locator, Duration.ZERO);
 
         verifyNoMoreInteractions(parameters);
-        verify(touchActions).performVerticalSwipe(eq(592), eq(endY), argThat(sa ->
+        verify(touchActions).performSwipe(eq(SwipeDirection.UP), eq(592), eq(endY), argThat(sa ->
             DIMENSION.equals(sa.getDimension()) && sa.getPoint().equals(new Point(0, 0))), eq(Duration.ZERO));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "200, LEFT",
+        "20, LEFT",
+        "-20, RIGHT",
+        "20, RIGHT"
+    })
+    void shouldSwipeToElementAndDoNotAdjustItForHorizontalScroll(int elementX, SwipeDirection direction)
+    {
+        mockScreenSize();
+        WebElement element = mock(WebElement.class);
+        mockAssertElementsNumber(List.of(element), true);
+        when(element.getRect()).thenReturn(new Rectangle(elementX, 1, 10, 10));
+        SearchParameters parameters = initSwipeMocks();
+
+        when(searchActions.findElements(locator)).thenReturn(new ArrayList<>())
+                                                 .thenReturn(List.of())
+                                                 .thenReturn(List.of(element))
+                                                 .thenReturn(List.of(element));
+        doAnswer(a ->
+        {
+            BooleanSupplier condition = a.getArgument(3, BooleanSupplier.class);
+            condition.getAsBoolean();
+            condition.getAsBoolean();
+            condition.getAsBoolean();
+            return null;
+        }).when(touchActions).swipeUntil(eq(direction), eq(Duration.ZERO), any(Rectangle.class),
+                any(BooleanSupplier.class));
+        touchSteps.swipeToElement(direction, locator, Duration.ZERO);
+        verifyNoMoreInteractions(parameters);
     }
 
     @Test
@@ -146,6 +179,7 @@ class TouchStepsTests
         WebElement element = mock(WebElement.class);
         mockAssertElementsNumber(List.of(element), true);
         when(element.getLocation()).thenReturn(new Point(-1, 138));
+        when(element.getRect()).thenReturn(new Rectangle(-1, 138, 10, 10));
         WebElement searchContext = mock(WebElement.class);
         Point point = new Point(10, 10);
         Dimension contextDimension = new Dimension(1920, 1080);
@@ -169,8 +203,9 @@ class TouchStepsTests
         touchSteps.swipeToElement(SwipeDirection.UP, locator, Duration.ZERO);
 
         verifyNoMoreInteractions(parameters);
-        verify(touchActions).performVerticalSwipe(eq(540), eq(564), argThat(sa ->
-            contextDimension.equals(sa.getDimension()) && sa.getPoint().equals(point)), eq(Duration.ZERO));
+        verify(touchActions).performSwipe(eq(SwipeDirection.UP), eq(540), eq(564),
+                argThat(sa -> contextDimension.equals(sa.getDimension()) && sa.getPoint().equals(point)),
+                eq(Duration.ZERO));
     }
 
     @Test

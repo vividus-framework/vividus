@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,73 +16,85 @@
 
 package org.vividus.mobileapp.model;
 
-import org.openqa.selenium.Dimension;
+import java.util.function.ToIntFunction;
+
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
 import org.vividus.mobileapp.configuration.MobileApplicationConfiguration;
 
 public enum SwipeDirection
 {
-    UP
-    {
-        @Override
-        public SwipeCoordinates calculateCoordinates(Rectangle swipeArea,
-                MobileApplicationConfiguration mobileApplicationConfiguration)
-        {
-            int indent = swipeArea.getHeight() / VERTICAL_INDENT_COEFFICIENT;
-            return createCoordinates(swipeArea.getHeight() - indent, indent, swipeArea.getWidth(),
-                    mobileApplicationConfiguration.getSwipeVerticalXPosition(), swipeArea.getPoint());
-        }
-    },
-    DOWN
-    {
-        @Override
-        public SwipeCoordinates calculateCoordinates(Rectangle swipeArea,
-                MobileApplicationConfiguration mobileApplicationConfiguration)
-        {
-            int indent = swipeArea.getHeight() / VERTICAL_INDENT_COEFFICIENT;
-            return createCoordinates(indent, swipeArea.getHeight() - indent, swipeArea.getWidth(),
-                    mobileApplicationConfiguration.getSwipeVerticalXPosition(), swipeArea.getPoint());
-        }
-    },
-    LEFT
-    {
-        @Override
-        public SwipeCoordinates calculateCoordinates(Rectangle swipeArea,
-                MobileApplicationConfiguration mobileApplicationConfiguration)
-        {
-            int indent = swipeArea.getWidth() / HORIZONTAL_INDENT_COEFFICIENT;
-            int y = calculateCoordinate(swipeArea.getHeight(),
-                    mobileApplicationConfiguration.getSwipeHorizontalYPosition());
-            return createAdjustedCoordinates(swipeArea.getWidth() - indent, y, indent, y, swipeArea.getPoint());
-        }
-    },
-    RIGHT
-    {
-        @Override
-        public SwipeCoordinates calculateCoordinates(Rectangle swipeArea,
-                MobileApplicationConfiguration mobileApplicationConfiguration)
-        {
-            Dimension dimension = swipeArea.getDimension();
-            Point point = swipeArea.getPoint();
-            int indent = dimension.getWidth() / HORIZONTAL_INDENT_COEFFICIENT;
-            int y = calculateCoordinate(dimension.getHeight(),
-                    mobileApplicationConfiguration.getSwipeHorizontalYPosition());
-            return createAdjustedCoordinates(indent, y, dimension.getWidth() - indent, y, point);
-        }
-    };
+    UP(true, true, SwipeDirection.VERTICAL_INDENT_COEFFICIENT, Rectangle::getHeight, Rectangle::getWidth,
+            MobileApplicationConfiguration::getSwipeVerticalXPosition),
+    DOWN(false, true, SwipeDirection.VERTICAL_INDENT_COEFFICIENT, Rectangle::getHeight, Rectangle::getWidth,
+        MobileApplicationConfiguration::getSwipeVerticalXPosition),
+    LEFT(true, false, SwipeDirection.HORIZONTAL_INDENT_COEFFICIENT, Rectangle::getWidth, Rectangle::getHeight,
+            MobileApplicationConfiguration::getSwipeHorizontalYPosition),
+    RIGHT(false, false, SwipeDirection.HORIZONTAL_INDENT_COEFFICIENT, Rectangle::getWidth, Rectangle::getHeight,
+            MobileApplicationConfiguration::getSwipeHorizontalYPosition);
 
-    private static final int VERTICAL_INDENT_COEFFICIENT = 5;
-    private static final int HORIZONTAL_INDENT_COEFFICIENT = 8;
+    private static final float VERTICAL_INDENT_COEFFICIENT = 0.2f;
+    private static final float HORIZONTAL_INDENT_COEFFICIENT = 0.125f;
 
-    public abstract SwipeCoordinates calculateCoordinates(Rectangle swipeArea,
-            MobileApplicationConfiguration mobileApplicationConfiguration);
+    private final boolean backward;
+    private final boolean vertical;
+    private final float indentCoefficient;
+    private final ToIntFunction<Rectangle> swipeAxisLengthProvider;
+    private final ToIntFunction<Rectangle> boundariesDimensionProvider;
+    private final ToIntFunction<MobileApplicationConfiguration> percentageProvider;
 
-    public static SwipeCoordinates createCoordinates(int startY, int endY, int width, int xOffsetPercentage,
-            Point point)
+    SwipeDirection(boolean backward, boolean vertical, float indentCoefficient,
+            ToIntFunction<Rectangle> swipeAxisLengthProvider, ToIntFunction<Rectangle> boundariesDimensionProvider,
+            ToIntFunction<MobileApplicationConfiguration> percentageProvider)
     {
-        int x = calculateCoordinate(width, xOffsetPercentage);
-        return createAdjustedCoordinates(x, startY, x, endY, point);
+        this.backward = backward;
+        this.vertical = vertical;
+        this.indentCoefficient = indentCoefficient;
+        this.swipeAxisLengthProvider = swipeAxisLengthProvider;
+        this.boundariesDimensionProvider = boundariesDimensionProvider;
+        this.percentageProvider = percentageProvider;
+    }
+
+    public boolean isVertical()
+    {
+        return vertical;
+    }
+
+    public boolean isBackward()
+    {
+        return backward;
+    }
+
+    public int getSwipeAxisLength(Rectangle swipeArea)
+    {
+        return swipeAxisLengthProvider.applyAsInt(swipeArea);
+    }
+
+    public SwipeCoordinates calculateCoordinates(Rectangle swipeArea, MobileApplicationConfiguration configuration)
+    {
+        int swipeAxisLength = getSwipeAxisLength(swipeArea);
+        int indent = (int) (swipeAxisLength * indentCoefficient);
+        int coordinateFirst = swipeAxisLength - indent;
+        int coordinateSecond = indent;
+        if (backward)
+        {
+            return createCoordinates(coordinateFirst, coordinateSecond, configuration, swipeArea);
+        }
+        return createCoordinates(coordinateSecond, coordinateFirst, configuration, swipeArea);
+    }
+
+    public SwipeCoordinates createCoordinates(int startCoordinate, int endCoordinate,
+            MobileApplicationConfiguration configuration, Rectangle swipeArea)
+    {
+        int swipeAxisCoordinate = calculateCoordinate(boundariesDimensionProvider.applyAsInt(swipeArea),
+                percentageProvider.applyAsInt(configuration));
+        if (vertical)
+        {
+            return createAdjustedCoordinates(swipeAxisCoordinate, startCoordinate, swipeAxisCoordinate,
+                    endCoordinate, swipeArea.getPoint());
+        }
+        return createAdjustedCoordinates(startCoordinate, swipeAxisCoordinate, endCoordinate, swipeAxisCoordinate,
+                swipeArea.getPoint());
     }
 
     private static SwipeCoordinates createAdjustedCoordinates(int startX, int startY, int endX, int endY, Point point)
