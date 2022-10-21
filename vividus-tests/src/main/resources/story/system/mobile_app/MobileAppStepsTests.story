@@ -21,7 +21,8 @@ Then `${deviceInfo}` matches `.*timeZone.*`
 Scenario: Verify step: 'When I reinstall mobile application with bundle identifier `$bundleId`'
 Meta:
     @requirementId 2073
-When I tap on element located `accessibilityId(menuToggler)`
+When I tap on element located by `accessibilityId(menuToggler)`
+!-- Deprecated, replace with "When I tap on element located by `$locator`" after removal
 When I tap on element located `xpath(<menuInputXpath>)`
 When I reinstall mobile application with bundle identifier `${main-app}`
 When I wait until element located `xpath(<textElementXpath>)->filter.text(Home)` appears
@@ -85,15 +86,19 @@ Scenario: Verify step: 'Then number of $state elements found by `$locator` is $c
 Then number of VISIBLE elements found by `accessibilityId(menuToggler):a` is equal to `1`
 
 
-Scenario: Verify step: 'When I tap on element located `$locator` with duration `$duration`'
+Scenario: Verify step: 'When I tap on element located by `$locator` with duration `$duration`'
 Then number of elements found by `xpath(<menuButtonXpath>)` is equal to `0`
-When I tap on element located `accessibilityId(menuToggler)` with duration `PT0.5S`
+When I tap on element located by `accessibilityId(menuToggler)` with duration `PT0.5S`
 Then number of elements found by `xpath(<menuButtonXpath>)` is equal to `1`
+!-- Deprecated, remove the rest of scenario after "When I tap on element located `$locator` with duration `$duration`" removal
+When I tap on element located `xpath(<menuInputXpath>)` with duration `PT0.5S`
+Then number of elements found by `xpath(<menuButtonXpath>)` is equal to `0`
+When I tap on element located by `accessibilityId(menuToggler)`
 
 
-Scenario: Verify step: 'When I tap on element located `$locator`' and Attribute Filter
+Scenario: Verify step: 'When I tap on element located by `$locator`' and Attribute Filter
 Then number of elements found by `accessibilityId(increment)` is equal to `0`
-When I tap on element located `xpath(<menuButtonXpath>)->filter.attribute(${visibility-attribute})`
+When I tap on element located by `xpath(<menuButtonXpath>)->filter.attribute(${visibility-attribute})`
 Then number of elements found by `accessibilityId(increment)->filter.attribute(${visibility-attribute}=true)` is equal to `1`
 
 
@@ -110,10 +115,10 @@ Scenario: Verify step: 'When I type text `$text`'
 Meta:
     @targetPlatform android
 
-When I tap on element located `accessibilityId(menuToggler)`
-When I tap on element located `xpath(<menuInputXpath>)`
+When I tap on element located by `accessibilityId(menuToggler)`
+When I tap on element located by `xpath(<menuInputXpath>)`
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `0`
-When I tap on element located `accessibilityId(nameInput)`
+When I tap on element located by `accessibilityId(nameInput)`
 Given I initialize story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
 When I type text `${text}`
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
@@ -124,14 +129,14 @@ When I navigate back
 
 Scenario: Verify step: 'When I type `$text` in field located `$locator`'
 Given I initialize story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
-When I tap on element located `accessibilityId(menuToggler)`
-When I tap on element located `xpath(<menuInputXpath>)`
+When I tap on element located by `accessibilityId(menuToggler)`
+When I tap on element located by `xpath(<menuInputXpath>)`
 When I type `${text}` in field located `accessibilityId(nameInput)`
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 
 
 Scenario: Verify dynamic variable: 'clipboard-text'
-When I tap on element located `accessibilityId(CopyTextToClipboardButton)`
+When I tap on element located by `accessibilityId(CopyTextToClipboardButton)`
 Then `${clipboard-text}` is equal to `${text}`
 
 
@@ -155,7 +160,7 @@ When I save `<textFieldValueAttribute>` attribute value of element located `acce
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 Then number of elements found by `<keyboardLocator>` is equal to `1`
 Then `${text}` is equal to `${typedText}`
-When I tap on element located `accessibilityId(Return)`
+When I tap on element located by `accessibilityId(Return)`
 Then number of elements found by `<keyboardLocator>` is equal to `0`
 
 
@@ -169,35 +174,36 @@ When I clear field located `accessibilityId(nameInput)` and keep keyboard open
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `0`
 Then number of elements found by `xpath(<nameInputXpath>)` is equal to `1`
 Then number of elements found by `<keyboardLocator>` is equal to `1`
-When I tap on element located `accessibilityId(Return)`
+When I tap on element located by `accessibilityId(Return)`
 Then number of elements found by `<keyboardLocator>` is equal to `0`
 
 
 Scenario: Verify step: 'When I wait until element located `$locator` disappears'
-When I tap on element located `accessibilityId(menuToggler)`
-When I tap on element located `xpath(<menuWaitXpath>)`
+When I tap on element located by `accessibilityId(menuToggler)`
+When I tap on element located by `xpath(<menuWaitXpath>)`
 Then number of elements found by `accessibilityId(picture)` is equal to `1`
-When I tap on element located `accessibilityId(hidePicture)`
+When I tap on element located by `accessibilityId(hidePicture)`
 When I wait until element located `accessibilityId(picture)` disappears
 Then number of elements found by `accessibilityId(picture)` is equal to `0`
 
 
 Scenario: Verify step: 'When I wait until element located `$locator` appears'
 Then number of elements found by `accessibilityId(picture)` is equal to `0`
-When I tap on element located `accessibilityId(showPicture)`
+When I tap on element located by `accessibilityId(showPicture)`
 When I wait until element located `accessibilityId(picture)` appears
 Then number of elements found by `accessibilityId(picture)` is equal to `1`
 
 
-Scenario: Verify step: 'When I swipe $direction to element located `$locator` with duration $swipeDuration'
-When I tap on element located `accessibilityId(menuToggler)`
-When I tap on element located `xpath(<menuScrollViewXpath>)`
+Scenario: Verify step: 'When I swipe $direction to element located by `$locator` with duration $swipeDuration'
+When I tap on element located by `accessibilityId(menuToggler)`
+When I tap on element located by `xpath(<menuScrollViewXpath>)`
 Then number of elements found by `accessibilityId(header)` is equal to `1`
 Then number of elements found by `accessibilityId(footer)` is equal to `0`
+!-- Deprecated, replace with "When I swipe $direction to element located by `$locator` with duration $swipeDuration`" after removal
 When I swipe UP to element located `accessibilityId(footer)` with duration PT1S
 Then number of elements found by `accessibilityId(header)` is equal to `0`
 Then number of elements found by `accessibilityId(footer)` is equal to `1`
-When I swipe DOWN to element located `accessibilityId(header)` with duration PT1S
+When I swipe DOWN to element located by `accessibilityId(header)` with duration PT1S
 Then number of elements found by `accessibilityId(header)` is equal to `1`
 Then number of elements found by `accessibilityId(footer)` is equal to `0`
 
@@ -205,25 +211,25 @@ Then number of elements found by `accessibilityId(footer)` is equal to `0`
 Scenario: [Android] Verify step: 'When I upload file `$filePath` to device'
 Meta:
     @targetPlatform android
-When I tap on element located `accessibilityId(menuToggler)`
-When I tap on element located `xpath(//android.widget.TextView[@text='Image'])`
+When I tap on element located by `accessibilityId(menuToggler)`
+When I tap on element located by `xpath(//android.widget.TextView[@text='Image'])`
 When I upload file `/data/mobile-upload-image.png` to device
-When I tap on element located `accessibilityId(selectImage)`
+When I tap on element located by `accessibilityId(selectImage)`
 When I wait until element located `xpath(//android.widget.TextView[@text='Pictures'])` appears
-When I tap on element located `xpath(//android.widget.TextView[@text='Pictures'])`
-When I tap on element located `xpath((//android.view.ViewGroup[contains(@content-desc, "Photo taken")])[1])`
+When I tap on element located by `xpath(//android.widget.TextView[@text='Pictures'])`
+When I tap on element located by `xpath((//android.view.ViewGroup[contains(@content-desc, "Photo taken")])[1])`
 Then number of elements found by `xpath(//android.widget.TextView[@text='228x228'])` is equal to `1`
 
 
 Scenario: [iOS] Verify step: 'When I upload file `$filePath` to device' AND 'iosClassChain' locator AND 'iosNsPredicate' locator
 Meta:
     @targetPlatform ios
-When I tap on element located `accessibilityId(menuToggler)`
-When I tap on element located `iosClassChain(**/XCUIElementTypeButton[$name == "Image"$])`
+When I tap on element located by `accessibilityId(menuToggler)`
+When I tap on element located by `iosClassChain(**/XCUIElementTypeButton[$name == "Image"$])`
 When I upload file `/data/mobile-upload-image.png` to device
 When I tap on element located `iosNsPredicate(name == 'selectImage')`
 When I wait until element located `accessibilityId(Photos)` appears
-When I tap on element located `xpath((//XCUIElementTypeImage[contains(@name, "Photo")])[1])`
+When I tap on element located by `xpath((//XCUIElementTypeImage[contains(@name, "Photo")])[1])`
 Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` is equal to `1`
 
 
@@ -231,7 +237,7 @@ Scenario: [Android] Verify step: 'When I delete file `$filePath` from device'
 Meta:
     @targetPlatform android
 When I delete file `/sdcard/Pictures/mobile-upload-image.png` from device
-When I tap on element located `accessibilityId(selectImage)`
+When I tap on element located by `accessibilityId(selectImage)`
 When I wait until element located `xpath(//android.widget.TextView[@text='Pictures'])` disappears
 
 
@@ -260,8 +266,8 @@ When I wait until element located `accessibilityId(menuToggler)` appears
 
 
 Scenario: Verify step: 'When I send mobile application to background for `$period` period'
-When I tap on element located `accessibilityId(menuToggler)`
-When I tap on element located `xpath(<menuScrollViewXpath>)`
+When I tap on element located by `accessibilityId(menuToggler)`
+When I tap on element located by `xpath(<menuScrollViewXpath>)`
 Then number of elements found by `accessibilityId(header)` is equal to `1`
 Then number of elements found by `accessibilityId(footer)` is equal to `0`
 When I send mobile application to background for `PT-1S` period
@@ -275,8 +281,8 @@ Then number of elements found by `accessibilityId(footer)` is equal to `0`
 Scenario: [iOS] Verify step: 'When I select $direction value with `$offset` offset in picker wheel located `$locator`'
 Meta:
     @targetPlatform ios
-When I tap on element located `accessibilityId(menuToggler)`
-When I tap on element located `xpath(//XCUIElementTypeButton[@name="Date Picker"])`
+When I tap on element located by `accessibilityId(menuToggler)`
+When I tap on element located by `xpath(//XCUIElementTypeButton[@name="Date Picker"])`
 When I change context to element located `accessibilityId(dateTimePicker)`
 When I select next value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(1)`
 When I select previous value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(2)`
@@ -288,8 +294,8 @@ Then number of elements found by `accessibilityId(dateInput)->filter.textPart(1/
 Scenario: [Android] Verify steps: 'When I switch to native context', 'When I switch to web view with name that $comparisonRule `$value`'
 Meta:
     @targetPlatform android
-When I tap on element located `accessibilityId(menuToggler)`
-When I tap on element located `xpath(//android.widget.TextView[@text='Web View'])`
+When I tap on element located by `accessibilityId(menuToggler)`
+When I tap on element located by `xpath(//android.widget.TextView[@text='Web View'])`
 When I wait until element located `xpath(//android.webkit.WebView[@focusable='true'])` appears
 When I switch to web view with name that contains `vividustestapp`
 Then number of elements found by `xpath(//*[@id='welcome-message'])` is equal to `1`
@@ -297,21 +303,21 @@ When I switch to native context
 Then number of elements found by `xpath(//*[@id='welcome-message'])` is equal to `0`
 
 
-Scenario: Verify step: 'When I swipe $direction to element located `$locator` with duration $swipeDuration'
-When I tap on element located `accessibilityId(menuToggler)`
-When I tap on element located `xpath(<carouselViewXpath>)`
+Scenario: Verify step: 'When I swipe $direction to element located by `$locator` with duration $swipeDuration'
+When I tap on element located by `accessibilityId(menuToggler)`
+When I tap on element located by `xpath(<carouselViewXpath>)`
 Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
-When I swipe LEFT to element located `accessibilityId(<secondItemAccessibilityId>)` with duration PT1S
+When I swipe LEFT to element located by `accessibilityId(<secondItemAccessibilityId>)` with duration PT1S
 Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
-When I swipe RIGHT to element located `accessibilityId(<firstItemAccessibilityId>)` with duration PT1S
+When I swipe RIGHT to element located by `accessibilityId(<firstItemAccessibilityId>)` with duration PT1S
 Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
 When I change context to element located `xpath(<swipeableAreaXpath>)`
-When I swipe LEFT to element located `accessibilityId(<secondItemAccessibilityId>)` with duration PT1S
+When I swipe LEFT to element located by `accessibilityId(<secondItemAccessibilityId>)` with duration PT1S
 Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
-When I swipe RIGHT to element located `accessibilityId(<firstItemAccessibilityId>)` with duration PT1S
+When I swipe RIGHT to element located by `accessibilityId(<firstItemAccessibilityId>)` with duration PT1S
 Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
 When I reset context
@@ -356,8 +362,8 @@ Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` 
 Scenario: Verify steps: "When I scan barcode from screen and save result to $scopes variable `$variableName`"
 Meta:
     @requirementId 2112
-When I tap on element located `accessibilityId(menuToggler)`
-When I tap on element located `xpath(<menuQrCodeXpath>)`
+When I tap on element located by `accessibilityId(menuToggler)`
+When I tap on element located by `xpath(<menuQrCodeXpath>)`
 When I wait until element located `xpath(<scrollableMenuXpath>)` disappears
 When I scan barcode from screen and save result to scenario variable `qrCodeLink`
 Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
@@ -371,9 +377,9 @@ Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
 When I reset context
 
 Scenario: Go to slider screen
-When I tap on element located `accessibilityId(menuToggler)`
-When I swipe UP to element located `xpath(<menuSliderXpath>)` with duration PT1S
-When I tap on element located `xpath(<menuSliderXpath>)`
+When I tap on element located by `accessibilityId(menuToggler)`
+When I swipe UP to element located by `xpath(<menuSliderXpath>)` with duration PT1S
+When I tap on element located by `xpath(<menuSliderXpath>)`
 When I wait until element located `accessibilityId(zeroToHundredSlider)` appears
 
 
