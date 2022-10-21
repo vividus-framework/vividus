@@ -72,7 +72,7 @@ public class TouchSteps
      * @param duration between an element is pressed and released in
      * <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
      */
-    @When(value = "I tap on element located `$locator` with duration `$duration`", priority = 1)
+    @When(value = "I tap on element located by `$locator` with duration `$duration`", priority = 1)
     public void tapByLocatorWithDuration(Locator locator, Duration duration)
     {
         findElementToTap(locator).ifPresent(e -> touchActions.tap(e, duration));
@@ -88,7 +88,7 @@ public class TouchSteps
      * </ol>
      * @param locator locator to find an element
      */
-    @When("I tap on element located `$locator`")
+    @When("I tap on element located by `$locator`")
     public void tapByLocator(Locator locator)
     {
         findElementToTap(locator).ifPresent(touchActions::tap);
@@ -102,7 +102,7 @@ public class TouchSteps
      * @param locator locator to find an element
      * @param swipeDuration swipe duration in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
      */
-    @When("I swipe $direction to element located `$locator` with duration $swipeDuration")
+    @When("I swipe $direction to element located by `$locator` with duration $swipeDuration")
     public void swipeToElement(SwipeDirection direction, Locator locator, Duration swipeDuration)
     {
         locator.getSearchParameters().setWaitForElement(false);
