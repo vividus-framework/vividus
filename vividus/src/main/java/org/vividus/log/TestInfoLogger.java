@@ -56,8 +56,8 @@ public final class TestInfoLogger
     private static final String CATEGORY_FORMAT = "%s%n %s:%n";
     private static final String NEW_LINE = "%n";
     private static final Logger LOGGER = LoggerFactory.getLogger(TestInfoLogger.class);
-    private static final Pattern SECURE_KEY_PATTERN = Pattern
-            .compile(".*(password|((access|api|private)-)?(key|secret|token)).*", Pattern.CASE_INSENSITIVE);
+    private static final Pattern SECURE_KEY_PATTERN = Pattern.compile(
+            "password|secret|token|key([^s]|$)", Pattern.CASE_INSENSITIVE);
     private static final int HORIZONTAL_RULE_LENGTH = 80;
     private static final String HORIZONTAL_RULE = HYPHEN.repeat(HORIZONTAL_RULE_LENGTH);
 
@@ -202,7 +202,7 @@ public final class TestInfoLogger
                     .sorted(Entry.comparingByKey())
                     .forEach(property -> {
                         String key = property.getKey();
-                        Object value = SECURE_KEY_PATTERN.matcher(key).matches() ? "****" : property.getValue();
+                        Object value = SECURE_KEY_PATTERN.matcher(key).find() ? "****" : property.getValue();
                         message.format("%n%s=%s", key, value);
                     });
             LOGGER.atInfo().addArgument(message::toString).log("Properties and environment variables:{}");
