@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junitpioneer.jupiter.SetEnvironmentVariable;
 import org.springframework.beans.factory.BeanIsAbstractException;
 
 class BeanFactoryIntegrationTests
@@ -50,6 +51,7 @@ class BeanFactoryIntegrationTests
     private static final char COMMA = ',';
     private static final String VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY = "vividus.encryptor.password";
     private static final String ENCRYPTED_PROPERTY = "encrypted-property";
+    private static final String VIVIDUS_ENCRYPTOR_PASSWORD_ENV_VARIABLE = "VIVIDUS_ENCRYPTOR_PASSWORD";
     private static final String HELLO = "hello";
 
     private static final String DEEPER_SUITE_LEVEL_OVERRIDABLE_PROPERTY = "deeper-suite-level-overridable-property";
@@ -220,12 +222,25 @@ class BeanFactoryIntegrationTests
     }
 
     @Test
+    @SetEnvironmentVariable(key = VIVIDUS_ENCRYPTOR_PASSWORD_ENV_VARIABLE, value = "swordfish")
     void testConfigurationResolverEncryptedPropertySystemPassword() throws IOException
     {
         System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
         System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, INTEGRATION_TEST);
         System.setProperty(VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY, "12345");
+        BeanFactory.open();
+        Properties properties = ConfigurationResolver.getInstance().getProperties();
+        assertEquals(HELLO, properties.getProperty(ENCRYPTED_PROPERTY));
+    }
+
+    @Test
+    @SetEnvironmentVariable(key = VIVIDUS_ENCRYPTOR_PASSWORD_ENV_VARIABLE, value = "12345")
+    void testConfigurationResolverEncryptedPropertyEnvironmentVariable() throws IOException
+    {
+        System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
+        System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, "integrationtestdecryptor");
         BeanFactory.open();
         Properties properties = ConfigurationResolver.getInstance().getProperties();
         assertEquals(HELLO, properties.getProperty(ENCRYPTED_PROPERTY));

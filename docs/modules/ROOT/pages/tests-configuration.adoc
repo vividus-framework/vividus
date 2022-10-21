@@ -677,14 +677,28 @@ CAUTION: Use this tool at your own risk, since there is a chance of potential le
 
 === How to use an encrypted string in VIVIDUS
 
-. Add the secret key/text to the project properties as the value of:
+. Set the password in one of the following ways:
++
+.. Pass the key with its password-value into a test run using command line:
++
+[source,shell]
+----
+./gradlew runStories -Pvividus.encryptor.password=MYPAS_WORD
+----
++
+.. Add the password to the system project properties as the value of:
 +
 [source,properties]
 ----
 system.vividus.encryptor.password=MYPAS_WORD
 ----
 +
-IMPORTANT: This value must be kept secret and must not be committed to version control system.
+.. Set via OS environment variable `VIVIDUS_ENCRYPTOR_PASSWORD`
++
+Keep in mind that a password specified in the command line takes priority over the project system property,
+and the project system property takes priority over the environment variable.
++
+IMPORTANT: This password must be kept secret and must not be committed to version control system.
 +
 NOTE: `MYPAS_WORD` is a sample password and should be never used, own strong password is required for the encryption.
 
@@ -695,7 +709,7 @@ NOTE: `MYPAS_WORD` is a sample password and should be never used, own strong pas
 http.auth.password=ENC(WVnXhzG704KRZZFYL7hfpA4YoSm8V2F5eNXyr7CRYCichteHvNS3nB23zaI8CuLy)
 ----
 
-Please see <<_externalized_configuration>> to find the ways how encryptor password can be passed to the tests.
+Please see <<_externalized_configuration>> to get more information about how encryptor password can be passed to the tests.
 
 == Steps aliases
 
