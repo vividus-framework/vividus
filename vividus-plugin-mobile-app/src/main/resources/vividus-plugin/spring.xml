@@ -105,6 +105,7 @@
 
     <bean class="org.vividus.selenium.mobileapp.screenshot.MobileAppAshotFactory" parent="abstractAshotFactory">
         <property name="downscale" value="${mobile.screenshot.downscale}" />
+        <property name="appendBottomNavigationBarOnAndroid" value="${mobile.screenshot.android.append-bottom-navigation-bar}" />
     </bean>
 
     <bean class="org.vividus.selenium.screenshot.ScreenshotCropper" />

@@ -29,6 +29,7 @@ import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 
 import pazone.ashot.AShot;
+import pazone.ashot.ShootingStrategies;
 import pazone.ashot.ShootingStrategy;
 import pazone.ashot.coordinates.CoordsProvider;
 
@@ -114,6 +115,11 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                 : CeilingJsCoordsProvider.getScrollAdjusted(javascriptActions);
         return new AShot().shootingStrategy(shootingStrategy)
                 .coordsProvider(new ScrollBarHidingCoordsProviderDecorator(coordsProvider, scrollbarHandler));
+    }
+
+    private ShootingStrategy getBaseShootingStrategy()
+    {
+        return ShootingStrategies.scaling((float) this.getDpr());
     }
 
     @Override

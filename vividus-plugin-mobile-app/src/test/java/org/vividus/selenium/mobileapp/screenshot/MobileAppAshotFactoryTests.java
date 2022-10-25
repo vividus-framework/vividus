@@ -17,8 +17,8 @@
 package org.vividus.selenium.mobileapp.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -31,6 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
+import org.vividus.selenium.mobileapp.screenshot.strategies.MobileViewportShootingStrategy;
 import org.vividus.selenium.mobileapp.screenshot.strategies.SimpleScreenshotShootingStrategy;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
@@ -56,62 +57,56 @@ class MobileAppAshotFactoryTests
     @InjectMocks private MobileAppAshotFactory ashotFactory;
 
     @Test
-    void shouldProvideDpr()
-    {
-        ashotFactory.getDpr();
-        verify(mobileAppWebDriverManager).getDpr();
-    }
-
-    @Test
-    void shouldCreateAshotWithTheMergedConfiguration() throws IllegalAccessException
+    void shouldCreateAshotWithMergedConfiguration() throws IllegalAccessException
     {
         mockAshotConfiguration(true);
-        ScreenshotParameters parameters = new ScreenshotParameters();
+        when(mobileAppWebDriverManager.getDpr()).thenReturn(2d);
+        ashotFactory.setAppendBottomNavigationBarOnAndroid(true);
+        when(mobileAppWebDriverManager.isAndroid()).thenReturn(false);
+        var parameters = new ScreenshotParameters();
         parameters.setShootingStrategy(Optional.of(SIMPLE));
-        AShot aShot = ashotFactory.create(Optional.of(parameters));
-        ElementCroppingDecorator croppingDecorator = (ElementCroppingDecorator) FieldUtils.readField(aShot,
-                SHOOTING_STRATEGY, true);
-        CuttingDecorator strategy = (CuttingDecorator) FieldUtils.readField(croppingDecorator, SHOOTING_STRATEGY, true);
-        assertBaseStrategy(ScalingDecorator.class, strategy);
-        assertCutStrategy(strategy, 1, 0);
+        var aShot = ashotFactory.create(Optional.of(parameters));
+        var croppingDecorator = (ElementCroppingDecorator) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
+        var strategy = (ScalingDecorator) FieldUtils.readField(croppingDecorator, SHOOTING_STRATEGY, true);
+        assertInstanceOf(MobileViewportShootingStrategy.class, FieldUtils.readField(strategy, SHOOTING_STRATEGY, true));
         assertCoordsProvider(aShot);
     }
 
     @Test
-    void shouldCreateAshotWithDefaultConfiguration() throws IllegalAccessException
+    void shouldCreateAshotWithDefaultConfigurationWithoutBottomNavigationBar() throws IllegalAccessException
     {
         mockAshotConfiguration(false);
+        ashotFactory.setAppendBottomNavigationBarOnAndroid(false);
         ashotFactory.setScreenshotShootingStrategy(SIMPLE);
-        AShot aShot = ashotFactory.create(Optional.empty());
-        CuttingDecorator strategy = (CuttingDecorator) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
-        assertBaseStrategy(SimpleShootingStrategy.class, strategy);
-        assertCutStrategy(strategy, 2, 0);
+        var aShot = ashotFactory.create(Optional.empty());
+        assertInstanceOf(MobileViewportShootingStrategy.class, FieldUtils.readField(aShot, SHOOTING_STRATEGY, true));
+        assertCoordsProvider(aShot);
+    }
+
+    @Test
+    void shouldCreateAshotWithDefaultConfigurationWithBottomNavigationBarOnAndroid() throws IllegalAccessException
+    {
+        mockAshotConfiguration(false);
+        when(mobileAppWebDriverManager.getStatusBarSize()).thenReturn(2);
+        ashotFactory.setAppendBottomNavigationBarOnAndroid(true);
+        when(mobileAppWebDriverManager.isAndroid()).thenReturn(true);
+        ashotFactory.setScreenshotShootingStrategy(SIMPLE);
+        var aShot = ashotFactory.create(Optional.empty());
+        var strategy = (CuttingDecorator) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
+        var baseStrategy = (ShootingStrategy) FieldUtils.readField(strategy, SHOOTING_STRATEGY, true);
+        assertInstanceOf(SimpleShootingStrategy.class, baseStrategy);
+        var cutStrategy = (CutStrategy) FieldUtils.readField(strategy, CUT_STRATEGY, true);
+        assertEquals(2, cutStrategy.getHeaderHeight(null));
+        assertEquals(0, cutStrategy.getFooterHeight(null));
         assertCoordsProvider(aShot);
     }
 
     private void mockAshotConfiguration(boolean downscale)
     {
         ashotFactory.setDownscale(downscale);
-        ashotFactory.setStrategies(Map.of(SIMPLE, new SimpleScreenshotShootingStrategy(), DIMPLE, s ->
-        {
+        ashotFactory.setStrategies(Map.of(SIMPLE, new SimpleScreenshotShootingStrategy(), DIMPLE, s -> {
             throw new IllegalStateException();
         }));
-        when(mobileAppWebDriverManager.getDpr()).thenReturn(2d);
-        when(mobileAppWebDriverManager.getStatusBarSize()).thenReturn(1);
-    }
-
-    private void assertBaseStrategy(Class<?> expectedClass, CuttingDecorator strategy) throws IllegalAccessException
-    {
-        ShootingStrategy baseStrategy = (ShootingStrategy) FieldUtils.readField(strategy, SHOOTING_STRATEGY, true);
-        assertEquals(expectedClass, baseStrategy.getClass());
-    }
-
-    private void assertCutStrategy(CuttingDecorator strategy, int expectedHeaderHeight, int expectedFooterHeight)
-            throws IllegalAccessException
-    {
-        CutStrategy cutStrategy = (CutStrategy) FieldUtils.readField(strategy, CUT_STRATEGY, true);
-        assertEquals(expectedHeaderHeight, cutStrategy.getHeaderHeight(null));
-        assertEquals(expectedFooterHeight, cutStrategy.getFooterHeight(null));
     }
 
     private void assertCoordsProvider(AShot aShot) throws IllegalAccessException
