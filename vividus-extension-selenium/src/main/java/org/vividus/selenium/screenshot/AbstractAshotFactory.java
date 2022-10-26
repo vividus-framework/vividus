@@ -28,7 +28,6 @@ import org.vividus.selenium.screenshot.strategies.ScreenshotShootingStrategy;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
 import pazone.ashot.ElementCroppingDecorator;
-import pazone.ashot.ShootingStrategies;
 import pazone.ashot.ShootingStrategy;
 import pazone.ashot.cutter.CutStrategy;
 import pazone.ashot.cutter.FixedCutStrategy;
@@ -69,11 +68,6 @@ public abstract class AbstractAshotFactory<T extends ScreenshotParameters> imple
         ScreenshotShootingStrategy strategy = strategies.get(strategyName);
         Validate.isTrue(null != strategy, "Unable to find the strategy with the name: %s", strategyName);
         return strategy;
-    }
-
-    protected ShootingStrategy getBaseShootingStrategy()
-    {
-        return ShootingStrategies.scaling((float) this.getDpr());
     }
 
     protected abstract double getDpr();

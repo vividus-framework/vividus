@@ -27,7 +27,6 @@ import static org.mockito.Mockito.verify;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,13 +50,6 @@ class AbstractAshotFactoryTests
 
     @Mock private ScreenshotCropper screenshotCropper;
     @InjectMocks private TestAshotFactory factory;
-
-    @Test
-    void shouldProvideScalingBaseStrategy() throws IllegalAccessException
-    {
-        ShootingStrategy scaling = factory.getBaseShootingStrategy();
-        assertEquals(101f, FieldUtils.readDeclaredField(scaling, "dprX", true));
-    }
 
     @Test
     void shouldThrowAnExceptionIfThereIsNoStrategyByTheName()
