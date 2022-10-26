@@ -54,7 +54,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.OutputType;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -92,7 +91,7 @@ class AbstractScreenshotTakerTests
         byte[] bytes = ResourceUtils.loadResourceAsByteArray(getClass(), IMAGE_PNG);
 
         when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(takesScreenshot);
-        when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(bytes);
+        when(takesScreenshot.getScreenshotAs(AppiumOutputType.INSTANCE)).thenReturn(bytes);
     }
 
     @Test

@@ -20,8 +20,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
+import org.vividus.selenium.screenshot.AppiumOutputType;
 
 import pazone.ashot.ImageReadException;
 import pazone.ashot.SimpleShootingStrategy;
@@ -35,7 +35,7 @@ public class MobileViewportShootingStrategy extends SimpleShootingStrategy
     {
         // Get screenshot without status bar
         String base64Png = (String) ((JavascriptExecutor) wd).executeScript("mobile:viewportScreenshot");
-        byte[] bytes = OutputType.BYTES.convertFromBase64Png(base64Png);
+        byte[] bytes = AppiumOutputType.INSTANCE.convertFromBase64Png(base64Png);
         try
         {
             return ImageTool.toBufferedImage(bytes);

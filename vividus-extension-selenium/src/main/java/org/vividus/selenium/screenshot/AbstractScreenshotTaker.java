@@ -23,7 +23,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.OutputType;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -121,7 +120,7 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
 
     protected byte[] takeScreenshotAsByteArray()
     {
-        return webDriverProvider.getUnwrapped(TakesScreenshot.class).getScreenshotAs(OutputType.BYTES);
+        return webDriverProvider.getUnwrapped(TakesScreenshot.class).getScreenshotAs(AppiumOutputType.INSTANCE);
     }
 
     protected IWebDriverProvider getWebDriverProvider()

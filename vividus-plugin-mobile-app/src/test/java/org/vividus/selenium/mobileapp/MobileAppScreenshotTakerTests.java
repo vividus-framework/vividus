@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,10 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.mobileapp.screenshot.MobileAppAshotFactory;
+import org.vividus.selenium.screenshot.AppiumOutputType;
 import org.vividus.selenium.screenshot.IScreenshotFileNameGenerator;
 import org.vividus.selenium.screenshot.Screenshot;
 
@@ -65,7 +65,7 @@ class MobileAppScreenshotTakerTests
     {
         when(screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME)).thenReturn(FILE_NAME);
         when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(takesScreenshot);
-        when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(DATA);
+        when(takesScreenshot.getScreenshotAs(AppiumOutputType.INSTANCE)).thenReturn(DATA);
 
         Optional<Screenshot> takenScreenshot = screenshotTaker.takeScreenshot(SCREENSHOT_NAME);
         assertTrue(takenScreenshot.isPresent());
@@ -79,7 +79,7 @@ class MobileAppScreenshotTakerTests
     void shouldSaveScreenshotToAPath(@TempDir Path path) throws IOException
     {
         when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(takesScreenshot);
-        when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(DATA);
+        when(takesScreenshot.getScreenshotAs(AppiumOutputType.INSTANCE)).thenReturn(DATA);
 
         Path takenScreenshot = screenshotTaker.takeScreenshot(path.resolve(FILE_NAME));
         assertArrayEquals(DATA, Files.readAllBytes(takenScreenshot));

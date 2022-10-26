@@ -46,13 +46,13 @@ import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.MutableCapabilities;
-import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.Response;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.screenshot.AppiumOutputType;
 import org.vividus.selenium.session.WebDriverSessionAttributes;
 import org.vividus.selenium.session.WebDriverSessionInfo;
 import org.vividus.ui.action.JavascriptActions;
@@ -181,7 +181,7 @@ class MobileAppWebDriverManagerTests
         var webDriver = mock(WebDriver.class,
                 withSettings().extraInterfaces(HasCapabilities.class, TakesScreenshot.class));
         when(((HasCapabilities) webDriver).getCapabilities()).thenReturn(capabilities);
-        when(((TakesScreenshot) webDriver).getScreenshotAs(OutputType.BYTES)).thenReturn(IMAGE);
+        when(((TakesScreenshot) webDriver).getScreenshotAs(AppiumOutputType.INSTANCE)).thenReturn(IMAGE);
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn((TakesScreenshot) webDriver);
         when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.DEVICE_PIXEL_RATIO),
@@ -214,7 +214,7 @@ class MobileAppWebDriverManagerTests
 
         TakesScreenshot taker = mock(TakesScreenshot.class);
         when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(taker);
-        when(taker.getScreenshotAs(OutputType.BYTES)).thenReturn(IMAGE);
+        when(taker.getScreenshotAs(AppiumOutputType.INSTANCE)).thenReturn(IMAGE);
         assertEquals(1d, driverManager.getDpr());
         verify(webDriverProvider).getUnwrapped(TakesScreenshot.class);
     }
@@ -239,7 +239,7 @@ class MobileAppWebDriverManagerTests
             imageIo.when(() -> ImageIO.read(any(InputStream.class))).thenThrow(new IOException("io is oi"));
             TakesScreenshot taker = mock(TakesScreenshot.class);
             when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(taker);
-            when(taker.getScreenshotAs(OutputType.BYTES)).thenReturn(IMAGE);
+            when(taker.getScreenshotAs(AppiumOutputType.INSTANCE)).thenReturn(IMAGE);
             when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.DEVICE_PIXEL_RATIO),
                     any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArguments()[1]).get());
             assertThrows(UncheckedIOException.class, driverManager::getDpr);

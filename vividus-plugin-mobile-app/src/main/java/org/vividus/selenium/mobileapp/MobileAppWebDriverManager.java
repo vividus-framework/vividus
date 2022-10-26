@@ -23,12 +23,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.Validate;
-import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.Response;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.GenericWebDriverManager;
+import org.vividus.selenium.screenshot.AppiumOutputType;
 import org.vividus.selenium.session.WebDriverSessionAttributes;
 import org.vividus.selenium.session.WebDriverSessionInfo;
 import org.vividus.ui.action.JavascriptActions;
@@ -129,7 +129,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
 
         try
         {
-            byte[] imageBytes = getUnwrappedDriver(TakesScreenshot.class).getScreenshotAs(OutputType.BYTES);
+            byte[] imageBytes = getUnwrappedDriver(TakesScreenshot.class).getScreenshotAs(AppiumOutputType.INSTANCE);
             BufferedImage image = ImageTool.toBufferedImage(imageBytes);
             return image.getHeight() / (double) getSize().getHeight();
         }
