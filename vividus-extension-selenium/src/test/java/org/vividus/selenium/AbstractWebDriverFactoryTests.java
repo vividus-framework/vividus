@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -56,7 +58,7 @@ import org.vividus.util.property.IPropertyParser;
 class AbstractWebDriverFactoryTests
 {
     private static final String CAPS = String.format("{%n  \"key1\" : \"arg\",%n  \"key2\" "
-            + ": \"arg\",%n  \"key3\" : \"arg\"%n}");
+            + ": \"arg\",%n  \"key3\" : \"arg\",%n  \"key4\" : \"configurer\"%n}");
     private static final String SELENIUM_CAPABILITIES = "selenium.capabilities.";
     private static final String SELENIUM_GRID_CAPABILITIES = "selenium.grid.capabilities.";
     private static final String FALSE = "false";
@@ -68,6 +70,7 @@ class AbstractWebDriverFactoryTests
     private static final String KEY1 = "key1";
     private static final String MAP = "map";
     private static final URI URL = URI.create("https://example.com");
+    private static final String CONFIGURER = "configurer";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractWebDriverFactory.class);
 
@@ -79,9 +82,9 @@ class AbstractWebDriverFactoryTests
     @Test
     void shouldReturnConvertedRemoteDriverCapability()
     {
-        lenient().when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES))
+        when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES))
             .thenReturn(Map.of(KEY1, TRUE, KEY3, TRUE.toUpperCase(), KEY4, ARG));
-        lenient().when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES))
+        when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES))
             .thenReturn(Map.of(KEY1, FALSE, KEY2, FALSE));
         Assertions.assertAll(
             () -> assertTrue((boolean) webDriverFactory.getCapability(KEY1, false)),
@@ -121,9 +124,9 @@ class AbstractWebDriverFactoryTests
     @Test
     void shouldCacheCapabilities()
     {
-        lenient().when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES))
+        when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES))
             .thenReturn(Map.of(KEY1, FALSE, KEY2, FALSE, KEY3, ARG));
-        lenient().when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES))
+        when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES))
             .thenReturn(Map.of(KEY1, TRUE, KEY2, TRUE));
         Assertions.assertAll(
             () -> assertTrue((boolean) webDriverFactory.getCapability(KEY1, false)),
@@ -136,34 +139,49 @@ class AbstractWebDriverFactoryTests
     @Test
     void testGetRemoteWebDriver() throws MalformedURLException
     {
+        var adjuster = new DesiredCapabilitiesAdjuster()
+        {
+            @Override
+            protected Map<String, Object> getExtraCapabilities(DesiredCapabilities desiredCapabilities)
+            {
+                return Map.of(KEY4, CONFIGURER);
+            }
+        };
+        var testWebDriverFactory = new TestWebDriverFactory(remoteWebDriverFactory, propertyParser, jsonUtils,
+                Optional.of(Set.of(adjuster)));
         RemoteWebDriver remoteWebDriver = mock(RemoteWebDriver.class,
                 withSettings().extraInterfaces(HasCapabilities.class));
-        Capabilities capabilities = new DesiredCapabilities(Map.of(KEY1, ARG, KEY2, ARG, KEY3, ARG));
+        Capabilities capabilities = new DesiredCapabilities(Map.of(KEY1, ARG, KEY2, ARG, KEY3, ARG, KEY4, CONFIGURER));
 
-        webDriverFactory.setRemoteDriverUrl(URL.toURL());
+        testWebDriverFactory.setRemoteDriverUrl(URL.toURL());
         when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES)).thenReturn(Map.of(KEY1, ARG));
         when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES)).thenReturn(Map.of(KEY2, ARG));
         when(remoteWebDriverFactory.getRemoteWebDriver(URL.toURL(), capabilities)).thenReturn(remoteWebDriver);
         when(((HasCapabilities) remoteWebDriver).getCapabilities()).thenReturn(capabilities);
 
-        webDriverFactory.getRemoteWebDriver(new DesiredCapabilities(Map.of(KEY3, ARG)));
+        testWebDriverFactory.getRemoteWebDriver(new DesiredCapabilities(Map.of(KEY3, ARG)));
 
         assertThat(logger.getLoggingEvents(),
                 is(List.of(info("Requested capabilities:\n{}", CAPS), info("Session capabilities:\n{}", CAPS))));
     }
 
+    @Test
+    void shouldUpdateCapabilitiesUsingConfigurer()
+    {
+        var desiredCapabilitiesAdjuster = mock(DesiredCapabilitiesAdjuster.class);
+        var capabilities = mock(DesiredCapabilities.class);
+        var testWebDriverFactory = new TestWebDriverFactory(remoteWebDriverFactory, propertyParser, jsonUtils,
+                Optional.of(Set.of(desiredCapabilitiesAdjuster)));
+        testWebDriverFactory.updateDesiredCapabilities(capabilities);
+        verify(desiredCapabilitiesAdjuster).adjust(capabilities);
+    }
+
     private static final class TestWebDriverFactory extends AbstractWebDriverFactory
     {
         TestWebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
-                JsonUtils jsonUtils)
+                JsonUtils jsonUtils, Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters)
         {
-            super(remoteWebDriverFactory, propertyParser, jsonUtils);
-        }
-
-        @Override
-        protected DesiredCapabilities updateDesiredCapabilities(DesiredCapabilities desiredCapabilities)
-        {
-            return desiredCapabilities;
+            super(remoteWebDriverFactory, propertyParser, jsonUtils, desiredCapabilitiesAdjusters);
         }
 
         @Override

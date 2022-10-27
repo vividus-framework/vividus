@@ -38,3 +38,8 @@ The baseline is JDK 11. The latest [JDK 16](https://jdk.java.net/16/) is support
 [<img src="https://resources.jetbrains.com/storage/products/intellij-idea/img/meta/intellij-idea_logo_300x300.png" width="100px" alt="IntelliJ IDEA">](https://www.jetbrains.com/?from=Vividus)
 
 [JetBrains](https://www.jetbrains.com/?from=Vividus) has provided us with the tools and IDEs necessary to build a high quality tool. Thank you.
+
+
+[![Mobitru](https://mobitru.com/images/logo.svg)](https://mobitru.com)
+
+[Mobitru](https://mobitru.com) has provided us with the tools and infrastructure necessary to build a high quality tool by testing our components on a range of browsers and platforms. Thank you.

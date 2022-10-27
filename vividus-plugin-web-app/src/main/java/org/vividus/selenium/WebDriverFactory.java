@@ -18,6 +18,7 @@ package org.vividus.selenium;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -45,9 +46,10 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
 
     public WebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
             JsonUtils jsonUtils, TimeoutConfigurer timeoutConfigurer, IProxy proxy,
-            WebDriverStartContext webDriverStartContext)
+            WebDriverStartContext webDriverStartContext,
+            Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters)
     {
-        super(remoteWebDriverFactory, propertyParser, jsonUtils);
+        super(remoteWebDriverFactory, propertyParser, jsonUtils, desiredCapabilitiesAdjusters);
         this.timeoutConfigurer = timeoutConfigurer;
         this.proxy = proxy;
         this.webDriverStartContext = webDriverStartContext;
@@ -72,22 +74,23 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
     @Override
     protected DesiredCapabilities updateDesiredCapabilities(DesiredCapabilities desiredCapabilities)
     {
+        DesiredCapabilities toUpdate = super.updateDesiredCapabilities(desiredCapabilities);
         Capabilities capabilities = Stream.of(WebDriverType.values())
-                .filter(type -> WebDriverManager.isBrowser(desiredCapabilities, type.getBrowser()))
+                .filter(type -> WebDriverManager.isBrowser(toUpdate, type.getBrowser()))
                 .findFirst()
                 .map(type ->
                 {
-                    type.prepareCapabilities(desiredCapabilities);
-                    configureProxy(type, desiredCapabilities);
+                    type.prepareCapabilities(toUpdate);
+                    configureProxy(type, toUpdate);
                     if (type == WebDriverType.CHROME)
                     {
                         WebDriverConfiguration configuration = getWebDriverConfiguration(type, false);
                         ChromeOptions chromeOptions = new ChromeOptions();
                         chromeOptions.addArguments(configuration.getCommandLineArguments());
                         configuration.getExperimentalOptions().forEach(chromeOptions::setExperimentalOption);
-                        return chromeOptions.merge(desiredCapabilities);
+                        return chromeOptions.merge(toUpdate);
                     }
-                    return desiredCapabilities;
+                    return toUpdate;
                 })
                 .orElse(desiredCapabilities);
         return new DesiredCapabilities(capabilities);

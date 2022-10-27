@@ -93,7 +93,6 @@ class WebDriverFactoryTests
     private static final String PATH = "testPath";
     private static final String ARG_1 = "--arg1";
     private static final String ARG_2 = "--arg2";
-    private static final String ARG_3 = "--arg3";
     private static final String ARGS = ARG_1 + " " + ARG_2;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractWebDriverFactory.class);
@@ -125,29 +124,29 @@ class WebDriverFactoryTests
     void beforeEach()
     {
         webDriverFactory = new WebDriverFactory(remoteWebDriverFactory, propertyParser,
-                new JsonUtils(), timeoutConfigurer, proxy, webDriverStartContext);
+                new JsonUtils(), timeoutConfigurer, proxy, webDriverStartContext, Optional.empty());
     }
 
     @ParameterizedTest
     @CsvSource({ "true, true", "false," })
     void testGetWebDriverWithWebDriverType(boolean proxyStarted,
-            Boolean acceptsInsecureCers) throws IllegalAccessException
+            Boolean acceptsInsecureCerts) throws IllegalAccessException
     {
         mockCapabilities((HasCapabilities) driver);
         WebDriverType webDriverType = mock(WebDriverType.class);
         webDriverFactory.setWebDriverType(webDriverType);
         WebDriverConfiguration configuration = mock(WebDriverConfiguration.class);
-        Map<String, Object> capablities = Map.of(KEY1, TRUE, KEY2, FALSE);
-        when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES)).thenReturn(capablities);
+        Map<String, Object> capabilities = Map.of(KEY1, TRUE, KEY2, FALSE);
+        when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES)).thenReturn(capabilities);
         when(proxy.isStarted()).thenReturn(proxyStarted);
         configuration.setBinaryPath(Optional.of(PATH));
         injectConfigurations(webDriverType, configuration);
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities(Map.of(KEY2, true));
-        when(webDriverType.getWebDriver(argThat(capabilities -> {
-            Assertions.assertAll(() -> assertTrue((boolean) capabilities.getCapability(KEY1)),
-                                 () -> assertTrue((boolean) capabilities.getCapability(KEY2)),
-                                 () -> assertEquals(acceptsInsecureCers,
-                                         capabilities.getCapability(CapabilityType.ACCEPT_INSECURE_CERTS)));
+        when(webDriverType.getWebDriver(argThat(caps -> {
+            Assertions.assertAll(() -> assertTrue((boolean) caps.getCapability(KEY1)),
+                                 () -> assertTrue((boolean) caps.getCapability(KEY2)),
+                                 () -> assertEquals(acceptsInsecureCerts,
+                                         caps.getCapability(CapabilityType.ACCEPT_INSECURE_CERTS)));
             return true;
         }), eq(configuration))).thenReturn(driver);
         mockTimeouts(driver);

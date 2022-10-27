@@ -23,6 +23,8 @@ import static org.vividus.selenium.type.CapabilitiesValueTypeAdjuster.adjustType
 import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -51,6 +53,7 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
     private final IRemoteWebDriverFactory remoteWebDriverFactory;
     private final IPropertyParser propertyParser;
     private final JsonUtils jsonUtils;
+    private final Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters;
 
     private URL remoteDriverUrl;
 
@@ -61,7 +64,7 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
         () -> getCapabilitiesByPrefix(LOCAL_DRIVER_PROPERTY_PREFIX));
 
     private final LoadingCache<Boolean, DesiredCapabilities> webDriverCapabilities = CacheBuilder.newBuilder()
-            .build(new CacheLoader<Boolean, DesiredCapabilities>()
+            .build(new CacheLoader<>()
             {
                 @Override
                 public DesiredCapabilities load(Boolean local)
@@ -76,11 +79,12 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
             });
 
     public AbstractWebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
-            JsonUtils jsonUtils)
+            JsonUtils jsonUtils, Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters)
     {
         this.remoteWebDriverFactory = remoteWebDriverFactory;
         this.propertyParser = propertyParser;
         this.jsonUtils = jsonUtils;
+        this.desiredCapabilitiesAdjusters = desiredCapabilitiesAdjusters;
     }
 
     private DesiredCapabilities getCapabilitiesByPrefix(String prefix)
@@ -122,7 +126,12 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
               .log(message);
     }
 
-    protected abstract DesiredCapabilities updateDesiredCapabilities(DesiredCapabilities desiredCapabilities);
+    protected DesiredCapabilities updateDesiredCapabilities(DesiredCapabilities desiredCapabilities)
+    {
+        desiredCapabilitiesAdjusters.ifPresent(
+                adjusters -> adjusters.forEach(adjuster -> adjuster.adjust(desiredCapabilities)));
+        return desiredCapabilities;
+    }
 
     protected abstract void configureWebDriver(WebDriver webDriver);
 

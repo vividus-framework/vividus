@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package org.vividus.selenium.mobileapp;
 
+import java.util.Optional;
+import java.util.Set;
+
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.selenium.AbstractWebDriverFactory;
+import org.vividus.selenium.DesiredCapabilitiesAdjuster;
 import org.vividus.selenium.IRemoteWebDriverFactory;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
@@ -26,15 +29,9 @@ import org.vividus.util.property.IPropertyParser;
 public class MobileAppDriverFactory extends AbstractWebDriverFactory
 {
     public MobileAppDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
-            JsonUtils jsonUtils)
+            JsonUtils jsonUtils, Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters)
     {
-        super(remoteWebDriverFactory, propertyParser, jsonUtils);
-    }
-
-    @Override
-    protected DesiredCapabilities updateDesiredCapabilities(DesiredCapabilities desiredCapabilities)
-    {
-        return desiredCapabilities;
+        super(remoteWebDriverFactory, propertyParser, jsonUtils, desiredCapabilitiesAdjusters);
     }
 
     @Override
