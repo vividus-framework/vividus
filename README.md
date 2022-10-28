@@ -9,7 +9,8 @@
 **This repository contains source code of VIVIDUS tool. If you are looking for the user guide, please, check out [Vividus Starter](https://github.com/vividus-framework/vividus-starter) and [the official documentation](https://docs.vividus.dev/).**
 
 ## How to build the project? (Only for VIVIDUS developers)
-The baseline is JDK 11. The latest [JDK 16](https://jdk.java.net/16/) is supported as well.
+Prerequisites: make sure [Java 17](https://adoptium.net/temurin/releases/?version=17) is used.
+
 1. Clone main [Vividus project](https://github.com/vividus-framework/vividus.git)
     ```shell
     git clone --recursive https://github.com/vividus-framework/vividus.git
