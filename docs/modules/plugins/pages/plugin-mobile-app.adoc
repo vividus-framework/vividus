@@ -215,17 +215,31 @@ selenium.grid.automation-name=UIAutomator2
 ----
 
 === Local
-:local-profile: mobile_app/local
 
-The profile simplifies execution of tests against the local Appium server. It could be used in conjunction with: `{android-profile}`, `{ios-profile}`, `{tvos-profile}`
-The profile can be enabled by adding `{local-profile}` to `configuration.profiles` property
+The local profiles can be used in conjunction with:
 
-Default profile configuration
+ - `{android-profile}`,
+ - `{ios-profile}`,
+ - `{tvos-profile}`.
+
+==== `mobile_app/local`
+
+The profile simplifies configuration of tests execution against the local Appium *1.x* server.
+
+.Configure local execution of the tests for iOS native application
 [source,properties]
 ----
-selenium.grid.url=http://127.0.0.1:4723/wd/hub
-selenium.grid.platformName=${selenium.grid.platform-name}
-selenium.grid.automationName=${selenium.grid.automation-name}
+configuration.profiles=mobile_app/local,mobile_app/ios
+----
+
+==== `mobile_app/local2`
+
+The profile simplifies configuration of tests execution against the local Appium https://appium.github.io/appium/docs/en/2.0/guides/migrating-1-to-2/#breaking-changes[*2.x*] server.
+
+.Configure local execution of the tests for Android native application
+[source,properties]
+----
+configuration.profiles=mobile_app/local2,mobile_app/android
 ----
 
 == xref:commons:variables.adoc[Dynamic variables]
@@ -484,7 +498,7 @@ accomplish it by deleting following files: */Media/PhotoData/Photos.sqlite*, */M
 
 === Switch to Web view by name
 
-Switches context to a web view with name that matches the rule {web-view-info}. Also Appium capabilities for https://github.com/appium/appium-xcuitest-driver#web-context[iOS] and https://github.com/appium/appium-uiautomator2-driver#web-context[Android] are available for the fine-tuning configuration. 
+Switches context to a web view with name that matches the rule {web-view-info}. Also Appium capabilities for https://github.com/appium/appium-xcuitest-driver#web-context[iOS] and https://github.com/appium/appium-uiautomator2-driver#web-context[Android] are available for the fine-tuning configuration.
 
 [source,gherkin]
 ----
