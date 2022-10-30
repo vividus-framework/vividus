@@ -58,7 +58,7 @@ jobs:
 
     - name: Cache tests history
       if: github.ref == 'refs/heads/master' && matrix.platform == 'ubuntu-latest'
-      uses: pat-s/always-upload-cache@v3.0.1
+      uses: pat-s/always-upload-cache@v3.0.11
       with:
         path: vividus-tests/output/history
         key: tests-history-cache-${{ github.sha }}
