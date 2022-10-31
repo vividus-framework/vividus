@@ -34,6 +34,8 @@ on the file system.
 gradlew runStories
 ----
 
+=== Treat known issues only as a positive result
+
 Known issues occurred during stories run fail the overall test execution with the corresponding xref:ROOT:tests-configuration.adoc#_exit_codes[exit code] by default. Use the following property in order to not treat known issues as failures:
 
 .Enable treating of known issues as positive result for current stories run
@@ -50,6 +52,10 @@ The treating of known issues as passed can be enabled globally for project by ad
 ----
 runStories.treatKnownIssuesOnlyAsPassed = true
 ----
+
+:task-name: runStories
+
+include::partial$exit-code.adoc[]
 
 == Debug stories
 
@@ -68,6 +74,8 @@ and tests state on the file system.
 gradlew debugStories
 ----
 
+=== Treat known issues only as a positive result
+
 Known issues occurred during stories run fail the overall test execution with the corresponding xref:ROOT:tests-configuration.adoc#_exit_codes[exit code] by default. Use the following property in order to not treat known issues as failures:
 
 .Enable treating of known issues as positive result for current debug run
@@ -84,6 +92,10 @@ The treating of known issues as passed can be enabled globally for project by ad
 ----
 debugStories.treatKnownIssuesOnlyAsPassed = true
 ----
+
+:task-name: debugStories
+
+include::partial$exit-code.adoc[]
 
 == Print available steps
 
