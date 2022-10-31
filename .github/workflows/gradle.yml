@@ -117,7 +117,7 @@ jobs:
     - name: Integration tests
       if: matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest'
       run: |
-        ./gradlew :vividus-tests:debugStories --project-prop 'vividus.configuration.environments=integration' --project-prop 'vividus.allure.history-directory=output/history/integration-tests' --project-prop 'vividus.allure.executor.name="Github Actions (Vividus)"' --project-prop 'vividus.allure.executor.type=github' --project-prop 'vividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions' --project-prop 'vividus.allure.executor.build-order=${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.build-name="Integration Tests ${GITHUB_RUN_ID}"' --project-prop 'vividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.report-name="Integration tests report"' --no-daemon
+        ./gradlew :vividus-tests:debugStories --project-prop 'vividus.configuration.environments=integration' --project-prop 'vividus.allure.history-directory=output/history/integration-tests' --project-prop 'vividus.allure.executor.name="Github Actions (Vividus)"' --project-prop 'vividus.allure.executor.type=github' --project-prop 'vividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions' --project-prop 'vividus.allure.executor.build-order=${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.build-name="Integration Tests ${GITHUB_RUN_ID}"' --project-prop 'vividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.report-name="Integration tests report"' --project-prop "fileToSaveExitCode=$(pwd)/exitCode.txt" --no-daemon
 
     - name: Publish integration tests report
       if: (matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest') && always()
@@ -125,6 +125,15 @@ jobs:
       with:
         name: Integration Tests - Allure report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
+
+    - name: Validate exit code
+      if: (matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest') && always()
+      run: |
+        exitCode=$(cat ./exitCode.txt)
+        if [[ $exitCode -ne '1' ]]; then
+          exit $exitCode
+        fi
+      shell: bash
 
     - name: System tests
       if: matrix.platform == 'ubuntu-latest'
