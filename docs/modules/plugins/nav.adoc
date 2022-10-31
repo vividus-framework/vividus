@@ -30,6 +30,7 @@
 ** xref:plugin-winrm.adoc[WinRM]
 * Testing Clouds
 ** xref:plugin-browserstack.adoc[BrowserStack]
+** xref:plugin-mobitru.adoc[Mobitru]
 ** xref:plugin-lambda-test.adoc[LambdaTest]
 ** xref:plugin-sauce-labs.adoc[Sauce Labs]
 ** xref:plugin-cross-browser-testing.adoc[SmartBear: CrossBrowserTesting]

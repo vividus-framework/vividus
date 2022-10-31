@@ -84,7 +84,6 @@ a|`tagName(android.widget.TextView)->filter.attribute(text=Hi)` - `android.widge
 include::partial$visibility-types.adoc[]
 
 
-
 == Properties
 
 NOTE: The properties marked with *bold* are mandatory.

@@ -1,0 +1,62 @@
+:test-cloud-name: Mobitru
+:test-cloud-key: mobitru
+:test-cloud-link: https://mobitru.com/
+:mobitru-guide-link: https://app.mobitru.com/static/mstfdocs/public/Mobitru_User_Guide.pdf
+
+include::partial$test-cloud-header.adoc[]
+
+== Profiles
+
+The plugin defines profile with a set of the preconfigured properties. In order to simplify work with Mobitru the plugin does following steps:
+.Waits for the requested device to be available using https://app.mobitru.com/wiki/api/#api-Device-TakeDeviceDesiredCapabilities[REST API call] and takes it in the usage.
+.Installs application on the devices using https://app.mobitru.com/wiki/api/#api-InstallApp-InstallApp[REST API call].
+
+INFO: For the device search plugin relies on the capabilities specified in the xref:plugins:plugin-mobile-app.adoc#_properties[properties].
+
+[cols="1,2"]
+|===
+
+|`mobitru`
+|Use in conjunction with xref:plugins:plugin-mobile-app.adoc#_profiles[native mobile application profiles].
+
+|===
+
+== Properties
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="6,2,3,5", options="header"]
+
+|===
+
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|[subs=+quotes]`*selenium.grid.username*`
+|The username.
+|`<empty>`
+|The name of the user.
+
+|[subs=+quotes]`*selenium.grid.password*`
+|The access key.
+|`<empty>`
+|{mobitru-guide-link}[See guide section about the key].
+
+|[subs=+quotes]`*mobitru.app-file-name*`
+|The name of application e.g. `app.apk` or `app.ipa`.
+|`<empty>`
+|The file name of the application under test uploaded to Mobitru. The application should be uploaded either via https://app.mobitru.com/static/mstfdocs/public/Mobitru_User_Guide.pdf[UI] or https://app.mobitru.com/wiki/api/#api-InstallApp-UpdateArtifact[REST API].
+
+|[subs=+quotes]`*mobile-application.bundle-id*`
+|The valid application package name or bundle id.
+|`<empty>`
+|`Package name` for Android or `Bundle identifier` from `Plist.info` for iOS. It is used to activate the application under tests after Appium session start.
+
+|`mobitru.device-wait-timeout`
+|The duration in {iso-date-format-link} format.
+|`PT5M`
+|The timeout to wait while the requested device becomes available for usage. VIVIDUS will perform at most 20 retries during the timeout.
+
+|===

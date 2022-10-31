@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.mobileapp;
+package org.vividus.mobitru.mobileapp;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.junit.jupiter.api.Test;
@@ -24,24 +25,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.WebDriver;
-import org.vividus.selenium.IRemoteWebDriverFactory;
-import org.vividus.util.json.JsonUtils;
-import org.vividus.util.property.IPropertyParser;
+import org.vividus.mobileapp.action.ApplicationActions;
+import org.vividus.selenium.event.WebDriverCreateEvent;
 
 @ExtendWith(MockitoExtension.class)
-class MobileAppDriverFactoryTests
+class MobitruApplicationActivatorTests
 {
-    @Mock private IRemoteWebDriverFactory remoteWebDriverFactory;
-    @Mock private IPropertyParser propertyParser;
-    @Mock private JsonUtils jsonUtils;
-    @InjectMocks private MobileAppDriverFactory factory;
+    @Mock private ApplicationActions applicationActions;
+    @InjectMocks private MobitruApplicationActivator mobitruApplicationActivator;
 
     @Test
-    void configureWebDriver()
+    void shouldActivateApplication()
     {
-        WebDriver webDriver = mock(WebDriver.class);
-        factory.configureWebDriver(webDriver);
-        verifyNoInteractions(webDriver, remoteWebDriverFactory, propertyParser, jsonUtils);
+        var event = mock(WebDriverCreateEvent.class);
+        var bundleId = "dev.vividus.starter";
+        mobitruApplicationActivator.setBundleId(bundleId);
+        mobitruApplicationActivator.onSessionStart(event);
+        verify(applicationActions).activateApp(bundleId);
+        verifyNoInteractions(event);
     }
 }
