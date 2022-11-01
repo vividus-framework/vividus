@@ -6,6 +6,8 @@ on:
       - master
     paths:
       - 'docs/**'
+      - '*.md'
+      - '.github/workflows/docs.yml'
 
 jobs:
   build:

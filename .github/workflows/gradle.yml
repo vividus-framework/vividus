@@ -10,6 +10,7 @@ on:
       - '**/**'
       - '!docs/**'
       - '!*.md'
+      - '!.github/workflows/docs.yml'
   pull_request:
     branches:
     - master
@@ -17,6 +18,7 @@ on:
       - '**/**'
       - '!docs/**'
       - '!*.md'
+      - '!.github/workflows/docs.yml'
 
 jobs:
   build:
@@ -673,7 +675,7 @@ jobs:
         else
             echo No MOBITRU_USER and/or MOBITRU_KEY variables, System tests will be skipped
         fi
-  
+
     - name: Mobitru - iOS - Mobile App - Publish system tests report
       if: matrix.platform == 'macos-latest' && always()
       uses: actions/upload-artifact@v3
