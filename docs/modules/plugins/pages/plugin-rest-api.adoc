@@ -1149,7 +1149,7 @@ to install `vividus-plugin-json` explicitly starting from VIVIDUS 0.6.0.
 
 === Validate HTTP response body
 
-In order to validate the body of the latest HTTP response use the <<_response>> dynamic variable to access the body
+In order to validate the body of the latest HTTP response use the <<_http_response_as_text,response>> dynamic variable to access the body
 data in conjunction with any step responsible for data validation like data comparison, JSON, XML and other steps.
 
 .Validate response body
@@ -1158,22 +1158,22 @@ data in conjunction with any step responsible for data validation like data comp
 When I execute HTTP GET request for resource with URL `https://httpbin.org/json`
 Then JSON element from `${response}` by JSON path `$.slideshow` is equal to `
 {
-  "author": "Yours Truly", 
-  "date": "date of publication", 
+  "author": "Yours Truly",
+  "date": "date of publication",
   "slides": [
     {
-      "title": "Wake up to WonderWidgets!", 
+      "title": "Wake up to WonderWidgets!",
       "type": "all"
-    }, 
+    },
     {
       "items": [
-        "Why <em>WonderWidgets</em> are great", 
+        "Why <em>WonderWidgets</em> are great",
         "Who <em>buys</em> WonderWidgets"
-      ], 
-      "title": "Overview", 
+      ],
+      "title": "Overview",
       "type": "all"
     }
-  ], 
+  ],
   "title": "Sample Slide Show"
 }
 `
@@ -1182,7 +1182,7 @@ Then JSON element from `${response}` by JSON path `$.slideshow` is equal to `
 === Save HTTP response body into variable
 
 The HTTP response body can be saved into static variable by using the xref:commons:vividus-steps.adoc#_initialize_variable[init variable step]
-in conjunction with the <<_response>> dynamic variable, it might be useful if you want to preserve the data for further computations since each
+in conjunction with the <<_http_response_as_text,response>> dynamic variable, it might be useful if you want to preserve the data for further computations since each
 subsequent HTTP call rewrites previously received response data.
 
 .Save response body into variable
