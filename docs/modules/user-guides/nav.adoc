@@ -5,5 +5,5 @@
 ** xref:use-in-memory-db-to-manage-test-data.adoc[Use in-memory database]
 * CI Integration
 ** xref:pipeline-with-proxy.adoc[Jenkins pipeline with browser proxy]
-* Mobile Testing 
+* Mobile Testing
 ** xref:appium-setup.adoc[Appium Setup]

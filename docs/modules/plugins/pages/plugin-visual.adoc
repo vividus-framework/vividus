@@ -240,7 +240,7 @@ a|Whether to append Android bottom navigation bar (black bar with system buttons
 The default behavior will be changed in VIVIDUS 0.6.0: the navigation bar won't
 be appended.
 
-- If you are starting creation of visual tests, please, consider setting the property to `false`. 
+- If you are starting creation of visual tests, please, consider setting the property to `false`.
 - If you are in the middle of your tests lifecycle, please, find some convenient time and re-establish baselines with the property set to `false`.
 ====
 

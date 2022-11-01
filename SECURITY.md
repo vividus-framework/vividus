@@ -11,7 +11,7 @@ Security issues in this project can be safely reported via the the following add
 
 team@vividus.dev
 
-In the report, please provide a [concise reproducible test case](http://sscce.org/) and describe 
+In the report, please provide a [concise reproducible test case](http://sscce.org/) and describe
 what results you are seeing and what results you expect.
 
 Members of VIVIDUS project will be notified and will begin the triage process.

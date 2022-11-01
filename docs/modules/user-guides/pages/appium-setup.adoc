@@ -111,7 +111,7 @@ selenium.grid.capabilities.app=/Users/myDirectory/application.apk
 
 While Android devices require only one additional property, for iOS you need to set three more.
 
-IMPORTANT: See the relevant sections for defining these properties for xref:appium-setup.adoc#_define_properties_for_running_a_real_apple_device[iOS] and xref:appium-setup.adoc#_android_device_udid[Android] 
+IMPORTANT: See the relevant sections for defining these properties for xref:appium-setup.adoc#_define_properties_for_running_a_real_apple_device[iOS] and xref:appium-setup.adoc#_android_device_udid[Android]
 
 == Appium Inspector (Optional)
 
@@ -121,13 +121,13 @@ You can get the latest version of Inspector application following the https://gi
 .Click to view capabilities set up in Inspector
 [%collapsible]
 ====
-image::appium-inspector-capabilities-android.png[]    
+image::appium-inspector-capabilities-android.png[]
 image::appium-inspector-capabilities-ios.png[]
 ====
 
 == Running tests on Simulator/Emulator
 
-VIVIDUS Sample Tests is a https://github.com/vividus-framework/vividus-sample-tests[GitHub repository]. Its puropose is to demo VIVIDUS capabilities via sample tests. 
+VIVIDUS Sample Tests is a https://github.com/vividus-framework/vividus-sample-tests[GitHub repository]. Its puropose is to demo VIVIDUS capabilities via sample tests.
 
 Let's use it as an example for running mobile tests via Appium.
 
@@ -230,7 +230,7 @@ Version 31.0.3-7562133
 Installed as /usr/local/bin/adb
 ----
 
-==== Android device UDID 
+==== Android device UDID
 Connect the device you want to interact with to your workstation. Use `adb devices` command to see the list of connected devices:
 
 [source,shell]
@@ -267,7 +267,7 @@ Follow the instructions below to handle this issue.
 
 ==== Manual WDA configuration
 
-NOTE: The next steps are based on https://appium.io/docs/en/drivers/ios-xcuitest-real-devices/#basic-manual-configuration[Appium manual configuration doc]. 
+NOTE: The next steps are based on https://appium.io/docs/en/drivers/ios-xcuitest-real-devices/#basic-manual-configuration[Appium manual configuration doc].
 
 . Add a new Apple Development Certificate for your Apple ID;
 +
@@ -318,7 +318,7 @@ image::appium-grant-access.png[]
 [source, property,subs=attributes+]
 ----
 # iOS
-selenium.grid.capabilities.xcodeSigningId=Apple Development<1> 
+selenium.grid.capabilities.xcodeSigningId=Apple Development<1>
 selenium.grid.capabilities.udid=b3f34105281bb345p980p824401d5913f13efe81<2>
 selenium.grid.capabilities.xcodeOrgId=5H8S64Q9G4<3>
 selenium.grid.capabilities.updatedWDABundleId=yourUniqueBundleId.WebDriverAgentRunner<4>

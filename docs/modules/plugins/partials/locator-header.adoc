@@ -54,7 +54,7 @@ Then number of elements found by `anyAttOrText(attribute, with comma\, text)` is
 |===
 
 |Description
-|Pattern 
+|Pattern
 |Usage
 |Result
 

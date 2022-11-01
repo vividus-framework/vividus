@@ -3,7 +3,7 @@
 Waits for the expected number of elements located by locator.
 
 TIP: In order to wait for invisible elements one rely on <<_visibility_types>>.
- 
+
 [source,gherkin]
 ----
 When I wait until number of elements located by `$locator` is $comparisonRule $number

@@ -5,7 +5,7 @@
 
 IMPORTANT: The exporter requires configuration of JIRA instance to work with.
 
-To configure connector to JIRA instance use `jira.` prefix followed by arbitrary sequence of alphanumerical 
+To configure connector to JIRA instance use `jira.` prefix followed by arbitrary sequence of alphanumerical
 characters that determine unique JIRA instance key and followed by the properties listed in the following table:
 
 NOTE: The properties marked with bold are mandatory.
