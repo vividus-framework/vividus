@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Azure SQL Databse'
+project.description = 'VIVIDUS plugin for Azure SQL Databse'
 
 dependencies {
     implementation project(':vividus-plugin-azure-resource-manager')

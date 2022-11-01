@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Amazon DynamoDB'
+project.description = 'VIVIDUS plugin for Amazon DynamoDB'
 
 dependencies {
     api project(':vividus-engine')

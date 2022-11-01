@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Azure Data Factory'
+project.description = 'VIVIDUS plugin for Azure Data Factory'
 
 dependencies {
     api project(':vividus-engine')

@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Browser Stack'
+project.description = 'VIVIDUS plugin for Browser Stack'
 
 dependencies {
     implementation project(':vividus-engine')

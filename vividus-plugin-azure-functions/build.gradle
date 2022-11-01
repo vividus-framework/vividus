@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Azure Functions'
+project.description = 'VIVIDUS plugin for Azure Functions'
 
 dependencies {
     api project(':vividus-engine')

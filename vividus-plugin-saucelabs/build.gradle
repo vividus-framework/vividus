@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Sauce Labs'
+project.description = 'VIVIDUS plugin for Sauce Labs'
 
 //https://github.com/powermock/powermock/issues/1094
 test {

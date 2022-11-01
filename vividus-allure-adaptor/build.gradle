@@ -1,4 +1,4 @@
-project.description = 'Vividus Allure report adaptor'
+project.description = 'VIVIDUS Allure report adaptor'
 
 dependencies {
     implementation project(':vividus-engine')

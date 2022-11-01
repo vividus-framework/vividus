@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Apache Kafka'
+project.description = 'VIVIDUS plugin for Apache Kafka'
 
 ext.springKafkaVersion = '2.9.2'
 

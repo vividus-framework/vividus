@@ -1,4 +1,4 @@
-project.description = 'Vividus extension for Visual Testing'
+project.description = 'VIVIDUS extension for Visual Testing'
 
 dependencies {
     implementation project(':vividus-engine')

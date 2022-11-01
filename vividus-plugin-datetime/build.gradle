@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for DateTime'
+project.description = 'VIVIDUS plugin for DateTime'
 
 dependencies {
     implementation project(':vividus-engine')

@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for work with excel'
+project.description = 'VIVIDUS plugin for work with excel'
 
 dependencies {
     api project(':vividus-engine')

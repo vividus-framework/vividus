@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Web App and Rest API plugins integration'
+project.description = 'VIVIDUS plugin for Web App and Rest API plugins integration'
 
 dependencies {
     implementation project(':vividus-http-client')

@@ -1,4 +1,4 @@
-project.description = 'Vividus soft assert'
+project.description = 'VIVIDUS soft assert'
 
 dependencies {
     api(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')

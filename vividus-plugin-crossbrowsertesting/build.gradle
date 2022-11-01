@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for CrossBrowserTesting'
+project.description = 'VIVIDUS plugin for CrossBrowserTesting'
 
 dependencies {
     implementation project(':vividus-engine')

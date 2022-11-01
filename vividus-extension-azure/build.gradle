@@ -1,4 +1,4 @@
-project.description = 'Vividus extension for Azure Cloud'
+project.description = 'VIVIDUS extension for Azure Cloud'
 
 dependencies {
     api platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.6')

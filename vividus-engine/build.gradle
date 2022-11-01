@@ -1,4 +1,4 @@
-project.description = 'Vividus test engine'
+project.description = 'VIVIDUS test engine'
 
 dependencies {
     api project(':vividus-test-context')

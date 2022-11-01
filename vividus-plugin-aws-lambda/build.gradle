@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for AWS Lambda'
+project.description = 'VIVIDUS plugin for AWS Lambda'
 
 dependencies {
     api project(':vividus-engine')
