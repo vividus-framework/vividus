@@ -8,10 +8,11 @@ include::partial$test-cloud-header.adoc[]
 == Profiles
 
 The plugin defines profile with a set of the preconfigured properties. In order to simplify work with Mobitru the plugin does following steps:
-.Waits for the requested device to be available using https://app.mobitru.com/wiki/api/#api-Device-TakeDeviceDesiredCapabilities[REST API call] and takes it in the usage.
-.Installs application on the devices using https://app.mobitru.com/wiki/api/#api-InstallApp-InstallApp[REST API call].
 
-INFO: For the device search plugin relies on the capabilities specified in the xref:plugins:plugin-mobile-app.adoc#_properties[properties].
+. Waits for the requested device to be available using https://app.mobitru.com/wiki/api/#api-Device-TakeDeviceDesiredCapabilities[REST API call] and takes it in the usage.
+. Installs application on the devices using https://app.mobitru.com/wiki/api/#api-InstallApp-InstallApp[REST API call].
+
+IMPORTANT: For the device search plugin relies on the capabilities specified in the xref:plugins:plugin-mobile-app.adoc#_properties[properties].
 
 [cols="1,2"]
 |===
