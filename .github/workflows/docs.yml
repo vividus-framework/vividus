@@ -11,6 +11,9 @@ jobs:
   build:
     runs-on: 'ubuntu-latest'
     steps:
+    - name: Run static code analysis
+      run: ./gradlew spotlessDocumentationCheck
+
     - name: Notify playbook
       env:
         GH_TOKEN: ${{ secrets.DOCS_TOKEN }}
