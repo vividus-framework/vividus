@@ -1,4 +1,4 @@
-project.description = 'Vividus to Zephyr exporter'
+project.description = 'VIVIDUS to Zephyr exporter'
 
 buildscript {
     ext {

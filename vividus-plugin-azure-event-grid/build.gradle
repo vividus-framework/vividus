@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Azure Event Grid'
+project.description = 'VIVIDUS plugin for Azure Event Grid'
 
 dependencies {
     api project(':vividus-engine')

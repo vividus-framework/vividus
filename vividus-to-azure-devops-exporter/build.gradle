@@ -1,4 +1,4 @@
-project.description = 'Vividus to Azure DevOps exporter'
+project.description = 'VIVIDUS to Azure DevOps exporter'
 
 buildscript {
     ext {

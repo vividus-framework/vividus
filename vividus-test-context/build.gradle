@@ -1,4 +1,4 @@
-project.description = 'Vividus test context'
+project.description = 'VIVIDUS test context'
 
 dependencies {
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.1')

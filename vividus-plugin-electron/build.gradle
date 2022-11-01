@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Electron-based applications'
+project.description = 'VIVIDUS plugin for Electron-based applications'
 dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-plugin-web-app')

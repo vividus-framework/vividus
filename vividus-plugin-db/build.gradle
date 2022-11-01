@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for DB testing'
+project.description = 'VIVIDUS plugin for DB testing'
 
 dependencies {
     api project(':vividus-engine')

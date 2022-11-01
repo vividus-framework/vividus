@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for WinRM (Windows Remote Management)'
+project.description = 'VIVIDUS plugin for WinRM (Windows Remote Management)'
 
 ext.cxfVersion = '3.5.4'
 

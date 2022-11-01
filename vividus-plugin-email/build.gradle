@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for interation with email message servers'
+project.description = 'VIVIDUS plugin for interation with email message servers'
 
 ext {
     mailVersion = '1.6.2'

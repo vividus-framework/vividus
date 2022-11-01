@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for XML testing'
+project.description = 'VIVIDUS plugin for XML testing'
 
 dependencies {
     implementation project(':vividus-engine')

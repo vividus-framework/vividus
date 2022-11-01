@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for WebSockets'
+project.description = 'VIVIDUS plugin for WebSockets'
 
 dependencies {
     api project(':vividus-engine')

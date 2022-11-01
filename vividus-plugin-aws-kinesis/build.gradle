@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Amazon Kinesis'
+project.description = 'VIVIDUS plugin for Amazon Kinesis'
 
 dependencies {
     api project(':vividus-engine')

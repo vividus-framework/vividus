@@ -2,7 +2,7 @@ plugins {
     id 'com.bmuschko.docker-remote-api' version '8.1.0'
 }
 
-project.description = 'Vividus Docker bundler'
+project.description = 'VIVIDUS Docker bundler'
 
 tasks {
     artifactoryPublish.enabled = false

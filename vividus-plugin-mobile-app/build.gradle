@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for testing mobile applications'
+project.description = 'VIVIDUS plugin for testing mobile applications'
 
 dependencies {
     implementation project(':vividus-extension-selenium')

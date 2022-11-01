@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for CSV'
+project.description = 'VIVIDUS plugin for CSV'
 
 dependencies {
     api project(':vividus-engine')

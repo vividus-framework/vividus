@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for Azure Storage Account'
+project.description = 'VIVIDUS plugin for Azure Storage Account'
 
 dependencies {
     api project(':vividus-engine')

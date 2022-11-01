@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for SSH operations'
+project.description = 'VIVIDUS plugin for SSH operations'
 
 dependencies {
     implementation project(':vividus-engine')

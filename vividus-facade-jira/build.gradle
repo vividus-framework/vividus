@@ -1,4 +1,4 @@
-project.description = 'Vividus facade for Jira'
+project.description = 'VIVIDUS facade for Jira'
 
 dependencies {
     implementation project(':vividus-http-client')

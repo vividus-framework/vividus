@@ -1,4 +1,4 @@
-project.description = 'Vividus HTTP client'
+project.description = 'VIVIDUS HTTP client'
 
 dependencies {
     api(group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13')

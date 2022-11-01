@@ -1,4 +1,4 @@
-project.description = 'Vividus plugin for REST API testing'
+project.description = 'VIVIDUS plugin for REST API testing'
 
 ext.jsonPathVersion = '2.7.0'
 
