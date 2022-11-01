@@ -1,4 +1,4 @@
-project.description = 'VIVIDUS extension for selenium'
+project.description = 'VIVIDUS extension for Selenium'
 
  ext {
      seleniumVersion = '4.5.0'
