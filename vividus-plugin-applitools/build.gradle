@@ -1,4 +1,4 @@
-project.description = 'VIVIDUS plugin for Applitools support'
+project.description = 'VIVIDUS plugin for Applitools'
 
 dependencies {
     implementation project(':vividus-engine')
