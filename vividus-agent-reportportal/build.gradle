@@ -1,4 +1,4 @@
-project.description = 'VIVIDUS agent for Report Portal'
+project.description = 'VIVIDUS agent for ReportPortal'
 
 dependencies {
     implementation project(':vividus-engine')
