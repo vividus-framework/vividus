@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +41,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -110,9 +112,7 @@ class AzureBlobStorageBaselineStorageTests
         when(blobServiceClientFactory.createBlobClient(BASELINE_PNG, CONTAINER, KEY)).thenReturn(blobClient);
         Screenshot baselineScreenshot = new Screenshot(ImageTool.toBufferedImage(IMAGE));
         storage.saveBaseline(baselineScreenshot, BASELINE);
-        verify(blobClient).upload(argThat(bd -> {
-            assertArrayEquals(IMAGE, bd.toBytes());
-            return true;
-        }), eq(true));
+        verify(blobClient).upload(argThat((ArgumentMatcher<BinaryData>) data -> Arrays.equals(IMAGE, data.toBytes())),
+                eq(true));
     }
 }

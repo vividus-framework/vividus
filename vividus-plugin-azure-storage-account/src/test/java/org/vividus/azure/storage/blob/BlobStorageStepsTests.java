@@ -42,6 +42,7 @@ import java.util.stream.Stream;
 
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.http.rest.PagedResponse;
+import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
@@ -62,6 +63,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -159,7 +161,8 @@ class BlobStorageStepsTests
         runWithBlobClient(blobClient ->
         {
             blobStorageSteps.uploadBlob(BLOB, new DataWrapper(DATA), CONTAINER, KEY);
-            verify(blobClient).upload(argThat(data -> Arrays.equals(data.toBytes(), BYTES)));
+            verify(blobClient).upload(argThat(
+                    (ArgumentMatcher<BinaryData>) data -> Arrays.equals(data.toBytes(), BYTES)));
         });
     }
 
@@ -169,7 +172,8 @@ class BlobStorageStepsTests
         runWithBlobClient(blobClient ->
         {
             blobStorageSteps.uploadBlob(BLOB, new DataWrapper(BYTES), CONTAINER, KEY);
-            verify(blobClient).upload(argThat(data -> Arrays.equals(data.toBytes(), BYTES)));
+            verify(blobClient).upload(argThat(
+                    (ArgumentMatcher<BinaryData>) data -> Arrays.equals(data.toBytes(), BYTES)));
         });
     }
 
@@ -179,7 +183,8 @@ class BlobStorageStepsTests
         runWithBlobClient(blobClient ->
         {
             blobStorageSteps.upsertBlob(BLOB, new DataWrapper(DATA), CONTAINER, KEY);
-            verify(blobClient).upload(argThat(data -> Arrays.equals(data.toBytes(), BYTES)), eq(true));
+            verify(blobClient).upload(
+                    argThat((ArgumentMatcher<BinaryData>) data -> Arrays.equals(data.toBytes(), BYTES)), eq(true));
         });
     }
 
