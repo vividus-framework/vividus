@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,9 @@
 
 package org.vividus.proxy.mitm;
 
-import java.io.File;
-
-import com.browserup.bup.mitm.KeyStoreFileCertificateSource;
-import com.browserup.bup.mitm.manager.ImpersonatingMitmManager;
-
 import org.apache.commons.lang3.Validate;
 import org.littleshoot.proxy.MitmManager;
 import org.vividus.http.keystore.KeyStoreOptions;
-import org.vividus.util.ResourceUtils;
 
 public class MitmManagerFactory implements IMitmManagerFactory
 {
@@ -37,15 +31,7 @@ public class MitmManagerFactory implements IMitmManagerFactory
         checkNotNull(keyStoreOptions.getPassword(), "key store password");
         checkNotNull(options.getAlias(), "alias");
 
-        File keyStore = ResourceUtils.loadFile(getClass(), keyStoreOptions.getPath());
-        KeyStoreFileCertificateSource certificateSource = new KeyStoreFileCertificateSource(keyStoreOptions.getType(),
-                keyStore, options.getAlias(), keyStoreOptions.getPassword());
-
-        return ImpersonatingMitmManager
-                .builder()
-                .rootCertificateSource(certificateSource)
-                .trustAllServers(options.isTrustAllServers())
-                .build();
+        return options.getMitmManagerType().buildMitmManager(options, keyStoreOptions);
     }
 
     private void checkNotNull(Object value, String parameter)

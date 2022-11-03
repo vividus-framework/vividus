@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,30 +20,46 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.vividus.proxy.model.MitmManagerType.IMPERSONATED;
+import static org.vividus.proxy.model.MitmManagerType.SELF_SIGNED;
 
 import com.browserup.bup.mitm.manager.ImpersonatingMitmManager;
 
 import org.junit.jupiter.api.Test;
 import org.littleshoot.proxy.MitmManager;
+import org.littleshoot.proxy.extras.SelfSignedMitmManager;
 import org.vividus.http.keystore.KeyStoreOptions;
 
 class MitmManagerFactoryTests
 {
-    private IMitmManagerFactory factory = new MitmManagerFactory();
+    private static final String KEYSTORE_PATH = "bundle.p12";
+    private static final String ALIAS = "alias";
+    private static final String PASSWORD = "password";
+
+    private final IMitmManagerFactory factory = new MitmManagerFactory();
 
     @Test
-    void testCreateMitmManager()
+    void testCreateImpersonatingMitmManager()
     {
-        MitmManagerOptions options = new MitmManagerOptions("alias", true,
-                new KeyStoreOptions("bundle.p12", "password", "PKCS12"));
+        MitmManagerOptions options = new MitmManagerOptions(IMPERSONATED, ALIAS, true,
+                new KeyStoreOptions(KEYSTORE_PATH, PASSWORD, "PKCS12"));
         MitmManager mitmManager = factory.createMitmManager(options);
         assertThat(mitmManager, instanceOf(ImpersonatingMitmManager.class));
     }
 
     @Test
+    void testCreateSelfSignedMitmManager()
+    {
+        MitmManagerOptions options = new MitmManagerOptions(SELF_SIGNED, ALIAS, false,
+                new KeyStoreOptions(KEYSTORE_PATH, PASSWORD, "JKS"));
+        MitmManager mitmManager = factory.createMitmManager(options);
+        assertThat(mitmManager, instanceOf(SelfSignedMitmManager.class));
+    }
+
+    @Test
     void testCreateMitmManagerWithInvalidParameters()
     {
-        MitmManagerOptions options = new MitmManagerOptions(null, true,
+        MitmManagerOptions options = new MitmManagerOptions(IMPERSONATED, null, true,
                 new KeyStoreOptions(null, null, null));
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> factory.createMitmManager(options));

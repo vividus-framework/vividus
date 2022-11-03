@@ -4,6 +4,12 @@ a|`true`
 |`false`
 |Enable proxy for the whole test run
 
+|`proxy.recording.enabled`
+a|`true`
+`false`
+|`false`
+|Enable proxy recording
+
 |`proxy.host`
 |any host name resolving on the machine
 |`<empty>`
@@ -19,8 +25,53 @@ a|`true`
 |`<empty>`
 |Overrides the proxy host which will be passed to browser
 
-|proxy.publish-har-on-failure
+|`proxy.publish-har-on-failure`
 a|`true`
 `false`
 |`false`
 |Enables publishing of attachments with HAR to each failed step. `@noHarOnFailure` meta tag can be used to disable HAR publishing at the story level.
+
+|`proxy.trust-all-servers`
+a|`true`
+`false`
+|`false`
+|Whether to disable verification of upstream servers SSL certificates
+
+|`proxy.capture-types`
+|HAR capture types: `REQUEST_HEADERS`, `REQUEST_COOKIES`, `REQUEST_CONTENT`, `REQUEST_BINARY_CONTENT`, `RESPONSE_HEADERS`, `RESPONSE_COOKIES`, `RESPONSE_CONTENT`, `RESPONSE_BINARY_CONTENT`
+|`REQUEST_CONTENT, RESPONSE_CONTENT, REQUEST_BINARY_CONTENT, RESPONSE_BINARY_CONTENT, REQUEST_HEADERS, RESPONSE_HEADERS`
+|List of HAR capture types
+
+|`proxy.mitm.enabled`
+a|`true`
+`false`
+|`false`
+|Whether to enable https://docs.mitmproxy.org/stable[MITM proxy] for the whole test run
+
+|`proxy.mitm.mitm-manager-type`
+|`SELF_SIGNED`
+`IMPERSONATED`
+|`IMPERSONATED`
+|The MITM type using the corresponding certificates. `SELF_SIGNED` MITM manager uses self-signed certificates that
+are generated lazily if the given key store file doesn't yet exist. Please note that certificates are usually generated
+in the current working directory
+
+|`proxy.mitm.key-store.type`
+|keystore type
+|`JKS`
+|The https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#keystore-types[keystore type]
+
+|`proxy.mitm.key-store.path`
+|path to keystore
+|`<empty>`
+|The relative to `src/main/resources` path to keystore
+
+|`proxy.mitm.key-store.password`
+|password for keystore
+|`<empty>`
+|The password for keystore
+
+|`proxy.mitm.key-store.alias`
+|keystore alias
+|`<empty>`
+|The alias for certificate entry in keystore
