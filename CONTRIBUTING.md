@@ -1,7 +1,7 @@
-# Contributing to Vividus
-Thank you for considering a contribution to Vividus! This guide explains how to:
+# Contributing to VIVIDUS
+Thank you for considering a contribution to VIVIDUS! This guide explains how to:
 * maximize the chance of your changes being accepted
-* work on the Vividus code base
+* work on the VIVIDUS code base
 * get help if you encounter trouble
 
 
@@ -34,7 +34,7 @@ VIVIDUS uses the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0
 ## Submitting Changes
 * Push your changes to a topic branch in your fork of the repository.
 * Submit a pull request to the original repository. We will rebase/merge it to the maintenance branches, if necessary.
-* After you submit your pull request, a Vividus core developer will review it. It is normal that this takes several iterations, so don't get discouraged by change requests. They ensure the high quality that we all enjoy.
+* After you submit your pull request, a VIVIDUS core developer will review it. It is normal that this takes several iterations, so don't get discouraged by change requests. They ensure the high quality that we all enjoy.
 
 ## Code Conventions
 ### Unit tests
@@ -58,6 +58,7 @@ When filing a bug report, please provide as much information as possible, so tha
 
 ## Questions
 
-There are various channels, on which you can ask questions:
-* On [Slack](https://vividus-support.herokuapp.com/)
-* Create an issue for your question at <https://github.com/vividus-framework/vividus/issues/new/choose>.
+There are various channels which you can ask questions on.
+* Use #support channel in [Slack](https://vividus-support.vercel.app/).
+* Create an issue for your question at [GitHub](https://github.com/vividus-framework/vividus/issues/new/choose).
+* Email us using team@vividus.dev.
