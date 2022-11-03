@@ -43,3 +43,12 @@ It's possible to receive ongoing updates about releases on GitHub through a subs
 - subscribe to release notifications
 +
 image::subscribe-to-releases.gif[Subscribe to releases,width=70%]
+
+== Contract Us
+
+There are various channels which you can ask questions on.
+
+- Use #support channel in https://vividus-support.vercel.app/[Slack].
+- Create an issue for your question at https://github.com/vividus-framework/vividus/issues/new/choose[GitHub].
+- Email us using team@vividus.dev.
+- Follow and tag us on https://twitter.com/vividus_tool[Twitter].
