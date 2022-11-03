@@ -620,7 +620,7 @@ jobs:
       run: |
         if [[ -n $MOBITRU_USER && -n $MOBITRU_KEY ]]; then
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments= \
-                                                  -Pvividus.configuration.suites=system/mobile_app/healthcheck/mobitru/android \
+                                                  -Pvividus.configuration.suites=system/mobile_app/healthcheck/mobitru \
                                                   -Pvividus.configuration.profiles=mobitru,mobile_app/android \
                                                   -Pvividus.selenium.grid.username=${MOBITRU_USER} \
                                                   -Pvividus.selenium.grid.password=${MOBITRU_KEY} \
@@ -656,7 +656,7 @@ jobs:
       run: |
         if [[ -n $MOBITRU_USER && -n $MOBITRU_KEY ]]; then
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments= \
-                                                  -Pvividus.configuration.suites=system/mobile_app/healthcheck/mobitru/ios \
+                                                  -Pvividus.configuration.suites=system/mobile_app/healthcheck/mobitru \
                                                   -Pvividus.configuration.profiles=mobitru,mobile_app/ios \
                                                   -Pvividus.selenium.grid.username=${MOBITRU_USER} \
                                                   -Pvividus.selenium.grid.password=${MOBITRU_KEY} \
