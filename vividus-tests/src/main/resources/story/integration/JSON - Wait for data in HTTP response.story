@@ -6,16 +6,13 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-When I execute HTTP GET request for resource with URL `http://jsonpath.herokuapp.com/json/goessner.json`
+When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/json-path/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
 Then `${responseCode}` matches `20\d`
-Examples:
-|URL                                             |jsonPath             |booksNumber|
-|http://jsonpath.herokuapp.com/json/goessner.json|$.store.book.length()|4          |
 
 
 Scenario: Verify step 'When I save JSON element from `$json` by JSON path `$jsonPath` to $scopes variable `$variableName`'
-When I save JSON element from `${response}` by JSON path `<jsonPath>` to scenario variable `numberOfBooks`
-Then `${numberOfBooks}` is equal to `<booksNumber>`
+When I save JSON element from `${response}` by JSON path `$.store.book.length()` to scenario variable `numberOfBooks`
+Then `${numberOfBooks}` is equal to `4`
 
 Scenario: Verify step 'Then number of JSON elements by JSON path `$jsonPath` is $comparisonRule $elementsNumber'
 Then number of JSON elements by JSON path `$.store.book` is greater than 0

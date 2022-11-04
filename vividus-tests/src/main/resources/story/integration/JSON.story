@@ -140,7 +140,7 @@ Then `Sayings of the Century` is = `${title}`
 
 
 Scenario: Step verification 'When I find $comparisonRule `$elementsNumber` JSON elements in context by `$jsonPath` and until variable `$variableName` $comparisonRule `$expectedValue` for each element I do:$stepsToExecute'
-When I execute HTTP GET request for resource with URL `http://jsonpath.herokuapp.com/json/goessner.json`
+When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/json-path/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
 When I find > `1` JSON elements in context by `$.store.book` and until variable `title` matches `M.+` for each element I do:
 |step                                                                                           |
 |When I save JSON element value from context by JSON path `$.title` to scenario variable `title`|
