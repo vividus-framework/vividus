@@ -6,4 +6,4 @@ Meta:
 Scenario: Verify step: "Then server `$hostname` supports secure protocols that $rule `$protocols`"
 Meta:
     @requirementId 681
-Then server `vividus-test-site.herokuapp.com` supports secure protocols that contain `TLSv1.3,TLSv1.2`
+Then server `${vividus-test-site-host}` supports secure protocols that contain `TLSv1.3,TLSv1.2`

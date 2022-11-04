@@ -1,4 +1,4 @@
-Description: Integration tests for JsonResponseValidationSteps class (base website http://jsonpath.herokuapp.com/)
+Description: Integration tests for JsonResponseValidationSteps class
 
 Meta:
     @epic vividus-plugin-rest-api,vividus-plugin-json
