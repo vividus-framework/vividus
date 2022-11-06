@@ -13,5 +13,5 @@ dependencies {
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.8.1')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-inline')
-    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.10.1')
+    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.11')
 }
