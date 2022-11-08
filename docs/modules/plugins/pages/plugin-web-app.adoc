@@ -1415,7 +1415,7 @@ Then there are no browser console $logLevels
 .Validate absence of JS errors
 [source,gherkin]
 ----
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
 Then there are no browser console ERRORS
 ----
 
@@ -1433,7 +1433,7 @@ Then there are no browser console $logLevels by regex '$pattern'
 .Validate absence of JS error referencing user
 [source,gherkin]
 ----
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
 Then there are no browser console ERRORS by regex '.*user.*'
 ----
 
@@ -1451,7 +1451,7 @@ Then there are browser console $logLevels by regex '$pattern'
 .Validate presence of JS errors referencing user
 [source,gherkin]
 ----
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
 Then there are browser console ERRORS by regex '.*user.*'
 ----
 
@@ -1472,7 +1472,7 @@ When I wait until browser console $logEntries by regex `$regex` appear and save 
 
 .Wait for application readiness
 ----
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
 When I wait until browser console infos by regex `.*Application ready.*` appear and save all entries into scenario variable `logs`
 Then `${logs}` matches `.*Application ready in \d+ seconds.*`
 ----
