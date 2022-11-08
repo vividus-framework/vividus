@@ -505,7 +505,7 @@ When I execute javascript `$jsCode` and save result to $scopes variable `$variab
 .Validate timings
 [source,gherkin]
 ----
-Given I am on a page with the URL 'http://vividus-test-site.herokuapp.com/mouseEvents.html'
+Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
 When I execute javascript `return JSON.stringify(window.performance.timing)` and save result to scenario variable `timings`
 Then number of JSON elements from `${timings}` by JSON path `$.connectStart` is = 1
 ----
