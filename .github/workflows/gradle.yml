@@ -28,7 +28,7 @@ jobs:
       fail-fast: false
 
     env:
-      TEST_APP_VERSION: 0.3.0
+      TEST_APP_VERSION: 0.4.1
 
     runs-on: ${{ matrix.platform }}
     permissions:
