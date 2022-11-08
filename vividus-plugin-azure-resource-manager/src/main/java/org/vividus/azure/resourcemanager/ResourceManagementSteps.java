@@ -40,6 +40,7 @@ import reactor.core.publisher.Mono;
 
 public class ResourceManagementSteps
 {
+    private static final String EXECUTION_FAILED = "Azure REST API HTTP request execution is failed";
     private final HttpPipeline httpPipeline;
     private final ISoftAssert softAssert;
     private final VariableContext variableContext;
@@ -52,6 +53,40 @@ public class ResourceManagementSteps
         this.softAssert = softAssert;
         this.variableContext = variableContext;
         this.azureProfile = azureProfile;
+    }
+
+    /**
+     * Gets the info about the specified Azure resource using the declared Azure resource URL and saves it to a
+     * variable. For more information, see the
+     * <a href="https://docs.microsoft.com/en-us/rest/api/azure/">Azure REST API reference</a>.
+     *
+     * @param azureResourceUrl It's used to specify Azure resource uniquely. For example:
+     *                         <ul>
+     *                         <li><code>https://management.azure.com/subscriptions/
+     *                         00000000-0000-0000-0000-000000000000/resourceGroups/sample-resource-group/
+     *                         providers/Microsoft.KeyVault/vaults/sample-vault?api-version=2021-10-01</code>
+     *                         <br><i>or</i>
+     *                         <br>
+     *                         <li><code>https://api.loganalytics.io/v1/workspaces/00000000-0000-0000-0000-000000000000/
+     *                         query?query=Syslog</code>
+     *                         </ul>
+     * @param scopes           The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable
+     *                         scopes.<br>
+     *                         <i>Available scopes:</i>
+     *                         <ul>
+     *                         <li><b>STEP</b> - the variable will be available only within the step,
+     *                         <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                         <li><b>STORY</b> - the variable will be available within the whole story,
+     *                         <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                         </ul>
+     * @param variableName     The variable name to store the Azure resource info.
+     */
+    @When("I get Azure resource with URL `$azureResourceUrl` and save it to $scopes variable `$variableName`")
+    public void saveAzureResourceAsVariableWithResourceUrl(String azureResourceUrl, Set<VariableScope> scopes,
+            String variableName)
+    {
+        executeHttpRequest(HttpMethod.GET, azureResourceUrl, Optional.empty(),
+                responseBody -> variableContext.putVariable(scopes, variableName, responseBody));
     }
 
     /**
@@ -195,8 +230,13 @@ public class ResourceManagementSteps
         String url = String.format("%ssubscriptions/%s%s?api-version=%s",
                 azureProfile.getEnvironment().getResourceManagerEndpoint(), azureProfile.getSubscriptionId(),
                 StringUtils.prependIfMissing(azureResourceIdentifier, "/"), apiVersion);
+        executeHttpRequest(method, url, azureResourceBody, responseBodyConsumer);
+    }
 
-        HttpRequest httpRequest = new HttpRequest(method, url);
+    private void executeHttpRequest(HttpMethod method, String azureResourceUrl, Optional<String> azureResourceBody,
+            Consumer<String> responseBodyConsumer)
+    {
+        HttpRequest httpRequest = new HttpRequest(method, azureResourceUrl);
         azureResourceBody.ifPresent(requestBody -> {
             httpRequest.setBody(requestBody);
             httpRequest.setHeader("Content-Type", ContentType.APPLICATION_JSON);
@@ -204,7 +244,7 @@ public class ResourceManagementSteps
 
         try (HttpResponse httpResponse = httpPipeline.send(httpRequest).block())
         {
-            Optional.ofNullable(httpResponse).map(HttpResponse::getBodyAsString).map(Mono::block).ifPresent(
+            Optional.ofNullable(httpResponse).map(HttpResponse::getBodyAsString).map(Mono::block).ifPresentOrElse(
                     responseBody -> {
                         if (httpResponse.getStatusCode() == HttpResponseStatus.OK.code())
                         {
@@ -212,10 +252,12 @@ public class ResourceManagementSteps
                         }
                         else
                         {
-                            softAssert.recordFailedAssertion(
-                                    "Azure REST API HTTP request execution is failed: " + responseBody);
+                            softAssert.recordFailedAssertion(EXECUTION_FAILED + ": " + responseBody);
                         }
-                    });
+                    }, () -> softAssert.recordFailedAssertion(EXECUTION_FAILED + " with empty body and status code: "
+                            + httpResponse.getStatusCode()
+                    )
+            );
         }
     }
 }

@@ -71,6 +71,44 @@ resourceGroups/sample-resource-group/providers/Microsoft.KeyVault/vaults/sample-
 When I get Azure resource with identifier `resourceGroups/TEST-RG/providers/Microsoft.KeyVault/vaults/KEY-VAULT-NAME` using API version `2021-10-01` and save it to scenario variable `key-vault-properties`
 ----
 
+==== Get information about Azure resource using Azure resource URL
+
+Gets the info about the specified Azure resource using the declared Azure resource URL and saves it to a variable. For more information, see the
+https://docs.microsoft.com/en-us/rest/api/azure/[Azure REST API reference].
+
+[source,gherkin]
+----
+When I get Azure resource with URL `$azureResourceUrl` and save it to $scopes variable `$variableName`
+----
+
+* `$azureResourceURL` - It's used to specify Azure resource uniquely. For example:
++
+[source,gherkin]
+----
+https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sample-resource-group/providers/Microsoft.KeyVault/vaults/sample-vault?api-version=2021-10-01
+----
++
+or
++
+[source,gherkin]
+----
+https://api.loganalytics.io/v1/workspaces/00000000-0000-0000-0000-000000000000/query?query=Syslog
+----
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the Azure resource info.
+
+.Query Log Analytics
+[source,gherkin]
+----
+When I get Azure resource with URL `https://api.loganalytics.io/v1/workspaces/00000000-0000-0000-0000-000000000000/query?query=Syslog` and save it to scenario variable `logAnalyticsQueryResult`
+----
+
+.Get secret from Key Vault
+[source,gherkin]
+----
+When I get Azure resource with URL `https://KEY-VAULT-NAME.vault.azure.net/secrets/SECRET-NAME?api-version=7.3` and save it to scenario variable `keyVaultSecret`
+----
+
 ==== Create/Update Azure resource
 
 Creates (if resource doesn't exist) or updates the specified Azure resource
