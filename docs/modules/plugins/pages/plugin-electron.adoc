@@ -3,13 +3,8 @@
 The plugin provides the ability to test https://www.electronjs.org/[Electron]-based desktop applications.
 VIVIDUS uses https://www.electronjs.org/docs/latest/tutorial/automated-testing[ChromeDriver] functionality to interact with the application.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-electron', version: '{current-version}')
-----
+:plugin-short-name: electron
+include::partial$plugin-installation.adoc[]
 
 == Profile
 

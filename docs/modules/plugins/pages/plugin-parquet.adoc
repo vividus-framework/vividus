@@ -2,13 +2,8 @@
 
 The plugin provides the ability to create https://parquet.apache.org/[Parquet] files.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-parquet', version: '{current-version}')
-----
+:plugin-short-name: parquet
+include::partial$plugin-installation.adoc[]
 
 == Properties
 

@@ -2,13 +2,8 @@
 
 The plugin provides a functionality to interact with https://tools.ietf.org/html/rfc6455[WebSocket].
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-websocket', version: '{current-version}')
-----
+:plugin-short-name: websocket
+include::partial$plugin-installation.adoc[]
 
 == Properties
 

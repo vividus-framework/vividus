@@ -3,14 +3,8 @@
 
 The plugin provides functionality to generate, modify and validate date/time.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-datetime', version: '{current-version}')
-----
-
+:plugin-short-name: datetime
+include::partial$plugin-installation.adoc[]
 
 == Properties
 

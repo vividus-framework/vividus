@@ -3,13 +3,8 @@
 
 The plugin for visual testing.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-visual', version: '{current-version}')
-----
+:plugin-short-name: visual
+include::partial$plugin-installation.adoc[]
 
 == Properties
 

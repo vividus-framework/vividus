@@ -4,13 +4,8 @@ The plugin provides functionality to perform accessibility validations.
 For more info please see https://squizlabs.github.io/HTML_CodeSniffer/[HTML Code Sniffer]
 Supported checks against following standards: https://squizlabs.github.io/HTML_CodeSniffer/Standards/WCAG2/[WCAG2] and https://squizlabs.github.io/HTML_CodeSniffer/Standards/Section508/[Section 508]
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-accessibility', version: '{current-version}')
-----
+:plugin-short-name: accessibility
+include::partial$plugin-installation.adoc[]
 
 == Steps
 

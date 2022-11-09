@@ -2,13 +2,8 @@
 
 The plugin provides a set of actions for validation of YAML data.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-yaml', version: '{current-version}')
-----
+:plugin-short-name: yaml
+include::partial$plugin-installation.adoc[]
 
 == Steps
 

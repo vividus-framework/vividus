@@ -2,13 +2,8 @@
 
 The plugin provides the ability to perform visual testing using the https://applitools.com/[Applitools] visual testing platform.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-applitools', version: '{current-version}')
-----
+:plugin-short-name: applitools
+include::partial$plugin-installation.adoc[]
 
 == Properties
 

@@ -2,13 +2,8 @@
 
 The plugin provides functionality to execute commands via https://tools.ietf.org/html/rfc4254[Secure Shell (SSH) connection protocol].
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-ssh', version: '{current-version}')
-----
+:plugin-short-name: ssh
+include::partial$plugin-installation.adoc[]
 
 == Properties
 
