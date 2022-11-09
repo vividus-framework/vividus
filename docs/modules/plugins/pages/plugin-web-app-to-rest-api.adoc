@@ -2,13 +2,8 @@
 
 The plugin provides the integration between web application testing functionality and REST API features.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-web-app-to-rest-api', version: '{current-version}')
-----
+:plugin-short-name: web-app-to-rest-api
+include::partial$plugin-installation.adoc[]
 
 == Steps
 

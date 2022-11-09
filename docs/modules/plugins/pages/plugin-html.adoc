@@ -4,13 +4,8 @@
 
 The plugin provides the ability to work with HTML documents: data extraction and validation.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-html', version: '{current-version}')
-----
+:plugin-short-name: html
+include::partial$plugin-installation.adoc[]
 
 == Locators
 

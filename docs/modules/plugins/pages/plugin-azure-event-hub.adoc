@@ -4,13 +4,8 @@
 
 The plugin provides functionality to interact with https://docs.microsoft.com/en-us/azure/event-hubs/[Event Hub].
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-azure-event-hub', version: '{current-version}')
-----
+:plugin-short-name: azure-event-hub
+include::partial$plugin-installation.adoc[]
 
 == Event Hub management
 

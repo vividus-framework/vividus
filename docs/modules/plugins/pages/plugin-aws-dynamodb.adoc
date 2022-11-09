@@ -2,13 +2,8 @@
 
 The plugin provides functionality to interact with https://aws.amazon.com/dynamodb/[Amazon DynamoDB].
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-aws-dynamodb', version: '{current-version}')
-----
+:plugin-short-name: aws-dynamodb
+include::partial$plugin-installation.adoc[]
 
 include::partial$aws.adoc[]
 

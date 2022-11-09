@@ -2,13 +2,8 @@
 
 The plugin provides functionality to execute commands via https://docs.microsoft.com/en-us/windows/win32/winrm/portal[WinRM].
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-winrm', version: '{current-version}')
-----
+:plugin-short-name: winrm
+include::partial$plugin-installation.adoc[]
 
 == Properties
 

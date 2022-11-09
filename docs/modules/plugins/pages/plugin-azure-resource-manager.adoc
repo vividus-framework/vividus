@@ -3,13 +3,8 @@
 The plugin provides the ability to collect information about Azure resources,
 also to create, update and delete them.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-azure-resource-manager', version: '{current-version}')
-----
+:plugin-short-name: azure-resource-manager
+include::partial$plugin-installation.adoc[]
 
 == Resource management
 

@@ -12,7 +12,7 @@ system (DBMS) can understand.
 
 == Installation
 
-. Add plugin dependency into `build.gradle` file:
+. Copy the below line code to `dependencies` section of the project `build.gradle` file
 +
 .build.gradle
 [source,gradle,subs="attributes+"]
@@ -35,6 +35,10 @@ implementation(group: 'org.postgresql', name: 'postgresql', version: '42.4.0')
 ----
 +
 NOTE: In case Maven repository does not contain driver you need, please refer to the documentation of your database to define suitable JDBC driver.
+
+. If the project was imported to the IDE before adding new plugin,
+xref:ROOT:getting-started.adoc#_use_ide_for_the_tests_development[re-generate]
+the configuration files for the used IDE and then refresh the project in the used IDE.
 
 == Configuration
 

@@ -2,13 +2,8 @@
 
 The plugin provides the ability to work with CSV files.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-csv', version: '{current-version}')
-----
+:plugin-short-name: csv
+include::partial$plugin-installation.adoc[]
 
 == Properties
 [cols="2,1,2,3", options="header"]

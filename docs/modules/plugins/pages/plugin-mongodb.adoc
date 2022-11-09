@@ -2,13 +2,8 @@
 
 The plugin provides a functionality to interact with https://www.mongodb.com/[MongoDB].
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-mongodb', version: '{current-version}')
-----
+:plugin-short-name: mongodb
+include::partial$plugin-installation.adoc[]
 
 == Properties
 

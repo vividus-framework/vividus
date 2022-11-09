@@ -2,13 +2,8 @@
 
 The plugin provides the ability to work with Excel documents.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-excel', version: '{current-version}')
-----
+:plugin-short-name: excel
+include::partial$plugin-installation.adoc[]
 
 == xref:ROOT:glossary.adoc#_table_transformer[Table Transformers]
 

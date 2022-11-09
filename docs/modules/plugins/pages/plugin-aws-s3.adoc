@@ -2,13 +2,8 @@
 
 The plugin provides functionality to interact with https://aws.amazon.com/s3/[Amazon Simple Storage Service (Amazon S3)].
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-aws-s3', version: '{current-version}')
-----
+:plugin-short-name: aws-s3
+include::partial$plugin-installation.adoc[]
 
 include::partial$aws.adoc[]
 

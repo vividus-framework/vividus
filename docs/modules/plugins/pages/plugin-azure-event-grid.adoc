@@ -4,13 +4,8 @@
 
 The plugin provides functionality to interact with https://azure.microsoft.com/en-us/services/event-grid/[Event Grid]
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-azure-event-grid', version: '{current-version}')
-----
+:plugin-short-name: azure-event-grid
+include::partial$plugin-installation.adoc[]
 
 == Interaction with topics
 

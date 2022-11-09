@@ -2,13 +2,8 @@
 
 The plugin provides a set of actions for transformation and validation of XML data.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-xml', version: '{current-version}')
-----
+:plugin-short-name: xml
+include::partial$plugin-installation.adoc[]
 
 == Steps
 

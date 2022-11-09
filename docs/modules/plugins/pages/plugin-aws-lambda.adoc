@@ -2,13 +2,8 @@
 
 The plugin provides functionality to interact with https://aws.amazon.com/lambda/[AWS Lambda].
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-aws-lambda', version: '{current-version}')
-----
+:plugin-short-name: aws-lambda
+include::partial$plugin-installation.adoc[]
 
 include::partial$aws.adoc[]
 

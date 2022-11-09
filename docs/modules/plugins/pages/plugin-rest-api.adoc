@@ -6,13 +6,8 @@ The plugin provides the following abilities:
 * validate HTTP responses (headers, status code, body)
 * validate JSON content of HTTP response bodies
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-rest-api', version: '{current-version}')
-----
+:plugin-short-name: rest-api
+include::partial$plugin-installation.adoc[]
 
 == Properties
 

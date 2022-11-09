@@ -4,13 +4,8 @@
 
 The plugin provides functionality to interact with https://docs.microsoft.com/en-us/azure/key-vault/[Azure Key Vault].
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-azure-key-vault', version: '{current-version}')
-----
+:plugin-short-name: azure-key-vault
+include::partial$plugin-installation.adoc[]
 
 == Key Vault management
 

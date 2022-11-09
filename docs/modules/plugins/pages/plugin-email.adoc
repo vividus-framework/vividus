@@ -2,13 +2,8 @@
 
 The plugin provides functionality to interact with email servers over https://en.wikipedia.org/wiki/Internet_Message_Access_Protocol[IMAPS protocol].
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-email', version: '{current-version}')
-----
+:plugin-short-name: email
+include::partial$plugin-installation.adoc[]
 
 == Properties
 

@@ -3,14 +3,8 @@
 
 The plugin provides functionality to interact with Web applications.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-web-app', version: '{current-version}')
-----
-
+:plugin-short-name: web-app
+include::partial$plugin-installation.adoc[]
 
 include::partial$locator-header.adoc[]
 

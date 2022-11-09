@@ -6,14 +6,8 @@
 
 The plugin provides functionality to test mobile application on real devices, Android Emulators and iOS Simulators.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-mobile-app', version: '{current-version}')
-----
-
+:plugin-short-name: mobile-app
+include::partial$plugin-installation.adoc[]
 
 include::partial$locator-header.adoc[]
 

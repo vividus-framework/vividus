@@ -4,13 +4,8 @@
 
 The plugin provides functionality to interact with https://azure.microsoft.com/en-us/services/functions/[Azure Functions]
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-azure-functions', version: '{current-version}')
-----
+:plugin-short-name: azure-functions
+include::partial$plugin-installation.adoc[]
 
 == Configuration
 

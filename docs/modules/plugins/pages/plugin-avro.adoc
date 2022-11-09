@@ -2,13 +2,8 @@
 
 The plugin provides the ability to work with https://avro.apache.org/docs/current/index.html[Avro] files.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-avro', version: '{current-version}')
-----
+:plugin-short-name: avro
+include::partial$plugin-installation.adoc[]
 
 == Steps
 

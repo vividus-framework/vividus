@@ -2,13 +2,8 @@
 
 The plugin provides functionality to interact with https://azure.microsoft.com/en-us/free/cosmos-db/[Cosmos DB]
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-azure-cosmos-db', version: '{current-version}')
-----
+:plugin-short-name: azure-cosmos-db
+include::partial$plugin-installation.adoc[]
 
 == Configuration
 

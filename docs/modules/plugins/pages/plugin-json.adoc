@@ -2,13 +2,8 @@
 
 The plugin provides a set of actions for transformation and validation of JSON data.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-json', version: '{current-version}')
-----
+:plugin-short-name: json
+include::partial$plugin-installation.adoc[]
 
 == xref:commons:variables.adoc[Dynamic variables]
 

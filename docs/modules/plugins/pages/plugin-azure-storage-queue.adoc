@@ -2,13 +2,8 @@
 
 The plugin provides functionality to interact with https://azure.microsoft.com/en-us/services/storage/queues/[Storage Queue]
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-plugin-azure-storage-queue', version: '{current-version}')
-----
+:plugin-short-name: azure-storage-queue
+include::partial$plugin-installation.adoc[]
 
 == Configuration
 
