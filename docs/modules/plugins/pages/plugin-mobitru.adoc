@@ -22,6 +22,24 @@ IMPORTANT: For the device search plugin relies on the capabilities specified in 
 
 |===
 
+.Capabilities to run tests on a specific device
+[source,properties]
+----
+selenium.grid.capabilities.udid=ce22271b791f6c0603
+----
+
+.Capabilities to run tests on any device with a specific platform version
+[source,properties]
+----
+selenium.grid.capabilities.platformVersion=12
+----
+
+.Capabilities to run tests on specific device model
+[source,properties]
+----
+selenium.grid.capabilities.deviceName=iPhone 13
+----
+
 == Properties
 
 NOTE: The properties marked with *bold* are mandatory.
