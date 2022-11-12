@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.runner;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,14 +35,14 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockedStatic;
+import org.junitpioneer.jupiter.StdIo;
+import org.junitpioneer.jupiter.StdOut;
 import org.springframework.beans.factory.BeanIsAbstractException;
-import org.vividus.SystemStreamTests;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
 @ExtendWith(TestLoggerFactoryExtension.class)
-class VividusInitializationCheckerTests extends SystemStreamTests
+class VividusInitializationCheckerTests
 {
     private static final String BEAN_1 = "bean1";
     private static final String BEAN_2 = "bean2";
@@ -49,12 +50,14 @@ class VividusInitializationCheckerTests extends SystemStreamTests
     private final TestLogger logger = TestLoggerFactory.getTestLogger(VividusInitializationChecker.class);
 
     @Test
-    void testPrintHelp() throws ParseException
+    @StdIo
+    void testPrintHelp(StdOut stdOut) throws ParseException
     {
-        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class))
+        try (var vividus = mockStatic(Vividus.class))
         {
             VividusInitializationChecker.main(new String[] {"-h"});
-            assertOutput(List.of("usage: VividusInitializationChecker",
+            assertThat(stdOut.capturedLines(), arrayContaining(
+                    "usage: VividusInitializationChecker",
                     " -h,--help                print this message.",
                     " -i,--ignoreBeans <arg>   comma separated list of beans that are not",
                     "                          instantiated during check (e.g. bean1,bean2)"
@@ -66,8 +69,7 @@ class VividusInitializationCheckerTests extends SystemStreamTests
     @Test
     void testNoArguments() throws ParseException
     {
-        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
-                MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class))
+        try (var vividus = mockStatic(Vividus.class); var beanFactory = mockStatic(BeanFactory.class))
         {
             beanFactory.when(BeanFactory::getBeanDefinitionNames).thenReturn(new String[] { BEAN_1, BEAN_2 });
             VividusInitializationChecker.main(new String[0]);
@@ -82,8 +84,7 @@ class VividusInitializationCheckerTests extends SystemStreamTests
     @Test
     void shouldIgnoreAbstractBeans() throws ParseException
     {
-        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
-                MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class))
+        try (var vividus = mockStatic(Vividus.class); var beanFactory = mockStatic(BeanFactory.class))
         {
             beanFactory.when(BeanFactory::getBeanDefinitionNames).thenReturn(new String[] { BEAN_1, BEAN_2 });
             beanFactory.when(() -> BeanFactory.getBean(BEAN_1)).thenThrow(new BeanIsAbstractException(BEAN_1));
@@ -99,13 +100,12 @@ class VividusInitializationCheckerTests extends SystemStreamTests
     @Test
     void shouldFailInCaseOfException()
     {
-        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
-                MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class))
+        try (var vividus = mockStatic(Vividus.class); var beanFactory = mockStatic(BeanFactory.class))
         {
             beanFactory.when(BeanFactory::getBeanDefinitionNames).thenReturn(new String[] { BEAN_1, BEAN_2 });
-            IllegalStateException exception = new IllegalStateException();
+            var exception = new IllegalStateException();
             beanFactory.when(() -> BeanFactory.getBean(BEAN_2)).thenThrow(exception);
-            RuntimeException runtimeException = assertThrows(RuntimeException.class,
+            var runtimeException = assertThrows(RuntimeException.class,
                     () -> VividusInitializationChecker.main(new String[0]));
             assertEquals("Initialization of beans has been failed", runtimeException.getMessage());
             vividus.verify(Vividus::init);
@@ -117,8 +117,7 @@ class VividusInitializationCheckerTests extends SystemStreamTests
     @Test
     void testIgnoreBeansOptionIsPresent() throws ParseException
     {
-        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
-                MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class))
+        try (var vividus = mockStatic(Vividus.class); var beanFactory = mockStatic(BeanFactory.class))
         {
             beanFactory.when(BeanFactory::getBeanDefinitionNames).thenReturn(new String[] { BEAN_1, BEAN_2 });
             VividusInitializationChecker.main(new String[] { "--ignoreBeans", BEAN_2 });
@@ -131,7 +130,7 @@ class VividusInitializationCheckerTests extends SystemStreamTests
     @Test
     void testUnknownOptionIsPresent()
     {
-        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class))
+        try (var vividus = mockStatic(Vividus.class))
         {
             assertThrows(UnrecognizedOptionException.class,
                     () -> VividusInitializationChecker.main(new String[] { "--any" }));

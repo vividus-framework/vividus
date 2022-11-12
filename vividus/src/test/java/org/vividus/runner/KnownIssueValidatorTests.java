@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,14 @@
 package org.vividus.runner;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.hasItemInArray;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -40,11 +37,11 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junitpioneer.jupiter.StdIo;
+import org.junitpioneer.jupiter.StdOut;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.SystemStreamTests;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 import org.vividus.issue.VividusKnownIssueIdentifier;
@@ -53,59 +50,64 @@ import org.vividus.softassert.issue.KnownIssueChecker;
 import org.vividus.softassert.model.KnownIssue;
 
 @ExtendWith(MockitoExtension.class)
-class KnownIssueValidatorTests extends SystemStreamTests
+class KnownIssueValidatorTests
 {
-    private static final String EMPTY = "";
-    private static final String KEY = "key";
-    private static final String MATCHED_FAILURE = "Elements to click found by locator By.xpath";
-    private static final String UNMATCHED_FAILURE = "There is exactly one element with locator By.xpath";
-    private static final String SEPARATOR = "| ";
-
     @Mock private IKnownIssueProvider knownIssueProvider;
     @Mock private KnownIssueChecker knownIssueChecker;
 
     @Test
-    void testNoOptionsAndNoKnownIssues() throws IOException, ParseException
+    @StdIo
+    void testNoOptionsAndNoKnownIssues(StdOut stdOut) throws IOException, ParseException
     {
         when(knownIssueProvider.getKnownIssueIdentifiers()).thenReturn(new HashMap<>());
         testValidator();
-        assertThat(getOutStreamContent(), is(equalTo(EMPTY)));
+        assertThat(stdOut.capturedLines(), arrayContaining(""));
     }
 
     @Test
-    void testNoInputFileAndNonEmptyKnownIssues() throws IOException, ParseException
+    @StdIo
+    void testNoInputFileAndNonEmptyKnownIssues(StdOut stdOut) throws IOException, ParseException
     {
         Map<String, VividusKnownIssueIdentifier> knownIssues = new HashMap<>();
-        knownIssues.put(KEY, null);
+        var key = "VVD-1";
+        knownIssues.put(key, null);
         doReturn(knownIssues).when(knownIssueProvider).getKnownIssueIdentifiers();
         testValidator();
-        assertThat(getOutStreamContent(), containsString(KEY));
+        assertThat(stdOut.capturedLines(), arrayContaining("Known issues found:", key));
     }
 
     @Test
-    void testFilePassedAsOption(@TempDir Path tempDir) throws IOException, ParseException
+    @StdIo
+    void testFilePassedAsOption(StdOut stdOut, @TempDir Path tempDir) throws IOException, ParseException
     {
-        File failuresList = tempDir.resolve("testFile.txt").toFile();
-        FileUtils.writeLines(failuresList, List.of(MATCHED_FAILURE, UNMATCHED_FAILURE));
+        var failuresList = tempDir.resolve("testFile.txt").toFile();
+        var matchedFailure = "Elements to click found by locator By.xpath";
+        var unmatchedFailure = "There is exactly one element with locator By.xpath";
+        FileUtils.writeLines(failuresList, List.of(matchedFailure, unmatchedFailure));
 
-        KnownIssue knownIssue = mock(KnownIssue.class);
-        when(knownIssueChecker.getKnownIssue(MATCHED_FAILURE)).thenReturn(knownIssue);
-        when(knownIssueChecker.getKnownIssue(UNMATCHED_FAILURE)).thenReturn(null);
-        when(knownIssue.getIdentifier()).thenReturn(KEY);
+        var knownIssue = mock(KnownIssue.class);
+        when(knownIssueChecker.getKnownIssue(matchedFailure)).thenReturn(knownIssue);
+        when(knownIssueChecker.getKnownIssue(unmatchedFailure)).thenReturn(null);
+        String key = "VVD-2";
+        when(knownIssue.getIdentifier()).thenReturn(key);
 
         testValidator("--file", failuresList.toString());
 
-        assertThat(getOutStreamContent(),
-                stringContainsInOrder(KEY, SEPARATOR, MATCHED_FAILURE, SEPARATOR, UNMATCHED_FAILURE));
+        assertThat(stdOut.capturedLines(), arrayContaining(
+                "Known Issue | Assertion Error",
+                key + "       | " + matchedFailure,
+                "            | " + unmatchedFailure
+        ));
     }
 
     @Test
-    void testHelpOptionIsPresent() throws IOException, ParseException
+    @StdIo
+    void testHelpOptionIsPresent(StdOut stdOut) throws IOException, ParseException
     {
-        try (MockedStatic<Vividus> vividus = Mockito.mockStatic(Vividus.class))
+        try (var vividus = Mockito.mockStatic(Vividus.class))
         {
             KnownIssueValidator.main(new String[] { "--help" });
-            assertThat(getOutStreamContent(), containsString("usage: KnownIssueValidator"));
+            assertThat(stdOut.capturedLines(), hasItemInArray("usage: KnownIssueValidator"));
             vividus.verifyNoInteractions();
         }
     }
@@ -113,7 +115,7 @@ class KnownIssueValidatorTests extends SystemStreamTests
     @Test
     void testUnknownOptionIsPresent()
     {
-        try (MockedStatic<Vividus> vividus = Mockito.mockStatic(Vividus.class))
+        try (var vividus = Mockito.mockStatic(Vividus.class))
         {
             assertThrows(UnrecognizedOptionException.class, () -> KnownIssueValidator.main(new String[] { "--any" }));
             vividus.verifyNoInteractions();
@@ -122,8 +124,7 @@ class KnownIssueValidatorTests extends SystemStreamTests
 
     private void testValidator(String... args) throws IOException, ParseException
     {
-        try (MockedStatic<Vividus> vividus = Mockito.mockStatic(Vividus.class);
-                MockedStatic<BeanFactory> beanFactory = Mockito.mockStatic(BeanFactory.class))
+        try (var vividus = Mockito.mockStatic(Vividus.class); var beanFactory = Mockito.mockStatic(BeanFactory.class))
         {
             beanFactory.when(() -> BeanFactory.getBean(KnownIssueChecker.class)).thenReturn(knownIssueChecker);
             beanFactory.when(() -> BeanFactory.getBean(IKnownIssueProvider.class)).thenReturn(knownIssueProvider);

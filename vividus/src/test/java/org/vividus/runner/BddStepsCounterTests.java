@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,20 +46,20 @@ import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junitpioneer.jupiter.StdIo;
+import org.junitpioneer.jupiter.StdOut;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction.Context;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.IPathFinder;
 import org.vividus.PathFinder;
-import org.vividus.SystemStreamTests;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 import org.vividus.resource.StoryLoader;
 import org.vividus.spring.ExtendedConfiguration;
 
 @ExtendWith(MockitoExtension.class)
-class BddStepsCounterTests extends SystemStreamTests
+class BddStepsCounterTests
 {
     private static final String STEP_PATTERN = "%s I do something with '%s'";
     private static final String AND = "And";
@@ -82,14 +82,14 @@ class BddStepsCounterTests extends SystemStreamTests
     private static final String TWO_OCCURRENCES = "2";
     private static final String ONE_OCCURRENCE = "1";
 
-    @Mock
-    private StepCandidate stepCandidate;
+    @Mock private StepCandidate stepCandidate;
 
     @Test
-    void testNoMatchedSteps() throws IOException, ParseException
+    @StdIo
+    void testNoMatchedSteps(StdOut stdOut) throws IOException, ParseException
     {
         testCounter(new String[0], DEFAULT_STORY_LOCATION, List.of(WHEN_STEP), List.of(stepCandidate));
-        String output = getOutStreamContent();
+        String output = getJoinedStdOut(stdOut);
         assertTrue(output.contains(NO_MATCHED_STEPS));
         assertTrue(output.contains(NO_STEP_CANDIDATES));
         assertTrue(output.contains(WHEN_STEP));
@@ -98,10 +98,11 @@ class BddStepsCounterTests extends SystemStreamTests
     }
 
     @Test
-    void testCommentedSteps() throws IOException, ParseException
+    @StdIo
+    void testCommentedSteps(StdOut stdOut) throws IOException, ParseException
     {
         testCounter(new String[0], DEFAULT_STORY_LOCATION, List.of(COMMENT + WHEN_STEP), List.of(stepCandidate));
-        String output = getOutStreamContent();
+        String output = getJoinedStdOut(stdOut);
         assertTrue(output.contains(NO_MATCHED_STEPS));
         assertFalse(output.contains(NO_STEP_CANDIDATES));
     }
@@ -115,7 +116,7 @@ class BddStepsCounterTests extends SystemStreamTests
     @Test
     void testUnknownOptionIsPresent()
     {
-        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class))
+        try (var vividus = mockStatic(Vividus.class))
         {
             assertThrows(UnrecognizedOptionException.class,
                     () -> BddStepsCounter.main(new String[] { "--any", DIR_VALUE }));
@@ -124,7 +125,8 @@ class BddStepsCounterTests extends SystemStreamTests
     }
 
     @Test
-    void testLimitOptionIsPresent() throws IOException, ParseException
+    @StdIo
+    void testLimitOptionIsPresent(StdOut stdOut) throws IOException, ParseException
     {
         when(stepCandidate.matches(THEN_STEP, null)).thenReturn(true);
         when(stepCandidate.matches(WHEN_STEP, null)).thenReturn(true);
@@ -132,7 +134,7 @@ class BddStepsCounterTests extends SystemStreamTests
         when(stepCandidate.getPatternAsString()).thenReturn(CANDIDATE_STRING);
         testCounter(new String[] { "--top", ONE_OCCURRENCE }, DEFAULT_STORY_LOCATION,
                 List.of(THEN_STEP, THEN_STEP, WHEN_STEP), List.of(stepCandidate));
-        String output = getOutStreamContent();
+        String output = getJoinedStdOut(stdOut);
         assertTrue(output.contains(String.format(STEP_PATTERN, THEN, VARIABLE)));
         assertFalse(output.contains(String.format(STEP_PATTERN, WHEN, VARIABLE)));
         assertTrue(output.contains(TWO_OCCURRENCES));
@@ -140,14 +142,15 @@ class BddStepsCounterTests extends SystemStreamTests
     }
 
     @Test
-    void testAndStep() throws IOException, ParseException
+    @StdIo
+    void testAndStep(StdOut stdOut) throws IOException, ParseException
     {
         when(stepCandidate.matches(WHEN_STEP, null)).thenReturn(true);
         when(stepCandidate.matches(AND_STEP, WHEN_STEP)).thenReturn(true);
         when(stepCandidate.getStartingWord()).thenReturn(WHEN);
         when(stepCandidate.getPatternAsString()).thenReturn(CANDIDATE_STRING);
         testCounter(new String[0], DEFAULT_STORY_LOCATION, List.of(WHEN_STEP, AND_STEP), List.of(stepCandidate));
-        String output = getOutStreamContent();
+        String output = getJoinedStdOut(stdOut);
         assertTrue(output.contains(TOP_STEPS));
         assertTrue(output.contains(OCCURRENCES));
         assertTrue(output.contains(String.format(STEP_PATTERN, WHEN, VARIABLE)));
@@ -159,33 +162,33 @@ class BddStepsCounterTests extends SystemStreamTests
     private void testCounter(String[] args, String resourceLocation, List<String> steps,
             List<StepCandidate> stepCandidates) throws IOException, ParseException
     {
-        String path = "";
-        Scenario scenario = new Scenario(steps);
-        Story story = new Story(path, List.of(scenario));
+        var path = "";
+        var scenario = new Scenario(steps);
+        var story = new Story(path, List.of(scenario));
 
-        try (MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
-                var regexStoryParser = mockConstruction(RegexStoryParser.class, (mock, context) -> {
-                    assertRegexStoryParserConstruction(context);
-                    when(mock.parseStory(any(String.class))).thenReturn(story);
-                }))
+        try (var beanFactory = mockStatic(BeanFactory.class);
+             var ignored = mockConstruction(RegexStoryParser.class, (mock, context) -> {
+                 assertRegexStoryParserConstruction(context);
+                 when(mock.parseStory(any(String.class))).thenReturn(story);
+             }))
         {
-            StoryLoader storyLoader = mock(StoryLoader.class);
+            var storyLoader = mock(StoryLoader.class);
             when(storyLoader.loadResourceAsText(path)).thenReturn("");
             beanFactory.when(() -> BeanFactory.getBean(StoryLoader.class)).thenReturn(storyLoader);
 
-            PathFinder pathFinder = mock(PathFinder.class);
+            var pathFinder = mock(PathFinder.class);
             when(pathFinder.findPaths(argThat(arg -> resourceLocation.equals(arg.getResourceLocation())))).thenReturn(
                     List.of(path));
             beanFactory.when(() -> BeanFactory.getBean(IPathFinder.class)).thenReturn(pathFinder);
 
-            ExtendedConfiguration configuration = new ExtendedConfiguration();
+            var configuration = new ExtendedConfiguration();
             configuration.useKeywords(new Keywords());
             beanFactory.when(() -> BeanFactory.getBean(Configuration.class)).thenReturn(configuration);
 
-            InjectableStepsFactory stepFactory = mock(InjectableStepsFactory.class);
+            var stepFactory = mock(InjectableStepsFactory.class);
             beanFactory.when(() -> BeanFactory.getBean(InjectableStepsFactory.class)).thenReturn(stepFactory);
 
-            CandidateSteps candidateSteps = mock(CandidateSteps.class);
+            var candidateSteps = mock(CandidateSteps.class);
             when(candidateSteps.listCandidates()).thenReturn(stepCandidates);
             when(stepFactory.createCandidateSteps()).thenReturn(List.of(candidateSteps));
 
@@ -205,5 +208,10 @@ class BddStepsCounterTests extends SystemStreamTests
         var examplesTableFactory = (ExamplesTableFactory) constructorArgument;
         assertSame(ExamplesTable.EMPTY, examplesTableFactory.createExamplesTable("t1.table"));
         assertSame(ExamplesTable.EMPTY, examplesTableFactory.createExamplesTable("t2.table"));
+    }
+
+    private static String getJoinedStdOut(StdOut stdOut)
+    {
+        return String.join(System.lineSeparator(), stdOut.capturedLines());
     }
 }

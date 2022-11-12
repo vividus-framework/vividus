@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.vividus.log;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -32,15 +32,20 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junitpioneer.jupiter.StdErr;
+import org.junitpioneer.jupiter.StdIo;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.SystemStreamTests;
 import org.vividus.report.allure.AllureStoryReporter;
 
 @ExtendWith(MockitoExtension.class)
-class AllureLogAppenderTests extends SystemStreamTests
+@TestMethodOrder(OrderAnnotation.class)
+class AllureLogAppenderTests
 {
     private static final String NAME = "Name";
 
@@ -48,17 +53,22 @@ class AllureLogAppenderTests extends SystemStreamTests
     @Mock private Layout<?> layout;
 
     @Test
-    void shouldNotCreateAppenderWithNullName()
+    @StdIo
+    // Need to be sure static variable org.apache.logging.log4j.status.StatusLogger.STATUS_LOGGER was not initialized
+    // with default value of System.err
+    @Order(1)
+    void shouldNotCreateAppenderWithNullName(StdErr stdErr)
     {
-        AllureLogAppender appender = AllureLogAppender.createAppender(null, filter, layout);
-        assertThat(getErrStreamContent(), containsString("No name provided for AllureLogAppender"));
+        var appender = AllureLogAppender.createAppender(null, filter, layout);
+        assertThat(stdErr.capturedLines(),
+                arrayContaining("ERROR StatusLogger No name provided for AllureLogAppender"));
         assertNull(appender);
     }
 
     @Test
     void shouldCreateAppenderWithNonNullName()
     {
-        AllureLogAppender appender = AllureLogAppender.createAppender(NAME, filter, layout);
+        var appender = AllureLogAppender.createAppender(NAME, filter, layout);
         assertNotNull(appender);
         assertEquals(NAME, appender.getName());
         assertEquals(filter, appender.getFilter());
@@ -68,7 +78,7 @@ class AllureLogAppenderTests extends SystemStreamTests
     @Test
     void shouldBeSingleton()
     {
-        AllureLogAppender appender = AllureLogAppender.createAppender(NAME, filter, layout);
+        var appender = AllureLogAppender.createAppender(NAME, filter, layout);
         assertNotNull(appender);
         assertEquals(appender, AllureLogAppender.getInstance());
     }
@@ -76,8 +86,8 @@ class AllureLogAppenderTests extends SystemStreamTests
     @Test
     void shouldNotAppendLogEventIfAllureStoryReporterIsNotSet()
     {
-        AllureLogAppender appender = AllureLogAppender.createAppender(NAME, filter, layout);
-        LogEvent logEvent = mock(LogEvent.class);
+        var appender = AllureLogAppender.createAppender(NAME, filter, layout);
+        var logEvent = mock(LogEvent.class);
         appender.append(logEvent);
         verifyNoInteractions(logEvent);
     }
@@ -85,12 +95,12 @@ class AllureLogAppenderTests extends SystemStreamTests
     @Test
     void shouldAddLogStepIfAllureStoryReporterIsSet()
     {
-        AllureLogAppender appender = AllureLogAppender.createAppender(NAME, filter, layout);
-        final AllureStoryReporter allureStoryReporter = mock(AllureStoryReporter.class);
+        var appender = AllureLogAppender.createAppender(NAME, filter, layout);
+        final var allureStoryReporter = mock(AllureStoryReporter.class);
         appender.setAllureStoryReporter(allureStoryReporter);
-        LogEvent logEvent = mock(LogEvent.class);
-        final String logEntry = "message";
-        final Level logLevel = Level.INFO;
+        var logEvent = mock(LogEvent.class);
+        final var logEntry = "message";
+        final var logLevel = Level.INFO;
         when(layout.toByteArray(logEvent)).thenReturn(logEntry.getBytes(StandardCharsets.UTF_8));
         when(logEvent.getLevel()).thenReturn(logLevel);
         appender.append(logEvent);

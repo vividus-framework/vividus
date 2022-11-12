@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.vividus.runner;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -24,7 +26,6 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,47 +36,52 @@ import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
 import org.junit.jupiter.api.Test;
+import org.junitpioneer.jupiter.StdIo;
+import org.junitpioneer.jupiter.StdOut;
 import org.mockito.MockedStatic;
-import org.vividus.SystemStreamTests;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
-class BddStepPrinterTests extends SystemStreamTests
+class BddStepPrinterTests
 {
     @Test
-    void testPrintHelp() throws IOException, ParseException
+    @StdIo
+    void testPrintHelp(StdOut stdOut) throws IOException, ParseException
     {
         BddStepPrinter.main(new String[] {"-h"});
-        assertOutput(List.of("usage: StepPrinter",
-                                   " -f,--file <arg>   Name of file to save steps",
-                                   " -h,--help         Print this message"));
+        assertThat(stdOut.capturedLines(), arrayContaining(
+                "usage: StepPrinter",
+                " -f,--file <arg>   Name of file to save steps",
+                " -h,--help         Print this message"
+        ));
     }
 
     @Test
-    void testPrintToSystemOut() throws IOException, ParseException, ReflectiveOperationException
+    @StdIo
+    void testPrintToSystemOut(StdOut stdOut) throws IOException, ParseException, ReflectiveOperationException
     {
-        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
-                MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class))
+        try (var vividus = mockStatic(Vividus.class); var beanFactory = mockStatic(BeanFactory.class))
         {
-            List<String> expectedOutput = mockStepCandidates(beanFactory);
+            var expectedOutput = mockStepCandidates(beanFactory);
             BddStepPrinter.main(new String[0]);
-            assertOutput(expectedOutput);
+            assertThat(stdOut.capturedLines(), arrayContaining(expectedOutput.toArray(new String[0])));
             vividus.verify(Vividus::init);
         }
     }
 
     @Test
-    void testPrintToFile() throws IOException, ParseException, ReflectiveOperationException
+    @StdIo
+    void testPrintToFile(StdOut stdOut) throws IOException, ParseException, ReflectiveOperationException
     {
-        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
-                MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
-                MockedStatic<FileUtils> fileUtils = mockStatic(FileUtils.class))
+        try (var vividus = mockStatic(Vividus.class);
+                var beanFactory = mockStatic(BeanFactory.class);
+                var fileUtils = mockStatic(FileUtils.class))
         {
-            List<String> expectedOutput = mockStepCandidates(beanFactory);
-            String filePath = "mocked" + File.separator + "file";
+            var expectedOutput = mockStepCandidates(beanFactory);
+            var filePath = "mocked" + File.separator + "file";
             BddStepPrinter.main(new String[] {"-f", filePath});
-            Path file = Paths.get(filePath);
-            assertOutput(List.of("File with steps: " + file.toAbsolutePath()));
+            var file = Paths.get(filePath);
+            assertThat(stdOut.capturedLines(), arrayContaining("File with steps: " + file.toAbsolutePath()));
             vividus.verify(Vividus::init);
             fileUtils.verify(() -> FileUtils.writeLines(argThat(f -> filePath.equals(f.toString())),
                     argThat(steps -> steps.stream().map(Object::toString).collect(Collectors.toList())
@@ -85,13 +91,13 @@ class BddStepPrinterTests extends SystemStreamTests
 
     private List<String> mockStepCandidates(MockedStatic<BeanFactory> beanFactory) throws ReflectiveOperationException
     {
-        InjectableStepsFactory stepsFactory = mock(InjectableStepsFactory.class);
+        var stepsFactory = mock(InjectableStepsFactory.class);
         beanFactory.when(() -> BeanFactory.getBean(InjectableStepsFactory.class)).thenReturn(stepsFactory);
-        CandidateSteps candidateSteps = mock(CandidateSteps.class);
+        var candidateSteps = mock(CandidateSteps.class);
         when(stepsFactory.createCandidateSteps()).thenReturn(List.of(candidateSteps));
-        StepCandidate stepCandidate1 = mockStepCandidate("Given", "initial state is '$status'", "simpleMethod");
-        StepCandidate stepCandidate2 = mockStepCandidate("When", "I do '$action'", "deprecatedMethod");
-        StepCandidate stepCandidate3 = mockStepCandidate("Then", "I perform '$verification'", (Method) null);
+        var stepCandidate1 = mockStepCandidate("Given", "initial state is '$status'", "simpleMethod");
+        var stepCandidate2 = mockStepCandidate("When", "I do '$action'", "deprecatedMethod");
+        var stepCandidate3 = mockStepCandidate("Then", "I perform '$verification'", (Method) null);
         when(candidateSteps.listCandidates()).thenReturn(List.of(stepCandidate1, stepCandidate2, stepCandidate3));
         return List.of("                         Given initial state is '$status'",
                 " DEPRECATED              When I do '$action'",
@@ -106,7 +112,7 @@ class BddStepPrinterTests extends SystemStreamTests
 
     private static StepCandidate mockStepCandidate(String startingWord, String patternAsString, Method method)
     {
-        StepCandidate stepCandidate = mock(StepCandidate.class);
+        var stepCandidate = mock(StepCandidate.class);
         when(stepCandidate.getStartingWord()).thenReturn(startingWord);
         when(stepCandidate.getPatternAsString()).thenReturn(patternAsString);
         when(stepCandidate.getMethod()).thenReturn(method);
