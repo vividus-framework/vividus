@@ -19,7 +19,7 @@ package org.vividus.visual.engine;
 import java.awt.Color;
 
 import pazone.ashot.comparison.DiffMarkupPolicy;
-import pazone.ashot.comparison.PointsMarkupPolicy;
+import pazone.ashot.comparison.ImageMarkupPolicy;
 
 public class DiffMarkupPolicyFactory
 {
@@ -28,8 +28,8 @@ public class DiffMarkupPolicyFactory
 
     public DiffMarkupPolicy create(int imageHeight, int imageWidth, double diffPercentage)
     {
-        PointsMarkupPolicy pointsMarkupPolicy = new PointsMarkupPolicy();
-        pointsMarkupPolicy.setDiffSizeTrigger((int) (imageHeight * imageWidth * diffPercentage / ONE_HUNDRED));
-        return pointsMarkupPolicy.withDiffColor(DIFF_COLOR);
+        ImageMarkupPolicy imageMarkupPolicy = new ImageMarkupPolicy();
+        imageMarkupPolicy.setDiffSizeTrigger((int) (imageHeight * imageWidth * diffPercentage / ONE_HUNDRED));
+        return imageMarkupPolicy.withDiffColor(DIFF_COLOR);
     }
 }
