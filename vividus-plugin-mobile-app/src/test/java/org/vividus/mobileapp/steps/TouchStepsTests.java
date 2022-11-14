@@ -16,6 +16,8 @@
 
 package org.vividus.mobileapp.steps;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -224,6 +226,26 @@ class TouchStepsTests
 
         touchSteps.swipeToElement(swipeDireciton, locator, Duration.ZERO);
         verifyNoInteractions(genericWebDriverManager);
+    }
+
+    @Test
+    void shouldDoubleTapByLocator()
+    {
+        WebElement element = mock(WebElement.class);
+        when(genericWebDriverManager.isMobile()).thenReturn(true);
+        when(baseValidations.assertElementExists("The element to double tap", locator))
+                .thenReturn(Optional.of(element));
+        touchSteps.doubleTapByLocator(locator);
+        verify(touchActions).doubleTap(element);
+    }
+
+    @Test
+    void shouldFailDoubleTapByLocatorIfNotMobilePlatform()
+    {
+        when(genericWebDriverManager.isMobile()).thenReturn(false);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> touchSteps.doubleTapByLocator(locator));
+        assertEquals("The step is supported only for Android and iOS platforms", exception.getMessage());
     }
 
     private SearchParameters initSwipeMocks()

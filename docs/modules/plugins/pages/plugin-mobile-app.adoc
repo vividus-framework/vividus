@@ -588,6 +588,26 @@ When I tap on element located by `accessibilityId(menu-toggler)` with duration `
 ----
 
 
+=== Double tap on element
+
+Performs double tap on the element located by the locator.
+
+WARNING: The step is supported for Android and iOS platforms.
+
+[source,gherkin]
+----
+When I double tap on element located by `$locator`
+----
+
+* `$locator` - <<_locator>>.
+
+.Double tap on element
+[source,gherkin]
+----
+When I double tap on element located by `accessibilityId(increment)`
+----
+
+
 === Press key
 
 Presses {keys}.
