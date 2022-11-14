@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.vividus.runner;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -35,17 +35,16 @@ import org.jbehave.core.junit.JUnit4StoryRunner;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.Description;
 import org.junit.runners.model.InitializationError;
-import org.mockito.MockedConstruction;
+import org.junitpioneer.jupiter.StdIo;
+import org.junitpioneer.jupiter.StdOut;
 import org.mockito.MockedStatic;
-import org.vividus.SystemStreamTests;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
-class BddScenariosCounterTests extends SystemStreamTests
+class BddScenariosCounterTests
 {
     private static final String DEFAULT_STORY_LOCATION = "story";
     private static final String DIR_VALUE = "story/bvt";
-    private static final String SEPARATOR = " | ";
     private static final String STORIES = "Stories";
     private static final String SCENARIOS = "Scenarios";
     private static final String SCENARIOS_WITH_EXAMPLES = "Scenarios with Examples";
@@ -56,16 +55,19 @@ class BddScenariosCounterTests extends SystemStreamTests
     private static final String EXAMPLE = "example description";
     private static final String BEFORE = "before description";
     private static final String RESOURCE_LOCATION = "bdd.story-loader.batch1.resource-location";
+    private static final String PARSING_NOTIFICATION = "Story parsing may take up to 5 minutes. Please be patient.";
+    private static final String OUTPUT_LINE_FORMAT = "    %d | %s";
 
     @Test
-    void testCounterIgnoresDescriptionsWithMethodNames()
+    @StdIo
+    void testCounterIgnoresDescriptionsWithMethodNames(StdOut stdOut)
             throws ParseException, ReflectiveOperationException, InitializationError
     {
-        Description root = Description.createSuiteDescription(ROOT);
-        Description beforeStories = Description.createTestDescription(Object.class, BEFORE);
-        Description story = Description.createSuiteDescription(STORY);
-        Description beforeStory = Description.createTestDescription(Object.class, BEFORE);
-        Description scenario = Description.createSuiteDescription(SCENARIO);
+        var root = Description.createSuiteDescription(ROOT);
+        var beforeStories = Description.createTestDescription(Object.class, BEFORE);
+        var story = Description.createSuiteDescription(STORY);
+        var beforeStory = Description.createTestDescription(Object.class, BEFORE);
+        var scenario = Description.createSuiteDescription(SCENARIO);
 
         root.addChild(beforeStories);
         root.addChild(story);
@@ -74,19 +76,24 @@ class BddScenariosCounterTests extends SystemStreamTests
 
         testCounter(new String[0], root, DEFAULT_STORY_LOCATION);
 
-        assertThat(getOutStreamContent(), containsString(1 + SEPARATOR + STORIES));
-        assertThat(getOutStreamContent(), containsString(1 + SEPARATOR + SCENARIOS));
-        assertThat(getOutStreamContent(), containsString(1 + SEPARATOR + SCENARIOS_WITH_EXAMPLES));
+        assertThat(stdOut.capturedLines(), arrayContaining(
+                PARSING_NOTIFICATION,
+                String.format(OUTPUT_LINE_FORMAT, 1, STORIES),
+                String.format(OUTPUT_LINE_FORMAT, 1, SCENARIOS),
+                String.format(OUTPUT_LINE_FORMAT, 1, SCENARIOS_WITH_EXAMPLES)
+        ));
     }
 
     @Test
-    void testMultipleChildDescriptions() throws ParseException, ReflectiveOperationException, InitializationError
+    @StdIo
+    void testMultipleChildDescriptions(StdOut stdOut)
+            throws ParseException, ReflectiveOperationException, InitializationError
     {
-        Description root = Description.createSuiteDescription(ROOT);
-        Description story = Description.createSuiteDescription(STORY);
-        Description scenario = Description.createSuiteDescription(SCENARIO);
-        Description scenarioWithoutExamples = Description.createSuiteDescription(SCENARIO);
-        Description example = Description.createSuiteDescription(EXAMPLE);
+        var root = Description.createSuiteDescription(ROOT);
+        var story = Description.createSuiteDescription(STORY);
+        var scenario = Description.createSuiteDescription(SCENARIO);
+        var scenarioWithoutExamples = Description.createSuiteDescription(SCENARIO);
+        var example = Description.createSuiteDescription(EXAMPLE);
 
         root.addChild(story);
         story.addChild(scenario);
@@ -96,15 +103,18 @@ class BddScenariosCounterTests extends SystemStreamTests
 
         testCounter(new String[0], root, DEFAULT_STORY_LOCATION);
 
-        assertThat(getOutStreamContent(), containsString(1 + SEPARATOR + STORIES));
-        assertThat(getOutStreamContent(), containsString(2 + SEPARATOR + SCENARIOS));
-        assertThat(getOutStreamContent(), containsString(3 + SEPARATOR + SCENARIOS_WITH_EXAMPLES));
+        assertThat(stdOut.capturedLines(), arrayContaining(
+                PARSING_NOTIFICATION,
+                String.format(OUTPUT_LINE_FORMAT, 1, STORIES),
+                String.format(OUTPUT_LINE_FORMAT, 2, SCENARIOS),
+                String.format(OUTPUT_LINE_FORMAT, 3, SCENARIOS_WITH_EXAMPLES)
+        ));
     }
 
     @Test
     void testDirectoryOptionIsPresent() throws ParseException, ReflectiveOperationException, InitializationError
     {
-        Description root = Description.createSuiteDescription(ROOT);
+        var root = Description.createSuiteDescription(ROOT);
 
         testCounter(new String[] { "--dir", DIR_VALUE }, root, DIR_VALUE);
     }
@@ -112,7 +122,7 @@ class BddScenariosCounterTests extends SystemStreamTests
     @Test
     void testUnknownOptionIsPresent()
     {
-        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class))
+        try (var vividus = mockStatic(Vividus.class))
         {
             assertThrows(UnrecognizedOptionException.class,
                     () -> BddScenariosCounter.main(new String[] { "--any", DIR_VALUE }));
@@ -121,28 +131,36 @@ class BddScenariosCounterTests extends SystemStreamTests
     }
 
     @Test
-    void testHelpOptionIsPresent() throws ParseException, ReflectiveOperationException, InitializationError
+    @StdIo
+    void testHelpOptionIsPresent(StdOut stdOut) throws ParseException, ReflectiveOperationException, InitializationError
     {
-        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class))
+        try (var vividus = mockStatic(Vividus.class))
         {
             BddScenariosCounter.main(new String[] { "--help" });
             vividus.verify(Vividus::init);
-            assertThat(getOutStreamContent(), containsString("usage: ScenariosCounter"));
+            assertThat(stdOut.capturedLines(), arrayContaining(
+                    "usage: ScenariosCounter",
+                    " -d,--dir <arg>   directory to count scenarios in (e.g. story/release).",
+                    " -h,--help        print this message."
+            ));
         }
     }
 
+    @SuppressWarnings("try")
     private void testCounter(String[] args, Description root, String dir)
             throws ParseException, InitializationError, ReflectiveOperationException
     {
-        try (MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
-                MockedConstruction<JUnit4StoryRunner> ignored = mockConstruction(JUnit4StoryRunner.class,
+        try (var beanFactory = mockStatic(BeanFactory.class);
+             var ignored = mockConstruction(JUnit4StoryRunner.class,
                         (runner, context) -> {
                             assertEquals(1, context.getCount());
                             assertEquals(List.of(StoriesRunner.class), context.arguments());
                             when(runner.getDescription()).thenReturn(root);
-                        }))
+                        }
+            )
+        )
         {
-            Properties properties = mockPropertiesBeanInstantiation(beanFactory);
+            var properties = mockPropertiesBeanInstantiation(beanFactory);
 
             BddScenariosCounter.main(args);
 
@@ -153,7 +171,7 @@ class BddScenariosCounterTests extends SystemStreamTests
 
     private Properties mockPropertiesBeanInstantiation(MockedStatic<BeanFactory> beanFactory)
     {
-        Properties properties = mock(Properties.class);
+        var properties = mock(Properties.class);
         beanFactory.when(() -> BeanFactory.getBean(PROPERTIES, Properties.class)).thenReturn(properties);
         return properties;
     }
