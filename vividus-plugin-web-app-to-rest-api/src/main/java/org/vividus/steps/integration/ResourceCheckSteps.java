@@ -21,18 +21,18 @@ import static org.vividus.util.UriUtils.buildNewUrl;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
 import org.jsoup.nodes.Element;
@@ -105,7 +105,17 @@ public class ResourceCheckSteps
         execute(() -> {
             Collection<Element> resourcesToValidate = getElementsByCssSelector(html, cssSelector);
             Stream<WebPageResourceValidation> validations = createResourceValidations(resourcesToValidate,
-                p -> createResourceValidation(p.getLeft(), p.getRight()));
+                resourceValidation -> {
+                    URI uriToCheck = resourceValidation.getUri();
+                    if (isNotAbsolute(uriToCheck))
+                    {
+                        softAssert.recordFailedAssertion(String.format(
+                                "Unable to resolve %s resource since the main application page URL is not set",
+                                uriToCheck));
+
+                        resourceValidation.setCheckStatus(CheckStatus.BROKEN);
+                    }
+                });
             validateResources(validations);
         });
     }
@@ -127,22 +137,46 @@ public class ResourceCheckSteps
     }
 
     private Stream<WebPageResourceValidation> createResourceValidations(Collection<Element> elements,
-            Function<Pair<URI, String>, WebPageResourceValidation> resourceValidationFactory)
+            Consumer<WebPageResourceValidation> resourceValidator)
     {
-        return elements.parallelStream().map(e ->
-            Pair.of(getHrefAttribute(e).orElseGet(() -> e.attr("src")).trim(), getSelector(e)))
-                       .filter(p -> !p.getKey().isEmpty() || softAssert.recordFailedAssertion(
-                        "Element by selector " + p.getValue() + " doesn't contain href/src attributes"))
-                       .map(p -> Pair.of(createUri(p.getKey()), p.getValue()))
-                       .map(resourceValidationFactory)
-                       .peek(rv ->
-                       {
-                           if ((!isSchemaAllowed(rv.getUri()) || excludeHrefsPattern.matcher(rv.toString()).matches())
-                                   && rv.getCheckStatus() != CheckStatus.BROKEN)
-                           {
-                               rv.setCheckStatus(CheckStatus.FILTERED);
-                           }
-                       });
+        return elements.stream()
+                .map(this::parseElement)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .peek(rv ->
+                {
+                    resourceValidator.accept(rv);
+                    if ((!isSchemaAllowed(rv.getUri()) || excludeHrefsPattern.matcher(rv.toString()).matches())
+                            && rv.getCheckStatus() != CheckStatus.BROKEN)
+                    {
+                        rv.setCheckStatus(CheckStatus.FILTERED);
+                    }
+                })
+                .parallel();
+    }
+
+    private Optional<WebPageResourceValidation> parseElement(Element element)
+    {
+        String elementUriAsString = getElementUri(element).trim();
+        String elementCssSelector = getCssSelector(element);
+        if (elementUriAsString.isEmpty())
+        {
+            softAssert.recordFailedAssertion(
+                    String.format("Element by selector %s doesn't contain href/src attributes", elementCssSelector));
+            return Optional.empty();
+        }
+        try
+        {
+            URI elementUri = resolveUri(elementUriAsString);
+            return Optional.of(new WebPageResourceValidation(elementUri, elementCssSelector));
+        }
+        catch (URISyntaxException e)
+        {
+            softAssert.recordFailedAssertion(
+                    String.format("Element by selector %s has href/src attribute with invalid URL", elementCssSelector),
+                    e);
+            return Optional.empty();
+        }
     }
 
     private static boolean isSchemaAllowed(URI uri)
@@ -150,7 +184,25 @@ public class ResourceCheckSteps
         return Optional.ofNullable(uri.getScheme()).map(ALLOWED_SCHEMES::contains).orElse(false);
     }
 
-    private String getSelector(Element element)
+    private static String getElementUri(Element element)
+    {
+        String href = element.attr(HREF_ATTR);
+        if (!href.isEmpty())
+        {
+            if (URL_FRAGMENT.equals(href))
+            {
+                return href;
+            }
+
+            String absUrl = element.absUrl(HREF_ATTR);
+            // For scripts e.g. href="javascript:alert('...');" the abs url will be empty
+            return absUrl.isEmpty() ? href : absUrl;
+        }
+
+        return element.attr("src");
+    }
+
+    private String getCssSelector(Element element)
     {
         try
         {
@@ -162,28 +214,10 @@ public class ResourceCheckSteps
         }
     }
 
-    private static Optional<String> getHrefAttribute(Element element)
+    private URI resolveUri(String uri) throws URISyntaxException
     {
-        String href = element.attr(HREF_ATTR);
-        if (!href.isEmpty())
-        {
-            if (URL_FRAGMENT.equals(href))
-            {
-                return Optional.of(href);
-            }
-
-            String absUrl = element.absUrl(HREF_ATTR);
-            // For scripts e.g. href="javascript:alert('...');" the abs url will be empty
-            return Optional.of(absUrl.isEmpty() ? href : absUrl);
-        }
-
-        return Optional.empty();
-    }
-
-    private URI createUri(String uri)
-    {
-        URI uriToCheck = URI.create(uri);
-        if (!isAbsolute(uriToCheck))
+        URI uriToCheck = new URI(uri);
+        if (isNotAbsolute(uriToCheck))
         {
             URI mainApplicationPageUrl = webApplicationConfiguration.getMainApplicationPageUrlUnsafely();
             if (mainApplicationPageUrl != null)
@@ -194,9 +228,9 @@ public class ResourceCheckSteps
         return uriToCheck;
     }
 
-    private static boolean isAbsolute(URI uri)
+    private static boolean isNotAbsolute(URI uri)
     {
-        return uri.isAbsolute() || uri.toString().charAt(0) != '/';
+        return !uri.isAbsolute() && uri.toString().charAt(0) == '/';
     }
 
     /**
@@ -207,11 +241,13 @@ public class ResourceCheckSteps
      *         a. If status code acceptable than check considered as passed;
      *         b. If status code not acceptable but one of (404, 405, 501, 503) then GET request will be sendt;
      *         c. If GET status code acceptable than check considered as passed otherwise failed;
-     * <b>Example</b>
+     * <b>Example:</b>
+     * <pre>
      * Then all resources by selector a are valid on:
      * |pages|
      * |https://vividus.org|
      * |/test-automation-made-awesome|
+     * </pre>
      * @param cssSelector to locate resources
      * @param pages where resources will be validated
      * @throws InterruptedException when a thread is interrupted
@@ -222,17 +258,25 @@ public class ResourceCheckSteps
     {
         execute(() -> {
             Stream<WebPageResourceValidation> resourcesToValidate =
-                pages.getRows()
-                     .parallelStream()
-                     .map(m -> m.get("pages"))
-                     .map(this::createUri)
-                     .flatMap(uri ->
+                pages.getRows().stream().map(m -> m.get("pages")).parallel()
+                     .flatMap(rawPageUrl ->
                      {
-                         String pageUrl = uri.toString();
-                         if (!isAbsolute(uri))
+                         String pageUrl;
+                         try
                          {
-                             return Stream.of(createUnresolvablePageValidation(pageUrl));
+                             URI uri = resolveUri(rawPageUrl);
+                             pageUrl = uri.toString();
+                             if (isNotAbsolute(uri))
+                             {
+                                 return Stream.of(createUnresolvablePageValidation(pageUrl));
+                             }
                          }
+                         catch (URISyntaxException e)
+                         {
+                             softAssert.recordFailedAssertion("Invalid page URL", e);
+                             return Stream.of(createBrokenPageValidation(rawPageUrl));
+                         }
+
 
                          try
                          {
@@ -240,7 +284,8 @@ public class ResourceCheckSteps
                              return Optional.ofNullable(httpTestContext.getResponse().getResponseBodyAsString())
                                             .map(response -> getElementsByCssSelector(pageUrl, response, cssSelector))
                                             .map(elements -> createResourceValidations(elements,
-                                                p -> new WebPageResourceValidation(p.getLeft(), p.getRight(), pageUrl)))
+                                                    rV -> rV.setPageURL(pageUrl)
+                                            ))
                                             .orElseGet(() -> Stream.of(createMissingPageBodyValidation(pageUrl)));
                          }
                          catch (IOException toReport)
@@ -256,20 +301,6 @@ public class ResourceCheckSteps
     {
         executor.execute(executable,
             (t, e) -> softAssert.recordFailedAssertion("Exception occured in thread with name: " + t.getName(), e));
-    }
-
-    private WebPageResourceValidation createResourceValidation(URI uriToCheck, String cssSelector)
-    {
-        WebPageResourceValidation resourceValidation = new WebPageResourceValidation(uriToCheck, cssSelector);
-        if (!isAbsolute(uriToCheck))
-        {
-            softAssert.recordFailedAssertion(
-                    String.format("Unable to resolve %s resource since the main application page URL is not set",
-                            uriToCheck));
-
-            resourceValidation.setCheckStatus(CheckStatus.BROKEN);
-        }
-        return resourceValidation;
     }
 
     private WebPageResourceValidation createUnreachablePageValidation(String pageURL, Exception exception)

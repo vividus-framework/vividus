@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -40,11 +41,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -96,6 +102,11 @@ class ResourceCheckStepsTests
     private static final URI VIVIDUS_QUERY_URI_2 = URI.create("https://vividus.org/products?name=smetanka");
     private static final String SELECTOR_QUERY_2 = "#query-params-two";
 
+    private static final String INVALID_URL = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|"
+            + "Google+Sans:400,500,700|Google+Sans+Text:400&lang=en";
+    private static final String INVALID_URL_ERROR =
+            "java.net.URISyntaxException: Illegal character in query at index 62: " + INVALID_URL;
+
     private static final String FIRST_PAGE =
           "<!DOCTYPE html>\n"
         + "<html>\n"
@@ -139,6 +150,7 @@ class ResourceCheckStepsTests
           + "<body>\r\n"
           + "  <a id='link-id' href='https://vividus.org/about'>About</a>\r\n"
           + "  <video id='video-id'>Some video without attributes</a>\r\n"
+          + "  <a id='link-id-2' href='" + INVALID_URL + "'>Fonts</a>\r\n"
           + "</body>\r\n"
           + "</html>\r\n";
 
@@ -218,15 +230,26 @@ class ResourceCheckStepsTests
                 "Unable to resolve /faq resource since the main application page URL is not set");
     }
 
-    @Test
-    void shouldConsiderResourceAsBrokenIfUnableToResolveTheUrlFromPage()
-            throws IOException, InterruptedException, ExecutionException
+    static Stream<Arguments> brokenPageUrls()
+    {
+        return Stream.of(
+                arguments("/relative", (Consumer<ISoftAssert>) softAssert -> verify(softAssert).recordFailedAssertion(
+                        "Unable to resolve /relative page since the main application page URL is not set")),
+                arguments(INVALID_URL, (Consumer<ISoftAssert>) softAssert -> verify(softAssert).recordFailedAssertion(
+                        eq("Invalid page URL"), argThat(e -> INVALID_URL_ERROR.equals(e.toString()))))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("brokenPageUrls")
+    void shouldConsiderResourceAsBrokenIfUnableToResolveTheUrlFromPage(String pageUrl,
+            Consumer<ISoftAssert> softAssertVerifier) throws InterruptedException, ExecutionException
     {
         mockResourceValidator();
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
-        ExamplesTable examplesTable = new ExamplesTable("|pages|\n|/faq|");
+        ExamplesTable examplesTable = new ExamplesTable("{valueSeparator=!}\n|pages|\n!" + pageUrl + "!");
         resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
 
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
@@ -234,12 +257,11 @@ class ResourceCheckStepsTests
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
-            validate(validationsToReport.iterator(), null, N_A, CheckStatus.BROKEN, FAQ_URL);
+            validate(validationsToReport.iterator(), null, N_A, CheckStatus.BROKEN, pageUrl);
             return true;
         }), eq(REPORT_NAME));
         verifyNoInteractions(httpRequestExecutor);
-        verify(softAssert)
-                .recordFailedAssertion("Unable to resolve /faq page since the main application page URL is not set");
+        softAssertVerifier.accept(softAssert);
     }
 
     @Test
@@ -308,6 +330,9 @@ class ResourceCheckStepsTests
             return true;
         }), eq(REPORT_NAME));
         verify(softAssert).recordFailedAssertion("Element by selector #video-id doesn't contain href/src attributes");
+        verify(softAssert).recordFailedAssertion(
+                eq("Element by selector #link-id-2 has href/src attribute with invalid URL"),
+                argThat(e -> INVALID_URL_ERROR.equals(e.toString())));
     }
 
     @Test
