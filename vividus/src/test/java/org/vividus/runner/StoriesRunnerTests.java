@@ -17,9 +17,13 @@
 package org.vividus.runner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -51,9 +55,9 @@ class StoriesRunnerTests
     @Test
     void shouldRun() throws IOException
     {
-        performTest(testInfoLogger ->
+        performTest(BATCH_TO_PATHS, testInfoLogger ->
         {
-            StoriesRunner runner = new StoriesRunner();
+            var runner = new StoriesRunner();
 
             runner.run();
 
@@ -65,24 +69,41 @@ class StoriesRunnerTests
     @Test
     void shouldGetStoryPaths() throws IOException
     {
-        performTest(testInfoLogger ->
+        performTest(BATCH_TO_PATHS, testInfoLogger ->
         {
-            StoriesRunner runner = new StoriesRunner();
+            var runner = new StoriesRunner();
 
             assertEquals(BATCH_TO_PATHS.values().iterator().next(), runner.storyPaths());
         });
     }
 
-    private void performTest(FailableConsumer<MockedStatic<TestInfoLogger>, IOException> test) throws IOException
+    @Test
+    void shouldThrowErrorOnAttemptToRunSuiteWithoutBatches() throws IOException
     {
-        try (MockedStatic<Vividus> vividus = mockStatic(Vividus.class);
-                MockedStatic<BeanFactory> beanFactory = mockStatic(BeanFactory.class);
-                MockedStatic<TestInfoLogger> testInfoLogger = mockStatic(TestInfoLogger.class))
+        performTest(Map.of(), testInfoLogger ->
+        {
+            var runner = new StoriesRunner();
+
+            var invalidConfigurationException = assertThrows(InvalidConfigurationException.class, runner::run);
+
+            assertEquals("No batches with tests to execute are configured", invalidConfigurationException.getMessage());
+            verifyNoInteractions(batchedEmbedder);
+            testInfoLogger.verify(() -> TestInfoLogger.logExecutionPlan(any()), times(0));
+        });
+    }
+
+    @SuppressWarnings("try")
+    private void performTest(Map<String, List<String>> batchToPaths,
+            FailableConsumer<MockedStatic<TestInfoLogger>, IOException> test) throws IOException
+    {
+        try (var ignored = mockStatic(Vividus.class);
+                var beanFactory = mockStatic(BeanFactory.class);
+                var testInfoLogger = mockStatic(TestInfoLogger.class))
         {
             beanFactory.when(() -> BeanFactory.getBean(IBatchedPathFinder.class)).thenReturn(batchedPathFinder);
-            when(batchedPathFinder.getPaths()).thenReturn(BATCH_TO_PATHS);
+            when(batchedPathFinder.getPaths()).thenReturn(batchToPaths);
             beanFactory.when(() -> BeanFactory.getBean(BatchedEmbedder.class)).thenReturn(batchedEmbedder);
-            Properties springProperties = mock(Properties.class);
+            var springProperties = mock(Properties.class);
             beanFactory.when(() -> BeanFactory.getBean("properties", Properties.class)).thenReturn(springProperties);
 
             test.accept(testInfoLogger);

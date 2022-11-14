@@ -400,27 +400,34 @@ When I perform highly time consuming task
 
 The tests execution returns one of the following exit codes.
 
-[cols="1,8,1", options="header"]
+[cols="1,9,1", options="header"]
 |===
 |Code
 |Description
 |Status
 
 |0
-|Test report is generated, contains only passed tests
+|Test report is generated, contains only passed tests.
 |`GREEN`
 
 |1
-|Test report is generated, contains only passed and tests with known issues
+|Test report is generated, contains only passed and tests with known issues.
 |`AMBER`
 
 |2
-|Test report is generated, contains any tests except passed and with known issues or doesn't contain tests at all
+|Test report is generated, contains any tests except passed and with known issues or doesn't contain tests at all.
 |`RED`
 
 |3
-|Test report isn't generated
+a|Test report isn't generated.
+
+*Common errors:*
+
+* "InvalidConfigurationException: No batches with tests to execute are configured" -
+the <<_suites,configured suite>> has 0 batches, i.e. no tests to execute are configured.
+
 |`RED`
+
 |===
 
 == HTTP Configuration
