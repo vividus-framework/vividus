@@ -26,15 +26,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 
-import pazone.ashot.comparison.PointsMarkupPolicy;
+import pazone.ashot.comparison.ImageMarkupPolicy;
 
 class DiffMarkupPolicyFactoryTests
 {
     @Test
     void shouldCreateDiffMarkupPolicy()
     {
-        try (MockedConstruction<PointsMarkupPolicy> mockedConstruction = Mockito.mockConstruction(
-                PointsMarkupPolicy.class))
+        try (MockedConstruction<ImageMarkupPolicy> mockedConstruction = Mockito.mockConstruction(
+                ImageMarkupPolicy.class))
         {
             new DiffMarkupPolicyFactory().create(1000, 1000, 0.01d);
             var constructed = mockedConstruction.constructed();
