@@ -263,6 +263,11 @@ Then `${cartesianProductTable}` is equal to table:
 |3 |AWS    |Neptune |row21|row22|row23|
 |3 |AWS    |Neptune |row31|row32|row33|
 
+Scenario: Verify CARTESIAN_PRODUCT transformer with empty table (should not be executed)
+Then `should` is equal to `be skipped`
+Examples:
+{transformer=CARTESIAN_PRODUCT, tables=/data/multirow.table}
+|col1 |
 
 Scenario: Verify sequence of transformers
 Meta:
