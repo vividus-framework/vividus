@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 import com.epam.reportportal.jbehave.ReportPortalStoryReporter;
 import com.epam.reportportal.listeners.LogLevel;
@@ -31,13 +30,11 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
 import org.jbehave.core.reporters.DelegatingStoryReporter;
 import org.jbehave.core.reporters.ThreadSafeReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
-import org.jbehave.core.steps.Timing;
 import org.vividus.softassert.event.AssertionFailedEvent;
 
 public class AdaptedDelegatingReportPortalStoryReporter extends DelegatingStoryReporter implements ThreadSafeReporter
@@ -72,7 +69,7 @@ public class AdaptedDelegatingReportPortalStoryReporter extends DelegatingStoryR
         {
             return;
         }
-        runIfNotSystem(step.getStepAsString(), reporter::beforeStep);
+        runIfNotSystem(step.getStepAsString(), () -> reporter.beforeStep(step));
     }
 
     @Override
@@ -82,27 +79,15 @@ public class AdaptedDelegatingReportPortalStoryReporter extends DelegatingStoryR
                 .map(failedSteps::remove)
                 .filter(Boolean.TRUE::equals)
                 .ifPresentOrElse(e -> reporter.failed(step, null),
-                    () -> runIfNotSystem(step, reporter::successful));
+                    () -> runIfNotSystem(step, () -> reporter.successful(step)));
     }
 
-    private void runIfNotSystem(String step, Consumer<String> toRun)
+    private void runIfNotSystem(String step, Runnable toRun)
     {
         if (!systemStage.get() && !step.contains("afterStories"))
         {
-            toRun.accept(step);
+            toRun.run();
         }
-    }
-
-    @Override
-    public void afterScenario(Timing timing)
-    {
-        reporter.afterScenario();
-    }
-
-    @Override
-    public void scenarioExcluded(Scenario scenario, String filter)
-    {
-        reporter.scenarioNotAllowed(scenario, filter);
     }
 
     @Subscribe
