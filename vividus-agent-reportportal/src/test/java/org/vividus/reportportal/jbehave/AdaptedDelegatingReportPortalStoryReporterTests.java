@@ -76,24 +76,11 @@ class AdaptedDelegatingReportPortalStoryReporterTests
     }
 
     @Test
-    void shouldDelegateAfterScenarioToWrappedReporter()
-    {
-        adaptedReporter.afterScenario(null);
-        verify(reporter).afterScenario();
-    }
-
-    @Test
-    void shouldDelegateScenarioNotAllowedToWrappedReporter()
-    {
-        adaptedReporter.scenarioExcluded(null, null);
-        verify(reporter).scenarioNotAllowed(null, null);
-    }
-
-    @Test
     void shouldDelegateBeforeStepToWrappedReporter()
     {
-        String step = "When I play Starfield";
-        adaptedReporter.beforeStep(new Step(StepExecutionType.EXECUTABLE, step));
+        String stepAsString = "When I play Starfield";
+        Step step = new Step(StepExecutionType.EXECUTABLE, stepAsString);
+        adaptedReporter.beforeStep(step);
         verify(reporter).beforeStep(step);
     }
 
