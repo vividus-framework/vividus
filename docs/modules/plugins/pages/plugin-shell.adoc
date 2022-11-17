@@ -1,0 +1,107 @@
+= Shell Plugin
+
+The plugin provides functionality to execute commands via https://en.wikipedia.org/wiki/Shell_(computing)[Shell].
+
+== Installation
+
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-plugin-shell', version: '{current-version}')
+----
+
+== Properties
+
+You are allowed to define a custom shell using properties:
+
+* `shell.<shell-key>.executable` - The executable file.
+* `shell.<shell-key>.option` - The command option.
+
+Where `<shell-key>` is the key which will be used to select a shell for the commands execution.
+
+.Configure custom shell
+[source,properties]
+----
+shell.ksh.executable=ksh
+shell.ksh.option=-c
+----
+
+[cols="3,1,1,3", options="header"]
+|===
+|Name
+|Acceptable values
+|Default
+|Description
+
+|`shell.active-shell-key`
+|<string>
+|
+a|The key of the shell which will be used for commands execution. By default, VIVIDUS picks the shell depending on the operating system:
+. `Windows` - *powershell*
+. `Mac OS` - *zsh*
+. `Linux` - *bash*
+
+Out of the box VIVIDUS supports `cmd`, `powershell`, `sh`, `zsh`, `bash`.
+
+|`shell.command-execution-timeout`
+|The timeout in {iso-date-format-link} format.
+|PT5M
+|The timeout duration to wait for command execution finish.
+
+|===
+
+
+== Steps
+
+=== Execute shell commands
+
+[source,gherkin]
+----
+When I execute command `$command` and save result to $scopes variable `$variableName`
+----
+
+* `$command` - The command to execute, it should follow the syntax of the currently active shell.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the command execution results. The the data will be stored under the following keys:
++
+  - `$variableName.stdout` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)[command standard output stream];
+  - `$variableName.stderr` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)[command standard error stream];
+  - `$variableName.exit-code` - the https://en.wikipedia.org/wiki/Exit_status[exit code] of the command.
+
+.Execute shell command
+[source,gherkin]
+----
+When I execute command `echo 'Hello World!'` and save result to scenario variable `result`
+Then `${result.stdout}` is equal to `Hello World!`
+Then `${result.stderr}` is equal to ``
+Then `${result.exit-code}` is equal to `0`
+----
+
+NOTE: The saved stdout/stderr are limited to ~2 billions of characters. But keep in mind depending on run configuration and environment it's possible to hit memory limits before reaching described output limits.
+
+=== Execute shell commands using specific shell
+
+[source,gherkin]
+----
+When I execute command `$command` using $shellName and save result to $scopes variable `$variableName`
+----
+
+* `$command` - The command to execute, it should follow the syntax of the shell defined under the `shellKey`.
+* `$shellKey` - The key of the shell which will be used for commands execution.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the command execution results. The the data will be stored under the following keys:
++
+  - `$variableName.stdout` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)[command standard output stream];
+  - `$variableName.stderr` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)[command standard error stream];
+  - `$variableName.exit-code` - the https://en.wikipedia.org/wiki/Exit_status[exit code] of the command.
+
+.Execute PowerShel command
+[source,gherkin]
+----
+When I execute command `echo 'Hello World!'` using PowerShell and save result to scenario variable `result`
+Then `${result.stdout}` is equal to `Hello World!`
+Then `${result.stderr}` is equal to ``
+Then `${result.exit-code}` is equal to `0`
+----
+
+NOTE: The saved stdout/stderr are limited to ~2 billions of characters. But keep in mind depending on run configuration and environment it's possible to hit memory limits before reaching described output limits.

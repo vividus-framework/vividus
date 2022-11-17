@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="shellSteps" class="org.vividus.shell.ShellSteps">
+        <constructor-arg>
+            <bean factory-bean="propertyMapper" factory-method="readValuesCaseInsensitively">
+                <constructor-arg value="shell." />
+                <constructor-arg value="org.vividus.shell.model.Shell" />
+            </bean>
+        </constructor-arg>
+        <constructor-arg value="${shell.active-shell-key}"/>
+        <property name="processFinishWaitTimeout" value="${shell.command-execution-timeout}" />
+    </bean>
+
+    <util:list id="stepBeanNames-Shell" value-type="java.lang.String">
+        <idref bean="shellSteps" />
+    </util:list>
+</beans>
