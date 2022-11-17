@@ -51,6 +51,10 @@ public class StoriesRunner extends AbstractTestRunner
     public void run()
     {
         Map<String, List<String>> paths = getPaths();
+        if (paths.isEmpty())
+        {
+            throw new InvalidConfigurationException("No batches with tests to execute are configured");
+        }
         TestInfoLogger.logExecutionPlan(paths);
         batchedEmbedder.runStoriesAsPaths(paths);
     }
