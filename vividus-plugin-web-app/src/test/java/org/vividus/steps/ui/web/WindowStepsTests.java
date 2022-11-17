@@ -46,7 +46,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
+import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebDriver.Window;
+import org.openqa.selenium.WindowType;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
@@ -74,6 +76,15 @@ class WindowStepsTests
     @Mock private IWebDriverManager webDriverManager;
     @Mock private ISoftAssert softAssert;
     @InjectMocks private WindowSteps windowSteps;
+
+    @Test
+    void shouldOpenNewTab()
+    {
+        when(webDriverProvider.get()).thenReturn(driver);
+        var targetLocator = mockTargetLocator();
+        windowSteps.openNewTab();
+        verify(targetLocator).newWindow(WindowType.TAB);
+    }
 
     @Test
     void testResizeCurrentWindow()
@@ -119,11 +130,10 @@ class WindowStepsTests
     void testCloseCurrentWindow()
     {
         mockWindowHandles();
-        var mockedTargetLocator = mock(WebDriver.TargetLocator.class);
-        when(driver.switchTo()).thenReturn(mockedTargetLocator);
+        var targetLocator = mockTargetLocator();
         windowSteps.closeCurrentWindow();
         verify(driver).close();
-        verify(mockedTargetLocator).window(WINDOW_TO_SWITCH_TO);
+        verify(targetLocator).window(WINDOW_TO_SWITCH_TO);
     }
 
     @Test
@@ -154,12 +164,18 @@ class WindowStepsTests
     void testCloseCurrentWindowWithoutAlerts()
     {
         mockWindowHandles();
-        var mockedTargetLocator = mock(WebDriver.TargetLocator.class);
-        when(driver.switchTo()).thenReturn(mockedTargetLocator);
+        var targetLocator = mockTargetLocator();
         when(alertActions.isAlertPresent()).thenReturn(false);
         windowSteps.closeCurrentWindowWithAlertsHandling();
         verify(javascriptActions).closeCurrentWindow();
-        verify(mockedTargetLocator).window(WINDOW_TO_SWITCH_TO);
+        verify(targetLocator).window(WINDOW_TO_SWITCH_TO);
+    }
+
+    private TargetLocator mockTargetLocator()
+    {
+        var targetLocator = mock(TargetLocator.class);
+        when(driver.switchTo()).thenReturn(targetLocator);
+        return targetLocator;
     }
 
     private Window mockWindow()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,5 +98,16 @@ class WebUiContextListenerTests
 
         verify(uiContext).reset();
         verify(targetLocator).window(WINDOW_NAME2);
+    }
+
+    @Test
+    void testSwitchToNewWindow()
+    {
+        WebDriver webDriver = mock(WebDriver.class);
+        when(webDriver.getWindowHandle()).thenReturn(WINDOW_NAME1);
+        webUiContextListener.afterSwitchToWindow(null, webDriver);
+        when(webDriver.getWindowHandles()).thenReturn(new LinkedHashSet<>(List.of(WINDOW_NAME1, WINDOW_NAME2)));
+        webUiContextListener.beforeSwitchToWindow(WINDOW_NAME2, webDriver);
+        verifyNoInteractions(uiContext);
     }
 }
