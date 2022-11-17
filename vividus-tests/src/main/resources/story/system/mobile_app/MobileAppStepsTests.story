@@ -102,6 +102,19 @@ When I tap on element located by `xpath(<menuButtonXpath>)->filter.attribute(${v
 Then number of elements found by `accessibilityId(increment)->filter.attribute(${visibility-attribute}=true)` is equal to `1`
 
 
+Scenario: Verify step: 'When I double tap on element located by `$locator`'
+When I change context to element located `accessibilityId(incrementDisplay)`
+When I save text of context element to scenario variable `incrementTextBefore`
+When I reset context
+When I double tap on element located by `accessibilityId(increment)`
+When I change context to element located `accessibilityId(incrementDisplay)`
+When I save text of context element to scenario variable `incrementTextAfter`
+When I reset context
+Given I initialize scenario variable `countBefore` with value `#{replaceFirstByRegExp(Count: (\d+), $1, ${incrementTextBefore})}`
+Given I initialize scenario variable `countAfter` with value `#{replaceFirstByRegExp(Count: (\d+), $1, ${incrementTextAfter})}`
+Then `${countAfter}` is equal to `#{eval(${countBefore} + 2 )}`
+
+
 Scenario: Verify step: 'When I navigate back'
 Meta:
     @targetPlatform android

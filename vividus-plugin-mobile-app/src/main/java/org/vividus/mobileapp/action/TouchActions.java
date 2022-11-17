@@ -24,12 +24,14 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.SearchContext;
@@ -109,6 +111,34 @@ public class TouchActions
                 .waitAction(waitOptions(duration))
                 .release()
                 .perform();
+    }
+
+    //CHECKSTYLE:OFF
+    /**
+     * Performs double tap on the <b>element</b>
+     * See details for
+     * <a href="https://github.com/appium/appium-xcuitest-driver#mobile-doubletap">iOS</a>,
+     * <a href="https://github.com/appium/appium-uiautomator2-driver/blob/master/docs/android-mobile-gestures.md#mobile-doubleclickgesture">Android</a>
+     * @param element element to double tap, must not be {@code null}
+     */
+    //CHECKSTYLE:ON
+    public void doubleTap(WebElement element)
+    {
+        String script;
+        if (genericWebDriverManager.isAndroid())
+        {
+            script = "mobile: doubleClickGesture";
+        }
+        else if (genericWebDriverManager.isIOS())
+        {
+            script = "mobile: doubleTap";
+        }
+        else
+        {
+            throw new IllegalArgumentException("Double tap action is available only for Android and iOS platforms");
+        }
+        Map<String, Object> args = Map.of("elementId", WebDriverUtils.unwrap(element, RemoteWebElement.class).getId());
+        webDriverProvider.getUnwrapped(JavascriptExecutor.class).executeScript(script, args);
     }
 
     private TouchAction<?> buildTapAction(WebElement element, BiConsumer<TouchAction<?>, ElementOption> tapByElement,

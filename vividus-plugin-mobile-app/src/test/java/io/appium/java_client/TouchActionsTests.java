@@ -33,6 +33,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
@@ -47,6 +48,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
@@ -302,6 +304,43 @@ class TouchActionsTests
         mockPerformsTouchActions();
         touchActions.performVerticalSwipe(640, 160, SWIPE_AREA, DURATION);
         verifySwipe(1);
+    }
+
+    @Test
+    void shouldPerformDoubleTapIos()
+    {
+        var javascriptExecutor = mock(JavascriptExecutor.class);
+        when(genericWebDriverManager.isAndroid()).thenReturn(false);
+        when(genericWebDriverManager.isIOS()).thenReturn(true);
+        when(element.getId()).thenReturn(ELEMENT_ID);
+        when(webDriverProvider.getUnwrapped(JavascriptExecutor.class)).thenReturn(javascriptExecutor);
+
+        touchActions.doubleTap(element);
+        verify(javascriptExecutor).executeScript("mobile: doubleTap", Map.of(ELEMENT_ID, ELEMENT_ID));
+        verifyNoMoreInteractions(webDriverProvider);
+    }
+
+    @Test
+    void shouldPerformDoubleTapAndroid()
+    {
+        var javascriptExecutor = mock(JavascriptExecutor.class);
+        when(element.getId()).thenReturn(ELEMENT_ID);
+        when(genericWebDriverManager.isAndroid()).thenReturn(true);
+        when(webDriverProvider.getUnwrapped(JavascriptExecutor.class)).thenReturn(javascriptExecutor);
+
+        touchActions.doubleTap(element);
+        verify(javascriptExecutor).executeScript("mobile: doubleClickGesture", Map.of(ELEMENT_ID, ELEMENT_ID));
+        verifyNoMoreInteractions(webDriverProvider);
+    }
+
+    @Test
+    void shouldFailDoubleTapElementIfNotSupportedPlatform()
+    {
+        when(genericWebDriverManager.isAndroid()).thenReturn(false);
+        when(genericWebDriverManager.isIOS()).thenReturn(false);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> touchActions.doubleTap(element));
+        assertEquals("Double tap action is available only for Android and iOS platforms", exception.getMessage());
     }
 
     private void verifySwipe(int times)

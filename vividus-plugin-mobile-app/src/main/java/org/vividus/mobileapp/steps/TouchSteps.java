@@ -16,6 +16,8 @@
 
 package org.vividus.mobileapp.steps;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +94,19 @@ public class TouchSteps
     public void tapByLocator(Locator locator)
     {
         findElementToTap(locator).ifPresent(touchActions::tap);
+    }
+
+    /**
+     * Performs double tap on <b>element</b> located by <b>locator</b>
+     * <br>
+     * The step is supported for Android and iOS platforms
+     * @param locator locator to find an element
+     */
+    @When("I double tap on element located by `$locator`")
+    public void doubleTapByLocator(Locator locator)
+    {
+        isTrue(genericWebDriverManager.isMobile(), "The step is supported only for Android and iOS platforms");
+        baseValidations.assertElementExists("The element to double tap", locator).ifPresent(touchActions::doubleTap);
     }
 
     /**
