@@ -33,12 +33,13 @@ import com.google.common.collect.Lists;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
+import org.vividus.util.ExamplesTableProcessor;
 
 public class CartesianProductTableTransformer extends AbstractTableLoadingTransformer
 {
     public CartesianProductTableTransformer()
     {
-        super(true);
+        super(false);
     }
 
     @Override
@@ -59,6 +60,11 @@ public class CartesianProductTableTransformer extends AbstractTableLoadingTransf
 
         isTrue(repeatingKeys.isEmpty(), "Tables must contain different keys, but found the same keys: %s",
                 repeatingKeys);
+
+        if (hasEmptyTable(tables))
+        {
+            return getEmptyTableWithHeaders(tables, properties);
+        }
 
         return tables.stream()
                      .reduce(CartesianProductTableTransformer::cartesianProduct)
@@ -94,5 +100,18 @@ public class CartesianProductTableTransformer extends AbstractTableLoadingTransf
                               .map(Map::values)
                               .map(ArrayList::new)
                               .collect(Collectors.toList());
+    }
+
+    private static boolean hasEmptyTable(List<ExamplesTable> tables)
+    {
+        return tables.stream().anyMatch(t -> t.getRowCount() == 0);
+    }
+
+    private static String getEmptyTableWithHeaders(List<ExamplesTable> tables, TableProperties tableProperties)
+    {
+        List<String> headers = new ArrayList<>();
+
+        tables.forEach(t -> headers.addAll(t.getHeaders()));
+        return ExamplesTableProcessor.buildExamplesTable(headers, List.of(), tableProperties);
     }
 }

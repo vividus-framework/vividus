@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,10 @@ import static org.mockito.Mockito.doReturn;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
+import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -34,10 +36,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CartesianProductTableTransformerTests
 {
-    private static final ExamplesTable TABLE = new ExamplesTable(
+    private static final ExamplesTable FIRST_TABLE = new ExamplesTable(
             "|name   |planet  |\n"
           + "|Junit  |Jupiter |\n"
           + "|Freddie|Mercury |\n"
+    );
+
+    private static final ExamplesTable SECOND_TABLE = new ExamplesTable(
+            "|col1 |col2 |\n"
+                    + "|row11|row12|\n"
+                    + "|row21|row22|\n"
+                    + "|row31|row32|"
     );
 
     @Mock private TableProperties properties;
@@ -46,19 +55,12 @@ class CartesianProductTableTransformerTests
     @Test
     void shouldTransform()
     {
-        ExamplesTable secondTable = new ExamplesTable(
-                "|col1 |col2 |\n"
-              + "|row11|row12|\n"
-              + "|row21|row22|\n"
-              + "|row31|row32|"
-        );
-
         ExamplesTable thirdTable = new ExamplesTable(
                 "|number|\n"
               + "|911   |"
         );
 
-        doReturn(List.of(TABLE, secondTable, thirdTable)).when(transformer).loadTables(StringUtils.EMPTY,
+        doReturn(List.of(FIRST_TABLE, SECOND_TABLE, thirdTable)).when(transformer).loadTables(StringUtils.EMPTY,
                 properties);
 
         String tableAsString = transformer.transform(StringUtils.EMPTY, null, properties);
@@ -73,9 +75,23 @@ class CartesianProductTableTransformerTests
     }
 
     @Test
+    void shouldTransformToEmptyTableIfOneTableEmpty()
+    {
+        var tableProperties = new TableProperties(StringUtils.EMPTY, new Keywords(), new ParameterConverters());
+        ExamplesTable thirdTable = new ExamplesTable("|number|");
+
+        doReturn(List.of(FIRST_TABLE, SECOND_TABLE, thirdTable)).when(transformer).loadTables(StringUtils.EMPTY,
+                tableProperties);
+
+        String tableAsString = transformer.transform(StringUtils.EMPTY, null, tableProperties);
+        String expectedTable = "|name|planet|col1|col2|number|";
+        assertEquals(expectedTable, tableAsString);
+    }
+
+    @Test
     void shouldFailIfTablesContainEqualHeaders()
     {
-        doReturn(List.of(TABLE, TABLE)).when(transformer).loadTables(StringUtils.EMPTY, properties);
+        doReturn(List.of(FIRST_TABLE, FIRST_TABLE)).when(transformer).loadTables(StringUtils.EMPTY, properties);
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
                 () -> transformer.transform(StringUtils.EMPTY, null, properties));
