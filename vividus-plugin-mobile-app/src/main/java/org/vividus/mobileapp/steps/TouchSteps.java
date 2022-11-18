@@ -110,14 +110,15 @@ public class TouchSteps
         List<WebElement> elements = new ArrayList<>(searchActions.findElements(locator));
         if (elements.isEmpty())
         {
-            touchActions.swipeUntil(direction, swipeDuration, swipeArea.get(), () ->
+            Rectangle swipeAreaRectangle = swipeArea.get();
+            touchActions.swipeUntil(direction, swipeDuration, swipeAreaRectangle, () ->
             {
                 if (elements.isEmpty())
                 {
                     elements.addAll(searchActions.findElements(locator));
                 }
-                return !elements.isEmpty()
-                        && isElementBoundaryVisible(elements.get(0).getRect(), swipeArea.get(), direction);
+                return !elements.isEmpty() && isElementInteractable(elements.get(0).getRect(), swipeAreaRectangle,
+                        direction);
             });
         }
         if (baseValidations.assertElementsNumber(String.format("The element by locator %s exists", locator), elements,
@@ -167,11 +168,9 @@ public class TouchSteps
         return baseValidations.assertElementExists("The element to tap", locator);
     }
 
-    private boolean isElementBoundaryVisible(Rectangle elementRectangle, Rectangle swipeArea,
-            SwipeDirection direction)
+    private boolean isElementInteractable(Rectangle elementRectangle, Rectangle swipeArea, SwipeDirection direction)
     {
-        int elementBoundaryCoordinate = getBoundaryCoordinate(elementRectangle, direction,
-                direction.isBackward());
+        int elementBoundaryCoordinate = getBoundaryCoordinate(elementRectangle, direction, direction.isBackward());
         int swipeAreaBoundaryCoordinate = getBoundaryCoordinate(swipeArea, direction, !direction.isBackward());
         if (direction.isBackward())
         {
@@ -180,15 +179,9 @@ public class TouchSteps
         return elementBoundaryCoordinate > swipeAreaBoundaryCoordinate;
     }
 
-    private int getBoundaryCoordinate(Rectangle elementRectangle,
-            SwipeDirection direction, boolean isBackward)
+    private int getBoundaryCoordinate(Rectangle elementRectangle, SwipeDirection direction, boolean lowerBoundary)
     {
-        if (direction.isVertical())
-        {
-            return isBackward ? elementRectangle.getY()
-                    : elementRectangle.getY() + elementRectangle.getHeight();
-        }
-        return isBackward ? elementRectangle.getX()
-                : elementRectangle.getX() + elementRectangle.getWidth();
+        int coordinate = direction.isVertical() ? elementRectangle.getY() : elementRectangle.getX();
+        return lowerBoundary ? coordinate : coordinate + direction.getAxisLength(elementRectangle);
     }
 }

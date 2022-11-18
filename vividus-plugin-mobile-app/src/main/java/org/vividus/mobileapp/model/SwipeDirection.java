@@ -39,18 +39,18 @@ public enum SwipeDirection
     private final boolean backward;
     private final boolean vertical;
     private final float indentCoefficient;
-    private final ToIntFunction<Rectangle> swipeAxisLengthProvider;
+    private final ToIntFunction<Rectangle> axisLengthProvider;
     private final ToIntFunction<Rectangle> boundariesDimensionProvider;
     private final ToIntFunction<MobileApplicationConfiguration> percentageProvider;
 
     SwipeDirection(boolean backward, boolean vertical, float indentCoefficient,
-            ToIntFunction<Rectangle> swipeAxisLengthProvider, ToIntFunction<Rectangle> boundariesDimensionProvider,
+            ToIntFunction<Rectangle> axisLengthProvider, ToIntFunction<Rectangle> boundariesDimensionProvider,
             ToIntFunction<MobileApplicationConfiguration> percentageProvider)
     {
         this.backward = backward;
         this.vertical = vertical;
         this.indentCoefficient = indentCoefficient;
-        this.swipeAxisLengthProvider = swipeAxisLengthProvider;
+        this.axisLengthProvider = axisLengthProvider;
         this.boundariesDimensionProvider = boundariesDimensionProvider;
         this.percentageProvider = percentageProvider;
     }
@@ -65,14 +65,14 @@ public enum SwipeDirection
         return backward;
     }
 
-    public int getSwipeAxisLength(Rectangle swipeArea)
+    public int getAxisLength(Rectangle rectangle)
     {
-        return swipeAxisLengthProvider.applyAsInt(swipeArea);
+        return axisLengthProvider.applyAsInt(rectangle);
     }
 
     public SwipeCoordinates calculateCoordinates(Rectangle swipeArea, MobileApplicationConfiguration configuration)
     {
-        int swipeAxisLength = getSwipeAxisLength(swipeArea);
+        int swipeAxisLength = getAxisLength(swipeArea);
         int indent = (int) (swipeAxisLength * indentCoefficient);
         int coordinateFirst = swipeAxisLength - indent;
         int coordinateSecond = indent;
