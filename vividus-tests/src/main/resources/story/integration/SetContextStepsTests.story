@@ -114,3 +114,13 @@ When I open URL `${vividus-test-site-url}/onbeforeunloadAlert.html` in new windo
 Then an alert is not present
 When I attempt to close current window with possibility to handle alert
 Then number of elements found by `By.xpath(//img[@name='vividus-logo'])` is equal to `1`
+
+Scenario: Verify step: "When I open new tab" (new tab doesn't inherit the state of the previous tab and can't handle alert)
+When I open new tab
+Given I am on a page with the URL '${vividus-test-site-url}/onbeforeunloadAlert.html'
+Then an alert is not present
+When I click on element located by `xpath(//a[text() = 'here'])`
+!-- No alert should be shown and tab should be kept open, but focus should be switched to another tab
+When I attempt to close current window with possibility to handle alert
+Then the page title is equal to 'Vividus Test Site'
+Then number of elements found by `By.xpath(//img[@name='vividus-logo'])` is equal to `1`
