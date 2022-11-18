@@ -8,3 +8,13 @@ When I compare_against baseline with name `context-element-with-acceptable-diff-
 When I compare_against baseline with name `context-element-with-acceptable-diff-percentage` from image `${response-as-bytes}` using storage `filesystem` and ignoring:
 |ACCEPTABLE_DIFF_PERCENTAGE|
 |100                       |
+
+Scenario: Verify visual checks using image out of file
+When I compare_against baseline with name `context` from image out of file `src/main/resources/baselines/context.png`
+When I compare_against baseline with name `context` from image out of file `src/main/resources/baselines/context.png` using storage `filesystem`
+When I compare_against baseline with name `context-element-with-acceptable-diff-percentage` from image out of file `src/main/resources/baselines/context.png` ignoring:
+|ACCEPTABLE_DIFF_PERCENTAGE|
+|100                       |
+When I compare_against baseline with name `context-element-with-acceptable-diff-percentage` from image out of file `src/main/resources/baselines/context.png` using storage `filesystem` and ignoring:
+|ACCEPTABLE_DIFF_PERCENTAGE|
+|100                       |
