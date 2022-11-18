@@ -24,6 +24,7 @@ import com.google.common.eventbus.EventBus;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.context.RunContext;
+import org.vividus.report.ui.ImageCompressor;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.selenium.screenshot.WebScreenshotTaker;
@@ -36,9 +37,10 @@ public class PublishingWebScreenshotOnFailureMonitor extends AbstractPublishingS
     private final WebScreenshotTaker webScreenshotTaker;
 
     public PublishingWebScreenshotOnFailureMonitor(EventBus eventBus, RunContext runContext,
-            IWebDriverProvider webDriverProvider, IUiContext uiContext, WebScreenshotTaker webScreenshotTaker)
+            IWebDriverProvider webDriverProvider, IUiContext uiContext, WebScreenshotTaker webScreenshotTaker,
+            ImageCompressor imageCompressor)
     {
-        super(eventBus, runContext, webDriverProvider);
+        super(eventBus, runContext, webDriverProvider, imageCompressor);
         this.uiContext = uiContext;
         this.webScreenshotTaker = webScreenshotTaker;
     }

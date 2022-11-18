@@ -18,6 +18,7 @@ package org.vividus.visual.eyes.service;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -66,10 +67,12 @@ import pazone.ashot.Screenshot;
 class ImageVisualTestingServiceTests
 {
     private static final String DIFF = "diff";
+    private static final String BASELINE = "baseline";
+    private static final String CHECKPOINT = "checkpoint";
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(ImageVisualTestingService.class);
-    private static final String DIFF_AS_B64 = "ZGlmZg==";
-    private static final String CHECKPOINT_AS_B64 = "Y2hlY2twb2ludA==";
-    private static final String BASELINE_AS_B64 = "YmFzZWxpbmU=";
+    private static final byte[] DIFF_AS_BYTES = DIFF.getBytes(StandardCharsets.UTF_8);
+    private static final byte[] CHECKPOINT_AS_BYTES = CHECKPOINT.getBytes(StandardCharsets.UTF_8);
+    private static final byte[] BASELINE_AS_BYTES = BASELINE.getBytes(StandardCharsets.UTF_8);
     private static final VisualActionType ACTION = VisualActionType.COMPARE_AGAINST;
     private static final String API_KEY = "?apiKey=";
     private static final String READ_KEY = "readKey";
@@ -110,9 +113,9 @@ class ImageVisualTestingServiceTests
         ordered.verify(eyes).close(false);
         Assertions.assertAll(
             () -> assertEquals(ACTION, result.getActionType()),
-            () -> assertEquals(BASELINE_AS_B64, result.getBaseline()),
-            () -> assertEquals(CHECKPOINT_AS_B64, result.getCheckpoint()),
-            () -> assertEquals(DIFF_AS_B64, result.getDiff()),
+            () -> assertArrayEquals(BASELINE_AS_BYTES, result.getBaseline()),
+            () -> assertArrayEquals(CHECKPOINT_AS_BYTES, result.getCheckpoint()),
+            () -> assertArrayEquals(DIFF_AS_BYTES, result.getDiff()),
             () -> assertEquals(BATCH_URL, result.getBatchUrl()),
             () -> assertEquals(STEP_EDITOR_URL, result.getStepUrl()),
             () -> assertTrue(result.isPassed())
@@ -254,8 +257,8 @@ class ImageVisualTestingServiceTests
 
     private void mockImagesRetrieval() throws IOException
     {
-        mockImageRetrieval(BASELINE_IMAGE_URI, "baseline");
-        mockImageRetrieval(CHECKPOINT_IMAGE_URI, "checkpoint");
+        mockImageRetrieval(BASELINE_IMAGE_URI, BASELINE);
+        mockImageRetrieval(CHECKPOINT_IMAGE_URI, CHECKPOINT);
         mockImageRetrieval(DIFF_IMAGE_URI, DIFF);
     }
 

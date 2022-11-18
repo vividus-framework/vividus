@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -122,7 +123,7 @@ class VisualTestingEngineTests
                 () -> assertNull(checkResult.getDiff()),
                 () -> assertEquals(BASELINE, checkResult.getBaselineName()),
                 () -> assertEquals(VisualActionType.ESTABLISH, checkResult.getActionType()),
-                () -> assertEquals(CHECKPOINT_BASE64, checkResult.getCheckpoint()),
+                () -> assertEquals(CHECKPOINT_BASE64, toBase64(checkResult.getCheckpoint())),
                 () -> assertFalse(checkResult.isPassed()));
         assertThat(testLogger.getLoggingEvents(), empty());
     }
@@ -146,15 +147,20 @@ class VisualTestingEngineTests
         mockGetCheckpointScreenshot(visualCheck);
         VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
         Assertions.assertAll(
-                () -> assertEquals(BASELINE_BASE64, checkResult.getBaseline()),
+                () -> assertEquals(BASELINE_BASE64, toBase64(checkResult.getBaseline())),
                 () -> assertEquals(BASELINE, checkResult.getBaselineName()),
-                () -> assertEquals(CHECKPOINT_BASE64, checkResult.getCheckpoint()),
+                () -> assertEquals(CHECKPOINT_BASE64, toBase64(checkResult.getCheckpoint())),
                 () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
-                () -> assertEquals(DIFF_BASE64, checkResult.getDiff()),
+                () -> assertEquals(DIFF_BASE64, toBase64(checkResult.getDiff())),
                 () -> assertEquals(status, checkResult.isPassed()));
         verify(baselineStorage, never()).saveBaseline(any(), any());
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE,
                 BigDecimal.valueOf(acceptableDiffPercentage), DIFF))));
+    }
+
+    private static String toBase64(byte[] image)
+    {
+        return Base64.getEncoder().encodeToString(image);
     }
 
     @ParameterizedTest
@@ -174,11 +180,11 @@ class VisualTestingEngineTests
         mockGetCheckpointScreenshot(visualCheck);
         VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
         Assertions.assertAll(
-                () -> assertEquals(BASELINE_BASE64, checkResult.getBaseline()),
+                () -> assertEquals(BASELINE_BASE64, toBase64(checkResult.getBaseline())),
                 () -> assertEquals(BASELINE, checkResult.getBaselineName()),
-                () -> assertEquals(CHECKPOINT_BASE64, checkResult.getCheckpoint()),
+                () -> assertEquals(CHECKPOINT_BASE64, toBase64(checkResult.getCheckpoint())),
                 () -> assertEquals(VisualActionType.CHECK_INEQUALITY_AGAINST, checkResult.getActionType()),
-                () -> assertEquals(DIFF_BASE64, checkResult.getDiff()),
+                () -> assertEquals(DIFF_BASE64, toBase64(checkResult.getDiff())),
                 () -> assertEquals(status, checkResult.isPassed()));
         verify(baselineStorage, never()).saveBaseline(any(), any());
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, "required",
@@ -195,11 +201,11 @@ class VisualTestingEngineTests
         mockGetCheckpointScreenshot(visualCheck);
         VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
         Assertions.assertAll(
-                () -> assertEquals(BASELINE_BASE64, checkResult.getBaseline()),
+                () -> assertEquals(BASELINE_BASE64, toBase64(checkResult.getBaseline())),
                 () -> assertEquals(BASELINE, checkResult.getBaselineName()),
-                () -> assertEquals(CHECKPOINT_BASE64, checkResult.getCheckpoint()),
+                () -> assertEquals(CHECKPOINT_BASE64, toBase64(checkResult.getCheckpoint())),
                 () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
-                () -> assertEquals(DIFF_BASE64, checkResult.getDiff()),
+                () -> assertEquals(DIFF_BASE64, toBase64(checkResult.getDiff())),
                 () -> assertTrue(checkResult.isPassed()));
         verify(baselineStorage, never()).saveBaseline(any(), any());
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, BigDecimal.valueOf(50.0),
@@ -215,11 +221,11 @@ class VisualTestingEngineTests
         mockGetCheckpointScreenshot(visualCheck, BASELINE);
         VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
         Assertions.assertAll(
-                () -> assertEquals(BASELINE_BASE64, checkResult.getBaseline()),
+                () -> assertEquals(BASELINE_BASE64, toBase64(checkResult.getBaseline())),
                 () -> assertEquals(BASELINE, checkResult.getBaselineName()),
-                () -> assertEquals(BASELINE_BASE64, checkResult.getCheckpoint()),
+                () -> assertEquals(BASELINE_BASE64, toBase64(checkResult.getCheckpoint())),
                 () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
-                () -> assertEquals(BASELINE_BASE64, checkResult.getDiff()),
+                () -> assertEquals(BASELINE_BASE64, toBase64(checkResult.getDiff())),
                 () -> assertTrue(checkResult.isPassed()));
         verify(baselineStorage, never()).saveBaseline(any(), any());
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, BigDecimal.valueOf(0d),
@@ -236,11 +242,11 @@ class VisualTestingEngineTests
         var finalImage = mockGetCheckpointScreenshot(visualCheck, BASELINE);
         VisualCheckResult checkResult = visualTestingEngine.compareAgainst(visualCheck);
         Assertions.assertAll(
-                () -> assertEquals(BASELINE_BASE64, checkResult.getBaseline()),
+                () -> assertEquals(BASELINE_BASE64, toBase64(checkResult.getBaseline())),
                 () -> assertEquals(BASELINE, checkResult.getBaselineName()),
-                () -> assertEquals(BASELINE_BASE64, checkResult.getCheckpoint()),
+                () -> assertEquals(BASELINE_BASE64, toBase64(checkResult.getCheckpoint())),
                 () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
-                () -> assertEquals(BASELINE_BASE64, checkResult.getDiff()),
+                () -> assertEquals(BASELINE_BASE64, toBase64(checkResult.getDiff())),
                 () -> assertTrue(checkResult.isPassed()));
         verify(baselineStorage).saveBaseline(argThat(s -> finalImage.equals(s.getImage())), eq(BASELINE));
         assertThat(testLogger.getLoggingEvents(), is(List.of(info(LOG_MESSAGE, ACCEPTABLE, BigDecimal.valueOf(0d),
@@ -272,7 +278,7 @@ class VisualTestingEngineTests
         Assertions.assertAll(
                 () -> assertNull(checkResult.getBaseline()),
                 () -> assertEquals(BASELINE, checkResult.getBaselineName()),
-                () -> assertEquals(CHECKPOINT_BASE64, checkResult.getCheckpoint()),
+                () -> assertEquals(CHECKPOINT_BASE64, toBase64(checkResult.getCheckpoint())),
                 () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
                 () -> assertNull(checkResult.getDiff()),
                 () -> assertFalse(checkResult.isPassed()));
@@ -291,7 +297,7 @@ class VisualTestingEngineTests
         Assertions.assertAll(
                 () -> assertNull(checkResult.getBaseline()),
                 () -> assertEquals(BASELINE, checkResult.getBaselineName()),
-                () -> assertEquals(CHECKPOINT_BASE64, checkResult.getCheckpoint()),
+                () -> assertEquals(CHECKPOINT_BASE64, toBase64(checkResult.getCheckpoint())),
                 () -> assertEquals(VisualActionType.COMPARE_AGAINST, checkResult.getActionType()),
                 () -> assertNull(checkResult.getDiff()),
                 () -> assertFalse(checkResult.isPassed()));

@@ -7,13 +7,17 @@
     <bean id="attachmentPublisher" class="org.vividus.reporter.event.AttachmentPublisher">
         <property name="eventBus" ref="eventBus" />
         <property name="freemarkerProcessor">
-            <bean parent="abstractFreemarkerConfig">
-                <property name="templateLoader">
-                    <bean class="freemarker.cache.ClassTemplateLoader">
-                        <constructor-arg index="0" value="org.vividus.reporter.event.AttachmentPublisher" />
-                        <constructor-arg index="1" value="/" />
+            <bean class="org.vividus.util.freemarker.FreemarkerProcessor" >
+                <constructor-arg>
+                    <bean parent="abstractFreemarkerConfig">
+                        <property name="templateLoader">
+                            <bean class="freemarker.cache.ClassTemplateLoader">
+                                <constructor-arg index="0" value="org.vividus.reporter.event.AttachmentPublisher" />
+                                <constructor-arg index="1" value="/" />
+                            </bean>
+                        </property>
                     </bean>
-                </property>
+                </constructor-arg>
             </bean>
         </property>
     </bean>

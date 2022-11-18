@@ -21,6 +21,7 @@ import java.util.Optional;
 import com.google.common.eventbus.EventBus;
 
 import org.vividus.context.RunContext;
+import org.vividus.report.ui.ImageCompressor;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
@@ -30,9 +31,9 @@ public class PublishingScreenshotOnFailureMonitor extends AbstractPublishingScre
     private final ScreenshotTaker screenshotTaker;
 
     public PublishingScreenshotOnFailureMonitor(EventBus eventBus, RunContext runContext,
-            IWebDriverProvider webDriverProvider, ScreenshotTaker screenshotTaker)
+            IWebDriverProvider webDriverProvider, ScreenshotTaker screenshotTaker, ImageCompressor imageCompressor)
     {
-        super(eventBus, runContext, webDriverProvider);
+        super(eventBus, runContext, webDriverProvider, imageCompressor);
         this.screenshotTaker = screenshotTaker;
     }
 

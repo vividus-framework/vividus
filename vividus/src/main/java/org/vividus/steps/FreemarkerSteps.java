@@ -51,9 +51,8 @@ public class FreemarkerSteps
             ExpressionAdaptor expressionAdaptor)
     {
         this.variableContext = variableContext;
-        this.freemarkerProcessor = new FreemarkerProcessor(configuration);
-        configuration.setSharedVariable("execVividusExpression",
-                new FreemarkerVividusExpressionProcessor(expressionAdaptor));
+        this.freemarkerProcessor = new FreemarkerProcessor(configuration,
+            Map.of("execVividusExpression", new FreemarkerVividusExpressionProcessor(expressionAdaptor)));
         this.resolveVariables = resolveVariables;
     }
 
