@@ -18,7 +18,6 @@ package org.vividus.visual.eyes.service;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Base64;
 
 import com.applitools.eyes.StepInfo;
 import com.applitools.eyes.StepInfo.ApiUrls;
@@ -90,12 +89,13 @@ public class ImageVisualTestingService implements VisualTestingService
     {
         MutableBoolean apiUnauthorized = new MutableBoolean(false);
         ApiUrls apiUrls = stepInfo.getApiUrls();
-        visualCheckResult.setBaseline(getImageAsBase64(apiUrls.getBaselineImage(), readKey, apiUnauthorized));
-        visualCheckResult.setCheckpoint(getImageAsBase64(apiUrls.getCheckpointImage(), readKey, apiUnauthorized));
-        visualCheckResult.setDiff(getImageAsBase64(apiUrls.getDiffImage(), readKey, apiUnauthorized));
+        visualCheckResult.setBaseline(getImage(apiUrls.getBaselineImage(), readKey, apiUnauthorized));
+        visualCheckResult.setCheckpoint(getImage(apiUrls.getCheckpointImage(), readKey, apiUnauthorized));
+        visualCheckResult.setDiff(getImage(apiUrls.getDiffImage(), readKey, apiUnauthorized));
     }
 
-    private String getImageAsBase64(String url, String readKey, MutableBoolean apiUnauthorized)
+    @SuppressWarnings("NoNullForCollectionReturn")
+    private byte[] getImage(String url, String readKey, MutableBoolean apiUnauthorized)
     {
         if (url != null && apiUnauthorized.isFalse())
         {
@@ -114,7 +114,7 @@ public class ImageVisualTestingService implements VisualTestingService
                 }
                 else if (statusCode == HttpStatus.SC_OK && body != null)
                 {
-                    return Base64.getEncoder().encodeToString(body);
+                    return body;
                 }
             }
             catch (IOException e)

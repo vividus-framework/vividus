@@ -20,7 +20,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 
@@ -67,7 +66,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
     {
         VisualCheckResult comparisonResult = new VisualCheckResult(visualCheck);
         Screenshot checkpoint = getCheckpointScreenshot(visualCheck);
-        comparisonResult.setCheckpoint(imageToBase64(checkpoint.getImage()));
+        comparisonResult.setCheckpoint(imageToBytes(checkpoint.getImage()));
         getBaselineStorage(visualCheck).saveBaseline(checkpoint, visualCheck.getBaselineName());
         return comparisonResult;
     }
@@ -84,12 +83,12 @@ public class VisualTestingEngine implements IVisualTestingEngine
     {
         VisualCheckResult comparisonResult = new VisualCheckResult(visualCheck);
         Screenshot checkpoint = getCheckpointScreenshot(visualCheck);
-        comparisonResult.setCheckpoint(imageToBase64(checkpoint.getImage()));
+        comparisonResult.setCheckpoint(imageToBytes(checkpoint.getImage()));
         Optional<Screenshot> baseline = getBaselineStorage(visualCheck).getBaseline(visualCheck.getBaselineName());
         if (baseline.isPresent())
         {
             Screenshot baselineScreenshot = baseline.get();
-            comparisonResult.setBaseline(imageToBase64(baselineScreenshot.getImage()));
+            comparisonResult.setBaseline(imageToBytes(baselineScreenshot.getImage()));
 
             boolean inequalityCheck = visualCheck.getAction() == VisualActionType.CHECK_INEQUALITY_AGAINST;
             int height = Math.max(baselineScreenshot.getImage().getHeight(), checkpoint.getImage().getHeight());
@@ -97,7 +96,7 @@ public class VisualTestingEngine implements IVisualTestingEngine
             double diffPercentage = calculateDiffPercentage(visualCheck, inequalityCheck);
             ImageDiff diff = findImageDiff(baselineScreenshot, checkpoint, height, width, diffPercentage);
             comparisonResult.setPassed(!diff.hasDiff());
-            comparisonResult.setDiff(imageToBase64(diff.getMarkedImage()));
+            comparisonResult.setDiff(imageToBytes(diff.getMarkedImage()));
             LOGGER.atInfo()
                   .addArgument(() -> inequalityCheck ? "required" : "acceptable")
                   .addArgument(BigDecimal.valueOf(diffPercentage))
@@ -145,9 +144,9 @@ public class VisualTestingEngine implements IVisualTestingEngine
         return differ.makeDiff(expected, actual);
     }
 
-    private String imageToBase64(BufferedImage image) throws IOException
+    private byte[] imageToBytes(BufferedImage image) throws IOException
     {
-        return Base64.getEncoder().encodeToString(ImageTool.toByteArray(image));
+        return ImageTool.toByteArray(image);
     }
 
     public void setOverrideBaselines(boolean overrideBaselines)

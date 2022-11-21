@@ -20,9 +20,9 @@ public class VisualCheckResult
 {
     private final String baselineName;
     private final VisualActionType actionType;
-    private String baseline;
-    private String checkpoint;
-    private String diff;
+    private byte[] baseline;
+    private byte[] checkpoint;
+    private byte[] diff;
     private boolean passed;
 
     public VisualCheckResult(AbstractVisualCheck visualCheck)
@@ -31,32 +31,32 @@ public class VisualCheckResult
         this.actionType = visualCheck.getAction();
     }
 
-    public String getBaseline()
+    public byte[] getBaseline()
     {
         return baseline;
     }
 
-    public void setBaseline(String baseline)
+    public void setBaseline(byte[] baseline)
     {
         this.baseline = baseline;
     }
 
-    public String getCheckpoint()
+    public byte[] getCheckpoint()
     {
         return checkpoint;
     }
 
-    public void setCheckpoint(String checkpoint)
+    public void setCheckpoint(byte[] checkpoint)
     {
         this.checkpoint = checkpoint;
     }
 
-    public String getDiff()
+    public byte[] getDiff()
     {
         return diff;
     }
 
-    public void setDiff(String diff)
+    public void setDiff(byte[] diff)
     {
         this.diff = diff;
     }

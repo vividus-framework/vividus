@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.vividus.util.freemarker;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,6 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateMethodModelEx;
 
 class FreemarkerProcessorTests
 {
@@ -41,9 +45,14 @@ class FreemarkerProcessorTests
     @BeforeEach
     void beforeEach()
     {
-        Configuration config = new Configuration(Configuration.VERSION_2_3_31);
-        config.setClassForTemplateLoading(FreemarkerProcessor.class, "");
-        freemarkerProcessor = new FreemarkerProcessor(config);
+        Configuration configuration = createConfiguration();
+        configuration.setClassForTemplateLoading(FreemarkerProcessor.class, "");
+        freemarkerProcessor = new FreemarkerProcessor(configuration, Map.of());
+    }
+
+    private static Configuration createConfiguration()
+    {
+        return new Configuration(Configuration.VERSION_2_3_31);
     }
 
     @Test
@@ -66,5 +75,15 @@ class FreemarkerProcessorTests
     {
         assertThrows(TemplateException.class, () ->
             freemarkerProcessor.process(RELATIVE_PATH, Collections.emptyMap(), StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void shouldRegisterMethods()
+    {
+        Configuration configuration = spy(createConfiguration());
+        var method = mock(TemplateMethodModelEx.class);
+        var name = "name";
+        new FreemarkerProcessor(configuration, Map.of(name, method));
+        verify(configuration).setSharedVariable(name, method);
     }
 }

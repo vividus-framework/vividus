@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,21 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateMethodModelEx;
 
 public class FreemarkerProcessor
 {
     private final Configuration configuration;
 
-    public FreemarkerProcessor(Configuration configuration)
+    public FreemarkerProcessor(Configuration configuration, Map<String, TemplateMethodModelEx> methods)
     {
         this.configuration = configuration;
+        methods.forEach(configuration::setSharedVariable);
     }
 
     public byte[] process(String templateName, Object dataModel) throws IOException, TemplateException

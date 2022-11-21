@@ -34,7 +34,7 @@
             <div class="col-md-6">
                 <p>Baseline</p>
                 <#if hasBaseline>
-                    <img class="img-responsive" src="data:image/png;base64,${result.baseline}" />
+                    <img class="img-responsive" src="data:image/png;base64,${freemarkerMethodCompressImage(result.baseline)}" />
                 <#else>
                     <span>No baseline image</span>
                 </#if>
@@ -43,13 +43,13 @@
                 <p>Checkpoint</p>
                 <#if hasBaseline>
                     <#if result.diff?hasContent>
-                        <img id="diff" class="img-responsive" src="data:image/png;base64,${result.diff}" />
+                        <img id="diff" class="img-responsive" src="data:image/png;base64,${freemarkerMethodCompressImage(result.diff)}" />
                     <#else>
                         <span>No diff image</span>
                     </#if>
                 </#if>
                 <#if result.checkpoint?hasContent>
-                    <img id="checkpoint" class="img-responsive" src="data:image/png;base64,${result.checkpoint}" />
+                    <img id="checkpoint" class="img-responsive" src="data:image/png;base64,${freemarkerMethodCompressImage(result.checkpoint)}" />
                 <#else>
                     <span>No checkpoint image</span>
                 </#if>
@@ -59,7 +59,7 @@
                 <p>Baseline</p>
                 <@custom_controls />
                 <#if result.checkpoint?hasContent>
-                    <img id="checkpoint" class="img-responsive" src="data:image/png;base64,${result.checkpoint}" />
+                    <img id="checkpoint" class="img-responsive" src="data:image/png;base64,${freemarkerMethodCompressImage(result.checkpoint)}" />
                 <#else>
                     <span>No checkpoint image</span>
                 </#if>

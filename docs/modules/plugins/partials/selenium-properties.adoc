@@ -47,3 +47,8 @@ a|`true` +
 |{iso-date-format-link} format
 |`PT2S`
 |Used together with `ui.wait.timeout`. Total duration of time between two iterations of UI condition check
+
+|`ui.report.image-compression-quality`
+|The value between 0 and 1 e.g. 0.75
+|`1`
+|Enables compressions of the images published to the report using the specified compression quality. If 1 is set then no compression will be performed. It may help to decrease total report size.

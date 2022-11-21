@@ -42,7 +42,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
 import org.junit.jupiter.api.BeforeEach;
@@ -298,7 +297,7 @@ class VisualStepsTests
 
     private void mockCheckResult()
     {
-        when(visualCheckResult.getBaseline()).thenReturn(StringUtils.EMPTY);
+        when(visualCheckResult.getBaseline()).thenReturn(new byte[] { });
     }
 
     @Test

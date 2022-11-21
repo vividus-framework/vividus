@@ -45,6 +45,7 @@ import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -55,10 +56,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
+import org.vividus.report.ui.ImageCompressor;
 import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.IWebDriverProvider;
@@ -78,10 +81,17 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
     @Mock private RunContext runContext;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private EventBus eventBus;
+    @Spy  private ImageCompressor imageCompressor;
     @InjectMocks private TestPublishingScreenshotOnFailureMonitor monitor;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(
             AbstractPublishingAttachmentOnFailureMonitor.class);
+
+    @BeforeEach
+    void beforeEach()
+    {
+        imageCompressor.setImageCompressionQuality(1f);
+    }
 
     @AfterEach
     void afterEach()
@@ -306,9 +316,9 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
     static class TestPublishingScreenshotOnFailureMonitor extends AbstractPublishingScreenshotOnFailureMonitor
     {
         TestPublishingScreenshotOnFailureMonitor(EventBus eventBus, RunContext runContext,
-                IWebDriverProvider webDriverProvider)
+                IWebDriverProvider webDriverProvider, ImageCompressor imageCompressor)
         {
-            super(eventBus, runContext, webDriverProvider);
+            super(eventBus, runContext, webDriverProvider, imageCompressor);
         }
 
         @Override

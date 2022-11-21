@@ -216,4 +216,9 @@
     <bean id="context-y-coordinate" class="org.vividus.ui.variable.SearchContextYCoordinateDynamicVariable"/>
     <bean id="source-code" class="org.vividus.ui.variable.SourceCodeDynamicVariable"/>
 
+    <bean class="org.vividus.report.ui.ImageCompressor" >
+        <property name="imageCompressionQuality" value="${ui.report.image-compression-quality}" />
+    </bean>
+
+    <bean id="freemarkerMethodCompressImage" class="org.vividus.report.ui.ImageBytesToBase64Method"  />
  </beans>

@@ -23,25 +23,30 @@ import java.util.Optional;
 import com.google.common.eventbus.EventBus;
 
 import org.vividus.context.RunContext;
+import org.vividus.report.ui.ImageCompressor;
 import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.Screenshot;
 
 public abstract class AbstractPublishingScreenshotOnFailureMonitor extends AbstractPublishingAttachmentOnFailureMonitor
 {
+    private final ImageCompressor imageCompressor;
+
     private List<String> debugModes;
 
     protected AbstractPublishingScreenshotOnFailureMonitor(EventBus eventBus, RunContext runContext,
-            IWebDriverProvider webDriverProvider)
+            IWebDriverProvider webDriverProvider, ImageCompressor imageCompressor)
     {
         super(runContext, webDriverProvider, eventBus, "noScreenshotOnFailure", "Unable to take a screenshot");
+        this.imageCompressor = imageCompressor;
     }
 
     @Override
     protected Optional<Attachment> createAttachment()
     {
         return takeScreenshot("Assertion_Failure")
-                .map(screenshot -> new Attachment(screenshot.getData(), screenshot.getFileName()));
+                .map(screenshot -> new Attachment(imageCompressor.compress(screenshot.getData()),
+                    screenshot.getFileName()));
     }
 
     @Override
