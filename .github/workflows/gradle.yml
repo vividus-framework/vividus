@@ -73,6 +73,10 @@ jobs:
         distribution: 'temurin'
         java-version: 16
 
+    - name: Warm up VIVIDUS test site
+      if: matrix.platform == 'ubuntu-latest'
+      run: curl https://vividus-test-site.onrender.com/ &
+
     - name: Build
       env:
         MATRIX_PLATFORM: ${{ matrix.platform }}
