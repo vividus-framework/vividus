@@ -7,6 +7,9 @@ updates:
     day: sunday
     time: "02:00"
   open-pull-requests-limit: 99
+  ignore:
+    - dependency-name: "spring-framework-bom"
+      update-types: ["version-update:semver-major"]
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
