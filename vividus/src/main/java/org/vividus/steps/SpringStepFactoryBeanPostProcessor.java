@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,11 @@ package org.vividus.steps;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -35,7 +39,15 @@ public class SpringStepFactoryBeanPostProcessor implements BeanPostProcessor, Ap
         if (bean instanceof SpringStepFactory)
         {
             List<String> stepBeanNames = BeanFactoryUtils.mergeLists(applicationContext, "stepBeanNames-");
-
+            String duplicateStepBeanNames = stepBeanNames.stream()
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                    .entrySet().stream()
+                    .filter(stepBeanNameCount -> stepBeanNameCount.getValue() > 1)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.joining(", "));
+            Validate.validState(duplicateStepBeanNames.isEmpty(),
+                    "Duplicate step beans names are found: %s. Please, consider renaming to avoid conflicts",
+                    duplicateStepBeanNames);
             ((SpringStepFactory) bean).setStepTypes(
                     stepBeanNames.stream().map(applicationContext::getType).collect(toList()));
         }
