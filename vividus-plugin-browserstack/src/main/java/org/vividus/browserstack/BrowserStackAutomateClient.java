@@ -36,7 +36,7 @@ import org.vividus.util.wait.Waiter;
 public class BrowserStackAutomateClient extends BrowserStackClient
 {
     private static final int DEFAULT_RETRY = 6;
-    private static final int DEFAULT_SECONDS = 90;
+    private static final int DEFAULT_SECONDS = 120;
 
     private final Waiter waiter = new DurationBasedWaiter(
             new WaitMode(Duration.ofSeconds(DEFAULT_SECONDS), DEFAULT_RETRY));
