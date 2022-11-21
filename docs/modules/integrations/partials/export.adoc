@@ -9,8 +9,11 @@ endif::[]
 * Go to the corresponding GitHub Packages {gh-packages-url}?version={current-version}[repository]
 * Find the link with name `{jar-link-name}`
 * Click the link and download the exporter JAR-file
-* Create a new file with name `application.properties` and put all necessary properties there
+* Create a new file with name `application.properties` in the same directory with the downloaded JAR-file
+* Put all custom properties to the created file
 * Run the following command replacing `<jar-file name>` with the name of the JAR-file downloaded previously
-```bash
++
+[source,shell]
+----
 java -jar <jar-file name> -Dspring.config.location=classpath:/application.properties,./application.properties
-```
+----
