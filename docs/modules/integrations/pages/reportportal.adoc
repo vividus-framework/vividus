@@ -7,7 +7,7 @@ https://reportportal.io/[ReportPortal] is a test automation analytics platform a
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'agent-reportportal', version: '{current-version}')
+implementation(group: 'org.vividus', name: 'vividus-agent-reportportal', version: '{current-version}')
 ----
 
 == Properties
