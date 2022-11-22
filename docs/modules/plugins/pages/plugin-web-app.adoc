@@ -1502,6 +1502,12 @@ Then `${logs}` matches `.*Application ready in \d+ seconds.*`
 
 === Wait for disappearance of an element with a tag
 
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0.
+The replacement is a <<_wait_for_element_disappearance,generic step waiting for element disappearance>>.
+====
+
 Waits for an element with the specified tag, attribute type and value disappearance.
 
 Actions performed by step:
@@ -1530,10 +1536,16 @@ When I wait until an element with the tag 'div' and attribute 'id'='delayed' dis
 
 === Wait for element disappearance with timeout
 
-Waits for element disappearance with desired timeout in seconds.
+Waits for element disappearance with desired timeout.
 
 NOTE: {disappearance-check-note}
 
+[source,gherkin]
+----
+Then element located by `$locator` disappears in `$timeout`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
 [source,gherkin]
 ----
 Then element located '$locator' disappears in '$timeout'

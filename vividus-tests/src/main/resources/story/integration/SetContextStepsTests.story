@@ -74,7 +74,7 @@ Then number of elements found by `By.xpath(html)` is equal to `1`
 Scenario: Should switch to first visible parent frame or main document if the current frame is closed
 Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
 When I click on element located by `id(modalButton)`
-When I wait until element located `id(modalWindow)` appears
+When I wait until element located by `id(modalWindow)` appears
 When I switch to frame located `id(firstFrame)`
 When I switch to frame located `id(secondFrame)`
 When I click on element located by `id(close)`

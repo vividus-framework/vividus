@@ -1,3 +1,58 @@
+=== Wait for element appearance
+
+Waits for appearance of the element by the locator.
+
+WARNING: It's forbidden to use <<_visibility_types>> in the locator.
+
+[source,gherkin]
+----
+When I wait until element by located `$locator` appears
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
+[source,gherkin]
+----
+When I wait until element located `$locator` appears
+----
+
+* `$locator` - <<_locator>>.
+
+.Wait for appearance of the element with the specified name
+[source,gherkin]
+----
+When I wait until element located by `name(welcome-image)` appears
+----
+
+
+=== Wait for element disappearance
+
+Waits for disappearance of the element by the locator.
+
+NOTE: If the element doesn't exist on the page/context, the step will immediately complete successfully.
+Checking the element on the page (if needed) should be done in a separate step (e.g. <<_wait_for_element_appearance>> or xref:plugin-html.adoc#_validate_elements[Validate elements]).
+
+WARNING: It's forbidden to use <<_visibility_types>> in the locator.
+
+[source,gherkin]
+----
+When I wait until element located by `$locator` disappears
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
+[source,gherkin]
+----
+When I wait until element located `$locator` disappears
+----
+
+* `$locator` - <<_locator>>.
+
+.Wait for disappearance of the element with the specified name
+[source,gherkin]
+----
+When I wait until element located by `name(welcome-image)` disappears
+----
+
+
 === Wait for expected elements number
 
 Waits for the expected number of elements located by locator.
@@ -72,49 +127,6 @@ Then number of $state elements found by `$locator` is $comparisonRule `$quantity
 [source,gherkin]
 ----
 Then number of VISIBLE elements found by `tagName(img)` is = `1`
-----
-
-
-=== Wait for element appearance
-
-Waits for appearance of an element by the locator.
-
-WARNING: It's forbidden to use <<_visibility_types>> in the locator.
-
-[source,gherkin]
-----
-When I wait until element located `$locator` appears
-----
-
-* `$locator` - <<_locator>>.
-
-.Wait for element appearance
-[source,gherkin]
-----
-When I wait until element located `name(welcome-image)` appears
-----
-
-
-=== Wait for element disappearance
-
-Waits for disappearance of an element by the locator.
-
-NOTE: If the element doesn't exist on the page/context, the step will immediately complete successfully.
-Checking the element on the page (if needed) should be done in a separate step (e.g. <<_wait_for_element_appearance>> or xref:plugin-html.adoc#_validate_elements[Validate elements]).
-
-WARNING: It's forbidden to use <<_visibility_types>> in the locator.
-
-[source,gherkin]
-----
-When I wait until element located `$locator` disappears
-----
-
-* `$locator` - <<_locator>>.
-
-.Wait for element disappearance
-[source,gherkin]
-----
-When I wait until element located `name(welcome-image)` disappears
 ----
 
 
@@ -280,6 +292,12 @@ The actions performed by the step:
 
 [source,gherkin]
 ----
+Then element located by `$locator` exists for `$duration` duration
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
+[source,gherkin]
+----
 Then element located `$locator` exists for `$duration` duration
 ----
 
@@ -289,7 +307,7 @@ Then element located `$locator` exists for `$duration` duration
 .The element should have existed for 5 second
 [source,gherkin]
 ----
-Then element located `By.id(banner)` exists for `PT5S` duration
+Then element located by `id(banner)` exists for `PT5S` duration
 ----
 
 

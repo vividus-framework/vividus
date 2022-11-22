@@ -66,7 +66,7 @@ public class GenericWaitSteps
      * or <b>INVISIBLE</b> exception will be thrown.
      * @param locator locator to locate element
      */
-    @When("I wait until element located `$locator` appears")
+    @When("I wait until element located by `$locator` appears")
     public void waitForElementAppearance(Locator locator)
     {
         waitForConditionValidatingVisibility(locator, expectedSearchActionsConditions::visibilityOfElement);
@@ -78,7 +78,7 @@ public class GenericWaitSteps
      * or <b>INVISIBLE</b> exception will be thrown.
      * @param locator locator to locate element
      */
-    @When("I wait until element located `$locator` disappears")
+    @When("I wait until element located by `$locator` disappears")
     public void waitForElementDisappearance(Locator locator)
     {
         waitForConditionValidatingVisibility(locator, expectedSearchActionsConditions::invisibilityOfElement);
@@ -147,7 +147,7 @@ public class GenericWaitSteps
      *                 <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>
      *                 format.
      */
-    @Then("element located `$locator` exists for `$duration` duration")
+    @Then("element located by `$locator` exists for `$duration` duration")
     public void doesElementByLocatorExistsForDuration(Locator locator, Duration duration)
     {
         String prettyPrintedDuration = formatDuration(duration);

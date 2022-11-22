@@ -1,0 +1,11 @@
+Composite: When I wait until element located `$locator` appears
+!-- WARNING: The step "When I wait until element located `$locator` appears" is deprecated and will be removed in VIVIDUS 0.6.0
+When I wait until element located by `<locator>` appears
+
+Composite: When I wait until element located `$locator` disappears
+!-- WARNING: The step "When I wait until element located `$locator` disappears" is deprecated and will be removed in VIVIDUS 0.6.0
+When I wait until element located by `<locator>` disappears
+
+Composite: Then element located `$locator` exists for `$duration` duration
+!-- WARNING: The step "Then element located `$locator` exists for `$duration` duration" is deprecated and will be removed in VIVIDUS 0.6.0
+Then element located by `<locator>` exists for `<duration>` duration

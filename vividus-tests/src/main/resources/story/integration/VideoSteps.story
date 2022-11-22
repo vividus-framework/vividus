@@ -13,13 +13,13 @@ When I switch to frame located `id(video)`
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
 Then `${details.currentTime}` is = `0`
 When I click on element located by `xpath(//button[@aria-label='Play'])`
-Then element located `<videoLocator>` exists for `PT1S` duration
+Then element located by `<videoLocator>` exists for `PT1S` duration
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
 Then `${details.currentTime}` is > `0`
 When I pause video in video player located `<videoLocator>`
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
 Given I initialize scenario variable `pausedTime` with value `${details.currentTime}`
-Then element located `<videoLocator>` exists for `PT1S` duration
+Then element located by `<videoLocator>` exists for `PT1S` duration
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
 Then `${details.currentTime}` is = `${pausedTime}`
 
@@ -33,7 +33,7 @@ Then `${rewindTime}` is > `${pausedTime}`
 
 Scenario: Verify steps: "When I play video in video player located `$locator`" and "When I save details of video player located `$locator` to $scopes variable `$variableName`"
 When I play video in video player located `<videoLocator>`
-Then element located `<videoLocator>` exists for `PT1S` duration
+Then element located by `<videoLocator>` exists for `PT1S` duration
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
 Then `${details.currentTime}` is > `${rewindTime}`
 Then `${details.duration}` is > `1000`
