@@ -333,12 +333,19 @@ public class ElementSteps implements ResourceLoaderAware
     }
 
     /**
+     * @deprecated Use steps: "When I click on element located by `$locator`" and
+     * "When I find $comparisonRule `$number` elements by `$locator` and for each element do$stepsToExecute".
+     *
      * Clicks on <b>elements</b> located by <b>locator</b>
      * @param locator to locate elements
      */
+    @Deprecated(since = "0.5.1", forRemoval = true)
     @When("I click on all elements located `$locator`")
     public void clickOnAllElements(Locator locator)
     {
+        LOGGER.warn("The step: \"When I click on all elements located `$locator`\" is deprecated and will be removed "
+                + "in VIVIDUS 0.6.0. Use steps: \"When I click on element located by `$locator\" and \"When "
+                + "I find $comparisonRule `$number` elements by `$locator` and for each element do$stepsToExecute\"");
         baseValidations.assertIfElementsExist("The elements to click", locator).forEach(mouseActions::click);
     }
 
