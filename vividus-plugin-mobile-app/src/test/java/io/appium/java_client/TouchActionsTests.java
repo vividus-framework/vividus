@@ -302,7 +302,7 @@ class TouchActionsTests
     void shouldPerformVerticalSwipe()
     {
         mockPerformsTouchActions();
-        touchActions.performVerticalSwipe(640, 160, SWIPE_AREA, DURATION);
+        touchActions.performSwipe(SwipeDirection.UP, 640, 160, SWIPE_AREA, DURATION);
         verifySwipe(1);
     }
 

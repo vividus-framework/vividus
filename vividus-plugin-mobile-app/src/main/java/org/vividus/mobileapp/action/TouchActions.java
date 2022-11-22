@@ -245,17 +245,22 @@ public class TouchActions
     }
 
     /**
-     * Performs vertical swipe from <b>startY</b> to <b>endY</b> with <b>swipeDuration</b>
+     * Performs vertical or horizontal swipe from <b>start</b> to <b>end</b> coordinate with <b>swipeDuration</b>
      *
-     * @param startY        start Y coordinate
-     * @param endY          end Y coordinate
-     * @param swipeArea     the area to execute the swipe
-     * @param swipeDuration swipe duration in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
+     * @param startCoordinate   start Y coordinate for the vertical direction or
+     *                          start X coordinate for the horizontal direction
+     * @param endCoordinate     end Y coordinate for the vertical direction or
+     *                          end X coordinate for the horizontal direction
+     * @param swipeArea         the area to execute the swipe
+     * @param direction         direction to swipe, either <b>UP</b> or <b>DOWN</b> or <b>LEFT</b> or <b>RIGHT</b>
+     * @param swipeDuration     swipe duration in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> format
      */
-    public void performVerticalSwipe(int startY, int endY, Rectangle swipeArea, Duration swipeDuration)
+    public void performSwipe(SwipeDirection direction, int startCoordinate, int endCoordinate, Rectangle swipeArea,
+            Duration swipeDuration)
     {
-        swipe(SwipeDirection.createCoordinates(startY, endY, swipeArea.getWidth(),
-                mobileApplicationConfiguration.getSwipeVerticalXPosition(), swipeArea.getPoint()), swipeDuration);
+        SwipeCoordinates coordinates = direction.createCoordinates(startCoordinate, endCoordinate,
+                mobileApplicationConfiguration, swipeArea);
+        swipe(coordinates, swipeDuration);
     }
 
     private void swipe(SwipeCoordinates coordinates, Duration swipeDuration)
