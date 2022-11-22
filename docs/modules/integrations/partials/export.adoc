@@ -11,7 +11,7 @@ endif::[]
 * Click the link and download the exporter JAR-file
 * Create a new file with name `application.properties` in the same directory with the downloaded JAR-file
 * Put all custom properties to the created file
-* Run the following command replacing `<jar-file name>` with the name of the JAR-file downloaded previously
+* Run the following command from the directory where the JAR-file has been downloaded, make sure to replace `<jar-file name>` placeholder with the actual name (not path) of the JAR-file including its extension
 +
 [source,shell]
 ----
