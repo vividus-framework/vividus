@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ public class HashExpressionProcessorTests
             // CHECKSTYLE:OFF
             "'calculateHash(SHA-1, a_tylmarande@gmail.com)', 025623becec96e8be6b88a7db6e0dc97fa0033ba",
             "'calculateHash(Sha-256, a_tylmarande@gmail.com)', b4e73a7c815bb0eff534ba8ef5f7dbfe9d4f51f449cd9b2ba87fc57ee9de5fc7",
+            "'calculateHash(SHA256, reg,exp,works)', 1ce5cd2ea218c8d28748216c4a7c9bb51fc4d8c4fafd8d91d4edb8b1f9bd06a4",
             "'calculateHash(md2, a_tylmarande@gmail.com)', 69ccf551ef37e2cf0181c97fcb7db030",
             "'calculateHash(MD5, a_tylmarande@gmail.com)', 7b2378863e837c51c83bb04e66a5876d",
             "'calculateHash(SHA-384, a_tylmarande@gmail.com)', 397bf1d877dead00a0e91cf27a2b561eff0736fbc05640580c2e541a42f99a61cc7bdd4f3fdc6c1ef7a614e6cac06415",

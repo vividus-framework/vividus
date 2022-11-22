@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,11 @@ class ReplaceByRegExpProcessorTests
         // CHECKSTYLE:OFF
         return Stream.of(
             of("replaceFirstByRegExp(.+=(\\d), $1.0, onePlusTwo=3)",                                Optional.of("3.0")),
+            of("replaceFirstByRegExp(\\s, \"\"\",\"\"\", string with comma)",                       Optional.of("string,with comma")),
             of("formatDate()",                                                                      Optional.empty()),
             of("replaceFirstByRegExp(\"\"\".*three, (\\d)\"\"\", $1.0, \"\"\"two, three, 4\"\"\")", Optional.of("4.0")),
             of("replaceAllByRegExp(\\s, _, string with spaces)",                                    Optional.of("string_with_spaces")),
+            of("replaceAllByRegExp(\\s, \"\"\",\"\"\", string with commas)",                        Optional.of("string,with,commas")),
             of("replaceAllByRegExp(test, TEST, this\nis\ntest\nvalue)",                             Optional.of("this\nis\nTEST\nvalue")),
             of("replaceAllByRegExp(.test, TEST, this\nis\ntest\nvalue)",                            Optional.of("this\nisTEST\nvalue")),
             of("replaceFirstByRegExp(.*(te[a-z]+).*, $1, this\nis\ntest\nvalue)",                   Optional.of("test"))
