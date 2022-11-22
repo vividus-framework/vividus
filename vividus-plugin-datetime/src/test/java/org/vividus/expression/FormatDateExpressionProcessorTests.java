@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ class FormatDateExpressionProcessorTests
             Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss)",                      "2017-01-10T13:04:20"),
             Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX)",               INPUT_DATE),
             Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd)",                                 "2017-01-10"),
+            Arguments.of("formatDate(" + INPUT_DATE + ", yyyy\\,MM\\,dd)",                             "2017,01,10"),
             Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ssXXX)",                   "2017-01-10T13:04:20Z"),
             Arguments.of("formatDate(" + INPUT_DATE_NOT_ZERO_TIMEZONE + ", yyyy-MM-dd'T'HH:mm:ssXXX)", "2017-01-10T08:04:20-05:00"),
             Arguments.of("formatDate(2017-01-10T13:04:20Z, yyyy-MM-dd'T'HH:mmXXX)",                    "2017-01-10T13:04Z"),
@@ -68,6 +69,7 @@ class FormatDateExpressionProcessorTests
             Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX, -05:00)",                   INPUT_DATE_NOT_ZERO_TIMEZONE),
             Arguments.of("formatDate(" + INPUT_DATE_NOT_ZERO_TIMEZONE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX, GMT)",    "2017-01-10T13:04:20.677Z"),
             Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX, America/New_York)",         "2017-01-10T08:04:20.677-05:00"),
+            Arguments.of("formatDate(" + INPUT_DATE + ", yyyy\\,MM\\,dd'T'HH:mm:ss.SSSXXX, America/New_York)",     "2017,01,10T08:04:20.677-05:00"),
             Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX,  -05:00)",                  INPUT_DATE_NOT_ZERO_TIMEZONE),
             Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX,-05:00)",                    INPUT_DATE_NOT_ZERO_TIMEZONE),
             Arguments.of("formatDate(1994-11-05T08:15:30, yyyy-MM-dd'T'HH:mm:ss.SSSXXX, -05:00)",                  "1994-11-05T03:15:30.000-05:00")

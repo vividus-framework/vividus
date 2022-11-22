@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,10 @@ import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
-import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.DateUtils;
 
 @Named
-public class FormatDateToExpressionProcessor extends AbstractExpressionProcessor<String>
+public class FormatDateToExpressionProcessor extends AbstractExpressionProcessor<String> implements NormalizingArguments
 {
     private static final Pattern FORMAT_TO_PATTERN = Pattern
             .compile("^formatDateTo\\((.+?),(?<!\\\\,)(.+?),(?<!\\\\,)(.+?)\\)$", Pattern.CASE_INSENSITIVE);
@@ -54,10 +53,5 @@ public class FormatDateToExpressionProcessor extends AbstractExpressionProcessor
         DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(
                 normalize(expressionMatcher.group(NEW_FORMAT_GROUP)), Locale.ENGLISH);
         return outputFormatter.format(zonedDate);
-    }
-
-    private String normalize(String argument)
-    {
-        return StringUtils.replace(argument.trim(), "\\,", ",");
     }
 }

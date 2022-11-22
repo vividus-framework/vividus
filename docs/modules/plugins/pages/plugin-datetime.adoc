@@ -21,6 +21,8 @@ There are no required properties for the plugin.
 
 NOTE: The expression parameters marked with *bold* are mandatory.
 
+TIP: If argument allows meaningful commas (like, parts of the date format pattern) should be escaped using `\`. Refer to examples for each expression.
+
 === `generateDate`
 
 Generates the date using current date as a baseline.
@@ -95,6 +97,10 @@ Let's imagine the current date is `2020-11-23` and the time is `00:10:01`. Here 
 |20-11-24
 |Current date +1 day with the custom output format
 
+|`#{generateDate(P2D, yyyy\\,MM\\,dd)}`
+|2020,11,25
+|Current date +2 day with the custom output format
+
 |`#{generateDate(P, yyyy-MM-dd\'T\'HH:mm:ssZ)}`
 |2020-11-23T00:10:01+0300
 |Current date with the custom output format including time zone offset
@@ -111,7 +117,7 @@ Formats the input date to another format. Additionally, time zone can be changed
 ----
 
 * *`$inputDate`* - the date to be formatted, it should be presented in the {iso-date-format-link} format
-* *`$outputFormat`* - the outut format based on {java-date-time-formatter-link}
+* *`$outputFormat`* - the output format based on {java-date-time-formatter-link}
 * `$outputTimeZone` - the time zone for the output result
 
 [cols="2,>1", options="header"]
@@ -140,6 +146,9 @@ Formats the input date to another format. Additionally, time zone can be changed
 
 |`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd)}`
 |2017-01-13
+
+|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy\\,MM\\,dd)}`
+|2017,01,13
 
 |`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss.SSSZ, -05:00)}`
 |2017-01-13T04:00:42.862-0500
@@ -174,8 +183,6 @@ Formats the input date to the desired format. The format of the input date shoul
 * *`$inputFormat`* - the input date format based on {java-date-time-formatter-link}
 * `$outputFormat` - the output date format based on {java-date-time-formatter-link}
 
-TIP: Since parameters of the expression comma-separated, meaningful commas (like, parts of the date format pattern) should be escaped using `\`.
-
 [cols="3,1", options="header"]
 .Examples of the expressions formatting dates with the custom input format
 |===
@@ -202,8 +209,6 @@ Shifts the given input date for a given period in any direction (+/-).
 * *`$inputDate`* - the date to be shifted, it can be in any format but this format should be described in the second parameter
 * *`$inputFormat`* - the input date format based on {java-date-time-formatter-link}
 * *`$period`* -  the period by which the date will be shifted, it should be written in {iso-date-format-link}
-
-TIP: Since parameters of the expression comma-separated, meaningful commas (like, parts of the date format pattern) should be escaped using `\`.
 
 [cols="3,>1", options="header"]
 .Examples of the expressions shifting dates
@@ -236,8 +241,6 @@ Calculates the difference between two dates with given formats and returns resul
 * *`$inputDate1Format`* - the first input date format based on {java-date-time-formatter-link}
 * *`$inputDate2`* - the second input date, it can be in any format but this format should be described in the second parameter
 * *`$inputDate2Format`* - the second input date format based on {java-date-time-formatter-link}
-
-TIP: Since parameters of the expression comma-separated, meaningful commas (like, parts of the date format pattern) should be escaped using `\`.
 
 [cols="3,>1", options="header"]
 .Examples of the expressions calculating dates difference

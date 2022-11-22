@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ class DiffDateExpressionProcessorTests
             Arguments.of("diffDate(10042019 13:20:43 GMT,             ddMMyyyy HH:mm:ss zzz,       10042019 06:22:43 US/Pacific, ddMMyyyy HH:mm:ss zzz)",                "PT2M"               ),
             Arguments.of("diffDate(\"10 Apr 2019 13:20:43\",          \"dd MMM yyyy HH:mm:ss\",    10 Apr 2019 09:20:43,         dd MMM yyyy HH:mm:ss)",                 "-PT4H"              ),
             Arguments.of("diffDate(Wed\\, 10 Apr\\, 2019\\, 13,EEE\\, dd MMM\\, yyyy\\, HH,        2019-04-10 03,                yyyy-MM-dd HH)",                        "-PT10H"             ),
+            Arguments.of("diffDate(Wed\\, 10 Apr\\, 2019\\, 13,EEE\\, dd MMM\\, yyyy\\, HH,        2019\\,04\\,10 03,            yyyy\\,MM\\,dd HH)",                    "-PT10H"             ),
             Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, days)",    "365"                ),
             Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, Hours)",   "8760"               ),
             Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, mInuteS)", "525600"             ),

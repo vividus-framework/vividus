@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,11 @@ import javax.inject.Named;
 import org.vividus.util.DateUtils;
 
 @Named
-public class FormatDateExpressionProcessor extends AbstractExpressionProcessor<String>
+public class FormatDateExpressionProcessor extends AbstractExpressionProcessor<String> implements NormalizingArguments
 {
     private static final Pattern FORMAT_PATTERN = Pattern
-            .compile("^formatDate\\(([^,]*),\\s*([^,]*)(?:,\\s*(.*))?\\)$", Pattern.CASE_INSENSITIVE);
+            .compile("^formatDate\\(([^,]*),\\s*([\\w+\\\\,]*(?<!\\\\,)[^,]*)(?:,\\s*(.*))?\\)$",
+                    Pattern.CASE_INSENSITIVE);
     private static final int INPUT_DATE_GROUP = 1;
     private static final int OUTPUT_FORMAT_GROUP = 2;
     private static final int OUTPUT_TIMEZONE_GROUP = 3;
@@ -49,7 +50,7 @@ public class FormatDateExpressionProcessor extends AbstractExpressionProcessor<S
     {
         ZonedDateTime zonedDate = dateUtils.parseDateTime(expressionMatcher.group(INPUT_DATE_GROUP),
                 ISO_STANDARD_FORMAT);
-        String outputFormat = expressionMatcher.group(OUTPUT_FORMAT_GROUP);
+        String outputFormat = normalize(expressionMatcher.group(OUTPUT_FORMAT_GROUP));
         DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(outputFormat);
         String outputTimeZone = expressionMatcher.group(OUTPUT_TIMEZONE_GROUP);
         if (outputTimeZone != null)
