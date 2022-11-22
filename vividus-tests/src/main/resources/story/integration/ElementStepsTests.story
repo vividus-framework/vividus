@@ -7,10 +7,10 @@ Scenario: Step verification Then number of elements found by `$locator` is $comp
 Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
 Then number of elements found by `id(element-to-hide)` is equal to `1`
 When I click on element located by `id(button-hide)`
-When I wait until element located `id(element-to-hide)` disappears
+When I wait until element located by `id(element-to-hide)` disappears
 Then number of elements found by `id(element-to-hide)` is equal to `0`
 
-Scenario: Deprecated step verification When I click on element located `$locator`
+Scenario: Deprecated steps verification: "When I click on element located `$locator`" and "When I wait until element located `$locator` disappears"
 !-- Deprecated
 Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
 Then number of elements found by `id(element-to-hide)` is equal to `1`
@@ -155,13 +155,13 @@ Scenario: Step verification When I click on an element with the attribute '$attr
 Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
 Then number of elements found by `id(element-to-hide)` is equal to `1`
 When I click on an element with the attribute 'id'='button-hide'
-When I wait until element located `id(element-to-hide)` disappears
+When I wait until element located by `id(element-to-hide)` disappears
 
 Scenario: Step verification When I click on an element with the text '$text'
 Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
 Then number of elements found by `id(element-to-hide)` is equal to `1`
 When I click on an element with the text 'hide'
-When I wait until element located `id(element-to-hide)` disappears
+When I wait until element located by `id(element-to-hide)` disappears
 
 Scenario: Step verification When I click on all elements by xpath '$xpath'
 Given I am on a page with the URL '${vividus-test-site-url}/checkboxes.html'
@@ -173,7 +173,7 @@ Scenario: Step verification When I click on an element by the xpath '$xpath'
 Given I am on a page with the URL '${vividus-test-site-url}/elementState.html'
 Then number of elements found by `id(element-to-hide)` is equal to `1`
 When I click on an element by the xpath './/button[@id="button-hide"]'
-When I wait until element located `id(element-to-hide)` disappears
+When I wait until element located by `id(element-to-hide)` disappears
 
 Scenario: Step verification When I hover a mouse over an element with the xpath '$xpath'
 Given I am on a page with the URL '${vividus-test-site-url}/mouseEvents.html'

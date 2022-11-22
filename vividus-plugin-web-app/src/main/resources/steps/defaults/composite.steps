@@ -212,33 +212,61 @@ Composite: Then a button with the tooltip '$tooltip' and image with the src '$im
 Then number of elements found by `By.xpath(.//button[./img[@src='<imageSrc>'] and @title='<tooltip>'])` is equal to `1`
 
 Composite: When I wait until an element with the text '$text' appears
-When I wait until element located `By.caseSensitiveText(<text>)` appears
+!-- WARNING: The step "When I wait until an element with the text '$text' appears" is deprecated and will be removed in VIVIDUS 0.6.0
+When I wait until element located by `caseSensitiveText(<text>)` appears
 
 Composite: When I wait until an element with the text '$text' disappears
-When I wait until element located `By.caseSensitiveText(<text>)` disappears
+!-- WARNING: The step "When I wait until an element with the text '$text' disappears" is deprecated and will be removed in VIVIDUS 0.6.0
+When I wait until element located by `caseSensitiveText(<text>)` disappears
 
 Composite: When I wait until an element with the name '$elementName' disappears
-When I wait until element located `By.elementName(<elementName>)` disappears
+!-- WARNING: The step "When I wait until an element with the name '$elementName' disappears" is deprecated and will be removed in VIVIDUS 0.6.0
+When I wait until element located by `elementName(<elementName>)` disappears
 
 Composite: When I wait until an element with the name '$elementName' appears
-When I wait until element located `By.elementName(<elementName>)` appears
+!-- WARNING: The step "When I wait until an element with the name '$elementName' appears" is deprecated and will be removed in VIVIDUS 0.6.0
+When I wait until element located by `elementName(<elementName>)` appears
 
 Composite: When I wait until an element with the xpath '$xpath' appears
 !-- WARNING: The step "When I wait until an element with the xpath '$xpath' appears" is deprecated and will be removed in VIVIDUS 0.6.0
-When I wait until element located `By.xpath(<xpath>)` appears
+When I wait until element located by `xpath(<xpath>)` appears
 
 Composite: When I wait until an element with the xpath '$xpath' disappeares
 !-- WARNING: The step "When I wait until an element with the xpath '$xpath' disappeares" is deprecated and will be removed in VIVIDUS 0.6.0
-When I wait until element located `By.xpath(<xpath>)` disappears
+When I wait until element located by `xpath(<xpath>)` disappears
 
 Composite: When I wait until the state of an element with the name '$elementName' becomes [$state]
-When I wait until state of element located `By.elementName(<elementName>)` is $state
+!-- WARNING: The step "When I wait until the state of an element with the name '$elementName' becomes [$state]" is deprecated and will be removed in VIVIDUS 0.6.0
+When I wait until state of element located by `elementName(<elementName>)` is <state>
 
 Composite: When I wait until an element with the name '$elementName' is stale
-When I wait until element located `By.elementName(<elementName>)` is stale
+!-- WARNING: The step "When I wait until an element with the name '$elementName' is stale" is deprecated and will be removed in VIVIDUS 0.6.0
+When I wait until element located by `elementName(<elementName>)` is stale
 
 Composite: When I wait until an element with the name '$elementName' contains the text '$text'
-When I wait until element located `By.elementName(<elementName>)` contains text '$text'
+!-- WARNING: The step "When I wait until an element with the name '$elementName' contains the text '$text'" is deprecated and will be removed in VIVIDUS 0.6.0
+When I wait until element located by `elementName(<elementName>)` contains text `<text>`
 
 Composite: Then an element with the name '$elementName' disappears in '$timeout' seconds
-Then element located `By.elementName(<elementName>)` disappears in '$timeout'
+!-- WARNING: The step "Then an element with the name '$elementName' disappears in '$timeout' seconds" is deprecated and will be removed in VIVIDUS 0.6.0
+Then element located by `elementName(<elementName>)` disappears in `<timeout>`
+
+Composite: When I wait `$duration` with `$pollingDuration` polling until element located `$locator` becomes $state
+!-- WARNING: The step "When I wait `$duration` with `$pollingDuration` polling until element located `$locator` becomes $state" is deprecated and will be removed in VIVIDUS 0.6.0
+When I wait `<duration>` with `<pollingDuration>` polling until element located by `<locator>` becomes <state>
+
+Composite: When I wait until state of element located `$locator` is $state
+!-- WARNING: The step "When I wait until state of element located `$locator` is $state" is deprecated and will be removed in VIVIDUS 0.6.0
+When I wait until state of element located by `<locator>` is <state>
+
+Composite: When I wait until element located `$locator` is stale
+!-- WARNING: The step "When I wait until element located `$locator` is stale" is deprecated and will be removed in VIVIDUS 0.6.0
+When I wait until element located by `<locator>` is stale
+
+Composite: When I wait until element located `$locator` contains text '$text'
+!-- WARNING: The step "When I wait until element located `$locator` contains text '$text'" is deprecated and will be removed in VIVIDUS 0.6.0
+When I wait until element located by `<locator>` contains text `<text>'
+
+Composite: Then element located '$locator' disappears in '$timeout'
+!-- WARNING: The step "Then element located '$locator' disappears in '$timeout'" is deprecated and will be removed in VIVIDUS 0.6.0
+Then element located by `<locator>` disappears in `<timeout>`

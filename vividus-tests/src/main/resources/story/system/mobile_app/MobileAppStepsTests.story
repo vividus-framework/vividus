@@ -25,7 +25,7 @@ When I tap on element located by `accessibilityId(menuToggler)`
 !-- Deprecated, replace with "When I tap on element located by `$locator`" after removal
 When I tap on element located `xpath(<menuInputXpath>)`
 When I reinstall mobile application with bundle identifier `${main-app}`
-When I wait until element located `xpath(<textElementXpath>)->filter.text(Home)` appears
+When I wait until element located by `xpath(<textElementXpath>)->filter.text(Home)` appears
 
 
 Scenario: Validate coordinate/size dynamic variables, page source dynamic variable
@@ -43,13 +43,13 @@ Then number of elements found by `xpath(<textElementXpath>)->filter.text(Home)` 
 When I press Home key
 Then number of elements found by `xpath(<textElementXpath>)->filter.text(Home)` is equal to `0`
 When I activate application with bundle identifier `${main-app}`
-When I wait until element located `xpath(<textElementXpath>)->filter.textPart(om)` appears
+When I wait until element located by `xpath(<textElementXpath>)->filter.textPart(om)` appears
 When I press keys:
 |key |
 |Home|
 Then number of elements found by `xpath(<textElementXpath>)->filter.text(Home)` is equal to `0`
 When I activate application with bundle identifier `${main-app}`
-When I wait until element located `xpath(<textElementXpath>)->filter.textPart(om)` appears
+When I wait until element located by `xpath(<textElementXpath>)->filter.textPart(om)` appears
 
 
 Scenario: [Android] Verify step: 'When I change Appium session settings:$settings' and Id Locator
@@ -191,7 +191,7 @@ When I tap on element located by `accessibilityId(Return)`
 Then number of elements found by `<keyboardLocator>` is equal to `0`
 
 
-Scenario: Verify step: 'When I wait until element located `$locator` disappears'
+Scenario: Verify deprecated step: 'When I wait until element located `$locator` disappears'
 When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `xpath(<menuWaitXpath>)`
 Then number of elements found by `accessibilityId(picture)` is equal to `1`
@@ -200,7 +200,7 @@ When I wait until element located `accessibilityId(picture)` disappears
 Then number of elements found by `accessibilityId(picture)` is equal to `0`
 
 
-Scenario: Verify step: 'When I wait until element located `$locator` appears'
+Scenario: Verify deprecated step: 'When I wait until element located `$locator` appears'
 Then number of elements found by `accessibilityId(picture)` is equal to `0`
 When I tap on element located by `accessibilityId(showPicture)`
 When I wait until element located `accessibilityId(picture)` appears
@@ -228,7 +228,7 @@ When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `xpath(//android.widget.TextView[@text='Image'])`
 When I upload file `/data/mobile-upload-image.png` to device
 When I tap on element located by `accessibilityId(selectImage)`
-When I wait until element located `xpath(//android.widget.TextView[@text='Pictures'])` appears
+When I wait until element located by `xpath(//android.widget.TextView[@text='Pictures'])` appears
 When I tap on element located by `xpath(//android.widget.TextView[@text='Pictures'])`
 When I tap on element located by `xpath((//android.view.ViewGroup[contains(@content-desc, "Photo taken")])[1])`
 Then number of elements found by `xpath(//android.widget.TextView[@text='228x228'])` is equal to `1`
@@ -241,7 +241,7 @@ When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `iosClassChain(**/XCUIElementTypeButton[$name == "Image"$])`
 When I upload file `/data/mobile-upload-image.png` to device
 When I tap on element located `iosNsPredicate(name == 'selectImage')`
-When I wait until element located `accessibilityId(Photos)` appears
+When I wait until element located by `accessibilityId(Photos)` appears
 When I tap on element located by `xpath((//XCUIElementTypeImage[contains(@name, "Photo")])[1])`
 Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` is equal to `1`
 
@@ -251,7 +251,7 @@ Meta:
     @targetPlatform android
 When I delete file `/sdcard/Pictures/mobile-upload-image.png` from device
 When I tap on element located by `accessibilityId(selectImage)`
-When I wait until element located `xpath(//android.widget.TextView[@text='Pictures'])` disappears
+When I wait until element located by `xpath(//android.widget.TextView[@text='Pictures'])` disappears
 
 
 Scenario: [iOS] Verify step: 'When I delete file `$filePath` from device'
@@ -264,18 +264,18 @@ When I delete file `/Media/DCIM/100APPLE/IMG_0001.JPG` from device
 
 Scenario: Verify step: 'When I activate application with bundle identifier `$bundleId`'
 When I activate application with bundle identifier `${browser-app}`
-When I wait until element located `accessibilityId(menuToggler)` disappears
+When I wait until element located by `accessibilityId(menuToggler)` disappears
 When I activate application with bundle identifier `${main-app}`
-When I wait until element located `accessibilityId(menuToggler)` appears
+When I wait until element located by `accessibilityId(menuToggler)` appears
 
 
 Scenario: Verify step: 'When I terminate application with bundle identifier `$bundleId`'
 Meta:
     @requirementId 2073
 When I terminate application with bundle identifier `${main-app}`
-When I wait until element located `accessibilityId(menuToggler)` disappears
+When I wait until element located by `accessibilityId(menuToggler)` disappears
 When I activate application with bundle identifier `${main-app}`
-When I wait until element located `accessibilityId(menuToggler)` appears
+When I wait until element located by `accessibilityId(menuToggler)` appears
 
 
 Scenario: Verify step: 'When I send mobile application to background for `$period` period'
@@ -309,7 +309,7 @@ Meta:
     @targetPlatform android
 When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `xpath(//android.widget.TextView[@text='Web View'])`
-When I wait until element located `xpath(//android.webkit.WebView[@focusable='true'])` appears
+When I wait until element located by `xpath(//android.webkit.WebView[@focusable='true'])` appears
 When I switch to web view with name that contains `vividustestapp`
 Then number of elements found by `xpath(//*[@id='welcome-message'])` is equal to `1`
 When I switch to native context
@@ -377,7 +377,7 @@ Meta:
     @requirementId 2112
 When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `xpath(<menuQrCodeXpath>)`
-When I wait until element located `xpath(<scrollableMenuXpath>)` disappears
+When I wait until element located by `xpath(<scrollableMenuXpath>)` disappears
 When I scan barcode from screen and save result to scenario variable `qrCodeLink`
 Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
 
@@ -393,7 +393,7 @@ Scenario: Go to slider screen
 When I tap on element located by `accessibilityId(menuToggler)`
 When I swipe UP to element located by `xpath(<menuSliderXpath>)` with duration PT1S
 When I tap on element located by `xpath(<menuSliderXpath>)`
-When I wait until element located `accessibilityId(zeroToHundredSlider)` appears
+When I wait until element located by `accessibilityId(zeroToHundredSlider)` appears
 
 
 Scenario: Verify steps: "When I set value of Android slider located `$locator` to `$number`"
@@ -433,22 +433,22 @@ Examples:
 Scenario: Verify step: 'When I long press $key key'
 Meta:
     @targetPlatform android
-When I wait until element located `accessibilityId(menuToggler)` appears
+When I wait until element located by `accessibilityId(menuToggler)` appears
 When I long press HOME key
-When I wait until element located `accessibilityId(menuToggler)` disappears
+When I wait until element located by `accessibilityId(menuToggler)` disappears
 When I activate application with bundle identifier `${main-app}`
-When I wait until element located `accessibilityId(menuToggler)` appears
+When I wait until element located by `accessibilityId(menuToggler)` appears
 
 
 Scenario: Verify step: 'When I long press $key key'
 Meta:
     @targetPlatform ios
     @requirementId 2087
-When I wait until element located `accessibilityId(menuToggler)` appears
+When I wait until element located by `accessibilityId(menuToggler)` appears
 When I long press home key
-When I wait until element located `accessibilityId(menuToggler)` disappears
+When I wait until element located by `accessibilityId(menuToggler)` disappears
 When I activate application with bundle identifier `${main-app}`
-When I wait until element located `accessibilityId(menuToggler)` appears
+When I wait until element located by `accessibilityId(menuToggler)` appears
 
 Scenario: Verify step: 'When I change device screen orientation to $orientation'
 When I save `${size-attribute}` attribute value of element located `accessibilityId(menuToggler)` to scenario variable `portraitSize`

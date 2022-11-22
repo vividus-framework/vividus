@@ -14,5 +14,5 @@ Examples:
 
 
 Scenario: Validate application start
-When I wait until element located `accessibilityId(test-Username)` appears
+When I wait until element located by `accessibilityId(test-Username)` appears
 When I take screenshot
