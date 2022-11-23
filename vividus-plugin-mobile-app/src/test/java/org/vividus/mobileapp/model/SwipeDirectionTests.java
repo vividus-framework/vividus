@@ -46,7 +46,7 @@ class SwipeDirectionTests
         Rectangle swipeArea = new Rectangle(point, dimension);
         MobileApplicationConfiguration configuration = mock(MobileApplicationConfiguration.class);
         when(configuration.getSwipeVerticalXPosition()).thenReturn(xPercentage);
-        SwipeCoordinates coordinates = direction.calculateCoordinates(swipeArea, configuration);
+        MoveCoordinates coordinates = direction.calculateCoordinates(swipeArea, configuration);
 
         assertPoint(coordinates.getStart(), x, fromY);
         assertPoint(coordinates.getEnd(), x, toY);
@@ -69,7 +69,7 @@ class SwipeDirectionTests
         Rectangle swipeArea = new Rectangle(point, dimension);
         MobileApplicationConfiguration configuration = mock(MobileApplicationConfiguration.class);
         when(configuration.getSwipeHorizontalYPosition()).thenReturn(yPercentage);
-        SwipeCoordinates coordinates = direction.calculateCoordinates(swipeArea, configuration);
+        MoveCoordinates coordinates = direction.calculateCoordinates(swipeArea, configuration);
 
         assertPoint(coordinates.getStart(), fromX, y);
         assertPoint(coordinates.getEnd(), toX, y);

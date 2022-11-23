@@ -838,6 +838,46 @@ Then number of elements found by `accessibilityId(slide 2)` is equal to `1`
 ----
 
 
+=== Zoom in/out
+
+Performs zoom in/out
+
+[.float-group]
+--
+[.left]
+.Zoom in
+====
+image::zoom_in.png[width=300]
+====
+
+[.left]
+.Zoom out
+====
+image::zoom_out.png[width=300]
+====
+--
+
+[NOTE]
+The step takes into account the current context. If you need to perform zoom on
+the element, you need to switch the context to this element.
+
+[source,gherkin]
+----
+When I zoom $zoomType context
+----
+
+* `$zoomType` - The type of zoom: `IN` or `OUT`
+
+.Zoom in/out
+[source,gherkin]
+----
+When I zoom in context
+When I wait until element located by `xpath(<welcomeMessageXpath>)` disappears
+When I zoom out context
+When I wait until element located by `xpath(<welcomeMessageXpath>)` appears
+----
+
+
 === Select date in date picker
 
 Selects a next or previous picker wheel value in date picker

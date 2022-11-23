@@ -7,6 +7,7 @@
 |menuWaitXpath              |//XCUIElementTypeButton[@name="Wait"]                           |
 |menuScrollViewXpath        |//XCUIElementTypeButton[@name="Scroll View"]                    |
 |menuSliderXpath            |//XCUIElementTypeButton[@name="Slider"]                         |
+|menuWebViewXpath           |//XCUIElementTypeButton[@name="Web View"]                       |
 |nameInputXpath             |//XCUIElementTypeTextField[@value='Enter your name...']         |
 |action                     |COMPARE_AGAINST                                                 |
 |scrollViewXpath            |//XCUIElementTypeScrollView                                     |
@@ -18,3 +19,4 @@
 |qrCodeContainerXpath       |//XCUIElementTypeOther[@name='RNE__Image__children__container'] |
 |firstItemAccessibilityId   |Item 1                                                          |
 |secondItemAccessibilityId  |Item 2                                                          |
+|welcomeMessageXpath        |//XCUIElementTypeOther[@name="Hello world"]                     |

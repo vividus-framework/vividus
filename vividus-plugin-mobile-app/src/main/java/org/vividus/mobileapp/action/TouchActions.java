@@ -24,6 +24,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -37,10 +38,15 @@ import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Interactive;
+import org.openqa.selenium.interactions.PointerInput;
+import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.vividus.mobileapp.configuration.MobileApplicationConfiguration;
-import org.vividus.mobileapp.model.SwipeCoordinates;
+import org.vividus.mobileapp.model.MoveCoordinates;
 import org.vividus.mobileapp.model.SwipeDirection;
+import org.vividus.mobileapp.model.ZoomCoordinates;
+import org.vividus.mobileapp.model.ZoomType;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverUtils;
 import org.vividus.selenium.manager.GenericWebDriverManager;
@@ -57,6 +63,7 @@ import pazone.ashot.util.ImageTool;
 public class TouchActions
 {
     private static final int HEIGHT_DIVIDER = 3;
+    private static final int MOVE_FINGER_DURATION_MS = 200;
 
     private final IWebDriverProvider webDriverProvider;
     private final GenericWebDriverManager genericWebDriverManager;
@@ -194,7 +201,7 @@ public class TouchActions
                      Duration stabilizationDuration = mobileApplicationConfiguration.getSwipeStabilizationDuration();
                      int swipeLimit = mobileApplicationConfiguration.getSwipeLimit();
                      BufferedImage previousFrame = null;
-                     SwipeCoordinates swipeCoordinates = direction.calculateCoordinates(swipeArea,
+                     MoveCoordinates swipeCoordinates = direction.calculateCoordinates(swipeArea,
                              mobileApplicationConfiguration);
                      for (int count = 0; count <= swipeLimit; count++)
                      {
@@ -258,12 +265,39 @@ public class TouchActions
     public void performSwipe(SwipeDirection direction, int startCoordinate, int endCoordinate, Rectangle swipeArea,
             Duration swipeDuration)
     {
-        SwipeCoordinates coordinates = direction.createCoordinates(startCoordinate, endCoordinate,
+        MoveCoordinates coordinates = direction.createCoordinates(startCoordinate, endCoordinate,
                 mobileApplicationConfiguration, swipeArea);
         swipe(coordinates, swipeDuration);
     }
 
-    private void swipe(SwipeCoordinates coordinates, Duration swipeDuration)
+    /**
+     * Performs zoom in/out
+     *
+     * @param zoomType type of zoom, either <b>IN</b> or <b>OUT</b>
+     * @param actionArea the area to perform zoom
+     */
+    public void performZoom(ZoomType zoomType, Rectangle actionArea)
+    {
+        ZoomCoordinates zoomCoordinates = zoomType.calculateCoordinates(actionArea);
+        Sequence moveFinger1Sequence = getFingerMoveSequence("finger1", zoomCoordinates.getFinger1MoveCoordinates());
+        Sequence moveFinger2Sequence = getFingerMoveSequence("finger2", zoomCoordinates.getFinger2MoveCoordinates());
+        webDriverProvider.getUnwrapped(Interactive.class).perform(List.of(moveFinger1Sequence, moveFinger2Sequence));
+    }
+
+    private Sequence getFingerMoveSequence(String pointerName, MoveCoordinates moveCoordinates)
+    {
+        PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, pointerName);
+        Sequence fingerMove = new Sequence(finger, 0);
+        fingerMove.addAction(finger.createPointerMove(Duration.ofSeconds(0), PointerInput.Origin.viewport(),
+                moveCoordinates.getStart().getX(), moveCoordinates.getStart().getY()));
+        fingerMove.addAction(finger.createPointerDown(0));
+        fingerMove.addAction(finger.createPointerMove(Duration.ofMillis(MOVE_FINGER_DURATION_MS),
+                PointerInput.Origin.viewport(), moveCoordinates.getEnd().getX(), moveCoordinates.getEnd().getY()));
+        fingerMove.addAction(finger.createPointerUp(0));
+        return fingerMove;
+    }
+
+    private void swipe(MoveCoordinates coordinates, Duration swipeDuration)
     {
         newTouchActions()
                 .press(point(coordinates.getStart()))

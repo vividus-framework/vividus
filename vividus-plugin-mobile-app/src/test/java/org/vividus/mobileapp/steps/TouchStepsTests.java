@@ -50,6 +50,7 @@ import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
 import org.vividus.mobileapp.action.TouchActions;
 import org.vividus.mobileapp.model.SwipeDirection;
+import org.vividus.mobileapp.model.ZoomType;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
@@ -183,11 +184,9 @@ class TouchStepsTests
         mockAssertElementsNumber(List.of(element), true);
         when(element.getLocation()).thenReturn(new Point(-1, 138));
         when(element.getRect()).thenReturn(new Rectangle(-1, 138, 10, 10));
-        WebElement searchContext = mock(WebElement.class);
         Point point = new Point(10, 10);
         Dimension contextDimension = new Dimension(1920, 1080);
-        when(searchContext.getRect()).thenReturn(new Rectangle(point, contextDimension));
-        when(uiContext.getSearchContext()).thenReturn(searchContext);
+        mockSearchContext(point, contextDimension);
 
         when(searchActions.findElements(locator)).thenReturn(new ArrayList<>())
                                                  .thenReturn(List.of())
@@ -235,7 +234,7 @@ class TouchStepsTests
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"UP", "DOWN"})
+    @ValueSource(strings = { "UP", "DOWN" })
     void shouldNotSwipeToElementIfItAlreadyExists(SwipeDirection swipeDireciton)
     {
         WebElement element = mock(WebElement.class);
@@ -256,7 +255,7 @@ class TouchStepsTests
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"LEFT", "RIGHT"})
+    @ValueSource(strings = { "LEFT", "RIGHT" })
     void shouldNotSwipeToElementIfItAlreadyExistsAndDoNotAdjustItForHorizontalScroll(SwipeDirection swipeDireciton)
     {
         initSwipeMocks();
@@ -314,6 +313,34 @@ class TouchStepsTests
         assertEquals("The step is supported only for Android and iOS platforms", exception.getMessage());
     }
 
+    @CsvSource({
+            "IN",
+            "OUT"
+    })
+    @ParameterizedTest
+    void shouldZoom(ZoomType zoomType)
+    {
+        mockScreenSize();
+        touchSteps.zoom(zoomType);
+        verify(touchActions).performZoom(zoomType, new Rectangle(new Point(0, 0), DIMENSION));
+        verifyNoMoreInteractions(touchActions);
+    }
+
+    @CsvSource({
+            "IN",
+            "OUT"
+    })
+    @ParameterizedTest
+    void shouldZoomUsingContextElement(ZoomType zoomType)
+    {
+        Point point = new Point(30, 30);
+        Dimension contextDimension = new Dimension(720, 440);
+        WebElement searchContext = mockSearchContext(point, contextDimension);
+        touchSteps.zoom(zoomType);
+        verify(touchActions).performZoom(zoomType, searchContext.getRect());
+        verifyNoMoreInteractions(touchActions);
+    }
+
     private SearchParameters initSwipeMocks()
     {
         SearchParameters parameters = mock(SearchParameters.class);
@@ -331,5 +358,13 @@ class TouchStepsTests
     private void mockScreenSize()
     {
         when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
+    }
+
+    private WebElement mockSearchContext(Point point, Dimension dimension)
+    {
+        WebElement searchContext = mock(WebElement.class);
+        when(searchContext.getRect()).thenReturn(new Rectangle(point, dimension));
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
+        return searchContext;
     }
 }

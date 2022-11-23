@@ -70,7 +70,7 @@ public enum SwipeDirection
         return axisLengthProvider.applyAsInt(rectangle);
     }
 
-    public SwipeCoordinates calculateCoordinates(Rectangle swipeArea, MobileApplicationConfiguration configuration)
+    public MoveCoordinates calculateCoordinates(Rectangle swipeArea, MobileApplicationConfiguration configuration)
     {
         int swipeAxisLength = getAxisLength(swipeArea);
         int indent = (int) (swipeAxisLength * indentCoefficient);
@@ -83,7 +83,7 @@ public enum SwipeDirection
         return createCoordinates(coordinateSecond, coordinateFirst, configuration, swipeArea);
     }
 
-    public SwipeCoordinates createCoordinates(int startCoordinate, int endCoordinate,
+    public MoveCoordinates createCoordinates(int startCoordinate, int endCoordinate,
             MobileApplicationConfiguration configuration, Rectangle swipeArea)
     {
         int swipeAxisCoordinate = calculateCoordinate(boundariesDimensionProvider.applyAsInt(swipeArea),
@@ -97,9 +97,9 @@ public enum SwipeDirection
                 swipeArea.getPoint());
     }
 
-    private static SwipeCoordinates createAdjustedCoordinates(int startX, int startY, int endX, int endY, Point point)
+    private static MoveCoordinates createAdjustedCoordinates(int startX, int startY, int endX, int endY, Point point)
     {
-        return new SwipeCoordinates(startX + point.x, startY + point.y, endX + point.getX(), endY + point.getY());
+        return new MoveCoordinates(startX + point.x, startY + point.y, endX + point.getX(), endY + point.getY());
     }
 
     @SuppressWarnings("MagicNumber")

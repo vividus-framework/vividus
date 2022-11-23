@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package org.vividus.mobileapp.model;
 
 import org.openqa.selenium.Point;
 
-public class SwipeCoordinates
+public class MoveCoordinates
 {
     private final Point start;
     private final Point end;
 
-    public SwipeCoordinates(int startX, int startY, int endX, int endY)
+    public MoveCoordinates(int startX, int startY, int endX, int endY)
     {
         this.start = new Point(startX, startY);
         this.end = new Point(endX, endY);
