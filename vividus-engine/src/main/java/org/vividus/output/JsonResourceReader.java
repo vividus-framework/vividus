@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,11 +37,14 @@ public final class JsonResourceReader
 
     private static final JsonUtils JSON_UTILS = new JsonUtils();
 
-    private JsonResourceReader()
+    private final List<String> namesOfFilesToIgnore;
+
+    public JsonResourceReader(List<String> namesOfFilesToIgnore)
     {
+        this.namesOfFilesToIgnore = namesOfFilesToIgnore;
     }
 
-    public static List<FileEntry> readFrom(Path sourceDirectory) throws IOException
+    public List<FileEntry> readFrom(Path sourceDirectory) throws IOException
     {
         LOGGER.atInfo().addArgument(sourceDirectory).log("Reading JSON files from filesystem by path {}");
 
@@ -51,14 +54,22 @@ public final class JsonResourceReader
             for (Path path : paths.filter(Files::isRegularFile).collect(Collectors.toList()))
             {
                 File file = path.toFile();
-                String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-                boolean json = JSON_UTILS.isJson(content);
-                if (!json)
+                if (namesOfFilesToIgnore.contains(file.getName()))
                 {
-                    LOGGER.atInfo().addArgument(file::getAbsolutePath).log("Content of file '{}' is not JSON");
-                    continue;
+                    LOGGER.atInfo().addArgument(file::getAbsolutePath).log("The file '{}' is ignored");
                 }
-                fileEntries.add(new FileEntry(file.getAbsolutePath(), content));
+                else
+                {
+                    String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
+                    if (JSON_UTILS.isJson(content))
+                    {
+                        fileEntries.add(new FileEntry(file.getAbsolutePath(), content));
+                    }
+                    else
+                    {
+                        LOGGER.atInfo().addArgument(file::getAbsolutePath).log("Content of file '{}' is not JSON");
+                    }
+                }
             }
         }
         return fileEntries;
