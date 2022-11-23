@@ -51,8 +51,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedConstruction;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
@@ -105,6 +103,10 @@ class ElementStepsTests
     private static final String THE_NUMBER_OF_PARENT_ELEMENTS = "The number of parent elements";
     private static final String ELEMENTS_TO_CLICK = "The elements to click";
     private static final String ELEMENT_TO_CLICK = "Element to click";
+    private static final String CLICK_ALL_STEP_DEPRECATION = "The step: \"When I click on all elements located "
+            + "`$locator`\" is deprecated and will be removed in VIVIDUS 0.6.0. Use steps: \"When I click on element "
+            + "located by `$locator\" and \"When I find $comparisonRule `$number` elements by `$locator` and for each"
+            + " element do$stepsToExecute\"";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(ElementSteps.class);
 
@@ -115,17 +117,13 @@ class ElementStepsTests
     @Mock private IUiContext uiContext;
     @Mock private WebElementActions webElementActions;
     @Mock private WebElement webElement;
-    @Mock private WebElement bodyElement;
-    @Mock private WebDriver webDriver;
+    @Mock private IDescriptiveSoftAssert softAssert;
     @InjectMocks private ElementSteps elementSteps;
-
-    @Mock
-    private IDescriptiveSoftAssert softAssert;
 
     @Test
     void testContextClickElementByLocator()
     {
-        Locator locator = new Locator(WebLocatorType.XPATH, XPATH);
+        var locator = new Locator(WebLocatorType.XPATH, XPATH);
         when(baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, locator)).thenReturn(webElement);
         elementSteps.contextClickElementByLocator(locator);
         verify(mouseActions).contextClick(webElement);
@@ -134,7 +132,7 @@ class ElementStepsTests
     @Test
     void shouldClickOnElementWithoutRetry()
     {
-        Locator locator = new Locator(WebLocatorType.ELEMENT_NAME, ELEMENT_NAME);
+        var locator = new Locator(WebLocatorType.ELEMENT_NAME, ELEMENT_NAME);
         when(baseValidations.assertIfElementExists(AN_ELEMENT_WITH_THE_ATTRIBUTES, locator))
                 .thenReturn(webElement);
         elementSteps.clickOnElementWithoutRetry(locator);
@@ -147,7 +145,7 @@ class ElementStepsTests
     @Test
     void shouldClickOnElement()
     {
-        Locator locator = mock(Locator.class);
+        var locator = mock(Locator.class);
         when(baseValidations.assertElementExists(ELEMENT_TO_CLICK, locator)).thenReturn(Optional.of(webElement));
 
         elementSteps.clickOnElement(locator);
@@ -158,8 +156,8 @@ class ElementStepsTests
     @Test
     void shouldRetryClickOnElementIfStaleElementReferenceExceptionIsThrown()
     {
-        StaleElementReferenceException exception = mock(StaleElementReferenceException.class);
-        Locator locator = mock(Locator.class);
+        var exception = mock(StaleElementReferenceException.class);
+        var locator = mock(Locator.class);
         when(baseValidations.assertElementExists(ELEMENT_TO_CLICK, locator)).thenReturn(Optional.of(webElement));
         doThrow(exception).doReturn(new ClickResult()).when(mouseActions).click(webElement);
 
@@ -172,28 +170,32 @@ class ElementStepsTests
     @Test
     void testClickAllElementsByLocator()
     {
-        Locator locator = new Locator(WebLocatorType.XPATH, XPATH);
+        var locator = new Locator(WebLocatorType.XPATH, XPATH);
         when(baseValidations.assertIfElementsExist(ELEMENTS_TO_CLICK, locator)).thenReturn(
                 List.of(webElement, webElement));
         elementSteps.clickOnAllElements(locator);
         verify(mouseActions, times(2)).click(webElement);
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(CLICK_ALL_STEP_DEPRECATION))));
     }
 
     @Test
     void testClickAllElementsByLocatorNoElements()
     {
-        Locator locator = new Locator(WebLocatorType.XPATH, XPATH);
+        var locator = new Locator(WebLocatorType.XPATH, XPATH);
         when(baseValidations.assertIfElementsExist(ELEMENTS_TO_CLICK, locator)).thenReturn(List.of());
         elementSteps.clickOnAllElements(locator);
         verifyNoInteractions(mouseActions);
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(CLICK_ALL_STEP_DEPRECATION))));
     }
 
     @Test
     void testIsElementHasRightWidth()
     {
+        WebDriver webDriver = mock(WebDriver.class);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        int widthInPerc = 50;
+        var widthInPerc = 50;
         when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
+        WebElement bodyElement = mock(WebElement.class);
         when(baseValidations.assertIfElementExists("'Body' element", webDriverProvider.get(),
                 new Locator(WebLocatorType.XPATH, new SearchParameters("//body", Visibility.ALL))))
                 .thenReturn(bodyElement);
@@ -204,7 +206,7 @@ class ElementStepsTests
     @Test
     void testIsElementHasWidthRelativeToTheParentElement()
     {
-        int width = 50;
+        var width = 50;
         when(uiContext.getSearchContext(WebElement.class)).thenReturn(Optional.of(webElement));
         when(baseValidations.assertIfElementExists("Parent element", new Locator(WebLocatorType.XPATH,
                 "./.."))).thenReturn(webElement);
@@ -241,8 +243,8 @@ class ElementStepsTests
     @Test
     void doesEachElementByLocatorHaveChildWithLocatorSuccess()
     {
-        Locator elementLocator = new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(ELEMENT_XPATH));
-        Locator childLocator = new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(CHILD_XPATH));
+        var elementLocator = new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(ELEMENT_XPATH));
+        var childLocator = new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(CHILD_XPATH));
         when(baseValidations.assertIfElementsExist(THE_NUMBER_OF_PARENT_ELEMENTS, elementLocator)).thenReturn(
                 List.of(webElement, webElement));
         elementSteps.doesEachElementByLocatorHaveChildWithLocator(elementLocator, 2, childLocator);
@@ -253,8 +255,8 @@ class ElementStepsTests
     @Test
     void doesEachElementByLocatorHaveChildWithLocatorNoElements()
     {
-        Locator elementLocator = new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(ELEMENT_XPATH));
-        Locator childLocator = new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(CHILD_XPATH));
+        var elementLocator = new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(ELEMENT_XPATH));
+        var childLocator = new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(CHILD_XPATH));
         when(baseValidations.assertIfElementsExist(THE_NUMBER_OF_PARENT_ELEMENTS, elementLocator))
                 .thenReturn(List.of());
         elementSteps.doesEachElementByLocatorHaveChildWithLocator(elementLocator, 2, childLocator);
@@ -265,9 +267,9 @@ class ElementStepsTests
     @Test
     void testIsEachElementByXpathHasSameDimension()
     {
-        Dimension dimension = Dimension.HEIGHT;
-        List<WebElement> elements = List.of(webElement, webElement);
-        Locator locator = new Locator(WebLocatorType.XPATH, XPATH);
+        var dimension = Dimension.HEIGHT;
+        var elements = List.of(webElement, webElement);
+        var locator = new Locator(WebLocatorType.XPATH, XPATH);
         when(baseValidations.assertIfAtLeastNumberOfElementsExist("The number of found elements", locator, 2))
                 .thenReturn(elements);
         elementSteps.doesEachElementByLocatorHaveSameDimension(locator, dimension);
@@ -277,7 +279,7 @@ class ElementStepsTests
     @Test
     void testHoverMouseOverAnElementByLocator()
     {
-        Locator locator = new Locator(WebLocatorType.ELEMENT_NAME, ELEMENT_NAME);
+        var locator = new Locator(WebLocatorType.ELEMENT_NAME, ELEMENT_NAME);
         when(baseValidations.assertIfElementExists(AN_ELEMENT_WITH_THE_ATTRIBUTES, locator))
                 .thenReturn(webElement);
         elementSteps.hoverMouseOverElement(locator);
@@ -287,9 +289,9 @@ class ElementStepsTests
     @Test
     void testClickElementWithTextPageNotRefresh()
     {
-        ClickResult clickResult = new ClickResult();
+        var clickResult = new ClickResult();
         clickResult.setNewPageLoaded(false);
-        Locator locator = new Locator(CASE_SENSITIVE_TEXT, TEXT);
+        var locator = new Locator(CASE_SENSITIVE_TEXT, TEXT);
         when(baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, locator)).thenReturn(webElement);
         when(mouseActions.click(webElement)).thenReturn(clickResult);
         elementSteps.clickElementPageNotRefresh(locator);
@@ -300,11 +302,11 @@ class ElementStepsTests
     @Test
     void testLoadFileNotRemote() throws IOException
     {
-        File file = mockFileForUpload();
-        mockResourceLoader(mockResource(ABSOLUTE_PATH, file, true));
+        var file = mockFileForUpload();
+        mockResourceLoader(mockResource(file, true));
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(false);
-        Locator locator = new Locator(WebLocatorType.XPATH,
+        var locator = new Locator(WebLocatorType.XPATH,
                 new SearchParameters(XPATH).setVisibility(Visibility.ALL));
         when(baseValidations.assertIfElementExists(AN_ELEMENT, locator)).thenReturn(webElement);
         elementSteps.uploadFile(locator, FILE_PATH);
@@ -314,27 +316,28 @@ class ElementStepsTests
     @Test
     void testLoadFileFromJar() throws IOException
     {
-        try (MockedStatic<FileUtils> fileUtils = mockStatic(FileUtils.class);
-                MockedConstruction<File> fileMock = mockConstruction(File.class, (mock, context) -> {
-                    assertEquals(List.of(FILE_PATH), context.arguments());
-                    when(mock.exists()).thenReturn(true);
-                    when(mock.getAbsolutePath()).thenReturn(ABSOLUTE_PATH);
-                })
+        try (var fileUtils = mockStatic(FileUtils.class);
+             var fileMock = mockConstruction(File.class,
+                 (mock, context) -> {
+                     assertEquals(List.of(FILE_PATH), context.arguments());
+                     when(mock.exists()).thenReturn(true);
+                     when(mock.getAbsolutePath()).thenReturn(ABSOLUTE_PATH);
+                 })
         )
         {
-            Resource resource = mock(Resource.class);
+            var resource = mock(Resource.class);
             when(resource.exists()).thenReturn(true);
             when(resource.getURL()).thenReturn(new URL("jar:file:/D:/archive.jar!/file.txt"));
             InputStream inputStream = new ByteArrayInputStream(TEXT.getBytes(StandardCharsets.UTF_8));
             when(resource.getInputStream()).thenReturn(inputStream);
             mockResourceLoader(resource);
             when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
-            Locator locator = new Locator(WebLocatorType.XPATH,
+            var locator = new Locator(WebLocatorType.XPATH,
                     new SearchParameters(XPATH).setVisibility(Visibility.ALL));
             when(baseValidations.assertIfElementExists(AN_ELEMENT, locator)).thenReturn(webElement);
             elementSteps.uploadFile(locator, FILE_PATH);
             verify(webElement).sendKeys(ABSOLUTE_PATH);
-            File file = fileMock.constructed().get(0);
+            var file = fileMock.constructed().get(0);
             fileUtils.verify(() -> FileUtils.copyInputStreamToFile(resource.getInputStream(), file));
         }
     }
@@ -342,12 +345,12 @@ class ElementStepsTests
     @Test
     void testLoadFileRemote() throws IOException
     {
-        File file = mockFileForUpload();
-        mockResourceLoader(mockResource(ABSOLUTE_PATH, file, true));
+        var file = mockFileForUpload();
+        mockResourceLoader(mockResource(file, true));
         mockRemoteWebDriver();
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(true);
-        Locator locator = new Locator(WebLocatorType.XPATH,
+        var locator = new Locator(WebLocatorType.XPATH,
                 new SearchParameters(XPATH).setVisibility(Visibility.ALL));
         when(baseValidations.assertIfElementExists(AN_ELEMENT, locator)).thenReturn(webElement);
         elementSteps.uploadFile(locator, FILE_PATH);
@@ -357,13 +360,13 @@ class ElementStepsTests
     @Test
     void testLoadFileFromFilesystem() throws IOException
     {
-        Resource resource = mockResource(ABSOLUTE_PATH, mockFileForUpload(), false);
-        ResourceLoader resourceLoader = mockResourceLoader(resource);
+        var resource = mockResource(mockFileForUpload(), false);
+        var resourceLoader = mockResourceLoader(resource);
         when(resourceLoader.getResource(ResourceUtils.FILE_URL_PREFIX + FILE_PATH)).thenReturn(resource);
         mockRemoteWebDriver();
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(true);
-        Locator locator = new Locator(WebLocatorType.XPATH,
+        var locator = new Locator(WebLocatorType.XPATH,
                 new SearchParameters(XPATH).setVisibility(Visibility.ALL));
         when(baseValidations.assertIfElementExists(AN_ELEMENT, locator)).thenReturn(webElement);
         elementSteps.uploadFile(locator, FILE_PATH);
@@ -373,12 +376,12 @@ class ElementStepsTests
     @Test
     void testLoadFileRemoteSimpleDriver() throws IOException
     {
-        File file = mockFileForUpload();
-        mockResourceLoader(mockResource(ABSOLUTE_PATH, file, true));
+        var file = mockFileForUpload();
+        mockResourceLoader(mockResource(file, true));
         mockRemoteWebDriver();
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(true);
-        Locator locator = new Locator(WebLocatorType.XPATH,
+        var locator = new Locator(WebLocatorType.XPATH,
                 new SearchParameters(XPATH).setVisibility(Visibility.ALL));
         when(baseValidations.assertIfElementExists(AN_ELEMENT, locator)).thenReturn(webElement);
         elementSteps.uploadFile(locator, FILE_PATH);
@@ -388,10 +391,10 @@ class ElementStepsTests
     @Test
     void testLoadFileNoFile() throws IOException
     {
-        File file = mock(File.class);
+        var file = mock(File.class);
         when(file.exists()).thenReturn(true);
-        mockResourceLoader(mockResource(ABSOLUTE_PATH, file, true));
-        Locator locator = new Locator(WebLocatorType.XPATH,
+        mockResourceLoader(mockResource(file, true));
+        var locator = new Locator(WebLocatorType.XPATH,
                 new SearchParameters(XPATH).setVisibility(Visibility.ALL));
         elementSteps.uploadFile(locator, FILE_PATH);
         verify(webElement, never()).sendKeys(ABSOLUTE_PATH);
@@ -400,11 +403,11 @@ class ElementStepsTests
     @Test
     void testLoadFileNoElement() throws IOException
     {
-        File file = mockFileForUpload();
-        mockResourceLoader(mockResource(ABSOLUTE_PATH, file, true));
+        var file = mockFileForUpload();
+        mockResourceLoader(mockResource(file, true));
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
         when(webDriverProvider.isRemoteExecution()).thenReturn(false);
-        Locator locator = new Locator(WebLocatorType.XPATH,
+        var locator = new Locator(WebLocatorType.XPATH,
                 new SearchParameters(LOCATOR_BY_ATTRIBUTE).setVisibility(Visibility.ALL));
         when(baseValidations.assertIfElementExists(AN_ELEMENT, locator)).thenReturn(null);
         elementSteps.uploadFile(locator, FILE_PATH);
@@ -419,7 +422,7 @@ class ElementStepsTests
 
     private ResourceLoader mockResourceLoader(Resource resource)
     {
-        ResourceLoader resourceLoader = mock(ResourceLoader.class);
+        var resourceLoader = mock(ResourceLoader.class);
         elementSteps.setResourceLoader(resourceLoader);
         when(resourceLoader.getResource(ResourceLoader.CLASSPATH_URL_PREFIX + FILE_PATH)).thenReturn(resource);
         return resourceLoader;
@@ -427,25 +430,24 @@ class ElementStepsTests
 
     private File mockFileForUpload()
     {
-        File file = mock(File.class);
+        var file = mock(File.class);
         when(file.exists()).thenReturn(true);
         when(file.getAbsolutePath()).thenReturn(ABSOLUTE_PATH);
         return file;
     }
 
-    private Resource mockResource(String resourceURL, File file, boolean fileExists)
-            throws IOException
+    private Resource mockResource(File file, boolean fileExists) throws IOException
     {
-        Resource resource = mock(Resource.class);
+        var resource = mock(Resource.class);
         when(resource.exists()).thenReturn(fileExists);
-        when(resource.getURL()).thenReturn(new URL(resourceURL));
+        when(resource.getURL()).thenReturn(new URL(ABSOLUTE_PATH));
         when(resource.getFile()).thenReturn(file);
         return resource;
     }
 
     private void mockRemoteWebDriver()
     {
-        RemoteWebDriver remoteDriver = mock(RemoteWebDriver.class);
+        var remoteDriver = mock(RemoteWebDriver.class);
         when(webDriverProvider.getUnwrapped(RemoteWebDriver.class)).thenReturn(remoteDriver);
     }
 }
