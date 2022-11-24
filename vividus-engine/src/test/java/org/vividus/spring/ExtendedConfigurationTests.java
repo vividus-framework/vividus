@@ -43,6 +43,7 @@ import org.jbehave.core.embedder.StoryControls;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.Story;
+import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
 import org.jbehave.core.parsers.RegexStoryParser;
 import org.jbehave.core.reporters.ViewGenerator;
@@ -61,6 +62,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.IPathFinder;
 import org.vividus.batch.BatchResourceConfiguration;
+import org.vividus.log.LoggingTableTransformerMonitor;
 import org.vividus.steps.ParameterConvertersDecorator;
 import org.vividus.steps.PlaceholderResolver;
 
@@ -71,6 +73,7 @@ class ExtendedConfigurationTests
 
     @Mock private IPathFinder pathFinder;
     @Mock private PlaceholderResolver placeholderResolver;
+    @Mock private TableParsers tableParsers;
 
     @InjectMocks
     @Spy
@@ -122,6 +125,12 @@ class ExtendedConfigurationTests
                     constructedMocks.put(ParameterConvertersDecorator.class, mock);
 
                     when(mock.addConverters(parameterConverterList)).thenReturn(mock);
+                });
+            MockedConstruction<LoggingTableTransformerMonitor> transformerMonitor = mockConstruction(
+                 LoggingTableTransformerMonitor.class, (mock, context) -> {
+                    assertEquals(1, context.getCount());
+                    assertEquals(List.of(tableParsers), context.arguments());
+                    constructedMocks.put(LoggingTableTransformerMonitor.class, mock);
                 }))
         {
             StoryControls storyControls = mock(StoryControls.class);
@@ -140,6 +149,8 @@ class ExtendedConfigurationTests
             ordered.verify(configuration).useAliasPaths(new HashSet<>(aliasPaths));
             ordered.verify(configuration).useParameterConverters(
                     (ParameterConvertersDecorator) constructedMocks.get(ParameterConvertersDecorator.class));
+            ordered.verify(configuration).useTableTransformerMonitor(
+                    (LoggingTableTransformerMonitor) constructedMocks.get(LoggingTableTransformerMonitor.class));
             ordered.verify(configuration).useStoryParser(
                     (RegexStoryParser) constructedMocks.get(RegexStoryParser.class));
             ordered.verify(configuration).useStoryControls(storyControls);

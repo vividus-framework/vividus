@@ -44,6 +44,7 @@ import org.jbehave.core.steps.StepMonitor;
 import org.vividus.IPathFinder;
 import org.vividus.batch.BatchResourceConfiguration;
 import org.vividus.converter.ResolvingPlaceholdersExamplesTableConverter;
+import org.vividus.log.LoggingTableTransformerMonitor;
 import org.vividus.steps.ParameterConvertersDecorator;
 import org.vividus.steps.PlaceholderResolver;
 
@@ -69,6 +70,7 @@ public class ExtendedConfiguration extends Configuration
         useParameterControls(parameterControls);
         useParameterConverters(new ParameterConvertersDecorator(this, placeholderResolver)
                 .addConverters(customConverters));
+        useTableTransformerMonitor(new LoggingTableTransformerMonitor(tableParsers()));
         parameterConverters().addConverters(
                 new ResolvingPlaceholdersExamplesTableConverter(examplesTableFactory(), placeholderResolver));
         useStoryParser(new RegexStoryParser(examplesTableFactory()));
