@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,8 @@ public final class OutputReader
 
     private static List<FileEntry> getJsonResultsFiles(Path jsonDirectory) throws IOException
     {
-        List<FileEntry> jsonFiles = JsonResourceReader.readFrom(jsonDirectory);
+        List<String> namesOfFilesToIgnore = List.of("BeforeStories.json", "AfterStories.json");
+        List<FileEntry> jsonFiles = new JsonResourceReader(namesOfFilesToIgnore).readFrom(jsonDirectory);
 
         notEmpty(jsonFiles, "The directory '%s' does not contain needed JSON files", jsonDirectory);
         LOGGER.atInfo().addArgument(() -> jsonFiles.stream().map(FileEntry::getPath).collect(Collectors.joining(", ")))
