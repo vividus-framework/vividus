@@ -86,6 +86,7 @@
     <bean id="CARTESIAN_PRODUCT" class="org.vividus.transformer.CartesianProductTableTransformer" />
     <bean id="DISTINCTING" class="org.vividus.transformer.DistinctingTableTransformer" />
     <bean id="FILTERING" class="org.vividus.transformer.FilteringTableTransformer" />
+    <bean id="INDEXING" class="org.vividus.transformer.IndexingTableTransformer" />
     <bean id="ITERATING" class="org.vividus.transformer.IteratingTableTransformer" />
     <bean id="JOINING" class="org.vividus.transformer.JoiningTableTransformer" />
     <bean id="MERGING" class="org.vividus.transformer.MergingTableTransformer" />

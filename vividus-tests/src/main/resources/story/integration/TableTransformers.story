@@ -303,3 +303,21 @@ When I initialize scenario variable `sitemapTransformerTable` with values:
 {transformer=FROM_SITEMAP, siteMapRelativeUrl=/index.html, column=sitemapUrl, ignoreErrors=true}
 Then `${sitemapTransformerTable}` is equal to table:
 |sitemapUrl |
+
+Scenario: Verify INDEXING transformer ASCENDING order
+Then `<index>` is = `<expected>`
+Examples:
+{transformer=INDEXING, order=ASCENDING}
+|expected|
+|0       |
+|1       |
+|2       |
+
+Scenario: Verify INDEXING transformer DESCENDING order
+Then `<index>` is = `<expected>`
+Examples:
+{transformer=INDEXING, order=DESCENDING}
+|expected|
+|2       |
+|1       |
+|0       |

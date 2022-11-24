@@ -471,3 +471,48 @@ Examples:
 ----
 {transformer=CARTESIAN_PRODUCT, tables=\{transformer=REPEATING\, times=100\};\{transformer=FROM_CSV\, csvPath=/data/csv.csv\}}
 ----
+
+== INDEXING
+
+`INDEXING` transformer adds a column with the rows indices in the specified order. Indices are zero-based
+
+[cols="1,3", options="header"]
+|===
+|Parameter|Description
+
+|`order`|The mandatory indedxing order: `ASCENDING` or `DESCENDING`.
+|===
+
+.ASCENDING order example
+[source,gherkin]
+----
+{transformer=INDEXING, order=ASCENDING}
+|key   |
+|value |
+|value2|
+----
+
+.ASCENDING order resulting table
+[source,gherkin]
+----
+|key   |index|
+|value |0    |
+|value2|1    |
+----
+
+.DESCENDING order example
+[source,gherkin]
+----
+{transformer=INDEXING, order=DESCENDING}
+|key   |
+|value |
+|value2|
+----
+
+.DESCENDING order resulting table
+[source,gherkin]
+----
+|key   |index|
+|value |1    |
+|value2|0    |
+----
