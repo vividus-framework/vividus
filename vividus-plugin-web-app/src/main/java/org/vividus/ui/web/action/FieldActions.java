@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,36 @@ package org.vividus.ui.web.action;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.support.ui.Select;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.web.util.FormatUtils;
 
 public class FieldActions implements IFieldActions
 {
-    @Inject private ISoftAssert softAssert;
-    @Inject private IWebWaitActions waitActions;
-    @Inject private IWebElementActions webElementActions;
+    private static final Logger LOGGER = LoggerFactory.getLogger(FieldActions.class);
+
+    private final IWebDriverManager webDriverManager;
+    private final WebJavascriptActions javascriptActions;
+    private final IWebElementActions webElementActions;
+    private final IWebWaitActions waitActions;
+    private final ISoftAssert softAssert;
+
+    public FieldActions(IWebDriverManager webDriverManager, WebJavascriptActions javascriptActions,
+            IWebElementActions webElementActions, IWebWaitActions waitActions, ISoftAssert softAssert)
+    {
+        this.webDriverManager = webDriverManager;
+        this.javascriptActions = javascriptActions;
+        this.webElementActions = webElementActions;
+        this.waitActions = waitActions;
+        this.softAssert = softAssert;
+    }
 
     @Override
     public void selectItemInDropDownList(Select select, String text, boolean addition)
@@ -84,5 +102,40 @@ public class FieldActions implements IFieldActions
         {
             field.sendKeys(Keys.chord(Keys.CONTROL, "a") + Keys.BACK_SPACE);
         }
+    }
+
+    @Override
+    public void addText(WebElement element, String text)
+    {
+        if (element != null)
+        {
+            String normalizedText = FormatUtils.normalizeLineEndings(text);
+            LOGGER.info("Adding text \"{}\" into the element", normalizedText);
+
+            // workaround for Safari and IE 11
+            // Safari issue: https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/4467
+            // IE 11 issue: https://github.com/SeleniumHQ/selenium/issues/3353
+            boolean workaroundNeeded = webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)
+                    && !element.findElements(By.xpath("//preceding-sibling::head"
+                    + "[descendant::title[contains(text(),'Rich Text')]]")).isEmpty()
+                    && isElementContenteditable(element);
+
+            if (workaroundNeeded)
+            {
+                javascriptActions.executeScript(
+                        "var text=arguments[0].innerHTML;arguments[0].innerHTML = text+arguments[1];", element,
+                        text);
+            }
+            else
+            {
+                element.sendKeys(normalizedText);
+            }
+        }
+    }
+
+    @Override
+    public boolean isElementContenteditable(WebElement element)
+    {
+        return Boolean.parseBoolean(element.getAttribute("contenteditable"));
     }
 }

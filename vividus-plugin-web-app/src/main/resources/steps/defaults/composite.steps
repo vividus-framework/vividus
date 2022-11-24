@@ -25,68 +25,82 @@ Composite: Then the number of elements found by the xpath '$xpath' is $compariso
 Then number of elements found by `By.xpath(<xpath>)` is <comparisonRule> `<quantity>`
 
 Composite: Then a field with the name '$fieldName' exists
+!-- WARNING: The step "Then a field with the name '$fieldName' exists" is deprecated and will be removed in VIVIDUS 0.6.0
 Then field located `By.fieldName(<fieldName>)` exists
 
 Composite: When I clear a field with the name '$fieldName'
-When I clear field located `By.fieldName(<fieldName>)`
+!-- WARNING: The step "When I clear a field with the name '$fieldName'" is deprecated and will be removed in VIVIDUS 0.6.0
+When I clear field located by `fieldName(<fieldName>)`
 
 Composite: When I clear a field with the name '$fieldName' using keyboard
-When I clear field located `By.fieldName(<fieldName>)` using keyboard
+!-- WARNING: The step "When I clear a field with the name '$fieldName' using keyboard" is deprecated and will be removed in VIVIDUS 0.6.0
+When I clear field located by `fieldName(<fieldName>)` using keyboard
 
 Composite: When I add '$text' to a field with the name '$fieldName'
-When I add `<text>` to field located `By.fieldName(<fieldName>)`
+!-- WARNING: The step "When I add '$text' to a field with the name '$fieldName'" is deprecated and will be removed in VIVIDUS 0.6.0
+When I add `<text>` to field located by `fieldName(<fieldName>)`
 
 Composite: When I add '$text' to a field by the xpath '$xpath'
 !-- WARNING: The step "When I add '$text' to a field by the xpath '$xpath'" is deprecated and will be removed in VIVIDUS 0.6.0
-When I add `<text>` to field located `By.xpath(<xpath>)`
+When I add `<text>` to field located by `xpath(<xpath>)`
 
 Composite: When I enter '$text' in a field with the name '$fieldName'
-When I enter `<text>` in field located `By.fieldName(<fieldName>)`
+!-- WARNING: The step "When I enter '$text' in a field with the name '$fieldName'" is deprecated and will be removed in VIVIDUS 0.6.0
+When I enter `<text>` in field located by `fieldName(<fieldName>)`
 
 Composite: When I clear a field by the xpath '$xpath'
 !-- WARNING: The step "When I clear a field by the xpath '$xpath'" is deprecated and will be removed in VIVIDUS 0.6.0
-When I clear field located `By.xpath(<xpath>)`
+When I clear field located by `xpath(<xpath>)`
 
 Composite: When I clear a field by the xpath '$xpath' using keyboard
 !-- WARNING: The step "When I clear a field by the xpath '$xpath' using keyboard" is deprecated and will be removed in VIVIDUS 0.6.0
-When I clear field located `By.xpath(<xpath>)` using keyboard
+When I clear field located by `xpath(<xpath>)` using keyboard
 
 Composite: Then a field with the name '$fieldName' and text containing '$textpart' exists
 Priority: 1
+!-- WARNING: The step "Then a field with the name '$fieldName' and text containing '$textpart' exists" is deprecated and will be removed in VIVIDUS 0.6.0
 Then field located `By.fieldName(<fieldName>):a->filter.fieldTextPart(<textpart>)` exists
 
 Composite: Then a field with the name '$fieldName' does not exist
+!-- WARNING: The step "Then a field with the name '$fieldName' does not exist" is deprecated and will be removed in VIVIDUS 0.6.0
 Then field located `By.fieldName(<fieldName>)` does not exist
 
 Composite: Then a [$state] field with the name '$fieldName' and text '$text' exists
 Priority: 1
+!-- WARNING: The step "Then a [$state] field with the name '$fieldName' and text '$text' exists" is deprecated and will be removed in VIVIDUS 0.6.0
 Then field located `By.fieldName(<fieldName>)->filter.fieldText(<text>).state(<state>)` exists
 
 Composite: Then a field with the name '$fieldName' and text '$text' does not exist
+!-- WARNING: The step "Then a field with the name '$fieldName' and text '$text' does not exist" is deprecated and will be removed in VIVIDUS 0.6.0
 Then field located `By.fieldName(<fieldName>):a->filter.fieldText(<text>)` does not exist
 
 Composite: Then a field with the name '$fieldName' and text '$text' exists
 Priority: 1
+!-- WARNING: The step "Then a field with the name '$fieldName' and text '$text' exists" is deprecated and will be removed in VIVIDUS 0.6.0
 Then field located `By.fieldName(<fieldName>)->filter.fieldText(<text>)` exists
 
 Composite: Then a field with the name '$fieldName' and placeholder text '$text' exists
 Priority: 1
+!-- WARNING: The step "Then a field with the name '$fieldName' and placeholder text '$text' exists" is deprecated and will be removed in VIVIDUS 0.6.0
 Then field located `By.fieldName(<fieldName>):a->filter.placeholder(<text>)` exists
 
 Composite: Then a [$state] field with the name '$fieldName' and placeholder text '$text' exists
 Priority: 1
+!-- WARNING: The step "Then a [$state] field with the name '$fieldName' and placeholder text '$text' exists" is deprecated and will be removed in VIVIDUS 0.6.0
 Then field located `By.fieldName(<fieldName>)->filter.placeholder(<text>).state(<state>)` exists
 
 Composite: Then a field with the name '$fieldName' placeholder text '$text' does not exist
 Priority: 1
+!-- WARNING: The step "Then a field with the name '$fieldName' placeholder text '$text' does not exist" is deprecated and will be removed in VIVIDUS 0.6.0
 Then field located `By.fieldName(<fieldName>):a->filter.placeholder(<text>)` does not exist
 
 Composite: Then a [$state] field with the name '$fieldName' exists
+!-- WARNING: The step "Then a [$state] field with the name '$fieldName' exists" is deprecated and will be removed in VIVIDUS 0.6.0
 Then field located `By.fieldName(<fieldName>):a->filter.state(<state>)` exists
 
 Composite: When I enter '$text' in a field by the xpath '$xpath'
 !-- WARNING: The step "When I enter '$text' in a field by the xpath '$xpath'" is deprecated and will be removed in VIVIDUS 0.6.0
-When I enter `<text>` in field located `By.xpath(<xpath>)`
+When I enter `<text>` in field located by `xpath(<xpath>)`
 
 Composite: When I enter `$text` in field located `$locator` using keyboard
 When I execute sequence of actions:

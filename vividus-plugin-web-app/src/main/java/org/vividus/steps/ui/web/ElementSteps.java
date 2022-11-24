@@ -303,16 +303,16 @@ public class ElementSteps implements ResourceLoaderAware
     }
 
     /**
-     * Clicks on an <b>element</b> found by the <b>locator</b>
+     * Clicks on the element found by the specified locator.
      * <p>The atomic actions performed are:</p>
      * <ul>
-     * <li>find an element by the locator;</li>
-     * <li>click on the element if it's found, otherwise fail the step;</li>
-     * <li>the first two actions are retried once if the
+     * <li>find the element by the locator;</li>
+     * <li>click on the element if it is found, otherwise the whole step is failed and its execution stops;</li>
+     * <li>the first two actions are retried once if the field becomes stale during actions execution in other words if
      * <a href="https://www.selenium.dev/exceptions/#stale_element_reference">StaleElementReferenceException</a>
-     * is thrown during their execution.</li>
+     * is occurred at any atomic action.</li>
      * </ul>
-     * @param locator The locator to find an element.
+     * @param locator The locator used to find element.
      */
     @When("I click on element located by `$locator`")
     public void clickOnElement(Locator locator)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,4 +24,18 @@ public interface IFieldActions
     void selectItemInDropDownList(Select select, String text, boolean addition);
 
     void clearFieldUsingKeyboard(WebElement field);
+
+    /**
+     * Enters text in any element without clearing its previous content
+     * @param element Any element to type
+     * @param text Text to type
+     */
+    void addText(WebElement element, String text);
+
+    /**
+     * Checks that the content of the element is editable
+     * @param element element to check
+     * @return true - if the element's content is editable or false - if it's not
+     */
+    boolean isElementContenteditable(WebElement element);
 }

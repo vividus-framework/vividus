@@ -18,8 +18,6 @@ package org.vividus.steps.ui.web;
 
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -34,41 +32,50 @@ import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.web.action.IFieldActions;
-import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.util.FormatUtils;
 
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @TakeScreenshotOnFailure
 public class FieldSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(FieldSteps.class);
 
     private static final String A_FIELD_WITH_NAME = "A field with attributes%1$s";
+    private static final String FIELD_TO_CLEAR = "The field to clear";
     private static final int TEXT_TYPING_ATTEMPTS_LIMIT = 5;
 
-    @Inject private IBaseValidations baseValidations;
-    @Inject private IWebElementActions webElementActions;
-    @Inject private IFieldActions fieldActions;
-    @Inject private ISoftAssert softAssert;
-    @Inject private WebJavascriptActions javascriptActions;
-    @Inject private IWebDriverManager webDriverManager;
+    private final IWebDriverManager webDriverManager;
+    private final IFieldActions fieldActions;
+    private final WebJavascriptActions javascriptActions;
+    private final ISoftAssert softAssert;
+    private final IBaseValidations baseValidations;
+
+    public FieldSteps(IWebDriverManager webDriverManager, IFieldActions fieldActions,
+            WebJavascriptActions javascriptActions, ISoftAssert softAssert, IBaseValidations baseValidations)
+    {
+        this.webDriverManager = webDriverManager;
+        this.fieldActions = fieldActions;
+        this.javascriptActions = javascriptActions;
+        this.softAssert = softAssert;
+        this.baseValidations = baseValidations;
+    }
 
     /**
-     * Clears an <b>element</b> located by <b>locator</b>
+     * Clears the field found by the specified locator.
      * <p>
-     * Can be used to delete the text from elements like <i>{@literal <input>}</i>, <i>{@literal <textarea>}</i>
-     * (or {@literal <body>} if you work with a CKE editor - a field to enter and edit text,
-     * that is contained in a frame as a separate html document), don't trigger keyboard or mouse events on the field.
+     * It's allowed to delete the text from elements declared using <i>{@literal <input>}</i> or <i>{@literal
+     * <textarea>}</i> tags and from CKE editors (they usually should be located via {@literal <body>} tag, that is
+     * contained in a frame as a separate HTML document).
      * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Finds the <b>text field</b>
-     * <li>Clears it
-     * </ul>
-     * @param locator to locate field
+     * The step does not trigger any keyboard or mouse events on the field.
+     *
+     * @param locator The locator used to find field.
      * @return WebElement An element that was cleared
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @deprecated Use step: When I clear field located by `$locator`.
      */
+    @Deprecated(since = "0.5.1", forRemoval = true)
     @When("I clear field located `$locator`")
     public WebElement clearFieldLocatedBy(Locator locator)
     {
@@ -81,22 +88,39 @@ public class FieldSteps
     }
 
     /**
-     * Clears an <b>element</b> located by <b>locator</b> using keyboard
+     * Clears the field found by the specified locator.
      * <p>
-     * Can be used to delete the text from elements like <i>{@literal <input>}</i>, <i>{@literal <textarea>}</i>
-     * (or {@literal <body>} if you work with a CKE editor - a field to enter and edit text,
-     * that is contained in a frame as a separate html document). Simulates an user action by pressing buttons
-     * Ctrl+a and Backspace, what allows to trigger keyboard or mouse events on the field.
+     * It's allowed to delete the text from elements declared using <i>{@literal <input>}</i> or <i>{@literal
+     * <textarea>}</i> tags and from CKE editors (they usually should be located via {@literal <body>} tag, that is
+     * contained in a frame as a separate HTML document).
      * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Finds the <b>text field</b>
-     * <li>Clears it by pressing Ctrl+a, Backspace
-     * </ul>
-     * @param locator to locate element
-     * @return WebElement An element that was cleared
+     * The step does not trigger any keyboard or mouse events on the field.
+     *
+     * @param locator The locator used to find field.
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
+    @When("I clear field located by `$locator`")
+    public void clearField(Locator locator)
+    {
+        baseValidations.assertElementExists(FIELD_TO_CLEAR, locator).ifPresent(WebElement::clear);
+    }
+
+    /**
+     * Clears the field found by the specified locator using keyboard.
+     * <p>
+     * It's allowed to delete the text from elements declared using <i>{@literal <input>}</i> or <i>{@literal
+     * <textarea>}</i> tags and from CKE editors (they usually should be located via {@literal <body>} tag, that is
+     * contained in a frame as a separate HTML document).
+     * <p>
+     * The step simulates user action by pressing buttons Ctrl+A and Backspace, that allows to trigger keyboard
+     * events on the field.
+     *
+     * @param locator The locator used to find field.
+     * @return WebElement An element that was cleared
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @deprecated Use step: When I clear field located by `$locator` using keyboard
+     */
+    @Deprecated(since = "0.5.1", forRemoval = true)
     @When("I clear field located `$locator` using keyboard")
     public WebElement clearFieldLocatedByUsingKeyboard(Locator locator)
     {
@@ -106,71 +130,164 @@ public class FieldSteps
     }
 
     /**
-     * Enters a 'text' in a <b>field</b> located by locator without clearing its previous content
+     * Clears the field found by the specified locator using keyboard.
      * <p>
-     * Can be used for typing text into elements like <i>{@literal <input>}</i>, <i>{@literal <textarea>}</i> (or
-     * {@literal <body>} if you work with a CKE editor - a field to enter and edit text, that is contained in a frame as
-     * a separate html document).
+     * It's allowed to delete the text from elements declared using <i>{@literal <input>}</i> or <i>{@literal
+     * <textarea>}</i> tags and from CKE editors (they usually should be located via {@literal <body>} tag, that is
+     * contained in a frame as a separate HTML document).
      * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Finds the <b>element</b>
-     * <li>Types the text into it
-     * </ul>
-     * @param locator to locate element
-     * @param text A text to type into the <b>element</b>
+     * The step simulates user action by pressing buttons Ctrl+A and Backspace, that allows to trigger keyboard
+     * events on the field.
+     *
+     * @param locator The locator used to find field.
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
-    @When("I add `$text` to field located `$locator`")
-    public void addTextToField(String text, Locator locator)
+    @When("I clear field located by `$locator` using keyboard")
+    public void clearFieldUsingKeyboard(Locator locator)
     {
-        WebElement field = findFieldBy(locator);
-        webElementActions.addText(field, text);
+        baseValidations.assertElementExists(FIELD_TO_CLEAR, locator).ifPresent(fieldActions::clearFieldUsingKeyboard);
     }
 
     /**
-     * Enters text in the field located by locator
-     * @param locator to locate element
-     * @param text A text to type into the <b>element</b>
+     * Enters the text in the field found by the specified locator without clearing of the previous content.
+     * <p>
+     * It's allowed to add the text to elements declared using <i>{@literal <input>}</i> or <i>{@literal
+     * <textarea>}</i> tags and from CKE editors (they usually should be located via {@literal <body>} tag, that is
+     * contained in a frame as a separate HTML document).
+     * <p>
+     *
+     * @param text    The text to add to the field.
+     * @param locator The locator used to find field.
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @deprecated Use step: When I add `$text` to field located by `$locator`
+     */
+    @Deprecated(since = "0.5.1", forRemoval = true)
+    @When("I add `$text` to field located `$locator`")
+    public void addTextToFieldLocatedBy(String text, Locator locator)
+    {
+        WebElement field = findFieldBy(locator);
+        fieldActions.addText(field, text);
+    }
+
+    /**
+     * Enters the text in the field found by the specified locator without clearing of the previous content.
+     * <p>
+     * It's allowed to add the text to elements declared using <i>{@literal <input>}</i> or <i>{@literal
+     * <textarea>}</i> tags and from CKE editors (they usually should be located via {@literal <body>} tag, that is
+     * contained in a frame as a separate HTML document).
+     * <p>
+     *
+     * @param text    The text to add to the field.
+     * @param locator The locator used to find field.
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
-    @SuppressWarnings("unchecked")
-    @When("I enter `$text` in field located `$locator`")
-    public void enterTextInField(String text, Locator locator)
+    @When("I add `$text` to field located by `$locator`")
+    public void addTextToField(String text, Locator locator)
     {
-        WebElement element = findElement(locator);
+        baseValidations.assertElementExists("The field to add text", locator).ifPresent(
+                field -> fieldActions.addText(field, text));
+    }
+
+    /**
+     * Enters the text in a field found by the specified locator.
+     * <p>
+     * It's allowed to enter the text in elements declared using <i>{@literal <input>}</i> or <i>{@literal
+     * <textarea>}</i> tags and from CKE editors (they usually should be located via {@literal <body>} tag, that is
+     * contained in a frame as a separate HTML document).
+     * <p>The atomic actions performed are:</p>
+     * <ul>
+     * <li>find the field by the locator;</li>
+     * <li>clear the field if it is found, otherwise the whole step is failed and its execution stops;</li>
+     * <li>type the text in the field;</li>
+     * <li>the first three actions are retried once if the field becomes stale during actions execution in other words
+     * <a href="https://www.selenium.dev/exceptions/#stale_element_reference">StaleElementReferenceException</a>
+     * is thrown at any atomic action.</li>
+     * </ul>
+     *
+     * @param text    The text to enter in the field.
+     * @param locator The locator used to find field.
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @deprecated Use step: When I enter `$text` in field located by `$locator`
+     */
+    @Deprecated(since = "0.5.1", forRemoval = true)
+    @When("I enter `$text` in field located `$locator`")
+    public void enterTextInFieldLocatedBy(String text, Locator locator)
+    {
+        String normalizedText = FormatUtils.normalizeLineEndings(text);
+        enterTextInFieldLocatedBy(normalizedText, locator, false);
+    }
+
+    private void enterTextInFieldLocatedBy(String text, Locator locator, boolean retry)
+    {
+        WebElement element = baseValidations.assertIfElementExists(
+                String.format("An element with attributes%1$s", locator), locator);
         if (element != null)
         {
-            String normalizedText = FormatUtils.normalizeLineEndings(text);
-            element.clear();
-            LOGGER.info("Entering text \"{}\" in element", normalizedText);
-            if (webDriverManager.isBrowserAnyOf(Browser.SAFARI) && webElementActions.isElementContenteditable(element))
-            {
-                javascriptActions.executeScript("var element = arguments[0];element.innerHTML = arguments[1];", element,
-                        normalizedText);
-                return;
-            }
-            element = sendKeysRetryingIfStale(locator, element, normalizedText);
-            applyWorkaroundIfIE(element, normalizedText);
+            enterTextInField(element, text, retry, () -> enterTextInFieldLocatedBy(text, locator, true));
         }
     }
 
-    private WebElement sendKeysRetryingIfStale(Locator locator, WebElement element, String normalizedText)
+    /**
+     * Enters the text in a field found by the specified locator.
+     * <p>
+     * It's allowed to enter the text in elements declared using <i>{@literal <input>}</i> or <i>{@literal
+     * <textarea>}</i> tags and from CKE editors (they usually should be located via {@literal <body>} tag, that is
+     * contained in a frame as a separate HTML document).
+     * <p>The atomic actions performed are:</p>
+     * <ul>
+     * <li>find the field by the locator;</li>
+     * <li>clear the field if it is found, otherwise the whole step is failed and its execution stops;</li>
+     * <li>type the text in the field;</li>
+     * <li>the first three actions are retried once if the field becomes stale during actions execution in other words
+     * <a href="https://www.selenium.dev/exceptions/#stale_element_reference">StaleElementReferenceException</a>
+     * is thrown at any atomic action.</li>
+     * </ul>
+     *
+     * @param text    The text to enter in the field.
+     * @param locator The locator used to find field.
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     */
+    @When("I enter `$text` in field located by `$locator`")
+    public void enterTextInField(String text, Locator locator)
     {
-        WebElement toSendKeys = element;
+        String normalizedText = FormatUtils.normalizeLineEndings(text);
+        enterTextInField(normalizedText, locator, false);
+    }
+
+    private void enterTextInField(String text, Locator locator, boolean retry)
+    {
+        baseValidations.assertElementExists("The field to enter text", locator).ifPresent(
+                element -> enterTextInField(element, text, retry, () -> enterTextInField(text, locator, true)));
+    }
+
+    private void enterTextInField(WebElement element, String text, boolean retry, Runnable retryRunnable)
+    {
         try
         {
-            toSendKeys.sendKeys(normalizedText);
+            element.clear();
+            LOGGER.info("Entering text \"{}\" in element", text);
+            if (webDriverManager.isBrowserAnyOf(Browser.SAFARI) && fieldActions.isElementContenteditable(element))
+            {
+                javascriptActions.executeScript("var element = arguments[0];element.innerHTML = arguments[1];", element,
+                        text);
+                return;
+            }
+
+            element.sendKeys(text);
+            applyWorkaroundIfIE(element, text);
         }
         catch (StaleElementReferenceException e)
         {
+            if (retry)
+            {
+                throw e;
+            }
             LOGGER.info("An element is stale. One more attempt to type text into it");
-            toSendKeys = findElement(locator);
-            toSendKeys.sendKeys(normalizedText);
+            retryRunnable.run();
         }
-        return toSendKeys;
     }
 
+    @SuppressWarnings("unchecked")
     private void applyWorkaroundIfIE(WebElement element, String normalizedText)
     {
         // Workaround for IExplore: https://github.com/seleniumhq/selenium/issues/805
@@ -194,11 +311,6 @@ public class FieldSteps
         }
     }
 
-    private WebElement findElement(Locator locator)
-    {
-        return baseValidations.assertIfElementExists(String.format("An element with attributes%1$s", locator), locator);
-    }
-
     private boolean isValueEqualTo(WebElement element, String expectedValue)
     {
         return expectedValue.equals(javascriptActions.executeScript("return arguments[0].value;", element));
@@ -211,8 +323,11 @@ public class FieldSteps
      * CKE editor - a field to enter and edit text, that is contained in a {@literal <frame>} as a separate
      * html-document)
      * <p>
-     * @param locator to locate field
+     *
+     * @param locator The locator used to find field.
+     * @deprecated Use step replacement pattern: Then number of elements found by `&lt;locator&gt;` is equal to `0`
      */
+    @Deprecated(since = "0.5.1", forRemoval = true)
     @Then("field located `$locator` does not exist")
     public void doesNotFieldExist(Locator locator)
     {
@@ -226,9 +341,12 @@ public class FieldSteps
      * CKE editor - a field to enter and edit text, that is contained in a {@literal <frame>} as a separate
      * html-document)
      * <p>
-     * @param locator to locate field
+     *
+     * @param locator The locator used to find field.
      * @return WebElement
+     * @deprecated Use step replacement pattern: Then number of elements found by `&lt;locator&gt;` is equal to `1`
      */
+    @Deprecated(since = "0.5.1", forRemoval = true)
     @Then("field located `$locator` exists")
     public WebElement findFieldBy(Locator locator)
     {

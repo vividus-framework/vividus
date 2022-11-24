@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.vividus.steps.ui.web;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -26,11 +28,11 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -47,7 +49,6 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.web.action.IFieldActions;
-import org.vividus.ui.web.action.WebElementActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
@@ -60,21 +61,22 @@ class FieldStepsTests
     private static final String TEXT = "text";
     private static final String GET_ELEMENT_VALUE_JS = "return arguments[0].value;";
     private static final String ATTRIBUTES = "An element with attributes";
+    private static final String FIELD_TO_CLEAR = "The field to clear";
+    private static final String FIELD_TO_ADD_TEXT = "The field to add text";
+    private static final String FIELD_TO_ENTER_TEXT = "The field to enter text";
 
-    @Mock private IBaseValidations baseValidations;
-    @Mock private WebElementActions webElementActions;
-    @Mock private WebElement webElement;
+    @Mock private IWebDriverManager webDriverManager;
     @Mock private IFieldActions fieldActions;
     @Mock private WebJavascriptActions javascriptActions;
-    @Mock private IWebDriverManager webDriverManager;
     @Mock private ISoftAssert softAssert;
+    @Mock private IBaseValidations baseValidations;
     @InjectMocks private FieldSteps fieldSteps;
+    @Mock private WebElement webElement;
 
     @Test
     void testDoesNotFieldExist()
     {
-        Locator locator = new Locator(WebLocatorType.FIELD_NAME,
-                new SearchParameters(FIELD_NAME, Visibility.ALL));
+        var locator = new Locator(WebLocatorType.FIELD_NAME, new SearchParameters(FIELD_NAME, Visibility.ALL));
         fieldSteps.doesNotFieldExist(locator);
         verify(baseValidations).assertIfElementDoesNotExist(
                 "A field with attributes Field name: 'fieldName'; Visibility: ALL;", locator);
@@ -83,34 +85,50 @@ class FieldStepsTests
     @Test
     void isFieldFound()
     {
-        Locator locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
+        var locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
         fieldSteps.findFieldBy(locator);
-        verify(baseValidations).assertIfElementExists(A_FIELD_WITH_NAME_FIELD_NAME,
-                locator);
+        verify(baseValidations).assertIfElementExists(A_FIELD_WITH_NAME_FIELD_NAME, locator);
     }
 
     @Test
     void testEnterTextInFieldNotSafari()
     {
-        Locator locator = mock(Locator.class);
+        var locator = mock(Locator.class);
         when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(false);
-        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator))
-                .thenReturn(webElement);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
+        fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
+        verify(webElement).clear();
+        verify(webElement).sendKeys(TEXT);
+    }
+
+    @Test
+    void shouldEnterTextInFieldForNotSafariBrowser()
+    {
+        var locator = mock(Locator.class);
+        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(false);
+        when(baseValidations.assertElementExists(FIELD_TO_ENTER_TEXT, locator)).thenReturn(Optional.of(webElement));
         fieldSteps.enterTextInField(TEXT, locator);
         verify(webElement).clear();
         verify(webElement).sendKeys(TEXT);
     }
 
     @Test
+    void shouldDoNothingIfFieldToEnterTextIsNotFound()
+    {
+        var locator = mock(Locator.class);
+        when(baseValidations.assertElementExists(FIELD_TO_ENTER_TEXT, locator)).thenReturn(Optional.empty());
+        fieldSteps.enterTextInField(TEXT, locator);
+    }
+
+    @Test
     void testEnterTextInFieldIExploreRequireWindowFocusFalse()
     {
-        Locator locator = mock(Locator.class);
+        var locator = mock(Locator.class);
         Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.IE)).thenReturn(true);
         mockRequireWindowFocusOption(false);
-        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator))
-                .thenReturn(webElement);
-        fieldSteps.enterTextInField(TEXT, locator);
-        InOrder inOrder = inOrder(webElement);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
+        fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
+        var inOrder = inOrder(webElement);
         inOrder.verify(webElement).clear();
         inOrder.verify(webElement).sendKeys(TEXT);
     }
@@ -118,14 +136,14 @@ class FieldStepsTests
     @Test
     void testEnterTextInFieldIExploreRequireWindowFocusTrueWithoutReentering()
     {
-        Locator locator = mock(Locator.class);
+        var locator = mock(Locator.class);
         Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.IE)).thenReturn(true);
         mockRequireWindowFocusOption(true);
         when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator))
                 .thenReturn(webElement);
         when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(TEXT);
-        fieldSteps.enterTextInField(TEXT, locator);
-        InOrder inOrder = inOrder(webElement);
+        fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
+        var inOrder = inOrder(webElement);
         inOrder.verify(webElement).clear();
         inOrder.verify(webElement).sendKeys(TEXT);
     }
@@ -133,13 +151,12 @@ class FieldStepsTests
     @Test
     void testEnterTextInFieldIExploreRequireWindowFocusTrueWithReentering()
     {
-        Locator locator = mock(Locator.class);
+        var locator = mock(Locator.class);
         Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.IE)).thenReturn(true);
         mockRequireWindowFocusOption(true);
         when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(StringUtils.EMPTY, TEXT);
-        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator))
-                .thenReturn(webElement);
-        fieldSteps.enterTextInField(TEXT, locator);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
+        fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
         verify(webElement, times(2)).clear();
         verify(webElement, times(2)).sendKeys(TEXT);
     }
@@ -147,13 +164,12 @@ class FieldStepsTests
     @Test
     void testEnterTextInFieldIExploreRequireWindowFocusTrueFieldNotFilledCorrectly()
     {
-        Locator locator = mock(Locator.class);
+        var locator = mock(Locator.class);
         Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.IE)).thenReturn(true);
         mockRequireWindowFocusOption(true);
         when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(StringUtils.EMPTY);
-        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator))
-                .thenReturn(webElement);
-        fieldSteps.enterTextInField(TEXT, locator);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
+        fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
         verify(webElement, times(6)).clear();
         verify(webElement, times(6)).sendKeys(TEXT);
         verify(softAssert).recordFailedAssertion("The element is not filled correctly after 6 typing attempt(s)");
@@ -162,14 +178,13 @@ class FieldStepsTests
     @Test
     void testEnterTextInFieldIExploreRequireWindowFocusTrueFieldIsFilledCorrectlyAfter5Attempts()
     {
-        Locator locator = mock(Locator.class);
+        var locator = mock(Locator.class);
         Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.IE)).thenReturn(true);
         mockRequireWindowFocusOption(true);
         when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(StringUtils.EMPTY,
                 StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, TEXT);
-        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator))
-                .thenReturn(webElement);
-        fieldSteps.enterTextInField(TEXT, locator);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
+        fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
         verify(webElement, times(6)).clear();
         verify(webElement, times(6)).sendKeys(TEXT);
         verifyNoInteractions(softAssert);
@@ -178,12 +193,11 @@ class FieldStepsTests
     @Test
     void testEnterTextInFieldSafariContentEditableFrame()
     {
-        Locator locator = mock(Locator.class);
-        when(webElementActions.isElementContenteditable(webElement)).thenReturn(true);
+        var locator = mock(Locator.class);
+        when(fieldActions.isElementContenteditable(webElement)).thenReturn(true);
         when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(true);
-        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator))
-                .thenReturn(webElement);
-        fieldSteps.enterTextInField(TEXT, locator);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
+        fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
         verify(webElement).clear();
         verify(javascriptActions).executeScript("var element = arguments[0];element.innerHTML = arguments[1];",
                 webElement, TEXT);
@@ -193,12 +207,11 @@ class FieldStepsTests
     @Test
     void testEnterTextInFieldSafariSimpleFrame()
     {
-        Locator locator = mock(Locator.class);
-        when(webElementActions.isElementContenteditable(webElement)).thenReturn(false);
+        var locator = mock(Locator.class);
+        when(fieldActions.isElementContenteditable(webElement)).thenReturn(false);
         when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(true);
-        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator))
-                .thenReturn(webElement);
-        fieldSteps.enterTextInField(TEXT, locator);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
+        fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
         verify(webElement).clear();
         verify(webElement).sendKeys(TEXT);
     }
@@ -206,49 +219,79 @@ class FieldStepsTests
     @Test
     void testEnterTextInFieldInNullElement()
     {
-        Locator locator = mock(Locator.class);
+        var locator = mock(Locator.class);
         when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(null);
-        fieldSteps.enterTextInField(TEXT, locator);
-        verifyNoInteractions(webElementActions, fieldActions, javascriptActions, webDriverManager,
-                softAssert);
+        fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
+        verifyNoInteractions(fieldActions, javascriptActions, webDriverManager, softAssert);
     }
 
     @Test
-    void testEnterTextInFieldInStaleElement()
+    void shouldEnterTextInFieldWhichBecameStaleOnce()
     {
-        Locator locator = mock(Locator.class);
+        var locator = mock(Locator.class);
         when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(false);
-        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator))
-                .thenReturn(webElement);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
         doThrow(StaleElementReferenceException.class).doNothing().when(webElement).sendKeys(TEXT);
-        fieldSteps.enterTextInField(TEXT, locator);
-        verify(webElement).clear();
+        fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
+        verify(webElement, times(2)).clear();
+        verify(webElement, times(2)).sendKeys(TEXT);
+    }
+
+    @Test
+    void shouldFailToEnterTextInFieldWhichIsAlwaysStale()
+    {
+        var locator = mock(Locator.class);
+        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(false);
+        when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
+        var exception1 = new StaleElementReferenceException("one");
+        var exception2 = new StaleElementReferenceException("two");
+        doThrow(exception1, exception2).when(webElement).sendKeys(TEXT);
+        var actual = assertThrows(StaleElementReferenceException.class,
+                () -> fieldSteps.enterTextInFieldLocatedBy(TEXT, locator));
+        assertEquals(exception2, actual);
+        verify(webElement, times(2)).clear();
         verify(webElement, times(2)).sendKeys(TEXT);
     }
 
     @Test
     void testAddText()
     {
-        Locator locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
-        when(baseValidations.assertIfElementExists(A_FIELD_WITH_NAME_FIELD_NAME, locator))
-                .thenReturn(webElement);
-        fieldSteps.addTextToField(TEXT, locator);
-        verify(webElementActions).addText(webElement, TEXT);
+        var locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
+        when(baseValidations.assertIfElementExists(A_FIELD_WITH_NAME_FIELD_NAME, locator)).thenReturn(webElement);
+        fieldSteps.addTextToFieldLocatedBy(TEXT, locator);
+        verify(fieldActions).addText(webElement, TEXT);
     }
 
     @Test
     void testAddTextNullField()
     {
-        fieldSteps.addTextToField(TEXT, mock(Locator.class));
+        fieldSteps.addTextToFieldLocatedBy(TEXT, mock(Locator.class));
         verify(webElement, never()).sendKeys(TEXT);
+    }
+
+    @Test
+    void shouldAddText()
+    {
+        var locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
+        when(baseValidations.assertElementExists(FIELD_TO_ADD_TEXT, locator)).thenReturn(Optional.of(webElement));
+        fieldSteps.addTextToField(TEXT, locator);
+        verify(fieldActions).addText(webElement, TEXT);
+    }
+
+    @Test
+    void shouldDoNothingIfFieldToAddTextIsNotFound()
+    {
+        var locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
+        when(baseValidations.assertElementExists(FIELD_TO_ADD_TEXT, locator)).thenReturn(Optional.empty());
+        fieldSteps.addTextToField(TEXT, locator);
+        verifyNoInteractions(fieldActions);
     }
 
     @Test
     void testClearFieldWithName()
     {
-        Locator locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
-        when(baseValidations.assertIfElementExists(A_FIELD_WITH_NAME_FIELD_NAME,
-                locator)).thenReturn(webElement);
+        var locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
+        when(baseValidations.assertIfElementExists(A_FIELD_WITH_NAME_FIELD_NAME, locator)).thenReturn(webElement);
         fieldSteps.clearFieldLocatedBy(locator);
         verify(webElement).clear();
     }
@@ -261,11 +304,27 @@ class FieldStepsTests
     }
 
     @Test
+    void shouldClearField()
+    {
+        var locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
+        when(baseValidations.assertElementExists(FIELD_TO_CLEAR, locator)).thenReturn(Optional.of(webElement));
+        fieldSteps.clearField(locator);
+        verify(webElement).clear();
+    }
+
+    @Test
+    void shouldDoNothingIfFieldToClearIsNotFound()
+    {
+        var locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
+        when(baseValidations.assertElementExists(FIELD_TO_CLEAR, locator)).thenReturn(Optional.empty());
+        fieldSteps.clearField(locator);
+    }
+
+    @Test
     void testClearFieldWithNameUsingKeyboard()
     {
-        Locator locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
-        when(baseValidations.assertIfElementExists(A_FIELD_WITH_NAME_FIELD_NAME,
-                locator)).thenReturn(webElement);
+        var locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
+        when(baseValidations.assertIfElementExists(A_FIELD_WITH_NAME_FIELD_NAME, locator)).thenReturn(webElement);
         fieldSteps.clearFieldLocatedByUsingKeyboard(locator);
         verify(fieldActions).clearFieldUsingKeyboard(webElement);
     }
@@ -277,10 +336,28 @@ class FieldStepsTests
         verify(webElement, never()).sendKeys(Keys.chord(Keys.CONTROL, "a") + Keys.BACK_SPACE);
     }
 
+    @Test
+    void shouldClearFieldUsingKeyboard()
+    {
+        var locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
+        when(baseValidations.assertElementExists(FIELD_TO_CLEAR, locator)).thenReturn(Optional.of(webElement));
+        fieldSteps.clearFieldUsingKeyboard(locator);
+        verify(fieldActions).clearFieldUsingKeyboard(webElement);
+    }
+
+    @Test
+    void shouldDoNothingIfFieldToClearUsingKeyboardIsNotFound()
+    {
+        var locator = new Locator(WebLocatorType.FIELD_NAME, FIELD_NAME);
+        when(baseValidations.assertElementExists(FIELD_TO_CLEAR, locator)).thenReturn(Optional.empty());
+        fieldSteps.clearFieldUsingKeyboard(locator);
+        verifyNoInteractions(fieldActions);
+    }
+
     private void mockRequireWindowFocusOption(boolean requireWindowFocus)
     {
         Map<String, Object> options = Map.of("requireWindowFocus", requireWindowFocus);
-        Capabilities capabilities = mock(Capabilities.class);
+        var capabilities = mock(Capabilities.class);
         when(capabilities.getCapability("se:ieOptions")).thenReturn(options);
         when(webDriverManager.getCapabilities()).thenReturn(capabilities);
     }
