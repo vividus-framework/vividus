@@ -1,0 +1,145 @@
+=== Locator Types
+
+[cols="2,3,3", options="header"]
+|===
+
+|Type
+|Description
+|Example
+
+
+|`id`
+|id attribute of an element
+|id(submitForm)
+
+|`cssSelector`
+|CSS selector to an element
+|cssSelector(.menu-item)
+
+|`xPath`
+|https://developer.mozilla.org/en-US/docs/Web/XPath[Xpath to locate an element]
+|xpath(//a)
+
+|`tagName`
+|name of an element tagName
+|tagName(a)
+
+|`className`
+|CSS class name
+|className(bold)
+
+|`linkText`
+|text of the link
+|linkText(Google)
+
+|`linkUrl`
+|*href* attribute of the link element
+|linkUrl(/faq)
+
+|`linkUrlPart`
+|part of a *href* attribute of the link element
+|linkUrlPart(faq)
+
+|`caseSensitiveText`
+|case sensitive text of an element
+|caseSensitiveText(Description)
+
+|`caseInsensitiveText`
+|case insensitive text of an element
+|caseInsensitiveText(description)
+
+|`imageSrc`
+|shortcut to a *.//img[@src='<value>>']*
+|imgSrc(/images/kote.png)
+
+|`imageSrcPart`
+|shortcut to a *.//img[contains(@src,'<value>>')]']*
+|imgSrcPart(kote.png)
+
+|`buttonName`
+|elements of type button or input with text or any attribute value
+|buttonName(submit)
+
+|`fieldName`
+|input or textarea with text or any attribute value
+|fieldName(editor)
+
+|`checkboxName`
+|input element with @type="checkbox" and text value
+|checkboxName(allow)
+
+|`elementName`
+|any attribute or text value
+|elementName(OK)
+
+|`shadowCssSelector`
+|chain of css selectors, separated by `;`, where first value - selector for upper shadow host, last value - target element selector
+|shadowCssSelector(.upperHost; #innerHost1; #innerHost2; .targetValue)
+
+|===
+
+include::partial$visibility-types.adoc[]
+
+=== Filter types
+
+The filters are applied after elements search using one of the locators specified above.
+The elements not matching the filter condition are sorted out without any notice.
+
+[cols="1,2,3", options="header"]
+|===
+
+|Filter type
+|Description
+|Example
+
+include::partial$common-filters.adoc[]
+
+|`state`
+|element xref:parameters:state.adoc[State]
+|id(v1)->filter.state(VISIBLE)
+
+|`caseSensitiveText`
+|element text should match case sensitively
+|id(v1)->filter.caseSensitiveText(text)
+
+|`classAttributePart`
+|class attribute should contain part
+|id(v1)->filter.classAttributePart(clazz)
+
+|`linkUrl`
+|*href* attribute of the link element
+|id(v1)->filter.linkUrl(/url)
+
+|`linkUrlPart`
+|part of *href* attribute of the link element
+|id(v1)->filter.linkUrlPart(/url)
+
+|`tooltip`
+|title attribute value
+|id(v1)->filter.tooltip(title)
+
+|`imageSrcPart`
+|src attribute should contain value
+|id(v1)->filter.imageSrcPart(part)
+
+|`placeholder`
+|Placeholder attribute should be equal to a value
+|id(v1)->filter.placeholder(placeholder-value)
+
+|`validationIconSource`
+|CSS property background-image should match
+|id(v1)->filter.validationIconSource(src)
+
+|`fieldText`
+|field text should match expected value
+|id(v1)->filter.fieldText(value)
+
+|`fieldTextPart`
+|field text should contain expected value
+|id(v1)->filter.fieldTextPart(value)
+
+|`dropDownText`
+|any of select options should be equal to a value
+|id(v1)->filter.dropDownText(value)
+
+|===

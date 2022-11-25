@@ -1,0 +1,210 @@
+== Profiles
+
+Profiles allow to choose or parameterize browser that tests run on. See more details on the profiles and nesting strategy on the xref:ROOT:tests-configuration.adoc#_profiles[configuration page].
+
+Web-application plugin contains significant number of built-in profiles. They can be found after plugin installation by the following path in Eclipse IDE:
+[source, DIR]
+----
+Referenced Libraries -> vividus-plugin-web-app-X.Y.Z -> properties -> profile -> web
+----
+
+Let's go through the structure and review its content.
+
+=== Desktop
+
+General place for web profiles. Each of the directory contains browser related properties. This is a place for adjustments for your browser. Add there any properties you need: screen resolution, path to driver or to a custom browser.
+
+==== Configure driver path
+
+While executing tests on the local machine it is allowed to use custom browser
+driver. This approach first requires manually downloading the driver (See
+https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/#quick-reference[Quick Reference Section]
+for download links). The path to the downloaded binary should be configured
+using the following property:
+
+[source, properties]
+----
+web.driver.<browser>.driver-executable-path=/path/to/driver/executable
+----
+
+where `<browser>` is one of the following values:
+
+- `chrome`
+- `firefox`
+- `safari`
+- `iexplore`
+- `edge`
+- `opera`
+
+==== Configure browser path
+
+While executing tests on the local machine it is allowed to configure path to
+browser executable file. In general cases it's not required, installed browsers
+are found automatically (except Opera browser). Also, for example, if browser is
+not installed, but only downloaded and unpacked into some folder, the path to
+the downloaded binary should be configured using the following property:
+
+[source, properties]
+----
+web.driver.<browser>.binary-path=/path/to/custom/browser/executable
+----
+
+where `<browser>` is one of the following values:
+
+- `chrome`
+- `firefox`
+- `edge`
+- `opera`
+
+==== List of desktop profiles
+
+[cols="~a,~a", options="header"]
+|===
+|Profile
+|Example of properties
+
+.^|`web/desktop/chrome`
+|
+[source, properties]
+----
+selenium.grid.platform-name=Windows
+selenium.grid.platform-version=10
+web.driver.chrome.command-line-arguments=--disable-auto-reload
+----
+
+.^|`web/desktop/edge` +
+[WARNING]
+====
+`web/desktop/edge/chromium` profile is deprecated in favor of `web/desktop/edge` and will be removed in VIVIDUS 0.6.0.
+
+EdgeHTML was https://techcommunity.microsoft.com/t5/microsoft-365-blog/new-microsoft-edge-to-replace-microsoft-edge-legacy-with-april-s/ba-p/2114224[retired] some time ago,
+so only Chromium backed Edge is available now, thus there is no need to distinguish Edge builds anymore.
+====
+
+|
+[source, properties]
+----
+selenium.grid.platform-name=macOS
+selenium.grid.platform-version=12.5
+selenium.grid.capabilities.browserName=MicrosoftEdge
+----
+
+.^|`web/desktop/firefox`
+|
+[source, properties]
+----
+selenium.grid.platform-name=Windows
+selenium.grid.platform-version=10
+web.driver.firefox.command-line-arguments=--turbo
+----
+
+.^|`web/desktop/iexplore`
+|
+[source, properties]
+----
+selenium.grid.capabilities.browserName=internet explorer
+web.driver.iexplore.command-line-arguments=-private
+selenium.grid.capabilities.iedriverVersion=3.141.0
+selenium.grid.platform-name=Windows
+selenium.grid.platform-version=7
+----
+
+.^|`web/desktop/opera`
+|
+[source, properties]
+----
+selenium.grid.screen-resolution=1920x1080
+selenium.grid.platform-name=Windows
+selenium.grid.platform-version=10
+----
+
+NOTE: In order to run tests in Opera browser locally, it is required
+to configure <<_configure_browser_path,browser path>>.
+
+.^|`web/desktop/safari`
+|
+[source, properties]
+----
+selenium.grid.platform-name=macOS
+selenium.grid.platform-version=11.00
+----
+
+|===
+
+==== Mobile emulation
+
+. Built-in devices
++
+Chrome allows to emulate view on mobile devices using https://developer.chrome.com/docs/devtools/device-mode/[Device mode]. Such feature is reflected in `mobile_emulation` subdirectory in Profiles. Use device-name property to mention target device:
++
+[source, properties]
+----
+web.driver.CHROME.mobile-emulation.device-name=DEVICE_NAME
+----
+Available for emulation devices you can find in the https://developer.chrome.com/docs/devtools/device-mode/#device[Dimensions list] in chrome.
+
+. Custom devices
++
+In case you need to use https://developer.chrome.com/docs/devtools/device-mode/#responsive[Responsive Viewport Mode] and set up your own device, update the screen resolution in the following properties:
++
+[source, properties]
+----
+web.driver.CHROME.mobile-emulation.width=1440
+web.driver.CHROME.mobile-emulation.height=900
+----
+
+=== Docker
+The profile can be enabled by adding `web/docker` to `configuration.profiles` property. The profile should be used together with the browser profile.
+
+WARNING: Default selenium grid URL is set to `selenium.grid.url=http://localhost:4444/wd/hub`. Don't forget to modify it if your grid is running in a different location.
+
+.Run chrome in docker container
+[source,properties]
+----
+confgiguraiton.profiles=web/docker,web/desktop/chrome
+----
+
+=== Headless
+
+https://en.wikipedia.org/wiki/Headless_browser[Headless mode] is a functionality that allows the execution of a full version of the browser while controlling it programmatically. It can be used without dedicated graphics or display, meaning that it runs without its “head”, the Graphical User Interface (GUI). Update properties in this directory to adjust your headless automation.
+
+=== Phone
+
+Contains phone related properties, for android and iOS devices, including portrait and landscape orientations.
+
+[cols="~a,~a", options="header"]
+|===
+|Profile
+|Example of properties
+
+.^|web/phone
+|
+[source, properties]
+----
+selenium.grid.capabilities.platform=Android
+selenium.grid.capabilities.platformVersion=11.0
+selenium.grid.capabilities.deviceOrientation=portrait
+selenium.grid.capabilities.appiumVersion=1.21.1
+----
+|===
+
+=== Tablet
+
+Similar to the xref:plugins:plugin-web-app.adoc#_phone[Phone] directory, but is designed for tablets properties.
+
+[cols="~a,~a", options="header"]
+|===
+|Profile
+|Example of properties
+
+.^|web/tablet
+|
+[source, properties]
+----
+selenium.grid.capabilities.platformName=iOS
+selenium.grid.capabilities.platformVersion=14.0
+selenium.grid.capabilities.deviceName=iPad
+selenium.grid.capabilities.deviceOrientation=landscape
+selenium.grid.capabilities.appiumVersion=1.21.1
+----
+|===
