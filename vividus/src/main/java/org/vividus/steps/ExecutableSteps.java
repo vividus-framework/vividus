@@ -202,15 +202,16 @@ public class ExecutableSteps
     }
 
     /**
-     * Steps designed to perform steps <b>number</b> times.
-     * Executions number must be in the range from 0 to 50.
+     * Steps designed to perform steps <b>number</b> times. The number of iterations must be in the range from 0 to
+     * 1000.
      * <br> Usage example:
-     * <code>
-     * <br>When I `2` times do:
-     * <br>|step|
-     * <br>|When I enter `text` in field located `By.xpath(//*[@id="identifierId"])`|
-     * </code>
-     * @param number executions number
+     * <pre>
+     * When I `2` times do:
+     * |step                                                                    |
+     * |When I enter `text` in field located by `xpath(//*[@id="identifierId"])`|
+     * </pre>
+     *
+     * @param number         executions number
      * @param stepsToExecute examples table with steps to execute <b>number</b> times
      */
     @When("I `$number` times do:$stepsToExecute")

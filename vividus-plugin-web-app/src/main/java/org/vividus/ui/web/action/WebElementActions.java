@@ -18,25 +18,20 @@ package org.vividus.ui.web.action;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.Browser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.util.FormatUtils;
 
 public class WebElementActions implements IWebElementActions
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebElementActions.class);
     private static final char APOSTROPHE = '\'';
     private static final char QUOTE = '"';
 
-    @Inject private WebJavascriptActions javascriptActions;
-    @Inject private IWebDriverManager webDriverManager;
+    private final WebJavascriptActions javascriptActions;
+
+    public WebElementActions(WebJavascriptActions javascriptActions)
+    {
+        this.javascriptActions = javascriptActions;
+    }
 
     @Override
     public String getCssValue(WebElement element, String propertyName)
@@ -58,35 +53,6 @@ public class WebElementActions implements IWebElementActions
         // CHROME only: The script returns content in single or double quotes depending on the browser
         return content == null || content.isEmpty() || "none".equals(content)
                 ? "" : content.substring(1, content.length() - 1);
-    }
-
-    @Override
-    public void addText(WebElement element, String text)
-    {
-        if (element != null)
-        {
-            String normalizedText = FormatUtils.normalizeLineEndings(text);
-            LOGGER.info("Adding text \"{}\" into the element", normalizedText);
-
-            // workaround for Safari and IE 11
-            // Safari issue: https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/4467
-            // IE 11 issue: https://github.com/SeleniumHQ/selenium/issues/3353
-            boolean workaroundNeeded = webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)
-                    && !element.findElements(By.xpath("//preceding-sibling::head"
-                    + "[descendant::title[contains(text(),'Rich Text')]]")).isEmpty()
-                    && isElementContenteditable(element);
-
-            if (workaroundNeeded)
-            {
-                javascriptActions.executeScript(
-                    "var text=arguments[0].innerHTML;arguments[0].innerHTML = text+arguments[1];", element,
-                    text);
-            }
-            else
-            {
-                element.sendKeys(normalizedText);
-            }
-        }
     }
 
     @Override
@@ -152,11 +118,5 @@ public class WebElementActions implements IWebElementActions
                             + "<= (window.scrollY + window.innerHeight)))")).booleanValue();
         }
         return false;
-    }
-
-    @Override
-    public boolean isElementContenteditable(WebElement element)
-    {
-        return Boolean.parseBoolean(element.getAttribute("contenteditable"));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,13 +39,6 @@ public interface IWebElementActions extends ElementActions
     String getPseudoElementContent(WebElement element);
 
     /**
-     * Enters text in any element without clearing its previous content
-     * @param element Any element to type
-     * @param text Text to type
-     */
-    void addText(WebElement element, String text);
-
-    /**
      * Gets the text from css 'content' value of all pseudo-elements on the page
      * @return the list of text values from the css 'content' value of all the pseudo-elements
      * or empty list if no content found
@@ -66,11 +59,4 @@ public interface IWebElementActions extends ElementActions
      * or empty string if no content found
      */
     String getPageText();
-
-    /**
-     * Checks that the content of the element is editable
-     * @param element element to check
-     * @return true - if the element's content is editable or false - if it's not
-     */
-    boolean isElementContenteditable(WebElement element);
 }

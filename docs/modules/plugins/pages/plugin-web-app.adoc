@@ -474,20 +474,22 @@ selenium.grid.capabilities.appiumVersion=1.21.1
 
 === Click on element
 
-Clicks on an element found by the locator.
+Clicks on the element found by the specified locator.
 
 The atomic actions performed are:
 
-* find an element by the locator;
-* click on the element if it's found, otherwise fail the step;
-* the first two actions are retried once if the https://www.selenium.dev/exceptions/#stale_element_reference[StaleElementReferenceException] is thrown during their execution.
+* find the element by the locator;
+* click on the element if it is found, otherwise the whole step is failed and its execution stops;
+* the first two actions are retried once if the field becomes stale during actions execution in other
+words if https://www.selenium.dev/exceptions/#stale_element_reference[StaleElementReferenceException]
+is occurred at any atomic action.
 
 [source,gherkin]
 ----
 When I click on element located by `$locator`
 ----
 
-* `$locator` - <<_locator>>
+* `$locator` - The <<_locator,locator>> used to find element.
 
 .Click on element
 [source,gherkin]
@@ -515,7 +517,7 @@ Clicks on an element found by the locator.
 When I click on element located `$locator`
 ----
 
-* `$locator` - <<_locator>>
+* `$locator` - The <<_locator,locator>> used to find element.
 
 .Click on element
 [source,gherkin]
@@ -707,7 +709,7 @@ Scrolls an element into the view.
 ----
 When I scroll element located `$locator` into view
 ----
-* `$locator` - <<_locator>>
+* `$locator` - The <<_locator,locator>> used to find element.
 
 .Scroll button into view
 [source,gherkin]
@@ -879,6 +881,93 @@ When I scan barcode from context and save result to scenario variable `qrCodeLin
 Then `${qrCodeLink}` is equal to `https://www.example.com`
 ----
 
+=== Field Steps
+
+Fields are elements where users can enter data. The most typical fields are:
+
+* https://www.w3schools.com/tags/tag_input.asp[`input`],
+* https://www.w3schools.com/tags/tag_textarea.asp[`textarea`],
+* CKE editor (it usually should be located via `body` tag, that is contained in a frame as a separate HTML document).
+
+==== Enter text in field
+
+Enters the text in a field found by the specified locator.
+
+The atomic actions performed are:
+
+* find the field by the locator;
+* clear the field if it is found, otherwise the whole step is failed and its execution stops;
+* type the text in the field;
+* the first three actions are retried once if the field becomes stale during actions execution in other
+words if https://www.selenium.dev/exceptions/#stale_element_reference[StaleElementReferenceException]
+is thrown at any atomic action.
+
+[source,gherkin]
+----
+When I enter `$text` in field located by `$locator`
+----
+* `$text` - The text to enter in the field.
+* `$locator` - The <<_locator,locator>> used to find field.
+
+.Add text 'pa$$w0rd' in password field
+[source,gherkin]
+----
+When I enter `pa$$w0rd` in field located by `id(password)`
+----
+
+==== Add text to field
+
+Enters the text in the field found by the specified locator without clearing of
+the previous content.
+
+[source,gherkin]
+----
+When I add `$text` to field located by `$locator`
+----
+* `$text` - The text to add to the field.
+* `$locator` - The <<_locator,locator>> used to find field.
+
+.Add text 'name' to username field
+[source,gherkin]
+----
+When I add `name` to field located by `id(username)`
+----
+
+==== Clear field
+
+Clears the field found by the specified locator. The step does not trigger any
+keyboard or mouse events on the field.
+
+[source,gherkin]
+----
+When I clear field located by `$locator`
+----
+* `$locator` - The <<_locator,locator>> used to find field.
+
+.Clear username field
+[source,gherkin]
+----
+When I clear field located by `id(username)`
+----
+
+==== Clear field using keyboard
+
+Clears the field found by the specified locator using keyboard. The step
+simulates user action by pressing buttons kbd:[Ctrl+A] and then kbd:[Backspace]
+that allows to trigger keyboard events on the field.
+
+[source,gherkin]
+----
+When I clear field located by `$locator` using keyboard
+----
+* `$locator` - The <<_locator,locator>> used to find field.
+
+.Clear password field using keyboard
+[source,gherkin]
+----
+When I clear field located by `id(password)` using keyboard
+----
+
 === Dropdown Steps
 ==== Validate available options
 
@@ -889,7 +978,7 @@ of the expected options.
 ----
 Then dropdown located `$locator` contains options: $option
 ----
-* `$locator` - <<_locator>>
+* `$locator` - The <<_locator,locator>> used to find dropdown.
 * `$options` - examples table describing expected options
 
 .Validate dropdown contains a set of colors
@@ -913,7 +1002,7 @@ Verifies if dropdown located by locator exists and first selected option.
 ----
 Then dropdown located `$locator` exists and selected option is `$option`
 ----
-* `$locator` - <<_locator>>
+* `$locator` - The <<_locator,locator>> used to find dropdown.
 * `$option` - first selected option
 
 .Dropdown.story
@@ -935,7 +1024,7 @@ Step will fail if target dropdown is not multi-select
 When I add `$option` to selection in dropdown located `$locator`
 ----
 * `$option` - option to select
-* `$locator` - <<_locator>>
+* `$locator` - The <<_locator,locator>> used to find dropdown.
 
 .Dropdown.story
 [source,gherkin]
@@ -956,7 +1045,7 @@ Does not support multi-selection
 When I select `$option` in dropdown located `$locator``
 ----
 * `$option` - option to select
-* `$locator` - <<_locator>>
+* `$locator` - The <<_locator,locator>> used to find dropdown.
 
 .Dropdown.story
 [source,gherkin]
@@ -1247,7 +1336,7 @@ Starts video playback.
 ----
 When I play video in video player located `$locator`
 ----
-* `$locator` - <<_locator>>
+* `$locator` - The <<_locator,locator>> used to find video player.
 
 ==== Pause Video
 
@@ -1257,7 +1346,7 @@ Pauses video playback.
 ----
 When I pause video in video player located `$locator`
 ----
-* `$locator` - <<_locator>>
+* `$locator` - The <<_locator,locator>> used to find video player.
 
 ==== Rewind Video
 
@@ -1268,7 +1357,7 @@ Rewinds video to the desired mark in seconds.
 When I rewind time to `$number` seconds in video player located `$locator`
 ----
 * `$number` - time mark in seconds
-* `$locator` - <<_locator>>
+* `$locator` - The <<_locator,locator>> used to find video player.
 
 ==== Get info
 Saves video player info: *duration*, *currentTime*, *src*, *networkState*.
@@ -1279,7 +1368,7 @@ For more information about the properties see https://www.w3schools.com/tags/ref
 When I save info from video player located `$locator` to $scopes variable `$variableName`
 ----
 
-* `$locator` - <<_locator>>
+* `$locator` - The <<_locator,locator>> used to find video player.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The variable name to save the info. If the variable name is *info*, the following variables will be created:
 ** `${info.src}`- The current source of the audio/video element
@@ -1322,7 +1411,7 @@ When I find $comparisonRule '$number' elements by $locator and for each element 
 
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
 * `$number` - The number of elements to find.
-* `$locator` - <<_locator>>.
+* `$locator` - The <<_locator,locator>> used to find elements.
 * `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
 
 .Script type check
@@ -1551,7 +1640,7 @@ _Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
 Then element located '$locator' disappears in '$timeout'
 ----
 
-* `$locator` - <<_locator>>.
+* `$locator` - The <<_locator,locator>> used to element.
 * `$timeout` - The maximum time to wait for the element disappearance in {iso-date-format-link} format.
 
 .Click on the button and waiting for disappearance of the element for 3 seconds

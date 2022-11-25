@@ -19,40 +19,27 @@ package org.vividus.ui.web.action;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.Browser;
-import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.util.FormatUtils;
 
 @ExtendWith(MockitoExtension.class)
 class WebElementActionsTests
 {
-    private static final By RICH_TEXT_EDITOR_LOCATOR = By
-            .xpath("//preceding-sibling::head[descendant::title[contains(text(),'Rich Text')]]");
-    private static final String TRUE = "true";
     private static final String PROPERTY_NAME = "someName";
-    private static final String CONTENTEDITABLE = "contenteditable";
     private static final String SCRIPT_PROPERTY_VALUE_CONTENT_AFTER =
             "return window.getComputedStyle(arguments[0],':after').getPropertyValue('content')";
     private static final String SCRIPT_PROPERTY_VALUE_CONTENT_BEFORE =
@@ -67,8 +54,6 @@ class WebElementActionsTests
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private WebElement webElement;
     @Mock private Point point;
-    @Mock private IWebDriverManager webDriverManager;
-
     @InjectMocks private WebElementActions webElementActions;
 
     @Test
@@ -76,7 +61,7 @@ class WebElementActionsTests
     {
         when(javascriptActions.executeScript(SCRIPT_PROPERTY_VALUE_CONTENT_BEFORE, webElement)).thenReturn(
                 QUOTE + TEXT + QUOTE);
-        String contentActual = webElementActions.getPseudoElementContent(webElement);
+        var contentActual = webElementActions.getPseudoElementContent(webElement);
         assertEquals(TEXT, contentActual, CONTENT_FOUND_CORRECT);
     }
 
@@ -86,7 +71,7 @@ class WebElementActionsTests
         when(javascriptActions.executeScript(SCRIPT_PROPERTY_VALUE_CONTENT_BEFORE, webElement)).thenReturn(null);
         when(javascriptActions.executeScript(SCRIPT_PROPERTY_VALUE_CONTENT_AFTER, webElement)).thenReturn(
                 QUOTE + TEXT + QUOTE);
-        String contentActual = webElementActions.getPseudoElementContent(webElement);
+        var contentActual = webElementActions.getPseudoElementContent(webElement);
         assertEquals(TEXT, contentActual, CONTENT_FOUND_CORRECT);
     }
 
@@ -95,7 +80,7 @@ class WebElementActionsTests
     {
         when(javascriptActions.executeScript(SCRIPT_PROPERTY_VALUE_CONTENT_BEFORE, webElement)).thenReturn(null);
         when(javascriptActions.executeScript(SCRIPT_PROPERTY_VALUE_CONTENT_AFTER, webElement)).thenReturn(null);
-        String contentActual = webElementActions.getPseudoElementContent(webElement);
+        var contentActual = webElementActions.getPseudoElementContent(webElement);
         assertEquals("", contentActual, CONTENT_FOUND_CORRECT);
     }
 
@@ -105,7 +90,7 @@ class WebElementActionsTests
     {
         when(javascriptActions.executeScript(SCRIPT_PROPERTY_VALUE_CONTENT_BEFORE, webElement))
                 .thenReturn(contentValue);
-        String contentActual = webElementActions.getPseudoElementContent(webElement);
+        var contentActual = webElementActions.getPseudoElementContent(webElement);
         assertEquals("", contentActual, CONTENT_FOUND_CORRECT);
     }
 
@@ -119,7 +104,7 @@ class WebElementActionsTests
     @Test
     void testGetAllPseudoElementsContent()
     {
-        String script = "var nodeList = document.querySelectorAll('*');var i;var contentList = [];"
+        var script = "var nodeList = document.querySelectorAll('*');var i;var contentList = [];"
                 + "for (i = 0; i < nodeList.length; i++){"
                 + "var valueBefore = window.getComputedStyle(nodeList[i],':before').getPropertyValue('content');"
                 + "var valueAfter = window.getComputedStyle(nodeList[i],':after').getPropertyValue('content');"
@@ -199,63 +184,6 @@ class WebElementActionsTests
     }
 
     @Test
-    void testAddTextSafariOrIExploreContenteditableRichText()
-    {
-        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)).thenReturn(true);
-        when(webElement.getAttribute(CONTENTEDITABLE)).thenReturn(TRUE);
-        when(webElement.findElements(RICH_TEXT_EDITOR_LOCATOR)).thenReturn(List.of(webElement));
-        webElementActions.addText(webElement, TEXT);
-        verifyRichTextNotEditable();
-    }
-
-    @Test
-    void testAddTextSafariOrIExploreNotContextEditableNotRichText()
-    {
-        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)).thenReturn(true);
-        webElementActions.addText(webElement, TEXT);
-        InOrder inOrder = verifyWebElementInOrderInvocation();
-        inOrder.verify(webElement).sendKeys(TEXT);
-        verifyNoInteractions(javascriptActions);
-    }
-
-    @Test
-    void testAddTextSafariOrIExploreRichTextNotEditable()
-    {
-        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)).thenReturn(true);
-        when(webElement.findElements(RICH_TEXT_EDITOR_LOCATOR)).thenReturn(List.of(webElement));
-        webElementActions.addText(webElement, TEXT);
-        InOrder inOrder = verifyWebElementInOrderInvocation();
-        inOrder.verify(webElement).sendKeys(TEXT);
-        verifyNoInteractions(javascriptActions);
-    }
-
-    @Test
-    void testAddTextNotSafari()
-    {
-        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(false);
-        webElementActions.addText(webElement, TEXT);
-        verifyNoInteractions(javascriptActions);
-        verify(webElement).sendKeys(TEXT);
-        verifyNoMoreInteractions(webElement);
-    }
-
-    @Test
-    void testAddTextElementIsNull()
-    {
-        String normalizedText = FormatUtils.normalizeLineEndings(TEXT);
-        webElementActions.addText(null, TEXT);
-        verify(webElement, never()).sendKeys(normalizedText);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { TRUE, "false" })
-    void testIsElementContenteditable(String result)
-    {
-        when(webElement.getAttribute(CONTENTEDITABLE)).thenReturn(result);
-        assertEquals(Boolean.valueOf(result), webElementActions.isElementContenteditable(webElement));
-    }
-
-    @Test
     void shouldCheckIsElementVisible()
     {
         when(webElement.isDisplayed()).thenReturn(true);
@@ -275,21 +203,5 @@ class WebElementActionsTests
 
         verify(javascriptActions).scrollIntoView(webElement, true);
         verifyNoMoreInteractions(javascriptActions);
-    }
-
-    private void verifyRichTextNotEditable()
-    {
-        verify(javascriptActions).executeScript(
-                "var text=arguments[0].innerHTML;arguments[0].innerHTML = text+arguments[1];", webElement, TEXT);
-        InOrder inOrder = verifyWebElementInOrderInvocation();
-        inOrder.verify(webElement).getAttribute(CONTENTEDITABLE);
-        verifyNoMoreInteractions(webElement);
-    }
-
-    private InOrder verifyWebElementInOrderInvocation()
-    {
-        InOrder inOrder = inOrder(webElement);
-        inOrder.verify(webElement).findElements(RICH_TEXT_EDITOR_LOCATOR);
-        return inOrder;
     }
 }
