@@ -22,7 +22,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.Point;
@@ -121,37 +120,35 @@ public class TouchSteps
     public void swipeToElement(SwipeDirection direction, Locator locator, Duration swipeDuration)
     {
         locator.getSearchParameters().setWaitForElement(false);
-        Supplier<Rectangle> swipeArea = createSwipeArea();
+        Rectangle swipeArea = createSwipeArea();
         List<WebElement> elements = new ArrayList<>(searchActions.findElements(locator));
-        if (elements.isEmpty())
+        if (!containsInteractableElement(elements, swipeArea, direction))
         {
-            Rectangle swipeAreaRectangle = swipeArea.get();
-            touchActions.swipeUntil(direction, swipeDuration, swipeAreaRectangle, () ->
+            touchActions.swipeUntil(direction, swipeDuration, swipeArea, () ->
             {
                 if (elements.isEmpty())
                 {
                     elements.addAll(searchActions.findElements(locator));
                 }
-                return !elements.isEmpty() && isElementInteractable(elements.get(0).getRect(), swipeAreaRectangle,
-                        direction);
+                return containsInteractableElement(elements, swipeArea, direction);
             });
         }
         if (baseValidations.assertElementsNumber(String.format("The element by locator %s exists", locator), elements,
                 ComparisonRule.EQUAL_TO, 1) && (SwipeDirection.UP == direction || SwipeDirection.DOWN == direction))
         {
-            adjustVerticalPosition(elements.get(0), direction, swipeArea.get(), swipeDuration);
+            adjustVerticalPosition(elements.get(0), direction, swipeArea, swipeDuration);
         }
     }
 
-    private Supplier<Rectangle> createSwipeArea()
+    private Rectangle createSwipeArea()
     {
         SearchContext searchContext = uiContext.getSearchContext();
         if (searchContext instanceof WebElement)
         {
             WebElement contextElement = (WebElement) searchContext;
-            return contextElement::getRect;
+            return contextElement.getRect();
         }
-        return () -> new Rectangle(new Point(0, 0), genericWebDriverManager.getSize());
+        return new Rectangle(new Point(0, 0), genericWebDriverManager.getSize());
     }
 
     private void adjustVerticalPosition(WebElement element, SwipeDirection direction, Rectangle swipeArea,
@@ -198,5 +195,12 @@ public class TouchSteps
     {
         int coordinate = direction.isVertical() ? elementRectangle.getY() : elementRectangle.getX();
         return lowerBoundary ? coordinate : coordinate + direction.getAxisLength(elementRectangle);
+    }
+
+    private boolean containsInteractableElement(List<WebElement> elements, Rectangle swipeAreaRectangle,
+            SwipeDirection direction)
+    {
+        return !elements.isEmpty() && isElementInteractable(elements.get(0).getRect(), swipeAreaRectangle,
+                direction);
     }
 }

@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -237,9 +238,14 @@ class TouchStepsTests
     @ValueSource(strings = {"UP", "DOWN"})
     void shouldNotSwipeToElementIfItAlreadyExists(SwipeDirection swipeDireciton)
     {
-        mockScreenSize();
         WebElement element = mock(WebElement.class);
-        when(element.getLocation()).thenReturn(new Point(-1, 500));
+        when(element.getLocation()).thenReturn(new Point(10, 500));
+        when(element.getRect()).thenReturn(new Rectangle(10, 500, 10, 10));
+        WebElement searchContext = mock(WebElement.class);
+        Point point = new Point(5, 5);
+        Dimension contextDimension = new Dimension(1920, 1080);
+        when(searchContext.getRect()).thenReturn(new Rectangle(point, contextDimension));
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
         mockAssertElementsNumber(List.of(element), true);
         when(searchActions.findElements(locator)).thenReturn(List.of(element));
         SearchParameters parameters = initSwipeMocks();
@@ -256,11 +262,36 @@ class TouchStepsTests
         initSwipeMocks();
         WebElement element = mock(WebElement.class);
         mockAssertElementsNumber(List.of(element), true);
-
+        when(element.getRect()).thenReturn(new Rectangle(10, 500, 10, 10));
+        WebElement searchContext = mock(WebElement.class);
+        Point point = new Point(5, 5);
+        Dimension contextDimension = new Dimension(1920, 1080);
+        when(searchContext.getRect()).thenReturn(new Rectangle(point, contextDimension));
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
         when(searchActions.findElements(locator)).thenReturn(List.of(element));
 
         touchSteps.swipeToElement(swipeDireciton, locator, Duration.ZERO);
         verifyNoInteractions(genericWebDriverManager);
+    }
+
+    @Test
+    void shouldSwipeToElementIfItAlreadyExistsButOutOfArea()
+    {
+        WebElement element = mock(WebElement.class);
+        when(element.getRect()).thenReturn(new Rectangle(1, 1, 10, 10));
+        WebElement searchContext = mock(WebElement.class);
+        Point point = new Point(50, 0);
+        Dimension contextDimension = new Dimension(1920, 1080);
+        when(searchContext.getRect()).thenReturn(new Rectangle(point, contextDimension));
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
+        mockAssertElementsNumber(List.of(element), true);
+        when(searchActions.findElements(locator)).thenReturn(List.of(element));
+        SearchParameters parameters = initSwipeMocks();
+        doNothing().when(touchActions).swipeUntil(eq(SwipeDirection.RIGHT), eq(Duration.ZERO), any(Rectangle.class),
+                any(BooleanSupplier.class));
+
+        touchSteps.swipeToElement(SwipeDirection.RIGHT, locator, Duration.ZERO);
+        verifyNoMoreInteractions(parameters);
     }
 
     @Test
