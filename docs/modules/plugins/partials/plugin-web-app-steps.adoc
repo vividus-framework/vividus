@@ -2,7 +2,9 @@
 :popup-alert: https://www.w3schools.com/js/js_popup.asp
 :close-spec: https://w3c.github.io/webdriver/webdriver-spec.html#close-window[close]
 
-=== Click on element
+=== Clicking steps
+
+==== Click on element
 
 Clicks on the element found by the specified locator.
 
@@ -27,44 +29,36 @@ When I click on element located by `$locator`
 When I click on element located by `name(Submit)`
 ----
 
-=== Open URL in a new tab
+==== Click on element without retry
 
-Opens a new tab, switches to the opened tab and loads the given URL
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0.
+The replacement is <<_click_on_element>>.
+The replacement pattern is:
+[source,gherkin]
+----
+When I click on element located by `<locator>`
+----
+====
+
+Clicks on an element found by the locator.
 
 [source,gherkin]
 ----
-When I open URL `$URL` in new window
+When I click on element located `$locator`
 ----
-* `$URL` - The URL to open
 
-.Open docs in a new tab.story
+* `$locator` - The <<_locator,locator>> used to find element.
+
+.Click on element
 [source,gherkin]
 ----
-When I open URL `https://docs.vividus.dev` in new window
+When I click on element located `name(Submit)`
 ----
 
-=== Close current window
-
-Closes the current window and switches to the previous window.
-
-[source,gherkin]
-----
-When I close the current window
-----
-
-IMPORTANT: Handling {popup-alert}[alerts] displayed with '{onbeforeunload-event}' events is not implied by the WebDriver specification to {close-spec} window. For handling alerts use step based on JavaScript '<<_close_current_window_with_possibility_to_handle_alert>>'.
-
-WARNING: This step can only be applied to a session with multiple windows open.
-
-.Open URL in new tab, close it and switch to the previous page
-[source,gherkin]
-----
-Given I am on a page with the URL 'https://example.com/'
-When I open URL `https://example.com/contact-us` in new window
-When I close the current window
-----
-
-=== Scroll context
+=== Scrolling steps
+==== Scroll context
 
 Scrolls the context to an edge
 
@@ -88,7 +82,7 @@ When I change context to element located `id(login)`
 When I scroll context to BOTTOM edge
 ----
 
-=== Scroll element into view
+==== Scroll element into view
 
 Scrolls an element into the view.
 
@@ -96,12 +90,105 @@ Scrolls an element into the view.
 ----
 When I scroll element located `$locator` into view
 ----
-* `$locator` - <<_locator>>
+* `$locator` - The <<_locator,locator>> used to find element.
 
 .Scroll button into view
 [source,gherkin]
 ----
 When I scroll element located `id(way_down_button)` into view
+----
+
+=== Tab steps
+==== Open a new tab
+
+Opens a new browser tab and switches the focus for future commands to this tab.
+
+[source,gherkin]
+----
+When I open new tab
+----
+
+.Open page in a new tab
+[source,gherkin]
+----
+When I open new tab
+Given I am on a page with the URL 'https://docs.vividus.dev/'
+----
+
+==== Open URL in a new tab
+
+Opens a new tab, switches the focus to this tab and loads the given URL.
+
+[IMPORTANT]
+====
+The key difference of this step from the <<_open_a_new_tab,previous one openning a new tab>>
+is that this step _inherits_ the state of the previous page, i.e.:
+
+* new tab will have acces to the <<_web_storage_steps,session storage>> of the previous tab,
+* it will be possible <<_close_current_tab_with_possibility_to_handle_alert,to handle alerts appearing on tab closing>>.
+====
+
+[source,gherkin]
+----
+When I open URL `$URL` in new window
+----
+* `$URL` - The URL to open.
+
+.Open docs in a new tab
+[source,gherkin]
+----
+When I open URL `https://docs.vividus.dev` in new window
+----
+
+==== Close current tab
+
+Closes the current tab and switches to the previous tab.
+
+[source,gherkin]
+----
+When I close the current window
+----
+
+IMPORTANT: Handling {popup-alert}[alerts] displayed with '{onbeforeunload-event}' events is not implied by the WebDriver specification to {close-spec} window. For handling alerts use step based on JavaScript '<<_close_current_tab_with_possibility_to_handle_alert>>'.
+
+NOTE: This step can only be applied to a session with multiple tabs open.
+
+.Open URL in new tab, close it and switch to the previous page
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com/'
+When I open URL `https://example.com/contact-us` in new window
+When I close the current window
+----
+
+==== Close current tab with possibility to handle alert
+
+Trying to close the current tab with '{onbeforeunload-event}' events handling.
+
+* If an {popup-alert}[alert] window is opened via '{onbeforeunload-event}' event, it must be checked and handled in the subsequent steps.
+* If an {popup-alert}[alert] window is not opened, the step closes the current window and switches to the previous window.
+
+[source,gherkin]
+----
+When I attempt to close current window with possibility to handle alert
+----
+
+IMPORTANT: This step can only be used if the current tab was opened via the step <<_open_url_in_a_new_tab,``When I open URL \`$pageUrl` in new window``>>.
+
+NOTE: If you confirm window close in {popup-alert}[alert], the tab will be closed, and you will need to switch to current tab using the following step: `When I switch to window with title that $stringComparisonRule `$windowName``.
+
+.Checking for an alert when trying to close a window with form
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com/'
+When I open URL `https://example.com/form` in new window
+When I click on element located by `xpath(//*[@id='form-edit'])`
+When I execute sequence of actions:
+|type      |argument    |
+|ENTER_TEXT|changed text|
+When I attempt to close current window with possibility to handle alert
+Then an alert is present
+When I accept alert with message which matches `.*`
 ----
 
 === Execute sequence of actions
@@ -246,7 +333,7 @@ Then there are no browser console $logLevels
 .Validate absence of JS errors
 [source,gherkin]
 ----
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
 Then there are no browser console ERRORS
 ----
 
@@ -264,7 +351,7 @@ Then there are no browser console $logLevels by regex '$pattern'
 .Validate absence of JS error referencing user
 [source,gherkin]
 ----
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
 Then there are no browser console ERRORS by regex '.*user.*'
 ----
 
@@ -282,7 +369,7 @@ Then there are browser console $logLevels by regex '$pattern'
 .Validate presence of JS errors referencing user
 [source,gherkin]
 ----
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
 Then there are browser console ERRORS by regex '.*user.*'
 ----
 
@@ -303,7 +390,7 @@ When I wait until browser console $logEntries by regex `$regex` appear and save 
 
 .Wait for application readiness
 ----
-Given I am on a page with the URL 'https://vividus-test-site.herokuapp.com/'
+Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
 When I wait until browser console infos by regex `.*Application ready.*` appear and save all entries into scenario variable `logs`
 Then `${logs}` matches `.*Application ready in \d+ seconds.*`
 ----
@@ -329,7 +416,7 @@ When I find $comparisonRule '$number' elements by $locator and for each element 
 
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
 * `$number` - The number of elements to find.
-* `$locator` - <<_locator>>.
+* `$locator` - The <<_locator,locator>> used to find elements.
 * `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
 
 .Script type check
