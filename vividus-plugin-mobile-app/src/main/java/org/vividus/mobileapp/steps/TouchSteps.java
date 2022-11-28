@@ -120,8 +120,8 @@ public class TouchSteps
     public void swipeToElement(SwipeDirection direction, Locator locator, Duration swipeDuration)
     {
         locator.getSearchParameters().setWaitForElement(false);
-        Rectangle swipeArea = createSwipeArea();
         List<WebElement> elements = new ArrayList<>(searchActions.findElements(locator));
+        Rectangle swipeArea = getSearchContextRectangle();
         if (!containsInteractableElement(elements, swipeArea, direction))
         {
             touchActions.swipeUntil(direction, swipeDuration, swipeArea, () ->
@@ -140,7 +140,7 @@ public class TouchSteps
         }
     }
 
-    private Rectangle createSwipeArea()
+    private Rectangle getSearchContextRectangle()
     {
         SearchContext searchContext = uiContext.getSearchContext();
         if (searchContext instanceof WebElement)
@@ -180,6 +180,13 @@ public class TouchSteps
         return baseValidations.assertElementExists("The element to tap", locator);
     }
 
+    private boolean containsInteractableElement(List<WebElement> elements, Rectangle swipeAreaRectangle,
+            SwipeDirection direction)
+    {
+        return !elements.isEmpty() && isElementInteractable(elements.get(0).getRect(), swipeAreaRectangle,
+                direction);
+    }
+
     private boolean isElementInteractable(Rectangle elementRectangle, Rectangle swipeArea, SwipeDirection direction)
     {
         int elementBoundaryCoordinate = getBoundaryCoordinate(elementRectangle, direction, direction.isBackward());
@@ -195,12 +202,5 @@ public class TouchSteps
     {
         int coordinate = direction.isVertical() ? elementRectangle.getY() : elementRectangle.getX();
         return lowerBoundary ? coordinate : coordinate + direction.getAxisLength(elementRectangle);
-    }
-
-    private boolean containsInteractableElement(List<WebElement> elements, Rectangle swipeAreaRectangle,
-            SwipeDirection direction)
-    {
-        return !elements.isEmpty() && isElementInteractable(elements.get(0).getRect(), swipeAreaRectangle,
-                direction);
     }
 }
