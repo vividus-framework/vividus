@@ -60,7 +60,6 @@ class DropDownTextFilterTests
         WebElement option = mock(WebElement.class);
         List<WebElement> options = List.of(option);
         when(webElement.getTagName()).thenReturn(SELECT);
-        when(webElement.isEnabled()).thenReturn(true);
         when(webElement.findElements(By.tagName(OPTION))).thenReturn(options);
         when(option.isSelected()).thenReturn(false);
         List<WebElement> webElements = List.of(webElement);
@@ -104,7 +103,6 @@ class DropDownTextFilterTests
         WebElement option = mock(WebElement.class);
         List<WebElement> options = Collections.singletonList(option);
         when(webElement.getTagName()).thenReturn(SELECT);
-        when(webElement.isEnabled()).thenReturn(true);
         when(webElement.findElements(By.tagName(OPTION))).thenReturn(options);
         when(option.getText()).thenReturn(SOME_TEXT);
         when(option.isSelected()).thenReturn(true);

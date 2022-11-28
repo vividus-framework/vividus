@@ -35,7 +35,9 @@ public class MobileViewportShootingStrategy extends SimpleShootingStrategy
     {
         // Get screenshot without status bar
         String base64Png = (String) ((JavascriptExecutor) wd).executeScript("mobile:viewportScreenshot");
-        byte[] bytes = OutputType.BYTES.convertFromBase64Png(base64Png);
+        // https://github.com/SeleniumHQ/selenium/issues/11168
+        String rfc4648Base64 = base64Png.replaceAll("\\r?\\n", "");
+        byte[] bytes = OutputType.BYTES.convertFromBase64Png(rfc4648Base64);
         try
         {
             return ImageTool.toBufferedImage(bytes);
