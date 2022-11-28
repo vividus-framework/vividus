@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.time.ZoneId;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.vividus.util.DateUtils;
 
 class EpochExpressionProcessorsTests
 {
     private static final String ISO_DATE_TIME = "1993-04-16T00:00:00";
-    private static final String EPOCH = "734918400";
 
     private final EpochExpressionProcessors processor = new EpochExpressionProcessors(new DateUtils(ZoneId.of("UTC")));
 
     @ParameterizedTest
     @CsvSource({
-            ISO_DATE_TIME + ", " + EPOCH,
+            "1993-04-16T00:00:00,       734918400",
             "2020-12-11T18:43:05+05:30, 1607692385"
     })
     void testExecuteMatchingExpressionToEpoch(String date, String expectedEpoch)
@@ -43,15 +42,21 @@ class EpochExpressionProcessorsTests
         assertEquals(Optional.of(expectedEpoch), processor.execute(String.format("toEpochSecond(%s)", date)));
     }
 
-    @Test
-    void testExecuteMatchingExpressionFromEpoch()
+    @ParameterizedTest
+    @CsvSource({
+            "1.669640468E9, 2022-11-28T13:01:08",
+            "734918400,     1993-04-16T00:00:00"
+    })
+    void testExecuteMatchingExpressionFromEpoch(String epoch, String expectedDate)
     {
-        assertEquals(Optional.of(ISO_DATE_TIME), processor.execute(String.format("fromEpochSecond(%s)", EPOCH)));
+        assertEquals(Optional.of(expectedDate), processor.execute(String.format("fromEpochSecond(%s)", epoch)));
     }
 
-    @Test
-    void testExecuteNonMatchingExpression()
+    @ParameterizedTest
+    @ValueSource(strings = { "fromEpoch", "toEpoch" })
+    void testExecuteNonMatchingExpression(String invalidExpressionName)
     {
-        assertEquals(Optional.empty(), processor.execute(String.format("toEpoch(%s)", ISO_DATE_TIME)));
+        assertEquals(Optional.empty(),
+                processor.execute(String.format("%s(%s)", invalidExpressionName, ISO_DATE_TIME)));
     }
 }

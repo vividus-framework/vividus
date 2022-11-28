@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.vividus.expression;
 
-import static java.lang.Long.parseLong;
-
+import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -34,7 +33,9 @@ public class EpochExpressionProcessors extends DelegatingExpressionProcessor<Str
             new UnaryExpressionProcessor("toEpochSecond",
                 arg -> String.valueOf(dateUtils.parseDateTime(arg, DateTimeFormatter.ISO_DATE_TIME).toEpochSecond())),
             new UnaryExpressionProcessor("fromEpochSecond",
-                arg -> DateTimeFormatter.ISO_DATE_TIME.format(dateUtils.fromEpochSecond(parseLong(arg))))
+                arg -> DateTimeFormatter.ISO_DATE_TIME.format(
+                        dateUtils.fromEpochSecond(new BigDecimal(arg).longValueExact())
+                ))
             ));
     }
 }
