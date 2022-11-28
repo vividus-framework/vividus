@@ -1,0 +1,16 @@
+= Web Testing
+:noindex:
+
+:plugin-short-name: web-app
+
+include::plugins:partial$plugin-installation.adoc[]
+
+include::plugins:partial$plugin-web-app-profiles.adoc[]
+
+== Locator
+include::plugins:partial$plugin-web-app-locators.adoc[]
+
+== Steps
+NOTE: For the full list of web-related steps, please see xref:plugins:plugin-web-app.adoc#_steps[Web Application plugin documentation].
+
+include::plugins:partial$plugin-web-app-steps.adoc[]

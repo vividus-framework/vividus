@@ -1,0 +1,429 @@
+:onbeforeunload-event: https://www.w3schools.com/jsref/event_onbeforeunload.asp[onbeforeunload]
+:popup-alert: https://www.w3schools.com/js/js_popup.asp
+:close-spec: https://w3c.github.io/webdriver/webdriver-spec.html#close-window[close]
+
+=== Clicking steps
+
+==== Click on element
+
+Clicks on the element found by the specified locator.
+
+The atomic actions performed are:
+
+* find the element by the locator;
+* click on the element if it is found, otherwise the whole step is failed and its execution stops;
+* the first two actions are retried once if the field becomes stale during actions execution in other
+words if https://www.selenium.dev/exceptions/#stale_element_reference[StaleElementReferenceException]
+is occurred at any atomic action.
+
+[source,gherkin]
+----
+When I click on element located by `$locator`
+----
+
+* `$locator` - The <<_locator,locator>> used to find element.
+
+.Click on element
+[source,gherkin]
+----
+When I click on element located by `name(Submit)`
+----
+
+==== Click on element without retry
+
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0.
+The replacement is <<_click_on_element>>.
+The replacement pattern is:
+[source,gherkin]
+----
+When I click on element located by `<locator>`
+----
+====
+
+Clicks on an element found by the locator.
+
+[source,gherkin]
+----
+When I click on element located `$locator`
+----
+
+* `$locator` - The <<_locator,locator>> used to find element.
+
+.Click on element
+[source,gherkin]
+----
+When I click on element located `name(Submit)`
+----
+
+=== Scrolling steps
+==== Scroll context
+
+Scrolls the context to an edge
+
+[source,gherkin]
+----
+When I scroll context to $scrollDirection edge
+----
+* `$scrollDirection` - the direction of the scroll. One of:
+** `LEFT` - start of a page/element horizontally
+** `RIGHT` - end of a page/element horizontally
+** `TOP` - start of a page/element vertically
+** `BOTTOM` - end of a page/element vertically
+
+[TIP]
+If the context is not set, the whole page will be scrolled
+
+.Scroll login to a bottom
+[source,gherkin]
+----
+When I change context to element located `id(login)`
+When I scroll context to BOTTOM edge
+----
+
+==== Scroll element into view
+
+Scrolls an element into the view.
+
+[source,gherkin]
+----
+When I scroll element located `$locator` into view
+----
+* `$locator` - The <<_locator,locator>> used to find element.
+
+.Scroll button into view
+[source,gherkin]
+----
+When I scroll element located `id(way_down_button)` into view
+----
+
+=== Tab steps
+==== Open a new tab
+
+Opens a new browser tab and switches the focus for future commands to this tab.
+
+[source,gherkin]
+----
+When I open new tab
+----
+
+.Open page in a new tab
+[source,gherkin]
+----
+When I open new tab
+Given I am on a page with the URL 'https://docs.vividus.dev/'
+----
+
+==== Open URL in a new tab
+
+Opens a new tab, switches the focus to this tab and loads the given URL.
+
+[IMPORTANT]
+====
+The key difference of this step from the <<_open_a_new_tab,previous one openning a new tab>>
+is that this step _inherits_ the state of the previous page, i.e.:
+
+* new tab will have acces to the <<_web_storage_steps,session storage>> of the previous tab,
+* it will be possible <<_close_current_tab_with_possibility_to_handle_alert,to handle alerts appearing on tab closing>>.
+====
+
+[source,gherkin]
+----
+When I open URL `$URL` in new window
+----
+* `$URL` - The URL to open.
+
+.Open docs in a new tab
+[source,gherkin]
+----
+When I open URL `https://docs.vividus.dev` in new window
+----
+
+==== Close current tab
+
+Closes the current tab and switches to the previous tab.
+
+[source,gherkin]
+----
+When I close the current window
+----
+
+IMPORTANT: Handling {popup-alert}[alerts] displayed with '{onbeforeunload-event}' events is not implied by the WebDriver specification to {close-spec} window. For handling alerts use step based on JavaScript '<<_close_current_tab_with_possibility_to_handle_alert>>'.
+
+NOTE: This step can only be applied to a session with multiple tabs open.
+
+.Open URL in new tab, close it and switch to the previous page
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com/'
+When I open URL `https://example.com/contact-us` in new window
+When I close the current window
+----
+
+==== Close current tab with possibility to handle alert
+
+Trying to close the current tab with '{onbeforeunload-event}' events handling.
+
+* If an {popup-alert}[alert] window is opened via '{onbeforeunload-event}' event, it must be checked and handled in the subsequent steps.
+* If an {popup-alert}[alert] window is not opened, the step closes the current window and switches to the previous window.
+
+[source,gherkin]
+----
+When I attempt to close current window with possibility to handle alert
+----
+
+IMPORTANT: This step can only be used if the current tab was opened via the step <<_open_url_in_a_new_tab,``When I open URL \`$pageUrl` in new window``>>.
+
+NOTE: If you confirm window close in {popup-alert}[alert], the tab will be closed, and you will need to switch to current tab using the following step: `When I switch to window with title that $stringComparisonRule `$windowName``.
+
+.Checking for an alert when trying to close a window with form
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://example.com/'
+When I open URL `https://example.com/form` in new window
+When I click on element located by `xpath(//*[@id='form-edit'])`
+When I execute sequence of actions:
+|type      |argument    |
+|ENTER_TEXT|changed text|
+When I attempt to close current window with possibility to handle alert
+Then an alert is present
+When I accept alert with message which matches `.*`
+----
+
+=== Execute sequence of actions
+
+Executes the sequence of web actions
+
+[source,gherkin]
+----
+When I execute sequence of actions: $actions
+----
+* `$actions` - table of actions to execute
++
+.Possible actions
+[cols="1,5,3", options="header"]
+|===
+
+|`type`
+|`argument`
+|Argument example
+
+|DOUBLE_CLICK
+|Element locator or empty
+|By.linkUrl(http://httpbin.org)
+
+|CLICK_AND_HOLD
+|Element locator or empty
+|By.linkText(Click me)
+
+|MOVE_BY_OFFSET
+|Point
+|(10, 15) where *x* is 10 and *y* is 15
+
+|RELEASE
+|Element locator or empty
+|By.tagName(div)
+
+|ENTER_TEXT
+|Text to type
+|Minsk City
+
+|CLICK
+|Element locator or empty
+|By.caseSensitiveText(Done)
+
+|PRESS_KEYS
+|Press and release any of https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys]
+|BACK_SPACE
+
+|KEY_DOWN
+|Press any of https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] one by one
+|CONTROL,SHIFT,ALT
+
+|KEY_UP
+|Release any of https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] one by one
+|CONTROL,SHIFT,ALT
+
+|MOVE_TO
+|Element locator
+|By.id(username)
+
+|===
+
+.Execute various web-actions
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type          |argument                                |
+|DOUBLE_CLICK  |By.fieldText(Hello World)               |
+|DOUBLE_CLICK  |                                        |
+|CLICK_AND_HOLD|By.xpath(//signature-pad-control/canvas)|
+|CLICK_AND_HOLD|                                        |
+|MOVE_BY_OFFSET|(-300, 0)                               |
+|RELEASE       |By.xpath(//signature-pad-control/canvas)|
+|RELEASE       |                                        |
+|ENTER_TEXT    |Text                                    |
+|CLICK         |By.placeholder(Enter your password)     |
+|CLICK         |                                        |
+|PRESS_KEYS    |BACK_SPACE                              |
+|KEY_DOWN      |CONTROL,SHIFT                           |
+|KEY_UP        |CONTROL,SHIFT                           |
+|MOVE_TO       |By.id(name)                             |
+----
+
+[TIP]
+====
+This step can be used to perform clipboard interactions.
+
+.Select all text in the focused field and copy it to the clipboard on Windows
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type      |argument  |
+|KEY_DOWN  |CONTROL, a|
+|KEY_UP    |a, CONTROL|
+|KEY_DOWN  |CONTROL, c|
+|KEY_UP    |c, CONTROL|
+----
+
+.Paste text from the clipboard to the focused field on MacOS
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type      |argument  |
+|KEY_DOWN  |COMMAND, v|
+|KEY_UP    |v, COMMAND|
+----
+====
+
+=== Browser logs steps
+
+This set of steps allows to validate the https://developer.mozilla.org/en-US/docs/Web/API/console[browser console logging messages].
+
+:log-levels: List of the comma-separated messages levels. The supported levels are: ERRORS, WARNINGS, INFOS.
+
+[TIP]
+=====
+In order to configure availability of the INFO level messages use following properties:
+[cols="1,2"]
+|===
+
+|Browser
+|Property to enable INFO logs
+
+|Google Chrome
+|`selenium.capabilities.goog\:loggingPrefs.browser=INFO`
+
+|Microsoft Edge Chromium
+|`selenium.capabilities.ms\:loggingPrefs.browser=INFO`
+|===
+=====
+
+==== Validate log entries absence
+
+Validates the absence of log entries of the desired level in the browser console.
+
+[source,gherkin]
+----
+Then there are no browser console $logLevels
+----
+* `$logLevels` - {log-levels}
+
+.Validate absence of JS errors
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
+Then there are no browser console ERRORS
+----
+
+==== Validate specific log entries absence
+
+Validates the absence of specific log entries of the desired level in the browser console.
+
+[source,gherkin]
+----
+Then there are no browser console $logLevels by regex '$pattern'
+----
+* `$logLevels` - {log-levels}
+* `$pattern` - The regular expression to match log entry messages.
+
+.Validate absence of JS error referencing user
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
+Then there are no browser console ERRORS by regex '.*user.*'
+----
+
+==== Validate specific log entries presence
+
+Validates the presence of specific log entries of the desired level in the browser console.
+
+[source,gherkin]
+----
+Then there are browser console $logLevels by regex '$pattern'
+----
+* `$logLevels` - {log-levels}
+* `$pattern` - The regular expression to match log entry messages.
+
+.Validate presence of JS errors referencing user
+[source,gherkin]
+----
+Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
+Then there are browser console ERRORS by regex '.*user.*'
+----
+
+==== Wait for console log entries and save them
+
+Waits for the appearance of the console log entries with the expected level and which match regular expression and saves all the entries (including awaited ones) of the expected level gathered during the wait to the scoped variable.
+
+NOTE: Wait uses generic UI timeouts specified by the properties `ui.wait.timeout` and `ui.wait.polling-period`. See <<_properties>> section for more details.
+
+[source,gherkin]
+----
+When I wait until browser console $logEntries by regex `$regex` appear and save all entries into $scopes variable `$variableName`
+----
+* `$logLevels` - {log-levels}
+* `$pattern` - The regular expression to match log entry messages.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the value of the barcode.
+
+.Wait for application readiness
+----
+Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
+When I wait until browser console infos by regex `.*Application ready.*` appear and save all entries into scenario variable `logs`
+Then `${logs}` matches `.*Application ready in \d+ seconds.*`
+----
+
+=== Perform steps for each found element
+
+Executes the steps against all elements found by locator. After a required number of elements is found,
+search context switches in order for each found element and performs all steps on it.
+
+[IMPORTANT]
+If comparison rule mismatch steps will not be performed even if elements are found.
+
+[source,gherkin]
+----
+When I find $comparisonRule `$number` elements by `$locator` and for each element do$stepsToExecute
+----
+
+Alias:
+[source,gherkin]
+----
+When I find $comparisonRule '$number' elements by $locator and for each element do$stepsToExecute
+----
+
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$number` - The number of elements to find.
+* `$locator` - The <<_locator,locator>> used to find elements.
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
+
+.Script type check
+[source,gherkin]
+----
+When I find = `5` elements by `By.xpath(//script):a` and for each element do
+|step                                                                                      |
+|When I set 'type' attribute value of the context element to the 'scenario' variable 'type'|
+|Then `${type}` is equal to `text/javascript`                                              |
+----
