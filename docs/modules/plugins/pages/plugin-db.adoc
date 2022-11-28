@@ -151,7 +151,7 @@ jdbc:sqlserver://serverName:portNumber;parameter1=value1;parameter2=value2
 .build.gradle
 [source,gradle]
 ----
-implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.0')
+implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.1')
 ----
 
 .environment.properties
