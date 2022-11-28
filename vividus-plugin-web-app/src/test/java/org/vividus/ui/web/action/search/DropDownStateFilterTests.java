@@ -51,7 +51,6 @@ class DropDownStateFilterTests
     void testStateFilter()
     {
         when(webElement.getTagName()).thenReturn("select");
-        when(webElement.isEnabled()).thenReturn(true);
         List<WebElement> webElements = List.of(webElement);
         List<WebElement> foundElements = filter.filter(webElements, "SINGLE_SELECT");
         assertEquals(webElements, foundElements);

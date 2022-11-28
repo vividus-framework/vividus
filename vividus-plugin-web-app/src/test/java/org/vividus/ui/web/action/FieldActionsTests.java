@@ -136,7 +136,7 @@ class FieldActionsTests
     @Test
     void testSelectItemInDDLSelectPresentOptionDoesntExist()
     {
-        mockSelectElement();
+        when(webElement.getTagName()).thenReturn(SELECT);
         when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(false));
         var select = new Select(webElement);
         addOptionsToSelect(select, "anotherOne");
@@ -158,7 +158,7 @@ class FieldActionsTests
     @Test
     void testSelectItemInDDLSingleSelectAdditable()
     {
-        mockSelectElement();
+        when(webElement.getTagName()).thenReturn(SELECT);
         when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(false));
         var select = new Select(webElement);
         fieldActions.selectItemInDropDownList(select, TEXT, true);
@@ -239,16 +239,11 @@ class FieldActionsTests
 
     private Select findDropDownListWithParameters(boolean isMultiple)
     {
-        mockSelectElement();
+        when(webElement.getTagName()).thenReturn(SELECT);
+        when(webElement.isEnabled()).thenReturn(true);
         when(webElement.getAttribute(INDEX)).thenReturn("0");
         when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(isMultiple));
         return new Select(webElement);
-    }
-
-    private void mockSelectElement()
-    {
-        when(webElement.getTagName()).thenReturn(SELECT);
-        when(webElement.isEnabled()).thenReturn(true);
     }
 
     private void addOptionsToSelect(Select select, String selectText)
