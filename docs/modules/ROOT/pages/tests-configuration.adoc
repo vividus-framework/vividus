@@ -68,15 +68,15 @@ NOTE: The properties marked with *bold* are mandatory.
 |`PT3H`
 |The max duration of the single story in the batch.
 
-|`bdd.batch.fail-fast`
+|`batch.fail-fast`
 |`false`
 |If set to `true` the subsequent batches execution will be stopped after first failed assertion
 
-|`bdd.story.fail-fast`
+|`story.fail-fast`
 |`false`
 |If set to `true` the story execution will be stopped after first failed assertion
 
-|`bdd.scenario.fail-fast`
+|`scenario.fail-fast`
 |`false`
 |If set to `true` the scenario execution will be stopped after first failed assertion
 
