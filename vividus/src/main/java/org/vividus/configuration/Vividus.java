@@ -16,6 +16,8 @@
 
 package org.vividus.configuration;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -23,9 +25,13 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.core.config.ConfigurationFactory;
+import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.vividus.log.TestInfoLogger;
+import org.vividus.util.Sleeper;
 import org.vividus.util.json.JsonPathUtils;
 
 import io.github.classgraph.ClassGraph;
@@ -35,6 +41,9 @@ import io.github.classgraph.ScanResult;
 
 public final class Vividus
 {
+    // +2 months after planned migration to Java 17 in order to do not slow down old projects
+    private static final LocalDateTime JAVA_MIGRATION_NOTIFICATION_DATE = LocalDateTime.of(2023, 4, 1, 0, 0);
+
     private Vividus()
     {
     }
@@ -45,6 +54,7 @@ public final class Vividus
         createJulToSlf4jBridge();
         configureFreemarkerLogger();
         TestInfoLogger.drawBanner();
+        checkJavaVersion();
         BeanFactory.open();
 
         // Load JsonPathUtils to configure JsonPath SPI
@@ -84,5 +94,27 @@ public final class Vividus
     {
         System.setProperty(freemarker.log.Logger.SYSTEM_PROPERTY_NAME_LOGGER_LIBRARY,
                 freemarker.log.Logger.LIBRARY_NAME_SLF4J);
+    }
+
+    private static void checkJavaVersion()
+    {
+        if (SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_17))
+        {
+            return;
+        }
+
+        long daysAfterNotification = Duration.between(JAVA_MIGRATION_NOTIFICATION_DATE, LocalDateTime.now()).toDays();
+        long secondsToWait = daysAfterNotification > 0 ? daysAfterNotification : 0;
+        String lineSeparator = System.lineSeparator();
+        String separator = lineSeparator + "====================================================================";
+        String message = separator
+                        + lineSeparator + "    Java of version {} is used."
+                        + lineSeparator + "    VIVIDUS will require Java 17 starting from February 1, 2023,"
+                        + lineSeparator + "    you won't be able to run tests using current Java instance."
+                        + lineSeparator + "    Please, upgrade to Java 17 at the earliest convenient time."
+                        + lineSeparator + "    Execution will resume in {}s."
+                        + separator;
+        LoggerFactory.getLogger(Vividus.class).warn(message, SystemUtils.JAVA_VERSION, secondsToWait);
+        Sleeper.sleep(Duration.ofSeconds(secondsToWait));
     }
 }
