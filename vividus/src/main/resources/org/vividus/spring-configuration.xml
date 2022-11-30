@@ -39,7 +39,7 @@
             <bean class="org.vividus.softassert.JBehaveFailTestFastHandler" />
         </property>
         <property name="eventBus" ref="eventBus" />
-        <property name="failTestCaseFast" value="${bdd.scenario.fail-fast}" />
+        <property name="failTestCaseFast" value="${scenario.fail-fast}" />
     </bean>
 
 </beans>
