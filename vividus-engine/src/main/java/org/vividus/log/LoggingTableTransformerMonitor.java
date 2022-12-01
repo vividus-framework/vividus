@@ -79,7 +79,7 @@ public class LoggingTableTransformerMonitor implements TableTransformerMonitor
                         table -> FORMATTING_TRANSFORMER.transform(table, tableParsers, tableProperties)
                 ))
                 .trim();
-        long numberOfTruncatedRows = totalNumberOrRows.get() - MAX_ROWS_LOGGING;
+        int numberOfTruncatedRows = totalNumberOrRows.get() - MAX_ROWS_LOGGING;
         if (numberOfTruncatedRows > 0)
         {
             return String.format("%s%s...%d row(s) truncated", resultingTable, rowSeparator, numberOfTruncatedRows);
