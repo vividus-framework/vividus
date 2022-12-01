@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,8 @@ class DateExpressionProcessorTests
     @CsvSource(delimiter = ';', value = {
             "generateDate(P5Y1M10D);                    1905-02-11",
             "generateDate(P1Y1M1W, dd-MM-yyyy);         08-02-1901",
+            "generateDate(P1Y1M1W, dd,MM,yyyy);         08,02,1901",
+            "generateDate(P1Y1M1W, dd\\,MM\\,yyyy);     08,02,1901",
             "generateDate(PT1H2M3S);                    1900-01-01T01:02:03",
             "generateDate(PT61M63S, yyyy'T'HH-mm-ss);   1900T01-02-03",
             "generateDate(-P1MT1M);                     1899-11-30T23:59:00",

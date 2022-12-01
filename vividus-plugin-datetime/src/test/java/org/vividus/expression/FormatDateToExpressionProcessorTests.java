@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,8 @@ class FormatDateToExpressionProcessorTests
         return Stream.of(
             Arguments.of(FORMAT_DATE_TO + INPUT_DATE + COMMA + INPUT_DATE_FORMAT + COMMA + " EEE\\, dd MMM yyyy HH:mm:ss ZZZZ)", "Tue, 10 Jan 2017 13:04:20 GMT"),
             Arguments.of(FORMAT_DATE_TO + INPUT_DATE + COMMA + INPUT_DATE_FORMAT + COMMA + " EEE\\, dd MMM yyyy HH:mm:ss)", "Tue, 10 Jan 2017 13:04:20"),
-            Arguments.of("formatDateTo(\"Tue\\, 10 Jan 2017 13:04:20 GMT\", \"EEE\\, dd MMM yyyy HH:mm:ss zzz\", " + "yyyy-MM-dd'T'HH:mm:ss" + ")", "2017-01-10T13:04:20")
+            Arguments.of("formatDateTo(\"Tue\\, 10 Jan 2017 13:04:20 GMT\", \"EEE\\, dd MMM yyyy HH:mm:ss zzz\", " + "yyyy-MM-dd'T'HH:mm:ss" + ")", "2017-01-10T13:04:20"),
+            Arguments.of("formatDateTo(2017\\,01\\,10T13\\,04\\,20, yyyy\\,MM\\,dd'T'HH\\,mm\\,ss, yyyy-MM-dd'T'HH:mm:ss)", "2017-01-10T13:04:20")
         );
         // CHECKSTYLE:ON
         // @formatter:on

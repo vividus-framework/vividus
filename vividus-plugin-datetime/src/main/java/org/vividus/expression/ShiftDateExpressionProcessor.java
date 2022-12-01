@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,10 @@ import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
-import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.DateUtils;
 
 @Named
-public class ShiftDateExpressionProcessor extends AbstractExpressionProcessor<String>
+public class ShiftDateExpressionProcessor extends AbstractExpressionProcessor<String> implements NormalizingArguments
 {
     private static final Pattern SHIFT_DATE_PATTERN = Pattern.compile(
             "^shiftDate\\((.+?),(?<!\\\\,)(.+?),\\s*(-)?P((?:\\d+[YMWD])*)((?:T?\\d+[HMS])*)\\)$",
@@ -39,6 +38,7 @@ public class ShiftDateExpressionProcessor extends AbstractExpressionProcessor<St
     private static final int MINUS_SIGN_GROUP = 3;
     private static final int PERIOD_GROUP = 4;
     private static final int DURATION_GROUP = 5;
+    private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
     private final DateUtils dateUtils;
 
@@ -52,24 +52,11 @@ public class ShiftDateExpressionProcessor extends AbstractExpressionProcessor<St
     protected String evaluateExpression(Matcher expressionMatcher)
     {
         DateTimeFormatter format = DateTimeFormatter.ofPattern(normalize(expressionMatcher.group(FORMAT_GROUP)),
-                Locale.ENGLISH);
+                DEFAULT_LOCALE);
         ZonedDateTime zonedDateTime = dateUtils.parseDateTime(normalize(expressionMatcher.group(INPUT_DATE_GROUP)),
                 format);
         DateExpression dateExpression = new DateExpression(expressionMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP,
                 DURATION_GROUP, FORMAT_GROUP);
-        if (dateExpression.hasPeriod())
-        {
-            zonedDateTime = dateExpression.processPeriod(zonedDateTime);
-        }
-        if (dateExpression.hasDuration())
-        {
-            zonedDateTime = dateExpression.processDuration(zonedDateTime);
-        }
-        return format.format(zonedDateTime);
-    }
-
-    private String normalize(String argument)
-    {
-        return StringUtils.replace(argument.trim(), "\\,", ",");
+        return dateExpression.format(zonedDateTime, DEFAULT_LOCALE);
     }
 }

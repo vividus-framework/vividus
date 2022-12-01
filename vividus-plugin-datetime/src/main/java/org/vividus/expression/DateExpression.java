@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,13 @@ package org.vividus.expression;
 import java.time.Duration;
 import java.time.Period;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.regex.Matcher;
 
 import org.apache.commons.lang3.StringUtils;
 
-public final class DateExpression
+public final class DateExpression implements NormalizingArguments
 {
     private static final String DURATION_DESIGNATOR = "P";
 
@@ -39,6 +41,26 @@ public final class DateExpression
         durationString = matcher.group(durationGroup);
         customFormatString = matcher.group(formatGroup);
         minusSign = matcher.group(minusSignGroup);
+    }
+
+    public String format(ZonedDateTime zonedDateTime, Locale locale)
+    {
+        DateTimeFormatter format = DateTimeFormatter.ISO_LOCAL_DATE;
+        ZonedDateTime result = zonedDateTime;
+        if (hasPeriod())
+        {
+            result = processPeriod(result);
+        }
+        if (hasDuration())
+        {
+            result = processDuration(result);
+            format = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        }
+        if (hasCustomFormat())
+        {
+            format = DateTimeFormatter.ofPattern(getCustomFormatString(), locale);
+        }
+        return result.format(format);
     }
 
     public boolean hasPeriod()
@@ -58,7 +80,7 @@ public final class DateExpression
 
     public String getCustomFormatString()
     {
-        return customFormatString;
+        return normalize(customFormatString);
     }
 
     public ZonedDateTime processPeriod(ZonedDateTime zonedDateTime)

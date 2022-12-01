@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.DateUtils;
 
 @Named
-public class DiffDateExpressionProcessor extends AbstractExpressionProcessor<String>
+public class DiffDateExpressionProcessor extends AbstractExpressionProcessor<String> implements NormalizingArguments
 {
-    private static final int FORMAT_GROUP = 6;
     private static final Pattern DIFF_DATE_PATTERN = Pattern
             .compile("^diffDate\\((.+?),(?<!\\\\,)(.+?),(?<!\\\\,)(.+?),(?<!\\\\,)(.+?)(,(?<!\\\\,)(.+?))?\\)$",
                     Pattern.CASE_INSENSITIVE);
@@ -44,6 +43,7 @@ public class DiffDateExpressionProcessor extends AbstractExpressionProcessor<Str
     private static final int FIRST_INPUT_FORMAT_GROUP = 2;
     private static final int SECOND_INPUT_DATE_GROUP = 3;
     private static final int SECOND_INPUT_FORMAT_GROUP = 4;
+    private static final int FORMAT_GROUP = 6;
 
     private final DateUtils dateUtils;
 
@@ -83,10 +83,5 @@ public class DiffDateExpressionProcessor extends AbstractExpressionProcessor<Str
         DateTimeFormatter inputFormat = DateTimeFormatter
                 .ofPattern(normalize(expressionMatcher.group(inputFormatGroup)), Locale.ENGLISH);
         return dateUtils.parseDateTime(normalize(expressionMatcher.group(inputDateGroup)), inputFormat);
-    }
-
-    private String normalize(String argument)
-    {
-        return StringUtils.replace(argument.trim(), "\\,", ",");
     }
 }
