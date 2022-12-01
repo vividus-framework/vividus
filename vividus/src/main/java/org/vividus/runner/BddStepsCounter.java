@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ import org.jbehave.core.steps.CandidateSteps;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
 import org.vividus.IPathFinder;
-import org.vividus.batch.BatchResourceConfiguration;
+import org.vividus.batch.BatchConfiguration;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 import org.vividus.resource.StoryLoader;
@@ -106,8 +106,8 @@ public final class BddStepsCounter
                 return ExamplesTable.EMPTY;
             }
         });
-        BatchResourceConfiguration batchResourceConfiguration = createResourceBatch(storyLocation);
-        return pathFinder.findPaths(batchResourceConfiguration)
+        BatchConfiguration batchConfiguration = createBatchConfiguration(storyLocation);
+        return pathFinder.findPaths(batchConfiguration)
                 .stream()
                 .map(storyLoader::loadResourceAsText)
                 .map(storyParser::parseStory)
@@ -117,13 +117,13 @@ public final class BddStepsCounter
                 .collect(Collectors.toList());
     }
 
-    private BatchResourceConfiguration createResourceBatch(String storyLocation)
+    private BatchConfiguration createBatchConfiguration(String storyLocation)
     {
-        BatchResourceConfiguration batchResourceConfiguration = new BatchResourceConfiguration();
-        batchResourceConfiguration.setResourceLocation(storyLocation);
-        batchResourceConfiguration.setResourceIncludePatterns("**/*.story");
-        batchResourceConfiguration.setResourceExcludePatterns("");
-        return batchResourceConfiguration;
+        BatchConfiguration batchConfiguration = new BatchConfiguration();
+        batchConfiguration.setResourceLocation(storyLocation);
+        batchConfiguration.setResourceIncludePatterns("**/*.story");
+        batchConfiguration.setResourceExcludePatterns("");
+        return batchConfiguration;
     }
 
     private void fillStepCandidates()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
-import org.vividus.batch.BatchResourceConfiguration;
+import org.vividus.batch.BatchConfiguration;
 import org.vividus.resource.TestResourceLoader;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,7 +52,7 @@ class PathFinderTests
     @Test
     void testFindPaths() throws IOException
     {
-        BatchResourceConfiguration config = new BatchResourceConfiguration();
+        var config = new BatchConfiguration();
         String resourceLocation = "story/uat";
         config.setResourceLocation(resourceLocation);
         config.setResourceIncludePatterns(STORY_INCLUDE_PATTERN + PATTERN_SEPARATOR + OTHER_INCLUDE_PATTERN);

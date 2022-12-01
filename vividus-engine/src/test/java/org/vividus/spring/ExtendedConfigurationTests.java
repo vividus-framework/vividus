@@ -61,7 +61,7 @@ import org.mockito.MockedConstruction;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.IPathFinder;
-import org.vividus.batch.BatchResourceConfiguration;
+import org.vividus.batch.BatchConfiguration;
 import org.vividus.log.LoggingTableTransformerMonitor;
 import org.vividus.steps.ParameterConvertersDecorator;
 import org.vividus.steps.PlaceholderResolver;
@@ -183,7 +183,7 @@ class ExtendedConfigurationTests
         verify(tableTransformer).transform(tableAsString, null, tableProperties);
     }
 
-    private static BatchResourceConfiguration argPathResolution(String compositePathPatterns)
+    private static BatchConfiguration argPathResolution(String compositePathPatterns)
     {
         List<String> resourceIncludePatterns = List.of(compositePathPatterns);
         return argThat(batch -> batch != null && "/".equals(batch.getResourceLocation())

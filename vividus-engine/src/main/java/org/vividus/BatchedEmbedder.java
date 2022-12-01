@@ -34,7 +34,7 @@ import org.jbehave.core.embedder.MetaFilter;
 import org.jbehave.core.embedder.PerformableTree;
 import org.jbehave.core.failures.BatchFailures;
 import org.jbehave.core.steps.InjectableStepsFactory;
-import org.vividus.batch.BatchExecutionConfiguration;
+import org.vividus.batch.BatchConfiguration;
 import org.vividus.batch.BatchStorage;
 import org.vividus.context.RunTestContext;
 import org.vividus.context.VariableContext;
@@ -75,12 +75,12 @@ public class BatchedEmbedder extends Embedder
                 Entry<String, List<String>> storyPathsBatch = iterator.next();
                 batch = storyPathsBatch.getKey();
 
-                BatchExecutionConfiguration batchExecutionConfiguration = batchStorage.getBatchExecutionConfiguration(
+                BatchConfiguration batchConfiguration = batchStorage.getBatchConfiguration(
                         batch);
-                useEmbedderControls(createEmbedderControls(batchExecutionConfiguration));
-                useMetaFilters(batchExecutionConfiguration.getMetaFilters());
+                useEmbedderControls(createEmbedderControls(batchConfiguration));
+                useMetaFilters(batchConfiguration.getMetaFilters());
 
-                failFast = batchExecutionConfiguration.isFailFast();
+                failFast = batchConfiguration.isFailFast();
 
                 EmbedderControls embedderControls = embedderControls();
                 embedderMonitor.usingControls(embedderControls);
@@ -157,12 +157,12 @@ public class BatchedEmbedder extends Embedder
         return Executors.newFixedThreadPool(threads, threadFactory);
     }
 
-    private EmbedderControls createEmbedderControls(BatchExecutionConfiguration batchExecutionConfiguration)
+    private EmbedderControls createEmbedderControls(BatchConfiguration batchConfiguration)
     {
         EmbedderControls embedderControls = new EmbedderControls();
         embedderControls.useStoryTimeouts(
-                Long.toString(batchExecutionConfiguration.getStoryExecutionTimeout().toSeconds()));
-        Optional.ofNullable(batchExecutionConfiguration.getThreads())
+                Long.toString(batchConfiguration.getStoryExecutionTimeout().toSeconds()));
+        Optional.ofNullable(batchConfiguration.getThreads())
                 .ifPresent(embedderControls::useThreads);
         embedderControls.doIgnoreFailureInStories(true);
         embedderControls.doGenerateViewAfterStories(false);

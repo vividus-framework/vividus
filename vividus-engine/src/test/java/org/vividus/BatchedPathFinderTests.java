@@ -30,7 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.batch.BatchResourceConfiguration;
+import org.vividus.batch.BatchConfiguration;
 import org.vividus.batch.BatchStorage;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,19 +43,19 @@ class BatchedPathFinderTests
     @Test
     void shouldGetPathsWithCaching() throws IOException
     {
-        BatchResourceConfiguration batchResourceConfiguration = new BatchResourceConfiguration();
-        batchResourceConfiguration.setResourceLocation("testLocation");
-        batchResourceConfiguration.setResourceIncludePatterns("testIncludePattern");
-        batchResourceConfiguration.setResourceExcludePatterns("testExcludePattern");
+        var batchConfiguration = new BatchConfiguration();
+        batchConfiguration.setResourceLocation("testLocation");
+        batchConfiguration.setResourceIncludePatterns("testIncludePattern");
+        batchConfiguration.setResourceExcludePatterns("testExcludePattern");
         String batchKey = "batch1";
-        when(batchStorage.getBatchResourceConfigurations()).thenReturn(Map.of(batchKey, batchResourceConfiguration));
+        when(batchStorage.getBatchConfigurations()).thenReturn(Map.of(batchKey, batchConfiguration));
         List<String> testPaths = List.of("testPath");
-        when(pathFinder.findPaths(batchResourceConfiguration)).thenReturn(testPaths);
+        when(pathFinder.findPaths(batchConfiguration)).thenReturn(testPaths);
         Map<String, List<String>> expected = Map.of(batchKey, testPaths);
         assertEquals(expected, batchedPathFinder.getPaths());
         assertEquals(expected, batchedPathFinder.getPaths());
-        verify(pathFinder).findPaths(batchResourceConfiguration);
-        verify(batchStorage).getBatchResourceConfigurations();
+        verify(pathFinder).findPaths(batchConfiguration);
+        verify(batchStorage).getBatchConfigurations();
         verifyNoMoreInteractions(batchStorage, pathFinder);
     }
 }

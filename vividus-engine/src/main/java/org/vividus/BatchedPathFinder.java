@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.vividus.batch.BatchResourceConfiguration;
+import org.vividus.batch.BatchConfiguration;
 import org.vividus.batch.BatchStorage;
 
 /**
@@ -48,7 +48,7 @@ public class BatchedPathFinder implements IBatchedPathFinder
         if (batchKeyToStoryPaths == null)
         {
             batchKeyToStoryPaths = new LinkedHashMap<>();
-            for (Entry<String, BatchResourceConfiguration> batch : batchStorage.getBatchResourceConfigurations()
+            for (Entry<String, BatchConfiguration> batch : batchStorage.getBatchConfigurations()
                     .entrySet())
             {
                 batchKeyToStoryPaths.put(batch.getKey(), pathFinder.findPaths(batch.getValue()));

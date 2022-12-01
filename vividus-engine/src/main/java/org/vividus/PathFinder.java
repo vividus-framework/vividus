@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.springframework.core.io.Resource;
-import org.vividus.batch.BatchResourceConfiguration;
+import org.vividus.batch.BatchConfiguration;
 import org.vividus.resource.ITestResourceLoader;
 
 public class PathFinder implements IPathFinder
@@ -38,22 +38,22 @@ public class PathFinder implements IPathFinder
     }
 
     @Override
-    public List<String> findPaths(BatchResourceConfiguration batchResourceConfiguration) throws IOException
+    public List<String> findPaths(BatchConfiguration batchConfiguration) throws IOException
     {
         List<String> paths = new ArrayList<>();
-        process(batchResourceConfiguration, batchResourceConfiguration.getResourceIncludePatterns(), paths::add);
-        process(batchResourceConfiguration, batchResourceConfiguration.getResourceExcludePatterns(), paths::remove);
+        process(batchConfiguration, batchConfiguration.getResourceIncludePatterns(), paths::add);
+        process(batchConfiguration, batchConfiguration.getResourceExcludePatterns(), paths::remove);
         Collections.sort(paths);
         return paths;
     }
 
-    private void process(BatchResourceConfiguration batchResourceConfiguration, List<String> resourcePatterns,
+    private void process(BatchConfiguration batchConfiguration, List<String> resourcePatterns,
             Consumer<String> consumer) throws IOException
     {
         for (String resourcePattern : resourcePatterns)
         {
             Resource[] foundResources = testResourceLoader.getResources(
-                    batchResourceConfiguration.getResourceLocation(), resourcePattern);
+                    batchConfiguration.getResourceLocation(), resourcePattern);
             for (Resource resource : foundResources)
             {
                 String resourceUri = resource.getURI().normalize().toASCIIString().replace("+", "%2b");

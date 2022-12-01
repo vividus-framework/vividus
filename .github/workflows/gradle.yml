@@ -239,8 +239,8 @@ jobs:
           ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs \
                                                 -Pvividus.configuration.suites= \
                                                 -Pvividus.configuration.profiles=saucelabs/web,web/desktop/chrome \
-                                                -Pvividus.bdd.story-loader.batch-1.resource-location=story/integration \
-                                                -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=ProxyStepsTests.story \
+                                                -Pvividus.batch-1.resource-location=story/integration \
+                                                -Pvividus.batch-1.resource-include-patterns=ProxyStepsTests.story \
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                 -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
                                                 -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com"
@@ -373,8 +373,8 @@ jobs:
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs/mobile_app/ios \
                                                   -Pvividus.configuration.suites= \
                                                   -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/ios \
-                                                  -Pvividus.bdd.story-loader.batch-1.resource-location=story/system/mobile_app \
-                                                  -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=ProxyMobileStepsTests.story \
+                                                  -Pvividus.batch-1.resource-location=story/system/mobile_app \
+                                                  -Pvividus.batch-1.resource-include-patterns=ProxyMobileStepsTests.story \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
                                                   -Pvividus.allure.history-directory=output/history/sl-ios-proxy-system-tests \
@@ -461,7 +461,7 @@ jobs:
                                                   -Pvividus.allure.executor.report-name="SauceLabs Android System tests report (Original)" \
                                                   -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-android-$TEST_APP_VERSION.zip \
                                                   -Pvividus.statistics.print-failures=true \
-                                                  -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=VisualTesting.story \
+                                                  -Pvividus.batch-1.resource-include-patterns=VisualTesting.story \
                                                   -Pvividus.ui.visual.baseline-storage.filesystem.folder=./baselines/original
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
@@ -485,8 +485,8 @@ jobs:
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs/mobile_app/android \
                                                   -Pvividus.configuration.suites= \
                                                   -Pvividus.configuration.profiles=saucelabs/mobile_app,mobile_app/android \
-                                                  -Pvividus.bdd.story-loader.batch-1.resource-location=story/system/mobile_app \
-                                                  -Pvividus.bdd.story-loader.batch-1.resource-include-patterns=ProxyMobileStepsTests.story \
+                                                  -Pvividus.batch-1.resource-location=story/system/mobile_app \
+                                                  -Pvividus.batch-1.resource-include-patterns=ProxyMobileStepsTests.story \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
                                                   -Pvividus.allure.history-directory=output/history/sl-android-proxy-system-tests \

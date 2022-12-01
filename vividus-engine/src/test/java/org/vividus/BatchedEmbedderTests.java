@@ -53,7 +53,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.batch.BatchExecutionConfiguration;
+import org.vividus.batch.BatchConfiguration;
 import org.vividus.batch.BatchStorage;
 import org.vividus.context.RunTestContext;
 import org.vividus.context.VariableContext;
@@ -95,7 +95,7 @@ class BatchedEmbedderTests
             failures.put(key, throwable);
             return true;
         }));
-        mockBatchExecutionConfiguration(true);
+        mockBatchConfiguration(true);
         Map<String, List<String>> batches = new LinkedHashMap<>();
         batches.put(BATCH, testStoryPaths);
         batches.put("batch-2", List.of("path2"));
@@ -127,7 +127,7 @@ class BatchedEmbedderTests
         List<String> testStoryPaths = List.of(PATH);
         EmbedderControls mockedEmbedderControls = mockEmbedderControls(spy);
         when(mockedEmbedderControls.threads()).thenReturn(THREADS);
-        mockBatchExecutionConfiguration(false);
+        mockBatchConfiguration(false);
         spy.runStoriesAsPaths(Map.of(BATCH, testStoryPaths));
         InOrder ordered = inOrder(spy, embedderMonitor, storyManager, runTestContext, variableContext);
         ordered.verify(spy).processSystemProperties();
@@ -160,7 +160,7 @@ class BatchedEmbedderTests
         when(mockedEmbedderControls.threads()).thenReturn(THREADS);
         when(mockedEmbedderControls.skip()).thenReturn(true);
         List<String> testStoryPaths = List.of(PATH);
-        mockBatchExecutionConfiguration(false);
+        mockBatchConfiguration(false);
         spy.runStoriesAsPaths(Map.of(BATCH, testStoryPaths));
         verify(spy).processSystemProperties();
         verify(embedderMonitor).usingControls(mockedEmbedderControls);
@@ -232,14 +232,14 @@ class BatchedEmbedderTests
         return mockedEmbedderControls;
     }
 
-    private void mockBatchExecutionConfiguration(boolean failFast)
+    private void mockBatchConfiguration(boolean failFast)
     {
-        BatchExecutionConfiguration batchExecutionConfiguration = new BatchExecutionConfiguration();
-        batchExecutionConfiguration.setStoryExecutionTimeout(Duration.ofHours(1));
-        batchExecutionConfiguration.setMetaFilters(META_FILTERS);
-        batchExecutionConfiguration.setThreads(2);
-        batchExecutionConfiguration.setFailFast(failFast);
-        when(batchStorage.getBatchExecutionConfiguration(BATCH)).thenReturn(batchExecutionConfiguration);
+        var batchConfiguration = new BatchConfiguration();
+        batchConfiguration.setStoryExecutionTimeout(Duration.ofHours(1));
+        batchConfiguration.setMetaFilters(META_FILTERS);
+        batchConfiguration.setThreads(2);
+        batchConfiguration.setFailFast(failFast);
+        when(batchStorage.getBatchConfiguration(BATCH)).thenReturn(batchConfiguration);
     }
 
     private boolean assertEmbedderControls(EmbedderControls controls)
