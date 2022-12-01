@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,7 @@ public class BatchStorage
 {
     private static final String BATCH = "batch-";
 
-    private final Map<String, BatchResourceConfiguration> batchResourceConfigurations;
-    private final Map<String, BatchExecutionConfiguration> batchExecutionConfigurations;
+    private final Map<String, BatchConfiguration> batchConfigurations;
 
     private final Duration defaultStoryExecutionTimeout;
     private final List<String> defaultMetaFilters;
@@ -44,30 +43,26 @@ public class BatchStorage
         this.defaultStoryExecutionTimeout = Duration.ofSeconds(Long.parseLong(defaultStoryExecutionTimeout));
         this.failFast = failFast;
 
-        batchResourceConfigurations = readFromProperties(propertyMapper, "bdd.story-loader.batch-",
-                BatchResourceConfiguration.class);
-        batchResourceConfigurations.forEach((batchKey, resourceConfiguration) -> Validate.isTrue(
-                resourceConfiguration.getResourceLocation() != null, "'resource-location' is missing for %s",
-                batchKey));
-
-        batchExecutionConfigurations = readFromProperties(propertyMapper, "bdd.batch-",
-                BatchExecutionConfiguration.class);
-        batchExecutionConfigurations.forEach((key, config) -> {
-            if (config.getName() == null)
+        batchConfigurations = readFromProperties(propertyMapper, BATCH, BatchConfiguration.class);
+        batchConfigurations.forEach((batchKey, batchConfiguration) -> {
+            Validate.isTrue(
+                    batchConfiguration.getResourceLocation() != null, "'resource-location' is missing for %s",
+                    batchKey);
+            if (batchConfiguration.getName() == null)
             {
-                config.setName(key);
+                batchConfiguration.setName(batchKey);
             }
-            if (config.getMetaFilters() == null)
+            if (batchConfiguration.getMetaFilters() == null)
             {
-                config.setMetaFilters(this.defaultMetaFilters);
+                batchConfiguration.setMetaFilters(this.defaultMetaFilters);
             }
-            if (config.getStoryExecutionTimeout() == null)
+            if (batchConfiguration.getStoryExecutionTimeout() == null)
             {
-                config.setStoryExecutionTimeout(this.defaultStoryExecutionTimeout);
+                batchConfiguration.setStoryExecutionTimeout(this.defaultStoryExecutionTimeout);
             }
-            if (config.isFailFast() == null)
+            if (batchConfiguration.isFailFast() == null)
             {
-                config.setFailFast(failFast);
+                batchConfiguration.setFailFast(failFast);
             }
         });
     }
@@ -83,20 +78,15 @@ public class BatchStorage
         return Comparator.comparingInt(batchKey -> Integer.parseInt(StringUtils.removeStart(batchKey, BATCH)));
     }
 
-    public BatchResourceConfiguration getBatchResourceConfiguration(String batchKey)
+    public Map<String, BatchConfiguration> getBatchConfigurations()
     {
-        return getBatchResourceConfigurations().get(batchKey);
+        return batchConfigurations;
     }
 
-    public Map<String, BatchResourceConfiguration> getBatchResourceConfigurations()
+    public BatchConfiguration getBatchConfiguration(String batchKey)
     {
-        return batchResourceConfigurations;
-    }
-
-    public BatchExecutionConfiguration getBatchExecutionConfiguration(String batchKey)
-    {
-        return batchExecutionConfigurations.computeIfAbsent(batchKey, b -> {
-            BatchExecutionConfiguration config = new BatchExecutionConfiguration();
+        return batchConfigurations.computeIfAbsent(batchKey, b -> {
+            BatchConfiguration config = new BatchConfiguration();
             config.setName(batchKey);
             config.setStoryExecutionTimeout(defaultStoryExecutionTimeout);
             config.setMetaFilters(defaultMetaFilters);

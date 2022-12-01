@@ -36,35 +36,35 @@ NOTE: The properties marked with *bold* are mandatory.
 |Default value
 |Description
 
-|[subs=+quotes]`*bdd.story-loader.batch-<batch-number>.resource-location*`
+|[subs=+quotes]`*batch-<batch-number>.resource-location*`
 |
 |The test project path to the folder with story-files
 
-|`bdd.story-loader.batch-<batch-number>.resource-include-patterns`
+|`batch-<batch-number>.resource-include-patterns`
 |`<empty>`
 |The comma-separated set of https://ant.apache.org/manual/dirtasks.html#patterns[ant-patterns] to match the stories to be included in the batch. Leading and trailing whitespaces in patterns are omitted.
 
-|`bdd.story-loader.batch-<batch-number>.resource-exclude-patterns`
+|`batch-<batch-number>.resource-exclude-patterns`
 |`<empty>`
 |The comma-separated set of https://ant.apache.org/manual/dirtasks.html#patterns[ant-patterns] to match the stories to be excluded from the batch. Leading and trailing whitespaces in patterns are omitted.
 
-|`bdd.batch-<batch-number>.name`
+|`batch-<batch-number>.name`
 |`batch-<batch-number>`
 |The name of the batch to display in the report
 
-|`bdd.batch-<batch-number>.threads`
+|`batch-<batch-number>.threads`
 |`1`
 |The number of parallel threads used to run stories
 
-|`bdd.batch-<batch-number>.meta-filters`
+|`batch-<batch-number>.meta-filters`
 |suite meta-filter
 |The meta-filter used to filter the batch stories and scenarios
 
-|`bdd.batch-<batch-number>.fail-fast`
+|`batch-<batch-number>.fail-fast`
 |`false`
 |If `true` and any failure is occurred during the batch execution, the subsequent batches will not be executed.
 
-|`bdd.batch-<batch-number>.story-execution-timeout`
+|`batch-<batch-number>.story-execution-timeout`
 |`PT3H`
 |The max duration of the single story in the batch.
 

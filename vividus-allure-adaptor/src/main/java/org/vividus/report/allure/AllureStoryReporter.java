@@ -207,7 +207,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     private String getBatchName()
     {
         String runningBatchKey = getRunContext().getRunningBatchKey();
-        return batchStorage.getBatchExecutionConfiguration(runningBatchKey).getName();
+        return batchStorage.getBatchConfiguration(runningBatchKey).getName();
     }
 
     @Override

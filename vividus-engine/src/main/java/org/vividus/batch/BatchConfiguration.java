@@ -16,6 +16,7 @@
 
 package org.vividus.batch;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,11 +24,16 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class BatchResourceConfiguration
+public class BatchConfiguration
 {
     private String resourceLocation;
     private List<String> resourceIncludePatterns = List.of();
     private List<String> resourceExcludePatterns = List.of();
+    private String name;
+    private Integer threads;
+    private List<String> metaFilters;
+    private Duration storyExecutionTimeout;
+    private Boolean failFast;
 
     public String getResourceLocation()
     {
@@ -57,6 +63,61 @@ public class BatchResourceConfiguration
     public void setResourceExcludePatterns(String resourceExcludePatterns)
     {
         this.resourceExcludePatterns = convertToList(resourceExcludePatterns);
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public Integer getThreads()
+    {
+        return threads;
+    }
+
+    public void setThreads(Integer threads)
+    {
+        this.threads = threads;
+    }
+
+    public List<String> getMetaFilters()
+    {
+        return metaFilters;
+    }
+
+    public void setMetaFilters(List<String> metaFilters)
+    {
+        this.metaFilters = metaFilters;
+    }
+
+    public void setMetaFilters(String metaFilters)
+    {
+        setMetaFilters(metaFilters != null ? List.of(StringUtils.split(metaFilters, ',')) : null);
+    }
+
+    public Duration getStoryExecutionTimeout()
+    {
+        return storyExecutionTimeout;
+    }
+
+    public void setStoryExecutionTimeout(Duration storyExecutionTimeout)
+    {
+        this.storyExecutionTimeout = storyExecutionTimeout;
+    }
+
+    public Boolean isFailFast()
+    {
+        return failFast;
+    }
+
+    public void setFailFast(Boolean failFast)
+    {
+        this.failFast = failFast;
     }
 
     private List<String> convertToList(String list)

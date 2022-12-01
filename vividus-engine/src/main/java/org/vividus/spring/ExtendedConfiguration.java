@@ -42,7 +42,7 @@ import org.jbehave.core.steps.ParameterControls;
 import org.jbehave.core.steps.ParameterConverters.ParameterConverter;
 import org.jbehave.core.steps.StepMonitor;
 import org.vividus.IPathFinder;
-import org.vividus.batch.BatchResourceConfiguration;
+import org.vividus.batch.BatchConfiguration;
 import org.vividus.converter.ResolvingPlaceholdersExamplesTableConverter;
 import org.vividus.log.LoggingTableTransformerMonitor;
 import org.vividus.steps.ParameterConvertersDecorator;
@@ -90,11 +90,11 @@ public class ExtendedConfiguration extends Configuration
 
     private Set<String> resolvePaths(String pathsPattern) throws IOException
     {
-        BatchResourceConfiguration resourceBatch = new BatchResourceConfiguration();
-        resourceBatch.setResourceLocation("/");
-        resourceBatch.setResourceIncludePatterns(pathsPattern);
-        resourceBatch.setResourceExcludePatterns(null);
-        return new HashSet<>(pathFinder.findPaths(resourceBatch));
+        BatchConfiguration batchConfiguration = new BatchConfiguration();
+        batchConfiguration.setResourceLocation("/");
+        batchConfiguration.setResourceIncludePatterns(pathsPattern);
+        batchConfiguration.setResourceExcludePatterns(null);
+        return new HashSet<>(pathFinder.findPaths(batchConfiguration));
     }
 
     public void setPathFinder(IPathFinder pathFinder)

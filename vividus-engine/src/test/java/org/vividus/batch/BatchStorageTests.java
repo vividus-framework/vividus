@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,9 @@ import org.vividus.util.property.PropertyParser;
 
 class BatchStorageTests
 {
-    private static final String BATCH_LOADER_PROPERTY_PREFIX = "bdd.story-loader.batch-";
-
     private static final List<String> BATCH_NUMBERS = List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11");
-    private static final List<String> BATCH_KEYS = BATCH_NUMBERS.stream().map(n -> "batch-" + n).collect(
+    private static final String BATCH = "batch-";
+    private static final List<String> BATCH_KEYS = BATCH_NUMBERS.stream().map(n -> BATCH + n).collect(
             Collectors.toList());
 
     private static final String DEFAULT_RESOURCE_LOCATION = "";
@@ -65,74 +64,70 @@ class BatchStorageTests
     @BeforeEach
     void beforeEach() throws IOException
     {
-        Map<String, String> batchResourceConfigurations = new HashMap<>();
-        addBatchResourceConfiguration(batchResourceConfigurations, 1);
-        addBatchResourceConfiguration(batchResourceConfigurations, 0);
-        addBatchResourceConfiguration(batchResourceConfigurations, 9);
-        addBatchResourceConfiguration(batchResourceConfigurations, 2);
-        addBatchResourceConfiguration(batchResourceConfigurations, 3);
-        addBatchResourceConfiguration(batchResourceConfigurations, 4);
-        addBatchResourceConfiguration(batchResourceConfigurations, 5);
-        addBatchResourceConfiguration(batchResourceConfigurations, 6);
-        addBatchResourceConfiguration(batchResourceConfigurations, 7);
-        addBatchResourceConfiguration(batchResourceConfigurations, 8);
-        addBatchResourceConfiguration(batchResourceConfigurations, 10);
+        var batchConfigurations = new HashMap<String, String>();
+        addBatchConfiguration(batchConfigurations, 1);
+        addBatchConfiguration(batchConfigurations, 0);
+        addBatchConfiguration(batchConfigurations, 9);
+        addBatchConfiguration(batchConfigurations, 2);
+        addBatchConfiguration(batchConfigurations, 3);
+        addBatchConfiguration(batchConfigurations, 4);
+        addBatchConfiguration(batchConfigurations, 5);
+        addBatchConfiguration(batchConfigurations, 6);
+        addBatchConfiguration(batchConfigurations, 7);
+        addBatchConfiguration(batchConfigurations, 8);
+        addBatchConfiguration(batchConfigurations, 10);
 
-        createBatchStorage(batchResourceConfigurations);
+        createBatchStorage(batchConfigurations);
     }
 
-    private void addBatchResourceConfiguration(Map<String, String> batchResourceConfigurations, int i)
+    private void addBatchConfiguration(Map<String, String> batchConfigurations, int i)
     {
-        batchResourceConfigurations.put(BATCH_LOADER_PROPERTY_PREFIX + BATCH_NUMBERS.get(i) + ".resource-location",
-                DEFAULT_RESOURCE_LOCATION);
+        batchConfigurations.put(BATCH_KEYS.get(i) + ".resource-location", DEFAULT_RESOURCE_LOCATION);
     }
 
-    private void createBatchStorage(Map<String, String> batchResourceConfigurations) throws IOException
+    private void createBatchStorage(Map<String, String> batchConfigurations) throws IOException
     {
+        batchConfigurations.put("batch-1.fail-fast", "");
+        batchConfigurations.put("batch-2.name", BATCH_2_NAME);
+        batchConfigurations.put("batch-2.threads", Integer.toString(BATCH_2_THREADS));
+        batchConfigurations.put("batch-2.story-execution-timeout", BATCH_2_TIMEOUT.toString());
+        batchConfigurations.put("batch-2.meta-filters", BATCH_2_META_FILTERS);
+        batchConfigurations.put("batch-2.fail-fast", "true");
         var propertyParser = mock(PropertyParser.class);
-        when(propertyParser.getPropertiesByPrefix(BATCH_LOADER_PROPERTY_PREFIX)).thenReturn(
-                batchResourceConfigurations);
-        when(propertyParser.getPropertiesByPrefix("bdd.batch-")).thenReturn(Map.of(
-            "bdd.batch-1.fail-fast", "",
-            "bdd.batch-2.name", BATCH_2_NAME,
-            "bdd.batch-2.threads", Integer.toString(BATCH_2_THREADS),
-            "bdd.batch-2.story-execution-timeout", BATCH_2_TIMEOUT.toString(),
-            "bdd.batch-2.meta-filters", BATCH_2_META_FILTERS,
-            "bdd.batch-2.fail-fast", "true"
-        ));
+        when(propertyParser.getPropertiesByPrefix(BATCH)).thenReturn(batchConfigurations);
 
         var propertyMapper = new PropertyMapper(".", PropertyNamingStrategies.KEBAB_CASE, propertyParser, Set.of());
         batchStorage = new BatchStorage(propertyMapper, Long.toString(DEFAULT_TIMEOUT), DEFAULT_META_FILTERS, false);
     }
 
     @Test
-    void shouldGetBatchResourceConfigurationByKey()
+    void shouldGetBatchConfigurationByKey()
     {
-        BatchResourceConfiguration batch = batchStorage.getBatchResourceConfiguration(BATCH_KEYS.get(0));
+        var batchConfiguration = batchStorage.getBatchConfiguration(BATCH_KEYS.get(0));
         assertAll(
-            () -> assertEquals(DEFAULT_RESOURCE_LOCATION, batch.getResourceLocation()),
-            () -> assertEquals(List.of(), batch.getResourceIncludePatterns()),
-            () -> assertEquals(List.of(), batch.getResourceExcludePatterns())
+            () -> assertEquals(DEFAULT_RESOURCE_LOCATION, batchConfiguration.getResourceLocation()),
+            () -> assertEquals(List.of(), batchConfiguration.getResourceIncludePatterns()),
+            () -> assertEquals(List.of(), batchConfiguration.getResourceExcludePatterns())
         );
     }
 
     @Test
-    void shouldGetAllBatchResourceConfigurations()
+    void shouldGetAllBatchConfigurations()
     {
-        Map<String, BatchResourceConfiguration> allBatches = batchStorage.getBatchResourceConfigurations();
+        Map<String, BatchConfiguration> allBatches = batchStorage.getBatchConfigurations();
         assertThat(allBatches.keySet(), Matchers.contains(BATCH_KEYS.toArray()));
     }
 
     @Test
-    void shouldGetBatchExecutionConfigurationInitializedWithDefaultValues()
+    void shouldGetBatchConfigurationInitializedWithDefaultValues()
     {
-        assertDefaultBatchExecutionConfiguration(BATCH_KEYS.get(0));
+        assertDefaultBatchConfiguration(BATCH_KEYS.get(0));
     }
 
     @Test
-    void shouldGetBatchExecutionConfigurationInitializedWithNonDefaultValues()
+    void shouldGetBatchConfigurationInitializedWithNonDefaultValues()
     {
-        BatchExecutionConfiguration config = batchStorage.getBatchExecutionConfiguration(BATCH_KEYS.get(1));
+        var config = batchStorage.getBatchConfiguration(BATCH_KEYS.get(1));
         assertAll(
             () -> assertEquals(BATCH_2_NAME, config.getName()),
             () -> assertEquals(BATCH_2_THREADS, config.getThreads()),
@@ -143,14 +138,14 @@ class BatchStorageTests
     }
 
     @Test
-    void shouldCreateNonExistentBatchExecutionConfiguration()
+    void shouldCreateNonExistentBatchConfiguration()
     {
-        assertDefaultBatchExecutionConfiguration("batch-100");
+        assertDefaultBatchConfiguration("batch-100");
     }
 
-    private void assertDefaultBatchExecutionConfiguration(String batchKey)
+    private void assertDefaultBatchConfiguration(String batchKey)
     {
-        BatchExecutionConfiguration config = batchStorage.getBatchExecutionConfiguration(batchKey);
+        var config = batchStorage.getBatchConfiguration(batchKey);
         assertAll(
             () -> assertEquals(batchKey,  config.getName()),
             () -> assertNull(config.getThreads()),
@@ -163,9 +158,10 @@ class BatchStorageTests
     @Test
     void shouldThrowErrorIfBatchResourceConfigurationDoesNotContainResourceLocation()
     {
-        var batchResourceConfigurations = Map.of("bdd.story-loader.batch-1.resource-include-patterns", "*.story");
+        var batchConfigurations = new HashMap<String, String>();
+        batchConfigurations.put("batch-1.resource-include-patterns", "*.story");
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> createBatchStorage(batchResourceConfigurations));
+                () -> createBatchStorage(batchConfigurations));
         assertEquals("'resource-location' is missing for batch-1", exception.getMessage());
     }
 }

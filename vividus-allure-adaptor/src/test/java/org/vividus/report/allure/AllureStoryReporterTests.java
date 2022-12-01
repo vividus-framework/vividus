@@ -84,7 +84,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.batch.BatchExecutionConfiguration;
+import org.vividus.batch.BatchConfiguration;
 import org.vividus.batch.BatchStorage;
 import org.vividus.context.ReportControlContext;
 import org.vividus.context.RunTestContext;
@@ -404,9 +404,9 @@ class AllureStoryReporterTests
     private String mockBatchExecutionConfiguration()
     {
         String batchKey = "batch-1";
-        BatchExecutionConfiguration config = new BatchExecutionConfiguration();
+        BatchConfiguration config = new BatchConfiguration();
         config.setName(BATCH_NAME);
-        when(batchStorage.getBatchExecutionConfiguration(batchKey)).thenReturn(config);
+        when(batchStorage.getBatchConfiguration(batchKey)).thenReturn(config);
         return batchKey;
     }
 

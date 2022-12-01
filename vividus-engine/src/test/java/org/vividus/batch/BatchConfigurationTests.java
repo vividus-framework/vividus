@@ -17,64 +17,82 @@
 package org.vividus.batch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-class BatchResourceConfigurationTests
+class BatchConfigurationTests
 {
     private static final String PATTERN = "testPattern";
 
-    private final BatchResourceConfiguration batchResourceConfiguration = new BatchResourceConfiguration();
+    private final BatchConfiguration batchConfiguration = new BatchConfiguration();
 
     @Test
     void testSetResourceIncludePatterns()
     {
-        batchResourceConfiguration.setResourceIncludePatterns(PATTERN);
-        assertPatterns(batchResourceConfiguration.getResourceIncludePatterns());
+        batchConfiguration.setResourceIncludePatterns(PATTERN);
+        assertPatterns(batchConfiguration.getResourceIncludePatterns());
     }
 
     @Test
     void testGetResourceIncludePatterns()
     {
-        batchResourceConfiguration.setResourceIncludePatterns(null);
-        assertTrue(batchResourceConfiguration.getResourceIncludePatterns().isEmpty());
+        batchConfiguration.setResourceIncludePatterns(null);
+        assertTrue(batchConfiguration.getResourceIncludePatterns().isEmpty());
     }
 
     @Test
     void testSetResourceExcludePatterns()
     {
-        batchResourceConfiguration.setResourceExcludePatterns(PATTERN);
-        assertPatterns(batchResourceConfiguration.getResourceExcludePatterns());
+        batchConfiguration.setResourceExcludePatterns(PATTERN);
+        assertPatterns(batchConfiguration.getResourceExcludePatterns());
     }
 
     @Test
     void testGetResourceExcludePatterns()
     {
-        batchResourceConfiguration.setResourceExcludePatterns(null);
-        assertTrue(batchResourceConfiguration.getResourceExcludePatterns().isEmpty());
+        batchConfiguration.setResourceExcludePatterns(null);
+        assertTrue(batchConfiguration.getResourceExcludePatterns().isEmpty());
     }
 
     @Test
     void testGetResourceExcludePatternsDefaultValueEmpty()
     {
-        assertTrue(batchResourceConfiguration.getResourceExcludePatterns().isEmpty());
+        assertTrue(batchConfiguration.getResourceExcludePatterns().isEmpty());
     }
 
     @Test
     void testGetResourceIncludePatternsDefaultValueEmpty()
     {
-        assertTrue(batchResourceConfiguration.getResourceExcludePatterns().isEmpty());
+        assertTrue(batchConfiguration.getResourceExcludePatterns().isEmpty());
     }
 
     @Test
     void shouldParseCommaSeparatedPatterns()
     {
-        var batch = new BatchResourceConfiguration();
+        var batch = new BatchConfiguration();
         batch.setResourceExcludePatterns(", 1,2, 3 , 4,");
         assertEquals(List.of("1", "2", "3", "4"), batch.getResourceExcludePatterns());
+    }
+
+    @Test
+    void shouldSetNullWhenMetaFiltersStringIsNull()
+    {
+        var configuration = new BatchConfiguration();
+        configuration.setMetaFilters((String) null);
+        assertNull(configuration.getMetaFilters());
+    }
+
+    @Test
+    void shouldParseWhenMetaFiltersStringIsNotNull()
+    {
+        List<String> filters = List.of("+feature vividus", "-skip");
+        var configuration = new BatchConfiguration();
+        configuration.setMetaFilters(String.join(",", filters));
+        assertEquals(filters, configuration.getMetaFilters());
     }
 
     private void assertPatterns(List<String> patterns)
