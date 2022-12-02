@@ -11,5 +11,5 @@ dependencies {
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.9.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-inline')
-    testImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '1.9.0')
+    testImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '1.9.1')
 }
