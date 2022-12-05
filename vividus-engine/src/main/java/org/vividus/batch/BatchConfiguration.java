@@ -34,6 +34,8 @@ public class BatchConfiguration
     private List<String> metaFilters;
     private Duration storyExecutionTimeout;
     private Boolean failFast;
+    private ScenarioExecutionConfiguration scenario;
+    private StoryExecutionConfiguration story;
 
     public String getResourceLocation()
     {
@@ -120,6 +122,26 @@ public class BatchConfiguration
         this.failFast = failFast;
     }
 
+    public Boolean isFailScenarioFast()
+    {
+        return scenario == null ? null : scenario.failFast;
+    }
+
+    public void setScenario(ScenarioExecutionConfiguration scenario)
+    {
+        this.scenario = scenario;
+    }
+
+    public Boolean isFailStoryFast()
+    {
+        return story == null ? null : story.failFast;
+    }
+
+    public void setStory(StoryExecutionConfiguration story)
+    {
+        this.story = story;
+    }
+
     private List<String> convertToList(String list)
     {
         if (list == null)
@@ -129,5 +151,25 @@ public class BatchConfiguration
         return Stream.of(StringUtils.split(list, ','))
                      .map(String::strip)
                      .collect(Collectors.toList());
+    }
+
+    private static final class StoryExecutionConfiguration
+    {
+        private boolean failFast;
+
+        private void setFailFast(boolean failFast)
+        {
+            this.failFast = failFast;
+        }
+    }
+
+    private static final class ScenarioExecutionConfiguration
+    {
+        private boolean failFast;
+
+        private void setFailFast(boolean failFast)
+        {
+            this.failFast = failFast;
+        }
     }
 }

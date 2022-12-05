@@ -27,6 +27,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,16 +41,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.embedder.EmbedderControls;
 import org.jbehave.core.embedder.EmbedderMonitor;
 import org.jbehave.core.embedder.MetaFilter;
 import org.jbehave.core.embedder.PerformableTree;
+import org.jbehave.core.embedder.StoryControls;
 import org.jbehave.core.embedder.StoryManager;
 import org.jbehave.core.embedder.StoryTimeouts.TimeoutParser;
 import org.jbehave.core.failures.BatchFailures;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -165,6 +170,31 @@ class BatchedEmbedderTests
         verify(spy).processSystemProperties();
         verify(embedderMonitor).usingControls(mockedEmbedderControls);
         verify(embedderMonitor).storiesSkipped(testStoryPaths);
+        verify(spy, never()).configuration();
+    }
+
+    @CsvSource({
+        "true, false",
+        "false, true"
+    })
+    @ParameterizedTest
+    void shouldConfigureFailTestSuiteFast(boolean failFast, boolean resetState)
+    {
+        BatchedEmbedder spy = createBatchedEmbedderSpy(false);
+        var configuration = mock(Configuration.class);
+        var storyControls = mock(StoryControls.class);
+        when(spy.configuration()).thenReturn(configuration);
+        when(configuration.storyControls()).thenReturn(storyControls);
+        EmbedderControls mockedEmbedderControls = mockEmbedderControls(spy);
+        when(mockedEmbedderControls.threads()).thenReturn(THREADS);
+        when(mockedEmbedderControls.skip()).thenReturn(true);
+        List<String> testStoryPaths = List.of(PATH);
+        mockBatchConfiguration(false, failFast);
+        spy.runStoriesAsPaths(Map.of(BATCH, testStoryPaths));
+        verify(spy).processSystemProperties();
+        verify(embedderMonitor).usingControls(mockedEmbedderControls);
+        verify(embedderMonitor).storiesSkipped(testStoryPaths);
+        verify(storyControls).doResetStateBeforeScenario(resetState);
     }
 
     @Test
@@ -234,11 +264,17 @@ class BatchedEmbedderTests
 
     private void mockBatchConfiguration(boolean failFast)
     {
-        var batchConfiguration = new BatchConfiguration();
+        mockBatchConfiguration(failFast, null);
+    }
+
+    private void mockBatchConfiguration(boolean failFast, Boolean failStoryFast)
+    {
+        var batchConfiguration = spy(new BatchConfiguration());
         batchConfiguration.setStoryExecutionTimeout(Duration.ofHours(1));
         batchConfiguration.setMetaFilters(META_FILTERS);
         batchConfiguration.setThreads(2);
         batchConfiguration.setFailFast(failFast);
+        when(batchConfiguration.isFailStoryFast()).thenReturn(failStoryFast);
         when(batchStorage.getBatchConfiguration(BATCH)).thenReturn(batchConfiguration);
     }
 

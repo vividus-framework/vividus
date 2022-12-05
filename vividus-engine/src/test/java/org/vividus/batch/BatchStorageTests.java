@@ -50,6 +50,7 @@ class BatchStorageTests
             Collectors.toList());
 
     private static final String DEFAULT_RESOURCE_LOCATION = "";
+    private static final String TRUE = "true";
 
     private static final long DEFAULT_TIMEOUT = 300;
     private static final List<String> DEFAULT_META_FILTERS = List.of("groovy: !skip");
@@ -88,11 +89,13 @@ class BatchStorageTests
     private void createBatchStorage(Map<String, String> batchConfigurations) throws IOException
     {
         batchConfigurations.put("batch-1.fail-fast", "");
+        batchConfigurations.put("batch-2.scenario.fail-fast", TRUE);
+        batchConfigurations.put("batch-2.story.fail-fast", TRUE);
         batchConfigurations.put("batch-2.name", BATCH_2_NAME);
         batchConfigurations.put("batch-2.threads", Integer.toString(BATCH_2_THREADS));
         batchConfigurations.put("batch-2.story-execution-timeout", BATCH_2_TIMEOUT.toString());
         batchConfigurations.put("batch-2.meta-filters", BATCH_2_META_FILTERS);
-        batchConfigurations.put("batch-2.fail-fast", "true");
+        batchConfigurations.put("batch-2.fail-fast", TRUE);
         var propertyParser = mock(PropertyParser.class);
         when(propertyParser.getPropertiesByPrefix(BATCH)).thenReturn(batchConfigurations);
 
@@ -133,7 +136,9 @@ class BatchStorageTests
             () -> assertEquals(BATCH_2_THREADS, config.getThreads()),
             () -> assertEquals(BATCH_2_TIMEOUT, config.getStoryExecutionTimeout()),
             () -> assertEquals(List.of(BATCH_2_META_FILTERS), config.getMetaFilters()),
-            () -> assertTrue(config.isFailFast())
+            () -> assertTrue(config.isFailFast()),
+            () -> assertTrue(config.isFailStoryFast()),
+            () -> assertTrue(config.isFailScenarioFast())
         );
     }
 
@@ -151,7 +156,9 @@ class BatchStorageTests
             () -> assertNull(config.getThreads()),
             () -> assertEquals(Duration.ofSeconds(DEFAULT_TIMEOUT), config.getStoryExecutionTimeout()),
             () -> assertEquals(DEFAULT_META_FILTERS, config.getMetaFilters()),
-            () -> assertFalse(config.isFailFast())
+            () -> assertFalse(config.isFailFast()),
+            () -> assertNull(config.isFailStoryFast()),
+            () -> assertNull(config.isFailScenarioFast())
         );
     }
 

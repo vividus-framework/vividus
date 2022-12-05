@@ -60,9 +60,9 @@ public class SoftAssert implements ISoftAssert
     private IAssertionFormatter formatter;
     private IKnownIssueChecker knownIssueChecker;
     private FailTestFastHandler failTestFastHandler;
-    private EventBus eventBus;
+    private FailTestFastManager failTestFastManager;
 
-    private boolean failTestCaseFast;
+    private EventBus eventBus;
 
     @Override
     public boolean assertTrue(final String description, final boolean condition)
@@ -359,7 +359,8 @@ public class SoftAssert implements ISoftAssert
         {
             failTestFastHandler.failTestSuiteFast();
         }
-        if (failTestCaseFast && !assertionError.isKnownIssue() || assertionError.isFailTestCaseFast())
+        if (failTestFastManager.isFailTestCaseFast() && !assertionError.isKnownIssue()
+                                                     || assertionError.isFailTestCaseFast())
         {
             failTestFastHandler.failTestCaseFast();
         }
@@ -436,8 +437,8 @@ public class SoftAssert implements ISoftAssert
         this.eventBus = eventBus;
     }
 
-    public void setFailTestCaseFast(boolean failTestCaseFast)
+    public void setFailTestFastManager(FailTestFastManager failTestFastManager)
     {
-        this.failTestCaseFast = failTestCaseFast;
+        this.failTestFastManager = failTestFastManager;
     }
 }

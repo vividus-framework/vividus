@@ -693,7 +693,34 @@ jobs:
       run: |
         ./gradlew :vividus-tests:validateRunStatistics \
                                 -Pvividus.configuration.suites=failFast \
-                                -PexpectedRunStatistics="resources/main/failFast/expected.json"
+                                -PexpectedRunStatistics="resources/main/failFast/expected.json" \
+                                -Pvividus.story.fail-fast=true \
+                                -Pvividus.scenario.fail-fast=true \
+                                -Pvividus.batch.fail-fast=true
+
+    - name: Validate fail fast configured at batch level
+      if: matrix.platform == 'macos-latest'
+      shell: bash
+      run: |
+        ./gradlew :vividus-tests:validateRunStatistics \
+                                -Pvividus.configuration.suites=failFast \
+                                -PexpectedRunStatistics="resources/main/failFast/expected.json" \
+                                -Pvividus.batch-1.story.fail-fast=true \
+                                -Pvividus.batch-1.scenario.fail-fast=true \
+                                -Pvividus.batch.fail-fast=true
+
+    - name: Validate fail fast batch override
+      if: matrix.platform == 'macos-latest'
+      shell: bash
+      run: |
+        ./gradlew :vividus-tests:validateRunStatistics \
+                                -Pvividus.configuration.suites=failFast \
+                                -PexpectedRunStatistics="resources/main/failFast/expected-batch.json" \
+                                -Pvividus.story.fail-fast=true \
+                                -Pvividus.scenario.fail-fast=true \
+                                -Pvividus.batch-1.story.fail-fast=false \
+                                -Pvividus.batch-1.scenario.fail-fast=false \
+                                -Pvividus.batch.fail-fast=true
 
     - name: Publish artifacts to GitHub packages
       if: (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/release-')) && matrix.platform == 'ubuntu-latest'

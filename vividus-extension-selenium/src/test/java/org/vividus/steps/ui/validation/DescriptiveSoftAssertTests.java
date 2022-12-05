@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.softassert.FailTestFastManager;
 import org.vividus.softassert.SoftAssert;
 import org.vividus.softassert.formatter.IAssertionFormatter;
 import org.vividus.softassert.issue.IKnownIssueChecker;
@@ -78,6 +79,9 @@ class DescriptiveSoftAssertTests
 
     @Mock
     private EventBus eventBus;
+
+    @Mock
+    private FailTestFastManager failTestFastManager;
 
     @InjectMocks
     private DescriptiveSoftAssert descriptiveSoftAssert;
