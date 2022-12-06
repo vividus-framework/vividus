@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.vividus.ui.web.action;
 
-import java.net.URI;
 import java.util.Set;
 
 import org.apache.http.client.CookieStore;
@@ -25,8 +24,6 @@ import org.openqa.selenium.Cookie;
 public interface ICookieManager
 {
     void addCookie(String cookieName, String cookieValue, String path, String urlAsString);
-
-    void addCookie(String cookieName, String cookieValue, String path, URI uri);
 
     void deleteAllCookies();
 
