@@ -88,6 +88,7 @@ class SoftAssertTests
     @Mock private EventBus eventBus;
     @Mock private AssertionCollection assertionCollection;
     @Mock private List<SoftAssertionError> assertionErrors;
+    @Mock private FailTestFastManager failTestFastManager;
     @InjectMocks private SoftAssert softAssert;
 
     @SuppressWarnings("unchecked")
@@ -242,7 +243,7 @@ class SoftAssertTests
     @Test
     void shouldRecordFailedAssertionAndFailTestCaseFast()
     {
-        softAssert.setFailTestCaseFast(true);
+        when(failTestFastManager.isFailTestCaseFast()).thenReturn(true);
         testRecordFailedAssertion(softAssert::recordFailedAssertion);
         verify(failTestFastHandler).failTestCaseFast();
         verifyNoMoreInteractions(failTestFastHandler);
@@ -313,7 +314,7 @@ class SoftAssertTests
         mockAssertionCollection();
         var knownIssueChecker = mock(IKnownIssueChecker.class);
         softAssert.setKnownIssueChecker(knownIssueChecker);
-        softAssert.setFailTestCaseFast(globalFailTestCaseFast);
+        when(failTestFastManager.isFailTestCaseFast()).thenReturn(globalFailTestCaseFast);
         var description = "failure";
         when(knownIssue.isPotentiallyKnown()).thenReturn(false);
         when(knownIssueChecker.getKnownIssue(description)).thenReturn(knownIssue);

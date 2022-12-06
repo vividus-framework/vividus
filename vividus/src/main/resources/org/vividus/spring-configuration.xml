@@ -38,8 +38,12 @@
         <property name="failTestFastHandler">
             <bean class="org.vividus.softassert.JBehaveFailTestFastHandler" />
         </property>
+        <property name="failTestFastManager">
+            <bean class="org.vividus.softassert.JBehaveFailTestFastManager">
+                <property name="failTestCaseFast" value="${scenario.fail-fast}" />
+            </bean>
+        </property>
         <property name="eventBus" ref="eventBus" />
-        <property name="failTestCaseFast" value="${scenario.fail-fast}" />
     </bean>
 
 </beans>

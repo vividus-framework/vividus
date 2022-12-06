@@ -64,6 +64,14 @@ NOTE: The properties marked with *bold* are mandatory.
 |`false`
 |If `true` and any failure is occurred during the batch execution, the subsequent batches will not be executed.
 
+|`batch-<batch-number>.story.fail-fast`
+|`<empty>`
+|If set the value overrides global setting `story.fail-fast`.
+
+|`batch-<batch-number>.scenario.fail-fast`
+|`<empty>`
+|If set the value overrides global setting `scenario.fail-fast`.
+
 |`batch-<batch-number>.story-execution-timeout`
 |`PT3H`
 |The max duration of the single story in the batch.

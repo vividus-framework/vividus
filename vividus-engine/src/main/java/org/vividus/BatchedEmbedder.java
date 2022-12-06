@@ -77,6 +77,8 @@ public class BatchedEmbedder extends Embedder
 
                 BatchConfiguration batchConfiguration = batchStorage.getBatchConfiguration(
                         batch);
+                Optional.ofNullable(batchConfiguration.isFailStoryFast())
+                        .ifPresent(fsf -> configuration().storyControls().doResetStateBeforeScenario(!fsf));
                 useEmbedderControls(createEmbedderControls(batchConfiguration));
                 useMetaFilters(batchConfiguration.getMetaFilters());
 
