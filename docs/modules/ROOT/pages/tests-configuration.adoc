@@ -588,7 +588,7 @@ export EXTERNAL_CONFIG_VALUE=value
 +
 [source,properties]
 ----
-bdd.variables.global.some-key=${EXTERNAL_CONFIG_VALUE}
+variables.some-key=${EXTERNAL_CONFIG_VALUE}
 ----
 +
 
@@ -597,7 +597,7 @@ The prefix only plays role during test start-up phase and cut off during the act
 +
 [source,shell]
 ----
-./gradlew runStories -Pvividus.bdd.variables.global.some-key-1=value1 -Pvividus.bdd.variables.global.some-key-2=value2
+./gradlew runStories -Pvividus.variables.some-key-1=value1 -Pvividus.variables.some-key-2=value2
 ----
 +
 This approach can be used only when tests are run via Gradle.
@@ -609,8 +609,8 @@ The following script assumes that we are in the root of the test project folder.
 [source,shell]
 ----
 cat > src/main/resources/overriding.properties << EOD
-bdd.variables.global.some-key-1=value1
-bdd.variables.global.some-key-2=value2
+variables.some-key-1=value1
+variables.some-key-2=value2
 EOD
 ----
 +

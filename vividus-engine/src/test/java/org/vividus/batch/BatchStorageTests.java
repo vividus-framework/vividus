@@ -59,6 +59,8 @@ class BatchStorageTests
     private static final int BATCH_2_THREADS = 5;
     private static final Duration BATCH_2_TIMEOUT = Duration.ofHours(1);
     private static final String BATCH_2_META_FILTERS = "grooyv: !ignored";
+    private static final String VALUE_1 = "value1";
+    private static final String VALUE_2 = "value2";
 
     private BatchStorage batchStorage;
 
@@ -96,6 +98,8 @@ class BatchStorageTests
         batchConfigurations.put("batch-2.story-execution-timeout", BATCH_2_TIMEOUT.toString());
         batchConfigurations.put("batch-2.meta-filters", BATCH_2_META_FILTERS);
         batchConfigurations.put("batch-2.fail-fast", TRUE);
+        batchConfigurations.put("batch-2.variables.key1", VALUE_1);
+        batchConfigurations.put("batch-2.variables.key2", VALUE_2);
         var propertyParser = mock(PropertyParser.class);
         when(propertyParser.getPropertiesByPrefix(BATCH)).thenReturn(batchConfigurations);
 
@@ -138,7 +142,8 @@ class BatchStorageTests
             () -> assertEquals(List.of(BATCH_2_META_FILTERS), config.getMetaFilters()),
             () -> assertTrue(config.isFailFast()),
             () -> assertTrue(config.isFailStoryFast()),
-            () -> assertTrue(config.isFailScenarioFast())
+            () -> assertTrue(config.isFailScenarioFast()),
+            () -> assertEquals(Map.of("key1", VALUE_1, "key2", VALUE_2), config.getVariables())
         );
     }
 
@@ -158,7 +163,8 @@ class BatchStorageTests
             () -> assertEquals(DEFAULT_META_FILTERS, config.getMetaFilters()),
             () -> assertFalse(config.isFailFast()),
             () -> assertNull(config.isFailStoryFast()),
-            () -> assertNull(config.isFailScenarioFast())
+            () -> assertNull(config.isFailScenarioFast()),
+            () -> assertEquals(Map.of(), config.getVariables())
         );
     }
 

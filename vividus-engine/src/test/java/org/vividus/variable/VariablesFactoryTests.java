@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,25 +21,21 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
-
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.batch.BatchConfiguration;
+import org.vividus.batch.BatchStorage;
 import org.vividus.context.RunContext;
-import org.vividus.util.property.IPropertyMapper;
-import org.vividus.util.property.PropertyMapper;
 import org.vividus.util.property.PropertyParser;
 
 @ExtendWith(MockitoExtension.class)
 class VariablesFactoryTests
 {
-    private static final String GLOBAL_PROPERTY_PREFIX = "bdd.variables.global.";
-    private static final String BATCH_PROPERTY_FAMILY = "bdd.variables.batch-";
+    private static final String GLOBAL_PROPERTY_PREFIX = "variables.";
     private static final String KEY1 = "key1";
     private static final String KEY2 = "key2";
     private static final String KEY3 = "key3";
@@ -47,6 +43,7 @@ class VariablesFactoryTests
     private static final String GLOBAL = "global";
     private static final String BATCH = "batch";
     private static final String NEXT_BATCHES = "next-batches";
+    private static final String BATCH_1 = "batch-1";
 
     private static final Map<String, String> GLOBAL_VARIABLES = Map.of(
             KEY1, GLOBAL,
@@ -56,29 +53,24 @@ class VariablesFactoryTests
 
     @Mock private PropertyParser propertyParser;
     @Mock private RunContext runContext;
+    @Mock private BatchStorage batchStorage;
     private VariablesFactory variablesFactory;
 
     @BeforeEach
     void beforeEach()
     {
-        IPropertyMapper propertyMapper = new PropertyMapper(".", PropertyNamingStrategies.KEBAB_CASE, propertyParser,
-                Set.of());
-        variablesFactory = new VariablesFactory(propertyParser, propertyMapper, runContext);
-
-        String batch1PropertyPrefix = BATCH_PROPERTY_FAMILY + "1.";
-
+        variablesFactory = new VariablesFactory(propertyParser, runContext, batchStorage);
         when(propertyParser.getPropertyValuesByPrefix(GLOBAL_PROPERTY_PREFIX)).thenReturn(GLOBAL_VARIABLES);
-        when(propertyParser.getPropertiesByPrefix(BATCH_PROPERTY_FAMILY)).thenReturn(Map.of(
-            batch1PropertyPrefix + KEY1, BATCH,
-            batch1PropertyPrefix + KEY2, BATCH
-        ));
+        var configuration = new BatchConfiguration();
+        configuration.setVariables(Map.of(KEY1, BATCH, KEY2, BATCH));
+        when(batchStorage.getBatchConfigurations()).thenReturn(Map.of(BATCH_1, configuration));
     }
 
     @Test
     void shouldCreateVariables() throws IOException
     {
         variablesFactory.init();
-        when(runContext.getRunningBatchKey()).thenReturn("batch-1");
+        when(runContext.getRunningBatchKey()).thenReturn(BATCH_1);
         variablesFactory.addNextBatchesVariable(KEY1, NEXT_BATCHES);
         Variables variables = variablesFactory.createVariables();
 
