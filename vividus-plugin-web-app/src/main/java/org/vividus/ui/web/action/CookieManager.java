@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,19 +41,11 @@ public class CookieManager implements ICookieManager
     @Override
     public void addCookie(String cookieName, String cookieValue, String path, String urlAsString)
     {
-        addCookie(cookieName, cookieValue, path, URI.create(urlAsString));
-    }
+        URI uri = URI.create(urlAsString);
+        String domain = InternetUtils.DOMAIN_PARTS_SEPARATOR + InternetUtils.getTopDomain(uri);
 
-    @Override
-    public void addCookie(String cookieName, String cookieValue, String path, URI uri)
-    {
-        executeAddCookieScript(cookieName, cookieValue, path, InternetUtils.getTopDomain(uri));
-    }
-
-    private void executeAddCookieScript(String cookieName, String cookieValue, String path, String domain)
-    {
         Cookie cookie = new Cookie.Builder(cookieName, cookieValue)
-                .domain("." + domain)
+                .domain(domain)
                 .path(path)
                 .build();
         LOGGER.debug("Adding cookie: {}", cookie);
