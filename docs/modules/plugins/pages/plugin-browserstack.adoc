@@ -13,7 +13,13 @@ The plugin defines profiles with a set of the preconfigured properties.
 |===
 
 |`browserstack/web`
-|Use in conjunction with web application profiles.
+|Use in conjunction with xref:plugins:plugin-web-app.adoc#_desktop[web application profiles].
+
+|`browserstack/web/phone`
+a|Use in conjunction with xref:plugins:plugin-web-app.adoc#_phone[web application phone profiles].
+Required properties:
+
+* `selenium.grid.device-name`
 
 |`browserstack/mobile_app`
 a|Use in conjunction with xref:plugins:plugin-mobile-app.adoc#_profiles[native mobile application profiles].

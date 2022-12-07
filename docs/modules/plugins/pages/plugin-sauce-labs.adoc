@@ -13,7 +13,23 @@ The plugin defines profiles with a set of the preconfigured properties.
 |===
 
 |`saucelabs/web`
-|Use in conjunction with web application profiles.
+|Use in conjunction with xref:plugins:plugin-web-app.adoc#_desktop[web application profiles].
+
+|`saucelabs/web/phone/iphone`
+a|Use in conjunction with xref:plugins:plugin-web-app.adoc#_phone[web application phone profiles].
+
+Required properties:
+
+* `selenium.grid.device-name`
+* `selenium.grid.platform-version`
+
+|`saucelabs/web/phone/android`
+a|Use in conjunction with xref:plugins:plugin-web-app.adoc#_phone[web application phone profiles].
+
+Required properties:
+
+* `selenium.grid.device-name`
+* `selenium.grid.platform-version`
 
 |`saucelabs/mobile_app`
 a|Use in conjunction with xref:plugins:plugin-mobile-app.adoc#_profiles[native mobile application profiles].
