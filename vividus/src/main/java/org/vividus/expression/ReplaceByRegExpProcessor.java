@@ -16,6 +16,8 @@
 
 package org.vividus.expression;
 
+import static org.vividus.expression.NormalizingArgumentsUtils.normalize;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,7 +32,7 @@ import java.util.stream.IntStream;
 import javax.inject.Named;
 
 @Named
-public class ReplaceByRegExpProcessor implements IExpressionProcessor<String>, NormalizingArguments
+public class ReplaceByRegExpProcessor implements IExpressionProcessor<String>
 {
     @SuppressWarnings("checkstyle:SingleSpaceSeparator")
     private static final Map<Pattern, Function<Matcher, Function<String, String>>> EVALUATE_REG_EXP = Map.of(
@@ -72,7 +74,7 @@ public class ReplaceByRegExpProcessor implements IExpressionProcessor<String>, N
         return IntStream.rangeClosed(1, expressionMatcher.groupCount())
                 .mapToObj(expressionMatcher::group)
                 .filter(Objects::nonNull)
-                .map(value -> value.replaceAll("^\"\"\"|\"\"\"$", ""))
+                .map(NormalizingArgumentsUtils::normalize)
                 .collect(Collectors.toList());
     }
 }

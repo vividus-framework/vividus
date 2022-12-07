@@ -17,6 +17,7 @@
 package org.vividus.expression;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.vividus.expression.NormalizingArgumentsUtils.normalize;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -48,7 +49,7 @@ import net.datafaker.Faker;
 @Named
 public class StringsExpressionProcessor extends DelegatingExpressionProcessor<String>
 {
-    private static final Pattern COMMA_SEPARATED = Pattern.compile("(?<!\\\\),");
+    private static final Pattern COMMA_SEPARATED = Pattern.compile("(?<!\\\\),(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
     private static final String COMMA = ",";
 
     private static final LoadingCache<Locale, Faker> FAKERS = CacheBuilder.newBuilder().build(new CacheLoader<>()
@@ -155,7 +156,7 @@ public class StringsExpressionProcessor extends DelegatingExpressionProcessor<St
         for (int i = 0; i < arguments.length; i++)
         {
             String argument = i > 0 ? arguments[i].stripLeading() : arguments[i];
-            arguments[i] = StringUtils.replace(argument, "\\,", COMMA);
+            arguments[i] = normalize(argument);
         }
         return arguments;
     }

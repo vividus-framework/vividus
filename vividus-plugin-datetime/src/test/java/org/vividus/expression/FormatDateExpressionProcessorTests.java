@@ -59,20 +59,22 @@ class FormatDateExpressionProcessorTests
             Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ssXXX)",                   "2017-01-10T13:04:20Z"),
             Arguments.of("formatDate(" + INPUT_DATE_NOT_ZERO_TIMEZONE + ", yyyy-MM-dd'T'HH:mm:ssXXX)", "2017-01-10T08:04:20-05:00"),
             Arguments.of("formatDate(2017-01-10T13:04:20Z, yyyy-MM-dd'T'HH:mmXXX)",                    "2017-01-10T13:04Z"),
-            Arguments.of("formatDate(1994-11-05T08:15:30, yyyy-MM-dd'T'HH:mm:ss.SSS)",                 "1994-11-05T08:15:30.000")
+            Arguments.of("formatDate(1994-11-05T08:15:30, yyyy-MM-dd'T'HH:mm:ss.SSS)",                 "1994-11-05T08:15:30.000"),
+            Arguments.of("formatDate(1994-11-05T09:15:30, \"\"\"yyyy\\,MM,dd\"\"\")",                  "1994\\,11,05")
         );
     }
 
     static Stream<Arguments> executeWithTZDDataProvider()
     {
         return Stream.of(
-            Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX, -05:00)",                   INPUT_DATE_NOT_ZERO_TIMEZONE),
-            Arguments.of("formatDate(" + INPUT_DATE_NOT_ZERO_TIMEZONE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX, GMT)",    "2017-01-10T13:04:20.677Z"),
-            Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX, America/New_York)",         "2017-01-10T08:04:20.677-05:00"),
-            Arguments.of("formatDate(" + INPUT_DATE + ", yyyy\\,MM\\,dd'T'HH:mm:ss.SSSXXX, America/New_York)",     "2017,01,10T08:04:20.677-05:00"),
-            Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX,  -05:00)",                  INPUT_DATE_NOT_ZERO_TIMEZONE),
-            Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX,-05:00)",                    INPUT_DATE_NOT_ZERO_TIMEZONE),
-            Arguments.of("formatDate(1994-11-05T08:15:30, yyyy-MM-dd'T'HH:mm:ss.SSSXXX, -05:00)",                  "1994-11-05T03:15:30.000-05:00")
+            Arguments.of("formatDate(" + INPUT_DATE + ",  yyyy-MM-dd'T'HH:mm:ss.SSSXXX, -05:00)",                   INPUT_DATE_NOT_ZERO_TIMEZONE),
+            Arguments.of("formatDate(" + INPUT_DATE_NOT_ZERO_TIMEZONE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX, GMT)",     "2017-01-10T13:04:20.677Z"),
+            Arguments.of("formatDate(" + INPUT_DATE + ",  yyyy-MM-dd'T'HH:mm:ss.SSSXXX, America/New_York)",         "2017-01-10T08:04:20.677-05:00"),
+            Arguments.of("formatDate(" + INPUT_DATE + ",  yyyy\\,MM\\,dd'T'HH:mm:ss.SSSXXX, America/New_York)",     "2017,01,10T08:04:20.677-05:00"),
+            Arguments.of("formatDate(" + INPUT_DATE + ",  yyyy-MM-dd'T'HH:mm:ss.SSSXXX,  -05:00)",                  INPUT_DATE_NOT_ZERO_TIMEZONE),
+            Arguments.of("formatDate(" + INPUT_DATE + ",  yyyy-MM-dd'T'HH:mm:ss.SSSXXX,-05:00)",                    INPUT_DATE_NOT_ZERO_TIMEZONE),
+            Arguments.of("formatDate(1994-11-05T08:15:30, yyyy-MM-dd'T'HH:mm:ss.SSSXXX, -05:00)",                   "1994-11-05T03:15:30.000-05:00"),
+            Arguments.of("formatDate(1994-11-05T08:15:30, \"\"\"yyyy MM dd\\, HH:mm XXX\"\"\", -05:00)",            "1994 11 05\\, 03:15 -05:00")
         );
     }
     // @formatter:on

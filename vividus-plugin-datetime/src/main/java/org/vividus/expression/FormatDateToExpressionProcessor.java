@@ -19,7 +19,6 @@ package org.vividus.expression;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Named;
@@ -27,10 +26,11 @@ import javax.inject.Named;
 import org.vividus.util.DateUtils;
 
 @Named
-public class FormatDateToExpressionProcessor extends AbstractExpressionProcessor<String> implements NormalizingArguments
+public class FormatDateToExpressionProcessor extends AbstractExpressionProcessor<String>
 {
-    private static final Pattern FORMAT_TO_PATTERN = Pattern
-            .compile("^formatDateTo\\((.+?),(?<!\\\\,)(.+?),(?<!\\\\,)(.+?)\\)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern FORMAT_TO_PATTERN = Pattern.compile(
+            "^formatDateTo\\(\\s*(\"\"\".+?\"\"\"|.+?),(?<!\\\\,)\\s*(\"\"\".+?\"\"\"|.+?),(?<!\\\\,)(.+?)\\)$",
+            Pattern.CASE_INSENSITIVE);
     private static final int INPUT_DATE_GROUP = 1;
     private static final int OLD_FORMAT_GROUP = 2;
     private static final int NEW_FORMAT_GROUP = 3;
@@ -44,14 +44,14 @@ public class FormatDateToExpressionProcessor extends AbstractExpressionProcessor
     }
 
     @Override
-    protected String evaluateExpression(Matcher expressionMatcher)
+    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
     {
-        String inputDate = normalize(expressionMatcher.group(INPUT_DATE_GROUP));
+        String inputDate = expressionMatcher.getArgument(INPUT_DATE_GROUP);
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(
-                normalize(expressionMatcher.group(OLD_FORMAT_GROUP)), Locale.ENGLISH);
+                expressionMatcher.getArgument(OLD_FORMAT_GROUP), Locale.ENGLISH);
         ZonedDateTime zonedDate = dateUtils.parseDateTime(inputDate, dateTimeFormatter);
-        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(
-                normalize(expressionMatcher.group(NEW_FORMAT_GROUP)), Locale.ENGLISH);
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(expressionMatcher.getArgument(NEW_FORMAT_GROUP),
+                Locale.ENGLISH);
         return outputFormatter.format(zonedDate);
     }
 }

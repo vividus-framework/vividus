@@ -18,7 +18,6 @@ package org.vividus.expression;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Named;
@@ -27,7 +26,7 @@ import org.vividus.converter.FluentTrimmedEnumConverter;
 import org.vividus.util.ResourceUtils;
 
 @Named
-public class HashExpressionProcessor extends AbstractExpressionProcessor<String> implements NormalizingArguments
+public class HashExpressionProcessor extends AbstractExpressionProcessor<String>
 {
     private static final Pattern HASH_PATTERN = Pattern.compile("^(calculate(?:File)?Hash)\\((.+), (.+)\\)$",
             Pattern.CASE_INSENSITIVE);
@@ -45,20 +44,20 @@ public class HashExpressionProcessor extends AbstractExpressionProcessor<String>
     }
 
     @Override
-    protected String evaluateExpression(Matcher expressionMatcher)
+    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
     {
         HashAlgorithmType hashAlgorithmType = (HashAlgorithmType) fluentTrimmedEnumConverter
                 .convertValue(expressionMatcher.group(INPUT_ALGORITHM_GROUP).replace("-", ""), HashAlgorithmType.class);
-        String data = expressionMatcher.group(INPUT_DATA_GROUP);
         if ("calculateHash".equalsIgnoreCase(expressionMatcher.group(INPUT_CALCULATE_TYPE_GROUP)))
         {
-            return hashAlgorithmType.getHash(normalize(data));
+            return hashAlgorithmType.getHash(expressionMatcher.getArgument(INPUT_DATA_GROUP));
         }
         else
         {
             try
             {
-                return hashAlgorithmType.getHash(ResourceUtils.loadResourceOrFileAsByteArray(data));
+                return hashAlgorithmType.getHash(
+                        ResourceUtils.loadResourceOrFileAsByteArray(expressionMatcher.group(INPUT_DATA_GROUP)));
             }
             catch (IOException e)
             {

@@ -698,20 +698,21 @@ Gets the substring before the first occurrence of a separator. The separator is 
 * *`$input`* - any string to get a substring from
 * *`$separator`* - the string to search for
 
-TIP: Since the arguments of the expression are comma-separated, meaningful commas (in `$input` or/and `$separator`) must be escaped with `\`
+TIP: Since the arguments of the expression are comma-separated, meaningful commas (in `$input` or/and `$separator`) must be escaped with `\` or the whole argument wrapped into """
 
 .Examples of the expressions getting the substring
 |===
-|Expression                             |Result
+|Expression                               |Result
 
-|`#{substringBefore(, a)}`              |
-|`#{substringBefore(abc, a)}`           |
-|`#{substringBefore(abcba, b)}`         |`a`
-|`#{substringBefore(abcba,b)}`          |`a`
-|`#{substringBefore(abc, c)}`           |`ab`
-|`#{substringBefore(abc, d)}`           |`abc`
-|`#{substringBefore(abc, )}`            |
-|`#{substringBefore(a\,b\,c\,b\,a, c)}` |`a,b,`
+|`#{substringBefore(, a)}`                |
+|`#{substringBefore(abc, a)}`             |
+|`#{substringBefore(abcba, b)}`           |`a`
+|`#{substringBefore(abcba,b)}`            |`a`
+|`#{substringBefore(abc, c)}`             |`ab`
+|`#{substringBefore(abc, d)}`             |`abc`
+|`#{substringBefore(abc, )}`              |
+|`#{substringBefore(a\,b\,c\,b\,a, c)}`   |`a,b,`
+|`#{substringBefore("""a,b,c,b,a""", c)}` |`a,b,`
 
 |===
 
@@ -727,20 +728,21 @@ Gets the substring after the first occurrence of a separator. The separator is n
 * *`$input`* - any string to get a substring from
 * *`$separator`* - the string to search for
 
-TIP: Since the arguments of the expression are comma-separated, meaningful commas (in `$input` or/and `$separator`) must be escaped with `\`
+TIP: Since the arguments of the expression are comma-separated, meaningful commas (in `$input` or/and `$separator`) must be escaped with `\` or the whole argument wrapped into """
 
 .Examples of the expressions getting the substring
 |===
-|Expression                             |Result
+|Expression                              |Result
 
-|`#{substringAfter(, a)}`              |
-|`#{substringAfter(abc, a)}`           |`bc`
-|`#{substringAfter(abcba, b)}`         |`cba`
-|`#{substringAfter(abcba,b)}`          |`cba`
-|`#{substringAfter(abc, c)}`           |
-|`#{substringAfter(abc, d)}`           |
-|`#{substringAfter(abc, )}`            |`abc`
-|`#{substringAfter(a\,b\,c\,b\,a, c)}` |`,b,a`
+|`#{substringAfter(, a)}`                |
+|`#{substringAfter(abc, a)}`             |`bc`
+|`#{substringAfter(abcba, b)}`           |`cba`
+|`#{substringAfter(abcba,b)}`            |`cba`
+|`#{substringAfter(abc, c)}`             |
+|`#{substringAfter(abc, d)}`             |
+|`#{substringAfter(abc, )}`              |`abc`
+|`#{substringAfter(a\,b\,c\,b\,a, c)}`   |`,b,a`
+|`#{substringAfter("""a,b,c,b,a""", c)}` |`,b,a`
 
 |===
 

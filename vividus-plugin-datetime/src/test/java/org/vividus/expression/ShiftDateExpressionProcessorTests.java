@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,15 +47,16 @@ class ShiftDateExpressionProcessorTests
         // CHECKSTYLE:OFF
         // @formatter:off
         return Stream.of(
-            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " -P1Y)",                                        "2018-01-01T12:00:00.333Z"),
-            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " P12D)",                                        "2019-01-13T12:00:00.333Z"),
-            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " -P3MT3S)",                                     "2018-10-01T11:59:57.333Z"),
-            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " P1MT2H)",                                      "2019-02-01T14:00:00.333Z"),
-            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " -PT10M)",                                      "2019-01-01T11:50:00.333Z"),
-            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " PT3H)",                                        "2019-01-01T15:00:00.333Z"),
-            Arguments.of(SHIFT_DATE + "2019-01-01T12:00:00-05:00" + COMMA + "yyyy-MM-dd'T'HH:mm:ssXXX" + COMMA + " PT5S)",   "2019-01-01T12:00:05-05:00"),
-            Arguments.of("shiftDate( Tue\\, 01 Jan 2019 12:00:00 GMT, EEE\\, dd MMM yyyy HH:mm:ss zzz,    P1MT2H5S)",        "Fri, 01 Feb 2019 14:00:05 GMT"),
-            Arguments.of("shiftDate(\"Tue\\, 01 Jan 2019 12:00:00 GMT\", \"EEE\\, dd MMM yyyy HH:mm:ss zzz\",    P1MT2H5S)", "\"Fri, 01 Feb 2019 14:00:05 GMT\"")
+            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " -P1Y)",                                          "2018-01-01T12:00:00.333Z"),
+            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " P12D)",                                          "2019-01-13T12:00:00.333Z"),
+            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " -P3MT3S)",                                       "2018-10-01T11:59:57.333Z"),
+            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " P1MT2H)",                                        "2019-02-01T14:00:00.333Z"),
+            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " -PT10M)",                                        "2019-01-01T11:50:00.333Z"),
+            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " PT3H)",                                          "2019-01-01T15:00:00.333Z"),
+            Arguments.of(SHIFT_DATE + "2019-01-01T12:00:00-05:00" + COMMA + "yyyy-MM-dd'T'HH:mm:ssXXX" + COMMA + " PT5S)",     "2019-01-01T12:00:05-05:00"),
+            Arguments.of("shiftDate( Tue\\, 01 Jan 2019 12:00:00 GMT, EEE\\, dd MMM yyyy HH:mm:ss zzz,    P1MT2H5S)",          "Fri, 01 Feb 2019 14:00:05 GMT"),
+            Arguments.of("shiftDate(\"Tue\\, 01 Jan 2019 12:00:00 GMT\", \"EEE\\, dd MMM yyyy HH:mm:ss zzz\",    P1MT2H5S)",   "\"Fri, 01 Feb 2019 14:00:05 GMT\""),
+            Arguments.of("shiftDate(\"\"\"Tue\\, 01 Jan 2019 12:00 GMT\"\"\", \"\"\"EEE\\, dd MMM yyyy HH:mm zzz\"\"\", P1M)", "Fri\\, 01 Feb 2019 12:00 GMT")
         );
         // CHECKSTYLE:ON
         // @formatter:on

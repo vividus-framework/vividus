@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.expression;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Named;
@@ -52,7 +51,7 @@ public class EvalExpressionProcessor extends AbstractExpressionProcessor<String>
     }
 
     @Override
-    protected String evaluateExpression(Matcher expressionMatcher)
+    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
     {
         String expressionToEvaluate = expressionMatcher.group(EVAL_GROUP);
         JexlScript jexlScript = jexlEngine.createScript(expressionToEvaluate);

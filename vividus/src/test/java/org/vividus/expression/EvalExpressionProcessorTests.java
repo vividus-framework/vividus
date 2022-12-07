@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ class EvalExpressionProcessorTests
     {
         JexlException.Variable exception = assertThrows(JexlException.Variable.class,
             () -> processor.execute("eval(missingVar + 'val')"));
-        assertEquals("org.vividus.expression.EvalExpressionProcessor.evaluateExpression:58 variable "
+        assertEquals("org.vividus.expression.EvalExpressionProcessor.evaluateExpression:57 variable "
                 + "'missingVar' is undefined", exception.getMessage());
     }
 
@@ -111,7 +111,7 @@ class EvalExpressionProcessorTests
     {
         JexlException.Parsing exception = assertThrows(JexlException.Parsing.class,
             () -> processor.execute("eval(var + 'val')"));
-        assertEquals("org.vividus.expression.EvalExpressionProcessor.evaluateExpression:58@1:1 parsing error"
+        assertEquals("org.vividus.expression.EvalExpressionProcessor.evaluateExpression:57@1:1 parsing error"
                 + " in 'var'", exception.getMessage());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
@@ -55,7 +54,7 @@ public class ConvertCsvToParquetFileExpressionProcessor extends AbstractExpressi
     }
 
     @Override
-    protected String evaluateExpression(Matcher expressionMatcher)
+    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
     {
         String csvPath = expressionMatcher.group(CSV_PATH_GROUP);
         String schemaPath = expressionMatcher.group(SCHEMA_PATH_GROUP);

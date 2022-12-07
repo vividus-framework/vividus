@@ -54,6 +54,7 @@ class DiffDateExpressionProcessorTests
             Arguments.of("diffDate(\"10 Apr 2019 13:20:43\",          \"dd MMM yyyy HH:mm:ss\",    10 Apr 2019 09:20:43,         dd MMM yyyy HH:mm:ss)",                 "-PT4H"              ),
             Arguments.of("diffDate(Wed\\, 10 Apr\\, 2019\\, 13,EEE\\, dd MMM\\, yyyy\\, HH,        2019-04-10 03,                yyyy-MM-dd HH)",                        "-PT10H"             ),
             Arguments.of("diffDate(Wed\\, 10 Apr\\, 2019\\, 13,EEE\\, dd MMM\\, yyyy\\, HH,        2019\\,04\\,10 03,            yyyy\\,MM\\,dd HH)",                    "-PT10H"             ),
+            Arguments.of("diffDate(\"\"\"11, Apr\\, 2019\"\"\",       \"\"\"dd, MMM\\, yyyy\"\"\", \"\"\"2019\\,04,10\"\"\",     \"\"\"yyyy\\,MM,dd\"\"\")",             "-PT24H"             ),
             Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, days)",    "365"                ),
             Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, Hours)",   "8760"               ),
             Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, mInuteS)", "525600"             ),

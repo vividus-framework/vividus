@@ -93,19 +93,20 @@ class DateExpressionProcessorTests
 
     @ParameterizedTest
     @CsvSource(delimiter = ';', value = {
-            "generateDate(P5Y1M10D);                    1905-02-11",
-            "generateDate(P1Y1M1W, dd-MM-yyyy);         08-02-1901",
-            "generateDate(P1Y1M1W, dd,MM,yyyy);         08,02,1901",
-            "generateDate(P1Y1M1W, dd\\,MM\\,yyyy);     08,02,1901",
-            "generateDate(PT1H2M3S);                    1900-01-01T01:02:03",
-            "generateDate(PT61M63S, yyyy'T'HH-mm-ss);   1900T01-02-03",
-            "generateDate(-P1MT1M);                     1899-11-30T23:59:00",
-            "generateDate(P, MMM);                      Jan",
-            "generateDate(P, MMMM);                     January",
-            "generateDate(P, d);                        1",
-            "generateDate(P, EEE);                      Mon",
-            "generateDate(P, EEEE);                     Monday",
-            "generateDate(P, yyyy-MM-dd'T'HH:mm:ssZ);   1900-01-01T00:00:00+0000"
+            "generateDate(P5Y1M10D);                                 1905-02-11",
+            "generateDate(P1Y1M1W, dd-MM-yyyy);                      08-02-1901",
+            "generateDate(P1Y1M1W, dd,MM,yyyy);                      08,02,1901",
+            "generateDate(P1Y1M1W, dd\\,MM\\,yyyy);                  08,02,1901",
+            "generateDate(PT1H2M3S);                                 1900-01-01T01:02:03",
+            "generateDate(PT61M63S, yyyy'T'HH-mm-ss);                1900T01-02-03",
+            "generateDate(-P1MT1M);                                  1899-11-30T23:59:00",
+            "generateDate(P, MMM);                                   Jan",
+            "generateDate(P, MMMM);                                  January",
+            "generateDate(P, d);                                     1",
+            "generateDate(P, EEE);                                   Mon",
+            "generateDate(P, EEEE);                                  Monday",
+            "generateDate(P, yyyy-MM-dd'T'HH:mm:ssZ);                1900-01-01T00:00:00+0000",
+            "generateDate(P, \"\"\"yyyy\\,MM dd HH mm ss Z\"\"\");   1900\\,01 01 00 00 00 +0000"
     })
     void testCalculatePeriod(String expression, String expected)
     {

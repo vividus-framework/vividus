@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.expression;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,7 +53,7 @@ public class RoundExpressionProcessor extends AbstractExpressionProcessor<String
     }
 
     @Override
-    protected String evaluateExpression(Matcher expressionMatcher)
+    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
     {
         RoundExpression roundExpression = new RoundExpression(expressionMatcher, fluentEnumConverter);
         return new BigDecimal(roundExpression.getValue())
@@ -76,7 +75,7 @@ public class RoundExpressionProcessor extends AbstractExpressionProcessor<String
         private final String maxFractionDigits;
         private final String roundingMode;
 
-        RoundExpression(Matcher durationMatcher, FluentEnumConverter fluentEnumConverter)
+        RoundExpression(ExpressionArgumentMatcher durationMatcher, FluentEnumConverter fluentEnumConverter)
         {
             converter = fluentEnumConverter;
             value = durationMatcher.group(VALUE_GROUP);

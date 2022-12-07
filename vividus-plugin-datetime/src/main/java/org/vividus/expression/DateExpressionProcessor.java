@@ -18,7 +18,6 @@ package org.vividus.expression;
 
 import java.time.ZonedDateTime;
 import java.util.Locale;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.vividus.util.DateUtils;
@@ -44,7 +43,7 @@ public class DateExpressionProcessor extends AbstractExpressionProcessor<String>
     }
 
     @Override
-    protected String evaluateExpression(Matcher expressionMatcher)
+    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
     {
         DateExpression dateExpression = new DateExpression(expressionMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP,
                 DURATION_GROUP, GENERATE_DATE_FORMAT_GROUP);

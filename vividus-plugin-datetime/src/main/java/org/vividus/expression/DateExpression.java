@@ -21,11 +21,10 @@ import java.time.Period;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.regex.Matcher;
 
 import org.apache.commons.lang3.StringUtils;
 
-public final class DateExpression implements NormalizingArguments
+public final class DateExpression
 {
     private static final String DURATION_DESIGNATOR = "P";
 
@@ -34,12 +33,12 @@ public final class DateExpression implements NormalizingArguments
     private final String customFormatString;
     private final String minusSign;
 
-    public DateExpression(Matcher matcher, int minusSignGroup, int periodGroup, int durationGroup,
+    public DateExpression(ExpressionArgumentMatcher matcher, int minusSignGroup, int periodGroup, int durationGroup,
             int formatGroup)
     {
         periodString = matcher.group(periodGroup);
         durationString = matcher.group(durationGroup);
-        customFormatString = matcher.group(formatGroup);
+        customFormatString = matcher.getArgument(formatGroup);
         minusSign = matcher.group(minusSignGroup);
     }
 
@@ -80,7 +79,7 @@ public final class DateExpression implements NormalizingArguments
 
     public String getCustomFormatString()
     {
-        return normalize(customFormatString);
+        return customFormatString;
     }
 
     public ZonedDateTime processPeriod(ZonedDateTime zonedDateTime)

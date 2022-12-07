@@ -19,7 +19,6 @@ package org.vividus.expression;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Named;
@@ -27,10 +26,10 @@ import javax.inject.Named;
 import org.vividus.util.DateUtils;
 
 @Named
-public class ShiftDateExpressionProcessor extends AbstractExpressionProcessor<String> implements NormalizingArguments
+public class ShiftDateExpressionProcessor extends AbstractExpressionProcessor<String>
 {
     private static final Pattern SHIFT_DATE_PATTERN = Pattern.compile(
-            "^shiftDate\\((.+?),(?<!\\\\,)(.+?),\\s*(-)?P((?:\\d+[YMWD])*)((?:T?\\d+[HMS])*)\\)$",
+            "^shiftDate\\((\"\"\".+?\"\"\"|.+?),(?<!\\\\,)(.+?),\\s*(-)?P((?:\\d+[YMWD])*)((?:T?\\d+[HMS])*)\\)$",
             Pattern.CASE_INSENSITIVE);
 
     private static final int INPUT_DATE_GROUP = 1;
@@ -49,11 +48,11 @@ public class ShiftDateExpressionProcessor extends AbstractExpressionProcessor<St
     }
 
     @Override
-    protected String evaluateExpression(Matcher expressionMatcher)
+    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
     {
-        DateTimeFormatter format = DateTimeFormatter.ofPattern(normalize(expressionMatcher.group(FORMAT_GROUP)),
+        DateTimeFormatter format = DateTimeFormatter.ofPattern(expressionMatcher.getArgument(FORMAT_GROUP),
                 DEFAULT_LOCALE);
-        ZonedDateTime zonedDateTime = dateUtils.parseDateTime(normalize(expressionMatcher.group(INPUT_DATE_GROUP)),
+        ZonedDateTime zonedDateTime = dateUtils.parseDateTime(expressionMatcher.getArgument(INPUT_DATE_GROUP),
                 format);
         DateExpression dateExpression = new DateExpression(expressionMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP,
                 DURATION_GROUP, FORMAT_GROUP);

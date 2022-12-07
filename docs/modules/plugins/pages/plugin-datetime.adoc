@@ -21,7 +21,7 @@ There are no required properties for the plugin.
 
 NOTE: The expression parameters marked with *bold* are mandatory.
 
-TIP: If argument allows meaningful commas (like, parts of the date format pattern) should be escaped using `\`. Refer to examples for each expression.
+TIP: If argument allows meaningful commas (like, parts of the date format pattern) should be escaped using `\` or the whole argument wrapped into """. Refer to examples for each expression.
 
 === `generateDate`
 
@@ -101,6 +101,10 @@ Let's imagine the current date is `2020-11-23` and the time is `00:10:01`. Here 
 |2020,11,25
 |Current date +2 day with the custom output format
 
+|`#{generateDate(P3D, """yyyy,MM,dd""")}`
+|2020,11,25
+|Current date +3 day with the custom output format
+
 |`#{generateDate(P, yyyy-MM-dd\'T\'HH:mm:ssZ)}`
 |2020-11-23T00:10:01+0300
 |Current date with the custom output format including time zone offset
@@ -150,6 +154,9 @@ Formats the input date to another format. Additionally, time zone can be changed
 |`#{formatDate(2017-01-13T09:00:42.862Z, yyyy\\,MM\\,dd)}`
 |2017,01,13
 
+|`#{formatDate(2017-01-13T09:00:42.862Z, """yyyy,MM,dd""")}`
+|2017,01,13
+
 |`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss.SSSZ, -05:00)}`
 |2017-01-13T04:00:42.862-0500
 
@@ -194,6 +201,9 @@ Formats the input date to the desired format. The format of the input date shoul
 
 |`#{formatDateTo(Fri\, 31 Mar 2017 07:20:43 GMT, EEE\, dd MMM yyyy HH:mm:ss zzz, yyyy-MM-dd\'T\'HH:mm:ss)}`
 |2017-03-31T07:20:43
+
+|`#{formatDateTo("""Fri, 31 Mar 2017 07:20:43 GMT""", """EEE, dd MMM yyyy HH:mm:ss zzz""", yyyy-MM-dd\'T\'HH:mm:ss)}`
+|2017-03-31T07:20:43
 |===
 
 
@@ -219,6 +229,9 @@ Shifts the given input date for a given period in any direction (+/-).
 
 |`#{shiftDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, -P1Y)}`
 |2018-03-19 01:40:00
+
+|`#{shiftDate("""2019-03-19, 03:40:00""", """yyyy-MM-dd, HH:mm:ss""", -P1Y)}`
+|2018-03-19, 01:40:00
 
 |`#{shiftDate(Wed\, 10 Apr 2019 07:20:43 GMT, EEE\, dd MMM yyyy HH:mm:ss zzz, P1MT2H)}`
 |Fri, 10 May 2019 09:20:43 GMT
@@ -250,6 +263,9 @@ Calculates the difference between two dates with given formats and returns resul
 |Result
 
 |`#{diffDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, 2019-03-19 03:40, yyyy-MM-dd HH:mm)}`
+|PT0S
+
+|`#{diffDate("""2019-03-19, 03:40:00""", """yyyy-MM-dd, HH:mm:ss""", 2019-03-19 03:40, yyyy-MM-dd HH:mm)}`
 |PT0S
 
 |`#{diffDate("Wed 10 Apr\, 2019\, 13:20:43 GMT", "EEE dd MMM\, yyyy\, HH:mm:ss zzz", "Wed 10 Apr\, 2019\, 09:20:43 America/New_York", "EEE dd MMM\, yyyy\, HH:mm:ss zzz")}`

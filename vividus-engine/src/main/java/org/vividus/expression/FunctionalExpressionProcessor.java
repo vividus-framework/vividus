@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.vividus.expression;
 
 import java.util.function.Function;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FunctionalExpressionProcessor<T> extends AbstractExpressionProcessor<T>
@@ -33,7 +32,7 @@ public class FunctionalExpressionProcessor<T> extends AbstractExpressionProcesso
     }
 
     @Override
-    protected T evaluateExpression(Matcher expressionMatcher)
+    protected T evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
     {
         String inputData = expressionMatcher.group(INPUT_DATA_GROUP);
         return transformer.apply(inputData);

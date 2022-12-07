@@ -87,6 +87,8 @@ class StringsExpressionProcessorTests
                 arguments("anyOf(,)",                                                      EMPTY),
                 arguments("anyOf(, )",                                                     EMPTY),
                 arguments("anyOf( )",                                                      " "),
+                arguments("anyOf(\"\"\"a,b\\,c\"\"\")",                                    "a,b\\,c"),
+                arguments("anyOf(\"\"\" \"\"\")",                                          " "),
                 arguments("anyOf(\\,)",                                                    ","),
                 arguments("toBase64Gzip(vividus)",                                         "H4sIAAAAAAAA/yvLLMtMKS0GANIHCdkHAAAA"),
                 arguments("escapeHTML(M&Ms)",                                              "M&amp;Ms"),
@@ -99,7 +101,8 @@ class StringsExpressionProcessorTests
                 arguments("substringBefore(abc, c)",                                       "ab"),
                 arguments("substringBefore(abc, d)",                                       "abc"),
                 arguments("substringBefore(abc, )",                                        ""),
-                arguments("substringBefore(a\\,b\\,c\\,b\\,a, c)",                         "a,b,"),
+                arguments("substringBefore(a\\,b\\,c\\,b\\,a, \"\"\",c\"\"\")",            "a,b"),
+                arguments("substringBefore(\"\"\"a,b,c,b,a\"\"\", c)",                     "a,b,"),
                 arguments("substringAfter(, a)",                                           ""),
                 arguments("substringAfter(abc, a)",                                        "bc"),
                 arguments("substringAfter(abcba, b)",                                      "cba"),
@@ -107,7 +110,10 @@ class StringsExpressionProcessorTests
                 arguments("substringAfter(abc, c)",                                        ""),
                 arguments("substringAfter(abc, d)",                                        ""),
                 arguments("substringAfter(abc, )",                                         "abc"),
-                arguments("substringAfter(a\\,b\\,c\\,b\\,a, c)",                          ",b,a")
+                arguments("substringAfter(a\\,b\\,c\\,b\\,a, c)",                          ",b,a"),
+                arguments("substringAfter(a\\,b\\,c\\,b\\,a, c\\,)",                       "b,a"),
+                arguments("substringAfter(\"\"\"a,b,c,b\\,a\"\"\", c)",                    ",b\\,a"),
+                arguments("substringAfter(\"\"\"a,b,c,b\\,a\"\"\", \"\"\"c,\"\"\")",       "b\\,a")
         );
         // CHECKSTYLE:ON
     }
@@ -140,8 +146,8 @@ class StringsExpressionProcessorTests
     @Test
     void shouldPickRandomValue()
     {
-        assertThat(processor.execute("anyOf(one,two, three\\, or,, four)").get(),
-                anyOf(equalTo("one"), equalTo("two"), equalTo("three, or"), equalTo("four"), emptyString()));
+        assertThat(processor.execute("anyOf(one,two, three\\, or,, \"\"\"four\\,five\"\"\")").get(),
+                anyOf(equalTo("one"), equalTo("two"), equalTo("three, or"), equalTo("four\\,five"), emptyString()));
     }
 
     @ParameterizedTest

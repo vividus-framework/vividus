@@ -18,10 +18,27 @@ package org.vividus.expression;
 
 import org.apache.commons.lang3.StringUtils;
 
-interface NormalizingArguments
+final class NormalizingArgumentsUtils
 {
-    default String normalize(String argument)
+    private static final String WRAP_TOKEN = "\"\"\"";
+
+    private NormalizingArgumentsUtils()
     {
-        return StringUtils.replace(argument.trim(), "\\,", ",");
+    }
+
+    static String normalize(String argument)
+    {
+        if (StringUtils.isNotBlank(argument))
+        {
+            String trimmed = argument.trim();
+            boolean wrappedInQuotes = trimmed.startsWith(WRAP_TOKEN) && trimmed.endsWith(WRAP_TOKEN);
+            if (wrappedInQuotes)
+            {
+                int wrapTokenLength = WRAP_TOKEN.length();
+                return trimmed.substring(wrapTokenLength, trimmed.length() - wrapTokenLength);
+            }
+            return trimmed.replace("\\,", ",");
+        }
+        return argument;
     }
 }

@@ -22,7 +22,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Named;
@@ -32,11 +31,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.vividus.util.DateUtils;
 
 @Named
-public class DiffDateExpressionProcessor extends AbstractExpressionProcessor<String> implements NormalizingArguments
+public class DiffDateExpressionProcessor extends AbstractExpressionProcessor<String>
 {
-    private static final Pattern DIFF_DATE_PATTERN = Pattern
-            .compile("^diffDate\\((.+?),(?<!\\\\,)(.+?),(?<!\\\\,)(.+?),(?<!\\\\,)(.+?)(,(?<!\\\\,)(.+?))?\\)$",
+    // CHECKSTYLE:OFF
+    // @formatter:off
+    private static final Pattern DIFF_DATE_PATTERN = Pattern.compile(
+            "^diffDate\\(\\s*(\"\"\".+?\"\"\"|.+?),(?<!\\\\,)\\s*(\"\"\".+?\"\"\"|.+?),(?<!\\\\,)\\s*(\"\"\".+?\"\"\"|.+?),(?<!\\\\,)\\s*(\"\"\".+?\"\"\"|.+?)(,(?<!\\\\,)(.+?))?\\)$",
                     Pattern.CASE_INSENSITIVE);
+    // CHECKSTYLE:ON
+    // @formatter:on
     private static final String MINUS_SIGN = "-";
 
     private static final int FIRST_INPUT_DATE_GROUP = 1;
@@ -54,7 +57,7 @@ public class DiffDateExpressionProcessor extends AbstractExpressionProcessor<Str
     }
 
     @Override
-    protected String evaluateExpression(Matcher expressionMatcher)
+    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
     {
         ZonedDateTime firstZonedDateTime = getZonedDateTime(expressionMatcher, FIRST_INPUT_DATE_GROUP,
                 FIRST_INPUT_FORMAT_GROUP);
@@ -78,10 +81,11 @@ public class DiffDateExpressionProcessor extends AbstractExpressionProcessor<Str
                 : durationAsString;
     }
 
-    private ZonedDateTime getZonedDateTime(Matcher expressionMatcher, int inputDateGroup, int inputFormatGroup)
+    private ZonedDateTime getZonedDateTime(ExpressionArgumentMatcher expressionMatcher, int inputDateGroup,
+                                           int inputFormatGroup)
     {
         DateTimeFormatter inputFormat = DateTimeFormatter
-                .ofPattern(normalize(expressionMatcher.group(inputFormatGroup)), Locale.ENGLISH);
-        return dateUtils.parseDateTime(normalize(expressionMatcher.group(inputDateGroup)), inputFormat);
+                .ofPattern(expressionMatcher.getArgument(inputFormatGroup), Locale.ENGLISH);
+        return dateUtils.parseDateTime(expressionMatcher.getArgument(inputDateGroup), inputFormat);
     }
 }

@@ -19,7 +19,6 @@ package org.vividus.expression;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Named;
@@ -27,10 +26,10 @@ import javax.inject.Named;
 import org.vividus.util.DateUtils;
 
 @Named
-public class FormatDateExpressionProcessor extends AbstractExpressionProcessor<String> implements NormalizingArguments
+public class FormatDateExpressionProcessor extends AbstractExpressionProcessor<String>
 {
     private static final Pattern FORMAT_PATTERN = Pattern
-            .compile("^formatDate\\(([^,]*),\\s*([\\w+\\\\,]*(?<!\\\\,)[^,]*)(?:,\\s*(.*))?\\)$",
+            .compile("^formatDate\\(([^,]*),\\s*([\\w+\\\\,]*\"\"\".+?\"\"\"|.+?)(?:,(?<!\\\\,)\\s*(.*))?\\)$",
                     Pattern.CASE_INSENSITIVE);
     private static final int INPUT_DATE_GROUP = 1;
     private static final int OUTPUT_FORMAT_GROUP = 2;
@@ -46,13 +45,13 @@ public class FormatDateExpressionProcessor extends AbstractExpressionProcessor<S
     }
 
     @Override
-    protected String evaluateExpression(Matcher expressionMatcher)
+    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
     {
-        ZonedDateTime zonedDate = dateUtils.parseDateTime(expressionMatcher.group(INPUT_DATE_GROUP),
+        ZonedDateTime zonedDate = dateUtils.parseDateTime(expressionMatcher.getArgument(INPUT_DATE_GROUP),
                 ISO_STANDARD_FORMAT);
-        String outputFormat = normalize(expressionMatcher.group(OUTPUT_FORMAT_GROUP));
+        String outputFormat = expressionMatcher.getArgument(OUTPUT_FORMAT_GROUP);
         DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(outputFormat);
-        String outputTimeZone = expressionMatcher.group(OUTPUT_TIMEZONE_GROUP);
+        String outputTimeZone = expressionMatcher.getArgument(OUTPUT_TIMEZONE_GROUP);
         if (outputTimeZone != null)
         {
             zonedDate = zonedDate.withZoneSameInstant(ZoneId.of(outputTimeZone));
