@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.archive.steps;
+package org.vividus.steps;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,13 +38,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
-import org.vividus.model.ArchiveVariable;
-import org.vividus.model.NamedEntry;
-import org.vividus.model.OutputFormat;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.steps.DataWrapper;
-import org.vividus.steps.StringComparisonRule;
+import org.vividus.steps.ArchiveSteps.ArchiveVariable;
+import org.vividus.steps.ArchiveSteps.NamedEntry;
+import org.vividus.steps.ArchiveSteps.OutputFormat;
 import org.vividus.util.ResourceUtils;
 import org.vividus.variable.VariableScope;
 
@@ -55,31 +53,31 @@ class ArchiveStepsTests
     private static final String FILE_JSON = "file.json";
     private static final String IMAGE_PNG = "images/image.png";
     private static final String DUMMY = "dummy";
-    private static final String MATHES_PATTERN = ".+\\.png";
+    private static final String MATCHES_PATTERN = ".+\\.png";
     private static final String CONTAINS_ENTRY_WITH_NAME = "The archive contains entry with name ";
     private static final String CONTAINS_ENTRY_WITH_RULE = "The archive contains entry matching the "
             + "comparison rule '%s' with name pattern '%s'";
-    @Mock private ISoftAssert softAssert;
-    @Mock private VariableContext variableContext;
-    @Mock private IAttachmentPublisher attachmentPublisher;
 
+    @Mock private VariableContext variableContext;
+    @Mock private ISoftAssert softAssert;
+    @Mock private IAttachmentPublisher attachmentPublisher;
     @InjectMocks  private ArchiveSteps archiveSteps;
 
     @Test
     void testSaveFilesContentToVariables()
     {
-        String json = "json";
-        String image = "image";
-        String base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7EAAAOxAGVK"
+        var json = "json";
+        var image = "image";
+        var base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7EAAAOxAGVK"
                 + "w4bAAAACklEQVQImWNgAAAAAgAB9HFkpgAAAABJRU5ErkJggg==";
 
         archiveSteps.saveArchiveEntriesToVariables(createArchiveData(),
                 List.of(createVariable(IMAGE_PNG, image, OutputFormat.BASE64),
                         createVariable(FILE_JSON, json, OutputFormat.TEXT)));
-        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
+        var scopes = Set.of(VariableScope.SCENARIO);
         verify(variableContext).putVariable(scopes, image, base64);
         verify(variableContext).putVariable(scopes, json,
-                "{\"plugin\": \"vividus-plugin-rest-api\"}\n");
+                "{\"hello\": \"world\"}\n");
         verifyNoInteractions(softAssert);
         verifyNoMoreInteractions(variableContext);
     }
@@ -87,7 +85,7 @@ class ArchiveStepsTests
     @Test
     void testSaveFilesContentToVariablesInvalidPath()
     {
-        String path = "path";
+        var path = "path";
         archiveSteps.saveArchiveEntriesToVariables(createArchiveData(),
                 List.of(createVariable(path, path, OutputFormat.BASE64)));
         verify(softAssert).recordFailedAssertion(
@@ -99,7 +97,7 @@ class ArchiveStepsTests
     @Test
     void testVerifyArchiveContainsEntries()
     {
-        Set<String> archiveEntries = createArchiveEntries();
+        var archiveEntries = createArchiveEntries();
         archiveSteps.verifyArchiveContainsEntries(createArchiveData(), List.of(
                 createEntry(FILE_JSON, null),
                 createEntry(IMAGE_PNG, null),
@@ -119,7 +117,7 @@ class ArchiveStepsTests
     @Test
     void testVerifyArchiveContainsEntriesIsPassed()
     {
-        Set<String> archiveEntries = createArchiveEntries();
+        var archiveEntries = createArchiveEntries();
         when(softAssert.assertThat(eq(CONTAINS_ENTRY_WITH_NAME + IMAGE_PNG), eq(archiveEntries),
                 argThat(e -> e.matches(archiveEntries)))).thenReturn(true);
         when(softAssert.assertThat(eq(CONTAINS_ENTRY_WITH_NAME + FILE_JSON), eq(archiveEntries),
@@ -139,7 +137,7 @@ class ArchiveStepsTests
     @Test
     void testVerifyArchiveContainsEntriesIsFailled()
     {
-        Set<String> archiveEntries = createArchiveEntries();
+        var archiveEntries = createArchiveEntries();
         when(softAssert.assertThat(eq(CONTAINS_ENTRY_WITH_NAME + IMAGE_PNG), eq(archiveEntries),
                 argThat(e -> e.matches(archiveEntries)))).thenReturn(true);
         when(softAssert.assertThat(eq(CONTAINS_ENTRY_WITH_NAME + DUMMY), eq(archiveEntries),
@@ -160,18 +158,18 @@ class ArchiveStepsTests
     @Test
     void testVerifyArchiveContainsEntriesWithUserRulesIsFailed()
     {
-        Set<String> archiveEntries = createArchiveEntries();
+        var archiveEntries = createArchiveEntries();
         when(softAssert.assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, DUMMY)),
                 eq(archiveEntries), argThat(e -> !e.matches(archiveEntries)))).thenReturn(false);
-        when(softAssert.assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATHES_PATTERN)),
+        when(softAssert.assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATCHES_PATTERN)),
                 eq(archiveEntries), argThat(e -> e.matches(archiveEntries)))).thenReturn(true);
         archiveSteps.verifyArchiveContainsEntries(createArchiveData(), List.of(
                 createEntry(DUMMY, MATCHES),
-                createEntry(MATHES_PATTERN, MATCHES)
+                createEntry(MATCHES_PATTERN, MATCHES)
         ));
         verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, DUMMY)),
                 eq(archiveEntries), argThat(e -> !e.matches(archiveEntries)));
-        verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATHES_PATTERN)),
+        verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATCHES_PATTERN)),
                 eq(archiveEntries), argThat(e -> e.matches(archiveEntries)));
         verifyNoMoreInteractions(softAssert);
         verifyPublishAttachment(archiveEntries);
@@ -181,13 +179,13 @@ class ArchiveStepsTests
     @Test
     void testVerifyArchiveContainsEntriesWithUserRulesIsPassed()
     {
-        Set<String> archiveEntries = createArchiveEntries();
-        when(softAssert.assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATHES_PATTERN)),
+        var archiveEntries = createArchiveEntries();
+        when(softAssert.assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATCHES_PATTERN)),
                 eq(archiveEntries), argThat(e -> e.matches(archiveEntries)))).thenReturn(true);
         archiveSteps.verifyArchiveContainsEntries(createArchiveData(), List.of(
-                createEntry(MATHES_PATTERN, MATCHES)
+                createEntry(MATCHES_PATTERN, MATCHES)
         ));
-        verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATHES_PATTERN)),
+        verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATCHES_PATTERN)),
                 eq(archiveEntries), argThat(e -> e.matches(archiveEntries)));
         verifyNoMoreInteractions(softAssert);
         verifyNoInteractions(attachmentPublisher);
@@ -196,15 +194,15 @@ class ArchiveStepsTests
     @Test
     void testVerifyArchiveContainsEntriesWithUserRules()
     {
-        String containsPattern = "file";
-        Set<String> archiveEntries = createArchiveEntries();
+        var containsPattern = "file";
+        var archiveEntries = createArchiveEntries();
         archiveSteps.verifyArchiveContainsEntries(createArchiveData(), List.of(
-                createEntry(MATHES_PATTERN, MATCHES),
+                createEntry(MATCHES_PATTERN, MATCHES),
                 createEntry(containsPattern, CONTAINS),
                 createEntry(DUMMY, IS_EQUAL_TO),
                 createEntry(DUMMY, DOES_NOT_CONTAIN)
         ));
-        verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATHES_PATTERN)),
+        verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATCHES_PATTERN)),
                 eq(archiveEntries), argThat(e -> e.matches(archiveEntries)));
         verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, CONTAINS, containsPattern)),
                 eq(archiveEntries), argThat(e -> e.matches(archiveEntries)));
@@ -219,13 +217,13 @@ class ArchiveStepsTests
 
     private void verifyPublishAttachment(Set<String> attachmentContent)
     {
-        verify(attachmentPublisher).publishAttachment("archive-entries-result-table.ftl",
+        verify(attachmentPublisher).publishAttachment("templates/archive-entries-result-table.ftl",
                 Map.of("entryNames", attachmentContent), "Archive entries");
     }
 
     private static NamedEntry createEntry(String name, StringComparisonRule rule)
     {
-        NamedEntry entry = new NamedEntry();
+        var entry = new NamedEntry();
         entry.setName(name);
         entry.setRule(rule);
         return entry;
@@ -233,7 +231,7 @@ class ArchiveStepsTests
 
     private DataWrapper createArchiveData()
     {
-        byte[] data = ResourceUtils.loadResourceAsByteArray(getClass(), "/org/vividus/steps/api/archive.zip");
+        var data = ResourceUtils.loadResourceAsByteArray(getClass(), "archive.zip");
         return new DataWrapper(data);
     }
 
@@ -247,8 +245,8 @@ class ArchiveStepsTests
 
     private static ArchiveVariable createVariable(String path, String variableName, OutputFormat outputFormat)
     {
-        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        ArchiveVariable variable = new ArchiveVariable();
+        var scopes = Set.of(VariableScope.SCENARIO);
+        var variable = new ArchiveVariable();
         variable.setPath(path);
         variable.setOutputFormat(outputFormat);
         variable.setScopes(scopes);

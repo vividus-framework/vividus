@@ -14,38 +14,38 @@
  * limitations under the License.
  */
 
-package org.vividus.archive.steps;
+package org.vividus.steps;
 
 import static org.hamcrest.Matchers.hasItem;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
-import org.vividus.model.ArchiveVariable;
-import org.vividus.model.NamedEntry;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.steps.DataWrapper;
-import org.vividus.steps.StringComparisonRule;
 import org.vividus.util.zip.ZipUtils;
+import org.vividus.variable.VariableScope;
 
 public class ArchiveSteps
 {
-    private final ISoftAssert softAssert;
     private final VariableContext variableContext;
+    private final ISoftAssert softAssert;
     private final IAttachmentPublisher attachmentPublisher;
 
-    public ArchiveSteps(ISoftAssert softAssert, VariableContext variableContext,
+    public ArchiveSteps(VariableContext variableContext, ISoftAssert softAssert,
             IAttachmentPublisher attachmentPublisher)
     {
-        this.softAssert = softAssert;
         this.variableContext = variableContext;
+        this.softAssert = softAssert;
         this.attachmentPublisher = attachmentPublisher;
     }
 
@@ -115,7 +115,7 @@ public class ArchiveSteps
                 .reduce(true, (a, b) -> a && b);
         if (!verificationPassed)
         {
-            attachmentPublisher.publishAttachment("archive-entries-result-table.ftl",
+            attachmentPublisher.publishAttachment("templates/archive-entries-result-table.ftl",
                     Map.of("entryNames", entryNames), "Archive entries");
         }
     }
@@ -132,5 +132,103 @@ public class ArchiveSteps
         }
         return softAssert.assertThat("The archive contains entry with name " + expectedName, entryNames,
                 hasItem(expectedName));
+    }
+
+    @AsParameters
+    public static class ArchiveVariable
+    {
+        private String path;
+        private String variableName;
+        private Set<VariableScope> scopes;
+        private OutputFormat outputFormat;
+
+        public String getPath()
+        {
+            return path;
+        }
+
+        public void setPath(String path)
+        {
+            this.path = path;
+        }
+
+        public String getVariableName()
+        {
+            return variableName;
+        }
+
+        public void setVariableName(String variableName)
+        {
+            this.variableName = variableName;
+        }
+
+        public Set<VariableScope> getScopes()
+        {
+            return scopes;
+        }
+
+        public void setScopes(Set<VariableScope> scopes)
+        {
+            this.scopes = scopes;
+        }
+
+        public OutputFormat getOutputFormat()
+        {
+            return outputFormat;
+        }
+
+        public void setOutputFormat(OutputFormat outputFormat)
+        {
+            this.outputFormat = outputFormat;
+        }
+    }
+
+    @AsParameters
+    public static class NamedEntry
+    {
+        private StringComparisonRule rule;
+        private String name;
+
+        public String getName()
+        {
+            return name;
+        }
+
+        public void setName(String name)
+        {
+            this.name = name;
+        }
+
+        public StringComparisonRule getRule()
+        {
+            return rule;
+        }
+
+        public void setRule(StringComparisonRule rule)
+        {
+            this.rule = rule;
+        }
+    }
+
+    public enum OutputFormat
+    {
+        TEXT
+        {
+            @Override
+            public String convert(byte[] data)
+            {
+                return new String(data, StandardCharsets.UTF_8);
+            }
+        },
+        BASE64
+        {
+            @Override
+            public String convert(byte[] data)
+            {
+                return Base64.getEncoder().encodeToString(data);
+            }
+        };
+
+        public abstract String convert(byte[] data);
     }
 }
