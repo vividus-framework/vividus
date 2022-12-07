@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.vividus.converter.FluentTrimmedEnumConverter;
 import org.vividus.util.ResourceUtils;
 
 @Named
-public class HashExpressionProcessor extends AbstractExpressionProcessor<String>
+public class HashExpressionProcessor extends AbstractExpressionProcessor<String> implements NormalizingArguments
 {
     private static final Pattern HASH_PATTERN = Pattern.compile("^(calculate(?:File)?Hash)\\((.+), (.+)\\)$",
             Pattern.CASE_INSENSITIVE);
@@ -52,7 +52,7 @@ public class HashExpressionProcessor extends AbstractExpressionProcessor<String>
         String data = expressionMatcher.group(INPUT_DATA_GROUP);
         if ("calculateHash".equalsIgnoreCase(expressionMatcher.group(INPUT_CALCULATE_TYPE_GROUP)))
         {
-            return hashAlgorithmType.getHash(data);
+            return hashAlgorithmType.getHash(normalize(data));
         }
         else
         {

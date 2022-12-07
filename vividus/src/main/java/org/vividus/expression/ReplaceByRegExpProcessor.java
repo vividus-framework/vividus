@@ -30,7 +30,7 @@ import java.util.stream.IntStream;
 import javax.inject.Named;
 
 @Named
-public class ReplaceByRegExpProcessor implements IExpressionProcessor<String>
+public class ReplaceByRegExpProcessor implements IExpressionProcessor<String>, NormalizingArguments
 {
     @SuppressWarnings("checkstyle:SingleSpaceSeparator")
     private static final Map<Pattern, Function<Matcher, Function<String, String>>> EVALUATE_REG_EXP = Map.of(
@@ -58,7 +58,7 @@ public class ReplaceByRegExpProcessor implements IExpressionProcessor<String>
             {
                 List<String> groupValues = processMatchExpressionResult(expressionMatcher);
                 String regExp = groupValues.get(REG_EXP_INDEX);
-                String input = groupValues.get(INPUT_INDEX);
+                String input = normalize(groupValues.get(INPUT_INDEX));
                 String replacement = groupValues.get(REPLACEMENT_INDEX);
                 return Optional.of(entry.getValue().apply(Pattern.compile(regExp, Pattern.DOTALL).matcher(input))
                         .apply(replacement));

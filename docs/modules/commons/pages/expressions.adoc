@@ -484,9 +484,54 @@ NOTE: The expression parameters containing commas or empty values must be surrou
 |`#{replaceAllByRegExp(\d, """""", a1b2c3d)}`
 |`abcd`
 
-|Replace whitespaces with commas
-|`#{replaceAllByRegExp(\\s, """,""", a b c d)}`
-|`a,b,c,d`
+|Replace all whitespaces with commas
+|`#{replaceAllByRegExp(\s, """,""", string with spaces)}`
+|`string,with,spaces`
+
+|Replace all whitespaces with commas
+|`#{replaceAllByRegExp(\s, \,, string with spaces)}`
+|`string,with,spaces`
+
+|Replace all commas with underscores
+|`#{replaceAllByRegExp(\,, _, string,with,commas)}`
+|`string_with_commas`
+
+|Replace all commas with underscores
+|`#{replaceAllByRegExp(""",""", _, string,with,commas)}`
+|`string_with_commas`
+
+|Replace all commas with underscores
+|`#{replaceAllByRegExp(\,, _, """string,with,commas""")}`
+|`string_with_commas`
+
+|Replace all commas with underscores
+|`#{replaceAllByRegExp(\,, _, string\,with\,commas)}`
+|`string_with_commas`
+
+|Replace the first whitespace with comma
+|`#{replaceFirstByRegExp(\s, """,""", string with spaces)}`
+|`string,with spaces`
+
+|Replace the first whitespace with comma
+|`#{replaceFirstByRegExp(\s, \,, string with spaces)}`
+|`string,with spaces`
+
+|Replace the first comma with underscore
+|`#{replaceFirstByRegExp(\,, _, string,with,commas)}`
+|`string_with,commas`
+
+|Replace the first comma with underscore
+|`#{replaceFirstByRegExp(""",""", _, string,with,commas)}`
+|`string_with,commas`
+
+|Replace the first comma with underscore
+|`#{replaceFirstByRegExp(\,, _, """string,with,commas""")}`
+|`string_with,commas`
+
+|Replace the first comma with underscore
+|`#{replaceFirstByRegExp(\,, _, string\,with\,commas)}`
+|`string_with,commas`
+
 |===
 
 === `toLowerCase`
@@ -844,8 +889,12 @@ TIP: Since the hashing argument of the expression can include commas do *not* es
 
 |`#{calculateHash(MD5, vividus)}`
 |`0a05ba6064ae7e5d6ee9818f85b666ad`
-|`#{calculateHash(sha256, do,not,escape,commas)}`
-|`a137d0e9729765d5f41dce3a386454e043bbe94e82b017f42661a4b7403dae4c`
+
+|`#{calculateHash(SHA256, with,comma)}`
+|`f93dcfd6fc4c91c058177af3b5de34090073f2cc4a658010609ed8778d6d89f3`
+
+|`#{calculateHash(SHA256, with\,comma)}`
+|`f93dcfd6fc4c91c058177af3b5de34090073f2cc4a658010609ed8778d6d89f3`
 |===
 
 === `calculateFileHash`
