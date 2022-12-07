@@ -21,6 +21,9 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.google.common.net.InetAddresses;
+import com.google.common.net.InternetDomainName;
+
 import org.apache.http.client.CookieStore;
 import org.apache.http.cookie.ClientCookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
@@ -30,19 +33,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.http.client.CookieStoreCollector;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.web.util.InternetUtils;
 
 public class CookieManager implements ICookieManager
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(CookieManager.class);
+
+    private static final String DOMAIN_PARTS_SEPARATOR = ".";
 
     @Inject private IWebDriverProvider webDriverProvider;
 
     @Override
     public void addCookie(String cookieName, String cookieValue, String path, String urlAsString)
     {
-        URI uri = URI.create(urlAsString);
-        String domain = InternetUtils.DOMAIN_PARTS_SEPARATOR + InternetUtils.getTopDomain(uri);
+        String host = URI.create(urlAsString).getHost();
+        String domain = host.contains(DOMAIN_PARTS_SEPARATOR) && !InetAddresses.isInetAddress(host)
+                ? DOMAIN_PARTS_SEPARATOR + getTopDomain(host)
+                : host;
 
         Cookie cookie = new Cookie.Builder(cookieName, cookieValue)
                 .domain(domain)
@@ -50,6 +56,11 @@ public class CookieManager implements ICookieManager
                 .build();
         LOGGER.debug("Adding cookie: {}", cookie);
         getOptions().addCookie(cookie);
+    }
+
+    private static String getTopDomain(String host)
+    {
+        return InternetDomainName.from(host).topPrivateDomain().toString();
     }
 
     @Override
