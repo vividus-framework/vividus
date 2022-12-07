@@ -34,6 +34,10 @@ import org.apache.http.cookie.ClientCookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -51,28 +55,41 @@ class CookieManagerTests
     private static final String COOKIE_VALUE = "cookieValue";
     private static final String DOMAIN = "https://www.domain.com";
 
+    @Captor private ArgumentCaptor<Cookie> cookieCaptor;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private Options options;
     @InjectMocks private CookieManager cookieManager;
 
     @Test
-    void testDeleteAllCookies()
+    void shouldDeleteAllCookies()
     {
         configureMockedWebDriver();
         cookieManager.deleteAllCookies();
         verify(options).deleteAllCookies();
     }
 
-    @Test
-    void testAddCookie()
+    @ParameterizedTest
+    @CsvSource({
+        "https://www.domain.com, .domain.com",
+        "http://localhost:8080,  localhost",
+        "http://test.topdomain.com/test/test, .topdomain.com",
+        "http://testproduct:80/test, testproduct",
+        "http://127.0.0.1:8080, 127.0.0.1"
+    })
+    void shouldAddCookie(String urlAsString, String domain)
     {
         configureMockedWebDriver();
-        cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, DOMAIN);
-        verify(options).addCookie(new Cookie(COOKIE_NAME, ZERO));
+        cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, urlAsString);
+        verify(options).addCookie(cookieCaptor.capture());
+        Cookie cookie = cookieCaptor.getValue();
+        assertEquals(COOKIE_NAME, cookie.getName());
+        assertEquals(ZERO, cookie.getValue());
+        assertEquals(PATH, cookie.getPath());
+        assertEquals(domain, cookie.getDomain());
     }
 
     @Test
-    void testDeleteCookie()
+    void shouldDeleteCookie()
     {
         configureMockedWebDriver();
         cookieManager.deleteCookie(COOKIE_NAME);
@@ -80,7 +97,7 @@ class CookieManagerTests
     }
 
     @Test
-    void testGetCookie()
+    void shouldGetCookie()
     {
         configureMockedWebDriver();
         Cookie seleniumCookie = createSeleniumCookie();
@@ -89,7 +106,7 @@ class CookieManagerTests
     }
 
     @Test
-    void testGetCookies()
+    void shouldGetCookies()
     {
         configureMockedWebDriver();
         Set<Cookie> expectedCookies = mockGetCookies(createSeleniumCookie());
@@ -97,7 +114,7 @@ class CookieManagerTests
     }
 
     @Test
-    void testGetCookiesAsHttpCookieStore()
+    void shouldGetCookiesAsHttpCookieStore()
     {
         configureMockedWebDriver();
         Cookie seleniumCookie = createSeleniumCookie();
