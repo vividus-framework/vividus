@@ -881,8 +881,6 @@ Calculates the hash using the specified hashing algorithm
 * *`$algorithm`* - {algorithm-summary}
 * *`$input`* - any string to calculate hash
 
-TIP: Since the hashing argument of the expression can include commas do *not* escape them using `\`.
-
 .Example of hash calculating for string using MD5
 |===
 |Expression |Result
