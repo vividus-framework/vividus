@@ -1,3 +1,6 @@
+Meta:
+    @epic vividus-core
+
 Scenario: Verify step: "Then `$archiveData` archive contains entries with the names:$parameters"
 Meta:
     @requirementId 2545

@@ -9,6 +9,7 @@
 
     <bean class="org.vividus.steps.SpringStepFactoryBeanPostProcessor" />
 
+    <bean id="archiveSteps" class="org.vividus.steps.ArchiveSteps" />
     <bean id="assertSteps" class="org.vividus.steps.AssertSteps" />
 
     <bean id="variablesSteps" class="org.vividus.steps.VariablesSteps" />
@@ -37,6 +38,7 @@
     </bean>
 
     <util:list id="stepBeanNames-Vividus">
+        <idref bean="archiveSteps" />
         <idref bean="assertSteps" />
         <idref bean="variablesSteps" />
         <idref bean="fileSteps" />
