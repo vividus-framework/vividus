@@ -13,6 +13,8 @@ include::partial$jira-configuration.adoc[]
 
 == Xray Export Properties
 
+NOTE: The properties marked with *bold* are mandatory.
+
 [cols="2,1,3", options="header"]
 |===
 
@@ -24,7 +26,7 @@ include::partial$jira-configuration.adoc[]
 |false
 |The key of the configured JIRA instance, in case of missing value it will be evaluated automatically based on issue keys being exported
 
-|`xray-exporter.json-results-directory`
+|*`xray-exporter.json-results-directory`*
 |true
 a|Path to directory with test execution JSON results.
 
@@ -32,7 +34,7 @@ The path is managed by the `bdd.report-directory` property which default value i
 
 Please make sure that the `bdd.configuration.formats` property includes JSON value in order to generate test execution results.
 
-|`xray-exporter.project-key`
+|*`xray-exporter.project-key`*
 |true
 |Key of a Jira project where new test cases should be created
 
@@ -53,6 +55,13 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |The key of a `Test Set` to which the exported test cases will be added
 
 |===
+
+.application.properties
+[source,json,subs=attributes+, source-highlighter+]
+----
+xray-exporter.project-key=ABBA
+xray-exporter.json-results-directory=/Users/happytester/Repositories/app-tests/output/results/jbehave
+----
 
 == Jira Fields Mapping
 
@@ -79,6 +88,13 @@ The Xray is a Jira plugin that uses custom Jira fields for it's data, one of the
 
 |===
 
+.mapping.properties
+[source,json,subs=attributes+, source-highlighter+]
+----
+jira.<jira instance key placeholder>.fields-mapping.test-case-type=customfield_10001
+jira.<jira instance key placeholder>.fields-mapping.manual-steps=customfield_10002
+----
+
 === Cucumber Test Case Properties
 
 [[_cucumber_test_case_view]]image:cucumber.png[Cucumber test case view]
@@ -103,6 +119,14 @@ The Xray is a Jira plugin that uses custom Jira fields for it's data, one of the
 |Key of a field containing body of cucumber scenario
 
 |===
+
+.mapping.properties
+[source,json,subs=attributes+, source-highlighter+]
+----
+jira.<jira instance key placeholder>.fields-mapping.test-case-type=customfield_10003
+jira.<jira instance key placeholder>.fields-mapping.cucumber-scenario-type=customfield_10004
+jira.<jira instance key placeholder>.fields-mapping.cucumber-scenario=customfield_10005
+----
 
 include::partial$authentication.adoc[]
 
