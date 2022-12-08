@@ -39,7 +39,7 @@ Scenario: Compare data with `null` values
 Meta:
     @requirementId 1583
 When I execute SQL query `
-SELECT * FROM "table-with-nulls"
+SELECT * FROM "nulls"
 ` against `vividus` and save result to scenario variable `from-db`
 Then `${from-db}` matching rows using `id` from `vividus` is equal to data from:
 {nullPlaceholder=NULL}
