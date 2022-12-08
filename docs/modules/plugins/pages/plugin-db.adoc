@@ -354,3 +354,152 @@ specified database using SQL query.
 ----
 {transformer=FROM_DB, dbKey=testh2db, sqlQuery=SELECT * FROM students, nullReplacement= }
 ----
+
+== Steps
+
+=== Execute SQL query and save its result
+
+Executes SQL query against the specified database and saves the query result to a variable.
+
+[source,gherkin]
+----
+When I execute SQL query `$sqlQuery` against `$dbKey` and save result to $scopes variable `$variableName`
+----
+
+* `$sqlQuery` - The https://www.techtarget.com/searchdatamanagement/definition/SQL[SQL query to execute].
+* `$dbKey` - The <<_database_connection, database connection key>>.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the SQL query result.
+
+.Given `launch_rockets` table available at 'launches' db connection
+[source]
+----
+|id|name        |payload_cost|country|
+|1 |Falcon 9    |$2,720      |USA    |
+|2 |Zhongxing-19|$4,320      |CHINA  |
+----
+
+.Query USA rocket launches and validate result set
+[source,gherkin]
+----
+When I execute SQL query `
+SELECT *
+FROM launch_rockets
+WHERE country='USA'
+` against `launches` and save result to scenario variable `usa-launches`
+Then `${usa-launches}` is equal to table:
+|name    |payload_cost|country|
+|Falcon 9|$2,720      |USA    |
+----
+
+Individual rows are available by index starting from zero as per the following example:
+
+.Query USA rocket launches and check name in first row
+[source,gherkin]
+----
+When I execute SQL query `
+SELECT *
+FROM launch_rockets
+WHERE country='USA'
+` against `launches` and save result to scenario variable `usa-launches`
+Then `usa-launches[0].name` is equal to `Falcon 9`
+----
+
+=== Execute update query
+
+Executes SQL query that changes the target table e.g.
+
+* https://www.w3schools.com/sql/sql_update.asp[UPDATE SQL query] 
+* https://www.w3schools.com/sql/sql_insert.asp[INSERT SQL query]
+* https://www.w3schools.com/sql/sql_delete.asp[DELETE SQL query]
+
+[IMPORTANT]
+In case of https://www.w3schools.com/sql/sql_select.asp[SELECT SQL query] an exception will be thrown.
+
+[source,gherkin]
+----
+When I execute SQL query `$sqlQuery` against `$dbKey`
+----
+
+* `$sqlQuery` - The https://www.techtarget.com/searchdatamanagement/definition/SQL[SQL query to execute].
+* `$dbKey` - The <<_database_connection, database connection key>>.
+
+.Given `launch_rockets` table available at 'launches' db connection
+[source]
+----
+|id|name        |payload_cost|country|
+|1 |Falcon 9    |$2,720      |USA    |
+|2 |Zhongxing-19|$4,320      |CHINA  |
+----
+
+.Update payload_cost for 'Falcon 9' launch
+[source,gherkin]
+----
+When I execute SQL query `
+UPDATE launch_rockets
+SET payload_cost='unknown'
+WHERE name='Falcon 9'
+` against `launches`
+----
+
+=== Compare two result sets
+
+Compares the result set queried from the baseline database with the result set queried from the checkpoint database matching by user-defined keys. Please see <<_data_comparison>> for more fine-grained comparison configuration. The order of columns is ignored.
+
+[source,gherkin]
+----
+Then data from `$leftSqlQuery` executed against `$leftDbKey` $comparisonRule data from `$rightSqlQuery` executed against `$rightDbKey` matching rows using keys:$keys
+----
+
+* `$leftSqlQuery` - The https://www.techtarget.com/searchdatamanagement/definition/SQL[SQL query to execute] to retrieve baseline result set.
+* `$leftDbKey` - The <<_database_connection, database connection key>> for baseline result set.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$rightSqlQuery` - The https://www.techtarget.com/searchdatamanagement/definition/SQL[SQL query to execute] to retrieve checkpoint result set.
+* `$rightDbKey` - The <<_database_connection, database connection key>>. for checkpoint result set.
+* `$keys` - The database columns to compare.
+
+.Given `launch_rockets` table available at 'launches' and 'launches-replica' db connections
+[source]
+----
+|id|name        |payload_cost|country|
+|1 |Falcon 9    |$2,720      |USA    |
+|2 |Zhongxing-19|$4,320      |CHINA  |
+----
+
+.Compare name and country columns in launch_rockets table contained in two databases
+[source,gherkin]
+----
+Then data from `SELECT * FROM launch_rockets` executed against `launches` is equal to data from `SELECT * FROM launch_rockets` executed against `launches-replica` matching rows using keys:name,country
+----
+
+=== Compare result set with table
+
+Compares the result set queried from the baseline database with the user-defined data set matching by the specified keys. Please see <<_data_comparison>> for more fine-grained comparison configuration. The order of columns is ignored.
+
+[source,gherkin]
+----
+Then `$leftData` matching rows using `$keys` from `$leftDbKey` $comparisonRule data from:$rightTable
+----
+
+* `$leftData` - The baseline result set.
+* `$keys` - The database columns to compare.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$rightTable` - The checkpoint data set.
+
+.Given `launch_rockets` table available at 'launches' db connection
+[source]
+----
+|id|name        |payload_cost|country|
+|1 |Falcon 9    |$2,720      |USA    |
+|2 |Zhongxing-19|$4,320      |CHINA  |
+----
+
+.Compare name and country columns in result set against defined data set
+[source,gherkin]
+----
+When I execute SQL query `SELECT * FROM launch_rockets` against `rockets` and save result to scenario variable `all-launches`
+Then `${all-launches}` matching rows using `name,country` from `launches` is equal to data from:
+|name        |country|
+|Falcon 9    |USA    |
+|Zhongxing-19|CHINA  |
+----
