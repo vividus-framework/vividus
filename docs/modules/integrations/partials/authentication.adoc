@@ -1,11 +1,12 @@
 == Authentication
 
-* If the authentication through basic schema is available on your JIRA instance use `jira.<jira instance key placeholder>.http.auth.username` and `jira.<jira instance key placeholder>.http.auth.password` properties, both properties must be set.
+* If the authentication through basic schema is available on your JIRA instance use `jira.<jira instance key placeholder>.http.auth.username` and `jira.<jira instance key placeholder>.http.auth.password` properties, both properties must be set. It's also advisible to turn the `preemptive authentication` on.
 +
 [source,properties]
 ----
 jira.<jira instance key placeholder>.http.auth.username=admin
 jira.<jira instance key placeholder>.http.auth.password=5401a7d27b291c5d
+jira.<jira instance key placeholder>.http.auth.preemptive-auth-enabled=true
 ----
 
 * In case of two-factor authentication or any other complex authentication process it's possible to set session cookies into request headers like the following example shows (`jira.<jira instance key placeholder>.http.auth.username` and `jira.<jira instance key placeholder>.http.auth.password` properties must be empty in this case).
