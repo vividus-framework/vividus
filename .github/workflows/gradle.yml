@@ -307,6 +307,25 @@ jobs:
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY, Browserstack phone system tests will be skipped
         fi
 
+    - name: Mobitru - Mobile - Web - System tests
+      if: matrix.platform == 'macos-latest'
+      env:
+        MOBITRU_USER: ${{ secrets.MOBITRU_USER }}
+        MOBITRU_KEY: ${{ secrets.MOBITRU_KEY }}
+      shell: bash
+      run: |
+        if [[ -n $MOBITRU_USER && -n $MOBITRU_KEY ]]; then
+          declare -a profiles=( iphone android )
+          for profile in "${profiles[@]}"; do
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=grid \
+                                                  -Pvividus.configuration.profiles=mobitru/web,web/phone/${profile} \
+                                                  -Pvividus.selenium.grid.username=${MOBITRU_USER} \
+                                                  -Pvividus.selenium.grid.password=${MOBITRU_KEY}
+          done
+        else
+            echo No MOBITRU_USER and/or MOBITRU_KEY, Mobitru web mobile system tests will be skipped
+        fi
+
     - name: SauceLabs - iOS - Mobile App - Run system tests (Downscaled)
       if: matrix.platform == 'ubuntu-latest'
       env:
@@ -643,7 +662,7 @@ jobs:
         if [[ -n $MOBITRU_USER && -n $MOBITRU_KEY ]]; then
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments= \
                                                   -Pvividus.configuration.suites=system/mobile_app/healthcheck/mobitru \
-                                                  -Pvividus.configuration.profiles=mobitru,mobile_app/android \
+                                                  -Pvividus.configuration.profiles=mobitru/mobile_app,mobile_app/android \
                                                   -Pvividus.selenium.grid.username=${MOBITRU_USER} \
                                                   -Pvividus.selenium.grid.password=${MOBITRU_KEY} \
                                                   -Pvividus.selenium.grid.capabilities.platformVersion=12 \
@@ -680,7 +699,7 @@ jobs:
         if [[ -n $MOBITRU_USER && -n $MOBITRU_KEY ]]; then
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments= \
                                                   -Pvividus.configuration.suites=system/mobile_app/healthcheck/mobitru \
-                                                  -Pvividus.configuration.profiles=mobitru,mobile_app/ios \
+                                                  -Pvividus.configuration.profiles=mobitru/mobile_app,mobile_app/ios \
                                                   -Pvividus.selenium.grid.username=${MOBITRU_USER} \
                                                   -Pvividus.selenium.grid.password=${MOBITRU_KEY} \
                                                   -Pvividus.allure.history-directory=output/history/mt-ios-system-tests \
