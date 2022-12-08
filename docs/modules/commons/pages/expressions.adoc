@@ -483,6 +483,55 @@ NOTE: The expression parameters containing commas or empty values must be surrou
 |Remove all numbers from the string
 |`#{replaceAllByRegExp(\d, """""", a1b2c3d)}`
 |`abcd`
+
+|Replace all whitespaces with commas
+|`#{replaceAllByRegExp(\s, """,""", string with spaces)}`
+|`string,with,spaces`
+
+|Replace all whitespaces with commas
+|`#{replaceAllByRegExp(\s, \,, string with spaces)}`
+|`string,with,spaces`
+
+|Replace all commas with underscores
+|`#{replaceAllByRegExp(\,, _, string,with,commas)}`
+|`string_with_commas`
+
+|Replace all commas with underscores
+|`#{replaceAllByRegExp(""",""", _, string,with,commas)}`
+|`string_with_commas`
+
+|Replace all commas with underscores
+|`#{replaceAllByRegExp(\,, _, """string,with,commas""")}`
+|`string_with_commas`
+
+|Replace all commas with underscores
+|`#{replaceAllByRegExp(\,, _, string\,with\,commas)}`
+|`string_with_commas`
+
+|Replace the first whitespace with comma
+|`#{replaceFirstByRegExp(\s, """,""", string with spaces)}`
+|`string,with spaces`
+
+|Replace the first whitespace with comma
+|`#{replaceFirstByRegExp(\s, \,, string with spaces)}`
+|`string,with spaces`
+
+|Replace the first comma with underscore
+|`#{replaceFirstByRegExp(\,, _, string,with,commas)}`
+|`string_with,commas`
+
+|Replace the first comma with underscore
+|`#{replaceFirstByRegExp(""",""", _, string,with,commas)}`
+|`string_with,commas`
+
+|Replace the first comma with underscore
+|`#{replaceFirstByRegExp(\,, _, """string,with,commas""")}`
+|`string_with,commas`
+
+|Replace the first comma with underscore
+|`#{replaceFirstByRegExp(\,, _, string\,with\,commas)}`
+|`string_with,commas`
+
 |===
 
 === `toLowerCase`
@@ -838,6 +887,12 @@ Calculates the hash using the specified hashing algorithm
 
 |`#{calculateHash(MD5, vividus)}`
 |`0a05ba6064ae7e5d6ee9818f85b666ad`
+
+|`#{calculateHash(SHA256, with,comma)}`
+|`f93dcfd6fc4c91c058177af3b5de34090073f2cc4a658010609ed8778d6d89f3`
+
+|`#{calculateHash(SHA256, with\,comma)}`
+|`f93dcfd6fc4c91c058177af3b5de34090073f2cc4a658010609ed8778d6d89f3`
 |===
 
 === `calculateFileHash`
