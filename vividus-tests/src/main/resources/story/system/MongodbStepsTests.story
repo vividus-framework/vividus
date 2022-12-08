@@ -21,7 +21,7 @@ When I execute command `
             "pets" : [
                 {
                     "type" : "cat",
-                    "value" : "Kitty"
+                    "nickname" : "Kitty"
                 }
             ]
         },
@@ -34,11 +34,11 @@ When I execute command `
             "pets" : [
                 {
                     "type" : "cat",
-                    "value" : "Fluff"
+                    "nickname" : "Fluff"
                 },
                 {
                     "type" : "dinosaur",
-                    "value" : "Ulad"
+                    "nickname" : "Ulad"
                 }
             ]
         },
@@ -54,16 +54,13 @@ When I execute command `
 ` against `${db-name}` database on `${instance-key}` MongoDB instance and save result to SCENARIO variable `insert`
 Then `${insert.ok}` is equal to `1.0`
 Given I initialize story variable `tableName` with value `#{generate(regexify '[a-z]{15}')}`
+Given I initialize story variable `tableName` with value `#{generate(regexify '[a-z]{15}')}`
 When I execute SQL query `
-CREATE TABLE ${tableName}(
-    name VARCHAR (50) NOT NULL,
-    email VARCHAR (50) NOT NULL,
-    type VARCHAR (10) NOT NULL,
-    value VARCHAR (10) NOT NULL
-);
-` against `vividus`
-When I execute SQL query `INSERT INTO ${tableName} (name, email, type, value) VALUES ('Joanna Pierce', 'joannapierce@lingoage.com', 'cat', 'Kitty');` against `vividus`
-When I execute SQL query `INSERT INTO ${tableName} (name, email, type, value) VALUES ('Buck Frazier', 'buckfrazier@autograte.com', 'cat', 'Fluff');` against `vividus`
+  CREATE TABLE ${tableName} (name VARCHAR(50) NOT NULL, email VARCHAR(50) NOT NULL, type VARCHAR (10) NOT NULL, nickname VARCHAR (10) NOT NULL);
+  INSERT INTO ${tableName} (name, email, type, nickname) VALUES
+   ('Joanna Pierce', 'joannapierce@lingoage.com', 'cat', 'Kitty'),
+   ('Buck Frazier', 'buckfrazier@autograte.com', 'cat', 'Fluff');
+` against `for-mongo`
 
 Scenario: Find and collect
 When I execute commands
@@ -80,7 +77,7 @@ Then JSON element from `${find}` by JSON path `$` is equal to `
       "pets":[
          {
             "type":"cat",
-            "value":"Kitty"
+            "nickname":"Kitty"
          }
       ]
    },
@@ -90,7 +87,7 @@ Then JSON element from `${find}` by JSON path `$` is equal to `
       "pets":[
          {
             "type":"cat",
-            "value":"Fluff"
+            "nickname":"Fluff"
          }
       ]
    }
@@ -132,7 +129,7 @@ Then JSON element from `${native-find.cursor}` by JSON path `$.firstBatch` is eq
 ]`
 
 Scenario: Compare document from MongoDB with table from relational DB
-When I execute SQL query `SELECT * FROM ${tableName}` against `vividus` and save result to SCENARIO variable `tableSource`
+When I execute SQL query `SELECT * FROM ${tableName}` against `for-mongo` and save result to SCENARIO variable `tableSource`
 When I execute commands
 |command   |argument                                    |
 |find      |{ age: { $gte: 25 }, "pets.type": "cat" }   |
@@ -140,9 +137,9 @@ When I execute commands
 |collect   |                                            |
  in `${collectionName}` collection against `${db-name}` database on `${instance-key}` MongoDB instance and save result to SCENARIO variable `documentSource`
 Then `${tableSource}` is equal to table:
-{transformer=FROM_JSON, variable=documentSource, columns=name=$.[*].name;email=$.[*].email;type=$.[*].pets.[0].type;value=$.[*].pets.[0].value}
+{transformer=FROM_JSON, variable=documentSource, columns=name=$.[*].name;email=$.[*].email;type=$.[*].pets.[0].type;nickname=$.[*].pets.[0].nickname}
 
 Scenario: Tear down
 When I execute command `{ drop: "${collectionName}" }` against `${db-name}` database on `${instance-key}` MongoDB instance and save result to SCENARIO variable `drop`
 Then `${drop.ok}` is equal to `1.0`
-When I execute SQL query `DROP TABLE ${tableName}` against `vividus`
+When I execute SQL query `SHUTDOWN IMMEDIATELY` against `for-mongo`
