@@ -116,7 +116,7 @@ jobs:
 
     - name: VIVIDUS tasks validation
       run: |
-         ./gradlew validateKnownIssues printSteps countSteps -x testVividusInitialization  -p vividus-tests --project-prop 'vividus.bdd.variables.global.iterationLimit=3' --project-prop 'vividus.bdd.variables.global.target-platform=ios'
+         ./gradlew validateKnownIssues printSteps countSteps -x testVividusInitialization  -p vividus-tests --project-prop 'vividus.variables.iterationLimit=3' --project-prop 'vividus.variables.target-platform=ios'
 
 
     - name: Integration tests
@@ -312,7 +312,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="SauceLabs iOS System tests report (Downscaled)" \
-                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-ios-$TEST_APP_VERSION.zip
+                                                  -Pvividus.variables.app-url=sauce-storage:vividus-test-app-ios-$TEST_APP_VERSION.zip
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
         fi
@@ -347,7 +347,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="SauceLabs iOS System tests report (Original)" \
-                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-ios-$TEST_APP_VERSION.zip \
+                                                  -Pvividus.variables.app-url=sauce-storage:vividus-test-app-ios-$TEST_APP_VERSION.zip \
                                                   -Pvividus.statistics.print-failures=true \
                                                   -Pvividus.ui.visual.baseline-storage.filesystem.folder=./baselines/original \
                                                   -Pvividus.ui.context.self-healing=true
@@ -388,7 +388,7 @@ jobs:
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="SauceLabs iOS Proxy tests report" \
                                                   -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com" \
-                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-ios-$TEST_APP_VERSION.zip
+                                                  -Pvividus.variables.app-url=sauce-storage:vividus-test-app-ios-$TEST_APP_VERSION.zip
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
         fi
@@ -424,7 +424,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="SauceLabs Android System tests report (Downscaled)" \
-                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-android-$TEST_APP_VERSION.zip
+                                                  -Pvividus.variables.app-url=sauce-storage:vividus-test-app-android-$TEST_APP_VERSION.zip
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
         fi
@@ -459,7 +459,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="SauceLabs Android System tests report (Original)" \
-                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-android-$TEST_APP_VERSION.zip \
+                                                  -Pvividus.variables.app-url=sauce-storage:vividus-test-app-android-$TEST_APP_VERSION.zip \
                                                   -Pvividus.statistics.print-failures=true \
                                                   -Pvividus.batch-1.resource-include-patterns=VisualTesting.story \
                                                   -Pvividus.ui.visual.baseline-storage.filesystem.folder=./baselines/original
@@ -500,7 +500,7 @@ jobs:
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="SauceLabs Android Proxy tests report" \
                                                   -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com" \
-                                                  -Pvividus.bdd.variables.global.app-url=sauce-storage:vividus-test-app-android-$TEST_APP_VERSION.zip
+                                                  -Pvividus.variables.app-url=sauce-storage:vividus-test-app-android-$TEST_APP_VERSION.zip
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY variables, System tests will be skipped
         fi
@@ -557,7 +557,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="BrowserStack iOS System tests report" \
-                                                  -Pvividus.bdd.variables.global.app-url=bs://444bd0308813ae0dc236f8cd461c02d3afa7901d \
+                                                  -Pvividus.variables.app-url=bs://444bd0308813ae0dc236f8cd461c02d3afa7901d \
                                                   -Pvividus.notifications.base.comment="VIVIDUS CI - BrowserStack iOS System Tests" \
                                                   -Pvividus.notifications.base.report-link=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.notifications.base.project=vividus-tests \
@@ -602,7 +602,7 @@ jobs:
                                                   -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
                                                   -Pvividus.allure.executor.report-name="BrowserStack Android System tests report" \
-                                                  -Pvividus.bdd.variables.global.app-url=bs://c700ce60cf13ae8ed97705a55b8e022f13c5827c
+                                                  -Pvividus.variables.app-url=bs://c700ce60cf13ae8ed97705a55b8e022f13c5827c
         else
             echo No BROWSERSTACK_USER and/or BROWSERSTACK_KEY variables, System tests will be skipped
         fi

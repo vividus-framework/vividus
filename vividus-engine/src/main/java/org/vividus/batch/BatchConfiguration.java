@@ -19,6 +19,7 @@ package org.vividus.batch;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,6 +37,7 @@ public class BatchConfiguration
     private Boolean failFast;
     private ScenarioExecutionConfiguration scenario;
     private StoryExecutionConfiguration story;
+    private Map<String, String> variables = Map.of();
 
     public String getResourceLocation()
     {
@@ -140,6 +142,16 @@ public class BatchConfiguration
     public void setStory(StoryExecutionConfiguration story)
     {
         this.story = story;
+    }
+
+    public void setVariables(Map<String, String> variables)
+    {
+        this.variables = variables;
+    }
+
+    public Map<String, String> getVariables()
+    {
+        return variables;
     }
 
     private List<String> convertToList(String list)

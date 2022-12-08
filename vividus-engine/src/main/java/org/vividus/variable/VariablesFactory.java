@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,46 +16,41 @@
 
 package org.vividus.variable;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.vividus.batch.BatchStorage;
 import org.vividus.context.RunContext;
-import org.vividus.util.property.IPropertyMapper;
 import org.vividus.util.property.IPropertyParser;
 
 public class VariablesFactory implements IVariablesFactory
 {
-    private static final String VARIABLES_PREFIX = "bdd.variables.";
-    private static final String BATCH_PREFIX = "batch-";
-    private static final String VARIABLES_PROPERTY_PREFIX = VARIABLES_PREFIX + "global.";
+    private static final String VARIABLES_PROPERTY_PREFIX = "variables.";
 
     private final IPropertyParser propertyParser;
-    private final IPropertyMapper propertyMapper;
+    private final BatchStorage batchStorage;
     private final RunContext runContext;
 
     private Map<String, String> globalVariables;
     private Map<String, Map<String, String>> batchVariables;
     private final Map<String, Object> nextBatchesVariables = new ConcurrentHashMap<>();
 
-    public VariablesFactory(IPropertyParser propertyParser, IPropertyMapper propertyMapper,
-            RunContext runContext)
+    public VariablesFactory(IPropertyParser propertyParser, RunContext runContext, BatchStorage batchStorage)
     {
         this.propertyParser = propertyParser;
-        this.propertyMapper = propertyMapper;
         this.runContext = runContext;
+        this.batchStorage = batchStorage;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void init() throws IOException
+    public void init()
     {
         globalVariables = propertyParser.getPropertyValuesByPrefix(VARIABLES_PROPERTY_PREFIX);
-        batchVariables = propertyMapper.readValues(VARIABLES_PREFIX + BATCH_PREFIX, BATCH_PREFIX::concat, Map.class)
-                .getData().entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        batchVariables = batchStorage.getBatchConfigurations().entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey, e -> e.getValue().getVariables()));
     }
 
     @Override
