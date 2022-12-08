@@ -1,0 +1,106 @@
+= Trainings
+:noindex:
+== VIVIDUS usage related technical basics
+
+Depending on which plugins/steps you are planning to use, it may be useful to complete the following technical basics trainings before processing to VIVIDUS:
+
+[cols="1,2,2", options="header"]
+|===
+
+|Topic
+|Goal
+|Resources
+
+|Test Automation Principles
+a| Get fundamentals of:
+
+    * test automation principles (viz. applicability, purpose, pros/cons)
+
+    * design concepts (simplicity, modularity, reliability, reusability, maintainability, parallelization, etc.)
+
+a|* https://www.guru99.com/automation-testing.html[What is Automation Testing?]
+
+|Test Automation Approaches
+a|Get fundamentals of:
+
+    * main test automation approaches (particularly BBD approach)
+
+a|* https://jbehave.org/reference/stable/concepts.html[BDD concepts]
+
+* https://cucumber.io/blog/bdd/intro-to-bdd-and-tdd/[Introduction to TDD and BDD]
+
+|Git
+a|Get basic understand of managing the version control process with Git:
+
+    * repo cloning
+    * branching strategy, create/update/delete branches
+    * create/update/delete/push/merge/squash a commit, etc.
+    * merge conflicts resolution
+
+a| * https://git-scm.com/about[About Git]
+
+* https://guides.github.com/introduction/git-handbook/[GitHub Docs]
+
+|Locating Web Elements
+a|Get basic knowledge & practical experience in:
+
+    * web locators (ID, CSS selectors, xPath expressions)
+
+
+a| * https://www.guru99.com/locators-in-selenium-ide.html[CSS selector in Selenium]
+
+* https://www.w3schools.com/xml/xml_xpath.asp[XML and XPath Tutorial]
+
+|Structured data processing
+a|Get basic knowledge & practical experience in:
+
+    * extracting structured data elements (JsonPath, XML xPath)
+
+
+a| * https://www.toolsqa.com/rest-assured/jsonpath-and-query-json-using-jsonpath/[JsonPath Basics]
+
+[NOTE]
+====
+You can use the following online services for your expressions validation:
+
+    * https://www.freeformatter.com/xpath-tester.html[XPath validator]
+    * https://jsonpath.com/[JsonPath evaluator] (however, 100% compatibility not guaranteed, better tool TBD)
+====
+
+|Query Languages & Data Formats
+
+a|Get basic knowledge & practical experience in:
+
+  * SQL
+  * regular expressions syntax
+
+a| * https://www.w3schools.com/sql[SQL Tutorial]
+
+* https://www.regular-expressions.info/[Regular Expressions Tutorials]
+
+[NOTE]
+====
+Please use the following online service for your expressions validation (other engines may process the same expression in a slightly different way) :
+
+* https://regex101.com/[Regex Validator]
+====
+
+|HTTP and Web Services
+a|Get understanding of:
+
+    * basic REST HTTP requests: POST, GET, PUT, and DELETE
+    * request/response validation
+a|* https://www.tutorialspoint.com/http/index.htm[HTTP Tutorial]
+
+* https://www.guru99.com/api-testing.html[API Testing Tutorial]
+
+|CI/CD
+a|Get understanding of:
+
+    * CI/CD process
+    * Popular CI tools
+a| * https://www.redhat.com/en/topics/devops/what-is-ci-cd[What is CI/CD?]
+
+* https://smartbear.com/blog/top-continuous-integration-tools-for-devops/[Popular CI Tools]
+
+|===
