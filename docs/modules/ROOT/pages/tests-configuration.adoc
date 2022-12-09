@@ -107,6 +107,10 @@ NOTE: The properties marked with *bold* are mandatory.
 |`report.text-length-diff-threshold`
 |`100`
 |Defines text threshold length to enable unified diff report publishing on failure, for variable comparisons. If you want to have this report despite the size of the compared data set 0.
+
+|`engine.composite-paths`
+|<empty>
+|Paths to the composite steps e.g. `steps/*.steps`
 |===
 
 === Profiles
@@ -725,6 +729,43 @@ http.auth.password=ENC(WVnXhzG704KRZZFYL7hfpA4YoSm8V2F5eNXyr7CRYCichteHvNS3nB23z
 ----
 
 Please see <<_externalized_configuration>> to get more information about how encryptor password can be passed to the tests.
+
+== Composite steps
+
+https://jbehave.org/reference/stable/composite-steps.html[Composite steps] allow to reuse set of actions via custom steps with own wordings.
+
+=== How to use composite steps
+
+. Define composite step in `*.steps` file, e.g. `steps/ui/my-app.steps`:
++
+.Compsite step definition
+[source,gherkin]
+----
+Composite: When I login with username `$username` and password `$password`
+When I enter `<username>` in field located by `id(username)`
+When I enter `<password>` in field located by `id(password)`
+When I click on element located by `id(signInButton)`
+----
+
+. Configure paths to files with custom steps:
++
+.Compsite steps paths configuration
+[source,gherkin]
+----
+engine.composite-paths=steps/ui/*.steps
+----
+
+. Use your step in the story:
++
+.Composite step usage example
+[source,gherkin]
+----
+Scenario: Verify login
+Given I am on the main application page
+When I login with username `admin` and password `pa$$w0rd`
+----
+
+TIP: Users are allowed to use composite steps in composite step definition.
 
 == Steps aliases
 
