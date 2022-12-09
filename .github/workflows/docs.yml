@@ -8,6 +8,13 @@ on:
       - 'docs/**'
       - '*.md'
       - '.github/workflows/docs.yml'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'docs/**'
+      - '*.md'
+      - '.github/workflows/docs.yml'
 
 jobs:
   build:
@@ -29,6 +36,7 @@ jobs:
       run: ./gradlew spotlessDocumentationCheck
 
     - name: Notify playbook
+      if: github.ref == 'refs/heads/master'
       env:
         GH_TOKEN: ${{ secrets.DOCS_TOKEN }}
       shell: bash
