@@ -1,0 +1,33 @@
+=== FROM_SITEMAP
+
+In case the relative URL to sitemap is known we can apply `FROM_SITEMAP` transformer. It generates table based on the website sitemap.
+
+==== Required properties
+* `web-application.main-page-url` - defines main application page URL
+
+==== Example of usage
+
+.Usage example
+----
+Examples:
+{transformer=FROM_SITEMAP, siteMapRelativeUrl=/sitemap.xml, ignoreErrors=true, column=page-url}
+----
+
+Where:
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`transformer`
+|indicator of transformer type
+
+|`siteMapRelativeUrl`
+|relative URL of `sitemap.xml`
+
+|`ignoreErrors`
+|ignore sitemap parsing errors (_true_ or _false_)
+
+|`column`
+|the column name in the generated table
+|===

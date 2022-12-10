@@ -1,0 +1,64 @@
+= Web Application and REST API integration
+:noindex:
+
+:plugin-short-name: web-app-to-rest-api
+
+include::plugins:partial$plugin-installation.adoc[]
+
+== Steps
+include::plugins:partial$plugin-web-app-to-rest-api-steps.adoc[]
+
+== Table Transformers
+NOTE: For more information about Table Transforrmers, please refer to xref:ROOT:glossary.adoc#_table_transformer[Table Transformers]
+
+include::plugins:partial$plugin-web-app-to-rest-api-from-sitemep.adoc[]
+
+==== Optional properties
+NOTE: For the full list of properties that could be used along with `FROM_SITEMAP` transformer, please see xref:plugins:plugin-web-app-to-rest-api.adoc#_optional_properties[Web Application & REST API Integration Plugin].
+
+==== Scenario example
+For example we need to verify that all resources by CSS selector `a` of web application `https://example.com` are valid. We know web app has sitemap with relative URL `/sitemap.xml`, but also know that some of the pages have similar redirections.
+
+Then we should add additional property:
+
+.Properties
+[source,gherkin]
+----
+web-application.main-page-ur=https://example.com
+transformer.from-sitemap.filter-redirects=true
+----
+
+.Usage example
+[source,gherkin]
+----
+Scenario: Verification of all resources on all the pages using Sitemap
+Then all resources by selector `a` are valid on:
+|pages     |
+|<page-url>|
+Examples:
+{transformer=FROM_SITEMAP, siteMapRelativeUrl=/sitemap.xml, ignoreErrors=true, column=page-url}
+----
+
+include::plugins:partial$plugin-web-app-to-rest-api-from-headless-crawling.adoc[]
+
+==== Optional properties
+NOTE: For the full list of properties that could be used along with `FROM_HEADLESS_CRAWLING` transformer, please see xref:plugins:plugin-web-app-to-rest-api.adoc#_optional_properties_2[Web Application & REST API Integration Plugin].
+
+==== Scenario example
+For example we need to verify that all resources by CSS selector `a` of web application `https://example.com` are valid. We don’t whether the web app has sitemap.
+
+So we create scenario using the transformer:
+
+.Usage example
+[source,gherkin]
+----
+Scenario: Verification of all resources on all the pages using headless crawling
+Then all resources by selector `a` are valid on:
+|pages     |
+|<page-url>|
+Examples:
+{transformer=FROM_HEADLESS_CRAWLING, column=page-url}
+----
+
+== Resource validation logic
+include::plugins:partial$plugin-web-app-to-rest-api-validation.adoc[]

@@ -1,0 +1,28 @@
+=== FROM_HEADLESS_CRAWLING
+
+In case the relative URL to sitemap is unknown we can apply `FROM_HEADLESS_CRAWLING` transformer. It generates table based on the results of headless crawling.
+
+==== Required properties
+
+* `web-application.main-page-url` - defines main application page URL
+
+.Usage example
+----
+Examples:
+{transformer=FROM_HEADLESS_CRAWLING, column=page-url}
+----
+
+Where:
+[cols="1,3", options="header"]
+|===
+
+|Parameter Name
+|Description
+
+|`transformer`
+|indicator of transformer type
+
+|`column`
+|The column name in the generated table.
+
+|===

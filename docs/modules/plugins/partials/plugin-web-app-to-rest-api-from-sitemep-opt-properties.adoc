@@ -1,0 +1,19 @@
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`transformer.from-sitemap.ignore-errors`
+a|`true`
+`false`
+|`false`
+|ignore sitemap parsing errors
+
+|`transformer.from-sitemap.filter-redirects`
+a|`true`
+`false`
+|`false`
+|defines whether urls that has redirect to the one that has already been included in the table are excluded from the table
+|===

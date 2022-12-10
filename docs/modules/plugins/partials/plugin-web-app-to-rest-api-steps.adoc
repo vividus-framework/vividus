@@ -1,0 +1,61 @@
+=== Validate resources
+
+Steps of installed plugin could help to validate resources that are present on the web page/source
+
+[source,gherkin]
+----
+Then all resources by selector `$cssSelector` from $html are valid
+----
+
+To use the step we need to specify:
+
+. `$cssSelector` - The https://www.w3schools.com/cssref/css_selectors.asp[CSS selector]
+. `$pages` - source to validate resources on
+
+Step could be used either for source gained using API call ($html - ${response}) or using web page ($html - ${pageSource})
+
+For example we need to validate that all links on the page https://www.example.com are valid. We know that all links on page have CSS selector ‘a’. So we have 2 options to validate them:
+
+. Trigger HTTP GET request to the URL to receive the HTML source in response
+. Proceed to the web page to receive the source
+
+.Validate resources
+[source,gherkin]
+----
+Scenario: Verification of resources when source is from HTTP response
+When I execute HTTP GET request for resource with URL 'https: //www.example.com'
+!-- Gets the source of page that is specified as variable
+Then all resources by selector 'a' from ${response} are valid
+!-- In response source searches for resources with css selectors 'a' and validates them
+
+Scenario: Verification of resources when source is from web page
+Given I am on a page with the URL 'https://www.example.com'
+!-- Opens the page with specified URL
+Then all resources by selector 'a' from ${pageSource} are valid
+!-- On a web page source searches for resources with css selectors 'a' and validates them
+----
+
+[source,gherkin]
+----
+Then all resources by selector `$cssSelector` are valid on:$pages
+----
+
+To use the step we need to specify:
+
+. `$cssSelector` - The https://www.w3schools.com/cssref/css_selectors.asp[CSS selector]
+. `$pages` - source to validate resources on
+
+For pages specification both absolute (https://example.com) and relative (/example) URLs could be used.
+In case relative URL is used base URL is taken from web-application.main-page-url property.
+
+NOTE: Number of pages that could be specified is not limited. We also have possibility to generate URLs for verification using sitemap of the application or headless crawling.
+
+.Validate resources
+[source,gherkin]
+----
+Scenario: Verify that all resources are valid
+Then all resources by selector a are valid on:
+|pages                        |
+|https://vividus.org/         |
+|/test-automation-made-awesome|
+----
