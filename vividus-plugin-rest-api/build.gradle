@@ -11,7 +11,7 @@ dependencies {
     implementation project(':vividus-test-context')
     implementation project(':vividus-util')
 
-    implementation(group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.13')
+    implementation(group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.14')
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.23')
     implementation(group: 'org.springframework', name: 'spring-web')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')
