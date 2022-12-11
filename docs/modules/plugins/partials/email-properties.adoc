@@ -1,0 +1,35 @@
+=== Required
+
+* `email.server.<server-key>.username` - defines email server username
+* `email.server.<server-key>.password` - defines email server password
+* `email.server.<server-key>.properties.host` - defines email server host, e.g. `imap.gmail.com`
+* `email.server.<server-key>.properties.port` - defines email server port, e.g. `993`
+
+=== Optional
+
+* `email.imap.wait.duration` - defines message polling duration from the email server, default value is `PT30S`
+* `email.imap.wait.retry-times` - defines a number of retries will be performed during polling duration, default value is `5`
+* `email.imap.folder` - defines folder name to work with, default value is `Inbox`
+
+Polling timeout that can be calculated by `email.imap.wait.duration / email.imap.wait.retry-times` must be not less than `5` seconds.
+
+For IMAP configuration details see https://javaee.github.io/javamail/docs/api/com/sun/mail/imap/package-summary.html#properties[IMAP Properties].
+To use IMAP properties the `mail.imap.` prefix must be replaced with `email.server.<server-key>.properties.` e.g. `mail.imap.timeout` will become `email.server.<server-key>.properties.timeout`.
+The `<server-key>` is a logical name defining single server configuration and referred in steps.
+
+.Configuration example: `email.properties`
+[source, properties]
+----
+# email server
+email.server.gmail.username=bob
+email.server.gmail.password=2kj34ndd
+email.server.gmail.properties.host=imap.gmail.com
+email.server.gmail.properties.port=993
+email.server.gmail.properties.starttls.required=true
+email.server.gmail.properties.usesocketchannels=true
+
+# client
+email.imap.wait.duration=PT15S
+email.imap.wait.retry-times=3
+email.imap.folder=Inbox
+----

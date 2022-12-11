@@ -3,7 +3,8 @@
 The plugin provides functionality to interact with email servers over https://en.wikipedia.org/wiki/Internet_Message_Access_Protocol[IMAPS protocol].
 
 :plugin-short-name: email
-include::partial$plugin-installation.adoc[]
+
+include::plugins:partial$plugin-installation.adoc[]
 
 == Properties
 
