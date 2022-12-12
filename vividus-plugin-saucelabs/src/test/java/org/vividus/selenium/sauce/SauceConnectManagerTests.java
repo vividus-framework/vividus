@@ -90,10 +90,10 @@ public class SauceConnectManagerTests
     {
         mockSocket();
         var options = startConnection();
-        var tunnelId = sauceConnectManager.start(options);
+        var tunnelName = sauceConnectManager.start(options);
         verify(sauceTunnelManager, times(1)).openConnection(USERNAME, USERKEY, DATA_CENTER, 1, null, OPTIONS, null,
                 Boolean.TRUE, null);
-        assertEquals(tunnelId, sauceConnectManager.start(options));
+        assertEquals(tunnelName, sauceConnectManager.start(options));
     }
 
     @Test

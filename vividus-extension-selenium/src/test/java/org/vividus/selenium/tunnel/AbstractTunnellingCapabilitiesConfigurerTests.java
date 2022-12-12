@@ -45,11 +45,11 @@ import org.vividus.context.RunContext;
 @ExtendWith(MockitoExtension.class)
 class AbstractTunnellingCapabilitiesConfigurerTests
 {
-    private static final String TUNNEL_ID = "tunnel-id";
+    private static final String TUNNEL = "tunnel-id-or-tunnel-name";
 
     @Captor private ArgumentCaptor<TunnelOptions> optionsCaptor;
     @Mock private DesiredCapabilities capabilities;
-    @Mock private Consumer<String> tunnelIdConsumer;
+    @Mock private Consumer<String> tunnelConsumer;
     @Mock private RunContext runContext;
     @Mock private TunnelManager<TunnelOptions> tunnelManager;
     @InjectMocks private TestTunnellingCapabilitiesConfigurer tunnellingConfigurer;
@@ -64,12 +64,12 @@ class AbstractTunnellingCapabilitiesConfigurerTests
 
         when(proxy.getHttpProxy()).thenReturn(httpProxy);
         when(capabilities.getCapability(CapabilityType.PROXY)).thenReturn(proxy);
-        when(tunnelManager.start(optionsCaptor.capture())).thenReturn(TUNNEL_ID);
+        when(tunnelManager.start(optionsCaptor.capture())).thenReturn(TUNNEL);
 
-        tunnellingConfigurer.configureTunnel(capabilities, tunnelIdConsumer);
+        tunnellingConfigurer.configureTunnel(capabilities, tunnelConsumer);
 
         verify(capabilities).setCapability(CapabilityType.PROXY, (Object) null);
-        verify(tunnelIdConsumer).accept(TUNNEL_ID);
+        verify(tunnelConsumer).accept(TUNNEL);
         assertEquals(httpProxy, optionsCaptor.getValue().getProxy());
     }
 
@@ -79,12 +79,12 @@ class AbstractTunnellingCapabilitiesConfigurerTests
         tunnellingConfigurer.setTunnellingEnabled(true);
 
         when(capabilities.getCapability(CapabilityType.PROXY)).thenReturn(null);
-        when(tunnelManager.start(optionsCaptor.capture())).thenReturn(TUNNEL_ID);
+        when(tunnelManager.start(optionsCaptor.capture())).thenReturn(TUNNEL);
 
-        tunnellingConfigurer.configureTunnel(capabilities, tunnelIdConsumer);
+        tunnellingConfigurer.configureTunnel(capabilities, tunnelConsumer);
 
         verify(capabilities).setCapability(CapabilityType.PROXY, (Object) null);
-        verify(tunnelIdConsumer).accept(TUNNEL_ID);
+        verify(tunnelConsumer).accept(TUNNEL);
         assertNull(optionsCaptor.getValue().getProxy());
     }
 
@@ -95,10 +95,10 @@ class AbstractTunnellingCapabilitiesConfigurerTests
 
         when(capabilities.getCapability(CapabilityType.PROXY)).thenReturn(null);
 
-        tunnellingConfigurer.configureTunnel(capabilities, tunnelIdConsumer);
+        tunnellingConfigurer.configureTunnel(capabilities, tunnelConsumer);
 
         verifyNoMoreInteractions(capabilities);
-        verifyNoInteractions(tunnelIdConsumer);
+        verifyNoInteractions(tunnelConsumer);
     }
 
     @Test
@@ -111,11 +111,11 @@ class AbstractTunnellingCapabilitiesConfigurerTests
         doThrow(thrown).when(tunnelManager).start(optionsCaptor.capture());
 
         IllegalStateException exception = assertThrows(IllegalStateException.class,
-            () -> tunnellingConfigurer.configureTunnel(capabilities, tunnelIdConsumer));
+            () -> tunnellingConfigurer.configureTunnel(capabilities, tunnelConsumer));
 
         assertEquals(thrown, exception.getCause());
         verifyNoMoreInteractions(capabilities);
-        verifyNoInteractions(tunnelIdConsumer);
+        verifyNoInteractions(tunnelConsumer);
         assertNull(optionsCaptor.getValue().getProxy());
     }
 
