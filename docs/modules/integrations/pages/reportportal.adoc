@@ -58,7 +58,7 @@ a|`true`
 |Defines what will be reported as a test case `SCENARIO` or `STEP`
 
 |system.rp.attributes
-|Semi-colon seprated values, e.g. `key:value; value;`
+|Semi-colon separated values, e.g. `key:value; value;`
 |none
 |Attributes could be used for additional tagging of the launches
 

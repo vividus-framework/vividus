@@ -284,14 +284,14 @@ Given I start mobile application
 === Start mobile application with capabilities
 
 Starts mobile application with capabilities from user's `*.properties` files and profiles set by a user.
-Additionally the step takes a list of capabilities as an argument that overrides gloablly-defined capabilities.
+Additionally the step takes a list of capabilities as an argument that overrides globally-defined capabilities.
 
 [source,gherkin]
 ----
 Given I start mobile application with capabilities:$capabilities
 ----
 
-* `$capabilities` - The capabilities to start application with, these capabilies
+* `$capabilities` - The capabilities to start application with, these capabilities
 have higher priority than capabilities defined in `*.properties` files and profiles.
 
 .Start mobile application with 2 custom capabilities
@@ -386,7 +386,7 @@ When I close mobile application
 
 === Run mobile application in background
 
-Runs mobile application in the backround for specific period of time and either activates the app after a certain amount of time, or leave the app deactivated (when PT-1S is used). See https://appium.io/docs/en/commands/device/app/background-app/[Appium docs] for more details.
+Runs mobile application in the background for specific period of time and either activates the app after a certain amount of time, or leave the app deactivated (when PT-1S is used). See https://appium.io/docs/en/commands/device/app/background-app/[Appium docs] for more details.
 
 [source,gherkin]
 ----
@@ -491,7 +491,7 @@ accomplish it by deleting following files: */Media/PhotoData/Photos.sqlite*, */M
 
 === Switch to Web view by name
 
-Switches context to a web view with name that matches the rule {web-view-info}. Also Appium capabilities for https://github.com/appium/appium-xcuitest-driver#web-context[iOS] and https://github.com/appium/appium-uiautomator2-driver#web-context[Android] are available for the fine-tuning configuration.
+Switches context to a web view with name that matches the rule {web-view-info}. Also, Appium capabilities for https://github.com/appium/appium-xcuitest-driver#web-context[iOS] and https://github.com/appium/appium-uiautomator2-driver#web-context[Android] are available for the fine-tuning configuration.
 
 [source,gherkin]
 ----
@@ -1055,7 +1055,7 @@ When I turn OFF `WIFI` network connection
 [source,gherkin]
 ----
 When I turn OFF `WIFI` network connection
-When I activate application with bundle identifier `my-aplication-bundle-id`
+When I activate application with bundle identifier `my-application-bundle-id`
 ----
 
 === Change device screen orientation

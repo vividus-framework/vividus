@@ -121,7 +121,7 @@ Opens a new tab, switches the focus to this tab and loads the given URL.
 
 [IMPORTANT]
 ====
-The key difference of this step from the <<_open_a_new_tab,previous one openning a new tab>>
+The key difference of this step from the <<_open_a_new_tab,previous one opening a new tab>>
 is that this step _inherits_ the state of the previous page, i.e.:
 
 * new tab will have acces to the <<_web_storage_steps,session storage>> of the previous tab,
