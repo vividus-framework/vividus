@@ -127,7 +127,7 @@ image::appium-inspector-capabilities-ios.png[]
 
 == Running tests on Simulator/Emulator
 
-VIVIDUS Sample Tests is a https://github.com/vividus-framework/vividus-sample-tests[GitHub repository]. Its puropose is to demo VIVIDUS capabilities via sample tests.
+VIVIDUS Sample Tests is a https://github.com/vividus-framework/vividus-sample-tests[GitHub repository]. Its purpose is to demo VIVIDUS capabilities via sample tests.
 
 Let's use it as an example for running mobile tests via Appium.
 

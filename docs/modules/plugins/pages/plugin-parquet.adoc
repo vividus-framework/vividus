@@ -1,4 +1,4 @@
-= Paquet Plugin
+= Parquet Plugin
 
 The plugin provides the ability to create https://parquet.apache.org/[Parquet] files.
 
@@ -46,8 +46,8 @@ and returns its path.
 #{convertCsvToParquetFile(*$csv-resource-path*, *$avro-schema-resource-path*)}
 ----
 
-* *`$csv-resource-path`* - The path to a resource containig CSV data.
-* *`$avro-schema-resource-path`* - The path to a resource containig https://avro.apache.org/docs/1.11.1/specification/_print/[Avro schema].
+* *`$csv-resource-path`* - The path to a resource containing CSV data.
+* *`$avro-schema-resource-path`* - The path to a resource containing https://avro.apache.org/docs/1.11.1/specification/_print/[Avro schema].
 
 .Initialize a variable with a path to a Parquet file
 [source,gherkin]

@@ -23,7 +23,7 @@ Then number of HTTP $httpMethods requests with URL pattern `$urlPattern` is $com
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[Comparison Rule]
 * `$number` - The number to compare with
 
-.Check the number of HTTP GET and POST requests matching URL regurlar expression is equal to 1
+.Check the number of HTTP GET and POST requests matching URL regular expression is equal to 1
 [source,gherkin]
 ----
 Then number of HTTP GET, POST requests with URL pattern `http://httpbin\.org/get` is equal to `1`

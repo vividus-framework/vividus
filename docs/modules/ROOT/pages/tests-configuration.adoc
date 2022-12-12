@@ -636,7 +636,7 @@ text is used to decrypt the encrypted text. The default encryption algorithm is
 . Download the https://github.com/jasypt/jasypt/releases[latest Jasypt release]
 . Unpack the downloaded zip-archive
 . Go to `bin` folder
-. Run the command perfoming encryption:
+. Run the command performing encryption:
 +
 .Windows:
 [source,bat]
@@ -738,7 +738,7 @@ https://jbehave.org/reference/stable/composite-steps.html[Composite steps] allow
 
 . Define composite step in `*.steps` file, e.g. `steps/ui/my-app.steps`:
 +
-.Compsite step definition
+.Composite step definition
 [source,gherkin]
 ----
 Composite: When I login with username `$username` and password `$password`
@@ -749,7 +749,7 @@ When I click on element located by `id(signInButton)`
 
 . Configure paths to files with custom steps:
 +
-.Compsite steps paths configuration
+.Composite steps paths configuration
 [source,gherkin]
 ----
 engine.composite-paths=steps/ui/*.steps
@@ -802,14 +802,14 @@ When I hover mouse over element located `$locator`
 ]
 ----
 
-. Point the alias configuration property to an exact location or location pattern with the JSON files containing ailases:
+. Point the alias configuration property to an exact location or location pattern with the JSON files containing aliases:
 +
 [source,properties]
 ----
 engine.alias-paths=aliases/aliases.json
 ----
 
-. Use the defned alias in place of actual step in your story
+. Use the defined alias in place of actual step in your story
 +
 [source,gherkin]
 ----

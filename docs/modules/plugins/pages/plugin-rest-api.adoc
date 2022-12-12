@@ -523,7 +523,7 @@ Compares the HTTP response body against the xref:ROOT:glossary.adoc#_resource[re
 Then response body $validationRule resource at `$resourcePath`
 ----
 
-* `$validationRule` - The valdation rule, either `is equal to` or `is not equal to`.
+* `$validationRule` - The validation rule, either `is equal to` or `is not equal to`.
 * `$resourcePath` - The xref:ROOT:glossary.adoc#_resource[resource] path.
 
 .Compare images
@@ -798,7 +798,7 @@ When I execute HTTP GET request for resource with URL `https://httpbin.org/json`
 Then content type of response body is equal to `application/json`
 ----
 
-=== Validate absence of reponse body
+=== Validate absence of response body
 
 Validates that the HTTP response does not contain a body.
 
@@ -838,7 +838,7 @@ Then size of decompressed response body is greater than or equal to `1200`
 [WARNING]
 ====
 The step xref:commons:vividus-steps.adoc#_save_zip_archive_entries[is moved] to core package
-i.e. it's not required to install any pluing to use this step - it's available out of the box.
+i.e. it's not required to install any plugin to use this step - it's available out of the box.
 ====
 
 === Validate ZIP archive
@@ -846,7 +846,7 @@ i.e. it's not required to install any pluing to use this step - it's available o
 [WARNING]
 ====
 The step xref:commons:vividus-steps.adoc#_validate_zip_archive[is moved] to core package
-i.e. it's not required to install any pluing to use this step - it's available out of the box.
+i.e. it's not required to install any plugin to use this step - it's available out of the box.
 ====
 
 === Validate HTTP resources
@@ -859,7 +859,7 @@ Actions performed by step:
 * if the status code is `200` then the check is considered as `passed`
 * if the status code falls under any of `404`, `405`, `501`, `503` then the https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET[HTTP GET] request will be sent
 * if the GET status code is `200` then check is considered as `passed`, otherwise `failed`
-* if the target URL had beed already checked then the check is considered as `skipped`
+* if the target URL has already been checked then the check is considered as `skipped`
 
 [source,gherkin]
 ----
