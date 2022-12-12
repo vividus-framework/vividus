@@ -18,6 +18,7 @@ package org.vividus.json.steps;
 
 import static net.javacrumbs.jsonunit.JsonMatchers.jsonEquals;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -61,6 +62,11 @@ public class JsonSteps
     private static final Pattern DIFFERENCES_PATTERN = Pattern.compile(
             "(?=(?:" + ASSERTION_BOUNDS + ")).+?(?=(?:" + ASSERTION_BOUNDS + "|$))",
             Pattern.DOTALL);
+
+    private static final String IS_EQUAL_TO = "IS_EQUAL_TO";
+    private static final String IS_NOT_EQUAL_TO = "IS_NOT_EQUAL_TO";
+    private static final String INVALID_COMPARISON_RULE_MESSAGE = "Unable to compare actual JSON element value '%s' "
+            + "against expected value '%s' using comparison rule '%s'";
 
     private final FluentEnumConverter fluentEnumConverter;
     private final JsonContext jsonContext;
@@ -352,8 +358,11 @@ public class JsonSteps
      *                              <li>equal to (=)</li>
      *                              <li>not equal to (!=)</li>
      *                          </ul>
-     *                          <li>for <code>boolean</code> and <code>null</code>-s - only single rule
-     *                          <code>IS_EQUAL_TO</code> (readable form: <code>is equal to</code>) is allowed</li>
+     *                          <li>for <code>boolean</code> - only single rule <code>IS_EQUAL_TO</code>
+     *                          (readable form: <code>is equal to</code>) is allowed,</li>
+     *                          <li>for <code>null</code> - only two rules <code>IS_EQUAL_TO</code> and
+     *                          <code>IS_NOT_EQUAL_TO</code> (readable forms: <code>is equal to</code> and
+     *                          <code>is not equal to</code>) are allowed</li>
      *                          <li><code>array</code> and <code>object</code> are complex types and must be validated
      *                          using another steps dedicated for JSON elements.</li>
      *                       </ul>
@@ -363,28 +372,41 @@ public class JsonSteps
     public void assertValueByJsonPath(String json, String jsonPath, String comparisonRule, Object expectedData)
     {
         getDataByJsonPathSafely(json, jsonPath, true).ifPresent(jsonByPath -> {
-            if (jsonByPath.isEmpty())
+            Object jsonValue = jsonByPath.orElse(null);
+            String normalizedComparisonRule = normalizeToEnumConstant(comparisonRule);
+            if (jsonValue == null || expectedData == null)
             {
-                validateEqualsComparison(comparisonRule, null, expectedData);
-                assertThat(jsonPath, null, equalTo(expectedData));
-                return;
+                Matcher<Object> matcher;
+                switch (normalizedComparisonRule)
+                {
+                    case IS_EQUAL_TO:
+                        matcher = equalTo(expectedData);
+                        break;
+                    case IS_NOT_EQUAL_TO:
+                        matcher = not(equalTo(expectedData));
+                        break;
+                    default:
+                        throw new IllegalArgumentException(
+                                String.format(INVALID_COMPARISON_RULE_MESSAGE, jsonValue, expectedData,
+                                        comparisonRule));
+                }
+                assertThat(jsonPath, jsonValue, matcher);
             }
-            Object jsonValue = jsonByPath.get();
-            if (jsonValue instanceof Boolean)
+            else if (jsonValue instanceof Boolean)
             {
-                validateEqualsComparison(comparisonRule, jsonValue, expectedData);
+                Validate.isTrue(IS_EQUAL_TO.equals(normalizedComparisonRule), INVALID_COMPARISON_RULE_MESSAGE,
+                        jsonValue, expectedData, comparisonRule);
                 assertThat(jsonPath, (Boolean) jsonValue, equalTo(Boolean.valueOf(String.valueOf(expectedData))));
             }
             else if (jsonValue instanceof String)
             {
-                StringComparisonRule rule = convertToEnum(normalizeToEnumConstant(comparisonRule),
-                        StringComparisonRule.class);
+                StringComparisonRule rule = convertToEnum(normalizedComparisonRule, StringComparisonRule.class);
                 assertThat(jsonPath, (String) jsonValue, rule.createMatcher(String.valueOf(expectedData)));
             }
             else if (jsonValue instanceof Number)
             {
-                ComparisonRule rule = convertToEnum(
-                        StringUtils.removeStart(normalizeToEnumConstant(comparisonRule), "IS_"), ComparisonRule.class);
+                ComparisonRule rule = convertToEnum(StringUtils.removeStart(normalizedComparisonRule, "IS_"),
+                        ComparisonRule.class);
                 BigDecimal actualNumber = new BigDecimal(jsonValue.toString());
                 BigDecimal expectedNumber = NumberUtils.createBigDecimal(String.valueOf(expectedData));
                 assertThat(jsonPath, actualNumber, rule.getComparisonRule(expectedNumber));
@@ -489,13 +511,6 @@ public class JsonSteps
     private <T extends Enum<?>> T convertToEnum(String comparisonRule, Class<T> enumClass)
     {
         return (T) fluentEnumConverter.convertValue(comparisonRule, enumClass);
-    }
-
-    private void validateEqualsComparison(String comparisonRule, Object actualJsonValue, Object expectedJsonValue)
-    {
-        Validate.isTrue("IS_EQUAL_TO".equals(normalizeToEnumConstant(comparisonRule)),
-                "Unable to compare actual JSON element value '" + actualJsonValue + "' against expected value '"
-                        + expectedJsonValue + "' using comparison rule '" + comparisonRule + "'");
     }
 
     private String normalizeToEnumConstant(String comparisonRule)

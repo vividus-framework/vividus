@@ -406,7 +406,8 @@ Then JSON element value from context by JSON path `$jsonPath` $comparisonRule `$
 * `$comparisonRule` - The comparison rule to match JSON element value depending on the https://www.json.org/json-en.html[element type]:
   ** for `string` - xref:parameters:string-comparison-rule.adoc[string comparison rules] are applicable,
   ** for `number` - xref:parameters:comparison-rule.adoc[regular comparison rules] are applicable,
-  ** for `boolean` and `null`-s - only single rule `IS_EQUAL_TO` (readable form: `is equal to`) is allowed
+  ** for `boolean` - only single rule `IS_EQUAL_TO` (readable form: `is equal to`) is allowed,
+  ** for `null` - only two rules `IS_EQUAL_TO` and `IS_NOT_EQUAL_TO` (readable forms: `is equal to` and `is not equal to`) are allowed
   ** `array` and `object` are complex types and must be validated using another steps dedicated for JSON elements.
 * `$expectedValue` - The expected value of JSON element to match according to the comparison rule.
 
@@ -432,7 +433,8 @@ Then JSON element value from `$json` by JSON path `$jsonPath` $comparisonRule `$
 * `$comparisonRule` - The comparison rule to match JSON element value depending on the https://www.json.org/json-en.html[element type]:
   ** for `string` - xref:parameters:string-comparison-rule.adoc[string comparison rules] are applicable,
   ** for `number` - xref:parameters:comparison-rule.adoc[regular comparison rules] are applicable,
-  ** for `boolean` and `null`-s - only single rule `IS_EQUAL_TO` (readable form: `is equal to`) is allowed
+  ** for `boolean` - only single rule `IS_EQUAL_TO` (readable form: `is equal to`) is allowed,
+  ** for `null` - only two rules `IS_EQUAL_TO` and `IS_NOT_EQUAL_TO` (readable forms: `is equal to` and `is not equal to`) are allowed
   ** `array` and `object` are complex types and must be validated using another steps dedicated for JSON elements.
 * `$expectedValue` - The expected value of JSON element to match according to the comparison rule.
 
