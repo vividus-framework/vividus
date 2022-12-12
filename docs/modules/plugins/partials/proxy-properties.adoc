@@ -53,7 +53,7 @@ a|`true`
 `IMPERSONATED`
 |`IMPERSONATED`
 |The MITM type using the corresponding certificates. `SELF_SIGNED` MITM manager uses self-signed certificates that
-are generated lazily if the given key store file doesn't yet exist. Please note that certificates are usually generated
+are generated lazily if the given keystore file doesn't yet exist. Please note that certificates are usually generated
 in the current working directory
 
 |`proxy.mitm.key-store.type`
