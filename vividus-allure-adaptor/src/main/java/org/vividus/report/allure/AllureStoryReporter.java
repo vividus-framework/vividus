@@ -46,6 +46,7 @@ import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.steps.StepCollector.Stage;
+import org.jbehave.core.steps.StepCreator.PendingStep;
 import org.jbehave.core.steps.Timing;
 import org.vividus.AbstractReportControlStoryReporter;
 import org.vividus.JBehaveFailureUnwrapper;
@@ -322,7 +323,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     }
 
     @Override
-    public void pending(String step)
+    public void pending(PendingStep step)
     {
         super.pending(step);
         stopStep(Status.SKIPPED, new StatusDetails().setMessage(PENDING_STEP_MARKER));

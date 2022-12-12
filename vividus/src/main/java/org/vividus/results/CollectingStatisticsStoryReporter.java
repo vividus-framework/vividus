@@ -40,6 +40,7 @@ import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.steps.StepCollector.Stage;
+import org.jbehave.core.steps.StepCreator.PendingStep;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
 import org.slf4j.Logger;
@@ -237,7 +238,7 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
     }
 
     @Override
-    public void pending(String step)
+    public void pending(PendingStep step)
     {
         endStep(Status.PENDING);
         changeStatus(Status.PENDING);
