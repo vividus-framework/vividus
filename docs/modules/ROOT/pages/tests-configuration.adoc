@@ -446,7 +446,7 @@ the <<_suites,configured suite>> has 0 batches, i.e. no tests to execute are con
 
 Here one could find description of general HTTP properties applied across all the HTTP interactions in VIVIDUS.
 
-:key-store-ref: {java-api-docs-base-url}/security/terms-and-definitions.html#GUID-C7BB21C7-E19E-4DE4-8494-CB43F957C329__GUID-D7CAC72A-2714-4C9B-88E2-7F317DE94CEE[key store]
+:keystore-ref: {java-api-docs-base-url}/security/terms-and-definitions.html#GUID-C7BB21C7-E19E-4DE4-8494-CB43F957C329__GUID-D7CAC72A-2714-4C9B-88E2-7F317DE94CEE[keystore]
 
 [cols="3,1,1,3", options="header"]
 |===
@@ -524,19 +524,19 @@ Here one could find description of general HTTP properties applied across all th
 4+^.^|_Two-Way SSL authentication_
 
 |`http.key-store.type`
-|{java-api-docs-base-url}/docs/specs/security/standard-names.html#keystore-types[KeyStore types]
+|{java-api-docs-base-url}/docs/specs/security/standard-names.html#keystore-types[Keystore type]
 |`JKS`
-|The {key-store-ref} type
+|The {keystore-ref} type
 
 |`http.key-store.path`
 |xref:ROOT:glossary.adoc#_resource[Resource]
 |`<empty>`
-|The {key-store-ref} to load
+|The {keystore-ref} to load
 
 |`http.key-store.password`
 |`string`
 |`<empty>`
-|The password used to unlock the {key-store-ref} and for the integrity checking
+|The password used to unlock the {keystore-ref} and for the integrity checking
 
 |`http.ssl.private-key-password`
 |`string`
