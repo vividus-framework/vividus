@@ -255,7 +255,7 @@ Other rules will fallback to strings comparison.
 
 INFO: The step prints the comparison results in the unified diff format for the strings with the legth more than specified in the property xref:ROOT:tests-configuration.adoc#_configuration_properties[report.text-length-diff-threshold].
 
-WARNING: If the variables contain valid numbers than they will be converted into https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigInteger.html[BigInteger] and compared as numbers.
+WARNING: If the variables contain valid numbers than they will be converted into {java-api-docs-base-url}/docs/api/java.base/java/math/BigInteger.html[BigInteger] and compared as numbers.
 
 [source,gherkin]
 ----

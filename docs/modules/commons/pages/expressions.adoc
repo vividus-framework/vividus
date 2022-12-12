@@ -360,7 +360,7 @@ Rounds a number with an approximate value based on specific rounding definitions
 
 * *`$value`* - any number to be processed
 * `$maxFractionDigits` - maximum number of digits after the decimal separator
-* `$roundingMode` - specifies a rounding behavior for numerical operations (more information https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/math/RoundingMode.html[here]):
+* `$roundingMode` - specifies a rounding behavior for numerical operations (more information {java-api-docs-base-url}/docs/api/java.base/java/math/RoundingMode.html[here]):
 +
 [cols="1, 1, 4", options="header"]
 |===

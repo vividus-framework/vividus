@@ -59,7 +59,7 @@ in the current working directory
 |`proxy.mitm.key-store.type`
 |keystore type
 |`JKS`
-|The https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#keystore-types[keystore type]
+|The {java-api-docs-base-url}/docs/specs/security/standard-names.html#keystore-types[keystore type]
 
 |`proxy.mitm.key-store.path`
 |path to keystore
