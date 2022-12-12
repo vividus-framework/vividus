@@ -1,5 +1,5 @@
 = Date/Time Plugin
-:java-date-time-formatter-link: https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns[the date/time format]
+:java-date-time-formatter-link: {java-api-docs-base-url}/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns[the date/time format]
 
 The plugin provides functionality to generate, modify and validate date/time.
 
@@ -14,7 +14,7 @@ There are no required properties for the plugin.
 
 === Optional
 
-`location.zone-id` - Defines time zone which will be used. The default is set to a system default timezone. https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/ZoneId.html[Time zone format]
+`location.zone-id` - Defines time zone which will be used. The default is set to a system default timezone. {java-api-docs-base-url}/docs/api/java.base/java/time/ZoneId.html[Time zone format]
 
 
 == xref:ROOT:glossary.adoc#_expression[Expressions]
