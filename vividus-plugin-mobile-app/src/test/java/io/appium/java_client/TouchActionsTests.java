@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -47,7 +48,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
@@ -60,6 +60,8 @@ import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.vividus.mobileapp.action.TouchActions;
 import org.vividus.mobileapp.configuration.MobileApplicationConfiguration;
+import org.vividus.mobileapp.configuration.SwipeConfiguration;
+import org.vividus.mobileapp.configuration.ZoomConfiguration;
 import org.vividus.mobileapp.model.SwipeDirection;
 import org.vividus.mobileapp.model.ZoomType;
 import org.vividus.selenium.IWebDriverProvider;
@@ -94,8 +96,11 @@ class TouchActionsTests
     private static final Dimension DIMENSION = new Dimension(600, 800);
     private static final Rectangle ACTION_AREA = new Rectangle(new Point(0, 0), DIMENSION);
 
+    private final SwipeConfiguration swipeConfiguration =
+            new SwipeConfiguration(Duration.ZERO, 5, 50, 0);
+    private final ZoomConfiguration zoomConfiguration = new ZoomConfiguration(10, 20, 15, 25);
     @Spy private final MobileApplicationConfiguration mobileApplicationConfiguration =
-            new MobileApplicationConfiguration(Duration.ZERO, 5, 50, 0);
+            new MobileApplicationConfiguration(swipeConfiguration, zoomConfiguration);
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private RemoteWebElement element;
     @Mock private PerformsTouchActions performsTouchActions;
@@ -206,7 +211,6 @@ class TouchActionsTests
         touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition);
 
         verifySwipe(3);
-        verifyConfiguration();
     }
 
     @Test
@@ -218,8 +222,8 @@ class TouchActionsTests
         when(stopCondition.getAsBoolean()).thenReturn(false)
                 .thenReturn(false)
                 .thenReturn(true);
-        var blackImage = Mockito.spy(getImage(BLACK_IMAGE));
-        var whiteImage = Mockito.spy(getImage(WHITE_IMAGE));
+        var blackImage = spy(getImage(BLACK_IMAGE));
+        var whiteImage = spy(getImage(WHITE_IMAGE));
         var blackScreenshot = new Screenshot(blackImage);
         var whiteScreenshot = new Screenshot(whiteImage);
 
@@ -232,7 +236,6 @@ class TouchActionsTests
         verifyNoMoreInteractions(genericWebDriverManager);
         verify(blackImage, never()).getSubimage(anyInt(), anyInt(), anyInt(), anyInt());
         verify(whiteImage, never()).getSubimage(anyInt(), anyInt(), anyInt(), anyInt());
-        verifyConfiguration();
     }
 
     @Test
@@ -259,7 +262,6 @@ class TouchActionsTests
 
         assertEquals(exception, wrapper.getCause());
         verifySwipe(1);
-        verifyConfiguration();
     }
 
     @Test
@@ -282,7 +284,6 @@ class TouchActionsTests
 
         assertEquals("Swiping is stopped due to exceeded swipe limit '5'", exception.getMessage());
         verifySwipe(6);
-        verifyConfiguration();
     }
 
     @Test
@@ -301,7 +302,6 @@ class TouchActionsTests
         touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition);
 
         verifySwipe(4);
-        verifyConfiguration();
     }
 
     @Test
@@ -351,8 +351,8 @@ class TouchActionsTests
 
     @SuppressWarnings("unchecked")
     @CsvSource({
-            "OUT,  120, 479, 263, 351, 480, 160, 336, 287",
-            "IN,   263, 351, 120, 479, 336, 287, 480, 160"
+            "OUT,  150, 640, 293, 416, 510, 80, 366, 303",
+            "IN,   293, 416, 150, 640, 366, 303, 510, 80"
     })
     @ParameterizedTest
     void shouldPerformZoom(ZoomType zoomType, int point1StartX, int point1StartY, int point1EndX, int point1EndY,
@@ -378,14 +378,6 @@ class TouchActionsTests
                 .performTouchAction(argThat(arg -> SCROLL_UP.equals(arg.getParameters().toString())));
         verifyNoMoreInteractions(stopCondition, performsTouchActions, screenshotTaker, genericWebDriverManager,
                 webDriverProvider);
-    }
-
-    private void verifyConfiguration()
-    {
-        verify(mobileApplicationConfiguration).getSwipeStabilizationDuration();
-        verify(mobileApplicationConfiguration).getSwipeLimit();
-        verify(mobileApplicationConfiguration).getSwipeVerticalXPosition();
-        verifyNoMoreInteractions(mobileApplicationConfiguration);
     }
 
     private BufferedImage getImage(String image)

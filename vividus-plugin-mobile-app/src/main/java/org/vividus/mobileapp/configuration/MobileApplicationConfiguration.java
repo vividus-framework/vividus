@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,52 +16,24 @@
 
 package org.vividus.mobileapp.configuration;
 
-import java.time.Duration;
-
-import org.apache.commons.lang3.Validate;
-
 public class MobileApplicationConfiguration
 {
-    private final Duration swipeStabilizationDuration;
-    private final int swipeLimit;
-    private final int swipeVerticalXPosition;
-    private final int swipeHorizontalYPosition;
+    private final SwipeConfiguration swipeConfiguration;
+    private final ZoomConfiguration zoomConfiguration;
 
-    public MobileApplicationConfiguration(Duration swipeStabilizationDuration, int swipeLimit,
-            int swipeVerticalXPosition, int swipeHorizontalYPosition)
+    public MobileApplicationConfiguration(SwipeConfiguration swipeConfiguration, ZoomConfiguration zoomConfiguration)
     {
-        validatePosition("x", swipeVerticalXPosition);
-        validatePosition("y", swipeHorizontalYPosition);
-        this.swipeStabilizationDuration = swipeStabilizationDuration;
-        this.swipeLimit = swipeLimit;
-        this.swipeVerticalXPosition = swipeVerticalXPosition;
-        this.swipeHorizontalYPosition = swipeHorizontalYPosition;
+        this.swipeConfiguration = swipeConfiguration;
+        this.zoomConfiguration = zoomConfiguration;
     }
 
-    @SuppressWarnings("MagicNumber")
-    private void validatePosition(String name, int value)
+    public SwipeConfiguration getSwipeConfiguration()
     {
-        Validate.isTrue(value >= 0 && value <= 100,
-            "The %s percentage value must be between 0 and 100, but got: %d", name, value);
+        return swipeConfiguration;
     }
 
-    public Duration getSwipeStabilizationDuration()
+    public ZoomConfiguration getZoomConfiguration()
     {
-        return swipeStabilizationDuration;
-    }
-
-    public int getSwipeLimit()
-    {
-        return swipeLimit;
-    }
-
-    public int getSwipeVerticalXPosition()
-    {
-        return swipeVerticalXPosition;
-    }
-
-    public int getSwipeHorizontalYPosition()
-    {
-        return swipeHorizontalYPosition;
+        return zoomConfiguration;
     }
 }

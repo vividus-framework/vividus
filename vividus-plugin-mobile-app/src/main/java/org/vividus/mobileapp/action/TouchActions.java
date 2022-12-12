@@ -43,6 +43,8 @@ import org.openqa.selenium.interactions.PointerInput;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.vividus.mobileapp.configuration.MobileApplicationConfiguration;
+import org.vividus.mobileapp.configuration.SwipeConfiguration;
+import org.vividus.mobileapp.configuration.ZoomConfiguration;
 import org.vividus.mobileapp.model.MoveCoordinates;
 import org.vividus.mobileapp.model.SwipeDirection;
 import org.vividus.mobileapp.model.ZoomCoordinates;
@@ -198,11 +200,11 @@ public class TouchActions
         uiContext.getOptionalSearchContext()
                  .map(this::createScreenShooter)
                  .ifPresent(screenShooter -> {
-                     Duration stabilizationDuration = mobileApplicationConfiguration.getSwipeStabilizationDuration();
-                     int swipeLimit = mobileApplicationConfiguration.getSwipeLimit();
+                     SwipeConfiguration swipeConfiguration = mobileApplicationConfiguration.getSwipeConfiguration();
+                     Duration stabilizationDuration = swipeConfiguration.getSwipeStabilizationDuration();
+                     int swipeLimit = swipeConfiguration.getSwipeLimit();
                      BufferedImage previousFrame = null;
-                     MoveCoordinates swipeCoordinates = direction.calculateCoordinates(swipeArea,
-                             mobileApplicationConfiguration);
+                     MoveCoordinates swipeCoordinates = direction.calculateCoordinates(swipeArea, swipeConfiguration);
                      for (int count = 0; count <= swipeLimit; count++)
                      {
                          swipe(swipeCoordinates, swipeDuration);
@@ -266,7 +268,7 @@ public class TouchActions
             Duration swipeDuration)
     {
         MoveCoordinates coordinates = direction.createCoordinates(startCoordinate, endCoordinate,
-                mobileApplicationConfiguration, swipeArea);
+                mobileApplicationConfiguration.getSwipeConfiguration(), swipeArea);
         swipe(coordinates, swipeDuration);
     }
 
@@ -274,14 +276,36 @@ public class TouchActions
      * Performs zoom in/out
      *
      * @param zoomType type of zoom, either <b>IN</b> or <b>OUT</b>
-     * @param actionArea the area to perform zoom
+     * @param contextArea the area to perform zoom
      */
-    public void performZoom(ZoomType zoomType, Rectangle actionArea)
+    public void performZoom(ZoomType zoomType, Rectangle contextArea)
     {
-        ZoomCoordinates zoomCoordinates = zoomType.calculateCoordinates(actionArea);
+        Rectangle zoomArea = calculateZoomArea(contextArea);
+        ZoomCoordinates zoomCoordinates = zoomType.calculateCoordinates(zoomArea);
         Sequence moveFinger1Sequence = getFingerMoveSequence("finger1", zoomCoordinates.getFinger1MoveCoordinates());
         Sequence moveFinger2Sequence = getFingerMoveSequence("finger2", zoomCoordinates.getFinger2MoveCoordinates());
         webDriverProvider.getUnwrapped(Interactive.class).perform(List.of(moveFinger1Sequence, moveFinger2Sequence));
+    }
+
+    @SuppressWarnings("MagicNumber")
+    private Rectangle calculateZoomArea(Rectangle contextArea)
+    {
+        ZoomConfiguration zoomConfiguration = mobileApplicationConfiguration.getZoomConfiguration();
+        int leftIndent = zoomConfiguration.getLeftIndent();
+        int topIndent = zoomConfiguration.getTopIndent();
+
+        int widthInPercentage = 100 - (leftIndent + zoomConfiguration.getRightIndent());
+        int zoomAreaWidth = contextArea.getWidth() * widthInPercentage / 100;
+
+        int heightInPercentage = 100 - (topIndent + zoomConfiguration.getBottomIndent());
+        int zoomAreaHeight = contextArea.getHeight() * heightInPercentage / 100;
+
+        int leftIndentPx = contextArea.getWidth() * leftIndent / 100;
+        int zoomAreaX = contextArea.getX() + leftIndentPx;
+
+        int topIndentPx = contextArea.getHeight() * topIndent / 100;
+        int zoomAreaY = contextArea.getY() + topIndentPx;
+        return new Rectangle(zoomAreaX, zoomAreaY, zoomAreaHeight, zoomAreaWidth);
     }
 
     private Sequence getFingerMoveSequence(String pointerName, MoveCoordinates moveCoordinates)

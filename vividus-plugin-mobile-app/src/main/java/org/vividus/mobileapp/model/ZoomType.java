@@ -23,42 +23,39 @@ public enum ZoomType
     IN, OUT;
 
     private static final float CENTER_INDENT_COEFFICIENT = 0.1f;
-    private static final float TOP_INDENT_COEFFICIENT = 0.2f;
-    private static final float BOTTOM_INDENT_COEFFICIENT = 0.4f;
-    private static final float LEFT_INDENT_COEFFICIENT = 0.2f;
-    private static final float RIGHT_INDENT_COEFFICIENT = 0.2f;
 
     @SuppressWarnings("MagicNumber")
     public ZoomCoordinates calculateCoordinates(Rectangle zoomArea)
     {
-        int zoomAreaWidth = (int) (zoomArea.getWidth() * (1 - (LEFT_INDENT_COEFFICIENT + RIGHT_INDENT_COEFFICIENT)));
-        int zoomAreaHeight = (int) (zoomArea.getHeight()
-                * (1 - (TOP_INDENT_COEFFICIENT + BOTTOM_INDENT_COEFFICIENT)));
-        int zoomAreaX = (int) (zoomArea.getX() + zoomArea.getWidth() * LEFT_INDENT_COEFFICIENT);
-        int zoomAreaY = (int) (zoomArea.getY() + zoomArea.getHeight() * TOP_INDENT_COEFFICIENT);
+        int zoomAreaWidth = zoomArea.getWidth();
+        int zoomAreaHeight = zoomArea.getHeight();
+        int zoomAreaX = zoomArea.getX();
+        int zoomAreaY = zoomArea.getY();
 
         int finger1CoordinateXFirst = (int) (zoomAreaWidth * (0.5 - CENTER_INDENT_COEFFICIENT) + zoomAreaX);
         int finger1CoordinateYFirst = (int) (zoomAreaHeight * (0.5 + CENTER_INDENT_COEFFICIENT) + zoomAreaY);
+        int finger1CoordinateXSecond = zoomAreaX;
         int finger1CoordinateYSecond = zoomAreaHeight + zoomAreaY;
         int finger2CoordinateXFirst = (int) (zoomAreaWidth * (0.5 + CENTER_INDENT_COEFFICIENT) + zoomAreaX);
         int finger2CoordinateYFirst = (int) (zoomAreaHeight * (0.5 - CENTER_INDENT_COEFFICIENT) + zoomAreaY);
         int finger2CoordinateXSecond = zoomAreaWidth + zoomAreaX;
+        int finger2CoordinateYSecond = zoomAreaY;
 
         MoveCoordinates moveCoordinates1;
         MoveCoordinates moveCoordinates2;
         if (ZoomType.OUT == this)
         {
-            moveCoordinates1 = new MoveCoordinates(zoomAreaX, finger1CoordinateYSecond, finger1CoordinateXFirst,
-                    finger1CoordinateYFirst);
-            moveCoordinates2 = new MoveCoordinates(finger2CoordinateXSecond, zoomAreaY, finger2CoordinateXFirst,
-                    finger2CoordinateYFirst);
+            moveCoordinates1 = new MoveCoordinates(finger1CoordinateXSecond, finger1CoordinateYSecond,
+                    finger1CoordinateXFirst, finger1CoordinateYFirst);
+            moveCoordinates2 = new MoveCoordinates(finger2CoordinateXSecond, finger2CoordinateYSecond,
+                    finger2CoordinateXFirst, finger2CoordinateYFirst);
         }
         else
         {
-            moveCoordinates1 = new MoveCoordinates(finger1CoordinateXFirst, finger1CoordinateYFirst, zoomAreaX,
-                    finger1CoordinateYSecond);
+            moveCoordinates1 = new MoveCoordinates(finger1CoordinateXFirst, finger1CoordinateYFirst,
+                    finger1CoordinateXSecond, finger1CoordinateYSecond);
             moveCoordinates2 = new MoveCoordinates(finger2CoordinateXFirst, finger2CoordinateYFirst,
-                    finger2CoordinateXSecond, zoomAreaY);
+                    finger2CoordinateXSecond, finger2CoordinateYSecond);
         }
         return new ZoomCoordinates(moveCoordinates1, moveCoordinates2);
     }

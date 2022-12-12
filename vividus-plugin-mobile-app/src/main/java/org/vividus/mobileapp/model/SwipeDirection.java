@@ -20,18 +20,18 @@ import java.util.function.ToIntFunction;
 
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
-import org.vividus.mobileapp.configuration.MobileApplicationConfiguration;
+import org.vividus.mobileapp.configuration.SwipeConfiguration;
 
 public enum SwipeDirection
 {
     UP(true, true, SwipeDirection.VERTICAL_INDENT_COEFFICIENT, Rectangle::getHeight, Rectangle::getWidth,
-            MobileApplicationConfiguration::getSwipeVerticalXPosition),
+            SwipeConfiguration::getSwipeVerticalXPosition),
     DOWN(false, true, SwipeDirection.VERTICAL_INDENT_COEFFICIENT, Rectangle::getHeight, Rectangle::getWidth,
-        MobileApplicationConfiguration::getSwipeVerticalXPosition),
+            SwipeConfiguration::getSwipeVerticalXPosition),
     LEFT(true, false, SwipeDirection.HORIZONTAL_INDENT_COEFFICIENT, Rectangle::getWidth, Rectangle::getHeight,
-            MobileApplicationConfiguration::getSwipeHorizontalYPosition),
+            SwipeConfiguration::getSwipeHorizontalYPosition),
     RIGHT(false, false, SwipeDirection.HORIZONTAL_INDENT_COEFFICIENT, Rectangle::getWidth, Rectangle::getHeight,
-            MobileApplicationConfiguration::getSwipeHorizontalYPosition);
+            SwipeConfiguration::getSwipeHorizontalYPosition);
 
     private static final float VERTICAL_INDENT_COEFFICIENT = 0.2f;
     private static final float HORIZONTAL_INDENT_COEFFICIENT = 0.125f;
@@ -41,11 +41,11 @@ public enum SwipeDirection
     private final float indentCoefficient;
     private final ToIntFunction<Rectangle> axisLengthProvider;
     private final ToIntFunction<Rectangle> boundariesDimensionProvider;
-    private final ToIntFunction<MobileApplicationConfiguration> percentageProvider;
+    private final ToIntFunction<SwipeConfiguration> percentageProvider;
 
     SwipeDirection(boolean backward, boolean vertical, float indentCoefficient,
             ToIntFunction<Rectangle> axisLengthProvider, ToIntFunction<Rectangle> boundariesDimensionProvider,
-            ToIntFunction<MobileApplicationConfiguration> percentageProvider)
+            ToIntFunction<SwipeConfiguration> percentageProvider)
     {
         this.backward = backward;
         this.vertical = vertical;
@@ -70,7 +70,7 @@ public enum SwipeDirection
         return axisLengthProvider.applyAsInt(rectangle);
     }
 
-    public MoveCoordinates calculateCoordinates(Rectangle swipeArea, MobileApplicationConfiguration configuration)
+    public MoveCoordinates calculateCoordinates(Rectangle swipeArea, SwipeConfiguration configuration)
     {
         int swipeAxisLength = getAxisLength(swipeArea);
         int indent = (int) (swipeAxisLength * indentCoefficient);
@@ -84,7 +84,7 @@ public enum SwipeDirection
     }
 
     public MoveCoordinates createCoordinates(int startCoordinate, int endCoordinate,
-            MobileApplicationConfiguration configuration, Rectangle swipeArea)
+            SwipeConfiguration configuration, Rectangle swipeArea)
     {
         int swipeAxisCoordinate = calculateCoordinate(boundariesDimensionProvider.applyAsInt(swipeArea),
                 percentageProvider.applyAsInt(configuration));

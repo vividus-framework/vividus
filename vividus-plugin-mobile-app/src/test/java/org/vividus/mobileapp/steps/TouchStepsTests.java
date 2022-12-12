@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -313,11 +314,8 @@ class TouchStepsTests
         assertEquals("The step is supported only for Android and iOS platforms", exception.getMessage());
     }
 
-    @CsvSource({
-            "IN",
-            "OUT"
-    })
     @ParameterizedTest
+    @EnumSource(ZoomType.class)
     void shouldZoom(ZoomType zoomType)
     {
         mockScreenSize();
@@ -326,11 +324,8 @@ class TouchStepsTests
         verifyNoMoreInteractions(touchActions);
     }
 
-    @CsvSource({
-            "IN",
-            "OUT"
-    })
     @ParameterizedTest
+    @EnumSource(ZoomType.class)
     void shouldZoomUsingContextElement(ZoomType zoomType)
     {
         Point point = new Point(30, 30);

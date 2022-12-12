@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.Rectangle;
-import org.vividus.mobileapp.configuration.MobileApplicationConfiguration;
+import org.vividus.mobileapp.configuration.SwipeConfiguration;
 
 class SwipeDirectionTests
 {
@@ -44,7 +44,7 @@ class SwipeDirectionTests
         Dimension dimension = new Dimension(1080, 1794);
         Point point = new Point(pointX, pointY);
         Rectangle swipeArea = new Rectangle(point, dimension);
-        MobileApplicationConfiguration configuration = mock(MobileApplicationConfiguration.class);
+        SwipeConfiguration configuration = mock(SwipeConfiguration.class);
         when(configuration.getSwipeVerticalXPosition()).thenReturn(xPercentage);
         MoveCoordinates coordinates = direction.calculateCoordinates(swipeArea, configuration);
 
@@ -67,7 +67,7 @@ class SwipeDirectionTests
         Dimension dimension = new Dimension(1080, 1794);
         Point point = new Point(pointX, pointY);
         Rectangle swipeArea = new Rectangle(point, dimension);
-        MobileApplicationConfiguration configuration = mock(MobileApplicationConfiguration.class);
+        SwipeConfiguration configuration = mock(SwipeConfiguration.class);
         when(configuration.getSwipeHorizontalYPosition()).thenReturn(yPercentage);
         MoveCoordinates coordinates = direction.calculateCoordinates(swipeArea, configuration);
 
