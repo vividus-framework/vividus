@@ -38,9 +38,9 @@ class SauceConnectOptionsTests
     private static final String DOT_JS = ".js";
     private static final String PAC_TEST_TUNNEL = "pac-saucelabs-test-tunnel";
     private static final String PROXY = "test";
-    private static final String TUNNEL_IDENTIFIER = "test-tunnel";
-    private static final String PID_FILE_NAME = "sc_client-" + TUNNEL_IDENTIFIER + "-";
-    private static final String TUNNEL_IDENTIFIER_OPTION = "--tunnel-identifier" + SPACE + TUNNEL_IDENTIFIER;
+    private static final String TUNNEL_NAME = "test-tunnel";
+    private static final String PID_FILE_NAME = "sc_client-" + TUNNEL_NAME + "-";
+    private static final String TUNNEL_NAME_OPTION = "--tunnel-name" + SPACE + TUNNEL_NAME;
     private static final String PID_EXTENSION = ".pid";
     private static final String NO_REMOVE_COLLIDING_TUNNELS = "--no-remove-colliding-tunnels";
     private static final String NO_PROXY_CACHING = "--no-proxy-caching";
@@ -73,9 +73,9 @@ class SauceConnectOptionsTests
             Path pidPath = mockPid(resources);
 
             assertEquals(
-                    TUNNEL_IDENTIFIER_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
+                    TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
                             + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
-                    sauceConnectOptions.build(TUNNEL_IDENTIFIER));
+                    sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
@@ -91,9 +91,9 @@ class SauceConnectOptionsTests
             Path pidPath = mockPid(resources);
 
             assertEquals(
-                    TUNNEL_IDENTIFIER_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + "c:/user/temp.js"
+                    TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + "c:/user/temp.js"
                             + SPACE + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
-                    sauceConnectOptions.build(TUNNEL_IDENTIFIER));
+                    sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
@@ -107,9 +107,9 @@ class SauceConnectOptionsTests
             Path pacPath = mockPac(resources, DEFAULT_MATCH_CHAIN);
             Path pidPath = mockPid(resources);
 
-            assertEquals(customFlags + SPACE + TUNNEL_IDENTIFIER_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE
+            assertEquals(customFlags + SPACE + TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE
                             + PAC_FILE + pacPath + SPACE + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
-                    sauceConnectOptions.build(TUNNEL_IDENTIFIER));
+                    sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
@@ -127,9 +127,9 @@ class SauceConnectOptionsTests
             Path pidPath = mockPid(resources);
 
             assertEquals(
-                    TUNNEL_IDENTIFIER_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
+                    TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
                             + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
-                    sauceConnectOptions.build(TUNNEL_IDENTIFIER));
+                    sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
@@ -142,9 +142,9 @@ class SauceConnectOptionsTests
 
             SauceConnectOptions sauceConnectOptions = createEmptyOptions();
             assertEquals(
-                    TUNNEL_IDENTIFIER_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + NO_REMOVE_COLLIDING_TUNNELS
+                    TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + NO_REMOVE_COLLIDING_TUNNELS
                             + SPACE + NO_PROXY_CACHING,
-                    sauceConnectOptions.build(TUNNEL_IDENTIFIER));
+                    sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
