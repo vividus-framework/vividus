@@ -66,6 +66,7 @@ import org.jbehave.core.model.Story;
 import org.jbehave.core.model.StoryDuration;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
+import org.jbehave.core.steps.StepCreator.PendingStep;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
 import org.junit.jupiter.api.AfterAll;
@@ -929,8 +930,9 @@ class AllureStoryReporterTests
     void testPending()
     {
         mockStepUid();
-        allureStoryReporter.pending(GIVEN_STEP);
-        verify(next).pending(GIVEN_STEP);
+        PendingStep pendingStep = new PendingStep(GIVEN_STEP, null);
+        allureStoryReporter.pending(pendingStep);
+        verify(next).pending(pendingStep);
         verify(allureLifecycle).updateStep(eq(STEP_UID), anyStepResultConsumer());
         verify(allureLifecycle).updateTestCase(eq(SCENARIO_UID), argThat(consumer -> {
             consumer.accept(
