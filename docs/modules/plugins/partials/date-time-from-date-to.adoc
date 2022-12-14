@@ -1,0 +1,12 @@
+=== formatDateTo
+
+Formats the input date to the desired format. The format of the input date should be provided in the second parameter.
+
+[source, subs="+quotes"]
+----
+#{formatDateTo(*$inputDate*, *$inputFormat*, $outputFormat)}
+----
+
+* *`$inputDate`* - the date to be formatted, it can be in any format but this format should be described in the second parameter
+* *`$inputFormat`* - the input date format based on {java-date-time-formatter-link}
+* `$outputFormat` - the output date format based on {java-date-time-formatter-link}

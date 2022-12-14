@@ -1,0 +1,12 @@
+=== `shiftDate`
+
+Shifts the given input date for a given period in any direction (+/-).
+
+[source, subs="+quotes"]
+----
+#{shiftDate(*$inputDate*, *$inputFormat*, *$period*)}
+----
+
+* *`$inputDate`* - the date to be shifted, it can be in any format but this format should be described in the second parameter
+* *`$inputFormat`* - the input date format based on {java-date-time-formatter-link}
+* *`$period`* -  the period by which the date will be shifted, it should be written in {iso-date-format-link}

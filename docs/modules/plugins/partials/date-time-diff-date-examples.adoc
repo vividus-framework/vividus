@@ -1,0 +1,18 @@
+==== Examples of generation
+
+[cols="3,>1", options="header"]
+.Examples of the expressions calculating dates difference
+|===
+
+|Expression
+|Result
+
+|`#{diffDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, 2019-03-19 03:40, yyyy-MM-dd HH:mm)}`
+|PT0S
+
+|`#{diffDate("Wed 10 Apr\, 2019\, 13:20:43 GMT", "EEE dd MMM\, yyyy\, HH:mm:ss zzz", "Wed 10 Apr\, 2019\, 09:20:43 America/New_York", "EEE dd MMM\, yyyy\, HH:mm:ss zzz")}`
+|PT0S
+
+|`#{diffDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, 3020-03-19 03:39:20, yyyy-MM-dd HH:mm:ss)}`
+|PT8774591H59M20S
+|===

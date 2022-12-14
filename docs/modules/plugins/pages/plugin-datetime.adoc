@@ -7,14 +7,7 @@ The plugin provides functionality to generate, modify and validate date/time.
 include::partial$plugin-installation.adoc[]
 
 == Properties
-
-=== Required
-
-There are no required properties for the plugin.
-
-=== Optional
-
-`location.zone-id` - Defines time zone which will be used. The default is set to a system default timezone. https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/ZoneId.html[Time zone format]
+include::partial$date-time-properties.adoc[]
 
 
 == xref:ROOT:glossary.adoc#_expression[Expressions]
@@ -23,354 +16,34 @@ NOTE: The expression parameters marked with *bold* are mandatory.
 
 TIP: If argument allows meaningful commas (like, parts of the date format pattern) should be escaped using `\`. Refer to examples for each expression.
 
-=== `generateDate`
+include::partial$date-time-generate-date.adoc[]
 
-Generates the date using current date as a baseline.
+include::partial$date-time-generate-date-examples.adoc[]
 
-[source, subs="+quotes"]
-----
- #{generateDate(*$period*, $outputFormat)}
-----
+include::partial$date-time-from-date.adoc[]
 
-* *`period`* - the period in {iso-date-format-link} format
-* `outputFormat` - the output format based on {java-date-time-formatter-link}
+include::partial$date-time-from-date-examples.adoc[]
 
-==== Properties
+include::partial$date-time-from-date-to.adoc[]
 
-[cols="4,3,1,4", options="header"]
-|===
-|Property name
-|Acceptable values
-|Default
-|Description
+include::partial$date-time-from-date-to-examples.adoc[]
 
-|`expression.generate-date.locale`
-|https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes[2-letter language code] followed by underscore `_` and then https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2[2-letter country code]
-|`en_US`
-a|The locale used for the resulting date. +
+include::partial$date-time-shift-date.adoc[]
 
-For example, the date '2022-08-11' with format 'EEE, dd MMM yyyy' will be displayed as
+include::partial$date-time-shift-date-examples.adoc[]
 
-* 'Mon, 15 Aug 2022' for `en_US` locale
-* 'lun., 15 août 2022' for `fr_FR` locale
+include::partial$date-time-diff-date.adoc[]
 
-|===
+include::partial$date-time-diff-date-examples.adoc[]
 
-Let's imagine the current date is `2020-11-23` and the time is `00:10:01`. Here is a set of examples with the results and comments.
+include::partial$date-time-to-epoch-seconds.adoc[]
 
-.Examples of the expressions generating dates
-[cols="3,2,2", options="header"]
-|===
-|Expression
-|Result
-|Comment
+include::partial$date-time-to-epoch-seconds-examples.adoc[]
 
-|`#{generateDate(P)}`
-|2020-11-23
-|Current date.
+include::partial$date-time-from-epoch-seconds.adoc[]
 
-|`#{generateDate(P1DT2h)}`
-|2020-11-24T02:10:01
-|Current date +1 day and +2 hours
-
-|`#{generateDate(-P1D}`
-|2020-11-23
-|Current date -1 day
-
-|`#{generateDate(P1M)}`
-|2020-12-23
-|Current date + 1 month
-
-|`#{generateDate(-PT10M)}`
-|2020-11-23T00:00:01
-|Current date time -10 mins
-
-|`#{generateDate(P, yyyy-MM)}`
-|2020-11
-|Current date with the custom output format
-
-|`#{generateDate(P, MM/dd/yyyy)}`
-|11/23/2020
-|Current date with a custom format
-
-|`#{generateDate(P1D, yy-MM-dd)}`
-|20-11-24
-|Current date +1 day with the custom output format
-
-|`#{generateDate(P2D, yyyy\\,MM\\,dd)}`
-|2020,11,25
-|Current date +2 day with the custom output format
-
-|`#{generateDate(P, yyyy-MM-dd\'T\'HH:mm:ssZ)}`
-|2020-11-23T00:10:01+0300
-|Current date with the custom output format including time zone offset
-|===
-
-
-=== `formatDate`
-
-Formats the input date to another format. Additionally, time zone can be changed in the output result.
-
-[source, subs="+quotes"]
-----
-#{formatDate(*$inputDate*, *$outputFormat*, $outputTimeZone)}
-----
-
-* *`$inputDate`* - the date to be formatted, it should be presented in the {iso-date-format-link} format
-* *`$outputFormat`* - the output format based on {java-date-time-formatter-link}
-* `$outputTimeZone` - the time zone for the output result
-
-[cols="2,>1", options="header"]
-.Examples of the expressions formatting dates
-|===
-|Expression
-|Result
-
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss.SSS)}`
-|2017-01-13T09:00:42.862
-
-|`#{formatDate(2017-01-13T09:00:42.862-05:00, yyyy-MM-dd\'T\'HH:mm:ss.SSS)}`
-|2017-01-13T09:00:42.862
-
-|`#{formatDate(2017-01-13T09:00:42.862-0500, yyyy-MM-dd\'T\'HH:mm:ss.SSS)}`
-|Throw exception
-
-|`#{formatDate(2017-01-13T09:00:42.862, yyyy-MM-dd\'T\'HH:mm:ss)}`
-|2017-01-13T09:00:42
-
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss)}`
-|2017-01-13T09:00:42+0000
-
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ssZ)}`
-|2017-01-13T09:00:42-05:00
-
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd)}`
-|2017-01-13
-
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy\\,MM\\,dd)}`
-|2017,01,13
-
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss.SSSZ, -05:00)}`
-|2017-01-13T04:00:42.862-0500
-
-|`#{formatDate(2017-01-13T04:00:42.862-05:00, yyyy-MM-dd\'T\'HH:mm:ss.SSSZ, GMT)}`
-|2017-01-13T09:00:42.862+0000
-
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss.SSSZ, America/New_York)}`
-|2017-01-13T04:00:42.862-0500
-
-|`#{formatDate(2017:01:13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss.SSS)}`
-|Error: invalid input data
-
-|`#{formatDate(2017-01-13T09:00:42.862Z, BBByyyy-MM-dd\'T\'HH:mm:ss.SSS)}`
-|Error: invalid output format
-
-|`#{formatDate(2017-01-13T09:00:42.862Z, yyyy-MM-dd\'T\'HH:mm:ss.SSS, ABCD)}`
-|Error: invalid output timezone
-|===
-
-
-=== formatDateTo
-
-Formats the input date to the desired format. The format of the input date should be provided in the second parameter.
-
-[source, subs="+quotes"]
-----
-#{formatDateTo(*$inputDate*, *$inputFormat*, $outputFormat)}
-----
-
-* *`$inputDate`* - the date to be formatted, it can be in any format but this format should be described in the second parameter
-* *`$inputFormat`* - the input date format based on {java-date-time-formatter-link}
-* `$outputFormat` - the output date format based on {java-date-time-formatter-link}
-
-[cols="3,1", options="header"]
-.Examples of the expressions formatting dates with the custom input format
-|===
-|Expression
-|Result
-
-|`#{formatDateTo("2017-03-31T07:20:43.808Z", "yyyy-MM-dd\'T\'HH:mm:ss.SSSVV", EEE\, dd MMM yyyy HH:mm:ss ZZZZ)}`
-|Fri, 31 Mar 2017 07:20:43 GMT
-
-|`#{formatDateTo(Fri\, 31 Mar 2017 07:20:43 GMT, EEE\, dd MMM yyyy HH:mm:ss zzz, yyyy-MM-dd\'T\'HH:mm:ss)}`
-|2017-03-31T07:20:43
-|===
-
-
-=== `shiftDate`
-
-Shifts the given input date for a given period in any direction (+/-).
-
-[source, subs="+quotes"]
-----
-#{shiftDate(*$inputDate*, *$inputFormat*, *$period*)}
-----
-
-* *`$inputDate`* - the date to be shifted, it can be in any format but this format should be described in the second parameter
-* *`$inputFormat`* - the input date format based on {java-date-time-formatter-link}
-* *`$period`* -  the period by which the date will be shifted, it should be written in {iso-date-format-link}
-
-[cols="3,>1", options="header"]
-.Examples of the expressions shifting dates
-|===
-
-|Expression
-|Result
-
-|`#{shiftDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, -P1Y)}`
-|2018-03-19 01:40:00
-
-|`#{shiftDate(Wed\, 10 Apr 2019 07:20:43 GMT, EEE\, dd MMM yyyy HH:mm:ss zzz, P1MT2H)}`
-|Fri, 10 May 2019 09:20:43 GMT
-
-|`#{shiftDate("Wed\, 10 Apr\, 2019\, 07:20:43 GMT", "EEE\, dd MMM\, yyyy\, HH:mm:ss zzz", P1MT2H)}`
-|"Fri, 10 May, 2019, 09:20:43 GMT"
-|===
-
-
-=== `diffDate`
-
-Calculates the difference between two dates with given formats and returns result as {iso-date-format-link} period.
-
-[source, subs="+quotes"]
-----
-#{diffDate(*$inputDate1*, *$inputDate1Format*, *$inputDate2*, *$inputDate2Format*)}
-----
-
-* *`$inputDate1`* - the first input date, it can be in any format but this format should be described in the second parameter
-* *`$inputDate1Format`* - the first input date format based on {java-date-time-formatter-link}
-* *`$inputDate2`* - the second input date, it can be in any format but this format should be described in the second parameter
-* *`$inputDate2Format`* - the second input date format based on {java-date-time-formatter-link}
-
-[cols="3,>1", options="header"]
-.Examples of the expressions calculating dates difference
-|===
-
-|Expression
-|Result
-
-|`#{diffDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, 2019-03-19 03:40, yyyy-MM-dd HH:mm)}`
-|PT0S
-
-|`#{diffDate("Wed 10 Apr\, 2019\, 13:20:43 GMT", "EEE dd MMM\, yyyy\, HH:mm:ss zzz", "Wed 10 Apr\, 2019\, 09:20:43 America/New_York", "EEE dd MMM\, yyyy\, HH:mm:ss zzz")}`
-|PT0S
-
-|`#{diffDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, 3020-03-19 03:39:20, yyyy-MM-dd HH:mm:ss)}`
-|PT8774591H59M20S
-|===
-
-=== `toEpochSecond`
-
-Converts the input date to the https://en.wikipedia.org/wiki/Unix_time[Unix epoch time] (the number of seconds from the epoch of 1970-01-01T00:00:00Z).
-
-[source, subs="+quotes"]
-----
-#{toEpochSecond(*$inputDate*)}
-----
-
-* *`$inputDate`* - the date to be converted in the {iso-date-format-link} format
-
-[cols="2,>1", options="header"]
-.Examples of the expressions converting the input date to the Unix epoch time
-|===
-|Expression
-|Result
-
-|`#{toEpochSecond(1993-04-16T00:00:00)}`
-|734918400
-
-|`#{toEpochSecond(2020-12-11T18:43:05+05:30)}`
-|1607692385
-
-|===
-
-=== `fromEpochSecond`
-
-Converts the input https://en.wikipedia.org/wiki/Unix_time[Unix epoch time]
-(the number of seconds from the epoch of 1970-01-01T00:00:00Z) to the input date
-in the {iso-date-format-link} format.
-
-[source, subs="+quotes"]
-----
-#{fromEpochSecond(*$unixEpochTime*)}
-----
-
-* *`$unixEpochTime`* - the Unix epoch time to be converted to the {iso-date-format-link} date
-
-[cols="2,>1", options="header"]
-.Examples of the expressions converting the Unix epoch time to the input date (https://en.wikipedia.org/wiki/UTC%2B00:00[UTC+00:00] time zone)
-|===
-|Expression
-|Result
-
-|`#{fromEpochSecond(734918400)}`
-|1993-04-16T00:00:00
-
-|`#{fromEpochSecond(1.669640468E9)}`
-|2022-11-28T13:01:08
-
-|===
-
+include::partial$date-time-from-epoch-seconds-examples.adoc[]
 
 == Steps
 
-=== Compare date and current instant
-
-Validates the difference between the current instant and the provided date in seconds.
-
-[source,gherkin]
-----
-Then the date '$date' is $comparisonRule current for $seconds seconds
-----
-
-* `$date` - The date in the {iso-date-format-link} format.
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `$seconds` - The expected number of seconds between the current instant and the provided date.
-
-
-.Validate the date is less than current for 10 seconds
-[source,gherkin]
-----
-Then the date '2020-06-16T15:25:29.516580Z' is less than current for 10 seconds
-----
-
-=== Compare two dates
-
-Compares two dates according to the given comparison rule.
-
-[source,gherkin]
-----
-Then the date '$date1' is $comparisonRule the date '$date2'
-----
-
-* `$date1` - The first date in the {iso-date-format-link} format.
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `$date2` - The second date in the {iso-date-format-link} format.
-
-
-.Compare dates
-[source,gherkin]
-----
-Then the date '2021-04-20T01:02:03.004Z' is greater than the date '2021-04-20T01:02:03.003Z'
-Then the date '2021-04-19' is less than the date '2021-04-20'
-----
-
-=== Compare date with custom format and current instant
-
-Validates the difference between the current instant and the provided date in seconds using the custom date format.
-
-[source,gherkin]
-----
-Then the date '$date' in the format '$format' is $comparisonRule current for $seconds seconds
-----
-
-* `$date` - The date to validate.
-* `$format` - {java-date-time-formatter-link}.
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `$seconds` - The expected number of seconds between the current instant and the provided date.
-
-.Validate the date is greater than current for 10 seconds
-[source,gherkin]
-----
-Then the date '2020-06-25T00:19:58.890007Z' in the format 'uuuu-MM-dd'T'HH:mm:ss.nnnX' is > current for 10 seconds
-----
+include::partial$date-time-steps.adoc[]

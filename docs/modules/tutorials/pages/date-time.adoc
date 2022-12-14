@@ -1,0 +1,51 @@
+= Date/Time Plugin
+:java-date-time-formatter-link: https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns[the date/time format]
+
+The plugin provides functionality to generate, modify and validate date/time.
+
+:plugin-short-name: datetime
+
+include::plugins:partial$plugin-installation.adoc[]
+
+== Properties
+
+include::plugins:partial$date-time-properties.adoc[]
+
+== Steps
+
+include::plugins:partial$date-time-steps.adoc[]
+
+
+== xref:ROOT:glossary.adoc#_expression[Expressions]
+
+NOTE: The expression parameters marked with *bold* are mandatory.
+
+TIP: If argument allows meaningful commas (like, parts of the date format pattern) should be escaped using `\`. Refer to examples for each expression.
+
+include::plugins:partial$date-time-generate-date.adoc[]
+
+NOTE: For examples of generation, please see xref:plugins:plugin-datetime.adoc#_examples_of_generation[generateDate examples].
+
+include::plugins:partial$date-time-from-date.adoc[]
+
+NOTE: For examples of generation, please see xref:plugins:plugin-datetime.adoc#_examples_of_generation_2[fromDate examples].
+
+include::plugins:partial$date-time-from-date-to.adoc[]
+
+NOTE: For examples of generation, please see xref:plugins:plugin-datetime.adoc#_examples_of_generation_3[fromDateTo examples].
+
+include::plugins:partial$date-time-shift-date.adoc[]
+
+NOTE: For examples of generation, please see xref:plugins:plugin-datetime.adoc#_examples_of_generation_4[shiftDate examples].
+
+include::plugins:partial$date-time-diff-date.adoc[]
+
+NOTE: For examples of generation, please see xref:plugins:plugin-datetime.adoc#_examples_of_generation_5[diffDate examples].
+
+include::plugins:partial$date-time-to-epoch-seconds.adoc[]
+
+NOTE: For examples of generation, please see xref:plugins:plugin-datetime.adoc#_examples_of_generation_6[toEpochSecond examples].
+
+include::plugins:partial$date-time-from-epoch-seconds.adoc[]
+
+NOTE: For examples of generation, please see xref:plugins:plugin-datetime.adoc#_examples_of_generation_7[fromEpochSecond examples].

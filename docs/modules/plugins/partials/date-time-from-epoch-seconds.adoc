@@ -1,0 +1,12 @@
+=== `fromEpochSecond`
+
+Converts the input https://en.wikipedia.org/wiki/Unix_time[Unix epoch time]
+(the number of seconds from the epoch of 1970-01-01T00:00:00Z) to the input date
+in the {iso-date-format-link} format.
+
+[source, subs="+quotes"]
+----
+#{fromEpochSecond(*$unixEpochTime*)}
+----
+
+* *`$unixEpochTime`* - the Unix epoch time to be converted to the {iso-date-format-link} date

@@ -1,0 +1,12 @@
+=== `formatDate`
+
+Formats the input date to another format. Additionally, time zone can be changed in the output result.
+
+[source, subs="+quotes"]
+----
+#{formatDate(*$inputDate*, *$outputFormat*, $outputTimeZone)}
+----
+
+* *`$inputDate`* - the date to be formatted, it should be presented in the {iso-date-format-link} format
+* *`$outputFormat`* - the output format based on {java-date-time-formatter-link}
+* `$outputTimeZone` - the time zone for the output result

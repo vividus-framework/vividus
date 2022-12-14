@@ -1,0 +1,18 @@
+==== Examples of generation
+
+[cols="3,>1", options="header"]
+.Examples of the expressions shifting dates
+|===
+
+|Expression
+|Result
+
+|`#{shiftDate(2019-03-19 03:40:00, yyyy-MM-dd HH:mm:ss, -P1Y)}`
+|2018-03-19 01:40:00
+
+|`#{shiftDate(Wed\, 10 Apr 2019 07:20:43 GMT, EEE\, dd MMM yyyy HH:mm:ss zzz, P1MT2H)}`
+|Fri, 10 May 2019 09:20:43 GMT
+
+|`#{shiftDate("Wed\, 10 Apr\, 2019\, 07:20:43 GMT", "EEE\, dd MMM\, yyyy\, HH:mm:ss zzz", P1MT2H)}`
+|"Fri, 10 May, 2019, 09:20:43 GMT"
+|===

@@ -1,0 +1,51 @@
+==== Examples of generation
+
+Let's imagine the current date is `2020-11-23` and the time is `00:10:01`. Here is a set of examples with the results and comments.
+
+.Examples of the expressions generating dates
+[cols="3,2,2", options="header"]
+|===
+|Expression
+|Result
+|Comment
+
+|`#{generateDate(P)}`
+|2020-11-23
+|Current date.
+
+|`#{generateDate(P1DT2h)}`
+|2020-11-24T02:10:01
+|Current date +1 day and +2 hours
+
+|`#{generateDate(-P1D}`
+|2020-11-23
+|Current date -1 day
+
+|`#{generateDate(P1M)}`
+|2020-12-23
+|Current date + 1 month
+
+|`#{generateDate(-PT10M)}`
+|2020-11-23T00:00:01
+|Current date time -10 mins
+
+|`#{generateDate(P, yyyy-MM)}`
+|2020-11
+|Current date with the custom output format
+
+|`#{generateDate(P, MM/dd/yyyy)}`
+|11/23/2020
+|Current date with a custom format
+
+|`#{generateDate(P1D, yy-MM-dd)}`
+|20-11-24
+|Current date +1 day with the custom output format
+
+|`#{generateDate(P2D, yyyy\\,MM\\,dd)}`
+|2020,11,25
+|Current date +2 day with the custom output format
+
+|`#{generateDate(P, yyyy-MM-dd\'T\'HH:mm:ssZ)}`
+|2020-11-23T00:10:01+0300
+|Current date with the custom output format including time zone offset
+|===

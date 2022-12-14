@@ -1,0 +1,15 @@
+==== Examples of generation
+
+[cols="2,>1", options="header"]
+.Examples of the expressions converting the Unix epoch time to the input date (https://en.wikipedia.org/wiki/UTC%2B00:00[UTC+00:00] time zone)
+|===
+|Expression
+|Result
+
+|`#{fromEpochSecond(734918400)}`
+|1993-04-16T00:00:00
+
+|`#{fromEpochSecond(1.669640468E9)}`
+|2022-11-28T13:01:08
+
+|===

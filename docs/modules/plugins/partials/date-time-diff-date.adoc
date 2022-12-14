@@ -1,0 +1,13 @@
+=== `diffDate`
+
+Calculates the difference between two dates with given formats and returns result as {iso-date-format-link} period.
+
+[source, subs="+quotes"]
+----
+#{diffDate(*$inputDate1*, *$inputDate1Format*, *$inputDate2*, *$inputDate2Format*)}
+----
+
+* *`$inputDate1`* - the first input date, it can be in any format but this format should be described in the second parameter
+* *`$inputDate1Format`* - the first input date format based on {java-date-time-formatter-link}
+* *`$inputDate2`* - the second input date, it can be in any format but this format should be described in the second parameter
+* *`$inputDate2Format`* - the second input date format based on {java-date-time-formatter-link}
