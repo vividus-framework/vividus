@@ -109,7 +109,7 @@ In order to support screenshot taking configuration per-project/per-step basis f
 Property based configuration could be specified using `web.screenshot.strategy.<YOUR_STRATEGY_NAME>.<PROPERTY_NAME>= pattern`,
 where:
 `YOUR_STRATEGY_NAME` - name of the custom strategy;
-`PROPERTY_NAME` - name of the property you want specify.
+`PROPERTY_NAME` - name of the property you want to specify.
 
 ==== Properties based configuration:
 
@@ -253,7 +253,7 @@ image::original_and_downscaled_checkpoints.png[Difference between original and d
 Property based configuration could be specified using `mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.<PROPERTY_NAME>= pattern`,
 where:
 `YOUR_STRATEGY_NAME` - name of the custom strategy;
-`PROPERTY_NAME` - name of the property you want specify.
+`PROPERTY_NAME` - name of the property you want to specify.
 
 ==== Properties based configuration:
 

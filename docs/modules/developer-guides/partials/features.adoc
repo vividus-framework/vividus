@@ -62,7 +62,7 @@ Examples:
 ====
 It's recommended to stick to the following naming conventions:
 
-* `SCREAMING_SNAKE_CASE` for transfomer names:
+* `SCREAMING_SNAKE_CASE` for transformer names:
 +
 [source,gherkin]
 ----

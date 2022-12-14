@@ -56,7 +56,7 @@ When I execute batch command `$command` on server `$connectionKey` using WinRM a
 * `$command` - The batch command limited to 8096 bytes. The maximum length of the command can be even less depending on the https://support.microsoft.com/en-us/kb/830473[platform].
 * `$connectionKey` - The WinRM connection key matching any of configured ones.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to store the command execution results. The the data will be stored under the following keys:
+* `$variableName` - The variable name to store the command execution results. The data will be stored under the following keys:
 +
   - `$variableName.stdout` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)[command standard output stream];
   - `$variableName.stderr` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)[command standard error stream];
@@ -83,7 +83,7 @@ When I execute PowerShell command `$command` on server `$connectionKey` using Wi
 * `$command` - The PowerShell command.
 * `$connectionKey` - The WinRM connection key matching any of configured ones.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to store the command execution results. The the data will be stored under the following keys:
+* `$variableName` - The variable name to store the command execution results. The data will be stored under the following keys:
 +
   - `$variableName.stdout` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)[command standard output stream];
   - `$variableName.stderr` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)[command standard error stream];

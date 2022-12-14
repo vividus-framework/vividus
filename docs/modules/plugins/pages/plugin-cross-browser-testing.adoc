@@ -3,7 +3,25 @@
 :test-cloud-link: https://crossbrowsertesting.com/
 :test-cloud-capabilities: https://support.smartbear.com/crossbrowsertesting/docs/automated-testing/automation-capabilities.html
 
-include::partial$test-cloud-header.adoc[]
+= {test-cloud-name} Plugin
+
+The plugin provides integration with continuous testing cloud {test-cloud-link}[{test-cloud-name}].
+
+.BitBar replaces CrossBrowserTesting
+****
+CrossBrowserTesting cloud will be sunset on https://support.smartbear.com/bitbar/docs/desktop-testing/cross-browser-testing.html[July 2023]:
+[quote]
+...we have also announced that we will be sunsetting the CrossBrowserTesting cloud in July 2023, as this new product will replace CrossBrowserTesting.
+
+Taking into account this anouncement:
+
+ - development of plugin features is stopped,
+ - any bug fixes for the plugin will be accepted and delivered till April 2023,
+ - the plugin will be dropped on July 2023
+****
+
+:plugin-short-name: {test-cloud-key}
+include::partial$plugin-installation.adoc[]
 
 == Profiles
 

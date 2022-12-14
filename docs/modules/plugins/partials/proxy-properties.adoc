@@ -53,13 +53,13 @@ a|`true`
 `IMPERSONATED`
 |`IMPERSONATED`
 |The MITM type using the corresponding certificates. `SELF_SIGNED` MITM manager uses self-signed certificates that
-are generated lazily if the given key store file doesn't yet exist. Please note that certificates are usually generated
+are generated lazily if the given keystore file doesn't yet exist. Please note that certificates are usually generated
 in the current working directory
 
 |`proxy.mitm.key-store.type`
 |keystore type
 |`JKS`
-|The https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#keystore-types[keystore type]
+|The {java-api-docs-base-url}/docs/specs/security/standard-names.html#keystore-types[keystore type]
 
 |`proxy.mitm.key-store.path`
 |path to keystore

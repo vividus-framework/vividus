@@ -1,5 +1,5 @@
 = Date/Time Plugin
-:java-date-time-formatter-link: https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns[the date/time format]
+:java-date-time-formatter-link: {java-api-docs-base-url}/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns[the date/time format]
 
 The plugin provides functionality to generate, modify and validate date/time.
 
@@ -7,8 +7,8 @@ The plugin provides functionality to generate, modify and validate date/time.
 include::partial$plugin-installation.adoc[]
 
 == Properties
-include::partial$date-time-properties.adoc[]
 
+include::partial$date-time-properties.adoc[]
 
 == xref:ROOT:glossary.adoc#_expression[Expressions]
 

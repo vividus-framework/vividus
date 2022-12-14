@@ -89,7 +89,7 @@ public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
         {
             throw new IllegalArgumentException("Only one SauceConnect tunnel is allowed within one thread");
         }
-        return sauceConnectDescriptor.getTunnelId();
+        return sauceConnectDescriptor.getTunnelName();
     }
 
     @Override
@@ -134,20 +134,20 @@ public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
 
     class SauceConnectDescriptor
     {
-        private final String tunnelId;
+        private final String tunnelName;
         private final int port;
         private final String options;
 
         SauceConnectDescriptor(SauceConnectOptions sauceConnectOptions) throws IOException
         {
-            tunnelId = UUID.randomUUID().toString();
-            options = sauceConnectOptions.build(tunnelId);
+            tunnelName = UUID.randomUUID().toString();
+            options = sauceConnectOptions.build(tunnelName);
             port = getFreePort();
         }
 
-        String getTunnelId()
+        String getTunnelName()
         {
-            return tunnelId;
+            return tunnelName;
         }
 
         int getPort()

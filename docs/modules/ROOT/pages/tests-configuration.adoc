@@ -446,8 +446,7 @@ the <<_suites,configured suite>> has 0 batches, i.e. no tests to execute are con
 
 Here one could find description of general HTTP properties applied across all the HTTP interactions in VIVIDUS.
 
-:base-java-docs-url: https://docs.oracle.com/en/java/javase/11/
-:key-store-ref: {base-java-docs-url}security/terms-and-definitions.html#GUID-C7BB21C7-E19E-4DE4-8494-CB43F957C329__GUID-D7CAC72A-2714-4C9B-88E2-7F317DE94CEE[key store]
+:keystore-ref: {java-api-docs-base-url}/security/terms-and-definitions.html#GUID-C7BB21C7-E19E-4DE4-8494-CB43F957C329__GUID-D7CAC72A-2714-4C9B-88E2-7F317DE94CEE[keystore]
 
 [cols="3,1,1,3", options="header"]
 |===
@@ -525,19 +524,19 @@ Here one could find description of general HTTP properties applied across all th
 4+^.^|_Two-Way SSL authentication_
 
 |`http.key-store.type`
-|{base-java-docs-url}docs/specs/security/standard-names.html#keystore-types[KeyStore types]
+|{java-api-docs-base-url}/docs/specs/security/standard-names.html#keystore-types[Keystore type]
 |`JKS`
-|The {key-store-ref} type
+|The {keystore-ref} type
 
 |`http.key-store.path`
 |xref:ROOT:glossary.adoc#_resource[Resource]
 |`<empty>`
-|The {key-store-ref} to load
+|The {keystore-ref} to load
 
 |`http.key-store.password`
 |`string`
 |`<empty>`
-|The password used to unlock the {key-store-ref} and for the integrity checking
+|The password used to unlock the {keystore-ref} and for the integrity checking
 
 |`http.ssl.private-key-password`
 |`string`
@@ -636,7 +635,7 @@ text is used to decrypt the encrypted text. The default encryption algorithm is
 . Download the https://github.com/jasypt/jasypt/releases[latest Jasypt release]
 . Unpack the downloaded zip-archive
 . Go to `bin` folder
-. Run the command perfoming encryption:
+. Run the command performing encryption:
 +
 .Windows:
 [source,bat]
@@ -738,7 +737,7 @@ https://jbehave.org/reference/stable/composite-steps.html[Composite steps] allow
 
 . Define composite step in `*.steps` file, e.g. `steps/ui/my-app.steps`:
 +
-.Compsite step definition
+.Composite step definition
 [source,gherkin]
 ----
 Composite: When I login with username `$username` and password `$password`
@@ -749,7 +748,7 @@ When I click on element located by `id(signInButton)`
 
 . Configure paths to files with custom steps:
 +
-.Compsite steps paths configuration
+.Composite steps paths configuration
 [source,gherkin]
 ----
 engine.composite-paths=steps/ui/*.steps
@@ -802,14 +801,14 @@ When I hover mouse over element located `$locator`
 ]
 ----
 
-. Point the alias configuration property to an exact location or location pattern with the JSON files containing ailases:
+. Point the alias configuration property to an exact location or location pattern with the JSON files containing aliases:
 +
 [source,properties]
 ----
 engine.alias-paths=aliases/aliases.json
 ----
 
-. Use the defned alias in place of actual step in your story
+. Use the defined alias in place of actual step in your story
 +
 [source,gherkin]
 ----

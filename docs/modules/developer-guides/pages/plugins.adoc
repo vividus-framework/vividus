@@ -2,7 +2,7 @@
 
 Plugins are extensible and flexible mechanism for development and represent generic features that
 can be used by multiple projects, it could be either VIVIDUS or external ones. The dependencies
-between plugins are not recommended, all the generic logics should be moved to approppriate extensions.
+between plugins are not recommended, all the generic logics should be moved to appropriate extensions.
 
 :path: vividus-plugin/spring.xml
 :key: plugin

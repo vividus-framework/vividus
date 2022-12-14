@@ -60,14 +60,14 @@ public class SauceConnectOptions extends TunnelOptions
         ));
     }
 
-    public String build(String tunnelIdentifier) throws IOException
+    public String build(String tunnelName) throws IOException
     {
         StringBuilder options = Optional.ofNullable(customArguments).map(args -> new StringBuilder(args).append(' '))
                 .orElseGet(StringBuilder::new);
-        if (tunnelIdentifier != null)
+        if (tunnelName != null)
         {
-            appendOption(options, "tunnel-identifier", tunnelIdentifier);
-            appendOption(options, "pidfile", createPidFile(tunnelIdentifier).toString());
+            appendOption(options, "tunnel-name", tunnelName);
+            appendOption(options, "pidfile", createPidFile(tunnelName).toString());
         }
 
         if (getProxy() != null)
@@ -78,7 +78,7 @@ public class SauceConnectOptions extends TunnelOptions
              * Affected SauceConnect version: 4.4.4 and above.
              * */
             appendOption(options, "pac",
-                    "file://" + FilenameUtils.separatorsToUnix(createPacFile(tunnelIdentifier).toString()));
+                    "file://" + FilenameUtils.separatorsToUnix(createPacFile(tunnelName).toString()));
         }
         if (restUrl != null)
         {
@@ -89,9 +89,9 @@ public class SauceConnectOptions extends TunnelOptions
         return options.substring(0, options.length() - 1);
     }
 
-    private Path createPacFile(String tunnelIdentifier) throws IOException
+    private Path createPacFile(String tunnelName) throws IOException
     {
-        return createTempFile("pac-saucelabs-" + tunnelIdentifier, ".js",
+        return createTempFile("pac-saucelabs-" + tunnelName, ".js",
                 String.format(PAC_FILE_CONTENT_FORMAT, getSkipShExpMatcher(), getProxy()));
     }
 
@@ -102,9 +102,9 @@ public class SauceConnectOptions extends TunnelOptions
                                    .collect(Collectors.joining(" || "));
     }
 
-    private Path createPidFile(String tunnelIdentifier) throws IOException
+    private Path createPidFile(String tunnelName) throws IOException
     {
-        return createTempFile("sc_client-" + tunnelIdentifier + "-", ".pid", null);
+        return createTempFile("sc_client-" + tunnelName + "-", ".pid", null);
     }
 
     private static void appendOption(StringBuilder stringBuilder, String name, String... values)

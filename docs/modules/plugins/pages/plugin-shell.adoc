@@ -62,7 +62,7 @@ When I execute command `$command` and save result to $scopes variable `$variable
 
 * `$command` - The command to execute, it should follow the syntax of the currently active shell.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to store the command execution results. The the data will be stored under the following keys:
+* `$variableName` - The variable name to store the command execution results. The data will be stored under the following keys:
 +
   - `$variableName.stdout` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)[command standard output stream];
   - `$variableName.stderr` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)[command standard error stream];
@@ -77,7 +77,7 @@ Then `${result.stderr}` is equal to ``
 Then `${result.exit-code}` is equal to `0`
 ----
 
-NOTE: The saved stdout/stderr are limited to ~2 billions of characters. But keep in mind depending on run configuration and environment it's possible to hit memory limits before reaching described output limits.
+NOTE: The saved stdout/stderr are limited to ~2 billion characters. But keep in mind depending on run configuration and environment it's possible to hit memory limits before reaching described output limits.
 
 === Execute shell commands using specific shell
 
@@ -89,7 +89,7 @@ When I execute command `$command` using $shellName and save result to $scopes va
 * `$command` - The command to execute, it should follow the syntax of the shell defined under the `shellKey`.
 * `$shellKey` - The key of the shell which will be used for commands execution.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The variable name to store the command execution results. The the data will be stored under the following keys:
+* `$variableName` - The variable name to store the command execution results. The data will be stored under the following keys:
 +
   - `$variableName.stdout` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_output_(stdout)[command standard output stream];
   - `$variableName.stderr` - the content of the https://en.wikipedia.org/wiki/Standard_streams#Standard_error_(stderr)[command standard error stream];
@@ -104,4 +104,4 @@ Then `${result.stderr}` is equal to ``
 Then `${result.exit-code}` is equal to `0`
 ----
 
-NOTE: The saved stdout/stderr are limited to ~2 billions of characters. But keep in mind depending on run configuration and environment it's possible to hit memory limits before reaching described output limits.
+NOTE: The saved stdout/stderr are limited to ~2 billion characters. But keep in mind depending on run configuration and environment it's possible to hit memory limits before reaching described output limits.

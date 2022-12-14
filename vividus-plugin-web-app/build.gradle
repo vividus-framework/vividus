@@ -1,7 +1,7 @@
 project.description = 'VIVIDUS plugin for testing web applications'
 
 ext {
-    seleniumVersion = '4.7.1'
+    seleniumVersion = '4.7.2'
 }
 
 dependencies {
@@ -14,7 +14,7 @@ dependencies {
 
     api project(':vividus-extension-selenium')
 
-    implementation(group: 'com.codeborne', name: 'selenide', version: '6.9.0')
+    implementation(group: 'com.codeborne', name: 'selenide', version: '6.10.2')
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-chrome-driver', version: "${seleniumVersion}")
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-edge-driver', version: "${seleniumVersion}")
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-firefox-driver', version: "${seleniumVersion}")
@@ -24,7 +24,7 @@ dependencies {
     implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '5.3.1') {
         exclude group: 'com.github.docker-java'
     }
-    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.23')
+    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.24')
     implementation(group: 'org.springframework', name: 'spring-context')
     implementation(group: 'org.apache.commons', name: 'commons-text', version: '1.10.0')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
@@ -37,5 +37,5 @@ dependencies {
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'org.mockito', name: 'mockito-inline')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '2.6.1')
-    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.12.1')
+    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.12.2')
 }

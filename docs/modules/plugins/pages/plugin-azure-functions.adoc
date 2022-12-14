@@ -38,7 +38,7 @@ When I trigger function `$functionName` from function app `$functionAppName` in 
 .Trigger function
 [source,gherkin]
 ----
-When I trigger function `HttpTrigger1` from function app `vivdus-http-function` in resource group `vividus` with payload:
+When I trigger function `HttpTrigger1` from function app `vividus-http-function` in resource group `vividus` with payload:
 and save response into scenario variable `functionTrigger`
 Then `${functionTrigger.status-code}` is equal to `202`
 ----

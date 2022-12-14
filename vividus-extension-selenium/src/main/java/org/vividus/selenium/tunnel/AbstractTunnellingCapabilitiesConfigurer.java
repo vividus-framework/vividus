@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public abstract class AbstractTunnellingCapabilitiesConfigurer<T extends TunnelO
         this.tunnelManager = tunnelManager;
     }
 
-    protected void configureTunnel(DesiredCapabilities desiredCapabilities, Consumer<String> tunnelIdConsumer)
+    protected void configureTunnel(DesiredCapabilities desiredCapabilities, Consumer<String> tunnelConsumer)
     {
         Proxy proxy = (Proxy) desiredCapabilities.getCapability(CapabilityType.PROXY);
         if (tunnellingEnabled || proxy != null)
@@ -53,10 +53,10 @@ public abstract class AbstractTunnellingCapabilitiesConfigurer<T extends TunnelO
 
             try
             {
-                String tunnelId = tunnelManager.start(options);
+                String tunnel = tunnelManager.start(options);
                 desiredCapabilities.setCapability(CapabilityType.PROXY, (Object) null);
 
-                tunnelIdConsumer.accept(tunnelId);
+                tunnelConsumer.accept(tunnel);
             }
             catch (TunnelException e)
             {

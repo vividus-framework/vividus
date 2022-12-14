@@ -12,7 +12,7 @@ ${variableName}
 
 There are 2 types of variables:
 
-* regaular - such variables are initialized and controlled by users;
+* regular - such variables are initialized and controlled by users;
 * dynamic - these variables are available out of the box and provided by VIVIDUS
 core and plugins, the values of such variables are calculated at the runtime
 (i.e. the same variables in different parts of tests may result in different values).

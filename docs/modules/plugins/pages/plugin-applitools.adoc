@@ -71,7 +71,7 @@ See https://applitools.com/docs/topics/general-concepts/working-withcross-enviro
 
 |===
 
-== Common visual testin actions use cases
+== Common visual testing actions use cases
 
 include::partial$establish.adoc[]
 
@@ -147,7 +147,7 @@ When I ESTABLISH baseline `main-app-page` in batch `example-testing` with Applit
 
 === Visual check with custom Applitools configuration
 
-Performs visual check on the Applitools visual testing plarform with custom Applitools configuration.
+Performs visual check on the Applitools visual testing platform with custom Applitools configuration.
 
 Properties in the custom Applitools configuration provided in step take presendence over properties specified in configuration files.
 
@@ -187,7 +187,7 @@ When I run visual test with Applitools using:
 
 === Visual check with custom Applitools and screenshot configuration
 
-Performs visual check on the Applitools visual testing plarform with custom configuration and screenshot strategy.
+Performs visual check on the Applitools visual testing platform with custom configuration and screenshot strategy.
 
 Properties in the custom Applitools configuration provided in step take presendence over properties specified in configuration files.
 

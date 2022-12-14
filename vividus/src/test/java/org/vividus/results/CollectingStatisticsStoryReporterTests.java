@@ -52,6 +52,7 @@ import org.jbehave.core.model.Step;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
+import org.jbehave.core.steps.StepCreator.PendingStep;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -132,25 +133,32 @@ class CollectingStatisticsStoryReporterTests
         var ioException = new IOException();
 
         return Stream.of(
-                arguments(ExitCode.PASSED, (BiConsumer<StoryReporter, String>) StoryReporter::successful),
-                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>) StoryReporter::ignorable),
-                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>) StoryReporter::notPerformed),
-                arguments(ExitCode.KNOWN_ISSUES, (BiConsumer<StoryReporter, String>)
-                        (reporter, step) -> reporter.failed(step, knownIssueError)
-                ),
-                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>) StoryReporter::pending),
-                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>)
-                        (reporter, step) -> reporter.failed(step, potentiallyKnownIssueError)
-                ),
-                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>)
-                        (reporter, step) -> reporter.failed(step, assertionError)
-                ),
-                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>)
-                        (reporter, step) -> reporter.failed(step, verificationError)
-                ),
-                arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>)
-                        (reporter, step) -> reporter.failed(step, ioException)
-                )
+            arguments(ExitCode.PASSED, (BiConsumer<StoryReporter, String>) StoryReporter::successful, STEP_AS_STRING),
+            arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>) StoryReporter::ignorable, STEP_AS_STRING),
+            arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>) StoryReporter::notPerformed, STEP_AS_STRING),
+            arguments(ExitCode.KNOWN_ISSUES, (BiConsumer<StoryReporter, String>)
+                    (reporter, step) -> reporter.failed(step, knownIssueError),
+                    STEP_AS_STRING
+            ),
+            arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, PendingStep>) StoryReporter::pending,
+                    new PendingStep(STEP_AS_STRING, null)
+            ),
+            arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>)
+                    (reporter, step) -> reporter.failed(step, potentiallyKnownIssueError),
+                    STEP_AS_STRING
+            ),
+            arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>)
+                    (reporter, step) -> reporter.failed(step, assertionError),
+                    STEP_AS_STRING
+            ),
+            arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>)
+                    (reporter, step) -> reporter.failed(step, verificationError),
+                    STEP_AS_STRING
+            ),
+            arguments(ExitCode.FAILED, (BiConsumer<StoryReporter, String>)
+                    (reporter, step) -> reporter.failed(step, ioException),
+                    STEP_AS_STRING
+            )
         );
     }
 
@@ -172,7 +180,7 @@ class CollectingStatisticsStoryReporterTests
 
     @ParameterizedTest
     @MethodSource("stepTypes")
-    void shouldRecordStepStatus(ExitCode expectedStatus, BiConsumer<StoryReporter, String> test,
+    <T> void shouldRecordStepStatus(ExitCode expectedStatus, BiConsumer<StoryReporter, T> test, T input,
             @TempDir Path tempDirectory)
     {
         when(runContext.isRunInProgress()).thenReturn(true);
@@ -181,7 +189,7 @@ class CollectingStatisticsStoryReporterTests
         reporter.beforeStory(story, false);
         reporter.beforeScenario(scenario);
         reporter.beforeStep(STEP);
-        test.accept(reporter, STEP_AS_STRING);
+        test.accept(reporter, input);
         reporter.afterScenario(null);
         reporter.afterStory(false);
 
@@ -191,7 +199,7 @@ class CollectingStatisticsStoryReporterTests
         ordered.verify(nextStoryReporter).beforeStory(story, false);
         ordered.verify(nextStoryReporter).beforeScenario(scenario);
         ordered.verify(nextStoryReporter).beforeStep(STEP);
-        test.accept(ordered.verify(nextStoryReporter), STEP_AS_STRING);
+        test.accept(ordered.verify(nextStoryReporter), input);
         ordered.verify(nextStoryReporter).afterScenario(null);
         ordered.verify(nextStoryReporter).afterStory(false);
         ordered.verifyNoMoreInteractions();
@@ -279,7 +287,7 @@ class CollectingStatisticsStoryReporterTests
         reporter.failed(STEP_AS_STRING, throwable);
         assertEquals(ExitCode.KNOWN_ISSUES, reporter.calculateExitCode());
         reporter.beforeStep(STEP);
-        reporter.pending(STEP_AS_STRING);
+        reporter.pending(new PendingStep(STEP_AS_STRING, null));
         reporter.afterScenario(null);
         reporter.afterStory(false);
         assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
@@ -413,7 +421,8 @@ class CollectingStatisticsStoryReporterTests
         reporter.beforeStory(givenStory, true);
         reporter.beforeScenario(scenario);
         reportStep(reporter, () -> reporter.successful(STEP_AS_STRING));
-        reportStep(reporter, () -> reporter.pending(STEP_AS_STRING));
+        PendingStep pendingStep = new PendingStep(STEP_AS_STRING, null);
+        reportStep(reporter, () -> reporter.pending(pendingStep));
         assertEquals(ExitCode.FAILED, reporter.calculateExitCode());
         reporter.afterScenario(null);
         reporter.afterStory(true);
@@ -507,7 +516,7 @@ class CollectingStatisticsStoryReporterTests
         verify(nextStoryReporter, times(14)).successful(STEP_AS_STRING);
         verify(nextStoryReporter, times(10)).afterScenario(null);
         verify(nextStoryReporter, times(5)).afterStory(true);
-        verify(nextStoryReporter).pending(STEP_AS_STRING);
+        verify(nextStoryReporter).pending(pendingStep);
         verify(nextStoryReporter).beforeStep(comment);
         verify(nextStoryReporter).comment(STEP_AS_STRING);
         verify(nextStoryReporter).ignorable(STEP_AS_STRING);

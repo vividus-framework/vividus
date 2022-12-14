@@ -112,7 +112,7 @@ jira.<jira instance key placeholder>.fields-mapping.manual-steps=customfield_100
 
 |<<#_cucumber_test_case_view, 2>>
 |`jira.<jira-instance-key>.fields-mapping.cucumber-scenario-type`
-|Key of a field containing type of cucumer scenario
+|Key of a field containing type of cucumber scenario
 
 |<<#_cucumber_test_case_view, 3>>
 |`jira.<jira-instance-key>.fields-mapping.cucumber-scenario`

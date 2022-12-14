@@ -53,8 +53,8 @@ class SauceLabsCapabilitiesConfigurerTests
     private static final String NAME_CAPABILITY = "name";
     private static final String STORY_NAME = "my";
 
-    private static final String TUNNEL_IDENTIFIER_CAPABILITY = "tunnelIdentifier";
-    private static final String TUNNEL_ID = "tunnelId";
+    private static final String TUNNEL_NAME_CAPABILITY = "tunnelName";
+    private static final String TUNNEL_NAME = "my-tunnel-name";
 
     private static final String STORY_PATH = STORY_NAME + ".story";
 
@@ -92,11 +92,11 @@ class SauceLabsCapabilitiesConfigurerTests
         Map<String, Object> sauceOptions = new HashMap<>();
         DesiredCapabilities desiredCapabilities = mockDesiredCapabilities(null, sauceOptions);
         SauceConnectOptions sauceConnectOptions = new SauceConnectOptions(null, null, Set.of());
-        when(sauceConnectManager.start(sauceConnectOptions)).thenReturn(TUNNEL_ID);
+        when(sauceConnectManager.start(sauceConnectOptions)).thenReturn(TUNNEL_NAME);
 
         configurer.configure(desiredCapabilities);
 
-        assertEquals(Map.of(NAME_CAPABILITY, STORY_NAME, TUNNEL_IDENTIFIER_CAPABILITY, TUNNEL_ID), sauceOptions);
+        assertEquals(Map.of(NAME_CAPABILITY, STORY_NAME, TUNNEL_NAME_CAPABILITY, TUNNEL_NAME), sauceOptions);
         verifyNoMoreInteractions(sauceConnectManager);
     }
 
@@ -118,11 +118,11 @@ class SauceLabsCapabilitiesConfigurerTests
         Map<String, Object> sauceOptions = new HashMap<>();
         DesiredCapabilities desiredCapabilities = mockDesiredCapabilities(proxy, sauceOptions);
 
-        when(sauceConnectManager.start(sauceConnectOptions)).thenReturn(TUNNEL_ID);
+        when(sauceConnectManager.start(sauceConnectOptions)).thenReturn(TUNNEL_NAME);
 
         configurer.configure(desiredCapabilities);
 
-        assertEquals(Map.of(TUNNEL_IDENTIFIER_CAPABILITY, TUNNEL_ID), sauceOptions);
+        assertEquals(Map.of(TUNNEL_NAME_CAPABILITY, TUNNEL_NAME), sauceOptions);
         verifyNoMoreInteractions(sauceConnectManager);
     }
 

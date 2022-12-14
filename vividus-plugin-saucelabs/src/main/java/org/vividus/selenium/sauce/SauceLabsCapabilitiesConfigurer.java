@@ -39,7 +39,7 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilit
     public void configure(DesiredCapabilities desiredCapabilities)
     {
         configureTunnel(desiredCapabilities,
-                tunnelId -> putNestedCapability(desiredCapabilities, SAUCE_OPTIONS, "tunnelIdentifier", tunnelId));
+                tunnelName -> putNestedCapability(desiredCapabilities, SAUCE_OPTIONS, "tunnelName", tunnelName));
 
         configureTestName(desiredCapabilities, SAUCE_OPTIONS, "name");
     }
