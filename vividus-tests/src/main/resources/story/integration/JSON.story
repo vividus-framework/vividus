@@ -102,6 +102,11 @@ Examples:
 |$.store.book[2].attributes|is equal to    |{"used": false}|
 |$.store.book[3].hardcover |is equal to    |true           |
 |$.expensive               |is equal to    |10             |
+|$.expensive               |is not equal to|#{null}        |
+|$.store.book[0].category  |is not equal to|#{null}        |
+|$.store.book[1].hardcover |is not equal to|#{null}        |
+|$.store.book[1]           |is not equal to|#{null}        |
+|$.store.book[0].isbn      |is not equal to|12             |
 
 Scenario: Step verification 'Then JSON element value from context by JSON path `$jsonPath` $comparisonRule `$expectedValue`'
 Meta:

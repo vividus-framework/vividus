@@ -127,6 +127,10 @@ class JsonStepsTests
     private static final String VARIABLE = "variable";
     private static final String EXPECTED_VALUE = "1";
 
+    private static final String INVALID_COMPARISON_RULE_MESSAGE = "Unable to compare actual JSON element value '%s' "
+            + "against expected value '%s' using comparison rule '%s'";
+    private static final String ANY_STRING = "any";
+
     @Mock private VariableContext variableContext;
     @Mock private ISoftAssert softAssert;
     @Mock private JsonContext jsonContext;
@@ -207,7 +211,12 @@ class JsonStepsTests
                 arguments("$.test.number-float-e",  "IS_EQUAL_TO ",                42.2),
                 arguments("$.test.number-float-e2", "  IS_EQUAL_TO  ",             400),
                 arguments(BOOLEAN_PATH,             " IS_EQUAL_TO ",               true),
-                arguments(NESTED_JSON_PATH,         "is EQUAL_tO",                 NESTED_JSON_PATH_RESULT)
+                arguments(NESTED_JSON_PATH,         "is EQUAL_tO",                 NESTED_JSON_PATH_RESULT),
+                arguments(NESTED_JSON_PATH,         "is NOT equal to",             null),
+                arguments(STRING_PATH,              "IS_NOT_EQUAL_TO  ",           null),
+                arguments(NUMBER_PATH,              "is not equal to",             null),
+                arguments(BOOLEAN_PATH,             " is not EQUAL_tO",            null),
+                arguments(NULL_PATH,                " is not equal to ",           43)
         );
     }
 
@@ -241,22 +250,33 @@ class JsonStepsTests
     }
 
     @Test
+    void shouldThrowErrorIfUnexpectedComparisonRule()
+    {
+        var expectedData = mock(Object.class);
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> steps.assertValueByJsonPath(JSON, NULL_PATH, ANY_STRING, expectedData));
+        assertEquals(String.format(INVALID_COMPARISON_RULE_MESSAGE, null, expectedData,
+                ANY_STRING), exception.getMessage());
+        verifyNoInteractions(expectedData);
+    }
+
+    @Test
     void shouldFailToCheckIfMissingJsonValueFromInputIsEqualToExpected()
     {
-        var expectedData1 = mock(Object.class);
-        steps.assertValueByJsonPath(JSON, NON_EXISTING_PATH, null, expectedData1);
+        var expectedData = mock(Object.class);
+        steps.assertValueByJsonPath(JSON, NON_EXISTING_PATH, ANY_STRING, expectedData);
         verifyPathNotFoundExceptionRecording(NON_EXISTING_PATH);
-        verifyNoInteractions(expectedData1);
+        verifyNoInteractions(expectedData);
     }
 
     @ParameterizedTest
     @MethodSource("jsonElementsErrors")
     void shouldFailToCheckIfNonPrimitiveJsonValueFromInputIsEqualToExpected(String jsonPath, String errorType)
     {
-        var expectedData1 = mock(Object.class);
-        steps.assertValueByJsonPath(JSON, jsonPath, null, expectedData1);
+        var expectedData = mock(Object.class);
+        steps.assertValueByJsonPath(JSON, jsonPath, ANY_STRING, expectedData);
         verifyUnexpectedType(jsonPath, errorType);
-        verifyNoInteractions(expectedData1);
+        verifyNoInteractions(expectedData);
     }
 
     @ParameterizedTest
