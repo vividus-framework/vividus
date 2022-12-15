@@ -78,6 +78,7 @@ class JsonStepsTests
             + "\"number-float\":42.1,"
             + "\"number-float-e\":42.2,"
             + "\"number-float-e2\":400.0,"
+            + "\"number-float-e3\":4E+2,"
             + "\"bool\":true,"
             + "\"array\":[1,2],"
             + "\"nested-json\":\"{\\\"nested-name\\\":\\\"nested-value\\\"}\","
@@ -112,8 +113,8 @@ class JsonStepsTests
     private static final String ANY_ELEMENT_PATH = "$.test.*";
 
     private static final String JSON = "{\"test\":{\"name\":\"value\","
-            + "\"number\":42,\"number-float\":42.1,\"number-float-e\":4.22E+1,"
-            + "\"number-float-e2\":4E+2,\"bool\":true,\"array\":[1,2],"
+            + "\"number\":42,\"number-float\":42.1,\"number-float-e\":4.22E+1,\"number-float-e2\":400.0,"
+            + "\"number-float-e3\":4E+2,\"bool\":true,\"array\":[1,2],"
             + "\"nested-json\":\"{\\\"nested-name\\\":\\\"nested-value\\\"}\",\"null\":null}}";
 
     private static final String VARIABLE_NAME = "name";
@@ -304,7 +305,7 @@ class JsonStepsTests
     void shouldExecuteIterationsUntilVariableIsNotCorrespondsToTheCondition()
     {
         var subSteps = mock(SubSteps.class);
-        when(softAssert.assertThat(eq(NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + ANY_ELEMENT_PATH), eq(9),
+        when(softAssert.assertThat(eq(NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + ANY_ELEMENT_PATH), eq(10),
                 verifyMatcher(1))).thenReturn(true);
         when(variableContext.getVariable(VARIABLE)).thenReturn(null).thenReturn(null).thenReturn(2).thenReturn(1);
         steps.executeStepsForFoundJsonElementsExpectingVariable(ComparisonRule.GREATER_THAN_OR_EQUAL_TO, 1, JSON,
@@ -320,12 +321,12 @@ class JsonStepsTests
     void shouldRecordFailedAssertionIfVariableWasNotInitialized()
     {
         var subSteps = mock(SubSteps.class);
-        when(softAssert.assertThat(eq(NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + ANY_ELEMENT_PATH), eq(9),
+        when(softAssert.assertThat(eq(NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + ANY_ELEMENT_PATH), eq(10),
                 verifyMatcher(1))).thenReturn(true);
         steps.executeStepsForFoundJsonElementsExpectingVariable(ComparisonRule.GREATER_THAN_OR_EQUAL_TO, 1, JSON,
                 ANY_ELEMENT_PATH, VARIABLE, StringComparisonRule.IS_EQUAL_TO, EXPECTED_VALUE, subSteps);
-        verify(subSteps, times(9)).execute(Optional.empty());
-        verify(jsonContext, times(9)).putJsonContext(any(String.class));
+        verify(subSteps, times(10)).execute(Optional.empty());
+        verify(jsonContext, times(10)).putJsonContext(any(String.class));
         verify(jsonContext).getJsonContext();
         verify(softAssert).recordFailedAssertion("Variable `variable` was not initialized");
         verify(jsonContext).putJsonContext(null);
@@ -335,7 +336,7 @@ class JsonStepsTests
     void shouldResetContextInCaseOfException()
     {
         var subSteps = mock(SubSteps.class);
-        when(softAssert.assertThat(eq(NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + ANY_ELEMENT_PATH), eq(9),
+        when(softAssert.assertThat(eq(NUMBER_OF_JSON_ELEMENTS_ASSERTION_MESSAGE + ANY_ELEMENT_PATH), eq(10),
                 verifyMatcher(1))).thenReturn(true);
         doThrow(new IllegalArgumentException()).when(subSteps).execute(Optional.empty());
         assertThrows(IllegalArgumentException.class,

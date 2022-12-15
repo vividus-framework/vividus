@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -74,8 +77,16 @@ public final class JsonPathUtils
 
     private static final class JacksonConfiguration implements Configuration.Defaults
     {
-        private final JsonProvider jacksonJsonProvider = new JacksonJsonProvider();
-        private final MappingProvider jacksonMappingProvider = new JacksonMappingProvider();
+        private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().findAndRegisterModules();
+
+        static
+        {
+            OBJECT_MAPPER.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true);
+            OBJECT_MAPPER.setNodeFactory(JsonNodeFactory.withExactBigDecimals(true));
+        }
+
+        private final JsonProvider jacksonJsonProvider = new JacksonJsonProvider(OBJECT_MAPPER);
+        private final MappingProvider jacksonMappingProvider = new JacksonMappingProvider(OBJECT_MAPPER);
 
         @Override
         public JsonProvider jsonProvider()
