@@ -177,3 +177,11 @@ When I find <= `1` JSON elements from `{}` by `$.name` and for each element do
 
 Scenario: Verify JSON validator can successfully compare int vs float numbers
 Then JSON element from `{"number":0.0}` by JSON path `$.number` is equal to `0`
+
+
+Scenario: Validate long float numbers are not trimmed
+Meta:
+    @issueId 3471
+Then JSON element value from `{
+    "long-long-float":485690.3866338789319252000000135498000000
+}` by JSON path `$.long-long-float` is equal to `485690.3866338789319252000000135498000000`
