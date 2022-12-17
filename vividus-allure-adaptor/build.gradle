@@ -11,7 +11,7 @@ dependencies {
     implementation(group: 'io.qameta.allure', name: 'allure-plugin-api', version: versions.allure)
     implementation(group: 'io.qameta.allure.plugins', name: 'behaviors-plugin', version: versions.allure)
 
-    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.24')
+    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.0.3')
     implementation(group: 'org.springframework', name: 'spring-core')
     implementation(group: 'com.google.guava', name: 'guava', version: '31.1-jre')
     implementation(group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1')

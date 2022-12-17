@@ -8,7 +8,7 @@ dependencies {
     implementation project(':vividus-util')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
-    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.24')
+    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.0.3')
     implementation(group: 'org.springframework', name: 'spring-beans')
     implementation(group: 'com.google.guava', name: 'guava', version: '31.1-jre')
     implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
