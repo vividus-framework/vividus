@@ -71,6 +71,8 @@ When I execute steps at most $max times while variable '$variableName' is $compa
 
 * `$max` - The maximum number of iterations
 * `$variableName` - The name of the variable to check
++
+NOTE: Exactly variable name (e.g. `myVaraible`) is expected here, *not* variable reference: pass:[<s>${myVariable}</s>]
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule]
 * `$expectedValue` - The expected value of the variable
 * `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute
@@ -109,6 +111,8 @@ When I execute steps with delay '$delay' at most $max times while variable '$var
 * `$delay` - The delay between iterations
 * `$max` - The maximum number of iterations
 * `$variableName` - The name of the variable to check
++
+NOTE: Exactly variable name (e.g. `myVaraible`) is expected here, *not* variable reference: pass:[<s>${myVariable}</s>]
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule]
 * `$expectedValue` - The expected value of the variable
 * `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute
