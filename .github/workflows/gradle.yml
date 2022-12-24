@@ -131,14 +131,24 @@ jobs:
         name: Integration Tests - Allure report - ${{ matrix.platform }}
         path: vividus-tests/output/reports/allure
 
-    - name: Validate exit code
+    - name: Validate successful exit code
       if: (matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest') && always()
+      shell: bash
       run: |
         exitCode=$(cat ./exitCode.txt)
         if [[ $exitCode -ne '1' ]]; then
           exit $exitCode
         fi
+
+    - name: Validate failed exit code
+      if: (matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest') && failure()
       shell: bash
+      run: |
+        exitCode=$(cat ./exitCode.txt)
+        if [[ $exitCode -ne '2' ]]; then
+          echo Exit code is $exitCode
+          exit -1
+        fi
 
     - name: System tests
       if: matrix.platform == 'ubuntu-latest'
