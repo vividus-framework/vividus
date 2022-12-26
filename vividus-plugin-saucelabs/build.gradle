@@ -13,6 +13,7 @@ dependencies {
     implementation(group: 'com.google.guava', name: 'guava', version: '31.1-jre')
     implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.165') {
         exclude group: 'com.google.collections', module: 'google-collections'
+        exclude module: 'slf4j-jdk14'
     }
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.1')
