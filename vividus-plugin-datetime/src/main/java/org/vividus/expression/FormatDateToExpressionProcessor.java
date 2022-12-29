@@ -19,39 +19,23 @@ package org.vividus.expression;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
 import org.vividus.util.DateUtils;
 
 @Named
-public class FormatDateToExpressionProcessor extends AbstractExpressionProcessor<String>
+public class FormatDateToExpressionProcessor extends MultiArgExpressionProcessor<String>
 {
-    private static final Pattern FORMAT_TO_PATTERN = Pattern.compile(
-            "^formatDateTo\\(\\s*(\"\"\".+?\"\"\"|.+?),(?<!\\\\,)\\s*(\"\"\".+?\"\"\"|.+?),(?<!\\\\,)(.+?)\\)$",
-            Pattern.CASE_INSENSITIVE);
-    private static final int INPUT_DATE_GROUP = 1;
-    private static final int OLD_FORMAT_GROUP = 2;
-    private static final int NEW_FORMAT_GROUP = 3;
-
-    private final DateUtils dateUtils;
+    private static final int EXPECTED_ARGS_NUMBER = 3;
 
     public FormatDateToExpressionProcessor(DateUtils dateUtils)
     {
-        super(FORMAT_TO_PATTERN);
-        this.dateUtils = dateUtils;
-    }
-
-    @Override
-    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
-    {
-        String inputDate = expressionMatcher.getArgument(INPUT_DATE_GROUP);
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(
-                expressionMatcher.getArgument(OLD_FORMAT_GROUP), Locale.ENGLISH);
-        ZonedDateTime zonedDate = dateUtils.parseDateTime(inputDate, dateTimeFormatter);
-        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(expressionMatcher.getArgument(NEW_FORMAT_GROUP),
-                Locale.ENGLISH);
-        return outputFormatter.format(zonedDate);
+        super("formatDateTo", EXPECTED_ARGS_NUMBER, args -> {
+            DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern(args.get(1), Locale.ENGLISH);
+            ZonedDateTime inputDate = dateUtils.parseDateTime(args.get(0), inputFormatter);
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(args.get(2), Locale.ENGLISH);
+            return outputFormatter.format(inputDate);
+        });
     }
 }

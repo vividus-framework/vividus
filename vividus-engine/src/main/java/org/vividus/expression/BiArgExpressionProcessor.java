@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package org.vividus.expression;
 
-import java.util.function.UnaryOperator;
+import java.util.function.BiFunction;
 
-public class UnaryExpressionProcessor extends FunctionalExpressionProcessor<String>
+public class BiArgExpressionProcessor<T> extends MultiArgExpressionProcessor<T>
 {
-    public UnaryExpressionProcessor(String functionName, UnaryOperator<String> transformer)
+    public BiArgExpressionProcessor(String expressionName, BiFunction<String, String, T> evaluator)
     {
-        super(functionName, transformer);
+        super(expressionName, 2, args -> evaluator.apply(args.get(0), args.get(1)));
     }
 }

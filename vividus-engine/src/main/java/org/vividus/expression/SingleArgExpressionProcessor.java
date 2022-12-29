@@ -16,26 +16,12 @@
 
 package org.vividus.expression;
 
-import static org.vividus.expression.NormalizingArgumentsUtils.normalize;
+import java.util.function.Function;
 
-import java.util.regex.Matcher;
-
-public class ExpressionArgumentMatcher
+public class SingleArgExpressionProcessor<T> extends MultiArgExpressionProcessor<T>
 {
-    private final Matcher baseMatcher;
-
-    public ExpressionArgumentMatcher(Matcher baseMatcher)
+    public SingleArgExpressionProcessor(String functionName, Function<String, T> evaluator)
     {
-        this.baseMatcher = baseMatcher;
-    }
-
-    public String group(int group)
-    {
-        return baseMatcher.group(group);
-    }
-
-    public String getArgument(int group)
-    {
-        return normalize(group(group));
+        super(functionName, 1, args -> evaluator.apply(args.get(0)));
     }
 }

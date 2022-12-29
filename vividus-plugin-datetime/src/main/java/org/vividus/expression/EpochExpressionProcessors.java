@@ -30,9 +30,9 @@ public class EpochExpressionProcessors extends DelegatingExpressionProcessor<Str
     public EpochExpressionProcessors(DateUtils dateUtils)
     {
         super(List.of(
-            new UnaryExpressionProcessor("toEpochSecond",
+            new SingleArgExpressionProcessor<>("toEpochSecond",
                 arg -> String.valueOf(dateUtils.parseDateTime(arg, DateTimeFormatter.ISO_DATE_TIME).toEpochSecond())),
-            new UnaryExpressionProcessor("fromEpochSecond",
+            new SingleArgExpressionProcessor<>("fromEpochSecond",
                 arg -> DateTimeFormatter.ISO_DATE_TIME.format(
                         dateUtils.fromEpochSecond(new BigDecimal(arg).longValueExact())
                 ))

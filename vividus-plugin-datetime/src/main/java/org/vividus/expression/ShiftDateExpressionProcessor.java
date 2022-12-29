@@ -19,43 +19,35 @@ package org.vividus.expression;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
+import org.apache.commons.lang3.Validate;
 import org.vividus.util.DateUtils;
 
 @Named
-public class ShiftDateExpressionProcessor extends AbstractExpressionProcessor<String>
+public class ShiftDateExpressionProcessor extends MultiArgExpressionProcessor<String>
 {
-    private static final Pattern SHIFT_DATE_PATTERN = Pattern.compile(
-            "^shiftDate\\((\"\"\".+?\"\"\"|.+?),(?<!\\\\,)(.+?),\\s*(-)?P((?:\\d+[YMWD])*)((?:T?\\d+[HMS])*)\\)$",
-            Pattern.CASE_INSENSITIVE);
+    private static final Pattern DURATION_PATTERN = Pattern.compile("(-?P)((?:\\d+[YMWD])*)(T(?:\\d+[HMS])+)?");
 
-    private static final int INPUT_DATE_GROUP = 1;
-    private static final int FORMAT_GROUP = 2;
-    private static final int MINUS_SIGN_GROUP = 3;
-    private static final int PERIOD_GROUP = 4;
-    private static final int DURATION_GROUP = 5;
+    private static final String EXPRESSION_NAME = "shiftDate";
+    private static final int EXPECTED_ARGS_NUMBER = 3;
     private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
-
-    private final DateUtils dateUtils;
 
     public ShiftDateExpressionProcessor(DateUtils dateUtils)
     {
-        super(SHIFT_DATE_PATTERN);
-        this.dateUtils = dateUtils;
-    }
-
-    @Override
-    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
-    {
-        DateTimeFormatter format = DateTimeFormatter.ofPattern(expressionMatcher.getArgument(FORMAT_GROUP),
-                DEFAULT_LOCALE);
-        ZonedDateTime zonedDateTime = dateUtils.parseDateTime(expressionMatcher.getArgument(INPUT_DATE_GROUP),
-                format);
-        DateExpression dateExpression = new DateExpression(expressionMatcher, MINUS_SIGN_GROUP, PERIOD_GROUP,
-                DURATION_GROUP, FORMAT_GROUP);
-        return dateExpression.format(zonedDateTime, DEFAULT_LOCALE);
+        super(EXPRESSION_NAME, EXPECTED_ARGS_NUMBER, args -> {
+            DateTimeFormatter inputFormat = DateTimeFormatter.ofPattern(args.get(1), DEFAULT_LOCALE);
+            ZonedDateTime inputDate = dateUtils.parseDateTime(args.get(0), inputFormat);
+            String duration = args.get(2);
+            Matcher durationMatcher = DURATION_PATTERN.matcher(duration);
+            Validate.isTrue(durationMatcher.matches(),
+                    "The third argument of '%s' expression must be a duration in ISO-8601 format, but found: '%s'",
+                    EXPRESSION_NAME, duration);
+            DateExpression dateExpression = new DateExpression(durationMatcher, args.get(1));
+            return dateExpression.format(inputDate, DEFAULT_LOCALE);
+        });
     }
 }

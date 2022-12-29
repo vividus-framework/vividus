@@ -16,25 +16,22 @@
 
 package org.vividus.expression;
 
+import java.util.List;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
-public class FunctionalExpressionProcessor<T> extends AbstractExpressionProcessor<T>
+public class RelaxedMultiArgExpressionProcessor<T> extends MultiArgExpressionProcessor<T>
 {
-    private static final int INPUT_DATA_GROUP = 1;
-
-    private final Function<String, T> transformer;
-
-    public FunctionalExpressionProcessor(String functionName, Function<String, T> transformer)
+    public RelaxedMultiArgExpressionProcessor(String expressionName, int argsLimit,
+            Function<List<String>, T> transformer)
     {
-        super(Pattern.compile("^" + functionName + "\\((.*)\\)$", Pattern.CASE_INSENSITIVE | Pattern.DOTALL));
-        this.transformer = transformer;
+        super(expressionName, argsLimit, argumentsAsString -> new ExpressionArguments(argumentsAsString, argsLimit),
+                transformer);
     }
 
-    @Override
-    protected T evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
+    public RelaxedMultiArgExpressionProcessor(String expressionName, int minArgNumber, int argsLimit,
+            Function<List<String>, T> transformer)
     {
-        String inputData = expressionMatcher.group(INPUT_DATA_GROUP);
-        return transformer.apply(inputData);
+        super(expressionName, minArgNumber, argsLimit,
+                argumentsAsString -> new ExpressionArguments(argumentsAsString, argsLimit), transformer);
     }
 }

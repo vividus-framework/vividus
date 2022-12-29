@@ -18,7 +18,6 @@ package org.vividus.expression;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
@@ -31,31 +30,23 @@ import org.apache.commons.text.WordUtils;
 import org.vividus.context.VariableContext;
 
 @Named
-public class EvalExpressionProcessor extends AbstractExpressionProcessor<String>
+public class EvalExpressionProcessor extends SingleArgExpressionProcessor<String>
 {
-    private static final Pattern EVAL_PATTERN = Pattern.compile("^eval\\((.*)\\)$", Pattern.CASE_INSENSITIVE
-            | Pattern.DOTALL);
-    private static final int EVAL_GROUP = 1;
-    private static final Map<String, Object> NAMESPACES = Map.of("math", Math.class, "stringUtils", StringUtils.class,
-            "wordUtils", WordUtils.class);
-
-    private final JexlEngine jexlEngine = new JexlBuilder().charset(StandardCharsets.UTF_8).namespaces(NAMESPACES)
+    private static final JexlEngine JEXL_ENGINE = new JexlBuilder()
+            .charset(StandardCharsets.UTF_8)
+            .namespaces(Map.of(
+                    "math", Math.class,
+                    "stringUtils", StringUtils.class,
+                    "wordUtils", WordUtils.class)
+            )
             .create();
-
-    private final VariableContext variableContext;
 
     public EvalExpressionProcessor(VariableContext variableContext)
     {
-        super(EVAL_PATTERN);
-        this.variableContext = variableContext;
-    }
-
-    @Override
-    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
-    {
-        String expressionToEvaluate = expressionMatcher.group(EVAL_GROUP);
-        JexlScript jexlScript = jexlEngine.createScript(expressionToEvaluate);
-        return String.valueOf(jexlScript.execute(new JexlVariableContext(variableContext)));
+        super("eval", expressionToEvaluate -> {
+            JexlScript jexlScript = JEXL_ENGINE.createScript(expressionToEvaluate);
+            return String.valueOf(jexlScript.execute(new JexlVariableContext(variableContext)));
+        });
     }
 
     private static final class JexlVariableContext extends MapContext

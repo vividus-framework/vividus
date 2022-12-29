@@ -20,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
@@ -47,16 +48,16 @@ class ShiftDateExpressionProcessorTests
         // CHECKSTYLE:OFF
         // @formatter:off
         return Stream.of(
-            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " -P1Y)",                                          "2018-01-01T12:00:00.333Z"),
-            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " P12D)",                                          "2019-01-13T12:00:00.333Z"),
-            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " -P3MT3S)",                                       "2018-10-01T11:59:57.333Z"),
-            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " P1MT2H)",                                        "2019-02-01T14:00:00.333Z"),
-            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " -PT10M)",                                        "2019-01-01T11:50:00.333Z"),
-            Arguments.of(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " PT3H)",                                          "2019-01-01T15:00:00.333Z"),
-            Arguments.of(SHIFT_DATE + "2019-01-01T12:00:00-05:00" + COMMA + "yyyy-MM-dd'T'HH:mm:ssXXX" + COMMA + " PT5S)",     "2019-01-01T12:00:05-05:00"),
-            Arguments.of("shiftDate( Tue\\, 01 Jan 2019 12:00:00 GMT, EEE\\, dd MMM yyyy HH:mm:ss zzz,    P1MT2H5S)",          "Fri, 01 Feb 2019 14:00:05 GMT"),
-            Arguments.of("shiftDate(\"Tue\\, 01 Jan 2019 12:00:00 GMT\", \"EEE\\, dd MMM yyyy HH:mm:ss zzz\",    P1MT2H5S)",   "\"Fri, 01 Feb 2019 14:00:05 GMT\""),
-            Arguments.of("shiftDate(\"\"\"Tue\\, 01 Jan 2019 12:00 GMT\"\"\", \"\"\"EEE\\, dd MMM yyyy HH:mm zzz\"\"\", P1M)", "Fri\\, 01 Feb 2019 12:00 GMT")
+            arguments(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " -P1Y)",                                          "2018-01-01T12:00:00.333Z"),
+            arguments(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " P12D)",                                          "2019-01-13T12:00:00.333Z"),
+            arguments(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " -P3MT3S)",                                       "2018-10-01T11:59:57.333Z"),
+            arguments(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " P1MT2H)",                                        "2019-02-01T14:00:00.333Z"),
+            arguments(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " -PT10M)",                                        "2019-01-01T11:50:00.333Z"),
+            arguments(SHIFT_DATE + INPUT_DATE + COMMA + FORMAT + COMMA + " PT3H)",                                          "2019-01-01T15:00:00.333Z"),
+            arguments(SHIFT_DATE + "2019-01-01T12:00:00-05:00" + COMMA + "yyyy-MM-dd'T'HH:mm:ssXXX" + COMMA + " PT5S)",     "2019-01-01T12:00:05-05:00"),
+            arguments("shiftDate( Tue\\, 01 Jan 2019 12:00:00 GMT, EEE\\, dd MMM yyyy HH:mm:ss zzz,    P1MT2H5S)",          "Fri, 01 Feb 2019 14:00:05 GMT"),
+            arguments("shiftDate(\"Tue\\, 01 Jan 2019 12:00:00 GMT\", \"EEE\\, dd MMM yyyy HH:mm:ss zzz\",    P1MT2H5S)",   "\"Fri, 01 Feb 2019 14:00:05 GMT\""),
+            arguments("shiftDate(\"\"\"Tue\\, 01 Jan 2019 12:00 GMT\"\"\", \"\"\"EEE\\, dd MMM yyyy HH:mm zzz\"\"\", P1M)", "Fri\\, 01 Feb 2019 12:00 GMT")
         );
         // CHECKSTYLE:ON
         // @formatter:on
@@ -66,19 +67,13 @@ class ShiftDateExpressionProcessorTests
     @MethodSource("shiftDateProvider")
     void testExecuteShiftDate(String expression, String expected)
     {
-        assertEquals(expected, processor.execute(expression).get());
-    }
-
-    @Test
-    void testExecuteShiftDateIncorrectExpression()
-    {
-        assertEquals(Optional.empty(), processor.execute("shiftDate()"));
+        assertEquals(Optional.of(expected), processor.execute(expression));
     }
 
     @Test
     void testExecuteUnsupportedSymbols()
     {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> processor
+        var exception = assertThrows(IllegalArgumentException.class, () -> processor
                 .execute(SHIFT_DATE + INPUT_DATE + COMMA + "fyyyy-MM-dd'T'HH:mm:ss.SSSVV" + COMMA + "-P1Y)"));
         assertEquals("Unknown pattern letter: f", exception.getMessage());
     }
@@ -86,7 +81,7 @@ class ShiftDateExpressionProcessorTests
     @Test
     void testExecuteIncorrectFormat()
     {
-        DateTimeParseException exception = assertThrows(DateTimeParseException.class,
+        var exception = assertThrows(DateTimeParseException.class,
             () -> processor.execute(SHIFT_DATE + INPUT_DATE + COMMA + "yyyy-MM-dd" + COMMA + "-P2Y)"));
         assertThat(exception.getMessage(), containsString(String.format("Text '%s' could not be parsed", INPUT_DATE)));
     }

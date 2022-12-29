@@ -20,11 +20,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.time.zone.ZoneRulesException;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -51,30 +51,30 @@ class FormatDateExpressionProcessorTests
     static Stream<Arguments> executeWithoutTZDDataProvider()
     {
         return Stream.of(
-            Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss.SSS)",                  "2017-01-10T13:04:20.677"),
-            Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss)",                      "2017-01-10T13:04:20"),
-            Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX)",               INPUT_DATE),
-            Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd)",                                 "2017-01-10"),
-            Arguments.of("formatDate(" + INPUT_DATE + ", yyyy\\,MM\\,dd)",                             "2017,01,10"),
-            Arguments.of("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ssXXX)",                   "2017-01-10T13:04:20Z"),
-            Arguments.of("formatDate(" + INPUT_DATE_NOT_ZERO_TIMEZONE + ", yyyy-MM-dd'T'HH:mm:ssXXX)", "2017-01-10T08:04:20-05:00"),
-            Arguments.of("formatDate(2017-01-10T13:04:20Z, yyyy-MM-dd'T'HH:mmXXX)",                    "2017-01-10T13:04Z"),
-            Arguments.of("formatDate(1994-11-05T08:15:30, yyyy-MM-dd'T'HH:mm:ss.SSS)",                 "1994-11-05T08:15:30.000"),
-            Arguments.of("formatDate(1994-11-05T09:15:30, \"\"\"yyyy\\,MM,dd\"\"\")",                  "1994\\,11,05")
+            arguments("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss.SSS)",                  "2017-01-10T13:04:20.677"),
+            arguments("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss)",                      "2017-01-10T13:04:20"),
+            arguments("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX)",               INPUT_DATE),
+            arguments("formatDate(" + INPUT_DATE + ", yyyy-MM-dd)",                                 "2017-01-10"),
+            arguments("formatDate(" + INPUT_DATE + ", yyyy\\,MM\\,dd)",                             "2017,01,10"),
+            arguments("formatDate(" + INPUT_DATE + ", yyyy-MM-dd'T'HH:mm:ssXXX)",                   "2017-01-10T13:04:20Z"),
+            arguments("formatDate(" + INPUT_DATE_NOT_ZERO_TIMEZONE + ", yyyy-MM-dd'T'HH:mm:ssXXX)", "2017-01-10T08:04:20-05:00"),
+            arguments("formatDate(2017-01-10T13:04:20Z, yyyy-MM-dd'T'HH:mmXXX)",                    "2017-01-10T13:04Z"),
+            arguments("formatDate(1994-11-05T08:15:30, yyyy-MM-dd'T'HH:mm:ss.SSS)",                 "1994-11-05T08:15:30.000"),
+            arguments("formatDate(1994-11-05T09:15:30, \"\"\"yyyy\\,MM,dd\"\"\")",                  "1994\\,11,05")
         );
     }
 
     static Stream<Arguments> executeWithTZDDataProvider()
     {
         return Stream.of(
-            Arguments.of("formatDate(" + INPUT_DATE + ",  yyyy-MM-dd'T'HH:mm:ss.SSSXXX, -05:00)",                   INPUT_DATE_NOT_ZERO_TIMEZONE),
-            Arguments.of("formatDate(" + INPUT_DATE_NOT_ZERO_TIMEZONE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX, GMT)",     "2017-01-10T13:04:20.677Z"),
-            Arguments.of("formatDate(" + INPUT_DATE + ",  yyyy-MM-dd'T'HH:mm:ss.SSSXXX, America/New_York)",         "2017-01-10T08:04:20.677-05:00"),
-            Arguments.of("formatDate(" + INPUT_DATE + ",  yyyy\\,MM\\,dd'T'HH:mm:ss.SSSXXX, America/New_York)",     "2017,01,10T08:04:20.677-05:00"),
-            Arguments.of("formatDate(" + INPUT_DATE + ",  yyyy-MM-dd'T'HH:mm:ss.SSSXXX,  -05:00)",                  INPUT_DATE_NOT_ZERO_TIMEZONE),
-            Arguments.of("formatDate(" + INPUT_DATE + ",  yyyy-MM-dd'T'HH:mm:ss.SSSXXX,-05:00)",                    INPUT_DATE_NOT_ZERO_TIMEZONE),
-            Arguments.of("formatDate(1994-11-05T08:15:30, yyyy-MM-dd'T'HH:mm:ss.SSSXXX, -05:00)",                   "1994-11-05T03:15:30.000-05:00"),
-            Arguments.of("formatDate(1994-11-05T08:15:30, \"\"\"yyyy MM dd\\, HH:mm XXX\"\"\", -05:00)",            "1994 11 05\\, 03:15 -05:00")
+            arguments("formatDate(" + INPUT_DATE + ",  yyyy-MM-dd'T'HH:mm:ss.SSSXXX, -05:00)",                   INPUT_DATE_NOT_ZERO_TIMEZONE),
+            arguments("formatDate(" + INPUT_DATE_NOT_ZERO_TIMEZONE + ", yyyy-MM-dd'T'HH:mm:ss.SSSXXX, GMT)",     "2017-01-10T13:04:20.677Z"),
+            arguments("formatDate(" + INPUT_DATE + ",  yyyy-MM-dd'T'HH:mm:ss.SSSXXX, America/New_York)",         "2017-01-10T08:04:20.677-05:00"),
+            arguments("formatDate(" + INPUT_DATE + ",  yyyy\\,MM\\,dd'T'HH:mm:ss.SSSXXX, America/New_York)",     "2017,01,10T08:04:20.677-05:00"),
+            arguments("formatDate(" + INPUT_DATE + ",  yyyy-MM-dd'T'HH:mm:ss.SSSXXX,  -05:00)",                  INPUT_DATE_NOT_ZERO_TIMEZONE),
+            arguments("formatDate(" + INPUT_DATE + ",  yyyy-MM-dd'T'HH:mm:ss.SSSXXX,-05:00)",                    INPUT_DATE_NOT_ZERO_TIMEZONE),
+            arguments("formatDate(1994-11-05T08:15:30, yyyy-MM-dd'T'HH:mm:ss.SSSXXX, -05:00)",                   "1994-11-05T03:15:30.000-05:00"),
+            arguments("formatDate(1994-11-05T08:15:30, \"\"\"yyyy MM dd\\, HH:mm XXX\"\"\", -05:00)",            "1994 11 05\\, 03:15 -05:00")
         );
     }
     // @formatter:on
@@ -96,13 +96,17 @@ class FormatDateExpressionProcessorTests
     @Test
     void testExecuteIncorrectExpression()
     {
-        assertEquals(Optional.empty(), processor.execute("formatDate(" + INPUT_DATE + ")"));
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> processor.execute("formatDate(" + INPUT_DATE + ")"));
+        assertEquals(
+                "The expected number of arguments for 'formatDate' expression is from 2 to 3, but found 1 argument: '"
+                        + INPUT_DATE + "'", exception.getMessage());
     }
 
     @Test
     void testExecuteIncorrectTimeZoneId()
     {
-        ZoneRulesException exception = assertThrows(ZoneRulesException.class,
+        var exception = assertThrows(ZoneRulesException.class,
             () -> processor.execute("formatDate(1994-11-05T08:15:30Z, yyyy-MM-dd'T'HH:mm:ssXXX, Incorrect)"));
         assertEquals("Unknown time-zone ID: Incorrect", exception.getMessage());
     }
@@ -110,7 +114,7 @@ class FormatDateExpressionProcessorTests
     @Test
     void testExecuteOutputFormatWithUnsupportedSymbols()
     {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        var exception = assertThrows(IllegalArgumentException.class,
             () -> processor.execute("formatDate(1994-11-05T08:15:30Z, fyyyy-MM-dd, GMT)"));
         assertEquals("Unknown pattern letter: f", exception.getMessage());
     }
@@ -118,7 +122,7 @@ class FormatDateExpressionProcessorTests
     @Test
     void testExecuteIncorrectFormatOfInputDate()
     {
-        DateTimeParseException exception = assertThrows(DateTimeParseException.class,
+        var exception = assertThrows(DateTimeParseException.class,
             () -> processor.execute("formatDate(1994:11:05T08:15:30Z, yyyy-MM-dd)"));
         assertThat(exception.getMessage(), containsString("Text '1994:11:05T08:15:30Z' could not be parsed"));
     }

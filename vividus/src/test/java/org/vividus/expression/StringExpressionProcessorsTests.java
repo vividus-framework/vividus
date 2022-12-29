@@ -44,14 +44,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.util.ILocationProvider;
 
 @ExtendWith(MockitoExtension.class)
-class StringsExpressionProcessorTests
+class StringExpressionProcessorsTests
 {
     private static final String VALUE = "value";
     private static final String BIG_DATA = "big data";
     private static final String BASE_64 = "YmlnIGRhdGE=";
 
     @Mock private ILocationProvider locationProvider;
-    @InjectMocks private StringsExpressionProcessor processor;
+    @InjectMocks private StringExpressionProcessors processor;
 
     @Test
     void testExecuteWithUnsupportedException()
@@ -86,7 +86,7 @@ class StringsExpressionProcessorTests
                 arguments("anyOf()",                                                       EMPTY),
                 arguments("anyOf(,)",                                                      EMPTY),
                 arguments("anyOf(, )",                                                     EMPTY),
-                arguments("anyOf( )",                                                      " "),
+                arguments("anyOf( )",                                                      ""),
                 arguments("anyOf(\"\"\"a,b\\,c\"\"\")",                                    "a,b\\,c"),
                 arguments("anyOf(\"\"\" \"\"\")",                                          " "),
                 arguments("anyOf(\\,)",                                                    ","),
@@ -151,17 +151,17 @@ class StringsExpressionProcessorTests
     }
 
     @ParameterizedTest
-    @CsvSource({
-        "'substringBefore(1, 2, 3)', 3",
-        "'substringAfter(1, 2, 3)',  3",
-        "substringBefore(1),         1",
-        "substringAfter(1),          1"
+    @CsvSource(delimiter = '|', value = {
+        // CHECKSTYLE:OFF
+        "substringBefore(1, 2, 3) | The expected number of arguments for 'substringBefore' expression is 2, but found 3 arguments: '1, 2, 3'",
+        "substringAfter(1, 2, 3)  | The expected number of arguments for 'substringAfter' expression is 2, but found 3 arguments: '1, 2, 3'",
+        "substringBefore(1)       | The expected number of arguments for 'substringBefore' expression is 2, but found 1 argument: '1'",
+        "substringAfter(1)        | The expected number of arguments for 'substringAfter' expression is 2, but found 1 argument: '1'",
+        // CHECKSTYLE:ON
     })
-    void shouldAssertParametersNumberWhenSubstring(String expression, int actualNumberOfArguments)
+    void shouldAssertParametersNumberWhenSubstring(String expression, String errorMessage)
     {
         var exception = assertThrows(IllegalArgumentException.class, () -> processor.execute(expression));
-        assertEquals(
-                "The expected number of arguments for substring-expression is 2, but found " + actualNumberOfArguments,
-                exception.getMessage());
+        assertEquals(errorMessage, exception.getMessage());
     }
 }

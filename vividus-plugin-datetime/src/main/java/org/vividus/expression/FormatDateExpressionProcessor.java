@@ -19,43 +19,34 @@ package org.vividus.expression;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
 import org.vividus.util.DateUtils;
 
 @Named
-public class FormatDateExpressionProcessor extends AbstractExpressionProcessor<String>
+public class FormatDateExpressionProcessor extends MultiArgExpressionProcessor<String>
 {
-    private static final Pattern FORMAT_PATTERN = Pattern
-            .compile("^formatDate\\(([^,]*),\\s*([\\w+\\\\,]*\"\"\".+?\"\"\"|.+?)(?:,(?<!\\\\,)\\s*(.*))?\\)$",
-                    Pattern.CASE_INSENSITIVE);
-    private static final int INPUT_DATE_GROUP = 1;
-    private static final int OUTPUT_FORMAT_GROUP = 2;
-    private static final int OUTPUT_TIMEZONE_GROUP = 3;
-    private static final DateTimeFormatter ISO_STANDARD_FORMAT = DateTimeFormatter.ISO_DATE_TIME;
+    private static final int MIN_ARG_NUMBER = 2;
+    private static final int MAX_ARG_NUMBER = 3;
 
-    private final DateUtils dateUtils;
+    private static final int INPUT_DATE_ARG_INDEX = 0;
+    private static final int OUTPUT_FORMAT_ARG_INDEX = 1;
+    private static final int OUTPUT_TIMEZONE_ARG_INDEX = 2;
+
+    private static final DateTimeFormatter ISO_STANDARD_FORMAT = DateTimeFormatter.ISO_DATE_TIME;
 
     public FormatDateExpressionProcessor(DateUtils dateUtils)
     {
-        super(FORMAT_PATTERN);
-        this.dateUtils = dateUtils;
-    }
-
-    @Override
-    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
-    {
-        ZonedDateTime zonedDate = dateUtils.parseDateTime(expressionMatcher.getArgument(INPUT_DATE_GROUP),
-                ISO_STANDARD_FORMAT);
-        String outputFormat = expressionMatcher.getArgument(OUTPUT_FORMAT_GROUP);
-        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(outputFormat);
-        String outputTimeZone = expressionMatcher.getArgument(OUTPUT_TIMEZONE_GROUP);
-        if (outputTimeZone != null)
-        {
-            zonedDate = zonedDate.withZoneSameInstant(ZoneId.of(outputTimeZone));
-        }
-        return outputFormatter.format(zonedDate);
+        super("formatDate", MIN_ARG_NUMBER, MAX_ARG_NUMBER, args -> {
+            ZonedDateTime inputDate = dateUtils.parseDateTime(args.get(INPUT_DATE_ARG_INDEX), ISO_STANDARD_FORMAT);
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(args.get(OUTPUT_FORMAT_ARG_INDEX));
+            if (args.size() == MAX_ARG_NUMBER)
+            {
+                ZoneId outputZone = ZoneId.of(args.get(OUTPUT_TIMEZONE_ARG_INDEX));
+                inputDate = inputDate.withZoneSameInstant(outputZone);
+            }
+            return outputFormatter.format(inputDate);
+        });
     }
 }

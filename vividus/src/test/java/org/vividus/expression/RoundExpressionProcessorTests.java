@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 package org.vividus.expression;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Optional;
 
 import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,41 +31,22 @@ class RoundExpressionProcessorTests
 
     @ParameterizedTest
     @CsvSource({
-        "'round(3)',              true",
-        "'round(-3)',             true",
-        "'round(+3)',             false",
-        "'round(2.90,1)',         true",
-        "'round(-30.12, 23)',     true",
-        "'round(.12, 0)',         false",
-        "'round(2.0094, 20)',     true",
-        "'raund(24)',             false",
-        "'round(ABC)',            false",
-        "'round(1, A)',           false",
-        "'round(,12)',            false",
-        "'round(12,)',            false",
-        "'round(1,2,3)',          false",
-        "'round(1.2,3.1.3,1)',    false",
-        "'round(1,2,ceiling)',    true",
-        "'round(1,2,floor)',      true",
-        "'round(1,2,up)',         true",
-        "'round(1,2,down)',       true",
-        "'round(1,2,half_up)',    true",
-        "'round(1,2,half_down)',  true",
-        "'round(1,2,half_even)',  true",
-        "'round(1,2,unnecessary)',true",
-        "'round(1,2,left)',       false",
-        "'round(0.15237E2,0)',    true",
-        "'round(0.15237E,0)',     false",
-        "'round(0.15237E-+2,0)',  false",
-        "'round(0.15237-2,0)',    false",
-        "'round(0.15237+2,0)',    false",
-        "'round(1,2,half up)',    true",
-        "'round(1,2,half down)',  true",
-        "'round(1,2,half even)',  true"
+        "'round(ABC)',          Invalid value to round: 'ABC'",
+        "'round(1, A)',         Invalid max fraction digits value: 'A'",
+        "'round(,12)',          Invalid value to round: ''",
+        "'round(12,)',          Invalid max fraction digits value: ''",
+        "'round(1,2,3)',        Invalid rounding mode: '3'",
+        "'round(1.2,3.1.3,1)',  Invalid max fraction digits value: '3.1.3'",
+        "'round(1,2,left)',     Invalid rounding mode: 'left'",
+        "'round(0.15237E)',     Invalid value to round: '0.15237E'",
+        "'round(0.15237E-+2)',  Invalid value to round: '0.15237E-+2'",
+        "'round(0.15237-2)',    Invalid value to round: '0.15237-2'",
+        "'round(0.15237+2)',    Invalid value to round: '0.15237+2'"
     })
-    void testApply(String expression, boolean expected)
+    void shouldHandleInvalidValues(String expression, String error)
     {
-        assertEquals(expected, processor.execute(expression).isPresent());
+        var exception = assertThrows(IllegalArgumentException.class, () -> processor.execute(expression));
+        assertEquals(error, exception.getMessage());
     }
 
     @ParameterizedTest
@@ -101,19 +85,27 @@ class RoundExpressionProcessorTests
         "'round(5.0)',              5",
         "'round(5.00000)',          5",
         "'round(-0.9, 0)',         -1",
+        "'round(-.9, 0)',          -1",
         "'round(-0.5, 0)',          0",
+        "'round(-.5, 0)',           0",
         "'round(-0.1, 0)',          0",
+        "'round(-.1, 0)',           0",
         "'round(-0, 0)',            0",
         "'round(0, 0)',             0",
         "'round(0.1, 0)',           0",
+        "'round(.1, 0)',            0",
         "'round(0.5, 0)',           1",
+        "'round(.5, 0)',            1",
         "'round(0.9, 0)',           1",
+        "'round(.9, 0)',            1",
         "'round(-4.9999)',         -5",
         "'round(-5.0001)',         -5",
         "'round(4.9999)',           5",
         "'round(5.0001)',           5",
         "'round(25.009, 0)',        25",
         "'round(5)',                5",
+        "'round(+5)',               5",
+        "'round(-5)',              -5",
         "'round(5.5)',              5.5",
         "'round(5.55, 2)',          5.55",
         "'round(5.55)',             5.55",
@@ -147,6 +139,7 @@ class RoundExpressionProcessorTests
         "'round(-1.4444, 3, half_down)',-1.444",
         "'round(-1.4444, 3, half_even)',-1.444",
         "'round(-1.1, 2, unnecessary)', -1.1",
+        "'round(-1.10, 2, unnecessary)', -1.1",
         "'round(0.15237E3, 0)', 152",
         "'round(0.15237E+3, 0)', 152",
         "'round(15237E-3, 2)', 15.24",
@@ -156,6 +149,6 @@ class RoundExpressionProcessorTests
     })
     void testRound(String expression, String expected)
     {
-        assertEquals(expected, processor.execute(expression).get());
+        assertEquals(Optional.of(expected), processor.execute(expression));
     }
 }

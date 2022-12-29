@@ -24,16 +24,16 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Optional;
 
+import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockedStatic;
-import org.vividus.converter.FluentTrimmedEnumConverter;
 import org.vividus.util.ResourceUtils;
 
-class HashExpressionProcessorTests
+class HashExpressionProcessorsTests
 {
-    private final HashExpressionProcessor processor = new HashExpressionProcessor(new FluentTrimmedEnumConverter());
+    private final HashExpressionProcessors processor = new HashExpressionProcessors(new FluentEnumConverter());
 
     @ParameterizedTest
     @CsvSource({

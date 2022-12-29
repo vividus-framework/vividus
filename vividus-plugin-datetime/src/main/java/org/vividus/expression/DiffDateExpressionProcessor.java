@@ -21,71 +21,56 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
-import java.util.Optional;
-import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
-import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.vividus.util.DateUtils;
 
 @Named
-public class DiffDateExpressionProcessor extends AbstractExpressionProcessor<String>
+public class DiffDateExpressionProcessor extends MultiArgExpressionProcessor<String>
 {
-    // CHECKSTYLE:OFF
-    // @formatter:off
-    private static final Pattern DIFF_DATE_PATTERN = Pattern.compile(
-            "^diffDate\\(\\s*(\"\"\".+?\"\"\"|.+?),(?<!\\\\,)\\s*(\"\"\".+?\"\"\"|.+?),(?<!\\\\,)\\s*(\"\"\".+?\"\"\"|.+?),(?<!\\\\,)\\s*(\"\"\".+?\"\"\"|.+?)(,(?<!\\\\,)(.+?))?\\)$",
-                    Pattern.CASE_INSENSITIVE);
-    // CHECKSTYLE:ON
-    // @formatter:on
     private static final String MINUS_SIGN = "-";
 
-    private static final int FIRST_INPUT_DATE_GROUP = 1;
-    private static final int FIRST_INPUT_FORMAT_GROUP = 2;
-    private static final int SECOND_INPUT_DATE_GROUP = 3;
-    private static final int SECOND_INPUT_FORMAT_GROUP = 4;
-    private static final int FORMAT_GROUP = 6;
+    private static final int MIN_ARG_NUMBER = 4;
+    private static final int MAX_ARG_NUMBER = 5;
 
-    private final DateUtils dateUtils;
+    private static final int INPUT_DATE_1_ARG_INDEX = 0;
+    private static final int INPUT_FORMAT_1_ARG_INDEX = 1;
+    private static final int INPUT_DATE_2_ARG_INDEX = 2;
+    private static final int INPUT_FORMAT_2_ARG_INDEX = 3;
+    private static final int OUTPUT_UNIT_ARG_INDEX = 4;
 
-    public DiffDateExpressionProcessor(DateUtils dateUtils)
+    public DiffDateExpressionProcessor(DateUtils dateUtils, FluentEnumConverter fluentEnumConverter)
     {
-        super(DIFF_DATE_PATTERN);
-        this.dateUtils = dateUtils;
+        super("diffDate", MIN_ARG_NUMBER, MAX_ARG_NUMBER, args ->
+        {
+            ZonedDateTime inputDate1 = getZonedDateTime(dateUtils, args.get(INPUT_DATE_1_ARG_INDEX),
+                    args.get(INPUT_FORMAT_1_ARG_INDEX));
+            ZonedDateTime inputDate2 = getZonedDateTime(dateUtils, args.get(INPUT_DATE_2_ARG_INDEX),
+                    args.get(INPUT_FORMAT_2_ARG_INDEX));
+
+            if (args.size() == OUTPUT_UNIT_ARG_INDEX)
+            {
+                Duration duration = Duration.between(inputDate1, inputDate2);
+                String durationAsString = duration.toString();
+                if (duration.isNegative())
+                {
+                    durationAsString = MINUS_SIGN + durationAsString.replace(MINUS_SIGN, StringUtils.EMPTY);
+                }
+                return durationAsString;
+            }
+
+            String outputUnit = args.get(OUTPUT_UNIT_ARG_INDEX);
+            ChronoUnit chronoUnit = (ChronoUnit) fluentEnumConverter.convertValue(outputUnit, ChronoUnit.class);
+            return Long.toString(chronoUnit.between(inputDate1, inputDate2));
+        });
     }
 
-    @Override
-    protected String evaluateExpression(ExpressionArgumentMatcher expressionMatcher)
+    private static ZonedDateTime getZonedDateTime(DateUtils dateUtils, String datetime, String format)
     {
-        ZonedDateTime firstZonedDateTime = getZonedDateTime(expressionMatcher, FIRST_INPUT_DATE_GROUP,
-                FIRST_INPUT_FORMAT_GROUP);
-        ZonedDateTime secondZonedDateTime = getZonedDateTime(expressionMatcher, SECOND_INPUT_DATE_GROUP,
-                SECOND_INPUT_FORMAT_GROUP);
-        Duration duration = Duration.between(firstZonedDateTime, secondZonedDateTime);
-        String durationAsString = duration.toString();
-        return Optional.ofNullable(expressionMatcher.group(FORMAT_GROUP))
-                .map(String::trim)
-                .map(String::toUpperCase)
-                .map(t -> EnumUtils.getEnum(ChronoUnit.class, t))
-                .map(u -> u.between(firstZonedDateTime, secondZonedDateTime))
-                .map(Object::toString)
-                .orElseGet(() -> processNegative(duration, durationAsString));
-    }
-
-    private String processNegative(Duration duration, String durationAsString)
-    {
-        return duration.isNegative()
-                ? MINUS_SIGN + durationAsString.replace(MINUS_SIGN, StringUtils.EMPTY)
-                : durationAsString;
-    }
-
-    private ZonedDateTime getZonedDateTime(ExpressionArgumentMatcher expressionMatcher, int inputDateGroup,
-                                           int inputFormatGroup)
-    {
-        DateTimeFormatter inputFormat = DateTimeFormatter
-                .ofPattern(expressionMatcher.getArgument(inputFormatGroup), Locale.ENGLISH);
-        return dateUtils.parseDateTime(expressionMatcher.getArgument(inputDateGroup), inputFormat);
+        DateTimeFormatter inputFormat = DateTimeFormatter.ofPattern(format, Locale.ENGLISH);
+        return dateUtils.parseDateTime(datetime, inputFormat);
     }
 }

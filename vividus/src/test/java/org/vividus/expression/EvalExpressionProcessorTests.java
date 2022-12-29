@@ -18,6 +18,7 @@ package org.vividus.expression;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.lenient;
 
 import java.util.Optional;
@@ -44,24 +45,23 @@ class EvalExpressionProcessorTests
     @Mock private VariableContext bddVariableContext;
     @InjectMocks private EvalExpressionProcessor processor;
 
-    @SuppressWarnings("unused")
-    private static Stream<Arguments> evalArguments()
+    static Stream<Arguments> evalArguments()
     {
         return Stream.of(
-                Arguments.of("eval(null)", "null"),
-                Arguments.of("eval(16 + 2 * 6)", "28"),
-                Arguments.of("eval(math:abs(-10))", "10"),
-                Arguments.of("eval(stringUtils:substringAfterLast('namescpaces are %here', '%'))", "here"),
-                Arguments.of("eval((16 + 2) * 6)", "108"),
-                Arguments.of("eval(100 / 5 - 16 * 2 + 6)", "-6"),
-                Arguments.of("eval(`string\n1` == `string\n1`)", TRUE),
-                Arguments.of("eval(`string\n1` == `string1`)", FALSE),
-                Arguments.of("eval(`string\n1` == 'string1')", FALSE),
-                Arguments.of("eval(var t = 20; var s = function(x, y) {x + y + t}; t = 54; s(15, 7))", "42"),
-                Arguments.of("eval(wordUtils:capitalize('i am FINE'))", "I Am FINE"),
-                Arguments.of("eval(wordUtils:uncapitalize('I Am FINE'))", "i am fINE"),
-                Arguments.of("eval(wordUtils:swapCase('The dog has a BONE'))", "tHE DOG HAS A bone"),
-                Arguments.of("eval(wordUtils:initials('Fus Ro Dah'))", "FRD")
+                arguments("eval(null)", "null"),
+                arguments("eval(16 + 2 * 6)", "28"),
+                arguments("eval(math:abs(-10))", "10"),
+                arguments("eval(stringUtils:substringAfterLast('namescpaces are %here', '%'))", "here"),
+                arguments("eval((16 + 2) * 6)", "108"),
+                arguments("eval(100 / 5 - 16 * 2 + 6)", "-6"),
+                arguments("eval(`string\n1` == `string\n1`)", TRUE),
+                arguments("eval(`string\n1` == `string1`)", FALSE),
+                arguments("eval(`string\n1` == 'string1')", FALSE),
+                arguments("eval(var t = 20; var s = function(x, y) {x + y + t}; t = 54; s(15, 7))", "42"),
+                arguments("eval(wordUtils:capitalize('i am FINE'))", "I Am FINE"),
+                arguments("eval(wordUtils:uncapitalize('I Am FINE'))", "i am fINE"),
+                arguments("eval(wordUtils:swapCase('The dog has a BONE'))", "tHE DOG HAS A bone"),
+                arguments("eval(wordUtils:initials('Fus Ro Dah'))", "FRD")
         );
     }
 
@@ -78,14 +78,13 @@ class EvalExpressionProcessorTests
         assertEquals(Optional.empty(), processor.execute("evaluate(1+1)"));
     }
 
-    @SuppressWarnings("unused")
-    private static Stream<Arguments> evalWithVars()
+    static Stream<Arguments> evalWithVars()
     {
         return Stream.of(
-                Arguments.of("eval(someKey + '=10')", "Value=10", VALUE),
-                Arguments.of("eval(someKey.length() + '')", "5", VALUE),
-                Arguments.of("eval((someKey.length() == 5) + '' )", TRUE, VALUE),
-                Arguments.of("eval(someKey = '1'; someKey + someKey)", "11", VALUE)
+                arguments("eval(someKey + '=10')", "Value=10", VALUE),
+                arguments("eval(someKey.length() + '')", "5", VALUE),
+                arguments("eval((someKey.length() == 5) + '' )", TRUE, VALUE),
+                arguments("eval(someKey = '1'; someKey + someKey)", "11", VALUE)
         );
     }
 
@@ -100,18 +99,17 @@ class EvalExpressionProcessorTests
     @Test
     void shouldThrowAnExceptionInCaseOfMissingVariable()
     {
-        JexlException.Variable exception = assertThrows(JexlException.Variable.class,
-            () -> processor.execute("eval(missingVar + 'val')"));
-        assertEquals("org.vividus.expression.EvalExpressionProcessor.evaluateExpression:57 variable "
-                + "'missingVar' is undefined", exception.getMessage());
+        var exception = assertThrows(JexlException.Variable.class, () -> processor.execute("eval(missingVar + 'val')"));
+        assertEquals(
+                "org.vividus.expression.EvalExpressionProcessor.lambda$new$0:47 variable 'missingVar' is undefined",
+                exception.getMessage());
     }
 
     @Test
     void shouldThrowAnExceptionInCaseOfSyntaxError()
     {
-        JexlException.Parsing exception = assertThrows(JexlException.Parsing.class,
-            () -> processor.execute("eval(var + 'val')"));
-        assertEquals("org.vividus.expression.EvalExpressionProcessor.evaluateExpression:57@1:1 parsing error"
-                + " in 'var'", exception.getMessage());
+        var exception = assertThrows(JexlException.Parsing.class, () -> processor.execute("eval(var + 'val')"));
+        assertEquals("org.vividus.expression.EvalExpressionProcessor.lambda$new$0:47@1:1 parsing error in 'var'",
+                exception.getMessage());
     }
 }

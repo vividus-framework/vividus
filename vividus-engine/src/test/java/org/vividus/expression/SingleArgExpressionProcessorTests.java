@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import java.util.function.Function;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class FunctionalExpressionProcessorTests
+class SingleArgExpressionProcessorTests
 {
-    private final FunctionalExpressionProcessor<String> processor = new FunctionalExpressionProcessor<>("expression",
+    private final SingleArgExpressionProcessor<String> processor = new SingleArgExpressionProcessor<>("expression",
             Function.identity());
 
     @ParameterizedTest
@@ -34,7 +34,6 @@ class FunctionalExpressionProcessorTests
             "'expression(x)',     'x'",
             "'expression()',      ''",
             "'expression( x )',   ' x '",
-            "'expression(x\n)',   'x\n'",
             "'expression(x\n)',   'x\n'",
             "'expression(x\r\n)', 'x\r\n'",
             "'expression(\nx\n)', '\nx\n'"
