@@ -31,6 +31,8 @@ import com.google.common.base.Splitter;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.context.VariableContext;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.transformer.ExtendedTableTransformer;
@@ -40,6 +42,11 @@ import org.vividus.util.json.JsonPathUtils;
 
 public class JsonRestApiTableTransformer implements ExtendedTableTransformer
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonRestApiTableTransformer.class);
+
+    private static final String URL_PROPERTY = "url";
+    private static final String VARIABLE_PROPERTY = "variable";
+
     @Inject private VariableContext variableContext;
     private IHttpClient httpClient;
 
@@ -52,8 +59,8 @@ public class JsonRestApiTableTransformer implements ExtendedTableTransformer
         String columns = properties.getMandatoryNonBlankProperty("columns", String.class);
 
         String jsonData = processCompetingMandatoryProperties(properties,
-                entry("url", this::getJsonByUrl),
-                entry("variable", variableContext::getVariable));
+                entry(URL_PROPERTY, this::getJsonByUrl),
+                entry(VARIABLE_PROPERTY, variableContext::getVariable));
 
         Map<String, String> columnsPerJsonPaths = Splitter.on(';').withKeyValueSeparator(Splitter.on('=').limit(2))
                 .split(columns);
@@ -67,8 +74,20 @@ public class JsonRestApiTableTransformer implements ExtendedTableTransformer
         return ExamplesTableProcessor.buildExamplesTableFromColumns(columnsPerJsonPaths.keySet(), values, properties);
     }
 
+    /**
+     * Fetches JSON resource via HTTP and returns response body as string
+     *
+     * @param url URL of JSON resource
+     * @return HTTP response body
+     * @deprecated Use `variable` property of `FROM_JSON` table transformer instead.
+     */
+    @Deprecated(since = "0.5.3", forRemoval = true)
     private String getJsonByUrl(String url)
     {
+        LOGGER.warn(
+                "`{}` parameter of `FROM_JSON` table transformer is deprecated and will be removed in VIVIDUS 0.6.0. "
+                        + "`{}` parameter must be used instead.",
+                URL_PROPERTY, VARIABLE_PROPERTY);
         try
         {
             return httpClient.doHttpGet(UriUtils.createUri(url)).getResponseBodyAsString();

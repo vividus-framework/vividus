@@ -16,12 +16,21 @@
 
 package org.vividus.http.transformer;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.List;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.configuration.Keywords;
@@ -38,14 +47,16 @@ import org.vividus.http.client.IHttpClient;
 import org.vividus.util.ResourceUtils;
 import org.vividus.util.UriUtils;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class JsonRestApiTableTransformerTests
 {
     private static final String JSON_DATA = ResourceUtils.loadResource(JsonRestApiTableTransformerTests.class,
             "data.json");
     private static final String URL_VALUE = "https://example.com/";
-    private static final String URL_PARAMETER = "url=";
-    private static final String VARIABLE_PARAMETER = "variable=";
+    private static final String URL_PROPERTY = "url";
+    private static final String VARIABLE_PROPERTY = "variable";
+    private static final String EQUAL = "=";
+    private static final String VARIABLE_PARAMETER = VARIABLE_PROPERTY + EQUAL;
 
     @Mock private VariableContext variableContext;
     @Mock private IHttpClient httpClient;
@@ -54,13 +65,19 @@ class JsonRestApiTableTransformerTests
     private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters =  new ParameterConverters();
 
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(JsonRestApiTableTransformer.class);
+
     @Test
     void testTransformFromUrl() throws IOException
     {
         var httpResponse = mock(HttpResponse.class);
         when(httpClient.doHttpGet(UriUtils.createUri(URL_VALUE))).thenReturn(httpResponse);
         when(httpResponse.getResponseBodyAsString()).thenReturn(JSON_DATA);
-        testTransform(URL_PARAMETER + URL_VALUE);
+        testTransform(URL_PROPERTY + EQUAL + URL_VALUE);
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(
+                "`{}` parameter of `FROM_JSON` table transformer is deprecated and will be removed in VIVIDUS 0.6.0. "
+                        + "`{}` parameter must be used instead.", URL_PROPERTY, VARIABLE_PROPERTY)
+        )));
     }
 
     @Test
@@ -69,6 +86,7 @@ class JsonRestApiTableTransformerTests
         var variableName = "varName";
         when(variableContext.getVariable(variableName)).thenReturn(JSON_DATA);
         testTransform(VARIABLE_PARAMETER + variableName);
+        assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
     private void testTransform(String source)
@@ -76,7 +94,7 @@ class JsonRestApiTableTransformerTests
         var tableProperties = createProperties(source + ",columns=column_code=$.superCodes..code;"
                         + "column_codeSystem=$.superCodes..codeSystem;"
                         + "column_type=$.superCodes..type");
-        String table = jsonTableGenerator.transform(StringUtils.EMPTY, null, tableProperties);
+        var table = jsonTableGenerator.transform(StringUtils.EMPTY, null, tableProperties);
         var expectedTable =
                 "|column_code|column_codeSystem|column_type|\n"
                 + "|107214|VIVIDUS|A|\n"
@@ -95,16 +113,17 @@ class JsonRestApiTableTransformerTests
         when(variableContext.getVariable(variableName)).thenReturn(JSON_DATA);
         var columns = "columns=type=$..[?(@.codes[0].code==\"107214\")].type";
         var tableProperties = createProperties(columns + "," + VARIABLE_PARAMETER + variableName);
-        String table = jsonTableGenerator.transform(StringUtils.EMPTY, null, tableProperties);
+        var table = jsonTableGenerator.transform(StringUtils.EMPTY, null, tableProperties);
         var expectedTable = "|type|\n|A|";
         assertEquals(expectedTable, table);
+        assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
     @Test
     void testSourceTransformPropertyIsNotSpecifiedException()
     {
-        TableProperties properties = createProperties("columns=key=value\\,url");
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        var properties = createProperties("columns=key=value\\,url");
+        var exception = assertThrows(IllegalArgumentException.class,
             () -> jsonTableGenerator.transform(StringUtils.EMPTY, null, properties));
         assertEquals("One of ExamplesTable properties must be set: either 'url' or 'variable'", exception.getMessage());
     }
@@ -112,8 +131,8 @@ class JsonRestApiTableTransformerTests
     @Test
     void testColumnsTransformPropertyIsNotSpecifiedException()
     {
-        TableProperties properties = createProperties(URL_PARAMETER + URL_VALUE);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        var properties = createProperties(VARIABLE_PROPERTY + EQUAL + "any");
+        var exception = assertThrows(IllegalArgumentException.class,
             () -> jsonTableGenerator.transform(StringUtils.EMPTY, null, properties));
         assertEquals("'columns' is not set in ExamplesTable properties", exception.getMessage());
     }

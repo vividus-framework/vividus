@@ -205,7 +205,9 @@ Then `${response-code}` is equal to `200`
 |The name of the variable containing source JSON, only variables of scopes `global` and `next_batches` are allowed.
 
 |`url`
-|The URL of the JSON resource that can be retrieved using the https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET[HTTP GET] call.
+a| WARNING: This parameter is deprecated and will be removed in VIVIDUS 0.6.0. `variable` parameter must be used instead.
+
+The URL of the JSON resource that can be retrieved using the https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET[HTTP GET] call.
 
 |columns
 a|The semicolon-separated list of mappings between column names and {json-paths} used to get column values.
