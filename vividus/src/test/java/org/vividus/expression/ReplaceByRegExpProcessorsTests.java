@@ -54,6 +54,8 @@ class ReplaceByRegExpProcessorsTests
             of("replaceFirstByRegExp(\"\"\",\"\"\", _, string,with,commas)",                        Optional.of("string_with,commas")),
             of("replaceFirstByRegExp(\\,, _, \"\"\"string,with,commas\"\"\")",                      Optional.of("string_with,commas")),
             of("replaceFirstByRegExp(\\,, _, string\\,with\\,commas)",                              Optional.of("string_with,commas")),
+            of("replaceFirstByRegExp(\\,, , string\\,with\\,commas)",                               Optional.of("stringwith,commas")),
+            of("replaceAllByRegExp(\\,, , string\\,with\\,commas)",                                 Optional.of("stringwithcommas")),
             of("replaceAllByRegExp(test, TEST, this\nis\ntest\nvalue)",                             Optional.of("this\nis\nTEST\nvalue")),
             of("replaceAllByRegExp(.test, TEST, this\nis\ntest\nvalue)",                            Optional.of("this\nisTEST\nvalue")),
             of("replaceFirstByRegExp(.*(te[a-z]+).*, $1, this\nis\ntest\nvalue)",                   Optional.of("test"))

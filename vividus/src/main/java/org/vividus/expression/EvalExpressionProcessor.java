@@ -18,6 +18,7 @@ package org.vividus.expression;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Named;
 
@@ -61,8 +62,7 @@ public class EvalExpressionProcessor extends SingleArgExpressionProcessor<String
         @Override
         public Object get(String name)
         {
-            Object variable = super.get(name);
-            return variable == null ? variableContext.getVariable(name) : variable;
+            return Optional.ofNullable(super.get(name)).orElseGet(() -> variableContext.getVariable(name));
         }
 
         @Override
