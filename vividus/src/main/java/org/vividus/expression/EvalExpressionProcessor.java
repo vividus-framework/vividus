@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,7 @@ package org.vividus.expression;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Optional;
 
 import javax.inject.Named;
 
@@ -32,31 +31,23 @@ import org.apache.commons.text.WordUtils;
 import org.vividus.context.VariableContext;
 
 @Named
-public class EvalExpressionProcessor extends AbstractExpressionProcessor<String>
+public class EvalExpressionProcessor extends SingleArgExpressionProcessor<String>
 {
-    private static final Pattern EVAL_PATTERN = Pattern.compile("^eval\\((.*)\\)$", Pattern.CASE_INSENSITIVE
-            | Pattern.DOTALL);
-    private static final int EVAL_GROUP = 1;
-    private static final Map<String, Object> NAMESPACES = Map.of("math", Math.class, "stringUtils", StringUtils.class,
-            "wordUtils", WordUtils.class);
-
-    private final JexlEngine jexlEngine = new JexlBuilder().charset(StandardCharsets.UTF_8).namespaces(NAMESPACES)
+    private static final JexlEngine JEXL_ENGINE = new JexlBuilder()
+            .charset(StandardCharsets.UTF_8)
+            .namespaces(Map.of(
+                    "math", Math.class,
+                    "stringUtils", StringUtils.class,
+                    "wordUtils", WordUtils.class)
+            )
             .create();
-
-    private final VariableContext variableContext;
 
     public EvalExpressionProcessor(VariableContext variableContext)
     {
-        super(EVAL_PATTERN);
-        this.variableContext = variableContext;
-    }
-
-    @Override
-    protected String evaluateExpression(Matcher expressionMatcher)
-    {
-        String expressionToEvaluate = expressionMatcher.group(EVAL_GROUP);
-        JexlScript jexlScript = jexlEngine.createScript(expressionToEvaluate);
-        return String.valueOf(jexlScript.execute(new JexlVariableContext(variableContext)));
+        super("eval", expressionToEvaluate -> {
+            JexlScript jexlScript = JEXL_ENGINE.createScript(expressionToEvaluate);
+            return String.valueOf(jexlScript.execute(new JexlVariableContext(variableContext)));
+        });
     }
 
     private static final class JexlVariableContext extends MapContext
@@ -71,8 +62,7 @@ public class EvalExpressionProcessor extends AbstractExpressionProcessor<String>
         @Override
         public Object get(String name)
         {
-            Object variable = super.get(name);
-            return variable == null ? variableContext.getVariable(name) : variable;
+            return Optional.ofNullable(super.get(name)).orElseGet(() -> variableContext.getVariable(name));
         }
 
         @Override

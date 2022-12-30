@@ -1,8 +1,7 @@
-= Expressions
+= xref:ROOT:glossary.adoc#_expression[Expressions]
 
-VIVIDUS provides a set of pre-defined xref:ROOT:glossary.adoc#_expression[expressions].
-Also plugins may define own expressions (they are documented in the
-corresponding plugins articles).
+VIVIDUS provides a set of pre-defined expressions. Also plugins may define own
+expressions (they are documented in the corresponding plugins articles).
 
 NOTE: The expression parameters marked with *bold* are mandatory.
 
@@ -458,8 +457,6 @@ https://regex101.com/[Regex101] can be used to test and debug regular expression
 substrings, e.g. `$1` is a reference to the first group
 * *$input* - any string to be processed
 
-NOTE: The expression parameters containing commas or empty values must be surrounded with triple quotes: `"""`
-
 [cols="1, 2,1", options="header"]
 |===
 |Description |Expression |Result
@@ -481,7 +478,7 @@ NOTE: The expression parameters containing commas or empty values must be surrou
 |`convert-spaces-to-dashes`
 
 |Remove all numbers from the string
-|`#{replaceAllByRegExp(\d, """""", a1b2c3d)}`
+|`#{replaceAllByRegExp(\d, , a1b2c3d)}`
 |`abcd`
 
 |Replace all whitespaces with commas
@@ -698,20 +695,19 @@ Gets the substring before the first occurrence of a separator. The separator is 
 * *`$input`* - any string to get a substring from
 * *`$separator`* - the string to search for
 
-TIP: Since the arguments of the expression are comma-separated, meaningful commas (in `$input` or/and `$separator`) must be escaped with `\`
-
 .Examples of the expressions getting the substring
 |===
-|Expression                             |Result
+|Expression                               |Result
 
-|`#{substringBefore(, a)}`              |
-|`#{substringBefore(abc, a)}`           |
-|`#{substringBefore(abcba, b)}`         |`a`
-|`#{substringBefore(abcba,b)}`          |`a`
-|`#{substringBefore(abc, c)}`           |`ab`
-|`#{substringBefore(abc, d)}`           |`abc`
-|`#{substringBefore(abc, )}`            |
-|`#{substringBefore(a\,b\,c\,b\,a, c)}` |`a,b,`
+|`#{substringBefore(, a)}`                |
+|`#{substringBefore(abc, a)}`             |
+|`#{substringBefore(abcba, b)}`           |`a`
+|`#{substringBefore(abcba,b)}`            |`a`
+|`#{substringBefore(abc, c)}`             |`ab`
+|`#{substringBefore(abc, d)}`             |`abc`
+|`#{substringBefore(abc, )}`              |
+|`#{substringBefore(a\,b\,c\,b\,a, c)}`   |`a,b,`
+|`#{substringBefore("""a,b,c,b,a""", c)}` |`a,b,`
 
 |===
 
@@ -727,20 +723,19 @@ Gets the substring after the first occurrence of a separator. The separator is n
 * *`$input`* - any string to get a substring from
 * *`$separator`* - the string to search for
 
-TIP: Since the arguments of the expression are comma-separated, meaningful commas (in `$input` or/and `$separator`) must be escaped with `\`
-
 .Examples of the expressions getting the substring
 |===
-|Expression                             |Result
+|Expression                              |Result
 
-|`#{substringAfter(, a)}`              |
-|`#{substringAfter(abc, a)}`           |`bc`
-|`#{substringAfter(abcba, b)}`         |`cba`
-|`#{substringAfter(abcba,b)}`          |`cba`
-|`#{substringAfter(abc, c)}`           |
-|`#{substringAfter(abc, d)}`           |
-|`#{substringAfter(abc, )}`            |`abc`
-|`#{substringAfter(a\,b\,c\,b\,a, c)}` |`,b,a`
+|`#{substringAfter(, a)}`                |
+|`#{substringAfter(abc, a)}`             |`bc`
+|`#{substringAfter(abcba, b)}`           |`cba`
+|`#{substringAfter(abcba,b)}`            |`cba`
+|`#{substringAfter(abc, c)}`             |
+|`#{substringAfter(abc, d)}`             |
+|`#{substringAfter(abc, )}`              |`abc`
+|`#{substringAfter(a\,b\,c\,b\,a, c)}`   |`,b,a`
+|`#{substringAfter("""a,b,c,b,a""", c)}` |`,b,a`
 
 |===
 

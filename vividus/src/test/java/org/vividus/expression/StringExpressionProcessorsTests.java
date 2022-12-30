@@ -44,19 +44,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.util.ILocationProvider;
 
 @ExtendWith(MockitoExtension.class)
-class StringsExpressionProcessorTests
+class StringExpressionProcessorsTests
 {
     private static final String VALUE = "value";
     private static final String BIG_DATA = "big data";
     private static final String BASE_64 = "YmlnIGRhdGE=";
 
     @Mock private ILocationProvider locationProvider;
-    @InjectMocks private StringsExpressionProcessor processor;
+    @InjectMocks private StringExpressionProcessors processors;
 
     @Test
     void testExecuteWithUnsupportedException()
     {
-        assertEquals(Optional.empty(), processor.execute("removeWrappingDoubleQuotes(\"value\")"));
+        assertEquals(Optional.empty(), processors.execute("removeWrappingDoubleQuotes(\"value\")"));
     }
 
     static Stream<Arguments> expressionSource()
@@ -86,7 +86,9 @@ class StringsExpressionProcessorTests
                 arguments("anyOf()",                                                       EMPTY),
                 arguments("anyOf(,)",                                                      EMPTY),
                 arguments("anyOf(, )",                                                     EMPTY),
-                arguments("anyOf( )",                                                      " "),
+                arguments("anyOf( )",                                                      ""),
+                arguments("anyOf(\"\"\"a,b\\,c\"\"\")",                                    "a,b\\,c"),
+                arguments("anyOf(\"\"\" \"\"\")",                                          " "),
                 arguments("anyOf(\\,)",                                                    ","),
                 arguments("toBase64Gzip(vividus)",                                         "H4sIAAAAAAAA/yvLLMtMKS0GANIHCdkHAAAA"),
                 arguments("escapeHTML(M&Ms)",                                              "M&amp;Ms"),
@@ -99,7 +101,8 @@ class StringsExpressionProcessorTests
                 arguments("substringBefore(abc, c)",                                       "ab"),
                 arguments("substringBefore(abc, d)",                                       "abc"),
                 arguments("substringBefore(abc, )",                                        ""),
-                arguments("substringBefore(a\\,b\\,c\\,b\\,a, c)",                         "a,b,"),
+                arguments("substringBefore(a\\,b\\,c\\,b\\,a, \"\"\",c\"\"\")",            "a,b"),
+                arguments("substringBefore(\"\"\"a,b,c,b,a\"\"\", c)",                     "a,b,"),
                 arguments("substringAfter(, a)",                                           ""),
                 arguments("substringAfter(abc, a)",                                        "bc"),
                 arguments("substringAfter(abcba, b)",                                      "cba"),
@@ -107,7 +110,10 @@ class StringsExpressionProcessorTests
                 arguments("substringAfter(abc, c)",                                        ""),
                 arguments("substringAfter(abc, d)",                                        ""),
                 arguments("substringAfter(abc, )",                                         "abc"),
-                arguments("substringAfter(a\\,b\\,c\\,b\\,a, c)",                          ",b,a")
+                arguments("substringAfter(a\\,b\\,c\\,b\\,a, c)",                          ",b,a"),
+                arguments("substringAfter(a\\,b\\,c\\,b\\,a, c\\,)",                       "b,a"),
+                arguments("substringAfter(\"\"\"a,b,c,b\\,a\"\"\", c)",                    ",b\\,a"),
+                arguments("substringAfter(\"\"\"a,b,c,b\\,a\"\"\", \"\"\"c,\"\"\")",       "b\\,a")
         );
         // CHECKSTYLE:ON
     }
@@ -116,7 +122,7 @@ class StringsExpressionProcessorTests
     @MethodSource("expressionSource")
     void testExecute(String expression, String expected)
     {
-        assertEquals(expected, processor.execute(expression).get());
+        assertEquals(expected, processors.execute(expression).get());
     }
 
     @ParameterizedTest
@@ -126,7 +132,7 @@ class StringsExpressionProcessorTests
     })
     void shouldExecuteLocalizedExpressions(String expression)
     {
-        String result = processor.execute("generateLocalized(" + expression + ", ru-RU)").get();
+        String result = processors.execute("generateLocalized(" + expression + ", ru-RU)").get();
         assertThat(result, matchesPattern("[А-яёЁ0-9 ,.-]+"));
     }
 
@@ -134,28 +140,28 @@ class StringsExpressionProcessorTests
     void shouldGenerateDataBasedOnNonLocalizedExpression()
     {
         when(locationProvider.getLocale()).thenReturn(Locale.US);
-        assertEquals("AA", processor.execute("generate(regexify '[A]{2}')").get());
+        assertEquals("AA", processors.execute("generate(regexify '[A]{2}')").get());
     }
 
     @Test
     void shouldPickRandomValue()
     {
-        assertThat(processor.execute("anyOf(one,two, three\\, or,, four)").get(),
-                anyOf(equalTo("one"), equalTo("two"), equalTo("three, or"), equalTo("four"), emptyString()));
+        assertThat(processors.execute("anyOf(one,two, three\\, or,, \"\"\"four\\,five\"\"\")").get(),
+                anyOf(equalTo("one"), equalTo("two"), equalTo("three, or"), equalTo("four\\,five"), emptyString()));
     }
 
     @ParameterizedTest
-    @CsvSource({
-        "'substringBefore(1, 2, 3)', 3",
-        "'substringAfter(1, 2, 3)',  3",
-        "substringBefore(1),         1",
-        "substringAfter(1),          1"
+    @CsvSource(delimiter = '|', value = {
+        // CHECKSTYLE:OFF
+        "substringBefore(1, 2, 3) | The expected number of arguments for 'substringBefore' expression is 2, but found 3 arguments: '1, 2, 3'",
+        "substringAfter(1, 2, 3)  | The expected number of arguments for 'substringAfter' expression is 2, but found 3 arguments: '1, 2, 3'",
+        "substringBefore(1)       | The expected number of arguments for 'substringBefore' expression is 2, but found 1 argument: '1'",
+        "substringAfter(1)        | The expected number of arguments for 'substringAfter' expression is 2, but found 1 argument: '1'",
+        // CHECKSTYLE:ON
     })
-    void shouldAssertParametersNumberWhenSubstring(String expression, int actualNumberOfArguments)
+    void shouldAssertParametersNumberWhenSubstring(String expression, String errorMessage)
     {
-        var exception = assertThrows(IllegalArgumentException.class, () -> processor.execute(expression));
-        assertEquals(
-                "The expected number of arguments for substring-expression is 2, but found " + actualNumberOfArguments,
-                exception.getMessage());
+        var exception = assertThrows(IllegalArgumentException.class, () -> processors.execute(expression));
+        assertEquals(errorMessage, exception.getMessage());
     }
 }

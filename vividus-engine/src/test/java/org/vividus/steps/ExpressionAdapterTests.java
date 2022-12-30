@@ -49,7 +49,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.expression.DelegatingExpressionProcessor;
 import org.vividus.expression.IExpressionProcessor;
-import org.vividus.expression.UnaryExpressionProcessor;
+import org.vividus.expression.SingleArgExpressionProcessor;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ExpressionAdapterTests
@@ -94,49 +94,52 @@ class ExpressionAdapterTests
         lenient().when(mockedTargetProcessor.execute(EXPRESSION_KEYWORD)).thenReturn(Optional.of(EXPRESSION_RESULT));
         expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
         when(mockedTargetProcessor.execute(expressionKeyword)).thenReturn(Optional.of(outputValue));
-        Object actual = expressionAdaptor.processRawExpression(input);
-        String output = String.format(outputFormat, outputValue);
+        var actual = expressionAdaptor.processRawExpression(input);
+        var output = String.format(outputFormat, outputValue);
         assertEquals(output, actual);
     }
 
     @Test
     void testSupportedExpressionNestedExpr()
     {
-        String input = "#{capitalize(#{trim(#{toLowerCase( VIVIDUS )})})}";
-        String output = "Vividus";
+        var input = "#{capitalize(#{trim(#{toLowerCase( VIVIDUS )})})}";
+        var output = "Vividus";
         IExpressionProcessor<String> processor = new DelegatingExpressionProcessor<>(List.of(
-            new UnaryExpressionProcessor(EXPRESSION_TRIM,        StringUtils::trim),
-            new UnaryExpressionProcessor(EXPRESSION_LOWER_CASE, StringUtils::lowerCase),
-            new UnaryExpressionProcessor(EXPRESSION_CAPITALIZE,  StringUtils::capitalize)
+                new SingleArgExpressionProcessor<>(EXPRESSION_TRIM,        StringUtils::trim),
+                new SingleArgExpressionProcessor<>(EXPRESSION_LOWER_CASE, StringUtils::lowerCase),
+                new SingleArgExpressionProcessor<>(EXPRESSION_CAPITALIZE,  StringUtils::capitalize)
         ));
         expressionAdaptor.setProcessors(List.of(processor));
-        Object actual = expressionAdaptor.processRawExpression(input);
+        var actual = expressionAdaptor.processRawExpression(input);
         assertEquals(output, actual);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void testNestedExpressionWithoutParams()
     {
-        String input = "#{capitalize(#{trim(#{target})})}";
-        String output = "Quetzalcoatlus";
+        var input = "#{capitalize(#{trim(#{target})})}";
+        var output = "Quetzalcoatlus";
 
-        UnaryExpressionProcessor mockedExpressionProcessor = mock(UnaryExpressionProcessor.class);
+        var mockedExpressionProcessor = (SingleArgExpressionProcessor<String>) mock(SingleArgExpressionProcessor.class);
         when(mockedExpressionProcessor.execute(EXPRESSION_KEYWORD)).thenReturn(Optional.of(" quetzalcoatlus "));
         IExpressionProcessor<String> processor = new DelegatingExpressionProcessor<>(List.of(
-                new UnaryExpressionProcessor(EXPRESSION_TRIM,        StringUtils::trim),
-                new UnaryExpressionProcessor(EXPRESSION_CAPITALIZE,  StringUtils::capitalize),
+                new SingleArgExpressionProcessor<>(EXPRESSION_TRIM,        StringUtils::trim),
+                new SingleArgExpressionProcessor<>(EXPRESSION_CAPITALIZE,  StringUtils::capitalize),
                 mockedExpressionProcessor
         ));
         expressionAdaptor.setProcessors(List.of(processor));
-        Object actual = expressionAdaptor.processRawExpression(input);
+        var actual = expressionAdaptor.processRawExpression(input);
         assertEquals(output, actual);
     }
 
     @Test
     void shouldProcessSimpleExpression()
     {
-        expressionAdaptor.setProcessors(List.of(new UnaryExpressionProcessor("toUpperCase", StringUtils::upperCase)));
-        Object actual = expressionAdaptor.processExpression("toUpperCase(this is sparta!)");
+        expressionAdaptor.setProcessors(List.of(
+                new SingleArgExpressionProcessor<>("toUpperCase", StringUtils::upperCase)
+        ));
+        var actual = expressionAdaptor.processExpression("toUpperCase(this is sparta!)");
         assertEquals("THIS IS SPARTA!", actual);
     }
 
@@ -146,7 +149,7 @@ class ExpressionAdapterTests
         when(mockedAnotherProcessor.execute(UNSUPPORTED_EXPRESSION_KEYWORD)).thenReturn(Optional.empty());
         when(mockedTargetProcessor.execute(UNSUPPORTED_EXPRESSION_KEYWORD)).thenReturn(Optional.empty());
         expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
-        Object actual = expressionAdaptor.processRawExpression(UNSUPPORTED_EXPRESSION);
+        var actual = expressionAdaptor.processRawExpression(UNSUPPORTED_EXPRESSION);
         assertEquals(UNSUPPORTED_EXPRESSION, actual, "Unsupported expression, should leave as is");
 
         verify(mockedTargetProcessor, times(2)).execute(UNSUPPORTED_EXPRESSION_KEYWORD);
@@ -157,7 +160,7 @@ class ExpressionAdapterTests
     @CsvSource({"${var}", "'#expr'", "{expr}", "value"})
     void testNonExpression(String nonExpression)
     {
-        Object actual = expressionAdaptor.processRawExpression(nonExpression);
+        var actual = expressionAdaptor.processRawExpression(nonExpression);
         assertEquals(nonExpression, actual, "Not expression, should leave as is");
 
         verify(mockedTargetProcessor, never()).execute(nonExpression);
@@ -171,15 +174,15 @@ class ExpressionAdapterTests
         when(mockedTargetProcessor.execute(EXPRESSION_KEYWORD_WITH_SEPARATOR))
                 .thenReturn(Optional.of(EXPRESSION_RESULT));
         expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
-        String header = "|value1|value2|value3|value4|\n";
-        String inputTable = header + "|#{target}|simple|#{target}|#{tar\nget}|\n|#{target (something inside#$)}|simple"
+        var header = "|value1|value2|value3|value4|\n";
+        var inputTable = header + "|#{target}|simple|#{target}|#{tar\nget}|\n|#{target (something inside#$)}|simple"
                 + "|#{target}|#{tar\nget}|";
-        String expectedTable = header + "|target result with \\ and $|simple|target result with \\ and $|target result"
+        var expectedTable = header + "|target result with \\ and $|simple|target result with \\ and $|target result"
                 + " with \\ and $|\n|target result with \\ and $|simple|target result with \\ and $|target result with"
                 + " \\ and $|";
         when(mockedTargetProcessor.execute("target (something inside#$)"))
                 .thenReturn(Optional.of(EXPRESSION_RESULT));
-        Object actualTable = expressionAdaptor.processRawExpression(inputTable);
+        var actualTable = expressionAdaptor.processRawExpression(inputTable);
         assertEquals(expectedTable, actualTable);
         verify(mockedTargetProcessor, times(6)).execute(anyString());
     }
@@ -190,8 +193,8 @@ class ExpressionAdapterTests
         when(mockedAnotherProcessor.execute(UNSUPPORTED_EXPRESSION_KEYWORD)).thenReturn(Optional.empty());
         when(mockedTargetProcessor.execute(UNSUPPORTED_EXPRESSION_KEYWORD)).thenReturn(Optional.empty());
         expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
-        String inputTable = "|value1|value2|value3|\n|#{unsupported}|simple|#{unsupported}|";
-        Object actualTable = expressionAdaptor.processRawExpression(inputTable);
+        var inputTable = "|value1|value2|value3|\n|#{unsupported}|simple|#{unsupported}|";
+        var actualTable = expressionAdaptor.processRawExpression(inputTable);
         assertEquals(inputTable, actualTable);
     }
 
@@ -204,14 +207,14 @@ class ExpressionAdapterTests
         when(mockedTargetProcessor.execute(EXPRESSION_KEYWORD_WITH_SEPARATOR))
                 .thenReturn(Optional.of(EXPRESSION_RESULT));
         expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
-        String anotherExpressionKeyword = "another";
+        var anotherExpressionKeyword = "another";
         when(mockedAnotherProcessor.execute(anotherExpressionKeyword)).thenReturn(Optional.of("another result"));
 
-        String header = "|value1|value2|value3|value4|value5|\n";
-        String inputTable = header + "|#{unsupported}|simple|#{target}|#{tar\nget}|#{another}|";
-        String expectedTable = header + "|#{unsupported}|simple|target result with \\ and $|target result with \\ and"
+        var header = "|value1|value2|value3|value4|value5|\n";
+        var inputTable = header + "|#{unsupported}|simple|#{target}|#{tar\nget}|#{another}|";
+        var expectedTable = header + "|#{unsupported}|simple|target result with \\ and $|target result with \\ and"
                 + " $|another result|";
-        Object actualTable = expressionAdaptor.processRawExpression(inputTable);
+        var actualTable = expressionAdaptor.processRawExpression(inputTable);
         assertEquals(expectedTable, actualTable);
     }
 
@@ -220,22 +223,22 @@ class ExpressionAdapterTests
     {
         when(mockedTargetProcessor.execute(EXPRESSION_KEYWORD)).thenReturn(Optional.of(EXPRESSION_RESULT));
         expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
-        String inputTable = "|value1|value2|\n|#{target}|${variable}|";
-        String expectedTable = "|value1|value2|\n|target result with \\ and $|${variable}|";
-        Object actualTable = expressionAdaptor.processRawExpression(inputTable);
+        var inputTable = "|value1|value2|\n|#{target}|${variable}|";
+        var expectedTable = "|value1|value2|\n|target result with \\ and $|${variable}|";
+        var actualTable = expressionAdaptor.processRawExpression(inputTable);
         assertEquals(expectedTable, actualTable);
     }
 
     @Test
     void testExpressionProcessingError()
     {
-        String input = "#{exp(any)}";
-        RuntimeException exception = new RuntimeException();
-        IExpressionProcessor<String> processor = new UnaryExpressionProcessor("exp", value -> {
+        var input = "#{exp(any)}";
+        var exception = new RuntimeException();
+        IExpressionProcessor<String> processor = new SingleArgExpressionProcessor<>("exp", value -> {
             throw exception;
         });
         expressionAdaptor.setProcessors(List.of(processor));
-        RuntimeException actualException = assertThrows(RuntimeException.class,
+        var actualException = assertThrows(RuntimeException.class,
             () -> expressionAdaptor.processRawExpression(input));
         assertEquals(exception, actualException);
         assertThat(logger.getLoggingEvents(),
@@ -245,7 +248,7 @@ class ExpressionAdapterTests
     @Test
     void shouldNotProcessExpressionsDuringDryRun()
     {
-        String input = "#{expr(ess)}";
+        var input = "#{expr(ess)}";
         var processor = mock(IExpressionProcessor.class);
         when(storyControls.dryRun()).thenReturn(true);
         expressionAdaptor.setProcessors(List.of(processor));
@@ -256,10 +259,10 @@ class ExpressionAdapterTests
     @Test
     void shouldReturnNotAStringValueForATopLevelExpression()
     {
-        String expression = "#{object(#{string()})}";
+        var expression = "#{object(#{string()})}";
         lenient().when(mockedTargetProcessor.execute("string()")).thenReturn(Optional.of("result"));
         expressionAdaptor.setProcessors(List.of(mockedTargetProcessor, mockedAnotherProcessor));
-        Object value = new Object();
+        var value = new Object();
         lenient().when(mockedTargetProcessor.execute("object(result)")).thenReturn(Optional.of(value));
         assertSame(value, expressionAdaptor.processRawExpression(expression));
     }

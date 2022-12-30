@@ -42,7 +42,7 @@ class FormatDateToExpressionProcessorTests
     private final FormatDateToExpressionProcessor processor = new FormatDateToExpressionProcessor(
             new DateUtils(ZoneId.of("GMT-0")));
 
-    static Stream<Arguments> formateToDataProvider()
+    static Stream<Arguments> formatToDataProvider()
     {
         // CHECKSTYLE:OFF
         // @formatter:off
@@ -50,6 +50,7 @@ class FormatDateToExpressionProcessorTests
             Arguments.of(FORMAT_DATE_TO + INPUT_DATE + COMMA + INPUT_DATE_FORMAT + COMMA + " EEE\\, dd MMM yyyy HH:mm:ss ZZZZ)", "Tue, 10 Jan 2017 13:04:20 GMT"),
             Arguments.of(FORMAT_DATE_TO + INPUT_DATE + COMMA + INPUT_DATE_FORMAT + COMMA + " EEE\\, dd MMM yyyy HH:mm:ss)", "Tue, 10 Jan 2017 13:04:20"),
             Arguments.of("formatDateTo(\"Tue\\, 10 Jan 2017 13:04:20 GMT\", \"EEE\\, dd MMM yyyy HH:mm:ss zzz\", " + "yyyy-MM-dd'T'HH:mm:ss" + ")", "2017-01-10T13:04:20"),
+            Arguments.of("formatDateTo(\"\"\"2017\\,01,10T13,04,20\"\"\", \"\"\"yyyy\\,MM,dd'T'HH,mm,ss\"\"\", yyyy-MM-dd'T'HH:mm:ss)", "2017-01-10T13:04:20"),
             Arguments.of("formatDateTo(2017\\,01\\,10T13\\,04\\,20, yyyy\\,MM\\,dd'T'HH\\,mm\\,ss, yyyy-MM-dd'T'HH:mm:ss)", "2017-01-10T13:04:20")
         );
         // CHECKSTYLE:ON
@@ -57,8 +58,8 @@ class FormatDateToExpressionProcessorTests
     }
 
     @ParameterizedTest(name = "{index}: for expression \"{0}\", accepted is \"{1}\"")
-    @MethodSource("formateToDataProvider")
-    void testExecuteFormateTo(String expression, String expected)
+    @MethodSource("formatToDataProvider")
+    void testExecuteFormatTo(String expression, String expected)
     {
         assertEquals(expected, processor.execute(expression).get());
     }

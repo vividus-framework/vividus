@@ -24,16 +24,16 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Optional;
 
+import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockedStatic;
-import org.vividus.converter.FluentTrimmedEnumConverter;
 import org.vividus.util.ResourceUtils;
 
-class HashExpressionProcessorTests
+class HashExpressionProcessorsTests
 {
-    private final HashExpressionProcessor processor = new HashExpressionProcessor(new FluentTrimmedEnumConverter());
+    private final HashExpressionProcessors processors = new HashExpressionProcessors(new FluentEnumConverter());
 
     @ParameterizedTest
     @CsvSource({
@@ -50,7 +50,7 @@ class HashExpressionProcessorTests
     })
     void shouldCalculateStringHash(String expression, String expected)
     {
-        assertEquals(Optional.of(expected), processor.execute(expression));
+        assertEquals(Optional.of(expected), processors.execute(expression));
     }
 
     @ParameterizedTest
@@ -66,7 +66,7 @@ class HashExpressionProcessorTests
     })
     void shouldCalculateFileHash(String expression, String expected)
     {
-        assertEquals(Optional.of(expected), processor.execute(expression));
+        assertEquals(Optional.of(expected), processors.execute(expression));
     }
 
     @Test
@@ -79,7 +79,7 @@ class HashExpressionProcessorTests
             resourceUtilsMockedStatic.when(() -> ResourceUtils.loadResourceOrFileAsByteArray(resourceOrFilePath))
                     .thenThrow(ioException);
             var uncheckedIOException = assertThrows(UncheckedIOException.class,
-                    () -> processor.execute(String.format("calculateFileHash(SHA-1, %s)", resourceOrFilePath)));
+                    () -> processors.execute(String.format("calculateFileHash(SHA-1, %s)", resourceOrFilePath)));
             assertEquals(ioException, uncheckedIOException.getCause());
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,46 +20,48 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 class RandomIntExpressionProcessorTests
 {
     private final RandomIntExpressionProcessor processor = new RandomIntExpressionProcessor();
 
     @ParameterizedTest
-    @ValueSource(strings = {
-        "randomInt(3)",
-        "randomInt(-3)",
-        "randomInt(+3)",
-        "randomInt(1.1, 1)",
-        "randomInt(0, 1.1)",
-        "randomInt(0, 1, 2)",
-        "randomInt(1aef)",
-        "randomInt(-)",
-        "randomInt()",
-        "randomInt(, 1)",
-        "randomInt(1, )"
+    @CsvSource({
+            // @formatter:off
+            "'randomInt(1.1, 1)', first,  1.1",
+            "'randomInt(0, 1.1)', second, 1.1",
+            "'randomInt(, 1)',    first,  ''",
+            "'randomInt(1, )',    second, ''"
+            // @formatter:on
     })
-    void testDoesNotMatch(String expression)
+    void shouldFailValidationOfArguments(String expression, String argIndex, String invalidArg)
     {
-        assertFalse(processor.execute(expression).isPresent());
+        var exception = assertThrows(IllegalArgumentException.class, () -> processor.execute(expression));
+        assertEquals(
+                "The " + argIndex + " argument of 'randomInt' expression must be an integer, but found: '" + invalidArg
+                        + "'", exception.getMessage());
     }
 
     @ParameterizedTest
     @CsvSource({
-        "'randomInt(1, 10)',      1,  10",
-        "'randomInt(100, 999)', 100, 999",
-        "'randomInt(-5, 5)',     -5,   5",
-        "'randomInt(-5, -2)',    -5,  -2",
-        "'randomInt(1,1)',        1,   1"
+            // @formatter:off
+            "'randomInt(1, 10)',      1,  10",
+            "'randomInt(100, 999)', 100, 999",
+            "'randomInt(-5, 5)',     -5,   5",
+            "'randomInt(-5, -2)',    -5,  -2",
+            "'randomInt(1,1)',        1,   1"
+            // @formatter:on
     })
-    void testRandomInt(String expression, Integer minInclusive, Integer maxInclusive)
+    void shouldGenerateRandomIntSuccessfully(String expression, int minInclusive, int maxInclusive)
     {
-        assertThat(processor.execute(expression).get(),
-                allOf(greaterThanOrEqualTo(minInclusive), lessThanOrEqualTo(maxInclusive)));
+        var expressionResult = processor.execute(expression);
+        assertTrue(expressionResult.isPresent());
+        assertThat(expressionResult.get(), allOf(greaterThanOrEqualTo(minInclusive), lessThanOrEqualTo(maxInclusive)));
     }
 }

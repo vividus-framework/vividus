@@ -16,12 +16,12 @@
 
 package org.vividus.expression;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.function.BiFunction;
 
-interface NormalizingArguments
+public class BiArgExpressionProcessor<T> extends MultiArgExpressionProcessor<T>
 {
-    default String normalize(String argument)
+    public BiArgExpressionProcessor(String expressionName, BiFunction<String, String, T> evaluator)
     {
-        return StringUtils.replace(argument.trim(), "\\,", ",");
+        super(expressionName, 2, args -> evaluator.apply(args.get(0), args.get(1)));
     }
 }

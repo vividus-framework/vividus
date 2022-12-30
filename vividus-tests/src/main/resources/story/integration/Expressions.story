@@ -9,7 +9,12 @@ Given I initialize scenario variable `currentDate` with value `#{generateDate(P)
 Then `#{formatDateTo(${currentDate}, yyyy-MM-dd, yyyy)}` is equal to `#{generateDate(P, yyyy)}`
 
 Scenario: Verify date generation and format
-Then `#{formatDateTo(#{generateDate(P)}, yyyy-MM-dd, yyyy)}` is equal to `#{generateDate(P, yyyy)}`
+Then `#{formatDateTo(<inputDate>, <inputFormat>, yyyy)}` is equal to `#{generateDate(P, yyyy)}`
+Examples:
+|inputDate                                  |inputFormat      |
+|#{generateDate(P)}                         |yyyy-MM-dd       |
+|"""#{generateDate(P, """yyyy, MM dd""")}"""|"""yyyy, MM dd"""|
+|"""#{generateDate(P, yyyy\\, MM dd)}"""    |yyyy\\, MM dd    |
 
 Scenario: Verify epoch generation and conversion
 Given I initialize scenario variable `date` with value `#{generateDate(P, yyyy-MM-dd'T'HH:mm:ss)}`
@@ -21,10 +26,15 @@ Given I initialize scenario variable `epoch` with value `#{toEpochSecond(2020-12
 Then `${epoch}` is equal to `1607692385`
 
 Scenario: Verify anyOf expression
-Then `#{anyOf(1, 2\,3,3)}` matches `1|2,3|3`
+Then `#{anyOf(1, 2\,3,3,"""4,5""")}` matches `1|2,3|3|4,5`
 
 Scenario: Verify diffDate with formatting
-Then `777` is = `#{diffDate(2019-01-01T12:00:00.223Z,yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:01.000Z,yyyy-MM-dd'T'HH:mm:ss.SSSVV, milliS)}`
+Then `777` is = `#{diffDate(<firstZonedDateTime>, 2019-01-01T12:00:01.000Z,yyyy-MM-dd'T'HH:mm:ss.SSSVV, milliS)}`
+Examples:
+|firstZonedDateTime                                               |
+|"""2019,01,01T12:00:00.223Z""", """yyyy,MM,dd'T'HH:mm:ss.SSSVV"""|
+|2019\\,01\\,01T12:00:00.223Z, yyyy\\,MM\\,dd'T'HH:mm:ss.SSSVV    |
+|2019-01-01T12:00:00.223Z,yyyy-MM-dd'T'HH:mm:ss.SSSVV             |
 
 Scenario: Verify eval expression
 Then `#{<expression>}` is = `<expected>`
@@ -108,23 +118,25 @@ Meta:
     @requirementId 3118
 Then `#{<expression>}` is = `<expected>`
 Examples:
-|expression                        |expected|
-|substringBefore(, a)              |        |
-|substringBefore(abc, a)           |        |
-|substringBefore(abcba, b)         |a       |
-|substringBefore(abcba,b)          |a       |
-|substringBefore(abc, c)           |ab      |
-|substringBefore(abc, d)           |abc     |
-|substringBefore(abc, )            |        |
-|substringBefore(a\,b\,c\,b\,a, c) |a,b,    |
-|substringAfter(, a)               |        |
-|substringAfter(abc, a)            |bc      |
-|substringAfter(abcba, b)          |cba     |
-|substringAfter(abcba,b)           |cba     |
-|substringAfter(abc, c)            |        |
-|substringAfter(abc, d)            |        |
-|substringAfter(abc, )             |abc     |
-|substringAfter(a\,b\,c\,b\,a, c)  |,b,a    |
+|expression                          |expected|
+|substringBefore(, a)                |        |
+|substringBefore(abc, a)             |        |
+|substringBefore(abcba, b)           |a       |
+|substringBefore(abcba,b)            |a       |
+|substringBefore(abc, c)             |ab      |
+|substringBefore(abc, d)             |abc     |
+|substringBefore(abc, )              |        |
+|substringBefore(a\,b\,c\,b\,a, c)   |a,b,    |
+|substringBefore("""a,b,c,b,a""", c) |a,b,    |
+|substringAfter(, a)                 |        |
+|substringAfter(abc, a)              |bc      |
+|substringAfter(abcba, b)            |cba     |
+|substringAfter(abcba,b)             |cba     |
+|substringAfter(abc, c)              |        |
+|substringAfter(abc, d)              |        |
+|substringAfter(abc, )               |abc     |
+|substringAfter(a\,b\,c\,b\,a, c)    |,b,a    |
+|substringAfter("""a,b,c,b,a""", c)  |,b,a    |
 
 
 Scenario: Verify hash expressions

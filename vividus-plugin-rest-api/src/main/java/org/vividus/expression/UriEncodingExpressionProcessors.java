@@ -42,10 +42,10 @@ public class UriEncodingExpressionProcessors extends DelegatingExpressionProcess
         ));
     }
 
-    private static UnaryExpressionProcessor createEncodingExpression(String functionName,
+    private static SingleArgExpressionProcessor<String> createEncodingExpression(String expressionName,
             BiFunction<String, Charset, String> transformer)
     {
-        return new UnaryExpressionProcessor(functionName,
-            input -> transformer.apply(input, StandardCharsets.UTF_8));
+        return new SingleArgExpressionProcessor<>(expressionName,
+                input -> transformer.apply(input, StandardCharsets.UTF_8));
     }
 }

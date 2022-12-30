@@ -29,9 +29,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class ReplaceByRegExpProcessorTests
+class ReplaceByRegExpProcessorsTests
 {
-    private final ReplaceByRegExpProcessor processor = new ReplaceByRegExpProcessor();
+    private final ReplaceByRegExpProcessors processors = new ReplaceByRegExpProcessors();
 
     static Stream<Arguments> expressionInput()
     {
@@ -54,6 +54,8 @@ class ReplaceByRegExpProcessorTests
             of("replaceFirstByRegExp(\"\"\",\"\"\", _, string,with,commas)",                        Optional.of("string_with,commas")),
             of("replaceFirstByRegExp(\\,, _, \"\"\"string,with,commas\"\"\")",                      Optional.of("string_with,commas")),
             of("replaceFirstByRegExp(\\,, _, string\\,with\\,commas)",                              Optional.of("string_with,commas")),
+            of("replaceFirstByRegExp(\\,, , string\\,with\\,commas)",                               Optional.of("stringwith,commas")),
+            of("replaceAllByRegExp(\\,, , string\\,with\\,commas)",                                 Optional.of("stringwithcommas")),
             of("replaceAllByRegExp(test, TEST, this\nis\ntest\nvalue)",                             Optional.of("this\nis\nTEST\nvalue")),
             of("replaceAllByRegExp(.test, TEST, this\nis\ntest\nvalue)",                            Optional.of("this\nisTEST\nvalue")),
             of("replaceFirstByRegExp(.*(te[a-z]+).*, $1, this\nis\ntest\nvalue)",                   Optional.of("test"))
@@ -65,13 +67,13 @@ class ReplaceByRegExpProcessorTests
     @MethodSource("expressionInput")
     void testExecute(String input, Optional<String> expectedResult)
     {
-        assertEquals(expectedResult, processor.execute(input));
+        assertEquals(expectedResult, processors.execute(input));
     }
 
     @Test
     void testExecuteWithPatterException()
     {
         assertThrows(PatternSyntaxException.class,
-            () -> processor.execute("replaceFirstByRegExp(},{, $1, justAString)"));
+            () -> processors.execute("replaceFirstByRegExp(}{, $1, justAString)"));
     }
 }

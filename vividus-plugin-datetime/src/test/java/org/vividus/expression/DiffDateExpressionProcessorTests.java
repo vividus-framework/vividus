@@ -20,12 +20,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
-import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -35,33 +36,33 @@ import org.vividus.util.DateUtils;
 class DiffDateExpressionProcessorTests
 {
     private final DiffDateExpressionProcessor processor = new DiffDateExpressionProcessor(
-            new DateUtils(ZoneId.of("GMT-0")));
+            new DateUtils(ZoneId.of("GMT-0")), new FluentEnumConverter());
 
     static Stream<Arguments> diffDateProvider()
     {
         // CHECKSTYLE:OFF
         // @formatter:off
         return Stream.of(
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT0S"               ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:02.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, plumbus)", "PT2S"               ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.353Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT0.02S"            ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:03:03.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT3M3S"             ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T11:05:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "-PT55M"             ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T11:05:03.353Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "-PT54M56.98S"       ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-02T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT24H"              ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2018-02-02T11:05:00.352Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "-PT7992H54M59.981S" ),
-            Arguments.of("diffDate(10042019 13:20:43 GMT,             ddMMyyyy HH:mm:ss zzz,       10042019 06:22:43 US/Pacific, ddMMyyyy HH:mm:ss zzz)",                "PT2M"               ),
-            Arguments.of("diffDate(\"10 Apr 2019 13:20:43\",          \"dd MMM yyyy HH:mm:ss\",    10 Apr 2019 09:20:43,         dd MMM yyyy HH:mm:ss)",                 "-PT4H"              ),
-            Arguments.of("diffDate(Wed\\, 10 Apr\\, 2019\\, 13,EEE\\, dd MMM\\, yyyy\\, HH,        2019-04-10 03,                yyyy-MM-dd HH)",                        "-PT10H"             ),
-            Arguments.of("diffDate(Wed\\, 10 Apr\\, 2019\\, 13,EEE\\, dd MMM\\, yyyy\\, HH,        2019\\,04\\,10 03,            yyyy\\,MM\\,dd HH)",                    "-PT10H"             ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, days)",    "365"                ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, Hours)",   "8760"               ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, mInuteS)", "525600"             ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.555Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, milliS)",  "222"                ),
-            Arguments.of("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.555Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, nanos)",   "222000000"          )
+            arguments("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT0S"               ),
+            arguments("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.353Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT0.02S"            ),
+            arguments("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:03:03.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT3M3S"             ),
+            arguments("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T11:05:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "-PT55M"             ),
+            arguments("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T11:05:03.353Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "-PT54M56.98S"       ),
+            arguments("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-02T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "PT24H"              ),
+            arguments("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2018-02-02T11:05:00.352Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV)",          "-PT7992H54M59.981S" ),
+            arguments("diffDate(10042019 13:20:43 GMT,             ddMMyyyy HH:mm:ss zzz,       10042019 06:22:43 US/Pacific, ddMMyyyy HH:mm:ss zzz)",                "PT2M"               ),
+            arguments("diffDate(\"10 Apr 2019 13:20:43\",          \"dd MMM yyyy HH:mm:ss\",    10 Apr 2019 09:20:43,         dd MMM yyyy HH:mm:ss)",                 "-PT4H"              ),
+            arguments("diffDate(Wed\\, 10 Apr\\, 2019\\, 13,EEE\\, dd MMM\\, yyyy\\, HH,        2019-04-10 03,                yyyy-MM-dd HH)",                        "-PT10H"             ),
+            arguments("diffDate(Wed\\, 10 Apr\\, 2019\\, 13,EEE\\, dd MMM\\, yyyy\\, HH,        2019\\,04\\,10 03,            yyyy\\,MM\\,dd HH)",                    "-PT10H"             ),
+            arguments("diffDate(\"\"\"11, Apr\\, 2019\"\"\",       \"\"\"dd, MMM\\, yyyy\"\"\", \"\"\"2019\\,04,10\"\"\",     \"\"\"yyyy\\,MM,dd\"\"\")",             "-PT24H"             ),
+            arguments("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, days)",    "365"                ),
+            arguments("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, Hours)",   "8760"               ),
+            arguments("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2020-01-01T12:00:00.333Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, mInuteS)", "525600"             ),
+            arguments("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.555Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, milliS)",  "222"                ),
+            arguments("diffDate(2019-01-01T12:00:00.333Z,          yyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.555Z,     yyyy-MM-dd'T'HH:mm:ss.SSSVV, nanos)",   "222000000"          )
         );
-        // CHECKSTYLE:ON
         // @formatter:on
+        // CHECKSTYLE:ON
     }
 
     @ParameterizedTest(name = "{index}: for expression \"{0}\", accepted is \"{1}\"")
@@ -74,13 +75,16 @@ class DiffDateExpressionProcessorTests
     @Test
     void testExecuteDiffDateIncorrectExpression()
     {
-        assertEquals(Optional.empty(), processor.execute("diffDate()"));
+        var exception = assertThrows(IllegalArgumentException.class, () -> processor.execute("diffDate(x)"));
+        assertEquals(
+                "The expected number of arguments for 'diffDate' expression is from 4 to 5, but found 1 argument: 'x'",
+                exception.getMessage());
     }
 
     @Test
     void testExecuteUnsupportedSymbols()
     {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> processor.execute(
+        var exception = assertThrows(IllegalArgumentException.class, () -> processor.execute(
                 "diffDate(2019-01-01T12:00:00.333Z, fyyyy-MM-dd'T'HH:mm:ss.SSSVV, 2019-01-01T12:00:00.333Z, "
                         + "yyyy-MM-dd'T'HH:mm:ss.SSSVV)"));
         assertEquals("Unknown pattern letter: f", exception.getMessage());
@@ -89,8 +93,8 @@ class DiffDateExpressionProcessorTests
     @Test
     void testExecuteIncorrectFormat()
     {
-        String inputDate = "2019-01-01T12:00:00.333Z";
-        DateTimeParseException exception = assertThrows(DateTimeParseException.class,
+        var inputDate = "2019-01-01T12:00:00.333Z";
+        var exception = assertThrows(DateTimeParseException.class,
             () -> processor.execute("diffDate(" + inputDate + ", yyyy-MM-dd, 2019-01-01, yyyy-MM-dd)"));
         assertThat(exception.getMessage(), containsString(String.format("Text '%s' could not be parsed", inputDate)));
     }

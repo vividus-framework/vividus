@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +17,32 @@
 package org.vividus.expression;
 
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
+import org.apache.commons.lang3.Validate;
+
 @Named
-public class RandomIntExpressionProcessor extends AbstractExpressionProcessor<Integer>
+public class RandomIntExpressionProcessor extends BiArgExpressionProcessor<Integer>
 {
-    private static final String INT_NUMBER_REGEX = "(-?[1-9]\\d*|0)";
-    private static final Pattern RANDOM_VALUE_PATTERN = Pattern.compile(
-            "^randomInt\\(" + INT_NUMBER_REGEX + ",\\s*" + INT_NUMBER_REGEX + "\\)$", Pattern.CASE_INSENSITIVE);
+    private static final String EXPRESSION_NAME = "randomInt";
+    private static final Pattern INT_NUMBER_PATTERN = Pattern.compile("(-?[1-9]\\d*|0)");
 
     public RandomIntExpressionProcessor()
     {
-        super(RANDOM_VALUE_PATTERN);
+        super(EXPRESSION_NAME, (minInclusive, maxInclusive) -> {
+            validateInteger(minInclusive, "first");
+            validateInteger(maxInclusive, "second");
+            return ThreadLocalRandom.current().nextInt(Integer.parseInt(minInclusive),
+                    Integer.parseInt(maxInclusive) + 1);
+        });
     }
 
-    @Override
-    protected Integer evaluateExpression(Matcher expressionMatcher)
+    private static void validateInteger(String arg, String argIndex)
     {
-        int minInclusive = Integer.parseInt(expressionMatcher.group(1));
-        int maxInclusive = Integer.parseInt(expressionMatcher.group(2));
-        return ThreadLocalRandom.current().nextInt(minInclusive, maxInclusive + 1);
+        Validate.isTrue(INT_NUMBER_PATTERN.matcher(arg).matches(),
+                "The %s argument of '%s' expression must be an integer, but found: '%s'", argIndex, EXPRESSION_NAME,
+                arg);
     }
 }

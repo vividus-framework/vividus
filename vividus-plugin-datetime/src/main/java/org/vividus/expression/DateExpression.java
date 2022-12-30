@@ -25,93 +25,47 @@ import java.util.regex.Matcher;
 
 import org.apache.commons.lang3.StringUtils;
 
-public final class DateExpression implements NormalizingArguments
+public final class DateExpression
 {
-    private static final String DURATION_DESIGNATOR = "P";
+    private static final int DURATION_DESIGNATOR_GROUP = 1;
+    private static final int DATE_GROUP = 2;
+    private static final int TIME_GROUP = 3;
 
-    private final String periodString;
-    private final String durationString;
-    private final String customFormatString;
-    private final String minusSign;
+    private final String durationDesignator;
+    private final String dateString;
+    private final String timeString;
+    private final String outputFormatString;
 
-    public DateExpression(Matcher matcher, int minusSignGroup, int periodGroup, int durationGroup,
-            int formatGroup)
+    public DateExpression(Matcher durationMatcher, String outputFormatString)
     {
-        periodString = matcher.group(periodGroup);
-        durationString = matcher.group(durationGroup);
-        customFormatString = matcher.group(formatGroup);
-        minusSign = matcher.group(minusSignGroup);
+        durationDesignator = durationMatcher.group(DURATION_DESIGNATOR_GROUP);
+        dateString = durationMatcher.group(DATE_GROUP);
+        timeString = durationMatcher.group(TIME_GROUP);
+        this.outputFormatString = outputFormatString;
     }
 
     public String format(ZonedDateTime zonedDateTime, Locale locale)
     {
-        DateTimeFormatter format = DateTimeFormatter.ISO_LOCAL_DATE;
+        DateTimeFormatter outputFormat = DateTimeFormatter.ISO_LOCAL_DATE;
         ZonedDateTime result = zonedDateTime;
-        if (hasPeriod())
+        if (exists(dateString))
         {
-            result = processPeriod(result);
+            result = result.plus(Period.parse(durationDesignator + dateString));
         }
-        if (hasDuration())
+        if (exists(timeString))
         {
-            result = processDuration(result);
-            format = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+            result = result.plus(Duration.parse(durationDesignator + timeString));
+            outputFormat = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         }
-        if (hasCustomFormat())
+        if (exists(outputFormatString))
         {
-            format = DateTimeFormatter.ofPattern(getCustomFormatString(), locale);
+            outputFormat = DateTimeFormatter.ofPattern(outputFormatString, locale);
         }
-        return result.format(format);
-    }
-
-    public boolean hasPeriod()
-    {
-        return exists(periodString);
-    }
-
-    public boolean hasDuration()
-    {
-        return exists(durationString);
-    }
-
-    public boolean hasCustomFormat()
-    {
-        return exists(customFormatString);
-    }
-
-    public String getCustomFormatString()
-    {
-        return normalize(customFormatString);
-    }
-
-    public ZonedDateTime processPeriod(ZonedDateTime zonedDateTime)
-    {
-        Period period = Period.parse(DURATION_DESIGNATOR + getPeriodString());
-        return !hasMinusSign() ? zonedDateTime.plus(period) : zonedDateTime.minus(period);
-    }
-
-    public ZonedDateTime processDuration(ZonedDateTime zonedDateTime)
-    {
-        Duration duration = Duration.parse(DURATION_DESIGNATOR + getDurationString());
-        return !hasMinusSign() ? zonedDateTime.plus(duration) : zonedDateTime.minus(duration);
+        return result.format(outputFormat);
     }
 
     private boolean exists(String valueToCheck)
     {
         return StringUtils.isNotEmpty(valueToCheck);
-    }
-
-    private String getPeriodString()
-    {
-        return periodString;
-    }
-
-    private String getDurationString()
-    {
-        return durationString;
-    }
-
-    private boolean hasMinusSign()
-    {
-        return exists(minusSign);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
@@ -38,28 +36,15 @@ import org.apache.parquet.hadoop.util.HadoopOutputFile;
 import org.vividus.csv.CsvReader;
 import org.vividus.util.ResourceUtils;
 
-public class ConvertCsvToParquetFileExpressionProcessor extends AbstractExpressionProcessor<String>
+public class ConvertCsvToParquetFileExpressionProcessor extends BiArgExpressionProcessor<String>
 {
-    private static final Pattern CONVERT_CSV_TO_PARQUET_PATTERN = Pattern
-            .compile("^convertCsvToParquetFile\\((.+), (.+)\\)$");
-
-    private static final int CSV_PATH_GROUP = 1;
-    private static final int SCHEMA_PATH_GROUP = 2;
-
-    private final CsvReader csvReader;
-
     public ConvertCsvToParquetFileExpressionProcessor(CsvReader csvReader)
     {
-        super(CONVERT_CSV_TO_PARQUET_PATTERN);
-        this.csvReader = csvReader;
+        super("convertCsvToParquetFile", (csvPath, schemaPath) -> createParquetFile(csvReader, csvPath, schemaPath));
     }
 
-    @Override
-    protected String evaluateExpression(Matcher expressionMatcher)
+    private static String createParquetFile(CsvReader csvReader, String csvPath, String schemaPath)
     {
-        String csvPath = expressionMatcher.group(CSV_PATH_GROUP);
-        String schemaPath = expressionMatcher.group(SCHEMA_PATH_GROUP);
-
         try
         {
             List<Map<String, String>> csvData = csvReader.readCsvString(ResourceUtils.loadResource(csvPath));
@@ -74,7 +59,7 @@ public class ConvertCsvToParquetFileExpressionProcessor extends AbstractExpressi
         }
     }
 
-    private void write(File file, String avroSchemaPath, List<Map<String, String>> data) throws IOException
+    private static void write(File file, String avroSchemaPath, List<Map<String, String>> data) throws IOException
     {
         Schema schema = new Parser().parse(ResourceUtils.loadResource(avroSchemaPath));
         try (ParquetWriter<GenericRecord> writer = AvroParquetWriter
