@@ -77,6 +77,7 @@ import org.vividus.db.DataSourceManager;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.util.Sleeper;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
 import org.vividus.variable.VariableScope;
 
@@ -245,7 +246,7 @@ class DatabaseStepsTests
     void shouldCompareSqlStatesSQLExceptionIsThrown() throws SQLException
     {
         String sqlState = "28000";
-        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
+        DriverManagerDataSource dataSource = mockDataSourceRetrieval(DB_KEY);
         SQLException exception = mock(SQLException.class);
         when(exception.getSQLState()).thenReturn(sqlState);
         doThrow(exception).when(dataSource).getConnection(ADMIN, ADMIN);
@@ -257,7 +258,7 @@ class DatabaseStepsTests
     void shouldCompareSqlStatesSuccessConnection() throws SQLException
     {
         String sqlState = "00000";
-        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
+        DriverManagerDataSource dataSource = mockDataSourceRetrieval(DB_KEY);
         Connection connection = mock(Connection.class);
         when(dataSource.getConnection(ADMIN, ADMIN)).thenReturn(connection);
         databaseSteps.verifySqlState(DB_KEY, ADMIN, ADMIN, StringComparisonRule.IS_EQUAL_TO, sqlState);
@@ -363,9 +364,20 @@ class DatabaseStepsTests
     void shouldThrowTimeoutExceptionIfQueryTakesTooMuchTime()
     {
         databaseSteps.setDbQueryTimeout(Duration.ofNanos(0));
-        mockDataSourceRetrieval();
+
+        DriverManagerDataSource dataSource1 = mockDataSource(DB_KEY);
+        JdbcTemplate jdbcTemplate1 = mockJdbcTemplate(DB_KEY, dataSource1);
+        lenient().when(jdbcTemplate1.queryForList(QUERY)).thenAnswer((Answer<List<Map<String, Object>>>) invocation -> {
+            Sleeper.sleep(Duration.ofSeconds(1));
+            return List.of();
+        });
+
+        DriverManagerDataSource dataSource2 = mockDataSource(DB_KEY2);
+        JdbcTemplate jdbcTemplate2 = mockJdbcTemplate(DB_KEY2, dataSource2);
+        lenient().when(jdbcTemplate2.queryForList(QUERY)).thenReturn(List.of());
+
         assertThrows(TimeoutException.class,
-            () -> databaseSteps.compareData(QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, QUERY, DB_KEY, KEYS));
+            () -> databaseSteps.compareData(QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, QUERY, DB_KEY2, KEYS));
         verifyNoInteractions(attachmentPublisher, softAssert);
     }
 
@@ -600,30 +612,38 @@ class DatabaseStepsTests
 
     private void mockDataSource()
     {
-        DriverManagerDataSource dataSource = mockDataSourceRetrieval();
+        DriverManagerDataSource dataSource = mockDataSourceRetrieval(DB_KEY);
         when(dataSource.getUrl()).thenReturn(DB_URL);
     }
 
-    private DriverManagerDataSource mockDataSourceRetrieval()
+    private DriverManagerDataSource mockDataSourceRetrieval(String dbKey)
     {
-        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
-        String dbKey = DB_KEY;
-        lenient().when(dataSourceManager.getDataSource(dbKey)).thenReturn(dataSource);
-        JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
-        lenient().when(dataSourceManager.getJdbcTemplate(dbKey)).thenReturn(jdbcTemplate);
-        lenient().when(jdbcTemplate.getDataSource()).thenReturn(dataSource);
+        DriverManagerDataSource dataSource = mockDataSource(dbKey);
+        mockJdbcTemplate(dbKey, dataSource);
         return dataSource;
     }
 
     private void mockQueryForList(String query, String dbKey, List<Map<String, Object>> result)
     {
-        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
+        DriverManagerDataSource dataSource = mockDataSource(dbKey);
         lenient().when(dataSource.getUrl()).thenReturn(DB_URL);
+        JdbcTemplate jdbcTemplate = mockJdbcTemplate(dbKey, dataSource);
+        when(jdbcTemplate.queryForList(query)).thenReturn(result);
+    }
+
+    private JdbcTemplate mockJdbcTemplate(String dbKey, DriverManagerDataSource dataSource)
+    {
         JdbcTemplate jdbcTemplate = mock(JdbcTemplate.class);
         lenient().when(jdbcTemplate.getDataSource()).thenReturn(dataSource);
-        when(jdbcTemplate.queryForList(query)).thenReturn(result);
         when(dataSourceManager.getJdbcTemplate(dbKey)).thenReturn(jdbcTemplate);
+        return jdbcTemplate;
+    }
+
+    private DriverManagerDataSource mockDataSource(String dbKey)
+    {
+        DriverManagerDataSource dataSource = mock(DriverManagerDataSource.class);
         when(dataSourceManager.getDataSource(dbKey)).thenReturn(dataSource);
+        return dataSource;
     }
 
     private void configureTimeout()
