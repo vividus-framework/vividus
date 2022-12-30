@@ -33,7 +33,7 @@ import org.vividus.util.ResourceUtils;
 
 class HashExpressionProcessorsTests
 {
-    private final HashExpressionProcessors processor = new HashExpressionProcessors(new FluentEnumConverter());
+    private final HashExpressionProcessors processors = new HashExpressionProcessors(new FluentEnumConverter());
 
     @ParameterizedTest
     @CsvSource({
@@ -50,7 +50,7 @@ class HashExpressionProcessorsTests
     })
     void shouldCalculateStringHash(String expression, String expected)
     {
-        assertEquals(Optional.of(expected), processor.execute(expression));
+        assertEquals(Optional.of(expected), processors.execute(expression));
     }
 
     @ParameterizedTest
@@ -66,7 +66,7 @@ class HashExpressionProcessorsTests
     })
     void shouldCalculateFileHash(String expression, String expected)
     {
-        assertEquals(Optional.of(expected), processor.execute(expression));
+        assertEquals(Optional.of(expected), processors.execute(expression));
     }
 
     @Test
@@ -79,7 +79,7 @@ class HashExpressionProcessorsTests
             resourceUtilsMockedStatic.when(() -> ResourceUtils.loadResourceOrFileAsByteArray(resourceOrFilePath))
                     .thenThrow(ioException);
             var uncheckedIOException = assertThrows(UncheckedIOException.class,
-                    () -> processor.execute(String.format("calculateFileHash(SHA-1, %s)", resourceOrFilePath)));
+                    () -> processors.execute(String.format("calculateFileHash(SHA-1, %s)", resourceOrFilePath)));
             assertEquals(ioException, uncheckedIOException.getCause());
         }
     }

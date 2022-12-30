@@ -24,8 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Optional;
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -62,7 +60,7 @@ class RandomIntExpressionProcessorTests
     })
     void shouldGenerateRandomIntSuccessfully(String expression, int minInclusive, int maxInclusive)
     {
-        Optional<Integer> expressionResult = processor.execute(expression);
+        var expressionResult = processor.execute(expression);
         assertTrue(expressionResult.isPresent());
         assertThat(expressionResult.get(), allOf(greaterThanOrEqualTo(minInclusive), lessThanOrEqualTo(maxInclusive)));
     }

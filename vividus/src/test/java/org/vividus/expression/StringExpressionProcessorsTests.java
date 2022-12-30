@@ -51,12 +51,12 @@ class StringExpressionProcessorsTests
     private static final String BASE_64 = "YmlnIGRhdGE=";
 
     @Mock private ILocationProvider locationProvider;
-    @InjectMocks private StringExpressionProcessors processor;
+    @InjectMocks private StringExpressionProcessors processors;
 
     @Test
     void testExecuteWithUnsupportedException()
     {
-        assertEquals(Optional.empty(), processor.execute("removeWrappingDoubleQuotes(\"value\")"));
+        assertEquals(Optional.empty(), processors.execute("removeWrappingDoubleQuotes(\"value\")"));
     }
 
     static Stream<Arguments> expressionSource()
@@ -122,7 +122,7 @@ class StringExpressionProcessorsTests
     @MethodSource("expressionSource")
     void testExecute(String expression, String expected)
     {
-        assertEquals(expected, processor.execute(expression).get());
+        assertEquals(expected, processors.execute(expression).get());
     }
 
     @ParameterizedTest
@@ -132,7 +132,7 @@ class StringExpressionProcessorsTests
     })
     void shouldExecuteLocalizedExpressions(String expression)
     {
-        String result = processor.execute("generateLocalized(" + expression + ", ru-RU)").get();
+        String result = processors.execute("generateLocalized(" + expression + ", ru-RU)").get();
         assertThat(result, matchesPattern("[А-яёЁ0-9 ,.-]+"));
     }
 
@@ -140,13 +140,13 @@ class StringExpressionProcessorsTests
     void shouldGenerateDataBasedOnNonLocalizedExpression()
     {
         when(locationProvider.getLocale()).thenReturn(Locale.US);
-        assertEquals("AA", processor.execute("generate(regexify '[A]{2}')").get());
+        assertEquals("AA", processors.execute("generate(regexify '[A]{2}')").get());
     }
 
     @Test
     void shouldPickRandomValue()
     {
-        assertThat(processor.execute("anyOf(one,two, three\\, or,, \"\"\"four\\,five\"\"\")").get(),
+        assertThat(processors.execute("anyOf(one,two, three\\, or,, \"\"\"four\\,five\"\"\")").get(),
                 anyOf(equalTo("one"), equalTo("two"), equalTo("three, or"), equalTo("four\\,five"), emptyString()));
     }
 
@@ -161,7 +161,7 @@ class StringExpressionProcessorsTests
     })
     void shouldAssertParametersNumberWhenSubstring(String expression, String errorMessage)
     {
-        var exception = assertThrows(IllegalArgumentException.class, () -> processor.execute(expression));
+        var exception = assertThrows(IllegalArgumentException.class, () -> processors.execute(expression));
         assertEquals(errorMessage, exception.getMessage());
     }
 }

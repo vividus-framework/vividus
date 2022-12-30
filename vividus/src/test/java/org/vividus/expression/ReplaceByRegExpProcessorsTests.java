@@ -31,7 +31,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class ReplaceByRegExpProcessorsTests
 {
-    private final ReplaceByRegExpProcessors processor = new ReplaceByRegExpProcessors();
+    private final ReplaceByRegExpProcessors processors = new ReplaceByRegExpProcessors();
 
     static Stream<Arguments> expressionInput()
     {
@@ -67,13 +67,13 @@ class ReplaceByRegExpProcessorsTests
     @MethodSource("expressionInput")
     void testExecute(String input, Optional<String> expectedResult)
     {
-        assertEquals(expectedResult, processor.execute(input));
+        assertEquals(expectedResult, processors.execute(input));
     }
 
     @Test
     void testExecuteWithPatterException()
     {
         assertThrows(PatternSyntaxException.class,
-            () -> processor.execute("replaceFirstByRegExp(}{, $1, justAString)"));
+            () -> processors.execute("replaceFirstByRegExp(}{, $1, justAString)"));
     }
 }
