@@ -82,12 +82,13 @@ class ExpressionAdapterTests
 
     @ParameterizedTest
     @CsvSource({
-        "'target',         '#{target}',                                %s,             " + EXPRESSION_RESULT,
-        "'target',         '{#{target}}',                              {%s},           " + EXPRESSION_RESULT,
-        "'target',         '{#{target} and #{target}}',                {%1$s and %1$s}," + EXPRESSION_RESULT,
-        "'target(})',      '#{target(})}',                             %s,             " + EXPRESSION_RESULT,
-        "'tar\nget',       '#{tar\nget}',                              %s,             " + EXPRESSION_RESULT,
-        "'expr(value{1})', '#{expr(#{expr(#{expr(value{1})})})}',      %s,                 value{1}"
+        "'target',                    '#{target}',                           %s,             " + EXPRESSION_RESULT,
+        "'target',                    '{#{target}}',                         {%s},           " + EXPRESSION_RESULT,
+        "'target',                    '{#{target} and #{target}}',           {%1$s and %1$s}," + EXPRESSION_RESULT,
+        "'target(})',                 '#{target(})}',                        %s,             " + EXPRESSION_RESULT,
+        "'tar\nget',                  '#{tar\nget}',                         %s,             " + EXPRESSION_RESULT,
+        "'expr(value{1})',            '#{expr(#{expr(#{expr(value{1})})})}', %s,             value{1}",
+        "'generateDate(-P19Y, yyyy)', '{#{generateDate(-P19Y, yyyy)}\n}',    '{%s\n}',       " + EXPRESSION_RESULT
     })
     void testSupportedExpression(String expressionKeyword, String input, String outputFormat, String outputValue)
     {

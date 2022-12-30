@@ -38,7 +38,7 @@ public class ExpressionAdaptor implements DryRunAwareExecutor
     private static final Pattern GREEDY_EXPRESSION_PATTERN = Pattern.compile("#\\{((?:(?!#\\{|\\$\\{).)*)}",
             Pattern.DOTALL);
     private static final Pattern RELUCTANT_EXPRESSION_PATTERN = Pattern.compile(
-            "#\\{((?:(?![#{]).[^(][^)])*?|(?:(?!#\\{|\\$\\{).)*?\\)|(?:(?!#\\{|\\$\\{).)*?)}",
+            "#\\{((?:(?![#{])[^)][^(][^)])*?|(?:(?!#\\{|\\$\\{).)*?\\)|(?:(?!#\\{|\\$\\{).)*?)}",
             Pattern.DOTALL);
 
     private static final String REPLACEMENT_PATTERN = "\\#\\{%s\\}";

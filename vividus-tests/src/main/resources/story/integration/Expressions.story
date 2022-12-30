@@ -194,3 +194,11 @@ Meta:
 Given I initialize scenario variable `word` with value `"cowabunga"`
 Given I initialize scenario variable `json` with value `{"question":"what is #{escapeJson(${word})}?"}`
 Then `${json}` is equal to `{"question":"what is \"cowabunga\"?"}`
+
+Scenario: Should evaluate expression in multiline string
+Meta:
+    @issueId 3501
+Given I initialize scenario variable `jsonWithYear` with value `{
+    "year": #{generateDate(-P19Y, yyyy)}
+}`
+Then `${jsonWithYear}` matches `\{\s+"year": 200\d\s+}`
