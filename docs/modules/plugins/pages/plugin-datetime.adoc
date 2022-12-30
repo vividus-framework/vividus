@@ -21,8 +21,6 @@ There are no required properties for the plugin.
 
 NOTE: The expression parameters marked with *bold* are mandatory.
 
-TIP: If argument allows meaningful commas (like, parts of the date format pattern) should be escaped using `\` or the whole argument wrapped into """. Refer to examples for each expression.
-
 === `generateDate`
 
 Generates the date using current date as a baseline.

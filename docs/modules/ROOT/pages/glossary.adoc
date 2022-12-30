@@ -133,10 +133,139 @@ of the expression evaluation. If expression is unknown for VIVIDUS,
 the placeholder will be kept as is. If expression evaluation results in error,
 it will be propagated to the top level and the test will be marked as broken.
 
-It's allowed to construct nested expressions: in this case the evaluation starts
-with the deepest expression.
+Expression accepts 1 or more arguments as input parameters. It's allowed to
+construct nested expressions: in this case the evaluation starts with the
+deepest expression.
 
 Expressions may include any number of variables placeholders.
+
+=== Single argument expressions
+
+Expressions accepting exactly 1 argument process it as is:
+
+* all leading and trailing spaces are preserved
+* no symbols are changed or removed
+
+|===
+|Expression |Resulting argument
+
+|`#{expression(x)}`
+|`x`
+
+|`#{expression( x )}`
+|+++<code style="white-space: pre"> x </code>+++
+
+|`#{expression( x, y, z )}`
+|+++<code style="white-space: pre"> x, y, z </code>+++
+
+|`#{expression( x\, y\, z )}`
+|+++<code style="white-space: pre"> x\, y\, z </code>+++
+
+|`#{expression(""" x, y, z """)}`
+|`""" x, y, z """`
+
+|===
+
+=== Multi argument expressions
+
+The rules used for processing of expressions accepting more than 1 argument are
+following:
+
+* comma `,` is a delimiter for arguments
++
+|===
+|Expression |Resulting arguments
+
+|`#{expression(x,y)}`
+a|argument 1: `x`
+
+argument 2: `y`
+
+|`#{expression(x:a,y;b,z)}`
+a|argument 1: `x:a`
+
+argument 2: `y;b`
+
+argument 3: `z`
+
+|`#{expression(x,)}`
+a|argument 1: `x`
+
+argument 2: <empty string>
+
+|===
+
+* all leading and trailing argument spaces are trimmed
++
+|===
+|Expression |Resulting arguments
+
+|`#{expression(x, y)}`
+a|argument 1: `x`
+
+argument 2: `y`
+
+|`#{expression( x , y , z )}`
+a|argument 1: `x`
+
+argument 2: `y`
+
+argument 3: `z`
+
+|`#{expression( x , )}`
+a|argument 1: `x`
+
+argument 2: <empty string>
+
+|===
+
+* meaningful commas (not used as delimiters) can be added to arguments in 2 ways:
+** escape comma using backslash `\`
++
+|===
+|Expression |Resulting arguments
+
+|`#{expression(x\,a, y\, b)}`
+a|argument 1: `x,a`
+
+argument 2: `y, b`
+
+|`#{expression( x \, a , y\,b ,  )}`
+a|argument 1: `x , a`
+
+argument 2: `y,b`
+
+argument 3: <empty string>
+
+|===
+
+** wrap argument into triple quotes (it might be convenient when arguments are
+get dynamically (e.g. from HTTP response) and escaping of such values could be a
+bit complicated)
++
+NOTE: The leading and trailing spaces outside triple quotes are trimmed, but the leading and trailing spaces inside triple quotes are preserved.
++
+|===
+|Expression |Resulting arguments
+
+|`#{expression( """x,a""" , y\, b)}`
+a|argument 1: `x,a`
+
+argument 2: `y, b`
+
+|`#{expression( x , """ y\,b """)}`
+a|NOTE: Escaping of commas in triple quotes is not allowed, all data is used as argument value.
+
+argument 1: `x`
+
+argument 2: +++<code style="white-space: pre"> y\,b </code>+++
+
+|`#{expression( x , """""")}`
+a|argument 1: `x`
+
+argument 2: <empty string>
+
+|===
 
 == Resource
 *Synonyms*: project resource, test resource.
