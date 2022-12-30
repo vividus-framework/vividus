@@ -4,331 +4,331 @@
 |Result
 
 |Address.buildingNumber
-|252
+|0327
 
 |Address.city
-|Gusikowskifort
+|North Lurline
 
 |Address.cityName
-|New Herlindatown
+|Kemmerville
 
 |Address.cityPrefix
-|Port
+|East
 
 |Address.citySuffix
-|land
+|bury
 
 |Address.country
-|Netherlands Antilles
+|Saudi Arabia
 
 |Address.countryCode
-|CC
+|DE
 
 |Address.fullAddress
-|27564 Stiedemann Way, South Freedaburgh, CT 10861
+|04870 Stoltenberg Forks, Gutkowskihaven, KY 17285
 
 |Address.latLon
-|28.87582600,-2.29991444
+|-72.04661208,97.60805702
 
 |Address.latLon '; '
-|-10.53028029; 93.94233404
+|79.55899331; 132.08817670
 
 |Address.latitude
-|64.90253713
+|32.93452132
 
 |Address.lonLat
-|-49.61155061,40.66987806
+|-110.45656339,-9.60818806
 
 |Address.lonLat '; '
-|0.41366234; -82.21679056
+|-92.67379923; -39.49502725
 
 |Address.longitude
-|163.09951159
+|-61.44111246
 
 |Address.mailBox
-|PO Box 3912
+|PO Box 20
 
 |Address.postcode
-|00205
+|19387
 
 |Address.secondaryAddress
-|Suite 311
+|Suite 476
 
 |Address.state
-|Colorado
+|Wisconsin
 
 |Address.stateAbbr
-|MS
+|MA
 
 |Address.streetAddress
-|6398 Arlie Cliffs
+|3946 Larson Isle
 
 |Address.streetAddress 'true'
-|131 Dane Hills Apt. 463
+|857 Hillary Ville Suite 468
 
 |Address.streetAddressNumber
-|298
+|160
 
 |Address.streetName
-|Murphy Pines
+|Nolan Greens
 
 |Address.streetPrefix
 |xx
 
 |Address.streetSuffix
-|Ramp
+|Well
 
 |Address.timeZone
-|America/Indiana/Indianapolis
+|Europe/Ljubljana
 
 |Address.zipCode
-|94820
+|16136
 
-|Address.zipCodeByState 'WA'
-|990##
+|Address.zipCodeByState 'NY'
+|122##
 
 |Address.zipCodePlus4
-|15356-4905
+|22405-3454
 
 |Ancient.god
-|Demeter
+|Hera
 
 |Ancient.hero
-|Achilles
+|Hercules
 
 |Ancient.primordial
-|Uranus
+|Hypnos
 
 |Ancient.titan
-|Hyperion
+|Tethys
 
 |Animal.genus
-|Cricetus
+|Microtus
 
 |Animal.name
-|mole
+|alpaca
 
 |Animal.scientificName
-|Spilogale grosbeak
+|Meles gladifer
 
 |Animal.species
-|nghetinhensis
+|bivittatus
 
 |App.author
-|Graig Mayer
+|Smitham, Klein and Beer
 
 |App.name
-|Zontrax
+|Cardify
 
 |App.version
-|0.96
+|0.04
 
 |Appliance.brand
-|Amana
+|Whirlpool
 
 |Appliance.equipment
-|Exhaust hood
+|Refrigerator
 
 |AquaTeenHungerForce.character
-|Meatwad
+|Skeeter
 
 |Artist.name
-|Munch
+|Joan Miro
 
 |Australia.animals
-|Australian fur seal
+|redback spider
 
 |Australia.locations
-|Toowoomba
+|Mackay
 
 |Australia.states
-|Tasmania
+|Western Australia
 
 |Avatar.image
-|https://robohash.org/nlzrfqka.png
+|https://robohash.org/amsmafge.png
 
 |Aviation.METAR
-|METAR: ZSPD 311400Z 12002MPS 080V190 9999 -SHRA NSC 23/22 Q1008 NOSIG
+|METAR: YPPH 011730Z 01004KT CAVOK 09/08 Q1021 NOSIG
 
 |Aviation.aircraft
-|F-4
+|Il-76
 
 |Aviation.airline
-|Skymark Airlines
+|Scandinavian Airlines
 
 |Aviation.airport
-|GAYE
+|SVMI
 
 |Aviation.flight
-|QK4914
+|VA1467
 
 |Aviation.flight 'ICAO'
-|JNA1648
+|WJA6626
 
 |Aws.accountId
-|0634081837
+|0049806700
 
 |Aws.acmARN
-a|arn:aws:acm:us-west-2:0884446127:certificate/1948273f-0087-46a6-9dc0-5 +
-7749a0749c5
+a|arn:aws:acm:us-east-1:0702963329:certificate/6e2d5c66-19b7-4394-9bd6-5 +
+5813b3ea961
 
 |Aws.albARN
-a|arn:aws:elasticloadbalancing:af-south-1:0517124453:loadbalancer/app/te +
-mpsoft/4d1e44723cdd617f
+a|arn:aws:elasticloadbalancing:us-east-1:0530028006:loadbalancer/app/zam +
+it/96a662633ef3fd39
 
 |Aws.albTargetGroupARN
-a|arn:aws:elasticloadbalancing:ap-northeast-2:0050223284:targetgroup/hom +
-eing/12102d8612a9b876
+a|arn:aws:elasticloadbalancing:eu-west-2:0351511578:targetgroup/wrapsafe +
+/2fb824a6637cbaa9
 
 |Aws.region
-|us-west-1
+|af-south-1
 
 |Aws.route53ZoneId
-|SEURGDJYUTLJSRZQBHPTN
+|BRRKFQSRBRMYRSHDDMQSR
 
 |Aws.securityGroupId
-|sg-4cbf4db3a7f45b32
+|sg-1229cd4df10872fd
 
 |Aws.subnetId
-|subnet-4cd2b185e6d805b7
+|subnet-a1ed1b4c31e80fb7
 
 |Aws.vpcId
-|vpc-9d5cf660fd7c67f5
+|vpc-17d3a9339edda7a7
 
 |Azure.appServiceEnvironment
-|ase-46326213cc2fe0d8
+|ase-ca24ee5501a1d76e
 
 |Azure.appServicePlan
-|asp-ba248fe0de9dcf34
+|asp-7b558385138e028f
 
 |Azure.applicationGateway
-|agw-93ee532af0ab36c8
+|agw-a605f02119562c7c
 
 |Azure.bastionHost
-|bas-63f85d1afbe3ae91
+|bas-e8187ab35b6a8586
 
 |Azure.containerApps
-|ca-81bc1627b72b3c75
+|ca-d51c5a46b76b1de0
 
 |Azure.containerAppsEnvironment
-|cae-87951fdd620c84d6
+|cae-816c999184570019
 
 |Azure.containerInstance
-|ci-93f26b29be747e46
+|ci-db4e7a4eca9bb488
 
 |Azure.containerRegistry
-|cr-56759e075b060b7c
+|cr-97fe7567daf00a58
 
 |Azure.cosmosDBDatabase
-|cosmos-9aac3e18caabdaf6
+|cosmos-b183f9d0375782a1
 
 |Azure.firewall
-|afw-3672f1e639d52d3a
+|afw-a9bdef760d3dfc8c
 
 |Azure.keyVault
-|kv-8655ec2016385cff
+|kv-8797b94f30403dee
 
 |Azure.loadBalancer
-|lbi-b19dab5dc30d03b0
+|lbi-7ed4d19cd573cfdb
 
 |Azure.loadTesting
-|lt-c94bebdcd2406c8c
+|lt-c766c59c47cdc9dd
 
 |Azure.logAnalytics
-|log-e91f487d08b23155
+|log-2b8183867beb6ada
 
 |Azure.managementGroup
-|mg-d8d9f7e9c07378c4
+|mg-05a9a3cc2be64917
 
 |Azure.mysqlDatabase
-|mysql-eedab5d639724558
+|mysql-e1ff88573f544c6e
 
 |Azure.networkSecurityGroup
-|nsg-708b138ea6706360
+|nsg-466ae2e0c9854821
 
 |Azure.postgreSQLDatabase
-|psql-0a7d0cb8be284de1
+|psql-4aec92fdab11fad1
 
 |Azure.region
-|westus
+|uae
 
 |Azure.resourceGroup
-|rg-9bf6a69b50d11cd6
+|rg-6e96637469f61bf5
 
 |Azure.serviceBus
-|sb-b44d5d885c2ed746
+|sb-bd11b2993aaa9ce9
 
 |Azure.serviceBusQueue
-|sbq-f3fe056b70f4e1c2
+|sbq-4dcf796fac046ae8
 
 |Azure.serviceBusTopic
-|sbt-53af1c7ce0c37593
+|sbt-27746da22277b94f
 
 |Azure.sqlDatabase
-|sql-f61571778d1ead07
+|sql-030ac1bb36007eb9
 
 |Azure.staticWebApp
-|stapp-cece11d5a27b5d90
+|stapp-68812626022ef04e
 
 |Azure.storageAccount
-|st-8c28d8ef365bcddf
+|st-2f7936e18317dfca
 
 |Azure.subscriptionId
-|2bf7ed77-ae9d-812c-04f1-2e969e92e7b8
+|4b357fe0-8211-84b5-8d42-17403afd4270
 
 |Azure.tenantId
-|fe143d8f-f9bf-3afc-d969-d2c1061cfeb0
+|a7c758a3-5d6a-b7cf-6918-d8d6528bdcda
 
 |Azure.virtualMachine
-|vm-bdea0aa5119a1322
+|vm-f646c39aa01d591f
 
 |Azure.virtualNetwork
-|vnet-df0a79a52bde231b
+|vnet-1b882b1d0724d7c3
 
 |Azure.virtualWan
-|vwan-502d817aa47edae0
+|vwan-9f9820a7b5543e8b
 
 |Babylon5.character
-|Jeffrey Sinclair
+|Warren Keffer
 
 |Babylon5.quote
-|"Warning: Hazardous materials storage facility" -- A sign in a transport ship in Babylon 5:"Revelations"
+|"Nothing. I saw .. nothing." -- Londo in Babylon 5:"The Fall of Night"
 
 |BackToTheFuture.character
-|Mr. Strickland
+|Red The Bum
 
 |BackToTheFuture.date
 |November 5, 1955
 
 |BackToTheFuture.quote
-|What are you looking at, butthead?
+|Radiation suit? Of course. 'Cause of all the fallout from the atomic wars.
 
 |Barcode.ean13
-|2651493081083
+|8561369369785
 
 |Barcode.ean8
-|16334649
+|46712752
 
 |Barcode.gtin12
-|777281620592
+|853803180185
 
 |Barcode.gtin13
-|5183879235829
+|3777742853306
 
 |Barcode.gtin14
-|70378669666790
+|38785837270033
 
 |Barcode.gtin8
-|57903682
+|40118826
 
 |Barcode.type
-|Codabar
+|MSI Plessey
 
 |Baseball.coaches
-|Brian Snitker
+|Torey Lovullo
 
 |Baseball.players
-|Joe Cronin
+|Joe DiMaggio
 
 |Baseball.positions
 |Center Fielder
@@ -337,58 +337,58 @@ eing/12102d8612a9b876
 |Boston Red Sox
 
 |Basketball.coaches
-|Luke Walton
+|Kenny Atkinson
 
 |Basketball.players
-|Dwayne Wade
+|Klay Thompson
 
 |Basketball.positions
-|Point Guard
+|Power Forward
 
 |Basketball.teams
-|Dallas Mavericks
+|Brooklyn Nets
 
 |Battlefield1.classes
-|Trench Raider
+|Medic
 
 |Battlefield1.faction
-|Austro-Hungarian Empire
+|French Republic
 
 |Battlefield1.map
-|Achi Baba
+|Brusilov Keep
 
 |Battlefield1.vehicle
-|Rumpler C.I
+|MC 18J Sidecar
 
 |Battlefield1.weapon
-|Fedorov-Degtyarev
+|Peacekeeper
 
 |Beer.hop
-|Columbus
+|Centennial
 
 |Beer.malt
-|Vienna
+|Munich
 
 |Beer.name
-|St. Bernardus Abt 12
+|Duvel
 
 |Beer.style
 |Merican Ale
 
 |Beer.yeast
-|1099 - Whitbread Ale
+|2308 - Munich Lager
 
 |BigBangTheory.character
-|Debbie Wolowitz
+|Howard Wolowitz
 
 |BigBangTheory.quote
-|Hard as this may be to believe, it’s possible that I’m not boyfriend material.
+|Bazinga!
 
 |BloodType.aboTypes
 |B
 
 |BloodType.bloodGroup
-|B-
+|O-
 
 |BloodType.pTypes
 |P1
@@ -397,164 +397,163 @@ eing/12102d8612a9b876
 |Rh+
 
 |BojackHorseman.characters
-|Pinky Penguin
+|Todd Chavez
 
 |BojackHorseman.quotes
-|Yes, I ate all the muffins, because I have no self-control and I hate myself
+|Beer before liquor, never sicker, liquor before beer, never fear, don't do heroin
 
 |BojackHorseman.tongueTwisters
-|Courtney Portnoy portrayed the formerly portly consort in the seaport resort
+|Courtly roles like the formerly portly consort are Courtney Portnoy's forté
 
 |Book.author
-|Desirae Runte
+|Williams Russel
 
 |Book.genre
-|Science fiction
+|Folklore
 
 |Book.publisher
-|Legend Books
+|Chambers Harrap
 
 |Book.title
-|The Sun Also Rises
+|What's Become of Waring
 
 |Bool.bool
 |true
 
 |BossaNova.artist
-|Bebel Gilberto
+|Antonio Carlos Jobim
 
 |BossaNova.song
-|Samba de Orly
+|Chuva de Prata
 
 |BreakingBad.character
-|'Don' Eladio Vuente
+|Walter White
 
 |BreakingBad.episode
-|I See You
+|Sunset
 
 |BrooklynNineNine.characters
-|Nikolaj Boyle
+|Kevin Cozner
 
 |BrooklynNineNine.quotes
-|If I die, turn my tweets into a book.
+|You should make me your campaign manager. I was born for politics. I have great hair and I love lying.
 
 |Buffy.bigBads
-|Adam
+|Dark Willow
 
 |Buffy.celebrities
-|Clea Duvall
+|Alyson Hannigan
 
 |Buffy.characters
-|Dawn Summers
+|Joyce Summers
 
 |Buffy.episodes
-|Gingerbread
+|I Robot, You Jane
 
 |Buffy.quotes
-|Well, I like you. You're nice, and you're funny, and you don't smoke. Yeah, okay, werewolf, but... that's not all the time. I mean, three days out of the month, I'm not much fun to be around either.
+|You know, I honestly don't think there's a human word fabulous enough for me.
 
 |Business.creditCardExpiry
-|2032-01-11
+|2031-09-04
 
 |Business.creditCardNumber
-|5018-1888-4120-2161
+|5138-4778-7252-7587
 
 |Business.creditCardType
-|maestro
+|discover
 
 |Business.securityCode
-|799
+|467
 
 |Camera.brand
 |Ricoh
 
 |Camera.brandWithModel
-|Canon PowerShot G16
+|Samsung WB2200F
 
 |Camera.model
-|Exilim EX-TR50
+|CX4
 
 |Cat.breed
-|British Longhair
+|Oriental Bicolor
 
 |Cat.name
-|Lily
+|Milo
 
 |Cat.registry
-|Emirates Feline Federation
+|American Cat Fanciers Association
 
 |Chiquito.expressions
-|No puedor
+|Por la gloria de mi madre
 
 |Chiquito.jokes
-a|- Cómo viene de borracho, ¡va usté muy cargado! +
- - ¿Qué quiere que dé dos viajes?
+|Nació un niño tan feo tan feo que la madre en vez de darle el pecho le daba la espalda
 
 |Chiquito.sentences
-|Trabajas menos que el sastre de Tarzán
+|¡Una mala taaaaaaaarde la tiene cualquiera!
 
 |Chiquito.terms
-|¿Cómor?
+|Meretérica
 
 |ChuckNorris.fact
-|Chuck Norris can't test for equality because he has no equal.
+|Chuck Norris doesn't bug hunt, as that signifies a probability of failure. He goes bug killing.
 
 |ClashOfClans.defensiveBuilding
-|Air Bombs
+|Walls
 
 |ClashOfClans.rank
-|Master I
+|Titan III
 
 |ClashOfClans.troop
-|Cannon Cart
+|Skeleton Barrel (Skeleton)
 
 |CNPJ.invalid
-|18.000.184/0653-54
+|71.000.640/1547-99
 
 |CNPJ.invalid 'true'
-|65.000.265/3990-16
+|50.000.690/4997-39
 
 |CNPJ.invalid 'true' 'true'
-|85.000.070/9874-76
+|98.000.148/0072-39
 
 |CNPJ.valid
-|03.134.528/0001-41
+|33.888.062/0001-30
 
 |CNPJ.valid 'true'
-|05.127.022/0001-30
+|04.050.472/0001-00
 
 |CNPJ.valid 'true' 'true'
-|50.583.326/5521-00
+|25.184.284/8729-23
 
 |Code.asin
-|B0000DIEOI
+|B0009R9L7W
 
 |Code.ean13
-|1067470761069
+|6080614422973
 
 |Code.ean8
-|27826850
+|09148918
 
 |Code.gtin13
-|2022136497095
+|7176183406687
 
 |Code.gtin8
-|99236861
+|65151921
 
 |Code.imei
-|993481487385537
+|915656268021030
 
 |Code.isbn10
-|1894888707
+|064261847X
 
 |Code.isbn10 'true'
-|1-7295-9680-0
+|0-9544281-4-5
 
 |Code.isbn13
-|9790877075065
+|9780872135710
 
 |Code.isbn13 'true'
-|979-0-8053-8779-6
+|978-0-9644672-7-9
 
 |Code.isbnGroup
 |0
@@ -563,523 +562,523 @@ a|- Cómo viene de borracho, ¡va usté muy cargado! +
 |979
 
 |Code.isbnRegistrant
-|8354-4579
+|247-60100
 
 |Coffee.blendName
-|Green Cake
+|Street Equinox
 
 |Coffee.body
-|round
+|silky
 
 |Coffee.country
-|Rwanda
+|Honduras
 
 |Coffee.descriptor
-|cocoa powder
+|nutella
 
 |Coffee.intensifier
-|vibrant
+|muted
 
 |Coffee.name1
-|Pumpkin-spice
+|Heart
 
 |Coffee.name2
-|Breaker
+|Treat
 
 |Coffee.notes
-|juicy, coating, pecan, cocoa powder, star fruit
+|dense, full, bittersweet chocolate, pineapple, black pepper
 
 |Coffee.region
-|Wellega
+|Kibale
 
 |Coffee.region 'BRAZIL'
-|Mogiana
+|Sul Minas
 
 |Coffee.variety
-|Bourbon
+|Ennarea
 
 |Coin.flip
 |Tails
 
 |Color.hex
-|#FC49F6
+|#9DCD3C
 
 |Color.hex 'true'
-|#F0783A
+|#29293D
 
 |Color.name
-|silver
+|lime
 
 |Commerce.brand
-|Dell
+|Apple
 
 |Commerce.department
-|Outdoors
+|Automotive & Outdoors
 
 |Commerce.material
-|Marble
+|Cotton
 
 |Commerce.price
-|55.82
+|61.63
 
 |Commerce.price '5.5' '10.10'
-|5.63
+|9.88
 
 |Commerce.productName
-|Enormous Linen Coat
+|Durable Wooden Bottle
 
 |Commerce.promotionCode
-|DiscountAmazing260740
+|PriceGood071370
 
 |Commerce.promotionCode '7'
-|DiscountAwesome2741981
+|CodeAwesome7723908
 
 |Commerce.vendor
-|Dollar General
+|Walmart
 
 |Community.character
-|Ian Duncan
+|Star Burns
 
 |Community.quote
-|So.. what is anthropology? Seriously, does anyone know?
+|A little trick for achieving the proper competitive mindset: I always envision my opponent having aggresive sex with my mother
 
 |Company.bs
-|whiteboard open-source ROI
+|cultivate customized deliverables
 
 |Company.buzzword
-|Reduced
+|Cloned
 
 |Company.catchPhrase
-|Customer-focused holistic alliance
+|Adaptive systemic instruction set
 
 |Company.industry
-|Computer Networking
+|Transportationg / Trucking / Railroad
 
 |Company.logo
-|https://pigment.github.io/fake-logos/logos/medium/color/7.png
+|https://pigment.github.io/fake-logos/logos/medium/color/6.png
 
 |Company.name
-|Spencer, Hoeger and Shanahan
+|Weber-Homenick
 
 |Company.profession
-|actor
+|librarian
 
 |Company.suffix
-|Inc
+|and Sons
 
 |Company.url
-|www.kuhlman-powlowski.com
+|www.ryandeckowandwilliamson.io
 
 |Compass.abbreviation
-|S
+|SbW
 
 |Compass.azimuth
-|67.5
+|315
 
 |Compass.word
-|northwest
+|southeast
 
 |Computer.linux
-|openSUSE Leap 15.1
+|Fedora 36
 
 |Computer.macos
 |Mojave (10.14)
 
 |Computer.operatingSystem
-|High Sierra (10.13)
+|Mojave (10.14)
 
 |Computer.platform
-|macOS
+|Windows
 
 |Computer.type
-|workstation
+|server
 
 |Computer.windows
-|Windows 11
+|Windows 10
 
 |Construction.heavyEquipment
-|Trencher
+|Dragline
 
 |Construction.materials
-|Brass
+|Plastic
 
 |Construction.roles
-|Project Manager
+|Construction Worker
 
 |Construction.standardCostCodes
-|2-790 - Athletic Surfacing
+|2-784 - Stone Unit Pavers
 
 |Construction.subcontractCategories
-|RF Shielding
+|Glass & Glazing
 
 |Construction.trades
-|Plumber
+|Landscaper
 
 |Control.alteredItem
-|The Oscillator
+|Pink Flamingo
 
 |Control.alteredWorldEvent
-|Bright Falls, Washington
+|Ordinary, Wisconsin
 
 |Control.character
-|Theodore Ash, Jr.
+|Casper Darling
 
 |Control.hiss
-|All hair must be eaten.
+|Repeat the word.
 
 |Control.location
-|Luck & Probablilty Lab
+|Executive Sector
 
 |Control.objectOfPower
-|Ashtray and Cigarette
+|Floppy Disk
 
 |Control.quote
 |Shawshank Redemption! That's the movie.
 
 |Control.theBoard
-|< Certain Resources/Loot can be constructed/crafted into mods/forms >
+|< Do not believe/get hype >
 
 |Cosmere.allomancers
-|Soother
+|Rioter
 
 |Cosmere.aons
-|Nae
+|Omi
 
 |Cosmere.feruchemists
 |Sparker
 
 |Cosmere.heralds
-|Ishar
+|Talanel
 
 |Cosmere.knightsRadiant
-|Skybreaker
+|Dustbringer
 
 |Cosmere.metals
-|Gold
+|Pewter
 
 |Cosmere.shardWorlds
-|Obrodai
+|Scadrial
 
 |Cosmere.shards
 |Ambition
 
 |Cosmere.sprens
-|Cryptic
+|Coldspren
 
 |Cosmere.surges
-|Abrasion
+|Transportation
 
 |Country.capital
-|Beijing
+|Havana
 
 |Country.countryCode2
-|hr
+|kh
 
 |Country.countryCode3
-|sdn
+|tun
 
 |Country.currency
-|Costa Rican Colon
+|Tugrik
 
 |Country.currencyCode
-|XOF
+|PKR
 
 |Country.flag
-|https://flags.fmcdn.net/data/flags/w580/om.png
+|https://flags.fmcdn.net/data/flags/w580/pe.png
 
 |Country.name
-|Nicaragua
+|Germany
 
 |CPF.invalid
-|315.807.260-80
+|634.468.761-41
 
 |CPF.invalid 'true'
-|227.018.186-44
+|160.103.025-74
 
 |CPF.valid
-|714.812.642-81
+|330.384.875-03
 
 |CPF.valid 'true'
-|407.446.274-51
+|210.045.227-46
 
 |Cricket.formats
 |Test
 
 |Cricket.players
-|Virat Kohli
+|Imran Khan
 
 |Cricket.teams
-|Ireland
+|West Indies
 
 |Cricket.tournaments
-|T20 World Cup
+|Champions Trophy
 
 |CryptoCoin.coin
-|Decred,           DCR,  https://i.imgur.com/nURXAC2.png
+|Cardano,          ADA,  https://i.imgur.com/8qGU4zg.png
 
 |CultureSeries.books
-|Inversions
+|The Hydrogen Sonata
 
 |CultureSeries.civs
-|Affront
+|Nauptre
 
 |CultureSeries.cultureShipClassAbvs
-|LCU
+|MSV
 
 |CultureSeries.cultureShipClasses
-|Rapid Offensive Unit
+|Superlifter
 
 |CultureSeries.cultureShips
-|Wisdom Like Silence
+|Boo!
 
 |CultureSeries.planets
-|Nauptria
+|Eä
 
 |Currency.code
-|VUV
+|SHP
 
 |Currency.name
-|Egyptian Pound
+|Pa'anga
 
 |DarkSoul.classes
-|Thief
+|Cleric
 
 |DarkSoul.covenants
-|Chaos Servant
+|Warrior of Sunlight
 
 |DarkSoul.shield
-|Target Shield
+|Knight Shield
 
 |DarkSoul.stats
-|Dexterity
+|Strength
 
 |DcComics.hero
-|Nightwing
+|Black Lightning
 
 |DcComics.heroine
-|Supergirl
+|Power Girl
 
 |DcComics.name
-|Billy Batson
+|Kyle Rayner
 
 |DcComics.title
-|Swamp Thing: The Anatomy Lesson
+|Gotham Central
 
 |DcComics.villain
-|Amanda Waller
+|Despero
 
 |Demographic.demonym
-|Nicaraguan
+|Croatian
 
 |Demographic.educationalAttainment
-|Regular high school diploma
+|No schooling completed
 
 |Demographic.maritalStatus
-|Widowed
+|Separated
 
 |Demographic.race
-|American Indian or Alaska Native
+|Black or African American
 
 |Demographic.sex
-|Male
+|Female
 
 |Departed.actor
-|Kevin Corrigan
+|Martin Sheen
 
 |Departed.character
-|Colin Sullivan
+|George Ellerby
 
 |Departed.quote
 |You have an immaculate record. Some guys don't trust an immaculate record. I do. I have an immaculate record.
 
 |Dessert.flavor
-|Almond
+|Banana
 
 |Dessert.topping
-|Gummy Bears
+|Peanut Butter
 
 |Dessert.variety
-|Frozen Yogurt
+|Trifle
 
 |DetectiveConan.characters
-|Muga Iori
+|Naeko Miike
 
 |DetectiveConan.gadgets
-|Glasses Modification (Telescopic Lenses)
+|Voice-Changing Bowtie
 
 |DetectiveConan.vehicles
-|Kusuda's Nissan
+|Sato's Mazda RX-7
 
 |Device.manufacturer
-|Huawei
+|Apple
 
 |Device.modelName
-|iPhone 7 / 7 Plus
+|iPhone SE
 
 |Device.platform
-|Android
+|Danger OS
 
 |Device.serial
-|CdNevWfqDPQw4iJgUhtyCqwCggV12T
+|hrR8nflThDDaSXO
 
 |Disease.dermatolory
-|drug eruption
+|bed sore
 
 |Disease.gynecologyAndObstetrics
-|postpartum hemorrhage
+|vulvitis
 
 |Disease.internalDisease
-|pancreatitis
+|hyperthyroidism
 
 |Disease.neurology
-|intracranial hematoma
+|cerebral hemorrhage
 
 |Disease.ophthalmologyAndOtorhinolaryngology
-|obstruction of larynx
+|cataract
 
 |Disease.paediatrics
-|necrotic enterocolitis of newborn
+|ascariasis
 
 |Disease.surgery
-|anal fissure
+|angioma
 
 |DoctorWho.actor
-|Paul McGann
+|Jon Pertwee
 
 |DoctorWho.catchPhrase
-|Fantastic!
+|Bow ties are cool.
 
 |DoctorWho.character
-|Adelaide Brooke
+|Adam Mitchell
 
 |DoctorWho.doctor
-|Fourth Doctor
+|Second Doctor
 
 |DoctorWho.quote
-|900 years of time and space, and I’ve never been slapped by someone’s mother.
+|Lots of planets have a north!
 
 |DoctorWho.species
-|Dulcian
+|Hath
 
 |DoctorWho.villain
 |Animus
 
 |Dog.age
-|puppy
+|adult
 
 |Dog.breed
-|Cocker Spaniel
+|Vizsla
 
 |Dog.coatLength
 |wire
 
 |Dog.gender
-|female
+|male
 
 |Dog.memePhrase
-|zoom
+|smol pupperino
 
 |Dog.name
-|Missy
+|Shelby
 
 |Dog.size
 |extra large
 
 |Dog.sound
-|ruff
+|woof woof
 
 |Domain.firstLevelDomain 'companyname'
-|companyname.edu
+|companyname.gov
 
 |Domain.fullDomain 'companyname'
-|nba.companyname.xyz.co
+|astro.companyname.name.bw
 
 |Domain.secondLevelDomain 'companyname'
-|companyname.post.at
+|companyname.org.gs
 
 |Domain.validDomain 'companyname'
-|companyname.edu
+|companyname.xyz.sz
 
 |Doraemon.character
-|Nobizaemon Nobi
+|Tamako Nobi
 
 |Doraemon.gadget
-|Festival Fan
+|Bird Caps
 
 |Doraemon.location
-|Easter Island
+|Open Lot
 
 |DragonBall.character
-|Android 19
+|Android 18
 
-|DrivingLicense.drivingLicense 'PA'
-|83217785
+|DrivingLicense.drivingLicense 'ME'
+|5856751R
 
 |Drone.batteryCapacity
-|2141 mAh
+|3873 mAh
 
 |Drone.batteryType
-|Li-Polymer
+|LiPo 3S
 
 |Drone.batteryVoltage
-|57.5V
+|35.7V
 
 |Drone.batteryWeight
-|939 g
+|108 g
 
 |Drone.chargingTemperature
-|86°-429°F
+|58°-210°F
 
 |Drone.flightTime
-|66 min
+|80 min
 
 |Drone.iso
-|100-6400
+|100-3200
 
 |Drone.maxAltitude
-|5441 m
+|6785 m
 
 |Drone.maxAngularVelocity
-|13°/s
+|68°/s
 
 |Drone.maxAscentSpeed
-|7 m/s
+|2 m/s
 
 |Drone.maxChargingPower
-|78W
+|98W
 
 |Drone.maxDescentSpeed
-|8 m/s
+|4 m/s
 
 |Drone.maxFlightDistance
-|9318 m
+|9727 m
 
 |Drone.maxResolution
-|55MP
+|72MP
 
 |Drone.maxShutterSpeed
-|15
+|8
 
 |Drone.maxSpeed
-|32 m/s
+|64 m/s
 
 |Drone.maxTiltAngle
-|60°
+|19°
 
 |Drone.maxWindResistance
-|79.4 m/s
+|82.9 m/s
 
 |Drone.minShutterSpeed
 |1/500
 
 |Drone.name
-|DJI Mavic 2 Pro
+|Yuneec H520
 
 |Drone.operatingTemperature
-|04°-298°F
+|62°-095°F
 
 |Drone.photoFormat
-|JPEG
+|PNG
 
 |Drone.shutterSpeedUnits
 |s
@@ -1088,268 +1087,268 @@ a|- Cómo viene de borracho, ¡va usté muy cargado! +
 |MP4
 
 |Drone.weight
-|436 g
+|616 g
 
 |DumbAndDumber.actor
-|Victoria Rowell
+|Cam Neely
 
 |DumbAndDumber.character
-|Harry Dunne
+|Mary Swanson
 
 |DumbAndDumber.quote
-|Why would she have you meet her in a bar at ten in the morning? I just figured she was a raging alcoholic.
+|What is the Soup Du Jour? It's the Soup of the Day. Mmmm. That sounds good. I'll have that.
 
 |Dune.character
-|Thufir Hawat
+|Alia Atreides
 
 |Dune.planet
-|Selusa Secundus
+|Ix
 
 |Dune.quote
-|I mean Paul Atreides. We want him killed. I did not say this. I am not here.
+|Superstitions sometimes have strange roots and stranger branchings
 
 |Dune.quote 'GUILD_NAVIGATOR'
-|Remedy this situation, restore spice production, or you will live out your life in a pain amplifier!
+|The Bene Gesserit Witch must leave.
 
 |Dune.saying
-|Deep in the human unconscious is a pervasive need for a logical universe that makes sense. But the real universe is always one step beyond logic.
+|Memory never recaptures reality. Memory reconstructs reality. Reconstructions change the original, becoming external frames of reference that inevitably fail.
 
 |Dune.saying 'BENE_GESSERIT'
 |Humans live best when each has his place to stand, when each knows where he belongs in the scheme of things and what he may achieve. Destroy the place and you destroy the person.
 
 |Dune.title
-|Elder
+|Master of Assassins
 
 |DungeonsAndDragons.alignments
-|Lawful Good
+|Lawful Evil
 
 |DungeonsAndDragons.backgrounds
 |Hillsfar Smuggler
 
 |DungeonsAndDragons.cities
-|Citadel of Ten Thousand Pearls
+|Scornubel
 
 |DungeonsAndDragons.klasses
-|Barbarian
+|Druid
 
 |DungeonsAndDragons.languages
-|Deep Speech
+|Elvish
 
 |DungeonsAndDragons.meleeWeapons
-|Scimitar
+|Glaive
 
 |DungeonsAndDragons.monsters
-|Manticore
+|Young Brass Dragon
 
 |DungeonsAndDragons.races
-|Kenku
+|Loxodon
 
 |DungeonsAndDragons.rangedWeapons
-|Dart
+|Crossbow
 
 |Educator.campus
-|Ironbarrow Campus
+|Clearcourt Campus
 
 |Educator.course
-|Associate Degree in Computer Science
+|Associate Degree in Criminology
 
 |Educator.secondarySchool
-|Ironston High
+|Ostbarrow High School
 
 |Educator.subjectWithNumber
-|Computer Science 364
+|Biological Science 153
 
 |Educator.university
-|Brookville College
+|Marblewald University
 
 |EldenRing.location
-|Weeping Penisula
+|Consecrated Snowfield
 
 |EldenRing.npc
-|Queen Marika
+|Smithing Master Hewg
 
 |EldenRing.skill
-|Impaling Thrust
+|Lion's Claw
 
 |EldenRing.spell
-|Comet
+|Loretta's Mastery
 
 |EldenRing.weapon
-|Dark Moon Greatsword
+|Cinquedea
 
 |ElderScrolls.city
-|Stormhold
+|Dwyynen
 
 |ElderScrolls.creature
-|Hagraven
+|Falmer Spellsword
 
 |ElderScrolls.dragon
-|Paarthunax
+|Frost Dragon
 
 |ElderScrolls.firstName
-|Vipir
+|Urag
 
 |ElderScrolls.lastName
-|The Old
+|Ember-Master
 
 |ElderScrolls.quote
-|What a fool you are. I'm a god! How can you kill a god? How could you be so naive? What a grand and intoxicating innocence. There is no escape. No recall or intervention works in this place. Come, lay down your weapons. It is not to late for my mercy.
+|What is better: To be born good, or to overcome one's evil nature through great effort?
 
 |ElderScrolls.race
-|Orc
+|Dwemer
 
 |ElderScrolls.region
-|Summerset Isles
+|Hammerfell
 
 |ElectricalComponents.active
-|LCD
+|LED
 
 |ElectricalComponents.electromechanical
-|Circuit Breaker
+|Fuse
 
 |ElectricalComponents.passive
-|Varistor
+|Motor
 
 |Emoji.cat
-|😽
+|😺
 
 |Emoji.smiley
-|😨
+|😚
 
 |EnglandFootBall.league
 |Premier League
 
 |EnglandFootBall.team
-|Newport County A.F.C.
+|Tranmere Rovers F.C.
 
 |Esports.event
-|ESL Cologne
+|Worlds
 
 |Esports.game
-|Super Smash Bros. Melee
+|League of Legends
 
 |Esports.league
 |MLG
 
 |Esports.player
-|cArn
+|KennyS
 
 |Esports.team
-|Team SoloMid
+|Ninjas in Pijamas
 
 |Fallout.character
-|Myron
+|Legate Lanius
 
 |Fallout.faction
-|Powder Gangers
+|State of Utobitha
 
 |Fallout.location
 |Goodsprings
 
 |Fallout.quote
-|Nobody has a Dick that long, not eve Long-Dick Johnson, and he had a fuckin long dick, thus the name.
+|Strange rumors from across the river indicate that a secret underground robot army has been destroyed before anyone had a chance to use it.
 
 |FamilyGuy.character
-|Chris Griffin
+|Cleveland Brown
 
 |FamilyGuy.location
-|Goldman's Pharmacy
+|James Woods High
 
 |FamilyGuy.quote
 |A degenerate, am I? Well, you are a festisio! See? I can make up words too, sister.
 
 |FamousLastWords.lastWords
-|I regret that I should leave this world without again beholding him.
+|Does nobody understand?
 
 |File.extension
-|txt
+|jpeg
 
 |File.fileName
-|natus_dolor/inventore.html
+|sit_maiores/expedita.avi
 
 |File.fileName 'dir' 'filename' 'txt' '/'
 |dir/filename.txt
 
 |File.mimeType
-|message/partial
+|model/x3d+xml
 
 |FinalSpace.character
-|Nighfall
+|Ash Graven
 
 |FinalSpace.quote
-|It's an alien on my face! It's an alien on my...It's a space alien!
+|That's not a cookie. And you know that HUE, you know that!
 
 |FinalSpace.vehicle
-|F71 Hawk
+|Galaxy One
 
 |Finance.bic
-|XTZXEF2CBX0
+|NGMJJILV
 
 |Finance.creditCard
-|3511-827878-77217
+|6759-6918-7345-9336-94
 
 |Finance.creditCard 'VISA'
-|4689-5018-4838-8259
+|4854-5563-8813-0742
 
 |Finance.iban
-|PK30WPCTgLSy7if1a63NA4eJ
+|BE12920220288292
 
 |Finance.iban 'LV'
-|LV02PDMJ3r3vIP8Q78m06
+|LV13BLWEs5n0J1b59FxZs
 
 |Finance.nasdaqTicker
-|MSFT
+|MDLZ
 
 |Finance.nyseTicker
-|BUD
+|HSBC
 
 |Finance.stockMarket
-|KRX
+|JPX
 
 |Food.dish
-|Chicken Fajitas
+|Pork Belly Buns
 
 |Food.fruit
-|Cantaloupe
+|Olives
 
 |Food.ingredient
-|Green Pepper
+|Szechuan Pepperberry
 
 |Food.measurement
-|1 quart
+|2 teaspoon
 
 |Food.spice
-|Poppy Seed
+|Peppercorns Cracked Black
 
 |Food.sushi
-|Mackerel
+|Oyster
 
 |Food.vegetable
-|Butternut lettuce
+|Carob Carrot
 
 |Football.coaches
-|Didier Deschamps
+|Jorge Sampaoli
 
 |Football.competitions
-|DFB Pokal
+|Super League
 
 |Football.players
 |Lionel Messi
 
 |Football.positions
-|Goalkeeper
+|Right Midfielder
 
 |Football.teams
-|Valencia CF
+|AS Roma
 
 |Formula1.circuit
-|Circuit Gilles-Villeneuve
+|Suzuka Circuit
 
 |Formula1.driver
-|Valtteri Bottas
+|Guanyu Zhou
 
 |Formula1.grandPrix
-|British Grand Prix
+|Monaco Grand Prix
 
 |Formula1.team
 |Red Bull
@@ -1358,49 +1357,49 @@ a|- Cómo viene de borracho, ¡va usté muy cargado! +
 |Leeza Gibbons
 
 |FreshPrinceOfBelAir.characters
-|Jazz
+|Vy Smith
 
 |FreshPrinceOfBelAir.quotes
-|Oh, don't worry, Carlton, we're all uncomfortable with your nudity.
+|Well, someone has her rude hat on tonight.
 
 |Friends.character
-|Ross Geller
+|Mark Robinson
 
 |Friends.location
-|New York Museum of Prehistoric History
+|New York University
 
 |Friends.quote
-|Well, maybe he was nervous.
+|It’s a moo point. It’s like a cow’s opinion; it doesn’t matter. It’s moo.
 
 |FullmetalAlchemist.character
-|Scar
+|Buccaneer
 
 |FullmetalAlchemist.city
 |Pendleton
 
 |FullmetalAlchemist.country
-|Xerxes
+|Xing
 
 |FunnyName.name
-|Rich Guy
+|Zoltan Pepper
 
 |GameOfThrones.character
-|Urrigon Greyjoy
+|Matthos Seaworth
 
 |GameOfThrones.city
-|Bhorash
+|Norvos
 
 |GameOfThrones.dragon
-|Shrykos
+|Tyraxes
 
 |GameOfThrones.house
-|Tyrell of Brightwater Keep
+|Coldwater of Coldwater Burn
 
 |GameOfThrones.quote
-|Every flight begins with a fall.
+|Why is it that when one man builds a wall, the next man immediately needs to know what's on the other side?
 
 |GarmentSize.size
-|XXXL
+|XL
 
 |Gender.binaryTypes
 |Male
@@ -1409,288 +1408,291 @@ a|- Cómo viene de borracho, ¡va usté muy cargado! +
 |m
 
 |Gender.types
-|Genderfluid
+|Bigender
 
 |Ghostbusters.actor
-|Annie Potts
+|Dan Aykroyd
 
 |Ghostbusters.character
-|Winston Zeddmore
+|Dana Barrett
 
 |Ghostbusters.quote
-|Generally you don't see that kind of behavior in a major appliance.
+|As they say in T.V., I'm sure there's one big question on everybody's mind, and I imagine you are the man to answer that. How is Elvis, and have you seen him lately?
 
 |GratefulDead.players
-|Ron McKernan
+|Phil Lesh
 
 |GratefulDead.songs
-|Morning Dew
+|Casey Jones
 
 |GreekPhilosopher.name
-|Parmenides
+|Arcesilaus
 
 |GreekPhilosopher.quote
-|Know how to listen, and you will profit even from those who talk badly.
+|Quality is not an act, it is a habit.
 
 |Hacker.abbreviation
-|RAM
+|IB
 
 |Hacker.adjective
-|online
+|redundant
 
 |Hacker.ingverb
-|generating
+|overriding
 
 |Hacker.noun
-|feed
+|array
 
 |Hacker.verb
-|program
+|synthesize
 
 |HarryPotter.book
-|Harry Potter and the Order of the Phoenix
+|Harry Potter and the Sorcerer's Stone
 
 |HarryPotter.character
-|George Weasley
+|Lord Voldemort
 
 |HarryPotter.house
-|Gryffindor
+|Thunderbird
 
 |HarryPotter.location
-|Diagon Alley
+|Post Office
 
 |HarryPotter.quote
-|Happiness can be found even in the darkest of times if only one remembers to turn on the light.
+|There are some things you can't share without ending up liking each other, and knocking out a twelve-foot mountain troll is one of them.
 
 |HarryPotter.spell
-|Lumos
+|Expecto Patronum
 
 |Hashing.md2
-|d8e6f169bd076b8b1e422fd7794fb6b4
+|05fa5716a60d489675587a48d46d45bf
 
 |Hashing.md5
-|5d76c0d76beef979949e358861e473d1
+|4339e25238c3f17928b30f1280b933bd
 
 |Hashing.sha1
-|afb59666ec492ef6d84f691777c3b3ce6e406fdb
+|0d9b260ac7a1507265e804aef3ba1cf419998139
 
 |Hashing.sha256
-|492d9f0bfa5421d1e12ad23ad760b18fd77fec9dfc3525ba7f4ddad873f6fbcb
+|80d6a69b4c3f3c29f0b6de0ffbb18eb04092619a6be68bbebe51962d70f32648
 
 |Hashing.sha384
-a|372053ceb1b432b75094f6328e8275d5d556ace3798eace3663d75e407cb85b0679502 +
-6042d984770aaa16a1c9cb29bf
+a|49b71b9d77862e897c27c27142b9f6f6fae9e48fdc31a19cee337cf22e821e4fff45a9 +
+82e86bdf1938d9f3fa26abeff5
 
 |Hashing.sha512
-a|639dac7cc912ed0606de6ce5a34acf307d1a9bc8ebd93c89784ec45a7cff00bb783105 +
-6c61d4a328c5a8831b7b1148fcb8e7bea3919326819da8bcd01d521b11
+a|d891162b1066b8624ad42c1b6f39cd2c14e0ec6151de6e6bf7a756c645e7acf9fcd73f +
+5df4f16d74668809691afdb58f3e6fe093c529cab91de2ff07cea5b4d5
 
 |Hearthstone.battlegroundsScore
-|4362
+|1750
 
 |Hearthstone.mainCharacter
-|Thrall
+|Garrosh Hellscream
 
 |Hearthstone.mainPattern
 |Solo Adventures
 
 |Hearthstone.mainProfession
-|Warrior
+|Paladin
 
 |Hearthstone.standardRank
-|Diamond 5
+|Platinum 8
 
 |Hearthstone.wildRank
-|Diamond 6
+|Gold 4
 
 |HeroesOfTheStorm.battleground
-|Haunted Mines
+|Dragon Shire
 
 |HeroesOfTheStorm.hero
-|Anub'arak
+|Gul'dan
 
 |HeroesOfTheStorm.heroClass
-|Tank
+|Support
 
 |HeroesOfTheStorm.quote
-|Taunting life form; you are weak! And physically unappealing!
+|Have you ever considered aiming anywhere other than the face?
 
 |HeyArnold.characters
-|Mr. Hyuhn
+|Phoebe Heyerdahl
 
 |HeyArnold.locations
-|Sundae Salon
+|Big Bob's Beeper Emporium
 
 |HeyArnold.quotes
-|But you see, Arnold and tall hair boy, I don’t want to be famous! I want to live my life simply! I like my banana wallpaper, I like doing my own laundry! Just give me the simple things!
+|But Gerald, the Jolly Olly Man is a stingy, mean spirited jerk, who hates kids and is constantly teetering on the brink of insanity.
 
 |Hipster.word
-|intelligentsia
+|sartorial
 
 |HitchhikersGuideToTheGalaxy.character
-|Agda
+|Slartibartfast
 
 |HitchhikersGuideToTheGalaxy.location
 |France
 
 |HitchhikersGuideToTheGalaxy.marvinQuote
-|I won't enjoy it.
+|And then of course I've got this terrible pain in all the diodes down my left side.
 
 |HitchhikersGuideToTheGalaxy.planet
-|Kria
+|Arkintoofle Minor
 
 |HitchhikersGuideToTheGalaxy.quote
-|If they don’t keep exercising their lips, he thought, their brains start working.
+|On the planet Earth, man had always assumed that he was more intelligent than dolphins because he had achieved so much—the wheel, New York, wars and so on—whilst all the dolphins had ever done was muck about in the water having a good time. But conversely, the dolphins had always believed that they were far more intelligent than man—for precisely the same reasons.
 
 |HitchhikersGuideToTheGalaxy.species
-|Azgoths of Kria
+|Perfectly Normal Beast
 
 |HitchhikersGuideToTheGalaxy.starship
-|Bistromath
+|Starship Titanic
 
 |Hobbit.character
-|Radagast
+|Bungo Baggins
 
 |Hobbit.location
-|Land of the Necromancer
+|Mines of Moria
 
 |Hobbit.quote
-|Do you wish me a good morning, or mean that it is a good morning whether I want it or not; or that you feel good this morning; or that it is a morning to be good on?
+|The road goes ever on and on
 
 |Hobbit.thorinsCompany
-|Gloin
+|Bilbo Baggins
 
 |Hobby.activity
-|scrapbook
+|Kayaking
 
 |Hololive.talent
 |Hizaki Gamma
 
 |Horse.breed
-|Costa Rican Saddle Horse
+|Estonian Horse
 
 |Horse.name
-|Opie
+|Carolina
 
 |House.furniture
-|bed
+|stool
 
 |House.room
-|hallway
+|sunroom
 
 |HowIMetYourMother.catchPhrase
-|What Up
+|Lawyered
 
 |HowIMetYourMother.character
-|Jerome Whittaker
+|Robin Scherbatsky Sr.
 
 |HowIMetYourMother.highFive
-|Get-this-over-with-quickly-so-we-can-move-past-how-awkward-it-was-that-I-just-said-that Five
+|Motility Five
 
 |HowIMetYourMother.quote
-|Definitions are important.
+|Look, you can’t design your life like a building. It doesn’t work that way. You just have to live it… and it’ll design itself.
 
 |IdNumber.inValidEnZaSsn
-|4594733622180
+|6293612779085
 
 |IdNumber.invalid
-|693-00-2156
+|000-77-6988
 
 |IdNumber.invalidEsMXSsn
-|ADKF144424MNSDFCD6
+|AKDF414424MSDSFAW6
 
 |IdNumber.invalidPtNif
-|4097826911
+|372267135
 
 |IdNumber.invalidSvSeSsn
-|563204-9260
+|059596-1614
 
 |IdNumber.peselNumber
-|15260436115
+|75060931410
 
 |IdNumber.singaporeanFin
-|G8403711P
+|G1060230U
 
 |IdNumber.singaporeanFinBefore2000
-|F7069841W
+|F3571457Q
 
 |IdNumber.singaporeanUin
-|T5459389A
+|T7077409A
 
 |IdNumber.singaporeanUinBefore2000
-|S7248000H
+|S3468435I
 
 |IdNumber.ssnValid
-|628-90-9547
+|664-69-0338
 
 |IdNumber.valid
-|443-23-9793
+|462-61-7261
 
 |IdNumber.validEnZaSsn
-|9903230816080
+|6208038421080
 
 |IdNumber.validEsMXSsn
-|NOFL330623MZAEEE00
+|DEMK750818MEMEEA01
+
+|IdNumber.validKoKrRrn
+|580222-5102179
 
 |IdNumber.validPtNif
-|987984411
+|672018950
 
 |IdNumber.validSvSeSsn
-|321026+5082
+|951016-5005
 
 |IdNumber.validZhCNSsn
-|513425200308037896
+|421202200107294428
 
 |IndustrySegments.industry
-|Oil & Gas
+|Basic Materials
 
 |IndustrySegments.sector
-|Banks
+|Beverages
 
 |IndustrySegments.subSector
-|Mortgage Finance
+|Drug Retailers
 
 |IndustrySegments.superSector
-|Automobiles & Parts
+|Insurance
 
 |Internet.botUserAgent 'GOOGLEBOT'
 |Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36 Googlebot-Image/1.0
 
 |Internet.botUserAgentAny
-|Mozilla/5.0 (compatible; DuckDuckBot-Https/1.1; https://duckduckgo.com/duckduckbot)
+|Mozilla/5.0 (compatible; YandexDirect/3.0; +http://yandex.com/bots)
 
 |Internet.domainName
-|kuhn.org
+|hickle.co
 
 |Internet.domainSuffix
-|net
+|info
 
 |Internet.domainWord
-|lang
+|krajcik
 
 |Internet.emailAddress
-|marquitta.cormier@hotmail.com
+|machelle.glover@yahoo.com
 
 |Internet.emailAddress 'myemail'
 |myemail@yahoo.com
 
 |Internet.getIpV4Address
-|/170.237.222.38
+|/116.155.168.197
 
 |Internet.getIpV6Address
-|/8a15:1333:2c42:4bd:85f9:df4c:e884:f26f
+|/5d8a:a2c4:e4c3:f043:68f0:c306:11ed:e2ae
 
 |Internet.getPrivateIpV4Address
-|/169.254.35.232
+|/10.235.7.100
 
 |Internet.getPublicIpV4Address
-|/52.167.158.250
+|/225.247.84.252
 
 |Internet.httpMethod
-|GET
+|PATCH
 
 |Internet.image
-|https://picsum.photos/720/348
+|https://picsum.photos/640/200
 
 |Internet.image '5' '10'
 |https://picsum.photos/5/10
@@ -1699,754 +1701,790 @@ a|639dac7cc912ed0606de6ce5a34acf307d1a9bc8ebd93c89784ec45a7cff00bb783105 +
 |https://picsum.photos/seed/imageName/100/200
 
 |Internet.ipV4Address
-|17.207.59.100
+|4.223.203.216
 
 |Internet.ipV4Cidr
-|35.194.61.93/7
+|211.170.75.97/29
 
 |Internet.ipV6Address
-|c236:bd7e:918:def5:ef97:a485:8de0:2ede
+|ddfb:1bbd:30eb:7fb5:319:20e4:4f98:c276
 
 |Internet.ipV6Cidr
-|6293:4d59:d664:bd9c:61de:2637:7453:3491/58
+|4ea7:e9e4:6bf8:32ef:9319:c02b:e48d:ef43/110
 
 |Internet.macAddress
-|24:fe:c4:96:bc:78
+|7b:90:e2:07:05:b6
 
 |Internet.macAddress 'aa:bb'
-|aa:bb:9e:88:7b:7b
+|aa:bb:a7:4d:49:0e
 
 |Internet.password
-|awi8x78m
+|x8w0s4lq
 
 |Internet.password 'true'
-|nw571disn4
+|0c0w13gv169n1t
 
 |Internet.password '5' '10'
-|755k1zshof
+|vhr46h
 
 |Internet.password '5' '10' 'true'
-|ajL0y5NB5
+|t43QUSG8Kh
 
 |Internet.password '5' '10' 'true' 'true'
-|&S7coOSP
+|*TU7Rs3O%
 
 |Internet.password '5' '10' 'true' 'true' 'true'
-|&7f1VHM
+|563!R
 
 |Internet.port
-|12238
+|44919
 
 |Internet.privateIpV4Address
-|10.38.229.43
+|10.12.223.133
 
 |Internet.publicIpV4Address
-|194.51.149.218
+|219.90.238.167
 
 |Internet.safeEmailAddress
-|alfred.schaden@example.com
+|nolan.mohr@example.com
 
 |Internet.safeEmailAddress 'myemail'
 |myemail@example.com
 
 |Internet.slug
-|sequi_ex
+|animi_nostrum
 
 |Internet.url
-|www.darrick-mayer.com
+|www.darron-anderson.co
 
 |Internet.userAgent
-|Mozilla/5.001 (windows; U; NT4.0; en-US; rv:1.0) Gecko/25250101
+|Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.59.10 (KHTML, like Gecko) Version/5.1.9 Safari/534.59.10
 
 |Internet.userAgent 'AOL'
-|Mozilla/4.0 (compatible; MSIE 6.0; AOL 9.0; Windows 98)
+|Mozilla/5.0 (compatible; MSIE 9.0; AOL 9.7; AOLBuild 4343.19; Windows NT 6.1; WOW64; Trident/5.0; FunWebProducts)
 
 |Internet.uuid
-|b23e6b21-e120-4f71-b408-68bcd26498db
+|a9055f72-2cfa-45b6-9731-d48c0d40980d
 
 |Internet.uuidv3
-|9e19a22c-dc3b-348d-91c7-863964505568
+|f5cd0a31-0d58-3476-9cd1-fc80ed1d1363
 
 |Job.field
-|Education
+|Technology
 
 |Job.keySkills
-|Organisation
+|Problem solving
 
 |Job.position
-|Associate
+|Engineer
 
 |Job.seniority
-|Global
+|Internal
 
 |Job.title
-|Marketing Liaison
+|Manufacturing Administrator
 
 |Kaamelott.character
-|Arthur
+|Le Jurisconsulte
 
 |Kaamelott.quote
-|Comment vous dire... C'est systématiquement débile mais c'est toujours inattendu.
+|Sloubi 1, sloubi 2, sloubi 3, sloubi 4, sloubi 5 [...] sloubi 324, sloubi 325 !
 
 |Kpop.boyBands
-|M4M
+|IKon
 
 |Kpop.girlGroups
-|Crayon Pop
+|Sorea Band
 
 |Kpop.iGroups
-|Turbo
+|Roo'ra
 
 |Kpop.iiGroups
-|M.I.L.K
+|Wonder Girls
 
 |Kpop.iiiGroups
-|ONF
+|Akdong Musician
 
 |Kpop.solo
-|Ali
+|Dara
 
 |LeagueOfLegends.champion
-|Sylas
+|Neeko
 
 |LeagueOfLegends.location
-|Bandle City
+|Shadow Isles
 
 |LeagueOfLegends.masteries
-|Vampirism
+|Assassin
 
 |LeagueOfLegends.quote
-|Blindness is no impairment against a smelly enemy.
+|You only have to click once, fool!
 
 |LeagueOfLegends.rank
-|Platinum III
+|Gold II
 
 |LeagueOfLegends.summonerSpell
-|Teleport
+|Ghost
 
 |Lebowski.actor
-|Philip Seymour Hoffman
+|John Turturro
 
 |Lebowski.character
-|Walter Sobchak
+|Jackie Treehorn
 
 |Lebowski.quote
-|This aggression will not stand, man.
+|Stay away from my special lady friend, man.
 
 |LordOfTheRings.character
-|Shadowfax
+|Shelob
 
 |LordOfTheRings.location
-|Tol Galen
+|Andustar
 
 |Lorem.character
-|9
+|8
 
 |Lorem.character 'true'
-|7
+|5
 
 |Lorem.characters
-a|1313v6ge8r2s03mjqc08nj3j6p6pp55r12e5n1p11866ur98r303zgxpb5fa7u1r978p2h +
-eak40l6vp9ysb2fs2v3oav62t2746q46hf06tovbidew70a9322vpy2x4p8ot93q666h13 +
-1ur40uzpsf5g3yr65z789d71b2q6hleoj1led32ve0fihohch5aj2t8g642v5z286de766 +
-752mu6u04x8e8z60nu613e2mwu6fea1v2717ycei0h230
+a|zgpl53ip0n0d550lyssfj24f4wdcyy3czsq327mp5435ic3bv72slw85wm57b0crp9m5fx +
+gzodf3dgt4hk599w7k97nvhcbde54grn4jlzi2epegeevbn7fg5929dgkja70u508pt1n5 +
+k8ehb1sjkil2ql8h1x7q259e3p4ch44dhkr9x87y3drpgjq8bddm7n0pzwskrdt7k6k2id +
+69qfdl43362qu2dob1mb8c4lguf8oeno8ec37lm28e4da
 
 |Lorem.characters 'true'
-a|KFnk7kFM9hpl7UdSx6ca5H976IXRa7wQ15f14d5O1eYXPkKr75w2PdcO9S505tnEyByRo3 +
-39HjQEGTg0lqlJSEaV1D0cXJ965K72ReC18wah7WUO7CR9dmZD9O609a28HZ9cpGA7pe92 +
-JO22yC854J0Q471uMRtl3mA26J0H10MD9Jtqu6LpHRSEnA6ws0M6B78ApcR449tt81JTTQ +
-j6FhPEU1z705bqAQ9pZk6WGUX93deuG958cRVif7tJJ58
+a|S4ry0werC62a2uwUA0hXV0z4nFVG8M58D5AuglY3NAUmCS8AoFpIDr4tBF5d1ZkQ0NCNC9 +
+ZSKkB7nxX0v2eQ0iIiRJx1L9kZ2DXWhFNdqDZ519r71YM8bvh4C1J9J0S0mpp4uqX4685g +
+kNTy2f62m4P2R8hKB3DnPOMqSX22ZKogg2dD230C33436zn9Ss7LdgVF111q9q0HMn7dlD +
+7VXLRQo0k0H68FH1r2W6oJK87ihCLbWH6N47177F2h8in
 
 |Lorem.characters '7'
-a|2v387i47pt189bd5cwga9w4n982bhu4bh1ct01an21i5r4z2ik3u151cfuj846s04u1ag1 +
-z5335f1c9t9m424258ki6v3bjc730v1ip82h6p19tfyi7945mwp76m6en94pro742km17i +
-1v131g3kmq03t6tat778qti43f4u8ip3d24fbp2x4e4f998ont821t867d1d4228744zmi +
-r956dr1b27buj586c2433343le4380559wwasy6fg87pm
+a|2y0ly7woia7i88gsdjq0q15xy663hl7xf5rd9tg76rot47x339940qk09d3lk229kwsjc6 +
+k94h63i2yerx617h01dlj7mx65c4io7j48j6c4ijw2ly9rdv1utzeqfkwz8y4x6t837iib +
+x7pt2pkzpdcjq728v99ubka9fe3d72r5cpjo3s4484tr6c80m335l45a1bp74g8e7622w6 +
+5t3vs3rkrm5s8hzv6z89f000y10n95xg2qkbzyyb5qp1g
 
 |Lorem.characters '5' '10'
-|ny2985cvk
+|6j0600c3f
 
 |Lorem.characters '5' 'true'
-|KHL31
+|vmf0I
 
 |Lorem.characters '5' 'true' 'true'
-|UAt7G
+|B1gjq
 
 |Lorem.characters '5' '10' 'true'
-|z1t32
+|rk5iz
 
 |Lorem.characters '5' 'true' 'true' 'true'
-|!^E$3
+|!v1hO
 
 |Lorem.characters '5' '10' 'true' 'true'
-|5452%
+|1%987
 
 |Lorem.characters '5' '10' 'true' 'true' 'true'
-|%3!EkBb0A!
+|ILf7D23@tt
 
 |Lorem.fixedString '7'
-|Repudia
+|Quae ne
 
 |Lorem.maxLengthSentence '7'
-|Quis no
+|Asperna
 
 |Lorem.paragraph
-|Reprehenderit voluptate et amet. Quis quas aspernatur modi non assumenda nemo aperiam. Aut minus quod. Eligendi excepturi voluptatem sed quia ut illo et.
+|Corrupti qui omnis consequatur consequatur beatae rem. Sunt eaque enim deleniti et laudantium dolor. Numquam temporibus aliquam.
 
 |Lorem.paragraph '7'
-|Ad tenetur dolorum ea provident. Non sed iusto. Architecto quas iure et quibusdam velit. Et odit ea commodi rerum aliquam. Voluptatibus quam iste vitae asperiores est quas similique. Doloribus sint doloremque dolores vero perferendis quidem eum. Excepturi sed temporibus sint aliquid soluta nihil. Earum odio nemo quod voluptatum dicta. Quam dolorem itaque.
+|Labore nulla tempore. Numquam enim dicta consequuntur ipsum cumque dolor in. Et porro aut assumenda dolore et minima. Vel sunt ratione in id voluptatem odio aliquam. Animi consequatur accusamus et ratione deserunt. Iste maiores facere. Facilis repudiandae aliquid et nulla aut similique.
 
 |Lorem.paragraphs '7'
-|[Eveniet consequatur repellat incidunt qui suscipit provident corporis. Placeat totam enim. Doloremque ipsam veniam. Debitis et et tenetur nam voluptates voluptatem rerum. Quisquam perspiciatis dolor id dicta ut eos perferendis., Rem delectus dignissimos optio. Veritatis qui itaque ad earum placeat sint. Velit ipsa voluptas minima. Dicta eum illo., Quod aut sit nostrum dignissimos. Autem ut est et ut officiis aut necessitatibus. Deserunt nostrum est., Sunt quia deserunt iusto. Occaecati delectus iure et suscipit quia. Ea a quisquam quas quas. Sapiente quo nihil dolores id neque voluptas incidunt. Occaecati at qui nostrum cupiditate porro voluptate rerum., At ut veritatis maiores. Molestiae et corrupti repudiandae expedita laudantium tempore. Quia officia eos in magnam neque molestiae animi. Esse ipsam aperiam. Rerum rerum omnis aut incidunt assumenda distinctio ut., Hic et aut libero. Qui nihil qui explicabo hic eum porro dicta. Fugit voluptatem perspiciatis., Recusandae sit dolores debitis ab est et. Ad ex soluta eos modi facere itaque facilis. Fuga excepturi fugit quo voluptatem assumenda esse. Facere reprehenderit et iure explicabo debitis reiciendis harum.]
+|[Minus repudiandae nihil a nobis quis explicabo quam. Atque occaecati laboriosam facere. Molestiae velit pariatur. Atque rerum et qui libero sed ut., Ipsam quia sit cumque. Aspernatur voluptas voluptate blanditiis qui perferendis ut voluptatem. Iusto voluptatem doloremque. Dolorum dolorem laudantium qui at et quia., Quibusdam et sint. Nihil perferendis quia qui. Ut quam voluptates pariatur molestiae accusantium necessitatibus excepturi. Eius neque quibusdam ea ut vel., Voluptatem quos omnis quam asperiores est quia. Ad et rerum quidem quos accusamus. Culpa qui sapiente consequatur tenetur nostrum laboriosam., Reprehenderit natus illo atque repudiandae eum. Saepe ea culpa aut. Ipsum voluptatem natus occaecati. Quia vitae et nemo vitae. Soluta dolores ipsa culpa., Voluptatem et ut. Molestiae ipsa non eligendi vitae. Ut architecto et facere modi consectetur laborum., Deleniti facilis quia ut voluptas. Nam possimus et harum dolorem harum. Veritatis omnis consequuntur et voluptas accusamus consectetur. Suscipit quo ex exercitationem excepturi.]
 
 |Lorem.sentence
-|Itaque repellendus illo maxime voluptatem.
+|Asperiores non commodi veniam voluptates non iste.
 
 |Lorem.sentence '7'
-|Dolor sit velit qui cupiditate ad incidunt at id molestiae consequuntur.
+|Sit voluptatum velit qui et eos quas accusamus occaecati inventore.
 
 |Lorem.sentence '5' '10'
-|Sit tenetur reprehenderit doloribus maiores exercitationem rerum saepe qui eaque officiis perspiciatis.
+|Aut et quia est animi.
 
 |Lorem.sentences '7'
-|[Accusamus asperiores deleniti excepturi ullam., Et nobis ipsam., Omnis eos aspernatur rerum et., Aliquam unde temporibus quam iusto in asperiores., Inventore voluptas voluptates autem voluptatum et., Eos ab vel omnis eveniet harum velit corporis., Illum tenetur ab voluptatem.]
+|[Enim distinctio aspernatur et ut., Inventore sit ad provident laboriosam iste a., Tenetur aliquid iure quia., In voluptatem unde ut accusamus., Cupiditate quis voluptate cupiditate excepturi dolor aliquam autem., Iste itaque neque quidem cum sit., Qui ratione tenetur rerum temporibus.]
 
 |Lorem.word
-|perspiciatis
+|dolore
 
 |Lorem.words
-|[expedita, praesentium, animi]
+|[non, ipsum, minus]
 
 |Lorem.words '7'
-|[iste, iusto, dolorem, ut, voluptatem, quia, et]
+|[iure, aliquid, dolor, aut, odio, et, odio]
 
 |Marketing.buzzwords
-|market share
+|synergy
+
+|MarvelSnap.character
+|Captain America
+
+|MarvelSnap.event
+|Symbiote Invasion
+
+|MarvelSnap.rank
+|Recruit
+
+|MarvelSnap.zone
+|Savage Land
 
 |MassEffect.character
-|Pelessaria B'Sayle
+|Kate Bowman
 
 |MassEffect.cluster
-|Nubian Expanse
+|Petra Nebula
 
 |MassEffect.planet
-|Pas-77
+|Quodis
 
 |MassEffect.quote
-|You are now the Avatar of victory—not just for Humans or Turians or Protheans, but for all life.
+|My favorite Quarian is all grown up and killing reapers.
 
 |MassEffect.specie
-|Rachni
+|Keepers
 
 |Matz.quote
-|Ruby inherited the Perl philosophy of having more than one way to do the same thing. I inherited that philosophy from Larry Wall, who is my hero actually. I want to make Ruby users free. I want to give them the freedom to choose.
+|Often people, especially computer engineers, focus on the machines. But in fact we need to focus on humans, on how humans care about doing programming or operating the application of the machines.
 
 |Mbti.characteristic
-|help each other
+|Seeing is believing.
 
 |Mbti.merit
-|altruism
+|Imaginative and observant
 
 |Mbti.name
-|Advocate Personality
+|Defender Personality
 
 |Mbti.personage
-|Martin Luther King
+|Captain America
 
 |Mbti.type
-|INFJ
+|ISFJ
 
 |Mbti.weakness
-|Prone To Job Burnout
+|Suppress their feelings
 
 |Measurement.height
-|inch
+|foot
 
 |Measurement.length
 |mile
 
 |Measurement.metricHeight
-|meter
+|centimeter
 
 |Measurement.metricLength
-|meter
+|dekameter
 
 |Measurement.metricVolume
 |liter
 
 |Measurement.metricWeight
-|dekagram
+|milligram
 
 |Measurement.volume
-|pint
+|teaspoon
 
 |Measurement.weight
-|ton
+|ounce
 
 |Medical.diagnosisCode
-|U5.5
+|B2.0
 
 |Medical.diseaseName
-|substance abuse
+|gynecomastia
 
 |Medical.hospitalName
-|Drake Center Inc
+|Rainbow Babies and Childrens Hospital
 
 |Medical.medicineName
-|iva axillaris pollen
+|dibasic calcium phosphate dihydrate
 
 |Medical.procedureCode
-|37tu34z
+|CnnXfjD
 
 |Medical.symptoms
-|alcohol abuse
+|weight loss, unexplained
 
 |Military.airForceRank
-|Second Lieutenant
+|General
 
 |Military.armyRank
-|Command Sergeant Major
+|First Lieutenant
 
 |Military.dodPaygrade
-|E-4
+|O-7
 
 |Military.marinesRank
-|Private
+|Lieutenant Colonel
 
 |Military.navyRank
-|Constructionman Recruit
+|Captain
 
 |Minecraft.animalName
-|The Killer Bunny
+|Mule
 
 |Minecraft.entityName
-|Armor Stand
+|Witch
 
 |Minecraft.itemName
-|Brown Bed
+|Spruce Door
 
 |Minecraft.monsterName
-|Husk
+|Blaze
 
 |Minecraft.tileItemName
-|Acacia Wood Slab
+|Light Blue Shulker Box
 
 |Minecraft.tileName
-|Stained Terracotta
+|Grass
 
 |Money.currency
-|Cape Verdean escudo
+|Danish krone
 
 |Money.currencyCode
-|BIF
+|CLP
 
 |MoneyHeist.character
-|The Professor
+|Alison Parker
 
 |MoneyHeist.heist
 |Bank of Spain
 
 |MoneyHeist.quote
-|I am offering you resurrection, A second life
+|I’ve spent my life being a bit of a son of a bitch, but today I think I want to die with dignity
 
 |Mood.emotion
-|sentimental
+|respectful
 
 |Mood.feeling
-|awful
+|comfortable
 
 |Mood.tone
-|solemn
+|bitter
 
 |Mountain.name
-|Gimmigela
+|Gasherbrum II
 
 |Mountain.range
-|Panmah Karakoram
+|Saser Karakoram
 
 |Mountaineering.mountaineer
-|Caroline Gleich
+|Edmund Hillary
 
 |Movie.quote
-|You talking to me?
+|Toto, I've got a feeling we're not in Kansas anymore.
 
 |Music.chord
-|Gmaj
+|F#
 
 |Music.genre
-|Folk
+|Reggae
 
 |Music.instrument
-|Cello
+|Xylophone
 
 |Music.key
-|D
+|Cb
 
 |Name.firstName
-|Jackeline
+|Angelika
 
 |Name.fullName
-|Mrs. Doyle Kuhn
+|Earnestine Osinski
 
 |Name.lastName
-|Beatty
+|Medhurst
 
 |Name.name
-|Joyce Ernser
+|Gordon Pfeffer
 
 |Name.nameWithMiddle
-|Juan Wisoky Greenfelder
+|Ricardo VonRueden Gerhold Sr.
 
 |Name.prefix
-|Miss
+|Dr.
 
 |Name.suffix
-|PhD
+|V
 
 |Name.title
-|Investor Web Facilitator
+|Future Functionality Associate
 
 |Name.username
-|russ.wintheiser
+|michael.funk
 
 |Nation.capitalCity
-|Stockholm
+|Islamabad
 
 |Nation.flag
-|🇸🇩
+|🇷🇪
 
 |Nation.isoCountry
-|JM
+|TH
 
 |Nation.isoLanguage
-|ja
+|uz
 
 |Nation.language
-|Nepali
+|Telugu
 
 |Nation.nationality
-|Sudanese
+|Ecuadorians
 
 |NatoPhoneticAlphabet.codeWord
-|Zulu
+|Uniform
 
 |Nigeria.celebrities
-|Burnaboy
+|The Lady Motara
 
 |Nigeria.food
 |Rice
 
 |Nigeria.name
-|Buhari
+|Okon
 
 |Nigeria.places
-|Ogun
+|Warri
 
 |Nigeria.schools
-|DELSU
+|UNIABUJA
 
 |Number.digit
-|2
+|7
 
 |Number.digits '7'
-|2119606
+|7969619
 
 |Number.negative
-|-1277639290
-
-|Number.numberBetween '5' '10'
-|6
+|-802993235
 
 |Number.numberBetween '5' '10'
 |5
+
+|Number.numberBetween '5' '10'
+|7
 
 |Number.positive
-|1595450285
+|2127607111
 
 |Number.randomDigit
-|2
+|7
 
 |Number.randomDigitNotZero
-|5
+|6
 
 |Number.randomDouble '3' '5' '10'
-|5.463
+|7.837
 
 |Number.randomDouble '3' '5' '10'
-|8.15
+|5.498
 
 |Number.randomNumber
-|32
+|559178899
 
 |Number.randomNumber '5' 'true'
-|41788
+|21002
 
 |OnePiece.akumasNoMi
-|Shari Shari no Mi
+|Giro Giro no Mi
 
 |OnePiece.character
-|Hacchi
+|Vinsmoke Sanji
 
 |OnePiece.island
-|Skypiea
+|Karai Bari Island
 
 |OnePiece.location
-|Totto Land
+|Nanohana
 
 |OnePiece.quote
-|I don't care now. I wanted to look like a human because I wanted friends. Now I want to be a monster who's helpful to Luffy!
+|Maybe nothing in this world happens by accident. As everything happens for a reason, our destiny slowly takes form.
 
 |OnePiece.sea
-|East Blue
+|Grand Line
 
 |OscarMovie.actor
-| Adrienne Barbeau
+|Tom Kemp
 
 |OscarMovie.character
-|Kathy Stafford
+|Ruben Stone
 
 |OscarMovie.getChoice
-|A1
+|A2
 
 |OscarMovie.getYear
-|A2013
+|A2021
 
 |OscarMovie.movieName
-|Argo
+|Sound of Metal
 
 |OscarMovie.quote
-|Brace yourself; it's like talking to those two old fucks from The Muppets.
+|I’m going to read your lips. I might miss some things but I’m going to try.
 
 |OscarMovie.releaseDate
-|October 12, 2012
+|20 November 2020
 
 |Overwatch.hero
-|Zarya
+|Roadhog
 
 |Overwatch.location
-|Ilios
+|Rialto
 
 |Overwatch.quote
-|Bombs away!
+|Here ya go!
 
 |Passport.valid
-|C94459725
+|Y34645491
 
 |PhoneNumber.cellPhone
-|414-612-6221
+|252-848-6371
 
 |PhoneNumber.extension
-|1569
+|3635
 
 |PhoneNumber.phoneNumber
-|(909) 863-0707 x7612
+|(714) 408-6786 x7976
 
 |PhoneNumber.phoneNumberInternational
-|+1 928-321-1047
+|+1 915-717-7066 x4672
 
 |PhoneNumber.phoneNumberNational
-|(810) 651-8225 x9520
+|(918) 608-9595
 
 |PhoneNumber.subscriberNumber
-|9494
+|4633
 
 |PhoneNumber.subscriberNumber '7'
-|6058493
+|3204958
 
 |Photography.aperture
-|f/1.0
+|f/64
 
 |Photography.brand
-|Samsung
+|Carl Zeiss
 
 |Photography.camera
-|Almaz 104
+|Nikon D3200
 
 |Photography.genre
-|Macro
+|Lomo
 
 |Photography.imageTag
-|water
+|celebration
 
 |Photography.iso
-|25600
+|1600
 
 |Photography.lens
-|24mm/1.4
+|18-300mm/3.5-5.6
 
 |Photography.shutter
-|4000
+|6400
 
 |Photography.term
-|DOF
+|ISO
 
 |Pokemon.location
-|Camphrier Town
+|Mahogany Town
 
 |Pokemon.move
-|Flamethrower
+|Skull Bash
 
 |Pokemon.name
-|Chansey
+|Dragonite
 
 |Pokemon.type
-|Fighting
+|Ghost
 
 |PrincessBride.character
-|Buttercup
+|Queen Bella
 
 |PrincessBride.quote
-|The rodents of unusual size? I don't believe they exist.
+|You rush a miracle man, you get rotten miracles.
 
 |ProgrammingLanguage.creator
-|Dan Ingalls
+|Brendan Eich
 
 |ProgrammingLanguage.name
-|Darwin
+|Ceylon
 
 |ResidentEvil.biologicalAgent
-|V-Poison
+|Poliovirus
 
 |ResidentEvil.character
-|Thomas Ashford
+|Keith Arving
 
 |ResidentEvil.creature
-|Zombie C (Bloodshot)
+|Seeker
 
 |ResidentEvil.equipment
-|A02)
+|RED QUEEN
 
 |ResidentEvil.location
-|Aircraft Carrier - Forward Hanger
+|Train Station
 
 |Restaurant.description
-|Culver’s Restaurant was founded by the Culver family in 1984, which eventually branched out to more than 300 franchised restaurants all over the US. Culver’s is well-known for its ButterBurger, which made the restaurant extremely famous. They also have other items which include salads, sandwiches, desserts, etc.
+|To provide an exceptional dining experience that satisfies our guests’ grown-up tastes by being a Cut-Above in everything we do.
 
 |Restaurant.name
-|Silver Sushi
+|Hungry Gastropub
 
 |Restaurant.namePrefix
-|Blue Plate
+|Blue
 
 |Restaurant.nameSuffix
-|Subs
+|Diner
 
 |Restaurant.review
-|They are way understaffed, where the cashier needs to stop taking orders to help pack to-go orders. The line ends up piling up and people are neglected.  Seen this happen multiple times during lunch hours.
+|My only critique would be that the rice could of used more vingaer and for them to use real wasabi. Also the variety of fish in stock wasnt a lot but hopefully that can change over time. The cost justify the quality youre getting. A solid 4 stars.
 
 |Restaurant.type
-|Chinese
+|Korean
 
 |RickAndMorty.character
-|Summer Smith
+|Shrimply Pibbles
 
 |RickAndMorty.location
-|Screaming Sun Earth
+|Cronenberg World
 
 |RickAndMorty.quote
-|Let me out, what you see is not the same person as me. My life's a lie. I'm not who you're looking. Let me out. Set me free. I'm really old. This isn't me. My real body is slowly dieing in a vat. Is anybody listening? Can anyone understand? Stop looking at me like that and actually help me. Help me. Help me I'm gunna die.
+|Keep Summer safe.
 
 |Robin.quote
-|Holy Olfactory
+|Holy Bluebeard
 
 |RockBand.name
-|Janis Joplin and Big Brother and the Holding Company
+|Red Hot Chili Peppers
 
 |RuPaulDragRace.queen
-|Trixie Mattel
+|Mimi Imfurst
 
 |RuPaulDragRace.quote
-|Bring back my girls.
+|Now listen, I gotta tell ya...
 
 |Science.bosons
-|W boson
+|gluon
 
 |Science.element
-|Praseodymium
+|Promethium
 
 |Science.elementSymbol
-|Ra
+|Pu
 
 |Science.leptons
 |electron
 
 |Science.quark
-|down
+|top
 
 |Science.scientist
-|Charles Darwin
+|Rudolf Virchow
 
 |Science.tool
-|Accelerator
+|SDR
 
 |Science.unit
-|pascal
+|candela
 
 |Seinfeld.business
-|Reggies
+|Kruger Industrial Smoothing
 
 |Seinfeld.character
-|Ruthie Cohen
+|Sue Ellen Mischke
 
 |Seinfeld.quote
-|You should've seen her face. It was the exact same look my father gave me when I told him I wanted to be a ventriloquist.
+|I lie every second of the day. My whole life is a sham.
 
 |Shakespeare.asYouLikeItQuote
-|All the world 's a stage, and all the men and women merely players. They have their exits and their entrances; And one man in his time plays many parts.
+|True is it that we have seen better days.
 
 |Shakespeare.hamletQuote
-|This above all: to thine own self be true.
+|Rich gifts wax poor when givers prove unkind.
 
 |Shakespeare.kingRichardIIIQuote
-|The world is grown so bad, that wrens make prey where eagles dare not perch.
+|A horse! a horse! my kingdom for a horse!.
 
 |Shakespeare.romeoAndJulietQuote
-|See, how she leans her cheek upon her hand! O that I were a glove upon that hand, that I might touch that cheek!.
+|Wisely and slow; they stumble that run fast.
+
+|SiliconValley.app
+|Pegg'd
+
+|SiliconValley.character
+|Jack "Action Jack" Barker
+
+|SiliconValley.company
+|Yoyodyne
+
+|SiliconValley.email
+|gavin@hooli.test
+
+|SiliconValley.invention
+|Limp Biscuit
+
+|SiliconValley.motto
+|The drink that doesn't give a fuck!
+
+|SiliconValley.quote
+|I firmly believe we can only achieve greatness if first, we achieve goodness
+
+|SiliconValley.url
+|https://coderag.com
 
 |Simpsons.character
-|Principal Seymour Skinner
+|Captain Lance Murdock
 
 |Simpsons.location
-|Noiseland Video Arcade
+|Stoner's Pot Palace
 
 |Simpsons.quote
-|Cheating is the gift man gives himself.
+|When will I learn? The answers to life’s problems aren’t at the bottom of a bottle, they’re on TV!
 
 |Sip.bodyBytes
-|[B@11a6e7d4
+|[B@5df0e5f0
 
 |Sip.bodyString
 a|v=0 +
-o=Maxwell 9777bd89-e5dc-4852-a38b-1713a22f6ebd IN IP4 batz.biz +
+o=Johnie 71d10c5f-52de-42ae-a990-d9b16d4ca451 IN IP4 mccullough.org +
 s=- +
-c=IN IP4 52.20.21.176 +
+c=IN IP4 18.130.226.152 +
 t=0 0 +
-m=audio 48748 RTP/AVP 0 +
+m=audio 41010 RTP/AVP 0 +
 a=rtpmap:0 PCMU/8000
 
 |Sip.clientErrorResponseCode
-|485
+|410
 
 |Sip.clientErrorResponsePhrase
-|Not Acceptable Here
+|Not Acceptable
 
 |Sip.contentType
-|text/html
+|application/pkcs7-signature
 
 |Sip.globalErrorResponseCode
-|600
+|607
 
 |Sip.globalErrorResponsePhrase
 |Decline
 
 |Sip.messagingPort
-|1963
+|4144
 
 |Sip.method
-|REFER
+|OPTIONS
 
 |Sip.nameAddress
-|<sip:Jeana@249.169.231.233:4460>
+|<sip:Cyril@165.180.147.183:8770>
 
 |Sip.provisionalResponseCode
 |181
@@ -2455,298 +2493,298 @@ a=rtpmap:0 PCMU/8000
 |Queued
 
 |Sip.redirectResponseCode
-|301
+|300
 
 |Sip.redirectResponsePhrase
-|Use Proxy
+|Multiple Choices
 
 |Sip.rtpPort
-|46062
+|43688
 
 |Sip.serverErrorResponseCode
-|513
+|501
 
 |Sip.serverErrorResponsePhrase
-|Push Notification Service Not Supported
+|Server Internal Error
 
 |Sip.successResponseCode
-|200
+|202
 
 |Sip.successResponsePhrase
-|accepted
+|OK
 
 |Size.adjective
-|short
+|tiny
 
 |SlackEmoji.activity
-|:notes:
+|:video_game:
 
 |SlackEmoji.celebration
-|:broken_heart:
+|:green_heart:
 
 |SlackEmoji.custom
-|:rage2:
+|:piggy:
 
 |SlackEmoji.emoji
-|:heart:
+|:blue_car:
 
 |SlackEmoji.foodAndDrink
-|:stew:
+|:oden:
 
 |SlackEmoji.nature
-|:ear_of_rice:
+|:full_moon_with_face:
 
 |SlackEmoji.objectsAndSymbols
-|:no_mobile_phones:
+|:hourglass_flowing_sand:
 
 |SlackEmoji.people
-|:haircut:
+|:disappointed:
 
 |SlackEmoji.travelAndPlaces
-|:bike:
+|:ambulance:
 
 |SoulKnight.bosses
-|Gold Mask
+|Sir Violet
 
 |SoulKnight.buffs
-|Sucking blood
+|Antifreeze
 
 |SoulKnight.characters
-|Special Forces
+|Berserker
 
 |SoulKnight.enemies
-|Volcanic Bug
+|Goblin Fly
 
 |SoulKnight.statues
-|Thief
+|Sorcerer
 
 |SoulKnight.weapons
-|Ice Bazooka
+|Gas Blaster
 
 |Space.agency
-|National Space Agency of Ukraine
+|UK Space Agency
 
 |Space.agencyAbbreviation
-|ESA
+|NASA
 
 |Space.company
 |Virgin Galactic
 
 |Space.constellation
-|Octans
+|Triangulum Australe
 
 |Space.distanceMeasurement
-|99light years
+|43kiloparsecs
 
 |Space.galaxy
-|Hoags Object
+|Pinwheel
 
 |Space.meteorite
-|Monte Milone
+|Twannberg
 
 |Space.moon
-|Dione
+|Rhea
 
 |Space.nasaSpaceCraft
-|Gemini
+|Orion
 
 |Space.nebula
-|Bodes Nebula
+|Ring Nebula
 
 |Space.planet
-|Uranus
+|Neptune
 
 |Space.star
-|Procyon A
+|Procyon B
 
 |Space.starCluster
-|Pearl Cluster
+|Wishing Well Cluster
 
 |StarCraft.building
-|Creep Tumor
+|Assimilator
 
 |StarCraft.character
-|Tassadar
+|Nova Terra
 
 |StarCraft.planet
-|Nemaka
+|Planet Christmas
 
 |StarCraft.unit
-|Siege Tank
+|Medivac Dropship
 
 |StarTrek.character
-|Kathryn Janeway
+|Phlox
 
 |StarTrek.klingon
-|qa' wIje'meH maSuv
+|Dubotchugh yIpummoH
 
 |StarTrek.location
-|Trillius Prime
+|Romulus
 
 |StarTrek.species
-|Cardassian
+|Q
 
 |StarTrek.villain
 |V'ger
 
 |StarWars.alternateCharacterSpelling
-|boba fett
+|thrawn
 
 |StarWars.callSign
-|Yellow 3
+|Yellow Leader
 
 |StarWars.character
-|Bendu
+|Wedge Antilles
 
 |StarWars.droids
-|NR-N99
+|Interrogation Droid
 
 |StarWars.planets
-|Cloud City
+|Jedha
 
 |StarWars.quotes
-|You're smarter than a tree, aren't you?
+|War is in your blood. I studied the art of war, worked to perfect it, but you? You were forged by it.
 
 |StarWars.species
-|Bith
+|Ewok
 
 |StarWars.vehicles
-|Sith Infiltrator
+|ATT Battle Tank
 
 |StarWars.wookieWords
-|roooarrgh
+|wyogg
 
 |Stock.nsdqSymbol
-|USAK
+|DWAC
 
 |Stock.nyseSymbol
-|L
+|USDP
 
 |StudioGhibli.character
-|Sophie Hatter
+|Mr. Piccolo
 
 |StudioGhibli.movie
-|My Neighbors the Yamadas
+|Castle in the Sky
 
 |StudioGhibli.quote
-|These days, there are angry ghosts all around us. Dead from wars, sickness, starvation, and nobody cares. So - you say you're under a curse. So what, so's the whole damn world.
+|It’s not really important what color your dress is. What matters is the heart inside.
 
 |Subscription.paymentMethods
-|Visa checkout
+|Credit card
 
 |Subscription.paymentTerms
-|Full subscription
+|Monthly
 
 |Subscription.plans
-|Professional
+|Essential
 
 |Subscription.statuses
-|Active
+|Blocked
 
 |Subscription.subscriptionTerms
 |Weekly
 
 |SuperMario.characters
-|King Boo
+|Wario
 
 |SuperMario.games
-|Super Smash Bros.
+|Super Mario Galaxy
 
 |SuperMario.locations
-|Peach's Castle
+|Rabbit Ridge
 
 |Superhero.descriptor
-|Blob
+|Synch
 
 |Superhero.name
-|Chuck Norris Brain
+|Illustrious Deadshot
 
 |Superhero.power
-|Telepathy
+|Energy Absorption
 
 |Superhero.prefix
 |Doctor
 
 |Superhero.suffix
-|the Fated
+|Fist
 
 |Tea.type
-|White
+|Oolong
 
 |Tea.variety
-|Turmeric
+|Rougui
 
 |Team.creature
-|dwarves
+|griffins
 
 |Team.name
-|Delaware witches
+|Mississippi griffins
 
 |Team.sport
-|arnis
+|dandi biyo
 
 |Team.state
-|Alaska
+|Oklahoma
 
 |Text.character
-|Q
+|Z
 
 |Text.lowercaseCharacter
-|o
+|t
 
 |Text.text
-|iqjzuoqrfpjldolxfoetavdphtqcizxhmc
+|hlxgnuhivsyortchmxqkuopasmsunjxmvknzxawqquemgreemffpcribdqvgmlgyohqhxz
 
 |Text.text 'true'
-|wq0f32fe6hc5d609s68u78bg4519sbb0q22njvjbu62085nl0px
+|r847t5z03443wqw9fh388da56tkl2499
 
 |Text.text '7'
-|nswylhwvlodxjcecpuegsucryypfucr
+|sxgvlwkpuxjgbjeojugkyou
 
 |Text.text '5' '10'
-|bxkxtb
+|hhfelk
 
 |Text.text '5' '10' 'true'
-|KXwgWDt
+|GJrbyf
 
 |Text.text '5' '10' 'true' 'true'
-|^MHyuF
+|f!!P*H
 
 |Text.text '5' '10' 'true' 'true' 'true'
-|@^^6W
+|ZOjB&0&5xg
 
 |Text.uppercaseCharacter
-|D
+|A
 
 |TheItCrowd.actors
-|James Bachman
+|Tom Binns
 
 |TheItCrowd.characters
-|Dr. Mendall
+|Johan
 
 |TheItCrowd.emails
 |harry@royalmail.test
 
 |TheItCrowd.quotes
-|Listen, Alistair, I just wanted to say, I'm not a window cleaner. No, no, I work in IT. Yeah, yeah, with computers and all that. Macs? No, I just really work with Windows. Hello?
+|OK, lady! You've won this round! But we can wait. You will slip up one day. And believe you me, we will be there when you do. There will be some piece of evidence that will prove without any shadow of a doubt that you don't know anything about computers!
 
 |Touhou.characterFirstName
-|Sekibanki
+|Yumemi
 
 |Touhou.characterLastName
-|Scarlet
+|Haniyashushin
 
 |Touhou.characterName
-|Hata no Kokoro
+|Sumireko Usami
 
 |Touhou.gameName
-|Mystic Square
+|Imperishable Night
 
 |Touhou.trackName
-|Doll Judgment
+|Kid's Festival ~ Innocent Treasures
 
 |Tron.alternateCharacterSpelling
-|dr walter gibbs
+|roy kleinberg
 
 |Tron.alternateCharacterSpelling 'ALAN_BRADLEY'
 |alan
@@ -2758,199 +2796,199 @@ a=rtpmap:0 PCMU/8000
 |bit
 
 |Tron.game
-|Code Wars
+|Pac-Man
 
 |Tron.location
-|I/O Tower
+|Pit Cell
 
 |Tron.quote
-|Try to look official. Here comes the boss.
+|I understand, sir.
 
 |Tron.quote 'ALAN_BRADLEY'
 |I still don't understand why you want to break into the system.
 
 |Tron.tagline
-|Trapped inside an electronic arena, where love, and escape, do not compute!
+|The Electronic Gladiator
 
 |Tron.vehicle
-|Sark's Carrier
+|Light Cycle
 
 |TwinPeaks.character
-|Harriet Hayward
+|Andy Brennan
 
 |TwinPeaks.location
-|Black Lodge
+|Town Hall
 
 |TwinPeaks.quote
-|Do you want to know what the ultimate secret is? Laura did. The secret of knowing who killed you.
+|Damn fine coffee! And hot!
 
 |Twitter.twitterId '7'
-|4210251
+|1240723
 
 |Twitter.userId
-|15000013
+|15000017
 
 |Twitter.userName
-|Latlux
+|ColonelKickass
 
 |University.name
-|East Durgan
+|Western South Carolina College
 
 |University.prefix
-|South
+|The
 
 |University.suffix
-|University
+|Institute
 
 |Vehicle.carOptions
-|[Fog Lights, Cruise Control, Tow Package, Airbag: Passenger, Antilock Brakes, Memory Seats, A/C: Front]
+|[Tinted Glass, Rear Window Wiper, Third Row Seats, Keyless Entry, Alloy Wheels, Memory Seats, CD (Multi Disc)]
 
 |Vehicle.carOptions '5' '10'
-|[Cassette Player, Keyless Entry, Third Row Seats, Rear Window Defroster, Third Row Seats]
+|[Memory Seats, Bucket Seats, Moonroof/Sunroof, Alloy Wheels, DVD System, Navigation, Cassette Player]
 
 |Vehicle.carType
-|Wagon
+|Regular Cab Pickup
 
 |Vehicle.color
-|Black
+|Beige
 
 |Vehicle.doors
-|4
+|3
 
 |Vehicle.driveType
-|AWD
+|4x4/4-wheel drive
 
 |Vehicle.engine
 |4 Cylinder Engine
 
 |Vehicle.fuelType
-|Gasoline Hybrid
+|Gasoline
 
 |Vehicle.licensePlate
-|fbl-9667
+|lzi-9859
 
-|Vehicle.licensePlate 'KS'
-|758 PJD
+|Vehicle.licensePlate 'NE'
+|9[0-3]-MP88
 
 |Vehicle.make
-|Renault
+|Honda
 
 |Vehicle.makeAndModel
-|Seat Tarraco
+|Dodge Ram
 
 |Vehicle.manufacturer
-|MG
+|Kantanka
 
 |Vehicle.model
 |Camero
 
-|Vehicle.model 'Chevy'
-|Camero
+|Vehicle.model 'Buick'
+|LaCrosse
 
 |Vehicle.standardSpecs
-|[Full-length floor console, 1-piece chrome window surround, Acoustic glass windshield, 3-point ELR/ALR front passenger seat belt w/pretensioner & load limiter, Vehicle dynamics integrated management (VDIM) system -inc: vehicle stability control (VSC), traction control (TRAC), Front/rear stabilizer bars, Child restraint seat anchors for outboard positions]
+|[3-point ELR/ALR rear seat belts at all positions, Sentry Key theft deterrent system, 6.1L SRT V8 "Hemi" engine, Monotone paint, Integrated fog lamps]
 
 |Vehicle.standardSpecs '5' '10'
-|[Foldable front door storage pockets, Tilt steering column, Collapsible steering column, Impact-dissipating upper interior trim, Remote fuel lid release, Trailer tow wiring harness, Carpeted cargo area, Traveler/mini trip computer]
+|[Grain-matched wood trim -inc: center console, dash, door panels, Cargo compartment lamp, Rear window wiper/washer, Dual illuminated visor vanity mirrors, All-position 3-point seat belts -inc: outboard pretensioners & force limiters, dual front pwr shoulder height adjusters, rear outboard emergency auto locking retractors, driver emergency locking retractor, Body color fascias w/bright insert]
 
 |Vehicle.style
-|ESi
+|XL
 
 |Vehicle.transmission
-|Automatic
+|Manual
 
 |Vehicle.upholstery
-|Brown Velvet
+|Anthracite Velvet
 
 |Vehicle.upholsteryColor
-|Black
+|Taupe
 
 |Vehicle.upholsteryFabric
-|Vinyl
+|Artificial Leather
 
 |Vehicle.vin
-|PS79XAY9KP0H51468
+|KTPKPLBFFDVM70594
 
 |Verb.base
-|encourage
+|signify
 
 |Verb.ingForm
-|envying
+|gazing
 
 |Verb.past
-|explored
+|severed
 
 |Verb.pastParticiple
-|burst
+|gashed
 
 |Verb.simplePresent
-|compels
+|copes
 
 |Volleyball.coach
-|Julio Velasco
+|Hubert Jerzy Wagner
 
 |Volleyball.formation
 |5-1
 
 |Volleyball.player
-|Seiji Oko
+|Dirk-Jan van Gendt
 
 |Volleyball.position
-|Outside hitter
+|Defensive Specialist
 
 |Volleyball.team
-|Diamant Odessa
+|Paris Volley
 
 |Weather.description
-|Drizzle
+|Rain
 
 |Weather.temperatureCelsius
-|-7°C
+|3°C
 
 |Weather.temperatureCelsius '5' '10'
 |9°C
 
 |Weather.temperatureFahrenheit
-|15°F
+|81°F
 
 |Weather.temperatureFahrenheit '5' '10'
-|5°F
+|6°F
 
 |Witcher.book
-|Time of Contempt
+|Season of Storms
 
 |Witcher.character
-|Iorveth
+|Yennefer of Vengerberg
 
 |Witcher.location
-|Rivia
+|Rakverelin
 
 |Witcher.monster
-|Silver Basilisk
+|Gargoyle
 
 |Witcher.potion
-|Swallow
+|Petri's Philter
 
 |Witcher.quote
-|Hide the wenches, Witcher's coming!!
+|Oh year... the Elder Blood can be fiery
 
 |Witcher.school
 |Cat
 
 |Witcher.sign
-|Aard
+|Yrden
 
 |Witcher.witcher
-|Vesemir
+|Jerome Moreau
 
 |Yoda.quote
-|Reckless he is. Matters are worse.
+|Soon will I rest, yes, forever sleep. Earned it I have. Twilight is upon me, soon night must fall.
 
 |Zelda.character
-|King of Hyrule
+|Captain
 
 |Zelda.game
-|Majora's Mask
+|Phantom Hourglass
 
 |===
 
