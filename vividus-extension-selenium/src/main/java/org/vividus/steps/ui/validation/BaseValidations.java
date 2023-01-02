@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,8 @@ import org.vividus.ui.validation.matcher.NotExistsMatcher;
 @SuppressWarnings("MethodCount")
 public class BaseValidations implements IBaseValidations
 {
+    private static final String THE_LOCATOR = "the locator ";
+    private static final String IS = " is ";
     private static final String AN_ELEMENT_WITH_ATTRIBUTES = "An element with attributes: '%s'";
 
     private final IWebDriverProvider webDriverProvider;
@@ -118,8 +120,8 @@ public class BaseValidations implements IBaseValidations
         List<WebElement> elements = searchActions.findElements(searchContext, locator);
         if (elements.size() > 1)
         {
-            String assertionFormat = "The number of elements found by the locator %s is %d, but expected 1";
-            softAssert.recordFailedAssertion(String.format(assertionFormat, locator, elements.size()));
+            softAssert.recordFailedAssertion(
+                    getNumberOfElementsAssertionMsg(locator.toString(), elements.size(), 1, true));
         }
         else if (doesOnlyOneElementExist(description, locator, elements))
         {
@@ -131,13 +133,8 @@ public class BaseValidations implements IBaseValidations
     private boolean doesOnlyOneElementExist(String description, Locator locator, List<WebElement> elements)
     {
         boolean passed = elements.size() == 1;
-        StringBuilder assertionMessageBuilder = new StringBuilder(description).append(" is ");
-        if (!passed)
-        {
-            assertionMessageBuilder.append("not ");
-        }
-        assertionMessageBuilder.append("found by the locator ").append(locator);
-        return softAssert.recordAssertion(passed, assertionMessageBuilder.toString());
+        return softAssert.recordAssertion(passed,
+                getElementFoundAssertionMsg(description, locator.toString(), elements.size() == 1, true));
     }
 
     @Override
@@ -225,6 +222,21 @@ public class BaseValidations implements IBaseValidations
     }
 
     @Override
+    public boolean assertElementDoesNotExist(String description, Locator locator)
+    {
+        return uiContext.getOptionalSearchContext().map(searchContext ->
+        {
+            locator.getSearchParameters().setWaitForElement(false);
+            List<WebElement> elements = searchActions.findElements(searchContext, locator);
+            boolean elementsExist = !elements.isEmpty();
+            String assertionMessage = elementsExist
+                    ? getNumberOfElementsAssertionMsg(locator.toHumanReadableString(), elements.size(), 0, false)
+                    : getElementFoundAssertionMsg(description, locator.toHumanReadableString(), elementsExist, false);
+            return softAssert.recordAssertion(!elementsExist, assertionMessage);
+        }).orElse(false);
+    }
+
+    @Override
     public List<WebElement> assertNumberOfElementsFound(String description, Locator locator, int number,
             ComparisonRule comparisonRule)
     {
@@ -263,5 +275,33 @@ public class BaseValidations implements IBaseValidations
             return softAssert.assertThat(businessDescription, systemDescription, elements,
                     elementNumber(comparisonRule.getComparisonRule(number))) ? elements : List.<WebElement>of();
         }).orElseGet(List::of);
+    }
+
+    private String getElementFoundAssertionMsg(String description, String locator, boolean found,
+            boolean oldLocatorDescription)
+    {
+        StringBuilder assertionMessageBuilder = new StringBuilder(description).append(IS);
+        if (!found)
+        {
+            assertionMessageBuilder.append("not ");
+        }
+        assertionMessageBuilder.append("found by ");
+        if (oldLocatorDescription)
+        {
+            assertionMessageBuilder.append(THE_LOCATOR);
+        }
+        return assertionMessageBuilder.append(locator).toString();
+    }
+
+    private String getNumberOfElementsAssertionMsg(String locator, int actual, int expected,
+            boolean oldLocatorDescription)
+    {
+        StringBuilder assertionMessageBuilder = new StringBuilder("The number of elements found by ");
+        if (oldLocatorDescription)
+        {
+            assertionMessageBuilder.append(THE_LOCATOR);
+        }
+        return assertionMessageBuilder.append(locator).append(IS).append(actual).append(", but expected ")
+                .append(expected).toString();
     }
 }

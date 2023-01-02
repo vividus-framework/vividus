@@ -35,12 +35,12 @@ Then the text '${expectedText}' exists
 Scenario: Action verification CLICK with no argument
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
 Given I initialize scenario variable `expectedText` with value `Good day!`
-Then the text '${expectedText}' does not exist
+Then text `${expectedText}` does not exist
 When I execute sequence of actions:
 |type   |argument                             |
 |MOVE_TO|By.xpath(//button[text()='Click me'])|
 |CLICK  |                                     |
-Then the text '${expectedText}' exists
+Then text `${expectedText}` exists
 
 Scenario: Action verification CLICK_AND_HOLD
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
@@ -84,37 +84,37 @@ Then the context element has the CSS property 'background-color'='rgba(0, 128, 0
 Scenario: Action verification DOUBLE_CLICK
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
 Given I initialize scenario variable `expectedText` with value `Good day!`
-Then the text '${expectedText}' does not exist
+Then text `${expectedText}` does not exist
 When I execute sequence of actions:
 |type        |argument                                |
 |DOUBLE_CLICK|By.xpath(//p[text()='Double-click me.'])|
-Then the text '${expectedText}' exists
+Then text `${expectedText}` exists
 
 Scenario: Action verification DOUBLE_CLICK with no argument
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
 Given I initialize scenario variable `expectedText` with value `Good day!`
-Then the text '${expectedText}' does not exist
+Then text `${expectedText}` does not exist
 When I execute sequence of actions:
 |type        |argument                                |
 |MOVE_TO     |By.xpath(//p[text()='Double-click me.'])|
 |DOUBLE_CLICK|                                        |
-Then the text '${expectedText}' exists
+Then text `${expectedText}` exists
 
 Scenario: Action verification ENTER_TEXT
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
 Given I initialize scenario variable `input` with value `#{generate(regexify '[a-z]{15}')}`
-Then the text '${input}' does not exist
+Then text `${input}` does not exist
 When I click on element located by `xpath(//label[@for='text'])`
 When I execute sequence of actions:
 |type      |argument|
 |ENTER_TEXT|${input}|
-Then the text '${input}' exists
+Then text `${input}` exists
 
 Scenario: Action verification PRESS_KEYS
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
 Given I initialize scenario variable `input` with value `mark#{generate(regexify '[a-z]{10}')}`
 When I enter `${input}` in field located `By.id(text)`
-Then the text '${input}' exists
+Then text `${input}` exists
 When I click on element located by `xpath(//label[@for='text'])`
 When I find = `1` elements `By.xpath(//div[@id='output' and text()!='mark'])` and while they exist do up to 11 iteration of
 |step                                                            |

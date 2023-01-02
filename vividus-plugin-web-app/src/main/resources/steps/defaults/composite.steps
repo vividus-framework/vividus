@@ -296,3 +296,7 @@ Given I am on page with URL `<pageURL>`
 Composite: When I go to the relative URL '$relativeURL'
 !-- WARNING: The step "When I go to the relative URL '$relativeURL'" is deprecated and will be removed in VIVIDUS 0.7.0
 When I go to relative URL `<relativeURL>`
+
+Composite: Then the text '$text' exists
+!-- WARNING: The step "Then the text '$text' exists" is deprecated and will be removed in VIVIDUS 0.6.0
+Then text `<text>` exists

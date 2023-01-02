@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,8 @@ import org.vividus.ui.validation.matcher.ExpectedConditionsMatcher;
 @SuppressWarnings("MethodCount")
 class BaseValidationsTests
 {
+    private static final String IS_NOT_FOUND_BY = " is not found by ";
+    private static final String IS_NOT_FOUND_BY_THE_LOCATOR = IS_NOT_FOUND_BY + "the locator ";
     private static final String SOME_ELEMENT = "Some element";
     private static final String BUSINESS_DESCRIPTION = "Test business description";
     private static final String XPATH_INT = ".//xpath=1";
@@ -166,6 +168,21 @@ class BaseValidationsTests
     }
 
     @Test
+    void testAssertElementDoesNotExistWithLocator()
+    {
+        spy = Mockito.spy(baseValidations);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
+        var searchParameters = new SearchParameters();
+        var attributes = new Locator(SEARCH, searchParameters);
+        when(softAssert.recordAssertion(true,
+                BUSINESS_DESCRIPTION + IS_NOT_FOUND_BY + attributes.toHumanReadableString()))
+                        .thenReturn(true);
+        when(searchActions.findElements(mockedSearchContext, attributes)).thenReturn(List.of());
+        assertTrue(spy.assertElementDoesNotExist(BUSINESS_DESCRIPTION, attributes));
+        assertFalse(searchParameters.isWaitForElement());
+    }
+
+    @Test
     void testAssertIfElementDoesNotExistWhenNoFailedAssertionRecordingIsNeeded()
     {
         spy = Mockito.spy(baseValidations);
@@ -176,6 +193,22 @@ class BaseValidationsTests
         assertFalse(spy.assertIfElementDoesNotExist(BUSINESS_DESCRIPTION, attributes));
         assertFalse(searchParameters.isWaitForElement());
         verifyNoInteractions(softAssert);
+    }
+
+    @Test
+    void testAssertElementDoesNotExistWhenNoFailedAssertionRecordingIsNeeded()
+    {
+        spy = Mockito.spy(baseValidations);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
+        var searchParameters = new SearchParameters();
+        var attributes = new Locator(SEARCH, searchParameters);
+        when(searchActions.findElements(mockedSearchContext, attributes)).thenReturn(List.of(mockedWebElement));
+        assertFalse(spy.assertElementDoesNotExist(BUSINESS_DESCRIPTION, attributes));
+        assertFalse(searchParameters.isWaitForElement());
+        String expectedAssertionMsg = String
+                .format("The number of elements found by %s is 1, but expected 0",
+                        attributes.toHumanReadableString());
+        verify(softAssert).recordAssertion(false, expectedAssertionMsg);
     }
 
     @Test
@@ -367,7 +400,7 @@ class BaseValidationsTests
         var locator = new Locator(SEARCH, XPATH_INT);
         when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(elements);
         when(softAssert.recordAssertion(false,
-                BUSINESS_DESCRIPTION + " is not found by the locator " + locator.toString())).thenReturn(false);
+                BUSINESS_DESCRIPTION + IS_NOT_FOUND_BY_THE_LOCATOR + locator.toString())).thenReturn(false);
         var element = baseValidations.assertElementExists(BUSINESS_DESCRIPTION, locator);
         assertTrue(element.isEmpty());
     }

@@ -191,6 +191,47 @@ When I scroll element located `$locator` into view
 When I scroll element located `id(way_down_button)` into view
 ----
 
+=== Text validation steps
+
+==== Validate the text exists
+
+Validates that the text is presented in the current context. Expected text is *case sensitive*.
+
+The context can be set by the <<_change_context,corresponding steps>>. If no context is set, the text will be searched on the whole page.
+
+[source,gherkin]
+----
+Then text `$text` exists
+----
+* `$text` - Expected text.
+
+.Check the text 'Contract Us' is presented on the page
+[source,gherkin]
+----
+Given I am on page with URL `https://docs.vividus.dev/`
+Then text `Contract Us` exists
+----
+
+==== Validate the text does not exists
+
+Validates that the text is not presented in the current context.
+
+The context can be set by the <<_change_context,corresponding steps>>. If no context is set, the text will be searched on the whole page.
+
+[source,gherkin]
+----
+Then text `$text` does not exist
+----
+* `$text` - Text that should not exist.
+
+.Check the text 'Deprecated' is not presented in the element
+[source,gherkin]
+----
+When I change context to element located by `id(code)`
+Then text `Deprecated` does not exist
+----
+
+
 === Tab steps
 ==== Open a new tab
 
