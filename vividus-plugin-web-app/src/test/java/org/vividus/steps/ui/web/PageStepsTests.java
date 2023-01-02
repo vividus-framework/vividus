@@ -224,32 +224,32 @@ class PageStepsTests
             // @formatter:on
             // CHECKSTYLE:ON
     })
-    void testIGoTo(String baseUrl, String toGo, String expected)
+    void testOpenRelativeUrl(String baseUrl, String toGo, String expected)
     {
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getCurrentUrl()).thenReturn(baseUrl);
-        pageSteps.iGoTo(toGo);
+        pageSteps.openRelativeUrl(toGo);
         verify(setContextSteps).switchingToDefault();
         verify(navigateActions).navigateTo(expected);
     }
 
     @Test
-    void testIGoToIOS()
+    void testOpenRelativeUrlIOS()
     {
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getCurrentUrl()).thenReturn(URL);
         when(webDriverManager.isIOS()).thenReturn(true);
-        pageSteps.iGoTo(RELATIVE_URL);
+        pageSteps.openRelativeUrl(RELATIVE_URL);
         verify(waitActions).waitForPageLoad();
     }
 
     @Test
-    void testIGoToNotIOS()
+    void testOpenRelativeUrlNotIOS()
     {
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getCurrentUrl()).thenReturn(URL);
         when(webDriverManager.isIOS()).thenReturn(false);
-        pageSteps.iGoTo(RELATIVE_URL);
+        pageSteps.openRelativeUrl(RELATIVE_URL);
         verifyNoInteractions(waitActions);
     }
 
