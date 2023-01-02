@@ -34,7 +34,7 @@ The step based on the contextual approach and when it's necessary it could be us
 [source,gherkin]
 ----
 Given I am on page with URL `https://vividus-test-site.onrender.com/`
-When I change context to element located `xpath(//body)`
+When I change context to element located by `xpath(//body)`
 Then I test accessibility:
 |standard|level |elementsToIgnore                                 |elementsToCheck|violationsToIgnore                                                                     |
 |WCAG2AAA|NOTICE|By.id(ignore), By.cssSelector(#errors > h1 > img)|               |WCAG2AAA.Principle1.Guideline1_3.1_3_1.H42.2,WCAG2AAA.Principle2.Guideline2_4.2_4_9.H30|

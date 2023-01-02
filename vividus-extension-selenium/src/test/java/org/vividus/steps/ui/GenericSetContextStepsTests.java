@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.vividus.steps.ui;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -26,7 +29,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
+
+import com.github.valfirst.slf4jtest.LoggingEvent;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -42,10 +51,12 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.context.SearchContextSetter;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class GenericSetContextStepsTests
 {
     private static final String ELEMENT_TO_SET_CONTEXT = "Element to set context";
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(GenericSetContextSteps.class);
 
     @Mock private IUiContext uiContext;
     @Mock private IBaseValidations baseValidations;
@@ -83,6 +94,33 @@ class GenericSetContextStepsTests
         verify(uiContext, times(2)).reset();
         verify(uiContext, times(2)).putSearchContext(eq(webElement), any(SearchContextSetter.class));
         verify(baseValidations, times(2)).assertIfElementExists(ELEMENT_TO_SET_CONTEXT, locator);
+        LoggingEvent expectedLoggingEvent = warn(
+                "The step: \"When I change context to element located `$locator`\" is deprecated "
+                        + "and will be removed in VIVIDUS 0.7.0. "
+                        + "Use step: \"When I change context to element located by `$locator`\"");
+        assertThat(logger.getLoggingEvents(), is(List.of(expectedLoggingEvent, expectedLoggingEvent)));
+    }
+
+    @Test
+    void shouldResetAndSetContextToElement()
+    {
+        Locator locator = mock(Locator.class);
+        WebElement webElement = mock(WebElement.class);
+        Optional<WebElement> webElementOpt = Optional.of(webElement);
+        GenericSetContextSteps spy = Mockito.spy(genericSetContextSteps);
+        ArgumentCaptor<SearchContextSetter> setterCaptor = ArgumentCaptor.forClass(SearchContextSetter.class);
+
+        when(baseValidations.assertElementExists(ELEMENT_TO_SET_CONTEXT, locator)).thenReturn(webElementOpt);
+        doNothing().when(uiContext).putSearchContext(eq(webElement), setterCaptor.capture());
+
+        spy.resetAndSetContextToElement(locator);
+
+        SearchContextSetter setter = setterCaptor.getValue();
+        setter.setSearchContext();
+        verify(spy, times(2)).resetAndSetContextToElement(locator);
+        verify(uiContext, times(2)).reset();
+        verify(uiContext, times(2)).putSearchContext(eq(webElement), any(SearchContextSetter.class));
+        verify(baseValidations, times(2)).assertElementExists(ELEMENT_TO_SET_CONTEXT, locator);
     }
 
     @Test

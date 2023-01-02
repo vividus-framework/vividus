@@ -43,7 +43,7 @@ Then the page has the relative URL '/mouseEvents.html'
 
 Scenario: Step verification Then the context element has a width of '$widthInPerc'% relative to the parent element
 Given I am on page with URL `${vividus-test-site-url}/dropdowns.html`
-When I change context to element located `By.xpath(.//*[@for='colors'])`
+When I change context to element located by `xpath(.//*[@for='colors'])`
 Then the context element has a width of '13'% relative to the parent element
 
 Scenario: Step verification When I perform right click on an element located `$locator`
@@ -56,12 +56,12 @@ Then number of elements found by `elementName(Bar)` is = `1`
 
 Scenario: Step verification Then the context element has the CSS property '$cssName'='$cssValue'
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
-When I change context to element located `By.xpath(.//*[@title='Text input section'])`
+When I change context to element located by `xpath(.//*[@title='Text input section'])`
 Then the context element has the CSS property 'color'='rgba(0, 0, 0, 1)'
 
 Scenario: Step verification Then the context element has the CSS property '$cssName' containing '$cssValue'
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
-When I change context to element located `By.xpath(.//*[@title='Text input section'])`
+When I change context to element located by `xpath(.//*[@title='Text input section'])`
 Then the context element has the CSS property 'color' containing '(0, 0, 0, 1)'
 
 Scenario: Step verification When I select an element '$locator' and upload the file '$filePath'

@@ -17,7 +17,7 @@ Meta:
 When I open URL `${vividus-test-site-url}/delayedLoading?imageTimeout=1000` in new window
 When I stop page loading
 When I execute async javascript `setTimeout(() => arguments[0]('wait for page to load'), 1000)` and save result to scenario variable `timeout`
-When I change context to element located `cssSelector(img)`
+When I change context to element located by `cssSelector(img)`
 Then `${context-height}` is < `100`
 Then `${context-width}`  is < `100`
 

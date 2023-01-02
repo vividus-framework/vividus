@@ -265,7 +265,7 @@ When I scan barcode from context and save result to $scopes variable `$variableN
 .Scan the barcode
 [source,gherkin]
 ----
-When I change context to element located `By.xpath(//div[@id='qrCode'])`
+When I change context to element located by `xpath(//div[@id='qrCode'])`
 When I scan barcode from context and save result to scenario variable `qrCodeLink`
 Then `${qrCodeLink}` is equal to `https://www.example.com`
 ----

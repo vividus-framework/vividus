@@ -13,7 +13,7 @@ Given I am on page with URL `${vividus-test-site-url}`
 Scenario: Verify context' rectangle dynamic variables
 Meta:
     @requirementId 802
-When I change context to element located `tagName(img)`
+When I change context to element located by `tagName(img)`
 Then `${context-height}`            is > `0`
 Then `${context-width}`             is > `0`
 Then `${context-x-coordinate}`      is > `0`

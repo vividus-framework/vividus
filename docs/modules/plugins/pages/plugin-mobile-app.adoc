@@ -831,7 +831,7 @@ Then number of elements found by `accessibilityId(end-of-screen)` is equal to `1
 [source,gherkin]
 ----
 Scenario: Switch slides
-When I change context to element located `accessibilityId(carousel)`
+When I change context to element located by `accessibilityId(carousel)`
 Then number of elements found by `accessibilityId(slide 2)` is equal to `0`
 When I swipe LEFT to element located `accessibilityId(slide 2)` with duration PT1S
 Then number of elements found by `accessibilityId(slide 2)` is equal to `1`
@@ -1084,7 +1084,7 @@ When I scan barcode from context and save result to $scopes variable `$variableN
 .Scan the barcode
 [source,gherkin]
 ----
-When I change context to element located `xpath(//android.view.ViewGroup[@resource-id='qrContainer'])`
+When I change context to element located by `xpath(//android.view.ViewGroup[@resource-id='qrContainer'])`
 When I scan barcode from context and save result to scenario variable `qrCodeLink`
 Then `${qrCodeLink}` is equal to `https://www.example.com`
 ----

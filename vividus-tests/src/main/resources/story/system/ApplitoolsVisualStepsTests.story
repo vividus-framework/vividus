@@ -9,7 +9,7 @@ Scope: STORY
 Given I am on page with URL `${vividus-test-site-url}/stickyHeader.html`
 Examples:
 |action         |firstP             |batchName           |
-|COMPARE_AGAINST|By.xpath((.//p)[1])|Vividus System Tests|
+|COMPARE_AGAINST|xpath((.//p)[1])   |Vividus System Tests|
 
 
 Scenario: Validation of step: 'When I $actionType baseline `$testName` in batch `$batchName` with Applitools' for full page
@@ -17,11 +17,11 @@ When I <action> baseline `full-page` in batch `<batchName>` with Applitools
 
 
 Scenario: Validation of step: 'When I $actionType baseline `$testName` in batch `$batchName` with Applitools' for context element
-When I change context to element located `<firstP>`
+When I change context to element located by `<firstP>`
 When I <action> baseline `context` in batch `<batchName>` with Applitools
 
 Scenario: Validation of CHECK_INEQUALITY_AGAINST action
-When I change context to element located `<firstP>`
+When I change context to element located by `<firstP>`
 When I CHECK_INEQUALITY_AGAINST baseline `full-page` in batch `<batchName>` with Applitools
 
 Scenario: Validation of step: 'When I run visual test with Applitools using:$applitoolsConfigurations' for full page with element cut
@@ -38,14 +38,14 @@ When I run visual test with Applitools using:
 
 
 Scenario: Validation of step: 'When I run visual test with Applitools using:$applitoolsConfigurations' for context element with element cut
-When I change context to element located `By.xpath(.//body)`
+When I change context to element located by `xpath(.//body)`
 When I run visual test with Applitools using:
 |baselineName        |batchName  |action  |elementsToIgnore|
 |context-element-cut |<batchName>|<action>|<firstP>        |
 
 
 Scenario: Validation of step: 'When I run visual test with Applitools using:$applitoolsConfigurations' for context element not in viewport with element cut
-When I change context to element located `By.xpath(.//p[last()])`
+When I change context to element located by `xpath(.//p[last()])`
 When I run visual test with Applitools using:
 |baselineName                     |batchName  |action  |elementsToIgnore   |
 |not-viewport-context-element-cut |<batchName>|<action>|By.cssSelector(img)|

@@ -148,7 +148,7 @@ When I save text of context element to $scopes variable `$variableName`
 .Save the text of the context element
 [source,gherkin]
 ----
-When I change context to element located `By.id(username)`
+When I change context to element located by `id(username)`
 When I save text of context element to SCENARIO variable `username`
 ----
 
@@ -172,7 +172,7 @@ When I save `$attributeName` attribute value of context element to $scopes varia
 .Save the attribute value of the context element
 [source,gherkin]
 ----
-When I change context to element located `By.id(username)`
+When I change context to element located by `id(username)`
 When I save `innerText` attribute value of context element to SCENARIO variable `username`
 ----
 
@@ -225,6 +225,12 @@ Changes the context to an element located by locator for limiting area of subseq
 
 [source,gherkin]
 ----
+When I change context to element located by `$locator` in scope of current context
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I change context to element located `$locator` in scope of current context
 ----
 
@@ -234,7 +240,7 @@ When I change context to element located `$locator` in scope of current context
 [source,gherkin]
 ----
 Then number of elements found by `By.xpath(html)` is equal to `1`
-When I change context to element located `By.xpath(//body)` in scope of current context
+When I change context to element located by `xpath(//body)` in scope of current context
 Then number of elements found by `By.xpath(html)` is equal to `0`
 ----
 
@@ -242,6 +248,12 @@ Then number of elements found by `By.xpath(html)` is equal to `0`
 
 Resets current context and changes the context to an element located by locator for limiting area of subsequent UI interactions.
 
+[source,gherkin]
+----
+When I change context to element located by `$locator`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
 [source,gherkin]
 ----
 When I change context to element located `$locator`
@@ -253,7 +265,7 @@ When I change context to element located `$locator`
 [source,gherkin]
 ----
 Then number of elements found by `By.xpath(html)` is equal to `1`
-When I change context to element located `By.xpath(//body)`
+When I change context to element located by `xpath(//body)`
 Then number of elements found by `By.xpath(html)` is equal to `0`
 ----
 
@@ -271,7 +283,7 @@ When I reset context
 [source,gherkin]
 ----
 Then number of elements found by `By.xpath(html)` is equal to `1`
-When I change context to element located `By.xpath(//body)`
+When I change context to element located by `xpath(//body)`
 Then number of elements found by `By.xpath(html)` is equal to `0`
 When I reset context
 Then number of elements found by `By.xpath(html)` is equal to `1`

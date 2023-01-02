@@ -30,7 +30,7 @@ When I wait until element located by `xpath(<textElementXpath>)->filter.text(Hom
 
 Scenario: Validate coordinate/size dynamic variables, page source dynamic variable
 Then `${source-code}` matches `.+Home.+`
-When I change context to element located `xpath(<textElementXpath>)->filter.text(Home)`
+When I change context to element located by `xpath(<textElementXpath>)->filter.text(Home)`
 Then `${context-height}`            is > `0`
 Then `${context-width}`             is > `0`
 Then `${context-x-coordinate}`      is > `0`
@@ -103,11 +103,11 @@ Then number of elements found by `accessibilityId(increment)->filter.attribute($
 
 
 Scenario: Verify step: 'When I double tap on element located by `$locator`'
-When I change context to element located `accessibilityId(incrementDisplay)`
+When I change context to element located by `accessibilityId(incrementDisplay)`
 When I save text of context element to scenario variable `incrementTextBefore`
 When I reset context
 When I double tap on element located by `accessibilityId(increment)`
-When I change context to element located `accessibilityId(incrementDisplay)`
+When I change context to element located by `accessibilityId(incrementDisplay)`
 When I save text of context element to scenario variable `incrementTextAfter`
 When I reset context
 Given I initialize scenario variable `countBefore` with value `#{replaceFirstByRegExp(Count: (\d+), $1, ${incrementTextBefore})}`
@@ -304,7 +304,7 @@ Meta:
     @targetPlatform ios
 When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `xpath(//XCUIElementTypeButton[@name="Date Picker"])`
-When I change context to element located `accessibilityId(dateTimePicker)`
+When I change context to element located by `accessibilityId(dateTimePicker)`
 When I select next value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(1)`
 When I select previous value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(2)`
 When I select next value with `0.1` offset in picker wheel located `xpath(//XCUIElementTypePickerWheel)->filter.index(3)`
@@ -334,7 +334,7 @@ Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` 
 When I swipe RIGHT to element located by `accessibilityId(<firstItemAccessibilityId>)` with duration PT1S
 Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
-When I change context to element located `xpath(<swipeableAreaXpath>)`
+When I change context to element located by `xpath(<swipeableAreaXpath>)`
 When I swipe LEFT to element located by `accessibilityId(<secondItemAccessibilityId>)` with duration PT1S
 Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
@@ -362,7 +362,7 @@ Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` 
 Scenario: Verify step: 'When I execute javascript `$script` with arguments:$args' on Android
 Meta:
     @targetPlatform android
-When I change context to element located `xpath(//android.view.ViewGroup[./android.widget.TextView[@content-desc="<firstItemAccessibilityId>"]])`
+When I change context to element located by `xpath(//android.view.ViewGroup[./android.widget.TextView[@content-desc="<firstItemAccessibilityId>"]])`
 Given I initialize scenario variable `x` with value `${context-x-coordinate}`
 Given I initialize scenario variable `y` with value `${context-y-coordinate}`
 Given I initialize scenario variable `width` with value `${context-width}`
@@ -392,7 +392,7 @@ Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
 Scenario: Verify steps: "When I scan barcode from context and save result to $scopes variable `$variableName`"
 Meta:
     @requirementId 2687
-When I change context to element located `xpath(<qrCodeContainerXpath>)`
+When I change context to element located by `xpath(<qrCodeContainerXpath>)`
 When I scan barcode from context and save result to scenario variable `qrCodeLink`
 Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
 When I reset context
