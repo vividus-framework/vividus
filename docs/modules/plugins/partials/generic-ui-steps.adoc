@@ -377,7 +377,7 @@ Then elements located by $locator are sorted by text in $sortingOrder order
 .Check items are sorted
 [source,gherkin]
 ----
-Given I am on a page with the URL 'https://grocery.by'
+Given I am on page with URL `https://grocery.by`
 When I click on element located by `id(a-z)`
 Then elements located by `xpath(//span[@id='item-to-purchase'])` are sorted by text in ascending order
 ----
@@ -523,7 +523,7 @@ When I execute javascript `$jsCode` and save result to $scopes variable `$variab
 .Validate timings
 [source,gherkin]
 ----
-Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
+Given I am on page with URL `https://vividus-test-site.onrender.com/`
 When I execute javascript `return JSON.stringify(window.performance.timing)` and save result to scenario variable `timings`
 Then number of JSON elements from `${timings}` by JSON path `$.connectStart` is = 1
 ----

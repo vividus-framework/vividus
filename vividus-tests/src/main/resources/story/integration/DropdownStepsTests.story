@@ -4,7 +4,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-Given I am on a page with the URL '${vividus-test-site-url}/dropdowns.html'
+Given I am on page with URL `${vividus-test-site-url}/dropdowns.html`
 
 
 Scenario: Validation of step 'Then dropdown located `$locator` contains options: $options'

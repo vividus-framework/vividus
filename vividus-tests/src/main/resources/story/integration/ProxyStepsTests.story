@@ -6,18 +6,18 @@ Meta:
     @proxy
 
 Scenario: Verify step Then number of HTTP $httpMethods requests with URL pattern `$urlPattern` is $comparisonRule `$number`
-Given I am on a page with the URL 'https://httpbin.org/get'
+Given I am on page with URL `https://httpbin.org/get`
 Then number of HTTP GET requests with URL pattern `https://httpbin\.org/get` is EQUAL TO `1`
 
 Scenario: Verify step When I clear proxy log
-Given I am on a page with the URL 'http:/httpbin.org/get'
+Given I am on page with URL `http:/httpbin.org/get`
 When I clear proxy log
 Then number of HTTP GET, POST requests with URL pattern `http://httpbin\.org/get` is EQUAL TO `0`
 
 Scenario: Verify URL and URL query HTTP message parts in step "When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save $httpMessagePart to $scopes variable `$variableName`"
 Meta:
     @issueId 1248; 1388
-Given I am on a page with the URL 'https://www.google.com/search?q=vividus'
+Given I am on page with URL `https://www.google.com/search?q=vividus`
 When I capture HTTP GET or POST request with URL pattern `.*/search.*=vividus` and save URL to scenario variable `URL`
 Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
 When I capture HTTP GET request with URL pattern `.*/search.*=vividus` and save URL query to scenario variable `query`
@@ -31,7 +31,7 @@ Then `${query}` is equal to table ignoring extra columns:
 Scenario: Verify request data and response data HTTP message parts in step "When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save $httpMessagePart to $scopes variable `$variableName`"
 Meta:
     @requirementId 1772
-Given I am on a page with the URL 'http://httpbin.org/forms/post'
+Given I am on page with URL `http://httpbin.org/forms/post`
 When I check checkbox located by `By.xpath(//input[@value='cheese'])`
 When I click on element located by `xpath(//button)`
 When I capture HTTP POST request with URL pattern `http://httpbin\.org/post` and save request data to SCENARIO variable `requestData`
@@ -43,7 +43,7 @@ When I capture HTTP POST request with URL pattern `http://httpbin\.org/post` and
 Then `${responseData.responseBody}` matches `.*"topping": "cheese".*`
 
 Scenario: Verify step When I wait until HTTP $httpMethods request with URL pattern `$urlPattern` exists in proxy log
-Given I am on a page with the URL 'http://httpbin.org/get'
+Given I am on page with URL `http://httpbin.org/get`
 When I wait until HTTP GET or POST request with URL pattern `http://httpbin\.org/get` exists in proxy log
 Then number of HTTP GET or POST requests with URL pattern `http://httpbin\.org/get` is EQUAL TO `1`
 
@@ -54,7 +54,7 @@ When I add headers to proxied requests with URL pattern which is equal to `http:
 |name     |value     |
 |testName1|testValue1|
 |testName2|testValue2|
-Given I am on a page with the URL 'http://httpbin.org/headers'
+Given I am on page with URL `http://httpbin.org/headers`
 When I change context to element located `xpath(//pre)`
 When I set the text found in search context to the 'SCENARIO' variable 'response'
 Then JSON element from `${response}` by JSON path `$.headers` is equal to `
@@ -67,7 +67,7 @@ Then JSON element from `${response}` by JSON path `$.headers` is equal to `
 Scenario: Verify step When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode`, content `$payload` and headers:$headers with binary data
 Meta:
     @requirementId 1104
-Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
+Given I am on page with URL `${vividus-test-site-url}/frames.html`
 When I switch to frame located `<frameId>`
 Then number of elements found by `<elementId>` is = `0`
 When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `200`, content `#{loadBinaryResource(page.html)}` and headers:
@@ -86,13 +86,13 @@ Meta:
 When I mock HTTP responses with request URL which CONTAINS `frames.html` using response code `200`, content `#{loadResource(page.html)}` and headers:
 |name        |value    |
 |Content-Type|text/html|
-Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
+Given I am on page with URL `${vividus-test-site-url}/frames.html`
 Then number of elements found by `id(sw)` is = `1`
 
 Scenario: Verify step When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode` and headers:$headers
 Meta:
     @requirementId 1104
-Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
+Given I am on page with URL `${vividus-test-site-url}/frames.html`
 When I switch to frame located `<frameId>`
 Then number of elements found by `<elementSelector>` is = `1`
 When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `404` and headers:
@@ -112,7 +112,7 @@ When I mock HTTP responses with request URL which CONTAINS `frames.html` using r
 |name        |value    |
 |Content-Type|text/html|
 When I clear proxy mocks
-Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
+Given I am on page with URL `${vividus-test-site-url}/frames.html`
 Then number of elements found by `id(sw)` is = `0`
 
 Scenario: Verify step When I mock HTTP $httpMethods responses with request URL which $comparisonRule `$url` using response code `$responseCode`, content `$payload` and headers:$headers
@@ -121,5 +121,5 @@ Meta:
 When I mock HTTP GET responses with request URL which CONTAINS `frames.html` using response code `200`, content `#{loadResource(page.html)}` and headers:
 |name        |value    |
 |Content-Type|text/html|
-Given I am on a page with the URL '${vividus-test-site-url}/frames.html'
+Given I am on page with URL `${vividus-test-site-url}/frames.html`
 Then number of elements found by `id(sw)` is = `1`

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,10 +81,11 @@ public class PageSteps
     /**
      * Loading the page which was set as a main application page.
      * <br>
-     * One can set an URL for the main page in the properties file.
+     * One can set an URL for the main page in the properties file
+     * by the <b>web-application.main-page-url</b> property
      */
-    @Given("I am on the main application page")
-    public void iAmOnTheMainApplicationPage()
+    @Given("I am on main application page")
+    public void openMainApplicationPage()
     {
         loadApplicationPage(webApplicationConfiguration.getMainApplicationPageUrl());
     }
@@ -96,8 +97,8 @@ public class PageSteps
      * <p>
      * @param pageURL An <b>absolute</b> URL of the page
      */
-    @Given("I am on a page with the URL '$pageURL'")
-    public void iAmOnPage(String pageURL)
+    @Given("I am on page with URL `$pageURL`")
+    public void openPage(String pageURL)
     {
         uiContext.reset();
         navigateActions.navigateTo(pageURL);
@@ -174,7 +175,7 @@ public class PageSteps
     {
         javascriptActions.openNewWindow();
         setContextSteps.switchingToWindow();
-        iAmOnPage(pageUrl);
+        openPage(pageUrl);
     }
 
     /**
