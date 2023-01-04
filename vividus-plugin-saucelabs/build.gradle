@@ -2,7 +2,11 @@ project.description = 'VIVIDUS plugin for Sauce Labs'
 
 //https://github.com/powermock/powermock/issues/1094
 test {
-    jvmArgs '--illegal-access=warn'
+    jvmArgs = [
+        '--add-opens=java.base/java.lang=ALL-UNNAMED',
+        '--add-opens=java.base/java.net=ALL-UNNAMED',
+        '--add-opens=java.base/java.util=ALL-UNNAMED'
+    ]
 }
 
 dependencies {

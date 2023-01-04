@@ -4,7 +4,16 @@ ext.jsonPathVersion = '2.7.0'
 
 //https://github.com/powermock/powermock/issues/1094
 test {
-    jvmArgs '--illegal-access=warn'
+    jvmArgs = [
+        '--add-opens=java.base/java.io=ALL-UNNAMED',
+        '--add-opens=java.base/java.lang=ALL-UNNAMED',
+        '--add-opens=java.base/java.net=ALL-UNNAMED',
+        '--add-opens=java.base/java.nio.file=ALL-UNNAMED',
+        '--add-opens=java.base/java.time=ALL-UNNAMED',
+        '--add-opens=java.base/java.util=ALL-UNNAMED',
+        '--add-opens=java.base/java.util.concurrent=ALL-UNNAMED',
+        '--add-opens=java.base/sun.nio.fs=ALL-UNNAMED'
+    ]
 }
 
 dependencies {
