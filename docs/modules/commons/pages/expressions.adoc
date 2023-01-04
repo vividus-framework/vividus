@@ -1,7 +1,8 @@
-= xref:ROOT:glossary.adoc#_expression[Expressions]
+= Expressions
 
 VIVIDUS provides a set of pre-defined expressions. Also plugins may define own
-expressions (they are documented in the corresponding plugins articles).
+xref:ROOT:glossary.adoc#_expression[expressions] (they are documented in the
+corresponding plugins articles).
 
 NOTE: The expression parameters marked with *bold* are mandatory.
 
