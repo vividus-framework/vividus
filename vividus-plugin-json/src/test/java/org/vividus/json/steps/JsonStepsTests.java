@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@ import org.vividus.variable.VariableScope;
 import net.javacrumbs.jsonunit.core.Option;
 import net.javacrumbs.jsonunit.core.internal.Options;
 
+@SuppressWarnings("MethodCount")
 @ExtendWith(MockitoExtension.class)
 class JsonStepsTests
 {
@@ -429,6 +430,19 @@ class JsonStepsTests
         steps.assertElementByJsonPath(JSON, ARRAY_PATH, expectedJson,
                 new Options(Option.IGNORING_ARRAY_ORDER, Option.IGNORING_EXTRA_ARRAY_ITEMS));
         verifyJsonEqualityAssertion(ARRAY_PATH, expectedJson, ARRAY_PATH_RESULT);
+    }
+
+    @Test
+    void shouldAssertArrayByJsonPathWithDifferentArrayLengthAndIgnoringExtraArrayItemsOption()
+    {
+        var expectedJson = "[1,2,3]";
+
+        steps.assertElementByJsonPath(JSON, ARRAY_PATH, expectedJson, new Options(Option.IGNORING_EXTRA_ARRAY_ITEMS));
+
+        verify(softAssert).recordFailedAssertion("Array \"\" has invalid length, expected: <at least 3> but was: <2>.");
+        verify(softAssert).recordFailedAssertion(
+                "Array \"\" has different content. Missing values: [3], expected: <[1,2,3]> but was: <[1,2]>");
+        verifyNoMoreInteractions(softAssert);
     }
 
     @Test
