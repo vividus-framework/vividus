@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,20 @@ package org.vividus.expression;
 import java.util.Collection;
 import java.util.Optional;
 
-public class DelegatingExpressionProcessor<T> implements IExpressionProcessor<T>
+public class DelegatingExpressionProcessor implements IExpressionProcessor<Object>
 {
-    private final Collection<IExpressionProcessor<T>> delegates;
+    private final Collection<IExpressionProcessor<?>> delegates;
 
-    public DelegatingExpressionProcessor(Collection<IExpressionProcessor<T>> delegates)
+    public DelegatingExpressionProcessor(Collection<IExpressionProcessor<?>> delegates)
     {
         this.delegates = delegates;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Optional<T> execute(String expression)
+    public Optional<Object> execute(String expression)
     {
-        return delegates.stream()
+        return (Optional<Object>) delegates.stream()
                 .map(processor -> processor.execute(expression))
                 .filter(Optional::isPresent)
                 .findFirst()

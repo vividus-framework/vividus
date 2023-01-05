@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ class StringExpressionProcessorsTests
     })
     void shouldExecuteLocalizedExpressions(String expression)
     {
-        String result = processors.execute("generateLocalized(" + expression + ", ru-RU)").get();
+        String result = (String) processors.execute("generateLocalized(" + expression + ", ru-RU)").get();
         assertThat(result, matchesPattern("[А-яёЁ0-9 ,.-]+"));
     }
 
@@ -146,7 +146,7 @@ class StringExpressionProcessorsTests
     @Test
     void shouldPickRandomValue()
     {
-        assertThat(processors.execute("anyOf(one,two, three\\, or,, \"\"\"four\\,five\"\"\")").get(),
+        assertThat((String) processors.execute("anyOf(one,two, three\\, or,, \"\"\"four\\,five\"\"\")").get(),
                 anyOf(equalTo("one"), equalTo("two"), equalTo("three, or"), equalTo("four\\,five"), emptyString()));
     }
 
