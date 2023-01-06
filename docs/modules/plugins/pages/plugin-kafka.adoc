@@ -110,10 +110,10 @@ Waits until the count of the consumed messaged (from the consumer start or after
 ----
 When I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka messages is $comparisonRule `$expectedCount`
 ----
-* `$timeout` - the maximum time to wait for the messages in {iso-date-format-link} format
-* `$consumerKey` - the key of the Kafka consumer configuration
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[the comparison rule]
-* `$expectedCount` - the expected count of the messages to be matched by the rule
+* `$timeout` - the maximum time to wait for the messages in {durations-format-link} format.
+* `$consumerKey` - the key of the Kafka consumer configuration.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[the comparison rule].
+* `$expectedCount` - the expected count of the messages to be matched by the rule.
 
 ==== *Stop the consumer*
 

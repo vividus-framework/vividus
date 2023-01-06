@@ -124,7 +124,7 @@ Waits for the windows with desired title and switches to it.
 When I wait `$duration` until window with title that $comparisonRule `$windowTitile` appears and switch to it
 ----
 
-* `$duration` - The timeout duration to wait for a window in {iso-date-format-link} format.
+* `$duration` - The timeout duration to wait for a window in {durations-format-link} format.
 * `$comparisonRule` - The window title xref:parameters:string-comparison-rule.adoc[comparison rule].
 * `$windowTitle` - The expected window title.
 
@@ -164,7 +164,7 @@ Sets a custom page load timeout for a part of the story
 When I set page load timeout to `$duration`
 ----
 
-* `$duration` - total duration to wait for page load completion in {iso-date-format-link} format
+* `$duration` - total duration to wait for page load completion in {durations-format-link} format.
 
 .Before loading a heavy page set an increased timeout
 [source,gherkin]
@@ -192,7 +192,7 @@ Then metric $webPerformanceMetric is $comparisonRule `$duration`
 ** [subs=+quotes]`*DOM_CONTENT_LOAD_TIME*` -  The time between {navigation-timing}domloading[the DOM loading] and the {navigation-timing}domcomplete[the DOM complete].
 ** [subs=+quotes]`*PAGE_LOAD_TIME*` -  The time between {navigation-timing}navigationstart[the navigation start] and {navigation-timing}loadeventend[the load event end].
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The duration comparison rule].
-* `$duration` - The duration to compare against in {iso-date-format-link} format.
+* `$duration` - The duration to compare against in {durations-format-link} format.
 
 .Check page load
 [source,gherkin]
@@ -862,7 +862,7 @@ Then element located '$locator' disappears in '$timeout'
 ----
 
 * `$locator` - The <<_locator,locator>> used to element.
-* `$timeout` - The maximum time to wait for the element disappearance in {iso-date-format-link} format.
+* `$timeout` - The maximum time to wait for the element disappearance in {durations-format-link} format.
 
 .Click on the button and waiting for disappearance of the element for 3 seconds
 [source,gherkin]

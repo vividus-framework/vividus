@@ -77,10 +77,10 @@ Waits until the count of the text messages received over the specified websocket
 When I wait with `$timeout` timeout until count of text messages received over `$webSocketConnectionKey` websocket is $comparisonRule `$expectedCount`
 ----
 
-* `$timeout` - the maximum time to wait for the messages in {iso-date-format-link} format
-* `$webSocketConnectionKey` - the websocket connection key
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[the comparison rule]
-* `$expectedCount` - the expected count of the messages to be matched by the rule
+* `$timeout` - the maximum time to wait for the messages in {durations-format-link} format.
+* `$webSocketConnectionKey` - the websocket connection key.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[the comparison rule].
+* `$expectedCount` - the expected count of the messages to be matched by the rule.
 
 .Wait for text messages
 [source,gherkin]

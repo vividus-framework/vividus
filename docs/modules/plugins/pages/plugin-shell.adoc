@@ -44,7 +44,7 @@ a|The key of the shell which will be used for commands execution. By default, VI
 Out of the box VIVIDUS supports `cmd`, `powershell`, `sh`, `zsh`, `bash`.
 
 |`shell.command-execution-timeout`
-|The timeout in {iso-date-format-link} format.
+|The timeout in {durations-format-link} format.
 |PT5M
 |The timeout duration to wait for command execution finish.
 

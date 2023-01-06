@@ -142,7 +142,7 @@ The step is for debugging purpose only
 When I wait `$period` for debug
 ----
 
-* `$period` - total duration to wait in {iso-date-format-link} format
+* `$period` - total duration to wait in {durations-format-link} format.
 
 .Wait 30 seconds for debug
 [source,gherkin]

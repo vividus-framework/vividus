@@ -563,7 +563,7 @@ Here one could find description of general HTTP properties applied across all th
 |The set of HTTP status codes to be retried. If it's empty, no retries will be performed
 
 |`http.service-unavailable-retry.retry-interval`
-|{iso-date-format-link} duration
+|{durations-format-link} format
 |`PT1S`
 |The retry interval between subsequent requests
 

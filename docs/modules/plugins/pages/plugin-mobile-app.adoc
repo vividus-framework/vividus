@@ -393,7 +393,7 @@ Runs mobile application in the background for specific period of time and either
 When I send mobile application to background for `$period` period
 ----
 
-* `$period` - The period of time in {iso-date-format-link} format.
+* `$period` - The period of time in {durations-format-link} format.
 
 .Run app in background
 [source,gherkin]
@@ -579,7 +579,7 @@ When I tap on element located by `$locator` with duration `$duration`
 ----
 
 * `$locator` - <<_locator>>.
-* `$duration` - The duration between an element is pressed and released in {iso-date-format-link} format.
+* `$duration` - The duration between an element is pressed and released in {durations-format-link} format.
 
 .Tap on element with duration
 [source,gherkin]
@@ -817,7 +817,7 @@ When I swipe $direction to element located by `$locator` with duration $swipeDur
 
 * `$direction` - The direction to swipe: `UP`, `DOWN`, `LEFT` or `RIGHT`.
 * `$locator` - <<_locator>>.
-* `$swipeDuration` - The swipe duration in {iso-date-format-link} format.
+* `$swipeDuration` - The swipe duration in {durations-format-link} format.
 
 .Swipe to an element
 [source,gherkin]
