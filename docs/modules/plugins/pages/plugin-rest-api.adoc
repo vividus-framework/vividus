@@ -696,7 +696,7 @@ When I wait for presence of element by `$jsonPath` for `$duration` duration retr
 ----
 
 * `$jsonPath` - The JSON path of the element to find.
-* `$duration` - The time duration to wait in {iso-date-format-link} format.
+* `$duration` - The time duration to wait in {durations-format-link} format.
 * `$retryTimes` -  The maximum of attempts. `duration/retryTimes = timeout` is a polling timeout between requests.
 * `$stepsToExecute` - The sub-steps to execute at each iteration.
 
@@ -767,7 +767,7 @@ When I wait for response code $responseCode for $duration duration retrying $ret
 ----
 
 * `$responseCode` - The expected HTTP status code.
-* `$duration` - The time duration to wait in {iso-date-format-link} format.
+* `$duration` - The time duration to wait in {durations-format-link} format.
 * `$retryTimes` - The number of times the request will be retried: `duration/retryTimes = timeout` is a polling timeout between requests.
 * `$stepsToExecute` - The steps to execute at each wait iteration.
 

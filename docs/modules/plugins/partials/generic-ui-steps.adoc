@@ -302,7 +302,7 @@ Then element located `$locator` exists for `$duration` duration
 ----
 
 * `$locator` - The <<_locator>> to find an element.
-* `$duration` - The period of time the element should have existed in {iso-date-format-link} format.
+* `$duration` - The period of time the element should have existed in {durations-format-link} format.
 
 .The element should have existed for 5 second
 [source,gherkin]

@@ -77,7 +77,7 @@ NOTE: The properties marked with *bold* are mandatory.
 |`Package name` for Android or `Bundle identifier` from `Plist.info` for iOS. It is used to activate the application under tests after Appium session start.
 
 |`mobitru.device-wait-timeout`
-|The duration in {iso-date-format-link} format.
+|The duration in {durations-format-link} format.
 |`PT5M`
 |The timeout to wait while the requested device becomes available for usage. VIVIDUS will perform at most 20 retries during the timeout.
 

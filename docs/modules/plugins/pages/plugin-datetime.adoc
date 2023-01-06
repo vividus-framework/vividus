@@ -30,8 +30,8 @@ Generates the date using current date as a baseline.
  #{generateDate(*$period*, $outputFormat)}
 ----
 
-* *`period`* - the period in {iso-date-format-link} format
-* `outputFormat` - the output format based on {java-date-time-formatter-link}
+* *`period`* - the period in {durations-format-link} format.
+* `outputFormat` - the output format based on {java-date-time-formatter-link}.
 
 ==== Properties
 
@@ -118,9 +118,9 @@ Formats the input date to another format. Additionally, time zone can be changed
 #{formatDate(*$inputDate*, *$outputFormat*, $outputTimeZone)}
 ----
 
-* *`$inputDate`* - the date to be formatted, it should be presented in the {iso-date-format-link} format
-* *`$outputFormat`* - the output format based on {java-date-time-formatter-link}
-* `$outputTimeZone` - the time zone for the output result
+* *`$inputDate`* - the date to be formatted, it should be presented in the {iso-date-format-link} format.
+* *`$outputFormat`* - the output format based on {java-date-time-formatter-link}.
+* `$outputTimeZone` - the time zone for the output result.
 
 [cols="2,>1", options="header"]
 .Examples of the expressions formatting dates
@@ -216,7 +216,7 @@ Shifts the given input date for a given period in any direction (+/-).
 
 * *`$inputDate`* - the date to be shifted, it can be in any format but this format should be described in the second parameter
 * *`$inputFormat`* - the input date format based on {java-date-time-formatter-link}
-* *`$period`* -  the period by which the date will be shifted, it should be written in {iso-date-format-link}
+* *`$period`* -  the period by which the date will be shifted, it should be written in {durations-format-link} format.
 
 [cols="3,>1", options="header"]
 .Examples of the expressions shifting dates
@@ -241,7 +241,7 @@ Shifts the given input date for a given period in any direction (+/-).
 
 === `diffDate`
 
-Calculates the difference between two dates with given formats and returns result as {iso-date-format-link} period.
+Calculates the difference between two dates with given formats and returns result in {iso-date-format-link} format.
 
 [source, subs="+quotes"]
 ----
@@ -282,7 +282,7 @@ Converts the input date to the https://en.wikipedia.org/wiki/Unix_time[Unix epoc
 #{toEpochSecond(*$inputDate*)}
 ----
 
-* *`$inputDate`* - the date to be converted in the {iso-date-format-link} format
+* *`$inputDate`* - the date to be converted in the {iso-date-format-link} format.
 
 [cols="2,>1", options="header"]
 .Examples of the expressions converting the input date to the Unix epoch time
@@ -309,7 +309,7 @@ in the {iso-date-format-link} format.
 #{fromEpochSecond(*$unixEpochTime*)}
 ----
 
-* *`$unixEpochTime`* - the Unix epoch time to be converted to the {iso-date-format-link} date
+* *`$unixEpochTime`* - the Unix epoch time to be converted to the {iso-date-format-link} format.
 
 [cols="2,>1", options="header"]
 .Examples of the expressions converting the Unix epoch time to the input date (https://en.wikipedia.org/wiki/UTC%2B00:00[UTC+00:00] time zone)
