@@ -771,7 +771,7 @@ Pick a random value from a predefined list
 |<empty string>
 
 |`#{anyOf(,)}`
-|
+|<empty string>
 
 |`#{anyOf(, )}`
 |
