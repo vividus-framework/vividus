@@ -16,17 +16,10 @@
 
 package org.vividus.expression;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
-import java.util.zip.GZIPOutputStream;
 
 import javax.inject.Named;
 
@@ -73,12 +66,6 @@ public class StringExpressionProcessors extends DelegatingExpressionProcessor
                     input)),
             new SingleArgExpressionProcessor<>("generateLocalized",     generateLocalized()),
             new SingleArgExpressionProcessor<>("loadResource",          ResourceUtils::loadResource),
-            new SingleArgExpressionProcessor<>("resourceToBase64",      input -> encodeToBase64(
-                    ResourceUtils.loadResourceAsByteArray(input))),
-            new SingleArgExpressionProcessor<>("decodeFromBase64",      input -> new String(Base64.getDecoder()
-                    .decode(input.getBytes(UTF_8)), UTF_8)),
-            new SingleArgExpressionProcessor<>("encodeToBase64",        input -> encodeToBase64(input.getBytes(UTF_8))),
-            new SingleArgExpressionProcessor<>("toBase64Gzip",          StringExpressionProcessors::toBase64Gzip),
             new SingleArgExpressionProcessor<>("escapeHTML",            StringEscapeUtils::escapeHtml4),
             new SingleArgExpressionProcessor<>("escapeJSON",            StringEscapeUtils::escapeJson),
             new SingleArgExpressionProcessor<>("quoteRegExp",           Pattern::quote),
@@ -86,28 +73,6 @@ public class StringExpressionProcessors extends DelegatingExpressionProcessor
             new BiArgExpressionProcessor<>("substringAfter",            StringUtils::substringAfter),
             new MultiArgExpressionProcessor<>("anyOf", 0, Integer.MAX_VALUE, StringExpressionProcessors::anyOf)
         ));
-    }
-
-    private static String encodeToBase64(byte[] input)
-    {
-        byte[] encodedInput = Base64.getEncoder().encode(input);
-        return new String(encodedInput, UTF_8);
-    }
-
-    private static String toBase64Gzip(String input)
-    {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream())
-        {
-            try (GZIPOutputStream gzipos = new GZIPOutputStream(baos))
-            {
-                gzipos.write(input.getBytes(UTF_8));
-            }
-            return encodeToBase64(baos.toByteArray());
-        }
-        catch (IOException e)
-        {
-            throw new UncheckedIOException(e);
-        }
     }
 
     private static String anyOf(List<String> arguments)

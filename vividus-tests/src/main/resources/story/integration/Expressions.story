@@ -202,3 +202,6 @@ Given I initialize scenario variable `jsonWithYear` with value `{
     "year": #{generateDate(-P19Y, yyyy)}
 }`
 Then `${jsonWithYear}` matches `\{\s+"year": 200\d\s+}`
+
+Scenario: Validate Base64 to binary data decoding expression
+When I compare against baseline with name `black-pixel` from image `#{decodeFromBase64toBinary(iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjYGBg+A8AAQQBAHAgZQsAAAAASUVORK5CYII=)}`
