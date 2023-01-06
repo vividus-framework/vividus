@@ -241,7 +241,7 @@ Shifts the given input date for a given period in any direction (+/-).
 
 === `diffDate`
 
-Calculates the difference between two dates with given formats and returns result as {iso-date-format-link} format.
+Calculates the difference between two dates with given formats and returns result in {iso-date-format-link} format.
 
 [source, subs="+quotes"]
 ----
