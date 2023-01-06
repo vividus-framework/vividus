@@ -819,6 +819,22 @@ Decodes the input string from Base64 format to the regular string
 |===
 
 
+=== `decodeFromBase64ToBinary`
+
+Decodes the input string from Base64 format to the binary data.
+
+[source, subs="+quotes"]
+----
+#{decodeFromBase64ToBinary(*$input*)}
+----
+
+* *`$input`* - Base64 string to decode
+
+.Decoding Base64-encoded image to perfrom visual check
+----
+When I compare against baseline with name `expected` from image `#{decodeFromBase64toBinary(iVBORw0KGgoAAAANSU...)}`
+----
+
 === `toBase64Gzip`
 
 Compress the input string to GZip and encode compressed bytes to Base64 format

@@ -48,7 +48,6 @@ class StringExpressionProcessorsTests
 {
     private static final String VALUE = "value";
     private static final String BIG_DATA = "big data";
-    private static final String BASE_64 = "YmlnIGRhdGE=";
 
     @Mock private ILocationProvider locationProvider;
     @InjectMocks private StringExpressionProcessors processors;
@@ -78,10 +77,6 @@ class StringExpressionProcessorsTests
                 arguments("generateLocalized(number.number_between '1000','1000', es-MX)", "1000"),
                 arguments("loadResource(/org/vividus/expressions/resource.txt)",           BIG_DATA),
                 arguments("loadResource(org/vividus/expressions/resource.txt)",            BIG_DATA),
-                arguments("resourceToBase64(/org/vividus/expressions/resource.txt)",       BASE_64),
-                arguments("resourceToBase64(org/vividus/expressions/resource.txt)",        BASE_64),
-                arguments("decodeFromBase64(QmFydWNo)",                                    "Baruch"),
-                arguments("encodeToBase64(Baruch)",                                        "QmFydWNo"),
                 arguments("anyOf(123)",                                                    "123"),
                 arguments("anyOf()",                                                       EMPTY),
                 arguments("anyOf(,)",                                                      EMPTY),
@@ -90,7 +85,6 @@ class StringExpressionProcessorsTests
                 arguments("anyOf(\"\"\"a,b\\,c\"\"\")",                                    "a,b\\,c"),
                 arguments("anyOf(\"\"\" \"\"\")",                                          " "),
                 arguments("anyOf(\\,)",                                                    ","),
-                arguments("toBase64Gzip(vividus)",                                         "H4sIAAAAAAAA/yvLLMtMKS0GANIHCdkHAAAA"),
                 arguments("escapeHTML(M&Ms)",                                              "M&amp;Ms"),
                 arguments("escapeJSON(\"abc\"\n\"xyz\")",                                  "\\\"abc\\\"\\n\\\"xyz\\\""),
                 arguments("quoteRegExp(Customer(Username))",                               "\\QCustomer(Username)\\E"),

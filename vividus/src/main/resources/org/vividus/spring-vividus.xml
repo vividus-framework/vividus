@@ -98,4 +98,5 @@
 
     <bean id="SORTING" class="org.vividus.transformer.SortingTableTransformer" />
 
+    <bean class="org.vividus.expression.Base64ExpressionProcessors" />
 </beans>
