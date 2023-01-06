@@ -332,4 +332,6 @@
     <bean id="browser-window-height" class="org.vividus.ui.web.variable.BrowserWindowHeightDynamicVariable"/>
     <bean id="browser-window-width" class="org.vividus.ui.web.variable.BrowserWindowWidthDynamicVariable"/>
 
+    <bean class="org.vividus.ui.web.expression.DecodeDataUrlExpression" />
+
  </beans>

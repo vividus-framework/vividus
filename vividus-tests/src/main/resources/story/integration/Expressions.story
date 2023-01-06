@@ -205,3 +205,15 @@ Then `${jsonWithYear}` matches `\{\s+"year": 200\d\s+}`
 
 Scenario: Validate Base64 to binary data decoding expression
 When I compare against baseline with name `black-pixel` from image `#{decodeFromBase64toBinary(iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjYGBg+A8AAQQBAHAgZQsAAAAASUVORK5CYII=)}`
+
+Scenario: Validate Data URL decoding expression for textual data
+Then `#{decodeDataUrl(<dataUrl>)}` is = `<expected>`
+Examples:
+|dataUrl                                    |expected     |
+|data:,value                                |value        |
+|data:text/plain,value                      |value        |
+|data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==|Hello, World!|
+|data:;base64,SGVsbG8sIFdvcmxkIQ==          |Hello, World!|
+
+Scenario: Validate Data URL decoding expression for binary data
+When I compare against baseline with name `black-pixel` from image `#{decodeDataUrl(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjYGBg+A8AAQQBAHAgZQsAAAAASUVORK5CYII=)}`
