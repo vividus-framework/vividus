@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ class ExpressionAdapterTests
     {
         var input = "#{capitalize(#{trim(#{toLowerCase( VIVIDUS )})})}";
         var output = "Vividus";
-        IExpressionProcessor<String> processor = new DelegatingExpressionProcessor<>(List.of(
+        IExpressionProcessor<Object> processor = new DelegatingExpressionProcessor(List.of(
                 new SingleArgExpressionProcessor<>(EXPRESSION_TRIM,        StringUtils::trim),
                 new SingleArgExpressionProcessor<>(EXPRESSION_LOWER_CASE, StringUtils::lowerCase),
                 new SingleArgExpressionProcessor<>(EXPRESSION_CAPITALIZE,  StringUtils::capitalize)
@@ -124,7 +124,7 @@ class ExpressionAdapterTests
 
         var mockedExpressionProcessor = (SingleArgExpressionProcessor<String>) mock(SingleArgExpressionProcessor.class);
         when(mockedExpressionProcessor.execute(EXPRESSION_KEYWORD)).thenReturn(Optional.of(" quetzalcoatlus "));
-        IExpressionProcessor<String> processor = new DelegatingExpressionProcessor<>(List.of(
+        IExpressionProcessor<?> processor = new DelegatingExpressionProcessor(List.of(
                 new SingleArgExpressionProcessor<>(EXPRESSION_TRIM,        StringUtils::trim),
                 new SingleArgExpressionProcessor<>(EXPRESSION_CAPITALIZE,  StringUtils::capitalize),
                 mockedExpressionProcessor

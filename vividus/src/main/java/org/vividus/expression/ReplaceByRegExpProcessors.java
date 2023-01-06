@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 import javax.inject.Named;
 
 @Named
-public class ReplaceByRegExpProcessors extends DelegatingExpressionProcessor<String>
+public class ReplaceByRegExpProcessors extends DelegatingExpressionProcessor
 {
     private static final int ARGS_LIMIT = 3;
 
