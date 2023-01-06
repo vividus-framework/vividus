@@ -740,6 +740,46 @@ Gets the substring after the first occurrence of a separator. The separator is n
 
 |===
 
+=== `anyOf`
+
+Pick a random value from a predefined list
+
+[source, subs="+quotes"]
+----
+#{anyOf(*$list*)}
+----
+
+* *`$list`* - comma-separated list of values
+
+.Examples of the expressions picking a random value
+|===
+|Expression |Result
+
+|`#{anyOf(1, 2, 3)}`
+|either `1`, or `2`, or `3`
+
+|`#{anyOf(123)}`
+|`123`
+
+|`#{anyOf(1\,2)}`
+|`1,2`
+
+|`#{anyOf()}`
+|
+
+|`#{anyOf( )}`
+|
+
+|`#{anyOf(,)}`
+|
+
+|`#{anyOf(, )}`
+|
+
+|`#{anyOf("""a,b\, c""")}`
+|`a,b\, c`
+|===
+
 === `encodeToBase64`
 
 Encode the input string to Base64 format
