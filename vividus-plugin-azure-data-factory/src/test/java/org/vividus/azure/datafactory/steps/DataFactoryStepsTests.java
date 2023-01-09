@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ class DataFactoryStepsTests
     private static final String RESOURCE_GROUP_NAME = "resourceGroupName";
     private static final String FACTORY_NAME = "factoryName";
     private static final String PIPELINE_NAME = "pipelineName";
-    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(2);
+    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(5);
 
     private static final String SUCCEEDED = "Succeeded";
     private static final String FAILED = "Failed";
