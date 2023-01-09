@@ -77,6 +77,42 @@ The allowed values for the preference from the example are:
 
 include::partial$proxy-meta-tags.adoc[]
 
+== xref:ROOT:glossary.adoc#_expression[Expressions]
+
+NOTE: The expression parameters marked with *bold* are mandatory.
+
+=== `decodeDataUrl`
+
+Parses https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs[Data URL-s] and decodes their data if https://developer.mozilla.org/en-US/docs/Glossary/Base64[Base64] encoding is set. The result of the expression depends on the https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types[MIME type] of Data URL. The result will be a binary data in case of the binary MIME type and it will be a string for the text MIME type.
+
+WARNING: If expression is applied to invalid Data URL the error will be thrown.
+
+[source, subs="+quotes"]
+----
+#{decodeDataUrl(*$dataUrl*)}
+----
+
+* *`$dataUrl`* - The Data URL to decode.
+
+.Decoding inlined image
+[source,gherkin]
+----
+When I save `src` attribute value of element located `By.id(image)` to scenario variable `image`
+When I compare against baseline with name `inlined-image` from image `#{decodeDataUrl(${image})}`
+----
+
+.Examples of the expressions decoding Data URL
+|===
+|Expression |Result
+|`#{decodeDataUrl(data:,value)}`                                  |`value`
+|`#{decodeDataUrl(data:text/plain,value)}`                        |`value`
+|`#{decodeDataUrl(data:;base64,SGVsbG8sIFdvcmxkIQ==)}`            |`Hello, World!`
+|`#{decodeDataUrl(data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==)}`  |`Hello, World!`
+|`#{decodeDataUrl(data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==)}`  |`Hello, World!`
+|`#{decodeDataUrl(decodeDataUrl(data:image/png;base64,iVBORw....)}|Image binary data.
+|===
+
+
 == xref:commons:variables.adoc[Dynamic variables]
 
 === Browser window dimension
