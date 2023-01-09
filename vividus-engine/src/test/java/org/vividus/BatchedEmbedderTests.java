@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -270,7 +270,7 @@ class BatchedEmbedderTests
     private void mockBatchConfiguration(boolean failFast, Boolean failStoryFast)
     {
         var batchConfiguration = spy(new BatchConfiguration());
-        batchConfiguration.setStoryExecutionTimeout(Duration.ofHours(1));
+        batchConfiguration.overrideStoryExecutionTimeout(Duration.ofHours(1));
         batchConfiguration.setMetaFilters(META_FILTERS);
         batchConfiguration.setThreads(2);
         batchConfiguration.setFailFast(failFast);

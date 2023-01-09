@@ -72,9 +72,9 @@ NOTE: The properties marked with *bold* are mandatory.
 |`<empty>`
 |If set the value overrides global setting `scenario.fail-fast`.
 
-|`batch-<batch-number>.story-execution-timeout`
+|`batch-<batch-number>.story.execution-timeout`
 |`PT3H`
-|The max duration of the single story in the batch.
+|The max duration of the single story in the batch in {iso-date-format-link} format. Overrides value specified via `story.execution-timeout`.
 
 |`batch.fail-fast`
 |`false`
@@ -87,6 +87,10 @@ NOTE: The properties marked with *bold* are mandatory.
 |`scenario.fail-fast`
 |`false`
 |If set to `true` the scenario execution will be stopped after first failed assertion
+
+|`story.execution-timeout`
+|`PT3H`
+|The max duration of the single story in {iso-date-format-link} format. Could be overriden via corresponging batch setting.
 
 |`bdd.configuration.dry-run`
 |`false`

@@ -12,7 +12,8 @@
 
     <bean id="batchStorage" class="org.vividus.batch.BatchStorage">
         <constructor-arg ref="propertyMapper" />
-        <constructor-arg value="${bdd.story-execution-timeout}" />
+        <constructor-arg type="java.time.Duration" value="${story.execution-timeout:#{null}}" />
+        <constructor-arg type="java.lang.String" value="${bdd.story.execution-timeout:#{null}}" />
         <constructor-arg value="${bdd.all-meta-filters}" />
         <constructor-arg value="${batch.fail-fast}" />
     </bean>

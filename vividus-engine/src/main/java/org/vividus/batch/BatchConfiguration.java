@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,9 @@ public class BatchConfiguration
     private String name;
     private Integer threads;
     private List<String> metaFilters;
-    private Duration storyExecutionTimeout;
     private Boolean failFast;
-    private ScenarioExecutionConfiguration scenario;
-    private StoryExecutionConfiguration story;
+    private ScenarioExecutionConfiguration scenario = new ScenarioExecutionConfiguration();
+    private StoryExecutionConfiguration story = new StoryExecutionConfiguration();
     private Map<String, String> variables = Map.of();
 
     public String getResourceLocation()
@@ -106,12 +105,12 @@ public class BatchConfiguration
 
     public Duration getStoryExecutionTimeout()
     {
-        return storyExecutionTimeout;
+        return story.executionTimeout;
     }
 
-    public void setStoryExecutionTimeout(Duration storyExecutionTimeout)
+    public void overrideStoryExecutionTimeout(Duration storyExecutionTimeout)
     {
-        this.storyExecutionTimeout = storyExecutionTimeout;
+        story.executionTimeout = storyExecutionTimeout;
     }
 
     public Boolean isFailFast()
@@ -126,7 +125,7 @@ public class BatchConfiguration
 
     public Boolean isFailScenarioFast()
     {
-        return scenario == null ? null : scenario.failFast;
+        return scenario.failFast;
     }
 
     public void setScenario(ScenarioExecutionConfiguration scenario)
@@ -136,7 +135,7 @@ public class BatchConfiguration
 
     public Boolean isFailStoryFast()
     {
-        return story == null ? null : story.failFast;
+        return story.failFast;
     }
 
     public void setStory(StoryExecutionConfiguration story)
@@ -167,19 +166,25 @@ public class BatchConfiguration
 
     private static final class StoryExecutionConfiguration
     {
-        private boolean failFast;
+        private Boolean failFast;
+        private Duration executionTimeout;
 
-        private void setFailFast(boolean failFast)
+        private void setFailFast(Boolean failFast)
         {
             this.failFast = failFast;
+        }
+
+        private void setExecutionTimeout(Duration executionTimeout)
+        {
+            this.executionTimeout = executionTimeout;
         }
     }
 
     private static final class ScenarioExecutionConfiguration
     {
-        private boolean failFast;
+        private Boolean failFast;
 
-        private void setFailFast(boolean failFast)
+        private void setFailFast(Boolean failFast)
         {
             this.failFast = failFast;
         }
