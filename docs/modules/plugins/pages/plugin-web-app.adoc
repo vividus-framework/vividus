@@ -83,7 +83,7 @@ NOTE: The expression parameters marked with *bold* are mandatory.
 
 === `decodeDataUrl`
 
-Parses https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs[Data URLs] and decodes their data if https://developer.mozilla.org/en-US/docs/Glossary/Base64[Base64] encoding is set. The result of the expression depends on the Data URL's https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types[MIME type]. The result will be a binary data in case of the binary MIME type and it will be a string for the text MIME type.
+Parses https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs[Data URL-s] and decodes their data if https://developer.mozilla.org/en-US/docs/Glossary/Base64[Base64] encoding is set. The result of the expression depends on the https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types[MIME type] of Data URL. The result will be a binary data in case of the binary MIME type and it will be a string for the text MIME type.
 
 WARNING: If expression is applied to invalid Data URL the error will be thrown.
 
