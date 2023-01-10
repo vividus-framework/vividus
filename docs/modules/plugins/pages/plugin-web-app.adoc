@@ -102,6 +102,7 @@ When I compare against baseline with name `inlined-image` from image `#{decodeDa
 ----
 
 .Examples of the expressions decoding Data URL
+[cols="2,1", options="header"]
 |===
 |Expression |Result
 |`#{decodeDataUrl(data:,value)}`                                  |`value`
