@@ -30,6 +30,7 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.vividus.mobileapp.action.TouchActions;
 import org.vividus.mobileapp.model.SwipeDirection;
+import org.vividus.mobileapp.model.ZoomType;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
@@ -138,6 +139,18 @@ public class TouchSteps
         {
             adjustVerticalPosition(elements.get(0), direction, swipeArea, swipeDuration);
         }
+    }
+
+    /**
+     * Performs zoom in/out
+     * The step takes into account current context. If you need to perform zoom on the element,
+     * you need to switch the context to this element.
+     * @param zoomType type of zoom, either <b>IN</b>  or <b>OUT</b>
+     */
+    @When("I zoom $zoomType context")
+    public void zoom(ZoomType zoomType)
+    {
+        touchActions.performZoom(zoomType, getSearchContextRectangle());
     }
 
     private Rectangle getSearchContextRectangle()

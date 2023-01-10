@@ -838,6 +838,99 @@ Then number of elements found by `accessibilityId(slide 2)` is equal to `1`
 ----
 
 
+=== Zoom in/out
+
+Performs zoom in/out
+
+[.float-group]
+--
+[.left]
+.Zoom in
+====
+image::zoom_in.png[width=300]
+====
+
+[.left]
+.Zoom out
+====
+image::zoom_out.png[width=300]
+====
+--
+
+[NOTE]
+The step takes into account the current context. If you need to perform zoom on
+the element, you need to switch the context to this element.
+
+==== Properties
+
+image::zoom_indent.png[width=70%]
+
+[cols="4,1,1,4", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default value
+|Description
+
+|`mobile-application.zoom.indent.top`
+|size in percentage
+|`30`
+|The size of the top part of the context to be excluded from zoom area
+
+|`mobile-application.zoom.indent.bottom`
+|size in percentage
+|`30`
+|The size of the bottom part of the context to be excluded from zoom area
+
+|`mobile-application.zoom.indent.right`
+|size in percentage
+|`20`
+|The size of the right part of the context to be excluded from zoom area
+
+|`mobile-application.zoom.indent.left`
+|size in percentage
+|`20`
+|The size of the left part of the context to be excluded from zoom area
+
+|===
+
+[WARNING]
+====
+The indent percentage value should be from `0` to `99`.
+
+The sum of `top` and `bottom` indent percentage values should be from `0` to `99`.
+
+The sum of `right` and `left` indent percentage values should be from `0` to `99`.
+====
+
+.Property configuration
+[source,gherkin]
+----
+mobile-application.zoom.indent.top=30
+mobile-application.zoom.indent.bottom=30
+mobile-application.zoom.indent.right=20
+mobile-application.zoom.indent.left=20
+----
+
+==== Step
+
+[source,gherkin]
+----
+When I zoom $zoomType context
+----
+
+* `$zoomType` - The type of zoom: `IN` or `OUT`
+
+.Zoom in/out
+[source,gherkin]
+----
+When I zoom in context
+When I wait until element located by `xpath(<welcomeMessageXpath>)` disappears
+When I zoom out context
+When I wait until element located by `xpath(<welcomeMessageXpath>)` appears
+----
+
+
 === Select date in date picker
 
 Selects a next or previous picker wheel value in date picker

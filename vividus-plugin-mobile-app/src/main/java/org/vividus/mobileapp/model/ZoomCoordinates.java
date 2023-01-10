@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package org.vividus.mobileapp.configuration;
+package org.vividus.mobileapp.model;
 
-public class MobileApplicationConfiguration
+public class ZoomCoordinates
 {
-    private final SwipeConfiguration swipeConfiguration;
-    private final ZoomConfiguration zoomConfiguration;
+    private final MoveCoordinates finger1MoveCoordinates;
+    private final MoveCoordinates finger2MoveCoordinates;
 
-    public MobileApplicationConfiguration(SwipeConfiguration swipeConfiguration, ZoomConfiguration zoomConfiguration)
+    public ZoomCoordinates(MoveCoordinates finger1MoveCoordinates, MoveCoordinates finger2MoveCoordinates)
     {
-        this.swipeConfiguration = swipeConfiguration;
-        this.zoomConfiguration = zoomConfiguration;
+        this.finger1MoveCoordinates = finger1MoveCoordinates;
+        this.finger2MoveCoordinates = finger2MoveCoordinates;
     }
 
-    public SwipeConfiguration getSwipeConfiguration()
+    public MoveCoordinates getFinger1MoveCoordinates()
     {
-        return swipeConfiguration;
+        return finger1MoveCoordinates;
     }
 
-    public ZoomConfiguration getZoomConfiguration()
+    public MoveCoordinates getFinger2MoveCoordinates()
     {
-        return zoomConfiguration;
+        return finger2MoveCoordinates;
     }
 }

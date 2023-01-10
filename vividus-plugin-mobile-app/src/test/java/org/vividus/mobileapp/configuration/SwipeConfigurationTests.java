@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class MobileApplicationConfigurationTests
+class SwipeConfigurationTests
 {
     @ValueSource(ints = { -1, 101 })
     @ParameterizedTest
     void shouldFailIfXPercentageIsNotValid(int invalidPercentage)
     {
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-            () -> new MobileApplicationConfiguration(null, 0, invalidPercentage, 0));
+        var thrown = assertThrows(IllegalArgumentException.class,
+                () -> new SwipeConfiguration(null, 0, invalidPercentage, 0));
         assertEquals("The x percentage value must be between 0 and 100, but got: " + invalidPercentage,
                 thrown.getMessage());
     }
@@ -38,8 +38,8 @@ class MobileApplicationConfigurationTests
     @ParameterizedTest
     void shouldFailIfYPercentageIsNotValid(int invalidPercentage)
     {
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-            () -> new MobileApplicationConfiguration(null, 0, 0, invalidPercentage));
+        var thrown = assertThrows(IllegalArgumentException.class,
+                () -> new SwipeConfiguration(null, 0, 0, invalidPercentage));
         assertEquals("The y percentage value must be between 0 and 100, but got: " + invalidPercentage,
                 thrown.getMessage());
     }

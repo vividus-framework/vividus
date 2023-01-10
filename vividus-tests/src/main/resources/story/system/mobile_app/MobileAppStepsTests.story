@@ -220,6 +220,14 @@ When I swipe DOWN to element located by `accessibilityId(header)` with duration 
 Then number of elements found by `accessibilityId(header)` is equal to `1`
 Then number of elements found by `accessibilityId(footer)` is equal to `0`
 
+Scenario: Verify step: 'When I zoom $zoomType context
+When I tap on element located by `accessibilityId(menuToggler)`
+When I tap on element located by `xpath(<menuWebViewXpath>)`
+When I wait until element located by `xpath(<welcomeMessageXpath>)` appears
+When I zoom in context
+When I wait until element located by `xpath(<welcomeMessageXpath>)` disappears
+When I zoom out context
+When I wait until element located by `xpath(<welcomeMessageXpath>)` appears
 
 Scenario: [Android] Verify step: 'When I upload file `$filePath` to device'
 Meta:
@@ -308,7 +316,7 @@ Scenario: [Android] Verify steps: 'When I switch to native context', 'When I swi
 Meta:
     @targetPlatform android
 When I tap on element located by `accessibilityId(menuToggler)`
-When I tap on element located by `xpath(//android.widget.TextView[@text='Web View'])`
+When I tap on element located by `xpath(<menuWebViewXpath>)`
 When I wait until element located by `xpath(//android.webkit.WebView[@focusable='true'])` appears
 When I switch to web view with name that contains `vividustestapp`
 Then number of elements found by `xpath(//*[@id='welcome-message'])` is equal to `1`

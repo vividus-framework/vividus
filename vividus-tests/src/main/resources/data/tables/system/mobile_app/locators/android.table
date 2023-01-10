@@ -7,6 +7,7 @@
 |menuWaitXpath              |//android.widget.TextView[@text='Wait']                                  |
 |menuScrollViewXpath        |//android.widget.TextView[@text='Scroll View']                           |
 |menuSliderXpath            |//android.widget.TextView[@text='Slider']                                |
+|menuWebViewXpath           |//android.widget.TextView[@text='Web View']                              |
 |nameInputXpath             |//android.widget.EditText[@text='Enter your name...']                    |
 |action                     |COMPARE_AGAINST                                                          |
 |scrollViewXpath            |//android.widget.ScrollView                                              |
@@ -17,3 +18,4 @@
 |qrCodeContainerXpath       |//android.view.ViewGroup[@resource-id='RNE__Image__children__container'] |
 |firstItemAccessibilityId   |Item 1                                                                   |
 |secondItemAccessibilityId  |Item 2                                                                   |
+|welcomeMessageXpath        |//*[@resource-id='welcome-message']                                      |
