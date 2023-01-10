@@ -74,7 +74,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 |`batch-<batch-number>.story.execution-timeout`
 |`PT3H`
-|The max duration of the single story in the batch in {iso-date-format-link} format. Overrides value specified via `story.execution-timeout`.
+|The max duration of the single story in the batch in {durations-format-link} format. Overrides value specified via `story.execution-timeout`.
 
 |`batch.fail-fast`
 |`false`
@@ -90,7 +90,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 |`story.execution-timeout`
 |`PT3H`
-|The max duration of the single story in {iso-date-format-link} format. Could be overriden via corresponging batch setting.
+|The max duration of the single story in {durations-format-link} format. Could be overriden via corresponging batch setting.
 
 |`bdd.configuration.dry-run`
 |`false`
