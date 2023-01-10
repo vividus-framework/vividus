@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.vividus.model.RunningStory;
 @ExtendWith(MockitoExtension.class)
 class FailureTests
 {
-    private static final String STEP = "Given I am on the main application page";
+    private static final String STEP = "Given I am on main application page";
     private static final String SCENARIO = "Verify main page";
     private static final String STORY = "Sample";
     private static final String MESSAGE = "message";

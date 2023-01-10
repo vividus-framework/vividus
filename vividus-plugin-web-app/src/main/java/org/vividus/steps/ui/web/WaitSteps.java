@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -409,7 +409,7 @@ public class WaitSteps
      * <br>
      * Usage example:
      * <code>
-     * <br>Given I am on a page with the URL 'https://example.com/'
+     * <br>Given I am on page with URL `https://example.com/`
      * <br>When I set page load timeout to `PT15S`
      * <br>When I open URL `https://example.com/super-heavy-page` in new window
      * <br>When I set page load timeout to `PT10S`

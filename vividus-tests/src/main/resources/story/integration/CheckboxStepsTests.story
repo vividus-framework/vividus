@@ -6,7 +6,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-Given I am on a page with the URL '${vividus-test-site-url}/checkboxes.html'
+Given I am on page with URL `${vividus-test-site-url}/checkboxes.html`
 
 Scenario: Validation of step: 'When I $checkboxAction checkbox located by `$searchAttributes`'
 When I change context to element located `id(single)`

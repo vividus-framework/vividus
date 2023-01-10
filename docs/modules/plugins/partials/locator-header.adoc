@@ -39,14 +39,14 @@ ui.locator.anyAttOrText.pattern=//*[@*='%s' or text()='%s']
 .Usage of custom locator
 [source,gherkin]
 ----
-Given I am on the main application page
+Given I am on main application page
 Then number of elements found by `anyAttOrText(attribute, text)` is = `1`
 ----
 
 .Usage of custom locator with comma in parameter
 [source,gherkin]
 ----
-Given I am on the main application page
+Given I am on main application page
 Then number of elements found by `anyAttOrText(attribute, with comma\, text)` is = `1`
 ----
 

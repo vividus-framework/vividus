@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -254,10 +254,10 @@ class PageStepsTests
     }
 
     @Test
-    void testIAmOnPage()
+    void testOpenPage()
     {
         String pageURL = "pageURL";
-        pageSteps.iAmOnPage(pageURL);
+        pageSteps.openPage(pageURL);
         verify(navigateActions).navigateTo(pageURL);
     }
 
@@ -282,39 +282,39 @@ class PageStepsTests
     }
 
     @Test
-    void testIAmOnTheMainApplicationPage()
+    void testOpenMainApplicationPage()
     {
         pageSteps.setKeepUserInfoForProtocolRedirects(false);
         URI mainPage = URI.create(URL);
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
-        pageSteps.iAmOnTheMainApplicationPage();
+        pageSteps.openMainApplicationPage();
         verify(navigateActions).navigateTo(URL);
         verify(webApplicationListener).onLoad();
     }
 
     @Test
-    void testIAmOnTheMainApplicationPageIOS()
+    void testOpenMainApplicationPageIOS()
     {
         when(webDriverManager.isIOS()).thenReturn(true);
-        testIAmOnTheMainApplicationPage();
+        testOpenMainApplicationPage();
         verify(waitActions).waitForPageLoad();
     }
 
     @Test
-    void testIAmOnTheMainApplicationPageRedirect() throws IOException
+    void testOpenMainApplicationPageRedirect() throws IOException
     {
         mockPageRedirect(URL, HTTP_EXAMPLE_COM);
-        pageSteps.iAmOnTheMainApplicationPage();
+        pageSteps.openMainApplicationPage();
         verify(navigateActions).navigateTo(URL);
         verify(webApplicationListener).onLoad();
     }
 
     @Test
-    void testIAmOnTheMainApplicationPageRedirectSameHost() throws IOException
+    void testOpenMainApplicationPageRedirectSameHost() throws IOException
     {
         mockPageRedirect(HTTP_EXAMPLE_COM, "https://example.com");
         when(webApplicationConfiguration.getBasicAuthUser()).thenReturn("user:password");
-        pageSteps.iAmOnTheMainApplicationPage();
+        pageSteps.openMainApplicationPage();
         verify(navigateActions).navigateTo("https://user:password@example.com");
         verify(webApplicationListener).onLoad();
     }
@@ -334,19 +334,19 @@ class PageStepsTests
     }
 
     @Test
-    void testIAmOnTheMainApplicationPageNoRedirect()
+    void testOpenMainApplicationPageNoRedirect()
     {
         pageSteps.setKeepUserInfoForProtocolRedirects(true);
         when(webApplicationConfiguration.getAuthenticationMode()).thenReturn(AuthenticationMode.URL);
         URI mainPage = URI.create(HTTP_EXAMPLE_COM);
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
-        pageSteps.iAmOnTheMainApplicationPage();
+        pageSteps.openMainApplicationPage();
         verify(navigateActions).navigateTo(HTTP_EXAMPLE_COM);
         verify(webApplicationListener).onLoad();
     }
 
     @Test
-    void testIAmOnTheMainApplicationPageIOExeption() throws IOException
+    void testOpenMainApplicationPageIOExeption() throws IOException
     {
         String exceptionMessage = "message";
         pageSteps.setKeepUserInfoForProtocolRedirects(true);
@@ -355,7 +355,7 @@ class PageStepsTests
         when(webApplicationConfiguration.getAuthenticationMode()).thenReturn(AuthenticationMode.URL);
         IOException exception = new IOException(exceptionMessage);
         doThrow(exception).when(httpClient).doHttpHead(eq(mainPage), any(HttpClientContext.class));
-        pageSteps.iAmOnTheMainApplicationPage();
+        pageSteps.openMainApplicationPage();
         assertThat(logger.getLoggingEvents(),
                 is(List.of(error("HTTP request for '{}' failed with the exception: {}", mainPage, exceptionMessage))));
     }

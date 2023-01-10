@@ -33,7 +33,7 @@ The step based on the contextual approach and when it's necessary it could be us
 .Check accessibility
 [source,gherkin]
 ----
-Given I am on a page with the URL 'https://vividus-test-site.onrender.com/'
+Given I am on page with URL `https://vividus-test-site.onrender.com/`
 When I change context to element located `xpath(//body)`
 Then I test accessibility:
 |standard|level |elementsToIgnore                                 |elementsToCheck|violationsToIgnore                                                                     |

@@ -2,7 +2,7 @@ Meta:
     @epic vividus-plugin-web-app
 
 Scenario: Validation of step When I change window size to `$sizeAsString`
-Given I am on a page with the URL '${vividus-test-site-url}/stickyHeader.html'
+Given I am on page with URL `${vividus-test-site-url}/stickyHeader.html`
 When I change context to element located `id(myHeader)`
 Then `${context-width}` is <conditionBefore> `<targetWidth>`
 When I change window size to `<targetWidth>x<targetHeight>`

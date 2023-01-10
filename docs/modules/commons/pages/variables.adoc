@@ -77,7 +77,7 @@ batch-2.variables.locale=/uk/en/
 .Using batch variable `locale`
 [source,gherkin]
 ----
-Given I am on the main application page
+Given I am on main application page
 When I go to the relative URL '${locale}'
 ----
 

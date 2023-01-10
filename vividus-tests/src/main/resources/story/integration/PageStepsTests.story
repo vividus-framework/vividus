@@ -5,7 +5,7 @@ Meta:
     @capability.pageLoadStrategy eager
 
 Scenario: Verify step: 'Then page is scrolled to element located `$locator`'
-Given I am on a page with the URL '${vividus-test-site-url}/delayedScroll.html'
+Given I am on page with URL `${vividus-test-site-url}/delayedScroll.html`
 When I click on element located by `id(anchor)`
 When I wait until scroll is finished
 Then page is scrolled to element located `id(toClick)`

@@ -12,7 +12,7 @@ Any scenario that doesn't correspond to the <<_manual_test_cases, manual test ca
 Scenario: Verify link
 Meta: @testCaseId TEST-231
 
-Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+Given I am on page with URL `${vividus-test-site-url}/links.html`
 When I wait until the page has the title 'Links'
 Then number of elements found by `<locator>` is equal to `1`
 Examples:
@@ -36,7 +36,7 @@ Meta: @testCaseId TEST-566
 !-- * link text is 'Link to an element'
 !-- Result: The number of links for all locators is equal to 1
 
-Given I am on a page with the URL '${vividus-test-site-url}/links.html'
+Given I am on page with URL `${vividus-test-site-url}/links.html`
 When I wait until the page has the title 'Links'
 Then number of elements found by `<locator>` is equal to `1`
 Examples:

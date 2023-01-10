@@ -284,3 +284,11 @@ When I wait until element located by `<locator>` contains text `<text>'
 Composite: Then element located '$locator' disappears in '$timeout'
 !-- WARNING: The step "Then element located '$locator' disappears in '$timeout'" is deprecated and will be removed in VIVIDUS 0.6.0
 Then element located by `<locator>` disappears in `<timeout>`
+
+Composite: Given I am on the main application page
+!-- WARNING: The step "Given I am on the main application page" is deprecated and will be removed in VIVIDUS 0.7.0
+Given I am on main application page
+
+Composite: Given I am on a page with the URL '$pageURL'
+!-- WARNING: The step "Given I am on a page with the URL '$pageURL'" is deprecated and will be removed in VIVIDUS 0.7.0
+Given I am on page with URL `<pageURL>`
