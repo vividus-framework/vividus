@@ -109,7 +109,7 @@ When I compare against baseline with name `inlined-image` from image `#{decodeDa
 |`#{decodeDataUrl(data:;base64,SGVsbG8sIFdvcmxkIQ==)}`            |`Hello, World!`
 |`#{decodeDataUrl(data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==)}`  |`Hello, World!`
 |`#{decodeDataUrl(data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==)}`  |`Hello, World!`
-|`#{decodeDataUrl(data:image/png;base64,iVBORw....)}              |Image binary data.
+|`#{decodeDataUrl(data:image/png;base64,iVBORw....)}`             |Image binary data.
 |===
 
 
