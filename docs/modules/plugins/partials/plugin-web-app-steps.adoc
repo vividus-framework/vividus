@@ -75,7 +75,7 @@ A relative URL can point to a file within a web site (like `about.html` or `/pro
 When I go to relative URL `$relativeURL`
 ----
 
-* `relativeURL` - A string value of the relative URL
+* `relativeURL` - A string value of the relative URL.
 
 . Open main application page and then navigate to '/products/new' page on the application host
 [source,gherkin]
