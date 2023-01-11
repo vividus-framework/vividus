@@ -2,7 +2,7 @@
 :popup-alert: https://www.w3schools.com/js/js_popup.asp
 :close-spec: https://w3c.github.io/webdriver/webdriver-spec.html#close-window[close]
 
-=== Page steps
+=== Steps opening pages
 
 ==== Open main application page
 
@@ -34,6 +34,54 @@ Given I am on page with URL `$pageURL`
 [source,gherkin]
 ----
 Given I am on page with URL `https://docs.vividus.dev/`
+----
+
+==== Open page with relative URL
+
+Navigates the browser to the specific path in the current host defined in the _relative URL_ step parameter.
+
+A relative URL can point to a file within a web site (like `about.html` or `/products`).
+
+- If the parameter starts with '/' char, navigation will be performed from the root of the host, see examples below.
+- If the parameter starts without '/' char or with './', navigation will be performed from the current path directory.
+
+.Examples
+|===
+|Current page |Relative URL parameter|Opened page
+
+|https://mysite.com
+|about.html
+|https://mysite.com/about.html
+
+|https://mysite.com
+|/products/new
+|https://mysite.com/products/new
+
+|https://mysite.com/path/foo
+|stats
+|https://mysite.com/path/foo/stats
+
+|https://mysite.com/path/foo
+|./docs/info.html
+|https://mysite.com/path/foo/docs/info.html
+
+|https://mysite.com/path/foo
+|/documents
+|https://mysite.com/documents
+|===
+
+[source,gherkin]
+----
+When I go to relative URL `$relativeURL`
+----
+
+* `relativeURL` - A string value of the relative URL.
+
+. Open main application page and then navigate to '/products/new' page on the application host
+[source,gherkin]
+----
+Given I am on main application page
+When I go to relative URL `/products/new`
 ----
 
 === Clicking steps

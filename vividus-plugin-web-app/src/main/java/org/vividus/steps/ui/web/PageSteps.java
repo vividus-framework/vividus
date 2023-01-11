@@ -237,9 +237,24 @@ public class PageSteps
     }
 
     /**
-     * Goes to the relative URL
+     * Navigates the browser to the specific path in the current host
+     * defined in the <i>relative URL</i> step variable
      * <br>
-     * A <b>relative URL</b> - points to a file within a web site (like <i>'about.html'</i> or <i>'/products'</i>)<br>
+     * A <b>relative URL</b> - points to a file within a web site
+     * (like <i>'about.html'</i> or <i>'/products'</i>)<br>
+     * <p>
+     * <table border="1">
+     * <caption>Examples:</caption>
+     * <tr>
+     * <td>Current page</td><td>Relative URL parameter</td><td>Opened page</td>
+     * </tr>
+     * <tr>
+     * <td>https://mysite.com/path/foo</td><td>stats</td><td>https://mysite.com/path/stats</td>
+     * </tr>
+     * <tr>
+     * <td>https://mysite.com/path/foo</td><td>/documents</td><td>https://mysite.com/documents</td>
+     * </tr>
+     * </table>
      * <p>
      * Actions performed at this step:
      * <ul>
@@ -249,8 +264,8 @@ public class PageSteps
      * <p>
      * @param relativeURL A string value of the relative URL
      */
-    @When("I go to the relative URL '$relativeURL'")
-    public void iGoTo(String relativeURL)
+    @When("I go to relative URL `$relativeURL`")
+    public void openRelativeUrl(String relativeURL)
     {
         setContextSteps.switchingToDefault();
         URI currentURI = UriUtils.createUri(getWebDriver().getCurrentUrl());

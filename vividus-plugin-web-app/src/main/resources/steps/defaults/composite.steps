@@ -292,3 +292,7 @@ Given I am on main application page
 Composite: Given I am on a page with the URL '$pageURL'
 !-- WARNING: The step "Given I am on a page with the URL '$pageURL'" is deprecated and will be removed in VIVIDUS 0.7.0
 Given I am on page with URL `<pageURL>`
+
+Composite: When I go to the relative URL '$relativeURL'
+!-- WARNING: The step "When I go to the relative URL '$relativeURL'" is deprecated and will be removed in VIVIDUS 0.7.0
+When I go to relative URL `<relativeURL>`

@@ -3,12 +3,12 @@ Meta:
 
 Lifecycle:
 Examples:
-|windowsTitle|indexTitle       |vivdus-test-site                                           |
-|Windows     |Vividus Test Site|${vividus-test-site-url}/windows.html|
+|windowsTitle|indexTitle       |
+|Windows     |Vividus Test Site|
 
 
 Scenario: Verify step with "is equal to": "When I switch to window with title that $stringComparisonRule `$title`"
-Given I am on page with URL `<vivdus-test-site>`
+Given I am on page with URL `${vividus-test-site-url}/windows.html`
 Then the page title is equal to '<windowsTitle>'
 When I click on element located by `id(plain)`
 When I switch to window with title that is equal to `<indexTitle>`
@@ -17,8 +17,9 @@ When I close the current window
 Then the page title is equal to '<windowsTitle>'
 
 
-Scenario: Verify step with "contains": "When I switch to window with title that $stringComparisonRule `$title`"
-Given I am on page with URL `<vivdus-test-site>`
+Scenario: Verify steps: with "contains": "When I switch to window with title that $stringComparisonRule `$title`" and "When I go to relative URL `$relativeURL`"
+Given I am on main application page
+When I go to relative URL `/windows.html`
 Then the page title is equal to '<windowsTitle>'
 When I click on element located by `id(plain)`
 When I switch to window with title that contains `<indexTitle>`
@@ -27,8 +28,9 @@ When I close the current window
 Then the page title is equal to '<windowsTitle>'
 
 
-Scenario: Verify step: "When I wait `$duration` until window with title that $comparisonRule `$windowTitile` appears and switch to it"
-Given I am on page with URL `<vivdus-test-site>`
+Scenario: Verify steps: "When I wait `$duration` until window with title that $comparisonRule `$windowTitile` appears and switch to it" and "When I go to relative URL `$relativeURL`"
+Given I am on main application page
+When I go to the relative URL 'windows.html'
 Then the page title is equal to '<windowsTitle>'
 When I click on element located by `id(timeout)`
 When I wait `PT3S` until window with title that is equal to `<indexTitle>` appears and switch to it
