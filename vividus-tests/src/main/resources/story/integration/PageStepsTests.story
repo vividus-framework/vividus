@@ -29,13 +29,3 @@ Examples:
 |DNS_LOOKUP_TIME      |
 |DOM_CONTENT_LOAD_TIME|
 |PAGE_LOAD_TIME       |
-
-Scenario: Verify step: When I go to relative URL `$relativeURL`
-Given I am on a page with the URL '${vividus-test-site-url}'
-When I go to relative URL `/elementState.html`
-Then number of elements found by `id(element-to-hide)` is equal to `1`
-
-Scenario: Verify deprecated step: When I go to the relative URL '$relativeURL'
-Given I am on a page with the URL '${vividus-test-site-url}'
-When I go to the relative URL '/elementState.html'
-Then number of elements found by `id(element-to-hide)` is equal to `1`
