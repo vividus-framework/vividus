@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.vividus.ui.web.action;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -33,7 +32,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,16 +42,12 @@ class WebElementActionsTests
             "return window.getComputedStyle(arguments[0],':after').getPropertyValue('content')";
     private static final String SCRIPT_PROPERTY_VALUE_CONTENT_BEFORE =
             "return window.getComputedStyle(arguments[0],':before').getPropertyValue('content')";
-    private static final int ELEMENT_Y_LOCATION = 100;
-    private static final String SCRIPT_WINDOW_SCROLL = "return ((window.scrollY <= " + ELEMENT_Y_LOCATION
-            + ") && (" + ELEMENT_Y_LOCATION + "<= (window.scrollY + window.innerHeight)))";
     private static final String CONTENT_FOUND_CORRECT = "Content found correct";
     private static final String QUOTE = "'";
     private static final String TEXT = "text";
 
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private WebElement webElement;
-    @Mock private Point point;
     @InjectMocks private WebElementActions webElementActions;
 
     @Test
@@ -157,30 +151,6 @@ class WebElementActionsTests
     {
         when(javascriptActions.getPageText()).thenReturn(TEXT);
         assertEquals(TEXT, webElementActions.getPageText());
-    }
-
-    @Test
-    void testIsPageVisibleAreaScrolledToElement()
-    {
-        when(webElement.getLocation()).thenReturn(point);
-        when(point.getY()).thenReturn(ELEMENT_Y_LOCATION);
-        when(javascriptActions.executeScript(SCRIPT_WINDOW_SCROLL)).thenReturn(true);
-        assertTrue(webElementActions.isPageVisibleAreaScrolledToElement(webElement));
-    }
-
-    @Test
-    void testIsPageVisibleAreaScrolledToElementNull()
-    {
-        assertFalse(webElementActions.isPageVisibleAreaScrolledToElement(null));
-    }
-
-    @Test
-    void testIsPageVisibleAreaScrolledToElementFalseCondition()
-    {
-        when(webElement.getLocation()).thenReturn(point);
-        when(point.getY()).thenReturn(ELEMENT_Y_LOCATION);
-        when(javascriptActions.executeScript(SCRIPT_WINDOW_SCROLL)).thenReturn(false);
-        assertFalse(webElementActions.isPageVisibleAreaScrolledToElement(webElement));
     }
 
     @Test

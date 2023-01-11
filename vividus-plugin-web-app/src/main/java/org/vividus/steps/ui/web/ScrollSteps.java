@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package org.vividus.steps.ui.web;
 
 import java.util.List;
 
+import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
@@ -29,14 +31,16 @@ public class ScrollSteps
 {
     private final IUiContext uiContext;
     private final WebJavascriptActions javascriptActions;
-    private final IBaseValidations baseValidaitons;
+    private final ISoftAssert softAssert;
+    private final IBaseValidations baseValidations;
 
-    public ScrollSteps(IUiContext uiContext, WebJavascriptActions javascriptActions,
+    public ScrollSteps(IUiContext uiContext, WebJavascriptActions javascriptActions, ISoftAssert softAssert,
             IBaseValidations baseValidations)
     {
         this.uiContext = uiContext;
         this.javascriptActions = javascriptActions;
-        this.baseValidaitons = baseValidations;
+        this.softAssert = softAssert;
+        this.baseValidations = baseValidations;
     }
 
     /**
@@ -63,10 +67,39 @@ public class ScrollSteps
     @When("I scroll element located `$locator` into view")
     public void scrollIntoView(Locator locator)
     {
-        List<WebElement> toScroll = baseValidaitons.assertIfElementsExist("Element to scroll into view", locator);
+        List<WebElement> toScroll = baseValidations.assertIfElementsExist("Element to scroll into view", locator);
         if (!toScroll.isEmpty())
         {
             javascriptActions.scrollIntoView(toScroll.get(0), true);
+        }
+    }
+
+    /**
+     * Checks if the page is scrolled to the specific element located by locator
+     * <br>Example: &lt;a id="information_collection" name="information_collection_name"&gt; -
+     * Then page is scrolled to element located `id(information_collection)`
+     * <p>
+     * Actions performed at this step:
+     * <ul>
+     * <li>Assert that element with specified locator exists
+     * <li>Checks whether page is scrolled to the very bottom
+     * <li>If yes --&gt; verify that element's Y coordinate is positive which means that element is visible if no --&gt;
+     * get element's Y coordinate and verify that it's close to 0 which means that element is an the very top
+     * </ul>
+     * @param locator A locator to locate element
+     */
+    @Then("page is scrolled to element located `$locator`")
+    public void isPageScrolledToElement(Locator locator)
+    {
+        WebElement element = baseValidations.assertIfElementExists("Element to verify position", locator);
+        if (element != null)
+        {
+            int elementYCoordinate = element.getLocation().getY();
+            boolean pageVisibleAreaScrolledToElement = javascriptActions.executeScript(String.format(
+                    "return window.scrollY <= %1$d && %1$d <= (window.scrollY + window.innerHeight)",
+                    elementYCoordinate));
+            softAssert.assertTrue(String.format("The page is scrolled to an element with located by %s", locator),
+                    pageVisibleAreaScrolledToElement);
         }
     }
 }

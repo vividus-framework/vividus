@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,14 +44,6 @@ public interface IWebElementActions extends ElementActions
      * or empty list if no content found
      */
     List<String> getAllPseudoElementsContent();
-
-    /**
-     * Checks that visible page area was scrolled to the element
-     * @param element Any element to scroll to
-     * @return the result of this verification, true - if the page was scrolled
-     * or false - if the page was not scrolled
-     */
-    boolean isPageVisibleAreaScrolledToElement(WebElement element);
 
     /**
      * Gets the text content from whole page

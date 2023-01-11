@@ -54,37 +54,25 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.steps.StringComparisonRule;
-import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
-import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.action.search.SearchParameters;
-import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.INavigateActions;
-import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
-import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.ui.web.listener.IWebApplicationListener;
 import org.vividus.util.UriUtils;
 
-@SuppressWarnings("MethodCount")
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class PageStepsTests
 {
     private static final String HTTP_EXAMPLE_COM = "http://example.com";
-    private static final String ELEMENT_TO_VERIFY_POSITION = "Element to verify position";
-    private static final String ID = "id";
-    private static final String VALUE = "value";
     private static final String PAGE_HAS_CORRECT_RELATIVE_URL = "Page has correct relative URL";
     private static final String PAGE_HAS_CORRECT_HOST = "Page has correct host";
     private static final String RELATIVE_URL = "/";
@@ -94,11 +82,9 @@ class PageStepsTests
 
     @Mock private WebDriver driver;
     @Mock private IDescriptiveSoftAssert softAssert;
-    @Mock private IBaseValidations mockedBaseValidations;
     @Mock private INavigateActions navigateActions;
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private IUiContext uiContext;
-    @Mock private IWebElementActions webElementActions;
     @Mock private WebApplicationConfiguration webApplicationConfiguration;
     @Mock private IWebApplicationListener webApplicationListener;
     @Mock private SetContextSteps setContextSteps;
@@ -168,6 +154,7 @@ class PageStepsTests
         verify(softAssert).assertEquals(PAGE_HAS_CORRECT_RELATIVE_URL, uri, uri);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void testPageWithURLpartIsLoaded()
     {
@@ -178,31 +165,6 @@ class PageStepsTests
         verify(softAssert).assertThat(eq("Page with the URLpart '" + urlValue + "' is loaded"),
                 eq("Page url '" + urlValue + "' contains part '" + urlValue + "'"), eq(urlValue),
                 (Matcher<String>) isA(Matcher.class));
-    }
-
-    @Test
-    void testIsElementAtTheTop()
-    {
-        WebElement webElement = mock(WebElement.class);
-        Locator locator = new Locator(WebLocatorType.XPATH,
-                new SearchParameters(XpathLocatorUtils.getXPathByAttribute(ID, VALUE), Visibility.ALL));
-        when(mockedBaseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, locator))
-                .thenReturn(webElement);
-        when(webElementActions.isPageVisibleAreaScrolledToElement(webElement)).thenReturn(true);
-        pageSteps.isPageScrolledToAnElement(locator);
-        verify(softAssert).assertTrue("The page is scrolled to an element with located by  XPath: "
-                + "'.//*[normalize-space(@id)=\"value\"]'; Visibility: ALL;", true);
-    }
-
-    @Test
-    void testIsElementAtTheTopElementNull()
-    {
-        Locator locator = new Locator(WebLocatorType.XPATH,
-                new SearchParameters(XpathLocatorUtils.getXPathByAttribute(ID, VALUE)));
-        when(mockedBaseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, locator))
-                .thenReturn(null);
-        pageSteps.isPageScrolledToAnElement(locator);
-        verifyNoInteractions(softAssert);
     }
 
     @ParameterizedTest
@@ -230,7 +192,7 @@ class PageStepsTests
         when(driver.getCurrentUrl()).thenReturn(baseUrl);
         pageSteps.openRelativeUrl(toGo);
         verify(setContextSteps).switchingToDefault();
-        verify(navigateActions).navigateTo(expected);
+        verify(navigateActions).navigateTo(URI.create(expected));
     }
 
     @Test
@@ -288,7 +250,7 @@ class PageStepsTests
         URI mainPage = URI.create(URL);
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
         pageSteps.openMainApplicationPage();
-        verify(navigateActions).navigateTo(URL);
+        verify(navigateActions).navigateTo(mainPage);
         verify(webApplicationListener).onLoad();
     }
 
@@ -305,7 +267,7 @@ class PageStepsTests
     {
         mockPageRedirect(URL, HTTP_EXAMPLE_COM);
         pageSteps.openMainApplicationPage();
-        verify(navigateActions).navigateTo(URL);
+        verify(navigateActions).navigateTo(URI.create(URL));
         verify(webApplicationListener).onLoad();
     }
 
@@ -315,7 +277,7 @@ class PageStepsTests
         mockPageRedirect(HTTP_EXAMPLE_COM, "https://example.com");
         when(webApplicationConfiguration.getBasicAuthUser()).thenReturn("user:password");
         pageSteps.openMainApplicationPage();
-        verify(navigateActions).navigateTo("https://user:password@example.com");
+        verify(navigateActions).navigateTo(URI.create("https://user:password@example.com"));
         verify(webApplicationListener).onLoad();
     }
 
@@ -341,7 +303,7 @@ class PageStepsTests
         URI mainPage = URI.create(HTTP_EXAMPLE_COM);
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
         pageSteps.openMainApplicationPage();
-        verify(navigateActions).navigateTo(HTTP_EXAMPLE_COM);
+        verify(navigateActions).navigateTo(mainPage);
         verify(webApplicationListener).onLoad();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,18 +105,5 @@ public class WebElementActions implements IWebElementActions
             return false;
         }
         return true;
-    }
-
-    @Override
-    public boolean isPageVisibleAreaScrolledToElement(final WebElement element)
-    {
-        if (element != null)
-        {
-            int elementYlocation = element.getLocation().getY();
-            return ((Boolean) javascriptActions.executeScript(
-                    "return ((window.scrollY <= " + elementYlocation + ") && (" + elementYlocation
-                            + "<= (window.scrollY + window.innerHeight)))")).booleanValue();
-        }
-        return false;
     }
 }
