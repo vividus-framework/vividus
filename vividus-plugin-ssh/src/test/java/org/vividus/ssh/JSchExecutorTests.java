@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,17 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import com.jcraft.jsch.AgentIdentityRepository;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SSHAgentConnector;
 import com.jcraft.jsch.Session;
-import com.jcraft.jsch.agentproxy.AgentProxyException;
-import com.jcraft.jsch.agentproxy.Connector;
-import com.jcraft.jsch.agentproxy.ConnectorFactory;
-import com.jcraft.jsch.agentproxy.RemoteIdentityRepository;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -71,26 +68,23 @@ class JSchExecutorTests
 
     @Test
     void shouldExecuteSuccessfullyWithAgentForwarding()
-            throws AgentProxyException, JSchException, CommandExecutionException
+            throws JSchException, CommandExecutionException
     {
         var server = getDefaultServerConfiguration();
         server.setAgentForwarding(true);
         var session = mock(Session.class);
-        var connector = mock(Connector.class);
-        try (var connectorFactoryMock = mockStatic(ConnectorFactory.class);
+        try (
+            var connector = mockConstruction(SSHAgentConnector.class);
             var jSchMock = mockConstruction(JSch.class, (mock, context) -> when(
                 mock.getSession(server.getUsername(), server.getHost(), server.getPort())).thenReturn(session)
             );
             var remoteIdentityRepositoryMock = mockConstruction(
-                    RemoteIdentityRepository.class, (mock, context) -> {
+                    AgentIdentityRepository.class, (mock, context) -> {
                         assertEquals(1, context.getCount());
-                        assertEquals(List.of(connector), context.arguments());
+                        assertEquals(List.of(connector.constructed().get(0)), context.arguments());
                 })
         )
         {
-            var connectorFactory = mock(ConnectorFactory.class);
-            connectorFactoryMock.when(ConnectorFactory::getDefault).thenReturn(connectorFactory);
-            when(connectorFactory.createConnector()).thenReturn(connector);
             var channelExec = mockChannelOpening(session);
             var actual = new TestJSchExecutor().execute(server, COMMANDS);
             assertEquals(SSH_OUTPUT, actual);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,14 @@ package org.vividus.ssh;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import com.jcraft.jsch.AgentIdentityRepository;
+import com.jcraft.jsch.AgentProxyException;
 import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.IdentityRepository;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.SSHAgentConnector;
 import com.jcraft.jsch.Session;
-import com.jcraft.jsch.agentproxy.AgentProxyException;
-import com.jcraft.jsch.agentproxy.Connector;
-import com.jcraft.jsch.agentproxy.ConnectorFactory;
-import com.jcraft.jsch.agentproxy.RemoteIdentityRepository;
 
 public abstract class JSchExecutor<T extends Channel, R> implements CommandExecutor<R>
 {
@@ -94,8 +94,8 @@ public abstract class JSchExecutor<T extends Channel, R> implements CommandExecu
         JSch jSch = new JSch();
         if (sshConnectionParameters.isAgentForwarding())
         {
-            Connector connector = ConnectorFactory.getDefault().createConnector();
-            jSch.setIdentityRepository(new RemoteIdentityRepository(connector));
+            IdentityRepository identityRepository = new AgentIdentityRepository(new SSHAgentConnector());
+            jSch.setIdentityRepository(identityRepository);
         }
         else if (sshConnectionParameters.getPrivateKey() != null && sshConnectionParameters.getPublicKey() != null)
         {
