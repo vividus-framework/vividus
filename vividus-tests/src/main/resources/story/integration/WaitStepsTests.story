@@ -72,7 +72,7 @@ Scenario: Verify step: 'When I set page load timeout to `$duration`'
 Meta:
     @requirementId 2122
 Given I am on page with URL `${vividus-test-site-url}/elementState.html`
-When I set page load timeout to `PT15S`
+When I set page load timeout to `PT20S`
 When I open URL `${vividus-test-site-url}/delayedLoading?imageTimeout=10000` in new window
 When I set page load timeout to `PT10S`
 
