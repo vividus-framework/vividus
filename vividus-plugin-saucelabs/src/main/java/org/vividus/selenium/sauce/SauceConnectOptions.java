@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public class SauceConnectOptions extends TunnelOptions
         {
             appendOption(options, "rest-url", restUrl);
         }
-        appendOption(options, "no-remove-colliding-tunnels");
+        appendOption(options, "tunnel-pool");
         appendOption(options, "no-proxy-caching");
         return options.substring(0, options.length() - 1);
     }
