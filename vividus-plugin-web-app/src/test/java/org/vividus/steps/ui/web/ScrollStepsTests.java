@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,27 +31,34 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.WebJavascriptActions;
+import org.vividus.ui.web.action.search.WebLocatorType;
 
 @ExtendWith(MockitoExtension.class)
 class ScrollStepsTests
 {
     private static final String ELEMENT_TO_SCROLL_INTO_VIEW = "Element to scroll into view";
+    private static final String ELEMENT_TO_VERIFY_POSITION = "Element to verify position";
 
     @Mock private IUiContext uiContext;
     @Mock private WebJavascriptActions javascriptActions;
+    @Mock private ISoftAssert softAssert;
     @Mock private IBaseValidations baseValidations;
     @InjectMocks private ScrollSteps scrollSteps;
 
     @Test
     void shouldScrollContextInDownDirectionWhenContextIsPage()
     {
-        WebDriver driver = mock(WebDriver.class);
+        var driver = mock(WebDriver.class);
         when(uiContext.getSearchContext()).thenReturn(driver);
         scrollSteps.scrollContextIn(ScrollDirection.BOTTOM);
         verify(javascriptActions).scrollToEndOfPage();
@@ -60,7 +67,7 @@ class ScrollStepsTests
     @Test
     void shouldScrollContextInDownDirectionWhenContextIsElement()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         when(uiContext.getSearchContext()).thenReturn(webElement);
         scrollSteps.scrollContextIn(ScrollDirection.BOTTOM);
         verify(javascriptActions).scrollToEndOf(webElement);
@@ -69,7 +76,7 @@ class ScrollStepsTests
     @Test
     void shouldScrollContextInUpDirectionWhenContextIsPage()
     {
-        WebDriver driver = mock(WebDriver.class);
+        var driver = mock(WebDriver.class);
         when(uiContext.getSearchContext()).thenReturn(driver);
         scrollSteps.scrollContextIn(ScrollDirection.TOP);
         verify(javascriptActions).scrollToStartOfPage();
@@ -78,7 +85,7 @@ class ScrollStepsTests
     @Test
     void shouldScrollContextInUpDirectionWhenContextIsElement()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         when(uiContext.getSearchContext()).thenReturn(webElement);
         scrollSteps.scrollContextIn(ScrollDirection.TOP);
         verify(javascriptActions).scrollToStartOf(webElement);
@@ -87,7 +94,7 @@ class ScrollStepsTests
     @Test
     void shouldScrollContextInLeftDirectionWhenContextIsElement()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         when(uiContext.getSearchContext()).thenReturn(webElement);
         scrollSteps.scrollContextIn(ScrollDirection.LEFT);
         verify(javascriptActions).scrollToLeftOf(webElement);
@@ -96,7 +103,7 @@ class ScrollStepsTests
     @Test
     void shouldScrollContextInRightDirectionWhenContextIsElement()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         when(uiContext.getSearchContext()).thenReturn(webElement);
         scrollSteps.scrollContextIn(ScrollDirection.RIGHT);
         verify(javascriptActions).scrollToRightOf(webElement);
@@ -105,7 +112,7 @@ class ScrollStepsTests
     @Test
     void shouldThorowExceptionForScrollContextInLeftDirectionWhenContextIsPage()
     {
-        WebDriver driver = mock(WebDriver.class);
+        var driver = mock(WebDriver.class);
         when(uiContext.getSearchContext()).thenReturn(driver);
         verifyUnsupportedScroll(() -> scrollSteps.scrollContextIn(ScrollDirection.LEFT));
     }
@@ -113,7 +120,7 @@ class ScrollStepsTests
     @Test
     void shouldThorowExceptionForScrollContextInRightDirectionWhenContextIsPage()
     {
-        WebDriver driver = mock(WebDriver.class);
+        var driver = mock(WebDriver.class);
         when(uiContext.getSearchContext()).thenReturn(driver);
         verifyUnsupportedScroll(() -> scrollSteps.scrollContextIn(ScrollDirection.RIGHT));
     }
@@ -121,8 +128,8 @@ class ScrollStepsTests
     @Test
     void shouldScrollElementIntoViewAlignedToATop()
     {
-        WebElement webElement = mock(WebElement.class);
-        Locator locator = mock(Locator.class);
+        var webElement = mock(WebElement.class);
+        var locator = mock(Locator.class);
         when(baseValidations.assertIfElementsExist(ELEMENT_TO_SCROLL_INTO_VIEW, locator)).thenReturn(
                 List.of(webElement));
         scrollSteps.scrollIntoView(locator);
@@ -132,15 +139,38 @@ class ScrollStepsTests
     @Test
     void shouldNotCallJavaScriptActionsIfNoElementFound()
     {
-        Locator locator = mock(Locator.class);
+        var locator = mock(Locator.class);
         when(baseValidations.assertIfElementsExist(ELEMENT_TO_SCROLL_INTO_VIEW, locator)).thenReturn(List.of());
         scrollSteps.scrollIntoView(locator);
         verifyNoInteractions(javascriptActions);
     }
 
+    @Test
+    void testIsElementAtTheTop()
+    {
+        var webElement = mock(WebElement.class);
+        when(webElement.getLocation()).thenReturn(new Point(50, 100));
+        var locator = new Locator(WebLocatorType.ID, new SearchParameters("all", Visibility.ALL));
+        when(baseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, locator)).thenReturn(webElement);
+        when(javascriptActions.executeScript(
+                "return window.scrollY <= 100 && 100 <= (window.scrollY + window.innerHeight)")).thenReturn(true);
+        scrollSteps.isPageScrolledToElement(locator);
+        verify(softAssert).assertTrue("The page is scrolled to an element with located by  Id: 'all'; Visibility: ALL;",
+                true);
+    }
+
+    @Test
+    void shouldNotCheckPageScrollPositionIfTargetElementIsMissing()
+    {
+        var locator = new Locator(WebLocatorType.ID, "visible");
+        when(baseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, locator)).thenReturn(null);
+        scrollSteps.isPageScrolledToElement(locator);
+        verifyNoInteractions(softAssert);
+    }
+
     private void verifyUnsupportedScroll(Executable toTest)
     {
-        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, toTest);
+        var exception = assertThrows(UnsupportedOperationException.class, toTest);
         assertEquals("Horizontal scroll of the page not supported", exception.getMessage());
     }
 }

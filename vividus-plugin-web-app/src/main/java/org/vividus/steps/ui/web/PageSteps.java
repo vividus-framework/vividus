@@ -33,20 +33,16 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.steps.StringComparisonRule;
-import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.web.action.INavigateActions;
-import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.configuration.AuthenticationMode;
@@ -54,7 +50,6 @@ import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.ui.web.listener.IWebApplicationListener;
 import org.vividus.util.UriUtils;
 
-@SuppressWarnings("MethodCount")
 @TakeScreenshotOnFailure
 public class PageSteps
 {
@@ -64,9 +59,7 @@ public class PageSteps
 
     @Inject private IUiContext uiContext;
     @Inject private SetContextSteps setContextSteps;
-    @Inject private IWebElementActions webElementActions;
     @Inject private INavigateActions navigateActions;
-    @Inject private IBaseValidations baseValidations;
     @Inject private WebApplicationConfiguration webApplicationConfiguration;
     @Inject private IWebApplicationListener webApplicationListener;
     @Inject private IWebWaitActions waitActions;
@@ -87,7 +80,9 @@ public class PageSteps
     @Given("I am on main application page")
     public void openMainApplicationPage()
     {
-        loadApplicationPage(webApplicationConfiguration.getMainApplicationPageUrl());
+        URI finalUri = updateUrlWithUserInfoForRedirects(webApplicationConfiguration.getMainApplicationPageUrl());
+        navigateTo(finalUri);
+        webApplicationListener.onLoad();
     }
 
     /**
@@ -211,38 +206,12 @@ public class PageSteps
     }
 
     /**
-     * Checks if the page is scrolled to the specific element located by locator
-     * <br>Example: &lt;a id="information_collection" name="information_collection_name"&gt; -
-     * Then page is scrolled to element located `id(information_collection)`
-     * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Assert that element with specified locator exists
-     * <li>Checks whether page is scrolled to the very bottom
-     * <li>If yes --&gt; verify that element's Y coordinate is positive which means that element is visible if no --&gt;
-     * get element's Y coordinate and verify that it's close to 0 which means that element is an the very top
-     * </ul>
-     * @param locator A locator to locate element
-     */
-    @Then("page is scrolled to element located `$locator`")
-    public void isPageScrolledToAnElement(Locator locator)
-    {
-        WebElement element = baseValidations.assertIfElementExists("Element to verify position", locator);
-        if (element != null)
-        {
-            boolean pageVisibleAreaScrolledToElement = webElementActions.isPageVisibleAreaScrolledToElement(element);
-            descriptiveSoftAssert.assertTrue(String.format("The page is scrolled to an element with located by %s",
-                locator), pageVisibleAreaScrolledToElement);
-        }
-    }
-
-    /**
      * Navigates the browser to the specific path in the current host
      * defined in the <i>relative URL</i> step variable
      * <br>
      * A <b>relative URL</b> - points to a file within a web site
      * (like <i>'about.html'</i> or <i>'/products'</i>)<br>
-     * <p>
+     * <br>
      * <table border="1">
      * <caption>Examples:</caption>
      * <tr>
@@ -272,8 +241,7 @@ public class PageSteps
         URI newURI = UriUtils.buildNewRelativeUrl(currentURI, relativeURL);
         // Workaround: window content is not loaded if basic authentification is used
         newURI = UriUtils.removeUserInfo(newURI);
-        navigateActions.navigateTo(newURI.toString());
-        waitForPageLoad(webDriverManager.isIOS());
+        navigateTo(newURI);
     }
 
     /**
@@ -310,18 +278,6 @@ public class PageSteps
         }
     }
 
-    /**
-     * Method loads given <b>mainApplicationPageUrl</b> page
-     * @param pageUrl any valid page URI
-     */
-    public void loadApplicationPage(URI pageUrl)
-    {
-        URI finalUri = updateUrlWithUserInfoForRedirects(pageUrl);
-        navigateActions.navigateTo(finalUri.toString());
-        waitForPageLoad(webDriverManager.isIOS());
-        webApplicationListener.onLoad();
-    }
-
     private URI updateUrlWithUserInfoForRedirects(URI pageUrl)
     {
         // Workaround for cases when redirects with changed protocols (http -> https)
@@ -345,15 +301,25 @@ public class PageSteps
             }
             catch (IOException e)
             {
-                LOGGER.error("HTTP request for '{}' failed with the exception: {}", pageUrl, e.getMessage());
+                LOGGER.atError()
+                        .addArgument(pageUrl)
+                        .addArgument(e::getMessage)
+                        .log("HTTP request for '{}' failed with the exception: {}");
             }
         }
         return pageUrl;
     }
 
-    private void waitForPageLoad(boolean waitForPageLoad)
+    /**
+     * Navigates to the specified URL and waits for page load if current platform is iOS
+     * @param uri URI to open
+     * @deprecated Wait for iOS should be removed, it looks outdated and redundant
+     */
+    @Deprecated(since = "0.5.4", forRemoval = true)
+    private void navigateTo(URI uri)
     {
-        if (waitForPageLoad)
+        navigateActions.navigateTo(uri);
+        if (webDriverManager.isIOS())
         {
             waitActions.waitForPageLoad();
         }
