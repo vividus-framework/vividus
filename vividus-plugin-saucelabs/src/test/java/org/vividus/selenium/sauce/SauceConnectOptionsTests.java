@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ class SauceConnectOptionsTests
     private static final String PID_FILE_NAME = "sc_client-" + TUNNEL_NAME + "-";
     private static final String TUNNEL_NAME_OPTION = "--tunnel-name" + SPACE + TUNNEL_NAME;
     private static final String PID_EXTENSION = ".pid";
-    private static final String NO_REMOVE_COLLIDING_TUNNELS = "--no-remove-colliding-tunnels";
+    private static final String TUNNEL_POOL = "--tunnel-pool";
     private static final String NO_PROXY_CACHING = "--no-proxy-caching";
     private static final String DEFAULT_REST_URL = "https://saucelabs.com/rest/v1/";
     private static final String DEFAULT_CUSTOM_ARGS = "--verbose";
@@ -74,7 +74,7 @@ class SauceConnectOptionsTests
 
             assertEquals(
                     TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
-                            + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
+                            + TUNNEL_POOL + SPACE + NO_PROXY_CACHING,
                     sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
@@ -92,7 +92,7 @@ class SauceConnectOptionsTests
 
             assertEquals(
                     TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + "c:/user/temp.js"
-                            + SPACE + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
+                            + SPACE + TUNNEL_POOL + SPACE + NO_PROXY_CACHING,
                     sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
@@ -108,7 +108,7 @@ class SauceConnectOptionsTests
             Path pidPath = mockPid(resources);
 
             assertEquals(customFlags + SPACE + TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE
-                            + PAC_FILE + pacPath + SPACE + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
+                            + PAC_FILE + pacPath + SPACE + TUNNEL_POOL + SPACE + NO_PROXY_CACHING,
                     sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
@@ -128,7 +128,7 @@ class SauceConnectOptionsTests
 
             assertEquals(
                     TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
-                            + NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING,
+                            + TUNNEL_POOL + SPACE + NO_PROXY_CACHING,
                     sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
@@ -142,7 +142,7 @@ class SauceConnectOptionsTests
 
             SauceConnectOptions sauceConnectOptions = createEmptyOptions();
             assertEquals(
-                    TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + NO_REMOVE_COLLIDING_TUNNELS
+                    TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + TUNNEL_POOL
                             + SPACE + NO_PROXY_CACHING,
                     sauceConnectOptions.build(TUNNEL_NAME));
         }
@@ -152,14 +152,14 @@ class SauceConnectOptionsTests
     void testBuildWOProxyNullOption() throws IOException
     {
         SauceConnectOptions sauceConnectOptions = createEmptyOptions();
-        assertEquals(NO_REMOVE_COLLIDING_TUNNELS + SPACE + NO_PROXY_CACHING, sauceConnectOptions.build(null));
+        assertEquals(TUNNEL_POOL + SPACE + NO_PROXY_CACHING, sauceConnectOptions.build(null));
     }
 
     @Test
     void testBuildWithRestUrl() throws IOException
     {
         SauceConnectOptions sauceConnectOptions = createOptions(DEFAULT_REST_URL, null, Set.of(), null);
-        assertEquals("--rest-url" + SPACE + DEFAULT_REST_URL + SPACE + NO_REMOVE_COLLIDING_TUNNELS + SPACE
+        assertEquals("--rest-url" + SPACE + DEFAULT_REST_URL + SPACE + TUNNEL_POOL + SPACE
                 + NO_PROXY_CACHING, sauceConnectOptions.build(null));
     }
 
