@@ -9,7 +9,7 @@ dependencies {
     implementation project(':vividus-util')
     api(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '2.36.0')
     implementation(group: 'com.jayway.jsonpath', name: 'json-path-assert', version: "${jsonPathVersion}")
-    implementation(group: 'com.flipkart.zjsonpatch', name: 'zjsonpatch', version: '0.4.13')
+    implementation(group: 'com.flipkart.zjsonpatch', name: 'zjsonpatch', version: '0.4.14')
     implementation(group: 'io.qameta.allure', name: 'allure-jsonunit', version: versions.allure) {
         exclude (group: 'io.qameta.allure')
     }
