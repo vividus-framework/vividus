@@ -18,7 +18,7 @@ test {
 
 dependencies {
     api(group: 'org.apache.commons', name: 'commons-pool2', version: '2.11.1')
-    api(group: 'org.freemarker', name: 'freemarker', version: '2.3.31')
+    api(group: 'org.freemarker', name: 'freemarker', version: '2.3.32')
     api platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.14.1')
     api(group: 'com.fasterxml.jackson.core', name: 'jackson-core')
     api(group: 'com.fasterxml.jackson.core', name: 'jackson-databind')
