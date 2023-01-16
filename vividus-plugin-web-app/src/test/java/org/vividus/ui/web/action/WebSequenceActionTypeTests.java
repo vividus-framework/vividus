@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.steps.ui.web.model;
+package org.vividus.ui.web.action;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -37,7 +37,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 @ExtendWith(MockitoExtension.class)
-class SequenceActionTypeTests
+class WebSequenceActionTypeTests
 {
     private static final String VALUE = "value";
     private static final String STRING = "str";
@@ -52,7 +52,7 @@ class SequenceActionTypeTests
     @Test
     void testDoubleClick()
     {
-        SequenceActionType.DOUBLE_CLICK.addAction(baseAction, element);
+        WebSequenceActionType.DOUBLE_CLICK.addAction(baseAction, element);
         verify(baseAction).doubleClick(element);
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -60,7 +60,7 @@ class SequenceActionTypeTests
     @Test
     void testDoubleClickNoElement()
     {
-        SequenceActionType.DOUBLE_CLICK.addAction(baseAction, null);
+        WebSequenceActionType.DOUBLE_CLICK.addAction(baseAction, null);
         verify(baseAction).doubleClick();
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -68,7 +68,7 @@ class SequenceActionTypeTests
     @Test
     void testClickAndHold()
     {
-        SequenceActionType.CLICK_AND_HOLD.addAction(baseAction, element);
+        WebSequenceActionType.CLICK_AND_HOLD.addAction(baseAction, element);
         verify(baseAction).clickAndHold(element);
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -76,7 +76,7 @@ class SequenceActionTypeTests
     @Test
     void testClickAndHoldNoElement()
     {
-        SequenceActionType.CLICK_AND_HOLD.addAction(baseAction, null);
+        WebSequenceActionType.CLICK_AND_HOLD.addAction(baseAction, null);
         verify(baseAction).clickAndHold();
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -84,7 +84,7 @@ class SequenceActionTypeTests
     @Test
     void testMoveTo()
     {
-        SequenceActionType.MOVE_TO.addAction(baseAction, element);
+        WebSequenceActionType.MOVE_TO.addAction(baseAction, element);
         verify(baseAction).moveToElement(element);
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -94,7 +94,7 @@ class SequenceActionTypeTests
     {
         var offset = 10;
         var point = spy(new Point(offset, offset));
-        SequenceActionType.MOVE_BY_OFFSET.addAction(baseAction, point);
+        WebSequenceActionType.MOVE_BY_OFFSET.addAction(baseAction, point);
         verify(baseAction).moveByOffset(offset, offset);
         verify(point).getX();
         verify(point).getY();
@@ -104,7 +104,7 @@ class SequenceActionTypeTests
     @Test
     void testRelease()
     {
-        SequenceActionType.RELEASE.addAction(baseAction, element);
+        WebSequenceActionType.RELEASE.addAction(baseAction, element);
         verify(baseAction).release(element);
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -112,7 +112,7 @@ class SequenceActionTypeTests
     @Test
     void testReleaseNoElement()
     {
-        SequenceActionType.RELEASE.addAction(baseAction, null);
+        WebSequenceActionType.RELEASE.addAction(baseAction, null);
         verify(baseAction).release();
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -120,7 +120,7 @@ class SequenceActionTypeTests
     @Test
     void testEnterText()
     {
-        SequenceActionType.ENTER_TEXT.addAction(baseAction, VALUE);
+        WebSequenceActionType.ENTER_TEXT.addAction(baseAction, VALUE);
         verify(baseAction).sendKeys(VALUE);
         verifyNoMoreInteractions(baseAction);
     }
@@ -128,7 +128,7 @@ class SequenceActionTypeTests
     @Test
     void testPressKeys()
     {
-        SequenceActionType.PRESS_KEYS.addAction(baseAction, List.of(VALUE));
+        WebSequenceActionType.PRESS_KEYS.addAction(baseAction, List.of(VALUE));
         verify(baseAction).sendKeys(VALUE);
         verifyNoMoreInteractions(baseAction);
     }
@@ -136,7 +136,7 @@ class SequenceActionTypeTests
     @Test
     void testKeyDown()
     {
-        SequenceActionType.KEY_DOWN.addAction(baseAction, KEY_LIST);
+        WebSequenceActionType.KEY_DOWN.addAction(baseAction, KEY_LIST);
         verify(baseAction).keyDown(Keys.CONTROL);
         verify(baseAction).keyDown(COPY_SHORTCUT_KEY);
         verifyNoMoreInteractions(baseAction);
@@ -145,9 +145,9 @@ class SequenceActionTypeTests
     @Test
     void testKeyDownWrongKey()
     {
-        List<String> argument = List.of(STRING);
+        var argument = List.of(STRING);
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> SequenceActionType.KEY_DOWN.addAction(baseAction, argument));
+                () -> WebSequenceActionType.KEY_DOWN.addAction(baseAction, argument));
         var expectedExceptionMessage = String.format(WRONG_KEY_LIST_VALUE_EXCEPTION_FORMAT, STRING);
         assertEquals(expectedExceptionMessage, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
@@ -158,7 +158,7 @@ class SequenceActionTypeTests
     {
         var argument = List.of();
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> SequenceActionType.KEY_DOWN.addAction(baseAction, argument));
+                () -> WebSequenceActionType.KEY_DOWN.addAction(baseAction, argument));
         assertEquals(EMPTY_KEY_LIST_EXCEPTION, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
     }
@@ -166,7 +166,7 @@ class SequenceActionTypeTests
     @Test
     void testKeyUp()
     {
-        SequenceActionType.KEY_UP.addAction(baseAction, KEY_LIST);
+        WebSequenceActionType.KEY_UP.addAction(baseAction, KEY_LIST);
         verify(baseAction).keyUp(Keys.CONTROL);
         verify(baseAction).keyUp(COPY_SHORTCUT_KEY);
         verifyNoMoreInteractions(baseAction);
@@ -177,7 +177,7 @@ class SequenceActionTypeTests
     {
         var argument = List.of(STRING);
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> SequenceActionType.KEY_UP.addAction(baseAction, argument));
+                () -> WebSequenceActionType.KEY_UP.addAction(baseAction, argument));
         var expectedExceptionMessage = String.format(WRONG_KEY_LIST_VALUE_EXCEPTION_FORMAT, STRING);
         assertEquals(expectedExceptionMessage, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
@@ -188,7 +188,7 @@ class SequenceActionTypeTests
     {
         var argument = List.of();
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> SequenceActionType.KEY_UP.addAction(baseAction, argument));
+                () -> WebSequenceActionType.KEY_UP.addAction(baseAction, argument));
         assertEquals(EMPTY_KEY_LIST_EXCEPTION, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
     }
@@ -196,7 +196,7 @@ class SequenceActionTypeTests
     @Test
     void testClick()
     {
-        SequenceActionType.CLICK.addAction(baseAction, element);
+        WebSequenceActionType.CLICK.addAction(baseAction, element);
         verify(baseAction).click(element);
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -204,14 +204,14 @@ class SequenceActionTypeTests
     @Test
     void testClickNoElement()
     {
-        SequenceActionType.CLICK.addAction(baseAction, null);
+        WebSequenceActionType.CLICK.addAction(baseAction, null);
         verify(baseAction).click();
         verifyNoMoreInteractions(baseAction, element);
     }
 
-    @EnumSource(SequenceActionType.class)
+    @EnumSource(WebSequenceActionType.class)
     @ParameterizedTest
-    void testWrongArgType(SequenceActionType type)
+    void testWrongArgType(WebSequenceActionType type)
     {
         var dummy = mock(Object.class);
         var exception = assertThrows(IllegalArgumentException.class, () -> type.addAction(baseAction, dummy));

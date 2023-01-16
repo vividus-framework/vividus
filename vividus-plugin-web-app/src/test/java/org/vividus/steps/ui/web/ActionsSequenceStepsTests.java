@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -44,13 +45,13 @@ import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.steps.ui.web.model.SequenceAction;
-import org.vividus.steps.ui.web.model.SequenceActionType;
+import org.vividus.ui.action.SequenceAction;
 import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.web.action.WebSequenceActionType;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
 @ExtendWith(MockitoExtension.class)
-class ActionStepsTests
+class ActionsSequenceStepsTests
 {
     private static final String SIGNATURE_FIELD_XPATH = "//canvas";
     private static final String ELEMENT_EXISTS_MESSAGE = "Element for interaction";
@@ -68,7 +69,7 @@ class ActionStepsTests
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IBaseValidations baseValidations;
-    @InjectMocks private ActionSteps actionSteps;
+    @InjectMocks private ActionsSequenceSteps actionSteps;
 
     @Mock(extraInterfaces = Interactive.class)
     private WebDriver webDriver;
@@ -86,30 +87,30 @@ class ActionStepsTests
         var locator = new Locator(WebLocatorType.XPATH, SIGNATURE_FIELD_XPATH);
         var point = mock(Point.class);
         var webElement = mock(WebElement.class);
-        int offset = 15;
+        var offset = 15;
 
-        when(baseValidations.assertIfElementExists(ELEMENT_EXISTS_MESSAGE, locator)).thenReturn(webElement);
+        when(baseValidations.assertElementExists(ELEMENT_EXISTS_MESSAGE, locator)).thenReturn(Optional.of(webElement));
         when(point.getX()).thenReturn(offset);
         when(point.getY()).thenReturn(offset);
 
-        var actions = List.of(
-            new SequenceAction(SequenceActionType.DOUBLE_CLICK, locator),
-            new SequenceAction(SequenceActionType.CLICK_AND_HOLD, locator),
-            new SequenceAction(SequenceActionType.MOVE_BY_OFFSET, point),
-            new SequenceAction(SequenceActionType.RELEASE, locator),
-            new SequenceAction(SequenceActionType.ENTER_TEXT, TEXT),
-            new SequenceAction(SequenceActionType.CLICK, locator),
-            new SequenceAction(SequenceActionType.MOVE_TO, locator),
-            new SequenceAction(SequenceActionType.DOUBLE_CLICK, null),
-            new SequenceAction(SequenceActionType.CLICK_AND_HOLD, null),
-            new SequenceAction(SequenceActionType.RELEASE, null),
-            new SequenceAction(SequenceActionType.KEY_DOWN, List.of(Keys.COMMAND.name(), COPY_SHORTCUT_KEY)),
-            new SequenceAction(SequenceActionType.KEY_UP, List.of(COPY_SHORTCUT_KEY, Keys.COMMAND.name())),
-            new SequenceAction(SequenceActionType.KEY_DOWN, List.of(Keys.CONTROL.name())),
-            new SequenceAction(SequenceActionType.PRESS_KEYS, List.of("v")),
-            new SequenceAction(SequenceActionType.KEY_UP, List.of(Keys.CONTROL.name())),
-            new SequenceAction(SequenceActionType.CLICK, null)
-        );
+        List<SequenceAction<WebSequenceActionType>> actions = List.of(
+                new SequenceAction<>(WebSequenceActionType.DOUBLE_CLICK, locator),
+                new SequenceAction<>(WebSequenceActionType.CLICK_AND_HOLD, locator),
+                new SequenceAction<>(WebSequenceActionType.MOVE_BY_OFFSET, point),
+                new SequenceAction<>(WebSequenceActionType.RELEASE, locator),
+                new SequenceAction<>(WebSequenceActionType.ENTER_TEXT, TEXT),
+                new SequenceAction<>(WebSequenceActionType.CLICK, locator),
+                new SequenceAction<>(WebSequenceActionType.MOVE_TO, locator),
+                new SequenceAction<>(WebSequenceActionType.DOUBLE_CLICK, null),
+                new SequenceAction<>(WebSequenceActionType.CLICK_AND_HOLD, null),
+                new SequenceAction<>(WebSequenceActionType.RELEASE, null),
+                new SequenceAction<>(WebSequenceActionType.KEY_DOWN, List.of(Keys.COMMAND.name(), COPY_SHORTCUT_KEY)),
+                new SequenceAction<>(WebSequenceActionType.KEY_UP, List.of(COPY_SHORTCUT_KEY, Keys.COMMAND.name())),
+                new SequenceAction<>(WebSequenceActionType.KEY_DOWN, List.of(Keys.CONTROL.name())),
+                new SequenceAction<>(WebSequenceActionType.PRESS_KEYS, List.of("v")),
+                new SequenceAction<>(WebSequenceActionType.KEY_UP, List.of(Keys.CONTROL.name())),
+                new SequenceAction<>(WebSequenceActionType.CLICK, null)
+                );
         actionSteps.executeSequenceOfActions(actions);
         var hash = webElement.hashCode();
         var mouseSequence = "{id=default mouse, type=pointer, parameters={pointerType=mouse}, actions=["
@@ -150,11 +151,11 @@ class ActionStepsTests
     {
         var locator = new Locator(WebLocatorType.XPATH, SIGNATURE_FIELD_XPATH);
 
-        when(baseValidations.assertIfElementExists(ELEMENT_EXISTS_MESSAGE, locator)).thenReturn(null);
+        when(baseValidations.assertElementExists(ELEMENT_EXISTS_MESSAGE, locator)).thenReturn(Optional.empty());
 
         var actions = List.of(
-            new SequenceAction(SequenceActionType.DOUBLE_CLICK, locator),
-            new SequenceAction(SequenceActionType.ENTER_TEXT, TEXT)
+            new SequenceAction<>(WebSequenceActionType.DOUBLE_CLICK, locator),
+            new SequenceAction<>(WebSequenceActionType.ENTER_TEXT, TEXT)
         );
         actionSteps.executeSequenceOfActions(actions);
         verify((Interactive) webDriver, never()).perform(any());
