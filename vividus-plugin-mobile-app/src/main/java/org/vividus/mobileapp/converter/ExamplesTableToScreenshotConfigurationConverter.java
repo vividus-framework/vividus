@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,12 @@ package org.vividus.mobileapp.converter;
 
 import java.lang.reflect.Type;
 
-import javax.inject.Named;
-
 import org.jbehave.core.model.ExamplesTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.converter.ui.AbstractExamplesTableToScreenshotConfigurationConverter;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 
-@Named
 public class ExamplesTableToScreenshotConfigurationConverter
         extends AbstractExamplesTableToScreenshotConfigurationConverter<ScreenshotConfiguration>
 {
