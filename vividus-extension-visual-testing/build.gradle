@@ -11,7 +11,7 @@ dependencies {
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.1')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.2')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '4.11.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
