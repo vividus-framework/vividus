@@ -160,7 +160,7 @@ If the context is not set, the whole page will be scrolled
 .Scroll login to a bottom
 [source,gherkin]
 ----
-When I change context to element located `id(login)`
+When I change context to element located by `id(login)`
 When I scroll context to BOTTOM edge
 ----
 

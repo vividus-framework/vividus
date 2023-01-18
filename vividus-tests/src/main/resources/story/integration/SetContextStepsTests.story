@@ -41,7 +41,7 @@ Then the page title is equal to '<windowsTitle>'
 
 Scenario: Verify step: "When I switch to frame located `$locator`"
 Given I am on page with URL `${vividus-test-site-url}/nestedFrames.html`
-When I change context to element located `id(toRemove):a`
+When I change context to element located by `id(toRemove):a`
 When I execute javascript `
 document.querySelector('#toRemove').remove();
 return [];
@@ -51,23 +51,23 @@ When I switch to frame located `id(exampleCom)`
 When I click on element located by `xpath(//a)`
 
 
-Scenario: Verify steps: "When I reset context" AND "When I change context to element located `$locator`"
-When I change context to element located `By.xpath(//body)`
+Scenario: Verify steps: "When I reset context" AND "When I change context to element located by `$locator`"
+When I change context to element located by `xpath(//body)`
 Then number of elements found by `By.xpath(html)` is equal to `0`
 When I reset context
 Then number of elements found by `By.xpath(html)` is equal to `1`
 
 
-Scenario: Verify step: "When I change context to element located `$locator` in scope of current context"
+Scenario: Verify step: "When I change context to element located by `$locator` in scope of current context"
 Given I am on page with URL `${vividus-test-site-url}`
-When I change context to element located `xpath(//a)`
+When I change context to element located by `xpath(//a)`
 When I change context to element located `xpath(.//*)` in scope of current context
 When I save `name` attribute value of context element to scenario variable `name`
 Then `${name}` is = `vividus-logo`
 
 
 Scenario: Verify step: "When I reset context"
-When I change context to element located `By.xpath(//body)`
+When I change context to element located by `xpath(//body)`
 Then number of elements found by `By.xpath(html)` is equal to `0`
 When I reset context
 Then number of elements found by `By.xpath(html)` is equal to `1`
@@ -85,7 +85,7 @@ Then number of elements found by `id(modalButton)` is equal to `1`
 
 Scenario: Verify context healing
 Given I am on page with URL `${vividus-test-site-url}`
-When I change context to element located `tagName(a)`
+When I change context to element located by `tagName(a)`
 When I execute javascript `location.reload();` with arguments:
 Then number of elements found by `cssSelector(img)` is = `1`
 

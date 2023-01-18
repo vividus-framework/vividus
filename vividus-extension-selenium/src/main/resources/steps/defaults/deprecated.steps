@@ -9,3 +9,7 @@ When I wait until element located by `<locator>` disappears
 Composite: Then element located `$locator` exists for `$duration` duration
 !-- WARNING: The step "Then element located `$locator` exists for `$duration` duration" is deprecated and will be removed in VIVIDUS 0.6.0
 Then element located by `<locator>` exists for `<duration>` duration
+
+Composite: When I change context to element located `$locator` in scope of current context
+!-- WARNING: The step "When I change context to element located `$locator` in scope of current context` duration" is deprecated and will be removed in VIVIDUS 0.7.0
+When I change context to element located by `<locator>` in scope of current context

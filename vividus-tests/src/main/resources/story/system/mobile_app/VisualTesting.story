@@ -45,14 +45,14 @@ Scenario: Verify cuts for full-page and context
 When I <action> baseline with name `${target-platform}-cuts-full-page` using screenshot configuration:
 |cutTop|cutBottom|cutLeft|cutRight|
 |400   |300      |200    |100     |
-When I change context to element located `${element-to-ignore}`
+When I change context to element located by `${element-to-ignore}`
 When I <action> baseline with name `${target-platform}-cuts-context` using screenshot configuration:
 |cutTop|cutBottom|cutLeft|cutRight|
 |400   |200      |100    |200     |
 
 
 Scenario: Step verification: When I $actionType baseline with name `$name` for the context
-When I change context to element located `${element-to-ignore}`
+When I change context to element located by `${element-to-ignore}`
 When I <action> baseline with name `${target-platform}-context`
 When I reset context
 
@@ -92,7 +92,7 @@ Scenario: Verify contextual check with ignored element
 When I tap on element located `accessibilityId(menuToggler)`
 When I tap on element located `xpath(<menuScrollViewXpath>)`
 When I wait until element located by `xpath(<scrollViewXpath>)` appears
-When I change context to element located `xpath(<scrollViewXpath>)`
+When I change context to element located by `xpath(<scrollViewXpath>)`
 When I <action> baseline with name `${target-platform}-context-with-ignore` ignoring:
 |ELEMENT                   |
 |By.accessibilityId(header)|

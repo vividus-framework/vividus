@@ -55,7 +55,7 @@ When I add headers to proxied requests with URL pattern which is equal to `http:
 |testName1|testValue1|
 |testName2|testValue2|
 Given I am on page with URL `http://httpbin.org/headers`
-When I change context to element located `xpath(//pre)`
+When I change context to element located by `xpath(//pre)`
 When I set the text found in search context to the 'SCENARIO' variable 'response'
 Then JSON element from `${response}` by JSON path `$.headers` is equal to `
 {

@@ -33,7 +33,7 @@ WARNING: In case of missing search context the error will be logged and `-1` wil
 .Check the size and the location of the image
 [source,gherkin]
 ----
-When I change context to element located `id(userpic)`
+When I change context to element located by `id(userpic)`
 Then `${context-height}` is > `0`
 Then `${context-width}` is > `0`
 Then `${context-x-coordinate}` is > `0`
