@@ -242,7 +242,7 @@ Then all resources by selector `$cssSelector` are valid on:$pages
 .Validate resources
 [source,gherkin]
 ----
-Then all resources by selector a are valid on:
+Then all resources by selector `a` are valid on:
 |pages                        |
 |https://vividus.org/         |
 |/test-automation-made-awesome|
