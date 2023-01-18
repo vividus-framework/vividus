@@ -164,27 +164,27 @@ public class BatchConfiguration
                      .collect(Collectors.toList());
     }
 
-    private static final class StoryExecutionConfiguration
+    public static final class StoryExecutionConfiguration
     {
         private Boolean failFast;
         private Duration executionTimeout;
 
-        private void setFailFast(Boolean failFast)
+        public void setFailFast(Boolean failFast)
         {
             this.failFast = failFast;
         }
 
-        private void setExecutionTimeout(Duration executionTimeout)
+        public void setExecutionTimeout(Duration executionTimeout)
         {
             this.executionTimeout = executionTimeout;
         }
     }
 
-    private static final class ScenarioExecutionConfiguration
+    public static final class ScenarioExecutionConfiguration
     {
         private Boolean failFast;
 
-        private void setFailFast(Boolean failFast)
+        public void setFailFast(Boolean failFast)
         {
             this.failFast = failFast;
         }
