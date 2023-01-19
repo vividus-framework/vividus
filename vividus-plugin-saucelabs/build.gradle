@@ -15,7 +15,7 @@ dependencies {
     implementation project(':vividus-extension-selenium')
 
     implementation(group: 'com.google.guava', name: 'guava', version: '31.1-jre')
-    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.166') {
+    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.167') {
         exclude group: 'com.google.collections', module: 'google-collections'
         exclude module: 'slf4j-jdk14'
     }
