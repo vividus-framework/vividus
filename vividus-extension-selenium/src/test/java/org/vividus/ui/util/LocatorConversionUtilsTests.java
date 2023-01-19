@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ class LocatorConversionUtilsTests
 {
     private static final String VALUE = "value";
     private static final String INVALID_LOCATOR_MESSAGE = "Invalid locator format. "
-            + "Expected matches [(?:By\\.)?([a-zA-Z]+)\\((.*)\\)(:(.*))?] Actual: [";
+            + "Expected matches [(?:By\\.)?([a-zA-Z-]+)\\((.*)\\)(:(.*))?] Actual: [";
     private static final char CLOSING_BRACKET = ']';
     private static final String INVALID_LOCATOR = "To.xpath(.a)";
     private static final String SEARCH = "search";
@@ -135,6 +135,16 @@ class LocatorConversionUtilsTests
         when(dynamicLocators.getNullable("fusrodah")).thenReturn(Optional.of(locatorPattern));
         assertEquals(createAttributes(TestLocatorType.SEARCH, "Hello, my dear friend!", Visibility.VISIBLE),
                 utils.convertToLocator("By.fusRoDah(Hello\\,, friend,!)"));
+    }
+
+    @Test
+    void shouldCreateLocatorsWithHyphen()
+    {
+        lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
+        var locatorPattern = new LocatorPattern(SEARCH, "Fus %s dah!");
+        when(dynamicLocators.getNullable("fus-ro-dah")).thenReturn(Optional.of(locatorPattern));
+        assertEquals(createAttributes(TestLocatorType.SEARCH, "Fus ro dah!", Visibility.VISIBLE),
+                utils.convertToLocator("By.fus-ro-dah(ro)"));
     }
 
     @Test
