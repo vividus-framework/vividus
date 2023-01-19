@@ -57,7 +57,7 @@ dependencies {
     implementation project(':vividus-plugin-xml')
     implementation project(':vividus-plugin-yaml')
 
-    implementation(group: 'com.mysql', name: 'mysql-connector-j', version: '8.0.31')
+    implementation(group: 'com.mysql', name: 'mysql-connector-j', version: '8.0.32')
     implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.1.0.jre11-preview')
     implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.1')
     implementation(group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.17.0.0')
