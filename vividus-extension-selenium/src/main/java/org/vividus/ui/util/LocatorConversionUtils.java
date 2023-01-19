@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class LocatorConversionUtils
     private static final int ELEMENT_TYPE_GROUP = 3;
     private static final int VISIBILITY_GROUP = 4;
     private static final char CLOSING_BRACKET = ']';
-    private static final String LOCATOR_FORMAT = "(?:By\\.)?([a-zA-Z]+)\\((.*)\\)(:(.*))?";
+    private static final String LOCATOR_FORMAT = "(?:By\\.)?([a-zA-Z-]+)\\((.*)\\)(:(.*))?";
     private static final String ESCAPED_COMMA = "\\,";
     private static final Pattern LOCATOR_PATTERN = Pattern.compile(LOCATOR_FORMAT);
     private static final Pattern FILTER_PATTERN = Pattern.compile("([a-zA-Z]+)(?:\\()([^()]*)(?:\\))");
