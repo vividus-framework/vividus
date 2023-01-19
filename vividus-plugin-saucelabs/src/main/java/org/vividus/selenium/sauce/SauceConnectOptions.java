@@ -85,7 +85,6 @@ public class SauceConnectOptions extends TunnelOptions
             appendOption(options, "rest-url", restUrl);
         }
         appendOption(options, "tunnel-pool");
-        appendOption(options, "no-proxy-caching");
         return options.substring(0, options.length() - 1);
     }
 
