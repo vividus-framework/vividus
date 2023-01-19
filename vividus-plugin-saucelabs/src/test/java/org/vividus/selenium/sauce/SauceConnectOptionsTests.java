@@ -43,7 +43,6 @@ class SauceConnectOptionsTests
     private static final String TUNNEL_NAME_OPTION = "--tunnel-name" + SPACE + TUNNEL_NAME;
     private static final String PID_EXTENSION = ".pid";
     private static final String TUNNEL_POOL = "--tunnel-pool";
-    private static final String NO_PROXY_CACHING = "--no-proxy-caching";
     private static final String DEFAULT_REST_URL = "https://saucelabs.com/rest/v1/";
     private static final String DEFAULT_CUSTOM_ARGS = "--verbose";
     private static final Set<String> DEFAULT_SKIP_GLOB_HOST_PATTERNS = Set.of("vividus.dev");
@@ -72,10 +71,8 @@ class SauceConnectOptionsTests
             Path pacPath = mockPac(resources, DEFAULT_MATCH_CHAIN);
             Path pidPath = mockPid(resources);
 
-            assertEquals(
-                    TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
-                            + TUNNEL_POOL + SPACE + NO_PROXY_CACHING,
-                    sauceConnectOptions.build(TUNNEL_NAME));
+            assertEquals(TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
+                    + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
@@ -90,10 +87,8 @@ class SauceConnectOptionsTests
             when(pacPath.toString()).thenReturn("c:\\user\\temp.js");
             Path pidPath = mockPid(resources);
 
-            assertEquals(
-                    TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + "c:/user/temp.js"
-                            + SPACE + TUNNEL_POOL + SPACE + NO_PROXY_CACHING,
-                    sauceConnectOptions.build(TUNNEL_NAME));
+            assertEquals(TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + "c:/user/temp.js"
+                    + SPACE + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
@@ -107,9 +102,9 @@ class SauceConnectOptionsTests
             Path pacPath = mockPac(resources, DEFAULT_MATCH_CHAIN);
             Path pidPath = mockPid(resources);
 
-            assertEquals(customFlags + SPACE + TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE
-                            + PAC_FILE + pacPath + SPACE + TUNNEL_POOL + SPACE + NO_PROXY_CACHING,
-                    sauceConnectOptions.build(TUNNEL_NAME));
+            assertEquals(
+                    customFlags + SPACE + TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE
+                            + pacPath + SPACE + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
@@ -126,10 +121,8 @@ class SauceConnectOptionsTests
             Path pacPath = mockPac(resources, matchCondition);
             Path pidPath = mockPid(resources);
 
-            assertEquals(
-                    TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
-                            + TUNNEL_POOL + SPACE + NO_PROXY_CACHING,
-                    sauceConnectOptions.build(TUNNEL_NAME));
+            assertEquals(TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
+                    + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
@@ -141,9 +134,7 @@ class SauceConnectOptionsTests
             Path pidPath = mockPid(resources);
 
             SauceConnectOptions sauceConnectOptions = createEmptyOptions();
-            assertEquals(
-                    TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + TUNNEL_POOL
-                            + SPACE + NO_PROXY_CACHING,
+            assertEquals(TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + TUNNEL_POOL,
                     sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
@@ -152,15 +143,14 @@ class SauceConnectOptionsTests
     void testBuildWOProxyNullOption() throws IOException
     {
         SauceConnectOptions sauceConnectOptions = createEmptyOptions();
-        assertEquals(TUNNEL_POOL + SPACE + NO_PROXY_CACHING, sauceConnectOptions.build(null));
+        assertEquals(TUNNEL_POOL, sauceConnectOptions.build(null));
     }
 
     @Test
     void testBuildWithRestUrl() throws IOException
     {
         SauceConnectOptions sauceConnectOptions = createOptions(DEFAULT_REST_URL, null, Set.of(), null);
-        assertEquals("--rest-url" + SPACE + DEFAULT_REST_URL + SPACE + TUNNEL_POOL + SPACE
-                + NO_PROXY_CACHING, sauceConnectOptions.build(null));
+        assertEquals("--rest-url" + SPACE + DEFAULT_REST_URL + SPACE + TUNNEL_POOL, sauceConnectOptions.build(null));
     }
 
     @Test
