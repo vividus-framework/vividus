@@ -72,11 +72,6 @@ public class SauceConnectOptions extends TunnelOptions
 
         if (getProxy() != null)
         {
-            /*
-             * Separators conversion added as workaround for SauceConnect bug (doesn't take into account windows like
-             * PAC-file path delimiters). Sauce lab ticket link: https://support.saucelabs.com/hc/en-us/requests/38183
-             * Affected SauceConnect version: 4.4.4 and above.
-             * */
             appendOption(options, "pac",
                     "file://" + FilenameUtils.separatorsToUnix(createPacFile(tunnelName).toString()));
         }
