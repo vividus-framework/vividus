@@ -251,7 +251,7 @@ jobs:
         fi
 
     - name: SauceLabs - Desktop - Web + Proxy + SauceConnect - System tests
-      if: matrix.platform == 'ubuntu-latest'
+      if: (matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest')
       env:
         SAUCELABS_USER: ${{ secrets.SAUCELABS_USER }}
         SAUCELABS_KEY: ${{ secrets.SAUCELABS_KEY }}
