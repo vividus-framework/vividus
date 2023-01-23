@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -313,10 +313,10 @@ public class TouchActions
         PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, pointerName);
         Sequence fingerMove = new Sequence(finger, 0);
         fingerMove.addAction(finger.createPointerMove(Duration.ofSeconds(0), PointerInput.Origin.viewport(),
-                moveCoordinates.getStart().getX(), moveCoordinates.getStart().getY()));
+                moveCoordinates.getStart()));
         fingerMove.addAction(finger.createPointerDown(0));
         fingerMove.addAction(finger.createPointerMove(Duration.ofMillis(MOVE_FINGER_DURATION_MS),
-                PointerInput.Origin.viewport(), moveCoordinates.getEnd().getX(), moveCoordinates.getEnd().getY()));
+                PointerInput.Origin.viewport(), moveCoordinates.getEnd()));
         fingerMove.addAction(finger.createPointerUp(0));
         return fingerMove;
     }
