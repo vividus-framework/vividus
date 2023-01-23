@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -225,21 +225,21 @@ public class DatabaseSteps
      *   <li><code>DISTINCT</code></li>
      * </ul>
      *
-     * @param leftSqlQuery   baseline SQL query
-     * @param leftDbKey      key identifying the database connection for the left data set
-     * @param comparisonRule The data set comparison rule: "is equal to" or "contains"
-     * @param rightSqlQuery  checkpoint SQL query
-     * @param rightDbKey     key identifying the database connection for the right data set
-     * @param keys           comma-separated list of column's names to map resulting tables rows
+     * @param leftSqlQuery      The SQL query to execute to retrieve baseline data set.
+     * @param leftDbKey         The database connection key to execute baseline query against.
+     * @param comparisonRule    The data set comparison rule: either "is equal to" or "contains".
+     * @param rightSqlQuery     The SQL query to execute to retrieve checkpoint data set.
+     * @param rightDbKey        The database connection key to execute checkpoint query against.
+     * @param columnsForMapping The comma-separated list of column names to map rows in the retrieved data sets. If
+     *                          empty then all column names from the retrieved data sets are used to map rows.
      * @throws InterruptedException in case of thread interruption
      * @throws ExecutionException   in case of any exception during DB query
      * @throws TimeoutException     in case when timeout to execute DB query expires
-     * @see <a href="https://en.wikipedia.org/wiki/ISO_8601#Durations">Durations format</a>
      */
     @Then("data from `$leftSqlQuery` executed against `$leftDbKey` $comparisonRule data from `$rightSqlQuery` executed"
-            + " against `$rightDbKey` matching rows using keys:$keys")
+            + " against `$rightDbKey` matching rows using keys:$columnsForMapping")
     public void compareData(String leftSqlQuery, String leftDbKey, DataSetComparisonRule comparisonRule,
-            String rightSqlQuery, String rightDbKey, Set<String> keys)
+            String rightSqlQuery, String rightDbKey, Set<String> columnsForMapping)
             throws InterruptedException, ExecutionException, TimeoutException
     {
         DataSourceStatistics dataSourceStatistics = new DataSourceStatistics(dataSourceManager.getDataSource(leftDbKey),
@@ -248,10 +248,10 @@ public class DatabaseSteps
         left.setQuery(leftSqlQuery);
         QueryStatistic right = dataSourceStatistics.getRight();
         right.setQuery(rightSqlQuery);
-        CompletableFuture<ListMultimap<Object, Map<String, Object>>> leftData =
-                createCompletableRequest(dataSourceManager.getJdbcTemplate(leftDbKey), leftSqlQuery, keys, left);
-        CompletableFuture<ListMultimap<Object, Map<String, Object>>> rightData =
-                createCompletableRequest(dataSourceManager.getJdbcTemplate(rightDbKey), rightSqlQuery, keys, right);
+        CompletableFuture<ListMultimap<Object, Map<String, Object>>> leftData = createCompletableRequest(
+                dataSourceManager.getJdbcTemplate(leftDbKey), leftSqlQuery, columnsForMapping, left);
+        CompletableFuture<ListMultimap<Object, Map<String, Object>>> rightData = createCompletableRequest(
+                dataSourceManager.getJdbcTemplate(rightDbKey), rightSqlQuery, columnsForMapping, right);
 
         List<List<EntryComparisonResult>> result = leftData.thenCombine(rightData,
                 (leftResult, rightResult) -> compareData(comparisonRule, dataSourceStatistics, leftResult, rightResult))
