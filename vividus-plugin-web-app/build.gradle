@@ -1,7 +1,7 @@
 project.description = 'VIVIDUS plugin for testing web applications'
 
 ext {
-    seleniumVersion = '4.7.2'
+    seleniumVersion = '4.8.0'
 }
 
 dependencies {
