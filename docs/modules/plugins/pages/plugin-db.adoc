@@ -442,21 +442,21 @@ WHERE name='Falcon 9'
 ` against `launches`
 ----
 
-=== Compare two result sets
+=== Compare two data sets
 
 Compares the result set queried from the baseline database with the result set queried from the checkpoint database matching by user-defined keys. Please see <<_data_comparison>> for more fine-grained comparison configuration. The order of columns is ignored.
 
 [source,gherkin]
 ----
-Then data from `$leftSqlQuery` executed against `$leftDbKey` $comparisonRule data from `$rightSqlQuery` executed against `$rightDbKey` matching rows using keys:$keys
+Then data from `$leftSqlQuery` executed against `$leftDbKey` $comparisonRule data from `$rightSqlQuery` executed against `$rightDbKey` matching rows using keys:$columnsForMapping
 ----
 
-* `$leftSqlQuery` - The https://www.techtarget.com/searchdatamanagement/definition/SQL[SQL query to execute] to retrieve baseline result set.
-* `$leftDbKey` - The <<_database_connection, database connection key>> for baseline result set.
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `$rightSqlQuery` - The https://www.techtarget.com/searchdatamanagement/definition/SQL[SQL query to execute] to retrieve checkpoint result set.
-* `$rightDbKey` - The <<_database_connection, database connection key>>. for checkpoint result set.
-* `$keys` - The database columns to compare.
+* `$leftSqlQuery` - The https://www.techtarget.com/searchdatamanagement/definition/SQL[SQL query to execute] to retrieve baseline data set.
+* `$leftDbKey` - The <<_database_connection, database connection key>> to execute baseline query against.
+* `$comparisonRule` - The data set comparison rule: either `is equal to` or `contains`.
+* `$rightSqlQuery` - The https://www.techtarget.com/searchdatamanagement/definition/SQL[SQL query to execute] to retrieve checkpoint data set.
+* `$rightDbKey` - The <<_database_connection, database connection key>> to execute checkpoint query against.
+* `$columnsForMapping` - The comma-separated list of column names to map rows in the retrieved data sets. If empty then all column names from the retrieved data sets are used to map rows.
 
 .Given `launch_rockets` table available at 'launches' and 'launches-replica' db connections
 [source]
