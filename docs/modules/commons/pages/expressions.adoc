@@ -1078,7 +1078,7 @@ Evaluates groovy script and converts result to a string.
 [TIP]
 ====
 * Any Vividus variable is accessible in the groovy script by its name
-* One could use any of online groovy evaluators to verify the script. For example see: https://groovy-playground.appspot.com/[Evaluator]
+* One could use any of online groovy evaluators to verify the script. For example see: https://groovyconsole.appspot.com/[Evaluator]
 ====
 
 
