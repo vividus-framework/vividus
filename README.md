@@ -31,7 +31,7 @@ Prerequisites: make sure [Java 17](https://adoptium.net/temurin/releases/?versio
 [BrowserStack](https://www.browserstack.com/) has provided us with the tools and infrastructure necessary to build a high quality tool by testing our components on a range of browsers and platforms. Thank you.
 
 
-[![LambdaTest](https://cdn.lambdatest.com/assetsnew/images/logo.svg)](https://www.lambdatest.com)
+[![LambdaTest](https://www.lambdatest.com/resources/images/logos/logo.svg)](https://www.lambdatest.com)
 
 [LambdaTest](https://www.lambdatest.com/) has provided us with the tools and infrastructure necessary to build a high quality tool by testing our components on a range of browsers and platforms. Thank you.
 
