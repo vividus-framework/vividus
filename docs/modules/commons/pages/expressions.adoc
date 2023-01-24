@@ -1037,10 +1037,10 @@ Evaluates https://commons.apache.org/proper/commons-jexl/[JEXL] script and conve
 #{eval(*$script*)}
 ----
 
-* *`$script`* - valid https://commons.apache.org/proper/commons-jexl/reference/syntax.html[JEXL] script to be evaluated
+* *`$script`* - valid JEXL script to be evaluated. See https://commons.apache.org/proper/commons-jexl/reference/syntax.html[JEXL Syntax].
 
 [TIP]
-* Any Vividus variable is accessible in the JEXL script by its name
+* Any VIVIDUS variable is accessible in the JEXL script by its name
 
 
 .Evaluate JEXL script
