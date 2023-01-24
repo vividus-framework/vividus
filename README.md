@@ -21,26 +21,30 @@ Prerequisites: make sure [Java 17](https://adoptium.net/temurin/releases/?versio
     ```
 
 ## Acknowledgements
+[<img src="https://resources.jetbrains.com/storage/products/intellij-idea/img/meta/intellij-idea_logo_300x300.png" width="100px" alt="IntelliJ IDEA">](https://www.jetbrains.com/?from=Vividus)
+
+[JetBrains](https://www.jetbrains.com/?from=Vividus) has provided us with the tools and IDEs necessary to build a high quality tool. Thank you.
+
+<br />
+
+[![Mobitru](https://mobitru.com/images/logo.svg)](https://mobitru.com)
+
+[Mobitru](https://mobitru.com) has provided us with the tools and infrastructure necessary to build a high quality tool by testing our components on a range of browsers and platforms. Thank you.
+
+<br />
+
 [<img src="https://saucelabs.com/images/logo-saucelabs.png" width="180px" alt="SauceLabs">](https://saucelabs.com)
 
 [SauceLabs](https://saucelabs.com/) has provided us with the tools and infrastructure necessary to build a high quality tool by testing our components on a range of browsers and platforms. Thank you.
 
+<br />
 
 [![BrowserStack](https://www.browserstack.com/images/mail/browserstack-logo-footer.png)](https://www.browserstack.com)
 
 [BrowserStack](https://www.browserstack.com/) has provided us with the tools and infrastructure necessary to build a high quality tool by testing our components on a range of browsers and platforms. Thank you.
 
+<br />
 
 [![LambdaTest](https://www.lambdatest.com/resources/images/logos/logo.svg)](https://www.lambdatest.com)
 
 [LambdaTest](https://www.lambdatest.com/) has provided us with the tools and infrastructure necessary to build a high quality tool by testing our components on a range of browsers and platforms. Thank you.
-
-
-[<img src="https://resources.jetbrains.com/storage/products/intellij-idea/img/meta/intellij-idea_logo_300x300.png" width="100px" alt="IntelliJ IDEA">](https://www.jetbrains.com/?from=Vividus)
-
-[JetBrains](https://www.jetbrains.com/?from=Vividus) has provided us with the tools and IDEs necessary to build a high quality tool. Thank you.
-
-
-[![Mobitru](https://mobitru.com/images/logo.svg)](https://mobitru.com)
-
-[Mobitru](https://mobitru.com) has provided us with the tools and infrastructure necessary to build a high quality tool by testing our components on a range of browsers and platforms. Thank you.
