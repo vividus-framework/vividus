@@ -46,5 +46,7 @@ Prerequisites: make sure [Java 17](https://adoptium.net/temurin/releases/?versio
 <br />
 
 [![LambdaTest](https://www.lambdatest.com/resources/images/logos/logo.svg)](https://www.lambdatest.com)
+&nbsp;&nbsp;
+[<img src="https://user-images.githubusercontent.com/5081226/214425833-cdafd4e2-a33e-4b6f-b345-91e1ffb70d32.png" width="150px" alt="LambdaTest HyperExecute">](https://www.lambdatest.com/hyperexecute?from=vividus)
 
 [LambdaTest](https://www.lambdatest.com/) has provided us with the tools and infrastructure necessary to build a high quality tool by testing our components on a range of browsers and platforms. Thank you.
