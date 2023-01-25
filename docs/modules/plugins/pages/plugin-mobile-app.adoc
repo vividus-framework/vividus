@@ -837,6 +837,63 @@ When I swipe LEFT to element located `accessibilityId(slide 2)` with duration PT
 Then number of elements found by `accessibilityId(slide 2)` is equal to `1`
 ----
 
+=== Execute sequence of touch actions
+
+Executes the sequence of touch actions.
+
+[source,gherkin]
+----
+When I execute sequence of touch actions: $actions
+----
+* `$actions` - The table with actions to execute.
++
+.Possible actions
+[cols="1,5,3", options="header"]
+|===
+
+|`type`
+|`argument`
+|Argument example
+
+|TAP
+|Element locator or empty
+|By.id(Name)
+
+|TAP_AND_HOLD
+|Element locator or empty
+|By.id(Name)
+
+|MOVE_TO
+|Element locator
+|By.id(username)
+
+|MOVE_BY_OFFSET
+|Point, that specifies x and y distance to move from its current position or from upper left corner (0,0), if the pointer has not previously been moved
+|(10, 15) where *x* is 10 and *y* is 15
+
+|RELEASE
+|empty
+|
+
+|WAIT
+|Duration
+|PT1S - wait 1 second
+
+|===
+
+[NOTE]
+`RELEASE` action releases the finger at the current touch location. For example, it can be used in the following
+sequence of actions:`TAP_AND_HOLD` -> `MOVE_BY_OFFSET` -> `RELEASE`
+
+.Execute touch actions
+[source,gherkin]
+----
+When I execute sequence of touch actions:
+|type          |argument          |
+|TAP_AND_HOLD  |By.id(Hello World)|
+|MOVE_BY_OFFSET|(0,200)           |
+|RELEASE       |                  |
+----
 
 === Zoom in/out
 

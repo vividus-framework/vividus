@@ -36,6 +36,8 @@
 
     <bean id="screenshotTaker" class="org.vividus.selenium.mobileapp.MobileAppScreenshotTaker" parent="abstractScreenshotTaker"/>
 
+    <bean id="actionsSequenceSteps" class="org.vividus.mobileapp.steps.ActionsSequenceSteps" />
+
     <bean id="applicationSteps" class="org.vividus.mobileapp.steps.ApplicationSteps" />
 
     <bean id="keyboardSteps" class="org.vividus.mobileapp.steps.KeyboardSteps">
@@ -138,9 +140,12 @@
         <constructor-arg index="0" value="${mobile.screenshot.downscale}" />
     </bean>
 
+    <bean class="org.vividus.mobileapp.converter.ParametersToMobileSequenceActionConverter" />
+
     <bean class="org.vividus.mobileapp.converter.ExamplesTableToScreenshotConfigurationConverter" />
 
     <util:list id="stepBeanNames-MobileApp" value-type="java.lang.String">
+        <idref bean="actionsSequenceSteps" />
         <idref bean="applicationSteps" />
         <idref bean="webDriverSetupSteps" />
         <idref bean="touchSteps" />

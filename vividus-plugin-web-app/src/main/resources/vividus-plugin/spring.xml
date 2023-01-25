@@ -220,7 +220,7 @@
 
     <bean id="windowSteps" class="org.vividus.steps.ui.web.WindowSteps" />
 
-    <bean id="actionSteps" class="org.vividus.steps.ui.web.ActionSteps" />
+    <bean id="actionsSequenceSteps" class="org.vividus.steps.ui.web.ActionsSequenceSteps" />
 
     <bean id="browserSteps" class="org.vividus.steps.ui.web.BrowserConfigurationSteps" />
 
@@ -282,6 +282,8 @@
         </property>
     </bean>
 
+    <bean class="org.vividus.ui.web.converter.ParametersToWebSequenceActionConverter" />
+
     <bean id="browserLogCleanningListener" class="org.vividus.steps.ui.web.listener.BrowserLogCleanningListener" />
 
     <util:list id="stepBeanNames-WebUi" value-type="java.lang.String">
@@ -307,7 +309,7 @@
         <idref bean="sliderSteps" />
         <idref bean="videoPlayerSteps" />
         <idref bean="nestedSteps" />
-        <idref bean="actionSteps" />
+        <idref bean="actionsSequenceSteps" />
         <idref bean="webUiVividusSetupSteps" />
         <idref bean="webStorageSteps" />
         <idref bean="dragAndDropSteps" />
