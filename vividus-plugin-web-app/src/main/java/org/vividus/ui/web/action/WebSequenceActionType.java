@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.steps.ui.web.model;
+package org.vividus.ui.web.action;
 
 import static org.apache.commons.lang3.Validate.isTrue;
 import static org.apache.commons.lang3.Validate.notEmpty;
@@ -30,8 +30,9 @@ import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.vividus.selenium.KeysUtils;
+import org.vividus.ui.action.SequenceActionType;
 
-public enum SequenceActionType
+public enum WebSequenceActionType implements SequenceActionType<Actions>
 {
     DOUBLE_CLICK(true)
     {
@@ -182,45 +183,18 @@ public enum SequenceActionType
 
     private final boolean nullable;
 
-    SequenceActionType(boolean nullable)
+    WebSequenceActionType(boolean nullable)
     {
         this.nullable = nullable;
     }
 
+    @Override
     public boolean isNullable()
     {
         return nullable;
     }
 
-    public abstract void addAction(Actions actions, Object argument);
-
-    public abstract Type getArgumentType();
-
-    <T, U extends WebElement> void performOnWebElement(T argument, Consumer<U> argumentConsumer, Runnable emptyRunner)
-    {
-        perform(argument, argumentConsumer, emptyRunner);
-    }
-
-    <T, U> void perform(T argument, Consumer<U> argumentConsumer)
-    {
-        perform(argument, argumentConsumer, () -> { });
-    }
-
     @SuppressWarnings("unchecked")
-    <T, U> void perform(T argument, Consumer<U> argumentConsumer, Runnable emptyRunner)
-    {
-        if (argument == null)
-        {
-            emptyRunner.run();
-        }
-        else
-        {
-            isTrue(TypeUtils.isAssignable(argument.getClass(), getArgumentType()),
-                    "Argument for %s action must be of type %s", name(), getArgumentType());
-            argumentConsumer.accept((U) argument);
-        }
-    }
-
     private static void buildKeysActions(List<String> keys, Consumer<CharSequence> actionBuilder)
     {
         notEmpty(keys, "At least one key should be provided");

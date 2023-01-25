@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package org.vividus.steps.ui.web.model;
+package org.vividus.ui.action;
 
-public class SequenceAction
+import org.openqa.selenium.interactions.Actions;
+
+public class SequenceAction<T extends SequenceActionType<? extends Actions>>
 {
-    private final SequenceActionType type;
+    private final T type;
     private final Object argument;
 
-    public SequenceAction(SequenceActionType type, Object argument)
+    public SequenceAction(T type, Object argument)
     {
         this.type = type;
         this.argument = argument;
     }
 
-    public SequenceActionType getType()
+    public T getType()
     {
         return type;
     }

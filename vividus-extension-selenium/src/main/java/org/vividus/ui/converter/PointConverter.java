@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package org.vividus.converter;
+package org.vividus.ui.converter;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.inject.Named;
 
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.openqa.selenium.Point;
 
-@Named
 public class PointConverter extends FunctionalParameterConverter<String, Point>
 {
     private static final Pattern POINT_PATTERN = Pattern.compile("\\((-?\\d+),\\s*(-?\\d+)\\)");
