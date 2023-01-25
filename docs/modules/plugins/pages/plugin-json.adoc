@@ -26,6 +26,7 @@ Then number of JSON elements from `${json-context}` by JSON path `$.product` is 
 == Steps
 
 :json-path: https://github.com/json-path/JsonPath#path-examples[JSON Path]
+:json-schema: https://json-schema.org/understanding-json-schema/[JSON Schema]
 
 The steps syntax uses two internal (VIVIDUS-only) terms:
 
@@ -499,4 +500,71 @@ Then number of JSON elements from `
   }
 ]
 ` by JSON path `$..accountId` is equal to 2
+----
+
+=== Validate JSON against schema
+
+Validates JSON against {json-schema}.
+
+[source,gherkin]
+----
+Then JSON `$json` is valid against schema `$schema`
+----
+
+* `$json` - The JSON to validate.
+* `$schema` - The {json-schema}.
+
+[IMPORTANT]
+====
+The step validates JSON according to https://json-schema.org/specification-links.html[schema specification] version provided in the schema itself, e.g.:
+[source,gherkin]
+----
+"$schema": "https://json-schema.org/draft/2020-12/schema"
+----
+If the version is not present in the schema then JSON is validated according to https://json-schema.org/specification-links.html#2020-12[2020-12] version.
+====
+
+.Validate product for sale information
+[source,gherkin]
+----
+Then JSON `
+{
+   "productId": 1,
+   "productName": "A desk lamp",
+   "price": 12.50,
+   "tags": [ "lamp", "desk" ]
+}
+` is valid against schema `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/product.schema.json",
+  "title": "Product",
+  "description": "A product from catalog",
+  "type": "object",
+  "properties": {
+    "productId": {
+      "description": "The unique identifier for a product",
+      "type": "integer"
+    },
+    "productName": {
+      "type": "string"
+    },
+    "price": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "tags": {
+      "description": "Tags for the product",
+      "type": "array",
+      "prefixItems": {
+        "type": "string",
+        "enum": ["lamp", "desk"]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "required": [ "productId", "productName", "price", "tags" ]
+}
+`
 ----
