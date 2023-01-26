@@ -41,19 +41,10 @@ Scenario: Step verification: When I $actionType baseline with name `$name`
 When I <action> baseline with name `${target-platform}-full-page`
 
 
-Scenario: Verify cuts for full-page
+Scenario: Verify cuts for full-page and context
 When I <action> baseline with name `${target-platform}-cuts-full-page` using screenshot configuration:
-|shootingStrategy  |cutTop  |cutBottom|cutLeft|cutRight|
-|<shootingStrategy>|<cutTop>|300      |200    |100     |
-Examples:
-|shootingStrategy|cutTop                             |
-|VIEWPORT        |400                                |
-|FULL_SCREEN     |#{eval(400 + ${status-bar-height})}|
-!-- Deprecated
-|SIMPLE          |400                                |
-
-
-Scenario: Verify cuts for context
+|cutTop|cutBottom|cutLeft|cutRight|
+|400   |300      |200    |100     |
 When I change context to element located by `${element-to-ignore}`
 When I <action> baseline with name `${target-platform}-cuts-context` using screenshot configuration:
 |cutTop|cutBottom|cutLeft|cutRight|

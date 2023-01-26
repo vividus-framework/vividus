@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,12 @@ import static pazone.ashot.ShootingStrategies.scaling;
 
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vividus.selenium.mobileapp.MobileAppWebDriverManager;
 import org.vividus.selenium.mobileapp.screenshot.strategies.MobileViewportShootingStrategy;
 import org.vividus.selenium.screenshot.AbstractAshotFactory;
 import org.vividus.selenium.screenshot.ScreenshotCropper;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import pazone.ashot.AShot;
 import pazone.ashot.ShootingStrategies;
 import pazone.ashot.ShootingStrategy;
@@ -36,10 +33,6 @@ import pazone.ashot.coordinates.CoordsProvider;
 
 public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotParameters>
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MobileAppAshotFactory.class);
-    private static final String SIMPLE = "SIMPLE";
-    private static final String VIEWPORT = "VIEWPORT";
-
     private final MobileAppWebDriverManager mobileAppWebDriverManager;
     private final CoordsProvider coordsProvider;
     private boolean downscale;
@@ -54,28 +47,22 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotParame
     }
 
     @Override
-    @SuppressFBWarnings("SF_SWITCH_FALLTHROUGH")
     public AShot create(Optional<ScreenshotParameters> screenshotParameters)
     {
         String strategyName = screenshotParameters.flatMap(ScreenshotParameters::getShootingStrategy)
                 .orElseGet(this::getScreenshotShootingStrategy);
 
         ShootingStrategy strategy;
-        switch (strategyName)
+        if (appendBottomNavigationBarOnAndroid && mobileAppWebDriverManager.isAndroid())
         {
-            case SIMPLE:
-                LOGGER.warn(
-                        "Shooting strategy '{}' is deprecated and will be removed in VIVIDUS 0.6.0. Use '{}' instead",
-                        SIMPLE, VIEWPORT);
-            case VIEWPORT:
-                strategy = getViewportStrategy();
-                break;
-            case "FULL_SCREEN":
-                strategy = ShootingStrategies.simple();
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        String.format("Unknown shooting strategy with the name: %s", strategyName));
+            strategy = getStrategyBy(strategyName).getDecoratedShootingStrategy(ShootingStrategies.simple());
+            int statusBarSize = mobileAppWebDriverManager.getStatusBarSize();
+            strategy = decorateWithFixedCutStrategy(strategy, statusBarSize, 0);
+        }
+        else
+        {
+            strategy = getStrategyBy(strategyName).getDecoratedShootingStrategy(new MobileViewportShootingStrategy());
+            strategy = downscale ? scaling(strategy, (float) this.getDpr()) : strategy;
         }
 
         if (screenshotParameters.isPresent())
@@ -84,17 +71,6 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotParame
         }
 
         return new AShot().shootingStrategy(strategy).coordsProvider(coordsProvider);
-    }
-
-    private ShootingStrategy getViewportStrategy()
-    {
-        if (appendBottomNavigationBarOnAndroid && mobileAppWebDriverManager.isAndroid())
-        {
-            int statusBarSize = mobileAppWebDriverManager.getStatusBarSize();
-            return decorateWithFixedCutStrategy(ShootingStrategies.simple(), statusBarSize, 0);
-        }
-        ShootingStrategy strategy = new MobileViewportShootingStrategy();
-        return downscale ? scaling(strategy, (float) this.getDpr()) : strategy;
     }
 
     @Override

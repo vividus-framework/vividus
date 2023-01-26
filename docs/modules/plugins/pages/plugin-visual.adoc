@@ -230,11 +230,6 @@ image::example.png[Difference between native/web footer/header image]
 |`true`
 a|Whether to append Android bottom navigation bar (black bar with system buttons on the screenshots below table) or not.
 
-[NOTE]
-====
-The property available only for *VIEWPORT* shooting strategy
-====
-
 [WARNING]
 ====
 The default behavior will be changed in VIVIDUS 0.6.0: the navigation bar won't
@@ -289,12 +284,8 @@ where:
 |The size of right part of the final screenshot to cut.
 
 |`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.shooting-strategy`
-|`VIEWPORT`, `FULL_SCREEN`, `SIMPLE`
-a|Screenshot shooting strategy name (`VIEWPORT` by default)
-[WARNING]
-====
-The shooting strategy `SIMPLE` is deprecated and will be removed in VIVIDUS 0.6.0. Use `VIEWPORT` instead. `VIEWPORT` is equal to `SIMPLE` shooting strategy
-====
+|`SIMPLE`
+|Screenshot shooting strategy name (`SIMPLE` by default)
 
 |`mobile.screenshot.strategy=YOUR_STRATEGY_NAME`
 |string
@@ -311,7 +302,7 @@ mobile.screenshot.strategy.custom.cut-top=100
 mobile.screenshot.strategy.custom.cut-left=100
 mobile.screenshot.strategy.custom.cut-right=100
 mobile.screenshot.strategy.custom.cut-bottom=100
-mobile.screenshot.strategy.custom.shooting-strategy=VIEWPORT
+mobile.screenshot.strategy.custom.shooting-strategy=SIMPLE
 mobile.screenshot.strategy=custom
 ----
 
@@ -321,7 +312,7 @@ mobile.screenshot.strategy=custom
 ----
 When I <action> baseline with `scrollable-element-context` using screenshot configuration:
 |cutTop           |shootingStrategy|
-|51               |VIEWPORT        |
+|51               |SIMPLE          |
 ----
 
 == Steps
