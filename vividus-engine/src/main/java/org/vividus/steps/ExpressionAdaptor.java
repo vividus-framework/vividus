@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class ExpressionAdaptor implements DryRunAwareExecutor
     private static final Pattern GREEDY_EXPRESSION_PATTERN = Pattern.compile("#\\{((?:(?!#\\{|\\$\\{).)*)}",
             Pattern.DOTALL);
     private static final Pattern RELUCTANT_EXPRESSION_PATTERN = Pattern.compile(
-            "#\\{((?:(?![#{])[^)][^(][^)])*?|(?:(?!#\\{|\\$\\{).)*?\\)|(?:(?!#\\{|\\$\\{).)*?)}",
+            "#\\{((?:(?![#{])[^)](?![()]))*?|(?:(?!#\\{|\\$\\{).)*?\\)|(?:(?!#\\{|\\$\\{).)*?)}",
             Pattern.DOTALL);
 
     private static final String REPLACEMENT_PATTERN = "\\#\\{%s\\}";
