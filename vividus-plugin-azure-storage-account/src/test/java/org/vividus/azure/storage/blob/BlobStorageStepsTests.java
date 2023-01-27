@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -40,12 +39,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.azure.core.http.HttpHeaders;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.http.rest.PagedResponse;
 import com.azure.core.util.BinaryData;
+import com.azure.core.util.Context;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.models.BlobDownloadResponse;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.BlobServiceProperties;
@@ -62,6 +64,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
@@ -107,25 +110,28 @@ class BlobStorageStepsTests
         verify(variableContext).putVariable(SCOPES, VARIABLE, propertiesAsJson);
     }
 
-    @Test
-    void shouldDownloadBlob()
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "application/json",
+            "application/rtf",
+            "text/plain",
+            "text/csv"
+    })
+    void shouldDownloadTextBlob(String mediaType)
     {
-        runWithBlobClient(blobClient -> {
-            doNothing().when(blobClient).downloadStream(argThat(s ->
-            {
-                try
-                {
-                    s.write(BYTES);
-                }
-                catch (IOException e)
-                {
-                    throw new UncheckedIOException(e);
-                }
-                return true;
-            }));
-            blobStorageSteps.downloadBlob(BLOB, CONTAINER, KEY, SCOPES, VARIABLE);
-            verify(variableContext).putVariable(SCOPES, VARIABLE, DATA);
-        });
+        downloadTextOrBinaryBlob(mediaType, DATA);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "application/octet-stream",
+        "audio/mp4",
+        "video/mp4",
+        "image/jpeg"
+    })
+    void shouldDownloadBinaryBlob(String mediaType)
+    {
+        downloadTextOrBinaryBlob(mediaType, BYTES);
     }
 
     @Test
@@ -298,5 +304,29 @@ class BlobStorageStepsTests
         {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private void downloadTextOrBinaryBlob(String mediaType, Object dataOrBytes)
+    {
+        BlobDownloadResponse blobDownloadResponse = mock(BlobDownloadResponse.class);
+        runWithBlobClient(blobClient -> {
+            when(blobClient.downloadStreamWithResponse(argThat(s ->
+            {
+                try
+                {
+                    s.write(BYTES);
+                }
+                catch (IOException e)
+                {
+                    throw new UncheckedIOException(e);
+                }
+                return true;
+            }), eq(null), eq(null), eq(null), eq(false), eq(null), eq(Context.NONE))).thenReturn(blobDownloadResponse);
+            HttpHeaders headers = mock(HttpHeaders.class);
+            when(blobDownloadResponse.getHeaders()).thenReturn(headers);
+            when(headers.getValue("Content-Type")).thenReturn(mediaType);
+            blobStorageSteps.downloadBlob(BLOB, CONTAINER, KEY, SCOPES, VARIABLE);
+            verify(variableContext).putVariable(SCOPES, VARIABLE, dataOrBytes);
+        });
     }
 }

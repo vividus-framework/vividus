@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,17 @@ import java.util.stream.StreamSupport;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.http.rest.PagedResponse;
 import com.azure.core.util.BinaryData;
+import com.azure.core.util.Context;
 import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.models.BlobDownloadResponse;
 import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.BlobServiceProperties;
 import com.azure.storage.blob.models.ListBlobsOptions;
+import com.google.common.net.HttpHeaders;
 
+import org.apache.tika.mime.MediaType;
+import org.apache.tika.mime.MediaTypeRegistry;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
@@ -114,9 +119,13 @@ public class BlobStorageSteps
     {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
         {
-            blobServiceClientFactory.createBlobClient(blobName, containerName, storageAccountKey)
-                    .downloadStream(outputStream);
-            variableContext.putVariable(scopes, variableName, outputStream.toString(StandardCharsets.UTF_8));
+            BlobDownloadResponse blobDownloadResponse = blobServiceClientFactory.createBlobClient(blobName,
+                    containerName, storageAccountKey).downloadStreamWithResponse(outputStream, null, null, null,
+                    false, null, Context.NONE);
+            String contentType = blobDownloadResponse.getHeaders().getValue(HttpHeaders.CONTENT_TYPE);
+            Object blobContent = MediaTypeRegistry.getDefaultRegistry().isInstanceOf(contentType,
+                    MediaType.TEXT_PLAIN) ? outputStream.toString(StandardCharsets.UTF_8) : outputStream.toByteArray();
+            variableContext.putVariable(scopes, variableName, blobContent);
         }
     }
 
