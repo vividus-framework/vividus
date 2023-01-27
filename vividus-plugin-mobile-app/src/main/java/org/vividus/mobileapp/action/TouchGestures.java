@@ -22,6 +22,7 @@ import java.time.Duration;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.Interaction;
 import org.openqa.selenium.interactions.Pause;
@@ -32,6 +33,7 @@ public class TouchGestures extends Actions
     private static final int MOVE_DURATION_MS = 200;
 
     private final PointerInput touchPointer = new PointerInput(PointerInput.Kind.TOUCH, "finger");
+    private boolean pointerMoved;
 
     public TouchGestures(WebDriver driver)
     {
@@ -67,6 +69,10 @@ public class TouchGestures extends Actions
     @Override
     public TouchGestures moveToElement(WebElement target)
     {
+        if (!pointerMoved)
+        {
+            pointerMoved = true;
+        }
         return tick(touchPointer.createPointerMove(Duration.ofMillis(MOVE_DURATION_MS),
                 PointerInput.Origin.fromElement(target), 0, 0));
     }
@@ -74,8 +80,17 @@ public class TouchGestures extends Actions
     @Override
     public TouchGestures moveByOffset(int xOffset, int yOffset)
     {
-        return tick(touchPointer.createPointerMove(Duration.ofMillis(MOVE_DURATION_MS), PointerInput.Origin.pointer(),
-                xOffset, yOffset));
+        PointerInput.Origin origin;
+        if (!pointerMoved)
+        {
+            origin = PointerInput.Origin.viewport();
+            pointerMoved = true;
+        }
+        else
+        {
+            origin = PointerInput.Origin.pointer();
+        }
+        return tick(touchPointer.createPointerMove(Duration.ofMillis(MOVE_DURATION_MS), origin, xOffset, yOffset));
     }
 
     @Override
@@ -89,5 +104,12 @@ public class TouchGestures extends Actions
     {
         super.tick(actions);
         return this;
+    }
+
+    @Override
+    public Action build()
+    {
+        pointerMoved = false;
+        return super.build();
     }
 }

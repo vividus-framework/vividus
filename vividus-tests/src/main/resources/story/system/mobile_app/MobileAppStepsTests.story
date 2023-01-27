@@ -419,6 +419,18 @@ When I execute sequence of touch actions:
 |RELEASE       |                                               |
 When I wait until element located by `accessibilityId(<firstItemAccessibilityId>)` appears
 Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
+When I change context to element located by `accessibilityId(<firstItemAccessibilityId>)`
+Given I initialize scenario variable `x` with value `#{eval(${context-x-coordinate} + ${context-width} / 2)}`
+Given I initialize scenario variable `y` with value `#{eval(${context-y-coordinate} + ${context-height} / 2)}`
+When I reset context
+When I execute sequence of touch actions:
+|type          |argument    |
+|MOVE_BY_OFFSET|(${x}, ${y})|
+|TAP_AND_HOLD  |            |
+|MOVE_BY_OFFSET|(-150, 0)   |
+|RELEASE       |            |
+When I wait until element located by `accessibilityId(<secondItemAccessibilityId>)` appears
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
 Examples:
 |firstItemAccessibilityId|secondItemAccessibilityId|
 |Item 1                  |Item 2                   |
