@@ -40,14 +40,17 @@ import org.openqa.selenium.interactions.Sequence;
 @ExtendWith(MockitoExtension.class)
 class TouchGesturesTests
 {
-    private static final String POINTER_MOVE_ACTION = "{duration=200, x=0, y=0, type=pointerMove, origin=Mock for "
-            + "WebElement, hashCode: %d}";
+    private static final String POINTER_MOVE_TO_ELEMENT_ACTION = "{duration=200, x=0, y=0, type=pointerMove, "
+            + "origin=Mock for WebElement, hashCode: %d}";
+    private static final String POINTER_MOVE_ACTION = "{duration=200, x=%d, y=%d, type=pointerMove, origin=%s}";
     private static final String ACTIONS_OPEN = "{id=finger, type=pointer, parameters={pointerType=touch}, actions=[";
-    private static final String POINTER_MOVE = POINTER_MOVE_ACTION + ", ";
+    private static final String ACTION_SEPARATOR = ", ";
+    private static final String POINTER_MOVE_TO_ELEMENT = POINTER_MOVE_TO_ELEMENT_ACTION + ACTION_SEPARATOR;
     private static final String TAP_ACTION = "{button=0, type=pointerDown}, {button=0, type=pointerUp}";
     private static final String RELEASE_ACTION = "{button=0, type=pointerUp}";
     private static final String PRESS_ACTION = "{button=0, type=pointerDown}";
     private static final String ACTIONS_CLOSE = "]}";
+    private static final String POINTER = "pointer";
 
     @Mock(extraInterfaces = Interactive.class)
     private WebDriver webDriver;
@@ -61,7 +64,7 @@ class TouchGesturesTests
         var webElement = mock(WebElement.class);
         actions.tapAndHold(webElement).perform();
         var hash = webElement.hashCode();
-        var touchSequence = ACTIONS_OPEN + format(POINTER_MOVE, hash) + PRESS_ACTION + ACTIONS_CLOSE;
+        var touchSequence = ACTIONS_OPEN + format(POINTER_MOVE_TO_ELEMENT, hash) + PRESS_ACTION + ACTIONS_CLOSE;
         verifyValue(touchSequence);
     }
 
@@ -87,7 +90,7 @@ class TouchGesturesTests
         var webElement = mock(WebElement.class);
         var hash = webElement.hashCode();
         actions.moveToElement(webElement).perform();
-        var touchSequence = ACTIONS_OPEN + format(POINTER_MOVE_ACTION, hash) + ACTIONS_CLOSE;
+        var touchSequence = ACTIONS_OPEN + format(POINTER_MOVE_TO_ELEMENT_ACTION, hash) + ACTIONS_CLOSE;
         verifyValue(touchSequence);
     }
 
@@ -97,7 +100,7 @@ class TouchGesturesTests
         var webElement = mock(WebElement.class);
         var hash = webElement.hashCode();
         actions.tap(webElement).perform();
-        var touchSequence = ACTIONS_OPEN + format(POINTER_MOVE, hash) + TAP_ACTION + ACTIONS_CLOSE;
+        var touchSequence = ACTIONS_OPEN + format(POINTER_MOVE_TO_ELEMENT, hash) + TAP_ACTION + ACTIONS_CLOSE;
         verifyValue(touchSequence);
     }
 
@@ -119,13 +122,28 @@ class TouchGesturesTests
     }
 
     @Test
-    void testPerformMoveBYOffset()
+    void testPerformMoveByOffset()
     {
         var offsetX = 15;
-        var offsetY = 15;
-        actions.moveByOffset(offsetX, offsetY).perform();
-        var touchSequence = ACTIONS_OPEN + "{duration=200, x=15, y=15, type=pointerMove, origin=pointer}"
-                            + ACTIONS_CLOSE;
+        var offsetY = 25;
+        var newOffsetX = 35;
+        var newOffsetY = 45;
+        actions.moveByOffset(offsetX, offsetY).moveByOffset(newOffsetX, newOffsetY).perform();
+        var touchSequence = ACTIONS_OPEN + format(POINTER_MOVE_ACTION, offsetX, offsetY, "viewport") + ACTION_SEPARATOR
+                + format(POINTER_MOVE_ACTION, newOffsetX, newOffsetY, POINTER) + ACTIONS_CLOSE;
+        verifyValue(touchSequence);
+    }
+
+    @Test
+    void testPerformMoveByOffsetAfterMoveToElement()
+    {
+        var offsetX = 5;
+        var offsetY = 55;
+        var webElement = mock(WebElement.class);
+        var hash = webElement.hashCode();
+        actions.moveToElement(webElement).moveByOffset(offsetX, offsetY).perform();
+        var touchSequence = ACTIONS_OPEN + format(POINTER_MOVE_TO_ELEMENT, hash)
+                + format(POINTER_MOVE_ACTION, offsetX, offsetY, POINTER) + ACTIONS_CLOSE;
         verifyValue(touchSequence);
     }
 
