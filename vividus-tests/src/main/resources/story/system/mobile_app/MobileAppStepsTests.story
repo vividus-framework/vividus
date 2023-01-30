@@ -254,10 +254,32 @@ When I tap on element located by `xpath((//XCUIElementTypeImage[contains(@name, 
 Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` is equal to `1`
 
 
+Scenario: [Android] Verify step: 'I upload file with name `$fileName` and data `$data` to device'
+Meta:
+    @targetPlatform android
+When I upload file with name `file_for_upload_step.png` and data `#{loadBinaryResource(/data/file_for_upload_step.png)}` to device
+When I tap on element located by `accessibilityId(selectImage)`
+When I wait until element located by `xpath(//android.widget.TextView[@text='Pictures'])` appears
+When I tap on element located by `xpath(//android.widget.TextView[@text='Pictures'])`
+When I tap on element located by `xpath((//android.view.ViewGroup[contains(@content-desc, "Photo taken")])[1])`
+Then number of elements found by `xpath(//android.widget.TextView[@text='569x407'])` is equal to `1`
+
+
+Scenario: [iOS] Verify step: 'I upload file with name `$fileName` and data `$data` to device'
+Meta:
+    @targetPlatform ios
+When I upload file with name `file_for_upload_step.png` and data `#{loadBinaryResource(/data/file_for_upload_step.png)}` to device
+When I tap on element located by `iosNsPredicate(name == 'selectImage')`
+When I wait until element located by `accessibilityId(Photos)` appears
+When I tap on element located by `xpath((//XCUIElementTypeImage[contains(@name, "Photo")])[1])`
+Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='569x407'])` is equal to `1`
+
+
 Scenario: [Android] Verify step: 'When I delete file `$filePath` from device'
 Meta:
     @targetPlatform android
 When I delete file `/sdcard/Pictures/mobile-upload-image.png` from device
+When I delete file `/sdcard/Pictures/file_for_upload_step.png` from device
 When I tap on element located by `accessibilityId(selectImage)`
 When I wait until element located by `xpath(//android.widget.TextView[@text='Pictures'])` disappears
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -31,10 +32,14 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.ScreenOrientation;
 import org.vividus.mobileapp.action.DeviceActions;
+import org.vividus.steps.DataWrapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -42,8 +47,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class DeviceStepsTests
 {
+    private static final byte[] BINARY_CONTENT = {1, 0, 1};
     private static final String DEVICE_FOLDER = "/device/folder";
-    private static final String DEVICE_FILE_PATH = "device-file-path";
+    private static final String FILE_NAME = "data.txt";
+    private static final String DEVICE_FILE_PATH = Paths.get(DEVICE_FOLDER, FILE_NAME).toString();
 
     @Mock private DeviceActions deviceActions;
     private DeviceSteps deviceSteps;
@@ -56,18 +63,37 @@ class DeviceStepsTests
         deviceSteps = new DeviceSteps(DEVICE_FOLDER, deviceActions);
     }
 
+    static Stream<Arguments> dataProvider()
+    {
+        // @formatter:off
+        return Stream.of(
+                Arguments.of(BINARY_CONTENT, BINARY_CONTENT),
+                Arguments.of("Hello",        new byte[] {72, 101, 108, 108, 111})
+        );
+        // @formatter:on
+    }
+
     @Test
     void shouldUploadFileToDevice()
     {
-        String fileName = "file.txt";
-        String filePath = Paths.get("/local/fs/", fileName).toString();
+        byte[] resourceContent = { 58, 41, 10 };
 
-        deviceSteps.uploadFileToDevice(filePath);
+        deviceSteps.uploadFileToDevice(FILE_NAME);
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(info("Uploading file '{}' from resources to a device at '{}' folder", FILE_NAME,
+                        DEVICE_FOLDER))));
+        verify(deviceActions).pushFile(DEVICE_FILE_PATH, resourceContent);
+    }
 
-        verify(deviceActions).pushFile(Paths.get(DEVICE_FOLDER, fileName).toString(), filePath);
-        assertThat(logger.getLoggingEvents(), is(List.of(
-            info("Uploading file '{}' to a device at '{}' folder", filePath, DEVICE_FOLDER)
-        )));
+    @ParameterizedTest
+    @MethodSource("dataProvider")
+    void shouldUploadFileWithSpecifiedDataToDevice(Object data, byte[] bytes)
+    {
+        deviceSteps.uploadFileToDevice(FILE_NAME, new DataWrapper(data));
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(info("Uploading file with name `{}` to the device at '{}' folder", FILE_NAME,
+                        DEVICE_FOLDER))));
+        verify(deviceActions).pushFile(DEVICE_FILE_PATH, bytes);
     }
 
     @Test

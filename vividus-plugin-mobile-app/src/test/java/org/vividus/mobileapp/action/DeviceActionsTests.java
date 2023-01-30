@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Base64;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -40,9 +41,7 @@ import io.appium.java_client.remote.SupportsRotation;
 @ExtendWith(MockitoExtension.class)
 class DeviceActionsTests
 {
-    private static final String RESOURCE_PATH = "data.txt";
     private static final String DEVICE_FILE_PATH = "device-file-path";
-    private static final byte[] RESOURCE_BODY = { 79, 105, 107, 75 };
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private WebDriverSessionInfo webDriverSessionInfo;
@@ -51,13 +50,16 @@ class DeviceActionsTests
     @Test
     void shouldPushFile()
     {
+        byte[] content = { 79, 105, 107, 75 };
+        byte[] base64content = Base64.getEncoder().encode(content);
+
         var pushingFilesDriver = mock(PushesFiles.class);
 
         when(webDriverProvider.getUnwrapped(PushesFiles.class)).thenReturn(pushingFilesDriver);
 
-        deviceActions.pushFile(DEVICE_FILE_PATH, RESOURCE_PATH);
+        deviceActions.pushFile(DEVICE_FILE_PATH, content);
 
-        verify(pushingFilesDriver).pushFile(DEVICE_FILE_PATH, RESOURCE_BODY);
+        verify(pushingFilesDriver).pushFile(DEVICE_FILE_PATH, base64content);
         verifyNoMoreInteractions(webDriverProvider);
     }
 

@@ -77,7 +77,7 @@ a|`tagName(android.widget.TextView)->filter.attribute(text=Hi)` - `android.widge
 
 include::partial$visibility-types.adoc[]
 
-
+[#mobile_properties]
 == Properties
 
 NOTE: The properties marked with *bold* are mandatory.
@@ -434,12 +434,44 @@ When I upload file `$filePath` to device
 
 * `$filePath` - The path of the file to upload to the device.
 
+include::partial$mobile-upload-folder-info.adoc[]
+
 .Upload file
 [source,gherkin]
 ----
 When I upload file `images/avatar.png` to device
 Then the avatar icon is displayed with the uploaded image
 ----
+
+
+=== Upload the file with data to the device
+
+Upload the file with data to the device/emulator/simulator.
+
+[source,gherkin]
+----
+When I upload file with name `$fileName` and data `$data` to device
+----
+
+* `$data` - The data to store as a file.
+* `$fileName` - The name of the uploaded file.
+
+include::partial$mobile-upload-folder-info.adoc[]
+
+.Upload the file with the image data to the device
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/vividus-framework/vividus/master/vividus-tests/src/main/resources/baselines/context.png`
+When I upload file with name `context.png` and data `${response-as-bytes}` to device
+Then image is displayed in gallery
+----
+.Upload the file with the text data to the device
+[source,gherkin]
+----
+When I upload file with name `message.txt` and data `This is a message` to device
+Then message file is displayed in file explorer
+----
+
 
 === Delete a file from the device
 
