@@ -1,0 +1,25 @@
+====
+
+. Open project_ios repo in code management system
+. Click on Clone button
+. Copy HTTP link
+. Clone repo in any folder on your computer via git clone '{HTTPS_link_of_ios_project}'
+. Open Xcode
+. Click on Open a project or file
+. Open cloned project from step #4
+. Click on Open button
+
+Added project is displayed in Xcode menu.
+
+* Click on added project - project is opened in Xcode
+* You can choose any environment if you have several by click on project name
+* Choose any needed simulator
+* Click on Build and than run the current scheme button
+
+Simulator with installed application will be opened.
+
+To add new iOS versions click on *Xcode* → *Preferences* → *Components* → *Download* icon near needed iOS version.
+
+After installation finished added version will appear in simulator option.
+
+====

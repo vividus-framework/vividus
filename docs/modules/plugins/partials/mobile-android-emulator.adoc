@@ -1,0 +1,19 @@
+====
+
+. Open Android Studio
+. Click on *Configure* → *AVD Manager*
+. In opened Android Virtual Device Manager click on *+Create Virtual Device* button
+. Select any hardware you need (you can also create device with unique hardware via  New Hardware Profile)
+. Click on *Next* button
+. Choose or download needed system image
+. Click on *Next* → *Finish* buttons
+
+Created device is displayed on Android Virtual Device Manager tab.
+
+* Choose your device and click on Launch this AVD in the emulator button (green triangle)
+
+Emulator is opened.
+
+If you have an application in Play Store you can download it on emulator from Play Store and work with it. If you don’t have you can build file with .apk extension and drag and drop it on emulator and work with it.
+
+====

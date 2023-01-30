@@ -8,6 +8,7 @@ The plugin provides functionality to test mobile application on real devices, An
 
 :plugin-short-name: mobile-app
 include::partial$plugin-installation.adoc[]
+include::partial$mobile-installation.adoc[]
 
 include::partial$locator-header.adoc[]
 

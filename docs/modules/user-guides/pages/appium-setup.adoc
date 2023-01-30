@@ -127,6 +127,12 @@ image::appium-inspector-capabilities-ios.png[]
 
 == Running tests on Simulator/Emulator
 
+How to work with iOS simulator
+include::plugins:partial$mobile-ios-simulator.adoc[]
+
+How to work with Android emulator
+include::plugins:partial$mobile-android-emulator.adoc[]
+
 VIVIDUS Sample Tests is a https://github.com/vividus-framework/vividus-sample-tests[GitHub repository]. Its purpose is to demo VIVIDUS capabilities via sample tests.
 
 Let's use it as an example for running mobile tests via Appium.

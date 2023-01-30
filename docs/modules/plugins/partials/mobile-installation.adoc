@@ -1,0 +1,34 @@
+
+=== Setup environment for Mobile testing
+
+====
+_Environment setup is needed only for local test execution and can be skipped if Cloud is used_
+====
+
+==== Requirement environment for iOS application:
+
+For iOS application testing macOS is needed.
+
+*Xcode:*
+
+* Download and install Xcode
+* Download and install NodeJS from https://nodejs.org/en/ 
+* Check that nodeJS was successfully installed 
+
+Run node -v command in Terminal (Expected result: v14.16.0 is returned)
+
+*Appium:*
+
+* Download and install Appium from http://appium.io/
+
+==== Requirement environment for Android application:
+
+*Android studio:*
+
+* Download and install Android Studio
+* Add ANDROID_HOME variable to environment variables with path to Android sdk (e.g. ANDROID_HOME=/Users/User_Name/Library/Android/sdk)
+
+*Appium:*
+
+* Download and install Appium from http://appium.io/
+
