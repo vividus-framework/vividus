@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,19 @@ class XpathLocatorUtilsTests
                         + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = '%1$s'] or *[translate(.,"
                         + " 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = '%1$s']]",
                 "what's great about it");
+        assertEquals(expectedLocator, actualLocator);
+    }
+
+    @Test
+    void testGetXpathPatternWithNormalizationAndNestedFunctionsInsideContains()
+    {
+        By expectedLocator = By.xpath("//*[contains(normalize-space(translate(@class, \"abcdefghijklmnopqrstuvwxyz\", "
+                + "\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\")), 'MAIN') "
+                + "or contains(normalize-space(translate(concat(text(), 'page'), \"abcdefghijklmnopqrstuvwxyz\", "
+                + "\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\")), 'MAIN PAGE')]");
+        By actualLocator = XpathLocatorUtils.getXPathLocator("//*[contains(translate(@class, %1$s, %2$s), 'MAIN') "
+                + "or contains(translate(concat(text(), 'page'), %1$s, %2$s), 'MAIN PAGE')]",
+                "abcdefghijklmnopqrstuvwxyz", "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         assertEquals(expectedLocator, actualLocator);
     }
 

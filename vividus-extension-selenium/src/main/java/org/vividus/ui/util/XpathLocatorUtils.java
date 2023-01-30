@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,12 @@ public final class XpathLocatorUtils
             .compile("(translate\\([^)]*\\))(| )=" + CONCAT);
     private static final Pattern ANY_ATTR_OR_TEXT_VALUE_PATTERN = Pattern.compile("((@[*])|(text\\(\\)))(| )="
             + CONCAT);
-    private static final Pattern ATTR_CONTAINS_PATTERN = Pattern.compile("(contains\\((?!normalize-space)(.*?)),");
-
+    private static final Pattern CONTAINS_PATTERN = Pattern
+            .compile("contains\\((?!normalize-space)(([a-z-]+?)\\(((?!\\b(and|or)\\b).)*\\)|.+?),");
     private static final String NORMALIZE_SPACE_FORMAT = "$3normalize-space($4$5$6)=$9";
     private static final String ANY_ATTR_OR_TEXT_NORMALIZE_SPACE_FORMAT = "$1[normalize-space()=$6]";
     private static final String NORMALIZE_SPACE_TRANSLATE_FORMAT = "normalize-space($1)=$5$6$7";
-    private static final String CONTAINS_NORMALIZE_SPACE_FORMAT = "contains(normalize-space($2),";
+    private static final String CONTAINS_NORMALIZE_SPACE_FORMAT = "contains(normalize-space($1),";
 
     private static final String NORMALIZE_SPACE_WITH_PARAMETR_FORMAT = "normalize-space\\"
             + "((text\\(\\)|\\*|@\\w+|@\\*)\\)(| )=(| )((concat\\([^\\)]*\\))|('[^']*')|(\\\"[^\\\"]*\\\"))";
@@ -127,6 +127,6 @@ public final class XpathLocatorUtils
         newXpath = SEARCH_IN_CURRENT_NODE_PATTERN.matcher(newXpath).replaceAll(NORMALIZE_CURRENT_NODE_PATTERN);
         newXpath = normalizeXpathWithOperators(newXpath);
         newXpath = ATTR_VALUE_TRANSLATE_PATTERN.matcher(newXpath).replaceAll(NORMALIZE_SPACE_TRANSLATE_FORMAT);
-        return ATTR_CONTAINS_PATTERN.matcher(newXpath).replaceAll(CONTAINS_NORMALIZE_SPACE_FORMAT);
+        return CONTAINS_PATTERN.matcher(newXpath).replaceAll(CONTAINS_NORMALIZE_SPACE_FORMAT);
     }
 }
