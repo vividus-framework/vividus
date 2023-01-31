@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,23 @@
 
 package org.vividus.steps.ui.web;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.function.BiFunction;
 
 import org.jbehave.core.annotations.When;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.steps.ui.web.model.SequenceAction;
-import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.action.SequenceAction;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
+import org.vividus.ui.steps.AbstractActionsSequenceSteps;
+import org.vividus.ui.web.action.WebSequenceActionType;
 
 @TakeScreenshotOnFailure
-public class ActionSteps
+public class ActionsSequenceSteps extends AbstractActionsSequenceSteps
 {
-    private final IWebDriverProvider webDriverProvider;
-    private final IBaseValidations baseValidations;
-
-    public ActionSteps(IWebDriverProvider webDriverProvider, IBaseValidations baseValidations)
+    public ActionsSequenceSteps(IWebDriverProvider webDriverProvider, IBaseValidations baseValidations)
     {
-        this.webDriverProvider = webDriverProvider;
-        this.baseValidations = baseValidations;
+        super(webDriverProvider, baseValidations);
     }
 
     /**
@@ -92,39 +86,12 @@ public class ActionSteps
      * </tr>
      * <tr><td>MOVE_TO</td><td>element locator</td><td>By.id(username)</td></tr>
      * </table>
+     *
      * @param actions table of actions to execute
      */
     @When("I execute sequence of actions: $actions")
-    public void executeSequenceOfActions(List<SequenceAction> actions)
+    public void executeSequenceOfActions(List<SequenceAction<WebSequenceActionType>> actions)
     {
-        performActions(actions, (builder, action) ->
-        {
-            Object argument = action.getArgument();
-            if (argument != null && argument.getClass().equals(Locator.class))
-            {
-                WebElement element = baseValidations.assertIfElementExists("Element for interaction",
-                        (Locator) argument);
-                if (element == null)
-                {
-                    return false;
-                }
-                argument = element;
-            }
-            action.getType().addAction(builder, argument);
-            return true;
-        });
-    }
-
-    private <T> void performActions(Collection<T> elements, BiFunction<Actions, T, Boolean> iterateFunction)
-    {
-        Actions actions = new Actions(webDriverProvider.get());
-        for (T element : elements)
-        {
-            if (!iterateFunction.apply(actions, element))
-            {
-                return;
-            }
-        }
-        actions.build().perform();
+        execute(Actions::new, actions);
     }
 }

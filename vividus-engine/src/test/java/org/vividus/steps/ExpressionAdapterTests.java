@@ -44,6 +44,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -116,14 +117,15 @@ class ExpressionAdapterTests
     }
 
     @SuppressWarnings("unchecked")
-    @Test
-    void testNestedExpressionWithoutParams()
+    @ParameterizedTest
+    @ValueSource(strings = { EXPRESSION_KEYWORD, "targets" })
+    void testNestedExpressionWithoutParams(String nestedExpression)
     {
-        var input = "#{capitalize(#{trim(#{target})})}";
+        var input = String.format("#{capitalize(#{trim(#{%s})})}", nestedExpression);
         var output = "Quetzalcoatlus";
 
         var mockedExpressionProcessor = (SingleArgExpressionProcessor<String>) mock(SingleArgExpressionProcessor.class);
-        when(mockedExpressionProcessor.execute(EXPRESSION_KEYWORD)).thenReturn(Optional.of(" quetzalcoatlus "));
+        when(mockedExpressionProcessor.execute(nestedExpression)).thenReturn(Optional.of(" quetzalcoatlus "));
         IExpressionProcessor<?> processor = new DelegatingExpressionProcessor(List.of(
                 new SingleArgExpressionProcessor<>(EXPRESSION_TRIM,        StringUtils::trim),
                 new SingleArgExpressionProcessor<>(EXPRESSION_CAPITALIZE,  StringUtils::capitalize),

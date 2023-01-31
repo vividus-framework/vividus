@@ -397,6 +397,45 @@ When I scan barcode from context and save result to scenario variable `qrCodeLin
 Then `${qrCodeLink}` is = `https://github.com/vividus-framework/vividus`
 When I reset context
 
+
+Scenario: Verify step: 'When I execute sequence of touch actions'
+When I execute sequence of touch actions:
+|type|argument                       |
+|TAP |By.accessibilityId(menuToggler)|
+When I tap on element located by `xpath(<carouselViewXpath>)`
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `1`
+When I execute sequence of touch actions:
+|type          |argument                                      |
+|TAP_AND_HOLD  |By.accessibilityId(<firstItemAccessibilityId>)|
+|MOVE_BY_OFFSET|(-150, 0)                                     |
+|RELEASE       |                                              |
+When I wait until element located by `accessibilityId(<firstItemAccessibilityId>)` disappears
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `1`
+When I execute sequence of touch actions:
+|type          |argument                                       |
+|MOVE_TO       |By.accessibilityId(<secondItemAccessibilityId>)|
+|TAP_AND_HOLD  |                                               |
+|MOVE_BY_OFFSET|(150, 0)                                       |
+|RELEASE       |                                               |
+When I wait until element located by `accessibilityId(<firstItemAccessibilityId>)` appears
+Then number of elements found by `accessibilityId(<secondItemAccessibilityId>)` is = `0`
+When I change context to element located by `accessibilityId(<firstItemAccessibilityId>)`
+Given I initialize scenario variable `x` with value `#{eval(${context-x-coordinate} + ${context-width} / 2)}`
+Given I initialize scenario variable `y` with value `#{eval(${context-y-coordinate} + ${context-height} / 2)}`
+When I reset context
+When I execute sequence of touch actions:
+|type          |argument    |
+|MOVE_BY_OFFSET|(${x}, ${y})|
+|TAP_AND_HOLD  |            |
+|MOVE_BY_OFFSET|(-150, 0)   |
+|RELEASE       |            |
+When I wait until element located by `accessibilityId(<secondItemAccessibilityId>)` appears
+Then number of elements found by `accessibilityId(<firstItemAccessibilityId>)` is = `0`
+Examples:
+|firstItemAccessibilityId|secondItemAccessibilityId|
+|Item 1                  |Item 2                   |
+
+
 Scenario: Go to slider screen
 When I tap on element located by `accessibilityId(menuToggler)`
 When I swipe UP to element located by `xpath(<menuSliderXpath>)` with duration PT1S
