@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,6 @@ public class SoftAssert implements ISoftAssert
         return assertEquality(description, false, expected, actual);
     }
 
-    @SuppressWarnings("checkstyle:UnnecessaryParentheses")
     private boolean assertEquality(final String description, boolean equals, final long expected, final long actual)
     {
         String assertionDescription = createAssertionDescription(Long.toString(expected), Long.toString(actual));
@@ -184,7 +183,6 @@ public class SoftAssert implements ISoftAssert
         return assertEquality(description, false, expected, actual);
     }
 
-    @SuppressWarnings("checkstyle:UnnecessaryParentheses")
     private boolean assertEquality(final String description, boolean equals, final boolean expected,
             final boolean actual)
     {
