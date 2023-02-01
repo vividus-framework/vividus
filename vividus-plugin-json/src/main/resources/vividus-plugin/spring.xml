@@ -20,8 +20,11 @@
 
     <bean id="jsonPatchSteps" class="org.vividus.json.steps.JsonPatchSteps" />
 
+    <bean id="jsonSchemaValidationSteps" class="org.vividus.json.steps.JsonSchemaValidationSteps"/>
+
     <util:list id="stepBeanNames-Json">
         <idref bean="jsonSteps" />
         <idref bean="jsonPatchSteps" />
+        <idref bean="jsonSchemaValidationSteps" />
     </util:list>
 </beans>

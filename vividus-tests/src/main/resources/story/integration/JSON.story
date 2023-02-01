@@ -185,3 +185,45 @@ Meta:
 Then JSON element value from `{
     "long-long-float":485690.3866338789319252000000135498000000
 }` by JSON path `$.long-long-float` is equal to `485690.3866338789319252000000135498000000`
+
+Scenario: Validate JSON against JSON schema
+Then JSON `
+{
+   "productId": 1,
+   "productName": "A desk lamp",
+   "price": 12.50,
+   "tags": [ "lamp", "desk" ]
+}
+` is valid against schema `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/product.schema.json",
+  "title": "Product",
+  "description": "A product from catalog",
+  "type": "object",
+  "properties": {
+    "productId": {
+      "description": "The unique identifier for a product",
+      "type": "integer"
+    },
+    "productName": {
+      "type": "string"
+    },
+    "price": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "tags": {
+      "description": "Tags for the product",
+      "type": "array",
+      "prefixItems": {
+        "type": "string",
+        "enum": ["lamp", "desk"]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "required": [ "productId", "productName", "price", "tags" ]
+}
+`
