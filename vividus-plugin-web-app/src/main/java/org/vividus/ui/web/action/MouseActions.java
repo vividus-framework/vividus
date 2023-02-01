@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,10 +91,9 @@ public class MouseActions implements IMouseActions
         {
             try
             {
-                if (webDriverManager.isBrowserAnyOf(Browser.CHROME)
-                        && message.contains(". Other element would receive the click"))
+                if (message.contains(". Other element would receive the click"))
                 {
-                    javascriptActions.click(element);
+                    softAssert.recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + webDriverException);
                 }
                 else
                 {

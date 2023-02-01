@@ -98,6 +98,17 @@ The atomic actions performed are:
 words if https://www.selenium.dev/exceptions/#stale_element_reference[StaleElementReferenceException]
 is occurred at any atomic action.
 
+[NOTE]
+====
+If element by the specified locator is not clickable (overlapped by another element, problems with page/context loading or the element is disabled) the step will fail with corresponding error:
+[source]
+----
+Could not click on the element: org.openqa.selenium.ElementClickInterceptedException: element click intercepted:
+Element <a href="#where-to-buy" data-tab-name="..." role="button">Where to Buy</a> is not clickable at point (1619, 275).
+Other element would receive the click: <div class="content">...</div>
+----
+====
+
 [source,gherkin]
 ----
 When I click on element located by `$locator`
