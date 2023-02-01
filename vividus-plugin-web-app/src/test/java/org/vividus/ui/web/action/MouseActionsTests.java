@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -195,7 +195,6 @@ class MouseActionsTests
     @Test
     void clickElementNotClickableStaleReferenceExceptionNotChrome()
     {
-        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(false);
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
@@ -248,7 +247,6 @@ class MouseActionsTests
     @Test
     void clickElementNotClickableExceptionNoExceptionNotChrome()
     {
-        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(false);
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
@@ -261,7 +259,6 @@ class MouseActionsTests
     @Test
     void clickElementNotClickableExceptionStaleExceptionChrome()
     {
-        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(true);
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
@@ -277,7 +274,6 @@ class MouseActionsTests
     @Test
     void clickElementNotClickableExceptionNoExceptionChrome()
     {
-        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(true);
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
@@ -286,38 +282,19 @@ class MouseActionsTests
     }
 
     @Test
-    void clickElementNotClickableExceptionWithJsChrome()
+    void shouldRecordFailedAssertionWhenClickOverlappedElement()
     {
-        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(true);
         mockBodySearch();
 
-        WebDriverException e = new WebDriverException(OTHER_ELEMENT_WOULD_RECEIVE_CLICK);
-        doThrow(e).when(webElement).click();
-        ClickResult result = mouseActions.click(webElement);
-        assertFalse(result.isNewPageLoaded());
-        InOrder ordered = inOrder(javascriptActions, alertActions, eventBus, uiContext, softAssert);
-        ordered.verify(javascriptActions).scrollElementIntoViewportCenter(webElement);
-        ordered.verify(javascriptActions).click(webElement);
-        ordered.verify(alertActions).waitForAlert(webDriver);
-        ordered.verify(eventBus).post(any(PageLoadEndEvent.class));
-        ordered.verifyNoMoreInteractions();
-    }
-
-    @Test
-    void clickElementNotClickableExceptionWithoutJsNotChrome()
-    {
-        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(false);
-        mockBodySearch();
-
-        WebDriverException e = new WebDriverException(OTHER_ELEMENT_WOULD_RECEIVE_CLICK);
-        doThrow(e).doNothing().when(webElement).click();
-        testClickWithElementNotClickableException();
+        var exception = new WebDriverException(OTHER_ELEMENT_WOULD_RECEIVE_CLICK);
+        doThrow(exception).when(webElement).click();
+        testClick(false, false);
+        verify(softAssert).recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + exception);
     }
 
     @Test
     void clickElementNotClickableExceptionAndWebDriverExceptionInChromeWorkaround()
     {
-        when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(true);
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
