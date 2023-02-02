@@ -1,0 +1,41 @@
+=== Save value of HTTP cookie
+
+Saves cookie to scope variable. If present several cookies with the same name will be saved cookie with the root path value (path is '/').
+
+[source,gherkin]
+----
+When I save value of HTTP cookie with name `$cookieName` to $scopes variable `$variableName`
+----
+
+* `$cookieName` - The name of cookie.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of variable.
+
+.Get cookie with name `cookieName` and save its value to scenario variable `value`
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/cookies/set/cookieName/cookieValue`
+When I save value of HTTP cookie with name `cookieName` to scenario variable `value`
+Then '${value}' is equal to 'cookieValue'
+----
+
+=== Change value of all HTTP cookies
+
+Change cookie value. If several cookies with the same name exist in cookie store, the value will be changed for all of them.
+
+[source,gherkin]
+----
+When I change value of all HTTP cookies with name `$cookieName` to `$newCookieValue`
+----
+
+* `$cookieName` - The name of cookie.
+* `$newCookieValue` - The new value for `$cookieName`.
+
+.Get cookie with name `cookieName` and set new value for it `newCookieValue`
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/cookies/set/cookieName/cookieValue`
+When I change value of all HTTP cookies with name `cookieName` to `newCookieValue`
+When I save value of HTTP cookie with name `cookieName` to scenario variable `value`
+Then '${value}' is equal to 'newCookieValue'
+----

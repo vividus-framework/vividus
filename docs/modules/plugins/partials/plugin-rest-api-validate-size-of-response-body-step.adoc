@@ -1,0 +1,16 @@
+Compare size of decompressed HTTP response body with the specified expected size in bytes.
+
+[source,gherkin]
+----
+Then size of decompressed response body is $comparisonRule `$sizeInBytes`
+----
+
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$sizeInBytes` - The expected size of the response body in bytes.
+
+.Submit a GET request and check that response body size is greater or equal to `1200` bytes
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://example.com`
+Then size of decompressed response body is greater than or equal to `1200`
+----

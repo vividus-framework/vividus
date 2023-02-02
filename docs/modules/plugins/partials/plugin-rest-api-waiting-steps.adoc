@@ -1,0 +1,78 @@
+=== Wait for JSON element in the HTTP response
+
+Waits for a specified amount of time until HTTP response body contains an element by the specified JSON path. The actions of the step:
+
+. Execute sub-steps.
+. Check if the HTTP response is present and the response body contains an element by JSON path.
+. If the required JSON element exists or the maximum number of retries is reached, then the execution stops, otherwise the step actions are repeated.
+. Stop step execution if HTTP response is not present or JSON element is found, otherwise sleep for the calculated part of specified duration and repeat actions from the start.
+
+[source,gherkin]
+----
+When I wait for presence of element by `$jsonPath` for `$duration` duration retrying $retryTimes times$stepsToExecute
+----
+
+* `$jsonPath` - The JSON path of the element to find.
+* `$duration` - The time duration to wait in {durations-format-link} format.
+* `$retryTimes` -  The maximum of attempts. `duration/retryTimes = timeout` is a polling timeout between requests.
+* `$stepsToExecute` - The sub-steps to execute at each iteration.
+
+.Wait for presence of element 10 times with polling timeout between requests 5 seconds
+[source,gherkin]
+----
+When I wait for presence of element by `$.unstableElement` for `PT50S` duration retrying 10 times
+|step                                                                                    |
+|When I execute HTTP GET request for resource with URL `http://example.com/testing-page` |
+----
+
+=== Wait for JSON element in the HTTP response with polling interval
+
+Executes the provided sub-steps until the HTTP response body contains an element by the specified JSON path or the maximum number of retries is reached. The maximum duration of the step execution is not limited. The actions of the step:
+
+. execute sub-steps
+. wait the polling interval
+. if the required JSON element exists or the maximum number of retries is reached, then the execution stops, otherwise the step actions are repeated
+
+[source,gherkin]
+----
+When I wait for presence of element by `$jsonPath` with `$pollingInterval` polling interval retrying $retryTimes times$stepsToExecute
+----
+
+* `jsonPath` - the JSON path of the element to find
+* `pollingInterval` - the duration to wait between retries
+* `retryTimes` - the maximum number of the retries
+* `stepsToExecute` - the sub-steps to execute at each iteration
+
+.Wait for presence of element by JSON path $.data.testData
+[source,gherkin]
+----
+When I wait for presence of element by `$.data.testData` with `PT5S` polling interval retrying 10 times
+|step                                  |
+|When I set request headers:           |
+|{headerSeparator=!,valueSeparator=!}  |
+|!name          !value                !|
+|!Authorization !${accessToken}       !|
+|When I execute HTTP GET request for resource with URL `${requestUrl}`|
+----
+
+=== Wait for expected HTTP status code in response
+
+Waits for the specified number of times until HTTP response code is equal to the expected one. In case if the expected code is not returned after all retries, the assertion error will be recorded.
+
+[source,gherkin]
+----
+When I wait for response code $responseCode for $duration duration retrying $retryTimes times$stepsToExecute
+----
+
+* `$responseCode` - The expected HTTP status code.
+* `$duration` - The time duration to wait in {durations-format-link} format.
+* `$retryTimes` - The number of times the request will be retried: `duration/retryTimes = timeout` is a polling timeout between requests.
+* `$stepsToExecute` - The steps to execute at each wait iteration.
+
+.Wait until HTTP GET request returns status code 200
+[source,gherkin]
+----
+When I wait for response code `200` for `PT10S` duration retrying 3 times
+|step                                                        |
+|When I send HTTP GET to the relative URL '/delayed-resource'|
+----

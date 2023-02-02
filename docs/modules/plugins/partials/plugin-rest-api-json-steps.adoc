@@ -1,0 +1,165 @@
+=== Verify context contains data
+
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0. The replacement is
+the combination of the xref:plugins:plugin-json.adoc#_json_context[dynamic variable] and the
+xref:plugins:plugin-json.adoc#_validate_json_element[step validating the JSON element from the input].
+The replacement pattern is:
+[source,gherkin]
+----
+Then JSON element from `${json-context}` by JSON path `<jsonPath>` is equal to `<expectedData>`<options>
+----
+====
+
+Checks if the JSON context contains an expected data by a JSON path
+
+[source,gherkin]
+----
+Then JSON element by JSON path `$jsonPath` is equal to `$expectedData`$options
+----
+
+* `jsonPath` - {json-path}
+* `expectedData` - expected JSON
+* `options` - {json-unit-options}
+
+.Check JSON context contains JSON object by JSON path
+[source,gherkin]
+----
+Then JSON element by JSON path `$.accountList[0]` is equal to `
+{
+  "accountId": 12345,
+  "accountName": "${json-unit.any-string}",
+  "status": "Active"
+}
+`ignoring extra fields
+----
+
+=== Verify JSON contains data
+
+[WARNING]
+====
+The step xref:plugins:plugin-json.adoc#_validate_json_element[is moved] to `vividus-plugin-json`.
+The step is still available via `vividus-plugin-rest-api`, but it'll be required
+to install `vividus-plugin-json` explicitly starting from VIVIDUS 0.6.0.
+====
+
+=== Verify number of elements in context
+
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0. The replacement is
+the combination of the xref:plugins:plugin-json.adoc#_json_context[dynamic variable] and the
+xref:plugins:plugin-json.adoc#_validate_number_of_json_elements[step validating the number of JSON elements from the input].
+The replacement pattern is:
+[source,gherkin]
+----
+Then number of JSON elements from `${json-context}` by JSON path `<jsonPath>` is <comparisonRule> <elementsNumber>
+----
+====
+
+Verifies that the number of elements found in the JSON context by a JSON path matches an expected number according to specified comparison rule
+
+[source,gherkin]
+----
+Then number of JSON elements by JSON path `$jsonPath` is $comparisonRule $elementsNumber
+----
+
+* `jsonPath` - {json-path}
+* `comparisonRule` - xref:parameters:comparison-rule.adoc[comparison rule]
+* `elementsNumber` - expected elements number
+
+.Number of account lists in JSON is equal to 2
+[source,gherkin]
+----
+Then number of JSON elements by JSON path `$.accountList` is equal to 2
+----
+
+=== Verify number of elements in JSON
+
+[WARNING]
+====
+The step xref:plugins:plugin-json.adoc#_validate_number_of_json_elements[is moved]
+to `vividus-plugin-json`. The step is still available via `vividus-plugin-rest-api`,
+but it'll be required to install `vividus-plugin-json` explicitly starting from VIVIDUS 0.6.0.
+====
+
+=== Save element from context
+
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0. The replacement is
+the combination of the xref:plugins:plugin-json.adoc#_json_context[dynamic variable] and the
+xref:plugins:plugin-json.adoc#_save_json_element[step saving JSON element from the input].
+The replacement pattern is:
+[source,gherkin]
+----
+When I save JSON element from `${json-context}` by JSON path `<jsonPath>` to <scopes> variable `<variableName>`
+----
+====
+
+Saves value extracted from the JSON context into a variable with specified name
+
+[source,gherkin]
+----
+When I save JSON element from context by JSON path `$jsonPath` to $scopes variable `$variableName`
+----
+
+* `jsonPath` - {json-path}
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - the variable name
+
+.Save accountId element from JSON context
+[source,gherkin]
+----
+When I save JSON element from context by JSON path `$.accountId` to SCENARIO variable `account-id`
+----
+
+=== Save element from JSON
+
+[WARNING]
+====
+The step xref:plugins:plugin-json.adoc#_save_json_element[is moved] to `vividus-plugin-json`.
+The step is still available via `vividus-plugin-rest-api`, but it'll be required
+to install `vividus-plugin-json` explicitly starting from VIVIDUS 0.6.0.
+====
+
+=== Save number of elements in context
+
+[WARNING]
+====
+The step is deprecated and will be removed in VIVIDUS 0.6.0. The replacement is
+the combination of the xref:plugins:plugin-json.adoc#_json_context[dynamic variable] and the
+xref:plugins:plugin-json.adoc#_save_number_of_json_elements[step saving the number of JSON elements from the input].
+The replacement pattern is:
+[source,gherkin]
+----
+When I save number of elements from `${json-context}` found by JSON path `<jsonPath>` to <scopes> variable `<variableName>`
+----
+====
+
+Saves number of elements found in the JSON context by JSON path into a variable
+
+[source,gherkin]
+----
+When I set number of elements found by JSON path `$jsonPath` to $scopes variable `$variableName`
+----
+
+* `jsonPath` - {json-path}
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - the variable name
+
+.Save number of id elements
+[source,gherkin]
+----
+When I set number of elements found by JSON path `$..id` to scenario variable `idsCount`
+----
+
+=== Save number of elements from JSON
+
+[WARNING]
+====
+The step xref:plugins:plugin-json.adoc#_save_number_of_json_elements[is moved] to `vividus-plugin-json`.
+The step is still available via `vividus-plugin-rest-api`, but it'll be required
+to install `vividus-plugin-json` explicitly starting from VIVIDUS 0.6.0.
+====

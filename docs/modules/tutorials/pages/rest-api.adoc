@@ -1,0 +1,128 @@
+= REST API Plugin
+
+The plugin provides the following abilities:
+
+* build and send HTTP requests
+* validate HTTP responses (headers, status code, body)
+* validate JSON content of HTTP response bodies
+
+:plugin-short-name: rest-api
+include::plugins:partial$plugin-installation.adoc[]
+
+== Properties
+
+We have an ability to configure all our needed properties and configurations for REST API testing in our project.
+
+Lets look at configurations we have for OUR REST plugin
+
+include::plugins:partial$plugin-rest-api-properties.adoc[]
+
+Lets configure them in our configuration.properties files
+
+.Properties
+ [source,gherkin]
+ ----
+ rest-api.http.endpoint=https://google.com
+ rest-api.http.header.Content-Length=500
+ rest-api.http.header.Content-Encoding=UTF-8
+ ----
+
+So now all our request will go to google.com as a base URL and to all our request will be added two header Content-Length and Content-Encoding with our specified values.
+
+See xref:ROOT:tests-configuration.adoc#_http_configuration[HTTP configuration] for more fine-grained control over the HTTP interactions.
+
+== HTTP Steps
+
+In order to create simple http request to resource we need to do the following simple steps:
+1.	Set header this which we are going to perform our request
+2.	Set URL to specify the resource we are going to query
+3.	Verify our expected result
+
+Lets start with Headers to define headers we are going to use we need set them first. To do this we need to use the step:
+
+=== Add HTTP headers to the request
+
+include::plugins:partial$plugin-rest-api-add-http-headers-to-request.adoc[]
+
+NOTE: For more ways to configure request, please see:
+xref:plugins:plugin-rest-api.adoc#_set_http_request_configuration[Set HTTP request configuration].
+xref:plugins:plugin-rest-api.adoc#_set_http_request_body[Set HTTP request body].
+xref:plugins:plugin-rest-api.adoc#_prepare_multipart_http_request[Prepare multipart HTTP request].
+xref:plugins:plugin-rest-api.adoc#_set_form_data_http_request[Set form data HTTP request].
+
+The next steps is to specify resource we are going to query and http method we are going to use. To do this we should use the following step:
+
+=== Execute HTTP request with absolute URL
+
+include::plugins:partial$plugin-rest-api-execute-http-request-with-absolute-url-step.adoc[]
+
+NOTE: For more ways to execute request, please see:
+xref:plugins:plugin-rest-api.adoc#_execute_http_request_with_relative_url[Execute HTTP request with relative URL].
+
+The last thing we need to do is to perform some checks. Let's perform for example Response code check to do this we need to use step:
+
+=== Validate HTTP response code
+
+include::plugins:partial$plugin-rest-api-validate-http-response-code-step.adoc[]
+
+NOTE: For more ways to validate response, save header values and validate connection security, please see:
+xref:plugins:plugin-rest-api.adoc#_compare_http_response_body_against_resource[Compare HTTP response body against resource].
+xref:plugins:plugin-rest-api.adoc#_validate_http_response_time[Validate HTTP response time].
+xref:plugins:plugin-rest-api.adoc#_valdate_number_of_http_response_headers[Valdate number of HTTP response headers].
+xref:plugins:plugin-rest-api.adoc#_validate_http_response_header_value[Validate HTTP response header value].
+xref:plugins:plugin-rest-api.adoc#_validate_http_response_header_elements[Validate HTTP response header elements].
+xref:plugins:plugin-rest-api.adoc#_validate_http_response_header_elements[Validate HTTP response header elements].
+xref:plugins:plugin-rest-api.adoc#_save_http_response_header_value[Save HTTP response header value].
+xref:plugins:plugin-rest-api.adoc#_validate_http_resources[Validate HTTP resources].
+
+In case we want to verify the size of returned response in bytes we should use step:
+
+=== Validate size of response body
+
+include::plugins:partial$plugin-rest-api-validate-size-of-response-body-step.adoc[]
+
+NOTE: Apart of size there is also opportunities to validate response, please see
+xref:plugins:plugin-rest-api.adoc#_validate_content_type_of_response_body[Validate content type of response body].
+xref:plugins:plugin-rest-api.adoc#_validate_absence_of_response_body[Validate absence of response body].
+
+In case we want to verify any protocols used by server we can use following step
+
+=== Validate secure protocols supported by server
+
+include::plugins:partial$plugin-rest-api-validate-secure-protocols-supported-by-server-step.adoc[]
+
+NOTE: Also there is an ability to check connection security, please see xref:plugins:plugin-rest-api.adoc#_validate_connection_security[Validate connection security].
+
+Waiting steps are designed to add tester an ability to wait for some time  during tests execution, it can be needed for example in case data creation in DB is taking for a long time or for verifying some periodical actions or cache.
+In total there are 3 steps with such an abilities:
+
+include::plugins:partial$plugin-rest-api-waiting-steps.adoc[]
+
+== JSON Steps
+
+:json-path: https://github.com/json-path/JsonPath#path-examples[JSON Path]
+:json-unit-options: https://github.com/lukas-krecan/JsonUnit/blob/master/README.md#options[options]
+
+In general JSON steps are used to verify content and data of JSONs which are actually air REST responses. That’s why the checks are developed with groups of verifications the actual response body which is named “Context”.
+
+Context is the last response body saved by VIVIDUS, which is currently in our context.
+
+Some JSON which can be previously saved response in JSON format, which can be obtained via following step:
+
+[source,gherkin]
+ ----
+ When I initialize variable with value ${response}
+ ----
+
+Or any other JSON generated or obtained by us previously.It can be done by saving our JSON to particular variable, generated JSON via any template or resource or simply using ${response}.
+
+include::plugins:partial$plugin-rest-api-json-steps.adoc[]
+
+== HTTP cookie steps
+
+Cookie steps allow user to interact with HTTP cookies for test needs.
+VIVIDUS allowes following steps to work with:
+
+include::plugins:partial$plugin-rest-api-cookie-steps.adoc[]
+
+NOTE: In order to work with HTTP requests and responses different xref:plugins:plugin-rest-api.adoc#_expressions[Expressions], xref:plugins:plugin-rest-api.adoc#_dynamic_variables[Dynamic variables] and xref:plugins:plugin-rest-api.adoc#_table_transformers[Table Transformers] could be used.

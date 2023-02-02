@@ -1,0 +1,18 @@
+Adds https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields[HTTP headers] to the HTTP request.
+
+[source,gherkin]
+----
+When I add request headers:$headers
+----
+
+* `headers` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing the list of the headers with columns `name` and `value` specifying HTTP header
+
+.Add request header with name Accept-Language and value en-ru
+[source,gherkin]
+----
+When I add request headers:
+|name           |value |
+|Accept-Language|en-ru |
+When I send HTTP GET to the relative URL '/get?name=Content'
+Then a JSON element by the JSON path '$.headers.Accept-Language' is equal to '"en-ru"'
+----

@@ -1,0 +1,17 @@
+Executes the HTTP request for a resource identified by the absolute URL. The step uses previously set HTTP headers
+and request body. The HTTP response headers, status code and body can be accessed by the corresponding steps and
+dynamic variables.
+
+[source,gherkin]
+----
+When I execute HTTP $httpMethod request for resource with URL `$url`
+----
+
+* `$httpMethod` - The https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods[HTTP method].
+* `$url` - The URL of the resource on the server.
+
+.Execute HTTP GET request
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://example.com`
+----

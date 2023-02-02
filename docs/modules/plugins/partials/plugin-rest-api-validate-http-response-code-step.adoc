@@ -1,0 +1,16 @@
+Compares the {http-status-code} against the expected number.
+
+[source,gherkin]
+----
+Then response code is $comparisonRule `$responseCode`
+----
+
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$responseCode` - The expected {http-status-code}.
+
+.Validate the resource is not found
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/cfa2fdbc`
+Then response code is equal to `404`
+----

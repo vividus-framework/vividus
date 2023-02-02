@@ -1,0 +1,16 @@
+Checks that a server defined by the `hostname` supports secure protocols listed in the `protocols` parameter.
+
+[source,gherkin]
+----
+Then server `$hostname` supports secure protocols that $rule `$protocols`
+----
+
+* `$hostname` - the server hostname
+* `$rule` - xref:parameters:collection-comparison-rule.adoc[the collection comparison rule]
+* `$protocols` - the secure protocols that are expected to match specified `$rule`
+
+.Validate the server supports TLSv1.2 and TLSv1.3 protocols
+[source,gherkin]
+----
+Then server `vividus-test-site.onrender.com` supports secure protocols that contain `TLSv1.2,TLSv1.3`
+----
