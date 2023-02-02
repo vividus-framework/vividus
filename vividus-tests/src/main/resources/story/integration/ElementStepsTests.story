@@ -34,7 +34,7 @@ Then each element with locator `tagName(select)` has `3` child elements with loc
 Scenario: Step verification When I hover a mouse over an element located '$locator'
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
 When I hover mouse over element located `xpath(//div[contains(., 'Mouse enter!')])`
-Then the text 'Mouse enter count: 1' exists
+Then text `Mouse enter count: 1` exists
 
 Scenario: Step verification When I click on an element '$searchAttributes' then the page does not refresh
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
@@ -68,7 +68,7 @@ Scenario: Step verification When I select an element '$locator' and upload the f
 Given I am on page with URL `http://demo.guru99.com/test/upload/`
 When I select element located `By.id(uploadfile_0)` and upload file `/data/file_for_upload_step.png`
 When I click on element located by `name(send)`
-Then the text 'has been successfully uploaded' exists
+Then text `has been successfully uploaded` exists
 
 Scenario: Should not fail click step when element in Cross-Origin frame
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
@@ -81,7 +81,7 @@ Scenario: Step verification When I enter `$text` in field located `$locator` usi
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
 Given I initialize scenario variable `text` with value `#{generate(regexify '[a-z]{15}')}`
 When I enter `${text}` in field located `By.id(text)` using keyboard
-Then the text '${text}' exists
+Then text `${text}` exists
 
 Scenario: Step verification Then an element with the name '$elementName' containing text '$text' exists
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
@@ -178,7 +178,7 @@ When I wait until element located by `id(element-to-hide)` disappears
 Scenario: Step verification When I hover a mouse over an element with the xpath '$xpath'
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
 When I hover a mouse over an element with the xpath './/div[contains(., 'Mouse enter!')]'
-Then the text 'Mouse enter count: 1' exists
+Then text `Mouse enter count: 1` exists
 
 Scenario: Step verification When I perform right click on an element by the xpath '$xpath'
 !-- Deprecated

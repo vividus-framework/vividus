@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,15 @@ public interface IBaseValidations
      */
     Optional<WebElement> assertElementExists(String description, SearchContext searchContext, Locator locator);
 
+    /**
+     * Asserts that an element located by the <b>locator</b> does not exists
+     *
+     * @param description The description of the element being validated, must not be {@code null}.
+     * @param locator     The locator to find element, must not be {@code null}.
+     * @return true if element doesn't and false otherwise.
+     */
+    boolean assertElementDoesNotExist(String description, Locator locator);
+
     WebElement assertIfElementExists(String businessDescription, SearchContext searchContext, Locator locator);
 
     List<WebElement> assertIfElementsExist(String businessDescription, Locator locator);
@@ -111,5 +120,14 @@ public interface IBaseValidations
 
     List<WebElement> assertIfAtLeastNumberOfElementsExist(String businessDescription, Locator locator, int leastNumber);
 
+    /**
+     * Asserts that an element located by the <b>locator</b> does not exist
+     *
+     * @param businessDescription The description of the element being validated, must not be {@code null}.
+     * @param locator     The locator to find element, must not be {@code null}.
+     * @return true if element does not exist and false otherwise.
+     * @deprecated Use {@link #assertElementDoesNotExist(String, Locator)}
+     */
+    @Deprecated(since = "0.5.4", forRemoval = true)
     boolean assertIfElementDoesNotExist(String businessDescription, Locator locator);
 }

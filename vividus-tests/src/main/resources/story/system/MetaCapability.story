@@ -4,4 +4,4 @@ Meta:
 
 Scenario: Browser should correspond options set in meta
 Given I am on page with URL `https://www.whatismybrowser.com`
-Then the text 'Internet Explorer 11' exists
+Then text `Internet Explorer 11` exists
