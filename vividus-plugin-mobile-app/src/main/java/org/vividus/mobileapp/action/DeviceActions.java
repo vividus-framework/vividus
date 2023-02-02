@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.openqa.selenium.ScreenOrientation;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.session.WebDriverSessionAttributes;
 import org.vividus.selenium.session.WebDriverSessionInfo;
-import org.vividus.util.ResourceUtils;
 
 import io.appium.java_client.PushesFiles;
 import io.appium.java_client.remote.SupportsRotation;
@@ -41,15 +40,13 @@ public class DeviceActions
     }
 
     /**
-     * Pushes a <b>resource</b> onto a device at the <b>deviceFilePath</b> path
-     * @param deviceFilePath destination file path on a device
-     * @param resource resource to push
+     * Pushes a file to the device.
+     * @param deviceFilePath The destination file path on a device.
+     * @param content The content of the file to be pushed.
      */
-    public void pushFile(String deviceFilePath, String resource)
+    public void pushFile(String deviceFilePath, byte[] content)
     {
-        byte[] fileBytes = ResourceUtils.loadResourceAsByteArray(getClass(), resource);
-        byte[] base64Bytes = Base64.getEncoder().encode(fileBytes);
-
+        byte[] base64Bytes = Base64.getEncoder().encode(content);
         webDriverProvider.getUnwrapped(PushesFiles.class).pushFile(deviceFilePath, base64Bytes);
     }
 

@@ -1,0 +1,2 @@
+[NOTE]
+The destination folder on the device for the uploaded file is configured by `mobile-environment.device.folder-for-file-upload` property. See more information in the <<mobile_properties,properties section.>>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import org.openqa.selenium.ScreenOrientation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.mobileapp.action.DeviceActions;
+import org.vividus.steps.DataWrapper;
+import org.vividus.util.ResourceUtils;
 
 public class DeviceSteps
 {
@@ -47,10 +49,23 @@ public class DeviceSteps
     {
         LOGGER.atInfo().addArgument(filePath)
                        .addArgument(folderForFileUpload)
-                       .log("Uploading file '{}' to a device at '{}' folder");
+                       .log("Uploading file '{}' from resources to a device at '{}' folder");
 
         String fileName = FilenameUtils.getName(filePath);
-        deviceActions.pushFile(Paths.get(folderForFileUpload, fileName).toString(), filePath);
+        byte[] fileBytes = ResourceUtils.loadResourceAsByteArray(getClass(), filePath);
+        uploadFileToDevice(fileName, fileBytes);
+    }
+
+    /**
+     * Upload the file with data to the device.
+     * @param data The data to store as a file.
+     * @param fileName The name of the uploaded file.
+     */
+    @When("I upload file with name `$fileName` and data `$data` to device")
+    public void uploadFileToDevice(String fileName, DataWrapper data)
+    {
+        LOGGER.info("Uploading file with name `{}` to the device at '{}' folder", fileName, folderForFileUpload);
+        uploadFileToDevice(fileName, data.getBytes());
     }
 
     /**
@@ -82,5 +97,11 @@ public class DeviceSteps
     public void changeDeviceScreenOrientation(ScreenOrientation orientation)
     {
         deviceActions.rotate(orientation);
+    }
+
+    private void uploadFileToDevice(String fileName, byte[] data)
+    {
+        String deviceFilePath = Paths.get(folderForFileUpload, fileName).toString();
+        deviceActions.pushFile(deviceFilePath, data);
     }
 }
