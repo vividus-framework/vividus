@@ -1140,5 +1140,5 @@ subsequent HTTP call rewrites previously received response data.
 [source,gherkin]
 ----
 When I execute HTTP GET request for resource with URL `https://httpbin.org/json`
-When I initialize the scenario variable `json` with value `${response}`
+Given I initialize scenario variable `json` with value `${response}`
 ----
