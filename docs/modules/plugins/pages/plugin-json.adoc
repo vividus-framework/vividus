@@ -37,7 +37,7 @@ The steps syntax uses two internal (VIVIDUS-only) terms:
    `string` _not wrapped_ into double quotes, `number`, `boolean`
    (`true` or `false`) and `null`.
 
-TIP: Use https://jsonpath.onrender.com/[Jsonpath online validtor] to test your JsonPath.
+TIP: Use https://jsonpath.onrender.com/[JsonPath online validator] to test your JsonPath.
 
 === Save JSON element value from context
 
