@@ -2,7 +2,7 @@ project.description = 'VIVIDUS plugin for CSV'
 
 dependencies {
     api project(':vividus-engine')
-    api(group: 'org.apache.commons', name: 'commons-csv', version: '1.9.0')
+    api(group: 'org.apache.commons', name: 'commons-csv', version: '1.10.0')
     implementation project(':vividus-util')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.2')
