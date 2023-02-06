@@ -24,14 +24,14 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-db', version: '{curre
 +
 - Open JDBC page on https://mvnrepository.com/open-source/jdbc-drivers[maven repository];
 - Find driver for your database and open details (https://mvnrepository.com/artifact/org.postgresql/postgresql[PostgreSQL JDBC Driver]);
-- Choose and open version (https://mvnrepository.com/artifact/org.postgresql/postgresql/42.4.0[42.4.0]);
+- Choose and open version (https://mvnrepository.com/artifact/org.postgresql/postgresql/42.5.3[42.5.3]);
 - Go to the Gradle tab and copy implementation string;
 - Paste chosen dependency into your build.gradle file:
 +
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.postgresql', name: 'postgresql', version: '42.4.0')
+implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.3')
 ----
 +
 NOTE: In case Maven repository does not contain driver you need, please refer to the documentation of your database to define suitable JDBC driver.
@@ -151,7 +151,7 @@ jdbc:sqlserver://serverName:portNumber;parameter1=value1;parameter2=value2
 .build.gradle
 [source,gradle]
 ----
-implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.1')
+implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.3')
 ----
 
 .environment.properties
