@@ -168,7 +168,7 @@ Reference to uninitialized variable can be resolved to default value using the o
 .Examples of using default values
 [cols="1,2,2", options="header"]
 |===
-|reference
+|Reference to resolve
 |variable value
 |output
 
