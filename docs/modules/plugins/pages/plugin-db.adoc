@@ -103,7 +103,7 @@ jdbc:mysql://host:port/database?parameters
 .build.gradle
 [source,gradle]
 ----
-implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.1.0.jre11-preview')
+implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.2.0.jre11')
 ----
 
 .environment.properties
