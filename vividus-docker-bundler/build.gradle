@@ -1,5 +1,5 @@
 plugins {
-    id 'com.bmuschko.docker-remote-api' version '9.1.0'
+    id 'com.bmuschko.docker-remote-api' version '9.2.0'
 }
 
 project.description = 'VIVIDUS Docker bundler'
@@ -59,12 +59,12 @@ dependencies {
 
     implementation(group: 'com.mysql', name: 'mysql-connector-j', version: '8.0.32')
     implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.2.0.jre11')
-    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.1')
+    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.3')
     implementation(group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.17.0.0')
     implementation(group: 'com.ibm.db2.jcc', name: 'db2jcc', version: 'db2jcc4')
     implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.40')
     implementation(group: 'com.h2database', name: 'h2', version: '2.1.214')
-    implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.13.26')
+    implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.13.27')
 }
 
 task copyRuntimeLibs(type: Copy) {
