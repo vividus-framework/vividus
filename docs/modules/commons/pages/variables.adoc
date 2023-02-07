@@ -169,7 +169,7 @@ Reference to uninitialized variable can be resolved to default value using the o
 [cols="1,2,2", options="header"]
 |===
 |Reference to resolve
-|variable value
+|Variable value
 |output
 
 |`${var:default}`
