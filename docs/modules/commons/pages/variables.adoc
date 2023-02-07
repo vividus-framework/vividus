@@ -170,7 +170,7 @@ Reference to uninitialized variable can be resolved to default value using the o
 |===
 |Reference to resolve
 |Variable value
-|output
+|Output
 
 |`${var:default}`
 |`value`
