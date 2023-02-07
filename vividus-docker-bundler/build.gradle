@@ -59,7 +59,7 @@ dependencies {
 
     implementation(group: 'com.mysql', name: 'mysql-connector-j', version: '8.0.32')
     implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.1.0.jre11-preview')
-    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.1')
+    implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.3')
     implementation(group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.17.0.0')
     implementation(group: 'com.ibm.db2.jcc', name: 'db2jcc', version: 'db2jcc4')
     implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.40')
