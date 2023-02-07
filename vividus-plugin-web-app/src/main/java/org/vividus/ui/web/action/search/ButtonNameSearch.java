@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.vividus.ui.util.XpathLocatorUtils;
 public class ButtonNameSearch extends AbstractWebElementSearchAction implements IElementSearchAction
 {
     private static final String BUTTON_WITH_ANY_ATTRIBUTE_NAME_PATTERN = "*[(local-name()='button' and "
-            + "(@*=%1$s or text()=%1$s)) or (local-name()='input' and ((@type='submit' or @type='button') and "
-            + "(@*=%1$s or text()=%1$s)))]";
+            + "(@*=%1$s or .=%1$s)) or (local-name()='input' and ((@type='submit' or @type='button') and "
+            + "(@*=%1$s or .=%1$s)))]";
 
     public ButtonNameSearch()
     {
