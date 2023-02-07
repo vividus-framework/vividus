@@ -160,3 +160,62 @@ Then `${var}` is equal to `story`
 ----
 
 `var` variable will be resolved to value `scenario` at the validation point in the first scenario, but it will be resolved to value `story` in the second scenario.
+
+=== Default values
+
+Variable reference can be set to default value using the operator `:` (colon). This value will be used if the variable is uninitialized.
+
+.Examples of using default values
+[cols="1,2,2", options="header"]
+|===
+|reference
+|variable value
+|output
+
+|`${var:default}`
+|`value`
+|value
+
+|`${var:default}`
+|`<uninitialized>`
+|default
+
+|`${var:}`
+|`<uninitialized>`
+|<empty string>
+
+|`${var:default:with:colons}`
+|`<uninitialized>`
+|default:with:colons
+
+|`${var[0]:default}`
+|`<uninitialized>`
+|default
+
+|`${var[0].key:default}`
+|`<uninitialized>`
+|default
+
+|`${var:#{generate(DungeonsAndDragons.alignments)}}`
+|`<uninitialized>`
+|Chaotic Evil
+
+|`${var:${var1}}`
+|var - `<uninitialized>`, var1 - `value`
+|value
+
+|`${var:${var1:}}`
+|var - `<uninitialized>`, var1 - `<uninitialized>`
+|<empty string>
+
+|===
+
+.Open either user specified page or default page
+[source,gherkin]
+----
+Scenario: Open page to be checked
+Given I am on main application page
+When the condition `#{eval(`${optionalPathToCheck:/defaultPath}` != `/forbiddenPath`)}` is true I do
+|step                                                                |
+|When I go to the relative URL '${optionalPathToCheck:/defaultPath}' |
+----
