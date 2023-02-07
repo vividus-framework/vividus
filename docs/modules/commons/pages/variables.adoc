@@ -163,7 +163,7 @@ Then `${var}` is equal to `story`
 
 === Default values
 
-Variable reference can be set to default value using the operator `:` (colon). This value will be used if the variable is uninitialized.
+Reference to uninitialized variable can be resolved to default value using the operator `:` (colon).
 
 .Examples of using default values
 [cols="1,2,2", options="header"]
