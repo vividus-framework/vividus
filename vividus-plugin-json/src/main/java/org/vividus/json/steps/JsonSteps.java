@@ -145,9 +145,9 @@ public class JsonSteps
 
     /**
      * Converts JSON element into the variable with the specified name and scope.
-     * JSON fields will be available via their names.<br/>
-     * For example:<br/>
-     * <b>JSON:</b><br/>
+     * JSON fields will be available via their names.<br>
+     * For example:<br>
+     * <b>JSON:</b><br>
      * <pre>
      * {
      *   "book":[
@@ -158,7 +158,7 @@ public class JsonSteps
      *   ]
      * }
      * </pre>
-     * <br/>
+     * <br>
      * <b>Reference to a variable:</b>
      * <pre><b>${json.books[0].title}</b></pre>
      *
@@ -260,7 +260,7 @@ public class JsonSteps
      * </ul>
      * Usage example:
      * <pre>
-     * When I find > `1` JSON elements in `${json}` by `$.store.book` and until variable `title` matches `M.+`
+     * When I find &gt; `1` JSON elements in `${json}` by `$.store.book` and until variable `title` matches `M.+`
      * for each element I do:
      * |step|
      * |When I save JSON element value from context by JSON path `$.title` to scenario variable `title`|
