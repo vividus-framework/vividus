@@ -1,8 +1,11 @@
+plugins {
+  id 'org.sonarqube' version '3.5.0.2730'
+}
+
 ext.buildSystemDir = file("${System.env.VIVIDUS_BUILD_SYSTEM_HOME?:buildSystemRootDir}/${buildSystemVersion}")
 ext.gradleScriptDir =  new File(ext.buildSystemDir, 'gradle')
 apply from: "${gradleScriptDir}/project.gradle"
 apply from: "${gradleScriptDir}/jacoco.gradle"
-apply from: "${gradleScriptDir}/sonarqube.gradle"
 
 subprojects {
     dependencies {
@@ -36,6 +39,7 @@ configure([project(':vividus-tests'), project(':vividus-docker-bundler')]) {
 def nonTestSubprojects = subprojects.findAll { !it.name.equals('vividus-tests') && !it.name.equals('vividus-docker-bundler') }
 configure(nonTestSubprojects) {
     apply from: "${buildSystemDir}/vividus-library-subproject.gradle"
+    sourceCompatibility = JavaVersion.VERSION_11
 
     publishing {
         repositories {
