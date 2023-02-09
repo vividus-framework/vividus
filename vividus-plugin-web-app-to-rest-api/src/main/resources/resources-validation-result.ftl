@@ -64,7 +64,12 @@
             <#assign checkStatus = result.checkStatus>
                 <tr class="${checkStatus?lower_case}">
                     <td>
-                        ${(result.uri)!"N/A"}
+                        <#if result.uri??>
+                            <#assign uri = result.uri>
+                            <a class="link" target="_blank" href="${uri}">${uri}</a>
+                        <#else>
+                            N/A
+                        </#if>
                     </td>
                     <td>
                         ${result.cssSelector}
@@ -76,7 +81,12 @@
                         ${result.statusCode}
                     </td>
                     <td>
-                        ${result.pageURL}
+                        <#assign pageURL = result.pageURL>
+                        <#if pageURL != 'N/A'>
+                            <a class="link" target="_blank" href="${pageURL}">${pageURL}</a>
+                        <#else>
+                            ${pageURL}
+                        </#if>
                     </td>
                 </tr>
                 </#list>
