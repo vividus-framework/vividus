@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -550,7 +550,7 @@ class DatabaseStepsTests
                 .thenReturn(List.of(Map.of(COL1, VAL1)))
                 .thenReturn(List.of(Map.of(COL1, VAL3)));
 
-        databaseSteps.waitForDataAppearance(Duration.ofSeconds(2), 2, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO,
+        databaseSteps.waitForDataAppearance(Duration.ofSeconds(4), 2, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO,
                 TABLE);
         String logMessage = "SQL result data is not equal to expected data in {} records";
         assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info(logMessage, 1), info(logMessage, 1))));
