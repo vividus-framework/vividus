@@ -109,7 +109,7 @@ implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '1
 .environment.properties
 [source,properties]
 ----
-db.connection.vividus.url=jdbc:sqlserver://mssql.db.server:1433\mssql_instance;databaseName=my_database
+db.connection.vividus.url=jdbc:sqlserver://;serverName=mssql.db.server;databaseName=my_database;encrypt=true;trustServerCertificate=true
 db.connection.vividus.username=vividus
 db.connection.vividus.password=pa$$w0rd
 ----
@@ -117,7 +117,7 @@ db.connection.vividus.password=pa$$w0rd
 .https://docs.microsoft.com/en-us/sql/connect/jdbc/building-the-connection-url[URL template]
 [source,properties]
 ----
-jdbc:sqlserver://serverName\instanceName:portNumber;parameter1=value1;parameter2=value2
+jdbc:sqlserver://;servername=server_name;encrypt=true;integratedSecurity=true;parameter1=value1;parameter2=value2
 ----
 ====
 
