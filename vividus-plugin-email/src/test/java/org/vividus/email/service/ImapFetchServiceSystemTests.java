@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,6 @@ class ImapFetchServiceSystemTests
         mailServer = new GreenMail(new ServerSetup[] { smtpsSetup, imapsSetup });
         mailServer.start();
         mailUser = mailServer.setUser(USERNAME_ADDR, USER_LOGIN, USER_PASS);
-        mailUser.create();
     }
 
     @AfterAll
