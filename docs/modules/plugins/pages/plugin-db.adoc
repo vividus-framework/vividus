@@ -106,13 +106,25 @@ jdbc:mysql://host:port/database?parameters
 implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.2.0.jre11')
 ----
 
-.environment.properties
+.`environment.properties` to connect using port number
 [source,properties]
 ----
-db.connection.vividus.url=jdbc:sqlserver://mssql.db.server:1433\mssql_instance;databaseName=my_database
+db.connection.vividus.url=jdbc:sqlserver://mssql.db.server:1433;databaseName=my_database
 db.connection.vividus.username=vividus
 db.connection.vividus.password=pa$$w0rd
 ----
+
+.`environment.properties` to connect using instance name
+[source,properties]
+----
+db.connection.vividus.url=jdbc:sqlserver://mssql.db.server\\mssql_instance;databaseName=my_database
+db.connection.vividus.username=vividus
+db.connection.vividus.password=pa$$w0rd
+----
+
+[NOTE]
+Pay attenttion to `\\` before instance name: it's required because `\` is a special char in properties-files
+and thus meaningful backward slash should be additionally escaped: `\\` will result in `\`.
 
 .https://docs.microsoft.com/en-us/sql/connect/jdbc/building-the-connection-url[URL template]
 [source,properties]
