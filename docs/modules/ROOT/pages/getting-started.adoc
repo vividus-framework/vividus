@@ -58,6 +58,8 @@ gradlew build
 
 == Use IDE for the tests development
 
+Please choose any of the listed below IDEs.
+
 === Eclipse
 
 ==== Prerequisites
@@ -83,6 +85,27 @@ gradlew eclipse
 
 . https://help.eclipse.org/2022-03/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-importproject.htm[Import the project to Eclipse]
 . Start creating your tests
+
+=== Visual Studio Code
+
+==== Prerequisites
+
+. Install https://code.visualstudio.com[Visual Studio Code].
+. Install https://marketplace.visualstudio.com/items?itemName=vividus.vividus-studio[VIVIDUS Studio Extension].
+
+==== Open the project in Visual Studio Code
+
+. Open Visual Studio Code.
+. Click menu:File[Open...].
+. Open a folder with a VIVIDUS project.
+. Wait until the message `Project with the name '...' is loaded` appears.
+. Start creating your tests.
+
+==== Execute tests
+
+. Open https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette[Command Palette] by clicking menu:View[Command Palette...].
+. Type `VIVIDUS: Run Stories` in the search bar and select matched command.
+. Find the tests execution progress logged in the `Output` console (if it's closed open it by clicking menu:View[Output]).
 
 ## Execute the tests via CLI
 . Execute your tests via Gradle:
