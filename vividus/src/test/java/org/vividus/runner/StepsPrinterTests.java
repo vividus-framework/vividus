@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,13 +42,13 @@ import org.mockito.MockedStatic;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
-class BddStepPrinterTests
+class StepsPrinterTests
 {
     @Test
     @StdIo
     void testPrintHelp(StdOut stdOut) throws IOException, ParseException
     {
-        BddStepPrinter.main(new String[] {"-h"});
+        StepsPrinter.main(new String[] {"-h"});
         assertThat(stdOut.capturedLines(), arrayContaining(
                 "usage: StepPrinter",
                 " -f,--file <arg>   Name of file to save steps",
@@ -63,7 +63,7 @@ class BddStepPrinterTests
         try (var vividus = mockStatic(Vividus.class); var beanFactory = mockStatic(BeanFactory.class))
         {
             var expectedOutput = mockStepCandidates(beanFactory);
-            BddStepPrinter.main(new String[0]);
+            StepsPrinter.main(new String[0]);
             assertThat(stdOut.capturedLines(), arrayContaining(expectedOutput.toArray(new String[0])));
             vividus.verify(Vividus::init);
         }
@@ -79,7 +79,7 @@ class BddStepPrinterTests
         {
             var expectedOutput = mockStepCandidates(beanFactory);
             var filePath = "mocked" + File.separator + "file";
-            BddStepPrinter.main(new String[] {"-f", filePath});
+            StepsPrinter.main(new String[] {"-f", filePath});
             var file = Paths.get(filePath);
             assertThat(stdOut.capturedLines(), arrayContaining("File with steps: " + file.toAbsolutePath()));
             vividus.verify(Vividus::init);
