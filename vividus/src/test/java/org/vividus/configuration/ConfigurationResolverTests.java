@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,6 +92,11 @@ class ConfigurationResolverTests
     private static final String EMPTY_STRING = "";
     private static final String NOSECURITY = "nosecurity";
     private static final String PROPERTY_8 = "property8";
+    private static final String CONFIGURATION_SET_PROPERTY_KEY = "configuration-set.active";
+    private static final String PLACEHOLDER_PREFIX = "${";
+    private static final String PLACEHOLDER_SUFFIX = "}";
+    private static final String SET = "set";
+    private static final String CONFIGURATION_PROPERTIES = "configuration.properties";
 
     @Mock private ResourcePatternResolver resourcePatternResolver;
 
@@ -103,7 +108,7 @@ class ConfigurationResolverTests
     {
         try (var beanFactory = mockStatic(BeanFactory.class);
              var newDeprecatedPropertiesHandler = mockConstruction(DeprecatedPropertiesHandler.class,
-                 withSettings().useConstructor(new Properties(), "${", "}"));
+                 withSettings().useConstructor(new Properties(), PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX));
              var newPropertiesLoaders = mockConstruction(PropertiesLoader.class,
                  withSettings().useConstructor(resourcePatternResolver), (mock, context) -> {
                      when(mock.loadConfigurationProperties()).thenReturn(toProperties(
@@ -180,7 +185,7 @@ class ConfigurationResolverTests
             ordered.verify(propertiesLoader).loadDefaultProperties(UTIL_DEFAULT);
             ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(true, DEFAULTS);
             var resource = mock(Resource.class);
-            when(resource.getFilename()).thenReturn("configuration.properties");
+            when(resource.getFilename()).thenReturn(CONFIGURATION_PROPERTIES);
             ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(eq(true),
                 argThat((ArgumentMatcher<Predicate<Resource>>) argument -> !argument.test(resource)), eq(EMPTY_STRING));
             ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(true, PROFILE, NOSECURITY);
@@ -218,6 +223,129 @@ class ConfigurationResolverTests
             ConfigurationResolver.reset();
             var ise = assertThrows(IllegalStateException.class, configurationResolver::getProperties);
             assertEquals("ConfigurationResolver has not been initialized after the reset", ise.getMessage());
+        }
+    }
+
+    @Test
+    void shouldUseConfigurationSet() throws IOException
+    {
+        try (var beanFactory = mockStatic(BeanFactory.class);
+                var newDeprecatedPropertiesHandler = mockConstruction(DeprecatedPropertiesHandler.class,
+                        withSettings().useConstructor(new Properties(), PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX));
+                var newPropertiesLoaders = mockConstruction(PropertiesLoader.class,
+                        withSettings().useConstructor(resourcePatternResolver), (mock, context) -> {
+                            var emptyProperties = toProperties(Map.of());
+                            when(mock.loadConfigurationProperties()).thenReturn(toProperties(
+                                    Map.of(CONFIGURATION_PROFILES, ACTIVE_PROFILES,
+                                            CONFIGURATION_ENVIRONMENTS, UAT,
+                                            CONFIGURATION_SUITES, "regression")));
+
+                            when(mock.loadOverridingProperties()).thenReturn(toProperties(
+                                    Map.of(CONFIGURATION_SET_PROPERTY_KEY, "test",
+                                            "configuration-set.test.profiles", SET,
+                                            "configuration-set.test.suites", SET,
+                                            "configuration-set.test.environments", SET)));
+
+                            when(mock.loadDefaultProperties(HTTP_CLIENT_DEFAULT)).thenReturn(emptyProperties);
+
+                            when(mock.loadDefaultProperties(UTIL_DEFAULT)).thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(true, DEFAULTS)).thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(eq(true), any(Predicate.class),
+                                    eq(EMPTY_STRING))).thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(true, PROFILE, SET))
+                                    .thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(true, ENVIRONMENT, SET))
+                                    .thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(true, SUITE, SET))
+                                    .thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(false, DEPRECATED)).thenReturn(new Properties());
+                        }))
+        {
+            beanFactory.when(BeanFactory::getResourcePatternResolver).thenReturn(resourcePatternResolver);
+            ConfigurationResolver.getInstance();
+            var propertiesLoader = verifySingeConstruction(newPropertiesLoaders);
+            var deprecatedPropertiesHandler = verifySingeConstruction(newDeprecatedPropertiesHandler);
+            var ordered = Mockito.inOrder(propertiesLoader, deprecatedPropertiesHandler);
+            ordered.verify(propertiesLoader).loadConfigurationProperties();
+            ordered.verify(propertiesLoader).loadOverridingProperties();
+            ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(false, DEPRECATED);
+            ordered.verify(propertiesLoader).prohibitConfigurationProperties();
+            ordered.verify(propertiesLoader).loadDefaultProperties(HTTP_CLIENT_DEFAULT);
+            ordered.verify(propertiesLoader).loadDefaultProperties(UTIL_DEFAULT);
+            ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(true, DEFAULTS);
+            var resource = mock(Resource.class);
+            when(resource.getFilename()).thenReturn(CONFIGURATION_PROPERTIES);
+            ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(eq(true),
+                argThat((ArgumentMatcher<Predicate<Resource>>) argument -> !argument.test(resource)), eq(EMPTY_STRING));
+            ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(true, PROFILE, SET);
+            ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(true, ENVIRONMENT, SET);
+            ordered.verify(propertiesLoader).loadFromResourceTreeRecursively(true, SUITE, SET);
+        }
+    }
+
+    @Test
+    void shouldThrowAnExceptionInCaseOfEmptyConfigurationSet()
+    {
+        try (var beanFactory = mockStatic(BeanFactory.class);
+                var newDeprecatedPropertiesHandler = mockConstruction(DeprecatedPropertiesHandler.class,
+                        withSettings().useConstructor(new Properties(), PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX));
+                var newPropertiesLoaders = mockConstruction(PropertiesLoader.class,
+                        withSettings().useConstructor(resourcePatternResolver), (mock, context) -> {
+                            var emptyProperties = toProperties(Map.of());
+                            when(mock.loadConfigurationProperties()).thenReturn(toProperties(
+                                    Map.of(CONFIGURATION_SET_PROPERTY_KEY, "")));
+
+                            when(mock.loadOverridingProperties()).thenReturn(emptyProperties);
+
+                            when(mock.loadDefaultProperties(HTTP_CLIENT_DEFAULT)).thenReturn(emptyProperties);
+
+                            when(mock.loadDefaultProperties(UTIL_DEFAULT)).thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(true, DEFAULTS)).thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(eq(true), any(Predicate.class),
+                                    eq(EMPTY_STRING))).thenReturn(emptyProperties);
+                        }))
+        {
+            beanFactory.when(BeanFactory::getResourcePatternResolver).thenReturn(resourcePatternResolver);
+            var ise = assertThrows(IllegalStateException.class, ConfigurationResolver::getInstance);
+            assertEquals("Property 'configuration-set.active' must be not blank.", ise.getMessage());
+        }
+    }
+
+    @Test
+    void shouldThrowAnExceptionIfConfigurationSetNotDefined()
+    {
+        try (var beanFactory = mockStatic(BeanFactory.class);
+                var newDeprecatedPropertiesHandler = mockConstruction(DeprecatedPropertiesHandler.class,
+                        withSettings().useConstructor(new Properties(), PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX));
+                var newPropertiesLoaders = mockConstruction(PropertiesLoader.class,
+                        withSettings().useConstructor(resourcePatternResolver), (mock, context) -> {
+                            var emptyProperties = toProperties(Map.of());
+                            when(mock.loadConfigurationProperties()).thenReturn(toProperties(
+                                    Map.of(CONFIGURATION_SET_PROPERTY_KEY, "active")));
+
+                            when(mock.loadOverridingProperties()).thenReturn(emptyProperties);
+
+                            when(mock.loadDefaultProperties(HTTP_CLIENT_DEFAULT)).thenReturn(emptyProperties);
+
+                            when(mock.loadDefaultProperties(UTIL_DEFAULT)).thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(true, DEFAULTS)).thenReturn(emptyProperties);
+
+                            when(mock.loadFromResourceTreeRecursively(eq(true), any(Predicate.class),
+                                    eq(EMPTY_STRING))).thenReturn(emptyProperties);
+                        }))
+        {
+            beanFactory.when(BeanFactory::getResourcePatternResolver).thenReturn(resourcePatternResolver);
+            var ise = assertThrows(IllegalStateException.class, ConfigurationResolver::getInstance);
+            assertEquals("The 'configuration-set.active.profiles' property is not set", ise.getMessage());
         }
     }
 

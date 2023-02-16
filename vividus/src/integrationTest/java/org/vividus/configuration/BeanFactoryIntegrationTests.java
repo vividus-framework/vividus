@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -253,6 +253,7 @@ class BeanFactoryIntegrationTests
         System.setProperty(CONFIGURATION_SUITES, empty);
         System.setProperty(CONFIGURATION_PROFILES, empty);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, empty);
+
         BeanFactory.open();
         var properties = ConfigurationResolver.getInstance().getProperties();
         assertEquals("value-from-upper-level", properties.getProperty(DEEPER_SUITE_LEVEL_OVERRIDABLE_PROPERTY));
@@ -268,9 +269,24 @@ class BeanFactoryIntegrationTests
 
         var ise = assertThrows(IllegalStateException.class, BeanFactory::open);
         assertThat(ise.getMessage(), startsWith(
-              "The configuration.* properties can be set using: System properties,"
+              "The configuration.* and configuration-set.* properties can be set using: System properties,"
             + " overriding.properties file or configuration.properties file. But found: [configuration.environments,"
-            + " configuration.suites, configuration.profiles]; In resource: file ["));
+            + " configuration-set.active, configuration.suites, configuration.profiles]; In resource: file ["));
+    }
+
+    @Test
+    void shouldUseConfigurationSet() throws IOException
+    {
+        var empty = "";
+        System.setProperty(CONFIGURATION_SUITES, empty);
+        System.setProperty(CONFIGURATION_PROFILES, empty);
+        System.setProperty(CONFIGURATION_ENVIRONMENTS, empty);
+        System.setProperty("configuration-set.active", "tests");
+        System.setProperty("configuration-set.tests.profiles", BASIC_PROFILE);
+        System.setProperty("configuration-set.tests.environments", BASIC_ENV);
+        System.setProperty("configuration-set.tests.suites", BASIC_SUITE);
+        BeanFactory.open();
+        assertIntegrationSuiteProperty();
     }
 
     private void assertIntegrationSuiteProperty() throws IOException

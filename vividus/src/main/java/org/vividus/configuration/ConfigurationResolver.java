@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ import org.vividus.spring.SpelExpressionResolver;
 public final class ConfigurationResolver
 {
     static final String CONFIGURATION_PROPERTY_FAMILY = "configuration.";
+    static final String CONFIGURATION_SET_PROPERTY_FAMILY = "configuration-set.";
 
     private static final String VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY = "vividus.encryptor.password";
     private static final String VIVIDUS_ENCRYPTOR_PASSWORD_ENV_VARIABLE = "VIVIDUS_ENCRYPTOR_PASSWORD";
@@ -183,10 +185,10 @@ public final class ConfigurationResolver
     private static Multimap<String, String> assembleConfiguration(Properties configurationProperties,
             Properties overridingProperties)
     {
-        String profiles = getConfigurationPropertyValue(configurationProperties, overridingProperties, PROFILES);
-        String environments = getConfigurationPropertyValue(configurationProperties, overridingProperties,
-                ENVIRONMENTS);
-        String suites = getConfigurationPropertyValue(configurationProperties, overridingProperties, SUITES);
+        Map<String, String> configurationSet = resolveConfiguration(configurationProperties, overridingProperties);
+        String profiles = configurationSet.get(PROFILES);
+        String environments = configurationSet.get(ENVIRONMENTS);
+        String suites = configurationSet.get(SUITES);
 
         Properties mergedProperties = new Properties();
         mergedProperties.putAll(configurationProperties);
@@ -206,6 +208,48 @@ public final class ConfigurationResolver
         configuration.putAll("environment", asPaths(resolveSpel(environments)));
         configuration.putAll("suite", asPaths(resolveSpel(suites)));
         return configuration;
+    }
+
+    private static Map<String, String> resolveConfiguration(Properties configurationProperties,
+        Properties overridingProperties)
+    {
+        String configurationSet = getPropertyValue(configurationProperties, overridingProperties,
+                "configuration-set.active");
+
+        String profiles;
+        String environments;
+        String suites;
+
+        if (configurationSet == null)
+        {
+            profiles = getConfigurationPropertyValue(configurationProperties, overridingProperties,
+                    CONFIGURATION_PROPERTY_FAMILY + PROFILES);
+            environments = getConfigurationPropertyValue(configurationProperties, overridingProperties,
+                    CONFIGURATION_PROPERTY_FAMILY + ENVIRONMENTS);
+            suites = getConfigurationPropertyValue(configurationProperties, overridingProperties,
+                    CONFIGURATION_PROPERTY_FAMILY + SUITES);
+        }
+        else
+        {
+            Validate.validState(!configurationSet.isBlank(), "Property 'configuration-set.active' must be not blank.");
+            profiles = getConfigurationSetProperty(configurationProperties, overridingProperties, configurationSet,
+                PROFILES);
+            environments = getConfigurationSetProperty(configurationProperties, overridingProperties, configurationSet,
+                ENVIRONMENTS);
+            suites = getConfigurationSetProperty(configurationProperties, overridingProperties, configurationSet,
+                SUITES);
+            overridingProperties.put(CONFIGURATION_PROPERTY_FAMILY + PROFILES, profiles);
+            overridingProperties.put(CONFIGURATION_PROPERTY_FAMILY + ENVIRONMENTS, environments);
+            overridingProperties.put(CONFIGURATION_PROPERTY_FAMILY + SUITES, suites);
+        }
+        return Map.of(PROFILES, profiles, SUITES, suites, ENVIRONMENTS, environments);
+    }
+
+    private static String getConfigurationSetProperty(Properties configurationProperties,
+            Properties overridingProperties, String configurationSet, String key)
+    {
+        return getConfigurationPropertyValue(configurationProperties, overridingProperties,
+                CONFIGURATION_SET_PROPERTY_FAMILY + configurationSet + "." + key);
     }
 
     private static String resolveSpel(String property)
@@ -237,21 +281,24 @@ public final class ConfigurationResolver
     private static String getConfigurationPropertyValue(Properties configurationProperties,
             Properties overridingProperties, String key)
     {
-        String propertyName = CONFIGURATION_PROPERTY_FAMILY + key;
+        String value =
+            getPropertyValue(configurationProperties, overridingProperties, key);
+        Validate.validState(value != null, "The '%s' property is not set", key);
+        return value;
+    }
+
+    private static String getPropertyValue(Properties configurationProperties,
+            Properties overridingProperties, String propertyName)
+    {
         String value = System.getProperty(VIVIDUS_SYSTEM_PROPERTY_FAMILY + propertyName,
-                System.getProperty(VIVIDUS_SYSTEM_PROPERTY_FAMILY + key,
-                        System.getProperty(propertyName, System.getProperty(key))));
+                System.getProperty(VIVIDUS_SYSTEM_PROPERTY_FAMILY + propertyName,
+                        System.getProperty(propertyName, System.getProperty(propertyName))));
         if (value == null)
         {
             value = overridingProperties.getProperty(propertyName);
             if (value == null)
             {
                 value = configurationProperties.getProperty(propertyName);
-                if (value == null)
-                {
-                    throw new IllegalStateException(
-                            String.format("The '%s%s' property is not set", CONFIGURATION_PROPERTY_FAMILY, key));
-                }
             }
         }
         else

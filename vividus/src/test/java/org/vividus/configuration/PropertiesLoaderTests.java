@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -239,6 +239,7 @@ class PropertiesLoaderTests
         when(resource.toString()).thenReturn("default.properties");
         mockResources("classpath*:org/defaults.properties", resource);
         var properties = new Properties();
+        properties.put("configuration-set.active", "qa-prod-no_ui");
         properties.put("configuration.suites", "qa,preprod,prod");
         properties.put("configuration.profiles", "web,mobile,no_ui");
         propertiesLoader.prohibitConfigurationProperties();
@@ -251,8 +252,9 @@ class PropertiesLoaderTests
             var ise = assertThrows(IllegalStateException.class,
                 () -> propertiesLoader.loadDefaultProperties(location));
             assertEquals(
-                  "The configuration.* properties can be set using: System properties, overriding.properties file or"
-                + " configuration.properties file. But found: [configuration.suites, configuration.profiles];"
+                  "The configuration.* and configuration-set.* properties can be set using:"
+                + " System properties, overriding.properties file or configuration.properties file."
+                + " But found: [configuration-set.active, configuration.suites, configuration.profiles];"
                 + " In resource: default.properties", ise.getMessage());
             validatePropertiesLoading(mockedConstruction, resource);
         }
