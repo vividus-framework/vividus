@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
+import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.results.ResultsProvider;
 import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Failure;
@@ -60,6 +61,7 @@ public final class TestInfoLogger
             "password|secret|token|key([^s]|$)", Pattern.CASE_INSENSITIVE);
     private static final int HORIZONTAL_RULE_LENGTH = 80;
     private static final String HORIZONTAL_RULE = HYPHEN.repeat(HORIZONTAL_RULE_LENGTH);
+    private static final String CONFIGURATION_SET = "Set";
 
     private final ResultsProvider resultsProvider;
 
@@ -89,7 +91,16 @@ public final class TestInfoLogger
             {
                 message.format(NEW_LINE);
                 EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.forEach((category, properties) -> {
-                    message.format(CATEGORY_FORMAT, HORIZONTAL_RULE, category.getCategoryName());
+                    if (category == PropertyCategory.CONFIGURATION && properties.get(CONFIGURATION_SET) != null)
+                    {
+                        String configurationSetFormat = "%s%n %-" + maxKeyLength + "s   %s%n";
+                        message.format(configurationSetFormat, HORIZONTAL_RULE, "Configuration set:",
+                            properties.remove(CONFIGURATION_SET));
+                    }
+                    else
+                    {
+                        message.format(CATEGORY_FORMAT, HORIZONTAL_RULE, category.getCategoryName());
+                    }
                     properties.forEach((name, value) -> message.format(propertyFormat, name, value));
                 });
                 logExecutionStatistics(message);

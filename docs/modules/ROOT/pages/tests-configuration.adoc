@@ -204,6 +204,37 @@ configuration.environments=dev
 
 Environment variables can also be declared in multiple files. Define common and specific properties for your environments and take the xref:ROOT:tests-configuration.adoc#_profiles_setup[same approach] of reusing and separating values.
 
+=== Configuration sets
+
+Configuration set simplifies reusage of pre-defined combinations of profiles/suites/environments. Users are allowed to define multiple configuration sets. Only one configuration set can be used during a test run.
+
+.Configuration sets definition
+[source,properties]
+----
+configuration-set.api-preprod-uat.profiles=
+configuration-set.api-preprod-uat.suites=uat
+configuration-set.api-preprod-uat.environments=preprod
+
+configuration-set.api-test-regression.profiles=
+configuration-set.api-test-regression.suites=regression
+configuration-set.api-test-regression.environments=test
+----
+
+Once configuration sets are defined, one can use an active configuration set for test execution.
+
+.Usage of configuration set
+[source,properties]
+----
+configuration-set.active=api-preprod-uat
+----
+
+[IMPORTANT]
+====
+* Configuration sets can be defined only in `configuration.properties` file.
+* Active configuration set overrides defined `configuration.profiles`, `configuration.suites` and `configuration.environments` properties.
+* Configuration set requires to define `profiles`, `suites` and `environments`, empty value considered as a valid one.
+====
+
 == Known Issues
 
 Known issues mechanism allows to distinguish failures from known issues presented in the system under test.

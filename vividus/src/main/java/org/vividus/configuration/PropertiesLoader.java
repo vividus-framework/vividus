@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,14 +165,15 @@ class PropertiesLoader
                       .stream()
                       .map(Entry::getKey)
                       .map(String.class::cast)
-                      .filter(k -> k.startsWith(ConfigurationResolver.CONFIGURATION_PROPERTY_FAMILY))
+                      .filter(k -> k.startsWith(ConfigurationResolver.CONFIGURATION_PROPERTY_FAMILY)
+                                || k.startsWith(ConfigurationResolver.CONFIGURATION_SET_PROPERTY_FAMILY))
                       .collect(Collectors.toList());
         if (configurationProperties.isEmpty())
         {
             return properties;
         }
         throw new IllegalStateException(String.format(
-                "The configuration.* properties can be set using: System properties,"
+                "The configuration.* and configuration-set.* properties can be set using: System properties,"
                         + " overriding.properties file or configuration.properties file. But found: %s; In "
                         + "resource: %s", configurationProperties, propertyResources));
     }

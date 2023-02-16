@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,6 +46,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
+import org.vividus.reporter.environment.EnvironmentConfigurer;
+import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.results.ResultsProvider;
 import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Failure;
@@ -120,8 +123,23 @@ class TestInfoLoggerTests
 
     @ParameterizedTest
     @MethodSource("sourceOfFailures")
-    @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "PMD.AvoidDuplicateLiterals"})
+    @Order(1)
     void shouldLogMetadata(String failuresMessage, Optional<List<Failure>> failures)
+    {
+        shouldLogMetadata(" Configuration:\\s+", failuresMessage, failures);
+    }
+
+    @Test
+    @Order(2)
+    @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "PMD.AvoidDuplicateLiterals"})
+    void shouldLogMetadataWithConfigurationSet()
+    {
+        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.get(PropertyCategory.CONFIGURATION).put("Set", "active");
+        shouldLogMetadata(" Configuration set:\\s+active\\s+", "", Optional.empty());
+    }
+
+    @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "PMD.AvoidDuplicateLiterals"})
+    void shouldLogMetadata(String configurationLine, String failuresMessage, Optional<List<Failure>> failures)
     {
         var statistic = new Statistic();
         statistic.incrementBroken();
@@ -139,31 +157,31 @@ class TestInfoLoggerTests
         var loggingEvents = logger.getLoggingEvents();
         assertThat(loggingEvents, hasSize(1));
         assertThat(loggingEvents.get(0).getMessage(), matchesRegex(
-                  "(?s)\\s+"
-                  + "-{80}\\s+"
-                  + " Configuration:\\s+"
-                  + "-{80}\\s+"
-                  + " Profile:\\s+"
-                  + "-{80}\\s+"
-                  + " Suite:\\s+"
-                  + "-{80}\\s+"
-                  + " Environment:\\s+"
-                  + "-{80}\\s+"
-                  + " Vividus:.*"
-                  + " Execution statistics:\\s+.+"
-                  + "-{40}\\s+"
-                  + "               Story   Scenario     Step\\s+"
-                  + "-{40}\\s+"
-                  + "Passed            1          1        1\\s+"
-                  + "Failed            1          1        1\\s+"
-                  + "Broken            1          1        1\\s+"
-                  + "Known Issue       1          1        1\\s+"
-                  + "Pending           0          0        0\\s+"
-                  + "Skipped           0          0        0\\s+"
-                  + "-{40}\\s+"
-                  + "TOTAL             4          4        4\\s+"
-                  + "-{40}"
-                  + failuresMessage));
+                "(?s)\\s+"
+                        + "-{80}\\s+"
+                        + configurationLine
+                        + "-{80}\\s+"
+                        + " Profile:\\s+"
+                        + "-{80}\\s+"
+                        + " Suite:\\s+"
+                        + "-{80}\\s+"
+                        + " Environment:\\s+"
+                        + "-{80}\\s+"
+                        + " Vividus:.*"
+                        + " Execution statistics:\\s+.+"
+                        + "-{40}\\s+"
+                        + "               Story   Scenario     Step\\s+"
+                        + "-{40}\\s+"
+                        + "Passed            1          1        1\\s+"
+                        + "Failed            1          1        1\\s+"
+                        + "Broken            1          1        1\\s+"
+                        + "Known Issue       1          1        1\\s+"
+                        + "Pending           0          0        0\\s+"
+                        + "Skipped           0          0        0\\s+"
+                        + "-{40}\\s+"
+                        + "TOTAL             4          4        4\\s+"
+                        + "-{40}"
+                        + failuresMessage));
     }
 
     private static Failure createFailure(String storyName, String scenarioTitle, String step, String message)
