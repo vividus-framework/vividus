@@ -65,14 +65,10 @@ When I change context to element located by `xpath(.//*[@title='Text input secti
 Then the context element has the CSS property 'color' containing '(0, 0, 0, 1)'
 
 Scenario: Step verification When I select an element '$locator' and upload the file '$filePath'
-Given I am on page with URL `http://demo.guru99.com/test/upload/`
-When I find less than or equal to `1` elements by `id(gdpr-consent-notice)` and for each element do
-|step                                                        |
-|When I switch to frame located `By.id(gdpr-consent-notice)` |
-|When I click on element located by `buttonName(Accept All)` |
-When I select element located `By.id(uploadfile_0)` and upload file `/data/file_for_upload_step.png`
-When I click on element located by `name(send)`
-Then text `has been successfully uploaded` exists
+Given I am on page with URL `${vividus-test-site-url}/upload.html`
+When I select element located `By.id(uploadInput)` and upload file `/data/file_for_upload_step.png`
+When I click on element located by `id(submit)`
+Then text `File has been successfully uploaded. Server received: 445508 bytes` exists
 
 Scenario: Should not fail click step when element in Cross-Origin frame
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
