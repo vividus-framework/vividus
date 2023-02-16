@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ import org.vividus.resource.StoryLoader;
 import org.vividus.spring.ExtendedConfiguration;
 
 @ExtendWith(MockitoExtension.class)
-class BddStepsCounterTests
+class StepsCounterTests
 {
     private static final String STEP_PATTERN = "%s I do something with '%s'";
     private static final String AND = "And";
@@ -118,8 +118,7 @@ class BddStepsCounterTests
     {
         try (var vividus = mockStatic(Vividus.class))
         {
-            assertThrows(UnrecognizedOptionException.class,
-                    () -> BddStepsCounter.main(new String[] { "--any", DIR_VALUE }));
+            assertThrows(UnrecognizedOptionException.class, () -> StepsCounter.main(new String[]{"--any", DIR_VALUE}));
             vividus.verify(Vividus::init);
         }
     }
@@ -192,7 +191,7 @@ class BddStepsCounterTests
             when(candidateSteps.listCandidates()).thenReturn(stepCandidates);
             when(stepFactory.createCandidateSteps()).thenReturn(List.of(candidateSteps));
 
-            BddStepsCounter.main(args);
+            StepsCounter.main(args);
 
             beanFactory.verify(BeanFactory::open);
         }

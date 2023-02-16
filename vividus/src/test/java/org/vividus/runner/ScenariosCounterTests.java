@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.mockito.MockedStatic;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
-class BddScenariosCounterTests
+class ScenariosCounterTests
 {
     private static final String DEFAULT_STORY_LOCATION = "story";
     private static final String DIR_VALUE = "story/bvt";
@@ -125,7 +125,7 @@ class BddScenariosCounterTests
         try (var vividus = mockStatic(Vividus.class))
         {
             assertThrows(UnrecognizedOptionException.class,
-                    () -> BddScenariosCounter.main(new String[] { "--any", DIR_VALUE }));
+                    () -> ScenariosCounter.main(new String[] { "--any", DIR_VALUE }));
             vividus.verify(Vividus::init);
         }
     }
@@ -136,7 +136,7 @@ class BddScenariosCounterTests
     {
         try (var vividus = mockStatic(Vividus.class))
         {
-            BddScenariosCounter.main(new String[] { "--help" });
+            ScenariosCounter.main(new String[] { "--help" });
             vividus.verify(Vividus::init);
             assertThat(stdOut.capturedLines(), arrayContaining(
                     "usage: ScenariosCounter",
@@ -162,7 +162,7 @@ class BddScenariosCounterTests
         {
             var properties = mockPropertiesBeanInstantiation(beanFactory);
 
-            BddScenariosCounter.main(args);
+            ScenariosCounter.main(args);
 
             beanFactory.verify(BeanFactory::open);
             verify(properties).put(RESOURCE_LOCATION, dir);
