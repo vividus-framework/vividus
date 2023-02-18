@@ -16,12 +16,19 @@
 
 package org.vividus.json.steps;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+import com.networknt.schema.JsonSchemaException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.ISoftAssert;
@@ -31,11 +38,9 @@ import org.vividus.util.json.JsonUtils;
 @ExtendWith(MockitoExtension.class)
 class JsonSchemaValidationStepsTests
 {
-    private static final String LINE_SEPARATOR = System.lineSeparator();
+    private static final String SCHEMA_RESOURCE_NAME = "schema.json";
 
-    @Mock
-    private ISoftAssert softAssert;
-
+    @Mock private ISoftAssert softAssert;
     private JsonSchemaValidationSteps steps;
 
     @BeforeEach
@@ -44,54 +49,45 @@ class JsonSchemaValidationStepsTests
         steps = new JsonSchemaValidationSteps(new JsonUtils(), softAssert);
     }
 
-    @Test
-    void shouldValidateJsonAgainstSchema()
+    @ParameterizedTest
+    @ValueSource(strings = {
+            SCHEMA_RESOURCE_NAME,
+            "schema-without-schema-tag.json"
+    })
+    void shouldValidateJsonAgainstSchema(String schemaResourceName)
     {
-        verifyValidationOfValidJson(loadSchema());
-    }
-
-    @Test
-    void shouldValidateJsonAgainstSchemaWithoutSchemaTag()
-    {
-        var schema = ResourceUtils.loadResource(getClass(), "schema-without-schema-tag.json");
-        verifyValidationOfValidJson(schema);
+        var schema = loadResource(schemaResourceName);
+        steps.validateJsonAgainstSchema(loadResource("valid-against-schema.json"), schema);
+        verify(softAssert).recordAssertion(true, "JSON is valid against schema");
+        verifyNoMoreInteractions(softAssert);
     }
 
     @Test
     void shouldFailJSONSchemaWithWrongSpecification()
     {
-        var schema = "{\"$schema\": \"wrong-specification\"}";
-        steps.validateJsonAgainstSchema(loadValidAgainstSchemaJson(), schema);
-        verify(softAssert).recordFailedAssertion("`wrong-specification` is unrecognizable schema");
+        var schema = "{\"$schema\": \"https://wrong-specification\"}";
+        steps.validateJsonAgainstSchema(any(), schema);
+        verify(softAssert).recordFailedAssertion(
+                argThat((ArgumentMatcher<Exception>) e -> e instanceof JsonSchemaException
+                        && "'https://wrong-specification' is unrecognizable schema".equals(e.getMessage())));
         verifyNoMoreInteractions(softAssert);
     }
 
     @Test
     void shouldFailValidationAgainstSchema()
     {
-        var notValidJson = ResourceUtils.loadResource(getClass(), "not-valid-against-schema.json");
-        steps.validateJsonAgainstSchema(notValidJson, loadSchema());
-        var errorMessage = "JSON is not valid against schema:" + LINE_SEPARATOR
-                + "1) $.price: is missing but it is required," + LINE_SEPARATOR
+        var schema = loadResource(SCHEMA_RESOURCE_NAME);
+        steps.validateJsonAgainstSchema(loadResource("not-valid-against-schema.json"), schema);
+        var lineSeparator = System.lineSeparator();
+        var errorMessage = "JSON is not valid against schema:" + lineSeparator
+                + "1) $.price: is missing but it is required," + lineSeparator
                 + "2) $.tags: integer found, array expected";
         verify(softAssert).recordAssertion(false, errorMessage);
         verifyNoMoreInteractions(softAssert);
     }
 
-    private void verifyValidationOfValidJson(String jsonSchema)
+    private String loadResource(String schemaResourceName)
     {
-        steps.validateJsonAgainstSchema(loadValidAgainstSchemaJson(), jsonSchema);
-        verify(softAssert).recordAssertion(true, "JSON is valid against schema");
-        verifyNoMoreInteractions(softAssert);
-    }
-
-    private String loadValidAgainstSchemaJson()
-    {
-        return ResourceUtils.loadResource(getClass(), "valid-against-schema.json");
-    }
-
-    private String loadSchema()
-    {
-        return ResourceUtils.loadResource(getClass(), "schema.json");
+        return ResourceUtils.loadResource(getClass(), schemaResourceName);
     }
 }

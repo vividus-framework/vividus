@@ -33,7 +33,6 @@ import org.vividus.util.json.JsonUtils;
 public class JsonSchemaValidationSteps
 {
     private static final String LINE_SEPARATOR = System.lineSeparator();
-    private static final String SCHEMA_TAG = "$schema";
 
     private final JsonUtils jsonUtils;
     private final ISoftAssert softAssert;
@@ -58,30 +57,22 @@ public class JsonSchemaValidationSteps
     {
         JsonNode schemaNode = jsonUtils.readTree(schema);
         SpecVersion.VersionFlag version;
-        if (schemaNode.has(SCHEMA_TAG))
+        try
         {
-            try
-            {
-                version = SpecVersionDetector.detect(schemaNode);
-            }
-            catch (JsonSchemaException e)
-            {
-                softAssert.recordFailedAssertion(
-                        String.format("`%s` is unrecognizable schema", schemaNode.get(SCHEMA_TAG).asText()));
-                return;
-            }
+            version = SpecVersionDetector.detectOptionalVersion(schemaNode).orElse(SpecVersion.VersionFlag.V202012);
         }
-        else
+        catch (JsonSchemaException e)
         {
-            version = SpecVersion.VersionFlag.V202012;
+            softAssert.recordFailedAssertion(e);
+            return;
         }
-        JsonSchemaFactory factory = JsonSchemaFactory.getInstance(version);
-        JsonSchema jsonSchema = factory.getSchema(schemaNode);
+        JsonSchema jsonSchema = JsonSchemaFactory.getInstance(version).getSchema(schemaNode);
         JsonNode jsonNode = jsonUtils.readTree(json);
-        assertJsonValidationAgainstSchema(jsonSchema.validate(jsonNode));
+        Set<ValidationMessage> validationMessages = jsonSchema.validate(jsonNode);
+        assertValidationMessages(validationMessages);
     }
 
-    private void assertJsonValidationAgainstSchema(Set<ValidationMessage> validationMessages)
+    private void assertValidationMessages(Set<ValidationMessage> validationMessages)
     {
         boolean passed = validationMessages.isEmpty();
         StringBuilder errorMessageBuilder = new StringBuilder("JSON is ");
@@ -93,16 +84,10 @@ public class JsonSchemaValidationSteps
         int index = 1;
         for (ValidationMessage validationMessage : validationMessages)
         {
-            if (index != 1)
-            {
-                errorMessageBuilder.append(',').append(LINE_SEPARATOR);
-            }
-            else
-            {
-                errorMessageBuilder.append(':').append(LINE_SEPARATOR);
-            }
-            errorMessageBuilder.append(index).append(") ").append(validationMessage);
-            index++;
+            errorMessageBuilder.append(index == 1 ? ':' : ',')
+                    .append(LINE_SEPARATOR)
+                    .append(index++).append(") ")
+                    .append(validationMessage);
         }
         softAssert.recordAssertion(passed, errorMessageBuilder.toString());
     }
