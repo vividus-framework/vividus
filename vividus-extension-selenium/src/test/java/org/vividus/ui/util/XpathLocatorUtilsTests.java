@@ -86,14 +86,17 @@ class XpathLocatorUtilsTests
     }
 
     @Test
-    void testGetXpathPatternWithNormalizationAndNestedFunctionsInsideContains()
+    void testGetXpathPatternWithNormalizationAndSequenceOfNestedFunctionsWithContains()
     {
         By expectedLocator = By.xpath("//*[contains(normalize-space(translate(@class, \"abcdefghijklmnopqrstuvwxyz\", "
                 + "\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\")), 'MAIN') "
                 + "or contains(normalize-space(translate(concat(text(), 'page'), \"abcdefghijklmnopqrstuvwxyz\", "
-                + "\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\")), 'MAIN PAGE')]");
+                + "\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\")), 'MAIN PAGE')]"
+                + "//*[contains(normalize-space(text()), 'Tachi')]"
+                + "/parent::body/label[contains(normalize-space(text()), 'MCRN')]");
         By actualLocator = XpathLocatorUtils.getXPathLocator("//*[contains(translate(@class, %1$s, %2$s), 'MAIN') "
-                + "or contains(translate(concat(text(), 'page'), %1$s, %2$s), 'MAIN PAGE')]",
+                + "or contains(translate(concat(text(), 'page'), %1$s, %2$s), 'MAIN PAGE')]"
+                        + "//*[contains(text(), 'Tachi')]/parent::body/label[contains(text(), 'MCRN')]",
                 "abcdefghijklmnopqrstuvwxyz", "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         assertEquals(expectedLocator, actualLocator);
     }

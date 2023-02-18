@@ -35,7 +35,7 @@ public final class XpathLocatorUtils
     private static final Pattern ANY_ATTR_OR_TEXT_VALUE_PATTERN = Pattern.compile("((@[*])|(text\\(\\)))(| )="
             + CONCAT);
     private static final Pattern CONTAINS_PATTERN = Pattern
-            .compile("contains\\((?!normalize-space)(([a-z-]+?)\\(((?!\\b(and|or)\\b).)*\\)|.+?),");
+            .compile("contains\\((?!normalize-space)(([a-z-]+?)\\(((?!(and|or|])).)*\\)|.+?),");
     private static final String NORMALIZE_SPACE_FORMAT = "$3normalize-space($4$5$6)=$9";
     private static final String ANY_ATTR_OR_TEXT_NORMALIZE_SPACE_FORMAT = "$1[normalize-space()=$6]";
     private static final String NORMALIZE_SPACE_TRANSLATE_FORMAT = "normalize-space($1)=$5$6$7";
