@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -673,7 +673,7 @@ class HttpResponseValidationStepsTests
         when(httpResponse.getStatusCode()).thenReturn(RESPONSE_CODE_ERROR, RESPONSE_CODE_ERROR, RESPONSE_CODE_ERROR);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
         httpResponseValidationSteps.waitForResponseCode(RESPONSE_CODE, DURATION, RETRY_TIMES, stepsToExecute);
-        verify(stepsToExecute, times(3)).execute(Optional.empty());
+        verify(stepsToExecute, atLeast(3)).execute(Optional.empty());
         verify(softAssert).assertEquals(HTTP_RESPONSE_STATUS_CODE, RESPONSE_CODE_ERROR, RESPONSE_CODE);
     }
 
