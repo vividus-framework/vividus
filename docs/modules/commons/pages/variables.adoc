@@ -200,7 +200,7 @@ Reference to uninitialized variable can be resolved to default value using the o
 |`<uninitialized>`
 |Chaotic Evil
 
-|`${var:${var1}}`
+|`${var:$\{var1}}`
 |var - `<uninitialized>`, var1 - `value`
 |value
 
