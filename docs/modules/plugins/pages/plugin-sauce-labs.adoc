@@ -47,7 +47,7 @@ include::partial$test-cloud-usage.adoc[]
 
 NOTE: The properties marked with *bold* are mandatory.
 
-[cols="3,1,1,3", options="header"]
+[cols="3,2,1,3", options="header"]
 |===
 |Property Name
 |Acceptable values
@@ -70,21 +70,31 @@ NOTE: The properties marked with *bold* are mandatory.
 |https://docs.saucelabs.com/basics/data-center-endpoints/#authorization-credentials[Sauce Labs access key]
 
 |[subs=+quotes]`*saucelabs.data-center*`
-a|`US`
+a|
+* `US_WEST` +
+* `US_EAST` +
+* `EU_CENTRAL` +
+* `APAC_SOUTHEAST`
 
-`EU`
-`US_EAST`
+[WARNING]
+====
+The data centers listed below are deprecated and will be removed in VIVIDUS 0.6.0:
+
+* `US` (use `US_WEST` instead)
+* `EU` (use `EU_CENTRAL` instead)
+====
+
 |
 |https://wiki.saucelabs.com/display/DOCS/Data+Center+Endpoints[Sauce Labs data center] to use
 
 |`saucelabs.sauce-connect.enabled`
-a|`true`
+a|`true` +
 `false`
 |`false`
 |Enables https://wiki.saucelabs.com/display/DOCS/Sauce+Connect+Proxy[Sauce Connect Proxy]
 
 |`saucelabs.sauce-connect.use-latest-version`
-a|`true`
+a|`true` +
 `false`
 |`true`
 |If `false`, then use embedded Sauce Connect (https://changelog.saucelabs.com/en?category=sauce%20connect[4.7.1]), otherwise check and download newer version if available.
@@ -97,6 +107,16 @@ a|`true`
 |`saucelabs.sauce-connect.skip-host-glob-patterns`
 |Comma (,) separated list of host https://developer.mozilla.org/en-US/docs/Web/HTTP/Proxy_servers_and_tunneling/Proxy_Auto-Configuration_PAC_file#shexpmatch[glob patterns]
 |
-|This property comes into effect only if proxy is used, otherwise its value is ignored. The property specifies the list of glob patterns for hosts that are connected-to directly, others are connected through the proxy. By default the list inicludes `*.miso.saucelabs.com`, `*.api.testobject.com`, `*.saucelabs.com`, `saucelabs.com` host patterns to avoid sending of status information by SauceConnect to SauceLabs REST API throughout the lifetime of a tunnel via proxy used by tests.
+a|This property comes into effect only if proxy is used, otherwise its value is ignored. The property specifies
+the list of glob patterns for hosts that are connected-to directly, others are connected through the proxy. By default
+the list inicludes
+
+* `*.miso.saucelabs.com`
+* `*.api.testobject.com`
+* `*.saucelabs.com`
+* `saucelabs.com`
+
+host patterns to avoid sending of status information by SauceConnect to SauceLabs REST API throughout the lifetime of
+a tunnel via proxy used by tests.
 
 |===

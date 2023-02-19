@@ -15,10 +15,13 @@ dependencies {
     implementation project(':vividus-extension-selenium')
 
     implementation(group: 'com.google.guava', name: 'guava', version: '31.1-jre')
-    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.166') {
+    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.167') {
         exclude group: 'com.google.collections', module: 'google-collections'
         exclude module: 'slf4j-jdk14'
     }
+
+    // To be removed once https://github.com/saucelabs/ci-sauce/pull/163/files is merged and released
+    implementation(group: 'com.saucelabs', name: 'saucerest', version: '2.0.3')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.2')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
