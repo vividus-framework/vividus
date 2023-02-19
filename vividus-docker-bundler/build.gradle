@@ -5,7 +5,6 @@ plugins {
 project.description = 'VIVIDUS Docker bundler'
 
 tasks {
-    artifactoryPublish.enabled = false
     publish.enabled = false
     testVividusInitialization.enabled = false
 }
