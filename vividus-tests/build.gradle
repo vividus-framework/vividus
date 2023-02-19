@@ -1,6 +1,5 @@
 project.description = 'VIVIDUS tests'
 
-tasks.artifactoryPublish.enabled = false
 tasks.publish.enabled = false
 
 runStories.treatKnownIssuesOnlyAsPassed = true
