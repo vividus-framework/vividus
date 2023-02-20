@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class SauceConnectManagerTests
     private static final String OPTIONS = "options";
     private static final String USERNAME = "user%";
     private static final String USERKEY = "key";
-    private static final String DATA_CENTER = "EU";
+    private static final String DATA_CENTER = "EU_CENTRAL";
 
     private SauceTunnelManager sauceTunnelManager;
     private SauceConnectManager sauceConnectManager;
@@ -58,7 +58,8 @@ public class SauceConnectManagerTests
     public void before()
     {
         sauceTunnelManager = mock(SauceTunnelManager.class);
-        sauceConnectManager = new SauceConnectManager(USERNAME, USERKEY, DataCenter.EU, sauceTunnelManager, context);
+        sauceConnectManager = new SauceConnectManager(USERNAME, USERKEY, DataCenter.fromString(DATA_CENTER),
+                sauceTunnelManager, context);
     }
 
     @Test

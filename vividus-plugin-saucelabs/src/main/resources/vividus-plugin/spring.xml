@@ -7,10 +7,13 @@
        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        profile="saucelabs" default-lazy-init="true">
 
+    <bean class="org.vividus.saucelabs.DataCenterFactory" factory-method="createDataCenter">
+        <constructor-arg value="${saucelabs.data-center}" />
+    </bean>
+
     <bean id="sauceConnectManager" class="org.vividus.selenium.sauce.SauceConnectManager">
         <constructor-arg index="0" value="${selenium.grid.username}" />
         <constructor-arg index="1" value="${selenium.grid.password}" />
-        <constructor-arg index="2" value="${saucelabs.data-center}" />
         <constructor-arg>
             <bean class="com.saucelabs.ci.sauceconnect.SauceConnectFourManager">
                 <constructor-arg value="false"/>
@@ -19,15 +22,12 @@
         </constructor-arg>
     </bean>
 
-    <bean id="sauceLabsLinkPublisher" class="org.vividus.saucelabs.SauceLabsTestLinkPublisher">
-        <constructor-arg index="0" value="${saucelabs.data-center}" />
-    </bean>
+    <bean id="sauceLabsLinkPublisher" class="org.vividus.saucelabs.SauceLabsTestLinkPublisher" />
 
     <bean class="org.vividus.saucelabs.SauceLabsTestStatusManager" lazy-init="false"/>
 
     <bean class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer">
         <property name="tunnellingEnabled" value="${saucelabs.sauce-connect.enabled}"/>
-        <property name="restUrl" value="#{T(com.saucelabs.saucerest.DataCenter).fromString('${saucelabs.data-center}').apiServer() + 'rest/v1'}" />
         <property name="sauceConnectArguments" value="${saucelabs.sauce-connect.command-line-arguments}" />
         <property name="skipHostGlobPatterns" value="${saucelabs.sauce-connect.skip-host-glob-patterns}" />
     </bean>
@@ -36,11 +36,4 @@
         <idref bean="sauceLabsLinkPublisher" />
     </util:list>
 
-    <util:map id="propertyEditors-SauceLabs" key-type="java.lang.Class">
-        <entry key="com.saucelabs.saucerest.DataCenter">
-            <bean class="org.vividus.beans.RelaxedEnumPropertyEditor">
-                <constructor-arg value="com.saucelabs.saucerest.DataCenter" />
-            </bean>
-        </entry>
-    </util:map>
 </beans>
