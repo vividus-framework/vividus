@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,16 @@ package org.vividus.ssh.sftp;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.debug;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -39,24 +43,31 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SftpOutputPublisherTests
 {
-    @Mock
-    private IAttachmentPublisher attachmentPublisher;
-
-    @InjectMocks
-    private SftpOutputPublisher sftpOutputPublisher;
+    @Mock private IAttachmentPublisher attachmentPublisher;
+    @InjectMocks private SftpOutputPublisher sftpOutputPublisher;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(SftpOutputPublisher.class);
 
     @Test
-    void publishOutput()
+    void shouldPublishResult()
     {
-        String result = "result";
-        SftpOutput sftpOutput = new SftpOutput();
-        sftpOutput.setResult(result);
+        var result = "result";
+        var sftpOutput = new SftpOutput();
+        sftpOutput.setResult(Optional.of(result));
         sftpOutputPublisher.publishOutput(sftpOutput);
         verify(attachmentPublisher).publishAttachment(result.getBytes(StandardCharsets.UTF_8), "result.txt");
         verifyNoMoreInteractions(attachmentPublisher);
         assertThat(logger.getLoggingEvents(),
                 equalTo(List.of(debug("SFTP command result:{}{}", System.lineSeparator(), result))));
+    }
+
+    @Test
+    void shouldNotPublishAnythingIfNoResultIsAvailable()
+    {
+        var sftpOutput = new SftpOutput();
+        sftpOutput.setResult(Optional.empty());
+        sftpOutputPublisher.publishOutput(sftpOutput);
+        verifyNoInteractions(attachmentPublisher);
+        assertThat(logger.getLoggingEvents(), is(empty()));
     }
 }

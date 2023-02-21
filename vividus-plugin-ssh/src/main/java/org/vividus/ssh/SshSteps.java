@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,13 @@ public class SshSteps
      * Retrieves SSH connection parameters by key, opens SSH session, executes SFTP commands remotely and saves the
      * result of the commands to the variable.
      *
-     * @param commands      Semicolon-separated commands to execute.
+     * @param commands      Semicolon-separated commands to execute. It's allowed to combine any SFTP commands, but
+     *                      at least one of them should return result. SFTP commands returning results are:
+     *                      <ul>
+     *                      <li><code>get remote-path</code></li>
+     *                      <li><code>ls [path]</code></li>
+     *                      <li><code>pwd</code></li>
+     *                      </ul>
      * @param connectionKey The SSH connection key matching any of configured ones.
      * @param scopes        The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
      *                      <i>Available scopes:</i>
@@ -117,7 +123,10 @@ public class SshSteps
             String variableName) throws CommandExecutionException
     {
         SftpOutput output = (SftpOutput) executeCommands(commands, connectionKey, Protocol.SFTP);
-        variableContext.putVariable(scopes, variableName, output.getResult());
+        output.getResult().ifPresentOrElse(result -> variableContext.putVariable(scopes, variableName, result), () -> {
+            throw new IllegalArgumentException("The command '" + commands.getJoinedCommands()
+                    + "' has not provided any result. Only following commands provide result: get, ls, pwd");
+        });
         return output;
     }
 

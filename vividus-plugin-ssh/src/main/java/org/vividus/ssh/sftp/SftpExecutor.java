@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.ssh.sftp;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import javax.inject.Named;
 
@@ -54,7 +55,7 @@ public class SftpExecutor extends JSchExecutor<ChannelSftp, SftpOutput>
         channel.setPty(sshConnectionParameters.isPseudoTerminalEnabled());
         channel.connect();
         SftpOutput executionOutput = new SftpOutput();
-        StringBuilder output = new StringBuilder();
+        StringBuilder output = null;
         try
         {
             for (SingleCommand<SftpCommand> command : commands.getSingleCommands(SftpCommand::fromString))
@@ -62,7 +63,11 @@ public class SftpExecutor extends JSchExecutor<ChannelSftp, SftpOutput>
                 String commandOutput = command.getCommand().execute(channel, command.getParameters());
                 if (commandOutput != null)
                 {
-                    if (output.length() > 0)
+                    if (output == null)
+                    {
+                        output = new StringBuilder();
+                    }
+                    else
                     {
                         output.append(System.lineSeparator());
                     }
@@ -74,7 +79,7 @@ public class SftpExecutor extends JSchExecutor<ChannelSftp, SftpOutput>
         {
             softAssert.recordFailedAssertion("SFTP command error", e);
         }
-        executionOutput.setResult(output.toString());
+        executionOutput.setResult(Optional.ofNullable(output).map(StringBuilder::toString));
         return executionOutput;
     }
 }

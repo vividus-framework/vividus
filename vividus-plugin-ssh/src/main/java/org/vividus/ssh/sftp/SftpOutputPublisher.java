@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,10 @@ public class SftpOutputPublisher implements OutputPublisher<SftpOutput>
     @Override
     public void publishOutput(SftpOutput executionOutput)
     {
-        String result = executionOutput.getResult();
-        LOGGER.atDebug().addArgument(System::lineSeparator).addArgument(result).log("SFTP command result:{}{}");
-        attachmentPublisher.publishAttachment(result.getBytes(StandardCharsets.UTF_8), "result.txt");
+        executionOutput.getResult().ifPresent(result ->
+        {
+            LOGGER.atDebug().addArgument(System::lineSeparator).addArgument(result).log("SFTP command result:{}{}");
+            attachmentPublisher.publishAttachment(result.getBytes(StandardCharsets.UTF_8), "result.txt");
+        });
     }
 }
