@@ -92,7 +92,7 @@ an escape sequence) must be used.
 |Escape Sequence
 |Description
 
-|\n<
+|\n
 |Insert a newline in the value at this point.
 
 |\r
