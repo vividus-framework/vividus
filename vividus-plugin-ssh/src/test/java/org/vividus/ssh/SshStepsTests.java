@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,17 @@ package org.vividus.ssh;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.function.FailableConsumer;
@@ -113,7 +116,8 @@ class SshStepsTests
     @Test
     void shouldExecuteSftpCommands() throws CommandExecutionException
     {
-        testSftpExecution(commands -> sshSteps.executeCommands(commands, SERVER, Protocol.SFTP));
+        testSftpExecution(commands -> Optional.of(sshSteps.executeCommands(commands, SERVER, Protocol.SFTP)),
+                Optional.empty());
     }
 
     @Test
@@ -121,8 +125,25 @@ class SshStepsTests
     {
         var scopes = Set.of(VariableScope.SCENARIO);
         var variableName = "sftp-result";
-        var sftpOutput = testSftpExecution(commands -> sshSteps.saveSftpResult(commands, SERVER, scopes, variableName));
-        verify(variableContext).putVariable(scopes, variableName, sftpOutput.getResult());
+        var result = "sftp-output";
+        testSftpExecution(commands -> Optional.of(sshSteps.saveSftpResult(commands, SERVER, scopes, variableName)),
+                Optional.of(result));
+        verify(variableContext).putVariable(scopes, variableName, result);
+    }
+
+    @Test
+    void shouldFailToSaveResultIfSftpCommandDoesNotProvideIt() throws CommandExecutionException
+    {
+        var scopes = Set.of(VariableScope.SCENARIO);
+        String variableName = any();
+        testSftpExecution(commands -> {
+            var exception = assertThrows(IllegalArgumentException.class,
+                    () -> sshSteps.saveSftpResult(commands, SERVER, scopes, variableName));
+            assertEquals(exception.getMessage(), "The command '" + commands.getJoinedCommands()
+                    + "' has not provided any result. Only following commands provide result: get, ls, pwd");
+            return Optional.empty();
+        }, Optional.empty());
+        verifyNoInteractions(variableContext);
     }
 
     @Test
@@ -161,24 +182,25 @@ class SshStepsTests
         verify(sshTestContext).putSshOutput(null);
     }
 
-    private SftpOutput testSftpExecution(FailableFunction<Commands, Object, CommandExecutionException> commandExecutor)
-            throws CommandExecutionException
+    private Commands testSftpExecution(
+            FailableFunction<Commands, Optional<Object>, CommandExecutionException> commandExecutor,
+            Optional<String> commandResult) throws CommandExecutionException
     {
         when(sshConnectionParameters.getConfiguration(SERVER)).thenReturn(SSH_CONNECTION_PARAMETERS);
         CommandExecutionManager<SftpOutput> executionManager = mockGettingOfCommandExecutionManager(Protocol.SFTP);
         var commands = new Commands("sftp-command");
         var output = new SftpOutput();
-        output.setResult("sftp-output");
+        output.setResult(commandResult);
         when(executionManager.run(SSH_CONNECTION_PARAMETERS, commands)).thenReturn(output);
 
         var actual = commandExecutor.apply(commands);
 
-        assertEquals(output, actual);
+        actual.ifPresent(result -> assertEquals(output, result));
         verify(sshTestContext).putSshOutput(null);
-        return output;
+        return commands;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("unchecked")
     private <T> CommandExecutionManager<T> mockGettingOfCommandExecutionManager(Protocol protocol)
     {
         var commandExecutionManager = mock(CommandExecutionManager.class);

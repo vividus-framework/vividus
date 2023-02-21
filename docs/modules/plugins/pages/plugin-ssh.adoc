@@ -56,6 +56,7 @@ When I execute commands `$commands` on $connectionKey over $protocol
 * `$connectionKey` - The SSH connection key matching any of configured ones.
 * `$protocol` - The protocol of execution: `SSH` or `SFTP`.
 +
+[#sftp-commands]
 .The list of the supported `SFTP` commands
 [cols="1,3", options="header"]
 |===
@@ -80,7 +81,7 @@ When I execute commands `$commands` on $connectionKey over $protocol
 |`rmdir path`
 |Remove remote directory
 
-|rm path
+|`rm path`
 |Remove remote file
 
 |===
@@ -107,7 +108,16 @@ commands remotely and saves the result of the commands to the variable.
 When I execute commands `$commands` on $connectionKey over SFTP and save result to $scopes variable `$variableName`
 ----
 
-* `$commands` - Semicolon-separated commands to execute.
+* `$commands` - Semicolon-separated <<sftp-commands,SFTP commands>> to execute.
++
+[NOTE]
+====
+It's allowed to combine any SFTP commands, but at least one of them should return result. SFTP commands returning results are:
+
+* `get remote-path`
+* `ls [path]`
+* `pwd`
+====
 * `$connectionKey` - The SSH connection key matching any of configured ones.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The name of the variable to save the SFTP commands execution result.
