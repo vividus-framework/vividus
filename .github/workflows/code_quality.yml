@@ -1,0 +1,39 @@
+name: Qodana
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - master
+    paths:
+      - '**/**'
+      - '!docs/**'
+      - '!*.md'
+      - '!.github/workflows/docs.yml'
+      - '!.github/workflows/gradle.yml'
+  pull_request:
+    branches:
+    - master
+    paths:
+      - '**/**'
+      - '!docs/**'
+      - '!*.md'
+      - '!.github/workflows/docs.yml'
+      - '!.github/workflows/gradle.yml'
+
+jobs:
+  qodana:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: 'Qodana Scan'
+        uses: JetBrains/qodana-action@v2022.3.4
+        env:
+         QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+
+      - uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
