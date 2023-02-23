@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,6 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.conn.DnsResolver;
-import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.junit.jupiter.api.Test;
 
@@ -155,20 +154,6 @@ class HttpClientConfigTests
         config.setHeaders(new HashMap<>());
         List<Header> headers = config.createHeaders();
         assertEquals(0, headers.size());
-    }
-
-    @Test
-    void testDefaultConnectionManager()
-    {
-        assertNull(config.getConnectionManager());
-    }
-
-    @Test
-    void testGetAndSetConnectionManager()
-    {
-        HttpClientConnectionManager connectionManager = mock(HttpClientConnectionManager.class);
-        config.setConnectionManager(connectionManager);
-        assertEquals(connectionManager, config.getConnectionManager());
     }
 
     @Test

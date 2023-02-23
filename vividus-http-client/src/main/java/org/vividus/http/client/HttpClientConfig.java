@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.ServiceUnavailableRetryStrategy;
 import org.apache.http.conn.DnsResolver;
-import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.vividus.http.handler.HttpResponseHandler;
 
@@ -45,7 +44,6 @@ public class HttpClientConfig
     private AuthScope authScope;
     private Map<String, String> headers;
     private SslConfig sslConfig;
-    private HttpClientConnectionManager connectionManager;
     private int maxTotalConnections;
     private int maxConnectionsPerRoute;
     private HttpRequestInterceptor firstRequestInterceptor;
@@ -125,16 +123,6 @@ public class HttpClientConfig
     public void setAuthConfig(AuthConfig authConfig)
     {
         this.authConfig = authConfig;
-    }
-
-    public HttpClientConnectionManager getConnectionManager()
-    {
-        return connectionManager;
-    }
-
-    public void setConnectionManager(HttpClientConnectionManager connectionManager)
-    {
-        this.connectionManager = connectionManager;
     }
 
     public int getMaxTotalConnections()

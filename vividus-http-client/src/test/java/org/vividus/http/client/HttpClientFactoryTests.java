@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.ServiceUnavailableRetryStrategy;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.DnsResolver;
-import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.auth.BasicScheme;
@@ -344,8 +343,6 @@ class HttpClientFactoryTests
 
     private void testBuildHttpClientUsingConfig(Consumer<HttpClient> httpClientVerifier) throws GeneralSecurityException
     {
-        HttpClientConnectionManager connectionManager = mock(HttpClientConnectionManager.class);
-        config.setConnectionManager(connectionManager);
         int maxTotalConnections = 10;
         config.setMaxTotalConnections(maxTotalConnections);
         int maxConnectionsPerRoute = 2;
@@ -384,7 +381,6 @@ class HttpClientFactoryTests
             verify(mockedHttpClientBuilder).build();
             verify(mockedHttpClientBuilder).setRetryHandler(handler);
             verify(mockedHttpClientBuilder).setServiceUnavailableRetryStrategy(serviceUnavailableRetryStrategy);
-            verify(mockedHttpClientBuilder).setConnectionManager(connectionManager);
             verify(mockedHttpClientBuilder).setMaxConnTotal(maxTotalConnections);
             verify(mockedHttpClientBuilder).setMaxConnPerRoute(maxConnectionsPerRoute);
             verify(mockedHttpClientBuilder).addInterceptorFirst(firstRequestInterceptor);
