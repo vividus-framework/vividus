@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,17 @@
 
 package org.vividus;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.jbehave.core.embedder.PerformableTree;
+import org.jbehave.core.model.Story;
 import org.jbehave.core.steps.StepCollector.Stage;
 
 public class BatchedPerformableTree extends PerformableTree
 {
+    private static final IdenticalStoryNamesResolver IDENTICAL_STORY_NAMES_RESOLVER = new IdenticalStoryNamesResolver();
+
     private boolean failFast;
     private boolean reportBeforeStories;
     private boolean reportAfterStories;
@@ -28,6 +34,14 @@ public class BatchedPerformableTree extends PerformableTree
     @Override
     public void performBeforeOrAfterStories(RunContext context, Stage stage)
     {
+        if (Stage.BEFORE.equals(stage))
+        {
+            List<Story> currentBatchStories = getRoot().getStories().stream()
+                    .filter(p -> p.getStatus() == null)
+                    .map(PerformableStory::getStory)
+                    .collect(Collectors.toList());
+            IDENTICAL_STORY_NAMES_RESOLVER.resolveIdenticalNames(currentBatchStories);
+        }
         if (reportBeforeStories && Stage.BEFORE.equals(stage) || Stage.AFTER.equals(stage)
                 && (reportAfterStories || failFast && !context.getFailures().isEmpty()))
         {

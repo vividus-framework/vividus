@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,19 @@
 
 package org.vividus;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import org.jbehave.core.embedder.PerformableTree.PerformableRoot;
+import org.jbehave.core.embedder.PerformableTree.PerformableStory;
 import org.jbehave.core.embedder.PerformableTree.RunContext;
+import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.failures.BatchFailures;
+import org.jbehave.core.model.Story;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.steps.StepCollector.Stage;
 import org.junit.jupiter.api.Test;
@@ -89,6 +95,40 @@ class BatchedPerformableTreeTests
         testPerformBeforeOrAfterStoriesPerformNone(Stage.AFTER);
     }
 
+    @Test
+    void shouldResolveIdenticalNamesBeforeStories()
+    {
+        PerformableRoot root = batchedPerformableTree.getRoot();
+        Story storyFromPreviousBatch = mock();
+        PerformableStory processedStoryFromPreviousBatch = mock();
+        when(processedStoryFromPreviousBatch.getStatus()).thenReturn(Status.SUCCESSFUL);
+        when(processedStoryFromPreviousBatch.getStory()).thenReturn(storyFromPreviousBatch);
+        Story storyName = new Story("file:/tests/name.story");
+        Story storyFolderName = new Story("file:/tests/folder/name.story");
+        root.add(processedStoryFromPreviousBatch);
+        verify(storyFromPreviousBatch).getPath();
+        root.add(createPerformableStory(storyName));
+        root.add(createPerformableStory(storyFolderName));
+        batchedPerformableTree.performBeforeOrAfterStories(runContext, Stage.BEFORE);
+        verifyNoMoreInteractions(storyFromPreviousBatch);
+        assertEquals("folder/name.story", storyFolderName.getName());
+    }
+
+    @Test
+    void shouldNotInteractWithStoriesAfterStories()
+    {
+        PerformableRoot root = batchedPerformableTree.getRoot();
+        Story storyMock = mock();
+        PerformableStory performableStoryMock = mock();
+        when(performableStoryMock.getStory()).thenReturn(storyMock);
+        when(storyMock.getPath()).thenReturn("");
+        root.add(performableStoryMock);
+        verify(storyMock).getPath();
+
+        batchedPerformableTree.performBeforeOrAfterStories(runContext, Stage.AFTER);
+        verifyNoMoreInteractions(storyMock);
+    }
+
     private BatchFailures getFailures()
     {
         BatchFailures failures = new BatchFailures();
@@ -105,5 +145,10 @@ class BatchedPerformableTreeTests
     private void mockRunContext()
     {
         when(runContext.reporter()).thenReturn(mock(StoryReporter.class));
+    }
+
+    private PerformableStory createPerformableStory(Story story)
+    {
+        return new PerformableStory(story, null, false);
     }
 }

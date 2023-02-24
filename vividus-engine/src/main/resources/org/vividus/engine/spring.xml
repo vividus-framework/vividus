@@ -40,13 +40,15 @@
 
     <bean id="testResourceLoader" class="org.vividus.resource.TestResourceLoader" />
 
+    <bean id="batchedPerformableTree" class="org.vividus.BatchedPerformableTree" />
+
     <bean id="storyReporterBuilder" class="org.vividus.ExtendedStoryReporterBuilder">
         <property name="reportFailureTrace" value="true" />
         <property name="storyReporter" ref="storyReporter" />
         <property name="codeLocation" value="${bdd.report-directory}" />
         <property name="formats" value="${bdd.configuration.formats}" />
         <property name="pathResolver">
-            <bean class="org.jbehave.core.reporters.FilePrintStreamFactory.ResolveToSimpleName" />
+            <bean class="org.vividus.ResolveToUniqueSimpleName"/>
         </property>
     </bean>
 
@@ -83,9 +85,7 @@
         <property name="embedderMonitor">
             <bean class="org.vividus.log.LoggingEmbedderMonitor" />
         </property>
-        <property name="performableTree">
-            <bean class="org.vividus.BatchedPerformableTree" />
-        </property>
+        <property name="performableTree" ref="batchedPerformableTree"/>
         <property name="generateViewAfterBatches" value="${bdd.generate-view-after-batches}" />
     </bean>
 
