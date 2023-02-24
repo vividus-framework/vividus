@@ -26,7 +26,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.http.Header;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.auth.AuthScope;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.RedirectStrategy;
@@ -41,7 +40,6 @@ public class HttpClientConfig
 {
     private String baseUrl;
     private AuthConfig authConfig;
-    private AuthScope authScope;
     private Map<String, String> headers;
     private SslConfig sslConfig;
     private int maxTotalConnections;
@@ -77,11 +75,6 @@ public class HttpClientConfig
         this.baseUrl = baseUrl;
     }
 
-    public boolean hasAuthScope()
-    {
-        return authScope != null;
-    }
-
     public List<Header> createHeaders()
     {
         return headers != null ? headers.entrySet().stream().map(e -> new BasicHeader(e.getKey(), e.getValue()))
@@ -91,16 +84,6 @@ public class HttpClientConfig
     public void setHeaders(Map<String, String> headers)
     {
         this.headers = headers;
-    }
-
-    public AuthScope getAuthScope()
-    {
-        return authScope;
-    }
-
-    public void setAuthScope(AuthScope authScope)
-    {
-        this.authScope = authScope;
     }
 
     public SslConfig getSslConfig()

@@ -32,7 +32,6 @@ import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.auth.AuthScope;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.RedirectStrategy;
@@ -46,7 +45,6 @@ class HttpClientConfigTests
     private static final String BASE_URL = "http://somewh.ere/";
     private static final String USERNAME = "user";
     private static final String PASSWORD = "pass";
-    private static final AuthScope AUTH_SCOPE = new AuthScope("host", 1, "realm");
     private final HttpClientConfig config = new HttpClientConfig();
 
     @Test
@@ -92,33 +90,6 @@ class HttpClientConfigTests
         assertEquals(authConfig, config.getAuthConfig());
         assertEquals(PASSWORD, config.getAuthConfig().getPassword());
         assertEquals(USERNAME, config.getAuthConfig().getUsername());
-    }
-
-    @Test
-    void testHasAuthScopeExists()
-    {
-        config.setAuthScope(AUTH_SCOPE);
-        assertTrue(config.hasAuthScope());
-        assertEquals(AUTH_SCOPE, config.getAuthScope());
-    }
-
-    @Test
-    void testGetAndSetAuthScope()
-    {
-        config.setAuthScope(AUTH_SCOPE);
-        assertEquals(AUTH_SCOPE, config.getAuthScope());
-    }
-
-    @Test
-    void testHasAuthScopeNotExists()
-    {
-        assertFalse(config.hasAuthScope());
-    }
-
-    @Test
-    void testDefaultAuthScope()
-    {
-        assertNull(config.getAuthScope());
     }
 
     @Test

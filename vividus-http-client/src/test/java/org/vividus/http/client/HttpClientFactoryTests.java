@@ -82,7 +82,6 @@ import org.vividus.http.keystore.IKeyStoreFactory;
 @ExtendWith(MockitoExtension.class)
 class HttpClientFactoryTests
 {
-    private static final AuthScope AUTH_SCOPE = new AuthScope("host1", 1);
     private static final Map<String, String> HEADERS = Collections.singletonMap("header1", "value1");
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
@@ -125,7 +124,6 @@ class HttpClientFactoryTests
     void testBuildHttpClientWithFullAuthenticationNoPreemptive() throws GeneralSecurityException
     {
         config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
-        config.setAuthScope(AUTH_SCOPE);
 
         try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
                 BasicCredentialsProvider.class))
@@ -134,7 +132,8 @@ class HttpClientFactoryTests
 
             CredentialsProvider credentialsProvider = credentialsProviderConstruction.constructed().get(0);
             verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
-            verify(credentialsProvider).setCredentials(eq(AUTH_SCOPE), argThat(usernamePasswordCredentialsMatcher()));
+            verify(credentialsProvider).setCredentials(eq(AuthScope.ANY),
+                    argThat(usernamePasswordCredentialsMatcher()));
             verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
         }
     }
@@ -292,7 +291,6 @@ class HttpClientFactoryTests
         config.setBaseUrl(baseUrl);
         config.setHeaders(HEADERS);
         config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
-        config.setAuthScope(AUTH_SCOPE);
         config.setSkipResponseEntity(true);
         CookieStore cookieStore = new BasicCookieStore();
         config.setCookieStore(cookieStore);
@@ -328,7 +326,8 @@ class HttpClientFactoryTests
             verify(mockedHttpClientBuilder).setSSLContext(sslContext);
             CredentialsProvider credentialsProvider = credentialsProviderConstruction.constructed().get(0);
             verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
-            verify(credentialsProvider).setCredentials(eq(AUTH_SCOPE), argThat(usernamePasswordCredentialsMatcher()));
+            verify(credentialsProvider).setCredentials(eq(AuthScope.ANY),
+                    argThat(usernamePasswordCredentialsMatcher()));
             verify(mockedHttpClientBuilder).setDefaultCookieStore(cookieStore);
             verify(mockedHttpClientBuilder).setDnsResolver(resolver);
             verify(mockedHttpClientBuilder).useSystemProperties();

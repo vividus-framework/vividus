@@ -151,9 +151,8 @@ public class HttpClientFactory implements IHttpClientFactory
         }
         else
         {
-            AuthScope authScope = config.hasAuthScope() ? config.getAuthScope() : AuthScope.ANY;
             CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(authScope, credentials);
+            credentialsProvider.setCredentials(AuthScope.ANY, credentials);
             builder.setDefaultCredentialsProvider(credentialsProvider);
         }
     }
