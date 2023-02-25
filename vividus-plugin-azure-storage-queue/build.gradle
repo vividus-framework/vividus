@@ -4,7 +4,7 @@ dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-util')
     implementation project(':vividus-extension-azure')
-    implementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.9')
+    implementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.10')
     implementation(group: 'com.azure', name: 'azure-storage-queue')
     implementation(group: 'com.google.guava', name: 'guava', version: '31.1-jre')
 
