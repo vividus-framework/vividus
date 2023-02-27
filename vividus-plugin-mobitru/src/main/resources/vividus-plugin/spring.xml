@@ -4,38 +4,47 @@
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
-       profile="mobitru">
+       http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
 
-    <bean class="org.vividus.mobitru.selenium.MobitruCapabilitiesAdjuster" >
-        <property name="appFileName" value="${mobitru.app-file-name}" />
-    </bean>
+    <beans profile="mobitru">
+        <bean class="org.vividus.mobitru.selenium.MobitruCapabilitiesAdjuster" >
+            <property name="appFileName" value="${mobitru.app-file-name}" />
+        </bean>
 
-    <bean class="org.vividus.mobitru.mobileapp.MobitruApplicationActivator" >
-        <property name="bundleId" value="${mobile-application.bundle-id}" />
-    </bean>
+        <bean class="org.vividus.mobitru.mobileapp.MobitruApplicationActivator" >
+            <property name="bundleId" value="${mobile-application.bundle-id}" />
+        </bean>
 
-    <bean class="org.vividus.mobitru.client.MobitruFacadeImpl" >
-        <property name="waitForDeviceTimeout" value="${mobitru.device-wait-timeout}" />
-    </bean>
+        <bean class="org.vividus.mobitru.client.MobitruFacadeImpl" >
+            <property name="waitForDeviceTimeout" value="${mobitru.device-wait-timeout}" />
+            <property name="seleniumGridUrl" value="${selenium.grid.url}" />
+        </bean>
 
-    <bean class="org.vividus.mobitru.client.MobitruClient" >
-        <constructor-arg name="httpClient">
-            <bean class="org.vividus.http.client.HttpClient"
-                  factory-bean="httpClientFactory"
-                  factory-method="buildHttpClient">
-                <constructor-arg>
-                    <bean parent="httpClientConfig">
-                        <property name="headers">
-                            <util:map>
-                                <entry key="Authorization" value="Bearer ${selenium.grid.password}"/>
-                            </util:map>
-                        </property>
-                    </bean>
-                </constructor-arg>
-            </bean>
-        </constructor-arg>
-        <constructor-arg name="billingUnit" value="${selenium.grid.username}" />
-        <property name="apiUrl" value="https://${selenium.grid.host}" />
-    </bean>
+        <bean class="org.vividus.mobitru.client.MobitruClient" >
+            <constructor-arg name="httpClient">
+                <bean class="org.vividus.http.client.HttpClient"
+                      factory-bean="httpClientFactory"
+                      factory-method="buildHttpClient">
+                    <constructor-arg>
+                        <bean parent="httpClientConfig">
+                            <property name="headers">
+                                <util:map>
+                                    <entry key="Authorization" value="Bearer ${selenium.grid.password}"/>
+                                </util:map>
+                            </property>
+                        </bean>
+                    </constructor-arg>
+                </bean>
+            </constructor-arg>
+            <constructor-arg name="billingUnit" value="${selenium.grid.username}" />
+            <property name="apiUrl" value="https://${selenium.grid.host}" />
+        </bean>
+    </beans>
+
+    <beans profile="!no_ui">
+        <bean class="org.vividus.mobitru.MobitruConfigurationValidator" lazy-init="false">
+            <constructor-arg name="seleniumGridHost" value="${selenium.grid.host}" />
+            <constructor-arg name="seleniumGridUrl" value="${selenium.grid.url}" />
+        </bean>
+    </beans>
 </beans>
