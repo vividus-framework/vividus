@@ -29,24 +29,30 @@ Where `<producer-key>` is the key of the producer configuration which should be 
 
 === Steps
 
-==== *Send the data*
+==== *Send event with value*
 
-Sends the data to the provided topic with no key or partition.
+Sends the event with the value to the provided topic with no key or partition.
 
+[source,gherkin]
+----
+When I send event with value `$value` to `$producerKey` Kafka topic `$topic`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
 [source,gherkin]
 ----
 When I send data `$data` to `$producerKey` Kafka topic `$topic`
 ----
-* `$producerKey` - the key of Kafka producer configuration
-* `$data` - the data to send
-* `$topic` - the topic name
+* `$value` - The event value.
+* `$producerKey` - The key of Kafka producer configuration.
+* `$topic` - The topic name.
 
 === Examples
 
-.Send the data to the Kafka topic
+.Send the event to the Kafka topic
 [source,gherkin]
 ----
-When I send data `my-data` to `dev` Kafka topic `my-topic`
+When I send event with value `my-data` to `dev` Kafka topic `my-topic`
 ----
 
 == Consumer
@@ -84,78 +90,106 @@ Starts the Kafka consumer with the provided configuration to listen the specifie
 
 [source,gherkin]
 ----
+When I start consuming events from `$consumerKey` Kafka topics `$topics`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
+[source,gherkin]
+----
 When I start consuming messages from `$consumerKey` Kafka topics `$topics`
 ----
-* `$consumerKey` - the key of the Kafka consumer configuration
-* `$topics` - the comma-separated set of topics to listen
 
-==== *Drain/Peek the consumed messages*
+* `$consumerKey` - The key of the Kafka consumer configuration.
+* `$topics` - The comma-separated set of topics to listen.
 
-Drains/Peeks the consumed messaged to the specified variable. If the consumer is not stopped, the new messages might arrive after the draining. If the consumer is stopped, all the messages received from the consumer start or after the last draining operation are stored to the variable.
+==== *Drain/Peek the consumed events*
 
+Drains/Peeks the consumed events to the specified variable. If the consumer is not stopped, the new events might arrive after the draining. If the consumer is stopped, all the events received from the consumer start or after the last draining operation are stored to the variable.
+
+[source,gherkin]
+----
+When I $queueOperation consumed `$consumerKey` Kafka events to $scopes variable `$variableName`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
 [source,gherkin]
 ----
 When I $queueOperation consumed `$consumerKey` Kafka messages to $scopes variable `$variableName`
 ----
-* `$queueOperation` -  `DRAIN` - saves the messages consumed since the last drain or from the consumption start and moves the consumer cursor to the position after the last consumed message, `PEEK` - saves the messages consumed since the last drain or from the consumption start and doesn't change the consumer cursor position
-* `$consumerKey` - the key of the Kafka consumer configuration
+
+* `$queueOperation` -  `DRAIN` - saves the events consumed since the last drain or from the consumption start and moves the consumer cursor to the position after the last consumed event, `PEEK` - saves the events consumed since the last drain or from the consumption start and doesn't change the consumer cursor position
+* `$consumerKey` - The key of the Kafka consumer configuration.
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - the variable name to store the messages. The messages are accessible via zero-based index, e.g. `${my-var[0]}` will return the first received message.
+* `$variableName` - The variable name to store the events. The events are accessible via zero-based index, e.g. `${my-var[0]}` will return the first received event.
 
-==== *Wait for the messages*
+==== *Wait for the events*
 
-Waits until the count of the consumed messaged (from the consumer start or after the last draining operation) matches to the rule or until the timeout is exceeded.
+Waits until the count of the consumed events (from the consumer start or after the last draining operation) matches to the rule or until the timeout is exceeded.
 
+[source,gherkin]
+----
+When I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka events is $comparisonRule `$expectedCount`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
 [source,gherkin]
 ----
 When I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka messages is $comparisonRule `$expectedCount`
 ----
-* `$timeout` - the maximum time to wait for the messages in {durations-format-link} format.
-* `$consumerKey` - the key of the Kafka consumer configuration.
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[the comparison rule].
-* `$expectedCount` - the expected count of the messages to be matched by the rule.
+
+* `$timeout` - The maximum time to wait for the events in {durations-format-link} format.
+* `$consumerKey` - The key of the Kafka consumer configuration.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$expectedCount` - The expected count of the events to be matched by the rule.
 
 ==== *Stop the consumer*
 
-Stops the Kafka consumer started by the corresponding step before. All recorded messages are kept and can be drained into the variable using the step described above.
+Stops the Kafka consumer started by the corresponding step before. All recorded events are kept and can be drained into the variable using the step described above.
 
+[source,gherkin]
+----
+When I stop consuming events from `$consumerKey` Kafka
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
 [source,gherkin]
 ----
 When I stop consuming messages from `$consumerKey` Kafka
 ----
-* `$consumerKey` - the key of the Kafka consumer configuration
+
+* `$consumerKey` - The key of the Kafka consumer configuration.
 
 === Examples
 
-.Consume messages from the Kafka topic
+.Consume events from the Kafka topic
 [source,gherkin]
 ----
-When I start consuming messages from `dev` Kafka topics `my-topic-1, my-topic-2`
-!-- Perform any actions triggering the publishing of messages to Kafka
-When I wait with `PT30S` timeout until count of consumed `dev` Kafka messages is greater than `1`
-When I stop consuming messages from `dev` Kafka
-When I drain consumed Kafka messages to scenario variable `consumed-messages`
-Then `${consumed-messages[0]}` is equal to `some-expected-message`
+When I start consuming events from `dev` Kafka topics `my-topic-1, my-topic-2`
+!-- Perform any actions triggering the publishing of events to Kafka
+When I wait with `PT30S` timeout until count of consumed `dev` Kafka events is greater than `1`
+When I stop consuming events from `dev` Kafka
+When I drain consumed Kafka events to scenario variable `consumed-events`
+Then `${consumed-events[0]}` is equal to `some-expected-event`
 ----
 
-.Drain messages while listener is rinning
+.Drain events while listener is running
 [source,gherkin]
 ----
-When I start consuming messages from `prod` Kafka topics `my-topic-1, my-topic-2`
-!-- Perform any actions triggering the publishing of messages to Kafka
-When I drain consumed `prod` Kafka messages to scenario variable `messages-after-action-X`
-!-- Perform more actions triggering the publishing of messages to Kafka
-When I drain consumed `prod` Kafka messages to scenario variable `messages-after-action-Y`
-When I stop consuming messages from `prod` Kafka
+When I start consuming events from `prod` Kafka topics `my-topic-1, my-topic-2`
+!-- Perform any actions triggering the publishing of events to Kafka
+When I drain consumed `prod` Kafka events to scenario variable `events-after-action-X`
+!-- Perform more actions triggering the publishing of events to Kafka
+When I drain consumed `prod` Kafka events to scenario variable `events-after-action-Y`
+When I stop consuming events from `prod` Kafka
 ----
 
-.Peek messages while listener is rinning
+.Peek events while listener is running
 [source,gherkin]
 ----
-When I start consuming messages from `prod` Kafka topics `my-topic-1, my-topic-2`
-!-- Perform any actions triggering the publishing of messages to Kafka
-When I drain consumed `prod` Kafka messages to scenario variable `messages-after-action-X`
-!-- Perform more actions triggering the publishing of messages to Kafka
-When I peek consumed `prod` Kafka messages to scenario variable `messages-after-action-Y`
-When I stop consuming messages from `prod` Kafka
+When I start consuming events from `prod` Kafka topics `my-topic-1, my-topic-2`
+!-- Perform any actions triggering the publishing of events to Kafka
+When I drain consumed `prod` Kafka events to scenario variable `events-after-action-X`
+!-- Perform more actions triggering the publishing of events to Kafka
+When I peek consumed `prod` Kafka events to scenario variable `events-after-action-Y`
+When I stop consuming events from `prod` Kafka
 ----
