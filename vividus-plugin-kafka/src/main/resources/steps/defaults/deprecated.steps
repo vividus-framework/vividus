@@ -1,0 +1,18 @@
+Composite: When I send data `$data` to `$producerKey` Kafka topic `$topic`
+!-- WARNING: This step "When I send data `$data` to `$producerKey` Kafka topic `$topic`" is deprecated and will be removed in VIVIDUS 0.6.0
+When I send event with value `<data>` to `<producerKey>` Kafka topic `<topic>`
+
+
+Composite: When I start consuming messages from `$consumerKey` Kafka topics `$topics`
+!-- WARNING: This step "When I start consuming messages from `$consumerKey` Kafka topics `$topics`" is deprecated and will be removed in VIVIDUS 0.6.0
+When I start consuming events from `<consumerKey>` Kafka topics `<topics>`
+
+
+Composite: When I stop consuming messages from `$consumerKey` Kafka
+!-- WARNING: This step "When I stop consuming messages from `$consumerKey` Kafka" is deprecated and will be removed in VIVIDUS 0.6.0
+When I stop consuming events from `<consumerKey>` Kafka
+
+
+Composite: When I $queueOperation consumed `$consumerKey` Kafka messages to $scopes variable `$variableName`
+!-- WARNING: This step "When I $queueOperation consumed `$consumerKey` Kafka messages to $scopes variable `$variableName`" is deprecated and will be removed in VIVIDUS 0.6.0
+When I <queueOperation> consumed `<consumerKey>` Kafka events to <scopes> variable `<variableName>`

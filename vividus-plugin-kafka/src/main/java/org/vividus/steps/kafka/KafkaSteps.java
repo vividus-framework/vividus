@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class KafkaSteps
     private static final int WAIT_TIMEOUT_IN_MINUTES = 10;
 
     private static final Class<?> LISTENER_KEY = GenericMessageListenerContainer.class;
-    private static final Class<?> MESSAGES_KEY = ConsumerRecord.class;
+    private static final Class<?> EVENTS_KEY = ConsumerRecord.class;
 
     private final Map<String, KafkaTemplate<String, String>> kafkaTemplates;
     private final Map<String, DefaultKafkaConsumerFactory<Object, Object>> consumerFactories;
@@ -113,19 +113,19 @@ public class KafkaSteps
     }
 
     /**
-     * Send the data to the provided topic with no key or partition.
-     * @param data                  The data to send
+     * Send the event with the specified value to the provided topic with no key or partition.
+     * @param value                 The event value
      * @param producerKey           The key of the producer configuration
      * @param topic                 The topic name
      * @throws InterruptedException If the current thread was interrupted while waiting
      * @throws ExecutionException   If the computation threw an exception
      * @throws TimeoutException     If the wait timed out
      */
-    @When("I send data `$data` to `$producerKey` Kafka topic `$topic`")
-    public void sendData(String data, String producerKey, String topic) throws InterruptedException, ExecutionException,
-        TimeoutException
+    @When("I send event with value `$value` to `$producerKey` Kafka topic `$topic`")
+    public void sendEvent(String value, String producerKey, String topic)
+            throws InterruptedException, ExecutionException, TimeoutException
     {
-        kafkaTemplates.get(producerKey).send(topic, data).get(WAIT_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES);
+        kafkaTemplates.get(producerKey).send(topic, value).get(WAIT_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES);
     }
 
     /**
@@ -135,25 +135,25 @@ public class KafkaSteps
      * @param consumerKey The key of the producer configuration
      * @param topics      The comma-separated set of topics to listen
      */
-    @When("I start consuming messages from `$consumerKey` Kafka topics `$topics`")
+    @When("I start consuming events from `$consumerKey` Kafka topics `$topics`")
     public void startKafkaListener(String consumerKey, Set<String> topics)
     {
         stopListener(getListeners().remove(consumerKey), false);
-        BlockingQueue<String> messageQueue = new LinkedBlockingDeque<>();
-        testContext.get(MESSAGES_KEY, HashMap::new).put(consumerKey, messageQueue);
+        BlockingQueue<String> eventValueQueue = new LinkedBlockingDeque<>();
+        testContext.get(EVENTS_KEY, HashMap::new).put(consumerKey, eventValueQueue);
         ContainerProperties containerProperties = new ContainerProperties(topics.toArray(new String[0]));
         containerProperties.setMessageListener(
-                (MessageListener<String, String>) data -> messageQueue.add(data.value()));
+                (MessageListener<String, String>) data -> eventValueQueue.add(data.value()));
         GenericMessageListenerContainer<String, String> container = new KafkaMessageListenerContainer<>(
                 consumerFactories.get(consumerKey), containerProperties);
         container.start();
         getListeners().put(consumerKey, container);
 
-        LOGGER.info("Kafka message listener is started");
+        LOGGER.info("Kafka event listener is started");
     }
 
     /**
-     * Waits until the count of the consumed messaged (from the consumer start or after the last draining operation)
+     * Waits until the count of the consumed messages (from the consumer start or after the last draining operation)
      * matches to the rule or until the timeout is exceeded.
      *
      * @param timeout        The maximum time to wait for the messages in ISO-8601 format
@@ -168,46 +168,80 @@ public class KafkaSteps
      *                       <li>not equal to (!=)</li>
      *                       </ul>
      * @param expectedCount  The expected count of the messages to be matched by the rule
+     * @deprecated Use step: "When I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka events is
+     * $comparisonRule `$expectedCount`"
      */
+    @Deprecated(since = "0.5.6", forRemoval = true)
     @When("I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka messages is $comparisonRule"
             + " `$expectedCount`")
     public void waitForKafkaMessages(Duration timeout, String consumerKey, ComparisonRule comparisonRule,
             int expectedCount)
     {
+        LOGGER.warn("The step: \"When I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka "
+                + "events is $comparisonRule `$expectedCount`\" is deprecated and will be removed in VIVIDUS 0.6.0. "
+                + "Use step: \"`$expectedCount`\"");
         Matcher<Integer> countMatcher = comparisonRule.getComparisonRule(expectedCount);
         Integer result = new DurationBasedWaiter(timeout, Duration.ofSeconds(1)).wait(
-                () -> getMessagesBy(consumerKey).size(),
+                () -> getEventsBy(consumerKey).size(),
                 countMatcher::matches);
         softAssert.assertThat("Total count of consumed Kafka messages", result, countMatcher);
     }
 
-    private BlockingQueue<String> getMessagesBy(String key)
+    /**
+     * Waits until the count of the consumed events (from the consumer start or after the last draining operation)
+     * matches to the rule or until the timeout is exceeded.
+     *
+     * @param timeout        The maximum time to wait for the event in ISO-8601 format
+     * @param consumerKey    The key of the producer configuration
+     * @param comparisonRule The rule to match the quantity of events. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param expectedCount  The expected count of the events to be matched by the rule
+     */
+    @When("I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka events is $comparisonRule"
+            + " `$expectedCount`")
+    public void waitForKafkaEvents(Duration timeout, String consumerKey, ComparisonRule comparisonRule,
+            int expectedCount)
     {
-        return testContext.<Map<String, BlockingQueue<String>>>get(MESSAGES_KEY).get(key);
+        Matcher<Integer> countMatcher = comparisonRule.getComparisonRule(expectedCount);
+        Integer result = new DurationBasedWaiter(timeout, Duration.ofSeconds(1)).wait(
+                () -> getEventsBy(consumerKey).size(), countMatcher::matches);
+        softAssert.assertThat("Total count of consumed Kafka events", result, countMatcher);
+    }
+
+    private BlockingQueue<String> getEventsBy(String key)
+    {
+        return testContext.<Map<String, BlockingQueue<String>>>get(EVENTS_KEY).get(key);
     }
 
     /**
-     * Stops the Kafka consumer started by the corresponding step before. All recorded messages are kept and can be
+     * Stops the Kafka consumer started by the corresponding step before. All recorded events are kept and can be
      * drained into the variable using the step described above.
      * @param consumerKey The key of the producer configuration
      */
-    @When("I stop consuming messages from `$consumerKey` Kafka")
+    @When("I stop consuming events from `$consumerKey` Kafka")
     public void stopKafkaListener(String consumerKey)
     {
         stopListener(getListeners().remove(consumerKey), true);
     }
 
     /**
-     * Drains the consumed messaged to the specified variable. If the consumer is not stopped, the new messages might
-     * arrive after the draining. If the consumer is stopped, all the messages received from the consumer start or
+     * Drains the consumed events to the specified variable. If the consumer is not stopped, the new events might
+     * arrive after the draining. If the consumer is stopped, all the events received from the consumer start or
      * after the last draining operation are stored to the variable.
      * @param queueOperation The one of: <br>
      *                       <ul>
-     *                       <li><b>PEEK</b> - saves the messages consumed since the last drain or from the
+     *                       <li><b>PEEK</b> - saves the events consumed since the last drain or from the
      *                       consumption start and doesn't change the consumer cursor position
-     *                       <li><b>DRAIN</b> - saves the messages consumed since the last drain or from the
+     *                       <li><b>DRAIN</b> - saves the events consumed since the last drain or from the
      *                       consumption start and moves the consumer cursor
-     *                       to the position after the last consumed message
+     *                       to the position after the last consumed event
      *                       </ul>
      * @param consumerKey    The key of the producer configuration
      * @param scopes         The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
@@ -218,14 +252,14 @@ public class KafkaSteps
      *                       <li><b>STORY</b> - the variable will be available within the whole story,
      *                       <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      *                       </ul>
-     * @param variableName   the variable name to store the messages. The messages are accessible via zero-based index,
-     *                       e.g. `${my-var[0]}` will return the first received message.
+     * @param variableName   the variable name to store the events. The events are accessible via zero-based index,
+     *                       e.g. `${my-var[0]}` will return the first received event.
      */
-    @When("I $queueOperation consumed `$consumerKey` Kafka messages to $scopes variable `$variableName`")
-    public void processKafkaMessages(QueueOperation queueOperation, String consumerKey, Set<VariableScope> scopes,
+    @When("I $queueOperation consumed `$consumerKey` Kafka events to $scopes variable `$variableName`")
+    public void processKafkaEvents(QueueOperation queueOperation, String consumerKey, Set<VariableScope> scopes,
             String variableName)
     {
-        variableContext.putVariable(scopes, variableName, queueOperation.performOn(getMessagesBy(consumerKey)));
+        variableContext.putVariable(scopes, variableName, queueOperation.performOn(getEventsBy(consumerKey)));
     }
 
     @AfterStory
@@ -242,12 +276,12 @@ public class KafkaSteps
         if (container != null)
         {
             container.stop();
-            LOGGER.info("Kafka message listener is stopped");
+            LOGGER.info("Kafka event listener is stopped");
         }
         else if (throwExceptionIfNoListener)
         {
             throw new IllegalStateException(
-                    "No Kafka message listener is running, did you forget to start consuming messages?");
+                    "No Kafka event listener is running, did you forget to start consuming events?");
         }
     }
 
@@ -261,22 +295,22 @@ public class KafkaSteps
         PEEK
         {
             @Override
-            List<String> performOn(BlockingQueue<String> messagesQueue)
+            List<String> performOn(BlockingQueue<String> eventsQueue)
             {
-                return new ArrayList<>(messagesQueue);
+                return new ArrayList<>(eventsQueue);
             }
         },
         DRAIN
         {
             @Override
-            List<String> performOn(BlockingQueue<String> messagesQueue)
+            List<String> performOn(BlockingQueue<String> eventsQueue)
             {
-                List<String> messages = new ArrayList<>();
-                messagesQueue.drainTo(messages);
-                return messages;
+                List<String> events = new ArrayList<>();
+                eventsQueue.drainTo(events);
+                return events;
             }
         };
 
-        abstract List<String> performOn(BlockingQueue<String> messagesQueue);
+        abstract List<String> performOn(BlockingQueue<String> eventsQueue);
     }
 }

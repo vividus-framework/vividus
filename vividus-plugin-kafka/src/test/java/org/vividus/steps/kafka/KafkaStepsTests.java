@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ class KafkaStepsTests
 
     private static final Class<?> LISTENER_KEY = GenericMessageListenerContainer.class;
 
-    private static final String LISTENER_IS_STOPPED = "Kafka message listener is stopped";
+    private static final String LISTENER_IS_STOPPED = "Kafka event listener is stopped";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(KafkaSteps.class);
 
@@ -90,7 +90,7 @@ class KafkaStepsTests
         mockListeners(new HashMap<>());
         IllegalStateException exception = assertThrows(IllegalStateException.class,
                 () -> kafkaSteps.stopKafkaListener(KEY2));
-        assertEquals("No Kafka message listener is running, did you forget to start consuming messages?",
+        assertEquals("No Kafka event listener is running, did you forget to start consuming events?",
                 exception.getMessage());
     }
 
@@ -151,7 +151,7 @@ class KafkaStepsTests
             assertEquals(construction.constructed().get(1), listeners.get(consumerKey));
             assertThat(construction.constructed(), hasSize(2));
 
-            String listenerIsStarted = "Kafka message listener is started";
+            String listenerIsStarted = "Kafka event listener is started";
             assertThat(logger.getLoggingEvents(),
                     is(List.of(info(listenerIsStarted),
                                info(LISTENER_IS_STOPPED),
