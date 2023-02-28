@@ -347,15 +347,15 @@ Gets a collection of elements by locator and checks that they are sorted by
 their text in the specified order. The collection should have more than 1
 element with not empty text, otherwise the step fails.
 
-.Deprecated syntax
-[source,gherkin]
-----
-Then elements located $locator are sorted by text in $sortingOrder order
-----
-
 [source,gherkin]
 ----
 Then elements located by $locator are sorted by text in $sortingOrder order
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
+[source,gherkin]
+----
+Then elements located $locator are sorted by text in $sortingOrder order
 ----
 
 * `$locator` - <<_locator>>.
