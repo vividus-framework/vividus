@@ -1,7 +1,6 @@
 project.description = 'VIVIDUS extension for Selenium'
 
  ext {
-     seleniumVersion = '4.8.1'
      browserupProxyVersion = '2.2.8'
 }
 
@@ -13,9 +12,10 @@ project.description = 'VIVIDUS extension for Selenium'
      implementation project(':vividus-util')
      implementation project(':vividus-soft-assert')
 
-     api(group: 'org.seleniumhq.selenium', name: 'selenium-api', version: "${seleniumVersion}")
-     api(group: 'org.seleniumhq.selenium', name: 'selenium-support', version: "${seleniumVersion}")
-     api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver', version: "${seleniumVersion}")
+     api platform(group: 'org.seleniumhq.selenium', name: 'selenium-bom', version: '4.8.1')
+     api(group: 'org.seleniumhq.selenium', name: 'selenium-api')
+     api(group: 'org.seleniumhq.selenium', name: 'selenium-support')
+     api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver')
      api(group: 'io.appium', name: 'java-client', version: '8.3.0')
 
      api(group: 'com.github.pazone', name: 'ashot', version: 'd62d99755c')
