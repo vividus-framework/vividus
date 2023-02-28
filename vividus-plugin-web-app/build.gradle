@@ -1,9 +1,5 @@
 project.description = 'VIVIDUS plugin for testing web applications'
 
-ext {
-    seleniumVersion = '4.8.1'
-}
-
 dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-http-client')
@@ -15,11 +11,12 @@ dependencies {
     api project(':vividus-extension-selenium')
 
     implementation(group: 'com.codeborne', name: 'selenide', version: '6.12.0')
-    implementation(group: 'org.seleniumhq.selenium', name: 'selenium-chrome-driver', version: "${seleniumVersion}")
-    implementation(group: 'org.seleniumhq.selenium', name: 'selenium-edge-driver', version: "${seleniumVersion}")
-    implementation(group: 'org.seleniumhq.selenium', name: 'selenium-firefox-driver', version: "${seleniumVersion}")
-    implementation(group: 'org.seleniumhq.selenium', name: 'selenium-ie-driver', version: "${seleniumVersion}")
-    implementation(group: 'org.seleniumhq.selenium', name: 'selenium-safari-driver', version: "${seleniumVersion}")
+    api platform(group: 'org.seleniumhq.selenium', name: 'selenium-bom', version: '4.8.1')
+    implementation(group: 'org.seleniumhq.selenium', name: 'selenium-chrome-driver')
+    implementation(group: 'org.seleniumhq.selenium', name: 'selenium-edge-driver')
+    implementation(group: 'org.seleniumhq.selenium', name: 'selenium-firefox-driver')
+    implementation(group: 'org.seleniumhq.selenium', name: 'selenium-ie-driver')
+    implementation(group: 'org.seleniumhq.selenium', name: 'selenium-safari-driver')
     implementation(group: 'junit', name: 'junit', version: '4.13.2')
     implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '5.3.2') {
         exclude group: 'com.github.docker-java'
