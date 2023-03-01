@@ -44,7 +44,7 @@ It's possible to receive ongoing updates about releases on GitHub through a subs
 +
 image::subscribe-to-releases.gif[Subscribe to releases,width=70%]
 
-== Contract Us
+== Contact Us
 
 There are various channels which you can ask questions on.
 
