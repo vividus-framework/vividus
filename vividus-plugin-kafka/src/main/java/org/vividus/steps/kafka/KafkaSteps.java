@@ -62,6 +62,8 @@ import org.vividus.util.property.IPropertyParser;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.variable.VariableScope;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class KafkaSteps
 {
     private static final String DOT = ".";
@@ -121,11 +123,34 @@ public class KafkaSteps
      * @throws ExecutionException   If the computation threw an exception
      * @throws TimeoutException     If the wait timed out
      */
+    @SuppressFBWarnings("NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS")
     @When("I send event with value `$value` to `$producerKey` Kafka topic `$topic`")
     public void sendEvent(String value, String producerKey, String topic)
             throws InterruptedException, ExecutionException, TimeoutException
     {
-        kafkaTemplates.get(producerKey).send(topic, value).get(WAIT_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES);
+        sendEventWithKey(null, value, producerKey, topic);
+    }
+
+    /**
+     * Sends the event with the key and the value to the provided topic. Events with the same event key are written to
+     * the <a href="https://kafka.apache.org/documentation/#intro_concepts_and_terms">same partition</a>, and Kafka
+     * guarantees that any consumer of a given topic-partition will always read that partition's events in exactly the
+     * same order as they were written.
+     *
+     * @param key                   The event key, all the events with the same event key are written to the same
+     * partition
+     * @param value                 The event value
+     * @param producerKey           The key of the producer configuration
+     * @param topic                 The topic name
+     * @throws InterruptedException If the current thread was interrupted while waiting
+     * @throws ExecutionException   If the computation threw an exception
+     * @throws TimeoutException     If the wait timed out
+     */
+    @When("I send event with key `$key` and value `$value` to `$producerKey` Kafka topic `$topic`")
+    public void sendEventWithKey(String key, String value, String producerKey, String topic)
+            throws InterruptedException, ExecutionException, TimeoutException
+    {
+        kafkaTemplates.get(producerKey).send(topic, key, value).get(WAIT_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES);
     }
 
     /**
@@ -135,15 +160,15 @@ public class KafkaSteps
      * @param consumerKey The key of the producer configuration
      * @param topics      The comma-separated set of topics to listen
      */
+    @SuppressWarnings("PreferMethodReference")
     @When("I start consuming events from `$consumerKey` Kafka topics `$topics`")
     public void startKafkaListener(String consumerKey, Set<String> topics)
     {
         stopListener(getListeners().remove(consumerKey), false);
-        BlockingQueue<String> eventValueQueue = new LinkedBlockingDeque<>();
+        BlockingQueue<ConsumerRecord<String, String>> eventValueQueue = new LinkedBlockingDeque<>();
         testContext.get(EVENTS_KEY, HashMap::new).put(consumerKey, eventValueQueue);
         ContainerProperties containerProperties = new ContainerProperties(topics.toArray(new String[0]));
-        containerProperties.setMessageListener(
-                (MessageListener<String, String>) data -> eventValueQueue.add(data.value()));
+        containerProperties.setMessageListener((MessageListener<String, String>) data -> eventValueQueue.add(data));
         GenericMessageListenerContainer<String, String> container = new KafkaMessageListenerContainer<>(
                 consumerFactories.get(consumerKey), containerProperties);
         container.start();
@@ -215,9 +240,9 @@ public class KafkaSteps
         softAssert.assertThat("Total count of consumed Kafka events", result, countMatcher);
     }
 
-    private BlockingQueue<String> getEventsBy(String key)
+    private BlockingQueue<ConsumerRecord<String, String>> getEventsBy(String key)
     {
-        return testContext.<Map<String, BlockingQueue<String>>>get(EVENTS_KEY).get(key);
+        return testContext.<Map<String, BlockingQueue<ConsumerRecord<String, String>>>>get(EVENTS_KEY).get(key);
     }
 
     /**
@@ -259,7 +284,13 @@ public class KafkaSteps
     public void processKafkaEvents(QueueOperation queueOperation, String consumerKey, Set<VariableScope> scopes,
             String variableName)
     {
-        variableContext.putVariable(scopes, variableName, queueOperation.performOn(getEventsBy(consumerKey)));
+        List<ConsumerRecord<String, String>> events = queueOperation.performOn(getEventsBy(consumerKey));
+        LOGGER.atInfo().addArgument(() -> events.stream().map(ConsumerRecord::key)
+                                                         .map(key -> key == null ? "<no key>" : key)
+                                                         .collect(Collectors.joining(", ")))
+                       .log("Saving events with the keys: {}");
+        List<String> eventValues = events.stream().map(ConsumerRecord::value).collect(Collectors.toList());
+        variableContext.putVariable(scopes, variableName, eventValues);
     }
 
     @AfterStory
@@ -295,7 +326,7 @@ public class KafkaSteps
         PEEK
         {
             @Override
-            List<String> performOn(BlockingQueue<String> eventsQueue)
+            List<ConsumerRecord<String, String>> performOn(BlockingQueue<ConsumerRecord<String, String>> eventsQueue)
             {
                 return new ArrayList<>(eventsQueue);
             }
@@ -303,14 +334,15 @@ public class KafkaSteps
         DRAIN
         {
             @Override
-            List<String> performOn(BlockingQueue<String> eventsQueue)
+            List<ConsumerRecord<String, String>> performOn(BlockingQueue<ConsumerRecord<String, String>> eventsQueue)
             {
-                List<String> events = new ArrayList<>();
+                List<ConsumerRecord<String, String>> events = new ArrayList<>();
                 eventsQueue.drainTo(events);
                 return events;
             }
         };
 
-        abstract List<String> performOn(BlockingQueue<String> eventsQueue);
+        abstract List<ConsumerRecord<String, String>>
+                performOn(BlockingQueue<ConsumerRecord<String, String>> blockingQueue);
     }
 }

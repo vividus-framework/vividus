@@ -55,6 +55,28 @@ When I send data `$data` to `$producerKey` Kafka topic `$topic`
 When I send event with value `my-data` to `dev` Kafka topic `my-topic`
 ----
 
+==== *Send event with key and value*
+
+Sends the event with the key and the value to the provided topic. Events with the same event key are written to the [same partition](https://kafka.apache.org/documentation/#intro_concepts_and_terms), and Kafka guarantees that any consumer of a given topic-partition will always read that partition's events in exactly the same order as they were written.
+
+[source,gherkin]
+----
+When I send event with key `$key` and value `$value` to `$producerKey` Kafka topic `$topic`
+----
+
+* `$key` - The event key, all the events with the same event key are written to the same partition.
+* `$value` - The event value.
+* `$producerKey` - The key of Kafka producer configuration.
+* `$topic` - The topic name.
+
+=== Examples
+
+.Send the event to the Kafka topic
+[source,gherkin]
+----
+When I send event with key `passenger car` and value `BMW x7` to `dev` Kafka topic `cars`
+----
+
 == Consumer
 === Properties
 
