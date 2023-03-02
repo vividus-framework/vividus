@@ -43,6 +43,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -75,6 +76,8 @@ class KafkaStepsIntegrationTests
     private static final String CONSUMER = "keyConsumer";
 
     private static final String PRODUCER = "keyProducer";
+
+    private static final String KEY = "key";
 
     private static final String ANY_DATA = "any-data";
 
@@ -177,5 +180,27 @@ class KafkaStepsIntegrationTests
         assertThat(logger.getLoggingEvents(), is(List.of(info(LISTENER_STARTED), info(LISTENER_STOPPED))));
 
         test.accept(kafkaSteps, variableContext);
+    }
+
+    @Test
+    void shouldProduceEventWithKey() throws InterruptedException, ExecutionException, TimeoutException
+    {
+        kafkaSteps.startKafkaListener(CONSUMER, Set.of(TOPIC));
+
+        kafkaSteps.sendEventWithKey(KEY + 1, ANY_DATA, PRODUCER, TOPIC);
+        kafkaSteps.sendEvent(ANY_DATA, PRODUCER, TOPIC);
+        kafkaSteps.sendEvent(ANY_DATA, PRODUCER, TOPIC);
+        kafkaSteps.sendEventWithKey(KEY + 2, ANY_DATA, PRODUCER, TOPIC);
+        kafkaSteps.sendEventWithKey(KEY + 3, ANY_DATA, PRODUCER, TOPIC);
+        kafkaSteps.sendEvent(ANY_DATA, PRODUCER, TOPIC);
+
+        kafkaSteps.waitForKafkaEvents(Duration.ofSeconds(10), CONSUMER, ComparisonRule.EQUAL_TO, 6);
+        kafkaSteps.stopKafkaListener(CONSUMER);
+        kafkaSteps.processKafkaEvents(QueueOperation.PEEK, CONSUMER, SCOPES, VARIABLE_NAME);
+
+        assertThat(logger.getLoggingEvents(), is(List.of(info(LISTENER_STARTED), info(LISTENER_STOPPED),
+                info("Saving events with the keys: {}", "key1, <no key>, <no key>, key2, key3, <no key>"))));
+        verify(variableContext).putVariable(SCOPES, VARIABLE_NAME,
+                List.of(ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA));
     }
 }
