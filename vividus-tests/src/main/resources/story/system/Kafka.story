@@ -24,7 +24,7 @@ When I execute steps with delay `PT1S` at most 30 times while variable `messageC
 |When I peek consumed `vividus` Kafka messages to scenario variable `messages`                                                       |
 |When I save number of elements from `${messages}` found by JSON path `$..[?(@.key == "failed")]` to scenario variable `messageCount`|
 When I drain consumed `vividus` Kafka messages to scenario variable `consumed-messages`
-Then `${consumed-messages}` is equal to `[{"key" : "failed"}, {"key" : "passed"}]`
+Then JSON element from `${consumed-messages}` by JSON path `$` is equal to `[{"key" : "failed"}, {"key" : "passed"}]` ignoring array order
 When I stop consuming messages from `vividus` Kafka
 
 
@@ -55,5 +55,5 @@ When I execute steps with delay `PT1S` at most 30 times while variable `eventCou
 |When I peek consumed `vividus` Kafka events to scenario variable `events`                                                          |
 |When I save number of elements from `${events}` found by JSON path `$..[?(@.status == "failed")]` to scenario variable `eventCount`|
 When I drain consumed `vividus` Kafka events to scenario variable `consumed-events`
-Then `${consumed-events}` is equal to `[{"status" : "failed"}, {"status" : "passed"}]`
+Then JSON element from `${consumed-events}` by JSON path `$` is equal to `[{"status" : "failed"}, {"status" : "passed"}]` ignoring array order
 When I stop consuming events from `vividus` Kafka

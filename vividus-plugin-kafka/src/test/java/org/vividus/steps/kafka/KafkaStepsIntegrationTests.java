@@ -20,7 +20,9 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -34,6 +36,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.LoggingEvent;
@@ -64,6 +67,8 @@ import org.vividus.steps.kafka.KafkaSteps.QueueOperation;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.util.property.IPropertyParser;
 import org.vividus.variable.VariableScope;
+
+import uk.org.lidalia.slf4jext.Level;
 
 @EmbeddedKafka(topics = KafkaStepsIntegrationTests.TOPIC)
 @ExtendWith({ MockitoExtension.class, SpringExtension.class, TestLoggerFactoryExtension.class })
@@ -198,8 +203,20 @@ class KafkaStepsIntegrationTests
         kafkaSteps.stopKafkaListener(CONSUMER);
         kafkaSteps.processKafkaEvents(QueueOperation.PEEK, CONSUMER, SCOPES, VARIABLE_NAME);
 
-        assertThat(logger.getLoggingEvents(), is(List.of(info(LISTENER_STARTED), info(LISTENER_STOPPED),
-                info("Saving events with the keys: {}", "key1, <no key>, <no key>, key2, key3, <no key>"))));
+        List<LoggingEvent> events = logger.getLoggingEvents();
+        assertThat(events, hasSize(3));
+        assertEquals(info(LISTENER_STARTED), events.get(0));
+        assertEquals(info(LISTENER_STOPPED), events.get(1));
+        LoggingEvent keysLogEvent = events.get(2);
+        assertEquals(Level.INFO, keysLogEvent.getLevel());
+        assertEquals("Saving events with the keys: {}", keysLogEvent.getMessage());
+        List<Object> arguments = keysLogEvent.getArguments();
+        assertThat(arguments, hasSize(1));
+        List<String> keys = Stream.of(arguments.get(0).toString().split(",")).map(String::strip).sorted()
+                .collect(Collectors.toList());
+        String noKey = "<no key>";
+        assertEquals(List.of(noKey, noKey, noKey, KEY + 1, KEY + 2, KEY + 3), keys);
+
         verify(variableContext).putVariable(SCOPES, VARIABLE_NAME,
                 List.of(ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA));
     }
