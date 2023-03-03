@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,14 +173,16 @@ class ExtendedConfigurationTests
     @Test
     void testSetCustomTableTransformers() throws IOException
     {
-        String name = "customTableTransformer";
-        TableTransformer tableTransformer = mock(TableTransformer.class);
+        var name = "customTableTransformer";
+        var tableAsString = "tableAsString";
+        var tableProperties = new TableProperties("", new Keywords(), new ParameterConverters());
+        TableTransformer tableTransformer = mock();
+        var transformed = "transformed";
+        when(tableTransformer.transform(tableAsString, tableParsers, tableProperties)).thenReturn(transformed);
         configuration.setCustomTableTransformers(Map.of(name, tableTransformer));
         configuration.init();
-        String tableAsString = "tableAsString";
-        TableProperties tableProperties = new TableProperties("", new Keywords(), new ParameterConverters());
-        configuration.tableTransformers().transform(name, tableAsString, null, tableProperties);
-        verify(tableTransformer).transform(tableAsString, null, tableProperties);
+        var result = configuration.tableTransformers().transform(name, tableAsString, tableParsers, tableProperties);
+        assertEquals(transformed, result);
     }
 
     private static BatchConfiguration argPathResolution(String compositePathPatterns)
