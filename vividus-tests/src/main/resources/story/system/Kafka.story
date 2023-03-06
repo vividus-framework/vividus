@@ -3,7 +3,7 @@ Meta:
     @requirementId 1049
 
 Scenario: Init
-Given I initialize story variable `topic` with value `l6eo4ztm-default`
+Given I initialize story variable `topic` with value `hnzzmrpq-default`
 
 Scenario: [DEPRECATED] Produce/consume data to/from Kafka
 Given I initialize scenario variable `message` with value `message-from-system-vividus-test-#{generate(regexify '[a-z]{8}')}`
