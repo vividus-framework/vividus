@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,11 @@ class DiffAttachmentPublisherTests
     @InjectMocks private DiffAttachmentPublisher diffAttachmentPublisher;
 
     @ParameterizedTest
-    @CsvSource({ "10, 0, '1\n2\n3',   '4\n3\n2\n', '--- variable\n+++ variable\n@@ -1,3 +1,3 @@\n-1\n-2\n+4\n 3\n+2'",
-                 "6, 1,  '1\n2\n3',   '4\n3\n2\n', '--- variable\n+++ variable\n@@ -1,3 +1,3 @@\n-1\n-2\n+4\n 3\n+2'",
-                 "6, 1,  '4\n3\n2\n', '1\n2\n3',   '--- variable\n+++ variable\n@@ -1,3 +1,3 @@\n-4\n-3\n+1\n 2\n+3'"
+    @CsvSource({
+        "10, 0, '1\n2\n3',   '4\n3\n2\n', '--- variable\n+++ variable\n@@ -1,3 +1,3 @@\n-1\n-2\n+4\n 3\n+2'",
+        "6, 1,  '1\n2\n3',   '4\n3\n2\n', '--- variable\n+++ variable\n@@ -1,3 +1,3 @@\n-1\n-2\n+4\n 3\n+2'",
+        "6, 1,  '4\n3\n2\n', '1\n2\n3',   '--- variable\n+++ variable\n@@ -1,3 +1,3 @@\n-4\n-3\n+1\n 2\n+3'",
+        "6, 1,  '${1}\n',    '1\n${3${4}}', '--- variable\n+++ variable\n@@ -1,1 +1,2 @@\n-\\${1}\n+1\n+\\${3\\${4}}'"
     })
     void shouldPublishAttachment(int textLengthDiffThreshold, int expectedPublisherInvocations,
         String left, String right, String udiff)
