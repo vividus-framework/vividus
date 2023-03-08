@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import javax.mail.Address;
-import javax.mail.Message;
-import javax.mail.Message.RecipientType;
-import javax.mail.MessagingException;
-
 import org.apache.commons.lang3.function.FailablePredicate;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
@@ -45,6 +40,11 @@ import org.vividus.email.service.ImapFetchService.EmailFetchServiceException;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.variable.VariableScope;
+
+import jakarta.mail.Address;
+import jakarta.mail.Message;
+import jakarta.mail.Message.RecipientType;
+import jakarta.mail.MessagingException;
 
 public class EmailSteps
 {

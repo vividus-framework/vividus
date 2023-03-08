@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
@@ -56,6 +53,9 @@ import org.vividus.email.service.ImapFetchService.EmailFetchServiceException;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.variable.VariableScope;
+
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class EmailStepsTests

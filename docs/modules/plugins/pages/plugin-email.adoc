@@ -22,7 +22,7 @@ include::partial$plugin-installation.adoc[]
 
 Polling timeout that can be calculated by `email.imap.wait.duration / email.imap.wait.retry-times` must be not less than `5` seconds.
 
-For IMAP configuration details see https://javaee.github.io/javamail/docs/api/com/sun/mail/imap/package-summary.html#properties[IMAP Properties].
+For IMAP configuration details see https://javadoc.io/static/com.sun.mail/jakarta.mail/2.0.1/jakarta.mail/com/sun/mail/imap/package-summary.html#properties[IMAP Properties].
 To use IMAP properties the `mail.imap.` prefix must be replaced with `email.server.<server-key>.properties.` e.g. `mail.imap.timeout` will become `email.server.<server-key>.properties.timeout`.
 The `<server-key>` is a logical name defining single server configuration and referred in steps.
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,13 @@ package org.vividus.email.service;
 
 import java.util.List;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-
 import org.apache.commons.lang3.function.FailablePredicate;
 import org.vividus.email.model.EmailMessage;
 import org.vividus.email.model.EmailServerConfiguration;
 import org.vividus.email.service.ImapFetchService.EmailFetchServiceException;
+
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
 
 public interface EmailFetchService
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ package org.vividus.email.converter;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-
 import org.apache.commons.lang3.function.FailablePredicate;
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
 
 class ParametersToMessagePredicateConverterTests
 {

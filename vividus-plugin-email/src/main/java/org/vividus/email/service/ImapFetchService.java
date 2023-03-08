@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,20 +29,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-import javax.mail.Authenticator;
-import javax.mail.FetchProfile;
-import javax.mail.FetchProfile.Item;
-import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.MessageRemovedException;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Store;
-import javax.mail.event.MessageCountEvent;
-import javax.mail.event.MessageCountListener;
-import javax.mail.search.SearchTerm;
-
 import org.apache.commons.lang3.function.FailablePredicate;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.vividus.email.factory.EmailMessageFactory;
@@ -54,6 +40,19 @@ import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.WaitMode;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import jakarta.mail.Authenticator;
+import jakarta.mail.FetchProfile;
+import jakarta.mail.FetchProfile.Item;
+import jakarta.mail.Folder;
+import jakarta.mail.Message;
+import jakarta.mail.MessageRemovedException;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Store;
+import jakarta.mail.event.MessageCountEvent;
+import jakarta.mail.event.MessageCountListener;
+import jakarta.mail.search.SearchTerm;
 
 public class ImapFetchService implements EmailFetchService
 {

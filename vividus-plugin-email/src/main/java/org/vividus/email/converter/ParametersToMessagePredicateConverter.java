@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@ package org.vividus.email.converter;
 import java.lang.reflect.Type;
 
 import javax.inject.Named;
-import javax.mail.Message;
-import javax.mail.MessagingException;
 
 import org.apache.commons.lang3.function.FailablePredicate;
 import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.jbehave.core.steps.Parameters;
 import org.vividus.email.factory.EmailParameterFilterFactory;
+
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
 
 @Named
 public class ParametersToMessagePredicateConverter
