@@ -33,7 +33,7 @@ Prerequisites: make sure [Java 17](https://adoptium.net/temurin/releases/?versio
 
 <br />
 
-[<img src="https://saucelabs.com/images/logo-saucelabs.png" width="180px" alt="SauceLabs">](https://saucelabs.com)
+[<img src="https://saucelabs.com/images/logo.svg" width="180px" alt="SauceLabs">](https://saucelabs.com)
 
 [SauceLabs](https://saucelabs.com/) has provided us with the tools and infrastructure necessary to build a high quality tool by testing our components on a range of browsers and platforms. Thank you.
 
