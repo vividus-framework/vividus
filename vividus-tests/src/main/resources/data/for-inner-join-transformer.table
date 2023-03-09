@@ -1,0 +1,6 @@
+|column1|joinID|column2|column3|
+|row11  |1     |row21  |row31  |
+|row12  |2     |row22  |row32  |
+|row13  |3     |row23  |row33  |
+|row133 |3     |row233 |row333 |
+|row14  |4     |row24  |row34  |

@@ -516,3 +516,97 @@ Examples:
 |value |1    |
 |value2|0    |
 ----
+
+== INNER_JOIN
+
+`INNER_JOIN` transformer combines rows from two tables whenever there are matching values between the columns.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`leftTableJoinColumn`
+|the column name for matching in the left table
+
+|`rightTableJoinColumn`
+|the column name for matching in the right table
+
+|`tables`
+|xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]-s to join
+|===
+
+- `left` table is the first xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] declared in `tables` parameter,
+- `right` table is the second xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] declared in `tables` parameter or table body put under the transformer definition.
+
+[IMPORTANT]
+====
+* The number of used xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]-s must be equal to 2 (`left` and `right`).
+* The column names of input tables must be different (except the column names for matching).
+* If any of tables is empty - the resulting table will also be empty.
+====
+
+.Usage of INNER_JOIN transformer with table body
+[source,gherkin]
+----
+{transformer=INNER_JOIN, leftTableJoinColumn=joinID, rightTableJoinColumn=joinID, tables=/tables/some-table.table}
+|joinID|column2|
+|5     |row25  |
+|3     |row23  |
+|1     |row21  |
+----
+
+where xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] from /tables/some-table.table:
+
+[source,gherkin]
+----
+|joinID|column1|
+|1     |row11  |
+|2     |row12  |
+|3     |row13  |
+|4     |row14  |
+----
+
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
+
+[source,gherkin]
+----
+|column1|joinID|column2|
+|row11  |1     |row21  |
+|row13  |3     |row23  |
+----
+
+.Usage of INNER_JOIN transformer with the same column names for matching
+[source,gherkin]
+----
+{transformer=INNER_JOIN, leftTableJoinColumn=joinID, rightTableJoinColumn=joinID, tables=/tables/test1.table;/tables/test2.table}
+----
+
+.Usage of INNER_JOIN transformer with the different column names for matching
+[source,gherkin]
+----
+{transformer=INNER_JOIN, leftTableJoinColumn=joinID1, rightTableJoinColumn=joinID2, tables=/tables/test1.table;/tables/test2.table}
+----
+
+.Usage of INNER_JOIN transformer with nested tables
+[source,gherkin]
+----
+{
+ transformer=INNER_JOIN,
+ leftTableJoinColumn=joinID,
+ rightTableJoinColumn=joinID,
+ tables=
+ \{
+   transformer=FROM_EXCEL\,
+   path=TestTemplate.xlsx\,
+   sheet=Data\, addresses=A2\;A3\,
+   column=joinID
+ \};
+ \{
+   transformer=FROM_EXCEL\,
+   path=TestTemplate.xlsx\,
+   sheet=Data\, range=B2:B4\,
+   column=joinID
+ \}
+}
+----
