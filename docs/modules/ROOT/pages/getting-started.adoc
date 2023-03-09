@@ -56,6 +56,43 @@ cd your_repository_name
 gradlew build
 ----
 
+== Get an existing tests project from GitHub
+. Login to http://github.com/[GitHub] (create a new account at first if you don't have any).
+. Navigate to the target VIVIDUS tests repo page (e.g. https://github.com/vividus-framework/vividus-sample-tests)
+. Create a fork of the target tests repo to be able to execute & modify scripts at your convinience:
+- click 'Fork' icon at the top-right corner of the screen
+- the prepopulated values cover the avg. user needs, so just click 'Create a fork' button. 
+- as the result you now have a copy of the target tests repo at your personal GitHub folder.
+. Clone your newly generated repository:
++
+[source,shell]
+----
+git clone --recursive your_generated_project_url.git
+----
+
+. Go to the local directory with your cloned repository:
++
+[source,shell]
+----
+cd your_repository_name
+----
+
+. Build the project:
++
+- macOS / Linux:
++
+[source,shell]
+----
+./gradlew build
+----
+
+- Windows:
++
+[source,cmd]
+----
+gradlew build
+----
+
 == Use IDE for the tests development
 
 Please choose any of the listed below IDEs.
