@@ -20,12 +20,30 @@ we highly recommend you read xref:ROOT:tests-configuration.adoc["How to cook VIV
     * for Windows: `%JAVA_HOME%/bin`
     * for macOS / Linux: `$JAVA_HOME/bin`
 
-== Create tests project
+== Setup test project
 . Login to http://github.com/[GitHub] (create a new account at first if you don't have any).
-. Generate your own project based on the starter project:
-- open https://github.com/vividus-framework/vividus-starter/generate[generator]
-- provide repository name for your test project
-- choose option to set visibility of your repository: `Public` or `Private` (`Private` is recommended from start, it can be changed in future)
+
+. Create test project repository:
++
+.generate your own empty project based on the starter project ...
+[%collapsible]
+====
+- Open https://github.com/vividus-framework/vividus-starter/generate[generator].
+- Provide repository name for your test project.
+- Choose option to set visibility of your repository: `Public` or `Private` (`Private` is recommended from start, it can be changed in future).
+- Click btn:[Create repository from template] button.
+====
++
+.or get an existing test project from GitHub.
+[%collapsible]
+====
+- Navigate to the target VIVIDUS tests repository page (e.g. https://github.com/vividus-framework/vividus-sample-tests[vividus-sample-tests])
+- Create a fork of the target tests repository to be able to execute and modify scripts at your convenience:
+    * click btn:[Fork] icon at the top-right corner of the screen,
+    * the pre-populated values cover the average user needs, so just click btn:[Create fork] button,
+    * as the result you now have a copy of the target tests repository at your personal GitHub account.
+====
+
 . Clone your newly generated repository:
 +
 [source,shell]
