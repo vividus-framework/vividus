@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ class ExcelSheetWriterTests
         return ResourceUtils.createTempFile("test", ".xlsx", null);
     }
 
-    @SuppressWarnings("checkstyle:MultipleStringLiteralsExtended")
+    @SuppressWarnings({ "checkstyle:MultipleStringLiterals", "checkstyle:MultipleStringLiteralsExtended" })
     private void assertDataInSheet(Path path, int index, String name) throws IOException
     {
         try (XSSFWorkbook myExcelBook = new XSSFWorkbook(FileUtils.openInputStream(new File(path.toString()))))

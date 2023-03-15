@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package org.vividus.ui.web.action;
 
+import static java.util.Map.entry;
+
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -100,7 +103,10 @@ public class FieldActions implements IFieldActions
     {
         if (field != null)
         {
-            field.sendKeys(Keys.chord(Keys.CONTROL, "a") + Keys.BACK_SPACE);
+            Entry<Keys, String> controllingKey = webDriverManager.isMacOs() ? entry(Keys.COMMAND, "Cmd")
+                    : entry(Keys.CONTROL, "Ctrl");
+            LOGGER.info("Attempting to clear field with [{} + A, Backspace] keys sequence", controllingKey.getValue());
+            field.sendKeys(Keys.chord(controllingKey.getKey(), "a") + Keys.BACK_SPACE);
         }
     }
 

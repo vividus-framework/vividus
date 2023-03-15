@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,6 +145,12 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
     public static boolean isAndroid(Capabilities capabilities)
     {
         return isPlatformName(capabilities, MobilePlatform.ANDROID);
+    }
+
+    @Override
+    public boolean isMacOs()
+    {
+        return isPlatformName(getCapabilities(), "MacOS");
     }
 
     private static boolean isPlatformName(Capabilities capabilities, String platformName)
