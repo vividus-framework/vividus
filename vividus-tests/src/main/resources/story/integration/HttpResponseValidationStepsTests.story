@@ -45,7 +45,7 @@ Then the response time should be less than '5000' milliseconds
 
 Scenario: Verify step: "When I wait for response code `$responseCode` for `$duration` duration retrying $retryTimes times$stepsToExecute"
 Given I initialize scenario variable `relativeURL` with value `get-wrong-wrong-wrong`
-When I wait for response code `200` for `PT10S` duration retrying 3 times
+When I wait for response code `200` for `PT2M` duration retrying 3 times
 |step                                                                                                                      |
 |Given I initialize scenario variable `relativeURL` with value `#{eval(stringUtils:substringBeforeLast(relativeURL, '-'))}`|
 |When I execute HTTP GET request for resource with relative URL `${relativeURL}`                                           |

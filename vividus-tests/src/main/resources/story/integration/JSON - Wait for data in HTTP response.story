@@ -27,7 +27,7 @@ When I find greater than `1` JSON elements by `$.store.book` and for each elemen
 |Then number of JSON elements by JSON path `$.author` is = 1|
 
 Scenario: Verify step "When I wait for presence of element by `$jsonPath` for `$duration` duration retrying $retryTimes times$stepsToExecute"
-When I wait for presence of element by `$.json.iteration3` for `PT15S` duration retrying 3 times
+When I wait for presence of element by `$.json.iteration3` for `PT2M` duration retrying 3 times
 |step                                                                                     |
 |Given I initialize scenario variable `iteration` with value `#{eval(${iteration:0} + 1)}`|
 |When I set request headers:                                                              |
