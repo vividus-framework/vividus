@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,11 @@ package org.vividus.selenium;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WrapsDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
 
 public class VividusWebDriver implements WrapsDriver
 {
-    private DesiredCapabilities desiredCapabilities;
     private WebDriver webDriver;
     private boolean remote;
-
-    public DesiredCapabilities getDesiredCapabilities()
-    {
-        return desiredCapabilities;
-    }
-
-    public void setDesiredCapabilities(DesiredCapabilities desiredCapabilities)
-    {
-        this.desiredCapabilities = desiredCapabilities;
-    }
 
     public void setWebDriver(WebDriver webDriver)
     {
