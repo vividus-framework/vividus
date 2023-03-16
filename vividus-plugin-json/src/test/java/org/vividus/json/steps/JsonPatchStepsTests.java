@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.vividus.json.steps;
 import static org.mockito.Mockito.verify;
 
 import java.util.Set;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +40,7 @@ class JsonPatchStepsTests
     private VariableContext variableContext;
 
     @Test
-    void patchJsonFile() throws JsonProcessingException
+    void patchJsonFile()
     {
         Set<VariableScope> variableScope = Set.of(VariableScope.SCENARIO);
         JsonPatchSteps jsonPatchSteps = new JsonPatchSteps(variableContext, new JsonUtils());

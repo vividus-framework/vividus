@@ -227,3 +227,14 @@ Then JSON `
   "required": [ "productId", "productName", "price", "tags" ]
 }
 `
+
+Scenario: Validate anyOf json-unit matcher
+Then JSON element from `${json}` by JSON path `$.store` is equal to `
+{
+  "book":"#{json-unit.matches:anyOf}[{\"category\":\"poetry\",\"author\":\"Yakub Kolas\",\"title\":\"Novaya zyamlya\",\"isbn\":null,\"price\":8.95},{\"category\": \"fiction\",\"author\": \"Evelyn Waugh\",\"title\": \"Sword of Honour\",\"price\": 12.99,\"hardcover\": false}]",
+  "bicycle":{
+    "color":"red",
+    "price":19.95
+  }
+}
+`

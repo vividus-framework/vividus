@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -145,7 +146,7 @@ class JsonStepsTests
     {
         JsonPathUtils.setJacksonConfiguration();
         steps = new JsonSteps(new FluentEnumConverter(), jsonContext, variableContext, new JsonUtils(), softAssert,
-                attachmentPublisher);
+                attachmentPublisher, Collections.emptyMap());
     }
 
     static Stream<Arguments> jsonValues()

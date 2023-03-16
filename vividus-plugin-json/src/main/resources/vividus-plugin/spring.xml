@@ -12,10 +12,19 @@
 
     <bean id="json-context" class="org.vividus.json.variable.JsonContextVariable" />
 
+    <util:map id="jsonMatchers" map-class="java.util.HashMap">
+        <entry key="anyOf">
+            <bean class="org.vividus.json.steps.JsonArrayContainsAnyOf">
+                <constructor-arg ref="jsonUtils-LowerCamelCase" />
+            </bean>
+        </entry>
+    </util:map>
+
     <bean id="jsonSteps" class="org.vividus.json.steps.JsonSteps">
         <constructor-arg>
             <bean class="org.vividus.json.softassert.JsonSoftAssert" parent="softAssert" />
         </constructor-arg>
+        <constructor-arg ref="jsonMatchers" />
     </bean>
 
     <bean id="jsonPatchSteps" class="org.vividus.json.steps.JsonPatchSteps" />
