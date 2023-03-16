@@ -28,8 +28,10 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.jayway.jsonpath.PathNotFoundException;
 
+import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -43,6 +45,7 @@ import org.vividus.json.JsonContext;
 import org.vividus.json.JsonDiffMatcher;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.steps.CollectionComparisonRule;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.SubSteps;
@@ -410,6 +413,13 @@ public class JsonSteps
                 BigDecimal actualNumber = new BigDecimal(jsonValue.toString());
                 BigDecimal expectedNumber = NumberUtils.createBigDecimal(String.valueOf(expectedData));
                 assertThat(jsonPath, actualNumber, rule.getComparisonRule(expectedNumber));
+            }
+            else if (jsonValue instanceof List)
+            {
+                CollectionComparisonRule rule = convertToEnum(normalizedComparisonRule, CollectionComparisonRule.class);
+                Object[] actual = IteratorUtils.toArray(jsonUtils.readTree(jsonUtils.toJson(jsonValue)).elements());
+                Object[] expected = IteratorUtils.toArray(jsonUtils.readTree(expectedData.toString()).elements());
+                assertThat(jsonPath, actual, rule.getComparisonRule(expected));
             }
             else
             {
