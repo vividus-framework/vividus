@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.not;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
@@ -74,9 +75,11 @@ public class JsonSteps
     private final JsonUtils jsonUtils;
     private final ISoftAssert softAssert;
     private final IAttachmentPublisher attachmentPublisher;
+    private final Map<String, Matcher<Object>> customJsonMatchers;
 
     public JsonSteps(FluentEnumConverter fluentEnumConverter, JsonContext jsonContext, VariableContext variableContext,
-            JsonUtils jsonUtils, ISoftAssert softAssert, IAttachmentPublisher attachmentPublisher)
+            JsonUtils jsonUtils, ISoftAssert softAssert, IAttachmentPublisher attachmentPublisher,
+                     Map<String, Matcher<Object>> customJsonMatchers)
     {
         this.fluentEnumConverter = fluentEnumConverter;
         this.jsonContext = jsonContext;
@@ -84,6 +87,7 @@ public class JsonSteps
         this.jsonUtils = jsonUtils;
         this.softAssert = softAssert;
         this.attachmentPublisher = attachmentPublisher;
+        this.customJsonMatchers = customJsonMatchers;
     }
 
     /**
@@ -435,6 +439,8 @@ public class JsonSteps
             JsonDiffMatcher jsonMatcher = new JsonDiffMatcher(attachmentPublisher, expectedJson)
                     .withOptions(options)
                     .withTolerance(BigDecimal.ZERO);
+            customJsonMatchers.forEach(jsonMatcher::withMatcher);
+
             jsonMatcher.matches(actualData);
             String differences = jsonMatcher.getDifferences();
 

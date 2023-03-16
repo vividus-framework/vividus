@@ -12,6 +12,10 @@
 
     <bean id="json-context" class="org.vividus.json.variable.JsonContextVariable" />
 
+    <bean id="anyOf" class="org.vividus.json.steps.JsonArrayContainsAnyOf">
+        <constructor-arg ref="jsonUtils-LowerCamelCase" />
+    </bean>
+
     <bean id="jsonSteps" class="org.vividus.json.steps.JsonSteps">
         <constructor-arg>
             <bean class="org.vividus.json.softassert.JsonSoftAssert" parent="softAssert" />

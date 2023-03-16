@@ -227,3 +227,42 @@ Then JSON `
   "required": [ "productId", "productName", "price", "tags" ]
 }
 `
+
+Scenario: Validate anyOf json-unit matcher (store expected value in variable)
+Given I initialize SCENARIO variable `expected-array` with value `[{\"category\":\"poetry\",\"author\":\"Yakub Kolas\",\"title\":\"Novaya zyamlya\",\"isbn\":null,\"price\":8.95},{\"category\":\"fiction\",\"author\":\"Evelyn Waugh\",\"title\":\"Sword of Honour\",\"price\":12.99,\"hardcover\":false}]`
+Then JSON element from `${json}` by JSON path `$.store` is equal to `
+{
+  "book":"#{json-unit.matches:anyOf}${expected-array}",
+  "bicycle":{
+    "color":"red",
+    "price":19.95
+  }
+}
+`
+
+Scenario: Validate anyOf json-unit matcher (with escapeJson expression)
+Then JSON element from `${json}` by JSON path `$.store` is equal to `
+{
+  "book":"#{json-unit.matches:anyOf}#{escapeJson(
+  [
+    {
+        "category":"poetry",
+        "author":"Yakub Kolas",
+        "title":"Novaya zyamlya",
+        "isbn":null,
+        "price":8.95
+    },
+    {
+        "category": "fiction",
+        "author": "Evelyn Waugh",
+        "title": "Sword of Honour",
+        "price": 12.99,
+        "hardcover": false
+    }
+  ])}",
+  "bicycle":{
+    "color":"red",
+    "price":19.95
+  }
+}
+`
