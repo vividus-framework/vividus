@@ -1,4 +1,4 @@
-Composite: Then field value is `$expected`
+Composite:Then field value is `$expected`
 When I execute javascript `return document.querySelector('#text').value` and save result to scenario variable `fieldValue`
 Then `${fieldValue}` is equal to `<expected>`
 
