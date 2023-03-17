@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.mobitru.client.model;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class Device
 {
@@ -30,5 +31,32 @@ public class Device
     public void setDesiredCapabilities(Map<String, Object> desiredCapabilities)
     {
         this.desiredCapabilities = desiredCapabilities;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "{desiredCapabilities=" + desiredCapabilities + '}';
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        Device device = (Device) o;
+        return Objects.equals(desiredCapabilities, device.desiredCapabilities);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(desiredCapabilities);
     }
 }

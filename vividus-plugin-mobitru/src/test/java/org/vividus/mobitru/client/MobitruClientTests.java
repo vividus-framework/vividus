@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ContentType;
@@ -41,6 +42,8 @@ import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestBuilder;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
+import org.vividus.mobitru.client.exception.MobitruDeviceTakeException;
+import org.vividus.mobitru.client.exception.MobitruOperationException;
 
 @ExtendWith(MockitoExtension.class)
 class MobitruClientTests
@@ -62,6 +65,28 @@ class MobitruClientTests
     {
         mobitruClient = new MobitruClient(httpClient, "vividus");
         mobitruClient.setApiUrl(ENDPOINT);
+    }
+
+    @Test
+    void shouldFindDevicesBySearchParameters() throws IOException, MobitruOperationException
+    {
+        var builder = mock(HttpRequestBuilder.class);
+        ClassicHttpRequest httpRequest = mock();
+        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        {
+            builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
+            when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
+            when(builder.withHttpMethod(HttpMethod.GET)).thenReturn(builder);
+            when(builder.withRelativeUrl(TAKE_DEVICE_ENDPOINT + "/ios?type=phone&version=15")).thenReturn(builder);
+            when(builder.build()).thenReturn(httpRequest);
+            when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
+            when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
+            when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_OK);
+            var searchParameters = new LinkedHashMap<String, String>();
+            searchParameters.put("type", "phone");
+            searchParameters.put("version", "15");
+            assertArrayEquals(RESPONSE, mobitruClient.findDevices("ios", searchParameters));
+        }
     }
 
     @Test
@@ -99,7 +124,7 @@ class MobitruClientTests
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_NOT_FOUND);
-            var mdse = assertThrows(MobitruDeviceSearchException.class, () -> mobitruClient.takeDevice(CONTENT));
+            var mdse = assertThrows(MobitruDeviceTakeException.class, () -> mobitruClient.takeDevice(CONTENT));
             assertEquals("Expected status code `200` but got `404`.", mdse.getMessage());
         }
     }

@@ -1,3 +1,24 @@
+Scenario: [Android] Start the application on device searched by device search capabilities
+Meta:
+    @targetPlatform android
+Given I start mobile application with capabilities:
+|name                              |value     |
+|mobitru-device-search:type        |phone     |
+|mobitru-device-search:manufacturer|SAMSUNG   |
+When I close mobile application
+
+
+Scenario: [iOS] Start the application on device searched by device search capabilities
+Meta:
+    @targetPlatform ios
+Given I start mobile application with capabilities:
+|name                              |value |
+|mobitru-device-search:type        |tablet|
+|mobitru-device-search:manufacturer|IPAD  |
+|mobitru-device-search:model       |iPad  |
+When I close mobile application
+
+
 Scenario: Start the application
 Given I start mobile application
 

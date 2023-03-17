@@ -17,19 +17,26 @@
 package org.vividus.mobitru.client;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.net.URIBuilder;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestBuilder;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
+import org.vividus.mobitru.client.exception.MobitruDeviceSearchException;
+import org.vividus.mobitru.client.exception.MobitruDeviceTakeException;
+import org.vividus.mobitru.client.exception.MobitruOperationException;
 
 public class MobitruClient
 {
+    private static final String DEVICE_PATH = "/device";
+
     private final IHttpClient httpClient;
 
     private final String apiBasePath;
@@ -42,9 +49,17 @@ public class MobitruClient
         this.apiBasePath = String.format("/billing/unit/%s/automation/api", billingUnit);
     }
 
+    public byte[] findDevices(String platform, Map<String, String> parameters) throws MobitruOperationException
+    {
+        URIBuilder uriBuilder = new URIBuilder().setPath(DEVICE_PATH).appendPath(platform);
+        parameters.forEach(uriBuilder::addParameter);
+        return executeRequest(uriBuilder.toString(), HttpMethod.GET, UnaryOperator.identity(), HttpStatus.SC_OK,
+                MobitruDeviceSearchException::new);
+    }
+
     public byte[] takeDevice(String requestedDevice) throws MobitruOperationException
     {
-        return executePost("/device", requestedDevice, HttpStatus.SC_OK);
+        return executePost(DEVICE_PATH, requestedDevice, HttpStatus.SC_OK);
     }
 
     public byte[] getArtifacts() throws MobitruOperationException
@@ -54,7 +69,7 @@ public class MobitruClient
 
     public void returnDevice(String deviceId) throws MobitruOperationException
     {
-        executeRequest("/device/" + deviceId, HttpMethod.DELETE, UnaryOperator.identity(), HttpStatus.SC_OK);
+        executeRequest(DEVICE_PATH + "/" + deviceId, HttpMethod.DELETE, UnaryOperator.identity(), HttpStatus.SC_OK);
     }
 
     public void installApp(String deviceId, String appId) throws MobitruOperationException
@@ -72,7 +87,7 @@ public class MobitruClient
     {
         return executeRequest(relativeUrl, HttpMethod.POST,
                 rb -> rb.withContent(payload, ContentType.APPLICATION_JSON), expectedResponseCode,
-            MobitruDeviceSearchException::new);
+            MobitruDeviceTakeException::new);
     }
 
     private byte[] executeRequest(String relativeUrl, HttpMethod httpMethod,

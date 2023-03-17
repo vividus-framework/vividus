@@ -9,9 +9,9 @@ include::partial$test-cloud-header.adoc[]
 
 The plugin defines profile with a set of the preconfigured properties. In order to simplify work with Mobitru the plugin does following steps:
 
-. Waits for the requested device to be available using https://app.mobitru.com/wiki/api/#api-Device-TakeDeviceDesiredCapabilities[REST API call] and takes it in the usage.
-. Installs application on the devices using https://app.mobitru.com/wiki/api/#api-InstallApp-InstallApp[REST API call].
-
+. Takes device.
++
+--
 IMPORTANT: For the device search plugin relies on the capabilities specified in the xref:plugins:plugin-mobile-app.adoc#_properties[properties].
 
 [cols="1,2"]
@@ -42,6 +42,45 @@ selenium.grid.capabilities.platformVersion=12
 ----
 selenium.grid.capabilities.deviceName=iPhone 13
 ----
+
+For more fine-grained configuration of taking device additionally use
+Mobitru device search capabilities specified below.
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="6,2,5", options="header"]
+
+|===
+
+|Property Name
+|Acceptable values
+|Description
+
+|`*selenium.grid.capabilities.mobitru-device-search\:type*`
+|`phone` or `tablet`
+|The type of the device.
+
+|`selenium.grid.capabilities.mobitru-device-search\:manufacturer`
+|`ZTE` or `samsung` or `IPHONE` etc.
+|The device manufacture name (case-insensitive).
+
+|`selenium.grid.capabilities.mobitru-device-search\:model`
+|`SM-G930F` or `sm-s901b` etc.
+|The model of the device (case-insensitive).
+|===
+
+IMPORTANT: `selenium.grid.capabilities.platformName` and `selenium.grid.capabilities.udid`  capabilities can not be specified along with Mobitru device search capabilities.
+
+.Capabilities to run tests on any SAMSUNG phone with a specific platform version
+[source,properties]
+----
+selenium.grid.capabilities.platformVersion=12
+selenium.grid.capabilities.mobitru-device-search\:type=phone
+selenium.grid.capabilities.mobitru-device-search\:manufacturer=SAMSUNG
+----
+--
+
+. Installs application on the device.
 
 == Properties
 
