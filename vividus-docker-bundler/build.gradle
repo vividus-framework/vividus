@@ -78,7 +78,7 @@ import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 task createDockerfile(type: Dockerfile) {
     dependsOn copyRuntimeLibs
 
-    from('adoptopenjdk/openjdk11:alpine-jre')
+    from('eclipse-temurin:17-jre-alpine')
     label(['maintainer': 'Vividus Team "vividus.team@vividus.dev"'])
     workingDir('vividus')
     copyFile('libs', 'libs/')
