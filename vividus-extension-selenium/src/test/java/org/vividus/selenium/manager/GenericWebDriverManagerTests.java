@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ class GenericWebDriverManagerTests
         verify(contextSwitchingDriver, never()).getContextHandles();
     }
 
-    static Stream<Arguments> mobileArguments()
+    static Stream<Arguments> platformsData()
     {
         // CHECKSTYLE:OFF
         return Stream.of(
@@ -167,13 +167,19 @@ class GenericWebDriverManagerTests
             arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isTvOS, MobilePlatform.TVOS, true),
             arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isTvOS, MobilePlatform.IOS, false),
             arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isTvOS, Platform.IOS, false),
-            arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isIOS, null, false)
+            arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isIOS, null, false),
+            arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isMacOs, Platform.MAC, true),
+            arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isMacOs, Platform.WINDOWS, false),
+            arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isMacOs, Platform.LINUX, false),
+            arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isMacOs, Platform.UNIX, false),
+            arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isMacOs, Platform.IOS, false),
+            arguments((Predicate<GenericWebDriverManager>) GenericWebDriverManager::isMacOs, null, false)
         );
         // CHECKSTYLE:ON
     }
 
     @ParameterizedTest
-    @MethodSource("mobileArguments")
+    @MethodSource("platformsData")
     void testIsPlatform(Predicate<GenericWebDriverManager> test, Object platform, boolean expected)
     {
         mockWebDriver(platform);

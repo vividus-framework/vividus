@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.vividus.ui.web.action;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -27,9 +30,14 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
@@ -45,7 +53,7 @@ import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.util.FormatUtils;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class FieldActionsTests
 {
     private static final String INDEX = "index";
@@ -68,6 +76,8 @@ class FieldActionsTests
     @Mock private ISoftAssert softAssert;
     @Mock private IWebWaitActions waitActions;
     @InjectMocks private FieldActions fieldActions;
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(FieldActions.class);
 
     @Test
     void testSelectItemInDDLSelectPresentOptionExist()
@@ -167,11 +177,18 @@ class FieldActionsTests
                 .recordFailedAssertion("Multiple selecting is not available to single select drop down");
     }
 
-    @Test
-    void testClearFieldUsingKeyboard()
+    @ParameterizedTest
+    @CsvSource({
+            "false, CONTROL, Ctrl",
+            "true,  COMMAND, Cmd"
+    })
+    void testClearFieldUsingKeyboard(boolean macOs, Keys controllingKey, String controllingKeyName)
     {
+        when(webDriverManager.isMacOs()).thenReturn(macOs);
         fieldActions.clearFieldUsingKeyboard(webElement);
-        verify(webElement).sendKeys(Keys.chord(Keys.CONTROL, "a") + Keys.BACK_SPACE);
+        verify(webElement).sendKeys(Keys.chord(controllingKey, "a") + Keys.BACK_SPACE);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info("Attempting to clear field with [{} + A, Backspace] keys sequence", controllingKeyName))));
     }
 
     @Test
