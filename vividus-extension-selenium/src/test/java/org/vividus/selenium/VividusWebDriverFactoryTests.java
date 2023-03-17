@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ class VividusWebDriverFactoryTests
                             "key7", "valueFromScenarioMeta7",
                             CapabilityType.PROXY, proxyMock,
                             OUTER_KEY, Map.of(INNER_KEY, parameterValue)),
-                vividusWebDriver.getDesiredCapabilities().asMap());
+                factory.desiredCapabilities.asMap());
         InOrder ordered = Mockito.inOrder(webDriverStartContext, runContext);
         ordered.verify(webDriverStartContext).get(WebDriverStartParameters.DESIRED_CAPABILITIES);
         ordered.verify(runContext).getRunningStory();
@@ -146,7 +146,7 @@ class VividusWebDriverFactoryTests
         VividusWebDriver vividusWebDriver = factory.create();
 
         assertFalse(vividusWebDriver.isRemote());
-        assertEquals(Map.of(KEY1, value), vividusWebDriver.getDesiredCapabilities().asMap());
+        assertEquals(Map.of(KEY1, value), factory.desiredCapabilities.asMap());
         InOrder ordered = Mockito.inOrder(webDriverStartContext, runContext);
         ordered.verify(webDriverStartContext).get(WebDriverStartParameters.DESIRED_CAPABILITIES);
         ordered.verify(runContext).getRunningStory();
@@ -170,6 +170,8 @@ class VividusWebDriverFactoryTests
 
     private final class TestVividusWebDriverFactory extends AbstractVividusWebDriverFactory
     {
+        private DesiredCapabilities desiredCapabilities;
+
         private TestVividusWebDriverFactory(boolean remoteExecution, WebDriverStartContext webDriverStartContext,
                 RunContext runContext, IProxy proxy,
                 Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers)
@@ -180,6 +182,7 @@ class VividusWebDriverFactoryTests
         @Override
         protected WebDriver createWebDriver(DesiredCapabilities desiredCapabilities)
         {
+            this.desiredCapabilities = desiredCapabilities;
             return webDriver;
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import static org.mockito.Mockito.mock;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
 
 class VividusWebDriverTests
 {
@@ -48,13 +47,5 @@ class VividusWebDriverTests
     {
         vividusWebDriver.setRemote(true);
         assertTrue(vividusWebDriver.isRemote());
-    }
-
-    @Test
-    void testGetSetDesiredCapabilities()
-    {
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
-        vividusWebDriver.setDesiredCapabilities(desiredCapabilities);
-        assertEquals(desiredCapabilities, vividusWebDriver.getDesiredCapabilities());
     }
 }
