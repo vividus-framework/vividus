@@ -31,7 +31,7 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-db', version: '{curre
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.4')
+implementation(group: 'org.postgresql', name: 'postgresql', version: '42.6.0')
 ----
 +
 NOTE: In case Maven repository does not contain driver you need, please refer to the documentation of your database to define suitable JDBC driver.
@@ -163,7 +163,7 @@ jdbc:sqlserver://serverName:portNumber;parameter1=value1;parameter2=value2
 .build.gradle
 [source,gradle]
 ----
-implementation(group: 'org.postgresql', name: 'postgresql', version: '42.5.4')
+implementation(group: 'org.postgresql', name: 'postgresql', version: '42.6.0')
 ----
 
 .environment.properties
