@@ -31,6 +31,10 @@ import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.text.WordUtils;
+import org.jbehave.core.expressions.BiArgExpressionProcessor;
+import org.jbehave.core.expressions.DelegatingExpressionProcessor;
+import org.jbehave.core.expressions.MultiArgExpressionProcessor;
+import org.jbehave.core.expressions.SingleArgExpressionProcessor;
 import org.vividus.util.ILocationProvider;
 import org.vividus.util.ResourceUtils;
 

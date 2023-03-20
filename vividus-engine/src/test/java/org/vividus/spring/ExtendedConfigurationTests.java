@@ -40,6 +40,7 @@ import java.util.Optional;
 
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.StoryControls;
+import org.jbehave.core.expressions.ExpressionResolver;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTableFactory;
 import org.jbehave.core.model.Story;
@@ -54,10 +55,8 @@ import org.jbehave.core.steps.StepMonitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedConstruction;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.IPathFinder;
@@ -72,6 +71,7 @@ class ExtendedConfigurationTests
     private static final String SEPARATOR = "|";
 
     @Mock private IPathFinder pathFinder;
+    @Mock private ExpressionResolver expressionResolver;
     @Mock private PlaceholderResolver placeholderResolver;
     @Mock private TableParsers tableParsers;
 
@@ -92,33 +92,33 @@ class ExtendedConfigurationTests
     @Test
     void testInit() throws IOException
     {
-        String compositePathPatterns = "**/*.steps";
-        List<String> compositePaths = List.of("/path/to/composite.steps");
+        var compositePathPatterns = "**/*.steps";
+        var compositePaths = List.of("/path/to/composite.steps");
         when(pathFinder.findPaths(argPathResolution(compositePathPatterns))).thenReturn(compositePaths);
 
-        String aliasPathPatterns = "**/*.json";
-        List<String> aliasPaths = List.of("/path/to/aliases.json");
+        var aliasPathPatterns = "**/*.json";
+        var aliasPaths = List.of("/path/to/aliases.json");
         when(pathFinder.findPaths(argPathResolution(aliasPathPatterns))).thenReturn(aliasPaths);
 
-        ExamplesTableFactory examplesTableFactory = mock(ExamplesTableFactory.class);
+        ExamplesTableFactory examplesTableFactory = mock();
         when(configuration.examplesTableFactory()).thenReturn(examplesTableFactory);
 
         Map<Class<?>, Object> constructedMocks = new HashMap<>();
         List<ParameterConverter<?, ?>> parameterConverterList = List.of();
 
-        try (MockedConstruction<Keywords> ignoredKeywords = mockConstruction(
+        try (var ignoredKeywords = mockConstruction(
                 Keywords.class, (mock, context) -> {
                     assertEquals(1, context.getCount());
                     assertEquals(List.of(Keywords.defaultKeywords()), context.arguments());
                     constructedMocks.put(Keywords.class, mock);
                 });
-            MockedConstruction<RegexStoryParser> ignoredParser = mockConstruction(
+            var ignoredParser = mockConstruction(
                 RegexStoryParser.class, (mock, context) -> {
                     assertEquals(1, context.getCount());
                     assertEquals(List.of(examplesTableFactory), context.arguments());
                     constructedMocks.put(RegexStoryParser.class, mock);
                 });
-            MockedConstruction<ParameterConvertersDecorator> ignoredDecorator = mockConstruction(
+            var ignoredDecorator = mockConstruction(
                 ParameterConvertersDecorator.class, (mock, context) -> {
                     assertEquals(1, context.getCount());
                     assertEquals(List.of(configuration, placeholderResolver), context.arguments());
@@ -126,27 +126,28 @@ class ExtendedConfigurationTests
 
                     when(mock.addConverters(parameterConverterList)).thenReturn(mock);
                 });
-            MockedConstruction<LoggingTableTransformerMonitor> transformerMonitor = mockConstruction(
+            var ignoredTransformerMonitor = mockConstruction(
                  LoggingTableTransformerMonitor.class, (mock, context) -> {
                     assertEquals(1, context.getCount());
                     assertEquals(List.of(tableParsers), context.arguments());
                     constructedMocks.put(LoggingTableTransformerMonitor.class, mock);
                 }))
         {
-            StoryControls storyControls = mock(StoryControls.class);
+            StoryControls storyControls = mock();
             configuration.setCustomConverters(parameterConverterList);
             configuration.setCompositePaths(compositePathPatterns);
             configuration.setAliasPaths(aliasPathPatterns);
             configuration.setStoryControls(storyControls);
-            StepMonitor stepMonitor = mock(StepMonitor.class);
+            StepMonitor stepMonitor = mock();
             configuration.setStepMonitors(List.of(stepMonitor));
 
             configuration.init();
 
-            InOrder ordered = inOrder(configuration);
+            var ordered = inOrder(configuration);
             ordered.verify(configuration).useKeywords((Keywords) constructedMocks.get(Keywords.class));
             ordered.verify(configuration).useCompositePaths(new HashSet<>(compositePaths));
             ordered.verify(configuration).useAliasPaths(new HashSet<>(aliasPaths));
+            ordered.verify(configuration).useExpressionResolver(expressionResolver);
             ordered.verify(configuration).useParameterConverters(
                     (ParameterConvertersDecorator) constructedMocks.get(ParameterConvertersDecorator.class));
             ordered.verify(configuration).useTableTransformerMonitor(
@@ -161,10 +162,10 @@ class ExtendedConfigurationTests
 
     private void verifyStepMonitor(StepMonitor expectedStepMonitorDelegate)
     {
-        StepMonitor actualStepMonitor = configuration.stepMonitor();
+        var actualStepMonitor = configuration.stepMonitor();
         assertThat(actualStepMonitor, instanceOf(DelegatingStepMonitor.class));
-        String step = "step";
-        boolean dryRun = true;
+        var step = "step";
+        var dryRun = true;
         Method method = null;
         actualStepMonitor.beforePerforming(step, dryRun, method);
         verify(expectedStepMonitorDelegate).beforePerforming(step, dryRun, method);
@@ -187,7 +188,7 @@ class ExtendedConfigurationTests
 
     private static BatchConfiguration argPathResolution(String compositePathPatterns)
     {
-        List<String> resourceIncludePatterns = List.of(compositePathPatterns);
+        var resourceIncludePatterns = List.of(compositePathPatterns);
         return argThat(batch -> batch != null && "/".equals(batch.getResourceLocation())
                 && resourceIncludePatterns.equals(batch.getResourceIncludePatterns())
                 && List.of().equals(batch.getResourceExcludePatterns()));
@@ -196,7 +197,7 @@ class ExtendedConfigurationTests
     @Test
     void testSetDryRun() throws IOException
     {
-        StoryControls storyControls = new StoryControls();
+        var storyControls = new StoryControls();
         storyControls.doDryRun(true);
         configuration.setStoryControls(storyControls);
         configuration.init();
@@ -206,7 +207,7 @@ class ExtendedConfigurationTests
     @Test
     void shouldSetViewGenerator()
     {
-        ViewGenerator viewGenerator = mock(ViewGenerator.class);
+        ViewGenerator viewGenerator = mock();
         configuration.setViewGenerator(Optional.of(viewGenerator));
         assertEquals(viewGenerator, configuration.viewGenerator());
     }
@@ -218,11 +219,10 @@ class ExtendedConfigurationTests
         verify(configuration, never()).useViewGenerator(any());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     void shouldSetStoryExecutionComparator()
     {
-        Comparator<Story> storyExecutionComparator = mock(Comparator.class);
+        Comparator<Story> storyExecutionComparator = mock();
         configuration.setStoryExecutionComparator(Optional.of(storyExecutionComparator));
         assertEquals(storyExecutionComparator, configuration.storyExecutionComparator());
     }

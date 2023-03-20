@@ -90,7 +90,11 @@
     </bean>
 
     <bean class="org.vividus.steps.VariableResolver" />
-    <bean class="org.vividus.steps.ExpressionAdaptor" />
+    <bean class="org.jbehave.core.expressions.ExpressionResolver">
+        <constructor-arg>
+            <bean class="org.vividus.expressions.LoggingExpressionResolverMonitor"/>
+        </constructor-arg>
+    </bean>
     <bean id="placeholderResolver" class="org.vividus.steps.PlaceholderResolver" />
     <bean id="parameterControls" class="org.jbehave.core.steps.ParameterControls" />
 

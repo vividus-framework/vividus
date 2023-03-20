@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
-package org.vividus.expression;
+package org.vividus.expressions;
 
-import javax.inject.Named;
+import org.jbehave.core.expressions.PrintingExpressionResolverMonitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.jbehave.core.expressions.SingleArgExpressionProcessor;
-import org.springframework.scripting.groovy.GroovyScriptEvaluator;
-import org.springframework.scripting.support.StaticScriptSource;
-
-@Named
-public class GroovyExpressionProcessor extends SingleArgExpressionProcessor<String>
+public class LoggingExpressionResolverMonitor extends PrintingExpressionResolverMonitor
 {
-    public GroovyExpressionProcessor(GroovyScriptEvaluator groovyScriptEvaluator)
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingExpressionResolverMonitor.class);
+
+    @Override
+    protected void print(String format, Object... args)
     {
-        super("evalGroovy", input -> String.valueOf(
-                groovyScriptEvaluator.evaluate(new StaticScriptSource(input))));
+        LOGGER.atError().addArgument(() -> String.format(format, args)).log("{}");
+    }
+
+    @Override
+    protected void printStackTrace(Throwable e)
+    {
+        // Do not print full stack trace
     }
 }

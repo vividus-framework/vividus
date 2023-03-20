@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import org.jbehave.core.configuration.Keywords;
+import org.jbehave.core.embedder.StoryControls;
+import org.jbehave.core.expressions.ExpressionResolver;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.steps.ParameterConverters;
@@ -28,22 +30,24 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.steps.ExpressionAdaptor;
 
 @ExtendWith(MockitoExtension.class)
 class ResolvingExpressionsEagerlyTransformerTests
 {
     private final ParameterConverters parameterConverters = new ParameterConverters();
 
-    @Mock private ExpressionAdaptor expressionAdaptor;
+    @Mock private ExpressionResolver expressionResolver;
+    @Mock private StoryControls storyControls;
     @InjectMocks private ResolvingExpressionsEagerlyTransformer transformer;
 
     @Test
     void shouldResolveDataRowsTest()
     {
         String table = "|header|\n|row1|\n|row2|";
-        when(expressionAdaptor.processRawExpression("row1")).thenReturn("resolved_row1");
-        when(expressionAdaptor.processRawExpression("row2")).thenReturn("resolved_row2");
+        boolean dryRun = false;
+        when(storyControls.dryRun()).thenReturn(dryRun);
+        when(expressionResolver.resolveExpressions(dryRun, "row1")).thenReturn("resolved_row1");
+        when(expressionResolver.resolveExpressions(dryRun, "row2")).thenReturn("resolved_row2");
         String actual = transformer.transform(table, new TableParsers(parameterConverters), createTableProperties());
         assertEquals("|header|\n|resolved_row1|\n|resolved_row2|", actual);
     }
@@ -52,7 +56,9 @@ class ResolvingExpressionsEagerlyTransformerTests
     void shouldNotResolveHeaderTest()
     {
         String table = "|header|\n|row|";
-        when(expressionAdaptor.processRawExpression("row")).thenReturn("resolved_row");
+        boolean dryRun = false;
+        when(storyControls.dryRun()).thenReturn(dryRun);
+        when(expressionResolver.resolveExpressions(dryRun, "row")).thenReturn("resolved_row");
         String actual = transformer.transform(table, new TableParsers(parameterConverters), createTableProperties());
         assertEquals("|header|\n|resolved_row|", actual);
     }

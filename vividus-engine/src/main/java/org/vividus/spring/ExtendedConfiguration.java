@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.StoryControls;
+import org.jbehave.core.expressions.ExpressionResolver;
 import org.jbehave.core.io.StoryLoader;
 import org.jbehave.core.model.Story;
 import org.jbehave.core.model.TableTransformers;
@@ -51,6 +52,7 @@ import org.vividus.steps.PlaceholderResolver;
 public class ExtendedConfiguration extends Configuration
 {
     private IPathFinder pathFinder;
+    private ExpressionResolver expressionResolver;
     private PlaceholderResolver placeholderResolver;
     private List<ParameterConverter<?, ?>> customConverters;
     private List<StepMonitor> stepMonitors;
@@ -68,6 +70,7 @@ public class ExtendedConfiguration extends Configuration
         useCompositePaths(resolvePaths(compositePaths));
         useAliasPaths(resolvePaths(aliasPaths));
         useParameterControls(parameterControls);
+        useExpressionResolver(expressionResolver);
         useParameterConverters(new ParameterConvertersDecorator(this, placeholderResolver)
                 .addConverters(customConverters));
         useTableTransformerMonitor(new LoggingTableTransformerMonitor(tableParsers()));
@@ -138,6 +141,11 @@ public class ExtendedConfiguration extends Configuration
     public void setAliasPaths(String aliasPaths)
     {
         this.aliasPaths = aliasPaths;
+    }
+
+    public void setExpressionResolver(ExpressionResolver expressionResolver)
+    {
+        this.expressionResolver = expressionResolver;
     }
 
     public void setPlaceholderResolver(PlaceholderResolver placeholderResolver)
