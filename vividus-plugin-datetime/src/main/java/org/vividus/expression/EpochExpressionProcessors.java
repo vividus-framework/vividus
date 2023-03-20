@@ -22,6 +22,8 @@ import java.util.List;
 
 import javax.inject.Named;
 
+import org.jbehave.core.expressions.DelegatingExpressionProcessor;
+import org.jbehave.core.expressions.SingleArgExpressionProcessor;
 import org.vividus.util.DateUtils;
 
 @Named

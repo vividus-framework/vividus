@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.jbehave.core.embedder.StoryControls;
+import org.jbehave.core.expressions.ExpressionProcessor;
+import org.jbehave.core.expressions.ExpressionResolver;
+import org.jbehave.core.expressions.NullExpressionResolverMonitor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -40,7 +42,6 @@ import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
-import org.vividus.expression.IExpressionProcessor;
 import org.vividus.util.freemarker.FreemarkerProcessor;
 import org.vividus.variable.VariableScope;
 
@@ -62,7 +63,6 @@ class FreemarkerStepsTests
     private static final List<Map<String, String>> TEMPLATE_PARAMETERS = List.of(Map.of(TABLE_KEY, TABLE_VALUE));
 
     @Mock private VariableContext variableContext;
-    @Mock private StoryControls storyControls;
 
     static Stream<Arguments> dataProvider()
     {
@@ -77,9 +77,9 @@ class FreemarkerStepsTests
     void shouldInitVariableUsingTemplate(List<Map<String, String>> templateParameters, String template)
             throws IOException, TemplateException
     {
-        ExpressionAdaptor adaptor = new ExpressionAdaptor(storyControls);
-        adaptor.setProcessors(List.of(new TestExpressionProcessor()));
-        FreemarkerSteps steps = new FreemarkerSteps(true, createConfiguration(), variableContext, adaptor);
+        ExpressionResolver processor = new ExpressionResolver(Set.of(new TestExpressionProcessor()),
+                new NullExpressionResolverMonitor());
+        FreemarkerSteps steps = new FreemarkerSteps(true, createConfiguration(), variableContext, processor);
         steps.initVariableUsingTemplate(SCOPES, VARIABLE_NAME, "org/vividus/steps/" + template, templateParameters);
         verify(variableContext).putVariable(SCOPES, VARIABLE_NAME, "Winter is coming\n");
     }
@@ -94,7 +94,7 @@ class FreemarkerStepsTests
             when(variableContext.getVariables()).thenReturn(Map.of(contextKey, contextValue));
 
             FreemarkerSteps steps = new FreemarkerSteps(true, createConfiguration(), variableContext,
-                    new ExpressionAdaptor(storyControls));
+                    new ExpressionResolver(Set.of(), new NullExpressionResolverMonitor()));
 
             steps.initVariableUsingTemplate(SCOPES, VARIABLE_NAME, TEMPLATE_FILE_NAME, TEMPLATE_PARAMETERS);
 
@@ -113,7 +113,7 @@ class FreemarkerStepsTests
         try (MockedConstruction<FreemarkerProcessor> mockedProcessor = mockConstruction(FreemarkerProcessor.class))
         {
             FreemarkerSteps steps = new FreemarkerSteps(false, createConfiguration(), variableContext,
-                    new ExpressionAdaptor(storyControls));
+                    new ExpressionResolver(Set.of(), new NullExpressionResolverMonitor()));
 
             steps.initVariableUsingTemplate(SCOPES, VARIABLE_NAME, TEMPLATE_FILE_NAME, TEMPLATE_PARAMETERS);
 
@@ -136,7 +136,7 @@ class FreemarkerStepsTests
         return configuration;
     }
 
-    private static final class TestExpressionProcessor implements IExpressionProcessor<String>
+    private static final class TestExpressionProcessor implements ExpressionProcessor<String>
     {
         @Override
         public Optional<String> execute(String expression)

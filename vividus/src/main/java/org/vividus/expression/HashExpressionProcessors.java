@@ -25,6 +25,8 @@ import java.util.function.UnaryOperator;
 import javax.inject.Named;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.jbehave.core.expressions.DelegatingExpressionProcessor;
+import org.jbehave.core.expressions.RelaxedMultiArgExpressionProcessor;
 import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.vividus.util.ResourceUtils;
 

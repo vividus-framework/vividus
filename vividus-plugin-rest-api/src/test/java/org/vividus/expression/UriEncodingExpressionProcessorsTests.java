@@ -20,13 +20,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Optional;
 
+import org.jbehave.core.expressions.ExpressionProcessor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 class UriEncodingExpressionProcessorsTests
 {
-    private final IExpressionProcessor<?> processor = new UriEncodingExpressionProcessors();
+    private final ExpressionProcessor<?> processor = new UriEncodingExpressionProcessors();
 
     @Test
     void testExecuteWithUnsupportedException()

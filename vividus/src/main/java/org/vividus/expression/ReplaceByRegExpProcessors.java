@@ -23,6 +23,9 @@ import java.util.regex.Pattern;
 
 import javax.inject.Named;
 
+import org.jbehave.core.expressions.DelegatingExpressionProcessor;
+import org.jbehave.core.expressions.RelaxedMultiArgExpressionProcessor;
+
 @Named
 public class ReplaceByRegExpProcessors extends DelegatingExpressionProcessor
 {

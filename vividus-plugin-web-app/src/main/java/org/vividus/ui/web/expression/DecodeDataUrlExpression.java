@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.vividus.expression.SingleArgExpressionProcessor;
+import org.jbehave.core.expressions.SingleArgExpressionProcessor;
 
 public class DecodeDataUrlExpression extends SingleArgExpressionProcessor<Object>
 {

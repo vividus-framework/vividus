@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,23 @@ package org.vividus.steps;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
+import org.jbehave.core.embedder.StoryControls;
+import org.jbehave.core.expressions.ExpressionResolver;
+
 public class PlaceholderResolver
 {
     private static final int MAX_DEPTH = 16;
 
     private final VariableResolver variableResolver;
-    private final ExpressionAdaptor expressionAdaptor;
+    private final ExpressionResolver expressionResolver;
+    private final StoryControls storyControls;
 
-    public PlaceholderResolver(VariableResolver variableResolver, ExpressionAdaptor expressionAdaptor)
+    public PlaceholderResolver(VariableResolver variableResolver, ExpressionResolver expressionResolver,
+            StoryControls storyControls)
     {
         this.variableResolver = variableResolver;
-        this.expressionAdaptor = expressionAdaptor;
+        this.expressionResolver = expressionResolver;
+        this.storyControls = storyControls;
     }
 
     public Object resolvePlaceholders(String value, Type type)
@@ -63,6 +69,6 @@ public class PlaceholderResolver
 
     public Object processExpressions(String valueToConvert)
     {
-        return expressionAdaptor.processRawExpression(valueToConvert);
+        return expressionResolver.resolveExpressions(storyControls.dryRun(), valueToConvert);
     }
 }

@@ -25,6 +25,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
+import org.jbehave.core.expressions.DelegatingExpressionProcessor;
+import org.jbehave.core.expressions.SingleArgExpressionProcessor;
 import org.vividus.util.ResourceUtils;
 
 public class Base64ExpressionProcessors extends DelegatingExpressionProcessor

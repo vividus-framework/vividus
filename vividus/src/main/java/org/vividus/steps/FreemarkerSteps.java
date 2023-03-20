@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jbehave.core.annotations.Given;
+import org.jbehave.core.expressions.ExpressionResolver;
 import org.vividus.context.VariableContext;
 import org.vividus.util.freemarker.FreemarkerProcessor;
 import org.vividus.variable.VariableScope;
@@ -48,11 +49,11 @@ public class FreemarkerSteps
     private final boolean resolveVariables;
 
     public FreemarkerSteps(boolean resolveVariables, Configuration configuration, VariableContext variableContext,
-            ExpressionAdaptor expressionAdaptor)
+            ExpressionResolver expressionResolver)
     {
         this.variableContext = variableContext;
         this.freemarkerProcessor = new FreemarkerProcessor(configuration,
-            Map.of("execVividusExpression", new FreemarkerVividusExpressionProcessor(expressionAdaptor)));
+            Map.of("execVividusExpression", new FreemarkerVividusExpressionProcessor(expressionResolver)));
         this.resolveVariables = resolveVariables;
     }
 
@@ -127,11 +128,11 @@ public class FreemarkerSteps
 
     private static final class FreemarkerVividusExpressionProcessor implements TemplateMethodModelEx
     {
-        private final ExpressionAdaptor expressionAdaptor;
+        private final ExpressionResolver expressionResolver;
 
-        private FreemarkerVividusExpressionProcessor(ExpressionAdaptor expressionAdaptor)
+        private FreemarkerVividusExpressionProcessor(ExpressionResolver expressionResolver)
         {
-            this.expressionAdaptor = expressionAdaptor;
+            this.expressionResolver = expressionResolver;
         }
 
         @SuppressWarnings({"rawtypes", "unchecked"})
@@ -142,8 +143,10 @@ public class FreemarkerSteps
             return arguments.subList(1, arguments.size())
                             .stream()
                             .map(Object::toString)
-                            .collect(Collectors.collectingAndThen(Collectors.joining(",", expressionName + "(", ")"),
-                                    expressionAdaptor::processExpression));
+                            .collect(Collectors.collectingAndThen(
+                                    Collectors.joining(",", "#{" + expressionName + "(", ")}"),
+                                    expression -> expressionResolver.resolveExpressions(false, expression)
+                            ));
         }
     }
 }
