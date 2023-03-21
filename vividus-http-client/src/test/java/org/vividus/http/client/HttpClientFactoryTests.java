@@ -59,6 +59,7 @@ import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.impl.win.WinHttpClients;
 import org.apache.hc.client5.http.protocol.RedirectStrategy;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
@@ -334,10 +335,10 @@ class HttpClientFactoryTests
         HttpRequestRetryStrategy retryStrategy = mock();
         config.setHttpRequestRetryStrategy(retryStrategy);
         try (var connectionManagerBuilderStaticMock = mockStatic(PoolingHttpClientConnectionManagerBuilder.class);
-                var httpClientBuilder = mockStatic(HttpClientBuilder.class);
+                var winHttpClients = mockStatic(WinHttpClients.class);
                 var httpClient = mockConstruction(HttpClient.class))
         {
-            httpClientBuilder.when(HttpClientBuilder::create).thenReturn(mockedHttpClientBuilder);
+            winHttpClients.when(WinHttpClients::custom).thenReturn(mockedHttpClientBuilder);
             when(mockedHttpClientBuilder.build()).thenReturn(mockedApacheHttpClient);
 
             PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = mock(Answers.RETURNS_SELF);
