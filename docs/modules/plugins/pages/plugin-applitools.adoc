@@ -78,7 +78,7 @@ include::partial$establish.adoc[]
 .Establish baseline
 [source,gherkin]
 ----
-Given I am on page with URL `https://example.com/`
+Given I am on page with URL 'https://example.com/'
 When I run visual test with Applitools using:
 |appName    |batchName      |baselineName |action   |
 |example.com|example-testing|main-app-page|ESTABLISH|
@@ -97,7 +97,7 @@ include::partial$compare-against.adoc[]
 .Compare against established baseline
 [source,gherkin]
 ----
-Given I am on page with URL `https://example.com/`
+Given I am on page with URL 'https://example.com/'
 When I run visual test with Applitools using:
 |appName    |batchName      |baselineName |action         |elementsToIgnore|
 |example.com|example-testing|main-app-page|COMPARE_AGAINST|By.tagName(h1)  |
@@ -116,7 +116,7 @@ include::partial$check-inequality-against.adoc[]
 .Check inequality established baseline
 [source,gherkin]
 ----
-Given I am on page with URL `https://example.com/`
+Given I am on page with URL 'https://example.com/'
 When I run visual test with Applitools using:
 |appName    |batchName      |baselineName |action                  |elementsToIgnore|
 |example.com|example-testing|main-app-page|CHECK_INEQUALITY_AGAINST|By.tagName(h1)  |

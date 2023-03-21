@@ -1,5 +1,5 @@
 = Web Application Plugin
-:given-step: Given I am on page with URL `https://www.google.com/search?q=vividus`
+:given-step: Given I am on page with URL 'https://www.google.com/search?q=vividus'
 
 The plugin provides functionality to interact with Web applications.
 
@@ -168,7 +168,7 @@ When I wait `$duration` until window with title that $comparisonRule `$windowTit
 .Wait for window and switch to it
 [source,gherkin]
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/windows.html`
+Given I am on page with URL 'https://vividus-test-site.onrender.com/windows.html'
 When I click on element located by `id(timeout)`
 When I wait `PT3S` until window with title that is equal to `Vividus test site` appears and switch to it
 ----
@@ -188,7 +188,7 @@ Could be useful in combination with Selenium's https://www.selenium.dev/document
 .Stop page loading.story
 [source,gherkin]
 ----
-When I open URL `https://delayed.vividus.dev` in new window
+When I open URL 'https://delayed.vividus.dev' in new window
 When I stop page loading
 ----
 
@@ -206,9 +206,9 @@ When I set page load timeout to `$duration`
 .Before loading a heavy page set an increased timeout
 [source,gherkin]
 ----
-Given I am on page with URL `https://example.com/`
+Given I am on page with URL 'https://example.com/'
 When I set page load timeout to `PT20S`
-When I open URL `https://example.com/super-heavy-page` in new window
+When I open URL 'https://example.com/super-heavy-page' in new window
 When I set page load timeout to `PT10S`
 ----
 
@@ -234,7 +234,7 @@ Then metric $webPerformanceMetric is $comparisonRule `$duration`
 .Check page load
 [source,gherkin]
 ----
-Given I am on page with URL `https://example.com`
+Given I am on page with URL 'https://example.com'
 Then metric PAGE_LOAD_TIME is less than `PT5S`
 ----
 
@@ -588,7 +588,7 @@ When I remove cookie with name `$cookieName` from current domain without applyin
 [source,gherkin]
 ----
 When I remove cookie with name `JSESSIONID` from current domain without applying changes
-When I refresh the page
+When I refresh page
 ----
 
 ==== Remove all cookies
@@ -709,7 +709,7 @@ where the first measure is window width, the last one is window height.
 .Resize the browser window
 [source,gherkin]
 ----
-Given I am on page with URL `https://example.com/`
+Given I am on page with URL 'https://example.com/'
 When I change window size to `640x320`
 ----
 
@@ -768,7 +768,7 @@ When I save info from video player located `$locator` to $scopes variable `$vari
 .Video player verifications
 [source,gherkin]
 ----
-Given I am on page with URL `https://www.youtube.com/watch?v=pYqyVpCV-3c`
+Given I am on page with URL 'https://www.youtube.com/watch?v=pYqyVpCV-3c'
 When I pause video in video player located `cssSelector(video)`
 When I rewind time to `777` seconds in video player located `cssSelector(video)`
 When I play video in video player located `cssSelector(video)`

@@ -92,7 +92,7 @@ public class PageSteps
      * <p>
      * @param pageURL An <b>absolute</b> URL of the page
      */
-    @Given("I am on page with URL `$pageURL`")
+    @Given("I am on page with URL '$pageURL'")
     public void openPage(String pageURL)
     {
         uiContext.reset();
@@ -112,7 +112,7 @@ public class PageSteps
      * <p>
      * @param relativeURL A string value of the relative URL
      */
-    @Then("the page has the relative URL '$relativeURL'")
+    @Then("page has relative URL '$relativeURL'")
     public void checkPageRelativeURL(String relativeURL)
     {
         URI url = UriUtils.createUri(getWebDriver().getCurrentUrl());
@@ -139,7 +139,7 @@ public class PageSteps
      * <p>
      * @param host A string value of the page host
      */
-    @Then("the host of the page URL is '$host'")
+    @Then("host of the page URL is '$host'")
     public void checkPageHost(String host)
     {
         URI url = UriUtils.createUri(getWebDriver().getCurrentUrl());
@@ -154,7 +154,7 @@ public class PageSteps
      * <li>Browser reloads current page which is the same action as one caused by pressing F5 on the keyboard.
      * </ul>
      */
-    @When("I refresh the page")
+    @When("I refresh page")
     public void refreshPage()
     {
         uiContext.reset();
@@ -165,7 +165,7 @@ public class PageSteps
      * Opens page with the given <b>pageUrl</b> in a new window object(tab)
      * @param pageUrl An absolute URL of the page
      */
-    @When("I open URL `$pageUrl` in new window")
+    @When("I open URL '$pageUrl' in new window")
     public void openPageUrlInNewWindow(String pageUrl)
     {
         javascriptActions.openNewWindow();
@@ -179,7 +179,7 @@ public class PageSteps
      * <p>
      * @param url String value of URL
      */
-    @Then("the page with the URL '$URL' is loaded")
+    @Then("page with URL '$URL' is loaded")
     public void checkUriIsLoaded(String url)
     {
         String actualUrl = getWebDriver().getCurrentUrl();
@@ -195,7 +195,7 @@ public class PageSteps
      * Checks if page's url contains part of url and this page is loaded
      * @param urlPart Expected URL part
      */
-    @Then("the page with the URL containing '$URLpart' is loaded")
+    @Then("page with URL containing '$URLpart' is loaded")
     public void checkUrlPartIsLoaded(String urlPart)
     {
         URI actualUrl = UriUtils.createUri(getWebDriver().getCurrentUrl());
@@ -233,7 +233,7 @@ public class PageSteps
      * <p>
      * @param relativeURL A string value of the relative URL
      */
-    @When("I go to relative URL `$relativeURL`")
+    @When("I go to relative URL '$relativeURL'")
     public void openRelativeUrl(String relativeURL)
     {
         setContextSteps.switchingToDefault();
@@ -251,7 +251,7 @@ public class PageSteps
      * @param comparisonRule String validation rule: "is equal to", "contains", "does not contain"
      * @param text The text of the title to compare (ex. {@code <title>}<b>'text'</b>{@code </title>})
      */
-    @Then("the page title $comparisonRule '$text'")
+    @Then("page title $comparisonRule '$text'")
     public void assertPageTitle(StringComparisonRule comparisonRule, String text)
     {
         descriptiveSoftAssert.assertThat(PAGE_TITLE, getWebDriver().getTitle(), comparisonRule.createMatcher(text));

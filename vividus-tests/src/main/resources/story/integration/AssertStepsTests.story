@@ -4,7 +4,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-Given I am on page with URL `https://google.com`
+Given I am on page with URL 'https://google.com'
 
 Scenario: Verify step Then I verify assertions matching '$assertionsPattern'
 Then number of elements found by `By.xpath(//input[@*='q'])` is = `1`

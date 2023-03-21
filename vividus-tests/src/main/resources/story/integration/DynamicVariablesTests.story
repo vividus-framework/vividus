@@ -7,7 +7,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-Given I am on page with URL `${vividus-test-site-url}`
+Given I am on page with URL '${vividus-test-site-url}'
 
 
 Scenario: Verify context' rectangle dynamic variables

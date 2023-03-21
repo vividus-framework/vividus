@@ -5,7 +5,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-Given I am on page with URL `${vividus-test-site-url}/webStorage.html`
+Given I am on page with URL '${vividus-test-site-url}/webStorage.html'
 Examples:
 |storageType|key       |
 |session    |sessionKey|

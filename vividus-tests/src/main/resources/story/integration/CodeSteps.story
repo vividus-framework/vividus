@@ -1,5 +1,5 @@
 Scenario: Step verification: "When I execute javascript `$jsCode` and save result to $scopes variable `$variableName`"
-Given I am on page with URL `${vividus-test-site-url}`
+Given I am on page with URL '${vividus-test-site-url}'
 When I execute javascript `return JSON.stringify(window.performance.timing)` and save result to scenario variable `timings`
 Then number of JSON elements from `${timings}` by JSON path `$.connectStart` is = 1
 

@@ -182,7 +182,7 @@ gradlew countSteps --args='-t 5 -d story/uat'
 ----
 Top of the most used steps:                                                                  occurrence(s)
 Then `$variable1` is $comparisonRule `$variable2`                                                      330
-Given I am on page with URL `$pageURL`                                                                 127
+Given I am on page with URL '$pageURL'                                                                127
 Then number of elements found by `$locator` is $comparisonRule `$quantity`                             110
 Given I initialize $scopes variable `$variableName` with value `$variableValue`                         83
 When I change context to element located `$locator`                                                     59

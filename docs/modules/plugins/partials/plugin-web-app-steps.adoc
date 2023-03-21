@@ -27,13 +27,13 @@ Loading the page with a given absolute URL, e.g. _https://example.com/_.
 
 [source,gherkin]
 ----
-Given I am on page with URL `$pageURL`
+Given I am on page with URL '$pageURL'
 ----
 
 .Open 'https://docs.vividus.dev/' page
 [source,gherkin]
 ----
-Given I am on page with URL `https://docs.vividus.dev/`
+Given I am on page with URL 'https://docs.vividus.dev/'
 ----
 
 ==== Open page with relative URL
@@ -72,7 +72,7 @@ A relative URL can point to a file within a web site (like `about.html` or `/pro
 
 [source,gherkin]
 ----
-When I go to relative URL `$relativeURL`
+When I go to relative URL '$relativeURL'
 ----
 
 * `relativeURL` - A string value of the relative URL.
@@ -81,7 +81,7 @@ When I go to relative URL `$relativeURL`
 [source,gherkin]
 ----
 Given I am on main application page
-When I go to relative URL `/products/new`
+When I go to relative URL '/products/new'
 ----
 
 === Clicking steps
@@ -208,7 +208,7 @@ Then text `$text` exists
 .Check the text 'Contract Us' is presented on the page
 [source,gherkin]
 ----
-Given I am on page with URL `https://docs.vividus.dev/`
+Given I am on page with URL 'https://docs.vividus.dev/'
 Then text `Contract Us` exists
 ----
 
@@ -246,7 +246,7 @@ When I open new tab
 [source,gherkin]
 ----
 When I open new tab
-Given I am on page with URL `https://docs.vividus.dev/`
+Given I am on page with URL 'https://docs.vividus.dev/'
 ----
 
 ==== Open URL in a new tab
@@ -264,14 +264,14 @@ is that this step _inherits_ the state of the previous page, i.e.:
 
 [source,gherkin]
 ----
-When I open URL `$URL` in new window
+When I open URL '$URL' in new window
 ----
 * `$URL` - The URL to open.
 
 .Open docs in a new tab
 [source,gherkin]
 ----
-When I open URL `https://docs.vividus.dev` in new window
+When I open URL 'https://docs.vividus.dev' in new window
 ----
 
 ==== Close current tab
@@ -290,8 +290,8 @@ NOTE: This step can only be applied to a session with multiple tabs open.
 .Open URL in new tab, close it and switch to the previous page
 [source,gherkin]
 ----
-Given I am on page with URL `https://example.com/`
-When I open URL `https://example.com/contact-us` in new window
+Given I am on page with URL 'https://example.com/'
+When I open URL 'https://example.com/contact-us' in new window
 When I close the current window
 ----
 
@@ -314,8 +314,8 @@ NOTE: If you confirm window close in {popup-alert}[alert], the tab will be close
 .Checking for an alert when trying to close a window with form
 [source,gherkin]
 ----
-Given I am on page with URL `https://example.com/`
-When I open URL `https://example.com/form` in new window
+Given I am on page with URL 'https://example.com/'
+When I open URL 'https://example.com/form' in new window
 When I click on element located by `xpath(//*[@id='form-edit'])`
 When I execute sequence of actions:
 |type      |argument    |
@@ -467,7 +467,7 @@ Then there are no browser console $logLevels
 .Validate absence of JS errors
 [source,gherkin]
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/`
+Given I am on page with URL 'https://vividus-test-site.onrender.com/'
 Then there are no browser console ERRORS
 ----
 
@@ -485,7 +485,7 @@ Then there are no browser console $logLevels by regex '$pattern'
 .Validate absence of JS error referencing user
 [source,gherkin]
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/`
+Given I am on page with URL 'https://vividus-test-site.onrender.com/'
 Then there are no browser console ERRORS by regex '.*user.*'
 ----
 
@@ -503,7 +503,7 @@ Then there are browser console $logLevels by regex '$pattern'
 .Validate presence of JS errors referencing user
 [source,gherkin]
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/`
+Given I am on page with URL 'https://vividus-test-site.onrender.com/'
 Then there are browser console ERRORS by regex '.*user.*'
 ----
 
@@ -524,7 +524,7 @@ When I wait until browser console $logEntries by regex `$regex` appear and save 
 
 .Wait for application readiness
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/`
+Given I am on page with URL 'https://vividus-test-site.onrender.com/'
 When I wait until browser console infos by regex `.*Application ready.*` appear and save all entries into scenario variable `logs`
 Then `${logs}` matches `.*Application ready in \d+ seconds.*`
 ----

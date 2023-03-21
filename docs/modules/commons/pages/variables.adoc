@@ -78,7 +78,7 @@ batch-2.variables.locale=/uk/en/
 [source,gherkin]
 ----
 Given I am on main application page
-When I go to the relative URL '${locale}'
+When I go to relative URL '${locale}'
 ----
 
 |`global`
@@ -217,5 +217,5 @@ Scenario: Open page to be checked
 Given I am on main application page
 When the condition `#{eval(`${optionalPathToCheck:/defaultPath}` != `/forbiddenPath`)}` is true I do
 |step                                                                |
-|When I go to the relative URL '${optionalPathToCheck:/defaultPath}' |
+|When I go to relative URL '${optionalPathToCheck:/defaultPath}' |
 ----

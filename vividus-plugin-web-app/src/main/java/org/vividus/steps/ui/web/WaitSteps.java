@@ -409,9 +409,9 @@ public class WaitSteps
      * <br>
      * Usage example:
      * <code>
-     * <br>Given I am on page with URL `https://example.com/`
+     * <br>Given I am on page with URL 'https://example.com/'
      * <br>When I set page load timeout to `PT15S`
-     * <br>When I open URL `https://example.com/super-heavy-page` in new window
+     * <br>When I open URL 'https://example.com/super-heavy-page' in new window
      * <br>When I set page load timeout to `PT10S`
      * </code>
      * <br>

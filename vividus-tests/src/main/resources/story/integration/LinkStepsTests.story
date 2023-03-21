@@ -8,7 +8,7 @@ Examples:
 
 
 Scenario: Step verification Then context contains list of link items with the text: $expectedLinkItems
-Given I am on page with URL `<linksUrl>`
+Given I am on page with URL '<linksUrl>'
 When I change context to element located by `xpath(//body)`
 Then context contains list of link items with the text:
 |text              |

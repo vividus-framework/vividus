@@ -325,16 +325,16 @@ Scenario: Open Epam main page
 Meta:
   @severity 1
   @layout desktop
-Given I am on page with URL `https://www.epam.com/`
-Then the page title is equal to 'EPAM | Enterprise Software Development, Design & Consulting'
+Given I am on page with URL 'https://www.epam.com/'
+Then page title is equal to 'EPAM | Enterprise Software Development, Design & Consulting'
 
 Scenario: Open Google main page
 Meta:
   @severity 2
   @layout desktop
   @skip
-Given I am on page with URL `https://www.google.com/`
-Then the page title is equal to 'Google'
+Given I am on page with URL 'https://www.google.com/'
+Then page title is equal to 'Google'
 ----
 
 === Properties

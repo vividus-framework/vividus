@@ -6,7 +6,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-Given I am on page with URL `${vividus-test-site-url}/stickyHeader.html`
+Given I am on page with URL '${vividus-test-site-url}/stickyHeader.html'
 Examples:
 |action         |firstP             |
 |COMPARE_AGAINST|xpath((.//p)[1])|
@@ -84,7 +84,7 @@ When I <action> baseline with name `cuts-context` using screenshot configuration
 
 
 Scenario: Validation of contextual visual testing on a page with scrollable element
-Given I am on page with URL `${vividus-test-site-url}/visualTestIntegration.html`
+Given I am on page with URL '${vividus-test-site-url}/visualTestIntegration.html'
 When I <action> baseline with name `scrollable-element-context` using screenshot configuration:
 |scrollableElement|webHeaderToCut|webFooterToCut|scrollTimeout|
 |id(scrollable)   |10            |0             |PT1S         |

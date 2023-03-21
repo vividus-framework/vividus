@@ -140,7 +140,7 @@ public class WindowSteps
      * </ul>
      * <p>
      * Note that this step can only be used if the current window was opened using the step
-     * 'When I open URL `$pageUrl` in new window'.
+     * 'When I open URL '$pageUrl' in new window'.
      * <p>
      * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context (Window &amp; Document)</i></a>
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>

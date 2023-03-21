@@ -18,5 +18,5 @@ Then all resources by selector `a` are valid on:
 |<pageToValidate>                            |
 
 Scenario: Verification of Then all resources by selector $cssSelector from $html are valid; Source from WEB page
-Given I am on page with URL `<pageToValidate>`
+Given I am on page with URL '<pageToValidate>'
 Then all resources by selector `a` from ${pageSource} are valid

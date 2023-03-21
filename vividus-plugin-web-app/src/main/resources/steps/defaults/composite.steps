@@ -300,3 +300,39 @@ When I go to relative URL `<relativeURL>`
 Composite: Then the text '$text' exists
 !-- WARNING: The step "Then the text '$text' exists" is deprecated and will be removed in VIVIDUS 0.6.0
 Then text `<text>` exists
+
+Composite: I am on page with URL `$pageURL`
+!-- WARNING: The step "I am on page with URL `$pageURL`" is deprecated and will be removed in VIVIDUS 0.6.0
+I am on page with URL '$pageURL'
+
+Composite: the page has the relative URL '$relativeURL'
+!-- WARNING: The step "the page has the relative URL '$relativeURL'" is deprecated and will be removed in VIVIDUS 0.6.0
+page has relative URL '$relativeURL'
+
+Composite: the host of the page URL is '$host'
+!-- WARNING: The step "the host of the page URL is '$host'" is deprecated and will be removed in VIVIDUS 0.6.0
+host of the page URL is '$host'
+
+Composite: I refresh the page
+!-- WARNING: The step "I refresh the page" is deprecated and will be removed in VIVIDUS 0.6.0
+I refresh page
+
+Composite: I open URL `$pageUrl` in new window
+!-- WARNING: The step "I open URL `$pageUrl` in new window" is deprecated and will be removed in VIVIDUS 0.6.0
+I open URL '$pageUrl' in new window
+
+Composite: the page with the URL '$URL' is loaded
+!-- WARNING: The step "the page with the URL '$URL' is loaded" is deprecated and will be removed in VIVIDUS 0.6.0
+page with URL '$URL' is loaded
+
+Composite: the page with the URL containing '$URLpart' is loaded
+!-- WARNING: The step "the page with the URL containing '$URLpart' is loaded" is deprecated and will be removed in VIVIDUS 0.6.0
+page with URL containing '$URLpart' is loaded
+
+Composite: I go to relative URL `$relativeURL`
+!-- WARNING: The step "I go to relative URL `$relativeURL`" is deprecated and will be removed in VIVIDUS 0.6.0
+I go to relative URL '$relativeURL'
+
+Composite: the page title $comparisonRule '$text'
+!-- WARNING: The step "the page title $comparisonRule '$text'" is deprecated and will be removed in VIVIDUS 0.6.0
+page title $comparisonRule '$text'

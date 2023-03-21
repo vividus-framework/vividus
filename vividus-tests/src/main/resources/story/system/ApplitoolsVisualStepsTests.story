@@ -6,7 +6,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-Given I am on page with URL `${vividus-test-site-url}/stickyHeader.html`
+Given I am on page with URL '${vividus-test-site-url}/stickyHeader.html'
 Examples:
 |action         |firstP             |batchName           |
 |COMPARE_AGAINST|xpath((.//p)[1])   |Vividus System Tests|
@@ -58,7 +58,7 @@ When I run visual test with Applitools using:
 |full-page-with-scroll-element-area-cut |<batchName>|<action>|By.xpath(//p[position() mod 2 = 1 and position() > 10])|By.xpath(//p[position() mod 2 = 1 and position() < 10])|
 
 Scenario: Validation of contextual visual testing on a page with scrollable element
-Given I am on page with URL `${vividus-test-site-url}/visualTestIntegration.html`
+Given I am on page with URL '${vividus-test-site-url}/visualTestIntegration.html'
 When I run visual test with Applitools using:
 |baselineName                          |batchName  |action  |
 |scrollable-element-context            |<batchName>|<action>|

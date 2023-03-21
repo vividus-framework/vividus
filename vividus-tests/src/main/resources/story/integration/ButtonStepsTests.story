@@ -5,7 +5,7 @@ Meta:
 
 
 Scenario: Step verification Then a radio button with the name '$radioOption' exists
-Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
+Given I am on page with URL '${vividus-test-site-url}/mouseEvents.html'
 Then a radio button with the name 'Email' exists
 
 Scenario: Step verification Then a [$state] radio button with the name '$radioOption' exists

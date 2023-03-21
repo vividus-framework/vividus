@@ -6,7 +6,7 @@ Scenario: Verify step: When I find $comparisonRule `$number` elements `$locator`
 Meta:
     @requirementId 2054
 
-Given I am on page with URL `${vividus-test-site-url}/elementState.html`
+Given I am on page with URL '${vividus-test-site-url}/elementState.html'
 When I find > `0` elements `id(element-to-hide)` and while they exist do up to 10 iteration of
 |step                                                |
 |When I click on element located by `id(button-hide)`|

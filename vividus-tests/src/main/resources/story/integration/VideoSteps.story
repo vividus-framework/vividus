@@ -8,7 +8,7 @@ Examples:
 
 
 Scenario: Verify step: "When I pause video in video player located `$locator`"
-Given I am on page with URL `${vividus-test-site-url}/video.html`
+Given I am on page with URL '${vividus-test-site-url}/video.html'
 When I switch to frame located `id(video)`
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
 Then `${details.currentTime}` is = `0`

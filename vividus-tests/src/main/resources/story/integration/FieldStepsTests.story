@@ -4,7 +4,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-Given I am on page with URL `${vividus-test-site-url}/inputs.html`
+Given I am on page with URL '${vividus-test-site-url}/inputs.html'
 Examples:
 |inputLocator|inputId|
 |By.id(text) |text   |
