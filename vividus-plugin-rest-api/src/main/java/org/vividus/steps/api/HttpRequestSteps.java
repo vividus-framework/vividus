@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,17 +28,18 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.entity.mime.ContentBody;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicHeader;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.util.Timeout;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
@@ -76,7 +77,7 @@ public class HttpRequestSteps
     {
         Object data = content.getData();
         HttpEntity requestEntity = data instanceof String ? new StringEntity((String) data, StandardCharsets.UTF_8)
-                : new ByteArrayEntity((byte[]) data);
+                : new ByteArrayEntity((byte[]) data, null);
         httpTestContext.putRequestEntity(requestEntity);
     }
 
@@ -213,30 +214,23 @@ public class HttpRequestSteps
      * <ul>
      * <li>expectContinueEnabled (boolean, default:{@code false})
      *  - determines whether the 'Expect: 100-Continue' handshake is enabled</li>
-     * <li>staleConnectionCheckEnabled (boolean, default:{@code false})
-     *  - determines whether stale connection check is to be used</li>
      * <li>redirectsEnabled (boolean, default:{@code true})
      *  - determines whether redirects should be handled automatically</li>
-     * <li>relativeRedirectsAllowed (boolean, default:{@code true})
-     *  - determines whether relative redirects should be rejected</li>
      * <li>circularRedirectsAllowed (boolean, default:{@code false})
      *  - determines whether circular redirects (redirects to the same location) should be allowed</li>
      * <li>authenticationEnabled (boolean, default:{@code true})
      *  - determines whether authentication should be handled automatically</li>
      * <li>contentCompressionEnabled (boolean, default:{@code true})
      *  - determines whether the target server is requested to compress content</li>
-     * <li>normalizeUri (boolean, default:{@code true})
-     *  - determines whether client should normalize URIs in requests or not</li>
      * <li>maxRedirects (int, default:{@code 50}) - returns the maximum number of redirects to be followed</li>
-     * <li>connectionRequestTimeout (int, default:{@code -1})
+     * <li>connectionRequestTimeout (int, default:{@code 180000})
      *  - returns the timeout in milliseconds used when requesting a connection from the connection manager</li>
-     * <li>connectTimeout (int, default:{@code -1})
+     * <li>connectTimeout (int, default:{@code 180000})
      *  - determines the timeout in milliseconds until a connection is established</li>
-     * <li>socketTimeout (int, default:{@code -1})
-     *  - defines the socket timeout ({@code SO_TIMEOUT}) in milliseconds,
-     * which is the timeout for waiting for data or, put differently,
-     * a maximum period inactivity between two consecutive data packets</li>
-     * <li>cookieSpec (String, default:{@code null})
+     * <li>responseTimeout (int, default:{@code 0})
+     *  - the timeout until arrival of a response from the opposite endpoint. A timeout value of zero is interpreted
+     *    as an infinite timeout.</li>
+     * <li>cookieSpec (String, default:{@code <not set>})
      *  - determines the name of the cookie specification to be used for HTTP state management</li>
      * </ul>
      * @throws ReflectiveOperationException if any unknown parameter is set in configuration items
@@ -270,6 +264,8 @@ public class HttpRequestSteps
                 return Boolean.parseBoolean(value);
             case "int":
                 return Integer.parseInt(value);
+            case "org.apache.hc.core5.util.Timeout":
+                return Timeout.ofMilliseconds(Integer.parseInt(value));
             default:
                 return value;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ContentType;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,7 +68,7 @@ class MobitruClientTests
     void shouldTakeDevice() throws IOException, MobitruOperationException
     {
         var builder = mock(HttpRequestBuilder.class);
-        var httpRequest = mock(HttpRequestBase.class);
+        ClassicHttpRequest httpRequest = mock();
         try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
         {
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
@@ -88,7 +88,7 @@ class MobitruClientTests
     void shouldThrowDeviceExceptionIfInvalidStatusCodeReturned() throws IOException
     {
         var builder = mock(HttpRequestBuilder.class);
-        var httpRequest = mock(HttpRequestBase.class);
+        ClassicHttpRequest httpRequest = mock();
         try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
         {
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
@@ -108,7 +108,7 @@ class MobitruClientTests
     void shouldWrapIOException() throws IOException
     {
         var builder = mock(HttpRequestBuilder.class);
-        var httpRequest = mock(HttpRequestBase.class);
+        ClassicHttpRequest httpRequest = mock();
         try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
         {
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
@@ -128,7 +128,7 @@ class MobitruClientTests
     void shouldGetApps() throws IOException, MobitruOperationException
     {
         var builder = mock(HttpRequestBuilder.class);
-        var httpRequest = mock(HttpRequestBase.class);
+        ClassicHttpRequest httpRequest = mock();
         try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
         {
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
@@ -148,7 +148,7 @@ class MobitruClientTests
     void shouldInstallApp() throws IOException, MobitruOperationException
     {
         var builder = mock(HttpRequestBuilder.class);
-        var httpRequest = mock(HttpRequestBase.class);
+        ClassicHttpRequest httpRequest = mock();
         try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
         {
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
@@ -169,7 +169,7 @@ class MobitruClientTests
     void shouldStopUsingDevice() throws IOException, MobitruOperationException
     {
         var builder = mock(HttpRequestBuilder.class);
-        var httpRequest = mock(HttpRequestBase.class);
+        ClassicHttpRequest httpRequest = mock();
         try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
         {
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
@@ -194,7 +194,7 @@ class MobitruClientTests
             throws IOException
     {
         var builder = mock(HttpRequestBuilder.class);
-        var httpRequest = mock(HttpRequestBase.class);
+        ClassicHttpRequest httpRequest = mock();
         try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
         {
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);

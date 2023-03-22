@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,12 +182,12 @@ class SiteMapTableTransformerTests
     }
 
     @Test
-    void testNullRedirects() throws SiteMapParseException
+    void testNoRedirects() throws SiteMapParseException
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(SITEMAP_URLS);
         siteMapTableTransformer.setFilterRedirects(true);
-        when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUT_URL))).thenReturn(null);
+        when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUT_URL))).thenReturn(List.of());
         var actual = siteMapTableTransformer.fetchUrls(createTableProperties());
         assertThat(actual, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
     }

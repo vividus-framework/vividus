@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +41,9 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -139,15 +141,15 @@ class GoogleAnalyticsFacadeTests
         HttpPost request = httpPostCaptor.getValue();
         assertAll(
             () -> assertEquals("User-Agent: ", request.getFirstHeader("User-Agent").toString()),
-            () -> assertEquals("POST https://www.google-analytics.com/batch HTTP/1.1",
-                    request.getRequestLine().toString()),
+            () -> assertEquals("POST", request.getMethod()),
+            () -> assertEquals(URI.create("https://www.google-analytics.com/batch"), request.getUri()),
             () -> assertEquals(expectedEncodedEvent + System.lineSeparator() + expectedEncodedEvent,
                     EntityUtils.toString(request.getEntity(), StandardCharsets.UTF_8))
         );
     }
 
     @Test
-    void shouldSendEventsByPartsIfTheirQuantityExceedsGALimit() throws IOException
+    void shouldSendEventsByPartsIfTheirQuantityExceedsGALimit() throws IOException, ParseException
     {
         useUserDir(DEFAULT_DIR);
         googleAnalyticsFacade.init();

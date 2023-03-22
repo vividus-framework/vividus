@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.net.WWWFormCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.analytics.model.AnalyticsEvent;
@@ -100,7 +100,7 @@ public class GoogleAnalyticsFacade
     {
         analyticsEvent.getEvents().stream()
                                   .map(this::asParams)
-                                  .map(params -> URLEncodedUtils.format(params, UTF_8))
+                                  .map(params -> WWWFormCodec.format(params, UTF_8))
                                   .collect(Collectors.collectingAndThen(toList(), this::prepareHttpEntites))
                                   .forEach(this::post);
     }
@@ -138,8 +138,7 @@ public class GoogleAnalyticsFacade
     {
         try
         {
-            HttpEntityEnclosingRequestBase post = HttpMethod.POST
-                    .createEntityEnclosingRequest(ANALYTICS_URI, entity);
+            ClassicHttpRequest post = HttpMethod.POST.createEntityEnclosingRequest(ANALYTICS_URI, entity);
             post.setHeader("User-Agent", "");
             httpClient.execute(post);
         }

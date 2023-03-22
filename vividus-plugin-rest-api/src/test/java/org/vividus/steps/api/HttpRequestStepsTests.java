@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
+import org.apache.hc.core5.http.HttpEntity;
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -69,7 +68,7 @@ class HttpRequestStepsTests
     @Test
     void testRequestUtf8Content()
     {
-        String content = "{\"storeUserNewPassword\": \"зЛЖЛВеБЛги!\"}";
+        var content = "{\"storeUserNewPassword\": \"зЛЖЛВеБЛги!\"}";
         httpRequestSteps.request(new DataWrapper(content));
         verifyPutRequestEntity(content);
     }
@@ -88,7 +87,7 @@ class HttpRequestStepsTests
     @Test
     void testUrlEncodedRequest()
     {
-        ExamplesTable parameters = new ExamplesTable("|name|value|\n|first name|Ivan 1|\n|lastName|Ivan@of|");
+        var parameters = new ExamplesTable("|name|value|\n|first name|Ivan 1|\n|lastName|Ivan@of|");
         httpRequestSteps.putUrlEncodedRequest(parameters);
         verifyPutRequestEntity("first+name=Ivan+1&lastName=Ivan%40of");
     }
@@ -99,24 +98,19 @@ class HttpRequestStepsTests
         return Stream.of(
                 arguments("|name|type|value|\n|part|STRING|content|",
                         "Content-Disposition: form-data; name=\"part\"\r\n"
-                                + "Content-Type: text/plain; charset=ISO-8859-1\r\n"
-                                + "Content-Transfer-Encoding: 8bit\r\n\r\ncontent\r\n"),
+                                + "Content-Type: text/plain; charset=ISO-8859-1\r\n\r\ncontent\r\n"),
                 arguments("|name|type|value|contentType|\n|part|STRING|content|text/html; charset=utf-8|",
                         "Content-Disposition: form-data; name=\"part\"\r\n"
-                                + "Content-Type: text/html; charset=utf-8\r\n"
-                                + "Content-Transfer-Encoding: 8bit\r\n\r\ncontent\r\n"),
+                                + "Content-Type: text/html; charset=utf-8\r\n\r\ncontent\r\n"),
                 arguments("|name|type|value|fileName|\n|part|FILE|/requestBody.txt|file.txt|",
                         "Content-Disposition: form-data; name=\"part\"; filename=\"file.txt\"\r\n"
-                                + "Content-Type: application/octet-stream\r\n"
-                                + "Content-Transfer-Encoding: binary\r\n\r\n{body}\r\n"),
+                                + "Content-Type: application/octet-stream\r\n\r\n{body}\r\n"),
                 arguments("|name|type|value|contentType|\n|part|FILE|/requestBody.txt|text/plain; charset=utf-8|",
                         "Content-Disposition: form-data; name=\"part\"; filename=\"requestBody.txt\"\r\n"
-                                + "Content-Type: text/plain; charset=utf-8\r\n"
-                                + "Content-Transfer-Encoding: binary\r\n\r\n{body}\r\n"),
+                                + "Content-Type: text/plain; charset=utf-8\r\n\r\n{body}\r\n"),
                 arguments("|name|type|value|fileName|\n|part|BINARY|data|file.bin|",
                         "Content-Disposition: form-data; name=\"part\"; filename=\"file.bin\"\r\n"
-                                + "Content-Type: application/octet-stream\r\n"
-                                + "Content-Transfer-Encoding: binary\r\n\r\ndata\r\n")
+                                + "Content-Type: application/octet-stream\r\n\r\ndata\r\n")
         );
     }
 
@@ -124,9 +118,9 @@ class HttpRequestStepsTests
     @MethodSource("multipartRequests")
     void shouldPutMultipartRequestFromString(String tableAsString, String content) throws IOException
     {
-        ExamplesTable requestParts = new ExamplesTable(tableAsString);
+        var requestParts = new ExamplesTable(tableAsString);
         httpRequestSteps.putMultipartRequest(requestParts);
-        ArgumentCaptor<HttpEntity> captor = ArgumentCaptor.forClass(HttpEntity.class);
+        var captor = ArgumentCaptor.forClass(HttpEntity.class);
         verify(httpTestContext).putRequestEntity(captor.capture());
         assertThat(IOUtils.toString(captor.getValue().getContent(), StandardCharsets.UTF_8), containsString(content));
     }
@@ -134,13 +128,13 @@ class HttpRequestStepsTests
     @Test
     void testSetUpRequestHeaders()
     {
-        ExamplesTable headers = new ExamplesTable("|name|value|\n|name1|value1|");
+        var headers = new ExamplesTable("|name|value|\n|name1|value1|");
         httpRequestSteps.setUpRequestHeaders(headers);
         verify(httpTestContext).putRequestHeaders(argThat(actual ->
         {
             if (actual.size() == 1)
             {
-                Header header = actual.get(0);
+                var header = actual.get(0);
                 return "name1".equals(header.getName()) && "value1".equals(header.getValue());
             }
             return false;
@@ -150,13 +144,13 @@ class HttpRequestStepsTests
     @Test
     void testAddRequestHeaders()
     {
-        ExamplesTable headers = new ExamplesTable("|name|value|\n|newName|newValue|");
+        var headers = new ExamplesTable("|name|value|\n|newName|newValue|");
         httpRequestSteps.addRequestHeaders(headers);
         verify(httpTestContext).addRequestHeaders(argThat(actual ->
         {
             if (actual.size() == 1)
             {
-                Header header = actual.get(0);
+                var header = actual.get(0);
                 return "newName".equals(header.getName()) && "newValue".equals(header.getValue());
             }
             return false;
@@ -182,8 +176,8 @@ class HttpRequestStepsTests
     @Test
     void testSetCustomRequestConfig() throws ReflectiveOperationException
     {
-        ExamplesTable configItems = new ExamplesTable("|redirectsEnabled|connectionRequestTimeout|cookieSpec|"
-                + "\n|false|2|superCookie|");
+        var configItems = new ExamplesTable("|redirectsEnabled|connectionRequestTimeout|cookieSpec|maxRedirects|"
+                + "\n|false|2|superCookie|3|");
         httpRequestSteps.setCustomRequestConfig(configItems);
         verify(httpTestContext).putRequestConfig(argThat(config -> !config.isRedirectsEnabled()));
     }
@@ -191,8 +185,8 @@ class HttpRequestStepsTests
     @Test
     void testSetCustomRequestConfigNoField()
     {
-        ExamplesTable configItems = new ExamplesTable("|nonExistentField|\n|any|");
-        NoSuchFieldException exception = assertThrows(NoSuchFieldException.class,
+        var configItems = new ExamplesTable("|nonExistentField|\n|any|");
+        var exception = assertThrows(NoSuchFieldException.class,
             () -> httpRequestSteps.setCustomRequestConfig(configItems));
         assertEquals("nonExistentField", exception.getMessage());
     }

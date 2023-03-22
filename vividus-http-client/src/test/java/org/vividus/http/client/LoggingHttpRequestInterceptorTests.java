@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -46,7 +46,7 @@ class LoggingHttpRequestInterceptorTests
     {
         LoggingHttpRequestInterceptor interceptor = new LoggingHttpRequestInterceptor(
                 LoggingHttpRequestInterceptor.class);
-        interceptor.process(request, null);
+        interceptor.process(request, null, null);
         verifyLogger();
     }
 
@@ -55,7 +55,7 @@ class LoggingHttpRequestInterceptorTests
     {
         LoggingHttpRequestInterceptor interceptor = new LoggingHttpRequestInterceptor(
                 LoggingHttpRequestInterceptor.class.getName());
-        interceptor.process(request, null);
+        interceptor.process(request, null, null);
         verifyLogger();
     }
 

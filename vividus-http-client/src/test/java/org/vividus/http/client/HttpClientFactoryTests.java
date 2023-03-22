@@ -18,7 +18,9 @@ package org.vividus.http.client;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -28,9 +30,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.Collections;
@@ -42,39 +47,37 @@ import java.util.function.Consumer;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpRequestRetryHandler;
-import org.apache.http.client.RedirectStrategy;
-import org.apache.http.client.ServiceUnavailableRetryStrategy;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.DnsResolver;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.client5.http.DnsResolver;
+import org.apache.hc.client5.http.HttpRequestRetryStrategy;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
+import org.apache.hc.client5.http.auth.CredentialsProvider;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.protocol.RedirectStrategy;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.HttpResponseInterceptor;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.ArgumentMatcher;
+import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedConstruction;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.handler.HttpResponseHandler;
 import org.vividus.http.keystore.IKeyStoreFactory;
@@ -82,6 +85,7 @@ import org.vividus.http.keystore.IKeyStoreFactory;
 @ExtendWith(MockitoExtension.class)
 class HttpClientFactoryTests
 {
+    private static final AuthScope ANY_AUTH_SCOPE = new AuthScope(null, -1);
     private static final Map<String, String> HEADERS = Collections.singletonMap("header1", "value1");
     private static final String USERNAME = "username";
     private static final String PASSWORD = "password";
@@ -111,78 +115,85 @@ class HttpClientFactoryTests
     }
 
     @Test
-    void testBuildHttpClientWithHeaders() throws GeneralSecurityException
+    void testBuildHttpClientWithHeadersAndInterceptors() throws GeneralSecurityException, URISyntaxException
     {
         config.setHeaders(HEADERS);
         config.setAuthConfig(authConfig(null, null, false));
 
+        HttpRequestInterceptor firstRequestInterceptor = mock();
+        config.setFirstRequestInterceptor(firstRequestInterceptor);
+
+        HttpRequestInterceptor lastRequestInterceptor = mock();
+        config.setLastRequestInterceptor(lastRequestInterceptor);
+
+        HttpResponseInterceptor responseInterceptor = mock();
+        config.setLastResponseInterceptor(responseInterceptor);
+
         testBuildHttpClientUsingConfig();
-        verifyDefaultHeaderSetting(HEADERS.entrySet().iterator().next());
-    }
-
-    @Test
-    void testBuildHttpClientWithFullAuthenticationNoPreemptive() throws GeneralSecurityException
-    {
-        config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
-
-        try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
-                BasicCredentialsProvider.class))
+        Entry<String, String> headerEntry = HEADERS.entrySet().iterator().next();
+        verify(mockedHttpClientBuilder).setDefaultHeaders(argThat(headers ->
         {
-            testBuildHttpClientUsingConfig();
+            if (headers.size() == 1)
+            {
+                Header header = headers.iterator().next();
+                return headerEntry.getKey().equals(header.getName())
+                        && headerEntry.getValue().equals(header.getValue());
+            }
+            return false;
+        }));
 
-            CredentialsProvider credentialsProvider = credentialsProviderConstruction.constructed().get(0);
-            verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
-            verify(credentialsProvider).setCredentials(eq(AuthScope.ANY),
-                    argThat(usernamePasswordCredentialsMatcher()));
-            verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
-        }
+        verify(mockedHttpClientBuilder).addRequestInterceptorFirst(firstRequestInterceptor);
+        verify(mockedHttpClientBuilder).addRequestInterceptorLast(lastRequestInterceptor);
+        verify(mockedHttpClientBuilder).addResponseInterceptorLast(responseInterceptor);
     }
 
     @Test
-    void testBuildHttpClientWithFullAuthenticationPreemptive() throws GeneralSecurityException
+    void testBuildHttpClientWithFullAuthenticationPreemptive() throws GeneralSecurityException, URISyntaxException
     {
         config.setAuthConfig(authConfig(USERNAME, PASSWORD, true));
 
-        Header header = mock(Header.class);
-        try (MockedConstruction<BasicScheme> basicSchemeConstruction = mockConstruction(BasicScheme.class,
-                (scheme, context) -> when(scheme.authenticate(argThat(usernamePasswordCredentialsMatcher()),
-                        any(HttpRequest.class), any(HttpContext.class))).thenReturn(header)))
-        {
-            HttpRequest request = mock(HttpRequest.class);
-            HttpContext context = mock(HttpContext.class);
-            doAnswer(args ->
-            {
-                HttpRequestInterceptor interceptor = args.getArgument(0);
-                interceptor.process(request, context);
-                return null;
-            }).when(mockedHttpClientBuilder).addInterceptorFirst(any(HttpRequestInterceptor.class));
+        HttpRequest request = mock();
+        HttpContext context = mock();
+        doAnswer(args -> {
+            HttpRequestInterceptor interceptor = args.getArgument(0);
+            interceptor.process(request, null, context);
+            return null;
+        }).when(mockedHttpClientBuilder).addRequestInterceptorFirst(any(HttpRequestInterceptor.class));
 
-            testBuildHttpClientUsingConfig();
+        PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = testBuildHttpClientUsingConfig();
 
-            verify(request).addHeader(header);
-            verify(mockedHttpClientBuilder, never()).setDefaultCredentialsProvider(any());
-            verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
-        }
+        ArgumentCaptor<Header> headerCaptor = ArgumentCaptor.forClass(Header.class);
+        verify(request).addHeader(headerCaptor.capture());
+        assertEquals("Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=", headerCaptor.getValue().toString());
+        verify(mockedHttpClientBuilder, never()).setDefaultCredentialsProvider(any());
+        verify(connectionManagerBuilder).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
     }
 
     @Test
-    void testBuildHttpClientWithAuthentication() throws GeneralSecurityException
+    void testBuildHttpClientWithFullAuthenticationNoPreemptive() throws GeneralSecurityException, URISyntaxException
     {
         config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
 
-        try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
-                BasicCredentialsProvider.class))
+        try (var credentialsProviderConstruction = mockConstruction(BasicCredentialsProvider.class))
         {
-            testBuildHttpClientUsingConfig();
+            PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = testBuildHttpClientUsingConfig();
 
-            CredentialsProvider credentialsProvider = credentialsProviderConstruction.constructed().get(0);
+            ArgumentCaptor<Credentials> credentialsCaptor = ArgumentCaptor.forClass(Credentials.class);
+
+            BasicCredentialsProvider credentialsProvider = credentialsProviderConstruction.constructed().get(0);
+            verify(credentialsProvider).setCredentials(eq(ANY_AUTH_SCOPE), credentialsCaptor.capture());
             verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
-            verify(credentialsProvider).setCredentials(eq(AuthScope.ANY),
-                    argThat(usernamePasswordCredentialsMatcher()));
-            verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
-            verify(mockedHttpClientBuilder, never()).addInterceptorFirst(
-                    (HttpRequestInterceptor) argThat(arg -> arg instanceof LoggingHttpRequestInterceptor));
+            verify(connectionManagerBuilder).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
+
+            Credentials credentials = credentialsCaptor.getValue();
+            assertInstanceOf(UsernamePasswordCredentials.class, credentials);
+            assertEquals(USERNAME, credentials.getUserPrincipal().getName());
+            assertArrayEquals(PASSWORD.toCharArray(), credentials.getPassword());
         }
+
+        verify(mockedHttpClientBuilder, times(0)).addRequestInterceptorFirst(any());
+        verify(mockedHttpClientBuilder, times(0)).addRequestInterceptorLast(any());
+        verify(mockedHttpClientBuilder, times(0)).addResponseInterceptorLast(any());
     }
 
     @ParameterizedTest
@@ -195,8 +206,7 @@ class HttpClientFactoryTests
     {
         config.setAuthConfig(authConfig(username, password, false));
 
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-            () -> httpClientFactory.buildHttpClient(config));
+        var thrown = assertThrows(IllegalArgumentException.class, () -> httpClientFactory.buildHttpClient(config));
         assertEquals(message, thrown.getMessage());
     }
 
@@ -211,212 +221,155 @@ class HttpClientFactoryTests
     }
 
     @Test
-    void testBuildHttpClientAuthenticationWithoutPass() throws GeneralSecurityException
+    void testBuildHttpClientAuthenticationWithoutPass() throws GeneralSecurityException, URISyntaxException
     {
         config.setAuthConfig(authConfig(null, null, false));
 
-        try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
-                BasicCredentialsProvider.class))
+        try (var credentialsProviderConstruction = mockConstruction(BasicCredentialsProvider.class))
         {
-            testBuildHttpClientUsingConfig();
+            PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = testBuildHttpClientUsingConfig();
 
             verify(mockedHttpClientBuilder, never()).setDefaultCredentialsProvider(any(CredentialsProvider.class));
-            verify(mockedHttpClientBuilder, never()).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
+            verify(connectionManagerBuilder).setSSLSocketFactory(any(SSLConnectionSocketFactory.class));
             assertThat(credentialsProviderConstruction.constructed(), hasSize(0));
         }
     }
 
     @Test
-    void testBuildTrustedHttpClient() throws GeneralSecurityException
+    void testBuildHttpClientTrustingAll() throws GeneralSecurityException, URISyntaxException
     {
         config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
         config.getSslConfig().setSslHostnameVerificationEnabled(false);
         config.getSslConfig().setSslCertificateCheckEnabled(false);
 
-        SSLContext sslContext = mock(SSLContext.class);
-        when(sslContextFactory.getTrustingAllSslContext(SSLConnectionSocketFactory.SSL)).thenReturn(sslContext);
-        testBuildHttpClientUsingConfig();
-        verify(mockedHttpClientBuilder).setSSLContext(sslContext);
-    }
+        SSLContext sslContext = mock();
+        when(sslContextFactory.getTrustingAllSslContext()).thenReturn(sslContext);
 
-    @Test
-    void testBuildHostnameVerifierHttpClient() throws GeneralSecurityException
-    {
-        config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
-        config.getSslConfig().setSslHostnameVerificationEnabled(false);
-        testBuildHttpClientUsingConfig();
-        verify(mockedHttpClientBuilder).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
-    }
-
-    @Test
-    void testBuildDnsResolver() throws GeneralSecurityException
-    {
-        DnsResolver resolver = mock(DnsResolver.class);
-        config.setDnsResolver(resolver);
-        config.setAuthConfig(authConfig(null, null, false));
-        testBuildHttpClientUsingConfig();
-        verify(mockedHttpClientBuilder).setDnsResolver(resolver);
-    }
-
-    @Test
-    void testBuildCircularRedirects() throws GeneralSecurityException
-    {
-        config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
-        config.setCircularRedirectsAllowed(true);
-        config.setMaxTotalConnections(-1);
-        config.setMaxConnectionsPerRoute(-1);
-
-        try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
-                BasicCredentialsProvider.class);
-                MockedStatic<HttpClientBuilder> httpClientBuilder = mockStatic(HttpClientBuilder.class);
-                MockedConstruction<HttpClient> httpClient = mockConstruction(HttpClient.class))
+        try (var connectionSocketFactoryBuilderStaticMock = mockStatic(SSLConnectionSocketFactoryBuilder.class))
         {
-            httpClientBuilder.when(HttpClientBuilder::create).thenReturn(mockedHttpClientBuilder);
-            when(mockedHttpClientBuilder.build()).thenReturn(mockedApacheHttpClient);
+            SSLConnectionSocketFactoryBuilder sslConnectionSocketFactoryBuilder = mock();
+            SSLConnectionSocketFactory sslConnectionSocketFactory = mock();
+            when(sslConnectionSocketFactoryBuilder.build()).thenReturn(sslConnectionSocketFactory);
+            connectionSocketFactoryBuilderStaticMock.when(SSLConnectionSocketFactoryBuilder::create).thenReturn(
+                    sslConnectionSocketFactoryBuilder);
 
-            IHttpClient actualClient = httpClientFactory.buildHttpClient(config);
-            assertEquals(httpClient.constructed(), List.of(actualClient));
-            verify(mockedHttpClientBuilder).setDefaultRequestConfig(argThat(RequestConfig::isCircularRedirectsAllowed));
-            CredentialsProvider credentialsProvider = credentialsProviderConstruction.constructed().get(0);
-            verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
-            verify(credentialsProvider).setCredentials(eq(AuthScope.ANY),
-                    argThat(usernamePasswordCredentialsMatcher()));
+            PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = testBuildHttpClientUsingConfig();
+
+            verify(connectionManagerBuilder).setSSLSocketFactory(sslConnectionSocketFactory);
+            verify(sslConnectionSocketFactoryBuilder).setSslContext(sslContext);
+            verify(sslConnectionSocketFactoryBuilder).setHostnameVerifier(NoopHostnameVerifier.INSTANCE);
+            verify(sslConnectionSocketFactoryBuilder).build();
+            verifyNoMoreInteractions(sslConnectionSocketFactory);
         }
     }
 
     @Test
-    void testBuildHttpClientAllPossible() throws GeneralSecurityException
+    void testBuildHttpClientWithCustomSslContext() throws GeneralSecurityException, URISyntaxException
     {
-        String baseUrl = "http://somewh.ere/";
+        String baseUrl = "http://somewh.ere";
         config.setBaseUrl(baseUrl);
-        config.setHeaders(HEADERS);
-        config.setAuthConfig(authConfig(USERNAME, PASSWORD, false));
-        config.setSkipResponseEntity(true);
-        CookieStore cookieStore = new BasicCookieStore();
-        config.setCookieStore(cookieStore);
-        SslConfig sslConfig = new SslConfig();
-        sslConfig.setSslCertificateCheckEnabled(true);
-        sslConfig.setSslHostnameVerificationEnabled(false);
-        config.setSslConfig(sslConfig);
-        DnsResolver resolver = mock(DnsResolver.class);
-        config.setDnsResolver(resolver);
-        HttpResponseHandler handler = mock(HttpResponseHandler.class);
-        config.setHttpResponseHandlers(List.of(handler));
+        config.setAuthConfig(authConfig(null, null, false));
+        config.getSslConfig().setSslHostnameVerificationEnabled(true);
+        config.getSslConfig().setSslCertificateCheckEnabled(true);
 
-        KeyStore keyStore = mock(KeyStore.class);
+        KeyStore keyStore = mock();
         when(keyStoreFactory.getKeyStore()).thenReturn(Optional.of(keyStore));
 
         String privateKeyPassword = "privateKeyPassword";
         httpClientFactory.setPrivateKeyPassword(privateKeyPassword);
 
         SSLContext sslContext = mock(SSLContext.class);
-        when(sslContextFactory.getSslContext(SSLConnectionSocketFactory.SSL, keyStore, privateKeyPassword)).thenReturn(
-                sslContext);
+        when(sslContextFactory.getSslContext(keyStore, privateKeyPassword)).thenReturn(sslContext);
 
-        try (MockedConstruction<BasicCredentialsProvider> credentialsProviderConstruction = mockConstruction(
-                BasicCredentialsProvider.class))
+        try (var connectionSocketFactoryBuilderStaticMock = mockStatic(SSLConnectionSocketFactoryBuilder.class))
         {
-            testBuildHttpClientUsingConfig(httpClient ->
-            {
-                verify(httpClient).setHttpHost(HttpHost.create(baseUrl));
-                verify(httpClient).setHttpResponseHandlers(List.of(handler));
-            });
-            verify(mockedHttpClientBuilder).setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
+            SSLConnectionSocketFactoryBuilder sslConnectionSocketFactoryBuilder = mock();
+            SSLConnectionSocketFactory sslConnectionSocketFactory = mock();
+            when(sslConnectionSocketFactoryBuilder.build()).thenReturn(sslConnectionSocketFactory);
+            connectionSocketFactoryBuilderStaticMock.when(SSLConnectionSocketFactoryBuilder::create).thenReturn(
+                    sslConnectionSocketFactoryBuilder);
 
-            verify(mockedHttpClientBuilder).setSSLContext(sslContext);
-            CredentialsProvider credentialsProvider = credentialsProviderConstruction.constructed().get(0);
-            verify(mockedHttpClientBuilder).setDefaultCredentialsProvider(credentialsProvider);
-            verify(credentialsProvider).setCredentials(eq(AuthScope.ANY),
-                    argThat(usernamePasswordCredentialsMatcher()));
-            verify(mockedHttpClientBuilder).setDefaultCookieStore(cookieStore);
-            verify(mockedHttpClientBuilder).setDnsResolver(resolver);
-            verify(mockedHttpClientBuilder).useSystemProperties();
-            verifyDefaultHeaderSetting(HEADERS.entrySet().iterator().next());
+            HttpHost httpHost = HttpHost.create(baseUrl);
+            PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = testBuildHttpClientUsingConfig(
+                    actualClient -> verify(actualClient).setHttpHost(httpHost)
+            );
+
+            verify(connectionManagerBuilder).setSSLSocketFactory(sslConnectionSocketFactory);
+            verify(sslConnectionSocketFactoryBuilder).setSslContext(sslContext);
+            verify(sslConnectionSocketFactoryBuilder).build();
+            verifyNoMoreInteractions(sslConnectionSocketFactory);
         }
     }
 
-    private void testBuildHttpClientUsingConfig() throws GeneralSecurityException
+    private PoolingHttpClientConnectionManagerBuilder testBuildHttpClientUsingConfig() throws GeneralSecurityException
     {
-        testBuildHttpClientUsingConfig(httpClient -> { });
+        return testBuildHttpClientUsingConfig(client -> { });
     }
 
-    private void testBuildHttpClientUsingConfig(Consumer<HttpClient> httpClientVerifier) throws GeneralSecurityException
+    private PoolingHttpClientConnectionManagerBuilder testBuildHttpClientUsingConfig(
+            Consumer<HttpClient> httpClientVerifier) throws GeneralSecurityException
     {
+        HttpResponseHandler responseHandler = mock();
+        config.setHttpResponseHandlers(List.of(responseHandler));
         int maxTotalConnections = 10;
         config.setMaxTotalConnections(maxTotalConnections);
         int maxConnectionsPerRoute = 2;
         config.setMaxConnectionsPerRoute(maxConnectionsPerRoute);
-        HttpRequestInterceptor firstRequestInterceptor = mock(HttpRequestInterceptor.class);
-        config.setFirstRequestInterceptor(firstRequestInterceptor);
-        HttpRequestInterceptor lastRequestInterceptor = mock(HttpRequestInterceptor.class);
-        config.setLastRequestInterceptor(lastRequestInterceptor);
-        HttpResponseInterceptor responseInterceptor = mock(HttpResponseInterceptor.class);
-        config.setLastResponseInterceptor(responseInterceptor);
-        RedirectStrategy redirectStrategy = mock(RedirectStrategy.class);
+        DnsResolver dnsResolver = mock(DnsResolver.class);
+        config.setDnsResolver(dnsResolver);
+        RedirectStrategy redirectStrategy = mock();
         config.setRedirectStrategy(redirectStrategy);
-        int connectionRequestTimeout = 20_000;
-        config.setConnectionRequestTimeout(connectionRequestTimeout);
         int connectTimeout = 30_000;
         config.setConnectTimeout(connectTimeout);
         int socketTimeout = 10_000;
         config.setSocketTimeout(socketTimeout);
+        int connectionRequestTimeout = 20_000;
+        config.setConnectionRequestTimeout(connectionRequestTimeout);
+        boolean circularRedirectsAllowed = true;
+        config.setCircularRedirectsAllowed(circularRedirectsAllowed);
         String cookieSpec = "cookieSpec";
         config.setCookieSpec(cookieSpec);
-        HttpRequestRetryHandler handler = mock(HttpRequestRetryHandler.class);
-        config.setHttpRequestRetryHandler(handler);
-        ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy = mock(ServiceUnavailableRetryStrategy.class);
-        config.setServiceUnavailableRetryStrategy(serviceUnavailableRetryStrategy);
-        try (MockedStatic<HttpClientBuilder> httpClientBuilder = mockStatic(HttpClientBuilder.class);
-                MockedConstruction<HttpClient> httpClient = mockConstruction(HttpClient.class))
+        CookieStore cookieStore = new BasicCookieStore();
+        config.setCookieStore(cookieStore);
+        HttpRequestRetryStrategy retryStrategy = mock();
+        config.setHttpRequestRetryStrategy(retryStrategy);
+        try (var connectionManagerBuilderStaticMock = mockStatic(PoolingHttpClientConnectionManagerBuilder.class);
+                var httpClientBuilder = mockStatic(HttpClientBuilder.class);
+                var httpClient = mockConstruction(HttpClient.class))
         {
             httpClientBuilder.when(HttpClientBuilder::create).thenReturn(mockedHttpClientBuilder);
             when(mockedHttpClientBuilder.build()).thenReturn(mockedApacheHttpClient);
 
-            IHttpClient actualClient = httpClientFactory.buildHttpClient(config);
-            assertEquals(httpClient.constructed(), List.of(actualClient));
-            verify((HttpClient) actualClient).setCloseableHttpClient(mockedApacheHttpClient);
-            verify((HttpClient) actualClient).setSkipResponseEntity(config.isSkipResponseEntity());
-            httpClientVerifier.accept((HttpClient) actualClient);
-            verify(mockedHttpClientBuilder).build();
-            verify(mockedHttpClientBuilder).setRetryHandler(handler);
-            verify(mockedHttpClientBuilder).setServiceUnavailableRetryStrategy(serviceUnavailableRetryStrategy);
-            verify(mockedHttpClientBuilder).setMaxConnTotal(maxTotalConnections);
-            verify(mockedHttpClientBuilder).setMaxConnPerRoute(maxConnectionsPerRoute);
-            verify(mockedHttpClientBuilder).addInterceptorFirst(firstRequestInterceptor);
-            verify(mockedHttpClientBuilder).addInterceptorLast(lastRequestInterceptor);
-            verify(mockedHttpClientBuilder).addInterceptorLast(responseInterceptor);
+            PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = mock(Answers.RETURNS_SELF);
+            connectionManagerBuilderStaticMock.when(PoolingHttpClientConnectionManagerBuilder::create).thenReturn(
+                    connectionManagerBuilder);
+
+            IHttpClient client = httpClientFactory.buildHttpClient(config);
+            assertEquals(httpClient.constructed(), List.of(client));
+            @SuppressWarnings("PMD.CloseResource")
+            HttpClient actualClient = (HttpClient) client;
+            verify(actualClient).setCloseableHttpClient(mockedApacheHttpClient);
+            verify(actualClient).setSkipResponseEntity(config.isSkipResponseEntity());
+            verify(actualClient).setHttpResponseHandlers(List.of(responseHandler));
+            httpClientVerifier.accept(actualClient);
+            verify(connectionManagerBuilder).setMaxConnTotal(maxTotalConnections);
+            verify(connectionManagerBuilder).setMaxConnPerRoute(maxConnectionsPerRoute);
+            verify(connectionManagerBuilder).setDnsResolver(dnsResolver);
+            verify(connectionManagerBuilder).setDefaultSocketConfig(
+                    argThat(socketConfig -> socketConfig.getSoTimeout().toMilliseconds() == socketTimeout));
+            verify(connectionManagerBuilder).setDefaultConnectionConfig(
+                    argThat(connectionConfig -> connectionConfig.getConnectTimeout().toMilliseconds() == connectTimeout
+                            && connectionConfig.getSocketTimeout().toMilliseconds() == socketTimeout));
+            verify(mockedHttpClientBuilder).setDefaultCookieStore(cookieStore);
+            verify(mockedHttpClientBuilder).setRetryStrategy(retryStrategy);
             verify(mockedHttpClientBuilder).setRedirectStrategy(redirectStrategy);
             verify(mockedHttpClientBuilder).setDefaultRequestConfig(
-                    argThat(requestConfig -> requestConfig.getConnectTimeout() == connectTimeout
-                            && requestConfig.getConnectionRequestTimeout() == connectionRequestTimeout
-                            && requestConfig.getSocketTimeout() == socketTimeout
-                            && requestConfig.getCookieSpec().equals(cookieSpec)));
-            verify(mockedHttpClientBuilder).setDefaultSocketConfig(
-                    argThat(socketConfig -> socketConfig.getSoTimeout() == socketTimeout));
+                    argThat(config -> config.getConnectionRequestTimeout().toMilliseconds() == connectionRequestTimeout
+                            && config.isCircularRedirectsAllowed() == circularRedirectsAllowed
+                            && config.getCookieSpec().equals(cookieSpec)));
+            verify(mockedHttpClientBuilder).build();
+            return connectionManagerBuilder;
         }
-    }
-
-    private ArgumentMatcher<Credentials> usernamePasswordCredentialsMatcher()
-    {
-        return arg ->
-        {
-            UsernamePasswordCredentials credentials = (UsernamePasswordCredentials) arg;
-            return USERNAME.equals(credentials.getUserName()) && PASSWORD.equals(credentials.getPassword());
-        };
-    }
-
-    private void verifyDefaultHeaderSetting(Entry<String, String> headerEntry)
-    {
-        verify(mockedHttpClientBuilder).setDefaultHeaders(argThat(headers ->
-        {
-            if (headers.size() == 1)
-            {
-                Header header = headers.iterator().next();
-                return headerEntry.getKey().equals(header.getName())
-                        && headerEntry.getValue().equals(header.getValue());
-            }
-            return false;
-        }));
     }
 
     private static AuthConfig authConfig(String username, String password, boolean preemptiveAuthEnabled)

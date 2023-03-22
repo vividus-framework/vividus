@@ -35,7 +35,7 @@
             <AppenderRef ref="file" />
             <AppenderRef ref="AllureLogAppender" level="INFO" />
         </Logger>
-        <Logger name="org.apache.http.client.protocol.ResponseProcessCookies" level="INFO" additivity="false">
+        <Logger name="org.apache.hc.client5.http.protocol.ResponseProcessCookies" level="INFO" additivity="false">
             <AppenderRef ref="console" />
             <AppenderRef ref="file" />
         </Logger>

@@ -29,14 +29,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.Header;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpRequestRetryHandler;
-import org.apache.http.client.RedirectStrategy;
-import org.apache.http.conn.DnsResolver;
-import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.hc.client5.http.DnsResolver;
+import org.apache.hc.client5.http.HttpRequestRetryStrategy;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.client5.http.protocol.RedirectStrategy;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.HttpResponseInterceptor;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("checkstyle:MethodCount")
@@ -281,8 +281,8 @@ class HttpClientConfigTests
     @Test
     void testGetAndSetHttpRequestRetryHandler()
     {
-        HttpRequestRetryHandler handler = mock(HttpRequestRetryHandler.class);
-        config.setHttpRequestRetryHandler(handler);
-        assertEquals(handler, config.getHttpRequestRetryHandler());
+        HttpRequestRetryStrategy handler = mock(HttpRequestRetryStrategy.class);
+        config.setHttpRequestRetryStrategy(handler);
+        assertEquals(handler, config.getHttpRequestRetryStrategy());
     }
 }

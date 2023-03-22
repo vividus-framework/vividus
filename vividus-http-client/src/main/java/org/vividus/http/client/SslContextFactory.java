@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import java.security.KeyStore;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.conn.ssl.TrustAllStrategy;
-import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.hc.client5.http.ssl.TrustAllStrategy;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
 
 public class SslContextFactory
 {
@@ -31,20 +31,19 @@ public class SslContextFactory
         return SSLContext.getDefault();
     }
 
-    public SSLContext getTrustingAllSslContext(String protocol) throws GeneralSecurityException
+    public SSLContext getTrustingAllSslContext() throws GeneralSecurityException
     {
-        return createBuilder(protocol).loadTrustMaterial(TrustAllStrategy.INSTANCE).build();
+        return createBuilder().loadTrustMaterial(TrustAllStrategy.INSTANCE).build();
     }
 
-    public SSLContext getSslContext(String protocol, KeyStore keyStore, String privateKeyPassword)
-            throws GeneralSecurityException
+    public SSLContext getSslContext(KeyStore keyStore, String privateKeyPassword) throws GeneralSecurityException
     {
         char[] privatePasswordKeyChars = privateKeyPassword != null ? privateKeyPassword.toCharArray() : null;
-        return createBuilder(protocol).loadKeyMaterial(keyStore, privatePasswordKeyChars).build();
+        return createBuilder().loadKeyMaterial(keyStore, privatePasswordKeyChars).build();
     }
 
-    private static SSLContextBuilder createBuilder(String protocol)
+    private static SSLContextBuilder createBuilder()
     {
-        return SSLContextBuilder.create().setProtocol(protocol);
+        return SSLContextBuilder.create();
     }
 }

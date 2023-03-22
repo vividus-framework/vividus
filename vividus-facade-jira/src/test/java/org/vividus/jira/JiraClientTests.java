@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,18 @@ package org.vividus.jira;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,7 +58,7 @@ class JiraClientTests
     void testExecuteGet() throws IOException
     {
         String relativeUrl = "/testGet";
-        String body = mockHttpMethodExecution(HttpGet.class, HttpStatus.SC_OK, relativeUrl);
+        String body = mockHttpMethodExecution(HttpGet.class, relativeUrl);
         assertEquals(body, jiraClient.executeGet(relativeUrl));
     }
 
@@ -65,7 +66,7 @@ class JiraClientTests
     void testExecutePost() throws IOException
     {
         String relativeUrl = "/testPost";
-        String body = mockHttpMethodExecution(HttpPost.class, HttpStatus.SC_OK, relativeUrl);
+        String body = mockHttpMethodExecution(HttpPost.class, relativeUrl);
         assertEquals(body, jiraClient.executePost(relativeUrl, "{\"key\":\"value\"}"));
     }
 
@@ -73,22 +74,28 @@ class JiraClientTests
     void testExecutePut() throws IOException
     {
         String relativeUrl = "/testPut";
-        mockHttpMethodExecution(HttpPut.class, HttpStatus.SC_OK, relativeUrl);
-        jiraClient.executePut(relativeUrl, "{\"status\":\"1\"}");
-        verify(httpClient).execute(argThat(httpRequest -> httpRequest instanceof HttpPut
-                && "https://jira.com/testPut".equals(httpRequest.getURI().toString())));
+        String body = mockHttpMethodExecution(HttpPut.class, relativeUrl);
+        assertEquals(body, jiraClient.executePut(relativeUrl, "{\"status\":\"1\"}"));
     }
 
-    private String mockHttpMethodExecution(Class<? extends HttpRequestBase> requestClass, int statusCode,
-            String relativeUrl) throws IOException
+    private String mockHttpMethodExecution(Class<? extends ClassicHttpRequest> requestClass, String relativeUrl)
+            throws IOException
     {
         HttpResponse response = new HttpResponse();
-        response.setStatusCode(statusCode);
+        response.setStatusCode(HttpStatus.SC_OK);
         response.setResponseBody(RESPONSE_BODY_AS_STRING.getBytes(StandardCharsets.UTF_8));
-        String expectedUrl = JIRA_URI + relativeUrl;
-        when(httpClient.execute(argThat(httpRequest -> requestClass.isInstance(httpRequest)
-                && expectedUrl.equals(httpRequest.getURI().toString()))))
-                        .thenReturn(response);
+        URI expectedUrl = URI.create(JIRA_URI + relativeUrl);
+        when(httpClient.execute(argThat(httpRequest -> {
+            try
+            {
+                return requestClass.isInstance(httpRequest) && expectedUrl.equals(
+                        httpRequest.getUri());
+            }
+            catch (URISyntaxException e)
+            {
+                throw new IllegalArgumentException(e);
+            }
+        }))).thenReturn(response);
         return response.getResponseBodyAsString();
     }
 }

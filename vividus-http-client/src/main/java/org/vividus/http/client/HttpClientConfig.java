@@ -23,15 +23,14 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import org.apache.http.Header;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpRequestRetryHandler;
-import org.apache.http.client.RedirectStrategy;
-import org.apache.http.client.ServiceUnavailableRetryStrategy;
-import org.apache.http.conn.DnsResolver;
-import org.apache.http.message.BasicHeader;
+import org.apache.hc.client5.http.DnsResolver;
+import org.apache.hc.client5.http.HttpRequestRetryStrategy;
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.client5.http.protocol.RedirectStrategy;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.HttpResponseInterceptor;
+import org.apache.hc.core5.http.message.BasicHeader;
 import org.vividus.http.handler.HttpResponseHandler;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -56,8 +55,7 @@ public class HttpClientConfig
     private DnsResolver dnsResolver;
     private boolean circularRedirectsAllowed;
     private String cookieSpec;
-    private HttpRequestRetryHandler httpRequestRetryHandler;
-    private ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy;
+    private HttpRequestRetryStrategy httpRequestRetryStrategy;
     private List<HttpResponseHandler> httpResponseHandlers;
 
     public boolean hasBaseUrl()
@@ -253,24 +251,14 @@ public class HttpClientConfig
         this.cookieSpec = cookieSpec;
     }
 
-    public HttpRequestRetryHandler getHttpRequestRetryHandler()
+    public HttpRequestRetryStrategy getHttpRequestRetryStrategy()
     {
-        return httpRequestRetryHandler;
+        return httpRequestRetryStrategy;
     }
 
-    public void setHttpRequestRetryHandler(HttpRequestRetryHandler httpRequestRetryHandler)
+    public void setHttpRequestRetryStrategy(HttpRequestRetryStrategy httpRequestRetryStrategy)
     {
-        this.httpRequestRetryHandler = httpRequestRetryHandler;
-    }
-
-    public ServiceUnavailableRetryStrategy getServiceUnavailableRetryStrategy()
-    {
-        return serviceUnavailableRetryStrategy;
-    }
-
-    public void setServiceUnavailableRetryStrategy(ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy)
-    {
-        this.serviceUnavailableRetryStrategy = serviceUnavailableRetryStrategy;
+        this.httpRequestRetryStrategy = httpRequestRetryStrategy;
     }
 
     public List<HttpResponseHandler> getHttpResponseHandlers()

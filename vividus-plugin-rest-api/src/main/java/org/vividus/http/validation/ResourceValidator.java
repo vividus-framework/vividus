@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpStatus;
 import org.hamcrest.Matcher;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.client.HttpResponse;
@@ -101,7 +101,7 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
     private HttpResponse executeHttpMethod(HttpMethod httpMethod, HttpClientContext httpClientContext, URI uri)
             throws IOException
     {
-        HttpRequestBase request = httpMethod.createRequest(uri);
+        ClassicHttpRequest request = httpMethod.createRequest(uri);
         return httpClient.execute(request, httpClientContext);
     }
 }

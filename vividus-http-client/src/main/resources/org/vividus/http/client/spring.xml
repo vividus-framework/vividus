@@ -41,20 +41,20 @@
         <property name="maxConnectionsPerRoute" value="${http.max-connections-per-route}" />
         <property name="socketTimeout" value="${http.socket-timeout}" />
         <property name="cookieSpec" value="${http.cookie-spec}" />
-        <property name="httpRequestRetryHandler" ref="idempotentMethodsRetryHandler" />
         <property name="dnsResolver">
             <bean class="org.vividus.http.dns.LocalDnsResolver" >
                 <property name="dnsMappingStorage" ref="localDnsStorage" />
                 <property name="fallbackDnsResolver" >
-                    <util:constant static-field="org.apache.http.impl.conn.SystemDefaultDnsResolver.INSTANCE"/>
+                    <util:constant static-field="org.apache.hc.client5.http.SystemDefaultDnsResolver.INSTANCE"/>
                 </property>
             </bean>
         </property>
-        <property name="serviceUnavailableRetryStrategy">
-            <bean class="org.vividus.http.client.ConfigurableServiceUnavailableRetryStrategy">
+        <property name="httpRequestRetryStrategy">
+            <bean class="org.vividus.http.client.HttpRequestRetryStrategy">
                 <constructor-arg index="0" value="${http.service-unavailable-retry.max-retries}" />
                 <constructor-arg index="1" value="${http.service-unavailable-retry.retry-interval}" />
                 <constructor-arg index="2" value="${http.service-unavailable-retry.status-codes}" />
+                <property name="idempotentMethodsSendingRequestBody" value="${http.idempotent-methods-sending-request-body}" />
             </bean>
         </property>
         <property name="authConfig">
@@ -77,8 +77,4 @@
         <constructor-arg value="http.local-dns-storage." />
     </bean>
 
-
-    <bean id="idempotentMethodsRetryHandler" class="org.vividus.http.handler.IdempotentMethodsRetryHandler" >
-        <property name="idempotentMethodsSendingRequestBody" value="${http.idempotent-methods-sending-request-body}" />
-    </bean>
 </beans>

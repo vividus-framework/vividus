@@ -17,7 +17,6 @@
 package org.vividus.steps.api;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
-import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -35,7 +34,6 @@ import static org.vividus.steps.StringComparisonRule.IS_EQUAL_TO;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -45,8 +43,8 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.message.BasicHeader;
 import org.hamcrest.Matchers;
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
@@ -75,7 +73,12 @@ class HttpResponseValidationStepsTests
 {
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(HttpResponseValidationSteps.class);
 
-    private static final String SET_COOKIES_HEADER_NAME = "Set-Cookies";
+    private static final String ACCEPT_ENCODING_HEADER_NAME = "Accept-Encoding";
+    private static final Header ACCEPT_ENCODING_HEADER = new BasicHeader(ACCEPT_ENCODING_HEADER_NAME,
+            "deflate, gzip;q=1.0, *;q=0.5");
+    private static final String HEADER_ELEMENT_NAME = "gzip";
+    private static final List<String> HEADER_ELEMENT_NAMES = List.of("deflate", HEADER_ELEMENT_NAME, "*");
+
     private static final String HEADER_IS_PRESENT = " header is present";
     private static final String RESPONSE_BODY = "testResponse";
     private static final String HTTP_RESPONSE_BODY = "HTTP response body";
@@ -119,20 +122,14 @@ class HttpResponseValidationStepsTests
     void testGetHeaderAttributes()
     {
         mockHttpResponse();
-        Header header = mock(Header.class);
-        when(header.getName()).thenReturn(SET_COOKIES_HEADER_NAME);
-        httpResponse.setResponseHeaders(header);
-        HeaderElement headerElement = mock(HeaderElement.class);
-        when(header.getElements()).thenReturn(new HeaderElement[] { headerElement });
-        when(softAssert.assertTrue(SET_COOKIES_HEADER_NAME + HEADER_IS_PRESENT, true)).thenReturn(true);
-        String headerAttributeName = "HTTPOnly";
-        when(headerElement.getName()).thenReturn(headerAttributeName);
-        ExamplesTable attribute = new ExamplesTable("|attribute|\n|HTTPOnly|/|");
-        httpResponseValidationSteps.assertHeaderContainsAttributes(SET_COOKIES_HEADER_NAME, attribute);
+        httpResponse.setResponseHeaders(ACCEPT_ENCODING_HEADER);
+        when(softAssert.assertTrue(ACCEPT_ENCODING_HEADER_NAME + HEADER_IS_PRESENT, true)).thenReturn(true);
+        ExamplesTable attributes = new ExamplesTable("|attribute|\n|gzip|");
+        httpResponseValidationSteps.assertHeaderContainsAttributes(ACCEPT_ENCODING_HEADER_NAME, attributes);
         verify(softAssert).assertThat(
-                eq(format("%s header contains %s attribute", SET_COOKIES_HEADER_NAME, headerAttributeName)),
-                eq(Collections.singletonList(headerAttributeName)),
-                argThat(matcher -> matcher.toString().equals(Matchers.contains(headerAttributeName).toString())));
+                eq(String.format("%s header contains %s attribute", ACCEPT_ENCODING_HEADER_NAME, HEADER_ELEMENT_NAME)),
+                eq(HEADER_ELEMENT_NAMES),
+                argThat(matcher -> matcher.toString().equals(Matchers.contains(HEADER_ELEMENT_NAME).toString())));
         validateDeprecateMessage("Then response header '$httpHeaderName' contains attribute: $attributes",
                 "Then response header `$headerName` contains elements:$elements");
     }
@@ -144,15 +141,15 @@ class HttpResponseValidationStepsTests
         Header header = mock(Header.class);
         when(header.getName()).thenReturn("Vary");
         httpResponse.setResponseHeaders(header);
-        ExamplesTable attribute = new ExamplesTable("|attribute|\n|Secure|/|");
-        httpResponseValidationSteps.assertHeaderContainsAttributes(SET_COOKIES_HEADER_NAME, attribute);
-        verify(softAssert).assertTrue(SET_COOKIES_HEADER_NAME + HEADER_IS_PRESENT, false);
+        ExamplesTable attribute = new ExamplesTable("|attribute|\n|any|");
+        httpResponseValidationSteps.assertHeaderContainsAttributes(ACCEPT_ENCODING_HEADER_NAME, attribute);
+        verify(softAssert).assertTrue(ACCEPT_ENCODING_HEADER_NAME + HEADER_IS_PRESENT, false);
     }
 
     @Test
     void testGetHeaderAttributesNoHttpResponse()
     {
-        httpResponseValidationSteps.assertHeaderContainsAttributes(SET_COOKIES_HEADER_NAME, ExamplesTable.empty());
+        httpResponseValidationSteps.assertHeaderContainsAttributes(ACCEPT_ENCODING_HEADER_NAME, ExamplesTable.empty());
         verifyNoHttpResponse();
     }
 
@@ -160,20 +157,14 @@ class HttpResponseValidationStepsTests
     void shouldCheckThatHeaderWithNameContainsElements()
     {
         mockHttpResponse();
-        Header header = mock(Header.class);
-        when(header.getName()).thenReturn(SET_COOKIES_HEADER_NAME);
-        httpResponse.setResponseHeaders(header);
-        HeaderElement headerElement = mock(HeaderElement.class);
-        when(header.getElements()).thenReturn(new HeaderElement[] { headerElement });
-        when(softAssert.assertTrue(SET_COOKIES_HEADER_NAME + HEADER_IS_PRESENT, true)).thenReturn(true);
-        String headerAttributeName = "charset";
-        when(headerElement.getName()).thenReturn(headerAttributeName);
-        ExamplesTable attribute = new ExamplesTable("|element|\n|charset|/|");
-        httpResponseValidationSteps.checkHeaderContainsElements(SET_COOKIES_HEADER_NAME, attribute);
+        httpResponse.setResponseHeaders(ACCEPT_ENCODING_HEADER);
+        when(softAssert.assertTrue(ACCEPT_ENCODING_HEADER_NAME + HEADER_IS_PRESENT, true)).thenReturn(true);
+        ExamplesTable elements = new ExamplesTable(String.format("|element|%n|%s|", HEADER_ELEMENT_NAME));
+        httpResponseValidationSteps.checkHeaderContainsElements(ACCEPT_ENCODING_HEADER_NAME, elements);
         verify(softAssert).assertThat(
-                eq(format("%s header contains %s element", SET_COOKIES_HEADER_NAME, headerAttributeName)),
-                eq(Collections.singletonList(headerAttributeName)),
-                argThat(matcher -> matcher.toString().equals(Matchers.contains(headerAttributeName).toString())));
+                eq(String.format("%s header contains %s element", ACCEPT_ENCODING_HEADER_NAME, HEADER_ELEMENT_NAME)),
+                eq(HEADER_ELEMENT_NAMES),
+                argThat(matcher -> matcher.toString().equals(Matchers.contains(HEADER_ELEMENT_NAME).toString())));
     }
 
     @Test
@@ -184,14 +175,14 @@ class HttpResponseValidationStepsTests
         when(header.getName()).thenReturn("Accept");
         httpResponse.setResponseHeaders(header);
         ExamplesTable attribute = new ExamplesTable("|element|\n|value|/|");
-        httpResponseValidationSteps.checkHeaderContainsElements(SET_COOKIES_HEADER_NAME, attribute);
-        verify(softAssert).assertTrue(SET_COOKIES_HEADER_NAME + HEADER_IS_PRESENT, false);
+        httpResponseValidationSteps.checkHeaderContainsElements(ACCEPT_ENCODING_HEADER_NAME, attribute);
+        verify(softAssert).assertTrue(ACCEPT_ENCODING_HEADER_NAME + HEADER_IS_PRESENT, false);
     }
 
     @Test
     void shouldNotCheckHeaderElementsIfHttpCallWasNotPerformed()
     {
-        httpResponseValidationSteps.checkHeaderContainsElements(SET_COOKIES_HEADER_NAME, ExamplesTable.empty());
+        httpResponseValidationSteps.checkHeaderContainsElements(ACCEPT_ENCODING_HEADER_NAME, ExamplesTable.empty());
         verifyNoHttpResponse();
     }
 
@@ -299,7 +290,7 @@ class HttpResponseValidationStepsTests
         httpResponse.setResponseBody(body.getBytes(StandardCharsets.UTF_8));
         httpResponseValidationSteps.doesResponseBodyMatch(IS_EQUAL_TO, body);
         verify(softAssert).assertThat(eq(HTTP_RESPONSE_BODY), eq(body),
-                argThat(arg -> arg.toString().equals("\"testResponse\"")));
+                argThat(arg -> "\"testResponse\"".equals(arg.toString())));
         assertThat(LOGGER.getLoggingEvents(), is(List.of(warn(
                 "The step: \"Then the response body $comparisonRule '$content'\" is deprecated and will be removed in"
                 + " VIVIDUS 0.6.0. Use ${response} dynamic variable with \"Then `$variable1` is $comparisonRule "
@@ -394,7 +385,7 @@ class HttpResponseValidationStepsTests
         mockHttpResponse();
         String headerValue = mockHeaderRetrieval();
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        httpResponseValidationSteps.saveHeaderValue(SET_COOKIES_HEADER_NAME, scopes, VARIABLE_NAME);
+        httpResponseValidationSteps.saveHeaderValue(ACCEPT_ENCODING_HEADER_NAME, scopes, VARIABLE_NAME);
         verify(variableContext).putVariable(scopes, VARIABLE_NAME, headerValue);
         validateDeprecateMessage(
                 "When I save response header '$httpHeaderName' value to $scopes variable '$variableName'",
@@ -404,7 +395,7 @@ class HttpResponseValidationStepsTests
     @Test
     void testSaveHeaderValueNoHttpResponse()
     {
-        httpResponseValidationSteps.saveHeaderValue(SET_COOKIES_HEADER_NAME, Set.of(VariableScope.SCENARIO),
+        httpResponseValidationSteps.saveHeaderValue(ACCEPT_ENCODING_HEADER_NAME, Set.of(VariableScope.SCENARIO),
                 VARIABLE_NAME);
         verifyNoHttpResponse();
     }
@@ -415,15 +406,15 @@ class HttpResponseValidationStepsTests
         mockHttpResponse();
         String headerValue = mockHeaderRetrieval();
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        httpResponseValidationSteps.saveHeaderValueToVariable(SET_COOKIES_HEADER_NAME, scopes, VARIABLE_NAME);
+        httpResponseValidationSteps.saveHeaderValueToVariable(ACCEPT_ENCODING_HEADER_NAME, scopes, VARIABLE_NAME);
         verify(variableContext).putVariable(scopes, VARIABLE_NAME, headerValue);
     }
 
     @Test
     void shouldNotSaveHeaderValueToVariableIfHttpCallWasNotPerformed()
     {
-        httpResponseValidationSteps.saveHeaderValueToVariable(SET_COOKIES_HEADER_NAME, Set.of(VariableScope.SCENARIO),
-                VARIABLE_NAME);
+        httpResponseValidationSteps.saveHeaderValueToVariable(ACCEPT_ENCODING_HEADER_NAME,
+                Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
         verifyNoHttpResponse();
     }
 
@@ -432,10 +423,13 @@ class HttpResponseValidationStepsTests
     {
         mockHttpResponse();
         String headerValue = mockHeaderRetrieval();
-        httpResponseValidationSteps.doesHeaderMatch(SET_COOKIES_HEADER_NAME, IS_EQUAL_TO,
+        httpResponseValidationSteps.doesHeaderMatch(ACCEPT_ENCODING_HEADER_NAME, IS_EQUAL_TO,
                 headerValue);
-        verify(softAssert).assertThat(eq(format(HEADER_VALUE, SET_COOKIES_HEADER_NAME)), eq(headerValue),
-                argThat(matcher -> matcher.toString().equals(equalTo(headerValue).toString())));
+        verify(softAssert).assertThat(
+                eq(String.format(HEADER_VALUE, ACCEPT_ENCODING_HEADER_NAME)),
+                eq(headerValue),
+                argThat(matcher -> matcher.toString().equals(equalTo(headerValue).toString()))
+        );
         validateDeprecateMessage("Then the value of the response header '$httpHeaderName' $comparisonRule '$value'",
                 "Then value of response header `$headerName` $comparisonRule `$value`");
     }
@@ -443,7 +437,7 @@ class HttpResponseValidationStepsTests
     @Test
     void testDoesHeaderEqualToValueNoHttpResponse()
     {
-        httpResponseValidationSteps.doesHeaderMatch(SET_COOKIES_HEADER_NAME, IS_EQUAL_TO, "value");
+        httpResponseValidationSteps.doesHeaderMatch(ACCEPT_ENCODING_HEADER_NAME, IS_EQUAL_TO, "value");
         verifyNoHttpResponse();
     }
 
@@ -452,16 +446,19 @@ class HttpResponseValidationStepsTests
     {
         mockHttpResponse();
         String headerValue = mockHeaderRetrieval();
-        httpResponseValidationSteps.validateHeaderValue(SET_COOKIES_HEADER_NAME, IS_EQUAL_TO,
+        httpResponseValidationSteps.validateHeaderValue(ACCEPT_ENCODING_HEADER_NAME, IS_EQUAL_TO,
                 headerValue);
-        verify(softAssert).assertThat(eq(format(HEADER_VALUE, SET_COOKIES_HEADER_NAME)), eq(headerValue),
-                argThat(matcher -> matcher.toString().equals(equalTo(headerValue).toString())));
+        verify(softAssert).assertThat(
+                eq(String.format(HEADER_VALUE, ACCEPT_ENCODING_HEADER_NAME)),
+                eq(headerValue),
+                argThat(matcher -> matcher.toString().equals(equalTo(headerValue).toString()))
+        );
     }
 
     @Test
     void shouldNotValidateHeaderValueIfHttpCallWasNotPerfor()
     {
-        httpResponseValidationSteps.validateHeaderValue(SET_COOKIES_HEADER_NAME, IS_EQUAL_TO, "header value");
+        httpResponseValidationSteps.validateHeaderValue(ACCEPT_ENCODING_HEADER_NAME, IS_EQUAL_TO, "header value");
         verifyNoHttpResponse();
     }
 
@@ -470,9 +467,9 @@ class HttpResponseValidationStepsTests
     {
         mockHttpResponse();
         httpResponse.setResponseHeaders();
-        httpResponseValidationSteps.saveHeaderValue(SET_COOKIES_HEADER_NAME, Set.of(VariableScope.SCENARIO),
+        httpResponseValidationSteps.saveHeaderValue(ACCEPT_ENCODING_HEADER_NAME, Set.of(VariableScope.SCENARIO),
                 VARIABLE_NAME);
-        verify(softAssert).assertTrue(SET_COOKIES_HEADER_NAME + HEADER_IS_PRESENT, false);
+        verify(softAssert).assertTrue(ACCEPT_ENCODING_HEADER_NAME + HEADER_IS_PRESENT, false);
         verifyNoInteractions(variableContext);
     }
 
@@ -481,9 +478,9 @@ class HttpResponseValidationStepsTests
     {
         mockHttpResponse();
         httpResponse.setResponseHeaders();
-        httpResponseValidationSteps.saveHeaderValueToVariable(SET_COOKIES_HEADER_NAME, Set.of(VariableScope.SCENARIO),
-                VARIABLE_NAME);
-        verify(softAssert).assertTrue(SET_COOKIES_HEADER_NAME + HEADER_IS_PRESENT, false);
+        httpResponseValidationSteps.saveHeaderValueToVariable(ACCEPT_ENCODING_HEADER_NAME,
+                Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
+        verify(softAssert).assertTrue(ACCEPT_ENCODING_HEADER_NAME + HEADER_IS_PRESENT, false);
         verifyNoInteractions(variableContext);
     }
 
@@ -525,9 +522,9 @@ class HttpResponseValidationStepsTests
     {
         mockHttpResponse();
         httpResponse.setResponseHeaders();
-        httpResponseValidationSteps.isHeaderWithNameFound(SET_COOKIES_HEADER_NAME, ComparisonRule.EQUAL_TO, 1);
-        verify(softAssert).assertThat(eq(String.format(NUMBER_RESPONSE_HEADERS_WITH_NAME,
-                SET_COOKIES_HEADER_NAME)), eq(0),
+        httpResponseValidationSteps.isHeaderWithNameFound(ACCEPT_ENCODING_HEADER_NAME, ComparisonRule.EQUAL_TO, 1);
+        verify(softAssert).assertThat(eq(String.format(NUMBER_RESPONSE_HEADERS_WITH_NAME, ACCEPT_ENCODING_HEADER_NAME)),
+                eq(0),
                 argThat(m -> ComparisonRule.EQUAL_TO.getComparisonRule(1).toString().equals(m.toString())));
     }
 
@@ -536,11 +533,11 @@ class HttpResponseValidationStepsTests
     {
         mockHttpResponse();
         Header header = mock(Header.class);
-        when(header.getName()).thenReturn(SET_COOKIES_HEADER_NAME);
+        when(header.getName()).thenReturn(ACCEPT_ENCODING_HEADER_NAME);
         httpResponse.setResponseHeaders(header, header);
-        httpResponseValidationSteps.isHeaderWithNameFound(SET_COOKIES_HEADER_NAME, ComparisonRule.EQUAL_TO, 2);
-        verify(softAssert).assertThat(eq(String.format(NUMBER_RESPONSE_HEADERS_WITH_NAME,
-                SET_COOKIES_HEADER_NAME)), eq(2),
+        httpResponseValidationSteps.isHeaderWithNameFound(ACCEPT_ENCODING_HEADER_NAME, ComparisonRule.EQUAL_TO, 2);
+        verify(softAssert).assertThat(eq(String.format(NUMBER_RESPONSE_HEADERS_WITH_NAME, ACCEPT_ENCODING_HEADER_NAME)),
+                eq(2),
                 argThat(m -> ComparisonRule.EQUAL_TO.getComparisonRule(2).toString().equals(m.toString())));
         validateDeprecateMessage(
                 "Then the number of the response headers with the name '$headerName' is $comparisonRule $value",
@@ -550,7 +547,7 @@ class HttpResponseValidationStepsTests
     @Test
     void testResponseContainsHeadersWithNameNoHttpResponse()
     {
-        httpResponseValidationSteps.isHeaderWithNameFound(SET_COOKIES_HEADER_NAME, ComparisonRule.EQUAL_TO, 1);
+        httpResponseValidationSteps.isHeaderWithNameFound(ACCEPT_ENCODING_HEADER_NAME, ComparisonRule.EQUAL_TO, 1);
         verifyNoHttpResponse();
     }
 
@@ -559,9 +556,9 @@ class HttpResponseValidationStepsTests
     {
         mockHttpResponse();
         httpResponse.setResponseHeaders();
-        httpResponseValidationSteps.validateNumberOfResponseHeaders(SET_COOKIES_HEADER_NAME, ComparisonRule.EQUAL_TO,
-                1);
-        verify(softAssert).assertThat(eq(String.format(NUMBER_OF_RESPONSE_HEADERS, SET_COOKIES_HEADER_NAME)), eq(0),
+        httpResponseValidationSteps.validateNumberOfResponseHeaders(ACCEPT_ENCODING_HEADER_NAME,
+                ComparisonRule.EQUAL_TO, 1);
+        verify(softAssert).assertThat(eq(String.format(NUMBER_OF_RESPONSE_HEADERS, ACCEPT_ENCODING_HEADER_NAME)), eq(0),
                 argThat(m -> ComparisonRule.EQUAL_TO.getComparisonRule(1).toString().equals(m.toString())));
     }
 
@@ -570,19 +567,19 @@ class HttpResponseValidationStepsTests
     {
         mockHttpResponse();
         Header header = mock(Header.class);
-        when(header.getName()).thenReturn(SET_COOKIES_HEADER_NAME);
+        when(header.getName()).thenReturn(ACCEPT_ENCODING_HEADER_NAME);
         httpResponse.setResponseHeaders(header, header);
-        httpResponseValidationSteps.validateNumberOfResponseHeaders(SET_COOKIES_HEADER_NAME, ComparisonRule.EQUAL_TO,
-                2);
-        verify(softAssert).assertThat(eq(String.format(NUMBER_OF_RESPONSE_HEADERS, SET_COOKIES_HEADER_NAME)), eq(2),
+        httpResponseValidationSteps.validateNumberOfResponseHeaders(ACCEPT_ENCODING_HEADER_NAME,
+                ComparisonRule.EQUAL_TO, 2);
+        verify(softAssert).assertThat(eq(String.format(NUMBER_OF_RESPONSE_HEADERS, ACCEPT_ENCODING_HEADER_NAME)), eq(2),
                 argThat(m -> ComparisonRule.EQUAL_TO.getComparisonRule(2).toString().equals(m.toString())));
     }
 
     @Test
     void shouldNotValidateNumberOfHeadersInResponseIfHttpCallWasNotPerformed()
     {
-        httpResponseValidationSteps.validateNumberOfResponseHeaders(SET_COOKIES_HEADER_NAME, ComparisonRule.EQUAL_TO,
-                1);
+        httpResponseValidationSteps.validateNumberOfResponseHeaders(ACCEPT_ENCODING_HEADER_NAME,
+                ComparisonRule.EQUAL_TO, 1);
         verifyNoHttpResponse();
     }
 
@@ -681,10 +678,10 @@ class HttpResponseValidationStepsTests
     {
         String headerValue = "headerValue";
         Header header = mock(Header.class);
-        when(header.getName()).thenReturn(SET_COOKIES_HEADER_NAME);
+        when(header.getName()).thenReturn(ACCEPT_ENCODING_HEADER_NAME);
         httpResponse.setResponseHeaders(header);
         when(header.getValue()).thenReturn(headerValue);
-        when(softAssert.assertTrue(SET_COOKIES_HEADER_NAME + HEADER_IS_PRESENT, true)).thenReturn(true);
+        when(softAssert.assertTrue(ACCEPT_ENCODING_HEADER_NAME + HEADER_IS_PRESENT, true)).thenReturn(true);
         return headerValue;
     }
 

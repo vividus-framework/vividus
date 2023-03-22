@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.vividus.http.exception.HttpRequestBuildException;
 import org.vividus.util.UriUtils;
 
@@ -87,18 +87,18 @@ public final class HttpRequestBuilder
         return this;
     }
 
-    public HttpRequestBase build() throws HttpRequestBuildException
+    public ClassicHttpRequest build() throws HttpRequestBuildException
     {
         Validate.isTrue(endpoint != null, "Endpoint must be not null");
         Validate.isTrue(httpMethod != null, "HTTP method must be not null");
-        HttpRequestBase request;
+        ClassicHttpRequest request;
         try
         {
             URI uri = getUrl();
             request = requestEntity != null ? httpMethod.createEntityEnclosingRequest(uri, requestEntity)
                     : httpMethod.createRequest(uri);
         }
-        catch (IllegalArgumentException | IllegalStateException e)
+        catch (IllegalArgumentException e)
         {
             throw new HttpRequestBuildException(e);
         }

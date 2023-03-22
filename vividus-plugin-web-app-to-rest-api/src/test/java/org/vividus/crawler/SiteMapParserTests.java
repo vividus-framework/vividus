@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -32,7 +33,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.client5.http.protocol.RedirectLocations;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -62,16 +64,13 @@ class SiteMapParserTests
     private static final URI SITEMAP_ENTRY_URL = URI.create(SITE_URL + "kotlin");
     private static final URI REDIRECTED_SITEMAP_ENTRY_URL = URI.create("http://www.vividus.site/groovy");
 
-    @Mock
-    private IHttpClient mockedHttpClient;
-
-    @InjectMocks
-    private SiteMapParser siteMapParser;
+    @Mock private IHttpClient mockedHttpClient;
+    @InjectMocks private SiteMapParser siteMapParser;
 
     @Test
     void testParse() throws IOException, SiteMapParseException
     {
-        mockSiteMapParsing(SITEMAP_XML, SITE_MAP_URL, null);
+        mockSiteMapParsing(SITEMAP_XML, SITE_MAP_URL);
         siteMapParser.setFollowRedirects(false);
         Collection<SiteMapURL> siteMapUrls = siteMapParser.parse(true, SITE_MAP_URL);
         assertSiteMapUrls(SITEMAP_URL_NUMBER, SITEMAP_ENTRY_URL, siteMapUrls);
@@ -80,7 +79,8 @@ class SiteMapParserTests
     @Test
     void testParseFollowingRedirects() throws IOException, SiteMapParseException
     {
-        mockSiteMapParsing(SITEMAP_XML, SITE_MAP_URL, List.of(REDIRECTED_SITE_MAP_URL));
+        RedirectLocations redirectLocations = mockSiteMapParsing(SITEMAP_XML, SITE_MAP_URL);
+        when(redirectLocations.getAll()).thenReturn(List.of(REDIRECTED_SITE_MAP_URL));
         siteMapParser.setFollowRedirects(true);
         Collection<SiteMapURL> siteMapUrls = siteMapParser.parse(true, SITE_MAP_URL);
         assertSiteMapUrls(REDIRECTED_SITEMAP_URL_NUMBER, REDIRECTED_SITEMAP_ENTRY_URL, siteMapUrls);
@@ -89,7 +89,7 @@ class SiteMapParserTests
     @Test
     void testParseFollowingRedirectsWhenNoRedirectHappened() throws IOException, SiteMapParseException
     {
-        mockSiteMapParsing(SITEMAP_XML, SITE_MAP_URL, null);
+        mockSiteMapParsing(SITEMAP_XML, SITE_MAP_URL);
         siteMapParser.setFollowRedirects(true);
         Collection<SiteMapURL> siteMapUrls = siteMapParser.parse(true, SITE_MAP_URL);
         assertSiteMapUrls(SITEMAP_URL_NUMBER, SITEMAP_ENTRY_URL, siteMapUrls);
@@ -99,7 +99,7 @@ class SiteMapParserTests
     void testParseSiteMapWithUserInfoInUrl() throws IOException, SiteMapParseException
     {
         URI siteMapUrl = UriUtils.addUserInfo(SITE_MAP_URL, "user:pass");
-        mockSiteMapParsing(SITEMAP_XML, siteMapUrl, null);
+        mockSiteMapParsing(SITEMAP_XML, siteMapUrl);
         siteMapParser.setFollowRedirects(false);
         Collection<SiteMapURL> siteMapUrls = siteMapParser.parse(true, siteMapUrl);
         assertSiteMapUrls(SITEMAP_URL_NUMBER, SITEMAP_ENTRY_URL, siteMapUrls);
@@ -118,7 +118,7 @@ class SiteMapParserTests
     @Test
     void testParseWithSiteUrlAndRelativeSitemapUrl() throws IOException, SiteMapParseException
     {
-        mockSiteMapParsing(SITEMAP_XML, SITE_MAP_URL, null);
+        mockSiteMapParsing(SITEMAP_XML, SITE_MAP_URL);
         siteMapParser.setFollowRedirects(false);
         siteMapParser.setSiteUrl(Optional.empty());
         Collection<SiteMapURL> siteMapUrls = siteMapParser.parse(true, URI.create(SITE_URL), RELATIVE_SITE_MAP_URL);
@@ -128,7 +128,7 @@ class SiteMapParserTests
     @Test
     void testParseToRelativeUrlsRelativeSitemapUrl() throws IOException, SiteMapParseException
     {
-        mockSiteMapParsing(SITEMAP_XML, SITE_MAP_URL, null);
+        mockSiteMapParsing(SITEMAP_XML, SITE_MAP_URL);
         siteMapParser.setFollowRedirects(false);
         siteMapParser.setSiteUrl(Optional.of(URI.create(SITE_URL)));
         Set<String> siteMapRelativeUrls = siteMapParser.parseToRelativeUrls(true, null, RELATIVE_SITE_MAP_URL);
@@ -138,7 +138,7 @@ class SiteMapParserTests
     @Test
     void testParseToRelativeUrls() throws IOException, SiteMapParseException
     {
-        mockSiteMapParsing(SITEMAP_XML, SITE_MAP_URL, null);
+        mockSiteMapParsing(SITEMAP_XML, SITE_MAP_URL);
         siteMapParser.setFollowRedirects(false);
         Set<String> siteMapRelativeUrls = siteMapParser.parseToRelativeUrls(true, SITE_MAP_URL);
         assertEquals(UNIQUE_SITEMAP_URL_NUMBER, siteMapRelativeUrls.size());
@@ -147,7 +147,7 @@ class SiteMapParserTests
     @Test
     void testParseWithSpecifiedBaseUrl() throws IOException, SiteMapParseException
     {
-        mockSiteMapParsing("sitemapForBaseDomain.xml", SITE_MAP_URL, null);
+        mockSiteMapParsing("sitemapForBaseDomain.xml", SITE_MAP_URL);
         siteMapParser.setBaseUrl(Optional.of(URI.create("http://www.baseDomain.com/")));
         Collection<SiteMapURL> siteMapUrls = siteMapParser.parse(true, SITE_MAP_URL);
         assertSiteMapUrls(3, SITEMAP_ENTRY_URL, siteMapUrls);
@@ -156,28 +156,30 @@ class SiteMapParserTests
     @Test
     void testParseSiteMapIndex() throws IOException, SiteMapParseException
     {
-        mockHttpGet("sitemap-index.xml", SITE_MAP_URL, null);
-        mockSiteMapParsing(SITEMAP_XML, URI.create(SITE_URL + "sitemap-misc.xml"), null);
+        mockHttpGet("sitemap-index.xml", SITE_MAP_URL);
+        mockSiteMapParsing(SITEMAP_XML, URI.create(SITE_URL + "sitemap-misc.xml"));
         siteMapParser.setFollowRedirects(false);
         Collection<SiteMapURL> siteMapUrls = siteMapParser.parse(true, SITE_MAP_URL);
         assertSiteMapUrls(SITEMAP_URL_NUMBER, SITEMAP_ENTRY_URL, siteMapUrls);
     }
 
-    private void mockSiteMapParsing(String resourceName, URI siteMapUrl, List<URI> redirectLocations) throws IOException
+    private RedirectLocations mockSiteMapParsing(String resourceName, URI siteMapUrl) throws IOException
     {
-        mockHttpGet(resourceName, siteMapUrl, redirectLocations);
         siteMapParser.setBaseUrl(Optional.empty());
+        return mockHttpGet(resourceName, siteMapUrl);
     }
 
-    private void mockHttpGet(String resourceName, URI siteMapUrl, List<URI> redirectLocations) throws IOException
+    private RedirectLocations mockHttpGet(String resourceName, URI siteMapUrl) throws IOException
     {
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.setResponseBody(ResourceUtils.loadResourceAsByteArray(getClass(), resourceName));
+        RedirectLocations locations = mock();
         when(mockedHttpClient.doHttpGet(eq(siteMapUrl), argThat(context ->
         {
-            context.setAttribute(HttpClientContext.REDIRECT_LOCATIONS, redirectLocations);
+            context.setAttribute(HttpClientContext.REDIRECT_LOCATIONS, locations);
             return true;
         }))).thenReturn(httpResponse);
+        return locations;
     }
 
     private void assertSiteMapUrls(int siteMapUrlNumber, URI sitemapEntryUrl, Collection<SiteMapURL> siteMapUrls)

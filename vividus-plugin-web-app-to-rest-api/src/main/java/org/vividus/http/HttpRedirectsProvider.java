@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-import org.apache.http.HttpStatus;
-import org.apache.http.client.CircularRedirectException;
-import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.hc.client5.http.CircularRedirectException;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpStatus;
 import org.vividus.http.client.ExternalServiceException;
 import org.vividus.http.client.IHttpClient;
 
@@ -34,7 +34,7 @@ public class HttpRedirectsProvider
      * Executes HEAD request to get redirects.
      * Throws IllegalStateException in case of status code outside of "200-207"
      * @param from URI to issue HEAD request
-     * @return List of redirects. {@code null} if there are no redirects.
+     * @return List of redirects. Empty list if there are no redirects.
      */
     public List<URI> getRedirects(URI from)
     {
@@ -43,7 +43,7 @@ public class HttpRedirectsProvider
             HttpClientContext httpContext = HttpClientContext.create();
             httpClient.doHttpHead(from, httpContext).verifyStatusCodeInRange(HttpStatus.SC_OK,
                     HttpStatus.SC_MULTI_STATUS);
-            return httpContext.getRedirectLocations();
+            return httpContext.getRedirectLocations().getAll();
         }
         catch (IOException | ExternalServiceException e)
         {

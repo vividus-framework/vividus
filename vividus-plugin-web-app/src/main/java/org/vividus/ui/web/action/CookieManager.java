@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,8 @@ import javax.inject.Inject;
 import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
 
-import org.apache.http.client.CookieStore;
-import org.apache.http.cookie.ClientCookie;
-import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver.Options;
 import org.slf4j.Logger;
@@ -94,15 +93,15 @@ public class CookieManager implements ICookieManager
                 new CookieStoreCollector());
     }
 
-    private static org.apache.http.cookie.Cookie createHttpClientCookie(Cookie seleniumCookie)
+    private static org.apache.hc.client5.http.cookie.Cookie createHttpClientCookie(Cookie seleniumCookie)
     {
         BasicClientCookie httpClientCookie = new BasicClientCookie(seleniumCookie.getName(), seleniumCookie.getValue());
         httpClientCookie.setDomain(seleniumCookie.getDomain());
         httpClientCookie.setPath(seleniumCookie.getPath());
-        httpClientCookie.setExpiryDate(seleniumCookie.getExpiry());
+        httpClientCookie.setExpiryDate(seleniumCookie.getExpiry().toInstant());
         httpClientCookie.setSecure(seleniumCookie.isSecure());
-        httpClientCookie.setAttribute(ClientCookie.DOMAIN_ATTR, seleniumCookie.getDomain());
-        httpClientCookie.setAttribute(ClientCookie.PATH_ATTR, seleniumCookie.getPath());
+        httpClientCookie.setAttribute(org.apache.hc.client5.http.cookie.Cookie.DOMAIN_ATTR, seleniumCookie.getDomain());
+        httpClientCookie.setAttribute(org.apache.hc.client5.http.cookie.Cookie.PATH_ATTR, seleniumCookie.getPath());
         return httpClientCookie;
     }
 

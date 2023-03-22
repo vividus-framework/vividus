@@ -41,7 +41,8 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.client5.http.protocol.RedirectLocations;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -289,19 +290,26 @@ class PageStepsTests
         URI redirectPage = URI.create(redirectPageUrl);
         when(httpClient.doHttpHead(eq(mainPage), argThat(context ->
         {
-            context.setAttribute(HttpClientContext.REDIRECT_LOCATIONS, List.of(redirectPage));
+            RedirectLocations redirectLocations = new RedirectLocations();
+            redirectLocations.add(redirectPage);
+            context.setAttribute(HttpClientContext.REDIRECT_LOCATIONS, redirectLocations);
             return true;
         }))).thenReturn(new HttpResponse());
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
     }
 
     @Test
-    void testOpenMainApplicationPageNoRedirect()
+    void testOpenMainApplicationPageNoRedirect() throws IOException
     {
         pageSteps.setKeepUserInfoForProtocolRedirects(true);
         when(webApplicationConfiguration.getAuthenticationMode()).thenReturn(AuthenticationMode.URL);
         URI mainPage = URI.create(HTTP_EXAMPLE_COM);
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
+        when(httpClient.doHttpHead(eq(mainPage), argThat(context ->
+        {
+            context.setAttribute(HttpClientContext.REDIRECT_LOCATIONS, new RedirectLocations());
+            return true;
+        }))).thenReturn(new HttpResponse());
         pageSteps.openMainApplicationPage();
         verify(navigateActions).navigateTo(mainPage);
         verify(webApplicationListener).onLoad();

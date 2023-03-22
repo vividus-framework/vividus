@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.azure.devops.client.model.AddOperation;
@@ -127,7 +127,7 @@ public class AzureDevOpsClient
 
     private String execute(HttpMethod method, String relativeUrl, HttpEntity payload) throws IOException
     {
-        HttpRequestBase httpRequest = HttpRequestBuilder.create()
+        ClassicHttpRequest httpRequest = HttpRequestBuilder.create()
                 .withHttpMethod(method)
                 .withEndpoint(endpoint)
                 .withRelativeUrl(relativeUrl + API_VERSION)

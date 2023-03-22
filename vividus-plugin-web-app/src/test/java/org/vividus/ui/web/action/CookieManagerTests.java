@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.http.client.CookieStore;
-import org.apache.http.cookie.ClientCookie;
-import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -120,20 +119,22 @@ class CookieManagerTests
         Cookie seleniumCookie = createSeleniumCookie();
         mockGetCookies(seleniumCookie);
         CookieStore cookieStore = cookieManager.getCookiesAsHttpCookieStore();
-        List<org.apache.http.cookie.Cookie> resultCookies = cookieStore.getCookies();
+        List<org.apache.hc.client5.http.cookie.Cookie> resultCookies = cookieStore.getCookies();
         assertEquals(1, resultCookies.size());
-        org.apache.http.cookie.Cookie httpCookie = resultCookies.get(0);
+        org.apache.hc.client5.http.cookie.Cookie httpCookie = resultCookies.get(0);
         assertThat(httpCookie, instanceOf(BasicClientCookie.class));
         BasicClientCookie clientCookie = (BasicClientCookie) httpCookie;
         assertAll(
             () -> assertEquals(seleniumCookie.getDomain(), clientCookie.getDomain()),
-            () -> assertEquals(seleniumCookie.getExpiry(), clientCookie.getExpiryDate()),
+            () -> assertEquals(seleniumCookie.getExpiry().toInstant(), clientCookie.getExpiryInstant()),
             () -> assertEquals(seleniumCookie.getName(), clientCookie.getName()),
             () -> assertEquals(seleniumCookie.getPath(), clientCookie.getPath()),
             () -> assertEquals(seleniumCookie.getValue(), clientCookie.getValue()),
             () -> assertEquals(seleniumCookie.isSecure(), clientCookie.isSecure()),
-            () -> assertEquals(seleniumCookie.getDomain(), clientCookie.getAttribute(ClientCookie.DOMAIN_ATTR)),
-            () -> assertEquals(seleniumCookie.getPath(), clientCookie.getAttribute(ClientCookie.PATH_ATTR))
+                () -> assertEquals(seleniumCookie.getDomain(),
+                        clientCookie.getAttribute(org.apache.hc.client5.http.cookie.Cookie.DOMAIN_ATTR)),
+                () -> assertEquals(seleniumCookie.getPath(),
+                        clientCookie.getAttribute(org.apache.hc.client5.http.cookie.Cookie.PATH_ATTR))
         );
     }
 

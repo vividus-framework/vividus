@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,15 +43,15 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.RequestLine;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
+import org.apache.hc.core5.http.message.BasicHeader;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,11 +67,11 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 @ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class})
 class PublishingAttachmentInterceptorTests
 {
-    private static final String ENDPOINT = "uri";
+    private static final String ENDPOINT = "https://uri.com/";
     private static final String METHOD = "method";
     private static final String API_MESSAGE_FTL = "/org/vividus/http/attachment/api-message.ftl";
-    private static final String RESPONSE = "Response: method uri";
-    private static final String REQUEST = "Request: method uri";
+    private static final String RESPONSE = "Response: method " + ENDPOINT;
+    private static final String REQUEST = "Request: method " + ENDPOINT;
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String TEXT_PLAIN = "text/plain";
     private static final byte[] DATA = "data".getBytes(StandardCharsets.UTF_8);
@@ -84,15 +84,18 @@ class PublishingAttachmentInterceptorTests
     @Test
     void testHttpRequestIsAttachedSuccessfully() throws IOException
     {
-        Header entityContentTypeHeader = mockContentTypeHeader();
-        when(entityContentTypeHeader.getElements()[0].getParameters()).thenReturn(new NameValuePair[0]).getMock();
-        testHttpRequestIsAttachedSuccessfully(new Header[] {entityContentTypeHeader}, entityContentTypeHeader);
+        Header entityContentTypeHeader = new BasicHeader(HttpHeaders.CONTENT_TYPE, TEXT_PLAIN);
+        var httpEntity = mock(HttpEntity.class);
+        var httpRequest = createClassicHttpRequest(new Header[] {entityContentTypeHeader}, httpEntity);
+        testHttpRequestIsAttachedSuccessfully(httpRequest);
+        verify(httpEntity).getContentLength();
+        verify(httpEntity).writeTo(any(ByteArrayOutputStream.class));
     }
 
     @Test
     void testHttpRequestWithNullBodyIsAttachedSuccessfully()
     {
-        HttpEntityEnclosingRequest httpRequest = mockHttpEntityEnclosingRequest(new Header[] {}, null);
+        var httpRequest = createClassicHttpRequest(new Header[] {}, null);
         testHttpRequestIsAttachedSuccessfully(httpRequest);
     }
 
@@ -100,9 +103,7 @@ class PublishingAttachmentInterceptorTests
     @ValueSource(strings = {CONTENT_TYPE, "content-type"})
     void testHttpRequestIsAttachedSuccessfullyWhenContentTypeIsSet(String contentTypeHeaderName) throws IOException
     {
-        Header contentTypeHeader = mockContentTypeHeader();
-        when(contentTypeHeader.getName()).thenReturn(contentTypeHeaderName);
-        when(contentTypeHeader.getValue()).thenReturn(TEXT_PLAIN);
+        Header contentTypeHeader = new BasicHeader(contentTypeHeaderName, TEXT_PLAIN);
         var httpEntity = mock(HttpEntity.class);
         testHttpRequestIsAttachedSuccessfully(contentTypeHeader, httpEntity);
         verify(httpEntity).getContentLength();
@@ -112,40 +113,40 @@ class PublishingAttachmentInterceptorTests
     @Test
     void testHttpRequestIsAttachedSuccessfullyWhenContentTypeIsUnset() throws IOException
     {
-        testHttpRequestIsAttachedSuccessfully(new Header[] { mock(Header.class) }, null);
+        testHttpRequestIsAttachedSuccessfully(mock(Header.class));
     }
 
     @Test
     void testHttpRequestIsAttachedSuccessfullyWhenContentTypeIsEmpty() throws IOException
     {
-        Header contentTypeHeader = mock(Header.class);
+        Header contentTypeHeader = mock();
         when(contentTypeHeader.getName()).thenReturn(CONTENT_TYPE);
-        testHttpRequestIsAttachedSuccessfully(new Header[] { contentTypeHeader }, null);
+        testHttpRequestIsAttachedSuccessfully(contentTypeHeader);
     }
 
     @Test
     void testHttpRequestBodyIsAttachedSuccessfullyWithContentTypeIsUnknown() throws IOException
     {
-        testHttpRequestIsAttachedSuccessfully(new Header[] {}, null);
+        testHttpRequestIsAttachedSuccessfully();
     }
 
     @Test
     void testNoHttpRequestBodyIsAttached()
     {
-        HttpEntityEnclosingRequest httpRequest = mockHttpEntityEnclosingRequest(new Header[] {},
-                mock(HttpEntity.class));
+        HttpRequest httpRequest = mock();
+        when(httpRequest.getHeaders()).thenReturn(new Header[] {});
+        when(httpRequest.toString()).thenReturn(METHOD + " " + ENDPOINT);
         testNoHttpRequestBodyIsAttached(httpRequest, empty());
     }
 
     @Test
     void testHttpRequestBodyAttachingIsFailed() throws IOException
     {
-        HttpEntity httpEntity = mock(HttpEntity.class);
+        var httpEntity = mock(HttpEntity.class);
         when(httpEntity.getContentType()).thenReturn(null);
-        IOException ioException = new IOException();
+        var ioException = new IOException();
         doThrow(ioException).when(httpEntity).writeTo(any(ByteArrayOutputStream.class));
-        HttpEntityEnclosingRequest httpRequest = mockHttpEntityEnclosingRequest(new Header[] { mock(Header.class) },
-                httpEntity);
+        var httpRequest = createClassicHttpRequest(new Header[] { mock(Header.class) }, httpEntity);
         testNoHttpRequestBodyIsAttached(httpRequest,
                 equalTo(List.of(error(ioException, "Error is occurred at HTTP message parsing"))));
     }
@@ -153,21 +154,21 @@ class PublishingAttachmentInterceptorTests
     @Test
     void testHttpResponseIsAttachedSuccessfully() throws IOException
     {
-        HttpResponse httpResponse = mock(HttpResponse.class);
+        var httpResponse = mock(HttpResponse.class);
         when(httpResponse.getResponseBody()).thenReturn(DATA);
         when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_OK);
         when(httpResponse.getMethod()).thenReturn(METHOD);
         when(httpResponse.getFrom()).thenReturn(URI.create(ENDPOINT));
         when(httpResponse.getResponseHeaders()).thenReturn(new Header[] { mock(Header.class) });
         interceptor.handle(httpResponse);
-        ArgumentCaptor<Map<String, Integer>> argumentCaptor = verifyPublishAttachment(RESPONSE);
+        var argumentCaptor = verifyPublishAttachment(RESPONSE);
         assertEquals(HttpStatus.SC_OK, argumentCaptor.getValue().get("statusCode").intValue());
     }
 
     @Test
     void testNoHttpResponseBodyIsAttached() throws IOException
     {
-        HttpResponse httpResponse = mock(HttpResponse.class);
+        var httpResponse = mock(HttpResponse.class);
         when(httpResponse.getResponseBody()).thenReturn(null);
         when(httpResponse.getMethod()).thenReturn(METHOD);
         when(httpResponse.getFrom()).thenReturn(URI.create(ENDPOINT));
@@ -176,58 +177,45 @@ class PublishingAttachmentInterceptorTests
         verifyPublishAttachment(RESPONSE);
     }
 
-    private Header mockContentTypeHeader()
-    {
-        HeaderElement headerElement = mock(HeaderElement.class);
-        when(headerElement.getName()).thenReturn(TEXT_PLAIN);
-        return when(mock(Header.class).getElements()).thenReturn(new HeaderElement[] { headerElement }).getMock();
-    }
-
     private void testHttpRequestIsAttachedSuccessfully(Header contentTypeHeader, HttpEntity httpEntity)
     {
-        HttpEntityEnclosingRequest httpRequest = mockHttpEntityEnclosingRequest(new Header[] { contentTypeHeader },
-                httpEntity);
+        var httpRequest = createClassicHttpRequest(new Header[] { contentTypeHeader }, httpEntity);
         testHttpRequestIsAttachedSuccessfully(httpRequest);
     }
 
-    private void testHttpRequestIsAttachedSuccessfully(Header[] allRequestHeaders, Header entityContentTypeHeader)
-            throws IOException
+    private void testHttpRequestIsAttachedSuccessfully(Header... allRequestHeaders) throws IOException
     {
-        HttpEntity httpEntity = mock(HttpEntity.class);
-        when(httpEntity.getContentType()).thenReturn(entityContentTypeHeader);
-        HttpEntityEnclosingRequest httpRequest = mockHttpEntityEnclosingRequest(allRequestHeaders, httpEntity);
+        var httpEntity = mock(HttpEntity.class);
+        when(httpEntity.getContentType()).thenReturn(null);
+        var httpRequest = createClassicHttpRequest(allRequestHeaders, httpEntity);
         testHttpRequestIsAttachedSuccessfully(httpRequest);
         verify(httpEntity).getContentLength();
         verify(httpEntity).writeTo(any(ByteArrayOutputStream.class));
     }
 
-    private void testHttpRequestIsAttachedSuccessfully(HttpEntityEnclosingRequest httpRequest)
+    private void testHttpRequestIsAttachedSuccessfully(ClassicHttpRequest httpRequest)
     {
-        HttpContext httpContext = mock(HttpContext.class);
-        interceptor.process(httpRequest, httpContext);
+        var httpContext = mock(HttpContext.class);
+        interceptor.process(httpRequest, null, httpContext);
         verifyPublishAttachment(REQUEST);
         verifyNoInteractions(httpContext);
         assertThat(logger.getLoggingEvents(), empty());
     }
 
-    private HttpEntityEnclosingRequest mockHttpEntityEnclosingRequest(Header[] allRequestHeaders, HttpEntity httpEntity)
+    private ClassicHttpRequest createClassicHttpRequest(Header[] requestHeaders, HttpEntity httpEntity)
     {
-        HttpEntityEnclosingRequest httpRequest = mock(HttpEntityEnclosingRequest.class);
-        RequestLine requestLine = mock(RequestLine.class);
-        when(httpRequest.getAllHeaders()).thenReturn(allRequestHeaders);
-        when(httpRequest.getEntity()).thenReturn(httpEntity);
-        when(httpRequest.getRequestLine()).thenReturn(requestLine);
-        when(requestLine.getMethod()).thenReturn(METHOD);
-        when(requestLine.getUri()).thenReturn(ENDPOINT);
+        ClassicHttpRequest httpRequest = new BasicClassicHttpRequest(METHOD, ENDPOINT);
+        httpRequest.setHeaders(requestHeaders);
+        httpRequest.setEntity(httpEntity);
         return httpRequest;
     }
 
     private void testNoHttpRequestBodyIsAttached(HttpRequest httpRequest,
             Matcher<Collection<? extends LoggingEvent>> loggingEventsMatcher)
     {
-        HttpContext httpContext = mock(HttpContext.class);
+        var httpContext = mock(HttpContext.class);
         verifyNoInteractions(httpContext);
-        interceptor.process(httpRequest, httpContext);
+        interceptor.process(httpRequest, null, httpContext);
         verifyPublishAttachment(REQUEST);
         verifyNoMoreInteractions(attachmentPublisher);
         assertThat(logger.getLoggingEvents(), loggingEventsMatcher);

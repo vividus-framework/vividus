@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,17 @@
 package org.vividus.http.client;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,22 +35,29 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Stream;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.protocol.HttpContext;
+import org.apache.commons.lang3.function.FailableSupplier;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -86,142 +95,166 @@ class HttpClientTests
     }
 
     @Test
-    void testGetHttpHost()
+    void testGetHttpHost() throws URISyntaxException
     {
-        HttpHost httpHost = HttpHost.create(VIVIDUS_ORG);
+        var httpHost = createHttpHost();
         httpClient.setHttpHost(httpHost);
         assertEquals(httpHost, httpClient.getHttpHost());
     }
 
-    @Test
-    void testDoHttpGet() throws Exception
+    @TestFactory
+    Stream<DynamicTest> httpGetTests()
     {
-        HttpHost httpHost = HttpHost.create(VIVIDUS_ORG);
+        return Stream.of(
+                dynamicTest("shouldDoHttpGetWithHttpContext", () -> {
+                    HttpContext context = mock();
+                    testDoHttpGet(context, () -> httpClient.doHttpGet(URI_TO_GO, context));
+                }),
+                dynamicTest("shouldDoHttpGetWithoutHttpContext", () -> {
+                    testDoHttpGet(null, () -> httpClient.doHttpGet(URI_TO_GO));
+                })
+        );
+    }
+
+    private void testDoHttpGet(HttpContext context, FailableSupplier<HttpResponse, IOException> test)
+            throws IOException, URISyntaxException
+    {
+        var httpHost = createHttpHost();
         httpClient.setHttpHost(httpHost);
-        CloseableHttpResponse closeableHttpResponse = mock(CloseableHttpResponse.class);
-        HttpContext context = null;
-        HttpEntity httpEntity = mock(HttpEntity.class);
+        @SuppressWarnings("PMD.CloseResource")
+        ClassicHttpResponse classicHttpResponse = mock();
+        HttpEntity httpEntity = mock();
         byte[] body = { 0, 1, 2 };
-        Header[] headers = { header };
-        StatusLine statusLine = mock(StatusLine.class);
-        int statusCode = HttpStatus.SC_OK;
+        var headers = new Header[] { header };
+        var statusCode = HttpStatus.SC_OK;
         when(httpEntity.getContent()).thenReturn(new ByteArrayInputStream(body));
-        when(closeableHttpResponse.getEntity()).thenReturn(httpEntity);
-        when(closeableHttpResponse.getAllHeaders()).thenReturn(headers);
-        when(statusLine.getStatusCode()).thenReturn(statusCode);
-        when(closeableHttpResponse.getStatusLine()).thenReturn(statusLine);
-        when(closeableHttpClient.execute(eq(httpHost), isA(HttpGet.class), eq(context)))
-                .thenAnswer(getAnswerWithSleep(closeableHttpResponse));
-        HttpResponse httpResponse = httpClient.doHttpGet(URI_TO_GO);
-        assertEquals(VIVIDUS_ORG, httpResponse.getFrom().toString());
-        assertEquals(GET, httpResponse.getMethod());
-        assertArrayEquals(body, httpResponse.getResponseBody());
-        assertArrayEquals(headers, httpResponse.getResponseHeaders());
-        assertEquals(statusCode, httpResponse.getStatusCode());
+        when(classicHttpResponse.getEntity()).thenAnswer((Answer<HttpEntity>) invocation -> {
+            Sleeper.sleep(Duration.ofMillis(THREAD_SLEEP_TIME));
+            return httpEntity;
+        });
+        when(classicHttpResponse.getHeaders()).thenReturn(headers);
+        when(classicHttpResponse.getCode()).thenReturn(statusCode);
+        when(closeableHttpClient.execute(eq(httpHost), isA(HttpGet.class), eq(context),
+                argThat((ArgumentMatcher<HttpClientResponseHandler<HttpResponse>>) responseHandler -> {
+                    try
+                    {
+                        var httpResponse = responseHandler.handleResponse(classicHttpResponse);
+                        assertEquals(VIVIDUS_ORG, httpResponse.getFrom().toString());
+                        assertEquals(GET, httpResponse.getMethod());
+                        assertArrayEquals(body, httpResponse.getResponseBody());
+                        assertArrayEquals(headers, httpResponse.getResponseHeaders());
+                        assertEquals(statusCode, httpResponse.getStatusCode());
+                        return true;
+                    }
+                    catch (HttpException | IOException e)
+                    {
+                        throw new IllegalStateException(e);
+                    }
+                }))).thenReturn(new HttpResponse());
+        var httpResponse = test.get();
         assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
         verify(handler).handle(httpResponse);
     }
 
     @Test
-    void testDoHttpGetThrowingIOExceptionAtExecution() throws Exception
+    void shouldDoHttpGetSkippingResponseBodySaving() throws URISyntaxException, IOException
     {
-        HttpContext context = null;
-        String message = "execute HTTP GET exception message";
-        when(closeableHttpClient.execute(isA(HttpGet.class), eq(context))).thenThrow(new IOException(message));
-        IOException exception = assertThrows(IOException.class, () -> httpClient.doHttpGet(URI_TO_GO));
+        httpClient.setSkipResponseEntity(true);
+        var httpHost = createHttpHost();
+        httpClient.setHttpHost(httpHost);
+        @SuppressWarnings("PMD.CloseResource")
+        ClassicHttpResponse classicHttpResponse = mock();
+        HttpEntity httpEntity = mock();
+        var headers = new Header[] { header };
+        var statusCode = HttpStatus.SC_OK;
+        when(classicHttpResponse.getEntity()).thenAnswer((Answer<HttpEntity>) invocation -> {
+            Sleeper.sleep(Duration.ofMillis(THREAD_SLEEP_TIME));
+            return httpEntity;
+        });
+        when(classicHttpResponse.getHeaders()).thenReturn(headers);
+        when(classicHttpResponse.getCode()).thenReturn(statusCode);
+        when(closeableHttpClient.execute(eq(httpHost), isA(HttpGet.class), nullable(HttpContext.class),
+                argThat((ArgumentMatcher<HttpClientResponseHandler<HttpResponse>>) responseHandler -> {
+                    try
+                    {
+                        var httpResponse = responseHandler.handleResponse(classicHttpResponse);
+                        assertEquals(VIVIDUS_ORG, httpResponse.getFrom().toString());
+                        assertEquals(GET, httpResponse.getMethod());
+                        assertNull(httpResponse.getResponseBody());
+                        assertArrayEquals(headers, httpResponse.getResponseHeaders());
+                        assertEquals(statusCode, httpResponse.getStatusCode());
+                        return true;
+                    }
+                    catch (HttpException | IOException e)
+                    {
+                        throw new IllegalStateException(e);
+                    }
+                }))).thenReturn(new HttpResponse());
+        var httpResponse = httpClient.doHttpGet(URI_TO_GO);
+        assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
+        verify(handler).handle(httpResponse);
+    }
+
+    @TestFactory
+    Stream<DynamicTest> httpHeadTests()
+    {
+        return Stream.of(
+                dynamicTest("shouldDoHttpHeadWithHttpContext", () -> {
+                    HttpContext context = mock();
+                    testDoHttpHead(context, () -> httpClient.doHttpHead(URI_TO_GO, context));
+                }),
+                dynamicTest("shouldDoHttpHeadWithoutHttpContext", () -> {
+                    testDoHttpHead(null, () -> httpClient.doHttpHead(URI_TO_GO));
+                })
+        );
+    }
+
+    private void testDoHttpHead(HttpContext context, FailableSupplier<HttpResponse, IOException> test)
+            throws IOException
+    {
+        @SuppressWarnings("PMD.CloseResource")
+        ClassicHttpResponse classicHttpResponse = mock();
+        when(classicHttpResponse.getEntity()).thenAnswer((Answer<HttpEntity>) invocation -> {
+            Sleeper.sleep(Duration.ofMillis(THREAD_SLEEP_TIME));
+            return null;
+        });
+        var statusCode = HttpStatus.SC_MOVED_PERMANENTLY;
+        var headers = new Header[] { header };
+        when(classicHttpResponse.getHeaders()).thenReturn(headers);
+        when(classicHttpResponse.getCode()).thenReturn(statusCode);
+        when(closeableHttpClient.execute(isA(HttpHead.class), eq(context),
+                argThat((ArgumentMatcher<HttpClientResponseHandler<HttpResponse>>) responseHandler -> {
+                    try
+                    {
+                        var httpResponse = responseHandler.handleResponse(classicHttpResponse);
+                        assertEquals(HEAD, httpResponse.getMethod());
+                        assertEquals(URI_TO_GO, httpResponse.getFrom());
+                        assertEquals(statusCode, httpResponse.getStatusCode());
+                        assertArrayEquals(headers, httpResponse.getResponseHeaders());
+                        return true;
+                    }
+                    catch (HttpException | IOException e)
+                    {
+                        throw new IllegalStateException(e);
+                    }
+                }))).thenReturn(new HttpResponse());
+        var httpResponse = test.get();
+        assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
+        verify(handler).handle(httpResponse);
+    }
+
+    @Test
+    void testDoHttpGetThrowingIOExceptionAtExecution() throws IOException
+    {
+        var message = "execute HTTP GET exception message";
+        when(closeableHttpClient.execute(isA(HttpGet.class), nullable(HttpContext.class), any())).thenThrow(
+                new IOException(message));
+        var exception = assertThrows(IOException.class, () -> httpClient.doHttpGet(URI_TO_GO));
         assertEquals(message, exception.getMessage());
     }
 
-    @Test
-    void testDoHttpGetThrowingIOExceptionAtResponseParsing() throws Exception
+    private static HttpHost createHttpHost() throws URISyntaxException
     {
-        CloseableHttpResponse closeableHttpResponse = mock(CloseableHttpResponse.class);
-        HttpContext context = null;
-        String message = "read HTTP GET response exception message";
-        HttpEntity httpEntity = mock(HttpEntity.class);
-        when(httpEntity.getContent()).thenThrow(new IOException(message));
-        when(closeableHttpResponse.getEntity()).thenReturn(httpEntity);
-        when(closeableHttpClient.execute(isA(HttpGet.class), eq(context))).thenReturn(closeableHttpResponse);
-        assertThrows(IOException.class, () -> httpClient.doHttpGet(URI_TO_GO), message);
-    }
-
-    @Test
-    void testDoHttpHead() throws Exception
-    {
-        CloseableHttpResponse closeableHttpResponse = mock(CloseableHttpResponse.class);
-        HttpContext context = null;
-        when(closeableHttpResponse.getEntity()).thenReturn(null);
-        StatusLine statusLine = mock(StatusLine.class);
-        int statusCode = HttpStatus.SC_MOVED_PERMANENTLY;
-        Header[] headers = { header };
-        when(closeableHttpResponse.getAllHeaders()).thenReturn(headers);
-        when(statusLine.getStatusCode()).thenReturn(statusCode);
-        when(closeableHttpResponse.getStatusLine()).thenReturn(statusLine);
-        when(closeableHttpClient.execute(isA(HttpHead.class), eq(context)))
-                .thenAnswer(getAnswerWithSleep(closeableHttpResponse));
-        HttpResponse httpResponse = httpClient.doHttpHead(URI_TO_GO);
-        assertEquals(HEAD, httpResponse.getMethod());
-        assertEquals(URI_TO_GO, httpResponse.getFrom());
-        assertEquals(statusCode, httpResponse.getStatusCode());
-        assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
-        assertThat(httpResponse.getResponseHeaders(), is(equalTo(headers)));
-        verify(handler).handle(httpResponse);
-    }
-
-    @Test
-    void testDoHttpHeadContext() throws Exception
-    {
-        CloseableHttpResponse closeableHttpResponse = mock(CloseableHttpResponse.class);
-        HttpContext context = mock(HttpContext.class);
-        when(closeableHttpResponse.getEntity()).thenReturn(null);
-        StatusLine statusLine = mock(StatusLine.class);
-        int statusCode = HttpStatus.SC_MOVED_PERMANENTLY;
-        Header[] headers = { header };
-        when(closeableHttpResponse.getAllHeaders()).thenReturn(headers);
-        when(statusLine.getStatusCode()).thenReturn(statusCode);
-        when(closeableHttpResponse.getStatusLine()).thenReturn(statusLine);
-        when(closeableHttpClient.execute(isA(HttpHead.class), eq(context)))
-                .thenAnswer(getAnswerWithSleep(closeableHttpResponse));
-        HttpResponse httpResponse = httpClient.doHttpHead(URI_TO_GO, context);
-        assertEquals(HEAD, httpResponse.getMethod());
-        assertEquals(URI_TO_GO, httpResponse.getFrom());
-        assertEquals(statusCode, httpResponse.getStatusCode());
-        assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
-        assertThat(httpResponse.getResponseHeaders(), is(equalTo(headers)));
-        verify(handler).handle(httpResponse);
-    }
-
-    @Test
-    void testDoHttpGetContext() throws Exception
-    {
-        httpClient.setSkipResponseEntity(true);
-        CloseableHttpResponse closeableHttpResponse = mock(CloseableHttpResponse.class);
-        HttpContext context = mock(HttpContext.class);
-        HttpEntity httpEntity = mock(HttpEntity.class);
-        when(closeableHttpResponse.getEntity()).thenReturn(httpEntity);
-        StatusLine statusLine = mock(StatusLine.class);
-        int statusCode = HttpStatus.SC_OK;
-        Header[] headers = { header };
-        when(closeableHttpResponse.getAllHeaders()).thenReturn(headers);
-        when(statusLine.getStatusCode()).thenReturn(statusCode);
-        when(closeableHttpResponse.getStatusLine()).thenReturn(statusLine);
-        when(closeableHttpClient.execute(isA(HttpGet.class), eq(context)))
-                .thenAnswer(getAnswerWithSleep(closeableHttpResponse));
-        HttpResponse httpResponse = httpClient.doHttpGet(URI_TO_GO, context);
-        assertEquals(GET, httpResponse.getMethod());
-        assertEquals(URI_TO_GO, httpResponse.getFrom());
-        assertNull(httpResponse.getResponseBody());
-        assertEquals(statusCode, httpResponse.getStatusCode());
-        assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
-        verify(handler).handle(httpResponse);
-    }
-
-    private static Answer<CloseableHttpResponse> getAnswerWithSleep(CloseableHttpResponse closeableHttpResponse)
-    {
-        return invocation ->
-        {
-            Sleeper.sleep(Duration.ofMillis(THREAD_SLEEP_TIME));
-            return closeableHttpResponse;
-        };
+        return HttpHost.create(VIVIDUS_ORG.substring(0, VIVIDUS_ORG.length() - 1));
     }
 }

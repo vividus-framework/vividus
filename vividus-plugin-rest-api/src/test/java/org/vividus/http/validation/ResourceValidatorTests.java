@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,7 +71,7 @@ class ResourceValidatorTests
         ResourceValidation resourceValidation = new ResourceValidation(FIRST);
         ResourceValidation result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, result.getCheckStatus());
-        verify(httpClient).execute(any(HttpUriRequest.class), any(HttpContext.class));
+        verify(httpClient).execute(any(ClassicHttpRequest.class), any(HttpContext.class));
         verify(softAssert).assertThat(eq(PASSED_CHECK_MESSAGE),
                 eq(OK), argThat(MATCHER));
     }
@@ -86,7 +86,7 @@ class ResourceValidatorTests
         ResourceValidation first = resourceValidator.perform(resourceValidation);
         ResourceValidation second = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, first.getCheckStatus());
-        verify(httpClient).execute(any(HttpUriRequest.class), any(HttpContext.class));
+        verify(httpClient).execute(any(ClassicHttpRequest.class), any(HttpContext.class));
         verify(softAssert).assertThat(eq(PASSED_CHECK_MESSAGE),
                 eq(OK), argThat(MATCHER));
         assertThat(first, not(sameInstance(second)));
@@ -104,7 +104,7 @@ class ResourceValidatorTests
         ResourceValidation resourceValidation = new ResourceValidation(FIRST);
         ResourceValidation result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.FAILED, result.getCheckStatus());
-        verify(httpClient).execute(any(HttpUriRequest.class), any(HttpContext.class));
+        verify(httpClient).execute(any(ClassicHttpRequest.class), any(HttpContext.class));
         verify(softAssert).assertThat(eq("Status code for https://vividus.org is 403. expected one of [200]"),
                 eq(forbidden), argThat(MATCHER));
     }
@@ -121,7 +121,7 @@ class ResourceValidatorTests
         ResourceValidation resourceValidation = new ResourceValidation(FIRST);
         ResourceValidation result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, result.getCheckStatus());
-        verify(httpClient, times(2)).execute(any(HttpUriRequest.class), any(HttpContext.class));
+        verify(httpClient, times(2)).execute(any(ClassicHttpRequest.class), any(HttpContext.class));
         verify(softAssert).assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER));
     }
 
@@ -134,7 +134,7 @@ class ResourceValidatorTests
         ResourceValidation resourceValidation = new ResourceValidation(FIRST);
         ResourceValidation result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.BROKEN, result.getCheckStatus());
-        verify(httpClient).execute(any(HttpUriRequest.class), any(HttpContext.class));
+        verify(httpClient).execute(any(ClassicHttpRequest.class), any(HttpContext.class));
         verify(softAssert).recordFailedAssertion("Exception occured during check of: https://vividus.org", ioException);
     }
 }

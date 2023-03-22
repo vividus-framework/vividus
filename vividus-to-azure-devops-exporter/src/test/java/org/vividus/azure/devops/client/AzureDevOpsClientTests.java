@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,11 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
 
@@ -36,7 +37,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,12 +46,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.azure.devops.client.model.AddOperation;
-import org.vividus.azure.devops.client.model.Entity;
 import org.vividus.azure.devops.client.model.ShallowReference;
-import org.vividus.azure.devops.client.model.TestPoint;
 import org.vividus.azure.devops.client.model.TestResult;
 import org.vividus.azure.devops.client.model.TestRun;
-import org.vividus.azure.devops.client.model.WorkItem;
 import org.vividus.azure.devops.configuration.AzureDevOpsExporterOptions;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.client.HttpResponse;
@@ -72,7 +70,7 @@ class AzureDevOpsClientTests
     private static final String WORK_ITEM_RESPONSE = "{\"id\": 1, \"rev\": 1}";
     private static final String ENTITY_RESPONSE = "{\"id\": 1}";
 
-    @Captor private ArgumentCaptor<HttpUriRequest> requestCaptor;
+    @Captor private ArgumentCaptor<ClassicHttpRequest> requestCaptor;
     @Mock private HttpResponse httpResponse;
     @Mock private IHttpClient httpClient;
     private AzureDevOpsClient client;
@@ -82,19 +80,19 @@ class AzureDevOpsClientTests
     @BeforeEach
     void init()
     {
-        AzureDevOpsExporterOptions options = new AzureDevOpsExporterOptions();
+        var options = new AzureDevOpsExporterOptions();
         options.setOrganization("organization");
         options.setProject("project");
         client = new AzureDevOpsClient(httpClient, options);
     }
 
     @Test
-    void shouldCreateTestCase() throws IOException
+    void shouldCreateTestCase() throws IOException, URISyntaxException
     {
         when(httpResponse.getResponseBodyAsString()).thenReturn(WORK_ITEM_RESPONSE);
         doReturn(httpResponse).when(httpClient).execute(requestCaptor.capture());
 
-        WorkItem workItem = client.createTestCase(List.of(
+        var workItem = client.createTestCase(List.of(
             new AddOperation(PATH + 1, VALUE + 1),
             new AddOperation(PATH + 2, VALUE + 2),
             new AddOperation(PATH + 3, VALUE + 3)
@@ -106,7 +104,7 @@ class AzureDevOpsClientTests
     }
 
     @Test
-    void shouldUpdateTestCase() throws IOException
+    void shouldUpdateTestCase() throws IOException, URISyntaxException
     {
         when(httpResponse.getResponseBodyAsString()).thenReturn(WORK_ITEM_RESPONSE);
         doReturn(httpResponse).when(httpClient).execute(requestCaptor.capture());
@@ -121,12 +119,12 @@ class AzureDevOpsClientTests
     }
 
     @Test
-    void shouldGetWorkItem() throws IOException
+    void shouldGetWorkItem() throws IOException, URISyntaxException
     {
         when(httpResponse.getResponseBodyAsString()).thenReturn(WORK_ITEM_RESPONSE);
         doReturn(httpResponse).when(httpClient).execute(requestCaptor.capture());
 
-        WorkItem workItem = client.getWorkItem(TEST_CASE_ID);
+        var workItem = client.getWorkItem(TEST_CASE_ID);
 
         assertEquals(1, workItem.getId());
         assertEquals(1, workItem.getRev());
@@ -135,16 +133,16 @@ class AzureDevOpsClientTests
     }
 
     @Test
-    void shouldQueryTestPoints() throws IOException
+    void shouldQueryTestPoints() throws IOException, URISyntaxException
     {
         when(httpResponse.getResponseBodyAsString()).thenReturn("{\"points\":[{\"id\":40,\"testCase\":"
                 + "{\"id\":\"test-case-id\"},\"testPlan\":{\"id\":\"test-plan-id\"}}]}");
         doReturn(httpResponse).when(httpClient).execute(requestCaptor.capture());
 
-        List<TestPoint> testPoints = client.queryTestPoints(Set.of(TEST_CASE_ID));
+        var testPoints = client.queryTestPoints(Set.of(TEST_CASE_ID));
 
         assertThat(testPoints, hasSize(1));
-        TestPoint testPoint = testPoints.get(0);
+        var testPoint = testPoints.get(0);
         assertEquals(40, testPoint.getId());
         assertEquals("test-case-id", testPoint.getTestCase().getId());
         assertEquals("test-plan-id", testPoint.getTestPlan().getId());
@@ -153,17 +151,17 @@ class AzureDevOpsClientTests
     }
 
     @Test
-    void shouldCreateTestRun() throws IOException
+    void shouldCreateTestRun() throws IOException, URISyntaxException
     {
         when(httpResponse.getResponseBodyAsString()).thenReturn(ENTITY_RESPONSE);
         doReturn(httpResponse).when(httpClient).execute(requestCaptor.capture());
 
-        TestRun testRun = new TestRun();
+        var testRun = new TestRun();
         testRun.setName("test-run-name");
         testRun.setAutomated(false);
         testRun.setPlan(new ShallowReference("plan-ref"));
 
-        Entity entity = client.createTestRun(testRun);
+        var entity = client.createTestRun(testRun);
 
         assertEquals(1, entity.getId());
         validateRequestWithPayload(HttpMethod.POST, BASE_URL + "/test/runs" + VERSION,
@@ -171,16 +169,16 @@ class AzureDevOpsClientTests
     }
 
     @Test
-    void shouldAddTestResults() throws IOException
+    void shouldAddTestResults() throws IOException, URISyntaxException
     {
         when(httpResponse.getResponseBodyAsString()).thenReturn("{}");
         doReturn(httpResponse).when(httpClient).execute(requestCaptor.capture());
 
-        ZoneOffset offset = ZoneId.systemDefault().getRules().getOffset(Instant.now());
-        TestResult testResult = new TestResult();
-        OffsetDateTime startDate = OffsetDateTime.of(1977, 5, 25, 3, 2, 1, 0, offset);
+        var offset = ZoneId.systemDefault().getRules().getOffset(Instant.now());
+        var testResult = new TestResult();
+        var startDate = OffsetDateTime.of(1977, 5, 25, 3, 2, 1, 0, offset);
         testResult.setStartedDate(startDate);
-        OffsetDateTime completeDate = OffsetDateTime.of(1993, 4, 16, 3, 2, 1, 0, offset);
+        var completeDate = OffsetDateTime.of(1993, 4, 16, 3, 2, 1, 0, offset);
         testResult.setCompletedDate(completeDate);
         testResult.setOutcome("outcome");
         testResult.setState("state");
@@ -190,22 +188,22 @@ class AzureDevOpsClientTests
 
         client.addTestResults(1, List.of(testResult));
 
-        String payload = "[{\"startedDate\":\"" + startDate + "\",\"completedDate\":\"" + completeDate
+        var payload = "[{\"startedDate\":\"" + startDate + "\",\"completedDate\":\"" + completeDate
                 + "\",\"outcome\":\"outcome\",\"state\":\"state\",\"testCaseTitle\":\"test-case-title\","
                 + "\"revision\":1,\"testPoint\":{\"id\":\"test-point-ref\"}}]";
         validateRequestWithPayload(HttpMethod.POST, BASE_URL + "/test/Runs/" + 1 + "/results" + VERSION, payload);
     }
 
-    private void validateRequestWithPayload(HttpMethod method, String url, String payload)
+    private void validateRequestWithPayload(HttpMethod method, String url, String payload) throws URISyntaxException
     {
         assertThat(logger.getLoggingEvents(), is(List.of(info(PAYLOAD_LOG, payload))));
         validateRequest(method, url);
     }
 
-    private void validateRequest(HttpMethod method, String url)
+    private void validateRequest(HttpMethod method, String url) throws URISyntaxException
     {
-        HttpUriRequest request = requestCaptor.getValue();
+        var request = requestCaptor.getValue();
         assertEquals(method.name(), request.getMethod());
-        assertEquals(url, request.getURI().toString());
+        assertEquals(URI.create(url), request.getUri());
     }
 }
