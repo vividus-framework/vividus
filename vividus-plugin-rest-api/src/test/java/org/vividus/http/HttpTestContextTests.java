@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.junit.jupiter.api.Test;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.testcontext.SimpleTestContext;
@@ -50,9 +52,26 @@ class HttpTestContextTests
     @Test
     void testPutAndGetRequest()
     {
+        @SuppressWarnings("PMD.CloseResource")
         HttpEntity requestEntity = new StringEntity(SOME_REQUEST, (ContentType) null);
         httpTestContext.putRequestEntity(requestEntity);
         assertEquals(Optional.of(requestEntity), httpTestContext.getRequestEntity());
+    }
+
+    @Test
+    void testPutAndGetCookieStore()
+    {
+        CookieStore cookieStore = mock();
+        httpTestContext.putCookieStore(cookieStore);
+        assertEquals(Optional.of(cookieStore), httpTestContext.getCookieStore());
+    }
+
+    @Test
+    void testPutAndGetRequestConfig()
+    {
+        RequestConfig requestConfig = mock();
+        httpTestContext.putRequestConfig(requestConfig);
+        assertEquals(Optional.of(requestConfig), httpTestContext.getRequestConfig());
     }
 
     @Test
@@ -64,7 +83,7 @@ class HttpTestContextTests
     @Test
     void testPutAndGetConnectionDetails()
     {
-        ConnectionDetails connectionDetails = new ConnectionDetails();
+        var connectionDetails = new ConnectionDetails();
         httpTestContext.putConnectionDetails(connectionDetails);
         assertEquals(connectionDetails, httpTestContext.getConnectionDetails());
     }
@@ -84,7 +103,7 @@ class HttpTestContextTests
     @Test
     void testPutAndGetResponse()
     {
-        HttpResponse response = new HttpResponse();
+        var response = new HttpResponse();
         httpTestContext.putResponse(response);
         assertEquals(response, httpTestContext.getResponse());
     }
@@ -98,7 +117,7 @@ class HttpTestContextTests
     @Test
     void testPutRequestHeaders()
     {
-        List<Header> headers = List.of(mock(Header.class));
+        var headers = List.of(mock(Header.class));
         httpTestContext.putRequestHeaders(headers);
         assertEquals(headers, httpTestContext.getRequestHeaders());
     }
@@ -106,7 +125,7 @@ class HttpTestContextTests
     @Test
     void tesAddRequestHeaders()
     {
-        List<Header> headers = List.of(mock(Header.class));
+        var headers = List.of(mock(Header.class));
         httpTestContext.addRequestHeaders(headers);
         assertEquals(headers, httpTestContext.getRequestHeaders());
     }
@@ -114,7 +133,7 @@ class HttpTestContextTests
     @Test
     void testPutJsonContext()
     {
-        HttpResponse response = new HttpResponse();
+        var response = new HttpResponse();
         httpTestContext.putResponse(response);
         httpTestContext.putJsonContext(JSON);
         assertEquals(JSON, httpTestContext.getJsonContext());
@@ -124,8 +143,8 @@ class HttpTestContextTests
     void testJsonContextResetAfterPuttingResponse()
     {
         httpTestContext.putJsonContext(JSON);
-        String responseBody = "{\"response\":\"data\"}";
-        HttpResponse response = new HttpResponse();
+        var responseBody = "{\"response\":\"data\"}";
+        var response = new HttpResponse();
         response.setResponseBody(responseBody.getBytes(StandardCharsets.UTF_8));
         httpTestContext.putResponse(response);
         assertEquals(responseBody, httpTestContext.getJsonContext());
@@ -134,8 +153,9 @@ class HttpTestContextTests
     @Test
     void testReleaseRequestData()
     {
-        List<Header> headers = List.of(mock(Header.class));
+        var headers = List.of(mock(Header.class));
         httpTestContext.putRequestHeaders(headers);
+        @SuppressWarnings("PMD.CloseResource")
         HttpEntity requestEntity = new StringEntity(SOME_REQUEST, (ContentType) null);
         httpTestContext.putRequestEntity(requestEntity);
         httpTestContext.releaseRequestData();

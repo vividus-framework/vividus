@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.ContentType;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpStatus;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestBuilder;
 import org.vividus.http.client.HttpResponse;
@@ -88,7 +88,7 @@ public class MobitruClient
     {
         try
         {
-            HttpUriRequest request = configurator.apply(HttpRequestBuilder.create()
+            ClassicHttpRequest request = configurator.apply(HttpRequestBuilder.create()
                             .withEndpoint(apiUrl)
                             .withHttpMethod(httpMethod)
                             .withRelativeUrl(apiBasePath + relativeUrl))

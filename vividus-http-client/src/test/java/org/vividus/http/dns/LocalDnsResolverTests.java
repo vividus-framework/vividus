@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,28 @@
 package org.vividus.http.dns;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Collections;
+import java.util.Map;
 
-import org.apache.http.conn.DnsResolver;
+import org.apache.hc.client5.http.DnsResolver;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class LocalDnsResolverTests
 {
-    private static final String HOST = "host";
+    private static final String HOST = "foo";
 
     @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
     private static final String IP_ADDRESS = "1.1.1.1";
@@ -47,28 +48,55 @@ class LocalDnsResolverTests
     @InjectMocks private LocalDnsResolver localDnsResolver;
 
     @Test
-    void testResolve() throws UnknownHostException
+    void shouldResolveFromCustomMapping() throws UnknownHostException
     {
-        localDnsResolver.setDnsMappingStorage(Collections.singletonMap(HOST, IP_ADDRESS));
-        try (MockedStatic<InetAddress> inetAddress = mockStatic(InetAddress.class))
+        localDnsResolver.setDnsMappingStorage(Map.of(HOST, IP_ADDRESS));
+        try (var inetAddressStaticMock = mockStatic(InetAddress.class))
         {
-            inetAddress.when(() -> InetAddress.getByName(IP_ADDRESS)).thenReturn(this.inetAddress);
+            inetAddressStaticMock.when(() -> InetAddress.getByName(IP_ADDRESS)).thenReturn(inetAddress);
             assertArrayEquals(new InetAddress[] { this.inetAddress }, localDnsResolver.resolve(HOST));
             verifyNoInteractions(fallbackDnsResolver);
         }
     }
 
-    @Test
-    void testResolveHostsAreEmpty() throws UnknownHostException
+    @ParameterizedTest
+    @ValueSource(strings = { HOST, "foo.mycompany.com" })
+    void shouldResolveCanonicalHostnameFromCustomMapping(String cname) throws UnknownHostException
     {
-        localDnsResolver.setDnsMappingStorage(Collections.emptyMap());
-        InetAddress[] inetAddresses = { inetAddress };
+        localDnsResolver.setDnsMappingStorage(Map.of(HOST, IP_ADDRESS));
+        try (var inetAddressStaticMock = mockStatic(InetAddress.class))
+        {
+            inetAddressStaticMock.when(() -> InetAddress.getByName(IP_ADDRESS)).thenReturn(inetAddress);
+            when(inetAddress.getCanonicalHostName()).thenReturn(cname);
+            when(inetAddress.getHostAddress()).thenReturn(HOST);
+            assertEquals(cname, localDnsResolver.resolveCanonicalHostname(HOST));
+            verifyNoInteractions(fallbackDnsResolver);
+        }
+    }
+
+    @Test
+    void shouldResolveWithFallback() throws UnknownHostException
+    {
+        localDnsResolver.setDnsMappingStorage(Map.of());
+        var inetAddresses = new InetAddress[] { inetAddress };
         when(fallbackDnsResolver.resolve(HOST)).thenReturn(inetAddresses);
-        try (MockedStatic<InetAddress> inetAddress = mockStatic(InetAddress.class))
+        try (var inetAddressStaticMock = mockStatic(InetAddress.class))
         {
             assertArrayEquals(inetAddresses, localDnsResolver.resolve(HOST));
-            inetAddress.verifyNoInteractions();
-            InetAddress.getByName(any());
+            inetAddressStaticMock.verifyNoInteractions();
+        }
+    }
+
+    @Test
+    void shouldResolveCanonicalHostnameWithFallback() throws UnknownHostException
+    {
+        localDnsResolver.setDnsMappingStorage(Map.of());
+        var cname = "cname";
+        when(fallbackDnsResolver.resolveCanonicalHostname(HOST)).thenReturn(cname);
+        try (var inetAddressStaticMock = mockStatic(InetAddress.class))
+        {
+            assertEquals(cname, localDnsResolver.resolveCanonicalHostname(HOST));
+            inetAddressStaticMock.verifyNoInteractions();
         }
     }
 }

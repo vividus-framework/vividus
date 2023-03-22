@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.vividus.http;
 import java.io.IOException;
 import java.util.Optional;
 
-import org.apache.http.ConnectionClosedException;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ConnectionClosedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.http.client.HttpResponse;
@@ -68,7 +68,7 @@ public class HttpRequestExecutor
                     .withRelativeUrl(relativeURL.orElse(null))
                     .withHeaders(httpTestContext.getRequestHeaders());
             httpTestContext.getRequestEntity().ifPresent(requestBuilder::withContent);
-            HttpRequestBase request = requestBuilder.build();
+            ClassicHttpRequest request = requestBuilder.build();
 
             HttpClientContext context = new HttpClientContext();
             httpTestContext.getCookieStore().ifPresent(context::setCookieStore);
@@ -76,7 +76,7 @@ public class HttpRequestExecutor
 
             HttpResponse response = httpClient.execute(request, context);
             httpTestContext.putResponse(response);
-            LOGGER.info("Response time: {} ms", response.getResponseTimeInMs());
+            LOGGER.atInfo().addArgument(response::getResponseTimeInMs).log("Response time: {} ms");
         }
         catch (HttpRequestBuildException | ConnectionClosedException e)
         {

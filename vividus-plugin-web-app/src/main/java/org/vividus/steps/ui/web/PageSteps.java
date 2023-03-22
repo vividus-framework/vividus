@@ -26,7 +26,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.text.StringEscapeUtils;
-import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.hamcrest.Matchers;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
@@ -289,8 +289,8 @@ public class PageSteps
             {
                 HttpClientContext context = HttpClientContext.create();
                 httpClient.doHttpHead(pageUrl, context);
-                List<URI> redirectLocations = context.getRedirectLocations();
-                if (null != redirectLocations)
+                List<URI> redirectLocations = context.getRedirectLocations().getAll();
+                if (!redirectLocations.isEmpty())
                 {
                     URI uri = redirectLocations.get(redirectLocations.size() - 1);
                     if (pageUrl.getHost().equals(uri.getHost()))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.apache.http.Header;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ContentType;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.jupiter.api.Test;
 import org.vividus.http.exception.HttpRequestBuildException;
 
 class HttpRequestBuilderTests
 {
-    private static final String ENDPOINT = "http://www.example.com/endpoint";
+    private static final String ENDPOINT = "https://www.example.com/endpoint";
     private static final String CONTENT = "content";
 
     private final HttpRequestBuilder builder = HttpRequestBuilder.create();
@@ -42,97 +44,95 @@ class HttpRequestBuilderTests
     @Test
     void shouldValidateEndpoint()
     {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> builder.withHttpMethod(HttpMethod.GET).build());
+        var builder = HttpRequestBuilder.create().withHttpMethod(HttpMethod.GET);
+        var exception = assertThrows(IllegalArgumentException.class, builder::build);
         assertEquals("Endpoint must be not null", exception.getMessage());
     }
 
     @Test
     void shouldValidateHttpMethod()
     {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> builder.withEndpoint(ENDPOINT).build());
+        var builder = HttpRequestBuilder.create().withEndpoint(ENDPOINT);
+        var exception = assertThrows(IllegalArgumentException.class, builder::build);
         assertEquals("HTTP method must be not null", exception.getMessage());
     }
 
     @Test
-    void buildGetWithoutContent() throws HttpRequestBuildException
+    void buildGetWithoutContent() throws HttpRequestBuildException, URISyntaxException
     {
-        HttpRequestBase request = builder.withHttpMethod(HttpMethod.GET).withEndpoint(ENDPOINT).build();
+        var request = builder.withHttpMethod(HttpMethod.GET).withEndpoint(ENDPOINT).build();
         assertRequest(request, HttpMethod.GET.name(), ENDPOINT);
     }
 
     @Test
-    void buildPostWithContent() throws IOException
+    void buildPostWithContent() throws IOException, ParseException, URISyntaxException
     {
-        HttpRequestBase request = builder.withHttpMethod(HttpMethod.POST).withEndpoint(ENDPOINT).withContent(CONTENT)
-                .build();
-        assertRequestWithContent(request, HttpMethod.POST.name(), ENDPOINT, CONTENT);
+        var request = builder.withHttpMethod(HttpMethod.POST).withEndpoint(ENDPOINT).withContent(CONTENT).build();
+        assertRequestWithContent(request, HttpMethod.POST.name());
     }
 
     @Test
-    void buildPostWithContentAndContentType() throws IOException
+    void buildPostWithContentAndContentType() throws IOException, ParseException, URISyntaxException
     {
-        ContentType contentType = ContentType.APPLICATION_FORM_URLENCODED;
-        HttpRequestBase request = builder.withHttpMethod(HttpMethod.POST).withEndpoint(ENDPOINT)
-                .withContent(CONTENT, contentType).build();
-        assertRequestWithContent(request, HttpMethod.POST.name(), ENDPOINT, CONTENT);
-        String expectedContentType = contentType.getMimeType() + "; charset=" + contentType.getCharset();
-        assertEquals(expectedContentType,
-                ((HttpEntityEnclosingRequestBase) request).getEntity().getContentType().getValue());
+        var contentType = ContentType.APPLICATION_FORM_URLENCODED;
+        var request = builder.withHttpMethod(HttpMethod.POST).withEndpoint(ENDPOINT).withContent(CONTENT, contentType)
+                .build();
+        assertRequestWithContent(request, HttpMethod.POST.name());
+        var expectedContentType = contentType.getMimeType() + "; charset=" + contentType.getCharset();
+        assertEquals(expectedContentType, request.getEntity().getContentType());
     }
 
     @Test
     void buildGetWithContent()
     {
-        assertThrows(HttpRequestBuildException.class,
-            () -> builder.withHttpMethod(HttpMethod.GET).withEndpoint(ENDPOINT).withContent(CONTENT).build());
+        var builder = HttpRequestBuilder.create().withHttpMethod(HttpMethod.GET).withEndpoint(ENDPOINT).withContent(
+                CONTENT);
+        assertThrows(HttpRequestBuildException.class, builder::build);
     }
 
     @Test
     void buildPatchWithoutContent()
     {
-        assertThrows(HttpRequestBuildException.class,
-            () -> builder.withHttpMethod(HttpMethod.PATCH).withEndpoint(ENDPOINT).build());
-    }
-
-    @Test
-    void buildGetToRelativeUrl() throws HttpRequestBuildException
-    {
-        String relativeUrl = "/relativeUrl";
-        HttpRequestBase request = builder.withHttpMethod(HttpMethod.GET).withEndpoint(ENDPOINT)
-                .withRelativeUrl(relativeUrl).build();
-        assertRequest(request, HttpMethod.GET.name(), "http://www.example.com/endpoint/relativeUrl");
+        var builder = HttpRequestBuilder.create().withHttpMethod(HttpMethod.PATCH).withEndpoint(ENDPOINT);
+        assertThrows(HttpRequestBuildException.class, builder::build);
     }
 
     @Test
     void buildGetWithMalformedUrl()
     {
-        assertThrows(HttpRequestBuildException.class,
-            () -> builder.withHttpMethod(HttpMethod.GET).withEndpoint("malformed.url").build());
+        var builder = HttpRequestBuilder.create().withHttpMethod(HttpMethod.GET).withEndpoint("malformed.url");
+        assertThrows(HttpRequestBuildException.class, builder::build);
     }
 
     @Test
-    void buildGetWithHeaders() throws HttpRequestBuildException
+    void buildGetToRelativeUrl() throws HttpRequestBuildException, URISyntaxException
     {
-        Header header = mock(Header.class);
-        HttpRequestBase request = builder.withHttpMethod(HttpMethod.GET).withEndpoint(ENDPOINT).withHeaders(
-                List.of(header)).build();
-        assertEquals(header, request.getAllHeaders()[0]);
+        var relativeUrl = "/relativeUrl";
+        var request = builder.withHttpMethod(HttpMethod.GET).withEndpoint(ENDPOINT).withRelativeUrl(relativeUrl)
+                .build();
+        assertRequest(request, HttpMethod.GET.name(), ENDPOINT + relativeUrl);
+    }
+
+    @Test
+    void buildGetWithHeaders() throws HttpRequestBuildException, URISyntaxException
+    {
+        var header = mock(Header.class);
+        var request = builder.withHttpMethod(HttpMethod.GET).withEndpoint(ENDPOINT).withHeaders(List.of(header))
+                .build();
+        assertEquals(header, request.getHeaders()[0]);
         assertRequest(request, HttpMethod.GET.name(), ENDPOINT);
     }
 
-    private void assertRequestWithContent(HttpRequestBase request, String method, String url, String content)
-            throws IOException
+    private void assertRequestWithContent(ClassicHttpRequest request, String method)
+            throws IOException, ParseException, URISyntaxException
     {
-        assertEquals(content, EntityUtils.toString(((HttpEntityEnclosingRequestBase) request).getEntity(),
-                StandardCharsets.UTF_8));
-        assertRequest(request, method, url);
+        assertEquals(CONTENT, EntityUtils.toString(request.getEntity(), StandardCharsets.UTF_8));
+        assertRequest(request, method, ENDPOINT);
     }
 
-    private void assertRequest(HttpRequestBase request, String method, String url)
+    private void assertRequest(ClassicHttpRequest request, String method, String url) throws URISyntaxException
     {
         assertEquals(method, request.getMethod());
-        assertEquals(url, request.getURI().toString());
+        assertEquals(URI.create(url), request.getUri());
     }
 }

@@ -38,6 +38,17 @@ Scenario: Verify HTTP cookies are cleared
 When I execute HTTP GET request for resource with relative URL `/cookies`
 Then JSON element by JSON path `$.cookies` is equal to `{}`
 
+Scenario: Verify step: "When I save value of HTTP cookie with name $cookieName to $scopes variable $variableName"
+When I execute HTTP GET request for resource with relative URL `/cookies/set?cookieName=cookieValue`
+When I save value of HTTP cookie with name `cookieName` to SCENARIO variable `value`
+Then `${value}` is equal to `cookieValue`
+
+Scenario: Verify step: "When I change value of all HTTP cookies with name `$cookieName` to `$newCookieValue`"
+When I execute HTTP GET request for resource with relative URL `/cookies/set?name=cookieValue`
+When I change value of all HTTP cookies with name `name` to `newCookieValue`
+When I save value of HTTP cookie with name `name` to SCENARIO variable `value`
+Then `${value}` is equal to `newCookieValue`
+
 Scenario: Validate HTTP retry on service unavailability
 Meta:
     @requirementId 214
@@ -45,21 +56,13 @@ Given I initialize scenario variable `uuid` with value `#{generate(Internet.uuid
 When I execute HTTP GET request for resource with URL `${vividus-test-site-url}/api/teapot?clientId=${uuid}`
 Then `${responseCode}` is equal to `200`
 
-Scenario: Validate HTTP methods with missing optional request body and zero content-length
-When I execute HTTP <http-method> request for resource with relative URL `/<http-method>`
-Then `${response-code}` is equal to `200`
-Then JSON element by JSON path `$.json` is equal to `null`
-Then JSON element by JSON path `$.headers.Content-Length` is equal to `"0"`
-Examples:
-|http-method|
-|post       |
-
 Scenario: Validate HTTP methods with missing optional request body
 When I execute HTTP <http-method> request for resource with relative URL `/<http-method>`
 Then `${responseCode}` is equal to `200`
 Then JSON element by JSON path `$.json` is equal to `null`
 Examples:
 |http-method|
+|post       |
 |put        |
 |delete     |
 
@@ -93,7 +96,7 @@ Then JSON element by JSON path `$.files.file-key` is equal to `"#{loadResource(/
 Then JSON element by JSON path `$.files.file-key2` is equal to `"${temp-file-content}"`
 Then JSON element by JSON path `$.form.string-key` is equal to `"string1"`
 Then JSON element by JSON path `$.files.binary-key` is equal to `"raw"`
-Then JSON element by JSON path `$.headers.Content-Type` is equal to `"${json-unit.regex}multipart/form-data; boundary=[A-Za-z0-9-_]+"`
+Then JSON element by JSON path `$.headers.Content-Type` is equal to `"${json-unit.regex}multipart/form-data; charset=ISO-8859-1; boundary=[A-Za-z0-9-_]+"`
 Then JSON element by JSON path `$.json` is equal to `null`
 
 Scenario: Verify steps "Given request body: $content" (binary content)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ package org.vividus.jira;
 
 import java.io.IOException;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestBuilder;
 import org.vividus.http.client.IHttpClient;
@@ -59,7 +59,7 @@ public class JiraClient
 
     private String execute(HttpMethod method, String relativeUrl, HttpEntity content) throws IOException
     {
-        HttpRequestBase httpRequest = HttpRequestBuilder.create()
+        ClassicHttpRequest httpRequest = HttpRequestBuilder.create()
                 .withHttpMethod(method)
                 .withEndpoint(endpoint)
                 .withRelativeUrl(relativeUrl)

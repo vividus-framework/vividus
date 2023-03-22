@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ package org.vividus.http;
 
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.core5.annotation.Contract;
 
 /**
  * HTTP DEBUG method
@@ -27,23 +28,21 @@ import org.apache.http.client.methods.HttpRequestBase;
  * request that contains the DEBUG verb. This HTTP request is used to verify that the process of the application is
  * running and to select the correct process to attach.
  */
-public class HttpDebug extends HttpRequestBase
+@Contract
+public class HttpDebug extends HttpUriRequestBase
 {
     public static final String METHOD = "DEBUG";
 
-    public HttpDebug()
-    {
-        // Nothing to do
-    }
+    private static final long serialVersionUID = 1L;
 
     public HttpDebug(final URI uri)
     {
-        setURI(uri);
+        super(METHOD, uri);
     }
 
     public HttpDebug(final String uri)
     {
-        setURI(URI.create(uri));
+        this(URI.create(uri));
     }
 
     @Override

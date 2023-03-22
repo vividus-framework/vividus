@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ package org.vividus.http.client;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
-import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
 import org.junit.jupiter.api.Test;
 
 class ThreadedBasicCookieStoreTests
@@ -51,10 +52,10 @@ class ThreadedBasicCookieStoreTests
     @Test
     void testClearExpired()
     {
-        BasicClientCookie expired = new BasicClientCookie(NAME, VALUE);
-        expired.setExpiryDate(new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1)));
-        BasicClientCookie notExpired = new BasicClientCookie(NAME, VALUE);
-        notExpired.setExpiryDate(new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2)));
+        var expired = new BasicClientCookie(NAME, VALUE);
+        expired.setExpiryDate(Instant.now().minus(1, ChronoUnit.DAYS));
+        var notExpired = new BasicClientCookie(NAME, VALUE);
+        notExpired.setExpiryDate(Instant.now().plus(2, ChronoUnit.DAYS));
         threadedBasicCookieStore.addCookie(expired);
         threadedBasicCookieStore.addCookie(notExpired);
         threadedBasicCookieStore.clearExpired(new Date());

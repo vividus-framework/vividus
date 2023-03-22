@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.util.UriUtils;
@@ -84,8 +84,8 @@ public class SiteMapParser implements ISiteMapParser
         return this.baseUrl.orElseGet(() -> {
             if (followRedirects)
             {
-                List<URI> redirectLocations = context.getRedirectLocations();
-                if (redirectLocations != null)
+                List<URI> redirectLocations = context.getRedirectLocations().getAll();
+                if (!redirectLocations.isEmpty())
                 {
                     return redirectLocations.get(redirectLocations.size() - 1);
                 }

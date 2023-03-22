@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
-import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -33,7 +33,7 @@ class CookieStoreProviderTests
 
     @ParameterizedTest
     @CsvSource({
-            "GLOBAL,   org.apache.http.impl.client.BasicCookieStore",
+            "GLOBAL,   org.apache.hc.client5.http.cookie.BasicCookieStore",
             "STORY,    org.vividus.http.client.ThreadedBasicCookieStore",
             "SCENARIO, org.vividus.http.client.ThreadedBasicCookieStore"
     })

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,19 @@ package org.vividus.http.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.vividus.http.handler.HttpResponseHandler;
 
 public class HttpClient implements IHttpClient, AutoCloseable
@@ -70,22 +71,25 @@ public class HttpClient implements IHttpClient, AutoCloseable
     }
 
     @Override
-    public HttpResponse execute(HttpUriRequest request) throws IOException
+    public HttpResponse execute(ClassicHttpRequest request) throws IOException
     {
         return execute(request, null);
     }
 
     @Override
-    public HttpResponse execute(HttpUriRequest request, HttpContext context) throws IOException
+    public HttpResponse execute(ClassicHttpRequest request, HttpContext context) throws IOException
     {
-        StopWatch watch = new StopWatch();
-        HttpResponse httpResponse = new HttpResponse();
-        httpResponse.setMethod(request.getMethod());
-        httpResponse.setFrom(request.getURI());
-        watch.start();
-        try (CloseableHttpResponse response = httpHost != null ? closeableHttpClient.execute(httpHost, request, context)
-                : closeableHttpClient.execute(request, context))
-        {
+        HttpClientResponseHandler<HttpResponse> responseHandler = response -> {
+            HttpResponse httpResponse = new HttpResponse();
+            httpResponse.setMethod(request.getMethod());
+            try
+            {
+                httpResponse.setFrom(request.getUri());
+            }
+            catch (URISyntaxException e)
+            {
+                throw new IOException(e);
+            }
             HttpEntity entity = response.getEntity();
             if (entity != null)
             {
@@ -98,9 +102,15 @@ public class HttpClient implements IHttpClient, AutoCloseable
                     EntityUtils.consume(entity);
                 }
             }
-            httpResponse.setResponseHeaders(response.getAllHeaders());
-            httpResponse.setStatusCode(response.getStatusLine().getStatusCode());
-        }
+            httpResponse.setResponseHeaders(response.getHeaders());
+            httpResponse.setStatusCode(response.getCode());
+            return httpResponse;
+        };
+
+        StopWatch watch = new StopWatch();
+        watch.start();
+        HttpResponse httpResponse = httpHost == null ? closeableHttpClient.execute(request, context, responseHandler)
+                : closeableHttpClient.execute(httpHost, request, context, responseHandler);
         watch.stop();
         httpResponse.setResponseTimeInMs(watch.getTime());
 

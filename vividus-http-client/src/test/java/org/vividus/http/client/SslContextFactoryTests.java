@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.security.KeyStore;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -32,6 +31,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class SslContextFactoryTests
 {
+    private static final String TLS = "TLS";
+
     private final SslContextFactory sslContextFactory = new SslContextFactory();
 
     @Test
@@ -43,9 +44,8 @@ class SslContextFactoryTests
     @Test
     void shouldReturnTrustingAllSslContext() throws GeneralSecurityException
     {
-        String protocol = SSLConnectionSocketFactory.SSL;
-        SSLContext actualContext = sslContextFactory.getTrustingAllSslContext(protocol);
-        assertEquals(protocol, actualContext.getProtocol());
+        SSLContext actualContext = sslContextFactory.getTrustingAllSslContext();
+        assertEquals(TLS, actualContext.getProtocol());
     }
 
     @ParameterizedTest
@@ -54,10 +54,9 @@ class SslContextFactoryTests
     void shouldReturnSslContextWithoutUsingKeyPassword(String privateKeyPassword)
             throws GeneralSecurityException, IOException
     {
-        String protocol = SSLConnectionSocketFactory.SSL;
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
         keyStore.load(null);
-        SSLContext actualContext = sslContextFactory.getSslContext(protocol, keyStore, privateKeyPassword);
-        assertEquals(protocol, actualContext.getProtocol());
+        SSLContext actualContext = sslContextFactory.getSslContext(keyStore, privateKeyPassword);
+        assertEquals(TLS, actualContext.getProtocol());
     }
 }

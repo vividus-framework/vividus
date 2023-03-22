@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -38,15 +38,15 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.apache.http.ConnectionClosedException;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ConnectionClosedException;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -62,26 +62,19 @@ class HttpRequestExecutorTests
     private static final String URL = "http://www.example.com/";
     private static final long RESPONSE_TIME_IN_MS = 100;
 
-    @Mock
-    private IHttpClient httpClient;
-
-    @Mock
-    private HttpTestContext httpTestContext;
-
-    @Mock
-    private ISoftAssert softAssert;
+    @Mock private IHttpClient httpClient;
+    @Mock private HttpTestContext httpTestContext;
+    @Mock private ISoftAssert softAssert;
+    @InjectMocks private HttpRequestExecutor httpRequestExecutor;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(HttpRequestExecutor.class);
-
-    @InjectMocks
-    private HttpRequestExecutor httpRequestExecutor;
 
     @Test
     void testExecuteHttpRequestFirstTime() throws IOException
     {
         when(httpTestContext.getCookieStore()).thenReturn(Optional.empty());
         when(httpTestContext.getRequestConfig()).thenReturn(Optional.empty());
-        HttpResponse httpResponse = mockHttpResponse(URL);
+        HttpResponse httpResponse = mockHttpResponse();
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty());
         InOrder orderedHttpTestContext = inOrder(httpTestContext);
         verifyHttpTestContext(orderedHttpTestContext, httpResponse);
@@ -93,25 +86,26 @@ class HttpRequestExecutorTests
     @Test
     void testExecuteHttpRequestWithContent() throws IOException
     {
+        @SuppressWarnings("PMD.CloseResource")
         HttpEntity requestEntity = new StringEntity("content", StandardCharsets.UTF_8);
         when(httpTestContext.getRequestEntity()).thenReturn(Optional.of(requestEntity));
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty());
         verify(softAssert).recordFailedAssertion(
                 (Exception) argThat(arg -> arg instanceof HttpRequestBuildException
-                        && "java.lang.IllegalStateException: HTTP GET request can't include body"
-                        .equals(((Exception) arg).getMessage())));
+                        && "HTTP GET request can't include body".equals(((Exception) arg).getMessage()))
+        );
         verify(httpTestContext).releaseRequestData();
     }
 
     @Test
     void testExecuteShouldUseCookieStoreFromContext() throws IOException
     {
-        CookieStore cookieStore = mock(CookieStore.class);
+        CookieStore cookieStore = mock();
         when(httpTestContext.getCookieStore()).thenReturn(Optional.of(cookieStore));
-        HttpResponse httpResponse = mockHttpResponse(URL);
+        HttpResponse httpResponse = mockHttpResponse();
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty());
 
-        verify(httpClient).execute(argThat(HttpUriRequest.class::isInstance),
+        verify(httpClient).execute(argThat(ClassicHttpRequest.class::isInstance),
                 argThat(e -> e != null && e.getAttribute("http.cookie-store") != null));
         InOrder orderedHttpTestContext = inOrder(httpTestContext);
         verifyHttpTestContext(orderedHttpTestContext, httpResponse);
@@ -126,9 +120,8 @@ class HttpRequestExecutorTests
         String url = "malformed.url";
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, url, Optional.empty());
         verify(softAssert).recordFailedAssertion(
-                (Exception) argThat(arg -> arg instanceof HttpRequestBuildException
-                        && ("java.lang.IllegalArgumentException: Scheme is missing in URL: " + url)
-                        .equals(((Exception) arg).getMessage())));
+                argThat((ArgumentMatcher<Exception>) arg -> arg instanceof HttpRequestBuildException && arg.getMessage()
+                        .equals("java.lang.IllegalArgumentException: Scheme is missing in URL: " + url)));
         verify(httpTestContext).releaseRequestData();
     }
 
@@ -138,16 +131,16 @@ class HttpRequestExecutorTests
         httpRequestExecutor.executeHttpRequest(HttpMethod.PATCH, URL, Optional.empty());
         verify(softAssert).recordFailedAssertion(
                 (Exception) argThat(arg -> arg instanceof HttpRequestBuildException
-                        && "java.lang.IllegalStateException: HTTP PATCH request must include body"
-                        .equals(((Exception) arg).getMessage())));
+                        && "HTTP PATCH request must include body".equals(((Exception) arg).getMessage()))
+        );
         verify(httpTestContext).releaseRequestData();
     }
 
     @Test
     void testExecuteHttpRequestConnectionClosedException() throws IOException
     {
-        when(httpClient.execute(argThat(e -> e instanceof HttpRequestBase && URL.equals(e.getURI().toString())),
-                nullable(HttpContext.class))).thenThrow(new ConnectionClosedException());
+        when(httpClient.execute(requestWithMatchingUrl(URL), nullable(HttpContext.class))).thenThrow(
+                new ConnectionClosedException());
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty());
         verify(softAssert).recordFailedAssertion(
                 (Exception) argThat(arg -> arg instanceof ConnectionClosedException
@@ -158,20 +151,32 @@ class HttpRequestExecutorTests
     @Test
     void testExecuteHttpRequestIOException() throws IOException
     {
-        when(httpClient.execute(argThat(e -> e instanceof HttpRequestBase && URL.equals(e.getURI().toString())),
-                nullable(HttpContext.class))).thenThrow(new IOException());
+        when(httpClient.execute(requestWithMatchingUrl(URL), nullable(HttpContext.class))).thenThrow(new IOException());
         assertThrows(IOException.class,
             () -> httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty()));
         verify(httpTestContext).releaseRequestData();
     }
 
-    private HttpResponse mockHttpResponse(String url) throws IOException
+    private HttpResponse mockHttpResponse() throws IOException
     {
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.setResponseTimeInMs(RESPONSE_TIME_IN_MS);
-        when(httpClient.execute(argThat(e -> e instanceof HttpRequestBase && URI.create(url).equals(e.getURI())),
-                nullable(HttpContext.class))).thenReturn(httpResponse);
+        when(httpClient.execute(requestWithMatchingUrl(URL), nullable(HttpContext.class))).thenReturn(httpResponse);
         return httpResponse;
+    }
+
+    private static ClassicHttpRequest requestWithMatchingUrl(String url)
+    {
+        return argThat(request -> {
+            try
+            {
+                return request != null && url.equals(request.getUri().toString());
+            }
+            catch (URISyntaxException e)
+            {
+                throw new IllegalArgumentException(e);
+            }
+        });
     }
 
     private void verifyHttpTestContext(InOrder orderedHttpTestContext, HttpResponse httpResponse)

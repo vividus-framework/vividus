@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.vividus.steps.api;
 
-import static java.lang.String.format;
 import static org.hamcrest.Matchers.contains;
 
 import java.nio.charset.StandardCharsets;
@@ -28,8 +27,10 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HeaderElement;
+import org.apache.hc.core5.http.message.MessageSupport;
 import org.apache.tika.Tika;
 import org.hamcrest.Matchers;
 import org.jbehave.core.annotations.Alias;
@@ -156,7 +157,7 @@ public class HttpResponseValidationSteps
         {
             byte[] responseBody = response.getResponseBody();
             String actualContentType = TIKA.detect(responseBody);
-            if ("text/plain".equals(actualContentType) && jsonUtils.isJson(
+            if (ContentType.TEXT_PLAIN.getMimeType().equals(actualContentType) && jsonUtils.isJson(
                     new String(responseBody, StandardCharsets.UTF_8)))
             {
                 actualContentType = "application/json";
@@ -191,7 +192,7 @@ public class HttpResponseValidationSteps
      * @param validationRule The validation rule, either <b>is equal to</b> or <b>is not equal to</b>
      * @param resourcePath   The resource path
      */
-    @Then(value = "response body $validationRule resource at `$resourcePath`")
+    @Then("response body $validationRule resource at `$resourcePath`")
     public void compareResponseBodyAgainstResource(ByteArrayValidationRule validationRule, String resourcePath)
     {
         performIfHttpResponseIsPresent(response -> validationRule.assertMatchesRule(softAssert,
@@ -355,12 +356,12 @@ public class HttpResponseValidationSteps
         {
             getHeaderByName(response, httpHeaderName).ifPresent(header ->
             {
-                List<String> actualAttributes = Stream.of(header.getElements()).map(HeaderElement::getName)
-                        .collect(Collectors.toList());
+                List<String> actualAttributes = extractHeaderElementsNames(header);
                 for (Parameters row : attributes.getRowsAsParameters(true))
                 {
                     String expectedAttribute = row.valueAs("attribute", String.class);
-                    softAssert.assertThat(format("%s header contains %s attribute", httpHeaderName, expectedAttribute),
+                    softAssert.assertThat(
+                            String.format("%s header contains %s attribute", httpHeaderName, expectedAttribute),
                             actualAttributes, contains(expectedAttribute));
                 }
             });
@@ -400,12 +401,11 @@ public class HttpResponseValidationSteps
     {
         performIfHttpResponseIsPresent(response -> getHeaderByName(response, headerName).ifPresent(header ->
         {
-            List<String> headerElements = Stream.of(header.getElements()).map(HeaderElement::getName)
-                    .collect(Collectors.toList());
+            List<String> headerElements = extractHeaderElementsNames(header);
             elements.getRowsAsParameters(true).stream()
                     .map(params -> params.valueAs("element", String.class))
                     .forEach(element -> softAssert.assertThat(
-                            format("%s header contains %s element", headerName, element), headerElements,
+                            String.format("%s header contains %s element", headerName, element), headerElements,
                             contains(element)));
         }));
     }
@@ -629,6 +629,11 @@ public class HttpResponseValidationSteps
         );
         performIfHttpResponseIsPresent(
                 response -> softAssert.assertEquals(HTTP_RESPONSE_STATUS_CODE, response.getStatusCode(), responseCode));
+    }
+
+    private static List<String> extractHeaderElementsNames(Header header)
+    {
+        return Stream.of(MessageSupport.parse(header)).map(HeaderElement::getName).collect(Collectors.toList());
     }
 
     private boolean isResponseCodeIsEqualToExpected(HttpResponse response, int expectedResponseCode)

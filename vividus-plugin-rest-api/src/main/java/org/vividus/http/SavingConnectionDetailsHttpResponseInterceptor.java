@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,34 +18,28 @@ package org.vividus.http;
 
 import javax.net.ssl.SSLSession;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.conn.ManagedHttpClientConnection;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpCoreContext;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.HttpResponseInterceptor;
+import org.apache.hc.core5.http.protocol.HttpContext;
 
 public class SavingConnectionDetailsHttpResponseInterceptor implements HttpResponseInterceptor
 {
     private HttpTestContext httpTestContext;
 
     @Override
-    public void process(HttpResponse response, HttpContext context)
+    public void process(HttpResponse response, EntityDetails entity, HttpContext context)
     {
-        ManagedHttpClientConnection routedConnection = (ManagedHttpClientConnection) context
-                .getAttribute(HttpCoreContext.HTTP_CONNECTION);
-        // Connection may be stale, when no response body is returned
-        if (routedConnection.isOpen() && (response.getEntity() != null || !routedConnection.isStale()))
+        SSLSession sslSession = HttpClientContext.adapt(context).getSSLSession();
+        boolean secure = sslSession != null;
+        ConnectionDetails connectionDetails = new ConnectionDetails();
+        connectionDetails.setSecure(secure);
+        if (secure)
         {
-            SSLSession sslSession = routedConnection.getSSLSession();
-            boolean secure = sslSession != null;
-            ConnectionDetails connectionDetails = new ConnectionDetails();
-            connectionDetails.setSecure(secure);
-            if (secure)
-            {
-                connectionDetails.setSecurityProtocol(sslSession.getProtocol());
-            }
-            httpTestContext.putConnectionDetails(connectionDetails);
+            connectionDetails.setSecurityProtocol(sslSession.getProtocol());
         }
+        httpTestContext.putConnectionDetails(connectionDetails);
     }
 
     public void setHttpTestContext(HttpTestContext httpTestContext)

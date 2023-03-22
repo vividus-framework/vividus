@@ -18,6 +18,7 @@ package org.vividus.http.client;
 
 import static org.apache.commons.lang3.Validate.isTrue;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
@@ -26,26 +27,32 @@ import java.util.Optional;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.ContextAwareAuthScheme;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.config.RequestConfig.Builder;
-import org.apache.http.config.SocketConfig;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
+import org.apache.hc.client5.http.auth.CredentialsStore;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.auth.BasicScheme;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.http.message.BasicHeader;
+import org.apache.hc.core5.util.Timeout;
 import org.vividus.http.keystore.IKeyStoreFactory;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class HttpClientFactory implements IHttpClientFactory
 {
+    private static final AuthScope ANY_AUTH_SCOPE = new AuthScope(null, -1);
+
     private final SslContextFactory sslContextFactory;
     private final IKeyStoreFactory keyStoreFactory;
     private String privateKeyPassword;
@@ -68,62 +75,70 @@ public class HttpClientFactory implements IHttpClientFactory
 
         configureAuth(config, builder);
 
-        SslConfig sslConfig = config.getSslConfig();
-        createSslContext(sslConfig.isSslCertificateCheckEnabled()).ifPresent(builder::setSSLContext);
+        builder.setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+                .setMaxConnTotal(config.getMaxTotalConnections())
+                .setMaxConnPerRoute(config.getMaxConnectionsPerRoute())
+                .setDnsResolver(config.getDnsResolver())
+                .setDefaultSocketConfig(SocketConfig.custom()
+                        .setSoTimeout(Timeout.ofMilliseconds(config.getSocketTimeout()))
+                        .build())
+                .setDefaultConnectionConfig(ConnectionConfig.custom()
+                        .setConnectTimeout(Timeout.ofMilliseconds(config.getConnectTimeout()))
+                        .setSocketTimeout(Timeout.ofMilliseconds(config.getSocketTimeout()))
+                        .build())
+                .setSSLSocketFactory(buildSslSocketFactory(config.getSslConfig()))
+                .build());
 
-        if (!sslConfig.isSslHostnameVerificationEnabled())
-        {
-            builder.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
-        }
-        builder.setMaxConnTotal(config.getMaxTotalConnections());
-        builder.setMaxConnPerRoute(config.getMaxConnectionsPerRoute());
-
-        builder.addInterceptorFirst(config.getFirstRequestInterceptor());
-        builder.addInterceptorLast(config.getLastRequestInterceptor());
-        builder.addInterceptorLast(config.getLastResponseInterceptor());
+        Optional.ofNullable(config.getFirstRequestInterceptor()).ifPresent(builder::addRequestInterceptorFirst);
+        Optional.ofNullable(config.getLastRequestInterceptor()).ifPresent(builder::addRequestInterceptorLast);
+        Optional.ofNullable(config.getLastResponseInterceptor()).ifPresent(builder::addResponseInterceptorLast);
 
         builder.setRedirectStrategy(config.getRedirectStrategy());
-        builder.setRetryHandler(config.getHttpRequestRetryHandler());
-        builder.setServiceUnavailableRetryStrategy(config.getServiceUnavailableRetryStrategy());
-        Builder requestConfigBuilder = RequestConfig.custom();
-        requestConfigBuilder.setConnectionRequestTimeout(config.getConnectionRequestTimeout());
-        requestConfigBuilder.setConnectTimeout(config.getConnectTimeout());
-        requestConfigBuilder.setCircularRedirectsAllowed(config.isCircularRedirectsAllowed());
-        requestConfigBuilder.setSocketTimeout(config.getSocketTimeout());
-        Optional.ofNullable(config.getCookieSpec()).ifPresent(requestConfigBuilder::setCookieSpec);
-        builder.setDefaultRequestConfig(requestConfigBuilder.build());
-        builder.setDefaultSocketConfig(SocketConfig.copy(SocketConfig.DEFAULT)
-                .setSoTimeout(config.getSocketTimeout())
+        builder.setRetryStrategy(config.getHttpRequestRetryStrategy());
+        builder.setDefaultRequestConfig(RequestConfig.custom()
+                .setConnectionRequestTimeout(Timeout.ofMilliseconds(config.getConnectionRequestTimeout()))
+                .setCircularRedirectsAllowed(config.isCircularRedirectsAllowed())
+                .setCookieSpec(config.getCookieSpec())
                 .build());
-        builder.setDnsResolver(config.getDnsResolver());
         builder.useSystemProperties();
 
         HttpClient httpClient = new HttpClient();
         httpClient.setCloseableHttpClient(builder.build());
         if (config.hasBaseUrl())
         {
-            httpClient.setHttpHost(HttpHost.create(config.getBaseUrl()));
+            httpClient.setHttpHost(HttpHost.create(URI.create(config.getBaseUrl())));
         }
         httpClient.setSkipResponseEntity(config.isSkipResponseEntity());
         httpClient.setHttpResponseHandlers(Optional.ofNullable(config.getHttpResponseHandlers()).orElseGet(List::of));
         return httpClient;
     }
 
+    private SSLConnectionSocketFactory buildSslSocketFactory(SslConfig sslConfig) throws GeneralSecurityException
+    {
+        SSLConnectionSocketFactoryBuilder builder = SSLConnectionSocketFactoryBuilder.create();
+        createSslContext(sslConfig.isSslCertificateCheckEnabled()).ifPresent(builder::setSslContext);
+        if (!sslConfig.isSslHostnameVerificationEnabled())
+        {
+            builder.setHostnameVerifier(NoopHostnameVerifier.INSTANCE);
+        }
+        return builder.build();
+    }
+
     private Optional<SSLContext> createSslContext(boolean sslCertificateCheckEnabled) throws GeneralSecurityException
     {
-        String protocol = SSLConnectionSocketFactory.SSL;
         if (!sslCertificateCheckEnabled)
         {
-            return Optional.of(sslContextFactory.getTrustingAllSslContext(protocol));
+            return Optional.of(sslContextFactory.getTrustingAllSslContext());
         }
         Optional<KeyStore> keyStore = keyStoreFactory.getKeyStore();
         if (keyStore.isPresent())
         {
-            return Optional.of(sslContextFactory.getSslContext(protocol, keyStore.get(), privateKeyPassword));
+            return Optional.of(sslContextFactory.getSslContext(keyStore.get(), privateKeyPassword));
         }
         return Optional.empty();
     }
 
+    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH")
     private void configureAuth(HttpClientConfig config, HttpClientBuilder builder)
     {
         AuthConfig authConfig = config.getAuthConfig();
@@ -139,21 +154,22 @@ public class HttpClientFactory implements IHttpClientFactory
 
         isTrue(username != null && password != null, "The %s is missing", username == null ? "username" : "password");
 
-        Credentials credentials = new UsernamePasswordCredentials(username, password);
+        Credentials credentials = new UsernamePasswordCredentials(username, password.toCharArray());
         if (authConfig.isPreemptiveAuthEnabled())
         {
-            builder.addInterceptorFirst((HttpRequestInterceptor) (req, ctx) ->
+            builder.addRequestInterceptorFirst((req, entity, ctx) ->
             {
-                ContextAwareAuthScheme scheme = new BasicScheme(StandardCharsets.UTF_8);
-                Header authHeader = scheme.authenticate(credentials, req, ctx);
-                req.addHeader(authHeader);
+                BasicScheme scheme = new BasicScheme(StandardCharsets.UTF_8);
+                scheme.initPreemptive(credentials);
+                String authResponse = scheme.generateAuthResponse(null, req, ctx);
+                req.addHeader(new BasicHeader(HttpHeaders.AUTHORIZATION, authResponse));
             });
         }
         else
         {
-            CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(AuthScope.ANY, credentials);
-            builder.setDefaultCredentialsProvider(credentialsProvider);
+            CredentialsStore credentialsStore = new BasicCredentialsProvider();
+            credentialsStore.setCredentials(ANY_AUTH_SCOPE, credentials);
+            builder.setDefaultCredentialsProvider(credentialsStore);
         }
     }
 

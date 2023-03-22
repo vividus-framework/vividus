@@ -282,48 +282,39 @@ When I set HTTP request configuration:$configItems
 * `$configItems` - Table representing list of configuration items with columns "name" and "value" specifying their names and values respectively.
 +
 .Available configs
+[cols="2,2,1,3", options="header"]
 |===
-|Config |Acceptable values |Request config default value |Description
+|Configuration item |Acceptable values |Default value |Description
 
 |`expectContinueEnabled`
-|Boolean
+a|`true` +
+`false`
 |`false`
 |Whether the 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/100[Expect: 100-Continue]' handshake is enabled
 
-|`staleConnectionCheckEnabled`
-|Boolean
-|`false`
-|Whether stale connection check is to be used
-
 |`redirectsEnabled`
-|Boolean
+a|`true` +
+`false`
 |`true`
 |Whether redirects should be handled automatically
 
-|`relativeRedirectsAllowed`
-|Boolean
-|`true`
-|Whether relative redirects should be rejected
-
 |`circularRedirectsAllowed`
-|Boolean
+a|`true` +
+`false`
 |`false`
 |Whether "circular redirects" (redirects to the same location) should be allowed
 
 |`authenticationEnabled`
-|Boolean
+a|`true` +
+`false`
 |`true`
 |Whether authentication should be handled automatically
 
 |`contentCompressionEnabled`
-|Boolean
+a|`true` +
+`false`
 |`true`
 |Whether the target server is requested to compress content
-
-|`normalizeUri`
-|Boolean
-|`true`
-|Whether client should normalize URIs in requests or not
 
 |`maxRedirects`
 |Integer
@@ -331,28 +322,29 @@ When I set HTTP request configuration:$configItems
 |The maximum number of redirects to be followed
 
 |`connectionRequestTimeout`
-|Integer
-|`-1`
-|The timeout in milliseconds used when requesting a connection from the connection manager
+|Integer (milliseconds)
+|`180000`
+|The timeout used when requesting a connection from the connection manager
 
-|`socketTimeout`
-|Integer
-|`-1`
-|The socket timeout in milliseconds
+|`connectTimeout`
+|Integer (milliseconds)
+|`180000`
+|The timeout until a new connection is fully established
 
-|`socketTimeout`
-|Integer
-|`-1`
-|The socket timeout in milliseconds, which is the timeout for waiting for data or, put differently, a maximum period inactivity between two consecutive data packets
+|`responseTimeout`
+|Integer (milliseconds)
+|`0`
+|The timeout until arrival of a response from the opposite endpoint. A timeout value of zero is interpreted as an infinite timeout.
 
 |`cookieSpec`
-|String
-|`null`
+a|
+* `relaxed` - The https://datatracker.ietf.org/doc/rfc6265/[RFC 6265] compliant policy (interoperability profile).
+* `strict` - The https://datatracker.ietf.org/doc/rfc6265/[RFC 6265] compliant policy (strict profile).
+* `ignore` - The policy that ignores cookies.
+|`<not set>`
 |The name of the cookie specification to be used for HTTP state management
 
 |===
-
-pass:[*] `-1` means "infinity"
 
 .Load a page with slow connection and with the property `http.socket-timeout` set to `15000`
 [source,gherkin]

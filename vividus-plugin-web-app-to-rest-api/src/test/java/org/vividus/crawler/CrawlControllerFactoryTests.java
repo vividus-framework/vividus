@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,27 +21,22 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mockConstruction;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.hc.core5.net.URIBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.MockedConstruction;
-import org.mockito.Mockito;
 import org.vividus.util.property.IPropertyMapper;
 import org.vividus.util.property.PropertyMapper;
 
-import edu.uci.ics.crawler4j.crawler.CrawlConfig;
-import edu.uci.ics.crawler4j.crawler.CrawlController;
-import edu.uci.ics.crawler4j.crawler.authentication.AuthInfo;
 import edu.uci.ics.crawler4j.frontier.SleepycatFrontierConfiguration;
 
 class CrawlControllerFactoryTests
@@ -55,55 +50,54 @@ class CrawlControllerFactoryTests
     @Test
     void shouldCreateCrawlController(@TempDir Path baseDirectory) throws URISyntaxException
     {
-        try (MockedConstruction<SleepycatFrontierConfiguration> frontier = Mockito
-                .mockConstruction(SleepycatFrontierConfiguration.class))
+        try (var frontier = mockConstruction(SleepycatFrontierConfiguration.class))
         {
-            Path crawlStorage = baseDirectory.resolve(CRAWL_STORAGE_FOLDER_KEY);
+            var crawlStorage = baseDirectory.resolve(CRAWL_STORAGE_FOLDER_KEY);
             Integer socketTimeout = 10_000;
 
-            Map<String, String> config = Map.of(
+            var config = Map.of(
                 "socket-timeout", socketTimeout.toString(),
                 CRAWL_STORAGE_FOLDER_KEY, crawlStorage.toString()
             );
 
-            CrawlControllerFactory factory = new CrawlControllerFactory(config, propertyMapper);
+            var factory = new CrawlControllerFactory(config, propertyMapper);
 
-            String username = "username";
-            String password = "password";
+            var username = "username";
+            var password = "password";
 
-            URI pageUri = new URIBuilder(URL).setUserInfo(username, password).build();
+            var pageUri = new URIBuilder(URL).setUserInfo(username + ":" + password).build();
 
-            CrawlController controller = factory.createCrawlController(pageUri);
-            CrawlConfig crawlConfig = controller.getConfig();
+            var controller = factory.createCrawlController(pageUri);
+            var crawlConfig = controller.getConfig();
 
             assertThat(frontier.constructed(), hasSize(1));
             assertEquals(crawlStorage.toString(), crawlConfig.getCrawlStorageFolder());
             assertTrue(crawlStorage.toFile().exists());
             assertEquals(socketTimeout, crawlConfig.getSocketTimeout());
-            List<AuthInfo> authInfos = crawlConfig.getAuthInfos();
+            var authInfos = crawlConfig.getAuthInfos();
             assertThat(authInfos, hasSize(1));
-            AuthInfo authInfo = authInfos.get(0);
+            var authInfo = authInfos.get(0);
             assertEquals(username, authInfo.getUsername());
             assertEquals(password, authInfo.getPassword());
         }
     }
 
+    @SuppressWarnings("try")
     @Test
     void shouldCreateCrawlControllerWithoutUserInfo(@TempDir Path baseDirectory) throws URISyntaxException
     {
-        try (MockedConstruction<SleepycatFrontierConfiguration> frontier = Mockito
-                .mockConstruction(SleepycatFrontierConfiguration.class))
+        try (var ignored = mockConstruction(SleepycatFrontierConfiguration.class))
         {
-            Path crawlStorage = baseDirectory.resolve(CRAWL_STORAGE_FOLDER_KEY);
+            var crawlStorage = baseDirectory.resolve(CRAWL_STORAGE_FOLDER_KEY);
 
-            Map<String, String> config = Map.of(CRAWL_STORAGE_FOLDER_KEY, crawlStorage.toString());
+            var config = Map.of(CRAWL_STORAGE_FOLDER_KEY, crawlStorage.toString());
 
-            CrawlControllerFactory factory = new CrawlControllerFactory(config, propertyMapper);
+            var factory = new CrawlControllerFactory(config, propertyMapper);
 
-            URI pageUri = new URI(URL);
+            var pageUri = new URI(URL);
 
-            CrawlController controller = factory.createCrawlController(pageUri);
-            CrawlConfig crawlConfig = controller.getConfig();
+            var controller = factory.createCrawlController(pageUri);
+            var crawlConfig = controller.getConfig();
 
             assertEquals(crawlStorage.toString(), crawlConfig.getCrawlStorageFolder());
             assertTrue(crawlStorage.toFile().exists());

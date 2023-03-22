@@ -483,7 +483,7 @@ Here one could find description of general HTTP properties applied across all th
 
 :keystore-ref: {java-api-docs-base-url}/security/terms-and-definitions.html#GUID-C7BB21C7-E19E-4DE4-8494-CB43F957C329__GUID-D7CAC72A-2714-4C9B-88E2-7F317DE94CEE[keystore]
 
-[cols="3,1,1,3", options="header"]
+[cols="3,2,1,3", options="header"]
 |===
 |Property Name
 |Acceptable values
@@ -523,9 +523,12 @@ Here one could find description of general HTTP properties applied across all th
 |The timeout in milliseconds used for waiting for data or, put differently, a maximum period inactivity between two consecutive data packets. A timeout value of zero is interpreted as an infinite timeout. A negative value is interpreted as undefined (system default if applicable)
 
 |`http.cookie-spec`
-|`default`, `ignoreCookies`, `standard-strict`, `standard`, `netscape`
-|`default`
-|The name of the https://hc.apache.org/httpcomponents-client-4.5.x/current/tutorial/html/statemgmt.html#d5e515[cookie specification] to be used for HTTP state management
+a|
+* `relaxed` - The https://datatracker.ietf.org/doc/rfc6265/[RFC 6265] compliant policy (interoperability profile).
+* `strict` - The https://datatracker.ietf.org/doc/rfc6265/[RFC 6265] compliant policy (strict profile).
+* `ignore` - The policy that ignores cookies.
+|`relaxed`
+|The name of the cookie specification to be used for HTTP state management
 
 4+^.^|[#_authentication]_Authentication_
 

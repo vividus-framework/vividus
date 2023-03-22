@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,29 +22,30 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpTrace;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.classic.methods.HttpOptions;
+import org.apache.hc.client5.http.classic.methods.HttpPatch;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpTrace;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.vividus.http.exception.HttpRequestBuildException;
 
 class HttpMethodTests
 {
-    private static final URI URI_EXAMPLE = URI.create("https://any.example");
+    private static final URI URI_EXAMPLE = URI.create("https://any.example/");
 
     static Stream<Arguments> successfulEmptyRequestCreation()
     {
@@ -55,7 +56,7 @@ class HttpMethodTests
                 Arguments.of(HttpMethod.OPTIONS, HttpOptions.class),
                 Arguments.of(HttpMethod.TRACE, HttpTrace.class),
                 Arguments.of(HttpMethod.POST, HttpPost.class),
-                Arguments.of(HttpMethod.PUT, HttpPutWithoutBody.class),
+                Arguments.of(HttpMethod.PUT, HttpPut.class),
                 Arguments.of(HttpMethod.DEBUG, HttpDebug.class)
         );
     }
@@ -63,7 +64,7 @@ class HttpMethodTests
     static Stream<Arguments> successfulEmptyEnclosingEntityRequestCreation()
     {
         return Stream.of(
-                Arguments.of(HttpMethod.DELETE, HttpDeleteWithBody.class),
+                Arguments.of(HttpMethod.DELETE, HttpDelete.class),
                 Arguments.of(HttpMethod.PATCH, HttpPatch.class),
                 Arguments.of(HttpMethod.POST, HttpPost.class),
                 Arguments.of(HttpMethod.PUT, HttpPut.class)
@@ -72,17 +73,18 @@ class HttpMethodTests
 
     @ParameterizedTest
     @MethodSource("successfulEmptyRequestCreation")
-    void testSuccessfulEmptyRequestCreation(HttpMethod httpMethod, Class<? extends HttpRequestBase> requestClass)
+    void testSuccessfulEmptyRequestCreation(HttpMethod httpMethod, Class<? extends ClassicHttpRequest> requestClass)
+            throws HttpRequestBuildException, URISyntaxException
     {
-        HttpRequestBase request = httpMethod.createRequest(URI_EXAMPLE);
+        var request = httpMethod.createRequest(URI_EXAMPLE);
         assertThat(request, instanceOf(requestClass));
-        assertEquals(URI_EXAMPLE, request.getURI());
+        assertEquals(URI_EXAMPLE, request.getUri());
     }
 
     @Test
     void testFailedEmptyRequestCreationForHttpPatch()
     {
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
+        var exception = assertThrows(HttpRequestBuildException.class,
             () -> HttpMethod.PATCH.createRequest(URI_EXAMPLE));
         assertEquals("HTTP PATCH request must include body", exception.getMessage());
     }
@@ -90,12 +92,13 @@ class HttpMethodTests
     @ParameterizedTest
     @MethodSource("successfulEmptyEnclosingEntityRequestCreation")
     void testSuccessfulEmptyEnclosingEntityRequestCreation(HttpMethod httpMethod,
-            Class<? extends HttpRequestBase> requestClass)
+            Class<? extends ClassicHttpRequest> requestClass) throws HttpRequestBuildException, URISyntaxException
     {
-        StringEntity entity = new StringEntity("body", StandardCharsets.UTF_8);
-        HttpEntityEnclosingRequestBase request = httpMethod.createEntityEnclosingRequest(URI_EXAMPLE, entity);
+        @SuppressWarnings("PMD.CloseResource")
+        var entity = new StringEntity("body", StandardCharsets.UTF_8);
+        var request = httpMethod.createEntityEnclosingRequest(URI_EXAMPLE, entity);
         assertThat(request, instanceOf(requestClass));
-        assertEquals(URI_EXAMPLE, request.getURI());
+        assertEquals(URI_EXAMPLE, request.getUri());
         assertEquals(entity, request.getEntity());
     }
 
@@ -103,7 +106,7 @@ class HttpMethodTests
     @EnumSource(value = HttpMethod.class, names = { "GET", "HEAD", "OPTIONS", "TRACE", "DEBUG" })
     void testFailedEmptyEnclosingEntityRequestCreation(HttpMethod httpMethod)
     {
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
+        var exception = assertThrows(HttpRequestBuildException.class,
             () -> httpMethod.createEntityEnclosingRequest(URI_EXAMPLE));
         assertEquals("HTTP " + httpMethod + " request can't include body", exception.getMessage());
     }

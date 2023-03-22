@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,24 +18,24 @@ package org.vividus.http;
 
 import java.net.URI;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpTrace;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.classic.methods.HttpOptions;
+import org.apache.hc.client5.http.classic.methods.HttpPatch;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpTrace;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpEntity;
+import org.vividus.http.exception.HttpRequestBuildException;
 
 public enum HttpMethod
 {
     GET
     {
         @Override
-        public HttpRequestBase createRequest(URI uri)
+        public ClassicHttpRequest createRequest(URI uri)
         {
             return new HttpGet(uri);
         }
@@ -43,7 +43,7 @@ public enum HttpMethod
     HEAD
     {
         @Override
-        public HttpRequestBase createRequest(URI uri)
+        public ClassicHttpRequest createRequest(URI uri)
         {
             return new HttpHead(uri);
         }
@@ -51,21 +51,21 @@ public enum HttpMethod
     DELETE
     {
         @Override
-        public HttpRequestBase createRequest(URI uri)
+        public ClassicHttpRequest createRequest(URI uri)
         {
             return new HttpDelete(uri);
         }
 
         @Override
-        HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri)
+        ClassicHttpRequest createEntityEnclosingRequest(URI uri)
         {
-            return new HttpDeleteWithBody(uri);
+            return new HttpDelete(uri);
         }
     },
     OPTIONS
     {
         @Override
-        public HttpRequestBase createRequest(URI uri)
+        public ClassicHttpRequest createRequest(URI uri)
         {
             return new HttpOptions(uri);
         }
@@ -73,13 +73,13 @@ public enum HttpMethod
     PATCH
     {
         @Override
-        public HttpRequestBase createRequest(URI uri)
+        public ClassicHttpRequest createRequest(URI uri) throws HttpRequestBuildException
         {
-            throw new IllegalStateException(generateExceptionMessage("must"));
+            throw new HttpRequestBuildException(generateExceptionMessage("must"));
         }
 
         @Override
-        HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri)
+        ClassicHttpRequest createEntityEnclosingRequest(URI uri)
         {
             return new HttpPatch(uri);
         }
@@ -87,13 +87,13 @@ public enum HttpMethod
     POST
     {
         @Override
-        HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri)
+        ClassicHttpRequest createEntityEnclosingRequest(URI uri)
         {
             return new HttpPost(uri);
         }
 
         @Override
-        public HttpRequestBase createRequest(URI uri)
+        public ClassicHttpRequest createRequest(URI uri)
         {
             return new HttpPost(uri);
         }
@@ -101,21 +101,21 @@ public enum HttpMethod
     PUT
     {
         @Override
-        HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri)
+        ClassicHttpRequest createEntityEnclosingRequest(URI uri)
         {
             return new HttpPut(uri);
         }
 
         @Override
-        public HttpRequestBase createRequest(URI uri)
+        public ClassicHttpRequest createRequest(URI uri)
         {
-            return new HttpPutWithoutBody(uri);
+            return new HttpPut(uri);
         }
     },
     TRACE
     {
         @Override
-        public HttpRequestBase createRequest(URI uri)
+        public ClassicHttpRequest createRequest(URI uri)
         {
             return new HttpTrace(uri);
         }
@@ -123,22 +123,23 @@ public enum HttpMethod
     DEBUG
     {
         @Override
-        public HttpRequestBase createRequest(URI uri)
+        public ClassicHttpRequest createRequest(URI uri)
         {
             return new HttpDebug(uri);
         }
     };
 
-    public abstract HttpRequestBase createRequest(URI uri);
+    public abstract ClassicHttpRequest createRequest(URI uri) throws HttpRequestBuildException;
 
-    HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri)
+    ClassicHttpRequest createEntityEnclosingRequest(URI uri) throws HttpRequestBuildException
     {
-        throw new IllegalStateException(generateExceptionMessage("can't"));
+        throw new HttpRequestBuildException(generateExceptionMessage("can't"));
     }
 
-    public HttpEntityEnclosingRequestBase createEntityEnclosingRequest(URI uri, HttpEntity httpEntity)
+    public ClassicHttpRequest createEntityEnclosingRequest(URI uri, HttpEntity httpEntity)
+            throws HttpRequestBuildException
     {
-        HttpEntityEnclosingRequestBase request = createEntityEnclosingRequest(uri);
+        ClassicHttpRequest request = createEntityEnclosingRequest(uri);
         request.setEntity(httpEntity);
         return request;
     }

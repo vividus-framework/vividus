@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,14 +79,17 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
     {
         try
         {
-            return Optional.ofNullable(httpRedirectsProvider.getRedirects(URI.create(urlAsString)))
-                    .map(redirects -> redirects.get(redirects.size() - 1));
+            List<URI> redirects = httpRedirectsProvider.getRedirects(URI.create(urlAsString));
+            if (!redirects.isEmpty())
+            {
+                return Optional.of(redirects.get(redirects.size() - 1));
+            }
         }
         catch (IllegalStateException e)
         {
             logger.warn("Exception during redirects receiving", e);
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     private String build(Set<String> urls, TableProperties properties)

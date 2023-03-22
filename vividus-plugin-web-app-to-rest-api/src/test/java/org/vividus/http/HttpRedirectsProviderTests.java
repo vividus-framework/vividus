@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
@@ -25,10 +26,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-import org.apache.http.HttpStatus;
-import org.apache.http.client.CircularRedirectException;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.hc.client5.http.CircularRedirectException;
+import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.client5.http.protocol.RedirectLocations;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -90,7 +92,9 @@ class HttpRedirectsProviderTests
             httpResponse.setStatusCode(HttpStatus.SC_OK);
             when(httpClient.doHttpHead(URI_EXAMPLES, httpClientContext)).thenReturn(httpResponse);
             List<URI> redirects = List.of(URI_EXAMPLES);
-            when(httpClientContext.getRedirectLocations()).thenReturn(redirects);
+            RedirectLocations redirectLocations = mock();
+            when(redirectLocations.getAll()).thenReturn(redirects);
+            when(httpClientContext.getRedirectLocations()).thenReturn(redirectLocations);
             assertEquals(redirects, redirectsProvider.getRedirects(URI_EXAMPLES));
         }
     }

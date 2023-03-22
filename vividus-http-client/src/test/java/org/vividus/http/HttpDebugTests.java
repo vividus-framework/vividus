@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 
 package org.vividus.http;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.junit.jupiter.api.Test;
 
@@ -28,27 +29,19 @@ class HttpDebugTests
     private static final String RESOURCE_URI = "http://somewh.ere/";
 
     @Test
-    void testEmptyRequestCreation()
-    {
-        assertNull(new HttpDebug().getURI());
-    }
-
-    @Test
-    void testRequestCreationWithURI()
+    void testRequestCreationWithURI() throws URISyntaxException
     {
         URI uri = URI.create(RESOURCE_URI);
-        assertEquals(uri, new HttpDebug(uri).getURI());
+        HttpDebug httpDebug = new HttpDebug(uri);
+        assertAll(
+                () -> assertEquals(uri, httpDebug.getUri()),
+                () -> assertEquals("DEBUG", httpDebug.getMethod())
+        );
     }
 
     @Test
-    void testRequestCreationWithStringURI()
+    void testRequestCreationWithStringURI() throws URISyntaxException
     {
-        assertEquals(URI.create(RESOURCE_URI), new HttpDebug(RESOURCE_URI).getURI());
-    }
-
-    @Test
-    void testMethodName()
-    {
-        assertEquals("DEBUG", new HttpDebug().getMethod());
+        assertEquals(URI.create(RESOURCE_URI), new HttpDebug(RESOURCE_URI).getUri());
     }
 }

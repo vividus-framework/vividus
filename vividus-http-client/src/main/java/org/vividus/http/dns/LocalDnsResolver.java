@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
 
-import org.apache.http.conn.DnsResolver;
+import org.apache.commons.lang3.function.FailableFunction;
+import org.apache.hc.client5.http.DnsResolver;
 
 public class LocalDnsResolver implements DnsResolver
 {
@@ -30,12 +31,28 @@ public class LocalDnsResolver implements DnsResolver
     @Override
     public InetAddress[] resolve(String host) throws UnknownHostException
     {
+        return resolve(host, inetAddress -> new InetAddress[] { inetAddress }, fallbackDnsResolver::resolve);
+    }
+
+    @Override
+    public String resolveCanonicalHostname(String host) throws UnknownHostException
+    {
+        return resolve(host, inetAddress -> {
+            String canonicalServer = inetAddress.getCanonicalHostName();
+            return inetAddress.getHostAddress().contentEquals(canonicalServer) ? host : canonicalServer;
+        }, fallbackDnsResolver::resolveCanonicalHostname);
+    }
+
+    private <T> T resolve(String host, FailableFunction<InetAddress, T, UnknownHostException> resolver,
+            FailableFunction<String, T, UnknownHostException> fallback) throws UnknownHostException
+    {
         String ipAddress = dnsMappingStorage.get(host);
-        if (null != ipAddress)
+        if (ipAddress != null)
         {
-            return new InetAddress[] { InetAddress.getByName(ipAddress) };
+            InetAddress inetAddress = InetAddress.getByName(ipAddress);
+            return resolver.apply(inetAddress);
         }
-        return fallbackDnsResolver.resolve(host);
+        return fallback.apply(host);
     }
 
     public void setDnsMappingStorage(Map<String, String> dnsMappingStorage)

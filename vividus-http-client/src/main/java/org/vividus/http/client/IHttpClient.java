@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.vividus.http.client;
 import java.io.IOException;
 import java.net.URI;
 
-import org.apache.http.HttpHost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.protocol.HttpContext;
 
 public interface IHttpClient
 {
@@ -35,7 +35,7 @@ public interface IHttpClient
 
     HttpResponse doHttpHead(URI uri, HttpContext context) throws IOException;
 
-    HttpResponse execute(HttpUriRequest request) throws IOException;
+    HttpResponse execute(ClassicHttpRequest request) throws IOException;
 
-    HttpResponse execute(HttpUriRequest request, HttpContext context) throws IOException;
+    HttpResponse execute(ClassicHttpRequest request, HttpContext context) throws IOException;
 }
