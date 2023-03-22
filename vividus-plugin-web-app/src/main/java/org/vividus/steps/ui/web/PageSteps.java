@@ -154,7 +154,7 @@ public class PageSteps
      * <li>Browser reloads current page which is the same action as one caused by pressing F5 on the keyboard.
      * </ul>
      */
-    @When("I refresh the page")
+    @When("I refresh page")
     public void refreshPage()
     {
         uiContext.reset();

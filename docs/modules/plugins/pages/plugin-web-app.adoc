@@ -588,7 +588,7 @@ When I remove cookie with name `$cookieName` from current domain without applyin
 [source,gherkin]
 ----
 When I remove cookie with name `JSESSIONID` from current domain without applying changes
-When I refresh the page
+When I refresh page
 ----
 
 ==== Remove all cookies
