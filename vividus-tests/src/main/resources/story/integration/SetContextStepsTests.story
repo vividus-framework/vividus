@@ -7,36 +7,36 @@ Examples:
 |Windows     |Vividus Test Site|
 
 
-Scenario: Verify step with "is equal to": "When I switch to window with title that $stringComparisonRule `$title`"
+Scenario: Verify step with "is equal to": "When I switch to window with title that $stringComparisonRule `$title`"; Verify deprecated composite step "Then the page title $comparisonRule '$text'"
 Given I am on page with URL `${vividus-test-site-url}/windows.html`
 Then the page title is equal to '<windowsTitle>'
 When I click on element located by `id(plain)`
 When I switch to window with title that is equal to `<indexTitle>`
-Then the page title is equal to '<indexTitle>'
+Then page title is equal to `<indexTitle>`
 When I close the current window
-Then the page title is equal to '<windowsTitle>'
+Then page title is equal to `<windowsTitle>`
 
 
-Scenario: Verify steps: with "contains": "When I switch to window with title that $stringComparisonRule `$title`" and "When I go to relative URL `$relativeURL`"
+Scenario: Verify steps: with "contains": "When I switch to window with title that $stringComparisonRule `$title`" and "When I go to relative URL `$relativeURL`"; Verify step "Then page title $comparisonRule `$text`"
 Given I am on main application page
 When I go to relative URL `/windows.html`
-Then the page title is equal to '<windowsTitle>'
+Then page title is equal to `<windowsTitle>`
 When I click on element located by `id(plain)`
 When I switch to window with title that contains `<indexTitle>`
-Then the page title is equal to '<indexTitle>'
+Then page title is equal to `<indexTitle>`
 When I close the current window
-Then the page title is equal to '<windowsTitle>'
+Then page title is equal to `<windowsTitle>`
 
 
 Scenario: Verify steps: "When I wait `$duration` until window with title that $comparisonRule `$windowTitile` appears and switch to it" and "When I go to relative URL `$relativeURL`"
 Given I am on main application page
 When I go to the relative URL 'windows.html'
-Then the page title is equal to '<windowsTitle>'
+Then page title is equal to `<windowsTitle>`
 When I click on element located by `id(timeout)`
 When I wait `PT3S` until window with title that is equal to `<indexTitle>` appears and switch to it
-Then the page title is equal to '<indexTitle>'
+Then page title is equal to `<indexTitle>`
 When I close the current window
-Then the page title is equal to '<windowsTitle>'
+Then page title is equal to `<windowsTitle>`
 
 
 Scenario: Verify step: "When I switch to frame located `$locator`"
@@ -124,5 +124,5 @@ Then an alert is not present
 When I click on element located by `xpath(//a[text() = 'here'])`
 !-- No alert should be shown and tab should be kept open, but focus should be switched to another tab
 When I attempt to close current window with possibility to handle alert
-Then the page title is equal to 'Vividus Test Site'
+Then page title is equal to `Vividus Test Site`
 Then number of elements found by `By.xpath(//img[@name='vividus-logo'])` is equal to `1`
