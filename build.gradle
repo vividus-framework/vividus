@@ -70,7 +70,7 @@ ext {
     versions = [
         allure:                 '2.21.0',
         jbehave:                '5.1.1-alpha.2',
-        slf4j:                  '2.0.6',
+        slf4j:                  '2.0.7',
         powermock:              'a0be5c4bbe'
     ]
 }
