@@ -300,3 +300,7 @@ When I go to relative URL `<relativeURL>`
 Composite: Then the text '$text' exists
 !-- WARNING: The step "Then the text '$text' exists" is deprecated and will be removed in VIVIDUS 0.6.0
 Then text `<text>` exists
+
+Composite: When I refresh the page
+!-- WARNING: The step "When I refresh the page" is deprecated and will be removed in VIVIDUS 0.6.0
+When I refresh page

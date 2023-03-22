@@ -30,7 +30,7 @@ Then the text matches '0'
 Scenario: Verify step: When I scroll element located `$locator` into view
 Meta:
     @requirementId 436
-When I refresh the page
+When I refresh page
 When I scroll element located `xpath(//a[text()="Contact"])` into view
 When I change context to element located by `id(current-vertical):a`
 Then the text matches '\d+'

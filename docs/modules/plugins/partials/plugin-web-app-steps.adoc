@@ -2,7 +2,7 @@
 :popup-alert: https://www.w3schools.com/js/js_popup.asp
 :close-spec: https://w3c.github.io/webdriver/webdriver-spec.html#close-window[close]
 
-=== Steps opening pages
+=== Page steps
 
 ==== Open main application page
 
@@ -82,6 +82,21 @@ When I go to relative URL `$relativeURL`
 ----
 Given I am on main application page
 When I go to relative URL `/products/new`
+----
+
+==== Refresh the page
+
+Refreshes the page: the step does the same as the reload button in the browser.
+
+[source,gherkin]
+----
+When I refresh page
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
+[source,gherkin]
+----
+When I refresh the page
 ----
 
 === Clicking steps

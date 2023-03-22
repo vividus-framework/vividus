@@ -24,7 +24,7 @@ Then an element with the id 'anchor' disappears
 
 
 Scenario: Verify step: When I wait until scroll finished should not lock the tests when no scroll performing
-When I refresh the page
+When I refresh page
 When I wait until scroll is finished
 When I execute sequence of actions:
 |type          |argument                                        |

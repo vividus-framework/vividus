@@ -64,7 +64,7 @@ Then JSON element from `${response}` by JSON path `$.headers` is equal to `
 }
 `IGNORING_EXTRA_FIELDS
 
-Scenario: Verify step When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode`, content `$payload` and headers:$headers with binary data
+Scenario: Verify step "When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode`, content `$payload` and headers:$headers with binary data" and "When I refresh page"
 Meta:
     @requirementId 1104
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
@@ -73,7 +73,7 @@ Then number of elements found by `<elementId>` is = `0`
 When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `200`, content `#{loadBinaryResource(page.html)}` and headers:
 |name        |value    |
 |Content-Type|text/html|
-When I refresh the page
+When I refresh page
 When I switch to frame located `<frameId>`
 Then number of elements found by `<elementId>` is = `1`
 Examples:
@@ -89,7 +89,7 @@ When I mock HTTP responses with request URL which CONTAINS `frames.html` using r
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
 Then number of elements found by `id(sw)` is = `1`
 
-Scenario: Verify step When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode` and headers:$headers
+Scenario: Verify step When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode` and headers:$headers and deprecated composite step "When I refresh the page"
 Meta:
     @requirementId 1104
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
