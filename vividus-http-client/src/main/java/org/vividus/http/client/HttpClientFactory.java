@@ -37,6 +37,7 @@ import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.auth.BasicScheme;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.impl.win.WinHttpClients;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
@@ -66,7 +67,10 @@ public class HttpClientFactory implements IHttpClientFactory
     @Override
     public IHttpClient buildHttpClient(HttpClientConfig config) throws GeneralSecurityException
     {
-        HttpClientBuilder builder = HttpClientBuilder.create();
+        // There is no need to provide user credentials: HttpClient will attempt to access current user security
+        // context through Windows platform specific methods via JNI.
+        HttpClientBuilder builder = WinHttpClients.custom();
+
         builder.setDefaultHeaders(config.createHeaders());
         if (config.hasCookieStore())
         {

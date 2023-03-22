@@ -6,8 +6,11 @@ configurations {
     testImplementation.extendsFrom compileOnly
 }
 
+ext.httpClientVersion = '5.2.1'
+
 dependencies {
-    api(group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: '5.2.1')
+    api(group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: "${httpClientVersion}")
+    implementation(group: 'org.apache.httpcomponents.client5', name: 'httpclient5-win', version: "${httpClientVersion}")
     implementation project(':vividus-util')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)

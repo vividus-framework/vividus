@@ -530,7 +530,12 @@ a|
 |`relaxed`
 |The name of the cookie specification to be used for HTTP state management
 
-4+^.^|[#_authentication]_Authentication_
+4+^.^a|[#_authentication]_Authentication_ +
+[NOTE]
+====
+https://en.wikipedia.org/wiki/Integrated_Windows_Authentication[Integrated Windows authentication] is enabled
+automatically whenever tests are run on Windows.
+====
 
 |`http.auth.username`
 |character sequence
