@@ -321,3 +321,29 @@ Examples:
 |2       |
 |1       |
 |0       |
+
+Scenario: Verify INNER_JOIN transformer with empty table (should not be executed)
+Meta:
+    @requirementId 1810
+Then `should` is equal to `be skipped`
+Examples:
+{transformer=INNER_JOIN, leftTableJoinColumn=joinID, rightTableJoinColumn=joinID1, tables=/data/for-inner-join-transformer.table}
+|joinID1 |
+
+Scenario: Verify INNER_JOIN transformer with table body
+Meta:
+    @requirementId 1810
+When I initialize scenario variable `innerJoinTable` with values:
+{transformer=INNER_JOIN, leftTableJoinColumn=joinID, rightTableJoinColumn=joinID, tables=/data/for-inner-join-transformer.table}
+|joinID|column4|column5|
+|5     |row45  |row51  |
+|3     |row43  |row53  |
+|1     |row41  |row51  |
+|3     |row433 |row533 |
+Then `${innerJoinTable}` is equal to table:
+|column1|joinID|column5|column4|column3|column2|
+|row11  |1     |row51  |row41  |row31  |row21  |
+|row13  |3     |row53  |row43  |row33  |row23  |
+|row13  |3     |row533 |row433 |row33  |row23  |
+|row133 |3     |row53  |row43  |row333 |row233 |
+|row133 |3     |row533 |row433 |row333 |row233 |
