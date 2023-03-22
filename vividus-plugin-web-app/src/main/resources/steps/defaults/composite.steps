@@ -304,3 +304,7 @@ Then text `<text>` exists
 Composite: When I refresh the page
 !-- WARNING: The step "When I refresh the page" is deprecated and will be removed in VIVIDUS 0.6.0
 When I refresh page
+
+Composite: Then the page title $comparisonRule '$text'
+!-- WARNING: The step "Then the page title $comparisonRule '$text'" is deprecated and will be removed in VIVIDUS 0.6.0
+Then page title <comparisonRule> `<text>`

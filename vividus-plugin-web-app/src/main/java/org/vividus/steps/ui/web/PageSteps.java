@@ -251,7 +251,7 @@ public class PageSteps
      * @param comparisonRule String validation rule: "is equal to", "contains", "does not contain"
      * @param text The text of the title to compare (ex. {@code <title>}<b>'text'</b>{@code </title>})
      */
-    @Then("the page title $comparisonRule '$text'")
+    @Then("page title $comparisonRule `$text`")
     public void assertPageTitle(StringComparisonRule comparisonRule, String text)
     {
         descriptiveSoftAssert.assertThat(PAGE_TITLE, getWebDriver().getTitle(), comparisonRule.createMatcher(text));

@@ -99,6 +99,39 @@ _Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
 When I refresh the page
 ----
 
+==== Validate the page title
+
+Checks the page title matches to the text according to the provided string validation rule
+
+[source,gherkin]
+----
+Then page title $comparisonRule `$text`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
+[source,gherkin]
+----
+Then the page title $comparisonRule '$text'
+----
+
+* `$comparisonRule` - string validation rule. One of:
+** `is equal to` - title should be equal to `text`
+** `contains` - title should contain `text`
+** `does not contain` - title should not contain `text`
+* `text` - the text of the title to compare
+
+.Validate 'https://docs.vividus.dev/' page title
+[source,gherkin]
+----
+Then page title is equal to `What is VIVIDUS :: VIVIDUS`
+----
+
+.Validate the part of 'https://docs.vividus.dev/' page title
+[source,gherkin]
+----
+Then page title contains `VIVIDUS`
+----
+
 === Clicking steps
 
 ==== Click on element
