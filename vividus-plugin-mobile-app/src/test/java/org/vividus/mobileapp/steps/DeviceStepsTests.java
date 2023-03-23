@@ -20,9 +20,11 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -38,8 +40,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.ScreenOrientation;
+import org.vividus.context.VariableContext;
 import org.vividus.mobileapp.action.DeviceActions;
 import org.vividus.steps.DataWrapper;
+import org.vividus.variable.VariableScope;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -53,6 +57,7 @@ class DeviceStepsTests
     private static final String DEVICE_FILE_PATH = Paths.get(DEVICE_FOLDER, FILE_NAME).toString();
 
     @Mock private DeviceActions deviceActions;
+    @Mock private VariableContext variableContext;
     private DeviceSteps deviceSteps;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(DeviceSteps.class);
@@ -60,7 +65,7 @@ class DeviceStepsTests
     @BeforeEach
     void init()
     {
-        deviceSteps = new DeviceSteps(DEVICE_FOLDER, deviceActions);
+        deviceSteps = new DeviceSteps(DEVICE_FOLDER, deviceActions, variableContext);
     }
 
     static Stream<Arguments> dataProvider()
@@ -101,6 +106,16 @@ class DeviceStepsTests
     {
         deviceSteps.deleteFileFromDevice(DEVICE_FILE_PATH);
         verify(deviceActions).deleteFile(DEVICE_FILE_PATH);
+    }
+
+    @Test
+    void shouldDownloadFileFromDevice()
+    {
+        var variableScopes = Set.of(VariableScope.SCENARIO);
+        var variableName = "variableName";
+        when(deviceActions.pullFile(DEVICE_FILE_PATH)).thenReturn(BINARY_CONTENT);
+        deviceSteps.downloadFileFromDevice(DEVICE_FILE_PATH, variableScopes, variableName);
+        verify(variableContext).putVariable(variableScopes, variableName, BINARY_CONTENT);
     }
 
     @Test

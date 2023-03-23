@@ -25,6 +25,7 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.session.WebDriverSessionAttributes;
 import org.vividus.selenium.session.WebDriverSessionInfo;
 
+import io.appium.java_client.PullsFiles;
 import io.appium.java_client.PushesFiles;
 import io.appium.java_client.remote.SupportsRotation;
 
@@ -54,7 +55,7 @@ public class DeviceActions
      * Deletes a file by <b>deviceFilePath</b> from the device
      * @param deviceFilePath the path to an existing remote file on the device. This variable can be predefined
      * with bundle id to delete file inside an application bundle. See details for
-     * <a href="https://github.com/appium/appium-xcuitest-driver#mobile-deletefile">iOS</a>,
+     * <a href="https://appium.github.io/appium-xcuitest-driver/4.19/execute-methods/#mobile-deletefile">iOS</a>,
      * <a href="https://github.com/appium/appium-uiautomator2-driver#mobile-deletefile">Android</a>
      */
     public void deleteFile(String deviceFilePath)
@@ -77,5 +78,20 @@ public class DeviceActions
         {
             webDriverSessionInfo.reset(WebDriverSessionAttributes.SCREEN_SIZE);
         }
+    }
+
+    /**
+     * Pulls a file at <b>deviceFilePath</b> from the device
+     * @param deviceFilePath The path to an existing remote file on the device. This parameter can be predefined
+     * with bundle id, then the file will be pulled from the root of the corresponding application container.
+     * See details for
+     * <a href="https://appium.github.io/appium-xcuitest-driver/4.19/execute-methods/#mobile-pullfile">iOS</a>,
+     * <a href="https://github.com/appium/appium-uiautomator2-driver#mobile-pullfile">Android</a>
+     *
+     * @return The content of the downloaded file.
+     */
+    public byte[] pullFile(String deviceFilePath)
+    {
+        return webDriverProvider.getUnwrapped(PullsFiles.class).pullFile(deviceFilePath);
     }
 }
