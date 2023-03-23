@@ -11,7 +11,7 @@ if (isFamily(FAMILY_WINDOWS)) {
     }
 }
 
-ext.hadoopVersion = '3.3.4'
+ext.hadoopVersion = '3.3.5'
 
 dependencies {
     api project(':vividus-engine')
