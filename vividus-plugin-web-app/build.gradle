@@ -10,7 +10,7 @@ dependencies {
 
     api project(':vividus-extension-selenium')
 
-    implementation(group: 'com.codeborne', name: 'selenide', version: '6.12.3')
+    implementation(group: 'com.codeborne', name: 'selenide', version: '6.12.4')
     api platform(group: 'org.seleniumhq.selenium', name: 'selenium-bom', version: '4.8.1')
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-chrome-driver')
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-edge-driver')
