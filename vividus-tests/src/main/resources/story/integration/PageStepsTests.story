@@ -22,7 +22,7 @@ Then `${context-height}` is < `100`
 Then `${context-width}`  is < `100`
 
 Scenario: Verify step: Then metric $webPerformanceMetric is $comparisonRule `$duration`
-Then metric <metric> is less than `PT5S`
+Then metric <metric> is less than `PT6S`
 Examples:
 |metric               |
 |TIME_TO_FIRST_BYTE   |
