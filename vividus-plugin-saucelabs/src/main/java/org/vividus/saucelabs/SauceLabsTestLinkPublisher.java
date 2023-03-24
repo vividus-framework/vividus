@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,27 +18,36 @@ package org.vividus.saucelabs;
 
 import static java.lang.String.format;
 
+import java.util.Optional;
+
 import com.google.common.eventbus.EventBus;
 import com.saucelabs.saucerest.DataCenter;
 
+import org.openqa.selenium.Capabilities;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.cloud.AbstractCloudTestLinkPublisher;
+import org.vividus.selenium.manager.IGenericWebDriverManager;
 import org.vividus.testcontext.TestContext;
 
 public class SauceLabsTestLinkPublisher extends AbstractCloudTestLinkPublisher
 {
     private final String sauceLabsUrl;
+    private final IGenericWebDriverManager webDriverManager;
 
     public SauceLabsTestLinkPublisher(DataCenter dataCenter, IWebDriverProvider webDriverProvider, EventBus eventBus,
-            TestContext testContext)
+            TestContext testContext, IGenericWebDriverManager webDriverManager)
     {
         super("SauceLabs", webDriverProvider, eventBus, testContext);
         this.sauceLabsUrl = dataCenter.appServer();
+        this.webDriverManager = webDriverManager;
     }
 
     @Override
     protected String getCloudTestUrl(String sessionId) throws GetCloudTestUrlException
     {
-        return format("%stests/%s", sauceLabsUrl, sessionId);
+        Capabilities capabilities = webDriverManager.getCapabilities();
+        return Optional.ofNullable(capabilities.getCapability("appium:testobject_test_report_url"))
+                       .map(Object::toString)
+                       .orElseGet(() -> format("%stests/%s", sauceLabsUrl, sessionId));
     }
 }

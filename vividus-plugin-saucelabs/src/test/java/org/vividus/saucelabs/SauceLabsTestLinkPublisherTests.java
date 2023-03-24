@@ -17,20 +17,49 @@
 package org.vividus.saucelabs;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
+import java.util.Map;
 
 import com.saucelabs.saucerest.DataCenter;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.MutableCapabilities;
 import org.vividus.selenium.cloud.AbstractCloudTestLinkPublisher.GetCloudTestUrlException;
+import org.vividus.selenium.manager.IGenericWebDriverManager;
 
+@ExtendWith(MockitoExtension.class)
 class SauceLabsTestLinkPublisherTests
 {
+    @Mock private IGenericWebDriverManager webDriverManager;
+    private SauceLabsTestLinkPublisher linkPublisher;
+
+    @BeforeEach
+    void init()
+    {
+        this.linkPublisher = new SauceLabsTestLinkPublisher(DataCenter.EU_CENTRAL, null, null, null,
+                webDriverManager);
+    }
+
     @Test
     void shouldReturnSessionUrl() throws GetCloudTestUrlException
     {
-        SauceLabsTestLinkPublisher linkPublisher = new SauceLabsTestLinkPublisher(DataCenter.EU_CENTRAL, null, null,
-                null);
+        when(webDriverManager.getCapabilities()).thenReturn(new MutableCapabilities());
         assertEquals("https://app.eu-central-1.saucelabs.com/tests/session-id",
                 linkPublisher.getCloudTestUrl("session-id"));
+    }
+
+    @Test
+    void shouldReturnSessionUrlForTestObject() throws GetCloudTestUrlException
+    {
+        String testObjectUrl = "https://app.saucelabs.com/tests/id";
+        when(webDriverManager.getCapabilities()).thenReturn(new MutableCapabilities(Map.of(
+            "appium:testobject_test_report_url", testObjectUrl
+        )));
+        assertEquals(testObjectUrl, linkPublisher.getCloudTestUrl(null));
     }
 }
