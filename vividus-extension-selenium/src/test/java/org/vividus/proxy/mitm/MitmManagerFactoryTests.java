@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.vividus.proxy.model.MitmManagerType.IMPERSONATED;
 import static org.vividus.proxy.model.MitmManagerType.SELF_SIGNED;
 
+import java.nio.file.Path;
+
 import com.browserup.bup.mitm.manager.ImpersonatingMitmManager;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.littleshoot.proxy.MitmManager;
 import org.littleshoot.proxy.extras.SelfSignedMitmManager;
 import org.vividus.http.keystore.KeyStoreOptions;
@@ -48,10 +51,10 @@ class MitmManagerFactoryTests
     }
 
     @Test
-    void testCreateSelfSignedMitmManager()
+    void testCreateSelfSignedMitmManager(@TempDir Path tempDir)
     {
         MitmManagerOptions options = new MitmManagerOptions(SELF_SIGNED, ALIAS, false,
-                new KeyStoreOptions(KEYSTORE_PATH, PASSWORD, "JKS"));
+                new KeyStoreOptions(tempDir.resolve(KEYSTORE_PATH).toString(), PASSWORD, "JKS"));
         MitmManager mitmManager = factory.createMitmManager(options);
         assertThat(mitmManager, instanceOf(SelfSignedMitmManager.class));
     }
