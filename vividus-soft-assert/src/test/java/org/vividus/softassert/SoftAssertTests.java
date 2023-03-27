@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.when;
 import static uk.org.lidalia.slf4jext.Level.ERROR;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -190,6 +192,15 @@ class SoftAssertTests
     }
 
     @Test
+    void testAssertTrueWithConsumer()
+    {
+        mockAssertionCollection();
+        Consumer<Boolean> consumer = mock();
+        assertTrue(softAssert.assertTrue(TRUE, TEXT.equals(TEXT), consumer));
+        verify(consumer).accept(true);
+    }
+
+    @Test
     void testAssertNotNull()
     {
         mockAssertionCollection();
@@ -232,6 +243,18 @@ class SoftAssertTests
     {
         mockAssertionCollection();
         assertFalse(softAssert.assertThat("Text contains 'a'", TEXT, containsString("a")));
+    }
+
+    @Test
+    void testAssertThatWithConsumerAndException()
+    {
+        mockAssertionCollection();
+        Consumer<Boolean> consumer = mock();
+        when(failTestFastManager.isFailTestCaseFast()).thenReturn(true);
+        doThrow(RuntimeException.class).when(failTestFastHandler).failTestCaseFast();
+        assertThrows(RuntimeException.class,
+                () -> softAssert.assertThat("Text contains 'b'", TEXT, containsString("b"), consumer));
+        verify(consumer).accept(false);
     }
 
     @Test

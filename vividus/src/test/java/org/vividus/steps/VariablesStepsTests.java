@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,18 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable;
@@ -47,6 +48,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.vividus.context.VariableContext;
 import org.vividus.publishing.DiffAttachmentPublisher;
 import org.vividus.reporter.event.IAttachmentPublisher;
@@ -85,9 +87,15 @@ class VariablesStepsTests
     @MethodSource("stringsAsNumbers")
     void shouldCompareStringsAsNumbers(Object variable1, Object variable2)
     {
+        String assertDescription = "Checking if \"1\" is less than or equal to \"10\"";
+        String matcherAsString = "a value less than or equal to <10>";
+        doAnswer(getAssertionAnswer(false)).when(softAssert).assertThat(
+                eq(assertDescription), eq(BigDecimal.ONE),
+                argThat(m -> matcherAsString.equals(m.toString())), any());
+
         variablesSteps.compareVariables(variable1, ComparisonRule.LESS_THAN_OR_EQUAL_TO, variable2);
-        verify(softAssert).assertThat(eq("Checking if \"1\" is less than or equal to \"10\""),
-                eq(BigDecimal.ONE), argThat(m -> "a value less than or equal to <10>".equals(m.toString())));
+        verify(softAssert).assertThat(eq(assertDescription),
+                eq(BigDecimal.ONE), argThat(m -> matcherAsString.equals(m.toString())), any());
         verify(diffAttachmentPublisher).publishDiff(BigDecimal.ONE, BigDecimal.TEN);
     }
 
@@ -100,7 +108,7 @@ class VariablesStepsTests
     void testCompareSimpleVariablesStrings(String variable1, String variable2, boolean passed, int published)
     {
         String description = "Checking if \"" + variable1 + "\" is equal to \"" + variable2 + "\"";
-        when(softAssert.assertThat(eq(description), eq(variable1), any())).thenReturn(passed);
+        doAnswer(getAssertionAnswer(passed)).when(softAssert).assertThat(eq(description), eq(variable1), any(), any());
         assertEquals(passed, variablesSteps.compareVariables(variable1, ComparisonRule.EQUAL_TO, variable2));
         verify(diffAttachmentPublisher, times(published)).publishDiff(variable1, variable2);
     }
@@ -324,5 +332,15 @@ class VariablesStepsTests
         List<Map<String, String>> listOfMaps = List.of(Map.of("key0", "value0", "key1", "value1"));
         variablesSteps.initVariableWithGivenValues(scopes, VALUE_1, listOfMaps);
         verify(variableContext).putVariable(scopes, VALUE_1, listOfMaps);
+    }
+
+    private Answer getAssertionAnswer(boolean assertionPassed)
+    {
+        return a ->
+        {
+            Consumer<Boolean> consumer = a.getArgument(3);
+            consumer.accept(assertionPassed);
+            return assertionPassed;
+        };
     }
 }

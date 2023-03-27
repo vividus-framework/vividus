@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -91,8 +92,7 @@ class BarcodeStepsTests
 
         barCodeSteps.scanBarcode(VARIABLE_SCOPE, VARIABLE_NAME);
 
-        verify(softAssert).recordFailedAssertion("There is no barcode on the screen", exception);
-        verifyScreenshotAttachment();
+        verifyScreenshotNotFoundBehavior("There is no barcode on the screen", exception);
     }
 
     @Test
@@ -119,9 +119,7 @@ class BarcodeStepsTests
         var exception = NotFoundException.getNotFoundInstance();
         when(barcodeActions.scanBarcode(QR_CODE_IMAGE)).thenThrow(exception);
         barCodeSteps.scanBarcodeFromContext(VARIABLE_SCOPE, VARIABLE_NAME);
-        verify(softAssert).recordFailedAssertion("There is no barcode on the selected context, page or screen",
-                exception);
-        verifyScreenshotAttachment();
+        verifyScreenshotNotFoundBehavior("There is no barcode on the selected context, page or screen", exception);
     }
 
     private void mockScreenshotFromSearchContext()
@@ -133,16 +131,18 @@ class BarcodeStepsTests
         when(screenshot.getImage()).thenReturn(QR_CODE_IMAGE);
     }
 
-    private void verifyScreenshotAttachment() throws IOException
+    private void verifyScreenshotNotFoundBehavior(String assertionMessage, Exception exception) throws IOException
     {
+        var ordered = inOrder(eventBus, softAssert);
         var eventCaptor = ArgumentCaptor.forClass(Object.class);
-        verify(eventBus).post(eventCaptor.capture());
+        ordered.verify(eventBus).post(eventCaptor.capture());
         Object event = eventCaptor.getValue();
         assertThat(event, instanceOf(AttachmentPublishEvent.class));
         Attachment attachment = ((AttachmentPublishEvent) event).getAttachment();
         assertEquals("Screenshot", attachment.getTitle());
         assertEquals("image/png", attachment.getContentType());
         assertArrayEquals(ImageTool.toByteArray(QR_CODE_IMAGE), attachment.getContent());
+        ordered.verify(softAssert).recordFailedAssertion(assertionMessage, exception);
         verifyNoInteractions(variableContext);
     }
 }

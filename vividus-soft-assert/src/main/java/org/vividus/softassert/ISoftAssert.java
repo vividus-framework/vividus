@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.softassert;
 
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import org.hamcrest.Matcher;
@@ -30,6 +31,17 @@ public interface ISoftAssert
      * @return <code>true</code> if assertion is passed, otherwise <code>false</code>
      */
     boolean assertTrue(String description, boolean condition);
+
+    /**
+     * Asserts that a condition is true. If it isn't, an assertion error is added to the collection.
+     * An additional operation which will always be executed is specified.
+     * Useful when used with fail-fast at the scenario level.
+     * @param description The assertion description
+     * @param condition Condition to be checked
+     * @param resultConsumer Always executed additional operation that consumes result of the assertion
+     * @return <code>true</code> if assertion is passed, otherwise <code>false</code>
+     */
+    boolean assertTrue(String description, boolean condition, Consumer<Boolean> resultConsumer);
 
     /**
      * Asserts that a condition is false. If it isn't an assertion error is added to the collection.
@@ -166,6 +178,22 @@ public interface ISoftAssert
      * @see org.hamcrest.MatcherAssert
      */
     <T> boolean assertThat(String description, T actual, Matcher<? super T> matcher);
+
+    /**
+     * Asserts that <code>actual</code> satisfies the condition specified by <code>matcher</code>.
+     * If it is not, an assertion error is added to the collection.
+     * An additional operation which will always be executed is specified.
+     * Useful when used with fail-fast at the scenario level.
+     * @param description The assertion description
+     * @param <T> the static type accepted by the matcher (this can flag obvious
+     * compile-time problems such as {@code assertThat(1, is("a"))}
+     * @param actual the computed value being compared
+     * @param matcher an expression, built of {@link Matcher}s, specifying allowed
+     * values
+     * @param resultConsumer always executed additional operation that consumes result of the assertion
+     * @return <code>true</code> if assertion is passed, otherwise <code>false</code>
+     */
+    <T> boolean assertThat(String description, T actual, Matcher<? super T> matcher, Consumer<Boolean> resultConsumer);
 
     /**
      * Logs information about passed assertion and returns true.

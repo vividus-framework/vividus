@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -110,28 +113,47 @@ public class ArchiveSteps
     public void verifyArchiveContainsEntries(DataWrapper archiveData, List<NamedEntry> parameters)
     {
         Set<String> entryNames = ZipUtils.readZipEntryNamesFromBytes(archiveData.getBytes());
-        boolean verificationPassed = parameters.stream()
-                .map(entry -> assertArchiveEntry(entry, entryNames))
-                .reduce(true, (a, b) -> a && b);
-        if (!verificationPassed)
-        {
-            attachmentPublisher.publishAttachment("templates/archive-entries-result-table.ftl",
-                    Map.of("entryNames", entryNames), "Archive entries");
-        }
+        MutableBoolean reportNotPublished = new MutableBoolean(true);
+
+        parameters.forEach(entry -> assertArchiveEntry(entry, entryNames, reportNotPublished));
     }
 
-    private boolean assertArchiveEntry(NamedEntry expectedEntry, Set<String> entryNames)
+    private void assertArchiveEntry(NamedEntry expectedEntry, Set<String> entryNames,
+            MutableBoolean reportNotPublished)
     {
         String expectedName = expectedEntry.getName();
         StringComparisonRule comparisonRule = expectedEntry.getRule();
+
+        String assertionDescription;
+        Matcher<Iterable<? super String>> entryMatcher;
         if (comparisonRule != null)
         {
-            return softAssert.assertThat(String.format(
+            assertionDescription = String.format(
                     "The archive contains entry matching the comparison " + "rule '%s' with name pattern '%s'",
-                    comparisonRule, expectedName), entryNames, hasItem(comparisonRule.createMatcher(expectedName)));
+                    comparisonRule, expectedName);
+            entryMatcher = hasItem(comparisonRule.createMatcher(expectedName));
         }
-        return softAssert.assertThat("The archive contains entry with name " + expectedName, entryNames,
-                hasItem(expectedName));
+        else
+        {
+            assertionDescription = "The archive contains entry with name " + expectedName;
+            entryMatcher = hasItem(expectedName);
+        }
+
+        softAssert.assertThat(assertionDescription, entryNames, entryMatcher,
+                publishAttachmentOnFailure(entryNames, reportNotPublished));
+    }
+
+    private Consumer<Boolean> publishAttachmentOnFailure(Set<String> entryNames, MutableBoolean reportNotPublished)
+    {
+        return passed ->
+        {
+            if (!passed && reportNotPublished.isTrue())
+            {
+                attachmentPublisher.publishAttachment("templates/archive-entries-result-table.ftl",
+                        Map.of("entryNames", entryNames), "Archive entries");
+                reportNotPublished.setFalse();
+            }
+        };
     }
 
     @AsParameters
