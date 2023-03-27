@@ -1,6 +1,6 @@
 project.description = 'VIVIDUS plugin for REST API testing'
 
-ext.jsonPathVersion = '2.7.0'
+ext.jsonPathVersion = '2.8.0'
 
 dependencies {
     api project(':vividus-engine')

@@ -1,6 +1,6 @@
 project.description = 'VIVIDUS utilities'
 
-ext.jsonPathVersion = '2.7.0'
+ext.jsonPathVersion = '2.8.0'
 
 //https://github.com/powermock/powermock/issues/1094
 test {

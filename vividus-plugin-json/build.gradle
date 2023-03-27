@@ -1,6 +1,6 @@
 project.description = 'VIVIDUS plugin for JSON testing'
 
-ext.jsonPathVersion = '2.7.0'
+ext.jsonPathVersion = '2.8.0'
 
 dependencies {
     implementation project(':vividus-engine')
