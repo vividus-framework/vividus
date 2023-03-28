@@ -153,7 +153,8 @@ class ScrollStepsTests
         var locator = new Locator(WebLocatorType.ID, new SearchParameters("all", Visibility.ALL));
         when(baseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, locator)).thenReturn(webElement);
         when(javascriptActions.executeScript(
-                "return window.scrollY <= 100 && 100 <= (window.scrollY + window.innerHeight)")).thenReturn(true);
+                "var windowScrollY = Math.floor(window.scrollY);"
+                + "return windowScrollY <= 100 && 100 <= (windowScrollY + window.innerHeight)")).thenReturn(true);
         scrollSteps.isPageScrolledToElement(locator);
         verify(softAssert).assertTrue("The page is scrolled to an element with located by  Id: 'all'; Visibility: ALL;",
                 true);

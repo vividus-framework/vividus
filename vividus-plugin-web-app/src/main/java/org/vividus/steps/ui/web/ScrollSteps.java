@@ -96,7 +96,8 @@ public class ScrollSteps
         {
             int elementYCoordinate = element.getLocation().getY();
             boolean pageVisibleAreaScrolledToElement = javascriptActions.executeScript(String.format(
-                    "return window.scrollY <= %1$d && %1$d <= (window.scrollY + window.innerHeight)",
+                    "var windowScrollY = Math.floor(window.scrollY);"
+                    + "return windowScrollY <= %1$d && %1$d <= (windowScrollY + window.innerHeight)",
                     elementYCoordinate));
             softAssert.assertTrue(String.format("The page is scrolled to an element with located by %s", locator),
                     pageVisibleAreaScrolledToElement);
