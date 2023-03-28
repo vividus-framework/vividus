@@ -170,21 +170,31 @@ https://en.wikipedia.org/wiki/Headless_browser[Headless mode] is a functionality
 
 === Phone
 
-Contains phone related properties, for android and iOS devices, including portrait and landscape orientations.
+Contains phone related properties, for android and iOS devices.
 
 [cols="~a,~a", options="header"]
 |===
 |Profile
 |Example of properties
 
-.^|web/phone
+.^|web/phone/android
 |
 [source, properties]
 ----
-selenium.grid.capabilities.platform=Android
-selenium.grid.capabilities.platformVersion=11.0
+selenium.grid.capabilities.platformName=Android
+selenium.grid.capabilities.platformVersion=12.0
 selenium.grid.capabilities.deviceOrientation=portrait
-selenium.grid.capabilities.appiumVersion=1.21.1
+selenium.grid.capabilities.appiumVersion=2.0.0
+----
+
+.^|web/phone/ios
+|
+[source, properties]
+----
+selenium.grid.capabilities.platformName=iOS
+selenium.grid.capabilities.platformVersion=16.2
+selenium.grid.capabilities.deviceOrientation=portrait
+selenium.grid.capabilities.appiumVersion=2.0.0
 ----
 |===
 
