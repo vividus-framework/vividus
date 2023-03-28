@@ -1,0 +1,58 @@
+== Matchers
+Matcher is an object which compares objects against a specific criteria and returns a boolean value indicating whether the match was successful or not.
+
+Embedded matchers, placeholders and expressions can be found on the json-unit library https://github.com/lukas-krecan/JsonUnit#readme[readme].
+
+=== Array contains any of entries
+
+Validate if actual array contains any of entries from the expected one.
+
+[source, subs="+quotes"]
+----
+#{json-unit.matches:anyOf}(*$input*)
+----
+
+* *`$input`* - any string which represents expected array entries
+
+.Validate entries
+[source,gherkin]
+----
+Given I initialize story variable `actual-json` with value `
+{
+  "store":{
+    "authors":[
+      {
+        "name":"Yakub Kolas",
+        "available":true
+      },
+      {
+        "name":"Uladzimir Karatkevich",
+        "available":true
+      }
+    ]
+  }
+}
+`
+Then JSON element from `${actual-json}` by JSON path `$.store` is equal to `{"book":"#{json-unit.matches:anyOf}[{\"name\":\"Uladzimir Karatkevich\",\"available\":true},{\"author\":\"Yanka Kupala\",\"available\":true}])}"`
+----
+
+[TIP]
+As JSON do not support multi line strings if you want to improve readability use xref:expressions.adoc#_escapejson[escapeJson] expression inside matcher
+
+.Validate entries with `escapeJson` expression
+[source,gherkin]
+----
+Then JSON element from `${actual-json}` by JSON path `$.store` is equal to `
+{
+  "book":"#{json-unit.matches:anyOf}#{escapeJson([
+    {
+      "name":"Uladzimir Karatkevich",
+      "available":true
+    },
+    {
+      "author":"Yanka Kupala",
+      "available":true
+    }
+  ])}"
+}
+----

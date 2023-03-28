@@ -145,7 +145,7 @@ class JsonStepsTests
     {
         JsonPathUtils.setJacksonConfiguration();
         steps = new JsonSteps(new FluentEnumConverter(), jsonContext, variableContext, new JsonUtils(), softAssert,
-                attachmentPublisher);
+                attachmentPublisher, Map.of());
     }
 
     static Stream<Arguments> jsonValues()
