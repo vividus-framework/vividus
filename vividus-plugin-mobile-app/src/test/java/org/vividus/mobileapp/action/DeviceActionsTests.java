@@ -35,6 +35,7 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.session.WebDriverSessionAttributes;
 import org.vividus.selenium.session.WebDriverSessionInfo;
 
+import io.appium.java_client.PullsFiles;
 import io.appium.java_client.PushesFiles;
 import io.appium.java_client.remote.SupportsRotation;
 
@@ -84,5 +85,15 @@ class DeviceActionsTests
 
         verify(supportsRotation).rotate(ScreenOrientation.LANDSCAPE);
         verify(webDriverSessionInfo).reset(WebDriverSessionAttributes.SCREEN_SIZE);
+    }
+
+    @Test
+    void shouldPullFile()
+    {
+        var pullFileDriver = mock(PullsFiles.class);
+        when(webDriverProvider.getUnwrapped(PullsFiles.class)).thenReturn(pullFileDriver);
+        deviceActions.pullFile(DEVICE_FILE_PATH);
+        verify(pullFileDriver).pullFile(DEVICE_FILE_PATH);
+        verifyNoMoreInteractions(webDriverProvider);
     }
 }

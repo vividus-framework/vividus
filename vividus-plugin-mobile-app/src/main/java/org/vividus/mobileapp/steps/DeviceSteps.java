@@ -17,15 +17,18 @@
 package org.vividus.mobileapp.steps;
 
 import java.nio.file.Paths;
+import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.ScreenOrientation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.context.VariableContext;
 import org.vividus.mobileapp.action.DeviceActions;
 import org.vividus.steps.DataWrapper;
 import org.vividus.util.ResourceUtils;
+import org.vividus.variable.VariableScope;
 
 public class DeviceSteps
 {
@@ -33,11 +36,13 @@ public class DeviceSteps
 
     private final DeviceActions deviceActions;
     private final String folderForFileUpload;
+    private final VariableContext variableContext;
 
-    public DeviceSteps(String folderForFileUpload, DeviceActions deviceActions)
+    public DeviceSteps(String folderForFileUpload, DeviceActions deviceActions, VariableContext variableContext)
     {
         this.folderForFileUpload = folderForFileUpload;
         this.deviceActions = deviceActions;
+        this.variableContext = variableContext;
     }
 
     /**
@@ -79,13 +84,44 @@ public class DeviceSteps
      * @param filePath the path to an existing remote file on the device. This variable can be predefined with bundle
      * id to delete file inside an application bundle.
      * <p>See details for
-     * <a href="https://github.com/appium/appium-xcuitest-driver#mobile-deletefile">iOS</a>,
+     * <a href="https://appium.github.io/appium-xcuitest-driver/4.19/execute-methods/#mobile-deletefile">iOS</a>,
      * <a href="https://github.com/appium/appium-uiautomator2-driver#mobile-deletefile">Android</a>
      */
     @When("I delete file `$filePath` from device")
     public void deleteFileFromDevice(String filePath)
     {
         deviceActions.deleteFile(filePath);
+    }
+
+    /**
+     * Downloads a file at <b>filePath</b> from the device and save its content to <b>scopes</b> variables with name
+     * <b>variableName</b>.<br>
+     * Example:
+     * <br>
+     * <code>
+     * When I download file `$filePath` from device and save its content to $scopes variable `$variableName`
+     * </code>
+     *
+     * @param filePath The path to an existing remote file on the device. This parameter can be predefined
+     * with bundle id, then the file will be pulled from the root of the corresponding application container.
+     * See details for
+     * <a href="https://appium.github.io/appium-xcuitest-driver/4.19/execute-methods/#mobile-pullfile">iOS</a>,
+     * <a href="https://github.com/appium/appium-uiautomator2-driver#mobile-pullfile">Android</a>
+     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable scopes.<br>
+     * <i>Available scopes:</i>
+     * <ul>
+     * <li><b>STEP</b> - the variable will be available only within the step,
+     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     * <li><b>STORY</b> - the variable will be available within the whole story,
+     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * </ul>
+     * @param variableName The variable name to store the file content.
+     */
+    @When("I download file `$filePath` from device and save its content to $scopes variable `$variableName`")
+    public void downloadFileFromDevice(String filePath, Set<VariableScope> scopes, String variableName)
+    {
+        byte[] data = deviceActions.pullFile(filePath);
+        variableContext.putVariable(scopes, variableName, data);
     }
 
     /**

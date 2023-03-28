@@ -275,6 +275,46 @@ When I tap on element located by `xpath((//XCUIElementTypeImage[contains(@name, 
 Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='569x407'])` is equal to `1`
 
 
+Scenario: [Android] Verify step: 'When I download file `$filePath` from device and save its content to $scopes variable `$variableName`'
+Meta:
+    @targetPlatform android
+Given I initialize story variable `json` with value `
+{
+    "productId": 1,
+    "productName": "An ice sculpture",
+    "price": 12.50,
+    "tags": [ "cold", "ice" ],
+    "dimensions": {
+      "length": 7.0,
+      "width": 12.0,
+      "height": 9.5
+    },
+    "warehouseLocation": {
+      "latitude": -78.75,
+      "longitude": 20.4
+    }
+}
+`
+When I upload file with name `product.json` and data `${json}` to device
+When I download file `/sdcard/Pictures/product.json` from device and save its content to scenario variable `downloaded-json`
+Then JSON element from `${json}` by JSON path `$` is equal to `${downloaded-json}`
+
+
+Scenario: [iOS] Verify step: When I download file `$filePath` from device and save its content to $scopes variable `$variableName`
+Meta:
+    @targetPlatform ios
+When I tap on element located by `iosNsPredicate(name == 'selectImage')`
+When I wait until element located by `accessibilityId(Photos)` appears
+Then number of elements found by `xpath(//XCUIElementTypeImage[contains(@name, "Photo, March 13")])` is equal to `1`
+When I tap on element located by `accessibilityId(Cancel)`
+When I download file `/Media/DCIM/100APPLE/IMG_0001.JPG` from device and save its content to scenario variable `downloaded-image`
+When I upload file with name `downloaded-image.jpg` and data `${downloaded-image}` to device
+When I tap on element located by `iosNsPredicate(name == 'selectImage')`
+When I wait until element located by `accessibilityId(Photos)` appears
+Then number of elements found by `xpath(//XCUIElementTypeImage[contains(@name, "Photo, March 13")])` is equal to `2`
+When I tap on element located by `accessibilityId(Cancel)`
+
+
 Scenario: [Android] Verify step: 'When I delete file `$filePath` from device'
 Meta:
     @targetPlatform android
