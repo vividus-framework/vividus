@@ -17,6 +17,8 @@
 package org.vividus.ui.web.action;
 
 import java.net.URI;
+import java.util.Date;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -98,7 +100,7 @@ public class CookieManager implements ICookieManager
         BasicClientCookie httpClientCookie = new BasicClientCookie(seleniumCookie.getName(), seleniumCookie.getValue());
         httpClientCookie.setDomain(seleniumCookie.getDomain());
         httpClientCookie.setPath(seleniumCookie.getPath());
-        httpClientCookie.setExpiryDate(seleniumCookie.getExpiry().toInstant());
+        Optional.ofNullable(seleniumCookie.getExpiry()).map(Date::toInstant).ifPresent(httpClientCookie::setExpiryDate);
         httpClientCookie.setSecure(seleniumCookie.isSecure());
         httpClientCookie.setAttribute(org.apache.hc.client5.http.cookie.Cookie.DOMAIN_ATTR, seleniumCookie.getDomain());
         httpClientCookie.setAttribute(org.apache.hc.client5.http.cookie.Cookie.PATH_ATTR, seleniumCookie.getPath());
