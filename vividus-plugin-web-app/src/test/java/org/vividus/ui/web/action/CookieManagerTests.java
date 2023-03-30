@@ -24,10 +24,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Calendar;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
@@ -35,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -99,7 +103,7 @@ class CookieManagerTests
     void shouldGetCookie()
     {
         configureMockedWebDriver();
-        Cookie seleniumCookie = createSeleniumCookie();
+        Cookie seleniumCookie = createSeleniumCookie(null);
         when(options.getCookieNamed(COOKIE_NAME)).thenReturn(seleniumCookie);
         assertEquals(seleniumCookie, cookieManager.getCookie(COOKIE_NAME));
     }
@@ -108,15 +112,24 @@ class CookieManagerTests
     void shouldGetCookies()
     {
         configureMockedWebDriver();
-        Set<Cookie> expectedCookies = mockGetCookies(createSeleniumCookie());
+        Set<Cookie> expectedCookies = mockGetCookies(createSeleniumCookie(null));
         assertEquals(expectedCookies, cookieManager.getCookies());
     }
 
-    @Test
-    void shouldGetCookiesAsHttpCookieStore()
+    public static Stream<Date> expiryDates()
+    {
+        return Stream.of(
+                Date.from(ZonedDateTime.now().plusDays(1).toInstant()),
+                null
+        );
+    }
+
+    @MethodSource("expiryDates")
+    @ParameterizedTest
+    void shouldGetCookiesAsHttpCookieStore(Date expiryDate)
     {
         configureMockedWebDriver();
-        Cookie seleniumCookie = createSeleniumCookie();
+        Cookie seleniumCookie = createSeleniumCookie(expiryDate);
         mockGetCookies(seleniumCookie);
         CookieStore cookieStore = cookieManager.getCookiesAsHttpCookieStore();
         List<org.apache.hc.client5.http.cookie.Cookie> resultCookies = cookieStore.getCookies();
@@ -126,7 +139,8 @@ class CookieManagerTests
         BasicClientCookie clientCookie = (BasicClientCookie) httpCookie;
         assertAll(
             () -> assertEquals(seleniumCookie.getDomain(), clientCookie.getDomain()),
-            () -> assertEquals(seleniumCookie.getExpiry().toInstant(), clientCookie.getExpiryInstant()),
+            () -> assertEquals(expiryDate != null ? expiryDate.toInstant().truncatedTo(ChronoUnit.SECONDS) : null,
+                    clientCookie.getExpiryInstant()),
             () -> assertEquals(seleniumCookie.getName(), clientCookie.getName()),
             () -> assertEquals(seleniumCookie.getPath(), clientCookie.getPath()),
             () -> assertEquals(seleniumCookie.getValue(), clientCookie.getValue()),
@@ -145,11 +159,9 @@ class CookieManagerTests
         when(webDriver.manage()).thenReturn(options);
     }
 
-    private Cookie createSeleniumCookie()
+    private Cookie createSeleniumCookie(Date expiry)
     {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH) + 1);
-        return new Cookie(COOKIE_NAME, COOKIE_VALUE, DOMAIN, "cookiePath", calendar.getTime(), true);
+        return new Cookie(COOKIE_NAME, COOKIE_VALUE, DOMAIN, "cookiePath", expiry, true);
     }
 
     private Set<Cookie> mockGetCookies(Cookie cookie)
