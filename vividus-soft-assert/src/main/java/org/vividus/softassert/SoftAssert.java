@@ -17,6 +17,7 @@
 package org.vividus.softassert;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import com.google.common.eventbus.EventBus;
@@ -67,7 +68,13 @@ public class SoftAssert implements ISoftAssert
     @Override
     public boolean assertTrue(final String description, final boolean condition)
     {
-        return recordAssertion(condition, description, condition ? IS_TRUE : IS_FALSE);
+        return assertTrue(description, condition, null);
+    }
+
+    @Override
+    public boolean assertTrue(String description, boolean condition, Consumer<Boolean> resultConsumer)
+    {
+        return recordAssertionWithFinally(condition, description, condition ? IS_TRUE : IS_FALSE, resultConsumer);
     }
 
     @Override
@@ -207,9 +214,16 @@ public class SoftAssert implements ISoftAssert
     @Override
     public <T> boolean assertThat(String description, T actual, Matcher<? super T> matcher)
     {
+        return assertThat(description, actual, matcher, null);
+    }
+
+    @Override
+    public <T> boolean assertThat(String description, T actual, Matcher<? super T> matcher,
+            Consumer<Boolean> resultConsumer)
+    {
         boolean matches = matcher.matches(actual);
         String matcherDescriptionString = getAssertionDescriptionString(actual, matcher);
-        return recordAssertion(matches, description, matcherDescriptionString);
+        return recordAssertionWithFinally(matches, description, matcherDescriptionString, resultConsumer);
     }
 
     protected String getNullAssertionDescription(final Object object)
@@ -311,6 +325,22 @@ public class SoftAssert implements ISoftAssert
     private boolean recordAssertion(boolean passed, String description, String assertionDescription)
     {
         return recordAssertion(passed, format(description, assertionDescription));
+    }
+
+    private boolean recordAssertionWithFinally(boolean passed, String description, String assertionDescription,
+            Consumer<Boolean> resultConsumer)
+    {
+        try
+        {
+            return recordAssertion(passed, format(description, assertionDescription));
+        }
+        finally
+        {
+            if (resultConsumer != null)
+            {
+                resultConsumer.accept(passed);
+            }
+        }
     }
 
     private boolean recordAssertion(boolean passed, String description, Throwable cause)

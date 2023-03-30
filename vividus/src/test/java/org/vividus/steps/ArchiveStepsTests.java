@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package org.vividus.steps;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 import static org.vividus.steps.StringComparisonRule.CONTAINS;
 import static org.vividus.steps.StringComparisonRule.DOES_NOT_CONTAIN;
 import static org.vividus.steps.StringComparisonRule.IS_EQUAL_TO;
@@ -31,12 +33,14 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.vividus.context.VariableContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
@@ -98,17 +102,20 @@ class ArchiveStepsTests
     void testVerifyArchiveContainsEntries()
     {
         var archiveEntries = createArchiveEntries();
+        lenient().doAnswer(getAssertionAnswer(false)).when(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + DUMMY),
+                eq(archiveEntries), argThat(e -> !e.matches(archiveEntries)), any());
+
         archiveSteps.verifyArchiveContainsEntries(createArchiveData(), List.of(
                 createEntry(FILE_JSON, null),
                 createEntry(IMAGE_PNG, null),
                 createEntry(DUMMY, null)
         ));
         verify(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + FILE_JSON), eq(archiveEntries),
-                argThat(e -> e.matches(archiveEntries)));
+                argThat(e -> e.matches(archiveEntries)), any());
         verify(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + IMAGE_PNG), eq(archiveEntries),
-                argThat(e -> e.matches(archiveEntries)));
+                argThat(e -> e.matches(archiveEntries)), any());
         verify(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + DUMMY), eq(archiveEntries),
-                argThat(e -> !e.matches(archiveEntries)));
+                argThat(e -> !e.matches(archiveEntries)), any());
         verifyNoMoreInteractions(softAssert);
         verifyPublishAttachment(archiveEntries);
         verifyNoMoreInteractions(attachmentPublisher);
@@ -118,38 +125,40 @@ class ArchiveStepsTests
     void testVerifyArchiveContainsEntriesIsPassed()
     {
         var archiveEntries = createArchiveEntries();
-        when(softAssert.assertThat(eq(CONTAINS_ENTRY_WITH_NAME + IMAGE_PNG), eq(archiveEntries),
-                argThat(e -> e.matches(archiveEntries)))).thenReturn(true);
-        when(softAssert.assertThat(eq(CONTAINS_ENTRY_WITH_NAME + FILE_JSON), eq(archiveEntries),
-                argThat(e -> e.matches(archiveEntries)))).thenReturn(true);
+        doAnswer(getAssertionAnswer(true)).when(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + IMAGE_PNG),
+                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)), any());
+        doAnswer(getAssertionAnswer(true)).when(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + FILE_JSON),
+                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)), any());
+
         archiveSteps.verifyArchiveContainsEntries(createArchiveData(), List.of(
                 createEntry(FILE_JSON, null),
                 createEntry(IMAGE_PNG, null)
         ));
         verify(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + FILE_JSON), eq(archiveEntries),
-                argThat(e -> e.matches(archiveEntries)));
+                argThat(e -> e.matches(archiveEntries)), any());
         verify(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + IMAGE_PNG), eq(archiveEntries),
-                argThat(e -> e.matches(archiveEntries)));
+                argThat(e -> e.matches(archiveEntries)), any());
         verifyNoMoreInteractions(softAssert);
         verifyNoInteractions(attachmentPublisher);
     }
 
     @Test
-    void testVerifyArchiveContainsEntriesIsFailled()
+    void testVerifyArchiveContainsEntriesIsFailed()
     {
         var archiveEntries = createArchiveEntries();
-        when(softAssert.assertThat(eq(CONTAINS_ENTRY_WITH_NAME + IMAGE_PNG), eq(archiveEntries),
-                argThat(e -> e.matches(archiveEntries)))).thenReturn(true);
-        when(softAssert.assertThat(eq(CONTAINS_ENTRY_WITH_NAME + DUMMY), eq(archiveEntries),
-                argThat(e -> !e.matches(archiveEntries)))).thenReturn(false);
+        doAnswer(getAssertionAnswer(false)).when(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + DUMMY),
+                eq(archiveEntries), argThat(e -> !e.matches(archiveEntries)), any());
+        doAnswer(getAssertionAnswer(true)).when(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + IMAGE_PNG),
+                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)), any());
+
         archiveSteps.verifyArchiveContainsEntries(createArchiveData(), List.of(
                 createEntry(DUMMY, null),
                 createEntry(IMAGE_PNG, null)
         ));
         verify(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + DUMMY), eq(archiveEntries),
-                argThat(e -> !e.matches(archiveEntries)));
+                argThat(e -> !e.matches(archiveEntries)), any());
         verify(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + IMAGE_PNG), eq(archiveEntries),
-                argThat(e -> e.matches(archiveEntries)));
+                argThat(e -> e.matches(archiveEntries)), any());
         verifyNoMoreInteractions(softAssert);
         verifyPublishAttachment(archiveEntries);
         verifyNoMoreInteractions(attachmentPublisher);
@@ -159,18 +168,21 @@ class ArchiveStepsTests
     void testVerifyArchiveContainsEntriesWithUserRulesIsFailed()
     {
         var archiveEntries = createArchiveEntries();
-        when(softAssert.assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, DUMMY)),
-                eq(archiveEntries), argThat(e -> !e.matches(archiveEntries)))).thenReturn(false);
-        when(softAssert.assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATCHES_PATTERN)),
-                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)))).thenReturn(true);
+        doAnswer(getAssertionAnswer(false)).when(softAssert).assertThat(
+                eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, DUMMY)), eq(archiveEntries),
+                argThat(e -> !e.matches(archiveEntries)), any());
+        doAnswer(getAssertionAnswer(true)).when(softAssert).assertThat(
+                eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATCHES_PATTERN)), eq(archiveEntries),
+                argThat(e -> e.matches(archiveEntries)), any());
+
         archiveSteps.verifyArchiveContainsEntries(createArchiveData(), List.of(
                 createEntry(DUMMY, MATCHES),
                 createEntry(MATCHES_PATTERN, MATCHES)
         ));
         verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, DUMMY)),
-                eq(archiveEntries), argThat(e -> !e.matches(archiveEntries)));
+                eq(archiveEntries), argThat(e -> !e.matches(archiveEntries)), any());
         verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATCHES_PATTERN)),
-                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)));
+                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)), any());
         verifyNoMoreInteractions(softAssert);
         verifyPublishAttachment(archiveEntries);
         verifyNoMoreInteractions(attachmentPublisher);
@@ -180,13 +192,14 @@ class ArchiveStepsTests
     void testVerifyArchiveContainsEntriesWithUserRulesIsPassed()
     {
         var archiveEntries = createArchiveEntries();
-        when(softAssert.assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATCHES_PATTERN)),
-                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)))).thenReturn(true);
-        archiveSteps.verifyArchiveContainsEntries(createArchiveData(), List.of(
-                createEntry(MATCHES_PATTERN, MATCHES)
+        doAnswer(getAssertionAnswer(true)).when(softAssert).assertThat(
+                eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATCHES_PATTERN)), eq(archiveEntries),
+                argThat(e -> e.matches(archiveEntries)), any());
+
+        archiveSteps.verifyArchiveContainsEntries(createArchiveData(), List.of(createEntry(MATCHES_PATTERN, MATCHES)
         ));
         verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATCHES_PATTERN)),
-                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)));
+                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)), any());
         verifyNoMoreInteractions(softAssert);
         verifyNoInteractions(attachmentPublisher);
     }
@@ -194,22 +207,35 @@ class ArchiveStepsTests
     @Test
     void testVerifyArchiveContainsEntriesWithUserRules()
     {
-        var containsPattern = "file";
         var archiveEntries = createArchiveEntries();
+        doAnswer(getAssertionAnswer(true)).when(softAssert).assertThat(
+                eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATCHES_PATTERN)), eq(archiveEntries),
+                argThat(e -> e.matches(archiveEntries)), any());
+        doAnswer(getAssertionAnswer(false)).when(softAssert).assertThat(
+                eq(String.format(CONTAINS_ENTRY_WITH_RULE, CONTAINS, DUMMY)), eq(archiveEntries),
+                argThat(e -> !e.matches(archiveEntries)), any());
+        doAnswer(getAssertionAnswer(false)).when(softAssert).assertThat(
+                eq(String.format(CONTAINS_ENTRY_WITH_RULE, IS_EQUAL_TO, DUMMY)), eq(archiveEntries),
+                argThat(e -> !e.matches(archiveEntries)), any());
+        doAnswer(getAssertionAnswer(true)).when(softAssert).assertThat(
+                eq(String.format(CONTAINS_ENTRY_WITH_RULE, DOES_NOT_CONTAIN, DUMMY)), eq(archiveEntries),
+                argThat(e -> e.matches(archiveEntries)), any());
+
         archiveSteps.verifyArchiveContainsEntries(createArchiveData(), List.of(
                 createEntry(MATCHES_PATTERN, MATCHES),
-                createEntry(containsPattern, CONTAINS),
+                createEntry(DUMMY, CONTAINS),
                 createEntry(DUMMY, IS_EQUAL_TO),
                 createEntry(DUMMY, DOES_NOT_CONTAIN)
         ));
+
         verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, MATCHES, MATCHES_PATTERN)),
-                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)));
-        verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, CONTAINS, containsPattern)),
-                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)));
+                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)), any());
+        verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, CONTAINS, DUMMY)),
+                eq(archiveEntries), argThat(e -> !e.matches(archiveEntries)), any());
         verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, IS_EQUAL_TO, DUMMY)),
-                eq(archiveEntries), argThat(e -> !e.matches(archiveEntries)));
+                eq(archiveEntries), argThat(e -> !e.matches(archiveEntries)), any());
         verify(softAssert).assertThat(eq(String.format(CONTAINS_ENTRY_WITH_RULE, DOES_NOT_CONTAIN, DUMMY)),
-                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)));
+                eq(archiveEntries), argThat(e -> e.matches(archiveEntries)), any());
         verifyNoMoreInteractions(softAssert);
         verifyPublishAttachment(archiveEntries);
         verifyNoMoreInteractions(attachmentPublisher);
@@ -241,6 +267,16 @@ class ArchiveStepsTests
         archiveEntries.add(IMAGE_PNG);
         archiveEntries.add(FILE_JSON);
         return archiveEntries;
+    }
+
+    private Answer getAssertionAnswer(boolean assertionPassed)
+    {
+        return a ->
+        {
+            Consumer<Boolean> consumer = a.getArgument(3);
+            consumer.accept(assertionPassed);
+            return null;
+        };
     }
 
     private static ArchiveVariable createVariable(String path, String variableName, OutputFormat outputFormat)

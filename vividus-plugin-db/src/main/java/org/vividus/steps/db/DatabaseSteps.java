@@ -30,6 +30,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -318,11 +319,16 @@ public class DatabaseSteps
     {
         attachmentPublisher.publishAttachment("data-sources-statistics.ftl", Map.of("statistics", dataSourceStatistics),
                 "Data sources statistics");
-        if (!softAssert.assertTrue(comparisonRule.getAssertionDescription(), result.isEmpty()))
+
+        Consumer<Boolean> resultConsumer = passed ->
         {
-            attachmentPublisher.publishAttachment("/templates/maps-comparison-table.ftl", Map.of("results", result),
-                    "Data sets comparison");
-        }
+            if (!passed)
+            {
+                attachmentPublisher.publishAttachment("/templates/maps-comparison-table.ftl", Map.of("results", result),
+                        "Data sets comparison");
+            }
+        };
+        softAssert.assertTrue(comparisonRule.getAssertionDescription(), result.isEmpty(), resultConsumer);
     }
 
     /**

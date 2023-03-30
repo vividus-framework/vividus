@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -297,7 +298,7 @@ class DatabaseStepsTests
         List<Map<String, Object>> result = List.of(Map.of(COL1, VAL1), Map.of(COL1, VAL1), Map.of(COL1, VAL3));
         mockQueryForList(QUERY, DB_KEY, result);
         mockQueryForList(QUERY2, DB_KEY2, List.of(Map.of(COL1, VAL2)));
-        when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, false)).thenReturn(false);
+        doAnswer(getAssertionAnswer(false)).when(softAssert).assertTrue(eq(QUERY_RESULTS_ARE_EQUAL), eq(false), any());
         mockHashing();
         configureTimeout();
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.DISTINCT);
@@ -351,7 +352,7 @@ class DatabaseStepsTests
         List<Map<String, Object>> result = List.of(Map.of(COL1, VAL1), Map.of(COL1, VAL3));
         mockQueryForList(QUERY, DB_KEY, result);
         mockQueryForList(QUERY, DB_KEY2, List.of(Map.of(COL1, VAL2)));
-        when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, false)).thenReturn(false);
+        doAnswer(getAssertionAnswer(false)).when(softAssert).assertTrue(eq(QUERY_RESULTS_ARE_EQUAL), eq(false), any());
         mockHashing();
         configureTimeout();
         databaseSteps.compareData(QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, QUERY, DB_KEY2, KEYS);
@@ -453,7 +454,8 @@ class DatabaseStepsTests
     void shouldCompareDataVsExamplesTableAndPostReportFailedChecks(DataSetComparisonRule comparisonRule,
             List<Map<String, Object>> leftDataSet, List<Map<String, String>> rightDataSet)
     {
-        when(softAssert.assertTrue(comparisonRule.getAssertionDescription(), false)).thenReturn(false);
+        doAnswer(getAssertionAnswer(false)).when(softAssert).assertTrue(eq(comparisonRule.getAssertionDescription()),
+                eq(false), any());
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
         mockHashing();
         mockDataSource();
@@ -508,11 +510,11 @@ class DatabaseStepsTests
     {
         databaseSteps.setDuplicateKeysStrategy(DuplicateKeysStrategy.NOOP);
         mockQueryForList(QUERY, DB_KEY, List.of(Map.of(COL1, VAL2)));
-        when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
+        doAnswer(getAssertionAnswer(true)).when(softAssert).assertTrue(eq(QUERY_RESULTS_ARE_EQUAL), eq(true), any());
         databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, TABLE);
         verify(attachmentPublisher).publishAttachment(eq(DATA_SOURCES_STATISTICS_FTL),
                 any(Map.class), eq(DATA_SOURCES_STATISTICS_TITLE));
-        verify(softAssert).assertTrue(QUERY_RESULTS_ARE_EQUAL, true);
+        verify(softAssert).assertTrue(eq(QUERY_RESULTS_ARE_EQUAL), eq(true), any());
     }
 
     @Test
@@ -529,11 +531,11 @@ class DatabaseStepsTests
                 .thenReturn(List.of(Map.of(COL1, VAL1)))
                 .thenReturn(List.of(Map.of(COL1, VAL2)));
 
-        when(softAssert.assertTrue(QUERY_RESULTS_ARE_EQUAL, true)).thenReturn(true);
+        doAnswer(getAssertionAnswer(true)).when(softAssert).assertTrue(eq(QUERY_RESULTS_ARE_EQUAL), eq(true), any());
         databaseSteps.waitForDataAppearance(TWO_SECONDS, 10, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO, TABLE);
         verify(attachmentPublisher).publishAttachment(eq(DATA_SOURCES_STATISTICS_FTL),
                 any(Map.class), eq(DATA_SOURCES_STATISTICS_TITLE));
-        verify(softAssert).assertTrue(QUERY_RESULTS_ARE_EQUAL, true);
+        verify(softAssert).assertTrue(eq(QUERY_RESULTS_ARE_EQUAL), eq(true), any());
     }
 
     @Test
@@ -549,6 +551,7 @@ class DatabaseStepsTests
         when(jdbcTemplate.queryForList(QUERY))
                 .thenReturn(List.of(Map.of(COL1, VAL1)))
                 .thenReturn(List.of(Map.of(COL1, VAL3)));
+        doAnswer(getAssertionAnswer(false)).when(softAssert).assertTrue(eq(QUERY_RESULTS_ARE_EQUAL), eq(false), any());
 
         databaseSteps.waitForDataAppearance(Duration.ofSeconds(4), 2, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO,
                 TABLE);
@@ -556,7 +559,7 @@ class DatabaseStepsTests
         assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info(logMessage, 1), info(logMessage, 1))));
         verify(attachmentPublisher).publishAttachment(eq(DATA_SOURCES_STATISTICS_FTL),
                 any(Map.class), eq(DATA_SOURCES_STATISTICS_TITLE));
-        verify(softAssert).assertTrue(QUERY_RESULTS_ARE_EQUAL, false);
+        verify(softAssert).assertTrue(eq(QUERY_RESULTS_ARE_EQUAL), eq(false), any());
         verify(attachmentPublisher).publishAttachment(eq(DATA_SET_COMPARISON_FTL), argThat(r -> {
             @SuppressWarnings("unchecked")
             List<List<EntryComparisonResult>> results = (List<List<EntryComparisonResult>>) ((Map<?, ?>) r)
@@ -649,5 +652,15 @@ class DatabaseStepsTests
     private void configureTimeout()
     {
         databaseSteps.setDbQueryTimeout(Duration.ofSeconds(20));
+    }
+
+    private Answer getAssertionAnswer(boolean assertionPassed)
+    {
+        return a ->
+        {
+            Consumer<Boolean> consumer = a.getArgument(2);
+            consumer.accept(assertionPassed);
+            return null;
+        };
     }
 }
