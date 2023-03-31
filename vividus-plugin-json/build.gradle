@@ -14,7 +14,7 @@ dependencies {
     implementation(group: 'io.qameta.allure', name: 'allure-jsonunit', version: versions.allure) {
         exclude (group: 'io.qameta.allure')
     }
-    implementation(group: 'com.networknt', name: 'json-schema-validator', version: '1.0.78');
+    implementation(group: 'com.networknt', name: 'json-schema-validator', version: '1.0.79');
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.2')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
