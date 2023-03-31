@@ -101,7 +101,7 @@ class EvalExpressionProcessorTests
     {
         var exception = assertThrows(JexlException.Variable.class, () -> processor.execute("eval(missingVar + 'val')"));
         assertEquals(
-                "org.vividus.expression.EvalExpressionProcessor.lambda$new$0:49 variable 'missingVar' is undefined",
+                "org.vividus.expression.EvalExpressionProcessor.lambda$new$0:52@1:1 variable 'missingVar' is undefined",
                 exception.getMessage());
     }
 
@@ -109,7 +109,7 @@ class EvalExpressionProcessorTests
     void shouldThrowAnExceptionInCaseOfSyntaxError()
     {
         var exception = assertThrows(JexlException.Parsing.class, () -> processor.execute("eval(var + 'val')"));
-        assertEquals("org.vividus.expression.EvalExpressionProcessor.lambda$new$0:49@1:1 parsing error in 'var'",
+        assertEquals("org.vividus.expression.EvalExpressionProcessor.lambda$new$0:52@1:1 parsing error in 'var'",
                 exception.getMessage());
     }
 }

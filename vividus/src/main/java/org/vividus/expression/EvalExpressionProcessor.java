@@ -26,6 +26,7 @@ import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlScript;
 import org.apache.commons.jexl3.MapContext;
+import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 import org.jbehave.core.expressions.SingleArgExpressionProcessor;
@@ -34,8 +35,10 @@ import org.vividus.context.VariableContext;
 @Named
 public class EvalExpressionProcessor extends SingleArgExpressionProcessor<String>
 {
+    @SuppressWarnings({ "checkstyle:TodoComment", "checkstyle:TrailingComment" })
     private static final JexlEngine JEXL_ENGINE = new JexlBuilder()
             .charset(StandardCharsets.UTF_8)
+            .permissions(JexlPermissions.UNRESTRICTED) // TODO: Change to RESTRICTED in VIVIDUS 0.6.0
             .namespaces(Map.of(
                     "math", Math.class,
                     "stringUtils", StringUtils.class,
