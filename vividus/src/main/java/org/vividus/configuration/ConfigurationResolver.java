@@ -291,8 +291,7 @@ public final class ConfigurationResolver
             Properties overridingProperties, String propertyName)
     {
         String value = System.getProperty(VIVIDUS_SYSTEM_PROPERTY_FAMILY + propertyName,
-                System.getProperty(VIVIDUS_SYSTEM_PROPERTY_FAMILY + propertyName,
-                        System.getProperty(propertyName, System.getProperty(propertyName))));
+                System.getProperty(propertyName));
         if (value == null)
         {
             value = overridingProperties.getProperty(propertyName);
