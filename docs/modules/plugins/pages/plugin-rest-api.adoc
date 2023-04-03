@@ -445,23 +445,51 @@ Given form data request:
 
 === Add HTTP headers to the request
 
-Adds https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields[HTTP headers] to the HTTP request.
+Adds https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields[HTTP headers] to the existing HTTP headers of the building HTTP request.
+
+NOTE: The added HTTP headers are scoped to the first performed HTTP request and not available afterwards.
 
 [source,gherkin]
 ----
 When I add request headers:$headers
 ----
 
-* `headers` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing the list of the headers with columns `name` and `value` specifying HTTP header
+* `headers` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing the list of the headers with columns `name` and `value` specifying HTTP header.
 
-.Add request header with name Accept-Language and value en-ru
+.Add request header with name `Accept-Language` and value `en-us`
 [source,gherkin]
 ----
 When I add request headers:
 |name           |value |
-|Accept-Language|en-ru |
-When I send HTTP GET to the relative URL '/get?name=Content'
-Then a JSON element by the JSON path '$.headers.Accept-Language' is equal to '"en-ru"'
+|Accept-Language|en-us |
+When I execute HTTP GET request for resource with relative URL `/get?name=Content`
+When I save JSON element value from `${response}` by JSON path `$.headers.Accept-Language` to scenario variable `language`
+Then `${language}` is equal to `"en-us"`
+----
+
+=== Set HTTP headers to the request
+
+Sets https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields[HTTP headers] to the building HTTP request. Previously set HTTP headers are discarded.
+
+NOTE: The added HTTP headers are scoped to the first performed HTTP request and not available afterwards.
+
+[source,gherkin]
+----
+When I set request headers:$headers
+----
+
+* `headers` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] representing the list of the headers with columns `name` and `value` specifying HTTP header.
+
+.Set request header with name `Content-Type` and value `application/json`
+[source,gherkin]
+----
+When I set request headers:
+|name        |value           |
+|Content-Type|application/json|
+Given request body: {
+  "type": "article"
+}
+When I execute HTTP POST request for resource with URL `https://api.example.com/entries`
 ----
 
 === Execute HTTP request with absolute URL
