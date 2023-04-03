@@ -45,9 +45,6 @@
         </property>
     </bean>
 
-    <bean id="SIMPLE" class="org.vividus.selenium.screenshot.strategies.SimpleScreenshotShootingStrategy" />
-    <bean id="VIEWPORT_PASTING" class="org.vividus.selenium.screenshot.strategies.ViewportPastingScreenshotShootingStrategy" />
-
     <bean id="scrollbarHandler" class="org.vividus.selenium.screenshot.ScrollbarHandler">
         <property name="webDriverManager" ref="webDriverManager" />
         <property name="webDriverProvider" ref="webDriverProvider" />

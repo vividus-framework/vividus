@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import java.util.Optional;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
 import org.vividus.selenium.screenshot.strategies.AdjustingViewportPastingDecorator;
-import org.vividus.selenium.screenshot.strategies.ScreenshotShootingStrategy;
-import org.vividus.selenium.screenshot.strategies.SimpleScreenshotShootingStrategy;
 import org.vividus.selenium.screenshot.strategies.StickyHeaderCutStrategy;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
@@ -35,6 +33,8 @@ import pazone.ashot.coordinates.CoordsProvider;
 
 public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameters>
 {
+    private static final int SCROLL_TIMEOUT = 500;
+
     private final ScreenshotDebugger screenshotDebugger;
     private final IScrollbarHandler scrollbarHandler;
     private final WebJavascriptActions javascriptActions;
@@ -104,15 +104,27 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
         return new ScrollbarHidingDecorator(strategy, scrollableElement, scrollbarHandler);
     }
 
-    private AShot createAShot(String screenshotShootingStrategyName)
+    private AShot createAShot(String strategyName)
     {
-        ScreenshotShootingStrategy configured = getStrategyBy(screenshotShootingStrategyName);
         ShootingStrategy baseShootingStrategy = getBaseShootingStrategy();
-        ShootingStrategy shootingStrategy = configured.getDecoratedShootingStrategy(baseShootingStrategy);
+        ShootingStrategy shootingStrategy;
+        CoordsProvider coordsProvider;
+        switch (strategyName)
+        {
+            case "SIMPLE":
+                shootingStrategy = baseShootingStrategy;
+                coordsProvider = CeilingJsCoordsProvider.getSimple(javascriptActions);
+                break;
+            case "VIEWPORT_PASTING":
+                shootingStrategy = new AdjustingViewportPastingDecorator(baseShootingStrategy, 0, 0)
+                        .withScrollTimeout(SCROLL_TIMEOUT);
+                coordsProvider = CeilingJsCoordsProvider.getScrollAdjusted(javascriptActions);
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        String.format("Unknown shooting strategy with the name: %s", strategyName));
+        }
         shootingStrategy = decorateWithScrollbarHiding(shootingStrategy, Optional.empty());
-        CoordsProvider coordsProvider = configured instanceof SimpleScreenshotShootingStrategy
-                ? CeilingJsCoordsProvider.getSimple(javascriptActions)
-                : CeilingJsCoordsProvider.getScrollAdjusted(javascriptActions);
         return new AShot().shootingStrategy(shootingStrategy)
                 .coordsProvider(new ScrollBarHidingCoordsProviderDecorator(coordsProvider, scrollbarHandler));
     }

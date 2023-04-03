@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,10 @@ package org.vividus.selenium.screenshot;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -34,7 +31,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.selenium.screenshot.strategies.ScreenshotShootingStrategy;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
 import pazone.ashot.AShot;
@@ -46,28 +42,15 @@ import pazone.ashot.ShootingStrategy;
 @ExtendWith(MockitoExtension.class)
 class AbstractAshotFactoryTests
 {
-    private static final String DEFAULT = "default";
-
     @Mock private ScreenshotCropper screenshotCropper;
     @InjectMocks private TestAshotFactory factory;
 
     @Test
-    void shouldThrowAnExceptionIfThereIsNoStrategyByTheName()
+    void shouldStoreStrategyName()
     {
-        factory.setStrategies(Map.of());
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> factory.getStrategyBy("podsas"));
-        assertEquals("Unable to find the strategy with the name: podsas", exception.getMessage());
-    }
-
-    @Test
-    void shouldReturnStrategyByName()
-    {
-        var strategy = mock(ScreenshotShootingStrategy.class);
-        factory.setStrategies(Map.of(DEFAULT, strategy));
-        factory.setScreenshotShootingStrategy(DEFAULT);
-        factory.create(Optional.empty());
-        assertSame(strategy, factory.strategy);
+        var simple = "simple";
+        factory.setScreenshotShootingStrategy(simple);
+        assertSame(simple, factory.getScreenshotShootingStrategy());
     }
 
     @ParameterizedTest
@@ -77,7 +60,7 @@ class AbstractAshotFactoryTests
     })
     void shouldNotConfigurePartialsToCut()
     {
-        ShootingStrategy simple = ShootingStrategies.simple();
+        var simple = ShootingStrategies.simple();
         assertSame(simple, factory.decorateWithFixedCutStrategy(simple, 0, 0));
     }
 
@@ -106,9 +89,6 @@ class AbstractAshotFactoryTests
 
     private static final class TestAshotFactory extends AbstractAshotFactory<ScreenshotParameters>
     {
-        private static final double DPR = 101d;
-        private ScreenshotShootingStrategy strategy;
-
         TestAshotFactory(ScreenshotCropper screenshotCropper)
         {
             super(screenshotCropper);
@@ -117,16 +97,13 @@ class AbstractAshotFactoryTests
         @Override
         public AShot create(Optional<ScreenshotParameters> screenshotParameters)
         {
-            String strategyName = screenshotParameters.flatMap(ScreenshotParameters::getShootingStrategy)
-                    .orElseGet(this::getScreenshotShootingStrategy);
-            this.strategy = getStrategyBy(strategyName);
-            return new AShot();
+            throw new UnsupportedOperationException();
         }
 
         @Override
         protected double getDpr()
         {
-            return DPR;
+            throw new UnsupportedOperationException();
         }
     }
 }

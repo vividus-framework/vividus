@@ -62,16 +62,14 @@ When I <action> baseline with name `context-element-cut` ignoring:
 Scenario: Validation of step "When I $actionType baseline with `$name` ignoring:$checkSettings" for context element not in viewport with element cut
 When I change context to element located by `xpath(.//p[last()])`
 When I <action> baseline with name `not-viewport-context-element-cut` ignoring:
-|ELEMENT            |
+|ELEMENT         |
 |cssSelector(img)|
-
+When I reset context
 
 Scenario: Validation of step When I $actionType baseline with name `$name` for full page with element/area cut
-When I reset context
 When I <action> baseline with name `full-page-with-scroll-element-area-cut` ignoring:
 |ELEMENT                                             |AREA                                                |
 |xpath(//p[position() mod 2 = 1 and position() > 10])|xpath(//p[position() mod 2 = 1 and position() < 10])|
-
 
 Scenario: Validation of cut for whole page and context
 When I <action> baseline with name `cuts-full-page` using screenshot configuration:
@@ -81,7 +79,15 @@ When I change context to element located by `<firstP>`
 When I <action> baseline with name `cuts-context` using screenshot configuration:
 |cutTop|cutBottom|cutLeft|cutRight|
 |50    |60       |800    |1000    |
+When I reset context
 
+Scenario: Validation of viewport visual check with sticky header cut at right
+Meta:
+    @issueId 3790
+When I scroll context to bottom edge
+When I <action> baseline with name `viewport-with-sticky-header-cut-at-right` using screenshot configuration:
+|cutRight|shootingStrategy|
+|100     |SIMPLE          |
 
 Scenario: Validation of contextual visual testing on a page with scrollable element
 Given I am on page with URL `${vividus-test-site-url}/visualTestIntegration.html`

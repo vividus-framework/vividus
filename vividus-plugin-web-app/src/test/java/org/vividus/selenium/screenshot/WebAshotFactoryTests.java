@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
-import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,10 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
 import org.vividus.selenium.screenshot.strategies.AdjustingViewportPastingDecorator;
-import org.vividus.selenium.screenshot.strategies.SimpleScreenshotShootingStrategy;
 import org.vividus.selenium.screenshot.strategies.StickyHeaderCutStrategy;
-import org.vividus.selenium.screenshot.strategies.ViewportPastingScreenshotShootingStrategy;
-import org.vividus.selenium.screenshot.strategies.ViewportShootingStrategy;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
@@ -65,37 +61,45 @@ class WebAshotFactoryTests
 
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private ScreenshotDebugger screenshotDebugger;
-    @InjectMocks private WebAshotFactory webAshotFactory;
-
-    @BeforeEach
-    void beforeEach()
-    {
-        when(javascriptActions.getDevicePixelRatio()).thenReturn(2d);
-    }
+    @InjectMocks private WebAshotFactory factory;
 
     @Test
     void shouldCreateAshotViaScreenshotShootingStrategyIfThereIsNoConfigurationFound() throws IllegalAccessException
     {
-        webAshotFactory.setStrategies(Map.of(VIEWPORT_PASTING, new ViewportPastingScreenshotShootingStrategy()));
-        webAshotFactory.setScreenshotShootingStrategy(VIEWPORT_PASTING);
-        AShot aShot = webAshotFactory.create(Optional.empty());
+        when(javascriptActions.getDevicePixelRatio()).thenReturn(2d);
+        factory.setScreenshotShootingStrategy(VIEWPORT_PASTING);
+        var aShot = factory.create(Optional.empty());
         validateCoordsProvider(aShot);
-        ShootingStrategy baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
+        var baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
         assertThat(baseStrategy, instanceOf(ScrollbarHidingDecorator.class));
-        assertThat(FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true),
-                instanceOf(AdjustingViewportPastingDecorator.class));
+        var actualShootingStrategy = FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true);
+        assertThat(actualShootingStrategy, instanceOf(AdjustingViewportPastingDecorator.class));
+        var adjustingViewportPastingDecorator = (AdjustingViewportPastingDecorator) actualShootingStrategy;
+        assertEquals(0, adjustingViewportPastingDecorator.getHeaderAdjustment());
+        assertEquals(0, adjustingViewportPastingDecorator.getFooterAdjustment());
+    }
+
+    @Test
+    void shouldThrowAnExceptionIfThereIsNoStrategyByTheName()
+    {
+        var strategyName = "unknown";
+        var screenshotParameters = new WebScreenshotParameters();
+        screenshotParameters.setShootingStrategy(Optional.of(strategyName));
+        var parameters = Optional.of(screenshotParameters);
+        var exception = assertThrows(IllegalArgumentException.class, () -> factory.create(parameters));
+        assertEquals("Unknown shooting strategy with the name: " + strategyName, exception.getMessage());
     }
 
     @Test
     void shouldCreateAshotViaScreenshotShootingStrategyUsingStrategyFromConfiguration() throws IllegalAccessException
     {
-        webAshotFactory.setStrategies(Map.of(VIEWPORT_PASTING, new ViewportPastingScreenshotShootingStrategy()));
-        webAshotFactory.setScreenshotShootingStrategy(SIMPLE);
-        WebScreenshotParameters screenshotParameters = new WebScreenshotParameters();
+        when(javascriptActions.getDevicePixelRatio()).thenReturn(2d);
+        factory.setScreenshotShootingStrategy(SIMPLE);
+        var screenshotParameters = new WebScreenshotParameters();
         screenshotParameters.setShootingStrategy(Optional.of(VIEWPORT_PASTING));
-        AShot aShot = webAshotFactory.create(Optional.of(screenshotParameters));
+        var aShot = factory.create(Optional.of(screenshotParameters));
         validateCoordsProvider(aShot);
-        ShootingStrategy baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
+        var baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
         assertThat(baseStrategy, instanceOf(ScrollbarHidingDecorator.class));
         assertThat(FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true),
                 instanceOf(AdjustingViewportPastingDecorator.class));
@@ -104,56 +108,56 @@ class WebAshotFactoryTests
     @Test
     void shouldCreateAshotViaWithSimpleCoords() throws IllegalAccessException
     {
-        webAshotFactory.setStrategies(Map.of(SIMPLE, new SimpleScreenshotShootingStrategy()));
-        webAshotFactory.setScreenshotShootingStrategy(SIMPLE);
-        AShot aShot = webAshotFactory.create(Optional.empty());
+        when(javascriptActions.getDevicePixelRatio()).thenReturn(2d);
+        factory.setScreenshotShootingStrategy(SIMPLE);
+        var aShot = factory.create(Optional.empty());
         validateCoordsProvider(aShot);
-        ShootingStrategy baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
+        var baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
         assertThat(baseStrategy, instanceOf(ScrollbarHidingDecorator.class));
-        assertThat(FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true),
-                instanceOf(ViewportShootingStrategy.class));
+        assertThat(FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true), instanceOf(ScalingDecorator.class));
     }
 
     @Test
     void shouldCreateAshotWithCuttingStrategiesForNativeWebHeadersFooters() throws IllegalAccessException
     {
-        WebScreenshotParameters screenshotParameters = new WebScreenshotParameters();
+        var screenshotParameters = new WebScreenshotParameters();
         screenshotParameters.setNativeFooterToCut(TEN);
-        WebCutOptions webCutOptions = new WebCutOptions(TEN, TEN);
+        var webCutOptions = new WebCutOptions(TEN, TEN);
         screenshotParameters.setWebCutOptions(webCutOptions);
         screenshotParameters.setShootingStrategy(Optional.empty());
         screenshotParameters.setWebCutOptions(new WebCutOptions(TEN, 0));
         screenshotParameters.setScrollTimeout(Duration.ofMillis(500));
         screenshotParameters.setCoordsProvider(CoordsProviderType.CEILING);
 
-        AShot aShot = webAshotFactory.create(Optional.of(screenshotParameters));
+        when(javascriptActions.getDevicePixelRatio()).thenReturn(2d);
+        var aShot = factory.create(Optional.of(screenshotParameters));
 
         validateCoordsProvider(aShot);
-        ShootingStrategy baseStrategy = getShootingStrategy(aShot);
+        var baseStrategy = getShootingStrategy(aShot);
         assertThat(baseStrategy, is(instanceOf(ElementCroppingDecorator.class)));
 
-        ShootingStrategy scrollbarHidingDecorator = (ShootingStrategy) FieldUtils.readField(baseStrategy,
+        var scrollbarHidingDecorator = (ShootingStrategy) FieldUtils.readField(baseStrategy,
                 SHOOTING_STRATEGY, true);
         assertThat(scrollbarHidingDecorator, is(instanceOf(ScrollbarHidingDecorator.class)));
 
-        ShootingStrategy viewportPastingDecorator = (ShootingStrategy) FieldUtils.readField(scrollbarHidingDecorator,
+        var viewportPastingDecorator = (ShootingStrategy) FieldUtils.readField(scrollbarHidingDecorator,
                 SHOOTING_STRATEGY, true);
         assertEquals(500, (int) FieldUtils.readField(viewportPastingDecorator, "scrollTimeout", true));
         assertEquals(screenshotDebugger, FieldUtils.readField(viewportPastingDecorator, "screenshotDebugger", true));
 
-        ShootingStrategy webCuttingDecorator = getShootingStrategy(viewportPastingDecorator);
+        var webCuttingDecorator = getShootingStrategy(viewportPastingDecorator);
         assertThat(webCuttingDecorator, is(instanceOf(CuttingDecorator.class)));
-        CutStrategy webCutStrategy = getCutStrategy(webCuttingDecorator);
+        var webCutStrategy = getCutStrategy(webCuttingDecorator);
         assertThat(webCutStrategy, is(instanceOf(StickyHeaderCutStrategy.class)));
         webCutStrategy.getHeaderHeight(null);
         validateCutStrategy(0, 10, webCutStrategy);
 
-        ShootingStrategy nativeCuttingDecorator = getShootingStrategy(webCuttingDecorator);
-        CutStrategy nativeCutStrategy = getCutStrategy(nativeCuttingDecorator);
+        var nativeCuttingDecorator = getShootingStrategy(webCuttingDecorator);
+        var nativeCutStrategy = getCutStrategy(nativeCuttingDecorator);
         assertThat(nativeCutStrategy, is(instanceOf(FixedCutStrategy.class)));
         validateCutStrategy(10, 0, nativeCutStrategy);
 
-        ShootingStrategy scalingDecorator = getShootingStrategy(nativeCuttingDecorator);
+        var scalingDecorator = getShootingStrategy(nativeCuttingDecorator);
         assertThat(scalingDecorator, is(instanceOf(ScalingDecorator.class)));
         verifyDPR(scalingDecorator);
     }
@@ -167,38 +171,40 @@ class WebAshotFactoryTests
     @Test
     void shouldCreateAshotUsingScrollableElement() throws IllegalAccessException
     {
-        WebElement webElement = mock(WebElement.class);
-        WebScreenshotParameters screenshotParameters = new WebScreenshotParameters();
+        var webElement = mock(WebElement.class);
+        var screenshotParameters = new WebScreenshotParameters();
         screenshotParameters.setScrollableElement(Optional.of(webElement));
         screenshotParameters.setCoordsProvider(CoordsProviderType.CEILING);
         screenshotParameters.setShootingStrategy(Optional.empty());
         screenshotParameters.setWebCutOptions(new WebCutOptions(0, 0));
         screenshotParameters.setScrollTimeout(Duration.ofMillis(TEN));
-        AShot aShot = webAshotFactory.create(Optional.of(screenshotParameters));
+
+        when(javascriptActions.getDevicePixelRatio()).thenReturn(2d);
+        var aShot = factory.create(Optional.of(screenshotParameters));
 
         validateCoordsProvider(aShot);
-        ShootingStrategy decorator = getShootingStrategy(aShot);
+        var decorator = getShootingStrategy(aShot);
         assertThat(decorator, is(instanceOf(ElementCroppingDecorator.class)));
 
-        ShootingStrategy scrollbarHidingDecorator = (ShootingStrategy) FieldUtils.readField(decorator,
+        var scrollbarHidingDecorator = (ShootingStrategy) FieldUtils.readField(decorator,
                 SHOOTING_STRATEGY, true);
         assertThat(scrollbarHidingDecorator, is(instanceOf(ScrollbarHidingDecorator.class)));
 
-        ShootingStrategy scrollableElementAwareDecorator = (ShootingStrategy) FieldUtils
+        var scrollableElementAwareDecorator = (ShootingStrategy) FieldUtils
                 .readField(scrollbarHidingDecorator, SHOOTING_STRATEGY, true);
         assertThat(scrollableElementAwareDecorator,
                 is(instanceOf(AdjustingScrollableElementAwareViewportPastingDecorator.class)));
 
         assertEquals(webElement, FieldUtils.readField(scrollableElementAwareDecorator, "scrollableElement", true));
 
-        ShootingStrategy scalingDecorator = getShootingStrategy(scrollableElementAwareDecorator);
+        var scalingDecorator = getShootingStrategy(scrollableElementAwareDecorator);
         assertThat(scalingDecorator, is(instanceOf(ScalingDecorator.class)));
         verifyDPR(scalingDecorator);
     }
 
     private void validateCoordsProvider(AShot aShot) throws IllegalAccessException
     {
-        CoordsProvider coordsProvider = (CoordsProvider) FieldUtils.readField(aShot, COORDS_PROVIDER, true);
+        var coordsProvider = (CoordsProvider) FieldUtils.readField(aShot, COORDS_PROVIDER, true);
         assertThat(coordsProvider, is(instanceOf(ScrollBarHidingCoordsProviderDecorator.class)));
         coordsProvider = (CoordsProvider) FieldUtils.readField(coordsProvider, COORDS_PROVIDER, true);
         assertThat(coordsProvider, is(instanceOf(CeilingJsCoordsProvider.class)));
