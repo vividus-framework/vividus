@@ -30,7 +30,7 @@
     <meta charset="utf-8">
     <title>Analytics result table</title>
     <link rel="stylesheet" href="../../styles.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap/3.3.6/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
 </head>
 <body>
     <style>
@@ -138,7 +138,7 @@
         </tbody>
     </table>
     <script src="../../webjars/jquery/2.1.1/jquery.min.js"></script>
-    <script src="../../webjars/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function()
         {
