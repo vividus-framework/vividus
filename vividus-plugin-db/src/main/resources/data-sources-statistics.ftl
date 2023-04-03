@@ -117,7 +117,7 @@
     </div>
     </#outputformat>
 
-    <script src="../../webjars/jquery/2.1.1/jquery.min.js"></script>
+    <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
     <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="../../webjars/highlight.js/9.12.0/highlight.min.js"></script>
     <script src="../../webjars/chart.js/3.2.1/chart.min.js"></script>

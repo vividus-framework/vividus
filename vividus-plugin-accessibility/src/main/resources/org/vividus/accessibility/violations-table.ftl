@@ -99,7 +99,7 @@
     <@violation_panel container=Error level="Error" panelClass="danger" />
     <@violation_panel container=Warning level="Warning" panelClass="warning" />
     <@violation_panel container=Notice level="Notice" panelClass="info" />
-    <script src="../../webjars/jquery/2.1.1/jquery.min.js"></script>
+    <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
     <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </body>
 </html>

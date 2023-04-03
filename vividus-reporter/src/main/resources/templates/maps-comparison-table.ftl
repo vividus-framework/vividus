@@ -137,7 +137,7 @@
             </#list>
         </tbody>
     </table>
-    <script src="../../webjars/jquery/2.1.1/jquery.min.js"></script>
+    <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
     <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function()

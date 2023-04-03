@@ -67,7 +67,7 @@
         </#if>
     </div>
 
-    <script src="../../webjars/jquery/2.1.1/jquery.min.js"></script>
+    <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
     <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="../../webjars/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <#if compare>
