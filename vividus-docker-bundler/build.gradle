@@ -7,6 +7,7 @@ project.description = 'VIVIDUS Docker bundler'
 tasks {
     publish.enabled = false
     testVividusInitialization.enabled = false
+    validateKnownIssues.enabled = false
 }
 
 dependencies {

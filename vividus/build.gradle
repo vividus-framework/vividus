@@ -14,7 +14,7 @@ task integrationTest(type: Test) {
     group = 'verification'
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
-    jvmArgs '--add-opens=java.base/java.util=ALL-UNNAMED'
+    jvmArgs += ['--add-opens=java.base/java.util=ALL-UNNAMED', '--add-opens=java.base/java.lang=ALL-UNNAMED']
 }
 
 // https://github.com/spotbugs/spotbugs-gradle-plugin/issues/115
