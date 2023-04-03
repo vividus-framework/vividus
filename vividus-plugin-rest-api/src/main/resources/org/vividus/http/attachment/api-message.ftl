@@ -6,7 +6,7 @@
     <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
     <link rel="icon" href="img/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="../../styles.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap/3.3.6/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
 </head>
 <body>
     <style>
@@ -97,7 +97,7 @@
     </div>
 
     <script src="../../webjars/jquery/2.1.1/jquery.min.js"></script>
-    <script src="../../webjars/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="../../webjars/highlight.js/9.12.0/highlight.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
