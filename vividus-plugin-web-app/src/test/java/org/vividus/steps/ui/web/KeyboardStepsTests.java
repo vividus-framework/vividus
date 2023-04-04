@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package org.vividus.steps.ui.web;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -32,6 +35,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.vividus.selenium.KeysManager;
 import org.vividus.steps.ui.web.validation.FocusValidations;
 import org.vividus.ui.context.IUiContext;
 
@@ -39,11 +43,12 @@ import org.vividus.ui.context.IUiContext;
 class KeyboardStepsTests
 {
     private static final String A = "a";
-    private static final List<String> KEYS = List.of("CONTROL", A);
+    private static final String CONTROL = "CONTROL";
+    private static final List<String> KEYS = List.of(CONTROL, A);
 
-    @Mock private WebDriver webDriver;
-    @Mock private IUiContext uiContext;
     @Mock private WebElement webElement;
+    @Mock private IUiContext uiContext;
+    @Mock private KeysManager keysManager;
     @Mock private FocusValidations focusValidations;
     @InjectMocks private KeyboardSteps keyboardSteps;
 
@@ -52,6 +57,7 @@ class KeyboardStepsTests
     {
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webElement));
         when(focusValidations.isElementInFocusState(webElement, FocusState.IN_FOCUS)).thenReturn(true);
+        when(keysManager.convertToKeys(KEYS)).thenReturn(new CharSequence[] { Keys.CONTROL, A });
         keyboardSteps.pressKeys(KEYS);
         verify(webElement).sendKeys(Keys.CONTROL, A);
     }
@@ -60,16 +66,20 @@ class KeyboardStepsTests
     void testPressKeysContextNotFocused()
     {
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webElement));
+        when(focusValidations.isElementInFocusState(webElement, FocusState.IN_FOCUS)).thenReturn(false);
         keyboardSteps.pressKeys(KEYS);
-        verify(webElement, never()).sendKeys(Keys.CONTROL, A);
+        verify(webElement, never()).sendKeys(any());
+        verifyNoInteractions(keysManager);
     }
 
     @Test
     void testPressKeysContextBody()
     {
+        WebDriver webDriver = mock();
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
         when(focusValidations.isElementInFocusState(webElement, FocusState.IN_FOCUS)).thenReturn(true);
         when(webDriver.findElement(By.xpath("//body"))).thenReturn(webElement);
+        when(keysManager.convertToKeys(KEYS)).thenReturn(new CharSequence[] { Keys.CONTROL, A });
         keyboardSteps.pressKeys(KEYS);
         verify(webElement).sendKeys(Keys.CONTROL, A);
     }

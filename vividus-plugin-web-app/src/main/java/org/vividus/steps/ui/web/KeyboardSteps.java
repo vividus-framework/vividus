@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,20 @@ import org.jbehave.core.annotations.When;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.selenium.KeysUtils;
+import org.vividus.selenium.KeysManager;
 import org.vividus.steps.ui.web.validation.FocusValidations;
 import org.vividus.ui.context.IUiContext;
 
 public class KeyboardSteps
 {
     private final IUiContext uiContext;
+    private final KeysManager keysManager;
     private final FocusValidations focusValidations;
 
-    public KeyboardSteps(IUiContext uiContext, FocusValidations focusValidations)
+    public KeyboardSteps(IUiContext uiContext, KeysManager keysManager, FocusValidations focusValidations)
     {
         this.uiContext = uiContext;
+        this.keysManager = keysManager;
         this.focusValidations = focusValidations;
     }
 
@@ -52,7 +54,7 @@ public class KeyboardSteps
                     : (WebElement) searchContext;
             if (focusValidations.isElementInFocusState(element, FocusState.IN_FOCUS))
             {
-                element.sendKeys(KeysUtils.keysToCharSequenceArray(keys));
+                element.sendKeys(keysManager.convertToKeys(keys));
             }
         });
     }

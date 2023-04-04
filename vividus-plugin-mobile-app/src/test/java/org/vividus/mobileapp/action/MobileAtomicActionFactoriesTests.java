@@ -24,18 +24,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.time.Duration;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
+import org.vividus.ui.action.AtomicActionFactory;
 
 @ExtendWith(MockitoExtension.class)
-class MobileSequenceActionTypeTests
+class MobileAtomicActionFactoriesTests
 {
     @Mock private TouchGestures baseAction;
 
@@ -43,7 +45,7 @@ class MobileSequenceActionTypeTests
     void testPress()
     {
         var element = mock(WebElement.class);
-        MobileSequenceActionType.TAP_AND_HOLD.addAction(baseAction, element);
+        new MobileAtomicActionFactories.TapAndHold().addAction(baseAction, element);
         verify(baseAction).tapAndHold(element);
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -52,7 +54,7 @@ class MobileSequenceActionTypeTests
     void testPressNoElement()
     {
         var element = mock(WebElement.class);
-        MobileSequenceActionType.TAP_AND_HOLD.addAction(baseAction, null);
+        new MobileAtomicActionFactories.TapAndHold().addAction(baseAction, null);
         verify(baseAction).tapAndHold();
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -61,7 +63,7 @@ class MobileSequenceActionTypeTests
     void testMoveTo()
     {
         var element = mock(WebElement.class);
-        MobileSequenceActionType.MOVE_TO.addAction(baseAction, element);
+        new MobileAtomicActionFactories.MoveTo().addAction(baseAction, element);
         verify(baseAction).moveToElement(element);
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -71,7 +73,7 @@ class MobileSequenceActionTypeTests
     {
         var offset = 10;
         var point = spy(new Point(offset, offset));
-        MobileSequenceActionType.MOVE_BY_OFFSET.addAction(baseAction, point);
+        new MobileAtomicActionFactories.MoveByOffset().addAction(baseAction, point);
         verify(baseAction).moveByOffset(offset, offset);
         verify(point).getX();
         verify(point).getY();
@@ -82,7 +84,7 @@ class MobileSequenceActionTypeTests
     void testRelease()
     {
         var element = mock(WebElement.class);
-        MobileSequenceActionType.RELEASE.addAction(baseAction, null);
+        new MobileAtomicActionFactories.Release().addAction(baseAction, null);
         verify(baseAction).release();
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -91,7 +93,7 @@ class MobileSequenceActionTypeTests
     void testTap()
     {
         var element = mock(WebElement.class);
-        MobileSequenceActionType.TAP.addAction(baseAction, element);
+        new MobileAtomicActionFactories.Tap().addAction(baseAction, element);
         verify(baseAction).tap(element);
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -100,7 +102,7 @@ class MobileSequenceActionTypeTests
     void testTapNoElement()
     {
         var element = mock(WebElement.class);
-        MobileSequenceActionType.TAP.addAction(baseAction, null);
+        new MobileAtomicActionFactories.Tap().addAction(baseAction, null);
         verify(baseAction).tap();
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -109,19 +111,32 @@ class MobileSequenceActionTypeTests
     void testWait()
     {
         Duration duration = mock(Duration.class);
-        MobileSequenceActionType.WAIT.addAction(baseAction, duration);
+        new MobileAtomicActionFactories.Wait().addAction(baseAction, duration);
         verify(baseAction).pause(duration);
         verifyNoMoreInteractions(baseAction);
     }
 
-    @EnumSource(MobileSequenceActionType.class)
+    static Stream<AtomicActionFactory<TouchGestures, ?>> mobileActions()
+    {
+        return Stream.of(
+                new MobileAtomicActionFactories.Tap(),
+                new MobileAtomicActionFactories.TapAndHold(),
+                new MobileAtomicActionFactories.MoveTo(),
+                new MobileAtomicActionFactories.MoveByOffset(),
+                new MobileAtomicActionFactories.Wait(),
+                new MobileAtomicActionFactories.Release()
+        );
+    }
+
     @ParameterizedTest
-    void testWrongArgType(MobileSequenceActionType type)
+    @MethodSource("mobileActions")
+    void testWrongArgType(AtomicActionFactory<TouchGestures, ?> factory)
     {
         var element = mock(WebElement.class);
         var dummy = mock(Object.class);
-        var exception = assertThrows(IllegalArgumentException.class, () -> type.addAction(baseAction, dummy));
-        assertEquals(String.format("Argument for %s action must be of type %s", type.name(), type.getArgumentType()),
+        var exception = assertThrows(IllegalArgumentException.class, () -> factory.addAction(baseAction, dummy));
+        assertEquals(
+                String.format("Argument for %s action must be of %s", factory.getName(), factory.getArgumentType()),
                 exception.getMessage());
         verifyNoMoreInteractions(baseAction, element);
     }

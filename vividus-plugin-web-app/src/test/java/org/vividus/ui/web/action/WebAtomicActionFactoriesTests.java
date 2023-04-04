@@ -21,38 +21,43 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.vividus.selenium.KeysManager;
+import org.vividus.ui.action.AtomicActionFactory;
 
 @ExtendWith(MockitoExtension.class)
-class WebSequenceActionTypeTests
+class WebAtomicActionFactoriesTests
 {
     private static final String VALUE = "value";
-    private static final String STRING = "str";
+    private static final String CONTROL = "CONTROL";
     private static final String COPY_SHORTCUT_KEY = "c";
-    private static final List<String> KEY_LIST = List.of("CONTROL", COPY_SHORTCUT_KEY);
+    private static final List<String> KEY_LIST = List.of(CONTROL, COPY_SHORTCUT_KEY);
     private static final String EMPTY_KEY_LIST_EXCEPTION = "At least one key should be provided";
-    private static final String WRONG_KEY_LIST_VALUE_EXCEPTION_FORMAT = "The '%s' is not allowed as a key";
 
     @Mock private Actions baseAction;
     @Mock private WebElement element;
+    @Mock private KeysManager keysManager;
 
     @Test
     void testDoubleClick()
     {
-        WebSequenceActionType.DOUBLE_CLICK.addAction(baseAction, element);
+        new WebAtomicActionFactories.DoubleClick().addAction(baseAction, element);
         verify(baseAction).doubleClick(element);
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -60,7 +65,7 @@ class WebSequenceActionTypeTests
     @Test
     void testDoubleClickNoElement()
     {
-        WebSequenceActionType.DOUBLE_CLICK.addAction(baseAction, null);
+        new WebAtomicActionFactories.DoubleClick().addAction(baseAction, null);
         verify(baseAction).doubleClick();
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -68,7 +73,7 @@ class WebSequenceActionTypeTests
     @Test
     void testClickAndHold()
     {
-        WebSequenceActionType.CLICK_AND_HOLD.addAction(baseAction, element);
+        new WebAtomicActionFactories.ClickAndHold().addAction(baseAction, element);
         verify(baseAction).clickAndHold(element);
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -76,7 +81,7 @@ class WebSequenceActionTypeTests
     @Test
     void testClickAndHoldNoElement()
     {
-        WebSequenceActionType.CLICK_AND_HOLD.addAction(baseAction, null);
+        new WebAtomicActionFactories.ClickAndHold().addAction(baseAction, null);
         verify(baseAction).clickAndHold();
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -84,7 +89,7 @@ class WebSequenceActionTypeTests
     @Test
     void testMoveTo()
     {
-        WebSequenceActionType.MOVE_TO.addAction(baseAction, element);
+        new WebAtomicActionFactories.MoveTo().addAction(baseAction, element);
         verify(baseAction).moveToElement(element);
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -94,7 +99,7 @@ class WebSequenceActionTypeTests
     {
         var offset = 10;
         var point = spy(new Point(offset, offset));
-        WebSequenceActionType.MOVE_BY_OFFSET.addAction(baseAction, point);
+        new WebAtomicActionFactories.MoveByOffset().addAction(baseAction, point);
         verify(baseAction).moveByOffset(offset, offset);
         verify(point).getX();
         verify(point).getY();
@@ -104,7 +109,7 @@ class WebSequenceActionTypeTests
     @Test
     void testRelease()
     {
-        WebSequenceActionType.RELEASE.addAction(baseAction, element);
+        new WebAtomicActionFactories.Release().addAction(baseAction, element);
         verify(baseAction).release(element);
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -112,7 +117,7 @@ class WebSequenceActionTypeTests
     @Test
     void testReleaseNoElement()
     {
-        WebSequenceActionType.RELEASE.addAction(baseAction, null);
+        new WebAtomicActionFactories.Release().addAction(baseAction, null);
         verify(baseAction).release();
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -120,7 +125,7 @@ class WebSequenceActionTypeTests
     @Test
     void testEnterText()
     {
-        WebSequenceActionType.ENTER_TEXT.addAction(baseAction, VALUE);
+        new WebAtomicActionFactories.EnterText().addAction(baseAction, VALUE);
         verify(baseAction).sendKeys(VALUE);
         verifyNoMoreInteractions(baseAction);
     }
@@ -128,28 +133,22 @@ class WebSequenceActionTypeTests
     @Test
     void testPressKeys()
     {
-        WebSequenceActionType.PRESS_KEYS.addAction(baseAction, List.of(VALUE));
-        verify(baseAction).sendKeys(VALUE);
+        KeysManager keysManager = mock();
+        var argument = List.of(VALUE);
+        CharSequence[] keys = { "v", "a", "l", "u", "e" };
+        when(keysManager.convertToKeys(argument)).thenReturn(keys);
+        new WebAtomicActionFactories.PressKeys(keysManager).addAction(baseAction, argument);
+        verify(baseAction).sendKeys(keys);
         verifyNoMoreInteractions(baseAction);
     }
 
     @Test
     void testKeyDown()
     {
-        WebSequenceActionType.KEY_DOWN.addAction(baseAction, KEY_LIST);
+        when(keysManager.convertToKey(true, CONTROL)).thenReturn(Keys.CONTROL);
+        new WebAtomicActionFactories.KeyDown(keysManager).addAction(baseAction, KEY_LIST);
         verify(baseAction).keyDown(Keys.CONTROL);
         verify(baseAction).keyDown(COPY_SHORTCUT_KEY);
-        verifyNoMoreInteractions(baseAction);
-    }
-
-    @Test
-    void testKeyDownWrongKey()
-    {
-        var argument = List.of(STRING);
-        var exception = assertThrows(IllegalArgumentException.class,
-                () -> WebSequenceActionType.KEY_DOWN.addAction(baseAction, argument));
-        var expectedExceptionMessage = String.format(WRONG_KEY_LIST_VALUE_EXCEPTION_FORMAT, STRING);
-        assertEquals(expectedExceptionMessage, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
     }
 
@@ -157,29 +156,20 @@ class WebSequenceActionTypeTests
     void testKeyDownWithEmptyList()
     {
         var argument = List.of();
-        var exception = assertThrows(IllegalArgumentException.class,
-                () -> WebSequenceActionType.KEY_DOWN.addAction(baseAction, argument));
+        var keyDown = new WebAtomicActionFactories.KeyDown(keysManager);
+        var exception = assertThrows(IllegalArgumentException.class, () -> keyDown.addAction(baseAction, argument));
         assertEquals(EMPTY_KEY_LIST_EXCEPTION, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
+        verifyNoInteractions(keysManager);
     }
 
     @Test
     void testKeyUp()
     {
-        WebSequenceActionType.KEY_UP.addAction(baseAction, KEY_LIST);
+        when(keysManager.convertToKey(true, CONTROL)).thenReturn(Keys.CONTROL);
+        new WebAtomicActionFactories.KeyUp(keysManager).addAction(baseAction, KEY_LIST);
         verify(baseAction).keyUp(Keys.CONTROL);
         verify(baseAction).keyUp(COPY_SHORTCUT_KEY);
-        verifyNoMoreInteractions(baseAction);
-    }
-
-    @Test
-    void testKeyUpWrongKey()
-    {
-        var argument = List.of(STRING);
-        var exception = assertThrows(IllegalArgumentException.class,
-                () -> WebSequenceActionType.KEY_UP.addAction(baseAction, argument));
-        var expectedExceptionMessage = String.format(WRONG_KEY_LIST_VALUE_EXCEPTION_FORMAT, STRING);
-        assertEquals(expectedExceptionMessage, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
     }
 
@@ -187,16 +177,17 @@ class WebSequenceActionTypeTests
     void testKeyUpWithEmptyList()
     {
         var argument = List.of();
-        var exception = assertThrows(IllegalArgumentException.class,
-                () -> WebSequenceActionType.KEY_UP.addAction(baseAction, argument));
+        var keyUp = new WebAtomicActionFactories.KeyUp(keysManager);
+        var exception = assertThrows(IllegalArgumentException.class, () -> keyUp.addAction(baseAction, argument));
         assertEquals(EMPTY_KEY_LIST_EXCEPTION, exception.getMessage());
         verifyNoMoreInteractions(baseAction);
+        verifyNoInteractions(keysManager);
     }
 
     @Test
     void testClick()
     {
-        WebSequenceActionType.CLICK.addAction(baseAction, element);
+        new WebAtomicActionFactories.Click().addAction(baseAction, element);
         verify(baseAction).click(element);
         verifyNoMoreInteractions(baseAction, element);
     }
@@ -204,18 +195,35 @@ class WebSequenceActionTypeTests
     @Test
     void testClickNoElement()
     {
-        WebSequenceActionType.CLICK.addAction(baseAction, null);
+        new WebAtomicActionFactories.Click().addAction(baseAction, null);
         verify(baseAction).click();
         verifyNoMoreInteractions(baseAction, element);
     }
 
-    @EnumSource(WebSequenceActionType.class)
+    static Stream<AtomicActionFactory<Actions, ?>> webActions()
+    {
+        return Stream.of(
+                new WebAtomicActionFactories.Click(),
+                new WebAtomicActionFactories.DoubleClick(),
+                new WebAtomicActionFactories.ClickAndHold(),
+                new WebAtomicActionFactories.Release(),
+                new WebAtomicActionFactories.MoveTo(),
+                new WebAtomicActionFactories.MoveByOffset(),
+                new WebAtomicActionFactories.EnterText(),
+                new WebAtomicActionFactories.PressKeys(mock(KeysManager.class)),
+                new WebAtomicActionFactories.KeyDown(mock(KeysManager.class)),
+                new WebAtomicActionFactories.KeyUp(mock(KeysManager.class))
+        );
+    }
+
     @ParameterizedTest
-    void testWrongArgType(WebSequenceActionType type)
+    @MethodSource("webActions")
+    void testWrongArgType(AtomicActionFactory<Actions, ?> factory)
     {
         var dummy = mock(Object.class);
-        var exception = assertThrows(IllegalArgumentException.class, () -> type.addAction(baseAction, dummy));
-        assertEquals(String.format("Argument for %s action must be of type %s", type.name(), type.getArgumentType()),
+        var exception = assertThrows(IllegalArgumentException.class, () -> factory.addAction(baseAction, dummy));
+        assertEquals(
+                String.format("Argument for %s action must be of %s", factory.getName(), factory.getArgumentType()),
                 exception.getMessage());
         verifyNoMoreInteractions(baseAction, element);
     }

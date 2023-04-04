@@ -42,10 +42,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
-import org.vividus.mobileapp.action.MobileSequenceActionType;
+import org.vividus.mobileapp.action.MobileAtomicActionFactories;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.ui.action.SequenceAction;
+import org.vividus.ui.action.AtomicAction;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.mobile.action.search.AppiumLocatorType;
 
@@ -62,6 +62,14 @@ class ActionsSequenceStepsTests
     private static final String RELEASE_ACTION = "{button=0, type=pointerUp}";
     private static final String PRESS_ACTION = "{button=0, type=pointerDown}";
     private static final String ACTIONS_CLOSE = "]}";
+
+    private static final MobileAtomicActionFactories.TapAndHold TAP_AND_HOLD =
+            new MobileAtomicActionFactories.TapAndHold();
+    private static final MobileAtomicActionFactories.Tap TAP = new MobileAtomicActionFactories.Tap();
+    private static final MobileAtomicActionFactories.MoveTo MOVE_TO = new MobileAtomicActionFactories.MoveTo();
+    private static final MobileAtomicActionFactories.MoveByOffset MOVE_BY_OFFSET =
+            new MobileAtomicActionFactories.MoveByOffset();
+    private static final MobileAtomicActionFactories.Release RELEASE = new MobileAtomicActionFactories.Release();
 
     @Mock private IBaseValidations baseValidations;
     @Mock private IWebDriverProvider webDriverProvider;
@@ -82,14 +90,14 @@ class ActionsSequenceStepsTests
         when(point.getY()).thenReturn(offset);
 
         var actions = List.of(
-                new SequenceAction<>(MobileSequenceActionType.TAP_AND_HOLD, LOCATOR),
-                new SequenceAction<>(MobileSequenceActionType.MOVE_BY_OFFSET, point),
-                new SequenceAction<>(MobileSequenceActionType.RELEASE, null),
-                new SequenceAction<>(MobileSequenceActionType.TAP, LOCATOR),
-                new SequenceAction<>(MobileSequenceActionType.MOVE_TO, LOCATOR),
-                new SequenceAction<>(MobileSequenceActionType.TAP_AND_HOLD, null),
-                new SequenceAction<>(MobileSequenceActionType.RELEASE, null),
-                new SequenceAction<>(MobileSequenceActionType.TAP, null)
+                new AtomicAction<>(TAP_AND_HOLD, LOCATOR),
+                new AtomicAction<>(MOVE_BY_OFFSET, point),
+                new AtomicAction<>(RELEASE, null),
+                new AtomicAction<>(TAP, LOCATOR),
+                new AtomicAction<>(MOVE_TO, LOCATOR),
+                new AtomicAction<>(TAP_AND_HOLD, null),
+                new AtomicAction<>(RELEASE, null),
+                new AtomicAction<>(TAP, null)
         );
         sequenceActionSteps.executeSequenceOfActions(actions);
         var hash = webElement.hashCode();
@@ -118,7 +126,7 @@ class ActionsSequenceStepsTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(baseValidations.assertElementExists(ELEMENT_EXISTS_MESSAGE, LOCATOR)).thenReturn(Optional.empty());
 
-        var actions = List.of(new SequenceAction<>(MobileSequenceActionType.TAP_AND_HOLD, LOCATOR));
+        var actions = List.of(new AtomicAction<>(TAP_AND_HOLD, LOCATOR));
         sequenceActionSteps.executeSequenceOfActions(actions);
         verify((Interactive) webDriver, never()).perform(any());
     }

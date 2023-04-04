@@ -44,10 +44,11 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.KeysManager;
 import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.ui.action.SequenceAction;
+import org.vividus.ui.action.AtomicAction;
 import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.web.action.WebSequenceActionType;
+import org.vividus.ui.web.action.WebAtomicActionFactories;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,6 +67,20 @@ class ActionsSequenceStepsTests
     private static final String RELEASE_ACTION = "{button=0, type=pointerUp}";
     private static final String CLICK_AND_HOLD_ACTION = "{button=0, type=pointerDown}";
     private static final String COPY_SHORTCUT_KEY = "c";
+
+    private static final KeysManager KEYS_MANAGER = new KeysManager(null);
+
+    private static final WebAtomicActionFactories.Click CLICK = new WebAtomicActionFactories.Click();
+    private static final WebAtomicActionFactories.DoubleClick DOUBLE_CLICK = new WebAtomicActionFactories.DoubleClick();
+    private static final WebAtomicActionFactories.ClickAndHold CLICK_AND_HOLD =
+            new WebAtomicActionFactories.ClickAndHold();
+    private static final WebAtomicActionFactories.Release RELEASE = new WebAtomicActionFactories.Release();
+    private static final WebAtomicActionFactories.MoveTo MOVE_TO = new WebAtomicActionFactories.MoveTo();
+    private static final WebAtomicActionFactories.MoveByOffset MOVE_BY_OFFSET =
+            new WebAtomicActionFactories.MoveByOffset();
+    private static final WebAtomicActionFactories.EnterText ENTER_TEXT = new WebAtomicActionFactories.EnterText();
+    private static final WebAtomicActionFactories.KeyDown KEY_DOWN = new WebAtomicActionFactories.KeyDown(KEYS_MANAGER);
+    private static final WebAtomicActionFactories.KeyUp KEY_UP = new WebAtomicActionFactories.KeyUp(KEYS_MANAGER);
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IBaseValidations baseValidations;
@@ -93,23 +108,29 @@ class ActionsSequenceStepsTests
         when(point.getX()).thenReturn(offset);
         when(point.getY()).thenReturn(offset);
 
-        List<SequenceAction<WebSequenceActionType>> actions = List.of(
-                new SequenceAction<>(WebSequenceActionType.DOUBLE_CLICK, locator),
-                new SequenceAction<>(WebSequenceActionType.CLICK_AND_HOLD, locator),
-                new SequenceAction<>(WebSequenceActionType.MOVE_BY_OFFSET, point),
-                new SequenceAction<>(WebSequenceActionType.RELEASE, locator),
-                new SequenceAction<>(WebSequenceActionType.ENTER_TEXT, TEXT),
-                new SequenceAction<>(WebSequenceActionType.CLICK, locator),
-                new SequenceAction<>(WebSequenceActionType.MOVE_TO, locator),
-                new SequenceAction<>(WebSequenceActionType.DOUBLE_CLICK, null),
-                new SequenceAction<>(WebSequenceActionType.CLICK_AND_HOLD, null),
-                new SequenceAction<>(WebSequenceActionType.RELEASE, null),
-                new SequenceAction<>(WebSequenceActionType.KEY_DOWN, List.of(Keys.COMMAND.name(), COPY_SHORTCUT_KEY)),
-                new SequenceAction<>(WebSequenceActionType.KEY_UP, List.of(COPY_SHORTCUT_KEY, Keys.COMMAND.name())),
-                new SequenceAction<>(WebSequenceActionType.KEY_DOWN, List.of(Keys.CONTROL.name())),
-                new SequenceAction<>(WebSequenceActionType.PRESS_KEYS, List.of("v")),
-                new SequenceAction<>(WebSequenceActionType.KEY_UP, List.of(Keys.CONTROL.name())),
-                new SequenceAction<>(WebSequenceActionType.CLICK, null)
+        var keyToPress = "v";
+        var keysToPress = List.of(keyToPress);
+        KeysManager keysManager = mock();
+        when(keysManager.convertToKeys(keysToPress)).thenReturn(new CharSequence[] { keyToPress });
+        var pressKeys = new WebAtomicActionFactories.PressKeys(keysManager);
+
+        var actions = List.of(
+                new AtomicAction<>(DOUBLE_CLICK, locator),
+                new AtomicAction<>(CLICK_AND_HOLD, locator),
+                new AtomicAction<>(MOVE_BY_OFFSET, point),
+                new AtomicAction<>(RELEASE, locator),
+                new AtomicAction<>(ENTER_TEXT, TEXT),
+                new AtomicAction<>(CLICK, locator),
+                new AtomicAction<>(MOVE_TO, locator),
+                new AtomicAction<>(DOUBLE_CLICK, null),
+                new AtomicAction<>(CLICK_AND_HOLD, null),
+                new AtomicAction<>(RELEASE, null),
+                new AtomicAction<>(KEY_DOWN, List.of(Keys.COMMAND.name(), COPY_SHORTCUT_KEY)),
+                new AtomicAction<>(KEY_UP, List.of(COPY_SHORTCUT_KEY, Keys.COMMAND.name())),
+                new AtomicAction<>(KEY_DOWN, List.of(Keys.CONTROL.name())),
+                new AtomicAction<>(pressKeys, keysToPress),
+                new AtomicAction<>(KEY_UP, List.of(Keys.CONTROL.name())),
+                new AtomicAction<>(CLICK, null)
                 );
         actionSteps.executeSequenceOfActions(actions);
         var hash = webElement.hashCode();
@@ -154,8 +175,8 @@ class ActionsSequenceStepsTests
         when(baseValidations.assertElementExists(ELEMENT_EXISTS_MESSAGE, locator)).thenReturn(Optional.empty());
 
         var actions = List.of(
-            new SequenceAction<>(WebSequenceActionType.DOUBLE_CLICK, locator),
-            new SequenceAction<>(WebSequenceActionType.ENTER_TEXT, TEXT)
+            new AtomicAction<>(DOUBLE_CLICK, locator),
+            new AtomicAction<>(ENTER_TEXT, TEXT)
         );
         actionSteps.executeSequenceOfActions(actions);
         verify((Interactive) webDriver, never()).perform(any());

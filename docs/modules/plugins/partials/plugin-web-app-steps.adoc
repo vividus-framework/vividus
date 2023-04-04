@@ -392,46 +392,57 @@ When I execute sequence of actions: $actions
 |Argument example
 
 |DOUBLE_CLICK
-|Element locator or empty
+|Element locator or empty.
 |By.linkUrl(http://httpbin.org)
 
 |CLICK_AND_HOLD
-|Element locator or empty
+|Element locator or empty.
 |By.linkText(Click me)
 
 |MOVE_BY_OFFSET
-|Point
+|Point.
 |(10, 15) where *x* is 10 and *y* is 15
 
 |RELEASE
-|Element locator or empty
+|Element locator or empty.
 |By.tagName(div)
 
 |ENTER_TEXT
-|Text to type
+|Text to type.
 |Minsk City
 
 |CLICK
-|Element locator or empty
+|Element locator or empty.
 |By.caseSensitiveText(Done)
 
 |PRESS_KEYS
-|Press and release any of https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys]
+|Comma-separated https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[keys] to press and release.
 |BACK_SPACE
 
 |KEY_DOWN
-|Press any of https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] one by one
+|Comma-separated https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[keys] to press one by one.
 |CONTROL,SHIFT,ALT
 
 |KEY_UP
-|Release any of https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[Keys] one by one
+|Comma-separated https://selenium.dev/selenium/docs/api/java/org/openqa/selenium/Keys.html[keys] to release one by one.
 |CONTROL,SHIFT,ALT
 
 |MOVE_TO
-|Element locator
+|Element locator.
 |By.id(username)
 
 |===
+
+[TIP]
+====
+Windows/Unix and macOS platforms have different keyboards. For example, kbd:[Ctrl+C] combination is used to copy text
+on Windows and Unix, but kbd:[⌘ Command+C] should be used on macOS with default preferences.
+
+In order to close this gap VIVIDUS offers unique key `OS_INDEPENDENT_CONTROL`: it is mapped to
+https://en.wikipedia.org/wiki/Control_key[`CONTROL`] key on Windows/Unix and to
+https://en.wikipedia.org/wiki/Command_key[`COMMAND`] key on macOS. Using this key it is possible to make tests fully
+platform independent.
+====
 
 .Execute various web-actions
 [source,gherkin]
@@ -476,6 +487,17 @@ When I execute sequence of actions:
 |type      |argument  |
 |KEY_DOWN  |COMMAND, v|
 |KEY_UP    |v, COMMAND|
+----
+
+.Select all text in the focused field and copy it to the clipboard on any OS
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type      |argument  |
+|KEY_DOWN  |OS_INDEPENDENT_CONTROL, a|
+|KEY_UP    |a, OS_INDEPENDENT_CONTROL|
+|KEY_DOWN  |OS_INDEPENDENT_CONTROL, c|
+|KEY_UP    |c, OS_INDEPENDENT_CONTROL|
 ----
 ====
 

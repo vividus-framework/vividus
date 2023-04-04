@@ -19,11 +19,10 @@ package org.vividus.mobileapp.steps;
 import java.util.List;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.mobileapp.action.MobileSequenceActionType;
 import org.vividus.mobileapp.action.TouchGestures;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.ui.action.SequenceAction;
+import org.vividus.ui.action.AtomicAction;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.steps.AbstractActionsSequenceSteps;
 
@@ -63,7 +62,7 @@ public class ActionsSequenceSteps extends AbstractActionsSequenceSteps
      * @param actions table of actions to execute
      */
     @When("I execute sequence of touch actions: $actions")
-    public void executeSequenceOfActions(List<SequenceAction<MobileSequenceActionType>> actions)
+    public void executeSequenceOfActions(List<AtomicAction<TouchGestures>> actions)
     {
         execute(TouchGestures::new, actions);
     }

@@ -22,10 +22,9 @@ import org.jbehave.core.annotations.When;
 import org.openqa.selenium.interactions.Actions;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.ui.action.SequenceAction;
+import org.vividus.ui.action.AtomicAction;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.steps.AbstractActionsSequenceSteps;
-import org.vividus.ui.web.action.WebSequenceActionType;
 
 @TakeScreenshotOnFailure
 public class ActionsSequenceSteps extends AbstractActionsSequenceSteps
@@ -90,7 +89,7 @@ public class ActionsSequenceSteps extends AbstractActionsSequenceSteps
      * @param actions table of actions to execute
      */
     @When("I execute sequence of actions: $actions")
-    public void executeSequenceOfActions(List<SequenceAction<WebSequenceActionType>> actions)
+    public void executeSequenceOfActions(List<AtomicAction<Actions>> actions)
     {
         execute(Actions::new, actions);
     }

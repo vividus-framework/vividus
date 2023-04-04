@@ -25,8 +25,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.ui.action.SequenceAction;
-import org.vividus.ui.action.SequenceActionType;
+import org.vividus.ui.action.AtomicAction;
 import org.vividus.ui.action.search.Locator;
 
 public class AbstractActionsSequenceSteps
@@ -40,11 +39,11 @@ public class AbstractActionsSequenceSteps
         this.baseValidations = baseValidations;
     }
 
-    protected <R extends Actions, T extends SequenceActionType<R>> void execute(
-            Function<WebDriver, R> actionsBuilderConstructor, List<SequenceAction<T>> actions)
+    protected <T extends Actions> void execute(Function<WebDriver, T> actionsBuilderConstructor,
+            List<AtomicAction<T>> actions)
     {
-        R actionBuilder = actionsBuilderConstructor.apply(webDriverProvider.get());
-        for (SequenceAction<T> action : actions)
+        T actionBuilder = actionsBuilderConstructor.apply(webDriverProvider.get());
+        for (AtomicAction<T> action : actions)
         {
             Object argument = action.getArgument();
             if (argument != null && argument.getClass().equals(Locator.class))
@@ -57,7 +56,7 @@ public class AbstractActionsSequenceSteps
                 }
                 argument = webElement.get();
             }
-            action.getType().addAction(actionBuilder, argument);
+            action.getActionFactory().addAction(actionBuilder, argument);
         }
         actionBuilder.perform();
     }

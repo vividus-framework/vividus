@@ -17,6 +17,7 @@
 package org.vividus.ui.web.action;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static java.util.Map.entry;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,6 +50,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.support.ui.Select;
+import org.vividus.selenium.KeysManager;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.util.FormatUtils;
@@ -70,6 +72,7 @@ class FieldActionsTests
     private static final String CONTENTEDITABLE = "contenteditable";
 
     @Mock private IWebDriverManager webDriverManager;
+    @Mock private KeysManager keysManager;
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private WebElementActions webElementActions;
     @Mock private WebElement webElement;
@@ -179,12 +182,12 @@ class FieldActionsTests
 
     @ParameterizedTest
     @CsvSource({
-            "false, CONTROL, Ctrl",
-            "true,  COMMAND, Cmd"
+            "CONTROL, Ctrl",
+            "COMMAND, Cmd"
     })
-    void testClearFieldUsingKeyboard(boolean macOs, Keys controllingKey, String controllingKeyName)
+    void testClearFieldUsingKeyboard(Keys controllingKey, String controllingKeyName)
     {
-        when(webDriverManager.isMacOs()).thenReturn(macOs);
+        when(keysManager.getOsIndependentControlKey()).thenReturn(entry(controllingKey, controllingKeyName));
         fieldActions.clearFieldUsingKeyboard(webElement);
         verify(webElement).sendKeys(Keys.chord(controllingKey, "a") + Keys.BACK_SPACE);
         assertThat(logger.getLoggingEvents(), is(List.of(

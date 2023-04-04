@@ -136,7 +136,12 @@
         <constructor-arg index="0" value="${mobile.screenshot.downscale}" />
     </bean>
 
-    <bean class="org.vividus.mobileapp.converter.ParametersToMobileSequenceActionConverter" />
+    <bean class="org.vividus.mobileapp.action.MobileAtomicActionFactories$Tap" />
+    <bean class="org.vividus.mobileapp.action.MobileAtomicActionFactories$TapAndHold" />
+    <bean class="org.vividus.mobileapp.action.MobileAtomicActionFactories$MoveTo" />
+    <bean class="org.vividus.mobileapp.action.MobileAtomicActionFactories$MoveByOffset" />
+    <bean class="org.vividus.mobileapp.action.MobileAtomicActionFactories$Wait" />
+    <bean class="org.vividus.mobileapp.action.MobileAtomicActionFactories$Release" />
 
     <bean class="org.vividus.mobileapp.converter.ExamplesTableToScreenshotConfigurationConverter" />
 
