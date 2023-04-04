@@ -149,7 +149,7 @@ Clone vividus-sample-tests project using the following command:
 git clone --recursive git@github.com:vividus-framework/vividus-sample-tests.git
 ----
 +
-Then use xref:ROOT:getting-started.adoc#_create_tests_project[this detailed guide] to proceed with importing and building the project.
+Then use xref:ROOT:getting-started.adoc#_setup_test_project[this detailed guide] to proceed with importing and building the project.
 
 . *Overriding properties*
 +
