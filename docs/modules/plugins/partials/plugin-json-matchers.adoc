@@ -37,7 +37,7 @@ Then JSON element from `${actual-json}` by JSON path `$.store` is equal to `{"bo
 ----
 
 [TIP]
-As JSON do not support multi line strings if you want to improve readability use xref:expressions.adoc#_escapejson[escapeJson] expression inside matcher
+As JSON do not support multi line strings if you want to improve readability use xref:commons:expressions.adoc#_escapejson[escapeJson] expression inside matcher
 
 .Validate entries with `escapeJson` expression
 [source,gherkin]
