@@ -55,6 +55,8 @@
         <property name="remoteScreenResolution" value="${selenium.grid.screen-resolution}" />
     </bean>
 
+    <bean class="org.vividus.selenium.KeysManager" />
+
     <bean id="fieldActions" class="org.vividus.ui.web.action.FieldActions" />
     <bean id="javascriptActions" class="org.vividus.ui.web.action.WebJavascriptActions">
         <property name="stickyHeaderSizePercentage" value="${web-application.sticky-header-size-percentage}" />
@@ -279,7 +281,16 @@
         </property>
     </bean>
 
-    <bean class="org.vividus.ui.web.converter.ParametersToWebSequenceActionConverter" />
+    <bean class="org.vividus.ui.web.action.WebAtomicActionFactories$Click" />
+    <bean class="org.vividus.ui.web.action.WebAtomicActionFactories$ClickAndHold" />
+    <bean class="org.vividus.ui.web.action.WebAtomicActionFactories$DoubleClick" />
+    <bean class="org.vividus.ui.web.action.WebAtomicActionFactories$Release" />
+    <bean class="org.vividus.ui.web.action.WebAtomicActionFactories$MoveTo" />
+    <bean class="org.vividus.ui.web.action.WebAtomicActionFactories$MoveByOffset" />
+    <bean class="org.vividus.ui.web.action.WebAtomicActionFactories$EnterText" />
+    <bean class="org.vividus.ui.web.action.WebAtomicActionFactories$PressKeys" />
+    <bean class="org.vividus.ui.web.action.WebAtomicActionFactories$KeyDown" />
+    <bean class="org.vividus.ui.web.action.WebAtomicActionFactories$KeyUp" />
 
     <bean id="browserLogCleanningListener" class="org.vividus.steps.ui.web.listener.BrowserLogCleanningListener" />
 

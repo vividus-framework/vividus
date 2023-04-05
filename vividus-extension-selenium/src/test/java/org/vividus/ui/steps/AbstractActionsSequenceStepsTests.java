@@ -29,7 +29,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,9 +38,9 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.Interactive;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.ui.validation.IBaseValidations;
+import org.vividus.testdouble.TestAtomicActionFactories;
 import org.vividus.testdouble.TestLocatorType;
-import org.vividus.testdouble.TestSequenceActionType;
-import org.vividus.ui.action.SequenceAction;
+import org.vividus.ui.action.AtomicAction;
 import org.vividus.ui.action.search.Locator;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,6 +49,12 @@ class AbstractActionsSequenceStepsTests
     private static final Locator LOCATOR = new Locator(TestLocatorType.SEARCH, "id");
     private static final String ELEMENT_EXISTS_MESSAGE = "Element for interaction";
     private static final String TEXT = "text";
+
+    private static final TestAtomicActionFactories.Click CLICK = new TestAtomicActionFactories.Click();
+    private static final TestAtomicActionFactories.DoubleClick DOUBLE_CLICK =
+            new TestAtomicActionFactories.DoubleClick();
+    private static final TestAtomicActionFactories.Release RELEASE = new TestAtomicActionFactories.Release();
+    private static final TestAtomicActionFactories.EnterText ENTER_TEXT = new TestAtomicActionFactories.EnterText();
 
     @Mock private WebDriver webDriver;
     @Mock private IBaseValidations baseValidations;
@@ -67,14 +72,14 @@ class AbstractActionsSequenceStepsTests
     void shouldPerformSequenceOfActions()
     {
         var actions = List.of(
-                new SequenceAction<>(TestSequenceActionType.CLICK, LOCATOR),
-                new SequenceAction<>(TestSequenceActionType.ENTER_TEXT, TEXT),
-                new SequenceAction<>(TestSequenceActionType.DOUBLE_CLICK, LOCATOR),
-                new SequenceAction<>(TestSequenceActionType.RELEASE, null));
+                new AtomicAction<>(CLICK, LOCATOR),
+                new AtomicAction<>(ENTER_TEXT, TEXT),
+                new AtomicAction<>(DOUBLE_CLICK, LOCATOR),
+                new AtomicAction<>(RELEASE, null));
         var webElement = mock(WebElement.class);
         when(baseValidations.assertElementExists(ELEMENT_EXISTS_MESSAGE, LOCATOR)).thenReturn(Optional.of(webElement));
         sequenceActionSteps.executeSequenceOfActions(actionsBuilder, webDriver, actions);
-        InOrder ordered = inOrder(actionsBuilder);
+        var ordered = inOrder(actionsBuilder);
         ordered.verify(actionsBuilder).click(webElement);
         ordered.verify(actionsBuilder).sendKeys(TEXT);
         ordered.verify(actionsBuilder).doubleClick(webElement);
@@ -91,7 +96,7 @@ class AbstractActionsSequenceStepsTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(baseValidations.assertElementExists(ELEMENT_EXISTS_MESSAGE, LOCATOR)).thenReturn(Optional.empty());
 
-        var actions = List.of(new SequenceAction<>(TestSequenceActionType.CLICK, LOCATOR));
+        var actions = List.of(new AtomicAction<>(CLICK, LOCATOR));
         sequenceActionSteps.executeSequenceOfActions(actionsBuilder, webDriver, actions);
         verifyNoMoreInteractions(actionsBuilder);
     }
@@ -104,7 +109,7 @@ class AbstractActionsSequenceStepsTests
         }
 
         public void executeSequenceOfActions(Actions actionBuilder, WebDriver webDriver,
-                List<SequenceAction<TestSequenceActionType>> actions)
+                List<AtomicAction<Actions>> actions)
         {
             execute(wd -> {
                 assertEquals(wd, webDriver);

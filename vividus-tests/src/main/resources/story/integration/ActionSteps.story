@@ -134,21 +134,21 @@ When I enter `${inputText}` in field located `${inputLocator}`
 Then field value is `${inputText}`
 When I click on element located by `${inputLocator}`
 When I execute sequence of actions:
-|type      |argument  |
-|KEY_DOWN  |CONTROL, a|
-|KEY_UP    |a, CONTROL|
-|KEY_DOWN  |CONTROL   |
-|PRESS_KEYS|c         |
-|KEY_UP    |CONTROL   |
+|type      |argument                 |
+|KEY_DOWN  |OS_INDEPENDENT_CONTROL, a|
+|KEY_UP    |a, OS_INDEPENDENT_CONTROL|
+|KEY_DOWN  |OS_INDEPENDENT_CONTROL   |
+|PRESS_KEYS|c                        |
+|KEY_UP    |OS_INDEPENDENT_CONTROL   |
 When I execute sequence of actions:
 |type      |argument|
-|KEY_DOWN  |CONTROL |
-|PRESS_KEYS|a       |
-|KEY_UP    |CONTROL |
-|PRESS_KEYS|DELETE  |
+|KEY_DOWN  |OS_INDEPENDENT_CONTROL |
+|PRESS_KEYS|a                      |
+|KEY_UP    |OS_INDEPENDENT_CONTROL |
+|PRESS_KEYS|DELETE                 |
 Then field value is ``
 When I execute sequence of actions:
-|type      |argument  |
-|KEY_DOWN  |CONTROL, v|
-|KEY_UP    |v, CONTROL|
+|type      |argument                 |
+|KEY_DOWN  |OS_INDEPENDENT_CONTROL, v|
+|KEY_UP    |v, OS_INDEPENDENT_CONTROL|
 Then field value is `${inputText}`

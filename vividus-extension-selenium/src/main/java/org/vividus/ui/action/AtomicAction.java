@@ -18,20 +18,20 @@ package org.vividus.ui.action;
 
 import org.openqa.selenium.interactions.Actions;
 
-public class SequenceAction<T extends SequenceActionType<? extends Actions>>
+public class AtomicAction<T extends Actions>
 {
-    private final T type;
+    private final AtomicActionFactory<T, ?> actionFactory;
     private final Object argument;
 
-    public SequenceAction(T type, Object argument)
+    public AtomicAction(AtomicActionFactory<T, ?> actionFactory, Object argument)
     {
-        this.type = type;
+        this.actionFactory = actionFactory;
         this.argument = argument;
     }
 
-    public T getType()
+    public AtomicActionFactory<T, ?> getActionFactory()
     {
-        return type;
+        return actionFactory;
     }
 
     public Object getArgument()

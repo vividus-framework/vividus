@@ -16,8 +16,6 @@
 
 package org.vividus.ui.web.action;
 
-import static java.util.Map.entry;
-
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -28,6 +26,7 @@ import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.selenium.KeysManager;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.util.FormatUtils;
@@ -40,15 +39,18 @@ public class FieldActions implements IFieldActions
     private final WebJavascriptActions javascriptActions;
     private final IWebElementActions webElementActions;
     private final IWebWaitActions waitActions;
+    private final KeysManager keysManager;
     private final ISoftAssert softAssert;
 
     public FieldActions(IWebDriverManager webDriverManager, WebJavascriptActions javascriptActions,
-            IWebElementActions webElementActions, IWebWaitActions waitActions, ISoftAssert softAssert)
+            IWebElementActions webElementActions, IWebWaitActions waitActions, KeysManager keysManager,
+            ISoftAssert softAssert)
     {
         this.webDriverManager = webDriverManager;
         this.javascriptActions = javascriptActions;
         this.webElementActions = webElementActions;
         this.waitActions = waitActions;
+        this.keysManager = keysManager;
         this.softAssert = softAssert;
     }
 
@@ -103,8 +105,7 @@ public class FieldActions implements IFieldActions
     {
         if (field != null)
         {
-            Entry<Keys, String> controllingKey = webDriverManager.isMacOs() ? entry(Keys.COMMAND, "Cmd")
-                    : entry(Keys.CONTROL, "Ctrl");
+            Entry<Keys, String> controllingKey = keysManager.getOsIndependentControlKey();
             LOGGER.info("Attempting to clear field with [{} + A, Backspace] keys sequence", controllingKey.getValue());
             field.sendKeys(Keys.chord(controllingKey.getKey(), "a") + Keys.BACK_SPACE);
         }
