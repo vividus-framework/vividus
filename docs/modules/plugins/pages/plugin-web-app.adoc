@@ -116,11 +116,25 @@ When I compare against baseline with name `inlined-image` from image `#{decodeDa
 
 == xref:commons:variables.adoc[Dynamic variables]
 
+=== Current page URL
+
+The variable provides the URL of the page currently loaded in the browser.
+
+[source,gherkin]
+----
+${current-page-url}
+----
+
+.Validate redirect in the browser
+[source,gherkin]
+----
+Given I am on page with URL `https://docs.vividus.dev/`
+Then `${current-page-url}` is equal to `https://docs.vividus.dev/vividus/latest/index.html`
+----
+
 === Browser window dimension
 
 The set of dynamic variables provides ability to access height and width of the browser window.
-
-==== *Variable name*
 
 [cols="1,3", options="header"]
 |===
