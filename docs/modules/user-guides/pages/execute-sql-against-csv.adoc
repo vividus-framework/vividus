@@ -12,7 +12,7 @@ As a prerequisite add the required DB plugin dependency to the project `build.gr
 implementation(group: 'org.vividus', name: 'vividus-plugin-db', version: '{current-version}')
 ----
 
-== Execute SQL against CSV resource
+== Execute SQL against CSV xref:ROOT:glossary.adoc#_resource[resource]
 
 . Add the CSV and CSV driver dependencies to the project `build.gradle`
 +
@@ -22,7 +22,7 @@ implementation(group: 'org.vividus', name: 'vividus-plugin-csv', version: '{curr
 implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.40')
 ----
 
-. Configure connection to the CSV resources
+. Configure connection to the CSV xref:ROOT:glossary.adoc#_resource[resources]
 +
 [source,properties]
 ----
