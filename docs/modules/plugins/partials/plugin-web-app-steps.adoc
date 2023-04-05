@@ -493,7 +493,7 @@ When I execute sequence of actions:
 [source,gherkin]
 ----
 When I execute sequence of actions:
-|type      |argument  |
+|type      |argument                 |
 |KEY_DOWN  |OS_INDEPENDENT_CONTROL, a|
 |KEY_UP    |a, OS_INDEPENDENT_CONTROL|
 |KEY_DOWN  |OS_INDEPENDENT_CONTROL, c|
