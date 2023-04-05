@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ package org.vividus.log;
 
 import java.util.List;
 
+import org.jbehave.core.model.Lifecycle.ExecutionType;
 import org.jbehave.core.reporters.TxtOutput;
+import org.jbehave.core.steps.StepCollector.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,5 +51,29 @@ public class LoggingStoryReporter extends TxtOutput
     {
         super.failed(step, storyFailure);
         LOGGER.error("Step is failed with exception", storyFailure);
+    }
+
+    @Override
+    public void beforeStorySteps(Stage stage, ExecutionType type)
+    {
+        // Skip logging as it's not informative
+    }
+
+    @Override
+    public void afterStorySteps(Stage stage, ExecutionType type)
+    {
+        // Skip logging as it's not informative
+    }
+
+    @Override
+    public void beforeScenarioSteps(Stage stage, ExecutionType type)
+    {
+        // Skip logging as it's not informative
+    }
+
+    @Override
+    public void afterScenarioSteps(Stage stage, ExecutionType type)
+    {
+        // Skip logging as it's not informative
     }
 }
