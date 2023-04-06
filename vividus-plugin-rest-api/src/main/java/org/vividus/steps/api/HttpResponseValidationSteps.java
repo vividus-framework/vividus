@@ -628,7 +628,7 @@ public class HttpResponseValidationSteps
                 () -> isResponseCodeIsEqualToExpected(httpTestContext.getResponse(), responseCode)
         );
         performIfHttpResponseIsPresent(
-                response -> softAssert.assertEquals(HTTP_RESPONSE_STATUS_CODE, response.getStatusCode(), responseCode));
+                response -> softAssert.assertEquals(HTTP_RESPONSE_STATUS_CODE, responseCode, response.getStatusCode()));
     }
 
     private static List<String> extractHeaderElementsNames(Header header)

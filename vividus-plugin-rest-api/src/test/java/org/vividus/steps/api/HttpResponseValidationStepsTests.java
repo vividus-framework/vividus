@@ -671,7 +671,7 @@ class HttpResponseValidationStepsTests
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
         httpResponseValidationSteps.waitForResponseCode(RESPONSE_CODE, DURATION, RETRY_TIMES, stepsToExecute);
         verify(stepsToExecute, atLeast(3)).execute(Optional.empty());
-        verify(softAssert).assertEquals(HTTP_RESPONSE_STATUS_CODE, RESPONSE_CODE_ERROR, RESPONSE_CODE);
+        verify(softAssert).assertEquals(HTTP_RESPONSE_STATUS_CODE, RESPONSE_CODE, RESPONSE_CODE_ERROR);
     }
 
     private String mockHeaderRetrieval()
