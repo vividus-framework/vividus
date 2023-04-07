@@ -217,3 +217,13 @@ Examples:
 
 Scenario: Validate Data URL decoding expression for binary data
 When I compare against baseline with name `black-pixel` from image `#{decodeDataUrl(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjYGBg+A8AAQQBAHAgZQsAAAAASUVORK5CYII=)}`
+
+Scenario: Validate expressions parsing URLs
+Then `#{<expression>}` is = `<expected>`
+Examples:
+|expression                                                                            |expected                  |
+|extractHostFromUrl(${vividus-test-site-url}/windows.html?query=test)                  |${vividus-test-site-host} |
+|extractPathFromUrl(${vividus-test-site-url}/windows.html?query=test)                  |/windows.html             |
+|extractPathFromUrl(${vividus-test-site-url}/encoded%E2%82%AC/windows.html?query=test) |/encoded€/windows.html    |
+|extractQueryFromUrl(${vividus-test-site-url}/windows.html?query=test)                 |query=test                |
+|extractQueryFromUrl(${vividus-test-site-url}/windows.html?query=encoded%E2%82%AC)     |query=encoded€            |
