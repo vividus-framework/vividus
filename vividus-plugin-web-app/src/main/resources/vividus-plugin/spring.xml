@@ -166,10 +166,6 @@
 
     <bean id="webElementHighlighter" class="org.vividus.selenium.screenshot.WebElementHighlighter" />
 
-    <bean id="webApplicationListener" class="org.vividus.ui.web.listener.DelegatingWebApplicationListener">
-        <property name="webApplicationListeners" ref="delegatingWebApplicationListener-WebApplicationListeners" />
-    </bean>
-
     <bean id="elementValidations" class="org.vividus.steps.ui.web.validation.ElementValidations" />
     <bean id="focusValidations" class="org.vividus.steps.ui.web.validation.FocusValidations" />
 
@@ -240,16 +236,6 @@
         <constructor-arg index="0" value="${selenium.grid.enabled}"/>
         <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers"/>
     </bean>
-
-    <bean id="delegatingWebApplicationListener-WebApplicationListeners" class="org.vividus.spring.ListMergerFactoryBean">
-        <property name="lists">
-            <list>
-                <ref bean="delegatingWebApplicationListener-CustomWebApplicationListeners" />
-                <ref bean="javascriptActions" />
-            </list>
-        </property>
-    </bean>
-    <util:list id="delegatingWebApplicationListener-CustomWebApplicationListeners" />
 
     <bean id="webDriverEventListener-EventHandlers" class="org.vividus.spring.ListMergerFactoryBean">
         <property name="lists">

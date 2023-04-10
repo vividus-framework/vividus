@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.TextUtils;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.action.JavascriptActions;
-import org.vividus.ui.web.listener.IWebApplicationListener;
+import org.vividus.ui.web.listener.WebApplicationListener;
 import org.vividus.util.ResourceUtils;
 
-public class WebJavascriptActions extends JavascriptActions implements IWebApplicationListener
+public class WebJavascriptActions extends JavascriptActions implements WebApplicationListener
 {
     private static final String TRIGGER_EVENT_FORMAT = "if(document.createEvent){var evObj = document"
             + ".createEvent('MouseEvents');evObj.initEvent('%1$s', true, false); arguments[0].dispatchEvent(evObj);} "
@@ -200,9 +200,10 @@ public class WebJavascriptActions extends JavascriptActions implements IWebAppli
     }
 
     @Override
-    public void onLoad()
+    public boolean onLoad()
     {
         browserConfig.get();
+        return false;
     }
 
     public String getUserAgent()
