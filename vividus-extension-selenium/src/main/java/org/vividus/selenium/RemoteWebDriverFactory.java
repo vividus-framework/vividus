@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,14 @@
 package org.vividus.selenium;
 
 import java.net.URL;
+import java.net.http.HttpConnectTimeoutException;
 
 import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.SessionNotCreatedException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 
 import io.appium.java_client.android.AndroidDriver;
@@ -27,20 +32,48 @@ import io.appium.java_client.ios.IOSDriver;
 
 public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
 {
-    private final boolean useW3C;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteWebDriverFactory.class);
 
-    public RemoteWebDriverFactory(boolean useW3C)
+    private final boolean useW3C;
+    private final boolean retrySessionCreationOnHttpConnectTimeout;
+
+    public RemoteWebDriverFactory(boolean useW3C, boolean retrySessionCreationOnHttpConnectTimeout)
     {
         this.useW3C = useW3C;
+        this.retrySessionCreationOnHttpConnectTimeout = retrySessionCreationOnHttpConnectTimeout;
     }
 
     @Override
     public RemoteWebDriver getRemoteWebDriver(URL url, Capabilities capabilities)
     {
-        /* Selenium 4 declares that it only supports W3C and nevertheless still writes  JWP's "desiredCapabilities" into
-        "createSession" JSON. Appium Java client eliminates that: https://github.com/appium/java-client/pull/1537.
-        But still some clouds (e.g. SmartBear CrossBrowserTesting) are not prepared for W3c, so we should avoid
-        using Appium drivers to create sessions for web tests. */
+        try
+        {
+            return createRemoteWebDriver(url, capabilities);
+        }
+        catch (SessionNotCreatedException e)
+        {
+            if (retrySessionCreationOnHttpConnectTimeout && isHttpConnectTimeout(e))
+            {
+                LOGGER.warn("Failed to create a new session due to HTTP connect timout", e);
+                LOGGER.warn("Retrying to create a new session");
+                return createRemoteWebDriver(url, capabilities);
+            }
+            throw e;
+        }
+    }
+
+    private static boolean isHttpConnectTimeout(SessionNotCreatedException e)
+    {
+        Throwable cause = e.getCause();
+        return cause instanceof TimeoutException && cause.getCause() instanceof HttpConnectTimeoutException;
+    }
+
+    private RemoteWebDriver createRemoteWebDriver(URL url, Capabilities capabilities)
+    {
+        /* Selenium 4 declares that it only supports W3C and nevertheless still writes  JWP's "desiredCapabilities"
+        into "createSession" JSON. Appium Java client eliminates that:https://github.com/appium/java-client/pull/1537.
+        But still some clouds (e.g. SmartBear CrossBrowserTesting) are not prepared for W3c, so we should avoid using
+        Appium drivers to create sessions for web tests. */
         if (useW3C)
         {
             if (GenericWebDriverManager.isIOS(capabilities) || GenericWebDriverManager.isTvOS(capabilities))

@@ -20,6 +20,7 @@
 
     <bean id="remoteWebDriverFactory" class="org.vividus.selenium.RemoteWebDriverFactory">
         <constructor-arg value="${selenium.grid.use-w3c}" />
+        <constructor-arg value="${selenium.grid.retry-session-creation-on-http-connect-timeout}" />
     </bean>
 
     <bean id="webDriverProvider" class="org.vividus.selenium.WebDriverProvider"
