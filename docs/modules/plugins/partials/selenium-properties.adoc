@@ -1,3 +1,25 @@
+|[subs=+quotes]`*selenium.grid.host*`
+|hostname
+|`<empty>`
+|The host of https://www.selenium.dev/documentation/grid/[Selenium Grid] used to create a new session.
+
+|`selenium.grid.username`
+|username
+|`<empty>`
+|The username for authentication at https://www.selenium.dev/documentation/grid/[Selenium Grid] used to create a new session.
+
+|`selenium.grid.password`
+|password
+|`<empty>`
+|The password for authentication at https://www.selenium.dev/documentation/grid/[Selenium Grid] used to create a new session.
+
+|`selenium.grid.retry-session-creation-on-http-connect-timeout`
+a|`true` +
+`false`
+|`false`
+a|Whether to rety session creation at https://www.selenium.dev/documentation/grid/[Selenium Grid] in case of HTTP
+connect timeout. This flag may be useful when tests are executed via intermittent network connection.
+
 |`{session-scope-property-base}.session-scope`
 a|`story`
 
@@ -12,7 +34,7 @@ a|The test lifecycle of the {application-under-test}:
 An empty property value will lead to the error: "Application session scope is not set".
 
 |`ui.publish-source-on-failure`
-a|`true`
+a|`true` +
 `false`
 |`true`
 |Whether to publish the application source code on failure or not
@@ -22,21 +44,6 @@ a|`true` +
 `false`
 |`false`
 |If the value is set to `true`, an attempt to reset context will be performed when it becomes stale.
-
-|[subs=+quotes]`*selenium.grid.host*`
-|hostname
-|`<empty>`
-|Remote grid host to be used to create a new session
-
-|`selenium.grid.username`
-|username
-|`<empty>`
-|Remote grid username to be used to create a new session
-
-|`selenium.grid.password`
-|password
-|`<empty>`
-|Password to be used to create a new session
 
 |`ui.wait.timeout`
 |{durations-format-link} format
