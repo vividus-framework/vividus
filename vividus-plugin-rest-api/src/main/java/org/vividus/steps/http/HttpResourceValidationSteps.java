@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,17 +25,20 @@ import org.jbehave.core.model.ExamplesTable;
 import org.vividus.http.validation.ResourceValidator;
 import org.vividus.http.validation.model.ResourceValidation;
 import org.vividus.reporter.event.AttachmentPublisher;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.UriUtils;
 
 public class HttpResourceValidationSteps
 {
     private final ResourceValidator<ResourceValidation> resourceValidator;
+    private final ISoftAssert softAssert;
     private final AttachmentPublisher attachmentPublisher;
 
-    public HttpResourceValidationSteps(ResourceValidator<ResourceValidation> resourceValidator,
+    public HttpResourceValidationSteps(ResourceValidator<ResourceValidation> resourceValidator, ISoftAssert softAssert,
             AttachmentPublisher attachmentPublisher)
     {
         this.resourceValidator = resourceValidator;
+        this.softAssert = softAssert;
         this.attachmentPublisher = attachmentPublisher;
     }
 
@@ -51,7 +54,8 @@ public class HttpResourceValidationSteps
     @Then("HTTP resources are valid:$resources")
     public void verifyHttpResources(ExamplesTable resources)
     {
-        List<ResourceValidation> validations = resources.getRows()
+        softAssert.runIgnoringTestFailFast(() -> {
+            List<ResourceValidation> validations = resources.getRows()
                                                         .stream()
                                                         .map(row -> row.get("url"))
                                                         .map(UriUtils::createUri)
@@ -60,7 +64,8 @@ public class HttpResourceValidationSteps
                                                         .sorted()
                                                         .collect(Collectors.toList());
 
-        attachmentPublisher.publishAttachment("http-resources-validation-results.ftl", Map.of("results", validations),
-                "HTTP resources validation results");
+            attachmentPublisher.publishAttachment("http-resources-validation-results.ftl",
+                    Map.of("results", validations), "HTTP resources validation results");
+        });
     }
 }

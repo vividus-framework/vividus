@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,12 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -46,6 +48,7 @@ import java.util.stream.Stream;
 
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,6 +64,7 @@ import org.vividus.http.client.HttpResponse;
 import org.vividus.http.validation.ResourceValidator;
 import org.vividus.http.validation.model.CheckStatus;
 import org.vividus.reporter.event.AttachmentPublisher;
+import org.vividus.softassert.FailableRunnable;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.testcontext.ContextCopyingExecutor;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
@@ -171,6 +175,17 @@ class ResourceCheckStepsTests
 
     @InjectMocks
     private ResourceCheckSteps resourceCheckSteps;
+
+    @BeforeEach
+    void beforeEach()
+    {
+        doAnswer(a ->
+        {
+            FailableRunnable runnable = a.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(softAssert).runIgnoringTestFailFast(any(FailableRunnable.class));
+    }
 
     @Test
     void shouldCheckDesiredResourcesAndPostAttachment() throws InterruptedException, ExecutionException
@@ -408,6 +423,25 @@ class ResourceCheckStepsTests
         verify(softAssert).recordFailedAssertion("Exception occured in thread with name: Interrupted-0",
                 interruptedException);
         verifyNoInteractions(httpTestContext, attachmentPublisher, resourceValidator);
+    }
+
+    static Stream<Arguments> exceptions()
+    {
+        return Stream.of(arguments(new InterruptedException()), arguments(new ExecutionException(new IOException())));
+    }
+
+    @ParameterizedTest
+    @MethodSource("exceptions")
+    void shouldWrapExceptionsOccurredInExecutingThread(Exception exception)
+            throws ExecutionException, InterruptedException
+    {
+        doAnswer(a ->
+        {
+            throw exception;
+        }).when(executor).execute(any(), any());
+        var illegalStateException = assertThrows(IllegalStateException.class,
+                () -> resourceCheckSteps.checkResources(LINK_SELECTOR, FIRST_PAGE_TABLE));
+        assertEquals(exception, illegalStateException.getCause());
     }
 
     private void mockResourceValidator()

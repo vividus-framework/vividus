@@ -246,4 +246,13 @@ public interface ISoftAssert
      * @throws VerificationError If there were any assertion errors collected
      */
     void verify(Pattern pattern) throws VerificationError;
+
+    /**
+     * Disable fail-fast at the test case level and execute <code>FailableRunnable</code> operation.
+     * After the operation completed fail-fast setting is restored and error verification is performed.
+     * @param <E> Throws if an exception occurred during execution of the operation
+     * @param runnable FailableRunnable operation
+     * @throws E If an exception occurred during execution of the operation
+     */
+    <E extends Exception> void runIgnoringTestFailFast(FailableRunnable<E> runnable) throws E;
 }

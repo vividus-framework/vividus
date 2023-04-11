@@ -16,11 +16,8 @@
 
 package org.vividus.softassert;
 
-public interface FailTestFastManager
+@FunctionalInterface
+public interface FailableRunnable<E extends Exception>
 {
-    boolean isFailTestCaseFast();
-
-    void enableTestCaseFailFast();
-
-    void disableTestCaseFailFast();
+    void run() throws E;
 }
