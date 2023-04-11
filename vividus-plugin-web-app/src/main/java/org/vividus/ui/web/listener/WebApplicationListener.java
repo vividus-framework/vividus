@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,13 @@
 
 package org.vividus.ui.web.listener;
 
-public interface IWebApplicationListener
+public interface WebApplicationListener
 {
-    void onLoad();
+    /**
+     * Handles web application load event.
+     *
+     * @return True if page refresh is needed after event handling, false - otherwise. It might be useful when event
+     * handler adds some cookies which require page reload to apply changes.
+     */
+    boolean onLoad();
 }

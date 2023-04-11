@@ -47,7 +47,7 @@ import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
-import org.vividus.ui.web.listener.IWebApplicationListener;
+import org.vividus.ui.web.listener.WebApplicationListener;
 import org.vividus.util.UriUtils;
 
 @TakeScreenshotOnFailure
@@ -61,15 +61,20 @@ public class PageSteps
     @Inject private SetContextSteps setContextSteps;
     @Inject private INavigateActions navigateActions;
     @Inject private WebApplicationConfiguration webApplicationConfiguration;
-    @Inject private IWebApplicationListener webApplicationListener;
     @Inject private IWebWaitActions waitActions;
     @Inject private WebJavascriptActions javascriptActions;
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IDescriptiveSoftAssert descriptiveSoftAssert;
     @Inject private IWebDriverManager webDriverManager;
+    private final List<WebApplicationListener> webApplicationListeners;
     private IHttpClient httpClient;
 
     private boolean keepUserInfoForProtocolRedirects;
+
+    public PageSteps(List<WebApplicationListener> webApplicationListeners)
+    {
+        this.webApplicationListeners = webApplicationListeners;
+    }
 
     /**
      * Loading the page which was set as a main application page.
@@ -82,7 +87,13 @@ public class PageSteps
     {
         URI finalUri = updateUrlWithUserInfoForRedirects(webApplicationConfiguration.getMainApplicationPageUrl());
         navigateTo(finalUri);
-        webApplicationListener.onLoad();
+        boolean refreshPageNeeded = webApplicationListeners.stream()
+                .map(WebApplicationListener::onLoad)
+                .reduce(false, (a, b) -> a || b);
+        if (refreshPageNeeded)
+        {
+            navigateActions.refresh();
+        }
     }
 
     /**

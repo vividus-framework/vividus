@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -67,7 +68,7 @@ import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
-import org.vividus.ui.web.listener.IWebApplicationListener;
+import org.vividus.ui.web.listener.WebApplicationListener;
 import org.vividus.util.UriUtils;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -87,13 +88,13 @@ class PageStepsTests
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private IUiContext uiContext;
     @Mock private WebApplicationConfiguration webApplicationConfiguration;
-    @Mock private IWebApplicationListener webApplicationListener;
     @Mock private SetContextSteps setContextSteps;
     @Mock private IWebWaitActions waitActions;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IWebDriverManager webDriverManager;
     @Mock private IHttpClient httpClient;
-    @InjectMocks private PageSteps pageSteps;
+    private final List<WebApplicationListener> webApplicationListeners = new ArrayList<>();
+    @InjectMocks private PageSteps pageSteps = new PageSteps(webApplicationListeners);
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(PageSteps.class);
 
@@ -244,22 +245,32 @@ class PageStepsTests
         ordered.verifyNoMoreInteractions();
     }
 
-    @Test
-    void testOpenMainApplicationPage()
+    @ParameterizedTest
+    @CsvSource({
+            "true, false",
+            "false, true"
+    })
+    void shouldOpenMainApplicationPage(boolean result1, boolean result2)
     {
+        WebApplicationListener webApplicationListener1 = mock();
+        when(webApplicationListener1.onLoad()).thenReturn(result1);
+        webApplicationListeners.add(webApplicationListener1);
+        WebApplicationListener webApplicationListener2 = mock();
+        when(webApplicationListener2.onLoad()).thenReturn(result2);
+        webApplicationListeners.add(webApplicationListener2);
         pageSteps.setKeepUserInfoForProtocolRedirects(false);
         URI mainPage = URI.create(URL);
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
         pageSteps.openMainApplicationPage();
         verify(navigateActions).navigateTo(mainPage);
-        verify(webApplicationListener).onLoad();
+        verify(navigateActions).refresh();
     }
 
     @Test
     void testOpenMainApplicationPageIOS()
     {
         when(webDriverManager.isIOS()).thenReturn(true);
-        testOpenMainApplicationPage();
+        shouldOpenMainApplicationPage(true, true);
         verify(waitActions).waitForPageLoad();
     }
 
@@ -269,17 +280,23 @@ class PageStepsTests
         mockPageRedirect(URL, HTTP_EXAMPLE_COM);
         pageSteps.openMainApplicationPage();
         verify(navigateActions).navigateTo(URI.create(URL));
-        verify(webApplicationListener).onLoad();
+        verifyNoMoreInteractions(navigateActions);
     }
 
     @Test
     void testOpenMainApplicationPageRedirectSameHost() throws IOException
     {
+        WebApplicationListener webApplicationListener1 = mock();
+        when(webApplicationListener1.onLoad()).thenReturn(false);
+        webApplicationListeners.add(webApplicationListener1);
+        WebApplicationListener webApplicationListener2 = mock();
+        when(webApplicationListener2.onLoad()).thenReturn(false);
+        webApplicationListeners.add(webApplicationListener2);
         mockPageRedirect(HTTP_EXAMPLE_COM, "https://example.com");
         when(webApplicationConfiguration.getBasicAuthUser()).thenReturn("user:password");
         pageSteps.openMainApplicationPage();
         verify(navigateActions).navigateTo(URI.create("https://user:password@example.com"));
-        verify(webApplicationListener).onLoad();
+        verifyNoMoreInteractions(navigateActions);
     }
 
     private void mockPageRedirect(String mainPageUrl, String redirectPageUrl) throws IOException
@@ -312,7 +329,7 @@ class PageStepsTests
         }))).thenReturn(new HttpResponse());
         pageSteps.openMainApplicationPage();
         verify(navigateActions).navigateTo(mainPage);
-        verify(webApplicationListener).onLoad();
+        verifyNoMoreInteractions(navigateActions);
     }
 
     @Test
