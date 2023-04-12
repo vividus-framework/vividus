@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.selenium.cloud;
 
 import com.google.common.eventbus.Subscribe;
 
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
@@ -58,14 +57,14 @@ public abstract class AbstractCloudTestStatusManager
         }
     }
 
-    @SuppressWarnings("IllegalCatchExtended")
+    @SuppressWarnings({ "IllegalCatchExtended", "PMD.AvoidCatchingGenericException" })
     @Subscribe
     public final void updateCloudTestStatus(BeforeWebDriverQuitEvent event)
     {
         String status = getCloudTestStatus().isFailed() ? testStatusMapping.getFailed() : testStatusMapping.getPassed();
         try
         {
-            updateCloudTestStatus(status);
+            updateCloudTestStatus(event.getSessionId(), status);
         }
         catch (Exception e)
         {
@@ -84,14 +83,10 @@ public abstract class AbstractCloudTestStatusManager
         return testContext.get(KEY, CloudTestStatus::new);
     }
 
-    protected abstract void updateCloudTestStatus(String status) throws UpdateCloudTestStatusException;
+    protected abstract void updateCloudTestStatus(String sessionId, String status)
+            throws UpdateCloudTestStatusException;
 
-    protected String getSessionId()
-    {
-        return webDriverProvider.getUnwrapped(RemoteWebDriver.class).getSessionId().toString();
-    }
-
-    private final class CloudTestStatus
+    private static final class CloudTestStatus
     {
         private boolean failed;
 

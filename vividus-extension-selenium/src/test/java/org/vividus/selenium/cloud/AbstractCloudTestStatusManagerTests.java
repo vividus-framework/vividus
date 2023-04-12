@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -45,8 +44,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.remote.SessionId;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.cloud.AbstractCloudTestStatusManager.UpdateCloudTestStatusException;
 import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
@@ -59,6 +56,7 @@ import org.vividus.testcontext.ThreadedTestContext;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class AbstractCloudTestStatusManagerTests
 {
+    private static final String SESSION_ID = "session-id";
     private static final String PASSED = "passed";
     private static final String FAILED = "failed";
 
@@ -73,7 +71,7 @@ class AbstractCloudTestStatusManagerTests
     @Test
     void shouldUpdateCloudTestStatusToFailure() throws UpdateCloudTestStatusException
     {
-        SoftAssertionError assertionError = mock(SoftAssertionError.class);
+        SoftAssertionError assertionError = mock();
 
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(assertionError.isKnownIssue()).thenReturn(false);
@@ -81,9 +79,9 @@ class AbstractCloudTestStatusManagerTests
         statusManager.setCloudTestStatusToFailure(new AssertionFailedEvent(assertionError));
         statusManager.setCloudTestStatusToFailure(new AssertionFailedEvent(assertionError));
         statusManager.setCloudTestStatusToFailure(new AssertionFailedEvent(assertionError));
-        statusManager.updateCloudTestStatus(new BeforeWebDriverQuitEvent());
+        statusManager.updateCloudTestStatus(new BeforeWebDriverQuitEvent(SESSION_ID));
 
-        verify(statusManager).updateCloudTestStatus(FAILED);
+        verify(statusManager).updateCloudTestStatus(SESSION_ID, FAILED);
         verify(testContext, times(5)).get(any(Class.class), any(Supplier.class));
         verify(testContext).remove(any(Class.class));
         assertThat(logger.getLoggingEvents(), is(empty()));
@@ -93,11 +91,11 @@ class AbstractCloudTestStatusManagerTests
     @Test
     void shouldLogExceptionOccurredWhileCloudTestStatusUpdate() throws UpdateCloudTestStatusException
     {
-        UpdateCloudTestStatusException exception = mock(UpdateCloudTestStatusException.class);
+        UpdateCloudTestStatusException exception = mock();
 
-        doThrow(exception).when(statusManager).updateCloudTestStatus(PASSED);
+        doThrow(exception).when(statusManager).updateCloudTestStatus(SESSION_ID, PASSED);
 
-        statusManager.updateCloudTestStatus(new BeforeWebDriverQuitEvent());
+        statusManager.updateCloudTestStatus(new BeforeWebDriverQuitEvent(SESSION_ID));
 
         verify(testContext).get(any(Class.class), any(Supplier.class));
         verify(testContext).remove(any(Class.class));
@@ -109,9 +107,9 @@ class AbstractCloudTestStatusManagerTests
     @Test
     void shouldUpdateCloudTestStatusToSuccess() throws UpdateCloudTestStatusException
     {
-        statusManager.updateCloudTestStatus(new BeforeWebDriverQuitEvent());
+        statusManager.updateCloudTestStatus(new BeforeWebDriverQuitEvent(SESSION_ID));
 
-        verify(statusManager).updateCloudTestStatus(PASSED);
+        verify(statusManager).updateCloudTestStatus(SESSION_ID, PASSED);
         verify(testContext).get(any(Class.class), any(Supplier.class));
         verify(testContext).remove(any(Class.class));
         assertThat(logger.getLoggingEvents(), is(empty()));
@@ -120,7 +118,7 @@ class AbstractCloudTestStatusManagerTests
     @Test
     void shouldSetCloudTestStatusToFailureIfWebDriverIsNotInitialized()
     {
-        SoftAssertionError assertionError = mock(SoftAssertionError.class);
+        SoftAssertionError assertionError = mock();
 
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(false);
 
@@ -138,8 +136,8 @@ class AbstractCloudTestStatusManagerTests
     })
     void shouldManageCloudTestStatusIfKnownIssue(boolean fixedKnownIssue, int invocations)
     {
-        SoftAssertionError assertionError = mock(SoftAssertionError.class);
-        KnownIssue knownIssue = mock(KnownIssue.class);
+        SoftAssertionError assertionError = mock();
+        KnownIssue knownIssue = mock();
 
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(assertionError.isKnownIssue()).thenReturn(true);
@@ -153,20 +151,6 @@ class AbstractCloudTestStatusManagerTests
         assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
-    @Test
-    void shouldGetSessionId()
-    {
-        RemoteWebDriver remoteWebDriver = mock(RemoteWebDriver.class);
-        SessionId sessionId = mock(SessionId.class);
-
-        when(webDriverProvider.getUnwrapped(RemoteWebDriver.class)).thenReturn(remoteWebDriver);
-        when(remoteWebDriver.getSessionId()).thenReturn(sessionId);
-        String sessionIdAsString = "session-id";
-        when(sessionId.toString()).thenReturn(sessionIdAsString);
-
-        assertEquals(sessionIdAsString, statusManager.getSessionId());
-    }
-
     private static final class TestCloudTestStatusManager extends AbstractCloudTestStatusManager
     {
         TestCloudTestStatusManager(IWebDriverProvider webDriverProvider, TestContext testContext)
@@ -175,7 +159,7 @@ class AbstractCloudTestStatusManagerTests
         }
 
         @Override
-        protected void updateCloudTestStatus(String status) throws UpdateCloudTestStatusException
+        protected void updateCloudTestStatus(String sessionId, String status) throws UpdateCloudTestStatusException
         {
         }
     }

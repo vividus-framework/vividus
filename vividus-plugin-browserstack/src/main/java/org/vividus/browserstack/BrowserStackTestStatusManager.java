@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,11 @@ public class BrowserStackTestStatusManager extends AbstractCloudTestStatusManage
     }
 
     @Override
-    protected void updateCloudTestStatus(String status) throws UpdateCloudTestStatusException
+    protected void updateCloudTestStatus(String sessionId, String status) throws UpdateCloudTestStatusException
     {
         try
         {
-            browserStackAutomateClient.updateSessionStatus(getSessionId(), status);
+            browserStackAutomateClient.updateSessionStatus(sessionId, status);
         }
         catch (BrowserStackException e)
         {

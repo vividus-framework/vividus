@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,15 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.crossbrowsertesting.AutomatedTest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.remote.SessionId;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.cloud.AbstractCloudTestStatusManager.UpdateCloudTestStatusException;
 
@@ -48,44 +43,29 @@ class CbtTestStatusManagerTests
     @Mock private IWebDriverProvider webDriverProvider;
     @InjectMocks private CbtTestStatusManager testStatusManager;
 
-    @BeforeEach
-    void init()
-    {
-        mockSessionId();
-    }
-
     @Test
     void shouldUpdateCloudTestStatus() throws UpdateCloudTestStatusException, UnirestException
     {
-        try (MockedConstruction<AutomatedTest> automatedTestConstruction = mockConstruction(AutomatedTest.class))
+        try (var automatedTestConstruction = mockConstruction(AutomatedTest.class))
         {
-            testStatusManager.updateCloudTestStatus(STATUS);
+            testStatusManager.updateCloudTestStatus(SESSION_ID, STATUS);
 
-            AutomatedTest automatedTest = automatedTestConstruction.constructed().get(0);
+            var automatedTest = automatedTestConstruction.constructed().get(0);
             verify(automatedTest).setScore(STATUS);
         }
     }
 
+    @SuppressWarnings("try")
     @Test
     void shouldWrapException()
     {
-        UnirestException exception = mock(UnirestException.class);
-        try (MockedConstruction<AutomatedTest> automatedTestConstruction = mockConstruction(AutomatedTest.class,
+        UnirestException exception = mock();
+        try (var ignored = mockConstruction(AutomatedTest.class,
                 (mock, context) -> doThrow(exception).when(mock).setScore(STATUS)))
         {
-            UpdateCloudTestStatusException thrown = assertThrows(UpdateCloudTestStatusException.class,
-                () -> testStatusManager.updateCloudTestStatus(STATUS));
+            var thrown = assertThrows(UpdateCloudTestStatusException.class,
+                () -> testStatusManager.updateCloudTestStatus(SESSION_ID, STATUS));
             assertEquals(exception, thrown.getCause());
         }
-    }
-
-    private void mockSessionId()
-    {
-        RemoteWebDriver remoteWebDriver = mock(RemoteWebDriver.class);
-        SessionId sessionId = mock(SessionId.class);
-
-        when(webDriverProvider.getUnwrapped(RemoteWebDriver.class)).thenReturn(remoteWebDriver);
-        when(remoteWebDriver.getSessionId()).thenReturn(sessionId);
-        when(sessionId.toString()).thenReturn(SESSION_ID);
     }
 }
