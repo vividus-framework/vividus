@@ -43,6 +43,13 @@
                 </div>
             </div>
         </#if>
+        <#if responseTime != -1>
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Response time: ${responseTime} ms</h4>
+                </div>
+            </div>
+        </#if>
 
         <div class="panel panel-info">
             <div class="panel-heading">

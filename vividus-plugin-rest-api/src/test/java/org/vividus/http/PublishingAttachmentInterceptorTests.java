@@ -152,7 +152,7 @@ class PublishingAttachmentInterceptorTests
     }
 
     @Test
-    void testHttpResponseIsAttachedSuccessfully() throws IOException
+    void testHttpResponseIsAttachedSuccessfully()
     {
         var httpResponse = mock(HttpResponse.class);
         when(httpResponse.getResponseBody()).thenReturn(DATA);
@@ -160,13 +160,14 @@ class PublishingAttachmentInterceptorTests
         when(httpResponse.getMethod()).thenReturn(METHOD);
         when(httpResponse.getFrom()).thenReturn(URI.create(ENDPOINT));
         when(httpResponse.getResponseHeaders()).thenReturn(new Header[] { mock(Header.class) });
+        when(httpResponse.getResponseTimeInMs()).thenReturn(1L);
         interceptor.handle(httpResponse);
         var argumentCaptor = verifyPublishAttachment(RESPONSE);
         assertEquals(HttpStatus.SC_OK, argumentCaptor.getValue().get("statusCode").intValue());
     }
 
     @Test
-    void testNoHttpResponseBodyIsAttached() throws IOException
+    void testNoHttpResponseBodyIsAttached()
     {
         var httpResponse = mock(HttpResponse.class);
         when(httpResponse.getResponseBody()).thenReturn(null);

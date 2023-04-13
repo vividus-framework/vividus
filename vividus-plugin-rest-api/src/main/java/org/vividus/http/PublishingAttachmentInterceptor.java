@@ -80,25 +80,28 @@ public class PublishingAttachmentInterceptor implements HttpRequestInterceptor, 
                 }
             }
         }
-        attachApiMessage("Request: " + request, request.getHeaders(), body, mimeType, -1);
+        attachApiMessage("Request: " + request, request.getHeaders(), body, mimeType, -1, -1);
     }
 
     @Override
-    public void handle(HttpResponse response) throws IOException
+    public void handle(HttpResponse response)
     {
         Header[] headers = response.getResponseHeaders();
         String attachmentTitle = String.format("Response: %s %s", response.getMethod(), response.getFrom());
         String mimeType = getMimeType(headers).orElseGet(ContentType.DEFAULT_TEXT::getMimeType);
-        attachApiMessage(attachmentTitle, headers, response.getResponseBody(), mimeType, response.getStatusCode());
+        attachApiMessage(attachmentTitle, headers, response.getResponseBody(), mimeType, response.getStatusCode(),
+            response.getResponseTimeInMs());
     }
 
-    private void attachApiMessage(String title, Header[] headers, byte[] body, String mimeType, int statusCode)
+    private void attachApiMessage(String title, Header[] headers, byte[] body, String mimeType, int statusCode,
+                                  long responseTime)
     {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("headers", headers);
         dataMap.put("body", body != null ? new String(body, StandardCharsets.UTF_8) : null);
         dataMap.put("bodyContentType", mimeType);
         dataMap.put("statusCode", statusCode);
+        dataMap.put("responseTime", responseTime);
 
         attachmentPublisher.publishAttachment("/org/vividus/http/attachment/api-message.ftl", dataMap, title);
     }
