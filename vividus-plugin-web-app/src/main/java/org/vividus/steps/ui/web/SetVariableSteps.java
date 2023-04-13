@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class SetVariableSteps
      * </ul>
      * @param variable A name under which the value should be saved
      */
-    @When("I get the value from the URL and set it to the '$scopes' variable '$variable'")
+    @When("I get value from URL and set it to $scopes variable `$variable`")
     public void saveValueFromUrl(Set<VariableScope> scopes, String variable)
     {
         String url = getWebDriver().getCurrentUrl();
@@ -115,7 +115,7 @@ public class SetVariableSteps
      * </ul>
      * @param variable A name under which the value should be saved
      */
-    @When("I get the URL path and set it to the $scopes variable '$variable'")
+    @When("I get URL path and set it to $scopes variable `$variable`")
     public void savePathFromUrl(Set<VariableScope> scopes, String variable)
     {
         String value = UriUtils.createUri(getWebDriver().getCurrentUrl()).getPath();
@@ -137,7 +137,7 @@ public class SetVariableSteps
      * </ul>
      * @param variable A name under which the value should be saved
      */
-    @When("I get the number of open windows and set it to the $scopes variable '$variable'")
+    @When("I get number of open windows and set it to $scopes variable `$variable`")
     public void saveNumberOfOpenWindow(Set<VariableScope> scopes, String variable)
     {
         int value = webDriverProvider.get().getWindowHandles().size();
@@ -167,8 +167,7 @@ public class SetVariableSteps
      * </ul>
      * @param variable A name under which the value should be saved
      */
-    @When("I get the URL value of a video with sequence number '$number' and set it to the '$scopes'"
-            + " variable '$variable'")
+    @When("I get URL value of video with sequence number `$number` and set it to $scopes variable `$variable`")
     public void saveUrlValueOfVideoWithNumber(int number, Set<VariableScope> scopes, String variable)
     {
         List<WebElement> frames = getVideoIFrames(number);
@@ -202,7 +201,7 @@ public class SetVariableSteps
      * </ul>
      * @param variable A name under which the value should be saved
      */
-    @When("I get the URL value of a video with the name '$name' and set it to the '$scopes' variable '$variable'")
+    @When("I get URL value of video with name `$name` and set it to the $scopes variable `$variable`")
     public void saveUrlValueOfVideoWithName(String name, Set<VariableScope> scopes, String variable)
     {
         List<WebElement> frames = getVideoIFrames(1);
@@ -243,7 +242,7 @@ public class SetVariableSteps
      * </ul>
      * @param variableName A name of variable to assign the values
      */
-    @When("I save table to $scopes variable '$variableName'")
+    @When("I save table to $scopes variable `$variableName`")
     public void saveTableToContext(Set<VariableScope> scopes, String variableName)
     {
         uiContext.getSearchContext(WebElement.class).ifPresent(tableElement -> {

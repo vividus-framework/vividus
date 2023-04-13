@@ -1,6 +1,16 @@
 Meta:
     @epic vividus-extension-selenium
 
+Scenario: Verify deprecated step: "When I get the value from the URL and set it to the '$scopes' variable '$variable'"
+Given I am on page with URL `${vividus-test-site-url}/inputs.html`
+When I get the value from the URL and set it to the 'SCENARIO' variable 'variableName'
+Then `inputs.html` is equal to `${variableName}`
+
+Scenario: Verify step: "I get value from URL and set it to $scopes variable `$variable`"
+Given I am on page with URL `${vividus-test-site-url}/shadowDom.html`
+When I get value from URL and set it to SCENARIO variable `variableName`
+Then `shadowDom.html` is equal to `${variableName}`
+
 Scenario: Verify step: "When I set the text found in search context to the '$scopes' variable '$variableName'"
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
 When I enter `text` in field located `By.id(text)`

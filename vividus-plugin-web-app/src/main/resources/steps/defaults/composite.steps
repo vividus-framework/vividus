@@ -308,3 +308,28 @@ When I refresh page
 Composite: Then the page title $comparisonRule '$text'
 !-- WARNING: The step "Then the page title $comparisonRule '$text'" is deprecated and will be removed in VIVIDUS 0.6.0
 Then page title <comparisonRule> `<text>`
+
+Composite: When I get the value from the URL and set it to the '$scopes' variable '$variable'
+!-- WARNING: The step "When I get the value from the URL and set it to the '$scopes' variable '$variable'" is deprecated and will be removed in VIVIDUS 0.6.0.
+When I get value from URL and set it to <scopes> variable `<variable>`
+
+Composite: When I get the URL path and set it to the $scopes variable '$variable'
+!-- WARNING: The step "When I get the URL path and set it to the $scopes variable '$variable'" is deprecated and will be removed in VIVIDUS 0.6.0.
+When I get URL path and set it to <scopes> variable `<variable>`
+
+Composite: When I get the number of open windows and set it to the $scopes variable '$variable'
+!-- WARNING: The step "When I get the number of open windows and set it to the $scopes variable '$variable'" is deprecated and will be removed in VIVIDUS 0.6.0.
+When I get number of open windows and set it to <scopes> variable `<variable>`
+
+Composite: When I get the URL value of a video with sequence number '$number' and set it to the '$scopes' variable '$variable'
+!-- WARNING: The step "When I get the URL value of a video with sequence number '$number' and set it to the '$scopes' variable '$variable'" is deprecated and will be removed in VIVIDUS 0.6.0.
+When I get URL value of video with sequence number `<number>` and set it to <scopes> variable `<variable>`
+
+Composite: When I get the URL value of a video with the name '$name' and set it to the '$scopes' variable '$variable'
+!-- WARNING: The step "When I get the URL value of a video with the name '$name' and set it to the '$scopes' variable '$variable'" is deprecated and will be removed in VIVIDUS 0.6.0.
+When I get URL value of video with name `<name>` and set it to the <scopes> variable `<variable>`
+
+Composite: When I save table to $scopes variable '$variableName'
+!-- WARNING: The step "When I save table to $scopes variable '$variableName'" is deprecated and will be removed in VIVIDUS 0.6.0.
+When I save table to <scopes> variable `<variableName>`
+
