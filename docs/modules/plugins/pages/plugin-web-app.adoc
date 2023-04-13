@@ -166,6 +166,15 @@ include::plugins:partial$plugin-web-app-profiles.adoc[]
 
 include::plugins:partial$plugin-web-app-steps.adoc[]
 
+=== Close browser
+
+Closes the browser.
+
+[source,gherkin]
+----
+When I close browser
+----
+
 === Wait for window and switch
 
 Waits for the windows with desired title and switches to it.

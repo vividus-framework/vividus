@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,22 +23,31 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverStartContext;
 import org.vividus.selenium.WebDriverStartParameters;
 
 @ExtendWith(MockitoExtension.class)
-class BrowserConfigurationStepsTests
+class BrowserStepsTests
 {
     private static final String COMMAND_LINE_ARGS = "args";
 
     @Mock private WebDriverStartContext webDriverStartContext;
-    @InjectMocks private BrowserConfigurationSteps browserConfigurationSteps;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @InjectMocks private BrowserSteps browserSteps;
 
     @Test
-    void testSetWebDriverCliArguments()
+    void shouldSetWebDriverCliArguments()
     {
-        browserConfigurationSteps.setWebDriverCliArguments(COMMAND_LINE_ARGS);
+        browserSteps.setWebDriverCliArguments(COMMAND_LINE_ARGS);
         verify(webDriverStartContext).put(
                 WebDriverStartParameters.COMMAND_LINE_ARGUMENTS, COMMAND_LINE_ARGS);
+    }
+
+    @Test
+    void shouldCloseBrowser()
+    {
+        browserSteps.closeBrowser();
+        verify(webDriverProvider).end();
     }
 }
