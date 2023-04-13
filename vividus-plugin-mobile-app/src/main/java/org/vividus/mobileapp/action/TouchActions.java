@@ -204,7 +204,11 @@ public class TouchActions
                      Duration stabilizationDuration = swipeConfiguration.getSwipeStabilizationDuration();
                      int swipeLimit = swipeConfiguration.getSwipeLimit();
                      BufferedImage previousFrame = null;
-                     MoveCoordinates swipeCoordinates = direction.calculateCoordinates(swipeArea, swipeConfiguration);
+
+                     Rectangle adjustedSwipeArea = adjustSwipeArea(swipeArea);
+
+                     MoveCoordinates swipeCoordinates = direction.calculateCoordinates(adjustedSwipeArea,
+                             swipeConfiguration);
                      for (int count = 0; count <= swipeLimit; count++)
                      {
                          swipe(swipeCoordinates, swipeDuration);
@@ -251,6 +255,21 @@ public class TouchActions
         {
             return () -> screenshotTaker.takeAshotScreenshot(searchContext, Optional.empty()).getImage();
         }
+    }
+
+    /**
+     * Make sure swipe area is not outside screen
+     * @param swipeArea Desired swipe area
+     * @return Adjusted with screen size swipe area
+     */
+    private Rectangle adjustSwipeArea(Rectangle swipeArea)
+    {
+        Dimension screenSize = genericWebDriverManager.getSize();
+        int x = Math.max(swipeArea.getX(), 0);
+        int y = Math.max(swipeArea.getY(), 0);
+        int height = Math.min(swipeArea.getHeight(), screenSize.getHeight());
+        int width = Math.min(swipeArea.getWidth(), screenSize.getWidth());
+        return new Rectangle(x, y, height, width);
     }
 
     /**
