@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,7 +126,7 @@ class TouchActionsTests
 
         var touchActionCaptor = ArgumentCaptor.forClass(TouchAction.class);
         verify(performsTouchActions).performTouchAction(touchActionCaptor.capture());
-        String actions = ACTIONS_OPEN + PRESS
+        var actions = ACTIONS_OPEN + PRESS
                 + WAIT
                 + RELEASE
                 + ACTIONS_CLOSE;
@@ -146,7 +146,7 @@ class TouchActionsTests
 
         var touchActionCaptor = ArgumentCaptor.forClass(TouchAction.class);
         verify(performsTouchActions).performTouchAction(touchActionCaptor.capture());
-        String actions = ACTIONS_OPEN + "{action=press, options={x=2, y=5}}, "
+        var actions = ACTIONS_OPEN + "{action=press, options={x=2, y=5}}, "
                 + WAIT
                 + RELEASE
                 + ACTIONS_CLOSE;
@@ -171,7 +171,7 @@ class TouchActionsTests
 
         var touchActionCaptor = ArgumentCaptor.forClass(TouchAction.class);
         verify(performsTouchActions).performTouchAction(touchActionCaptor.capture());
-        String actions = ACTIONS_OPEN + PRESS
+        var actions = ACTIONS_OPEN + PRESS
                 + WAIT
                 + RELEASE
                 + ACTIONS_CLOSE;
@@ -189,8 +189,8 @@ class TouchActionsTests
 
         verify(performsTouchActions).performTouchAction(argThat(arg ->
         {
-            String parameters = arg.getParameters().toString();
-            String actions = ACTIONS_OPEN + "{action=tap, options={element=elementId}}" + ACTIONS_CLOSE;
+            var parameters = arg.getParameters().toString();
+            var actions = ACTIONS_OPEN + "{action=tap, options={element=elementId}}" + ACTIONS_CLOSE;
             return actions.equals(parameters);
         }));
     }
@@ -208,7 +208,8 @@ class TouchActionsTests
         when(screenshotTaker.takeViewportScreenshot()).thenReturn(getImage(BLACK_IMAGE))
                                                       .thenReturn(getImage(WHITE_IMAGE));
 
-        touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition);
+        var swipeArea = new Rectangle(new Point(-5, -5), new Dimension(700, 900));
+        touchActions.swipeUntil(SwipeDirection.UP, DURATION, swipeArea, stopCondition);
 
         verifySwipe(3);
     }
@@ -219,6 +220,7 @@ class TouchActionsTests
         mockPerformsTouchActions();
         var context = mock(WebElement.class);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
+        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
         when(stopCondition.getAsBoolean()).thenReturn(false)
                 .thenReturn(false)
                 .thenReturn(true);
@@ -233,7 +235,6 @@ class TouchActionsTests
         touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition);
 
         verifySwipe(3);
-        verifyNoMoreInteractions(genericWebDriverManager);
         verify(blackImage, never()).getSubimage(anyInt(), anyInt(), anyInt(), anyInt());
         verify(whiteImage, never()).getSubimage(anyInt(), anyInt(), anyInt(), anyInt());
     }
@@ -252,12 +253,12 @@ class TouchActionsTests
         mockPerformsTouchActions();
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mock(AppiumDriver.class)));
         when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
-        IOException exception = mock(IOException.class);
+        var exception = mock(IOException.class);
 
         when(stopCondition.getAsBoolean()).thenReturn(false);
         doThrow(exception).when(screenshotTaker).takeViewportScreenshot();
 
-        UncheckedIOException wrapper = assertThrows(UncheckedIOException.class,
+        var wrapper = assertThrows(UncheckedIOException.class,
                 () -> touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition));
 
         assertEquals(exception, wrapper.getCause());
@@ -279,7 +280,7 @@ class TouchActionsTests
                                                       .thenReturn(getImage(BLACK_IMAGE))
                                                       .thenReturn(getImage(WHITE_IMAGE));
 
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
+        var exception = assertThrows(IllegalStateException.class,
             () -> touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition));
 
         assertEquals("Swiping is stopped due to exceeded swipe limit '5'", exception.getMessage());
@@ -344,7 +345,7 @@ class TouchActionsTests
     {
         when(genericWebDriverManager.isAndroid()).thenReturn(false);
         when(genericWebDriverManager.isIOS()).thenReturn(false);
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        var exception = assertThrows(IllegalArgumentException.class,
                 () -> touchActions.doubleTap(element));
         assertEquals("Double tap action is available only for Android and iOS platforms", exception.getMessage());
     }
@@ -358,7 +359,7 @@ class TouchActionsTests
     void shouldPerformZoom(ZoomType zoomType, int point1StartX, int point1StartY, int point1EndX, int point1EndY,
             int point2StartX, int point2StartY, int point2EndX, int point2EndY)
     {
-        Interactive webDriver = mock(Interactive.class);
+        var webDriver = mock(Interactive.class);
         when(webDriverProvider.getUnwrapped(Interactive.class)).thenReturn(webDriver);
         var pointerMoveTemplate = "{duration=%d, x=%%s, y=%%s, type=pointerMove, origin=viewport}";
         var swipeSequenceTemplate = "{id=%s, type=pointer, parameters={pointerType=touch}, actions=["
@@ -384,7 +385,7 @@ class TouchActionsTests
     {
         try
         {
-            byte[] bytes = ResourceUtils.loadResourceAsByteArray(getClass(), image);
+            var bytes = ResourceUtils.loadResourceAsByteArray(getClass(), image);
             return ImageTool.toBufferedImage(bytes);
         }
         catch (IOException e)
