@@ -46,9 +46,9 @@ import org.openqa.selenium.remote.SessionId;
 import org.vividus.reporter.event.LinkPublishEvent;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.cloud.AbstractCloudTestLinkPublisher.GetCloudTestUrlException;
-import org.vividus.selenium.event.AfterWebDriverQuitEvent;
+import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
+import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.testcontext.TestContext;
-import org.vividus.testcontext.ThreadedTestContext;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractCloudTestLinkPublisherTests
@@ -59,8 +59,8 @@ class AbstractCloudTestLinkPublisherTests
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private EventBus eventBus;
-    @Mock private AfterWebDriverQuitEvent webDriverQuitEvent;
-    @Spy private ThreadedTestContext testContext;
+    @Mock private BeforeWebDriverQuitEvent webDriverQuitEvent;
+    @Spy private SimpleTestContext testContext;
     @InjectMocks private TestCloudTestLinkPublisher linkPublisher;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractCloudTestLinkPublisher.class);
@@ -114,8 +114,8 @@ class AbstractCloudTestLinkPublisherTests
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         mockDriverSession();
 
-        GetCloudTestUrlException thrown = mock(GetCloudTestUrlException.class);
-        TestCloudTestLinkPublisher spy = spy(linkPublisher);
+        GetCloudTestUrlException thrown = mock();
+        var spy = spy(linkPublisher);
         doThrow(thrown).when(spy).getCloudTestUrl(SESSION_ID);
 
         spy.resetState();
@@ -127,8 +127,8 @@ class AbstractCloudTestLinkPublisherTests
 
     private void mockDriverSession()
     {
-        RemoteWebDriver remoteWebDriver = mock(RemoteWebDriver.class);
-        SessionId sessionId = mock(SessionId.class);
+        RemoteWebDriver remoteWebDriver = mock();
+        SessionId sessionId = mock();
 
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         when(webDriverProvider.getUnwrapped(RemoteWebDriver.class)).thenReturn(remoteWebDriver);
@@ -140,7 +140,7 @@ class AbstractCloudTestLinkPublisherTests
     {
         verify(eventBus, times(times)).post(argThat(arg ->
         {
-            LinkPublishEvent event = (LinkPublishEvent) arg;
+            var event = (LinkPublishEvent) arg;
             return URL.equals(event.getUrl()) && "Test Test URL".equals(event.getName());
         }));
     }

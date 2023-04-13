@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
@@ -40,7 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.InOrder;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -76,31 +75,27 @@ class WebDriverProviderTests
     @Test
     void testEnd()
     {
-        SessionId sessionId = mock(SessionId.class);
+        SessionId sessionId = mock();
         testContext.put(VividusWebDriver.class, vividusWebDriver);
         when(vividusWebDriver.getWrappedDriver()).thenReturn(remoteWebDriver);
         when(remoteWebDriver.getSessionId()).thenReturn(sessionId);
         when(sessionId.toString()).thenReturn(SESSION_ID);
-        InOrder bus = inOrder(mockedEventBus);
         webDriverProvider.end();
         verify(remoteWebDriver).quit();
-        bus.verify(mockedEventBus).post(any(BeforeWebDriverQuitEvent.class));
-        bus.verify(mockedEventBus).post(argThat(e -> SESSION_ID.equals(((AfterWebDriverQuitEvent) e).getSessionId())));
+        verifyEventsPosting();
     }
 
     @Test
     void testEndWebDriveException()
     {
-        SessionId sessionId = mock(SessionId.class);
+        SessionId sessionId = mock();
         testContext.put(VividusWebDriver.class, vividusWebDriver);
         when(vividusWebDriver.getWrappedDriver()).thenReturn(remoteWebDriver);
         when(remoteWebDriver.getSessionId()).thenReturn(sessionId);
         when(sessionId.toString()).thenReturn(SESSION_ID);
         doThrow(new WebDriverException()).when(remoteWebDriver).quit();
-        InOrder bus = inOrder(mockedEventBus);
         assertThrows(WebDriverException.class, webDriverProvider :: end);
-        bus.verify(mockedEventBus).post(any(BeforeWebDriverQuitEvent.class));
-        bus.verify(mockedEventBus).post(argThat(e -> SESSION_ID.equals(((AfterWebDriverQuitEvent) e).getSessionId())));
+        verifyEventsPosting();
     }
 
     @Test
@@ -129,7 +124,7 @@ class WebDriverProviderTests
     })
     void testIsRemoteExecution(boolean initialized, boolean remote, boolean expected)
     {
-        WebDriverProvider spy = spy(webDriverProvider);
+        var spy = spy(webDriverProvider);
         testContext.put(VividusWebDriver.class, vividusWebDriver);
 
         when(spy.isWebDriverInitialized()).thenReturn(initialized);
@@ -144,6 +139,18 @@ class WebDriverProviderTests
         testContext.put(VividusWebDriver.class, vividusWebDriver);
         when(vividusWebDriver.getWrappedDriver()).thenReturn(remoteWebDriver);
         assertThat(webDriverProvider.getUnwrapped(WrapsDriver.class), instanceOf(WrapsDriver.class));
+    }
+
+    private void verifyEventsPosting()
+    {
+        var ordered = inOrder(mockedEventBus);
+        var beforeWebDriverQuitEventArgumentCaptor = ArgumentCaptor.forClass(BeforeWebDriverQuitEvent.class);
+        var afterWebDriverQuitEventArgumentCaptor = ArgumentCaptor.forClass(AfterWebDriverQuitEvent.class);
+        ordered.verify(mockedEventBus).post(beforeWebDriverQuitEventArgumentCaptor.capture());
+        ordered.verify(mockedEventBus).post(afterWebDriverQuitEventArgumentCaptor.capture());
+        ordered.verifyNoMoreInteractions();
+        assertEquals(SESSION_ID, beforeWebDriverQuitEventArgumentCaptor.getValue().getSessionId());
+        assertEquals(SESSION_ID, afterWebDriverQuitEventArgumentCaptor.getValue().getSessionId());
     }
 
     private static class TestVividusDriverFactory extends AbstractVividusWebDriverFactory

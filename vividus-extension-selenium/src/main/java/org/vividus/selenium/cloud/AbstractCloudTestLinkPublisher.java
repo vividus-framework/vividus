@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.reporter.event.LinkPublishEvent;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.event.AfterWebDriverQuitEvent;
+import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
 import org.vividus.testcontext.TestContext;
 
 public abstract class AbstractCloudTestLinkPublisher
@@ -74,7 +74,7 @@ public abstract class AbstractCloudTestLinkPublisher
     }
 
     @Subscribe
-    public void publishCloudTestLinkOnWebDriverQuit(AfterWebDriverQuitEvent event)
+    public void publishCloudTestLinkOnWebDriverQuit(BeforeWebDriverQuitEvent event)
     {
         if (!getPublishState().isPublishedAfterScenario())
         {
@@ -87,7 +87,7 @@ public abstract class AbstractCloudTestLinkPublisher
         return testContext.get(KEY, CloudTestLinkPublishState.class);
     }
 
-    @SuppressWarnings("IllegalCatchExtended")
+    @SuppressWarnings({ "IllegalCatchExtended", "PMD.AvoidCatchingGenericException" })
     private void publishCloudTestLink(String sessionId)
     {
         try
@@ -104,7 +104,7 @@ public abstract class AbstractCloudTestLinkPublisher
         }
     }
 
-    private final class CloudTestLinkPublishState
+    private static final class CloudTestLinkPublishState
     {
         private boolean publishedAfterScenario;
 
