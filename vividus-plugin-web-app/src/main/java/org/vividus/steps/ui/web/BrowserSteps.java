@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,19 @@
 package org.vividus.steps.ui.web;
 
 import org.jbehave.core.annotations.When;
+import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.WebDriverStartContext;
 import org.vividus.selenium.WebDriverStartParameters;
 
-public class BrowserConfigurationSteps
+public class BrowserSteps
 {
     private final WebDriverStartContext webDriverStartContext;
+    private final IWebDriverProvider webDriverProvider;
 
-    public BrowserConfigurationSteps(WebDriverStartContext webDriverStartContext)
+    public BrowserSteps(WebDriverStartContext webDriverStartContext, IWebDriverProvider webDriverProvider)
     {
         this.webDriverStartContext = webDriverStartContext;
+        this.webDriverProvider = webDriverProvider;
     }
 
     /**
@@ -47,5 +50,14 @@ public class BrowserConfigurationSteps
     public void setWebDriverCliArguments(String argsString)
     {
         webDriverStartContext.put(WebDriverStartParameters.COMMAND_LINE_ARGUMENTS, argsString);
+    }
+
+    /**
+     * Closes the browser
+     */
+    @When("I close browser")
+    public void closeBrowser()
+    {
+        webDriverProvider.end();
     }
 }

@@ -217,7 +217,7 @@
 
     <bean id="actionsSequenceSteps" class="org.vividus.steps.ui.web.ActionsSequenceSteps" />
 
-    <bean id="browserSteps" class="org.vividus.steps.ui.web.BrowserConfigurationSteps" />
+    <bean id="browserSteps" class="org.vividus.steps.ui.web.BrowserSteps" />
 
     <bean id="webUiVividusSetupSteps" class="org.vividus.steps.WebUiVividusSetupSteps">
         <property name="windowsStrategy" value="${selenium.windows-strategy}" />
