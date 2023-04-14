@@ -7,7 +7,7 @@ use, security is always extremely important.
 Please do not open an issue or pull request as this makes the problem immediately visible to everyone
 including malicious actors.
 
-Security issues in this project can be safely reported via the the following address:
+Security issues in this project can be safely reported via the following address:
 
 team@vividus.dev
 
