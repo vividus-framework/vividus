@@ -347,3 +347,48 @@ Then `${innerJoinTable}` is equal to table:
 |row13  |3     |row533 |row433 |row33  |row23  |
 |row133 |3     |row53  |row43  |row333 |row233 |
 |row133 |3     |row533 |row433 |row333 |row233 |
+
+Scenario: Verify SORTING transformer with default order
+When I initialize scenario variable `sortingTable` with values:
+{transformer=SORTING, byColumns=key1|key2}
+|key1|key2|key3|
+|bb  |d   |1   |
+|ba  |c   |2   |
+|bb  |b   |3   |
+|aa  |a   |4   |
+Then `${sortingTable}` is equal to table:
+|key1|key2|key3|
+|aa  |a   |4   |
+|ba  |c   |2   |
+|bb  |b   |3   |
+|bb  |d   |1   |
+
+Scenario: Verify SORTING transformer with ASCENDING order
+When I initialize scenario variable `sortingTable` with values:
+{transformer=SORTING, byColumns=key1|key2, order=ASCENDING}
+|key1|key2|key3|
+|bb  |d   |1   |
+|ba  |c   |2   |
+|bb  |b   |3   |
+|aa  |a   |4   |
+Then `${sortingTable}` is equal to table:
+|key1|key2|key3|
+|aa  |a   |4   |
+|ba  |c   |2   |
+|bb  |b   |3   |
+|bb  |d   |1   |
+
+Scenario: Verify SORTING transformer with DESCENDING order
+When I initialize scenario variable `sortingTable` with values:
+{transformer=SORTING, byColumns=key1|key2, order=DESCENDING}
+|key1|key2|key3|
+|bb  |d   |1   |
+|ba  |c   |2   |
+|bb  |b   |3   |
+|aa  |a   |4   |
+Then `${sortingTable}` is equal to table:
+|key1|key2|key3|
+|bb  |d   |1   |
+|bb  |b   |3   |
+|ba  |c   |2   |
+|aa  |a   |4   |
