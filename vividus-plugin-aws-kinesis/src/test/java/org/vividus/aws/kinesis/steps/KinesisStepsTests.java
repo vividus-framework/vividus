@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.AmazonKinesisClientBuilder;
 import com.amazonaws.services.kinesis.model.GetRecordsResult;
@@ -49,9 +51,10 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
 import org.vividus.testcontext.TestContext;
 import org.vividus.variable.VariableScope;
@@ -67,6 +70,7 @@ class KinesisStepsTests
     private static final String DATA = "data";
     private static final Object KEY = GetShardIteratorResult.class;
 
+    @Mock private AwsServiceClientsContext clientsContext;
     @Mock private TestContext testContext;
     @Mock private VariableContext variableContext;
 
@@ -144,12 +148,20 @@ class KinesisStepsTests
 
     void runWithKinesisClient(BiConsumer<AmazonKinesis, KinesisSteps> kinesisConsumer)
     {
-        try (MockedStatic<AmazonKinesisClientBuilder> builder = mockStatic(AmazonKinesisClientBuilder.class))
+        try (var builder = mockStatic(AmazonKinesisClientBuilder.class))
         {
-            AmazonKinesis kinesis = mock(AmazonKinesis.class);
+            AmazonKinesis kinesis = mock();
             builder.when(AmazonKinesisClientBuilder::defaultClient).thenReturn(kinesis);
 
-            KinesisSteps steps = new KinesisSteps(testContext, variableContext);
+            AmazonKinesisClientBuilder customClientBuilder = mock();
+            builder.when(AmazonKinesisClientBuilder::standard).thenReturn(customClientBuilder);
+
+            KinesisSteps steps = new KinesisSteps(clientsContext, testContext, variableContext);
+
+            when(clientsContext.getServiceClient(
+                    argThat((ArgumentMatcher<Supplier<AwsClientBuilder<AmazonKinesisClientBuilder, AmazonKinesis>>>)
+                            supplier -> supplier.get().equals(customClientBuilder)), eq(kinesis)))
+                    .thenReturn(kinesis);
 
             kinesisConsumer.accept(kinesis, steps);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
 import org.vividus.csv.CsvReader;
 import org.vividus.util.DateUtils;
@@ -59,15 +60,24 @@ public class S3BucketSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(S3BucketSteps.class);
 
-    private final AmazonS3 amazonS3Client;
+    private final AwsServiceClientsContext clientsContext;
     private final VariableContext variableContext;
     private final DateUtils dateUtils;
 
-    public S3BucketSteps(VariableContext variableContext, DateUtils dateUtils)
+    private final AmazonS3 amazonS3Client;
+
+    public S3BucketSteps(AwsServiceClientsContext clientsContext, VariableContext variableContext, DateUtils dateUtils)
     {
-        this.dateUtils = dateUtils;
-        this.amazonS3Client = AmazonS3ClientBuilder.defaultClient();
+        this.clientsContext = clientsContext;
         this.variableContext = variableContext;
+        this.dateUtils = dateUtils;
+
+        this.amazonS3Client = AmazonS3ClientBuilder.defaultClient();
+    }
+
+    private AmazonS3 getS3Client()
+    {
+        return clientsContext.getServiceClient(AmazonS3ClientBuilder::standard, amazonS3Client);
     }
 
     /**
@@ -131,7 +141,7 @@ public class S3BucketSteps
         objectMetadata.setContentType(contentType);
         objectMetadata.setContentLength(content.length);
         InputStream inputStream = new ByteArrayInputStream(content);
-        amazonS3Client.putObject(bucketName, objectKey, inputStream, objectMetadata);
+        getS3Client().putObject(bucketName, objectKey, inputStream, objectMetadata);
     }
 
     /**
@@ -193,7 +203,7 @@ public class S3BucketSteps
 
     private String fetchObject(String bucketName, String key) throws IOException
     {
-        try (S3ObjectInputStream objectContent = amazonS3Client.getObject(bucketName, key).getObjectContent())
+        try (S3ObjectInputStream objectContent = getS3Client().getObject(bucketName, key).getObjectContent())
         {
             return IOUtils.toString(objectContent, StandardCharsets.UTF_8);
         }
@@ -217,7 +227,7 @@ public class S3BucketSteps
     @When("I set ACL `$cannedAcl` for object with key `$objectKey` from S3 bucket `$bucketName`")
     public void setObjectAcl(CannedAccessControlList cannedAcl, String objectKey, String bucketName)
     {
-        amazonS3Client.setObjectAcl(bucketName, objectKey, cannedAcl);
+        getS3Client().setObjectAcl(bucketName, objectKey, cannedAcl);
     }
 
     /**
@@ -234,7 +244,7 @@ public class S3BucketSteps
     @When("I delete object with key `$objectKey` from S3 bucket `$bucketName`")
     public void deleteObject(String objectKey, String bucketName)
     {
-        amazonS3Client.deleteObject(bucketName, objectKey);
+        getS3Client().deleteObject(bucketName, objectKey);
     }
 
     /**
@@ -319,7 +329,7 @@ public class S3BucketSteps
 
         do
         {
-            result = amazonS3Client.listObjectsV2(request);
+            result = getS3Client().listObjectsV2(request);
 
             List<S3ObjectSummary> objectSummaries = result.getObjectSummaries();
             totalNumberOfObjects += objectSummaries.size();

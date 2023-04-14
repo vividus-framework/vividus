@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import com.amazonaws.services.kinesis.model.ShardIteratorType;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
 import org.vividus.testcontext.TestContext;
 import org.vividus.variable.VariableScope;
@@ -48,15 +49,25 @@ public class KinesisSteps
     private static final Logger LOGGER = LoggerFactory.getLogger(KinesisSteps.class);
     private static final Object KEY = GetShardIteratorResult.class;
 
-    private final AmazonKinesis amazonKinesis;
     private final TestContext testContext;
     private final VariableContext variableContext;
+    private final AwsServiceClientsContext clientsContext;
 
-    public KinesisSteps(TestContext testContext, VariableContext variableContext)
+    private final AmazonKinesis amazonKinesis;
+
+    public KinesisSteps(AwsServiceClientsContext clientsContext, TestContext testContext,
+            VariableContext variableContext)
     {
-        this.amazonKinesis = AmazonKinesisClientBuilder.defaultClient();
+        this.clientsContext = clientsContext;
         this.testContext = testContext;
         this.variableContext = variableContext;
+
+        this.amazonKinesis = AmazonKinesisClientBuilder.defaultClient();
+    }
+
+    private AmazonKinesis getKinesisClient()
+    {
+        return clientsContext.getServiceClient(AmazonKinesisClientBuilder::standard, amazonKinesis);
     }
 
     /**
@@ -82,7 +93,7 @@ public class KinesisSteps
     public void putRecord(String data, String partitionKey, String streamName)
     {
         ByteBuffer wrappedData = ByteBuffer.wrap(data.getBytes(StandardCharsets.UTF_8));
-        PutRecordResult result = amazonKinesis.putRecord(streamName, wrappedData, partitionKey);
+        PutRecordResult result = getKinesisClient().putRecord(streamName, wrappedData, partitionKey);
         LOGGER.atInfo()
                 .addArgument(result::getShardId)
                 .addArgument(result::getSequenceNumber)
@@ -98,7 +109,8 @@ public class KinesisSteps
     public void createShardIterators(String streamName)
     {
         ListShardsRequest listShardsRequest = new ListShardsRequest().withStreamName(streamName);
-        ListShardsResult listShardsResult = amazonKinesis.listShards(listShardsRequest);
+        AmazonKinesis amazonKinesisClient = getKinesisClient();
+        ListShardsResult listShardsResult = amazonKinesisClient.listShards(listShardsRequest);
         List<Shard> shards = listShardsResult.getShards();
         LOGGER.atInfo()
                 .addArgument(streamName)
@@ -112,7 +124,7 @@ public class KinesisSteps
                         .withShardId(shardId)
                         .withShardIteratorType(ShardIteratorType.LATEST)
                 )
-                .map(amazonKinesis::getShardIterator)
+                .map(amazonKinesisClient::getShardIterator)
                 .map(GetShardIteratorResult::getShardIterator)
                 .collect(Collectors.toList());
 
@@ -150,7 +162,7 @@ public class KinesisSteps
             LOGGER.info("Getting records using shard iterator '{}'", shardIterator);
 
             GetRecordsRequest request = new GetRecordsRequest().withShardIterator(shardIterator);
-            GetRecordsResult result = amazonKinesis.getRecords(request);
+            GetRecordsResult result = getKinesisClient().getRecords(request);
 
             nextShardIterators.add(result.getNextShardIterator());
             result.getRecords().stream()

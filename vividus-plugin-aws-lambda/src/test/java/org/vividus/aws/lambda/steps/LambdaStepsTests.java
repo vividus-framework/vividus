@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.vividus.aws.lambda.steps;
 
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
@@ -28,7 +30,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvokeRequest;
@@ -37,15 +41,17 @@ import com.amazonaws.services.lambda.model.LogType;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
 class LambdaStepsTests
 {
+    @Mock private AwsServiceClientsContext clientsContext;
     @Mock private VariableContext variableContext;
 
     @Test
@@ -64,10 +70,13 @@ class LambdaStepsTests
     private void testAwsLambdaInvocation(Consumer<InvokeResult> resultDecorator,
             Map<String, String> extraExpectedEntries)
     {
-        try (MockedStatic<AWSLambdaClientBuilder> awsLambdaClientBuilder = mockStatic(AWSLambdaClientBuilder.class))
+        try (var builder = mockStatic(AWSLambdaClientBuilder.class))
         {
-            AWSLambda awsLambda = mock(AWSLambda.class);
-            awsLambdaClientBuilder.when(AWSLambdaClientBuilder::defaultClient).thenReturn(awsLambda);
+            AWSLambda awsLambda = mock();
+            builder.when(AWSLambdaClientBuilder::defaultClient).thenReturn(awsLambda);
+
+            AWSLambdaClientBuilder customClientBuilder = mock();
+            builder.when(AWSLambdaClientBuilder::standard).thenReturn(customClientBuilder);
 
             String result = "result";
             int statusCode = 500;
@@ -87,9 +96,16 @@ class LambdaStepsTests
                     .withPayload(payload)
                     .withLogType(LogType.Tail);
             when(awsLambda.invoke(invokeRequest)).thenReturn(invokeResult);
+
+            LambdaSteps steps = new LambdaSteps(clientsContext, variableContext);
+
+            when(clientsContext.getServiceClient(
+                    argThat((ArgumentMatcher<Supplier<AwsClientBuilder<AWSLambdaClientBuilder, AWSLambda>>>)
+                            supplier -> supplier.get().equals(customClientBuilder)), eq(awsLambda)))
+                    .thenReturn(awsLambda);
+
             Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
             String variableName = "var";
-            LambdaSteps steps = new LambdaSteps(variableContext);
             steps.invokeLambda(functionName, payload, scopes, variableName);
             Map<String, String> variableValue = new HashMap<>();
             variableValue.put("payload", result);

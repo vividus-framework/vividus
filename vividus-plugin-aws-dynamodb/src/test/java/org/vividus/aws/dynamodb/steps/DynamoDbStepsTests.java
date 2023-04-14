@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
@@ -31,9 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider.Builder;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
@@ -46,10 +50,11 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
 import org.vividus.variable.VariableScope;
 
@@ -58,6 +63,7 @@ class DynamoDbStepsTests
 {
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(DynamoDbSteps.class);
 
+    @Mock private AwsServiceClientsContext clientsContext;
     @Mock private VariableContext variableContext;
 
     @SuppressWarnings({ "try", "PMD.CloseResource" })
@@ -105,18 +111,24 @@ class DynamoDbStepsTests
     private AmazonDynamoDBClientBuilder executeQuery(String roleArn, String partiqlQuery, ExecuteStatementResult result,
             Consumer<DynamoDbSteps> test)
     {
-        try (MockedStatic<AmazonDynamoDBClientBuilder> builder = mockStatic(AmazonDynamoDBClientBuilder.class))
+        try (var builder = mockStatic(AmazonDynamoDBClientBuilder.class))
         {
-            AmazonDynamoDBClientBuilder amazonDynamoDBClientBuilder = mock(AmazonDynamoDBClientBuilder.class);
+            AmazonDynamoDBClientBuilder amazonDynamoDBClientBuilder = mock();
             builder.when(AmazonDynamoDBClientBuilder::standard).thenReturn(amazonDynamoDBClientBuilder);
 
-            AmazonDynamoDB amazonDynamoDB = mock(AmazonDynamoDB.class);
+            AmazonDynamoDB amazonDynamoDB = mock();
             when(amazonDynamoDBClientBuilder.build()).thenReturn(amazonDynamoDB);
 
             ArgumentCaptor<ExecuteStatementRequest> captor = ArgumentCaptor.forClass(ExecuteStatementRequest.class);
             when(amazonDynamoDB.executeStatement(captor.capture())).thenReturn(result);
 
-            DynamoDbSteps steps = new DynamoDbSteps(roleArn, variableContext);
+            DynamoDbSteps steps = new DynamoDbSteps(roleArn, clientsContext, variableContext);
+
+            when(clientsContext.getServiceClient(
+                    argThat((ArgumentMatcher<Supplier<AwsClientBuilder<AmazonDynamoDBClientBuilder, AmazonDynamoDB>>>)
+                            supplier -> supplier.get().equals(amazonDynamoDBClientBuilder)), eq(amazonDynamoDB)))
+                    .thenReturn(amazonDynamoDB);
+
             test.accept(steps);
 
             ExecuteStatementRequest request = captor.getValue();
