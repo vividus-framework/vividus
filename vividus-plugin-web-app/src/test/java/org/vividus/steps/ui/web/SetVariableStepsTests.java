@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,11 +177,11 @@ class SetVariableStepsTests
     }
 
     @Test
-    void testCheckNumberOfOpenWindow()
+    void testCheckNumberOfOpenTabs()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriver.getWindowHandles()).thenReturn(Collections.singleton(VARIABLE));
-        setVariableSteps.saveNumberOfOpenWindow(VARIABLE_SCOPE, VARIABLE);
+        setVariableSteps.saveNumberOfOpenTabs(VARIABLE_SCOPE, VARIABLE);
         verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE, 1);
     }
 

@@ -219,3 +219,30 @@ When the condition `#{eval(`${optionalPathToCheck:/defaultPath}` != `/forbiddenP
 |step                                                                |
 |When I go to the relative URL '${optionalPathToCheck:/defaultPath}' |
 ----
+
+=== List and Map variables
+
+Vividus provides the ability to work with not only primitive variables like numbers and strings but also supports complex types such as lists and maps.
+
+==== Accessing Values
+
+* Values from list variables can be accessed by index. For example, `+${listVar[0]}+` returns the first value.
+* Values from map variables can be accessed by key. For instance, `+${listVar.key1}+` returns the value associated with 'key1'.
+
+==== Working with Tables
+
+List and map variables can be combined into more complex structures. A common case is tables, which are represented as a list of maps.
+
+Each Map object represents a row, with the keys corresponding to column headers and the values being the cell data.
+These Map objects are added to a List, creating a collection of rows representing the entire table.
+
+.Assuming we have the table below stored in the variable 'tableVar':
+[options="header",cols="2,2"]
+|===
+| A  | B
+| A1 | B1
+| A2 | B2
+|===
+
+* `+${tableVar[1]}+` returns a Map of the second table row: [|A:A2|, |B:B2|].
+* `+${tableVar[1].B}+` returns the value from the second row of column B: B2.

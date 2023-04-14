@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ public class SetVariableSteps
     }
 
     /**
-     * Gets an expected <b>value</b> from the <b>number of open windows</b>
+     * Gets an expected <b>value</b> from the <b>number of open tabs</b>
      * and saves it into the <b>variable</b>
      * <p>
      * A <b>value</b> is everything after the last <b>/</b>. <br>
@@ -135,13 +135,13 @@ public class SetVariableSteps
      * <li><b>STORY</b> - the variable will be available within the whole story,
      * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      * </ul>
-     * @param variable A name under which the value should be saved
+     * @param variableName A name under which the value should be saved
      */
-    @When("I get the number of open windows and set it to the $scopes variable '$variable'")
-    public void saveNumberOfOpenWindow(Set<VariableScope> scopes, String variable)
+    @When("I save number of open tabs to $scopes variable `$variableName`")
+    public void saveNumberOfOpenTabs(Set<VariableScope> scopes, String variableName)
     {
         int value = webDriverProvider.get().getWindowHandles().size();
-        variableContext.putVariable(scopes, variable, value);
+        variableContext.putVariable(scopes, variableName, value);
     }
 
     /**
@@ -243,7 +243,7 @@ public class SetVariableSteps
      * </ul>
      * @param variableName A name of variable to assign the values
      */
-    @When("I save table to $scopes variable '$variableName'")
+    @When("I save table to $scopes variable `$variableName`")
     public void saveTableToContext(Set<VariableScope> scopes, String variableName)
     {
         uiContext.getSearchContext(WebElement.class).ifPresent(tableElement -> {
