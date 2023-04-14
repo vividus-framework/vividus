@@ -1026,6 +1026,66 @@ Finds the resource by its name and replaces the expression with the content of t
 Given I initialize scenario variable `my-data` with value `#{resourceToBase64(/data/body.txt)}`
 ----
 
+== URL parsing
+:url-parameter: pass:quotes[*`$url`* - the URL to extract component from.]
+
+=== `extractHostFromUrl`
+
+Extracts host component from the given URL.
+
+[source, subs="+quotes"]
+----
+#{extractHostFromUrl(*$url*)}
+----
+
+[subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
+* {url-parameter}
+
+.Validate host component from URL
+[source,gherkin]
+----
+Then `#{extractHostFromUrl(file://server/folder/data.xml?id=123)}` is = `server`
+Then `#{extractHostFromUrl(https://docs.vividus.dev/vividus/latest?page=2)}` is = `docs.vividus.dev`
+----
+
+=== `extractPathFromUrl`
+
+Extracts decoded path component from the given URL.
+
+[source, subs="+quotes"]
+----
+#{extractPathFromUrl(*$url*)}
+----
+
+[subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
+* {url-parameter}
+
+.Validate path component from URL
+[source,gherkin]
+----
+Then `#{extractPathFromUrl(file://server/folder/data.xml?id=123)}` is = `/folder/data.xml`
+Then `#{extractPathFromUrl(https://docs.vividus.dev/vividus/latest?page=2)}` is = `/vividus/latest`
+----
+
+=== `extractQueryFromUrl`
+
+Extracts decoded query component from the given URL.
+
+[source, subs="+quotes"]
+----
+#{extractQueryFromUrl(*$url*)}
+----
+
+[subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
+* {url-parameter}
+
+.Validate query component from URL
+[source,gherkin]
+----
+Then `#{extractQueryFromUrl(file://server/folder/data.xml?id=123)}` is = `id=123`
+Then `#{extractQueryFromUrl(https://docs.vividus.dev/vividus/latest?page=2)}` is = `page=2`
+----
+
 == Script evaluation
 
 === `eval`
