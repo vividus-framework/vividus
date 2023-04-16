@@ -56,7 +56,7 @@ dependencies {
     implementation(group: 'org.apache.groovy', name: 'groovy', version: '4.0.11')
 
     // Spring
-    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.26')
+    implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.27')
     implementation(group: 'org.springframework', name: 'spring-context')
     implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
     implementation(group: 'commons-cli', name: 'commons-cli', version: '1.5.0')
