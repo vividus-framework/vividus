@@ -87,17 +87,41 @@ at step execution stage, in other words the same placeholders will be replaced b
 `SORTING` transformer is designed to sort the table rows by the values in
 the columns.
 
-[cols="1,3", options="header"]
+[cols="2,3", options="header"]
 |===
 |Parameter
 |Description
 
 |`byColumns`
 |column names ordered according to the priority of applying sorting (the column names are joined using `\|`)
+
+|`order`
+|the optional sorting order: ASCENDING or DESCENDING. By default - ASCENDING.
 |===
 
+.Usage of SORTING transformer with DESCENDING  sorting. The following transformer:
+[source,gherkin]
+----
+{transformer=SORTING, byColumns=key1|key2, order=DESCENDING}
+|key1|key2|key3|
+|bb  |d   |1   |
+|ba  |c   |2   |
+|bb  |b   |3   |
+|aa  |a   |4   |
+----
 
-.Usage of SORTING transformer
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
+
+[source,gherkin]
+----
+|key1|key2|key3|
+|bb  |d   |1   |
+|bb  |b   |3   |
+|ba  |c   |2   |
+|aa  |a   |4   |
+----
+
+.Usage of SORTING transformer with sorting by default (ASCENDING)
 [source,gherkin]
 ----
 {transformer=SORTING, byColumns=key|key1}
@@ -480,7 +504,7 @@ Examples:
 |===
 |Parameter|Description
 
-|`order`|The mandatory indedxing order: `ASCENDING` or `DESCENDING`.
+|`order`|The mandatory indexing order: `ASCENDING` or `DESCENDING`.
 |===
 
 .ASCENDING order example

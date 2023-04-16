@@ -18,7 +18,7 @@
         </constructor-arg>
     </bean>
 
-    <bean class="org.jbehave.core.steps.ParameterConverters.FluentEnumConverter" />
+    <bean class="org.vividus.converter.FluentTrimmedEnumConverter" />
 
     <bean name="SORTING" class="org.vividus.transformer.SortingTableTransformer" />
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,23 +30,28 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.vividus.converter.FluentTrimmedEnumConverter;
 
 class SortingTableTransformerTests
 {
     private static final String TABLE_WITH_SAME_VALUES = "|key1|key2|\n|10|0|\n|1|0|";
     private static final String TABLE = "|key1|key2|\n|4|3|\n|1|0|";
-    private final SortingTableTransformer transformer = new SortingTableTransformer();
+    private static final String REVERSE_TABLE = "|key1|key2|\n|1|0|\n|4|3|";
+
     private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters = new ParameterConverters();
     private final TableParsers tableParsers = new TableParsers(parameterConverters);
 
+    private final SortingTableTransformer transformer = new SortingTableTransformer(new FluentTrimmedEnumConverter());
+
     // CHECKSTYLE:OFF
     static Stream<Arguments> tableSource() {
         return Stream.of(
-                arguments(TABLE,                                "byColumns=key5",      TABLE),
-                arguments("|key1|key2|\n|1|0|\n|4|3|",          "byColumns=key1",      TABLE),
-                arguments(TABLE_WITH_SAME_VALUES,               "byColumns=key2",      TABLE_WITH_SAME_VALUES),
-                arguments("|key1|key2|key3|\n|0|2|1|\n|0|2|5|", "byColumns=key1|key3", "|key1|key2|key3|\n|0|2|5|\n|0|2|1|")
+                arguments(TABLE_WITH_SAME_VALUES,              "byColumns=key2",                  TABLE_WITH_SAME_VALUES),
+                arguments("|key1|key2|key3|\n|0|2|1|\n|0|2|5|","byColumns=key1|key3",             "|key1|key2|key3|\n|0|2|5|\n|0|2|1|"),
+                arguments(TABLE,                               "byColumns=key5, order=ascending", TABLE),
+                arguments(REVERSE_TABLE,                       "byColumns=key1, order=ASCENDING", TABLE),
+                arguments(TABLE,                               "byColumns=key1, order=DESCENDING",REVERSE_TABLE)
         );
     }
     // CHECKSTYLE:ON

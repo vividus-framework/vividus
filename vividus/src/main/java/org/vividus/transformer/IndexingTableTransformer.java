@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,28 +46,5 @@ public class IndexingTableTransformer implements TableTransformer
         }
         headers.add(INDEX);
         return ExamplesTableProcessor.buildExamplesTable(headers, rows, properties);
-    }
-
-    private enum Order
-    {
-        ASCENDING
-        {
-            @Override
-            IntUnaryOperator getIndexer(List<?> rows)
-            {
-                return i -> i;
-            }
-        },
-        DESCENDING
-        {
-            @Override
-            IntUnaryOperator getIndexer(List<?> rows)
-            {
-                int size = rows.size();
-                return i -> size - i - 1;
-            }
-        };
-
-        abstract IntUnaryOperator getIndexer(List<?> rows);
     }
 }
