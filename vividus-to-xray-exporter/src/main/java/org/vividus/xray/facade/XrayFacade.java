@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
@@ -92,17 +94,30 @@ public class XrayFacade
                        .log("{} Test with key {} has been updated");
     }
 
-    public void updateTestExecution(TestExecution testExecution) throws IOException, JiraConfigurationException
+    public void importTestExecution(TestExecution testExecution) throws IOException, JiraConfigurationException
     {
         String testExecutionRequest = objectMapper.writeValueAsString(testExecution);
+        FailableFunction<JiraClient, String, IOException> importFunction = client -> client
+                .executePost("/rest/raven/1.0/import/execution", testExecutionRequest);
+
         String testExecutionKey = testExecution.getTestExecutionKey();
-        LOGGER.atInfo()
-              .addArgument(testExecutionKey)
-              .addArgument(testExecutionRequest)
-              .log("Updating Test Execution with ID {}: {}");
-        jiraClientProvider.getByIssueKey(testExecutionKey).executePost("/rest/raven/1.0/import/execution",
-                testExecutionRequest);
-        LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been updated");
+        if (testExecutionKey != null)
+        {
+            LOGGER.atInfo()
+                  .addArgument(testExecutionKey)
+                  .addArgument(testExecutionRequest)
+                  .log("Updating Test Execution with ID {}: {}");
+            importFunction.apply(jiraClientProvider.getByIssueKey(testExecutionKey));
+            LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been updated");
+        }
+        else
+        {
+            LOGGER.atInfo().addArgument(testExecutionRequest).log("Creating Test Execution: {}");
+            String response = importFunction.apply(jiraClientProvider.getByJiraConfigurationKey(jiraInstanceKey));
+            LOGGER.atInfo()
+                  .addArgument(() -> JsonPathUtils.getData(response, "$.testExecIssue.key"))
+                  .log("Test Execution with key {} has been created");
+        }
     }
 
     public void updateTestSet(String testSetKey, List<String> testCaseKeys)

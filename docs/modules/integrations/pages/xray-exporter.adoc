@@ -15,6 +15,8 @@ include::partial$jira-configuration.adoc[]
 
 NOTE: The properties marked with *bold* are mandatory.
 
+=== General
+
 [cols="2,1,3", options="header"]
 |===
 
@@ -46,10 +48,6 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |false
 |Statuses of test cases allowed to update
 
-|`xray-exporter.test-execution-key`
-|false
-|The key of a `Test Execution` to which the exported test cases along with their statuses will be added
-
 |`xray-exporter.test-set-key`
 |false
 |The key of a `Test Set` to which the exported test cases will be added
@@ -62,6 +60,53 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 xray-exporter.project-key=ABBA
 xray-exporter.json-results-directory=/Users/happytester/Repositories/app-tests/output/results/jbehave
 ----
+
+=== Test Execution
+
+[cols="2,1,3", options="header"]
+|===
+
+|Property
+|Required
+|Description
+
+|`xray-exporter.test-execution-key`
+|false
+|The key of `Test Execution` which the exported test cases along with their statuses will be added to
+
+|`xray-exporter.test-execution-summary`
+|false
+|The `Test Execution` summary
+
+|===
+
+Test execution import varies depending on values in `xray-exporter.test-execution-key` and `xray-exporter.test-execution-summary`, the following matrix shows this behavior change:
+
+[cols="1,1", options="header"]
+|===
+
+|Configuration
+|Result
+
+|Both `xray-exporter.test-execution-key` and `xray-exporter.test-execution-summary` are set
+a|Test execution summary and associated test cases will be updated, the update of test cases is performed according to following rules:
+
+* new test cases are added to the test execution
+* statuses of existing test cases are updated
+
+|Only `xray-exporter.test-execution-summary` is set
+|New test execution will be created
+
+|Only `xray-exporter.test-execution-key` is set
+a|Associated test cases will be updated according to following rules:
+
+* new test cases are added to the test execution
+* statuses of existing test cases are updated
+
+|Neither `xray-exporter.test-execution-key` nor `xray-exporter.test-execution-summary` are set
+|Text execution import is skipped
+
+|===
 
 == Jira Fields Mapping
 
