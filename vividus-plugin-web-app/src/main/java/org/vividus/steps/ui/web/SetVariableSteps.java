@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -243,7 +243,7 @@ public class SetVariableSteps
      * </ul>
      * @param variableName A name of variable to assign the values
      */
-    @When("I save table to $scopes variable '$variableName'")
+    @When("I save table to $scopes variable `$variableName`")
     public void saveTableToContext(Set<VariableScope> scopes, String variableName)
     {
         uiContext.getSearchContext(WebElement.class).ifPresent(tableElement -> {
