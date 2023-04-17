@@ -317,6 +317,29 @@ public class SoftAssert implements ISoftAssert
         verify();
     }
 
+    @Override
+    public <E extends Exception> void runIgnoringTestFailFast(FailableRunnable<E> runnable) throws E
+    {
+        boolean testCaseFailFast = failTestFastManager.isFailTestCaseFast();
+        if (testCaseFailFast)
+        {
+            failTestFastManager.disableTestCaseFailFast();
+        }
+
+        try
+        {
+            runnable.run();
+        }
+        finally
+        {
+            if (testCaseFailFast)
+            {
+                failTestFastManager.enableTestCaseFailFast();
+                verify();
+            }
+        }
+    }
+
     public void init()
     {
         testContext.putInitValueSupplier(AssertionCollection.class, AssertionCollection::new);

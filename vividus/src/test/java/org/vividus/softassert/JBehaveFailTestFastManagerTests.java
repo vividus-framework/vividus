@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,16 @@
 package org.vividus.softassert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.function.Supplier;
+
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -29,12 +36,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.batch.BatchConfiguration;
 import org.vividus.batch.BatchStorage;
 import org.vividus.context.RunContext;
+import org.vividus.testcontext.TestContext;
 
 @ExtendWith(MockitoExtension.class)
 class JBehaveFailTestFastManagerTests
 {
+    private static final Object FAIL_TEST_CASE_FAST_KEY = JBehaveFailTestFastManager.class;
+
     @Mock private RunContext runContext;
     @Mock private BatchStorage batchStorage;
+    @Mock private TestContext testContext;
 
     @InjectMocks private JBehaveFailTestFastManager failTestFastManager;
 
@@ -53,6 +64,25 @@ class JBehaveFailTestFastManagerTests
         var configuration = mock(BatchConfiguration.class);
         when(batchStorage.getBatchConfiguration(key)).thenReturn(configuration);
         when(configuration.isFailScenarioFast()).thenReturn(configurationValue);
+        doAnswer(a ->
+        {
+            Supplier supplier = a.getArgument(1);
+            return supplier.get();
+        }).when(testContext).get(eq(FAIL_TEST_CASE_FAST_KEY), any(Supplier.class));
         assertEquals(expectedValue, failTestFastManager.isFailTestCaseFast());
+    }
+
+    @Test
+    void shouldEnableTestCaseFailFast()
+    {
+        failTestFastManager.enableTestCaseFailFast();
+        verify(testContext).put(FAIL_TEST_CASE_FAST_KEY, true);
+    }
+
+    @Test
+    void shouldDisableTestCaseFailFast()
+    {
+        failTestFastManager.disableTestCaseFailFast();
+        verify(testContext).put(FAIL_TEST_CASE_FAST_KEY, false);
     }
 }

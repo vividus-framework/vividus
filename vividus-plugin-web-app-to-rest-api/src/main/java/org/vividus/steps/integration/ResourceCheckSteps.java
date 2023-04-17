@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,28 +96,27 @@ public class ResourceCheckSteps
      *     3. If element doesn't contain href or src attribute fail assertion will be recorded
      * @param cssSelector to locate resources
      * @param html to validate
-     * @throws InterruptedException when a thread is interrupted
-     * @throws ExecutionException  when exception thrown before result get
      */
     @Then("all resources by selector `$cssSelector` from $html are valid")
-    public void checkResources(String cssSelector, String html) throws InterruptedException, ExecutionException
+    public void checkResources(String cssSelector, String html)
     {
-        execute(() -> {
+        softAssert.runIgnoringTestFailFast(() -> execute(() ->
+        {
             Collection<Element> resourcesToValidate = getElementsByCssSelector(html, cssSelector);
             Stream<WebPageResourceValidation> validations = createResourceValidations(resourcesToValidate,
-                resourceValidation -> {
-                    URI uriToCheck = resourceValidation.getUri();
-                    if (isNotAbsolute(uriToCheck))
-                    {
-                        softAssert.recordFailedAssertion(String.format(
-                                "Unable to resolve %s resource since the main application page URL is not set",
-                                uriToCheck));
+                    resourceValidation -> {
+                        URI uriToCheck = resourceValidation.getUri();
+                        if (isNotAbsolute(uriToCheck))
+                        {
+                            softAssert.recordFailedAssertion(String.format(
+                                    "Unable to resolve %s resource since the main application page URL is not set",
+                                    uriToCheck));
 
-                        resourceValidation.setCheckStatus(CheckStatus.BROKEN);
-                    }
-                });
+                            resourceValidation.setCheckStatus(CheckStatus.BROKEN);
+                        }
+                    });
             validateResources(validations);
-        });
+        }));
     }
 
     private void validateResources(Stream<WebPageResourceValidation> resourceValidation)
@@ -250,57 +249,65 @@ public class ResourceCheckSteps
      * </pre>
      * @param cssSelector to locate resources
      * @param pages where resources will be validated
-     * @throws InterruptedException when a thread is interrupted
-     * @throws ExecutionException  when exception thrown before result get
      */
     @Then("all resources by selector `$cssSelector` are valid on:$pages")
-    public void checkResources(String cssSelector, ExamplesTable pages) throws InterruptedException, ExecutionException
+    public void checkResources(String cssSelector, ExamplesTable pages)
     {
-        execute(() -> {
-            Stream<WebPageResourceValidation> resourcesToValidate =
-                pages.getRows().stream().map(m -> m.get("pages")).parallel()
-                     .flatMap(rawPageUrl ->
-                     {
-                         String pageUrl;
-                         try
-                         {
-                             URI uri = resolveUri(rawPageUrl);
-                             pageUrl = uri.toString();
-                             if (isNotAbsolute(uri))
-                             {
-                                 return Stream.of(createUnresolvablePageValidation(pageUrl));
-                             }
-                         }
-                         catch (URISyntaxException e)
-                         {
-                             softAssert.recordFailedAssertion("Invalid page URL", e);
-                             return Stream.of(createBrokenPageValidation(rawPageUrl));
-                         }
+        softAssert.runIgnoringTestFailFast(() -> execute(() -> {
+            Stream<WebPageResourceValidation> resourcesToValidate = pages.getRows().stream().map(m -> m.get("pages"))
+                    .parallel().flatMap(rawPageUrl ->
+                    {
+                        String pageUrl;
+                        try
+                        {
+                            URI uri = resolveUri(rawPageUrl);
+                            pageUrl = uri.toString();
+                            if (isNotAbsolute(uri))
+                            {
+                                return Stream.of(createUnresolvablePageValidation(pageUrl));
+                            }
+                        }
+                        catch (URISyntaxException e)
+                        {
+                            softAssert.recordFailedAssertion("Invalid page URL", e);
+                            return Stream.of(createBrokenPageValidation(rawPageUrl));
+                        }
 
-
-                         try
-                         {
-                             httpRequestExecutor.executeHttpRequest(HttpMethod.GET, pageUrl, Optional.empty());
-                             return Optional.ofNullable(httpTestContext.getResponse().getResponseBodyAsString())
-                                            .map(response -> getElementsByCssSelector(pageUrl, response, cssSelector))
-                                            .map(elements -> createResourceValidations(elements,
-                                                    rV -> rV.setPageURL(pageUrl)
-                                            ))
-                                            .orElseGet(() -> Stream.of(createMissingPageBodyValidation(pageUrl)));
-                         }
-                         catch (IOException toReport)
-                         {
-                             return Stream.of(createUnreachablePageValidation(pageUrl, toReport));
-                         }
-                     });
+                        try
+                        {
+                            httpRequestExecutor.executeHttpRequest(HttpMethod.GET, pageUrl, Optional.empty());
+                            return Optional.ofNullable(httpTestContext.getResponse().getResponseBodyAsString())
+                                    .map(response -> getElementsByCssSelector(pageUrl, response, cssSelector))
+                                    .map(elements -> createResourceValidations(elements,
+                                            rV -> rV.setPageURL(pageUrl)
+                                    ))
+                                    .orElseGet(() -> Stream.of(createMissingPageBodyValidation(pageUrl)));
+                        }
+                        catch (IOException toReport)
+                        {
+                            return Stream.of(createUnreachablePageValidation(pageUrl, toReport));
+                        }
+                    });
             validateResources(resourcesToValidate);
-        });
+        }));
     }
 
-    private void execute(Runnable executable) throws InterruptedException, ExecutionException
+    private void execute(Runnable executable)
     {
-        executor.execute(executable,
-            (t, e) -> softAssert.recordFailedAssertion("Exception occured in thread with name: " + t.getName(), e));
+        try
+        {
+            executor.execute(executable, (t, e) -> softAssert
+                    .recordFailedAssertion("Exception occured in thread with name: " + t.getName(), e));
+        }
+        catch (InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        }
+        catch (ExecutionException e)
+        {
+            throw new IllegalStateException(e);
+        }
     }
 
     private WebPageResourceValidation createUnreachablePageValidation(String pageURL, Exception exception)
