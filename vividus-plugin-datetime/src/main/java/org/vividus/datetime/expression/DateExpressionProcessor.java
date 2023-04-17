@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.expression;
+package org.vividus.datetime.expression;
 
 import java.util.Locale;
 import java.util.regex.Matcher;

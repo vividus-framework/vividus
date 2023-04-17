@@ -107,4 +107,7 @@
     <bean id="response-code" class="org.vividus.http.variable.ResponseCodeDynamicVariable"/>
     <bean id="response" class="org.vividus.http.variable.ResponseDynamicVariable"/>
     <bean id="response-as-bytes" class="org.vividus.http.variable.ResponseAsBytesDynamicVariable"/>
+
+    <bean class="org.vividus.http.expression.UriEncodingExpressionProcessors" />
+    <bean class="org.vividus.http.expression.RemoveWrappingDoubleQuotesExpressionProcessor" />
 </beans>

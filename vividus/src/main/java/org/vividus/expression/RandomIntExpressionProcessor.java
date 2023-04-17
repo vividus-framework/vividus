@@ -19,12 +19,9 @@ package org.vividus.expression;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
-import javax.inject.Named;
-
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.expressions.BiArgExpressionProcessor;
 
-@Named
 public class RandomIntExpressionProcessor extends BiArgExpressionProcessor<Integer>
 {
     private static final String EXPRESSION_NAME = "randomInt";

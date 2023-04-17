@@ -23,13 +23,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Named;
-
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.expressions.MultiArgExpressionProcessor;
 import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 
-@Named
 public class RoundExpressionProcessor extends MultiArgExpressionProcessor<String>
 {
     private static final int MAX_ARGS = 3;

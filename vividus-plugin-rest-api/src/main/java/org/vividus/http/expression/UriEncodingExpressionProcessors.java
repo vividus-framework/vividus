@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package org.vividus.expression;
+package org.vividus.http.expression;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import javax.inject.Named;
-
 import org.jbehave.core.expressions.DelegatingExpressionProcessor;
 import org.jbehave.core.expressions.SingleArgExpressionProcessor;
 import org.springframework.web.util.UriUtils;
 
-@Named
 public class UriEncodingExpressionProcessors extends DelegatingExpressionProcessor
 {
     @SuppressWarnings("checkstyle:SingleSpaceSeparator")

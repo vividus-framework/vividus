@@ -100,5 +100,13 @@
     <bean id="SORTING" class="org.vividus.transformer.SortingTableTransformer" />
 
     <bean class="org.vividus.expression.Base64ExpressionProcessors" />
+    <bean class="org.vividus.expression.EvalExpressionProcessor" />
+    <bean class="org.vividus.expression.GroovyExpressionProcessor" />
+    <bean class="org.vividus.expression.HashExpressionProcessors" />
+    <bean class="org.vividus.expression.LoadBinaryResourceExpressionProcessor" />
+    <bean class="org.vividus.expression.RandomIntExpressionProcessor" />
+    <bean class="org.vividus.expression.ReplaceByRegExpProcessors" />
+    <bean class="org.vividus.expression.RoundExpressionProcessor" />
+    <bean class="org.vividus.expression.StringExpressionProcessors" />
     <bean class="org.vividus.expression.UrlExpressionProcessors" />
 </beans>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.expression;
+package org.vividus.parquet.expression;
 
 import java.io.File;
 import java.io.IOException;

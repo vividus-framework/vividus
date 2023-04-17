@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.expression;
+package org.vividus.http.expression;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

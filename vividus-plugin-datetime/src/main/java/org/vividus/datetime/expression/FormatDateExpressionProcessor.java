@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package org.vividus.expression;
+package org.vividus.datetime.expression;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-import javax.inject.Named;
-
 import org.jbehave.core.expressions.MultiArgExpressionProcessor;
 import org.vividus.util.DateUtils;
 
-@Named
 public class FormatDateExpressionProcessor extends MultiArgExpressionProcessor<String>
 {
     private static final int MIN_ARG_NUMBER = 2;

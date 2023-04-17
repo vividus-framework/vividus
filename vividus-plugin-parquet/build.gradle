@@ -14,7 +14,7 @@ if (isFamily(FAMILY_WINDOWS)) {
 ext.hadoopVersion = '3.3.5'
 
 dependencies {
-    api project(':vividus-engine')
+    api(group: 'org.vividus', name: 'jbehave-core', version: versions.jbehave)
     implementation project(':vividus-util')
     implementation project(':vividus-plugin-csv')
 
