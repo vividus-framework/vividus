@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package org.vividus.expression;
+package org.vividus.datetime.expression;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-import javax.inject.Named;
-
 import org.jbehave.core.expressions.MultiArgExpressionProcessor;
 import org.vividus.util.DateUtils;
 
-@Named
 public class FormatDateToExpressionProcessor extends MultiArgExpressionProcessor<String>
 {
     private static final int EXPECTED_ARGS_NUMBER = 3;

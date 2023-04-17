@@ -16,13 +16,10 @@
 
 package org.vividus.expression;
 
-import javax.inject.Named;
-
 import org.jbehave.core.expressions.SingleArgExpressionProcessor;
 import org.springframework.scripting.groovy.GroovyScriptEvaluator;
 import org.springframework.scripting.support.StaticScriptSource;
 
-@Named
 public class GroovyExpressionProcessor extends SingleArgExpressionProcessor<String>
 {
     public GroovyExpressionProcessor(GroovyScriptEvaluator groovyScriptEvaluator)

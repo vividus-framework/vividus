@@ -16,12 +16,9 @@
 
 package org.vividus.expression;
 
-import javax.inject.Named;
-
 import org.jbehave.core.expressions.SingleArgExpressionProcessor;
 import org.vividus.util.ResourceUtils;
 
-@Named
 public class LoadBinaryResourceExpressionProcessor extends SingleArgExpressionProcessor<byte[]>
 {
     public LoadBinaryResourceExpressionProcessor()

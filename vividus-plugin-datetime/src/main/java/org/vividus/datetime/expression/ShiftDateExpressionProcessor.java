@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.expression;
+package org.vividus.datetime.expression;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,13 +22,10 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Named;
-
 import org.apache.commons.lang3.Validate;
 import org.jbehave.core.expressions.MultiArgExpressionProcessor;
 import org.vividus.util.DateUtils;
 
-@Named
 public class ShiftDateExpressionProcessor extends MultiArgExpressionProcessor<String>
 {
     private static final Pattern DURATION_PATTERN = Pattern.compile("(-?P)((?:\\d+[YMWD])*)(T(?:\\d+[HMS])+)?");

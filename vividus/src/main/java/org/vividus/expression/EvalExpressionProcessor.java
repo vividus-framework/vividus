@@ -20,8 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.inject.Named;
-
 import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlScript;
@@ -32,7 +30,6 @@ import org.apache.commons.text.WordUtils;
 import org.jbehave.core.expressions.SingleArgExpressionProcessor;
 import org.vividus.context.VariableContext;
 
-@Named
 public class EvalExpressionProcessor extends SingleArgExpressionProcessor<String>
 {
     @SuppressWarnings({ "checkstyle:TodoComment", "checkstyle:TrailingComment" })
