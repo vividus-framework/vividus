@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.vividus.steps.http;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,11 +35,14 @@ import org.vividus.http.validation.ResourceValidator;
 import org.vividus.http.validation.model.CheckStatus;
 import org.vividus.http.validation.model.ResourceValidation;
 import org.vividus.reporter.event.AttachmentPublisher;
+import org.vividus.softassert.FailableRunnable;
+import org.vividus.softassert.ISoftAssert;
 
 @ExtendWith(MockitoExtension.class)
 class HttpResourceValidationStepsTests
 {
     @Mock private ResourceValidator<ResourceValidation> resourceValidator;
+    @Mock private ISoftAssert softAssert;
     @Mock private AttachmentPublisher attachmentPublisher;
     @InjectMocks private HttpResourceValidationSteps steps;
 
@@ -54,6 +59,12 @@ class HttpResourceValidationStepsTests
         when(resourceValidator.perform(passed)).thenReturn(passed);
         when(resourceValidator.perform(failed1)).thenReturn(failed1);
         when(resourceValidator.perform(failed2)).thenReturn(failed2);
+        doAnswer(a ->
+        {
+            FailableRunnable runnable = a.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(softAssert).runIgnoringTestFailFast(any(FailableRunnable.class));
 
         steps.verifyHttpResources(
                 new ExamplesTable(String.format("|url|%n|%s|%n|%s|%n|%s|%n", passedUrl, failedUrl1, failedUrl2)));

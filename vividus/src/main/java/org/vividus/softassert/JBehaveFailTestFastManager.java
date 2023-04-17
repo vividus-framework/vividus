@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,23 @@ import java.util.Optional;
 import org.vividus.batch.BatchConfiguration;
 import org.vividus.batch.BatchStorage;
 import org.vividus.context.RunContext;
+import org.vividus.testcontext.TestContext;
 
 public class JBehaveFailTestFastManager implements FailTestFastManager
 {
+    private static final Object FAIL_TEST_CASE_FAST_KEY = JBehaveFailTestFastManager.class;
+
     private final RunContext runContext;
     private final BatchStorage batchStorage;
+    private final TestContext testContext;
 
     private boolean failTestCaseFast;
 
-    public JBehaveFailTestFastManager(RunContext runContext, BatchStorage batchStorage)
+    public JBehaveFailTestFastManager(RunContext runContext, BatchStorage batchStorage, TestContext testContext)
     {
         this.runContext = runContext;
         this.batchStorage = batchStorage;
+        this.testContext = testContext;
     }
 
     @Override
@@ -40,7 +45,20 @@ public class JBehaveFailTestFastManager implements FailTestFastManager
     {
         String batchKey = runContext.getRunningBatchKey();
         BatchConfiguration batchConfiguration = batchStorage.getBatchConfiguration(batchKey);
-        return Optional.ofNullable(batchConfiguration.isFailScenarioFast()).orElse(failTestCaseFast);
+        return testContext.get(FAIL_TEST_CASE_FAST_KEY,
+                () -> Optional.ofNullable(batchConfiguration.isFailScenarioFast()).orElse(failTestCaseFast));
+    }
+
+    @Override
+    public void enableTestCaseFailFast()
+    {
+        testContext.put(FAIL_TEST_CASE_FAST_KEY, true);
+    }
+
+    @Override
+    public void disableTestCaseFailFast()
+    {
+        testContext.put(FAIL_TEST_CASE_FAST_KEY, false);
     }
 
     public void setFailTestCaseFast(boolean failTestCaseFast)

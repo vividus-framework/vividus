@@ -29,7 +29,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -97,6 +99,11 @@ class SoftAssertTests
     private void mockAssertionCollection()
     {
         when(testContext.get(any(), any(Supplier.class))).thenReturn(assertionCollection);
+    }
+
+    private void mockTestCaseFailFast(boolean failFast)
+    {
+        when(failTestFastManager.isFailTestCaseFast()).thenReturn(failFast);
     }
 
     @Test
@@ -250,7 +257,7 @@ class SoftAssertTests
     {
         mockAssertionCollection();
         Consumer<Boolean> consumer = mock();
-        when(failTestFastManager.isFailTestCaseFast()).thenReturn(true);
+        mockTestCaseFailFast(true);
         doThrow(RuntimeException.class).when(failTestFastHandler).failTestCaseFast();
         assertThrows(RuntimeException.class,
                 () -> softAssert.assertThat("Text contains 'b'", TEXT, containsString("b"), consumer));
@@ -266,7 +273,7 @@ class SoftAssertTests
     @Test
     void shouldRecordFailedAssertionAndFailTestCaseFast()
     {
-        when(failTestFastManager.isFailTestCaseFast()).thenReturn(true);
+        mockTestCaseFailFast(true);
         testRecordFailedAssertion(softAssert::recordFailedAssertion);
         verify(failTestFastHandler).failTestCaseFast();
         verifyNoMoreInteractions(failTestFastHandler);
@@ -337,7 +344,7 @@ class SoftAssertTests
         mockAssertionCollection();
         var knownIssueChecker = mock(IKnownIssueChecker.class);
         softAssert.setKnownIssueChecker(knownIssueChecker);
-        when(failTestFastManager.isFailTestCaseFast()).thenReturn(globalFailTestCaseFast);
+        mockTestCaseFailFast(globalFailTestCaseFast);
         var description = "failure";
         when(knownIssue.isPotentiallyKnown()).thenReturn(false);
         when(knownIssueChecker.getKnownIssue(description)).thenReturn(knownIssue);
@@ -534,5 +541,40 @@ class SoftAssertTests
         softAssert.init();
         verify(testContext).putInitValueSupplier(eq(AssertionCollection.class),
                 argThat(argument -> argument.get() instanceof AssertionCollection));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "true,  1, 1",
+            "false, 0, 0"
+    })
+    void shouldRunIgnoringTestFailFast(boolean failFastGlobal, int failFastChangesNumber, int verifyInvocationNumber)
+    {
+        mockAssertionCollection();
+        mockTestCaseFailFast(failFastGlobal);
+        FailableRunnable runnable = () -> softAssert.assertTrue("", false);
+
+        softAssert.runIgnoringTestFailFast(runnable);
+
+        InOrder ordered = inOrder(failTestFastManager, assertionCollection);
+        ordered.verify(failTestFastManager).isFailTestCaseFast();
+        ordered.verify(failTestFastManager, times(failFastChangesNumber)).disableTestCaseFailFast();
+        ordered.verify(failTestFastManager, times(failFastChangesNumber)).enableTestCaseFailFast();
+        ordered.verify(assertionCollection, times(verifyInvocationNumber)).clear();
+    }
+
+    @Test
+    void shouldRunIgnoringTestFailFastWithException()
+    {
+        mockAssertionCollection();
+        mockTestCaseFailFast(true);
+        FailableRunnable runnable = () ->
+        {
+            softAssert.assertTrue("", false);
+            throw new UnsupportedOperationException("");
+        };
+
+        assertThrows(UnsupportedOperationException.class, () -> softAssert.runIgnoringTestFailFast(runnable));
+        verify(failTestFastManager).enableTestCaseFailFast();
     }
 }
