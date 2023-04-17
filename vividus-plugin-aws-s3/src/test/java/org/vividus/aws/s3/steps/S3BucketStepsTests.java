@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
@@ -55,8 +57,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.aws.s3.steps.S3BucketSteps.S3ObjectFilter;
 import org.vividus.aws.s3.steps.S3BucketSteps.S3ObjectFilterType;
 import org.vividus.context.VariableContext;
@@ -76,7 +78,8 @@ class S3BucketStepsTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(S3BucketSteps.class);
 
-    @Mock private AmazonS3Client amazonS3Client;
+    @Mock private AmazonS3 amazonS3Client;
+    @Mock private AwsServiceClientsContext clientsContext;
     @Mock private VariableContext variableContext;
 
     @Test
@@ -258,10 +261,20 @@ class S3BucketStepsTests
 
     void testSteps(FailableConsumer<S3BucketSteps, IOException> test) throws IOException
     {
-        try (MockedStatic<AmazonS3ClientBuilder> clientBuilder = mockStatic(AmazonS3ClientBuilder.class))
+        try (var builder = mockStatic(AmazonS3ClientBuilder.class))
         {
-            clientBuilder.when(AmazonS3ClientBuilder::defaultClient).thenReturn(amazonS3Client);
-            S3BucketSteps steps = new S3BucketSteps(variableContext, new DateUtils(ZoneId.of("Z")));
+            builder.when(AmazonS3ClientBuilder::defaultClient).thenReturn(amazonS3Client);
+
+            AmazonS3ClientBuilder customClientBuilder = mock();
+            builder.when(AmazonS3ClientBuilder::standard).thenReturn(customClientBuilder);
+
+            S3BucketSteps steps = new S3BucketSteps(clientsContext, variableContext, new DateUtils(ZoneId.of("Z")));
+
+            when(clientsContext.getServiceClient(
+                    argThat((ArgumentMatcher<Supplier<AwsClientBuilder<AmazonS3ClientBuilder, AmazonS3>>>)
+                            supplier -> supplier.get().equals(customClientBuilder)), eq(amazonS3Client)))
+                    .thenReturn(amazonS3Client);
+
             test.accept(steps);
         }
     }
