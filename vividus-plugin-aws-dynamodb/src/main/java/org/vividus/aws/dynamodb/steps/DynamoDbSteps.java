@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import com.amazonaws.services.dynamodbv2.model.ExecuteStatementResult;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
 import org.vividus.variable.VariableScope;
 
@@ -38,20 +39,28 @@ public class DynamoDbSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(DynamoDbSteps.class);
 
-    private final AmazonDynamoDB amazonDynamoDB;
+    private final AwsServiceClientsContext clientsContext;
     private final VariableContext variableContext;
 
-    public DynamoDbSteps(String roleArn, VariableContext variableContext)
+    private final AmazonDynamoDB amazonDynamoDB;
+
+    public DynamoDbSteps(String roleArn, AwsServiceClientsContext clientsContext, VariableContext variableContext)
     {
+        this.clientsContext = clientsContext;
+        this.variableContext = variableContext;
+
         AmazonDynamoDBClientBuilder amazonDynamoDBClientBuilder = AmazonDynamoDBClientBuilder.standard();
         if (roleArn != null)
         {
             AWSCredentialsProvider credentialsProvider = new Builder(roleArn, "Vividus").build();
             amazonDynamoDBClientBuilder.withCredentials(credentialsProvider);
         }
-
         this.amazonDynamoDB = amazonDynamoDBClientBuilder.build();
-        this.variableContext = variableContext;
+    }
+
+    private AmazonDynamoDB getDynamoDbClient()
+    {
+        return clientsContext.getServiceClient(AmazonDynamoDBClientBuilder::standard, amazonDynamoDB);
     }
 
     /**
@@ -72,7 +81,7 @@ public class DynamoDbSteps
     {
         LOGGER.info("Executing query: {}", partiqlQuery);
         ExecuteStatementRequest request = new ExecuteStatementRequest().withStatement(partiqlQuery);
-        return amazonDynamoDB.executeStatement(request);
+        return getDynamoDbClient().executeStatement(request);
     }
 
     /**

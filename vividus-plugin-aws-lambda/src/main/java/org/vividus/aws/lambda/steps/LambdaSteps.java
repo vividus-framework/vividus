@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,18 +29,28 @@ import com.amazonaws.services.lambda.model.InvokeResult;
 import com.amazonaws.services.lambda.model.LogType;
 
 import org.jbehave.core.annotations.When;
+import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
 import org.vividus.variable.VariableScope;
 
 public class LambdaSteps
 {
-    private final AWSLambda awsLambdaClient;
     private final VariableContext variableContext;
+    private final AwsServiceClientsContext clientsContext;
 
-    public LambdaSteps(VariableContext variableContext)
+    private final AWSLambda awsLambdaClient;
+
+    public LambdaSteps(AwsServiceClientsContext clientsContext, VariableContext variableContext)
     {
-        this.awsLambdaClient = AWSLambdaClientBuilder.defaultClient();
+        this.clientsContext = clientsContext;
         this.variableContext = variableContext;
+
+        this.awsLambdaClient = AWSLambdaClientBuilder.defaultClient();
+    }
+
+    private AWSLambda getLambdaClient()
+    {
+        return clientsContext.getServiceClient(AWSLambdaClientBuilder::standard, awsLambdaClient);
     }
 
     /**
@@ -89,7 +99,7 @@ public class LambdaSteps
                 .withFunctionName(functionName)
                 .withPayload(payload)
                 .withLogType(LogType.Tail);
-        InvokeResult invokeResult = awsLambdaClient.invoke(invokeRequest);
+        InvokeResult invokeResult = getLambdaClient().invoke(invokeRequest);
 
         Map<String, String> result = new HashMap<>();
         result.put("payload", new String(invokeResult.getPayload().array(), StandardCharsets.UTF_8));
