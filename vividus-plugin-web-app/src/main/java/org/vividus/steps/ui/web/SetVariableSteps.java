@@ -23,6 +23,8 @@ import java.util.Set;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.context.VariableContext;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
@@ -40,6 +42,14 @@ import org.vividus.variable.VariableScope;
 @TakeScreenshotOnFailure
 public class SetVariableSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SetVariableSteps.class);
+
+    private static final String DEPRECATED_LOG_MESSAGE_TEMPLATE = "The step: \"{}\" is deprecated "
+            + "and will be removed in VIVIDUS 0.7.0. "
+            + "Use combination of step and expression: "
+            + "\"Given I initialize $scopes variable `$variableName` with value "
+            + "`#{{}}`\"";
+
     private final IWebDriverProvider webDriverProvider;
     private final ISoftAssert softAssert;
     private final ISearchActions searchActions;
@@ -81,10 +91,17 @@ public class SetVariableSteps
      * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      * </ul>
      * @param variable A name under which the value should be saved
+     * @deprecated Use combination of step and expression:
+     * "Given I initialize $scopes variable `$variableName`
+     *  with value `#{replaceFirstByRegExp(.*\/(?=[^\/?#]+(?:\?.+)?(?:#.*)?$),,${current-page-url})}`"
      */
+    @Deprecated(since = "0.5.9", forRemoval = true)
     @When("I get the value from the URL and set it to the '$scopes' variable '$variable'")
     public void saveValueFromUrl(Set<VariableScope> scopes, String variable)
     {
+        LOGGER.warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
+                "When I get the value from the URL and set it to the '$scopes' variable '$variable'",
+                "replaceFirstByRegExp(.*\\/(?=[^\\/?#]+(?:\\?.+)?(?:#.*)?$),,${current-page-url})");
         String url = getWebDriver().getCurrentUrl();
         int valueIndex = url.lastIndexOf('/') + 1;
         if (valueIndex != 0 && valueIndex != url.length())
@@ -114,10 +131,16 @@ public class SetVariableSteps
      * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      * </ul>
      * @param variable A name under which the value should be saved
+     * @deprecated Use combination of step and expression:
+     * "Given I initialize $scopes variable `$variableName` with value `#{extractPathFromUrl(${current-page-url})}`"
      */
+    @Deprecated(since = "0.5.9", forRemoval = true)
     @When("I get the URL path and set it to the $scopes variable '$variable'")
     public void savePathFromUrl(Set<VariableScope> scopes, String variable)
     {
+        LOGGER.warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
+                "When I get the URL path and set it to the $scopes variable '$variable'",
+                "extractPathFromUrl(${current-page-url})");
         String value = UriUtils.createUri(getWebDriver().getCurrentUrl()).getPath();
         saveVariable(scopes, variable, value);
     }
@@ -201,10 +224,14 @@ public class SetVariableSteps
      * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      * </ul>
      * @param variable A name under which the value should be saved
+     * @deprecated This step will be removed in VIVIDUS 0.7.0
      */
     @When("I get the URL value of a video with the name '$name' and set it to the '$scopes' variable '$variable'")
+    @Deprecated(since = "0.5.9", forRemoval = true)
     public void saveUrlValueOfVideoWithName(String name, Set<VariableScope> scopes, String variable)
     {
+        LOGGER.warn("The step: \"When I get the URL value of a video with the name '$name' and set it "
+                + "to the '$scopes' variable '$variable'\" is deprecated and will be removed in VIVIDUS 0.7.0.");
         List<WebElement> frames = getVideoIFrames(1);
         if (!frames.isEmpty())
         {

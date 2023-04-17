@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.vividus.steps.ui.web;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,6 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import com.github.valfirst.slf4jtest.LoggingEvent;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,9 +59,14 @@ import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.variable.VariableScope;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SetVariableStepsTests
 {
+    private static final String DEPRECATED_LOG_MESSAGE_TEMPLATE = "The step: \"{}\" is deprecated "
+            + "and will be removed in VIVIDUS 0.7.0. "
+            + "Use combination of step and expression: "
+            + "\"Given I initialize $scopes variable `$variableName` with value "
+            + "`#{{}}`\"";
     private static final String THE_SRC_VALUE_WAS_FOUND = "The 'src' attribute value was found";
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
     private static final String NAME = "name";
@@ -66,6 +79,7 @@ class SetVariableStepsTests
     private static final String SRC = "src";
     private static final String NUMBER_FOUND_VIDEO_MESSAGE = "The number of found video frames";
 
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(SetVariableSteps.class);
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private ISoftAssert softAssert;
     @Mock private ISearchActions searchActions;
@@ -83,6 +97,11 @@ class SetVariableStepsTests
         when(webDriver.getCurrentUrl()).thenReturn("http://testurl.com/testvalue");
         setVariableSteps.saveValueFromUrl(VARIABLE_SCOPE, VARIABLE);
         verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE, "testvalue");
+
+        LoggingEvent expectedLoggingEvent = warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
+                "When I get the value from the URL and set it to the '$scopes' variable '$variable'",
+                "replaceFirstByRegExp(.*\\/(?=[^\\/?#]+(?:\\?.+)?(?:#.*)?$),,${current-page-url})");
+        assertThat(logger.getLoggingEvents(), is(List.of(expectedLoggingEvent)));
     }
 
     @Test
@@ -148,6 +167,11 @@ class SetVariableStepsTests
         when(mockedTargetLocator.frame(videoFrame)).thenReturn(webDriver);
         setVariableSteps.saveUrlValueOfVideoWithName(NAME, VARIABLE_SCOPE, URL_VARIABLE);
         verify(variableContext).putVariable(VARIABLE_SCOPE, URL_VARIABLE, VALUE);
+
+        LoggingEvent expectedLoggingEvent = warn("The step: \"When I get the URL value of "
+                + "a video with the name '$name' and set it "
+                + "to the '$scopes' variable '$variable'\" is deprecated and will be removed in VIVIDUS 0.7.0.");
+        assertThat(logger.getLoggingEvents(), is(List.of(expectedLoggingEvent)));
     }
 
     @Test
@@ -212,6 +236,11 @@ class SetVariableStepsTests
         setVariableSteps.savePathFromUrl(VARIABLE_SCOPE, VARIABLE_NAME);
 
         verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, "/relative/path");
+
+        LoggingEvent expectedLoggingEvent = warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
+                "When I get the URL path and set it to the $scopes variable '$variable'",
+                "extractPathFromUrl(${current-page-url})");
+        assertThat(logger.getLoggingEvents(), is(List.of(expectedLoggingEvent)));
     }
 
     @Test
