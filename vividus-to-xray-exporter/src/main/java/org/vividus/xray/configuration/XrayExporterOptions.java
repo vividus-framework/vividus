@@ -27,6 +27,7 @@ public class XrayExporterOptions
     private String testSetKey;
     private String testExecutionKey;
     private String testExecutionSummary;
+    private boolean testCaseUpdatesEnabled;
 
     public Path getJsonResultsDirectory()
     {
@@ -66,5 +67,15 @@ public class XrayExporterOptions
     public void setTestExecutionSummary(String testExecutionSummary)
     {
         this.testExecutionSummary = testExecutionSummary;
+    }
+
+    public boolean isTestCaseUpdatesEnabled()
+    {
+        return testCaseUpdatesEnabled;
+    }
+
+    public void setTestCaseUpdatesEnabled(boolean testCaseUpdatesEnabled)
+    {
+        this.testCaseUpdatesEnabled = testCaseUpdatesEnabled;
     }
 }

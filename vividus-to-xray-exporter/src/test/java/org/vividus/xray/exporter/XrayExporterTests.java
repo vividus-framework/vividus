@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -53,6 +54,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -85,6 +87,7 @@ import org.vividus.xray.model.TestExecution;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class XrayExporterTests
 {
+    private static final String UPDATECUCUMBER_RESOURCE_KEY = "updatecucumber";
     private static final String ISSUE_ID = "STUB-0";
     private static final String SCENARIO_TITLE = "Dummy scenario";
     private static final String STORY_TITLE = "storyPath";
@@ -106,6 +109,12 @@ class XrayExporterTests
     @InjectMocks private XrayExporter xrayExporter;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(XrayExporter.class);
+
+    @BeforeEach
+    void beforeEach()
+    {
+        xrayExporterOptions.setTestCaseUpdatesEnabled(true);
+    }
 
     @AfterEach
     void afterEach()
@@ -142,7 +151,7 @@ class XrayExporterTests
     void shouldUpdateExistingCucumberTestCase() throws URISyntaxException, IOException, NonEditableIssueStatusException,
         JiraConfigurationException
     {
-        URI jsonResultsUri = getJsonResultsUri("updatecucumber");
+        URI jsonResultsUri = getJsonResultsUri(UPDATECUCUMBER_RESOURCE_KEY);
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
         CucumberTestCase testCase = mock(CucumberTestCase.class);
 
@@ -154,6 +163,26 @@ class XrayExporterTests
         String scenario = GIVEN_STEP + lineSeparator() + WHEN_STEP + lineSeparator() + THEN_STEP;
         verifyCucumberTestCaseParameters("Scenario", scenario);
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
+    }
+
+    @Test
+    void shouldNotUpdateExistingTestCaseIfUpdateIsDisabled()
+            throws URISyntaxException, IOException, NonEditableIssueStatusException, JiraConfigurationException
+    {
+        URI jsonResultsUri = getJsonResultsUri(UPDATECUCUMBER_RESOURCE_KEY);
+        xrayExporterOptions.setTestCaseUpdatesEnabled(false);
+        xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
+        CucumberTestCase testCase = mock(CucumberTestCase.class);
+        String type = TestCaseType.CUCUMBER.getValue();
+        when(testCase.getType()).thenReturn(type);
+
+        when(testCaseFactory.createCucumberTestCase(any())).thenReturn(testCase);
+
+        xrayExporter.exportResults();
+
+        verifyNoInteractions(xrayFacade);
+        validateLogs(jsonResultsUri, getExportingScenarioEvent(),
+                info("Skipping update of {} Test Case with ID {}", type, ISSUE_ID), getExportSuccessfulEvent());
     }
 
     @Test
