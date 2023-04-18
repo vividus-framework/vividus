@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -175,7 +177,7 @@ class XrayExporterTests
         verifyManualTestCaseParameters(Set.of("dummy-label-1", "dummy-label-2"),
                 Set.of("dummy-component-1", "dummy-component-2"));
 
-        verify(xrayFacade).updateTestExecution(testExecution);
+        verify(xrayFacade).importTestExecution(testExecution);
         List<Entry<String, Scenario>> scenarios = scenariosCaptor.getValue();
         assertThat(scenarios, hasSize(1));
         assertEquals(ISSUE_ID, scenarios.get(0).getKey());
@@ -184,9 +186,13 @@ class XrayExporterTests
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), getExportSuccessfulEvent());
     }
 
-    @Test
-    void shouldCompleteExportIfExportAttemptThrownIOException() throws URISyntaxException, IOException,
-        NonEditableIssueStatusException, JiraConfigurationException
+    @ParameterizedTest
+    @CsvSource({
+        TEST_EXECUTION_KEY + ", Failed to update test execution with the key TEST-EXEC: error message",
+        ", Failed to create test execution: error message"
+    })
+    void shouldCompleteExportIfExportAttemptThrownIOException(String testExecutionKey, String testExecutionMessage)
+            throws URISyntaxException, IOException, NonEditableIssueStatusException, JiraConfigurationException
     {
         URI jsonResultsUri = getJsonResultsUri("continueiferror");
         xrayExporterOptions.setJsonResultsDirectory(Paths.get(jsonResultsUri));
@@ -203,18 +209,18 @@ class XrayExporterTests
         xrayExporterOptions.setTestSetKey(TEST_SET_KEY);
         doThrow(exception).when(xrayFacade).updateTestSet(TEST_SET_KEY, List.of(ISSUE_ID));
         errorLogMessage += "Error #2" + lineSeparator()
-                + "Failed updating test set with the key TEST-SET: error message" + lineSeparator();
+                + "Failed to update test set with the key TEST-SET: error message" + lineSeparator();
 
-        xrayExporterOptions.setTestExecutionKey(TEST_EXECUTION_KEY);
-        doThrow(exception).when(xrayFacade).updateTestExecution(any());
-        errorLogMessage += "Error #3" + lineSeparator()
-                + "Failed updating test execution with the key TEST-EXEC: error message" + lineSeparator();
+        xrayExporterOptions.setTestExecutionKey(testExecutionKey);
+        xrayExporterOptions.setTestExecutionSummary("summary");
+        doThrow(exception).when(xrayFacade).importTestExecution(any());
+        errorLogMessage += "Error #3" + lineSeparator() + testExecutionMessage + lineSeparator();
 
         xrayExporter.exportResults();
 
         verify(xrayFacade).updateTestCase(ISSUE_ID, testCase);
         verify(xrayFacade).updateTestSet(TEST_SET_KEY, List.of(ISSUE_ID));
-        verify(xrayFacade).updateTestExecution(any());
+        verify(xrayFacade).importTestExecution(any());
         verifyManualTestCaseParameters(Set.of(), Set.of());
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), error(exception, ERROR_MESSAGE),
                 getExportingScenarioEvent(), getExportFailedErrorEvent(errorLogMessage));

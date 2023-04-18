@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,14 @@ package org.vividus.xray.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
 public class TestExecution
 {
     private String testExecutionKey;
+    private TestExecutionInfo info;
     private List<TestExecutionItem> tests;
 
     public String getTestExecutionKey()
@@ -31,6 +36,16 @@ public class TestExecution
     public void setTestExecutionKey(String testExecutionKey)
     {
         this.testExecutionKey = testExecutionKey;
+    }
+
+    public TestExecutionInfo getInfo()
+    {
+        return info;
+    }
+
+    public void setInfo(TestExecutionInfo info)
+    {
+        this.info = info;
     }
 
     public List<TestExecutionItem> getTests()
