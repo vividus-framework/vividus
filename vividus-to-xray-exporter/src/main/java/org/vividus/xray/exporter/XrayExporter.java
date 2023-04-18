@@ -154,13 +154,19 @@ public class XrayExporter
 
             AbstractTestCaseParameters parameters = parameterFactories.get(testCaseType).apply(scenarioTitle, scenario);
             AbstractTestCase testCase = testCaseFactories.get(testCaseType).apply(parameters);
-            if (testCaseId != null)
+            if (testCaseId == null)
+            {
+                testCaseId = xrayFacade.createTestCase(testCase);
+            }
+            else if (xrayExporterOptions.isTestCaseUpdatesEnabled())
             {
                 xrayFacade.updateTestCase(testCaseId, testCase);
             }
             else
             {
-                testCaseId = xrayFacade.createTestCase(testCase);
+                LOGGER.atInfo().addArgument(testCase::getType)
+                               .addArgument(testCaseId)
+                               .log("Skipping update of {} Test Case with ID {}");
             }
             createTestsLink(testCaseId, scenario);
             return Optional.of(entry(testCaseId, scenario));

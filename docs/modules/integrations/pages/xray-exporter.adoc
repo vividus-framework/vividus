@@ -52,6 +52,10 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |false
 |The key of a `Test Set` to which the exported test cases will be added
 
+|`xray-exporter.test-case-updates-enabled`
+|false
+|By default, the content of Test Cases that have associated IDs, is updated every export run, to disable this behavior set the value of this property to `false`
+
 |===
 
 .application.properties
