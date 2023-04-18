@@ -87,7 +87,7 @@ at step execution stage, in other words the same placeholders will be replaced b
 `SORTING` transformer is designed to sort the table rows by the values in
 the columns.
 
-[cols="2,3", options="header"]
+[cols="1,3", options="header"]
 |===
 |Parameter
 |Description
@@ -97,9 +97,12 @@ the columns.
 
 |`order`
 |the optional sorting order: ASCENDING or DESCENDING. By default - ASCENDING.
+
+|`sortingTypes`
+|the optional sorting types ordered according to the column names from the `byColumns` parameter: STRING or NUMBER (only for number values). By default - STRING. The sorting types are joined using `\|` (if one sorting type is defined, it applies to all column names from the `byColumns` parameter)
 |===
 
-.Usage of SORTING transformer with DESCENDING  sorting. The following transformer:
+.Usage of SORTING transformer with DESCENDING  sorting and sorting type by default (STRING). The following transformer:
 [source,gherkin]
 ----
 {transformer=SORTING, byColumns=key1|key2, order=DESCENDING}
@@ -121,7 +124,67 @@ will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTabl
 |aa  |a   |4   |
 ----
 
-.Usage of SORTING transformer with sorting by default (ASCENDING)
+.Usage of SORTING transformer with DESCENDING  sorting and NUMBER sorting type. The following transformer:
+[source,gherkin]
+----
+{transformer=SORTING, byColumns=key2, order=DESCENDING, sortingTypes=NUMBER}
+|key1|key2|
+|a   |10  |
+|b   |2.3 |
+|c   |10.2|
+----
+
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
+
+[source,gherkin]
+----
+|key1|key2|
+|c   |10.2|
+|a   |10  |
+|b   |2.3 |
+----
+
+.Usage of SORTING transformer with DESCENDING  sorting and STRING sorting type. The following transformer:
+[source,gherkin]
+----
+{transformer=SORTING, byColumns=key2, order=DESCENDING, sortingTypes=STRING}
+|key1|key2|
+|a   |10  |
+|b   |2.3 |
+|c   |10.2|
+----
+
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
+
+[source,gherkin]
+----
+|key1|key2|
+|b   |2.3 |
+|c   |10.2|
+|a   |10  |
+----
+
+.Usage of SORTING transformer with sorting by default (ASCENDING) and STRING sorting type for column name `key1` and NUMBER sorting type for column name `key2`. The following transformer:
+[source,gherkin]
+----
+{transformer=SORTING, byColumns=key1|key2, sortingTypes=STRING|NUMBER}
+|key1|key2|index|
+|a1  |10  |1    |
+|a1  |2.3 |2    |
+|a2  |10.2|3    |
+----
+
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
+
+[source,gherkin]
+----
+|key1|key2 |index|
+|a1   |2.3 |2    |
+|a1   |10  |1    |
+|a2   |10.2|3    |
+----
+
+.Usage of SORTING transformer with sorting by default (ASCENDING) and sorting type by default (STRING)
 [source,gherkin]
 ----
 {transformer=SORTING, byColumns=key|key1}
