@@ -6,9 +6,14 @@
                http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        default-lazy-init="true">
 
-    <bean class="org.vividus.expression.DateExpressionProcessor">
+    <bean class="org.vividus.datetime.expression.DateExpressionProcessor">
         <constructor-arg index="0" value="${expression.generate-date.locale}" />
     </bean>
+    <bean class="org.vividus.datetime.expression.DiffDateExpressionProcessor" />
+    <bean class="org.vividus.datetime.expression.EpochExpressionProcessors" />
+    <bean class="org.vividus.datetime.expression.FormatDateExpressionProcessor" />
+    <bean class="org.vividus.datetime.expression.FormatDateToExpressionProcessor" />
+    <bean class="org.vividus.datetime.expression.ShiftDateExpressionProcessor" />
 
     <bean id="dateValidationSteps" class="org.vividus.steps.DateValidationSteps">
         <property name="softAssert" ref="softAssert" />

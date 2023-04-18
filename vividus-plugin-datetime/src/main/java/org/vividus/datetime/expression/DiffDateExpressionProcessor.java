@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.expression;
+package org.vividus.datetime.expression;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -22,14 +22,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
-import javax.inject.Named;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.expressions.MultiArgExpressionProcessor;
 import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.vividus.util.DateUtils;
 
-@Named
 public class DiffDateExpressionProcessor extends MultiArgExpressionProcessor<String>
 {
     private static final String MINUS_SIGN = "-";

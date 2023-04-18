@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package org.vividus.expression;
+package org.vividus.xray.model;
 
-import org.jbehave.core.expressions.SingleArgExpressionProcessor;
-import org.springframework.scripting.groovy.GroovyScriptEvaluator;
-import org.springframework.scripting.support.StaticScriptSource;
-
-public class GroovyExpressionProcessor extends SingleArgExpressionProcessor<String>
+public class TestExecutionInfo
 {
-    public GroovyExpressionProcessor(GroovyScriptEvaluator groovyScriptEvaluator)
+    private String summary;
+
+    public String getSummary()
     {
-        super("evalGroovy", input -> String.valueOf(
-                groovyScriptEvaluator.evaluate(new StaticScriptSource(input))));
+        return summary;
+    }
+
+    public void setSummary(String summary)
+    {
+        this.summary = summary;
     }
 }

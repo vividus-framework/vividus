@@ -21,8 +21,6 @@ import java.util.Locale;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
-import javax.inject.Named;
-
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -40,7 +38,6 @@ import org.vividus.util.ResourceUtils;
 
 import net.datafaker.Faker;
 
-@Named
 public class StringExpressionProcessors extends DelegatingExpressionProcessor
 {
     private static final String COMMA = ",";

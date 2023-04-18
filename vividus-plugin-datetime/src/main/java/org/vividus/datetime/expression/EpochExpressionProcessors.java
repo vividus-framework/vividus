@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package org.vividus.expression;
+package org.vividus.datetime.expression;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import javax.inject.Named;
-
 import org.jbehave.core.expressions.DelegatingExpressionProcessor;
 import org.jbehave.core.expressions.SingleArgExpressionProcessor;
 import org.vividus.util.DateUtils;
 
-@Named
 public class EpochExpressionProcessors extends DelegatingExpressionProcessor
 {
     public EpochExpressionProcessors(DateUtils dateUtils)

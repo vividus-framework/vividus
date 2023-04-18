@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package org.vividus.expression;
-
-import javax.inject.Named;
+package org.vividus.http.expression;
 
 import org.jbehave.core.expressions.SingleArgExpressionProcessor;
 
-@Named
 public class RemoveWrappingDoubleQuotesExpressionProcessor extends SingleArgExpressionProcessor<String>
 {
     private static final char DOUBLE_QUOTE = '"';

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,7 @@ import org.vividus.model.jbehave.AbstractStepsContainer;
 import org.vividus.model.jbehave.Scenario;
 import org.vividus.xray.configuration.XrayExporterOptions;
 import org.vividus.xray.model.TestExecution;
+import org.vividus.xray.model.TestExecutionInfo;
 import org.vividus.xray.model.TestExecutionItem;
 import org.vividus.xray.model.TestExecutionItemStatus;
 
@@ -41,7 +43,17 @@ public class TestExecutionFactory
     public TestExecution create(List<Entry<String, Scenario>> scenarios)
     {
         TestExecution testExecution = new TestExecution();
-        testExecution.setTestExecutionKey(xrayExporterOptions.getTestExecutionKey());
+
+        Optional.ofNullable(xrayExporterOptions.getTestExecutionKey())
+                .ifPresent(testExecution::setTestExecutionKey);
+
+        Optional.ofNullable(xrayExporterOptions.getTestExecutionSummary())
+                .ifPresent(summary ->
+                {
+                    TestExecutionInfo info = new TestExecutionInfo();
+                    info.setSummary(summary);
+                    testExecution.setInfo(info);
+                });
 
         List<TestExecutionItem> tests = scenarios.stream()
                                     .map(TestExecutionFactory::createTestInfo)

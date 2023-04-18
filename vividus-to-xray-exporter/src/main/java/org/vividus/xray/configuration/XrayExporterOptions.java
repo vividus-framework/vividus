@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ public class XrayExporterOptions
     private Path jsonResultsDirectory;
     private String testSetKey;
     private String testExecutionKey;
+    private String testExecutionSummary;
 
     public Path getJsonResultsDirectory()
     {
@@ -55,5 +56,15 @@ public class XrayExporterOptions
     public void setTestExecutionKey(String testExecutionKey)
     {
         this.testExecutionKey = testExecutionKey;
+    }
+
+    public String getTestExecutionSummary()
+    {
+        return testExecutionSummary;
+    }
+
+    public void setTestExecutionSummary(String testExecutionSummary)
+    {
+        this.testExecutionSummary = testExecutionSummary;
     }
 }

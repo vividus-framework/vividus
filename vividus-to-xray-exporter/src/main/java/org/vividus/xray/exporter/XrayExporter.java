@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,21 +105,22 @@ public class XrayExporter
                                                 .map(Entry::getKey)
                                                 .collect(Collectors.toList());
 
-            updateSafely(() -> xrayFacade.updateTestSet(testSetKey, testCaseIds), "test set", testSetKey);
+            executeSafely(() -> xrayFacade.updateTestSet(testSetKey, testCaseIds), "test set", testSetKey);
         }
     }
 
     private void addTestCasesToTestExecution(List<Entry<String, Scenario>> testCases)
     {
         String testExecutionKey = xrayExporterOptions.getTestExecutionKey();
-        if (testExecutionKey != null)
+
+        if (testExecutionKey != null || xrayExporterOptions.getTestExecutionSummary() != null)
         {
             TestExecution testExecution = testExecutionFactory.create(testCases);
-            updateSafely(() -> xrayFacade.updateTestExecution(testExecution), "test execution", testExecutionKey);
+            executeSafely(() -> xrayFacade.importTestExecution(testExecution), "test execution", testExecutionKey);
         }
     }
 
-    private void updateSafely(FailableRunnable runnable, String type, String key)
+    private void executeSafely(FailableRunnable runnable, String type, String key)
     {
         try
         {
@@ -127,8 +128,9 @@ public class XrayExporter
         }
         catch (IOException | JiraConfigurationException thrown)
         {
-            String errorMessage = String.format("Failed updating %s with the key %s: %s", type, key,
-                    thrown.getMessage());
+            String errorMessage = key == null
+                    ? String.format("Failed to create %s: %s", type, thrown.getMessage())
+                    : String.format("Failed to update %s with the key %s: %s", type, key, thrown.getMessage());
             errors.add(errorMessage);
         }
     }

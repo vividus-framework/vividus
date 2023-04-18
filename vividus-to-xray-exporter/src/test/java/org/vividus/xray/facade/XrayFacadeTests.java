@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import org.vividus.xray.model.CucumberTestCase;
 import org.vividus.xray.model.ManualTestCase;
 import org.vividus.xray.model.TestCaseType;
 import org.vividus.xray.model.TestExecution;
+import org.vividus.xray.model.TestExecutionInfo;
 import org.vividus.xray.model.TestExecutionItem;
 import org.vividus.xray.model.TestExecutionItemStatus;
 
@@ -73,6 +74,7 @@ class XrayFacadeTests
     private static final String MANUAL_TYPE = "Manual";
     private static final String CUCUMBER_TYPE = "Cucumber";
     private static final String CREATE_RESPONSE = "{\"key\" : \"" + ISSUE_ID + "\"}";
+    private static final String EXECUTION_IMPORT_ENDPOINT = "/rest/raven/1.0/import/execution";
 
     @Mock private ManualTestCaseSerializer manualTestSerializer;
     @Mock private CucumberTestCaseSerializer cucumberTestSerializer;
@@ -167,7 +169,7 @@ class XrayFacadeTests
     }
 
     @Test
-    void shouldAddTestCasesToTestExecution() throws IOException, JiraConfigurationException
+    void shouldUpdateTestExecution() throws IOException, JiraConfigurationException
     {
         initializeFacade(List.of());
         TestExecution testExecution = new TestExecution();
@@ -178,13 +180,37 @@ class XrayFacadeTests
                     TestExecutionItemStatus.FAIL))
         ));
         when(jiraClientProvider.getByIssueKey(ISSUE_KEY)).thenReturn(jiraClient);
-        xrayFacade.updateTestExecution(testExecution);
+        xrayFacade.importTestExecution(testExecution);
         String body = "{\"testExecutionKey\":\"TEST-0\",\"tests\":[{\"testKey\":\"test-1\",\"status\":\"PASS\"},"
                 + "{\"testKey\":\"test-2\",\"status\":\"FAIL\",\"examples\":[\"PASS\",\"FAIL\"]}]}";
-        verify(jiraClient).executePost("/rest/raven/1.0/import/execution", body);
+        verify(jiraClient).executePost(EXECUTION_IMPORT_ENDPOINT, body);
         assertThat(logger.getLoggingEvents(), is(List.of(
             info("Updating Test Execution with ID {}: {}", ISSUE_KEY, body),
             info("Test Execution with key {} has been updated", ISSUE_KEY))));
+    }
+
+    @Test
+    void shouldCreateTestExecution() throws JiraConfigurationException, IOException
+    {
+        initializeFacade(List.of());
+        TestExecution testExecution = new TestExecution();
+        TestExecutionInfo info = new TestExecutionInfo();
+        info.setSummary("summary");
+        testExecution.setInfo(info);
+        testExecution.setTests(List.of(
+            createTestExecutionItem("test-one", TestExecutionItemStatus.PASS, null)
+        ));
+        when(jiraClientProvider.getByJiraConfigurationKey(Optional.empty())).thenReturn(jiraClient);
+        String body = "{\"info\":{\"summary\":\"summary\"},\"tests\":[{\"testKey\":\"test-one\",\"status\":\"PASS\"}]}";
+        when(jiraClient.executePost(EXECUTION_IMPORT_ENDPOINT, body)).thenReturn("{\"testExecIssue\":{\"id\":\"01101\""
+                + ",\"key\":\"TEST-0\",\"self\":\"https://jira.com/rest/api/2/issue/01101\"}}");
+
+        xrayFacade.importTestExecution(testExecution);
+
+        verify(jiraClient).executePost(EXECUTION_IMPORT_ENDPOINT, body);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+            info("Creating Test Execution: {}", body),
+            info("Test Execution with key {} has been created", ISSUE_KEY))));
     }
 
     private static TestExecutionItem createTestExecutionItem(String key, TestExecutionItemStatus status,

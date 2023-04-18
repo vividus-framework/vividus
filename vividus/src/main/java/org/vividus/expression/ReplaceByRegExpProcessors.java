@@ -21,12 +21,9 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Named;
-
 import org.jbehave.core.expressions.DelegatingExpressionProcessor;
 import org.jbehave.core.expressions.RelaxedMultiArgExpressionProcessor;
 
-@Named
 public class ReplaceByRegExpProcessors extends DelegatingExpressionProcessor
 {
     private static final int ARGS_LIMIT = 3;
