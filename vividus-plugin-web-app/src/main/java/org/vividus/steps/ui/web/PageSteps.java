@@ -56,6 +56,10 @@ public class PageSteps
     private static final Logger LOGGER = LoggerFactory.getLogger(PageSteps.class);
     private static final String FORWARD_SLASH = "/";
     private static final String PAGE_TITLE = "Page title";
+    private static final String DEPRECATED_LOG_MESSAGE_TEMPLATE =
+            "The step: \"{}\" is deprecated "
+            + "and will be removed in VIVIDUS 0.7.0. "
+            + "Use step: \"{}\"";
 
     @Inject private IUiContext uiContext;
     @Inject private SetContextSteps setContextSteps;
@@ -122,10 +126,15 @@ public class PageSteps
      * </ul>
      * <p>
      * @param relativeURL A string value of the relative URL
+     * @deprecated Use combination of step and expression:
+     * "Then `#{extractPathFromUrl(${current-page-url})}` is equal to `$variable2`"
      */
+    @Deprecated(since = "0.5.9", forRemoval = true)
     @Then("the page has the relative URL '$relativeURL'")
     public void checkPageRelativeURL(String relativeURL)
     {
+        LOGGER.warn(DEPRECATED_LOG_MESSAGE_TEMPLATE, "Then the page has the relative URL '$relativeURL'",
+                "Then `#{extractPathFromUrl(${current-page-url})}` is equal to `$variable2`");
         URI url = UriUtils.createUri(getWebDriver().getCurrentUrl());
         // If web application under test is unavailable (no page is opened), an empty URL will be returned
         if (url.getPath() != null)
@@ -149,10 +158,15 @@ public class PageSteps
      * </ul>
      * <p>
      * @param host A string value of the page host
+     * @deprecated Use combination of step and expression:
+     * "Then `#{extractHostFromUrl(${current-page-url})}` is equal to `$variable2`"
      */
+    @Deprecated(since = "0.5.9", forRemoval = true)
     @Then("the host of the page URL is '$host'")
     public void checkPageHost(String host)
     {
+        LOGGER.warn(DEPRECATED_LOG_MESSAGE_TEMPLATE, "Then the host of the page URL is '$host'",
+                "Then `#{extractHostFromUrl(${current-page-url})}` is equal to `$variable2`");
         URI url = UriUtils.createUri(getWebDriver().getCurrentUrl());
         descriptiveSoftAssert.assertEquals("Page has correct host", host, url.getHost());
     }
@@ -205,10 +219,15 @@ public class PageSteps
     /**
      * Checks if page's url contains part of url and this page is loaded
      * @param urlPart Expected URL part
+     * @deprecated Use combination of step and expression:
+     * "Then `${current-page-url}` matches `$regex`"
      */
+    @Deprecated(since = "0.5.9", forRemoval = true)
     @Then("the page with the URL containing '$URLpart' is loaded")
     public void checkUrlPartIsLoaded(String urlPart)
     {
+        LOGGER.warn(DEPRECATED_LOG_MESSAGE_TEMPLATE, "Then the page with the URL containing '$URLpart' is loaded",
+                "Then `${current-page-url}` matches `$regex`");
         URI actualUrl = UriUtils.createUri(getWebDriver().getCurrentUrl());
         String actualDecodedUrl = actualUrl.toString();
         descriptiveSoftAssert.assertThat(String.format("Page with the URLpart '%s' is loaded", urlPart),

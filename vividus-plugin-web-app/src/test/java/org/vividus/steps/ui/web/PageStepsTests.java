@@ -18,6 +18,7 @@ package org.vividus.steps.ui.web;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
@@ -81,6 +82,14 @@ class PageStepsTests
     private static final String URL = "http://qa.vividus.org/";
     private static final String HOST = "qa.vividus.org";
     private static final String PAGE_TITLE = "Page title";
+    private static final String DEPRECATED_LOG_MESSAGE_TEMPLATE =
+            "The step: \"{}\" is deprecated "
+                    + "and will be removed in VIVIDUS 0.7.0. "
+                    + "Use step: \"{}\"";
+    private static final String THEN_THE_PAGE_HAS_RELATIVE_URL_STEP =
+            "Then the page has the relative URL '$relativeURL'";
+    private static final String THEN_EXTRACT_PATH_FROM_URL_STEP =
+            "Then `#{extractPathFromUrl(${current-page-url})}` is equal to `$variable2`";
 
     @Mock private WebDriver driver;
     @Mock private IDescriptiveSoftAssert softAssert;
@@ -106,6 +115,8 @@ class PageStepsTests
         pageSteps.checkPageRelativeURL(RELATIVE_URL);
         URI uri = UriUtils.createUri(URL);
         verify(softAssert).assertEquals(PAGE_HAS_CORRECT_RELATIVE_URL, uri, uri);
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
+                THEN_THE_PAGE_HAS_RELATIVE_URL_STEP, THEN_EXTRACT_PATH_FROM_URL_STEP))));
     }
 
     @Test
@@ -117,6 +128,8 @@ class PageStepsTests
         pageSteps.checkPageRelativeURL(relativeURL);
         URI uri = UriUtils.createUri(URL);
         verify(softAssert).assertEquals(PAGE_HAS_CORRECT_RELATIVE_URL, uri, uri);
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
+                THEN_THE_PAGE_HAS_RELATIVE_URL_STEP, THEN_EXTRACT_PATH_FROM_URL_STEP))));
     }
 
     @Test
@@ -130,6 +143,8 @@ class PageStepsTests
         pageSteps.checkPageRelativeURL(relativeURL);
         URI uri = UriUtils.createUri(url);
         verify(softAssert).assertEquals(PAGE_HAS_CORRECT_RELATIVE_URL, uri, uri);
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
+                THEN_THE_PAGE_HAS_RELATIVE_URL_STEP, THEN_EXTRACT_PATH_FROM_URL_STEP))));
     }
 
     @Test
@@ -142,6 +157,8 @@ class PageStepsTests
         pageSteps.checkPageRelativeURL(relativeURL);
         URI uri = UriUtils.createUri(url);
         verify(softAssert).assertEquals(PAGE_HAS_CORRECT_RELATIVE_URL, uri, uri);
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
+                THEN_THE_PAGE_HAS_RELATIVE_URL_STEP, THEN_EXTRACT_PATH_FROM_URL_STEP))));
     }
 
     @Test
@@ -154,6 +171,8 @@ class PageStepsTests
         pageSteps.checkPageRelativeURL(relativeURL);
         URI uri = UriUtils.createUri(url);
         verify(softAssert).assertEquals(PAGE_HAS_CORRECT_RELATIVE_URL, uri, uri);
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
+                THEN_THE_PAGE_HAS_RELATIVE_URL_STEP, THEN_EXTRACT_PATH_FROM_URL_STEP))));
     }
 
     @SuppressWarnings("unchecked")
@@ -167,6 +186,9 @@ class PageStepsTests
         verify(softAssert).assertThat(eq("Page with the URLpart '" + urlValue + "' is loaded"),
                 eq("Page url '" + urlValue + "' contains part '" + urlValue + "'"), eq(urlValue),
                 (Matcher<String>) isA(Matcher.class));
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
+                "Then the page with the URL containing '$URLpart' is loaded",
+                "Then `${current-page-url}` matches `$regex`"))));
     }
 
     @ParameterizedTest
@@ -355,6 +377,8 @@ class PageStepsTests
         when(driver.getCurrentUrl()).thenReturn(url);
         pageSteps.checkPageRelativeURL(RELATIVE_URL);
         verify(softAssert).recordFailedAssertion("URL path component is null");
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
+                THEN_THE_PAGE_HAS_RELATIVE_URL_STEP, THEN_EXTRACT_PATH_FROM_URL_STEP))));
     }
 
     @Test
@@ -376,6 +400,9 @@ class PageStepsTests
         URI uri = UriUtils.createUri(URL);
         String uriHost = uri.getHost();
         verify(softAssert).assertEquals(PAGE_HAS_CORRECT_HOST, uriHost, uriHost);
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
+                "Then the host of the page URL is '$host'",
+                "Then `#{extractHostFromUrl(${current-page-url})}` is equal to `$variable2`"))));
     }
 
     @Test
