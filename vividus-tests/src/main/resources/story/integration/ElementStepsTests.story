@@ -75,7 +75,29 @@ Given I am on page with URL `${vividus-test-site-url}/frames.html`
 When I switch to frame located `By.id(exampleCom)`
 When I click on element located by `xpath(//a[contains(text(), 'More')])`
 
+Scenario: Steps verification: "When I set focus on context element", "Then context element is $focusState", "When I press $keys on keyboard"
+Given I am on page with URL `${vividus-test-site-url}/inputs.html`
+Given I initialize scenario variable `car-brand` with value `#{generate(Brand.car)}`
+When I change context to element located by `id(text)`
+Then context element is not in focus
+When I set focus on context element
+Then context element is in focus
+When I press ${car-brand} on keyboard
+When I reset context
+Then text `${car-brand}` exists
+
 !-- Composites down there
+
+Scenario: Steps verification: "When I set focus to the context element", "Then the context element is $focusState"
+Given I am on page with URL `${vividus-test-site-url}/inputs.html`
+Given I initialize scenario variable `watch-brand` with value `#{generate(Brand.watch)}`
+When I change context to element located by `id(text)`
+Then the context element is not in focus
+When I set focus to the context element
+Then the context element is in focus
+When I press ${watch-brand} on keyboard
+When I reset context
+Then text `${watch-brand}` exists
 
 Scenario: Step verification When I enter `$text` in field located `$locator` using keyboard
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`

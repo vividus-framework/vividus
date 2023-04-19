@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.vividus.steps.ui.web;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
@@ -29,20 +27,22 @@ import org.vividus.ui.web.action.WebJavascriptActions;
 @TakeScreenshotOnFailure
 public class FocusSteps
 {
-    @Inject private IUiContext uiContext;
-    @Inject private WebJavascriptActions javascriptActions;
-    @Inject private FocusValidations focusValidations;
+    private final IUiContext uiContext;
+    private final WebJavascriptActions javascriptActions;
+    private final FocusValidations focusValidations;
+
+    public FocusSteps(IUiContext uiContext, WebJavascriptActions javascriptActions, FocusValidations focusValidations)
+    {
+        this.uiContext = uiContext;
+        this.javascriptActions = javascriptActions;
+        this.focusValidations = focusValidations;
+    }
 
     /**
-     * Step sets focus to an element in context
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li>Sets focus by performing javascript method focus() to found element.</li>
-     * </ul>
+     * Sets the focus on the context element, if it can be focused. The focused element is the element that will
+     * receive keyboard and similar events by default.
      */
-    @When("I set focus to the context element")
+    @When("I set focus on context element")
     public void setFocus()
     {
         uiContext.getSearchContext(WebElement.class).ifPresent(
@@ -50,18 +50,12 @@ public class FocusSteps
     }
 
     /**
-     * Step checks if the context element in given focus state
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li>Gets element from context</li>
-     * <li>Checks focus state of element by comparing given the element and the element
-     *  returned by activeElement javascript method</li>
-     * </ul>
-     * @param focusState state to verify
+     * Checks if the context element is in the provided focus state by comparing the context element and the active
+     * element
+     *
+     * @param focusState The state to verify: "in focus" or "not in focus".
      */
-    @Then("the context element is $focusState")
+    @Then("context element is $focusState")
     public void isElementInFocusState(FocusState focusState)
     {
         uiContext.getSearchContext(WebElement.class).ifPresent(
