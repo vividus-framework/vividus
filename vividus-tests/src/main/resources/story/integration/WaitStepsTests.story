@@ -73,7 +73,7 @@ Meta:
     @requirementId 2122
 Given I am on page with URL `${vividus-test-site-url}/elementState.html`
 When I set page load timeout to `PT20S`
-When I open URL `${vividus-test-site-url}/delayedLoading?imageTimeout=10000` in new window
+When I open URL `${vividus-test-site-url}/delayedLoading?imageTimeout=10000` in new tab
 When I set page load timeout to `PT10S`
 
 Scenario: Verify step: 'When I wait until number of elements located by `$locator` is $comparisonRule $number'

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,7 @@ class SetContextStepsTests
     private static final String OTHER_WINDOW_HANDLE = "{248427e8-e67d-47ba-923f-4051f349f813}";
     private static final String NEW_WINDOW_IS_FOUND = "New window is found";
     private static final String NEW_WINDOW = "New window '";
+    private static final String NEW_TAB_IS_FOUND = "New tab is found";
     private static final String A_FRAME = "A frame";
 
     @Mock private IBaseValidations mockedBaseValidations;
@@ -99,7 +100,7 @@ class SetContextStepsTests
     {
         when(webDriverProvider.get()).thenReturn(mockedWebDiver);
         when(mockedWebDiver.getWindowHandle()).thenReturn(CURRENT_WINDOW_HANDLE);
-        when(windowsActions.switchToNewWindow(CURRENT_WINDOW_HANDLE)).thenReturn(OTHER_WINDOW_HANDLE);
+        when(windowsActions.switchToNewTab(CURRENT_WINDOW_HANDLE)).thenReturn(OTHER_WINDOW_HANDLE);
         when(softAssert.assertThat(eq(NEW_WINDOW + OTHER_WINDOW_HANDLE + APOSTROPHE + IS_FOUND),
                 eq(NEW_WINDOW_IS_FOUND), eq(OTHER_WINDOW_HANDLE), argThat(matcher -> matcher.toString()
                         .contains(MATCHER_STRING)))).thenReturn(true);
@@ -113,7 +114,7 @@ class SetContextStepsTests
     {
         when(webDriverProvider.get()).thenReturn(mockedWebDiver);
         when(mockedWebDiver.getWindowHandle()).thenReturn(CURRENT_WINDOW_HANDLE);
-        when(windowsActions.switchToNewWindow(CURRENT_WINDOW_HANDLE)).thenReturn(CURRENT_WINDOW_HANDLE);
+        when(windowsActions.switchToNewTab(CURRENT_WINDOW_HANDLE)).thenReturn(CURRENT_WINDOW_HANDLE);
         setContextSteps.switchingToWindow();
 
         verify(softAssert).assertThat(eq(NEW_WINDOW + CURRENT_WINDOW_HANDLE + APOSTROPHE + IS_FOUND),
@@ -122,9 +123,31 @@ class SetContextStepsTests
     }
 
     @Test
+    void testSwitchToTab()
+    {
+        when(webDriverProvider.get()).thenReturn(mockedWebDiver);
+        when(mockedWebDiver.getWindowHandle()).thenReturn(CURRENT_WINDOW_HANDLE);
+        when(windowsActions.switchToNewTab(CURRENT_WINDOW_HANDLE)).thenReturn(OTHER_WINDOW_HANDLE);
+        when(softAssert.recordAssertion(true, NEW_TAB_IS_FOUND)).thenReturn(true);
+        setContextSteps.switchToTab();
+        verify(uiContext).reset();
+    }
+
+    @Test
+    void testSwitchToTabNoTab()
+    {
+        when(webDriverProvider.get()).thenReturn(mockedWebDiver);
+        when(mockedWebDiver.getWindowHandle()).thenReturn(CURRENT_WINDOW_HANDLE);
+        when(windowsActions.switchToNewTab(CURRENT_WINDOW_HANDLE)).thenReturn(CURRENT_WINDOW_HANDLE);
+        when(softAssert.recordAssertion(false, NEW_TAB_IS_FOUND)).thenReturn(false);
+        setContextSteps.switchToTab();
+        verifyNoInteractions(uiContext);
+    }
+
+    @Test
     void shouldSwitchAndResetContex()
     {
-        when(windowsActions.switchToWindowWithMatchingTitle(argThat(matcher -> EQUALS_MATCHER
+        when(windowsActions.switchToTabWithMatchingTitle(argThat(matcher -> EQUALS_MATCHER
                 .equals(matcher.toString())))).thenReturn(TITLE);
         when(softAssert.assertThat(eq(NEW_WINDOW_OR_TAB_IS_FOUND), eq(WINDOW_OR_TAB_WITH_NAME),
                 eq(TITLE), argThat(matcher -> EQUALS_MATCHER.equals(matcher.toString())))).thenReturn(true);
@@ -135,12 +158,36 @@ class SetContextStepsTests
     }
 
     @Test
+    void shouldSwitchToTabAndResetContext()
+    {
+        when(windowsActions.switchToTabWithMatchingTitle(argThat(matcher -> EQUALS_MATCHER
+                .equals(matcher.toString())))).thenReturn(TITLE);
+        when(softAssert.assertThat(eq(NEW_WINDOW_OR_TAB_IS_FOUND),
+                eq(TITLE), argThat(matcher -> EQUALS_MATCHER.equals(matcher.toString())))).thenReturn(true);
+
+        setContextSteps.switchToTab(StringComparisonRule.IS_EQUAL_TO, NEW_TITLE);
+
+        verify(uiContext).reset();
+    }
+
+    @Test
     void testSwitchingToWindowWithPartNameNoNewPage()
     {
-        when(windowsActions.switchToWindowWithMatchingTitle(argThat(matcher -> matcher.toString()
+        when(windowsActions.switchToTabWithMatchingTitle(argThat(matcher -> matcher.toString()
                 .contains(EQUALS_MATCHER)))).thenReturn(TITLE);
         setContextSteps.switchingToWindow(StringComparisonRule.IS_EQUAL_TO, NEW_TITLE);
         verify(softAssert).assertThat(eq(NEW_WINDOW_OR_TAB_IS_FOUND), eq(WINDOW_OR_TAB_WITH_NAME),
+                eq(TITLE), argThat(matcher -> matcher.toString().contains(EQUALS_MATCHER)));
+        verifyNoInteractions(uiContext);
+    }
+
+    @Test
+    void testSwitchingToTabWithPartNameNoNewPage()
+    {
+        when(windowsActions.switchToTabWithMatchingTitle(argThat(matcher -> matcher.toString()
+                .contains(EQUALS_MATCHER)))).thenReturn(TITLE);
+        setContextSteps.switchToTab(StringComparisonRule.IS_EQUAL_TO, NEW_TITLE);
+        verify(softAssert).assertThat(eq(NEW_WINDOW_OR_TAB_IS_FOUND),
                 eq(TITLE), argThat(matcher -> matcher.toString().contains(EQUALS_MATCHER)));
         verifyNoInteractions(uiContext);
     }
@@ -175,10 +222,10 @@ class SetContextStepsTests
         WaitResult<Boolean> result = new WaitResult<>();
         result.setWaitPassed(true);
         when(waitActions.wait(eq(mockedWebDiver), eq(duration), waitForWindow())).thenReturn(result);
-        when(windowsActions.switchToWindowWithMatchingTitle(
+        when(windowsActions.switchToTabWithMatchingTitle(
             argThat(m -> (QUOTE + TITLE + QUOTE).equals(m.toString()))))
             .thenThrow(new WebDriverException()).thenReturn(TITLE);
-        setContextSteps.waitForWindowAndSwitch(duration, StringComparisonRule.IS_EQUAL_TO, TITLE);
+        setContextSteps.waitForTabAndSwitch(duration, StringComparisonRule.IS_EQUAL_TO, TITLE);
         verify(uiContext).reset();
     }
 
@@ -190,7 +237,7 @@ class SetContextStepsTests
         WaitResult<Object> result = new WaitResult<>();
         result.setWaitPassed(false);
         when(waitActions.wait(eq(mockedWebDiver), eq(duration), any())).thenReturn(result);
-        setContextSteps.waitForWindowAndSwitch(duration, StringComparisonRule.IS_EQUAL_TO, TITLE);
+        setContextSteps.waitForTabAndSwitch(duration, StringComparisonRule.IS_EQUAL_TO, TITLE);
         verifyNoInteractions(softAssert);
     }
 
@@ -199,7 +246,7 @@ class SetContextStepsTests
         return argThat(waiter -> {
             assertFalse(waiter.apply(mockedWebDiver));
             assertTrue(waiter.apply(mockedWebDiver));
-            assertEquals("switch to a window where title IS_EQUAL_TO \"Title\"", waiter.toString());
+            assertEquals("switch to the tab where title is equal to \"Title\"", waiter.toString());
             return true;
         });
     }

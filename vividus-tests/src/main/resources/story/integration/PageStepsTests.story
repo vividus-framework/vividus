@@ -11,7 +11,7 @@ When I wait until scroll is finished
 Then page is scrolled to element located by `id(toClick)`
 
 
-Scenario: Verify step: When I open URL `$URL` in new window; Verify step: When I stop page loading
+Scenario: Verify deprecated step: When I open URL `$URL` in new window; Verify step: When I stop page loading
 Meta:
     @requirementId 1154; 1236
 When I open URL `${vividus-test-site-url}/delayedLoading?imageTimeout=1000` in new window

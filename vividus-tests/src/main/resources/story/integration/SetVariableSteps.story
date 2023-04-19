@@ -35,14 +35,14 @@ Scenario: Verify step: "When I save number of open tabs to $scopes variable `$va
 Given I am on page with URL `${vividus-test-site-url}/table.html`
 When I open new tab
 When I save number of open tabs to SCENARIO variable `tabscount`
-When I close the current window
+When I close current tab
 Then `${tabscount}` is = `2`
 
 Scenario: Verify deprecated step: "When I get the number of open windows and set it to the $scopes variable '$variable'"
 Given I am on page with URL `${vividus-test-site-url}`
-When I open URL `${vividus-test-site-url}` in new window
+When I open URL `${vividus-test-site-url}` in new tab
 When I get the number of open windows and set it to the SCENARIO variable 'tabscount'
-When I close the current window
+When I close current tab
 Then `${tabscount}` is = `2`
 
 Scenario: Verify deprecated step: "When I get the URL value of a video with sequence number '$number' and set it to the '$scopes' variable '$variable'"

@@ -64,7 +64,7 @@ Given I start electron application
 [source,gherkin]
 ----
 Given I start electron application
-When I wait `PT1M` until window with title that contains ` | Microsoft Teams` appears and switch to it
+When I wait `PT1M` until tab with title that contains ` | Microsoft Teams` appears and switch to it
 When I wait until element located `id(searchInputField)` appears
 ----
 

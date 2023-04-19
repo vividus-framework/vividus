@@ -76,7 +76,7 @@ public class AlertActions implements IAlertActions
         }
         catch (NoSuchWindowException e)
         {
-            windowsActions.switchToPreviousWindow();
+            windowsActions.switchToPreviousTab();
             return Optional.empty();
         }
     }

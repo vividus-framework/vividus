@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,28 +21,28 @@ import org.hamcrest.Matcher;
 public interface IWindowsActions
 {
     /**
-     * Closing all windows and left only larger one
+     * Closing all tabs and left only larger one
      */
-    void closeAllWindowsExceptOne();
+    void closeAllTabsExceptOne();
 
     /**
-     * Switches to a new window.
-     * If there is no new window stays on current.
-     * @param currentWindow identifier
+     * Switches to a new tab.
+     * If there is no new tabs stays on current.
+     * @param currentTab identifier
      * @return window identifier
      */
-    String switchToNewWindow(String currentWindow);
+    String switchToNewTab(String currentTab);
 
     /**
-     * Switches to a window with a title matching matcher or else
-     * last available window.
-     * @param matcher to match window title
-     * @return window title
+     * Switches to a tab with a title matching matcher or else
+     * last available tab.
+     * @param matcher to match tab title
+     * @return tab title
      */
-    String switchToWindowWithMatchingTitle(Matcher<String> matcher);
+    String switchToTabWithMatchingTitle(Matcher<String> matcher);
 
     /**
-     * Switches to a previous window
+     * Switches to a previous tab
      */
-    void switchToPreviousWindow();
+    void switchToPreviousTab();
 }

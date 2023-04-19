@@ -335,6 +335,12 @@ is that this step _inherits_ the state of the previous page, i.e.:
 
 [source,gherkin]
 ----
+When I open URL `$URL` in new tab
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I open URL `$URL` in new window
 ----
 * `$URL` - The URL to open.
@@ -342,13 +348,19 @@ When I open URL `$URL` in new window
 .Open docs in a new tab
 [source,gherkin]
 ----
-When I open URL `https://docs.vividus.dev` in new window
+When I open URL `https://docs.vividus.dev` in new tab
 ----
 
 ==== Close current tab
 
 Closes the current tab and switches to the previous tab.
 
+[source,gherkin]
+----
+When I close current tab
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
 [source,gherkin]
 ----
 When I close the current window
@@ -362,8 +374,8 @@ NOTE: This step can only be applied to a session with multiple tabs open.
 [source,gherkin]
 ----
 Given I am on page with URL `https://example.com/`
-When I open URL `https://example.com/contact-us` in new window
-When I close the current window
+When I open URL `https://example.com/contact-us` in new tab
+When I close current tab
 ----
 
 ==== Close current tab with possibility to handle alert
@@ -375,23 +387,29 @@ Trying to close the current tab with '{onbeforeunload-event}' events handling.
 
 [source,gherkin]
 ----
+When I attempt to close current tab with possibility to handle alert
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I attempt to close current window with possibility to handle alert
 ----
 
-IMPORTANT: This step can only be used if the current tab was opened via the step <<_open_url_in_a_new_tab,``When I open URL \`$pageUrl` in new window``>>.
+IMPORTANT: This step can only be used if the current tab was opened via the step <<_open_url_in_a_new_tab,``When I open URL \`$pageUrl` in new tab``>>.
 
-NOTE: If you confirm window close in {popup-alert}[alert], the tab will be closed, and you will need to switch to current tab using the following step: `When I switch to window with title that $stringComparisonRule `$windowName``.
+NOTE: If you confirm window close in {popup-alert}[alert], the tab will be closed, and you will need to switch to current tab using the following step: `When I switch to tab with title that $stringComparisonRule `$windowName``.
 
 .Checking for an alert when trying to close a window with form
 [source,gherkin]
 ----
 Given I am on page with URL `https://example.com/`
-When I open URL `https://example.com/form` in new window
+When I open URL `https://example.com/form` in new tab
 When I click on element located by `xpath(//*[@id='form-edit'])`
 When I execute sequence of actions:
 |type      |argument    |
 |ENTER_TEXT|changed text|
-When I attempt to close current window with possibility to handle alert
+When I attempt to close current tab with possibility to handle alert
 Then an alert is present
 When I accept alert with message which matches `.*`
 ----
@@ -703,6 +721,16 @@ Then text `Modal Frame Example` exists
 
 Switch the focus of future browser commands to new tab.
 
+This step gets the identifier of the currently active tab and then switches focus to the first available tab with a different identifier. For example, if tabs #1, #2, #3 are open and tab #2 is active, this step will switch focus to tab #3.
+
+[NOTE]
+A new tab should already be open for this step to function. After executing this step, the new tab will become the active tab.
+
+[source,gherkin]
+----
+When I switch to new tab
+----
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
 [source,gherkin]
 ----
 When I switch to a new window
@@ -713,7 +741,7 @@ When I switch to a new window
 Given I am on page with URL `https://the-internet.herokuapp.com/windows`
 When I click on element located by `linkUrlPart(/windows/new)`
 Then text `New Window` does not exist
-When I switch to a new window
+When I switch to new tab
 Then text `New Window` exists
 ----
 
@@ -723,16 +751,21 @@ Switch the focus of future browser commands to new tab with specified title.
 
 [source,gherkin]
 ----
+When I switch to tab with title that $stringComparisonRule `$tabName`
+----
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I switch to window with title that $stringComparisonRule `$windowName`
 ----
 * `$stringComparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule].
-* `$windowName` - The expected tab title.
+* `$tabName` - The expected tab title.
 
 .Open the new tab by link and switch to it using regex title pattern
 ----
 Given I am on page with URL `https://the-internet.herokuapp.com/windows`
 When I click on element located by `linkUrlPart(/windows/new)`
 Then text `New Window` does not exist
-When I switch to window with title that matches `.*[wW]indow.*`
+When I switch to tab with title that matches `.*[wW]indow.*`
 Then text `New Window` exists
 ----

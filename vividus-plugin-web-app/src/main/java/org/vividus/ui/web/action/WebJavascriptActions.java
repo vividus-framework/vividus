@@ -145,12 +145,12 @@ public class WebJavascriptActions extends JavascriptActions implements WebApplic
     /**
      * Opens new window
      */
-    public void openNewWindow()
+    public void openNewTab()
     {
         executeScript("window.open()");
     }
 
-    public void closeCurrentWindow()
+    public void closeCurrentTab()
     {
         executeScript("window.close()");
     }

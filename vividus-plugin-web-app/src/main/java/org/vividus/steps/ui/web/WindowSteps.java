@@ -16,9 +16,6 @@
 
 package org.vividus.steps.ui.web;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.not;
-
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -95,67 +92,58 @@ public class WindowSteps
     }
 
     /**
-     * Closes <b>current window</b> and switches to the window from which redirection to current window was performed
-     * <p>
-     * Each browser <b>window</b> or <b>tab</b> is considered to be a separate <b>window object</b>. This object holds
-     * corresponding <b>Document</b> object, which itself is a html page. So this method applies to both windows and
-     * tabs.
-     * <p>
+     * Closes <b>current tab</b> and switches to the tab from which redirection to current tab was performed
      * Actions performed at this step:
      * <ul>
-     * <li>Receives all opened browser windows
-     * <li>Identifies current window and closes it
-     * <li>Switches back to the window from which redirection to current window was performed
+     * <li>Receives all opened browser tabs
+     * <li>Identifies current tab and closes it
+     * <li>Switches back to the tab from which redirection to current tab was performed
      * </ul>
-     * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context (Window &amp; Document)</i></a>
+     * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context</i></a>
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      */
-    @When("I close the current window")
-    public void closeCurrentWindow()
+    @When("I close current tab")
+    public void closeCurrentTab()
     {
-        tryToCloseCurrentWindow((driver, window) ->
+        boolean tabClosed = tryToCloseCurrentTab((driver, tab) ->
         {
             driver.close();
-            driver.switchTo().window(window);
+            driver.switchTo().window(tab);
         });
+        softAssert.recordAssertion(tabClosed, "Current tab has been closed");
     }
 
     /**
-     * Trying to close the <b>current window</b> with JavaScript method 'close()'.
+     * Trying to close the <b>current tab</b> with JavaScript method 'close()'.
      * If an alert window is opened via 'onbeforeunload' event, it must be checked and handled in the subsequent steps.
-     * If an alert window is not opened, the step closes the current window and switches to the previous window.
-     * <p>
-     * Each browser <b>window</b> or <b>tab</b> is considered to be a separate <b>window object</b>. This object holds
-     * corresponding <b>Document</b> object, which itself is a html page. So this method applies to both windows and
-     * tabs.
-     * <p>
+     * If an alert window is not opened, the step closes the current tab and switches to the previous tab.
      * Actions performed at this step:
      * <ul>
-     * <li>Receives all opened browser windows
-     * <li>Identifies current window and try to close it
+     * <li>Receives all opened browser tabs
+     * <li>Identifies current tab and try to close it
      * <li>If an alert window via 'onbeforeunload' event opens, step completes execution
      * (alert is expected to be handled in next steps)
-     * <li>If an alert window does not open, closes current window and
-     *  switches back to the window from which redirection to current window was performed
+     * <li>If an alert window does not open, closes current tab and
+     *  switches back to the tab from which redirection to current tab was performed
      * </ul>
      * <p>
-     * Note that this step can only be used if the current window was opened using the step
-     * 'When I open URL `$pageUrl` in new window'.
+     * Note that this step can only be used if the current tab was opened using the step
+     * 'When I open URL `$pageUrl` in new tab'.
      * </p>
-     * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context (Window &amp; Document)</i></a>
+     * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context</i></a>
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      * @see <a href="https://www.w3schools.com/jsref/event_onbeforeunload.asp"><i>Event 'onbeforeunload'</i></a>
      * @see <a href="https://www.w3schools.com/js/js_popup.asp"><i>JavaScript Popup Boxes</i></a>
      */
-    @When("I attempt to close current window with possibility to handle alert")
-    public void closeCurrentWindowWithAlertsHandling()
+    @When("I attempt to close current tab with possibility to handle alert")
+    public void closeCurrentTabWithAlertsHandling()
     {
-        tryToCloseCurrentWindow((driver, window) ->
+        tryToCloseCurrentTab((driver, tab) ->
         {
-            javascriptActions.closeCurrentWindow();
+            javascriptActions.closeCurrentTab();
             if (!alertActions.isAlertPresent(driver))
             {
-                driver.switchTo().window(window);
+                driver.switchTo().window(tab);
             }
             else
             {
@@ -164,20 +152,19 @@ public class WindowSteps
         });
     }
 
-    private void tryToCloseCurrentWindow(BiConsumer<WebDriver, String> closeExecutor)
+    private boolean tryToCloseCurrentTab(BiConsumer<WebDriver, String> closeExecutor)
     {
         WebDriver driver = getWebDriver();
-        String currentWindow = driver.getWindowHandle();
-        for (String window : driver.getWindowHandles())
+        String currentTab = driver.getWindowHandle();
+        for (String tab : driver.getWindowHandles())
         {
-            if (!window.equals(currentWindow))
+            if (!tab.equals(currentTab))
             {
-                closeExecutor.accept(driver, window);
+                closeExecutor.accept(driver, tab);
                 break;
             }
         }
-        softAssert.assertThat("Current window has been closed", driver.getWindowHandles(),
-                not(contains(currentWindow)));
+        return !driver.getWindowHandles().contains(currentTab);
     }
 
     private WebDriver getWebDriver()
