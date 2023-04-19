@@ -1,3 +1,6 @@
+Meta:
+    @epic vividus-plugin-web-app
+
 Scenario: Step verification: "When I execute javascript `$jsCode` and save result to $scopes variable `$variableName`"
 Given I am on page with URL `${vividus-test-site-url}`
 When I execute javascript `return JSON.stringify(window.performance.timing)` and save result to scenario variable `timings`

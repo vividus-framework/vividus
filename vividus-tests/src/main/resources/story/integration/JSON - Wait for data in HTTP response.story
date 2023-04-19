@@ -1,7 +1,7 @@
 Description: Integration tests for JsonResponseValidationSteps class
 
 Meta:
-    @epic vividus-plugin-rest-api,vividus-plugin-json
+    @epic vividus-plugin-rest-api; vividus-plugin-json
 
 Lifecycle:
 Before:

@@ -1,3 +1,6 @@
+Meta:
+    @epic vividus-plugin-shell
+
 Scenario: Validate shell commands execution steps
 
 When I execute command `echo 'Hello World!'` and save result to scenario variable `result`
