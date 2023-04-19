@@ -308,3 +308,11 @@ When I refresh page
 Composite: Then the page title $comparisonRule '$text'
 !-- WARNING: The step "Then the page title $comparisonRule '$text'" is deprecated and will be removed in VIVIDUS 0.6.0
 Then page title <comparisonRule> `<text>`
+
+Composite: When I set focus to the context element
+!-- WARNING: The step "When I set focus to the context element" is deprecated and will be removed in VIVIDUS 0.7.0
+When I set focus on context element
+
+Composite: Then the context element is $focusState
+!-- WARNING: The step "Then the context element is $focusState" is deprecated and will be removed in VIVIDUS 0.7.0
+Then context element is <focusState>

@@ -293,6 +293,45 @@ When I scan barcode from context and save result to scenario variable `qrCodeLin
 Then `${qrCodeLink}` is equal to `https://www.example.com`
 ----
 
+=== https://en.wikipedia.org/wiki/Focus_(computing)[Focus] Steps
+
+Focus indicates the act of selecting an element of a graphical user interface. Text entered at the keyboard or pasted
+from a clipboard is sent to the component which has the focus.
+
+==== Set focus to the context element
+
+Sets the focus on the context element, if it can be focused. The focused element is the element that will receive
+keyboard and similar events by default.
+
+[source,gherkin]
+----
+When I set focus on context element
+----
+
+.Set focus on the element with "text" ID
+[source,gherkin]
+----
+When I change context to element located by `id(text)`
+When I set focus on context element
+----
+
+==== Check the context element focus state
+
+Checks if the context element is in the provided focus state by comparing the context element and the active element.
+
+[source,gherkin]
+----
+Then context element is $focusState
+----
+* `$focusState` - The state to verify: `in focus` or `not in focus`.
+
+.Check the context element is in focus and do keyboard input
+[source,gherkin]
+----
+Then context element is in focus
+When I press ENTER on keyboard
+----
+
 === Field Steps
 
 Fields are elements where users can enter data. The most typical fields are:
