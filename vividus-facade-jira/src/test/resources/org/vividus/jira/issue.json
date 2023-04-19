@@ -1,0 +1,25 @@
+{
+    "id": "31354",
+    "fields": {
+        "issuelinks": [
+            {
+                "id": "58571",
+                "self": "https://jira.vividus.com/rest/api/2/issueLink/58571",
+                "type": {
+                    "id": "84542",
+                    "name": "Tests",
+                    "inward": "tested by",
+                    "outward": "tests",
+                    "self": "https://jira.vividus.com/rest/api/2/issueLinkType/84542"
+                },
+                "outwardIssue": {
+                    "id": "22791",
+                    "key": "VVDS-2",
+                    "self": "https://jira.vividus.com/rest/api/2/issue/22791",
+                    "fields": {
+                    }
+                }
+            }
+        ]
+    }
+}

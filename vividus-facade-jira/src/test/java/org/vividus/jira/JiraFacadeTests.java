@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,16 @@
 package org.vividus.jira;
 
 import static java.util.Optional.empty;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -30,8 +34,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.jira.model.IssueLink;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.jira.model.Project;
+import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
 class JiraFacadeTests
@@ -39,6 +45,7 @@ class JiraFacadeTests
     private static final String ISSUE_ID = "issue id";
     private static final String ISSUE_BODY = "issue body";
     private static final String ISSUE_ENDPOINT = "/rest/api/latest/issue/";
+    private static final String TESTS_LINK = "Tests";
 
     @Mock private JiraClient jiraClient;
     @Mock private JiraClientProvider jiraClientProvider;
@@ -75,7 +82,7 @@ class JiraFacadeTests
         String linkRequest = "{\"type\":{\"name\":\"Tests\"},\"inwardIssue\":{\"key\":\"issue id\"},"
                 + "\"outwardIssue\":{\"key\":\"requirement id\"}}";
         when(jiraClientProvider.getByIssueKey(ISSUE_ID)).thenReturn(jiraClient);
-        jiraFacade.createIssueLink(ISSUE_ID, requirementKey, "Tests");
+        jiraFacade.createIssueLink(ISSUE_ID, requirementKey, TESTS_LINK);
         verify(jiraClient).executePost("/rest/api/latest/issueLink", linkRequest);
     }
 
@@ -92,9 +99,16 @@ class JiraFacadeTests
     void shouldGetIssue() throws IOException, JiraConfigurationException
     {
         when(jiraClientProvider.getByIssueKey(ISSUE_ID)).thenReturn(jiraClient);
-        when(jiraClient.executeGet(ISSUE_ENDPOINT + ISSUE_ID)).thenReturn("{\"id\":\"001\"}");
+        String responseBody = ResourceUtils.loadResource(getClass(), "issue.json");
+        when(jiraClient.executeGet(ISSUE_ENDPOINT + ISSUE_ID)).thenReturn(responseBody);
         JiraEntity issue = jiraFacade.getIssue(ISSUE_ID);
-        assertEquals("001", issue.getId());
+        assertEquals("31354", issue.getId());
+        List<IssueLink> issueLinks = issue.getIssueLinks();
+        assertThat(issueLinks, hasSize(1));
+        IssueLink issueLink = issueLinks.get(0);
+        assertNull(issueLink.getInwardIssueKey());
+        assertEquals(TESTS_LINK, issueLink.getType());
+        assertEquals("VVDS-2", issueLink.getOutwardIssueKey());
     }
 
     @Test
