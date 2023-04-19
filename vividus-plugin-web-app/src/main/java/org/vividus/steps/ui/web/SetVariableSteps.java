@@ -187,11 +187,20 @@ public class SetVariableSteps
      * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      * </ul>
      * @param variable A name under which the value should be saved
+     * @deprecated Use step:
+     * "When I save `src` attribute value of element located `xpath((div[contains(@class,'video')]/iframe)[$number])`
+     * to $scopes variable `$variableName`" instead
      */
+    @Deprecated(since = "0.5.10", forRemoval = true)
     @When("I get the URL value of a video with sequence number '$number' and set it to the '$scopes'"
             + " variable '$variable'")
     public void saveUrlValueOfVideoWithNumber(int number, Set<VariableScope> scopes, String variable)
     {
+        LOGGER.warn("The step: \"When I get the URL value of a video with sequence number '$number' and set it"
+                + " to the '$scopes' variable '$variable'\" is deprecated and will be removed in VIVIDUS 0.7.0."
+                + " Use step: \"When I save `src` attribute value of element located"
+                + " `xpath((div[contains(@class,'video')]/iframe)[$number])` to $scopes variable `$variableName`\""
+                + " instead");
         List<WebElement> frames = getVideoIFrames(number);
         if (!frames.isEmpty())
         {
