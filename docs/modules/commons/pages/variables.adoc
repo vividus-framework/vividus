@@ -219,3 +219,29 @@ When the condition `#{eval(`${optionalPathToCheck:/defaultPath}` != `/forbiddenP
 |step                                                                |
 |When I go to the relative URL '${optionalPathToCheck:/defaultPath}' |
 ----
+
+=== Complex types variables
+
+VIVIDUS provides the ability to work with not only primitive variables like numbers and strings but also supports complex types such as lists and maps.
+
+==== Accessing values
+
+* Values from list variables can be accessed by index. For example, `+${listVar[0]}+` returns the first value.
+* Values from map variables can be accessed by key. For instance, `+${mapVar.key}+` returns the value associated with 'key'.
+
+==== Working with tables
+
+VIVIDUS provides the ability to store tables in variables.
+Tables should have a header and at least one row with values.
+
+.Assuming we have the table below stored in the variable 'tableVar':
+[options="header",cols="2,2"]
+|===
+| A  | B
+| A1 | B1
+| A2 | B2
+|===
+
+To access specific cell values, specify the row and header key. Rows indexing starts from 0.
+* `+${tableVar[0].A}+` returns the value from the first row of column A: A1.
+* `+${tableVar[1].B}+` returns the value from the second row of column B: B2.

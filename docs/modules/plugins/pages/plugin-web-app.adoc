@@ -969,3 +969,32 @@ Then element located '$locator' disappears in '$timeout'
 When I click on a button with the name 'Toggle element visibility with delay'
 Then element located 'By.xpath(//div[@id='delayed'])' disappears in 'PT3S'
 ----
+
+=== Set Variable Steps
+
+==== Save HTML table to the variable
+
+This step allows you to save an HTML table from a specified context into a variable.
+
+For more information, see how xref:commons:variables.adoc#_working_with_tables[to work with table variables]
+
+[IMPORTANT]
+The HTML table must have a header row with <th> tags.
+
+[source,gherkin]
+----
+When I save table to $scopes variable `$variableName`
+----
+
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to refer to the variable value.
+
+[NOTE]
+Before using this step, ensure the context is set to the required table. See the example below.
+
+.Save the first table on the page into a variable named 'table'
+[source,gherkin]
+----
+When I change context to element located `xpath(//table[1])`
+When I save table to SCENARIO variable `table`
+----

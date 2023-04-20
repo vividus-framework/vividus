@@ -316,3 +316,7 @@ When I set focus on context element
 Composite: Then the context element is $focusState
 !-- WARNING: The step "Then the context element is $focusState" is deprecated and will be removed in VIVIDUS 0.7.0
 Then context element is <focusState>
+
+Composite: When I save table to $scopes variable '$variableName'
+!-- WARNING: The step "When I save table to $scopes variable '$variableName'" is deprecated and will be removed in VIVIDUS 0.7.0.
+When I save table to <scopes> variable `<variableName>`
