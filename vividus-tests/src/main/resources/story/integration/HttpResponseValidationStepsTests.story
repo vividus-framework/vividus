@@ -35,11 +35,11 @@ Then the response body is equal to resource at '/data/pig'
 
 
 Scenario: Verify steps: "Then connection is secured using $securityProtocol protocol", "Then response time is $comparisonRule `$responseTime` milliseconds"
-When I execute HTTP GET request for resource with URL `https://httpbin.org/anything`
-Then connection is secured using TLSv1.2 protocol
+When I execute HTTP GET request for resource with URL `${vividus-test-site-url}/index.html`
+Then connection is secured using TLSv1.3 protocol
 Then response time is less than `5000` milliseconds
 !-- Deprecated
-Then the connection is secured using TLSv1.2 protocol
+Then the connection is secured using TLSv1.3 protocol
 Then the response time should be less than '5000' milliseconds
 
 
@@ -52,7 +52,7 @@ When I wait for response code `200` for `PT2M` duration retrying 3 times
 Then `${responseCode}` is equal to `200`
 
 
-Scenario: Verify steps: "Then number of response headers with name `$headerName` is $comparisonRule $number", "When I save response header `$headerName` value to $scopes variable `$variableName`", "Then value of response header `$headerName` $comparisonRule `$value`", "Then response header `$headerName` contains elements:$elements"
+Scenario: Verify steps: "Then number of response headers with name `$headerName` is $comparisonRule $number", "When I save response header `$headerName` value to $scopes variable `$variableName`", "Then value of response header `$headerName` $comparisonRule `$value`", "Then response header `$headerName` contains elements:$elements"; verify deprecated HTTP header steps: "Then the number of the response headers with the name '$headerName' is $comparisonRule $value", "When I save response header '$httpHeaderName' value to $scopes variable '$variableName'", "Then the value of the response header '$httpHeaderName' $comparisonRule '$value'", "Then the value of the response header "$httpHeaderName" $comparisonRule "$value"", "Then response header '$httpHeaderName' contains attribute: $attributes"
 When I execute HTTP GET request for resource with URL `https://httpbin.org/html`
 Then number of response headers with name `Content-Type` is equal to 1
 When I save response header `Content-Type` value to scenario variable `contentType`
@@ -61,10 +61,7 @@ Then value of response header `Content-Type` is equal to `text/html; charset=utf
 Then response header `Content-Type` contains elements:
 |element  |
 |text/html|
-
-
-Scenario: Verify deprecated HTTP header steps: "Then the number of the response headers with the name '$headerName' is $comparisonRule $value", "When I save response header '$httpHeaderName' value to $scopes variable '$variableName'", "Then the value of the response header '$httpHeaderName' $comparisonRule '$value'", "Then the value of the response header "$httpHeaderName" $comparisonRule "$value"", "Then response header '$httpHeaderName' contains attribute: $attributes"
-When I execute HTTP GET request for resource with URL `https://httpbin.org/html`
+!-- Deprecated
 Then the number of the response headers with the name 'Content-Type' is equal to 1
 When I save response header 'Content-Type' value to scenario variable 'contentType'
 Then `${contentType}` is equal to `text/html; charset=utf-8`
