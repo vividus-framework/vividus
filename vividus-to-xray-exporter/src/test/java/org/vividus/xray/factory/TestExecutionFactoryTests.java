@@ -143,7 +143,7 @@ class TestExecutionFactoryTests
         Scenario scenario = createScenario();
         scenario.setBeforeSystemScenarioSteps(beforeSystemScenarioSteps);
         scenario.setBeforeUserScenarioSteps(beforeUserScenarioSteps);
-        scenario.setSteps(List.of(createStep(SUCCESS), createStep(outcome)));
+        scenario.setSteps(List.of(createStep(SUCCESS), createStep(outcome), createStep(COMMENT)));
         scenario.setAfterUserScenarioSteps(afterUserScenarioSteps);
         scenario.setAfterSystemScenarioSteps(afterSystemScenarioSteps);
         return scenario;
@@ -166,13 +166,13 @@ class TestExecutionFactoryTests
         Example example1 = new Example();
         example1.setBeforeSystemScenarioSteps(beforeSystemScenarioSteps);
         example1.setBeforeUserScenarioSteps(beforeUserScenarioSteps);
-        example1.setSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
+        example1.setSteps(List.of(createStep(SUCCESS), createStep(SUCCESS), createStep(COMMENT)));
         example1.setAfterUserScenarioSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
         example1.setAfterSystemScenarioSteps(afterSystemScenarioSteps);
 
         Example example2 = new Example();
         example2.setBeforeSystemScenarioSteps(beforeSystemScenarioSteps);
-        example2.setBeforeUserScenarioSteps(List.of(createStep(SUCCESS), createStep(SUCCESS)));
+        example2.setBeforeUserScenarioSteps(List.of(createStep(COMMENT), createStep(SUCCESS), createStep(SUCCESS)));
         example2.setSteps(List.of(createStep(SUCCESS), createStep(outcome)));
         example2.setAfterUserScenarioSteps(afterUserScenarioSteps);
         example2.setAfterSystemScenarioSteps(afterSystemScenarioSteps);

@@ -101,9 +101,9 @@ public class TestExecutionFactory
 
     private static TestExecutionItemStatus calculateStatus(AbstractStepsContainer steps)
     {
-        return steps.createStreamOfAllSteps().allMatch(step -> "successful".equals(step.getOutcome()))
-                ? TestExecutionItemStatus.PASS
-                : TestExecutionItemStatus.FAIL;
+        return steps.createStreamOfAllSteps().anyMatch(step -> "failed".equals(step.getOutcome()))
+                ? TestExecutionItemStatus.FAIL
+                : TestExecutionItemStatus.PASS;
     }
 
     private static String asOffsetDateTime(long millis)
