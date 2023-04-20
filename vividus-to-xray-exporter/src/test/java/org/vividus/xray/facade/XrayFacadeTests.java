@@ -50,6 +50,8 @@ import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
+import org.vividus.jira.model.IssueLink;
+import org.vividus.jira.model.JiraEntity;
 import org.vividus.output.ManualTestStep;
 import org.vividus.xray.databind.AbstractTestCaseSerializer;
 import org.vividus.xray.databind.CucumberTestCaseSerializer;
@@ -68,7 +70,9 @@ import org.vividus.xray.model.TestExecutionItemStatus;
 class XrayFacadeTests
 {
     private static final String ISSUE_KEY = "TEST-0";
+    private static final String LINK_TYPE = "Tests";
     private static final String ISSUE_ID = "issue id";
+    private static final String REQUIREMENT_ID = "requirement id";
     private static final String BODY = "{}";
     private static final String OPEN_STATUS = "Open";
     private static final String MANUAL_TYPE = "Manual";
@@ -95,14 +99,33 @@ class XrayFacadeTests
     void shouldCreateTestsLink() throws IOException, JiraConfigurationException
     {
         initializeFacade(List.of());
-        String requirementId = "requirement id";
-        String linkType = "Tests";
+        JiraEntity jiraEntity = new JiraEntity();
+        jiraEntity.setIssueLinks(List.of(
+            new IssueLink(LINK_TYPE, null, "another requirement id"),
+            new IssueLink("another link type", null, REQUIREMENT_ID)
+        ));
+        when(jiraFacade.getIssue(ISSUE_ID)).thenReturn(jiraEntity);
 
-        xrayFacade.createTestsLink(ISSUE_ID, requirementId);
+        xrayFacade.createTestsLink(ISSUE_ID, REQUIREMENT_ID);
 
-        verify(jiraFacade).createIssueLink(ISSUE_ID, requirementId, linkType);
+        verify(jiraFacade).createIssueLink(ISSUE_ID, REQUIREMENT_ID, LINK_TYPE);
         assertThat(logger.getLoggingEvents(),
-                is(List.of(info("Create '{}' link from {} to {}", linkType, ISSUE_ID, requirementId))));
+                is(List.of(info("Create '{}' link from {} to {}", LINK_TYPE, ISSUE_ID, REQUIREMENT_ID))));
+    }
+
+    @Test
+    void shouldNotCreateNewLinkIfItExists() throws IOException, JiraConfigurationException
+    {
+        initializeFacade(List.of());
+        JiraEntity jiraEntity = new JiraEntity();
+        jiraEntity.setIssueLinks(List.of(new IssueLink(LINK_TYPE, null, REQUIREMENT_ID)));
+        when(jiraFacade.getIssue(ISSUE_ID)).thenReturn(jiraEntity);
+
+        xrayFacade.createTestsLink(ISSUE_ID, REQUIREMENT_ID);
+
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info("Skipping create of {} {} {} link as it already exists", ISSUE_ID, LINK_TYPE, REQUIREMENT_ID))));
+        verifyNoMoreInteractions(jiraFacade);
     }
 
     @Test

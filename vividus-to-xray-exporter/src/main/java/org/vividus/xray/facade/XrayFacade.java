@@ -33,6 +33,7 @@ import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
+import org.vividus.jira.model.JiraEntity;
 import org.vividus.util.json.JsonPathUtils;
 import org.vividus.xray.databind.CucumberTestCaseSerializer;
 import org.vividus.xray.databind.ManualTestCaseSerializer;
@@ -147,6 +148,19 @@ public class XrayFacade
     public void createTestsLink(String testCaseId, String requirementId) throws IOException, JiraConfigurationException
     {
         String linkType = "Tests";
+        JiraEntity issue = jiraFacade.getIssue(testCaseId);
+        boolean linkExists = issue.getIssueLinks().stream()
+                .anyMatch(link -> linkType.equals(link.getType()) && requirementId.equals(link.getOutwardIssueKey()));
+
+        if (linkExists)
+        {
+            LOGGER.atInfo().addArgument(testCaseId)
+                           .addArgument(linkType)
+                           .addArgument(requirementId)
+                           .log("Skipping create of {} {} {} link as it already exists");
+            return;
+        }
+
         LOGGER.atInfo().addArgument(linkType)
                        .addArgument(testCaseId)
                        .addArgument(requirementId)
