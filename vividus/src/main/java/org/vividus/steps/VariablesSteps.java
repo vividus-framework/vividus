@@ -98,7 +98,7 @@ public class VariablesSteps
      * @param variableValue A value to be saved
      */
     @Given("I initialize $scopes variable `$variableName` with value `$variableValue`")
-    public void initializeVariableWithValue(Set<VariableScope> scopes, String variableName, String variableValue)
+    public void initializeVariableWithValue(Set<VariableScope> scopes, String variableName, Object variableValue)
     {
         variableContext.putVariable(scopes, variableName, variableValue);
     }

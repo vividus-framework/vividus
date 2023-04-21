@@ -15,8 +15,9 @@ Then `${response-as-bytes}` contains excel sheet with index `0` and records:
 !B3        !Price                  !
 !C1:C5     !                       !
 
-Scenario: Step verification 'Then `$excelDocument` contains excel sheet with name `$name` and records:$records'
-Then `${response-as-bytes}` contains excel sheet with name `Mapping` and records:
+Scenario: Validate variable initialization with binary data and step verification 'Then `$excelDocument` contains excel sheet with name `$name` and records:$records'
+Given I initialize scenario variable `excel` with value `${response-as-bytes}`
+Then `${excel}` contains excel sheet with name `Mapping` and records:
 {valueSeparator=!}
 |cellsRange|valueRegex             |
 !A4:B5     !(Product|Price)\d+\s*  !
