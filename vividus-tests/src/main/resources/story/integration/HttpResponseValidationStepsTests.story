@@ -9,13 +9,13 @@ Then the response does not contain body
 
 
 Scenario: Verify deprecated steps: "Then the response body $comparisonRule '$content'" & "When I save response body to the $scopes variable '$variableName'"
-When I execute HTTP GET request for resource with URL `https://httpbin.org/xml`
+When I execute HTTP GET request for resource with relative URL `/xml`
 Then the response body contains 'Date of publication'
 When I save response body to the scenario variable 'my-super-response'
 Then `${my-super-response}` matches `.*Date of publication.*`
 
 Scenario: Verify step: "Then response code is $comparisonRule `$responseCode`"
-When I execute HTTP GET request for resource with URL `https://httpbin.org/status/<statusCode>`
+When I execute HTTP GET request for resource with relative URL `/status/<statusCode>`
 Then response code is equal to `<statusCode>`
 !-- Deprecated
 Then the response code is equal to '<statusCode>'
@@ -26,7 +26,7 @@ Examples:
 
 
 Scenario: Verify steps: "Then response body $validationRule resource at `$resourcePath`", "Then size of decompressed response body is equal to `8090`", "Then content type of response body $comparisonRule `$contentType`"
-When I execute HTTP GET request for resource with URL `https://httpbin.org/image/png`
+When I execute HTTP GET request for resource with relative URL `/image/png`
 Then size of decompressed response body is equal to `8090`
 Then response body is equal to resource at `/data/pig`
 Then content type of response body is equal to `image/png`
@@ -53,20 +53,20 @@ Then `${responseCode}` is equal to `200`
 
 
 Scenario: Verify steps: "Then number of response headers with name `$headerName` is $comparisonRule $number", "When I save response header `$headerName` value to $scopes variable `$variableName`", "Then value of response header `$headerName` $comparisonRule `$value`", "Then response header `$headerName` contains elements:$elements"; verify deprecated HTTP header steps: "Then the number of the response headers with the name '$headerName' is $comparisonRule $value", "When I save response header '$httpHeaderName' value to $scopes variable '$variableName'", "Then the value of the response header '$httpHeaderName' $comparisonRule '$value'", "Then the value of the response header "$httpHeaderName" $comparisonRule "$value"", "Then response header '$httpHeaderName' contains attribute: $attributes"
-When I execute HTTP GET request for resource with URL `https://httpbin.org/html`
-Then number of response headers with name `Content-Type` is equal to 1
-When I save response header `Content-Type` value to scenario variable `contentType`
+When I execute HTTP GET request for resource with relative URL `/html`
+Then number of response headers with name `content-type` is equal to 1
+When I save response header `content-type` value to scenario variable `contentType`
 Then `${contentType}` is equal to `text/html; charset=utf-8`
-Then value of response header `Content-Type` is equal to `text/html; charset=utf-8`
-Then response header `Content-Type` contains elements:
+Then value of response header `content-type` is equal to `text/html; charset=utf-8`
+Then response header `content-type` contains elements:
 |element  |
 |text/html|
 !-- Deprecated
-Then the number of the response headers with the name 'Content-Type' is equal to 1
-When I save response header 'Content-Type' value to scenario variable 'contentType'
+Then the number of the response headers with the name 'content-type' is equal to 1
+When I save response header 'content-type' value to scenario variable 'contentType'
 Then `${contentType}` is equal to `text/html; charset=utf-8`
-Then the value of the response header 'Content-Type' is equal to 'text/html; charset=utf-8'
-Then the value of the response header "Content-Type" is equal to "text/html; charset=utf-8"
-Then response header 'Content-Type' contains attribute:
+Then the value of the response header 'content-type' is equal to 'text/html; charset=utf-8'
+Then the value of the response header "content-type" is equal to "text/html; charset=utf-8"
+Then response header 'content-type' contains attribute:
 |attribute|
 |text/html|

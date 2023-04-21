@@ -31,11 +31,11 @@ When I send HTTP PUT to the relative URL '/put'
 
 Scenario: Verify steps "Given request body: $content" and "When I execute HTTP $httpMethod request for resource with URL `$url`"
 Given request body: ${request-body}
-When I execute HTTP DELETE request for resource with URL `https://httpbin.org/delete`
+When I execute HTTP DELETE request for resource with URL `${http-endpoint}delete`
 
 Scenario: Verify steps "When I execute HTTP $httpMethod request for resource with URL `$url`"
 Given request body: ${request-body}
-When I execute HTTP POST request for resource with URL `https://httpbin.org/post`
+When I execute HTTP POST request for resource with URL `${http-endpoint}post`
 
 Scenario: Verify step "Then HTTP resources are valid:$resources"
 Then HTTP resources are valid:
