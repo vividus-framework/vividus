@@ -7,21 +7,17 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
-    <bean class="org.vividus.http.validation.ResourceValidator" >
-      <constructor-arg index="0">
-        <bean class="org.vividus.http.client.HttpClient"
-            factory-bean="httpClientFactory"
-            factory-method="buildHttpClient">
-            <constructor-arg>
-                <bean parent="restApiHttpClientConfig">
-                    <property name="skipResponseEntity" value="true" />
-                    <property name="lastRequestInterceptor"><null/></property>
-                    <property name="lastResponseInterceptor"><null/></property>
-                    <property name="httpResponseHandlers"><list/></property>
-                </bean>
-            </constructor-arg>
-        </bean>
-      </constructor-arg>
+    <bean id="httpClient-ResourceValidator" class="org.vividus.http.client.HttpClient"
+          factory-bean="httpClientFactory"
+          factory-method="buildHttpClient">
+        <constructor-arg>
+            <bean parent="restApiHttpClientConfig">
+                <property name="skipResponseEntity" value="true" />
+                <property name="lastRequestInterceptor"><null/></property>
+                <property name="lastResponseInterceptor"><null/></property>
+                <property name="httpResponseHandlers"><list/></property>
+            </bean>
+        </constructor-arg>
     </bean>
 
     <bean id="httpTestContext" class="org.vividus.http.HttpTestContext" />
@@ -36,7 +32,13 @@
 
     <bean id="httpResponseValidationSteps" class="org.vividus.steps.api.HttpResponseValidationSteps" />
 
-    <bean id="httpResourceValidationSteps" class="org.vividus.steps.http.HttpResourceValidationSteps" />
+    <bean id="httpResourceValidationSteps" class="org.vividus.steps.http.HttpResourceValidationSteps">
+        <constructor-arg>
+            <bean class="org.vividus.http.validation.ResourceValidator">
+                <constructor-arg ref="httpClient-ResourceValidator" />
+            </bean>
+        </constructor-arg>
+    </bean>
 
     <bean id="jsonResponseValidationSteps" class="org.vividus.steps.api.JsonResponseValidationSteps" />
 
