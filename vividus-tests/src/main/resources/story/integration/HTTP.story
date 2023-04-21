@@ -23,20 +23,20 @@ Then the response code is equal to '200'
 Then JSON element by JSON path `$.url` is equal to `${http-endpoint}anything/path-with-&-ampersand`
 
 Scenario: Verify handling of ampersand and space characters in URI query parameter
-When I execute HTTP GET request for resource with relative URL `/get?key=#{encodeUriQueryParameter(a & b)}`
+When I execute HTTP GET request for resource with URL `https://httpbin.org/get?key=#{encodeUriQueryParameter(a & b)}`
 Then the response code is equal to '200'
-Then JSON element by JSON path `$.url` is equal to `${http-endpoint}get?key=a %26 b`
+Then JSON element by JSON path `$.url` is equal to `https://httpbin.org/get?key=a %26 b`
 Then JSON element by JSON path `$.args.length()` is equal to `1`
 Then JSON element by JSON path `$.args.key` is equal to `a & b`
 
 Scenario: Set HTTP cookies
 When I execute HTTP GET request for resource with relative URL `/cookies/set?vividus-cookie=vividus`
 When I execute HTTP GET request for resource with relative URL `/cookies`
-Then JSON element by JSON path `$.cookies` is equal to `{"vividus-cookie": "vividus"}`
+Then JSON element by JSON path `$` is equal to `{"vividus-cookie": "vividus"}`
 
 Scenario: Verify HTTP cookies are cleared
 When I execute HTTP GET request for resource with relative URL `/cookies`
-Then JSON element by JSON path `$.cookies` is equal to `{}`
+Then JSON element by JSON path `$` is equal to `{}`
 
 Scenario: Verify step: "When I save value of HTTP cookie with name $cookieName to $scopes variable $variableName"
 When I execute HTTP GET request for resource with relative URL `/cookies/set?cookieName=cookieValue`
@@ -90,7 +90,7 @@ Given multipart request:
 |file  |file-key2 |${temp-file-path}|text/plain |               |
 |string|string-key|string1          |text/plain |               |
 |binary|binary-key|raw              |text/plain |raw.txt        |
-When I execute HTTP POST request for resource with relative URL `/post`
+When I execute HTTP POST request for resource with URL `https://httpbin.org/post`
 Then `${responseCode}` is equal to `200`
 Then JSON element by JSON path `$.files.file-key` is equal to `"#{loadResource(/data/file.txt)}"`
 Then JSON element by JSON path `$.files.file-key2` is equal to `"${temp-file-content}"`
@@ -112,15 +112,15 @@ Given form data request:
 |firstName|Alice Marry|
 |lastName |Crewe      |
 |password |!@3qwer    |
-When I execute HTTP POST request for resource with URL `https://httpbin.org/post`
+When I execute HTTP POST request for resource with relative URL `/post`
 Then JSON element by JSON path `$` is equal to `{
   "form": {
-    "firstName": "Alice Marry",
-    "lastName": "Crewe",
-    "password": "!@3qwer"
+    "firstName": [ "Alice Marry" ],
+    "lastName": [ "Crewe" ],
+    "password": [ "!@3qwer" ]
   },
   "headers": {
-     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+     "Content-Type": [ "application/x-www-form-urlencoded; charset=UTF-8" ]
   }
 }`ignoring extra fields
 
@@ -130,14 +130,14 @@ Given form data request:
 |firstName|Alice Marry|
 |lastName |Crewe      |
 |password |!@3qwer    |
-When I execute HTTP POST request for resource with URL `https://httpbin.org/post`
+When I execute HTTP POST request for resource with relative URL `/post`
 Then JSON element from `${response-as-bytes}` by JSON path `$` is equal to `{
   "form": {
-    "firstName": "Alice Marry",
-    "lastName": "Crewe",
-    "password": "!@3qwer"
+    "firstName": [ "Alice Marry" ],
+    "lastName": [ "Crewe" ],
+    "password": [ "!@3qwer" ]
   },
   "headers": {
-     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+     "Content-Type": [ "application/x-www-form-urlencoded; charset=UTF-8" ]
   }
 }`ignoring extra fields
