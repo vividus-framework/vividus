@@ -326,3 +326,7 @@ Then context element is <focusState>
 Composite: When I save table to $scopes variable '$variableName'
 !-- WARNING: The step "When I save table to $scopes variable '$variableName'" is deprecated and will be removed in VIVIDUS 0.7.0.
 When I save table to <scopes> variable `<variableName>`
+
+Composite: When I get the number of open windows and set it to the $scopes variable '$variable'
+!-- WARNING: The step "When I get the number of open windows and set it to the $scopes variable '$variable'" is deprecated and will be removed in VIVIDUS 0.7.0.
+When I save number of open tabs to <scopes> variable `<variable>`

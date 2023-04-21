@@ -999,6 +999,24 @@ When I change context to element located `xpath(//table[1])`
 When I save table to SCENARIO variable `table`
 ----
 
+==== Save the number of opened tabs
+
+Saves the number of currently opened tabs in the browser to the variable.
+
+[source,gherkin]
+----
+When I save number of open tabs to $scopes variable `$variableName`
+----
+
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to refer to the variable value.
+
+.Save the number of currently opened browser tabs into a variable named 'count'
+[source,gherkin]
+----
+When I save number of open tabs to SCENARIO variable `count`
+----
+
 == Tips & Tricks
 
 === Validate URL host of the opened page
