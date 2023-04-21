@@ -17,6 +17,7 @@
 package org.vividus.xray.configuration;
 
 import java.nio.file.Path;
+import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -27,6 +28,7 @@ public class XrayExporterOptions
     private String testSetKey;
     private String testExecutionKey;
     private String testExecutionSummary;
+    private List<Path> testExecutionAttachments;
     private boolean testCaseUpdatesEnabled;
 
     public Path getJsonResultsDirectory()
@@ -67,6 +69,16 @@ public class XrayExporterOptions
     public void setTestExecutionSummary(String testExecutionSummary)
     {
         this.testExecutionSummary = testExecutionSummary;
+    }
+
+    public List<Path> getTestExecutionAttachments()
+    {
+        return testExecutionAttachments;
+    }
+
+    public void setTestExecutionAttachments(List<Path> testExecutionAttachments)
+    {
+        this.testExecutionAttachments = testExecutionAttachments;
     }
 
     public boolean isTestCaseUpdatesEnabled()

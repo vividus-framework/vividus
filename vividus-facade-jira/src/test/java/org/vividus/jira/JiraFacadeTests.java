@@ -21,6 +21,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -28,12 +30,18 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.jira.model.Attachment;
 import org.vividus.jira.model.IssueLink;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.jira.model.Project;
@@ -126,5 +134,32 @@ class JiraFacadeTests
         assertEquals("Release 1.0", project.getVersions().get(0).getName());
         assertEquals("0022", project.getVersions().get(1).getId());
         assertEquals("Release 2.0", project.getVersions().get(1).getName());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldAddAttachment() throws IOException, JiraConfigurationException, ParseException
+    {
+        when(jiraClientProvider.getByIssueKey(ISSUE_ID)).thenReturn(jiraClient);
+
+        String name = "attachment-name";
+        byte[] body = { 1, 0, 1, 0, 1, 0 };
+
+        jiraFacade.addAttachments(ISSUE_ID, List.of(new Attachment(name, body)));
+
+        ArgumentCaptor<HttpEntity> httpEntityCaptor = ArgumentCaptor.forClass(HttpEntity.class);
+        ArgumentCaptor<List<Header>> headersCaptor = ArgumentCaptor.forClass(List.class);
+
+        verify(jiraClient).executePost(eq(ISSUE_ENDPOINT + ISSUE_ID + "/attachments"), headersCaptor.capture(),
+                httpEntityCaptor.capture());
+        List<Header> headers = headersCaptor.getValue();
+        assertThat(headers, hasSize(1));
+        assertEquals("X-Atlassian-Token", headers.get(0).getName());
+        assertEquals("no-check", headers.get(0).getValue());
+        HttpEntity httpEntity = httpEntityCaptor.getValue();
+        String entityAsString = EntityUtils.toString(httpEntity);
+        assertTrue(entityAsString.contains("Content-Disposition: form-data; name=\"file\"; "
+                + "filename=\"attachment-name\""));
+        assertTrue(entityAsString.contains("Content-Type: multipart/form-data; charset=ISO-8859-1"));
     }
 }

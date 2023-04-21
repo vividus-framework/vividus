@@ -17,6 +17,7 @@
 package org.vividus.jira;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -24,9 +25,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import org.apache.commons.lang3.function.FailableSupplier;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.message.BasicHeader;
 import org.vividus.jira.databind.IssueLinkDeserializer;
 import org.vividus.jira.databind.IssueLinkSerializer;
 import org.vividus.jira.databind.JiraEntityDeserializer;
+import org.vividus.jira.model.Attachment;
 import org.vividus.jira.model.IssueLink;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.jira.model.Project;
@@ -86,6 +91,16 @@ public class JiraFacade
     public JiraEntity getIssue(String issueKey) throws IOException, JiraConfigurationException
     {
         return getJiraEntity(ISSUE, issueKey, JiraEntity.class);
+    }
+
+    public void addAttachments(String issueKey, List<Attachment> attachments)
+            throws IOException, JiraConfigurationException
+    {
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        attachments.forEach(attachment -> builder.addBinaryBody("file", attachment.getBody(),
+                ContentType.MULTIPART_FORM_DATA, attachment.getName()));
+        jiraClientProvider.getByIssueKey(issueKey).executePost(ISSUE_ENDPOINT + issueKey + "/attachments",
+                List.of(new BasicHeader("X-Atlassian-Token", "no-check")), builder.build());
     }
 
     private <T> T getJiraEntity(String relativeUrl, String entityKey, Class<T> entityType)

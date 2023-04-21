@@ -16,22 +16,32 @@
 
 package org.vividus.xray.facade;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.aMapWithSize;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -41,18 +51,23 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.apache.commons.io.FilenameUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
+import org.vividus.jira.model.Attachment;
 import org.vividus.jira.model.IssueLink;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.output.ManualTestStep;
+import org.vividus.util.zip.ZipUtils;
 import org.vividus.xray.databind.AbstractTestCaseSerializer;
 import org.vividus.xray.databind.CucumberTestCaseSerializer;
 import org.vividus.xray.databind.ManualTestCaseSerializer;
@@ -69,6 +84,8 @@ import org.vividus.xray.model.TestExecutionItemStatus;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class XrayFacadeTests
 {
+    private static final String TEST_EXECUTION_UPDATED_LOG = "Test Execution with key {} has been updated";
+    private static final String UPDATE_TEST_EXECUTION_LOG = "Updating Test Execution with ID {}: {}";
     private static final String ISSUE_KEY = "TEST-0";
     private static final String LINK_TYPE = "Tests";
     private static final String ISSUE_ID = "issue id";
@@ -79,6 +96,9 @@ class XrayFacadeTests
     private static final String CUCUMBER_TYPE = "Cucumber";
     private static final String CREATE_RESPONSE = "{\"key\" : \"" + ISSUE_ID + "\"}";
     private static final String EXECUTION_IMPORT_ENDPOINT = "/rest/raven/1.0/import/execution";
+    private static final String FILES_ATTACH_MESSAGE = "Successfully attached files and folders at {} to test "
+            + "execution with key {}";
+    private static final String TEST_EXECUTION_REQUEST = "{\"testExecutionKey\":\"TEST-0\",\"tests\":[]}";
 
     @Mock private ManualTestCaseSerializer manualTestSerializer;
     @Mock private CucumberTestCaseSerializer cucumberTestSerializer;
@@ -191,8 +211,9 @@ class XrayFacadeTests
         verifyCreateLogs(MANUAL_TYPE);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
-    void shouldUpdateTestExecution() throws IOException, JiraConfigurationException
+    void shouldUpdateTestExecution(@TempDir Path directory) throws IOException, JiraConfigurationException
     {
         initializeFacade(List.of());
         TestExecution testExecution = new TestExecution();
@@ -203,17 +224,47 @@ class XrayFacadeTests
                     TestExecutionItemStatus.FAIL))
         ));
         when(jiraClientProvider.getByIssueKey(ISSUE_KEY)).thenReturn(jiraClient);
-        xrayFacade.importTestExecution(testExecution);
+
+        Path regularFile = createRegularFile(directory);
+        xrayFacade.importTestExecution(testExecution, List.of(regularFile, directory));
+
         String body = "{\"testExecutionKey\":\"TEST-0\",\"tests\":[{\"testKey\":\"test-1\",\"status\":\"PASS\"},"
                 + "{\"testKey\":\"test-2\",\"status\":\"FAIL\",\"examples\":[\"PASS\",\"FAIL\"]}]}";
         verify(jiraClient).executePost(EXECUTION_IMPORT_ENDPOINT, body);
         assertThat(logger.getLoggingEvents(), is(List.of(
-            info("Updating Test Execution with ID {}: {}", ISSUE_KEY, body),
-            info("Test Execution with key {} has been updated", ISSUE_KEY))));
+            info(UPDATE_TEST_EXECUTION_LOG, ISSUE_KEY, body),
+            info(FILES_ATTACH_MESSAGE, List.of(regularFile, directory), ISSUE_KEY),
+            info(TEST_EXECUTION_UPDATED_LOG, ISSUE_KEY)
+        )));
+
+        ArgumentCaptor<List<Attachment>> attachmentsCaptor = ArgumentCaptor.forClass(List.class);
+        String regularFileName = FilenameUtils.getName(regularFile.toString());
+        verify(jiraFacade).addAttachments(eq(ISSUE_KEY), attachmentsCaptor.capture());
+        List<Attachment> attachments = attachmentsCaptor.getValue();
+        assertThat(attachments, hasSize(2));
+        Attachment regularFileAttachment = attachments.get(0);
+        assertEquals(regularFileName, regularFileAttachment.getName());
+        assertArrayEquals(Files.readAllBytes(regularFile), regularFileAttachment.getBody());
+        Attachment directoryAttachment = attachments.get(1);
+        assertEquals(directory.getFileName() + ".zip", directoryAttachment.getName());
+        Map<String, byte[]> entries = ZipUtils.readZipEntriesFromBytes(directoryAttachment.getBody());
+        assertThat(entries, aMapWithSize(1));
+        Entry<String, byte[]> entry = entries.entrySet().iterator().next();
+        assertEquals(regularFileName, entry.getKey());
+        assertArrayEquals(Files.readAllBytes(regularFile), entry.getValue());
     }
 
+    private Path createRegularFile(Path root) throws IOException
+    {
+        Path filePath = root.resolve("data.txt");
+        Files.createFile(filePath);
+        Files.write(filePath, new byte[] { 0, 1, 0, 1 });
+        return filePath;
+    }
+
+    @SuppressWarnings("unchecked")
     @Test
-    void shouldCreateTestExecution() throws JiraConfigurationException, IOException
+    void shouldCreateTestExecution(@TempDir Path directory) throws JiraConfigurationException, IOException
     {
         initializeFacade(List.of());
         TestExecution testExecution = new TestExecution();
@@ -228,12 +279,65 @@ class XrayFacadeTests
         when(jiraClient.executePost(EXECUTION_IMPORT_ENDPOINT, body)).thenReturn("{\"testExecIssue\":{\"id\":\"01101\""
                 + ",\"key\":\"TEST-0\",\"self\":\"https://jira.com/rest/api/2/issue/01101\"}}");
 
-        xrayFacade.importTestExecution(testExecution);
+        Path regularFile = createRegularFile(directory);
+        xrayFacade.importTestExecution(testExecution, List.of(regularFile));
 
         verify(jiraClient).executePost(EXECUTION_IMPORT_ENDPOINT, body);
         assertThat(logger.getLoggingEvents(), is(List.of(
             info("Creating Test Execution: {}", body),
+            info(FILES_ATTACH_MESSAGE, List.of(regularFile), ISSUE_KEY),
             info("Test Execution with key {} has been created", ISSUE_KEY))));
+        ArgumentCaptor<List<Attachment>> attachmentsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(jiraFacade).addAttachments(eq(ISSUE_KEY), attachmentsCaptor.capture());
+        List<Attachment> attachments = attachmentsCaptor.getValue();
+        assertThat(attachments, hasSize(1));
+        Attachment regularFileAttachment = attachments.get(0);
+        assertEquals(FilenameUtils.getName(regularFile.toString()), regularFileAttachment.getName());
+        assertArrayEquals(Files.readAllBytes(regularFile), regularFileAttachment.getBody());
+    }
+
+    @Test
+    void shouldLogErrorIfAttachmentsUploadIsFailed(@TempDir Path directory)
+            throws JiraConfigurationException, IOException
+    {
+        createRegularFile(directory);
+        initializeFacade(List.of());
+        TestExecution testExecution = new TestExecution();
+        testExecution.setTestExecutionKey(ISSUE_KEY);
+        testExecution.setTests(List.of());
+        when(jiraClientProvider.getByIssueKey(ISSUE_KEY)).thenReturn(jiraClient);
+
+        IOException thrown = mock(IOException.class);
+        doThrow(thrown).when(jiraFacade).addAttachments(eq(ISSUE_KEY), any());
+
+        xrayFacade.importTestExecution(testExecution, List.of(directory));
+
+        verify(jiraClient).executePost(EXECUTION_IMPORT_ENDPOINT, TEST_EXECUTION_REQUEST);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+            info(UPDATE_TEST_EXECUTION_LOG, ISSUE_KEY, TEST_EXECUTION_REQUEST),
+            error(thrown, "Failed to attach files and folders at {} to test execution with key {}", List.of(directory),
+                    ISSUE_KEY),
+            info(TEST_EXECUTION_UPDATED_LOG, ISSUE_KEY)
+        )));
+    }
+
+    @Test
+    void shouldNotAttachAnythingIfAttachmentsAreEmpty() throws JiraConfigurationException, IOException
+    {
+        initializeFacade(List.of());
+        TestExecution testExecution = new TestExecution();
+        testExecution.setTestExecutionKey(ISSUE_KEY);
+        testExecution.setTests(List.of());
+        when(jiraClientProvider.getByIssueKey(ISSUE_KEY)).thenReturn(jiraClient);
+
+        xrayFacade.importTestExecution(testExecution, List.of());
+
+        verify(jiraClient).executePost(EXECUTION_IMPORT_ENDPOINT, TEST_EXECUTION_REQUEST);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+            info(UPDATE_TEST_EXECUTION_LOG, ISSUE_KEY, TEST_EXECUTION_REQUEST),
+            info(TEST_EXECUTION_UPDATED_LOG, ISSUE_KEY)
+        )));
+        verify(jiraFacade, times(0)).addAttachments(any(), any());
     }
 
     private static TestExecutionItem createTestExecutionItem(String key, TestExecutionItemStatus status,

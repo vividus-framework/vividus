@@ -116,7 +116,8 @@ public class XrayExporter
         if (testExecutionKey != null || xrayExporterOptions.getTestExecutionSummary() != null)
         {
             TestExecution testExecution = testExecutionFactory.create(testCases);
-            executeSafely(() -> xrayFacade.importTestExecution(testExecution), "test execution", testExecutionKey);
+            executeSafely(() -> xrayFacade.importTestExecution(testExecution,
+                    xrayExporterOptions.getTestExecutionAttachments()), "test execution", testExecutionKey);
         }
     }
 
