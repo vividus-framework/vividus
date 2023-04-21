@@ -16,7 +16,11 @@
 
 package org.vividus.xray.facade;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +29,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.slf4j.Logger;
@@ -33,6 +38,7 @@ import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
+import org.vividus.jira.model.Attachment;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.util.json.JsonPathUtils;
 import org.vividus.xray.databind.CucumberTestCaseSerializer;
@@ -42,6 +48,8 @@ import org.vividus.xray.model.AddOperationRequest;
 import org.vividus.xray.model.CucumberTestCase;
 import org.vividus.xray.model.ManualTestCase;
 import org.vividus.xray.model.TestExecution;
+import org.zeroturnaround.zip.ZipException;
+import org.zeroturnaround.zip.ZipUtil;
 
 public class XrayFacade
 {
@@ -95,7 +103,8 @@ public class XrayFacade
                        .log("{} Test with key {} has been updated");
     }
 
-    public void importTestExecution(TestExecution testExecution) throws IOException, JiraConfigurationException
+    public void importTestExecution(TestExecution testExecution, List<Path> attachments)
+            throws IOException, JiraConfigurationException
     {
         String testExecutionRequest = objectMapper.writeValueAsString(testExecution);
         FailableFunction<JiraClient, String, IOException> importFunction = client -> client
@@ -109,16 +118,69 @@ public class XrayFacade
                   .addArgument(testExecutionRequest)
                   .log("Updating Test Execution with ID {}: {}");
             importFunction.apply(jiraClientProvider.getByIssueKey(testExecutionKey));
+            addAttachments(testExecutionKey, attachments);
             LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been updated");
         }
         else
         {
             LOGGER.atInfo().addArgument(testExecutionRequest).log("Creating Test Execution: {}");
             String response = importFunction.apply(jiraClientProvider.getByJiraConfigurationKey(jiraInstanceKey));
-            LOGGER.atInfo()
-                  .addArgument(() -> JsonPathUtils.getData(response, "$.testExecIssue.key"))
-                  .log("Test Execution with key {} has been created");
+            testExecutionKey = JsonPathUtils.getData(response, "$.testExecIssue.key");
+            addAttachments(testExecutionKey, attachments);
+            LOGGER.atInfo().addArgument(testExecutionKey).log("Test Execution with key {} has been created");
         }
+    }
+
+    public void addAttachments(String testExecutionKey, List<Path> attachmentPaths)
+            throws IOException, JiraConfigurationException
+    {
+        if (attachmentPaths.isEmpty())
+        {
+            return;
+        }
+
+        try
+        {
+            jiraFacade.addAttachments(testExecutionKey, asAttachments(attachmentPaths));
+
+            LOGGER.atInfo().addArgument(attachmentPaths)
+                           .addArgument(testExecutionKey)
+                           .log("Successfully attached files and folders at {} to test execution with key {}");
+        }
+        catch (IOException | ZipException | JiraConfigurationException e)
+        {
+            LOGGER.atError().setCause(e)
+                            .addArgument(attachmentPaths)
+                            .addArgument(testExecutionKey)
+                            .log("Failed to attach files and folders at {} to test execution with key {}");
+        }
+    }
+
+    private List<Attachment> asAttachments(List<Path> attachmentPaths) throws IOException
+    {
+        List<Attachment> attachments = new ArrayList<>(attachmentPaths.size());
+
+        for (Path attachmentPath : attachmentPaths)
+        {
+            String name = FilenameUtils.getName(attachmentPath.toString());
+            byte[] body;
+
+            if (Files.isDirectory(attachmentPath))
+            {
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                ZipUtil.pack(attachmentPath.toFile(), output, ZipUtil.DEFAULT_COMPRESSION_LEVEL);
+                name += ".zip";
+                body = output.toByteArray();
+            }
+            else
+            {
+                body = Files.readAllBytes(attachmentPath);
+            }
+
+            attachments.add(new Attachment(name, body));
+        }
+
+        return attachments;
     }
 
     public void updateTestSet(String testSetKey, List<String> testCaseKeys)

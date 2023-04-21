@@ -97,6 +97,7 @@ class XrayExporterTests
     private static final String THEN_STEP = "Then I verify changes on test environment";
     private static final String TEST_SET_KEY = "TEST-SET";
     private static final String TEST_EXECUTION_KEY = "TEST-EXEC";
+    private static final Path ROOT = Paths.get("path");
 
     @Captor private ArgumentCaptor<ManualTestCaseParameters> manualTestCaseParametersCaptor;
     @Captor private ArgumentCaptor<CucumberTestCaseParameters> cucumberTestCaseParametersCaptor;
@@ -114,6 +115,7 @@ class XrayExporterTests
     void beforeEach()
     {
         xrayExporterOptions.setTestCaseUpdatesEnabled(true);
+        xrayExporterOptions.setTestExecutionAttachments(List.of(ROOT));
     }
 
     @AfterEach
@@ -206,7 +208,7 @@ class XrayExporterTests
         verifyManualTestCaseParameters(Set.of("dummy-label-1", "dummy-label-2"),
                 Set.of("dummy-component-1", "dummy-component-2"));
 
-        verify(xrayFacade).importTestExecution(testExecution);
+        verify(xrayFacade).importTestExecution(testExecution, List.of(ROOT));
         List<Entry<String, Scenario>> scenarios = scenariosCaptor.getValue();
         assertThat(scenarios, hasSize(1));
         assertEquals(ISSUE_ID, scenarios.get(0).getKey());
@@ -242,14 +244,14 @@ class XrayExporterTests
 
         xrayExporterOptions.setTestExecutionKey(testExecutionKey);
         xrayExporterOptions.setTestExecutionSummary("summary");
-        doThrow(exception).when(xrayFacade).importTestExecution(any());
+        doThrow(exception).when(xrayFacade).importTestExecution(any(), eq(List.of(ROOT)));
         errorLogMessage += "Error #3" + lineSeparator() + testExecutionMessage + lineSeparator();
 
         xrayExporter.exportResults();
 
         verify(xrayFacade).updateTestCase(ISSUE_ID, testCase);
         verify(xrayFacade).updateTestSet(TEST_SET_KEY, List.of(ISSUE_ID));
-        verify(xrayFacade).importTestExecution(any());
+        verify(xrayFacade).importTestExecution(any(), eq(List.of(ROOT)));
         verifyManualTestCaseParameters(Set.of(), Set.of());
         validateLogs(jsonResultsUri, getExportingScenarioEvent(), error(exception, ERROR_MESSAGE),
                 getExportingScenarioEvent(), getExportFailedErrorEvent(errorLogMessage));

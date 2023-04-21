@@ -56,6 +56,10 @@ Please make sure that the `bdd.configuration.formats` property includes JSON val
 |false
 |By default, the content of Test Cases that have associated IDs, is updated every export run, to disable this behavior set the value of this property to `false`
 
+|`xray-exporter.test-execution-attachments`
+|false
+|Comma-separated list of file and folder paths that should be uploaded to test execution as attachments. Please note that regular files like images, texts are uploaded as is, whereas folders are archived before the upload.
+
 |===
 
 .application.properties

@@ -18,18 +18,25 @@ package org.vividus.jira;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Predicate;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +65,7 @@ class JiraClientTests
     void testExecuteGet() throws IOException
     {
         String relativeUrl = "/testGet";
-        String body = mockHttpMethodExecution(HttpGet.class, relativeUrl);
+        String body = mockHttpMethodExecution(HttpGet.class, relativeUrl, List.of(), e -> e == null);
         assertEquals(body, jiraClient.executeGet(relativeUrl));
     }
 
@@ -68,6 +75,16 @@ class JiraClientTests
         String relativeUrl = "/testPost";
         String body = mockHttpMethodExecution(HttpPost.class, relativeUrl);
         assertEquals(body, jiraClient.executePost(relativeUrl, "{\"key\":\"value\"}"));
+    }
+
+    @Test
+    void testExecutePostWithEntity() throws IOException
+    {
+        HttpEntity entity = mock(HttpEntity.class);
+        Header header = mock(Header.class);
+        String relativeUrl = "/testPostWithEntity";
+        String body = mockHttpMethodExecution(HttpPost.class, relativeUrl, List.of(header), e -> e.equals(entity));
+        assertEquals(body, jiraClient.executePost(relativeUrl, List.of(header), entity));
     }
 
     @Test
@@ -81,6 +98,12 @@ class JiraClientTests
     private String mockHttpMethodExecution(Class<? extends ClassicHttpRequest> requestClass, String relativeUrl)
             throws IOException
     {
+        return mockHttpMethodExecution(requestClass, relativeUrl, List.of(), e -> e instanceof StringEntity);
+    }
+
+    private String mockHttpMethodExecution(Class<? extends ClassicHttpRequest> requestClass, String relativeUrl,
+            List<Header> headers, Predicate<HttpEntity> entityTest) throws IOException
+    {
         HttpResponse response = new HttpResponse();
         response.setStatusCode(HttpStatus.SC_OK);
         response.setResponseBody(RESPONSE_BODY_AS_STRING.getBytes(StandardCharsets.UTF_8));
@@ -88,8 +111,9 @@ class JiraClientTests
         when(httpClient.execute(argThat(httpRequest -> {
             try
             {
-                return requestClass.isInstance(httpRequest) && expectedUrl.equals(
-                        httpRequest.getUri());
+                return requestClass.isInstance(httpRequest) && expectedUrl.equals(httpRequest.getUri())
+                        && entityTest.test(httpRequest.getEntity())
+                        && Arrays.asList(httpRequest.getHeaders()).equals(headers);
             }
             catch (URISyntaxException e)
             {
