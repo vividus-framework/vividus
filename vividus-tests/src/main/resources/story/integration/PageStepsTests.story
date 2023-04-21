@@ -29,3 +29,14 @@ Examples:
 |DNS_LOOKUP_TIME      |
 |DOM_CONTENT_LOAD_TIME|
 |PAGE_LOAD_TIME       |
+
+Scenario: Verify URL components of the opened page
+Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
+Then `#{extractHostFromUrl(${current-page-url})}` is equal to `${vividus-test-site-host}`
+Then `#{extractPathFromUrl(${current-page-url})}` is equal to `/mouseEvents.html`
+Then `${current-page-url}` matches `.+mouse.+`
+
+Scenario: Verify URL components of the opened page with deprecated steps
+Then the host of the page URL is '${vividus-test-site-host}'
+Then the page has the relative URL '/mouseEvents.html'
+Then the page with the URL containing 'mouse' is loaded

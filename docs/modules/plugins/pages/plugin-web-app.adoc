@@ -998,3 +998,45 @@ Before using this step, ensure the context is set to the required table. See the
 When I change context to element located `xpath(//table[1])`
 When I save table to SCENARIO variable `table`
 ----
+
+== Tips & Tricks
+
+=== Validate URL host of the opened page
+
+To validate host component of the current page URL the following statement can be used:
+
+.Validate host component of "https://example.com/relative/url/example.html"
+[source,gherkin]
+----
+Given I am on page with URL `https://example.com/relative/url/example.html`
+Then `#{extractHostFromUrl(${current-page-url})}` is equal to `example.com`
+----
+
+* `${current-page-url}` is the <<Current page URL,current page URL>> dynamic variable.
+
+=== Validate URL path of the opened page
+
+To validate path component of the current page URL the following statement can be used:
+
+.Validate path component of "https://example.com/relative/url/example.html"
+[source,gherkin]
+----
+Given I am on page with URL `https://example.com/relative/url/example.html`
+Then `#{extractPathFromUrl(${current-page-url})}` is equal to `/relative/url/example.html`
+----
+
+* `${current-page-url}` is the <<Current page URL,current page URL>> dynamic variable.
+
+=== Validate URL of the opened page partially
+
+To validate whether current page URL contains some part the following statement can be used:
+
+.Validate part of "https://example.com/relative/url/example.html"
+[source,gherkin]
+----
+Given I am on page with URL `https://example.com/relative/url/example.html`
+Then `${current-page-url}` matches `.+\/relative\/url.+`
+----
+
+* `${current-page-url}` is the <<Current page URL,current page URL>> dynamic variable.
+* `.+\/relative\/url.+` is a regular expression to match the expected part of the page URL.
