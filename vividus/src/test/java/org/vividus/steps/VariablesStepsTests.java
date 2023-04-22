@@ -113,12 +113,22 @@ class VariablesStepsTests
         verify(diffAttachmentPublisher, times(published)).publishDiff(variable1, variable2);
     }
 
-    @Test
-    void shouldInitialzeVariableWithValue()
+    static Stream<Object> variableValues()
+    {
+        return Stream.of(
+                VALUE_1,
+                1,
+                new Object()
+        );
+    }
+
+    @MethodSource("variableValues")
+    @ParameterizedTest
+    void shouldInitializeVariableWithValue(Object value)
     {
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        variablesSteps.initializeVariableWithValue(scopes, VALUE_1, VALUE_1);
-        verify(variableContext).putVariable(scopes, VALUE_1, VALUE_1);
+        variablesSteps.initializeVariableWithValue(scopes, VALUE_1, value);
+        verify(variableContext).putVariable(scopes, VALUE_1, value);
     }
 
     @SuppressWarnings("unchecked")
