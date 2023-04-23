@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -101,10 +102,22 @@ class WebDriverTypeTests
     @Test
     void testGetIExploreWebDriver()
     {
+        var expected = new InternetExplorerOptions()
+                .requireWindowFocus();
+        testGetIExploreWebDriver(new DesiredCapabilities(), new WebDriverConfiguration(), expected);
+    }
+
+    @Test
+    void testGetIExploreWebDriverWithIEOptions()
+    {
+        Map<String, Object> ieOptions = new HashMap<>();
+        ieOptions.put(InternetExplorerDriver.ENABLE_PERSISTENT_HOVERING, true);
         var desiredCapabilities = new DesiredCapabilities();
-        var expected = new InternetExplorerOptions(
-                desiredCapabilities.merge(new InternetExplorerOptions().requireWindowFocus()));
-        testGetIExploreWebDriver(new WebDriverConfiguration(), expected);
+        desiredCapabilities.setCapability(InternetExplorerOptions.IE_OPTIONS, ieOptions);
+        var expected = new InternetExplorerOptions()
+                .requireWindowFocus()
+                .enablePersistentHovering();
+        testGetIExploreWebDriver(desiredCapabilities, new WebDriverConfiguration(), expected);
     }
 
     @Test
@@ -113,25 +126,23 @@ class WebDriverTypeTests
         var argument = "private";
         var configuration = new WebDriverConfiguration();
         configuration.setCommandLineArguments(argument);
-        var desiredCapabilities = new DesiredCapabilities();
-        var expected = new InternetExplorerOptions(
-                desiredCapabilities.merge(new InternetExplorerOptions().requireWindowFocus()));
-        expected.addCommandSwitches(argument);
-        expected.useCreateProcessApiToLaunchIe();
-        testGetIExploreWebDriver(configuration, expected);
+        var expected = new InternetExplorerOptions()
+                .requireWindowFocus()
+                .addCommandSwitches(argument)
+                .useCreateProcessApiToLaunchIe();
+        testGetIExploreWebDriver(new DesiredCapabilities(), configuration, expected);
     }
 
-    private static void testGetIExploreWebDriver(WebDriverConfiguration configuration, InternetExplorerOptions expected)
+    private static void testGetIExploreWebDriver(DesiredCapabilities inputDesiredCapabilities,
+            WebDriverConfiguration configuration, InternetExplorerOptions expected)
     {
         try (var internetExplorerDriverMock = mockConstruction(
                 InternetExplorerDriver.class, (mock, context) -> {
                     assertEquals(1, context.getCount());
-                    expected.requireWindowFocus();
                     assertEquals(List.of(expected), context.arguments());
                 }))
         {
-            var desiredCapabilities = new DesiredCapabilities();
-            var actual = WebDriverType.IEXPLORE.getWebDriver(desiredCapabilities, configuration);
+            var actual = WebDriverType.IEXPLORE.getWebDriver(inputDesiredCapabilities, configuration);
             assertEquals(internetExplorerDriverMock.constructed().get(0), actual);
         }
     }

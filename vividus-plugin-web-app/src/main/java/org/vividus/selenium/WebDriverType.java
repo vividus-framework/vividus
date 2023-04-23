@@ -16,9 +16,12 @@
 
 package org.vividus.selenium;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
@@ -45,7 +48,7 @@ public enum WebDriverType
     FIREFOX(true, true, Browser.FIREFOX, GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, WebDriverManager::firefoxdriver)
     {
         @Override
-        public void prepareCapabilities(DesiredCapabilities desiredCapabilities)
+        public void prepareCapabilities(MutableCapabilities desiredCapabilities)
         {
             FirefoxOptions options = new FirefoxOptions();
             options.addPreference("startup.homepage_welcome_url.additional", "about:blank");
@@ -68,19 +71,33 @@ public enum WebDriverType
     },
     IEXPLORE(false, true, Browser.IE, InternetExplorerDriverService.IE_DRIVER_EXE_PROPERTY, WebDriverManager::iedriver)
     {
+        @SuppressWarnings("unchecked")
         @Override
-        public void prepareCapabilities(DesiredCapabilities desiredCapabilities)
+        public void prepareCapabilities(MutableCapabilities desiredCapabilities)
         {
+            Object options = desiredCapabilities.getCapability(WebDriverType.IE_OPTIONS);
+            Map<String, Object> ieOptions;
+            if (options == null)
+            {
+                ieOptions = new HashMap<>();
+                desiredCapabilities.setCapability(WebDriverType.IE_OPTIONS, ieOptions);
+            }
+            else
+            {
+                ieOptions = (Map<String, Object>) options;
+            }
+
             // Workaround for IExplore:
             // https://stackoverflow.com/questions/50287435/actions-movetoelement-not-working-on-ie-11
-            desiredCapabilities.merge(new InternetExplorerOptions().requireWindowFocus());
+            ieOptions.put(InternetExplorerDriver.REQUIRE_WINDOW_FOCUS, true);
         }
 
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
-            prepareCapabilities(desiredCapabilities);
             InternetExplorerOptions options = new InternetExplorerOptions(desiredCapabilities);
+            prepareCapabilities(options);
+
             String[] switches = configuration.getCommandLineArguments();
             if (switches.length > 0)
             {
@@ -151,7 +168,7 @@ public enum WebDriverType
         this.webDriverManagerSupplier = webDriverManagerSupplier;
     }
 
-    public void prepareCapabilities(@SuppressWarnings("unused") DesiredCapabilities desiredCapabilities)
+    public void prepareCapabilities(@SuppressWarnings("unused") MutableCapabilities desiredCapabilities)
     {
         // Nothing to do by default
     }
