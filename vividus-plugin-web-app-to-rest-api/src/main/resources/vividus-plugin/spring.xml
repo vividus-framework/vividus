@@ -10,6 +10,11 @@
     <bean id="httpRequestSteps" class="org.vividus.steps.integration.HttpRequestSteps" />
 
     <bean id="resourceCheckSteps" class="org.vividus.steps.integration.ResourceCheckSteps" init-method="init">
+        <constructor-arg>
+            <bean class="org.vividus.http.validation.ResourceValidator">
+                <constructor-arg ref="httpClient-ResourceValidator" />
+            </bean>
+        </constructor-arg>
         <property name="uriToIgnoreRegex" value="${resource-checker.uri-to-ignore-regex}" />
     </bean>
 

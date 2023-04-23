@@ -41,3 +41,4 @@ Scenario: Verify step "Then HTTP resources are valid:$resources"
 Then HTTP resources are valid:
 |url                                     |
 |${vividus-test-site-url}/img/vividus.png|
+|${vividus-test-site-url}/links.html     |
