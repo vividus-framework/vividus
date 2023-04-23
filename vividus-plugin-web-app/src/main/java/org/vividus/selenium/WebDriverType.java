@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.vividus.selenium;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import org.openqa.selenium.WebDriver;
@@ -43,8 +42,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 
 public enum WebDriverType
 {
-    FIREFOX(true, true, Set.of(FirefoxOptions.FIREFOX_OPTIONS), Browser.FIREFOX,
-            GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, WebDriverManager::firefoxdriver)
+    FIREFOX(true, true, Browser.FIREFOX, GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY, WebDriverManager::firefoxdriver)
     {
         @Override
         public void prepareCapabilities(DesiredCapabilities desiredCapabilities)
@@ -68,8 +66,7 @@ public enum WebDriverType
             return new FirefoxDriver(options);
         }
     },
-    IEXPLORE(false, true, Set.of(WebDriverType.IE_OPTIONS), Browser.IE,
-        InternetExplorerDriverService.IE_DRIVER_EXE_PROPERTY, WebDriverManager::iedriver)
+    IEXPLORE(false, true, Browser.IE, InternetExplorerDriverService.IE_DRIVER_EXE_PROPERTY, WebDriverManager::iedriver)
     {
         @Override
         public void prepareCapabilities(DesiredCapabilities desiredCapabilities)
@@ -93,8 +90,7 @@ public enum WebDriverType
             return new InternetExplorerDriver(options);
         }
     },
-    CHROME(true, true, Set.of(ChromeOptions.CAPABILITY), Browser.CHROME,
-        ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, WebDriverManager::chromedriver)
+    CHROME(true, true, Browser.CHROME, ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, WebDriverManager::chromedriver)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
@@ -106,8 +102,7 @@ public enum WebDriverType
             return new ChromeDriver(options);
         }
     },
-    SAFARI(false, false, Set.of("safari:automaticInspection", "safari:automaticProfiling"), Browser.SAFARI,
-        SafariDriverService.SAFARI_DRIVER_EXE_PROPERTY, WebDriverManager::safaridriver)
+    SAFARI(false, false, Browser.SAFARI, SafariDriverService.SAFARI_DRIVER_EXE_PROPERTY, WebDriverManager::safaridriver)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
@@ -115,8 +110,7 @@ public enum WebDriverType
             return new SafariDriver(SafariOptions.fromCapabilities(desiredCapabilities));
         }
     },
-    OPERA(true, true, Set.of(ChromeOptions.CAPABILITY), Browser.OPERA,
-        ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, WebDriverManager::operadriver)
+    OPERA(true, true, Browser.OPERA, ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, WebDriverManager::operadriver)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
@@ -128,8 +122,7 @@ public enum WebDriverType
             return new ChromeDriver(options);
         }
     },
-    EDGE(true, false, Set.of(), Browser.EDGE, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY,
-        WebDriverManager::edgedriver)
+    EDGE(true, false, Browser.EDGE, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY, WebDriverManager::edgedriver)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
@@ -144,18 +137,15 @@ public enum WebDriverType
 
     private final boolean binaryPathSupported;
     private final boolean commandLineArgumentsSupported;
-    private final Set<String> driverSpecificCapabilities;
     private final Browser browser;
     private final String driverExePropertyName;
     private final Supplier<WebDriverManager> webDriverManagerSupplier;
 
-    WebDriverType(boolean binaryPathSupported, boolean commandLineArgumentsSupported,
-            Set<String> driverSpecificCapabilities, Browser browser, String driverExePropertyName,
-            Supplier<WebDriverManager> webDriverManagerSupplier)
+    WebDriverType(boolean binaryPathSupported, boolean commandLineArgumentsSupported, Browser browser,
+            String driverExePropertyName, Supplier<WebDriverManager> webDriverManagerSupplier)
     {
         this.binaryPathSupported = binaryPathSupported;
         this.commandLineArgumentsSupported = commandLineArgumentsSupported;
-        this.driverSpecificCapabilities = driverSpecificCapabilities;
         this.browser = browser;
         this.driverExePropertyName = driverExePropertyName;
         this.webDriverManagerSupplier = webDriverManagerSupplier;
@@ -185,11 +175,6 @@ public enum WebDriverType
     public boolean isCommandLineArgumentsSupported()
     {
         return commandLineArgumentsSupported;
-    }
-
-    public Set<String> getDriverSpecificCapabilities()
-    {
-        return driverSpecificCapabilities;
     }
 
     public Browser getBrowser()
