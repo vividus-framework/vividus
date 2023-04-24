@@ -1,6 +1,18 @@
 Meta:
     @epic vividus-plugin-web-app
 
+Scenario: Verify deprecated step: "When I get the URL path and set it to the $scopes variable '$variable'"
+Given I am on page with URL `${vividus-test-site-url}/inputs.html?id=1`
+When I get the URL path and set it to the SCENARIO variable 'urlpath'
+Given I initialize SCENARIO variable `exprurlpath` with value `#{extractPathFromUrl(${current-page-url})}`
+Then `${exprurlpath}` is = `${urlpath}`
+
+Scenario: Verify deprecated step: "When I get the value from the URL and set it to the '$scopes' variable '$variable'"
+Given I am on page with URL `${vividus-test-site-url}/inputs.html?id=1#test`
+When I get the value from the URL and set it to the 'SCENARIO' variable 'urlvalue'
+Given I initialize SCENARIO variable `exprurlvalue` with value `#{replaceFirstByRegExp(.*\/(?=[^\/?#]+(?:\?.+)?(?:#.*)?$),,${current-page-url})}`
+Then `${exprurlvalue}` is = `${urlvalue}`
+
 Scenario: Verify step: "I save table to $scopes variable `$variableName`"
 Given I am on page with URL `${vividus-test-site-url}/table.html`
 When I change context to element located `xpath(//table)`
