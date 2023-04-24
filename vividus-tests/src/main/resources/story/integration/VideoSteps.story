@@ -13,7 +13,7 @@ When I switch to frame located `id(video)`
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
 Then `${details.currentTime}` is = `0`
 When I click on element located by `xpath(//button[@aria-label='Play'])`
-Then element located by `<videoLocator>` exists for `PT1S` duration
+Then element located by `<videoLocator>` exists for `PT3S` duration
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
 Then `${details.currentTime}` is > `0`
 When I pause video in video player located `<videoLocator>`
