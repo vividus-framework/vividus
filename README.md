@@ -50,3 +50,9 @@ Prerequisites: make sure [Java 17](https://adoptium.net/temurin/releases/?versio
 [<img src="https://user-images.githubusercontent.com/5081226/214425833-cdafd4e2-a33e-4b6f-b345-91e1ffb70d32.png" width="150px" alt="LambdaTest HyperExecute">](https://www.lambdatest.com/hyperexecute?from=vividus)
 
 [LambdaTest](https://www.lambdatest.com/) has provided us with the tools and infrastructure necessary to build a high quality tool by testing our components on a range of browsers and platforms. Thank you.
+
+<br />
+
+[<img src="https://applitools.com/wp-content/uploads/2022/08/Applitools-Logo-Set-V2_Applitools_1c_Green_Applitools_fullcolor_tagline-1.svg" width="150px" alt="Applitools">](https://applitools.com/)
+
+[Applitools](https://applitools.com/) has provided us with the tools to build a high quality tool by testing our components on a range of browsers and platforms. Thank you.
