@@ -78,15 +78,15 @@ NOTE: The properties marked with *bold* are mandatory.
 
 |`batch.fail-fast`
 |`false`
-|If set to `true` the subsequent batches execution will be stopped after first failed assertion
+|If set to `true` the subsequent batches execution will be stopped after the first failed batch
 
 |`story.fail-fast`
 |`false`
-|If set to `true` the story execution will be stopped after first failed assertion
+|If set to `true` the story execution will be stopped after the first failed scenario
 
 |`scenario.fail-fast`
 |`false`
-|If set to `true` the scenario execution will be stopped after first failed assertion
+|If set to `true` the scenario execution will be stopped after the first failed assertion
 
 |`story.execution-timeout`
 |`PT3H`
