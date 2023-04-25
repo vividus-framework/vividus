@@ -201,11 +201,11 @@ class SetVariableStepsTests
     }
 
     @Test
-    void testCheckNumberOfOpenWindow()
+    void testCheckNumberOfOpenTabs()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriver.getWindowHandles()).thenReturn(Collections.singleton(VARIABLE));
-        setVariableSteps.saveNumberOfOpenWindow(VARIABLE_SCOPE, VARIABLE);
+        setVariableSteps.saveNumberOfOpenTabs(VARIABLE_SCOPE, VARIABLE);
         verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE, 1);
     }
 

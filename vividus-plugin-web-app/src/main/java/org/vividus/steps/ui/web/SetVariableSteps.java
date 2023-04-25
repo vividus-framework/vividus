@@ -146,10 +146,8 @@ public class SetVariableSteps
     }
 
     /**
-     * Gets an expected <b>value</b> from the <b>number of open windows</b>
-     * and saves it into the <b>variable</b>
+     * Saves the number of currently opened tabs in the browser to the variable
      * <p>
-     * A <b>value</b> is everything after the last <b>/</b>. <br>
      * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
      * <i>Available scopes:</i>
      * <ul>
@@ -158,13 +156,13 @@ public class SetVariableSteps
      * <li><b>STORY</b> - the variable will be available within the whole story,
      * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
      * </ul>
-     * @param variable A name under which the value should be saved
+     * @param variableName A name under which the value should be saved
      */
-    @When("I get the number of open windows and set it to the $scopes variable '$variable'")
-    public void saveNumberOfOpenWindow(Set<VariableScope> scopes, String variable)
+    @When("I save number of open tabs to $scopes variable `$variableName`")
+    public void saveNumberOfOpenTabs(Set<VariableScope> scopes, String variableName)
     {
         int value = webDriverProvider.get().getWindowHandles().size();
-        variableContext.putVariable(scopes, variable, value);
+        variableContext.putVariable(scopes, variableName, value);
     }
 
     /**
