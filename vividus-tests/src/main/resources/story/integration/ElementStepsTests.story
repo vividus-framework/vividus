@@ -86,6 +86,17 @@ When I press ${car-brand} on keyboard
 When I reset context
 Then text `${car-brand}` exists
 
+Scenario: Steps verification: "When I set focus on context element", "Then context element is $focusState", "When I press $keys on keyboard"
+Given I am on page with URL `${vividus-test-site-url}/inputs.html`
+Given I initialize scenario variable `sport-brand` with value `#{generate(Brand.sport)}`
+Then element located by `id(text)` is not in focus
+When I set focus on element located by `id(text)`
+Then element located by `id(text)` is in focus
+When I change context to element located by `id(text)`
+When I press ${sport-brand} on keyboard
+When I reset context
+Then text `${sport-brand}` exists
+
 !-- Composites down there
 
 Scenario: Steps verification: "When I set focus to the context element", "Then the context element is $focusState"
