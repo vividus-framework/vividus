@@ -298,7 +298,7 @@ Then `${qrCodeLink}` is equal to `https://www.example.com`
 Focus indicates the act of selecting an element of a graphical user interface. Text entered at the keyboard or pasted
 from a clipboard is sent to the component which has the focus.
 
-==== Set focus to the context element
+==== Set focus on the context element
 
 Sets the focus on the context element, if it can be focused. The focused element is the element that will receive
 keyboard and similar events by default.
@@ -308,11 +308,28 @@ keyboard and similar events by default.
 When I set focus on context element
 ----
 
-.Set focus on the element with "text" ID
+.Set focus on the element with ID "input-username"
 [source,gherkin]
 ----
-When I change context to element located by `id(text)`
+When I change context to element located by `id(input-username)`
 When I set focus on context element
+----
+
+==== Set focus on the element
+
+Sets the focus on the element found by the specified locator, if it can be focused. The focused element is the element
+that will receive keyboard and similar events by default.
+
+[source,gherkin]
+----
+When I set focus on element located by `$locator`
+----
+* `$locator` - The <<_locator,locator>> to find an element.
+
+.Set focus on the element with ID "input-username"
+[source,gherkin]
+----
+When I set focus on element located by `id(input-username)`
 ----
 
 ==== Check the context element focus state
@@ -329,6 +346,26 @@ Then context element is $focusState
 [source,gherkin]
 ----
 Then context element is in focus
+When I press ENTER on keyboard
+----
+
+==== Check the element focus state
+
+Checks if the element found by the specified locator is in the provided focus state by comparing the found element and
+the active element
+
+[source,gherkin]
+----
+Then element located by `$locator` is $focusState
+----
+* `$locator` - The <<_locator,locator>> to find an element.
+* `$focusState` - The state to verify: `in focus` or `not in focus`.
+
+.Check the element with ID "input-username" is in focus and do keyboard input
+[source,gherkin]
+----
+Then element located by `id(input-username)` is in focus
+When I change context to element located by `id(input-username)`
 When I press ENTER on keyboard
 ----
 
@@ -358,7 +395,7 @@ is thrown at any atomic action.
 When I enter `$text` in field located by `$locator`
 ----
 * `$text` - The text to enter in the field.
-* `$locator` - The <<_locator,locator>> used to find field.
+* `$locator` - The <<_locator,locator>> to find a field.
 
 .Add text 'pa$$w0rd' in password field
 [source,gherkin]
@@ -393,7 +430,7 @@ keyboard or mouse events on the field.
 ----
 When I clear field located by `$locator`
 ----
-* `$locator` - The <<_locator,locator>> used to find field.
+* `$locator` - The <<_locator,locator>> used to find a field.
 
 .Clear username field
 [source,gherkin]
@@ -411,7 +448,7 @@ that allows to trigger keyboard events on the field.
 ----
 When I clear field located by `$locator` using keyboard
 ----
-* `$locator` - The <<_locator,locator>> used to find field.
+* `$locator` - The <<_locator,locator>> used to find a field.
 
 .Clear password field using keyboard
 [source,gherkin]
@@ -429,7 +466,7 @@ of the expected options.
 ----
 Then dropdown located `$locator` contains options: $option
 ----
-* `$locator` - The <<_locator,locator>> used to find dropdown.
+* `$locator` - The <<_locator,locator>> used to find a dropdown.
 * `$options` - examples table describing expected options
 
 .Validate dropdown contains a set of colors
@@ -453,7 +490,7 @@ Verifies if dropdown located by locator exists and first selected option.
 ----
 Then dropdown located `$locator` exists and selected option is `$option`
 ----
-* `$locator` - The <<_locator,locator>> used to find dropdown.
+* `$locator` - The <<_locator,locator>> used to find a dropdown.
 * `$option` - first selected option
 
 .Dropdown.story
@@ -475,7 +512,7 @@ Step will fail if target dropdown is not multi-select
 When I add `$option` to selection in dropdown located `$locator`
 ----
 * `$option` - option to select
-* `$locator` - The <<_locator,locator>> used to find dropdown.
+* `$locator` - The <<_locator,locator>> used to find a dropdown.
 
 .Dropdown.story
 [source,gherkin]
@@ -496,7 +533,7 @@ Does not support multi-selection
 When I select `$option` in dropdown located `$locator``
 ----
 * `$option` - option to select
-* `$locator` - The <<_locator,locator>> used to find dropdown.
+* `$locator` - The <<_locator,locator>> used to find a dropdown.
 
 .Dropdown.story
 [source,gherkin]
@@ -787,7 +824,7 @@ Starts video playback.
 ----
 When I play video in video player located `$locator`
 ----
-* `$locator` - The <<_locator,locator>> used to find video player.
+* `$locator` - The <<_locator,locator>> used to find a video player.
 
 ==== Pause Video
 
@@ -797,7 +834,7 @@ Pauses video playback.
 ----
 When I pause video in video player located `$locator`
 ----
-* `$locator` - The <<_locator,locator>> used to find video player.
+* `$locator` - The <<_locator,locator>> used to find a video player.
 
 ==== Rewind Video
 
@@ -808,7 +845,7 @@ Rewinds video to the desired mark in seconds.
 When I rewind time to `$number` seconds in video player located `$locator`
 ----
 * `$number` - time mark in seconds
-* `$locator` - The <<_locator,locator>> used to find video player.
+* `$locator` - The <<_locator,locator>> used to find a video player.
 
 ==== Get info
 Saves video player info: *duration*, *currentTime*, *src*, *networkState*.
