@@ -389,6 +389,9 @@ class PageStepsTests
         when(driver.getCurrentUrl()).thenReturn(url);
         pageSteps.checkUriIsLoaded(url);
         verify(softAssert).assertEquals("Page has correct URL", url, url);
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
+                "Then the page with the URL '$URL' is loaded",
+                "Then `${current-page-url}` is equal to `$variable2`"))));
     }
 
     @Test
