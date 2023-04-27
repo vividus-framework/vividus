@@ -203,10 +203,15 @@ public class PageSteps
      * <b>URL</b> is the internet address of the current page which is located in the address bar
      * <p>
      * @param url String value of URL
+     * @deprecated Use combination of step and dynamic variable:
+     * "Then `${current-page-url}` is equal to `$variable2`"
      */
+    @Deprecated(since = "0.5.10", forRemoval = true)
     @Then("the page with the URL '$URL' is loaded")
     public void checkUriIsLoaded(String url)
     {
+        LOGGER.warn(DEPRECATED_LOG_MESSAGE_TEMPLATE, "Then the page with the URL '$URL' is loaded",
+                "Then `${current-page-url}` is equal to `$variable2`");
         String actualUrl = getWebDriver().getCurrentUrl();
         descriptiveSoftAssert.assertEquals("Page has correct URL", decodeUrl(url), decodeUrl(actualUrl));
     }
