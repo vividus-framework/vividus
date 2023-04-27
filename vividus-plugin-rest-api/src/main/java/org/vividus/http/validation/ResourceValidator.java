@@ -28,11 +28,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.HttpStatus;
-import org.hamcrest.Matcher;
-import org.vividus.http.HttpMethod;
-import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.http.validation.model.AbstractResourceValidation;
 import org.vividus.http.validation.model.CheckStatus;
@@ -60,49 +56,39 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
 
     public T perform(T resourceValidation)
     {
-        return cache.compute(resourceValidation.getUri(), (u, rv) -> {
-            return Optional.ofNullable(rv).map(r -> {
-                T cachedResult = r.copy();
-                cachedResult.setCheckStatus(CheckStatus.SKIPPED);
-                return cachedResult;
-            }).orElseGet(() -> {
-                try
-                {
-                    HttpClientContext httpClientContext = HttpClientContext.create();
-                    int statusCode = checkResource(u, httpClientContext, HttpMethod.HEAD);
-                    resourceValidation.setStatusCode(OptionalInt.of(statusCode));
-                    String message = String.format("Status code for %s is %d. expected one of %s", u,
-                            statusCode, allowedStatusCodes);
-                    Matcher<Object> oneOf = is(oneOf(allowedStatusCodes.toArray()));
-                    resourceValidation.setCheckStatus(CheckStatus.get(oneOf.matches(statusCode)));
-                    softAssert.assertThat(message, statusCode, oneOf);
-                }
-                catch (IOException e)
-                {
-                    softAssert.recordFailedAssertion("Exception occured during check of: " + u, e);
-                    resourceValidation.setCheckStatus(CheckStatus.BROKEN);
-                }
-                return resourceValidation;
-            });
-        });
+        return cache.compute(resourceValidation.getUri(), (uri, rv) -> Optional.ofNullable(rv)
+                .map(r -> {
+                    T cachedResult = r.copy();
+                    cachedResult.setCheckStatus(CheckStatus.SKIPPED);
+                    return cachedResult;
+                }).orElseGet(() -> {
+                    validateResource(uri, resourceValidation);
+                    return resourceValidation;
+                })
+        );
     }
 
-    private int checkResource(URI uri, HttpClientContext httpClientContext, HttpMethod httpMethod)
-            throws IOException
+    private void validateResource(URI uri, T resourceValidation)
     {
-        HttpResponse httpResponse = executeHttpMethod(httpMethod, httpClientContext, uri);
-        int statusCode = httpResponse.getStatusCode();
-        if (HttpMethod.GET == httpMethod || !notAllowedHeadStatusCodes.contains(statusCode))
+        try
         {
-            return statusCode;
-        }
-        return checkResource(uri, httpClientContext, HttpMethod.GET);
-    }
+            HttpClientContext httpClientContext = HttpClientContext.create();
+            int statusCode = httpClient.doHttpHead(uri, httpClientContext).getStatusCode();
+            if (notAllowedHeadStatusCodes.contains(statusCode))
+            {
+                statusCode = httpClient.doHttpGet(uri, httpClientContext).getStatusCode();
+            }
+            resourceValidation.setStatusCode(OptionalInt.of(statusCode));
 
-    private HttpResponse executeHttpMethod(HttpMethod httpMethod, HttpClientContext httpClientContext, URI uri)
-            throws IOException
-    {
-        ClassicHttpRequest request = httpMethod.createRequest(uri);
-        return httpClient.execute(request, httpClientContext);
+            CheckStatus checkStatus = softAssert.assertThat(
+                    String.format("Status code for %s is %d. expected one of %s", uri, statusCode, allowedStatusCodes),
+                    statusCode, is(oneOf(allowedStatusCodes.toArray()))) ? CheckStatus.PASSED : CheckStatus.FAILED;
+            resourceValidation.setCheckStatus(checkStatus);
+        }
+        catch (IOException e)
+        {
+            softAssert.recordFailedAssertion("Exception occured during check of: " + uri, e);
+            resourceValidation.setCheckStatus(CheckStatus.BROKEN);
+        }
     }
 }

@@ -23,15 +23,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URI;
 
-import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
@@ -52,7 +49,6 @@ class ResourceValidatorTests
     private static final String PASSED_CHECK_MESSAGE =
             "Status code for https://vividus.org is 200. expected one of [200]";
     private static final int OK = 200;
-    private static final String HEAD = "HEAD";
     private static final URI FIRST = URI.create("https://vividus.org");
     private static final ArgumentMatcher<Matcher<? super Integer>> MATCHER =
         m -> "is one of {<200>}".equals(m.toString());
@@ -65,30 +61,25 @@ class ResourceValidatorTests
     @Test
     void shouldValidateResource() throws IOException
     {
-        when(httpClient.execute(argThat(r -> HEAD.equals(r.getMethod())), any(HttpContext.class)))
-            .thenReturn(httpResponse);
+        when(httpClient.doHttpHead(eq(FIRST), any(HttpContext.class))).thenReturn(httpResponse);
         when(httpResponse.getStatusCode()).thenReturn(200);
-        ResourceValidation resourceValidation = new ResourceValidation(FIRST);
-        ResourceValidation result = resourceValidator.perform(resourceValidation);
+        when(softAssert.assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER))).thenReturn(true);
+        var resourceValidation = new ResourceValidation(FIRST);
+        var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, result.getCheckStatus());
-        verify(httpClient).execute(any(ClassicHttpRequest.class), any(HttpContext.class));
-        verify(softAssert).assertThat(eq(PASSED_CHECK_MESSAGE),
-                eq(OK), argThat(MATCHER));
     }
 
     @Test
     void shouldValidateResourceAndReuseCachedResultForTheSameUrl() throws IOException
     {
-        when(httpClient.execute(argThat(r -> HEAD.equals(r.getMethod())), any(HttpContext.class)))
-            .thenReturn(httpResponse);
+        when(httpClient.doHttpHead(eq(FIRST), any(HttpContext.class))).thenReturn(httpResponse);
         when(httpResponse.getStatusCode()).thenReturn(200);
-        ResourceValidation resourceValidation = new ResourceValidation(FIRST);
-        ResourceValidation first = resourceValidator.perform(resourceValidation);
-        ResourceValidation second = resourceValidator.perform(resourceValidation);
+        when(softAssert.assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER))).thenReturn(true);
+        var resourceValidation = new ResourceValidation(FIRST);
+        var first = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, first.getCheckStatus());
-        verify(httpClient).execute(any(ClassicHttpRequest.class), any(HttpContext.class));
-        verify(softAssert).assertThat(eq(PASSED_CHECK_MESSAGE),
-                eq(OK), argThat(MATCHER));
+
+        var second = resourceValidator.perform(resourceValidation);
         assertThat(first, not(sameInstance(second)));
         assertEquals(CheckStatus.SKIPPED, second.getCheckStatus());
         assertEquals(first.getUri(), second.getUri());
@@ -97,44 +88,37 @@ class ResourceValidatorTests
     @Test
     void shouldValidateResourceAndNotRetryWithGetIfStatusCodeNotInNotAllowedSet() throws IOException
     {
-        when(httpClient.execute(argThat(r -> HEAD.equals(r.getMethod())), any(HttpContext.class)))
-            .thenReturn(httpResponse);
-        int forbidden = 403;
+        when(httpClient.doHttpHead(eq(FIRST), any(HttpContext.class))).thenReturn(httpResponse);
+        var forbidden = 403;
         when(httpResponse.getStatusCode()).thenReturn(forbidden);
-        ResourceValidation resourceValidation = new ResourceValidation(FIRST);
-        ResourceValidation result = resourceValidator.perform(resourceValidation);
+        when(softAssert.assertThat(eq("Status code for https://vividus.org is 403. expected one of [200]"),
+                eq(forbidden), argThat(MATCHER))).thenReturn(false);
+        var resourceValidation = new ResourceValidation(FIRST);
+        var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.FAILED, result.getCheckStatus());
-        verify(httpClient).execute(any(ClassicHttpRequest.class), any(HttpContext.class));
-        verify(softAssert).assertThat(eq("Status code for https://vividus.org is 403. expected one of [200]"),
-                eq(forbidden), argThat(MATCHER));
     }
 
     @Test
     void shouldValidateResourceAndRetryWithGetWhenHeadStatusCodeInNotAllowedSet() throws IOException
     {
-        doReturn(httpResponse).when(httpClient).execute(argThat(r -> HEAD.equals(r.getMethod())),
-                any(HttpContext.class));
-        doReturn(httpResponse).when(httpClient).execute(argThat(r -> "GET".equals(r.getMethod())),
-                any(HttpContext.class));
-        int notFound = 404;
+        when(httpClient.doHttpHead(eq(FIRST), any(HttpContext.class))).thenReturn(httpResponse);
+        when(httpClient.doHttpGet(eq(FIRST), any(HttpContext.class))).thenReturn(httpResponse);
+        when(softAssert.assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER))).thenReturn(true);
+        var notFound = 404;
         when(httpResponse.getStatusCode()).thenReturn(notFound).thenReturn(OK);
-        ResourceValidation resourceValidation = new ResourceValidation(FIRST);
-        ResourceValidation result = resourceValidator.perform(resourceValidation);
+        var resourceValidation = new ResourceValidation(FIRST);
+        var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, result.getCheckStatus());
-        verify(httpClient, times(2)).execute(any(ClassicHttpRequest.class), any(HttpContext.class));
-        verify(softAssert).assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER));
     }
 
     @Test
     void shouldMarkValidationAsBrokenIfExceptionOccurs() throws IOException
     {
-        IOException ioException = new IOException();
-        when(httpClient.execute(argThat(r -> HEAD.equals(r.getMethod())), any(HttpContext.class)))
-            .thenThrow(ioException);
-        ResourceValidation resourceValidation = new ResourceValidation(FIRST);
-        ResourceValidation result = resourceValidator.perform(resourceValidation);
+        var ioException = new IOException();
+        when(httpClient.doHttpHead(eq(FIRST), any(HttpContext.class))).thenThrow(ioException);
+        var resourceValidation = new ResourceValidation(FIRST);
+        var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.BROKEN, result.getCheckStatus());
-        verify(httpClient).execute(any(ClassicHttpRequest.class), any(HttpContext.class));
         verify(softAssert).recordFailedAssertion("Exception occured during check of: https://vividus.org", ioException);
     }
 }
