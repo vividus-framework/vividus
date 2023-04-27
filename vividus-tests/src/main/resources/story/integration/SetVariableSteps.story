@@ -44,3 +44,10 @@ When I open URL `${vividus-test-site-url}` in new window
 When I get the number of open windows and set it to the SCENARIO variable 'tabscount'
 When I close the current window
 Then `${tabscount}` is = `2`
+
+Scenario: Verify deprecated step: "When I get the URL value of a video with sequence number '$number' and set it to the '$scopes' variable '$variable'"
+Given I am on page with URL `${vividus-test-site-url}/severalvideos.html`
+When I change context to element located `xpath(//div[@class='container'])`
+When I get the URL value of a video with sequence number '2' and set it to the 'SCENARIO' variable 'vidSrc1'
+When I save `src` attribute value of element located `xpath((div[contains(@class,'video')]/iframe)[2])` to SCENARIO variable `vidSrc2`
+Then `${vidSrc1}` is = `${vidSrc2}`

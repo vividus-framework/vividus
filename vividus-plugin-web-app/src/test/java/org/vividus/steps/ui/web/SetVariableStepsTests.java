@@ -80,6 +80,7 @@ class SetVariableStepsTests
     private static final String NUMBER_FOUND_VIDEO_MESSAGE = "The number of found video frames";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(SetVariableSteps.class);
+
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private ISoftAssert softAssert;
     @Mock private ISearchActions searchActions;
@@ -135,6 +136,13 @@ class SetVariableStepsTests
         when(softAssert.assertNotNull(THE_SRC_VALUE_WAS_FOUND, VALUE)).thenReturn(Boolean.TRUE);
         setVariableSteps.saveUrlValueOfVideoWithNumber(1, VARIABLE_SCOPE, URL_VARIABLE);
         verify(variableContext).putVariable(VARIABLE_SCOPE, URL_VARIABLE, VALUE);
+        LoggingEvent expectedLoggingEvent = warn("The step: \"When I get the URL value of a video with sequence"
+                + " number '$number' and set it to the '$scopes' variable '$variable'\""
+                + " is deprecated and will be removed in VIVIDUS 0.7.0."
+                + " Use step: \"When I save `src` attribute value of element located"
+                + " `xpath((div[contains(@class,'video')]/iframe)[$number])` to $scopes variable `$variableName`\""
+                + " instead");
+        assertThat(logger.getLoggingEvents(), is(List.of(expectedLoggingEvent)));
     }
 
     @Test
