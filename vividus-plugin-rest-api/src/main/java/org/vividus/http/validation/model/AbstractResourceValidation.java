@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@ package org.vividus.http.validation.model;
 
 import java.net.URI;
 import java.util.Objects;
+import java.util.OptionalInt;
 
 public abstract class AbstractResourceValidation<T extends AbstractResourceValidation<T>> implements Comparable<T>
 {
     private URI uri;
-    private int statusCode = -1;
+    private OptionalInt statusCode = OptionalInt.empty();
     private CheckStatus checkStatus;
 
     protected AbstractResourceValidation(URI uri)
@@ -40,12 +41,12 @@ public abstract class AbstractResourceValidation<T extends AbstractResourceValid
         this.uri = uri;
     }
 
-    public int getStatusCode()
+    public OptionalInt getStatusCode()
     {
         return statusCode;
     }
 
-    public void setStatusCode(int statusCode)
+    public void setStatusCode(OptionalInt statusCode)
     {
         this.statusCode = statusCode;
     }

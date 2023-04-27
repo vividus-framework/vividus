@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -69,7 +70,7 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
                 {
                     HttpClientContext httpClientContext = HttpClientContext.create();
                     int statusCode = checkResource(u, httpClientContext, HttpMethod.HEAD);
-                    resourceValidation.setStatusCode(statusCode);
+                    resourceValidation.setStatusCode(OptionalInt.of(statusCode));
                     String message = String.format("Status code for %s is %d. expected one of %s", u,
                             statusCode, allowedStatusCodes);
                     Matcher<Object> oneOf = is(oneOf(allowedStatusCodes.toArray()));
