@@ -78,7 +78,7 @@
                         ${checkStatus}
                     </td>
                     <td>
-                        ${result.statusCode}
+                        ${(result.statusCode.isPresent())?then(result.statusCode.getAsInt(),'N/A')}
                     </td>
                     <td>
                         <#assign pageURL = result.pageURL>

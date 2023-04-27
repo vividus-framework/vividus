@@ -64,7 +64,7 @@
                         ${checkStatus}
                     </td>
                     <td>
-                        ${result.statusCode}
+                        ${result.statusCode.getAsInt()}
                     </td>
                 </tr>
                 </#list>
