@@ -87,7 +87,7 @@ Examples:
 |`transformer.from-headless-crawling.exclude-extensions-regex`
 |Regular expression
 a |`(css\|gif\|gz\|ico\|jpeg\|jpg\|js\|mp3\|mp4\|pdf\|png\|svg\|zip\|woff2
-\|woff\|ttf\|doc\|docx)`
+\|woff\|ttf\|doc\|docx\|xml\|json\|webmanifest)`
 |The regular expression to match extensions in URLs.
 The crawler will ignore all URLs referring to files with extensions matching the given regular expression.
 URLs without extensions will always be crawled.
