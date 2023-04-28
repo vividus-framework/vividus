@@ -209,7 +209,7 @@ public class ResourceCheckSteps
         }
         catch (SelectorParseException exception)
         {
-            return "N/A";
+            return String.format("Unable to build CSS selector for '%s' element", element.tagName());
         }
     }
 
