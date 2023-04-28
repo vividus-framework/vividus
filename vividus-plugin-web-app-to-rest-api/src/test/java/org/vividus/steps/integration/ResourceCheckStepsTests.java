@@ -207,7 +207,8 @@ class ResourceCheckStepsTests
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations, SERENITY_URI, HTTP_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, imageUri, "#image", CheckStatus.PASSED, N_A);
-            validate(resourceValidations, gifImageUri, N_A, CheckStatus.PASSED, N_A);
+            validate(resourceValidations, gifImageUri, "Unable to build CSS selector for 'img' element",
+                    CheckStatus.PASSED, N_A);
             validate(resourceValidations, VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, FAQ_URI, RELATIVE_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, VIVIDUS_QUERY_URI_1, SELECTOR_QUERY_1, CheckStatus.PASSED, N_A);
