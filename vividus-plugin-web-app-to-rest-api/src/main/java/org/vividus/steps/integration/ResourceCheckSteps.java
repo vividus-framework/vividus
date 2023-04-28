@@ -157,6 +157,11 @@ public class ResourceCheckSteps
     private Optional<WebPageResourceValidation> parseElement(Element element)
     {
         String elementUriAsString = getElementUri(element).trim();
+        if (elementUriAsString.startsWith("data:"))
+        {
+            return Optional.empty();
+        }
+
         String elementCssSelector = getCssSelector(element);
         if (elementUriAsString.isEmpty())
         {

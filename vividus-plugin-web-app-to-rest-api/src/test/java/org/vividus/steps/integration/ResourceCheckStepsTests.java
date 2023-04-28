@@ -131,6 +131,7 @@ class ResourceCheckStepsTests
         + "  <a id='query-params-two' href='/products?name=smetanka'>Sour cream</a>\n"
         + "  <img id='image' src='https://avatars0.githubusercontent.com/u/48793437?s=200&v=4'/>\n"
         + "  <img class='image (gif)' src='https://github.githubassets.com/images/spinners/octocat-spinner-32.gif'/>\n"
+        + "  <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUAAsTAAALEwEAmpwYAAAAAM4HdnM8AAAAABJRU5ErkJggg=='/>\n"
         + "  <iframe src='https://selenide.org'/>"
         + "</body>\n</html>";
 
