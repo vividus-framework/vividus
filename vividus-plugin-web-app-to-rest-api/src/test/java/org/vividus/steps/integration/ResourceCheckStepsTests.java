@@ -79,10 +79,12 @@ class ResourceCheckStepsTests
     private static final String FIRST_PAGE_TABLE = "|pages|\n|https://first.page|";
     private static final String SECOND_PAGE_URL = "https://second.page";
     private static final String FIRST_PAGE_URL = "https://first.page";
+    private static final String SLASH = "/";
     private static final String THIRD_PAGE_URL = "https://third.page";
     private static final String N_A = "N/A";
     private static final String RESULTS = "results";
     private static final String MAILTO_ID = "#mailto";
+    private static final String SHORTCUT_SELECTOR = "#shortcut-scheme";
     private static final URI MAILTO_URI = URI.create("mailto:by.kalinin@gmail.com");
     private static final String JS_ID = "#js";
     private static final URI JS_URI = URI.create("javascript:void(0)");
@@ -91,9 +93,11 @@ class ResourceCheckStepsTests
     private static final String SHARP_ID = "#sharp";
     private static final URI SHARP_URI = URI.create("#");
     private static final URI FAQ_URI = URI.create("https://vividus.org/faq");
+    private static final URI ROOT_URI = URI.create("https://vividus.org/");
     private static final String FAQ_URL = "/faq";
     private static final String ABOUT_ID = "#about";
     private static final String RELATIVE_ID = "#relative";
+    private static final String ROOT_ID = "#root";
     private static final String HTTPS_ID = "#https";
     private static final String HTTP_ID = "#http";
     private static final String TEMPLATE_NAME = "resources-validation-result.ftl";
@@ -120,6 +124,7 @@ class ResourceCheckStepsTests
         + "<title>Title of the document</title>\n"
         + "</head>\n"
         + "<body>\n"
+        + "  <a id='root' href='/'>Root</a>\n"
         + "  <a id='https' href='https://vividus.org'>Eeny, meeny, miny, moe</a>\n"
         + "  <a id='relative' href='/faq'>Catch a tiger by the toe.</a>\n"
         + "  <a id='js' href='javascript:void(0)'>If he hollers, let him go,</a>\n"
@@ -133,6 +138,7 @@ class ResourceCheckStepsTests
         + "  <img class='image (gif)' src='https://github.githubassets.com/images/spinners/octocat-spinner-32.gif'/>\n"
         + "  <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUAAsTAAALEwEAmpwYAAAAAM4HdnM8AAAAABJRU5ErkJggg=='/>\n"
         + "  <iframe src='https://selenide.org'/>"
+        + "  <img id='shortcut-scheme' src='//images.ctfassets.net/us_cool_mint_pocketpaks_breath_strips.png'/>\n"
         + "</body>\n</html>";
 
     private static final String SECOND_PAGE =
@@ -204,13 +210,17 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(11));
+            assertThat(validationsToReport, hasSize(13));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations, SERENITY_URI, HTTP_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, imageUri, "#image", CheckStatus.PASSED, N_A);
             validate(resourceValidations, gifImageUri, "Unable to build CSS selector for 'img' element",
                     CheckStatus.PASSED, N_A);
+            validate(resourceValidations,
+                    URI.create("https://images.ctfassets.net/us_cool_mint_pocketpaks_breath_strips.png"),
+                    SHORTCUT_SELECTOR, CheckStatus.PASSED, N_A);
             validate(resourceValidations, VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED, N_A);
+            validate(resourceValidations, ROOT_URI, ROOT_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, FAQ_URI, RELATIVE_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, VIVIDUS_QUERY_URI_1, SELECTOR_QUERY_1, CheckStatus.PASSED, N_A);
             validate(resourceValidations, VIVIDUS_QUERY_URI_2, SELECTOR_QUERY_2, CheckStatus.PASSED, N_A);
@@ -305,9 +315,10 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(10));
+            assertThat(validationsToReport, hasSize(11));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations.next(), SERENITY_URI, HTTP_ID, CheckStatus.PASSED);
+            validate(resourceValidations.next(), URI.create(FIRST_PAGE_URL + SLASH), ROOT_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), URI.create(FIRST_PAGE_URL + FAQ_URL), RELATIVE_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), URI.create(FIRST_PAGE_URL + "/products?name=pelmeshki"),
                     SELECTOR_QUERY_1, CheckStatus.PASSED);
@@ -350,6 +361,34 @@ class ResourceCheckStepsTests
         verify(softAssert).recordFailedAssertion(
                 eq("Element by selector #link-id-2 has href/src attribute with invalid URL"),
                 argThat(e -> INVALID_URL_ERROR.equals(e.toString())));
+    }
+
+    @Test
+    void shouldNotAppendSchemeToUrlIfMainAppUrlIsNotSet() throws InterruptedException, ExecutionException, IOException
+    {
+        mockResourceValidator();
+        runExecutor();
+        HttpResponse httpResponse = mock(HttpResponse.class);
+        when(httpTestContext.getResponse()).thenReturn(httpResponse);
+        URI resourceUri = URI.create("//images.ctfassets.net/icon.png");
+        when(httpResponse.getResponseBodyAsString())
+                .thenReturn("<html><body><img id='shortcut-scheme' src='" + resourceUri + "'/></body></html>");
+        resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
+        resourceCheckSteps.init();
+        when(webApplicationConfiguration.getMainApplicationPageUrlUnsafely()).thenReturn(URI.create("/no-scheme"));
+        String page = "https://any.page";
+        ExamplesTable examplesTable =
+                new ExamplesTable(String.format("|pages|%n|%s|", page));
+        resourceCheckSteps.checkResources("img", examplesTable);
+        verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, page, Optional.empty());
+        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
+            @SuppressWarnings(UNCHECKED)
+            Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
+                    .get(RESULTS);
+            assertThat(validationsToReport, hasSize(1));
+            validate(validationsToReport.iterator().next(), resourceUri, SHORTCUT_SELECTOR, CheckStatus.FILTERED);
+            return true;
+        }), eq(REPORT_NAME));
     }
 
     @Test
@@ -470,9 +509,10 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(9));
+            assertThat(validationsToReport, hasSize(10));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations, VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED, N_A);
+            validate(resourceValidations, ROOT_URI, ROOT_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, FAQ_URI, RELATIVE_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, VIVIDUS_QUERY_URI_1, SELECTOR_QUERY_1, CheckStatus.PASSED, N_A);
             validate(resourceValidations, VIVIDUS_QUERY_URI_2, SELECTOR_QUERY_2, CheckStatus.PASSED, N_A);

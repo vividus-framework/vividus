@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.hc.core5.net.URIBuilder;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
 import org.jsoup.nodes.Element;
@@ -226,7 +227,15 @@ public class ResourceCheckSteps
             URI mainApplicationPageUrl = webApplicationConfiguration.getMainApplicationPageUrlUnsafely();
             if (mainApplicationPageUrl != null)
             {
-                return buildNewUrl(mainApplicationPageUrl, uri);
+                if (uri.length() <= 1 || uri.charAt(1) != '/')
+                {
+                    return buildNewUrl(mainApplicationPageUrl, uri);
+                }
+                String scheme = mainApplicationPageUrl.getScheme();
+                if (scheme != null)
+                {
+                    return new URIBuilder(uri).setScheme(scheme).build();
+                }
             }
         }
         return uriToCheck;
