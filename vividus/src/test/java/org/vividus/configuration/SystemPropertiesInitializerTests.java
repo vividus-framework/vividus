@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class SystemPropertiesProcessorTests
+class SystemPropertiesInitializerTests
 {
-    @Mock
-    private PropertiesDecryptor propertiesDecryptor;
-
-    @InjectMocks
-    private SystemPropertiesProcessor systemPropertiesProcessor;
+    @Mock private EncryptedPropertiesProcessor encryptedPropertiesProcessor;
+    @InjectMocks private SystemPropertiesInitializer systemPropertiesInitializer;
 
     @Test
     void shouldProcessSystemPropertyWithDecryption()
@@ -48,11 +45,12 @@ class SystemPropertiesProcessorTests
         Properties properties = new Properties();
         properties.setProperty(systemPropertyKey, systemPropertyValue);
         properties.setProperty(propertyKey, value2);
-        when(propertiesDecryptor.decrypt(systemPropertyValue)).thenReturn(systemPropertyValue);
-        Properties systemPropertiesExtracted = systemPropertiesProcessor.process(properties);
-        verify(propertiesDecryptor).decrypt(systemPropertyValue);
+        when(encryptedPropertiesProcessor.processProperty(systemPropertyKey, systemPropertyValue)).thenReturn(
+                systemPropertyValue);
+        systemPropertiesInitializer.setSystemProperties(properties);
+        verify(encryptedPropertiesProcessor).processProperty(systemPropertyKey, systemPropertyValue);
         assertEquals(systemPropertyValue, System.getProperty(systemPropertyKey.substring(7)));
-        assertNull(systemPropertiesExtracted.getProperty(systemPropertyKey));
-        assertEquals(value2, systemPropertiesExtracted.getProperty(propertyKey));
+        assertNull(properties.getProperty(systemPropertyKey));
+        assertEquals(value2, properties.getProperty(propertyKey));
     }
 }

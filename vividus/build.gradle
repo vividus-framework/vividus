@@ -5,23 +5,40 @@ sourceSets {
         compileClasspath += sourceSets.main.output
         runtimeClasspath += compileClasspath
     }
+    systemTest {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += compileClasspath
+    }
 }
 
 configurations.integrationTestImplementation.extendsFrom configurations.implementation
+configurations.systemTestImplementation.extendsFrom configurations.implementation
 
-task integrationTest(type: Test) {
+tasks.register('integrationTest', Test) {
     description = 'Runs Integration Tests'
     group = 'verification'
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
+    mustRunAfter test
+    useJUnitPlatform()
     jvmArgs += ['--add-opens=java.base/java.util=ALL-UNNAMED', '--add-opens=java.base/java.lang=ALL-UNNAMED']
+}
+
+tasks.register('systemTest', Test) {
+    description = 'Runs System Tests'
+    group = 'verification'
+    testClassesDirs = sourceSets.systemTest.output.classesDirs
+    classpath = sourceSets.systemTest.runtimeClasspath
+    useJUnitPlatform()
+    mustRunAfter test
 }
 
 // https://github.com/spotbugs/spotbugs-gradle-plugin/issues/115
 spotbugsIntegrationTest.auxClassPaths += integrationTest.classpath
+spotbugsSystemTest.auxClassPaths += integrationTest.classpath
 
 check.dependsOn integrationTest
-integrationTest.mustRunAfter test
+check.dependsOn systemTest
 
 configurations.testImplementation {
     exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j2-impl'
@@ -58,6 +75,8 @@ dependencies {
     // Spring
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.27')
     implementation(group: 'org.springframework', name: 'spring-context')
+    implementation(group: 'org.springframework.vault', name: 'spring-vault-core', version: '2.3.3')
+
     implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
     implementation(group: 'commons-cli', name: 'commons-cli', version: '1.5.0')
     // jasypt
@@ -100,4 +119,11 @@ dependencies {
     integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.3')
     integrationTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     integrationTestImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.0.1')
+
+    systemTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.3')
+    systemTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    systemTestImplementation platform(group: 'org.testcontainers', name: 'testcontainers-bom', version: '1.18.0')
+    systemTestImplementation(group: 'org.testcontainers', name: 'testcontainers')
+    systemTestImplementation(group: 'org.testcontainers', name: 'junit-jupiter')
+    systemTestImplementation(group: 'org.testcontainers', name: 'vault')
 }

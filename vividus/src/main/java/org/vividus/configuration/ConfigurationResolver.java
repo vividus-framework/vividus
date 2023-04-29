@@ -32,8 +32,6 @@ import com.google.common.collect.Multimap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.jasypt.encryption.StringEncryptor;
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.PropertyPlaceholderHelper;
@@ -43,12 +41,6 @@ public final class ConfigurationResolver
 {
     static final String CONFIGURATION_PROPERTY_FAMILY = "configuration.";
     static final String CONFIGURATION_SET_PROPERTY_FAMILY = "configuration-set.";
-
-    private static final String VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY = "vividus.encryptor.password";
-    private static final String VIVIDUS_ENCRYPTOR_PASSWORD_ENV_VARIABLE = "VIVIDUS_ENCRYPTOR_PASSWORD";
-
-    private static final String DEFAULT_ENCRYPTOR_ALGORITHM = "PBEWithMD5AndDES";
-    private static final String DEFAULT_ENCRYPTOR_PASSWORD = "82=thuMUH@";
 
     private static final SpelExpressionResolver SPEL_RESOLVER = new SpelExpressionResolver();
     private static final String VIVIDUS_SYSTEM_PROPERTY_FAMILY = "vividus.";
@@ -152,28 +144,17 @@ public final class ConfigurationResolver
         deprecatedPropertiesHandler.removeDeprecated(properties);
         resolveSpelExpressions(properties, false);
 
-        StringEncryptor stringEncryptor = createStringEncryptor(properties);
-        BeanFactory.registerBean("stringEncryptor", StringEncryptor.class, () -> stringEncryptor);
-        PropertiesDecryptor decryptor = new PropertiesDecryptor(stringEncryptor);
-        SystemPropertiesProcessor systemPropertiesProcessor = new SystemPropertiesProcessor(decryptor);
-        systemPropertiesProcessor.process(properties);
-        properties = decryptor.decryptProperties(properties);
+        try (VaultStoredPropertiesProcessor vaultProcessor = new VaultStoredPropertiesProcessor(properties))
+        {
+            PropertiesProcessor propertiesProcessor = new DelegatingPropertiesProcessor(List.of(
+                    new EncryptedPropertiesProcessor(properties), vaultProcessor
+            ));
+            new SystemPropertiesInitializer(propertiesProcessor).setSystemProperties(properties);
+            properties = propertiesProcessor.processProperties(properties);
+        }
 
         instance = new ConfigurationResolver(properties);
         return instance;
-    }
-
-    private static StringEncryptor createStringEncryptor(Properties properties)
-    {
-        String password = Optional.ofNullable(System.getProperty(VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY))
-                .or(() -> Optional.ofNullable(properties.getProperty("system." + VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY)))
-                .or(() -> Optional.ofNullable(System.getenv(VIVIDUS_ENCRYPTOR_PASSWORD_ENV_VARIABLE)))
-                .orElse(DEFAULT_ENCRYPTOR_PASSWORD);
-
-        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
-        encryptor.setAlgorithm(DEFAULT_ENCRYPTOR_ALGORITHM);
-        encryptor.setPassword(password);
-        return encryptor;
     }
 
     private static PropertyPlaceholderHelper createPropertyPlaceholderHelper(boolean ignoreUnresolvablePlaceholders)
