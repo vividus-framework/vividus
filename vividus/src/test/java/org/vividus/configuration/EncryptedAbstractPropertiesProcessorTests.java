@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,12 +34,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class PropertiesDecryptorTests
+class EncryptedAbstractPropertiesProcessorTests
 {
     private static final String ALGORITHM = "PBEWithMD5AndDES";
     private static final String PASSWORD = "I test VIVIDUS encryption features";
     private static final String PROPERTY_KEY = "key";
-    private static final String ENCRYPTED_VALUE = "ENC(KixcztydWWB6e3EYz4tzZg==)";
+    private static final String ENCRYPTED_VALUE = "KixcztydWWB6e3EYz4tzZg==";
+    private static final String ENCRYPTED_VALUE_PLACEHOLDER = "ENC(" + ENCRYPTED_VALUE + ")";
     private static final String DECRYPTED_VALUE = "hello";
 
     private StandardPBEStringEncryptor createEncryptor()
@@ -57,15 +58,15 @@ class PropertiesDecryptorTests
 
     @ParameterizedTest
     @CsvSource({
-            ENCRYPTED_VALUE + ", " + DECRYPTED_VALUE,
-            "username=open password=" + ENCRYPTED_VALUE + " secret-key=" + ENCRYPTED_VALUE + ", username=open password="
-                    + DECRYPTED_VALUE + " secret-key=" + DECRYPTED_VALUE
+            ENCRYPTED_VALUE_PLACEHOLDER + ", " + DECRYPTED_VALUE,
+            "username=open password=" + ENCRYPTED_VALUE_PLACEHOLDER + " secret-key=" + ENCRYPTED_VALUE_PLACEHOLDER
+                    + ", username=open password=" + DECRYPTED_VALUE + " secret-key=" + DECRYPTED_VALUE
     })
     void shouldDecryptProperties(String encryptedValue, String decryptedValue)
     {
         var properties = new Properties();
         properties.setProperty(PROPERTY_KEY, encryptedValue);
-        var propertiesDecrypted = new PropertiesDecryptor(createEncryptor()).decryptProperties(properties);
+        var propertiesDecrypted = new EncryptedPropertiesProcessor(createEncryptor()).processProperties(properties);
         assertEquals(decryptedValue, propertiesDecrypted.getProperty(PROPERTY_KEY));
     }
 
@@ -85,23 +86,24 @@ class PropertiesDecryptorTests
 
         var properties = new Properties();
         properties.put(PROPERTY_KEY, propertyValue);
-        var propertiesDecrypted = new PropertiesDecryptor(standardPBEStringEncryptor).decryptProperties(properties);
-        assertEquals(propertyValue, propertiesDecrypted.get(PROPERTY_KEY));
+        var decryptedProperties = new EncryptedPropertiesProcessor(standardPBEStringEncryptor).processProperties(
+                properties);
+        assertEquals(propertyValue, decryptedProperties.get(PROPERTY_KEY));
         verifyNoInteractions(standardPBEStringEncryptor);
     }
 
     @ParameterizedTest
     @CsvSource({
             ENCRYPTED_VALUE + ", invalid password",
-            "ENC(invalidvalue), " + PASSWORD
+            "invalidvalue, " + PASSWORD
     })
-    void shouldThrowExceptionOnInvalidValues(String propertyValue, String password)
+    void shouldThrowExceptionOnInvalidValues(String value, String password)
     {
         var properties = new Properties();
-        properties.setProperty(PROPERTY_KEY, propertyValue);
-        var decryptor = new PropertiesDecryptor(createEncryptor(password));
-        var exception = assertThrows(DecryptionFailedException.class, () -> decryptor.decryptProperties(properties));
-        assertEquals("Unable to decrypt the value '" + propertyValue + "' of property with name 'key'",
+        properties.setProperty(PROPERTY_KEY, String.format("ENC(%s)", value));
+        var decryptor = new EncryptedPropertiesProcessor(createEncryptor(password));
+        var exception = assertThrows(DecryptionFailedException.class, () -> decryptor.processProperties(properties));
+        assertEquals("Unable to decrypt the value '" + value + "' from the property with the name 'key'",
                 exception.getMessage());
         var cause = exception.getCause();
         assertEquals(EncryptionOperationNotPossibleException.class, cause.getClass());

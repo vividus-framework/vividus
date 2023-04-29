@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,18 +22,18 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class SystemPropertiesProcessor
+public class SystemPropertiesInitializer
 {
     private static final String SYSTEM_PROPERTIES_PREFIX = "system.";
 
-    private final PropertiesDecryptor propertiesDecryptor;
+    private final PropertiesProcessor propertiesProcessor;
 
-    SystemPropertiesProcessor(PropertiesDecryptor propertiesDecryptor)
+    SystemPropertiesInitializer(PropertiesProcessor propertiesProcessor)
     {
-        this.propertiesDecryptor = propertiesDecryptor;
+        this.propertiesProcessor = propertiesProcessor;
     }
 
-    public Properties process(Properties properties)
+    public void setSystemProperties(Properties properties)
     {
         Iterator<Map.Entry<Object, Object>> iterator = properties.entrySet().iterator();
         while (iterator.hasNext())
@@ -43,11 +43,10 @@ public class SystemPropertiesProcessor
             if (key.startsWith(SYSTEM_PROPERTIES_PREFIX))
             {
                 String value = (String) entry.getValue();
-                value = propertiesDecryptor.decrypt(value);
+                value = propertiesProcessor.processProperty((String) entry.getKey(), value);
                 System.setProperty(StringUtils.removeStart(key, SYSTEM_PROPERTIES_PREFIX), value);
                 iterator.remove();
             }
         }
-        return properties;
     }
 }

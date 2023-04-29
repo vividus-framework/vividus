@@ -10,10 +10,8 @@
     <bean id="configurationResolver" class="org.vividus.configuration.ConfigurationResolver"
         factory-method="getInstance" />
 
-    <bean class="org.jasypt.spring4.properties.EncryptablePropertyPlaceholderConfigurer">
-        <constructor-arg ref="stringEncryptor"/>
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="systemPropertiesMode" value="#{T(org.springframework.beans.factory.config.PropertyPlaceholderConfigurer).SYSTEM_PROPERTIES_MODE_OVERRIDE}" />
-
         <property name="nullValue" value="" />
         <property name="properties" ref="properties" />
     </bean>
