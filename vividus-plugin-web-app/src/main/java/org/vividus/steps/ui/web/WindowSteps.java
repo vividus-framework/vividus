@@ -153,7 +153,7 @@ public class WindowSteps
         tryToCloseCurrentWindow((driver, window) ->
         {
             javascriptActions.closeCurrentWindow();
-            if (!alertActions.isAlertPresent())
+            if (!alertActions.isAlertPresent(driver))
             {
                 driver.switchTo().window(window);
             }

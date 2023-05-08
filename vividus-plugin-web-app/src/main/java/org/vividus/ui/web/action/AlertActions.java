@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.hamcrest.Matcher;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
@@ -48,46 +48,36 @@ public class AlertActions implements IAlertActions
     private Duration waitForAlertTimeout;
 
     @Override
-    public boolean isAlertPresent()
-    {
-        return isAlertPresent(webDriverProvider.get());
-    }
-
-    @Override
     public boolean isAlertPresent(WebDriver webDriver)
     {
-        return switchToAlert(webDriver) != null;
+        return switchToAlert(webDriver).isPresent();
     }
 
     @Override
-    public void processAlert(Matcher<String> matcher, Action action)
+    public Optional<Alert> switchToAlert()
     {
-        Alert alert = switchToAlert(webDriverProvider.get());
-        if (alert != null && matcher.matches(alert.getText()))
-        {
-            action.process(alert, webDriverManager);
-        }
+        return switchToAlert(webDriverProvider.get());
     }
 
-    private Alert switchToAlert(WebDriver webDriver)
+    private Optional<Alert> switchToAlert(WebDriver webDriver)
     {
         if (webDriverManager.isMobile())
         {
             LOGGER.warn("Skipped alert interaction in mobile context");
-            return null;
+            return Optional.empty();
         }
         try
         {
-            return webDriver.switchTo().alert();
+            return Optional.ofNullable(webDriver.switchTo().alert());
         }
         catch (NoAlertPresentException e)
         {
-            return null;
+            return Optional.empty();
         }
         catch (NoSuchWindowException e)
         {
             windowsActions.switchToPreviousWindow();
-            return null;
+            return Optional.empty();
         }
     }
 
@@ -101,11 +91,13 @@ public class AlertActions implements IAlertActions
     @Override
     public void processAlert(Action action)
     {
-        Alert alert = switchToAlert(webDriverProvider.get());
-        if (alert != null)
-        {
-            action.process(alert, webDriverManager);
-        }
+        switchToAlert().ifPresent(alert -> processAlert(action, alert));
+    }
+
+    @Override
+    public void processAlert(Action action, Alert alert)
+    {
+        action.process(alert, webDriverManager);
     }
 
     public void setWaitForAlertTimeout(Duration waitForAlertTimeout)
@@ -128,8 +120,8 @@ public class AlertActions implements IAlertActions
                 }
                 catch (WebDriverException e)
                 {
-                    LOGGER.warn("Could not accept alert smoothly, trying to perform it in native context: {}",
-                            e.getMessage());
+                    LOGGER.atWarn().addArgument(e::getMessage).log(
+                            "Could not accept alert smoothly, trying to perform it in native context: {}");
                     if (webDriverManager.isAndroid())
                     {
                         webDriverManager.performActionInNativeContext(webDriver ->

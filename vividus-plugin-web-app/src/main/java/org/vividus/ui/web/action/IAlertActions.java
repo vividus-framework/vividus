@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,21 @@
 
 package org.vividus.ui.web.action;
 
-import org.hamcrest.Matcher;
+import java.util.Optional;
+
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.WebDriver;
 import org.vividus.ui.web.action.AlertActions.Action;
 
 public interface IAlertActions
 {
-    boolean isAlertPresent();
-
     boolean isAlertPresent(WebDriver webDriver);
 
-    void processAlert(Matcher<String> matcher, Action action);
+    Optional<Alert> switchToAlert();
 
     void processAlert(Action action);
+
+    void processAlert(Action action, Alert alert);
 
     boolean waitForAlert(WebDriver webDriver);
 }
