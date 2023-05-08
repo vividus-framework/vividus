@@ -22,7 +22,12 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class ResourceValidation extends AbstractResourceValidation<ResourceValidation>
 {
-    public ResourceValidation(Pair<URI, String> uriOrError)
+    public ResourceValidation(URI resourceUri)
+    {
+        this(Pair.of(resourceUri, null));
+    }
+
+    private ResourceValidation(Pair<URI, String> uriOrError)
     {
         super(uriOrError);
     }

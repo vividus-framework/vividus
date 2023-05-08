@@ -29,7 +29,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
@@ -65,7 +64,7 @@ class ResourceValidatorTests
         when(httpClient.doHttpHead(eq(FIRST), any(HttpContext.class))).thenReturn(httpResponse);
         when(httpResponse.getStatusCode()).thenReturn(200);
         when(softAssert.assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER))).thenReturn(true);
-        var resourceValidation = new ResourceValidation(Pair.of(FIRST, null));
+        var resourceValidation = new ResourceValidation(FIRST);
         var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, result.getCheckStatus());
     }
@@ -76,7 +75,7 @@ class ResourceValidatorTests
         when(httpClient.doHttpHead(eq(FIRST), any(HttpContext.class))).thenReturn(httpResponse);
         when(httpResponse.getStatusCode()).thenReturn(200);
         when(softAssert.assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER))).thenReturn(true);
-        var resourceValidation = new ResourceValidation(Pair.of(FIRST, null));
+        var resourceValidation = new ResourceValidation(FIRST);
         var first = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, first.getCheckStatus());
 
@@ -94,7 +93,7 @@ class ResourceValidatorTests
         when(httpResponse.getStatusCode()).thenReturn(forbidden);
         when(softAssert.assertThat(eq("Status code for https://vividus.org is 403. expected one of [200]"),
                 eq(forbidden), argThat(MATCHER))).thenReturn(false);
-        var resourceValidation = new ResourceValidation(Pair.of(FIRST, null));
+        var resourceValidation = new ResourceValidation(FIRST);
         var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.FAILED, result.getCheckStatus());
     }
@@ -107,7 +106,7 @@ class ResourceValidatorTests
         when(softAssert.assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER))).thenReturn(true);
         var notFound = 404;
         when(httpResponse.getStatusCode()).thenReturn(notFound).thenReturn(OK);
-        var resourceValidation = new ResourceValidation(Pair.of(FIRST, null));
+        var resourceValidation = new ResourceValidation(FIRST);
         var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, result.getCheckStatus());
     }
@@ -117,7 +116,7 @@ class ResourceValidatorTests
     {
         var ioException = new IOException();
         when(httpClient.doHttpHead(eq(FIRST), any(HttpContext.class))).thenThrow(ioException);
-        var resourceValidation = new ResourceValidation(Pair.of(FIRST, null));
+        var resourceValidation = new ResourceValidation(FIRST);
         var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.BROKEN, result.getCheckStatus());
         verify(softAssert).recordFailedAssertion("Exception occured during check of: https://vividus.org", ioException);

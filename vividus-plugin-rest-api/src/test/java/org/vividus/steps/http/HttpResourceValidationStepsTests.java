@@ -25,7 +25,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,7 +75,7 @@ class HttpResourceValidationStepsTests
 
     private static ResourceValidation createResourceValidation(String url, CheckStatus status)
     {
-        ResourceValidation validation = new ResourceValidation(Pair.of(URI.create(url), null));
+        ResourceValidation validation = new ResourceValidation(URI.create(url));
         validation.setCheckStatus(status);
         return validation;
     }

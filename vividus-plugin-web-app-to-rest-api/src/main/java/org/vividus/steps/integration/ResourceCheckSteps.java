@@ -111,10 +111,12 @@ public class ResourceCheckSteps
                         URI uriToCheck = resourceValidation.getUriOrError().getLeft();
                         if (uriToCheck != null && isNotAbsolute(uriToCheck))
                         {
-                            softAssert.recordFailedAssertion(String.format(
+                            String message = String.format(
                                     "Unable to resolve %s resource since the main application page URL is not set",
-                                    uriToCheck));
+                                    uriToCheck);
+                            softAssert.recordFailedAssertion(message);
 
+                            resourceValidation.setUriOrError(Pair.of(null, message));
                             resourceValidation.setCheckStatus(CheckStatus.BROKEN);
                         }
                     });

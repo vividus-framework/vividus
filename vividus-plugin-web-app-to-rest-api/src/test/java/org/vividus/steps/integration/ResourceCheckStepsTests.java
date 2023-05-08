@@ -113,6 +113,8 @@ class ResourceCheckStepsTests
 
     private static final String INVALID_URL = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|"
             + "Google+Sans:400,500,700|Google+Sans+Text:400&lang=en";
+    private static final String INVALID_HREF_ATTR_MESSAGE = "Element has href/src attribute with invalid URL: "
+            + INVALID_URL;
     private static final String INVALID_URL_ERROR =
             "java.net.URISyntaxException: Illegal character in query at index 62: " + INVALID_URL;
 
@@ -243,19 +245,22 @@ class ResourceCheckStepsTests
         resourceCheckSteps.init();
         when(webApplicationConfiguration.getMainApplicationPageUrlUnsafely()).thenReturn(null);
 
-        String html = "<!DOCTYPE html><html><head></head><body><a id='about' href='/faq'>FAQ</a></body></html>";
+        String html = "<!DOCTYPE html><html><head></head><body><a id='about' href='/faq'>FAQ</a>"
+                + "<a id='broken-link' href='" + INVALID_URL + "'>Invalid link</a></body></html>";
         resourceCheckSteps.checkResources(LINK_SELECTOR, html);
 
+        String errorMessage = "Unable to resolve /faq resource since the main application page URL is not set";
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(1));
-            validate(validationsToReport.iterator(), URI.create(FAQ_URL), ABOUT_ID, CheckStatus.BROKEN, N_A);
+            assertThat(validationsToReport, hasSize(2));
+            Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
+            validateError(resourceValidations.next(), INVALID_HREF_ATTR_MESSAGE, "#broken-link", N_A);
+            validateError(resourceValidations.next(), errorMessage, ABOUT_ID, N_A);
             return true;
         }), eq(REPORT_NAME));
-        verify(softAssert).recordFailedAssertion(
-                "Unable to resolve /faq resource since the main application page URL is not set");
+        verify(softAssert).recordFailedAssertion(errorMessage);
     }
 
     static Stream<Arguments> brokenPageUrls()
@@ -360,8 +365,7 @@ class ResourceCheckStepsTests
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validateError(resourceValidations.next(), "Element doesn't contain href/src attributes", "#video-id",
                     THIRD_PAGE_URL);
-            validateError(resourceValidations.next(), "Element has href/src attribute with invalid URL: " + INVALID_URL,
-                    "#link-id-2", THIRD_PAGE_URL);
+            validateError(resourceValidations.next(), INVALID_HREF_ATTR_MESSAGE, "#link-id-2", THIRD_PAGE_URL);
             validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, "#link-id", CheckStatus.PASSED);
             return true;
         }), eq(REPORT_NAME));
