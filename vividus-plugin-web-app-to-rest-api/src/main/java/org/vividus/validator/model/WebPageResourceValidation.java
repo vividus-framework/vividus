@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.vividus.validator.model;
 
 import java.net.URI;
+import java.util.Comparator;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.vividus.http.validation.model.AbstractResourceValidation;
 
 public class WebPageResourceValidation extends AbstractResourceValidation<WebPageResourceValidation>
@@ -32,14 +34,14 @@ public class WebPageResourceValidation extends AbstractResourceValidation<WebPag
         this(null, N_A);
     }
 
-    public WebPageResourceValidation(URI toCheck, String cssSelector)
+    public WebPageResourceValidation(Pair<URI, String> uriOrError, String cssSelector)
     {
-        this(toCheck, cssSelector, N_A);
+        this(uriOrError, cssSelector, N_A);
     }
 
-    public WebPageResourceValidation(URI toCheck, String cssSelector, String pageURL)
+    public WebPageResourceValidation(Pair<URI, String> uriOrError, String cssSelector, String pageURL)
     {
-        super(toCheck);
+        super(uriOrError);
         this.cssSelector = cssSelector;
         this.pageURL = pageURL;
     }
@@ -69,6 +71,7 @@ public class WebPageResourceValidation extends AbstractResourceValidation<WebPag
     {
         WebPageResourceValidation newValidation = new WebPageResourceValidation();
         newValidation.pageURL = this.pageURL;
+        newValidation.cssSelector = this.cssSelector;
         copyParameters(newValidation);
         return newValidation;
     }
@@ -79,7 +82,9 @@ public class WebPageResourceValidation extends AbstractResourceValidation<WebPag
         int result = super.compareTo(toCompare);
         if (0 == result)
         {
-            return this.getPageURL().compareTo(getPageURL());
+            return Comparator.comparing(WebPageResourceValidation::getPageURL)
+                             .thenComparing(WebPageResourceValidation::getCssSelector)
+                             .compare(this, toCompare);
         }
         return result;
     }
@@ -87,7 +92,7 @@ public class WebPageResourceValidation extends AbstractResourceValidation<WebPag
     @Override
     public String toString()
     {
-        return "WebPageResourceValidation [uri=" + getUri() + ", cssSelector=" + cssSelector + ", pageURL=" + pageURL
-                + ", statusCode=" + getStatusCode() + ", checkStatus=" + getCheckStatus() + "]";
+        return "WebPageResourceValidation [uri=" + getUriOrError() + ", cssSelector=" + cssSelector + ", pageURL="
+                + pageURL + ", statusCode=" + getStatusCode() + ", checkStatus=" + getCheckStatus() + "]";
     }
 }

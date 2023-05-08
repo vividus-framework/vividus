@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
 import org.vividus.http.validation.ResourceValidator;
@@ -59,6 +60,7 @@ public class HttpResourceValidationSteps
                                                         .stream()
                                                         .map(row -> row.get("url"))
                                                         .map(UriUtils::createUri)
+                                                        .map(uri -> Pair.of(uri, (String) null))
                                                         .map(ResourceValidation::new)
                                                         .map(resourceValidator::perform)
                                                         .sorted()

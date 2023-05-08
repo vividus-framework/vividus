@@ -56,7 +56,7 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
 
     public T perform(T resourceValidation)
     {
-        return cache.compute(resourceValidation.getUri(), (uri, rv) -> Optional.ofNullable(rv)
+        return cache.compute(resourceValidation.getUriOrError().getLeft(), (uri, rv) -> Optional.ofNullable(rv)
                 .map(r -> {
                     T cachedResult = r.copy();
                     cachedResult.setCheckStatus(CheckStatus.SKIPPED);
