@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ class MobileAppWebDriverManagerTests
     private static final String GET_SESSION_COMMAND = "getSession";
     private static final String STAT_BAR_HEIGHT = "statBarHeight";
     private static final String HEIGHT = "height";
-    private static final String MOBILE_DEVICE_SCREEN_INFO_JS = "mobile:deviceScreenInfo";
+    private static final String MOBILE_DEVICE_SCREEN_INFO_JS = "mobile: deviceScreenInfo";
     private static final Map<String, Object> STATUS_BAR_SIZE =
         Map.of("statusBarSize", Map.of("width", 375, HEIGHT, 44), "scale", 3);
 

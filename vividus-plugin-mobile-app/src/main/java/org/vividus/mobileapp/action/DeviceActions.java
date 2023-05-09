@@ -61,7 +61,7 @@ public class DeviceActions
     public void deleteFile(String deviceFilePath)
     {
         Map<String, Object> args = Map.of("remotePath", deviceFilePath);
-        webDriverProvider.getUnwrapped(JavascriptExecutor.class).executeScript("mobile:deleteFile", args);
+        webDriverProvider.getUnwrapped(JavascriptExecutor.class).executeScript("mobile: deleteFile", args);
     }
 
     /**

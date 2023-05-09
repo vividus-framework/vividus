@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class MobileAppWebDriverManager extends GenericWebDriverManager
             if (null == statBarHeight)
             {
                 // Appium 1.21.0 or higher is required
-                Map<String, ?> deviceScreenInfo = javascriptActions.executeScript("mobile:deviceScreenInfo");
+                Map<String, ?> deviceScreenInfo = javascriptActions.executeScript("mobile: deviceScreenInfo");
                 Map<String, ?> statusBarSize = (Map<String, ?>) deviceScreenInfo.get("statusBarSize");
                 statBarHeight = (Number) statusBarSize.get(HEIGHT);
             }

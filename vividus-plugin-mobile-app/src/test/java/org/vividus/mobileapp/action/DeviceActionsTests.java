@@ -71,7 +71,7 @@ class DeviceActionsTests
         when(webDriverProvider.getUnwrapped(JavascriptExecutor.class)).thenReturn(javascriptExecutor);
 
         deviceActions.deleteFile(DEVICE_FILE_PATH);
-        verify(javascriptExecutor).executeScript("mobile:deleteFile", Map.of("remotePath", DEVICE_FILE_PATH));
+        verify(javascriptExecutor).executeScript("mobile: deleteFile", Map.of("remotePath", DEVICE_FILE_PATH));
         verifyNoMoreInteractions(webDriverProvider);
     }
 

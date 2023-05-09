@@ -186,7 +186,7 @@ public class TouchActions
             BooleanSupplier stopCondition)
     {
         /*
-         * mobile:scroll
+         * mobile: scroll
          * iOS
          * - scroll to an element works only if the element resides in UP scroll direction
          * - if the element in DOWN scroll direction, the command still tries to find the element in UP scroll direction

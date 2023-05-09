@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class MobileViewportShootingStrategy extends SimpleShootingStrategy
     public BufferedImage getScreenshot(WebDriver wd)
     {
         // Get screenshot without status bar
-        String base64Png = (String) ((JavascriptExecutor) wd).executeScript("mobile:viewportScreenshot");
+        String base64Png = (String) ((JavascriptExecutor) wd).executeScript("mobile: viewportScreenshot");
         // https://github.com/SeleniumHQ/selenium/issues/11168
         String rfc4648Base64 = base64Png.replaceAll("\\r?\\n", "");
         byte[] bytes = OutputType.BYTES.convertFromBase64Png(rfc4648Base64);
