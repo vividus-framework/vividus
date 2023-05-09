@@ -61,7 +61,7 @@ public class ActionsSequenceSteps extends AbstractActionsSequenceSteps
      * </table>
      * @param actions table of actions to execute
      */
-    @When("I execute sequence of touch actions: $actions")
+    @When("I execute sequence of touch actions:$actions")
     public void executeSequenceOfActions(List<AtomicAction<TouchGestures>> actions)
     {
         execute(TouchGestures::new, actions);

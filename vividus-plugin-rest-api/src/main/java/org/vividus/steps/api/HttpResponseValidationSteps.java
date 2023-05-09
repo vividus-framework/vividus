@@ -347,10 +347,10 @@ public class HttpResponseValidationSteps
      * @param attributes The ExamplesTable with expected elements
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
-    @Then("response header '$httpHeaderName' contains attribute: $attributes")
+    @Then("response header '$httpHeaderName' contains attribute:$attributes")
     public void assertHeaderContainsAttributes(String httpHeaderName, ExamplesTable attributes)
     {
-        logDeprecated("Then response header '$httpHeaderName' contains attribute: $attributes",
+        logDeprecated("Then response header '$httpHeaderName' contains attribute:$attributes",
                 "Then response header `$headerName` contains elements:$elements");
         performIfHttpResponseIsPresent(response ->
         {
