@@ -108,8 +108,6 @@
         <constructor-arg index="1" value="#{T(org.vividus.steps.StringComparisonRule).IS_EQUAL_TO}" />
     </bean>
 
-    <bean class="org.vividus.ui.mobile.action.search.ElementAttributeFilter" />
-
     <bean class="org.vividus.ui.mobile.action.MobileAppElementActions" />
 
     <bean class="org.vividus.selenium.mobileapp.screenshot.MobileAppAshotFactory" parent="abstractAshotFactory">

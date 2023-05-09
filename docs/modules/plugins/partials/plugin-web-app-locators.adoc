@@ -94,6 +94,12 @@ The elements not matching the filter condition are sorted out without any notice
 
 include::partial$common-filters.adoc[]
 
+|`attribute`
+|Filter elements by their attribute values
+a|`tagName(div)->filter.attribute(class=burger-menu)` - `div` element has the `class` attribute with `burger-menu` value
+`tagName(div)->filter.attribute(class)` - `div` element has the `class` attribute with any value
+`tagName(div)->filter.attribute(class=)` - `div` element has the `class` attribute with an empty value
+
 |`state`
 |element xref:parameters:state.adoc[State]
 |id(v1)->filter.state(VISIBLE)

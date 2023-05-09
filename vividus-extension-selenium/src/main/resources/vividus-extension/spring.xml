@@ -151,6 +151,7 @@
     <bean id="barcodeSteps" class="org.vividus.steps.ui.BarcodeSteps" />
 
     <bean class="org.vividus.ui.action.search.IndexElementFilter" />
+    <bean class="org.vividus.ui.action.search.ElementAttributeFilter" />
 
     <bean class="org.vividus.selenium.screenshot.AbstractScreenshotTaker" id="abstractScreenshotTaker" abstract="true" />
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.mobile.action.search;
+package org.vividus.ui.action.search;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -81,6 +81,6 @@ class ElementAttributeFilterTests
     @Test
     void shouldReturnLocatorType()
     {
-        assertEquals(AppiumLocatorType.ATTRIBUTE, filter.getType());
+        assertEquals(GenericLocatorType.ATTRIBUTE, filter.getType());
     }
 }
