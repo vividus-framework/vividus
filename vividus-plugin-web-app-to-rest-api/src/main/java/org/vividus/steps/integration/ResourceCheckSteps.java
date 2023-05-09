@@ -150,9 +150,8 @@ public class ResourceCheckSteps
                 .peek(rv ->
                 {
                     resourceValidator.accept(rv);
-                    URI uri = rv.getUriOrError().getLeft();
-                    if ((uri != null && !isSchemaAllowed(uri) || excludeHrefsPattern.matcher(rv.toString()).matches())
-                            && rv.getCheckStatus() != CheckStatus.BROKEN)
+                    if (rv.getCheckStatus() != CheckStatus.BROKEN && !isSchemaAllowed(rv.getUriOrError().getLeft())
+                            || excludeHrefsPattern.matcher(rv.toString()).matches())
                     {
                         rv.setCheckStatus(CheckStatus.FILTERED);
                     }
