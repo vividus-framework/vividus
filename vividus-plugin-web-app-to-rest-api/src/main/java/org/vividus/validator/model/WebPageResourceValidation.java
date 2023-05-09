@@ -34,6 +34,11 @@ public class WebPageResourceValidation extends AbstractResourceValidation<WebPag
         this(null, N_A);
     }
 
+    public WebPageResourceValidation(String error)
+    {
+        this(Pair.of(null, error), N_A);
+    }
+
     public WebPageResourceValidation(Pair<URI, String> uriOrError, String cssSelector)
     {
         this(uriOrError, cssSelector, N_A);
@@ -64,6 +69,11 @@ public class WebPageResourceValidation extends AbstractResourceValidation<WebPag
     public void setPageURL(String pageURL)
     {
         this.pageURL = pageURL;
+    }
+
+    public void setError(String error)
+    {
+        super.setUriOrError(Pair.of(null, error));
     }
 
     @Override

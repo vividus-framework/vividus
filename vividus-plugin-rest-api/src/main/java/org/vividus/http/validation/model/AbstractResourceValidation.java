@@ -38,7 +38,7 @@ public abstract class AbstractResourceValidation<T extends AbstractResourceValid
         return uriOrError;
     }
 
-    public void setUriOrError(Pair<URI, String> uriOrError)
+    protected void setUriOrError(Pair<URI, String> uriOrError)
     {
         this.uriOrError = uriOrError;
     }

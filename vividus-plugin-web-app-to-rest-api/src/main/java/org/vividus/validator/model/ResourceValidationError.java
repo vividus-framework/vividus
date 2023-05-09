@@ -18,7 +18,6 @@ package org.vividus.validator.model;
 
 import java.util.function.Consumer;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.vividus.http.validation.model.CheckStatus;
 
 public enum ResourceValidationError
@@ -48,9 +47,9 @@ public enum ResourceValidationError
 
     public WebPageResourceValidation createValidation(String pageUrl, String cssSelector, Object... params)
     {
-        WebPageResourceValidation resourceValidation = new WebPageResourceValidation();
+        WebPageResourceValidation resourceValidation = new WebPageResourceValidation(
+                String.format(errorFormat, params));
         resourceValidation.setCheckStatus(CheckStatus.BROKEN);
-        resourceValidation.setUriOrError(Pair.of(null, String.format(errorFormat, params)));
         if (pageUrl != null)
         {
             resourceValidation.setPageURL(pageUrl);

@@ -116,7 +116,7 @@ public class ResourceCheckSteps
                                     uriToCheck);
                             softAssert.recordFailedAssertion(message);
 
-                            resourceValidation.setUriOrError(Pair.of(null, message));
+                            resourceValidation.setError(message);
                             resourceValidation.setCheckStatus(CheckStatus.BROKEN);
                         }
                     });
