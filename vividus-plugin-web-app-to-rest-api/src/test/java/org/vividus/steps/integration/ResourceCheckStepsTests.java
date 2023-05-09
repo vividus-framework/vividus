@@ -43,9 +43,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -112,6 +113,8 @@ class ResourceCheckStepsTests
 
     private static final String INVALID_URL = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|"
             + "Google+Sans:400,500,700|Google+Sans+Text:400&lang=en";
+    private static final String INVALID_HREF_ATTR_MESSAGE = "Element has href/src attribute with invalid URL: "
+            + INVALID_URL;
     private static final String INVALID_URL_ERROR =
             "java.net.URISyntaxException: Illegal character in query at index 62: " + INVALID_URL;
 
@@ -242,35 +245,41 @@ class ResourceCheckStepsTests
         resourceCheckSteps.init();
         when(webApplicationConfiguration.getMainApplicationPageUrlUnsafely()).thenReturn(null);
 
-        String html = "<!DOCTYPE html><html><head></head><body><a id='about' href='/faq'>FAQ</a></body></html>";
+        String html = "<!DOCTYPE html><html><head></head><body><a id='about' href='/faq'>FAQ</a>"
+                + "<a id='broken-link' href='" + INVALID_URL + "'>Invalid link</a></body></html>";
         resourceCheckSteps.checkResources(LINK_SELECTOR, html);
 
+        String errorMessage = "Unable to resolve /faq resource since the main application page URL is not set";
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(1));
-            validate(validationsToReport.iterator(), URI.create(FAQ_URL), ABOUT_ID, CheckStatus.BROKEN, N_A);
+            assertThat(validationsToReport, hasSize(2));
+            Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
+            validateError(resourceValidations.next(), INVALID_HREF_ATTR_MESSAGE, "#broken-link", N_A);
+            validateError(resourceValidations.next(), errorMessage, ABOUT_ID, N_A);
             return true;
         }), eq(REPORT_NAME));
-        verify(softAssert).recordFailedAssertion(
-                "Unable to resolve /faq resource since the main application page URL is not set");
+        verify(softAssert).recordFailedAssertion(errorMessage);
     }
 
     static Stream<Arguments> brokenPageUrls()
     {
         return Stream.of(
-                arguments("/relative", (Consumer<ISoftAssert>) softAssert -> verify(softAssert).recordFailedAssertion(
-                        "Unable to resolve /relative page since the main application page URL is not set")),
-                arguments(INVALID_URL, (Consumer<ISoftAssert>) softAssert -> verify(softAssert).recordFailedAssertion(
-                        eq("Invalid page URL"), argThat(e -> INVALID_URL_ERROR.equals(e.toString()))))
+            arguments(
+                "/relative", "Unable to resolve /relative page since the main application page URL is not set",
+                (BiConsumer<ISoftAssert, String>) (softAssert, msg) -> verify(softAssert).recordFailedAssertion(msg)),
+            arguments(
+                INVALID_URL, "Invalid page URL: " + INVALID_URL,
+                (BiConsumer<ISoftAssert, String>) (softAssert, msg) -> verify(softAssert).recordFailedAssertion(eq(msg),
+                        argThat(e -> INVALID_URL_ERROR.equals(e.toString()))))
         );
     }
 
     @ParameterizedTest
     @MethodSource("brokenPageUrls")
-    void shouldConsiderResourceAsBrokenIfUnableToResolveTheUrlFromPage(String pageUrl,
-            Consumer<ISoftAssert> softAssertVerifier) throws InterruptedException, ExecutionException
+    void shouldConsiderResourceAsBrokenIfUnableToResolveTheUrlFromPage(String pageUrl, String message,
+            BiConsumer<ISoftAssert, String> softAssertVerifier) throws InterruptedException, ExecutionException
     {
         mockResourceValidator();
         runExecutor();
@@ -284,11 +293,11 @@ class ResourceCheckStepsTests
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
-            validate(validationsToReport.iterator(), null, N_A, CheckStatus.BROKEN, pageUrl);
+            validateError(validationsToReport.iterator().next(), message, N_A, pageUrl);
             return true;
         }), eq(REPORT_NAME));
         verifyNoInteractions(httpRequestExecutor);
-        softAssertVerifier.accept(softAssert);
+        softAssertVerifier.accept(softAssert, message);
     }
 
     @Test
@@ -352,15 +361,30 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(1));
+            assertThat(validationsToReport, hasSize(3));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
+            validateError(resourceValidations.next(), "Element doesn't contain href/src attributes", "#video-id",
+                    THIRD_PAGE_URL);
+            validateError(resourceValidations.next(), INVALID_HREF_ATTR_MESSAGE, "#link-id-2", THIRD_PAGE_URL);
             validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, "#link-id", CheckStatus.PASSED);
             return true;
         }), eq(REPORT_NAME));
         verify(softAssert).recordFailedAssertion("Element by selector #video-id doesn't contain href/src attributes");
         verify(softAssert).recordFailedAssertion(
-                eq("Element by selector #link-id-2 has href/src attribute with invalid URL"),
+                eq("Element by selector #link-id-2 has href/src attribute with invalid URL: " + INVALID_URL),
                 argThat(e -> INVALID_URL_ERROR.equals(e.toString())));
+    }
+
+    private static void validateError(WebPageResourceValidation validation, String message, String selector,
+            String page)
+    {
+        Pair<URI, String> uriOrError = validation.getUriOrError();
+        Assertions.assertAll(
+            () -> assertNull(uriOrError.getLeft()),
+            () -> assertEquals(message, uriOrError.getRight()),
+            () -> assertEquals(selector, validation.getCssSelector()),
+            () -> assertSame(CheckStatus.BROKEN, validation.getCheckStatus()),
+            () -> assertEquals(page, validation.getPageURL()));
     }
 
     @Test
@@ -404,22 +428,17 @@ class ResourceCheckStepsTests
         ExamplesTable examplesTable =
                 new ExamplesTable(FIRST_PAGE_TABLE);
         resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
+        String errorMessage = "Unable to get page with URL: https://first.page";
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
-            WebPageResourceValidation resourceValidation = validationsToReport.iterator().next();
-            Assertions.assertAll(
-                () -> assertNull(resourceValidation.getUri()),
-                () -> assertEquals(N_A, resourceValidation.getCssSelector()),
-                () -> assertSame(CheckStatus.BROKEN, resourceValidation.getCheckStatus()),
-                () -> assertEquals(FIRST_PAGE_URL, resourceValidation.getPageURL()));
+            validateError(validationsToReport.iterator().next(), errorMessage, N_A, FIRST_PAGE_URL);
             return true;
         }), eq(REPORT_NAME));
         verifyNoInteractions(httpTestContext);
-        verify(softAssert).recordFailedAssertion(
-                "Unable to get page with URL: https://first.page", ioException);
+        verify(softAssert).recordFailedAssertion(errorMessage, ioException);
     }
 
     @Test
@@ -434,22 +453,17 @@ class ResourceCheckStepsTests
         ExamplesTable examplesTable =
                 new ExamplesTable("|pages|\n|https://second.page|");
         resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
+        String errorMessage = "Unable to get page with URL: https://second.page; Response is received without body;";
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
-            WebPageResourceValidation resourceValidation = validationsToReport.iterator().next();
-            Assertions.assertAll(
-                () -> assertNull(resourceValidation.getUri()),
-                () -> assertEquals(N_A, resourceValidation.getCssSelector()),
-                () -> assertSame(CheckStatus.BROKEN, resourceValidation.getCheckStatus()),
-                () -> assertEquals(SECOND_PAGE_URL, resourceValidation.getPageURL()));
+            validateError(validationsToReport.iterator().next(), errorMessage, N_A, SECOND_PAGE_URL);
             return true;
         }), eq(REPORT_NAME));
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, SECOND_PAGE_URL, Optional.empty());
-        verify(softAssert).recordFailedAssertion(
-                "Unable to get page with URL: https://second.page; Response is received without body;");
+        verify(softAssert).recordFailedAssertion(errorMessage);
     }
 
     @Test
@@ -544,7 +558,7 @@ class ResourceCheckStepsTests
     private void validate(WebPageResourceValidation actual, URI uri, String selector, CheckStatus checkStatus)
     {
         Assertions.assertAll(
-            () -> assertEquals(uri, actual.getUri()),
+            () -> assertEquals(uri, actual.getUriOrError().getLeft()),
             () -> assertEquals(selector, actual.getCssSelector()),
             () -> assertSame(checkStatus, actual.getCheckStatus()));
     }

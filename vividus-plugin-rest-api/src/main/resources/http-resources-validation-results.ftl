@@ -58,7 +58,7 @@
             <#assign checkStatus = result.checkStatus>
                 <tr class="${checkStatus?lower_case}">
                     <td>
-                        ${result.uri}
+                        ${result.uriOrError.getLeft()}
                     </td>
                     <td>
                         ${checkStatus}

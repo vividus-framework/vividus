@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hc.core5.net.URIBuilder;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
@@ -47,6 +48,7 @@ import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.testcontext.ContextCopyingExecutor;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
+import org.vividus.validator.model.ResourceValidationError;
 import org.vividus.validator.model.WebPageResourceValidation;
 
 public class ResourceCheckSteps
@@ -106,13 +108,15 @@ public class ResourceCheckSteps
             Collection<Element> resourcesToValidate = getElementsByCssSelector(html, cssSelector);
             Stream<WebPageResourceValidation> validations = createResourceValidations(resourcesToValidate,
                     resourceValidation -> {
-                        URI uriToCheck = resourceValidation.getUri();
-                        if (isNotAbsolute(uriToCheck))
+                        URI uriToCheck = resourceValidation.getUriOrError().getLeft();
+                        if (uriToCheck != null && isNotAbsolute(uriToCheck))
                         {
-                            softAssert.recordFailedAssertion(String.format(
+                            String message = String.format(
                                     "Unable to resolve %s resource since the main application page URL is not set",
-                                    uriToCheck));
+                                    uriToCheck);
+                            softAssert.recordFailedAssertion(message);
 
+                            resourceValidation.setError(message);
                             resourceValidation.setCheckStatus(CheckStatus.BROKEN);
                         }
                     });
@@ -146,8 +150,8 @@ public class ResourceCheckSteps
                 .peek(rv ->
                 {
                     resourceValidator.accept(rv);
-                    if ((!isSchemaAllowed(rv.getUri()) || excludeHrefsPattern.matcher(rv.toString()).matches())
-                            && rv.getCheckStatus() != CheckStatus.BROKEN)
+                    if (rv.getCheckStatus() != CheckStatus.BROKEN && !isSchemaAllowed(rv.getUriOrError().getLeft())
+                            || excludeHrefsPattern.matcher(rv.toString()).matches())
                     {
                         rv.setCheckStatus(CheckStatus.FILTERED);
                     }
@@ -166,21 +170,21 @@ public class ResourceCheckSteps
         String elementCssSelector = getCssSelector(element);
         if (elementUriAsString.isEmpty())
         {
-            softAssert.recordFailedAssertion(
-                    String.format("Element by selector %s doesn't contain href/src attributes", elementCssSelector));
-            return Optional.empty();
+            return Optional.of(ResourceValidationError.EMPTY_HREF_SRC
+                    .onAssertion(softAssert::recordFailedAssertion, elementCssSelector)
+                    .createValidation(null, elementCssSelector));
         }
         try
         {
-            URI elementUri = resolveUri(elementUriAsString);
+            Pair<URI, String> elementUri = Pair.of(resolveUri(elementUriAsString), null);
             return Optional.of(new WebPageResourceValidation(elementUri, elementCssSelector));
         }
         catch (URISyntaxException e)
         {
-            softAssert.recordFailedAssertion(
-                    String.format("Element by selector %s has href/src attribute with invalid URL", elementCssSelector),
-                    e);
-            return Optional.empty();
+            return Optional.of(ResourceValidationError.INVALID_HREF_SRC
+                    .onAssertion(msg -> softAssert.recordFailedAssertion(msg, e), elementCssSelector,
+                            elementUriAsString)
+                    .createValidation(null, elementCssSelector, elementUriAsString));
         }
     }
 
@@ -283,8 +287,10 @@ public class ResourceCheckSteps
                         }
                         catch (URISyntaxException e)
                         {
-                            softAssert.recordFailedAssertion("Invalid page URL", e);
-                            return Stream.of(createBrokenPageValidation(rawPageUrl));
+                            WebPageResourceValidation valdation = ResourceValidationError.INVALID_PAGE_URL
+                                    .onAssertion(msg -> softAssert.recordFailedAssertion(msg, e), rawPageUrl)
+                                    .createValidation(rawPageUrl, null, rawPageUrl);
+                            return Stream.of(valdation);
                         }
 
                         try
@@ -326,30 +332,21 @@ public class ResourceCheckSteps
 
     private WebPageResourceValidation createUnreachablePageValidation(String pageURL, Exception exception)
     {
-        softAssert.recordFailedAssertion("Unable to get page with URL: " + pageURL, exception);
-        return createBrokenPageValidation(pageURL);
+        return ResourceValidationError.UNREACHABLE_PAGE
+                .onAssertion(msg -> softAssert.recordFailedAssertion(msg, exception), pageURL)
+                .createValidation(pageURL, null, pageURL);
     }
 
     private WebPageResourceValidation createMissingPageBodyValidation(String pageURL)
     {
-        softAssert.recordFailedAssertion(
-                String.format("Unable to get page with URL: %s; Response is received without body;", pageURL));
-        return createBrokenPageValidation(pageURL);
+        return ResourceValidationError.RESPONSE_IS_EMPTY.onAssertion(softAssert::recordFailedAssertion, pageURL)
+                .createValidation(pageURL, null, pageURL);
     }
 
     private WebPageResourceValidation createUnresolvablePageValidation(String pageUrl)
     {
-        softAssert.recordFailedAssertion(
-                String.format("Unable to resolve %s page since the main application page URL is not set", pageUrl));
-        return createBrokenPageValidation(pageUrl);
-    }
-
-    private WebPageResourceValidation createBrokenPageValidation(String pageUrl)
-    {
-        WebPageResourceValidation resourceValidation = new WebPageResourceValidation();
-        resourceValidation.setCheckStatus(CheckStatus.BROKEN);
-        resourceValidation.setPageURL(pageUrl);
-        return resourceValidation;
+        return ResourceValidationError.MAIN_PAGE_IS_NOT_SET.onAssertion(softAssert::recordFailedAssertion, pageUrl)
+                .createValidation(pageUrl, null, pageUrl);
     }
 
     public void setUriToIgnoreRegex(Optional<String> uriToIgnoreRegex)

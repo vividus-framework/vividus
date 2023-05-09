@@ -64,11 +64,11 @@
             <#assign checkStatus = result.checkStatus>
                 <tr class="${checkStatus?lower_case}">
                     <td>
-                        <#if result.uri??>
-                            <#assign uri = result.uri>
+                        <#if result.uriOrError.getLeft()??>
+                            <#assign uri = result.uriOrError.getLeft()>
                             <a class="link" target="_blank" href="${uri}">${uri}</a>
                         <#else>
-                            N/A
+                            ${result.uriOrError.getRight()}
                         </#if>
                     </td>
                     <td>

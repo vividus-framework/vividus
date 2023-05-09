@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,24 @@ package org.vividus.http.validation.model;
 
 import java.net.URI;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 public class ResourceValidation extends AbstractResourceValidation<ResourceValidation>
 {
     public ResourceValidation(URI resourceUri)
     {
-        super(resourceUri);
+        this(Pair.of(resourceUri, null));
+    }
+
+    private ResourceValidation(Pair<URI, String> uriOrError)
+    {
+        super(uriOrError);
     }
 
     @Override
     public ResourceValidation copy()
     {
-        ResourceValidation newValidation = new ResourceValidation(getUri());
+        ResourceValidation newValidation = new ResourceValidation(getUriOrError());
         copyParameters(newValidation);
         return newValidation;
     }

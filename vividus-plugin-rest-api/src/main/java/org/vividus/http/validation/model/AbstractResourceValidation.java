@@ -20,25 +20,27 @@ import java.net.URI;
 import java.util.Objects;
 import java.util.OptionalInt;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 public abstract class AbstractResourceValidation<T extends AbstractResourceValidation<T>> implements Comparable<T>
 {
-    private URI uri;
+    private Pair<URI, String> uriOrError;
     private OptionalInt statusCode = OptionalInt.empty();
     private CheckStatus checkStatus;
 
-    protected AbstractResourceValidation(URI uri)
+    protected AbstractResourceValidation(Pair<URI, String> uriOrError)
     {
-        this.uri = uri;
+        this.uriOrError = uriOrError;
     }
 
-    public URI getUri()
+    public Pair<URI, String> getUriOrError()
     {
-        return uri;
+        return uriOrError;
     }
 
-    public void setUri(URI uri)
+    protected void setUriOrError(Pair<URI, String> uriOrError)
     {
-        this.uri = uri;
+        this.uriOrError = uriOrError;
     }
 
     public OptionalInt getStatusCode()
@@ -66,13 +68,13 @@ public abstract class AbstractResourceValidation<T extends AbstractResourceValid
     protected void copyParameters(AbstractResourceValidation<T> newValidation)
     {
         newValidation.statusCode = this.statusCode;
-        newValidation.uri = this.uri;
+        newValidation.uriOrError = this.uriOrError;
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(uri);
+        return uriOrError.hashCode();
     }
 
     @Override
@@ -88,16 +90,16 @@ public abstract class AbstractResourceValidation<T extends AbstractResourceValid
         }
         @SuppressWarnings("unchecked")
         AbstractResourceValidation<T> other = (AbstractResourceValidation<T>) obj;
-        return Objects.equals(uri.toString(), other.uri.toString());
+        return Objects.equals(uriOrError, other.uriOrError);
     }
 
     @Override
     public int compareTo(T object)
     {
         int result = Integer.compare(this.getCheckStatus().getWeight(), object.getCheckStatus().getWeight());
-        if (0 == result && this.getUri() != null && object.getUri() != null)
+        if (0 == result && this.getUriOrError() != null && object.getUriOrError() != null)
         {
-            return this.getUri().toString().compareTo(object.getUri().toString());
+            return this.getUriOrError().compareTo(object.getUriOrError());
         }
         return result;
     }

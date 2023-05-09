@@ -82,7 +82,7 @@ class ResourceValidatorTests
         var second = resourceValidator.perform(resourceValidation);
         assertThat(first, not(sameInstance(second)));
         assertEquals(CheckStatus.SKIPPED, second.getCheckStatus());
-        assertEquals(first.getUri(), second.getUri());
+        assertEquals(first.getUriOrError(), second.getUriOrError());
     }
 
     @Test
