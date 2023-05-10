@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,18 @@
 package org.vividus.visual.eyes.factory;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.applitools.eyes.BatchInfo;
+import com.applitools.eyes.EyesRunner;
 import com.applitools.eyes.LogHandler;
 import com.applitools.eyes.RectangleSize;
 import com.applitools.eyes.images.Eyes;
+import com.applitools.eyes.images.ImageRunner;
 
+import org.openqa.selenium.Dimension;
+import org.vividus.ui.ViewportSizeProvider;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.model.VisualActionType;
 
@@ -31,26 +36,31 @@ public class ImageEyesFactory
 {
     private final LogHandler logHandler;
     private final Map<String, BatchInfo> batchStorage = new ConcurrentHashMap<>();
+    private final ViewportSizeProvider viewportSizeProvider;
 
-    public ImageEyesFactory(LogHandler logHandler)
+    public ImageEyesFactory(LogHandler logHandler, ViewportSizeProvider viewportSizeProvider)
     {
         this.logHandler = logHandler;
+        this.viewportSizeProvider = viewportSizeProvider;
     }
 
     public Eyes createEyes(ApplitoolsVisualCheck applitoolsVisualCheck)
     {
-        Eyes eyes = new Eyes();
+        EyesRunner runner = new ImageRunner();
+        runner.setLogHandler(logHandler);
+
+        Eyes eyes = new Eyes(runner);
         eyes.setApiKey(applitoolsVisualCheck.getExecuteApiKey());
-        String viewporSize = applitoolsVisualCheck.getViewportSize();
         //Environment
-        eyes.setExplicitViewportSize(viewporSize == null ? null : RectangleSize.parse(viewporSize));
+        Dimension viewportSize = Optional.ofNullable(applitoolsVisualCheck.getViewportSize())
+                .orElseGet(viewportSizeProvider::getViewportSize);
+        eyes.setViewportSize(new RectangleSize(viewportSize.getWidth(), viewportSize.getHeight()));
         eyes.setHostApp(applitoolsVisualCheck.getHostApp());
         eyes.setHostOS(applitoolsVisualCheck.getHostOS());
         eyes.setBaselineEnvName(applitoolsVisualCheck.getBaselineEnvName());
 
         eyes.setMatchLevel(applitoolsVisualCheck.getMatchLevel());
-        eyes.setServerUrl(applitoolsVisualCheck.getServerUri());
-        eyes.setLogHandler(logHandler);
+        eyes.setServerUrl(applitoolsVisualCheck.getServerUri().toString());
         boolean saveTests = applitoolsVisualCheck.getAction() == VisualActionType.ESTABLISH;
         eyes.setSaveFailedTests(saveTests);
         eyes.setSaveNewTests(saveTests);

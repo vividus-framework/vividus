@@ -9,7 +9,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation(group: 'com.applitools', name: 'eyes-images-java3', version: '3.213.0')
+    implementation(group: 'com.applitools', name: 'eyes-images-java5', version: '5.50.0')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.3')

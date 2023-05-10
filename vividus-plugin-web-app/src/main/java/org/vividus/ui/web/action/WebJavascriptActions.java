@@ -24,11 +24,12 @@ import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.TextUtils;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.ui.ViewportSizeProvider;
 import org.vividus.ui.action.JavascriptActions;
 import org.vividus.ui.web.listener.WebApplicationListener;
 import org.vividus.util.ResourceUtils;
 
-public class WebJavascriptActions extends JavascriptActions implements WebApplicationListener
+public class WebJavascriptActions extends JavascriptActions implements WebApplicationListener, ViewportSizeProvider
 {
     private static final String TRIGGER_EVENT_FORMAT = "if(document.createEvent){var evObj = document"
             + ".createEvent('MouseEvents');evObj.initEvent('%1$s', true, false); arguments[0].dispatchEvent(evObj);} "
@@ -237,6 +238,7 @@ public class WebJavascriptActions extends JavascriptActions implements WebApplic
         return originTop.intValue();
     }
 
+    @Override
     public Dimension getViewportSize()
     {
         Map<String, Long> result = executeScript(
