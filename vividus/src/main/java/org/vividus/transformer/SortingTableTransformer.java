@@ -16,6 +16,9 @@
 
 package org.vividus.transformer;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +33,8 @@ import org.vividus.util.ExamplesTableProcessor;
 
 public class SortingTableTransformer implements ExtendedTableTransformer
 {
+    private static final char DELIMITER = '|';
+
     private final FluentTrimmedEnumConverter fluentTrimmedEnumConverter;
 
     public SortingTableTransformer(FluentTrimmedEnumConverter fluentTrimmedEnumConverter)
@@ -45,26 +50,77 @@ public class SortingTableTransformer implements ExtendedTableTransformer
         String orderProperty = properties.getProperties().getProperty("order", "ASCENDING");
         Order order = (Order) fluentTrimmedEnumConverter.convertValue(orderProperty, Order.class);
         List<String> headerValues = tableRows.getHeaders();
-        List<String> columnsToCompare = Stream.of(StringUtils.split(byColumns, '|'))
+        List<String> columnsToCompare = Stream.of(StringUtils.split(byColumns, DELIMITER))
                 .map(String::trim)
                 .collect(Collectors.toList());
-        List<List<String>> rows = tableRows.getRows().stream()
+        String sortingTypes = properties.getProperties().getProperty("sortingTypes", "STRING");
+        List<SortingType> sortingTypesToCompare = Stream.of(StringUtils.split(sortingTypes, DELIMITER))
+                .map(s -> (SortingType) fluentTrimmedEnumConverter.convertValue(s, SortingType.class))
+                .collect(Collectors.toList());
+        int sortingTypesSize = sortingTypesToCompare.size();
+        isTrue(sortingTypesSize == 1 || sortingTypesSize == columnsToCompare.size(),
+                "Please, specify parameter 'sortingType' (%s) with the same count of types as count of column"
+                + " names in parameter 'byColumns' (%s)", sortingTypes, byColumns);
+        List<List<String>> rows = sort(tableRows, columnsToCompare, sortingTypesToCompare, headerValues, order);
+        return ExamplesTableProcessor.buildExamplesTable(headerValues, rows, properties);
+    }
+
+    private static List<List<String>> sort(TableRows tableRows, List<String> columnsToCompare,
+            List<SortingType> sortingTypesToCompare, List<String> headerValues, Order order)
+    {
+        return tableRows.getRows().stream()
                 .sorted((r1, r2) ->
                 {
                     int result = 0;
                     Iterator<String> columnIterator = columnsToCompare.iterator();
+                    Iterator<SortingType> sortingTypeIterator = sortingTypesToCompare.iterator();
+                    SortingType sortingType = null;
                     while (result == 0 && columnIterator.hasNext())
                     {
                         String column = columnIterator.next();
+                        if (sortingTypeIterator.hasNext())
+                        {
+                            sortingType = sortingTypeIterator.next();
+                        }
                         int indexOfColumn = headerValues.indexOf(column);
                         if (indexOfColumn > -1)
                         {
-                            result = order.getDirection() * r1.get(indexOfColumn).compareTo(r2.get(indexOfColumn));
+                            result = order.getDirection() * sortingType.compareValues(r1.get(indexOfColumn),
+                                    r2.get(indexOfColumn));
                         }
                     }
                     return result;
                 })
                 .collect(Collectors.toList());
-        return ExamplesTableProcessor.buildExamplesTable(headerValues, rows, properties);
+    }
+
+    private enum SortingType
+    {
+        STRING
+        {
+            @Override
+            int compareValues(String valueFirst, String valueSecond)
+            {
+                return valueFirst.compareTo(valueSecond);
+            }
+        },
+        NUMBER
+        {
+            @Override
+            int compareValues(String valueFirst, String valueSecond)
+            {
+                try
+                {
+                    return new BigDecimal(valueFirst).compareTo(new BigDecimal(valueSecond));
+                }
+                catch (NumberFormatException e)
+                {
+                    throw new IllegalArgumentException(String.format(
+                            "NUMBER sorting type supports only number values for comparison. %s", e.getMessage()), e);
+                }
+            }
+        };
+
+        abstract int compareValues(String valueFirst, String valueSecond);
     }
 }

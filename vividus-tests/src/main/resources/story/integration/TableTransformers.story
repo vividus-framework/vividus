@@ -392,3 +392,55 @@ Then `${sortingTable}` is equal to table:
 |bb  |b   |3   |
 |ba  |c   |2   |
 |aa  |a   |4   |
+
+Scenario: Verify SORTING transformer with DESCENDING order and NUMBER sorting type
+When I initialize scenario variable `sortingTable` with values:
+{transformer=SORTING, byColumns=key2, order=DESCENDING, sortingTypes=NUMBER}
+|key1|key2|
+|a   |10  |
+|b   |2.3 |
+|c   |10.2|
+Then `${sortingTable}` is equal to table:
+|key1|key2|
+|c   |10.2|
+|a   |10  |
+|b   |2.3 |
+
+Scenario: Verify SORTING transformer with DESCENDING order and STRING sorting type
+When I initialize scenario variable `sortingTable` with values:
+{transformer=SORTING, byColumns=key2, order=DESCENDING, sortingTypes=STRING}
+|key1|key2|
+|a   |10  |
+|b   |2.3 |
+|c   |10.2|
+Then `${sortingTable}` is equal to table:
+|key1|key2|
+|b   |2.3 |
+|c   |10.2|
+|a   |10  |
+
+Scenario: Verify SORTING transformer with DESCENDING order and default sorting type
+When I initialize scenario variable `sortingTable` with values:
+{transformer=SORTING, byColumns=key2, order=DESCENDING}
+|key1|key2|
+|a   |10  |
+|b   |2.3 |
+|c   |10.2|
+Then `${sortingTable}` is equal to table:
+|key1|key2|
+|b   |2.3 |
+|c   |10.2|
+|a   |10  |
+
+Scenario: Verify SORTING transformer with default order and STRING|NUMBER sorting types
+When I initialize scenario variable `sortingTable` with values:
+{transformer=SORTING, byColumns=key1|key2, sortingTypes=STRING|NUMBER}
+|key1|key2|
+|a1  |10  |
+|a1  |2.3 |
+|a2  |10.2|
+Then `${sortingTable}` is equal to table:
+|key1|key2|
+|a1  |2.3 |
+|a1  |10  |
+|a2  |10.2|
