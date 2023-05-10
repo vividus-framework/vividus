@@ -72,7 +72,7 @@ public class HttpRequestSteps
      *
      * @param content HTTP request body
      */
-    @Given("request body: $content")
+    @Given("request body:$content")
     public void request(DataWrapper content)
     {
         Object data = content.getData();

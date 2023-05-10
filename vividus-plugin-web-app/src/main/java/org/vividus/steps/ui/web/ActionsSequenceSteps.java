@@ -88,7 +88,7 @@ public class ActionsSequenceSteps extends AbstractActionsSequenceSteps
      *
      * @param actions table of actions to execute
      */
-    @When("I execute sequence of actions: $actions")
+    @When("I execute sequence of actions:$actions")
     public void executeSequenceOfActions(List<AtomicAction<Actions>> actions)
     {
         execute(Actions::new, actions);

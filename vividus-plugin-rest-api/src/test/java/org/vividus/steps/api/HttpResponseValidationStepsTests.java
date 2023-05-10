@@ -130,7 +130,7 @@ class HttpResponseValidationStepsTests
                 eq(String.format("%s header contains %s attribute", ACCEPT_ENCODING_HEADER_NAME, HEADER_ELEMENT_NAME)),
                 eq(HEADER_ELEMENT_NAMES),
                 argThat(matcher -> matcher.toString().equals(Matchers.contains(HEADER_ELEMENT_NAME).toString())));
-        validateDeprecateMessage("Then response header '$httpHeaderName' contains attribute: $attributes",
+        validateDeprecateMessage("Then response header '$httpHeaderName' contains attribute:$attributes",
                 "Then response header `$headerName` contains elements:$elements");
     }
 

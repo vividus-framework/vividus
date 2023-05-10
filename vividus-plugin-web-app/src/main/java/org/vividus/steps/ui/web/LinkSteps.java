@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,10 +71,10 @@ public class LinkSteps
      * @param expectedLinkItems A table of expected <b>link</b> items
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
-    @Then(value = "context contains list of link items with the text and link: $expectedLinkItems", priority = 1)
+    @Then(value = "context contains list of link items with the text and link:$expectedLinkItems", priority = 1)
     public void ifLinkItemsWithTextAndLink(ExamplesTable expectedLinkItems)
     {
-        LOGGER.warn("The step: \"Then context contains list of link items with the text and link: $expectedLinkItems\""
+        LOGGER.warn("The step: \"Then context contains list of link items with the text and link:$expectedLinkItems\""
                 + " is deprecated and will be removed in VIVIDUS 0.6.0. Use step: "
                 + "\"Then number of elements found by `$locator` is $comparisonRule `$quantity`\"");
         for (Parameters row : expectedLinkItems.getRowsAsParameters(true))
@@ -112,10 +112,10 @@ public class LinkSteps
      * @param expectedLinkItems A table of expected <b>link</b> items (<b>text</b> values):
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
-    @Then("context contains list of link items with the text: $expectedLinkItems")
+    @Then("context contains list of link items with the text:$expectedLinkItems")
     public void ifLinkItemsWithTextExists(ExamplesTable expectedLinkItems)
     {
-        LOGGER.warn("The step: \"Then context contains list of link items with the text: $expectedLinkItems\""
+        LOGGER.warn("The step: \"Then context contains list of link items with the text:$expectedLinkItems\""
                 + " is deprecated and will be removed in VIVIDUS 0.6.0."
                 + " Use step: \"Then number of elements found by `$locator` is $comparisonRule `$quantity`\"");
         expectedLinkItems.getRowsAsParameters(true).stream()
