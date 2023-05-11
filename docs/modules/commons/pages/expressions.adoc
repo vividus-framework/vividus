@@ -454,8 +454,14 @@ https://regex101.com/[Regex101] can be used to test and debug regular expression
 ----
 
 * *$regularExpression* - the regular expression to match substring(s)
-* *$replacement* - the replacement string, it may contain references to captured
-substrings, e.g. `$1` is a reference to the first group
+* *$replacement* - the replacement string
++
+[NOTE]
+====
+Backslashes (`\`) and dollar signs (`$`) in the replacement string may cause the results to be different than if it were
+being treated as a literal replacement string. Dollar signs may be treated as references to captured substrings (e.g.
+`$1` is a reference to the first group) and backslashes are used to escape literal characters in the replacement string.
+====
 * *$input* - any string to be processed
 
 [cols="1, 2,1", options="header"]
