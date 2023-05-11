@@ -122,7 +122,7 @@ dependencies {
 
     systemTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.3')
     systemTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    systemTestImplementation platform(group: 'org.testcontainers', name: 'testcontainers-bom', version: '1.18.0')
+    systemTestImplementation platform(group: 'org.testcontainers', name: 'testcontainers-bom', version: '1.18.1')
     systemTestImplementation(group: 'org.testcontainers', name: 'testcontainers')
     systemTestImplementation(group: 'org.testcontainers', name: 'junit-jupiter')
     systemTestImplementation(group: 'org.testcontainers', name: 'vault')
