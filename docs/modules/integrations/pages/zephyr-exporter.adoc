@@ -138,7 +138,7 @@ Meta:
 Given I am on page with URL `${vividus-test-site-url}/delayedScroll.html`
 When I click on element located by `id(anchor)`
 When I wait until scroll is finished
-Then page is scrolled to element located `id(toClick)`
+Then page is scrolled to element located by `id(toClick)`
 ----
 
 :service-key: zephyr

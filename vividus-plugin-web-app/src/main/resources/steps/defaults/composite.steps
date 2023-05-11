@@ -330,3 +330,11 @@ When I save table to <scopes> variable `<variableName>`
 Composite: When I get the number of open windows and set it to the $scopes variable '$variable'
 !-- WARNING: The step "When I get the number of open windows and set it to the $scopes variable '$variable'" is deprecated and will be removed in VIVIDUS 0.7.0.
 When I save number of open tabs to <scopes> variable `<variable>`
+
+Composite: When I scroll element located `$locator` into view
+!-- WARNING: The step "When I scroll element located `$locator` into view" is deprecated and will be removed in VIVIDUS 0.7.0.
+When I scroll element located by `<locator>` into view
+
+Composite: Then page is scrolled to element located `$locator`
+!-- WARNING: The step "When I scroll element located `$locator` into view" is deprecated and will be removed in VIVIDUS 0.7.0.
+Then page is scrolled to element located by `<locator>`

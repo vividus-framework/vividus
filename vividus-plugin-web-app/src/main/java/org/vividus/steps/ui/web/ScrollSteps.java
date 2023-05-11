@@ -64,7 +64,7 @@ public class ScrollSteps
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView">Scroll into view</a>
      * @param locator to locate an element
      */
-    @When("I scroll element located `$locator` into view")
+    @When("I scroll element located by `$locator` into view")
     public void scrollIntoView(Locator locator)
     {
         List<WebElement> toScroll = baseValidations.assertIfElementsExist("Element to scroll into view", locator);
@@ -77,7 +77,7 @@ public class ScrollSteps
     /**
      * Checks if the page is scrolled to the specific element located by locator
      * <br>Example: &lt;a id="information_collection" name="information_collection_name"&gt; -
-     * Then page is scrolled to element located `id(information_collection)`
+     * Then page is scrolled to element located by `id(information_collection)`
      * <p>
      * Actions performed at this step:
      * <ul>
@@ -88,7 +88,7 @@ public class ScrollSteps
      * </ul>
      * @param locator A locator to locate element
      */
-    @Then("page is scrolled to element located `$locator`")
+    @Then("page is scrolled to element located by `$locator`")
     public void isPageScrolledToElement(Locator locator)
     {
         WebElement element = baseValidations.assertIfElementExists("Element to verify position", locator);

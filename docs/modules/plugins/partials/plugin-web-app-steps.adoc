@@ -229,6 +229,13 @@ Scrolls an element into the view.
 
 [source,gherkin]
 ----
+When I scroll element located by `$locator` into view
+----
+* `$locator` - The <<_locator,locator>> used to find element.
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I scroll element located `$locator` into view
 ----
 * `$locator` - The <<_locator,locator>> used to find element.
@@ -236,7 +243,23 @@ When I scroll element located `$locator` into view
 .Scroll button into view
 [source,gherkin]
 ----
-When I scroll element located `id(way_down_button)` into view
+When I scroll element located by `id(way_down_button)` into view
+----
+
+==== Validate the page is scrolled to element
+
+Checks if the page is scrolled to the specific element
+
+[source,gherkin]
+----
+Then page is scrolled to element located by `$locator`
+----
+* `$locator` - The <<_locator,locator>> used to find element.
+
+.Validate Contact link is scrolled into view
+[source,gherkin]
+----
+Then page is scrolled to element located by `xpath(//a[text()="Contact"])`
 ----
 
 === Text validation steps
