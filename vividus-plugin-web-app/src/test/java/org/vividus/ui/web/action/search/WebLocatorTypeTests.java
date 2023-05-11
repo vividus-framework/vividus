@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,13 @@ class WebLocatorTypeTests
     {
         var xpath = "//xpath";
         assertEquals(By.xpath(xpath), WebLocatorType.XPATH.buildBy(xpath));
+    }
+
+    @Test
+    void shouldBuildByUnnormalizedXPath()
+    {
+        var xpath = "//*[text()='a  b']";
+        assertEquals(By.xpath(xpath), WebLocatorType.UNNORMALIZED_XPATH.buildBy(xpath));
     }
 
     @Test
