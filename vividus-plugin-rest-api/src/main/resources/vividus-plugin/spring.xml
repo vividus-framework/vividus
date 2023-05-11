@@ -88,6 +88,8 @@
 
     <bean id="httpCookieSteps" class="org.vividus.steps.api.HttpCookieSteps"/>
 
+    <bean id="jwtSteps" class="org.vividus.steps.api.JwtSteps"/>
+
     <util:list id="stepBeanNames-Api" value-type="java.lang.String">
         <idref bean="apiSteps" />
         <idref bean="httpResponseValidationSteps" />
@@ -95,6 +97,7 @@
         <idref bean="jsonResponseValidationSteps" />
         <idref bean="cookieStoreProvider" />
         <idref bean="httpCookieSteps" />
+        <idref bean="jwtSteps" />
         <idref bean="sslSteps" />
     </util:list>
 
