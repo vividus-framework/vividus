@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Set;
 
 import com.applitools.eyes.MatchLevel;
 
+import org.openqa.selenium.Dimension;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.visual.model.AbstractVisualCheck;
 import org.vividus.visual.model.VisualActionType;
@@ -31,7 +32,7 @@ public class ApplitoolsVisualCheck extends AbstractVisualCheck
     private String readApiKey;
     private String hostApp;
     private String hostOS;
-    private String viewportSize;
+    private Dimension viewportSize;
     private MatchLevel matchLevel;
     private URI serverUri;
     private String appName;
@@ -136,12 +137,12 @@ public class ApplitoolsVisualCheck extends AbstractVisualCheck
         this.baselineEnvName = baselineEnvName;
     }
 
-    public String getViewportSize()
+    public Dimension getViewportSize()
     {
         return viewportSize;
     }
 
-    public void setViewportSize(String viewportSize)
+    public void setViewportSize(Dimension viewportSize)
     {
         this.viewportSize = viewportSize;
     }

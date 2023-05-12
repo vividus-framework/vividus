@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.function.Function;
 
 import com.applitools.eyes.MatchLevel;
 
+import org.openqa.selenium.Dimension;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
@@ -39,7 +40,7 @@ public class ApplitoolsVisualCheckFactory
     private String readApiKey;
     private String hostApp;
     private String hostOS;
-    private String viewportSize;
+    private Dimension viewportSize;
     private MatchLevel matchLevel;
     private URI serverUri;
     private String appName = "Application";
@@ -124,7 +125,7 @@ public class ApplitoolsVisualCheckFactory
         this.hostOS = hostOS;
     }
 
-    public void setViewportSize(String viewportSize)
+    public void setViewportSize(Dimension viewportSize)
     {
         this.viewportSize = viewportSize;
     }

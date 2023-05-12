@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Dimension;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
@@ -49,7 +50,7 @@ class ApplitoolsVisualCheckFactoryTests
 
     private static final String BASELINE = "baseline";
 
-    private static final String VIEWPORT_SIZE = "7680x4320";
+    private static final Dimension VIEWPORT_SIZE = new Dimension(7680, 4320);
 
     private static final URI SERVER_URI = URI.create("https://eyesapi.applitools.com");
 
