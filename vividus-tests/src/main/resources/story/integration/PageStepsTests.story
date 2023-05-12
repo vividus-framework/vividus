@@ -4,11 +4,11 @@ Meta:
     @epic vividus-plugin-web-app
     @capability.pageLoadStrategy eager
 
-Scenario: Verify step: 'Then page is scrolled to element located `$locator`'
+Scenario: Verify step: 'Then page is scrolled to element located by `$locator`'
 Given I am on page with URL `${vividus-test-site-url}/delayedScroll.html`
 When I click on element located by `id(anchor)`
 When I wait until scroll is finished
-Then page is scrolled to element located `id(toClick)`
+Then page is scrolled to element located by `id(toClick)`
 
 
 Scenario: Verify step: When I open URL `$URL` in new window; Verify step: When I stop page loading

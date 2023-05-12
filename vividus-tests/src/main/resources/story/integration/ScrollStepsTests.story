@@ -27,11 +27,19 @@ When I scroll context to TOP edge
 When I change context to element located by `id(current-vertical):a`
 Then the text matches '0'
 
-Scenario: Verify step: When I scroll element located `$locator` into view
+Scenario: Verify steps: "When I scroll element located by `$locator` into view", "Then page is scrolled to element located by `$locator`"
 Meta:
     @requirementId 436
 When I refresh page
+When I scroll element located by `xpath(//a[text()="Contact"])` into view
+Then page is scrolled to element located by `xpath(//a[text()="Contact"])`
+When I change context to element located by `id(current-vertical):a`
+Then the text matches '\d+'
+
+Scenario: Verify deprecated steps: "When I scroll element located `$locator` into view", "Then page is scrolled to element located `$locator`"
+When I refresh page
 When I scroll element located `xpath(//a[text()="Contact"])` into view
+Then page is scrolled to element located `xpath(//a[text()="Contact"])`
 When I change context to element located by `id(current-vertical):a`
 Then the text matches '\d+'
 
