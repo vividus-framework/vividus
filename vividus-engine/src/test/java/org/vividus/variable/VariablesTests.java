@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +46,9 @@ class VariablesTests
     private static final String VALUE = "value";
     private static final Pojo POJO = new Pojo(VALUE);
     private static final String DEFAULT_VALUE = "defaultValue";
+    private static final String VIVIDUS_NULL_EXPRESSION = "#{null}";
+    private static final List<String> LIST_WITH_NULL_VALUE = Collections.singletonList(null);
+    private static final Map<String, Object> MAP_WITH_NULL_VALUE = Collections.singletonMap(KEY, null);
 
     @SuppressWarnings({ "checkstyle:MultipleStringLiterals", "checkstyle:MultipleStringLiteralsExtended" })
     static Stream<Arguments> variablesProvider()
@@ -52,7 +56,6 @@ class VariablesTests
         //CHECKSTYLE:OFF
         return Stream.of(
                 arguments(VARIABLE_KEY,                           VARIABLE_KEY, List.of(Map.of(KEY, VALUE)),    List.of(Map.of(KEY, VALUE))),
-                arguments(VARIABLE_KEY,                           VARIABLE_KEY, null,                           null),
                 arguments("",                                     VARIABLE_KEY, null,                           null),
                 arguments("variableKey:defaultValue",             VARIABLE_KEY, null,                           DEFAULT_VALUE),
                 arguments("variableKey:defaultValue:with:colons", VARIABLE_KEY, null,                           "defaultValue:with:colons"),
@@ -79,8 +82,11 @@ class VariablesTests
                 arguments("variableKey.key[0].name",              VARIABLE_KEY, Map.of(KEY, List.of(POJO)),     VALUE),
                 arguments("variableKey.name",                     VARIABLE_KEY, POJO,                           VALUE),
                 arguments("variableKey.key.key.name",             VARIABLE_KEY, Map.of(KEY, Map.of(KEY, POJO)), VALUE),
-                arguments("variableKey.notExists",                VARIABLE_KEY, POJO,                           POJO)
-        );
+                arguments("variableKey.notExists",                VARIABLE_KEY, POJO,                           POJO),
+                arguments(VARIABLE_KEY,                           VARIABLE_KEY, null,                           VIVIDUS_NULL_EXPRESSION),
+                arguments("variableKey[0]",                       VARIABLE_KEY, LIST_WITH_NULL_VALUE,           VIVIDUS_NULL_EXPRESSION),
+                arguments("variableKey[0].key",                   VARIABLE_KEY, List.of(MAP_WITH_NULL_VALUE),   VIVIDUS_NULL_EXPRESSION)
+                );
         //CHECKSTYLE:ON
     }
 

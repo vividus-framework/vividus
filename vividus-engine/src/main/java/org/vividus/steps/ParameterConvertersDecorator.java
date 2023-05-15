@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@ import org.jbehave.core.steps.ParameterConverters;
 
 public class ParameterConvertersDecorator extends ParameterConverters
 {
-    private static final String NULL_EXPRESSION = "#{null}";
-
     private final PlaceholderResolver placeholderResolver;
 
     public ParameterConvertersDecorator(Configuration configuration, PlaceholderResolver placeholderResolver)
@@ -44,11 +42,11 @@ public class ParameterConvertersDecorator extends ParameterConverters
         {
             return super.convert(value, type);
         }
-        if (NULL_EXPRESSION.equals(value))
+        Object adaptedValue = placeholderResolver.resolvePlaceholders(value, type);
+        if (adaptedValue == null)
         {
             return null;
         }
-        Object adaptedValue = placeholderResolver.resolvePlaceholders(value, type);
         if (type == String.class || adaptedValue instanceof String)
         {
             adaptedValue = placeholderResolver.processExpressions(String.valueOf(adaptedValue));
@@ -58,10 +56,6 @@ public class ParameterConvertersDecorator extends ParameterConverters
 
     private Object convertAdaptedValue(Object adaptedValue, Type type)
     {
-        if (adaptedValue == null)
-        {
-            return null;
-        }
         if (type == DataWrapper.class)
         {
             return new DataWrapper(adaptedValue);

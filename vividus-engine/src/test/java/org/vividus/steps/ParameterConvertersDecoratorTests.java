@@ -60,6 +60,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.vividus.converter.ResolvingPlaceholdersExamplesTableConverter;
+import org.vividus.variable.Variables;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("unchecked")
@@ -336,9 +337,9 @@ class ParameterConvertersDecoratorTests
     @Test
     void shouldReturnNullIfRawExpressionsReturnNull()
     {
-        String nullExpression = "#{null}";
-        assertNull(parameterConverters.convert(nullExpression, String.class));
-        verifyNoInteractions(expressionResolver, variableResolver);
+        when(variableResolver.resolve(Variables.VIVIDUS_NULL_EXPRESSION)).thenReturn(Variables.VIVIDUS_NULL_EXPRESSION);
+        assertNull(parameterConverters.convert(Variables.VIVIDUS_NULL_EXPRESSION, String.class));
+        verifyNoMoreInteractions(variableResolver, expressionResolver);
     }
 
     @Test
