@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,13 @@ public interface IFieldActions
      * @param text Text to type
      */
     void addText(WebElement element, String text);
+
+    /**
+     * Types the text in the element
+     * @param element The element to type text in
+     * @param text The text to type
+     */
+    void typeText(WebElement element, String text);
 
     /**
      * Checks that the content of the element is editable
