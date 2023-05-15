@@ -154,7 +154,7 @@ public class FieldSteps
      * It's allowed to add the text to elements declared using <i>{@literal <input>}</i> or <i>{@literal
      * <textarea>}</i> tags and from CKE editors (they usually should be located via {@literal <body>} tag, that is
      * contained in a frame as a separate HTML document).
-     * <p>
+     * </p>
      *
      * @param text    The text to add to the field.
      * @param locator The locator used to find field.
@@ -175,7 +175,7 @@ public class FieldSteps
      * It's allowed to add the text to elements declared using <i>{@literal <input>}</i> or <i>{@literal
      * <textarea>}</i> tags and from CKE editors (they usually should be located via {@literal <body>} tag, that is
      * contained in a frame as a separate HTML document).
-     * <p>
+     * </p>
      *
      * @param text    The text to add to the field.
      * @param locator The locator used to find field.
@@ -322,7 +322,7 @@ public class FieldSteps
      * <b>Field</b> is a {@literal <input> or <textarea>} tags in the table (or a {@literal <body>} tag if you work with
      * CKE editor - a field to enter and edit text, that is contained in a {@literal <frame>} as a separate
      * html-document)
-     * <p>
+     * </p>
      *
      * @param locator The locator used to find field.
      * @deprecated Use step replacement pattern: Then number of elements found by `&lt;locator&gt;` is equal to `0`
@@ -340,7 +340,7 @@ public class FieldSteps
      * <b>Field</b> is a {@literal <input> or <textarea>} tags in the table (or a {@literal <body>} tag if you work with
      * CKE editor - a field to enter and edit text, that is contained in a {@literal <frame>} as a separate
      * html-document)
-     * <p>
+     * </p>
      *
      * @param locator The locator used to find field.
      * @return WebElement

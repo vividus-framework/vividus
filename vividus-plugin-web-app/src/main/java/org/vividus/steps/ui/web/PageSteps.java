@@ -104,7 +104,7 @@ public class PageSteps
      * Loads a <b>page</b> with the given <b>URL</b>
      * <p>
      * Requires an <b>absolute</b> URL (like https://example.com/).
-     * <p>
+     * </p>
      * @param pageURL An <b>absolute</b> URL of the page
      */
     @Given("I am on page with URL `$pageURL`")
@@ -117,14 +117,13 @@ public class PageSteps
     /**
      * Checks, that the current page has a correct relative URL <br>
      * A <b>relative URL</b> - points to a file within a web site (like <i>'about.html'</i> or <i>'/products'</i>)<br>
-     * <p>
      * Actions performed at this step:
      * <ul>
      * <li>Gets the absolute URL of the current page;
      * <li>Gets relative URL from it;
      * <li>Compares it with the specified relative URL.
      * </ul>
-     * <p>
+     *
      * @param relativeURL A string value of the relative URL
      * @deprecated Use combination of step and expression:
      * "Then `#{extractPathFromUrl(${current-page-url})}` is equal to `$variable2`"
@@ -148,15 +147,14 @@ public class PageSteps
     }
 
     /**
-     * Checks, that the current page has a correct host
-     * <p>
+     * Checks, that the current page has a correct host.<br/>
      * Actions performed at this step:
      * <ul>
      * <li>Gets the absolute URL of the current page;
      * <li>Gets page host from it;
      * <li>Compares it with the specified page host.
      * </ul>
-     * <p>
+
      * @param host A string value of the page host
      * @deprecated Use combination of step and expression:
      * "Then `#{extractHostFromUrl(${current-page-url})}` is equal to `$variable2`"
@@ -201,7 +199,7 @@ public class PageSteps
     /**
      * Checks, that the <b><i>page</i></b> with certain <b>URL</b> is loaded <br>
      * <b>URL</b> is the internet address of the current page which is located in the address bar
-     * <p>
+     *
      * @param url String value of URL
      * @deprecated Use combination of step and dynamic variable:
      * "Then `${current-page-url}` is equal to `$variable2`"
@@ -259,13 +257,12 @@ public class PageSteps
      * <td>https://mysite.com/path/foo</td><td>/documents</td><td>https://mysite.com/documents</td>
      * </tr>
      * </table>
-     * <p>
      * Actions performed at this step:
      * <ul>
      * <li>Builds the absolute URL by concatenating the base URL and the relative URL;
      * <li>Loads the page with the absolute URL;
      * </ul>
-     * <p>
+     *
      * @param relativeURL A string value of the relative URL
      */
     @When("I go to relative URL `$relativeURL`")

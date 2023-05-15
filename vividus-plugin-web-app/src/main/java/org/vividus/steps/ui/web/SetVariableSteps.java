@@ -147,7 +147,7 @@ public class SetVariableSteps
 
     /**
      * Saves the number of currently opened tabs in the browser to the variable
-     * <p>
+     *
      * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
      * <i>Available scopes:</i>
      * <ul>
