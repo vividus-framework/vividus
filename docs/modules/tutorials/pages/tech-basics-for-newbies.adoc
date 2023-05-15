@@ -64,7 +64,7 @@ a| * https://www.toolsqa.com/rest-assured/jsonpath-and-query-json-using-jsonpath
 You can use the following online services for your expressions validation:
 
     * https://www.freeformatter.com/xpath-tester.html[XPath validator]
-    * https://jsonpath.com/[JsonPath evaluator] (however, 100% compatibility not guaranteed, better tool TBD)
+    * https://jsonpath.onrender.com/[JsonPath online validator]
 ====
 
 |Query Languages & Data Formats
