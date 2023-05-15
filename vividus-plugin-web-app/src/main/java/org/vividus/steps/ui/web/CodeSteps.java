@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class CodeSteps extends AbstractExecuteScriptSteps
      * <p>
      * To make a JavaScript call one can open a <b><i>JavaScript console</i></b> in a browser <i>(via Ctrl+Shift+J)</i>,
      * type the <b>script</b> string and press <i>Enter</i>.
-     * <p>
+     * </p>
      * Actions performed at this step:
      * <ul>
      * <li>Removes the value of JSON message field;
@@ -150,7 +150,6 @@ public class CodeSteps extends AbstractExecuteScriptSteps
      * Executes passed async javascript code on the opened page
      * and saves returned value into the <b>variable</b>
      * See {@link org.openqa.selenium.JavascriptExecutor#executeAsyncScript(String, Object[])}
-     * <p>
      *
      * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
      *                     <i>Available scopes:</i>

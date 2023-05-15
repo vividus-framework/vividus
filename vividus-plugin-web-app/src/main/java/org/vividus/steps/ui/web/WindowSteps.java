@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ public class WindowSteps
      * <p>
      * Note that this step can only be used if the current window was opened using the step
      * 'When I open URL `$pageUrl` in new window'.
-     * <p>
+     * </p>
      * @see <a href="https://html.spec.whatwg.org/#browsing-context"><i>Browsing context (Window &amp; Document)</i></a>
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
      * @see <a href="https://www.w3schools.com/jsref/event_onbeforeunload.asp"><i>Event 'onbeforeunload'</i></a>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,13 +37,13 @@ public class ScriptSteps
      * <p>
      * JS files are placed under <i>{@literal <script>}</i> tag having attribute <i>type</i> = "text/javascript". Their
      * <b>filename</b> is specified in <i>src</i> attribute.
-     * <p>
+     * <br/>
      * Actions performed at this step:
      * <ul>
      * <li><i>Checks</i> if the javascript file with the given filename exists in the page source code
      * <li>Step passes if only one such JS file was found. Otherwise step fails.
      * </ul>
-     * <p>
+     *
      * @param jsFileName Value of the <i>src</i> attribute
      * @return webElement found js script
      */
@@ -62,13 +62,13 @@ public class ScriptSteps
      * <p>
      * JS files are placed under <i>{@literal <script>}</i> tag having attribute <i>type</i> = "text/javascript".
      * <b>Text</b> is actual content of <i>{@literal <script>}</i> tag.
-     * <p>
+     * <br/>
      * Actions performed at this step:
      * <ul>
      * <li><i>Checks</i> if the javascript file with the given text exists in the page source code
      * <li>Step passes if only one such JS file was found. Otherwise step fails.
      * </ul>
-     * <p>
+     *
      * @param jsText Content of the <i>{@literal <script>}</i> tag.
      * @return webElement found js script
      */
@@ -87,13 +87,13 @@ public class ScriptSteps
      * <p>
      * JS files are placed under <i>{@literal <script>}</i> tag having attribute <i>type</i> = "text/javascript".
      * <b>Text</b> is actual content of <i>{@literal <script>}</i> tag.
-     * <p>
+     * <br/>
      * Actions performed at this step:
      * <ul>
      * <li><i>Checks</i> if the javascript file containing the given text exists in the page source code.
      * <li>Step passes if only one such JS file was found. Otherwise step fails.
      * </ul>
-     * <p>
+     *
      * @param jsTextPart String which should be contained in the <i>{@literal <script>}</i> tag.
      * @return webElement found js script
      */
