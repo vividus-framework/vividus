@@ -107,7 +107,9 @@ public class FieldActions implements IFieldActions
         if (field != null)
         {
             Entry<Keys, String> controllingKey = keysManager.getOsIndependentControlKey();
-            LOGGER.info("Attempting to clear field with [{} + A, Backspace] keys sequence", controllingKey.getValue());
+            LOGGER.atInfo()
+                    .addArgument(controllingKey::getValue)
+                    .log("Attempting to clear field with [{} + A, Backspace] keys sequence");
             field.sendKeys(Keys.chord(controllingKey.getKey(), "a") + Keys.BACK_SPACE);
         }
     }
