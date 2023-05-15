@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -273,7 +273,7 @@ public class FieldSteps
                 return;
             }
 
-            element.sendKeys(text);
+            fieldActions.typeText(element, text);
             applyWorkaroundIfIE(element, text);
         }
         catch (StaleElementReferenceException e)
@@ -300,7 +300,7 @@ public class FieldSteps
             {
                 element.clear();
                 LOGGER.info("Re-typing text \"{}\" to element", normalizedText);
-                element.sendKeys(normalizedText);
+                fieldActions.typeText(element, normalizedText);
                 iterationsCounter--;
             }
             if (iterationsCounter == 0 && !isValueEqualTo(element, normalizedText))

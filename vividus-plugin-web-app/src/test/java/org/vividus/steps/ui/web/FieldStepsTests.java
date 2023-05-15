@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,7 +98,7 @@ class FieldStepsTests
         when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
         fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
         verify(webElement).clear();
-        verify(webElement).sendKeys(TEXT);
+        verify(fieldActions).typeText(webElement, TEXT);
     }
 
     @Test
@@ -109,7 +109,7 @@ class FieldStepsTests
         when(baseValidations.assertElementExists(FIELD_TO_ENTER_TEXT, locator)).thenReturn(Optional.of(webElement));
         fieldSteps.enterTextInField(TEXT, locator);
         verify(webElement).clear();
-        verify(webElement).sendKeys(TEXT);
+        verify(fieldActions).typeText(webElement, TEXT);
     }
 
     @Test
@@ -128,9 +128,9 @@ class FieldStepsTests
         mockRequireWindowFocusOption(false);
         when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
         fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
-        var inOrder = inOrder(webElement);
+        var inOrder = inOrder(webElement, fieldActions);
         inOrder.verify(webElement).clear();
-        inOrder.verify(webElement).sendKeys(TEXT);
+        inOrder.verify(fieldActions).typeText(webElement, TEXT);
     }
 
     @Test
@@ -143,9 +143,9 @@ class FieldStepsTests
                 .thenReturn(webElement);
         when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(TEXT);
         fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
-        var inOrder = inOrder(webElement);
+        var inOrder = inOrder(webElement, fieldActions);
         inOrder.verify(webElement).clear();
-        inOrder.verify(webElement).sendKeys(TEXT);
+        inOrder.verify(fieldActions).typeText(webElement, TEXT);
     }
 
     @Test
@@ -158,7 +158,7 @@ class FieldStepsTests
         when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
         fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
         verify(webElement, times(2)).clear();
-        verify(webElement, times(2)).sendKeys(TEXT);
+        verify(fieldActions, times(2)).typeText(webElement, TEXT);
     }
 
     @Test
@@ -171,7 +171,7 @@ class FieldStepsTests
         when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
         fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
         verify(webElement, times(6)).clear();
-        verify(webElement, times(6)).sendKeys(TEXT);
+        verify(fieldActions, times(6)).typeText(webElement, TEXT);
         verify(softAssert).recordFailedAssertion("The element is not filled correctly after 6 typing attempt(s)");
     }
 
@@ -186,7 +186,7 @@ class FieldStepsTests
         when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
         fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
         verify(webElement, times(6)).clear();
-        verify(webElement, times(6)).sendKeys(TEXT);
+        verify(fieldActions, times(6)).typeText(webElement, TEXT);
         verifyNoInteractions(softAssert);
     }
 
@@ -213,7 +213,7 @@ class FieldStepsTests
         when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
         fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
         verify(webElement).clear();
-        verify(webElement).sendKeys(TEXT);
+        verify(fieldActions).typeText(webElement, TEXT);
     }
 
     @Test
@@ -231,10 +231,10 @@ class FieldStepsTests
         var locator = mock(Locator.class);
         when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(false);
         when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
-        doThrow(StaleElementReferenceException.class).doNothing().when(webElement).sendKeys(TEXT);
+        doThrow(StaleElementReferenceException.class).doNothing().when(fieldActions).typeText(webElement, TEXT);
         fieldSteps.enterTextInFieldLocatedBy(TEXT, locator);
         verify(webElement, times(2)).clear();
-        verify(webElement, times(2)).sendKeys(TEXT);
+        verify(fieldActions, times(2)).typeText(webElement, TEXT);
     }
 
     @Test
@@ -245,12 +245,12 @@ class FieldStepsTests
         when(baseValidations.assertIfElementExists(ATTRIBUTES + locator, locator)).thenReturn(webElement);
         var exception1 = new StaleElementReferenceException("one");
         var exception2 = new StaleElementReferenceException("two");
-        doThrow(exception1, exception2).when(webElement).sendKeys(TEXT);
+        doThrow(exception1, exception2).when(fieldActions).typeText(webElement, TEXT);
         var actual = assertThrows(StaleElementReferenceException.class,
                 () -> fieldSteps.enterTextInFieldLocatedBy(TEXT, locator));
         assertEquals(exception2, actual);
         verify(webElement, times(2)).clear();
-        verify(webElement, times(2)).sendKeys(TEXT);
+        verify(fieldActions, times(2)).typeText(webElement, TEXT);
     }
 
     @Test

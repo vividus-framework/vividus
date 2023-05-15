@@ -21,6 +21,7 @@ import static java.util.Map.entry;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -46,6 +47,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.Browser;
@@ -255,6 +257,22 @@ class FieldActionsTests
     {
         when(webElement.getAttribute(CONTENTEDITABLE)).thenReturn(result);
         assertEquals(Boolean.valueOf(result), fieldActions.isElementContenteditable(webElement));
+    }
+
+    @Test
+    void shouldTypeTextInInteractableElement()
+    {
+        fieldActions.typeText(webElement, TEXT);
+        verify(webElement).sendKeys(TEXT);
+    }
+
+    @Test
+    void shouldRecordFailedAssertionOnAttemptToTypeTextInNotInteractableElement()
+    {
+        var exception = new ElementNotInteractableException("element not interactable");
+        doThrow(exception).when(webElement).sendKeys(TEXT);
+        fieldActions.typeText(webElement, TEXT);
+        verify(softAssert).recordFailedAssertion(exception);
     }
 
     private Select findDropDownListWithParameters(boolean isMultiple)

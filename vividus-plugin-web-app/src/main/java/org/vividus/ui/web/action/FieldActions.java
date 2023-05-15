@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.Browser;
@@ -135,8 +136,21 @@ public class FieldActions implements IFieldActions
             }
             else
             {
-                element.sendKeys(normalizedText);
+                typeText(element, normalizedText);
             }
+        }
+    }
+
+    @Override
+    public void typeText(WebElement element, String text)
+    {
+        try
+        {
+            element.sendKeys(text);
+        }
+        catch (ElementNotInteractableException e)
+        {
+            softAssert.recordFailedAssertion(e);
         }
     }
 
