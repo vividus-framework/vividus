@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 
 public class Variables
 {
+    public static final String VIVIDUS_NULL_EXPRESSION = "#{null}";
     private static final int VARIABLE_NAME_GROUP = 1;
     private static final int LIST_INDEX_GROUP = 2;
     private static final int MAP_KEY_GROUP = 3;
@@ -79,6 +80,7 @@ public class Variables
     private Optional<Object> getVariable(Map<String, Object> variables, VariableKey variableKey)
     {
         return Optional.ofNullable(variables.get(variableKey.key))
+                .or(() -> getNullValue(variables, variableKey.key))
                 .or(() -> variableKey.hasDefaultValue()
                         ? Optional.ofNullable(variables.get(variableKey.name))
                         : Optional.empty()
@@ -110,7 +112,9 @@ public class Variables
         if (variable instanceof Map)
         {
             Map<String, Object> map = (Map<String, Object>) variable;
-            return Optional.ofNullable(map.get(key)).or(() -> resolveAsCompound(map, key)).orElse(null);
+            return Optional.ofNullable(map.get(key))
+                    .or(() -> getNullValue(map, key))
+                    .or(() -> resolveAsCompound(map, key)).orElse(null);
         }
         else
         {
@@ -137,9 +141,20 @@ public class Variables
         {
             List<?> listVariable = (List<?>) variable;
             int elementIndex = Integer.parseInt(listIndex);
-            return elementIndex < listVariable.size() ? listVariable.get(elementIndex) : null;
+            return elementIndex < listVariable.size() ? getElementOrNullValue(listVariable, elementIndex) : null;
         }
         return variable;
+    }
+
+    private Optional<Object> getNullValue(Map<String, Object> map, String key)
+    {
+        return map.containsKey(key) ? Optional.of(VIVIDUS_NULL_EXPRESSION) : Optional.empty();
+    }
+
+    private Object getElementOrNullValue(List<?> listVariable, int elementIndex)
+    {
+        Object target = listVariable.get(elementIndex);
+        return target == null ? VIVIDUS_NULL_EXPRESSION : target;
     }
 
     private Optional<String> getSystemProperty(String variableKey)

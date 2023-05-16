@@ -191,3 +191,13 @@ A
 B
 C
 ` matches `.*B.*`
+
+Scenario: Verify null values in variables
+Meta:
+    @issueId 2378
+Given I initialize scenario variable `nullVar` with value `#{null}`
+When I initialize SCENARIO variable `varsMap` with values:
+|key     |
+|#{null} |
+Then `${nullVar}` is equal to `#{null}`
+Then `${varsMap[0].key}` is equal to `#{null}`

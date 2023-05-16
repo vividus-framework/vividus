@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.jbehave.core.embedder.StoryControls;
 import org.jbehave.core.expressions.ExpressionResolver;
+import org.vividus.variable.Variables;
 
 public class PlaceholderResolver
 {
@@ -46,6 +47,10 @@ public class PlaceholderResolver
     private Object resolvePlaceholders(String originalValue, String value, Type type, int iteration)
     {
         Object adaptedValue = variableResolver.resolve(value);
+        if (Variables.VIVIDUS_NULL_EXPRESSION.equals(adaptedValue))
+        {
+            return null;
+        }
         if (type == String.class || adaptedValue instanceof String)
         {
             if (adaptedValue instanceof byte[])
