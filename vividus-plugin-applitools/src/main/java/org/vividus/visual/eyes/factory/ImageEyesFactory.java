@@ -16,56 +16,28 @@
 
 package org.vividus.visual.eyes.factory;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.applitools.eyes.BatchInfo;
 import com.applitools.eyes.EyesRunner;
 import com.applitools.eyes.LogHandler;
-import com.applitools.eyes.RectangleSize;
 import com.applitools.eyes.images.Eyes;
 import com.applitools.eyes.images.ImageRunner;
 
-import org.openqa.selenium.Dimension;
 import org.vividus.ui.ViewportSizeProvider;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
-import org.vividus.visual.model.VisualActionType;
 
-public class ImageEyesFactory
+public class ImageEyesFactory extends AbstractEyesFactory
 {
-    private final LogHandler logHandler;
-    private final Map<String, BatchInfo> batchStorage = new ConcurrentHashMap<>();
-    private final ViewportSizeProvider viewportSizeProvider;
-
     public ImageEyesFactory(LogHandler logHandler, ViewportSizeProvider viewportSizeProvider)
     {
-        this.logHandler = logHandler;
-        this.viewportSizeProvider = viewportSizeProvider;
+        super(logHandler, viewportSizeProvider);
     }
 
     public Eyes createEyes(ApplitoolsVisualCheck applitoolsVisualCheck)
     {
         EyesRunner runner = new ImageRunner();
-        runner.setLogHandler(logHandler);
+        runner.setLogHandler(getLogHandler());
 
         Eyes eyes = new Eyes(runner);
-        eyes.setApiKey(applitoolsVisualCheck.getExecuteApiKey());
-        //Environment
-        Dimension viewportSize = Optional.ofNullable(applitoolsVisualCheck.getViewportSize())
-                .orElseGet(viewportSizeProvider::getViewportSize);
-        eyes.setViewportSize(new RectangleSize(viewportSize.getWidth(), viewportSize.getHeight()));
-        eyes.setHostApp(applitoolsVisualCheck.getHostApp());
-        eyes.setHostOS(applitoolsVisualCheck.getHostOS());
-        eyes.setBaselineEnvName(applitoolsVisualCheck.getBaselineEnvName());
-
-        eyes.setMatchLevel(applitoolsVisualCheck.getMatchLevel());
-        eyes.setServerUrl(applitoolsVisualCheck.getServerUri().toString());
-        boolean saveTests = applitoolsVisualCheck.getAction() == VisualActionType.ESTABLISH;
-        eyes.setSaveFailedTests(saveTests);
-        eyes.setSaveNewTests(saveTests);
-        String batchName = applitoolsVisualCheck.getBatchName();
-        eyes.setBatch(batchStorage.computeIfAbsent(batchName, BatchInfo::new));
+        eyes.setConfiguration(createConfiguration(applitoolsVisualCheck));
         return eyes;
     }
 }

@@ -1,5 +1,7 @@
 project.description = 'VIVIDUS plugin for Applitools'
 
+ext.eyesVersion = '5.50.0'
+
 dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-extension-visual-testing')
@@ -9,7 +11,8 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation(group: 'com.applitools', name: 'eyes-images-java5', version: '5.50.0')
+    implementation(group: 'com.applitools', name: 'eyes-images-java5', version: eyesVersion)
+    implementation(group: 'com.applitools', name: 'eyes-selenium-java5', version: eyesVersion)
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.3')

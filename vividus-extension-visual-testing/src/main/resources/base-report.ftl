@@ -7,12 +7,10 @@
     <link rel="stylesheet" href="../../styles.css"/>
     <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="../../webjars/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css">
+    <link rel="stylesheet" href="../../webjars/vividus/style.css"/>
 </head>
 <body>
     <style>
-    body {
-        background-color: #EEEEEE;
-    }
     h3, p {
         font-weight: bold;
     }

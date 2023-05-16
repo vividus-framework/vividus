@@ -38,7 +38,8 @@ import org.vividus.visual.eyes.model.ApplitoolsVisualCheckResult;
 
 import pazone.ashot.Screenshot;
 
-public class ImageVisualTestingService implements VisualTestingService
+public class ImageVisualTestingService
+        implements VisualTestingService<ApplitoolsVisualCheckResult, ApplitoolsVisualCheck>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageVisualTestingService.class);
 

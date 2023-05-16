@@ -14,12 +14,31 @@
  * limitations under the License.
  */
 
-package org.vividus.visual.eyes.service;
+package org.vividus.visual.eyes.model;
 
-import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
+import java.util.List;
+
+import com.applitools.eyes.TestResults;
+
+import org.vividus.visual.model.AbstractVisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 
-public interface VisualTestingService<R extends VisualCheckResult, T extends ApplitoolsVisualCheck>
+public class UfgApplitoolsVisualCheckResult extends VisualCheckResult
 {
-    R run(T visualTestingSettings);
+    private List<TestResults> testResults;
+
+    public UfgApplitoolsVisualCheckResult(AbstractVisualCheck visualCheck)
+    {
+        super(visualCheck);
+    }
+
+    public List<TestResults> getTestResults()
+    {
+        return testResults;
+    }
+
+    public void setTestResults(List<TestResults> testResults)
+    {
+        this.testResults = testResults;
+    }
 }
