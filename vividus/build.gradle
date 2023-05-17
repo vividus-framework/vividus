@@ -44,6 +44,10 @@ configurations.testImplementation {
     exclude group: 'org.apache.logging.log4j', module: 'log4j-slf4j2-impl'
 }
 
+ext {
+    springBootVersion = '2.7.11'
+}
+
 dependencies {
     api project(':vividus-engine')
     api project(':vividus-http-client')
@@ -53,7 +57,6 @@ dependencies {
     implementation project(':vividus-analytics')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
-
 
     // Logging SLF4J + Log4j2
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
@@ -76,6 +79,9 @@ dependencies {
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.27')
     implementation(group: 'org.springframework', name: 'spring-context')
     implementation(group: 'org.springframework.vault', name: 'spring-vault-core', version: '2.3.3')
+
+    implementation platform(group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: springBootVersion)
+    implementation(group: 'org.springframework.boot', name: 'spring-boot-autoconfigure', version: springBootVersion)
 
     implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
     implementation(group: 'commons-cli', name: 'commons-cli', version: '1.5.0')
