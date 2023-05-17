@@ -36,10 +36,9 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.visual.eyes.factory.UfgEyesFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.UfgApplitoolsVisualCheckResult;
-import org.vividus.visual.eyes.model.UfgVisualCheck;
 import org.vividus.visual.eyes.ufg.UfgEyes;
 
-public class UfgVisualTestingService implements VisualTestingService<UfgApplitoolsVisualCheckResult, UfgVisualCheck>
+public class UfgVisualTestingService implements VisualTestingService<UfgApplitoolsVisualCheckResult>
 {
     private static final int PADDING = 10_000;
 
@@ -56,13 +55,13 @@ public class UfgVisualTestingService implements VisualTestingService<UfgApplitoo
     }
 
     @Override
-    public UfgApplitoolsVisualCheckResult run(UfgVisualCheck applitoolsVisualCheck)
+    public UfgApplitoolsVisualCheckResult run(ApplitoolsVisualCheck applitoolsVisualCheck)
     {
         UfgEyes eyes = eyesFactory.createEyes(applitoolsVisualCheck);
         List<TestResults> testResults = List.of();
 
-        eyes.open(webDriverProvider.getUnwrapped(RemoteWebDriver.class), applitoolsVisualCheck.getAppName(),
-                applitoolsVisualCheck.getBaselineName());
+        eyes.open(webDriverProvider.getUnwrapped(RemoteWebDriver.class),
+                applitoolsVisualCheck.getConfiguration().getAppName(), applitoolsVisualCheck.getBaselineName());
 
         try
         {

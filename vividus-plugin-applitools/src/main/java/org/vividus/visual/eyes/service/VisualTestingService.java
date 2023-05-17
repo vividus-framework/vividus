@@ -19,7 +19,7 @@ package org.vividus.visual.eyes.service;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 
-public interface VisualTestingService<R extends VisualCheckResult, T extends ApplitoolsVisualCheck>
+public interface VisualTestingService<R extends VisualCheckResult>
 {
-    R run(T visualTestingSettings);
+    R run(ApplitoolsVisualCheck visualTestingSettings);
 }

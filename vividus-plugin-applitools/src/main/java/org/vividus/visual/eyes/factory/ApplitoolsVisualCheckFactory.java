@@ -16,24 +16,10 @@
 
 package org.vividus.visual.eyes.factory;
 
-import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.model.VisualActionType;
-import org.vividus.visual.screenshot.BaselineIndexer;
 
-public class ApplitoolsVisualCheckFactory extends AbstractApplitoolsVisualCheckFactory
+public interface ApplitoolsVisualCheckFactory
 {
-    @SuppressWarnings("rawtypes")
-    public ApplitoolsVisualCheckFactory(
-        ScreenshotParametersFactory screenshotParametersFactory, BaselineIndexer baselineIndexer)
-    {
-        super(screenshotParametersFactory, baselineIndexer);
-    }
-
-    public ApplitoolsVisualCheck create(String batchName, String baselineName, VisualActionType action)
-    {
-        ApplitoolsVisualCheck check = new ApplitoolsVisualCheck(batchName, indexBaseline(baselineName), action);
-        configure(check);
-        return check;
-    }
+    ApplitoolsVisualCheck create(String batchName, String baselineName, VisualActionType action);
 }

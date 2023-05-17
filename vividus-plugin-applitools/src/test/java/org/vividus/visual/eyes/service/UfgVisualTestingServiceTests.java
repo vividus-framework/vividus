@@ -32,6 +32,7 @@ import com.applitools.eyes.Padding;
 import com.applitools.eyes.StepInfo;
 import com.applitools.eyes.StepInfo.AppUrls;
 import com.applitools.eyes.TestResults;
+import com.applitools.eyes.config.Configuration;
 import com.applitools.eyes.fluent.GetRegion;
 import com.applitools.eyes.selenium.ElementReference;
 import com.applitools.eyes.selenium.TargetPathLocator;
@@ -52,8 +53,8 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.visual.eyes.factory.UfgEyesFactory;
+import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.UfgApplitoolsVisualCheckResult;
-import org.vividus.visual.eyes.model.UfgVisualCheck;
 import org.vividus.visual.eyes.ufg.UfgEyes;
 import org.vividus.visual.model.VisualActionType;
 
@@ -92,7 +93,7 @@ class UfgVisualTestingServiceTests
     @Test
     void shouldRunForWindow()
     {
-        UfgVisualCheck applitoolsVisualCheck = createCheck();
+        ApplitoolsVisualCheck applitoolsVisualCheck = createCheck();
         applitoolsVisualCheck.setSearchContext(remoteWebDriver);
         when(eyesFactory.createEyes(applitoolsVisualCheck)).thenReturn(eyes);
         when(eyes.getTestResults()).thenReturn(List.of(testResults));
@@ -113,7 +114,7 @@ class UfgVisualTestingServiceTests
     @Test
     void shouldRunForWebElement()
     {
-        UfgVisualCheck applitoolsVisualCheck = createCheck();
+        ApplitoolsVisualCheck applitoolsVisualCheck = createCheck();
         RemoteWebElement webElement = mock(RemoteWebElement.class);
         applitoolsVisualCheck.setSearchContext(webElement);
         when(eyesFactory.createEyes(applitoolsVisualCheck)).thenReturn(eyes);
@@ -153,13 +154,13 @@ class UfgVisualTestingServiceTests
         assertEquals(right, padding.getRight());
     }
 
-    private UfgVisualCheck createCheck()
+    private ApplitoolsVisualCheck createCheck()
     {
-        UfgVisualCheck applitoolsVisualCheck = new UfgVisualCheck(BATCH_NAME, BASELINE_NAME,
-                VisualActionType.ESTABLISH, List.of());
+        ApplitoolsVisualCheck applitoolsVisualCheck = new ApplitoolsVisualCheck(BATCH_NAME, BASELINE_NAME,
+                VisualActionType.ESTABLISH);
         applitoolsVisualCheck.setElementsToIgnore(Set.of(elementLocator));
         applitoolsVisualCheck.setAreasToIgnore(Set.of(areaLocator));
-        applitoolsVisualCheck.setAppName(APP_NAME);
+        applitoolsVisualCheck.setConfiguration(new Configuration().setAppName(APP_NAME));
         return applitoolsVisualCheck;
     }
 }

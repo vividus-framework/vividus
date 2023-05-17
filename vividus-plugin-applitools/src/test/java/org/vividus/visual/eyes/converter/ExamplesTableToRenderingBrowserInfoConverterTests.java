@@ -55,13 +55,13 @@ class ExamplesTableToRenderingBrowserInfoConverterTests
     void shouldConvertParameters()
     {
         // CHECKSTYLE:OFF
-        String table = "|profile                |browserType|viewportSize|deviceName|screenOrientation|" + System.lineSeparator()
-                     + "|Desktop                |CHROME     |820x640     |          |                 |" + System.lineSeparator()
-                     + "|chrome_mobile_emulation|           |            |iPhone X  |PORTRAIT         |" + System.lineSeparator()
-                     + "|iOS                    |           |            |iPhone XS |LANDSCAPE        |" + System.lineSeparator();
+        String table = "|profile                |browser|viewportSize|deviceName|screenOrientation|" + System.lineSeparator()
+                     + "|Desktop                |CHROME |820x640     |          |                 |" + System.lineSeparator()
+                     + "|chrome_mobile_emulation|       |            |iPhone X  |PORTRAIT         |" + System.lineSeparator()
+                     + "|iOS                    |       |            |iPhone XS |LANDSCAPE        |" + System.lineSeparator();
         // CHECKSTYLE:ON
 
-        List<IRenderingBrowserInfo> infos = converter.convertValue(createTable(table), null);
+        List<IRenderingBrowserInfo> infos = List.of(converter.convertValue(createTable(table), null));
         assertThat(infos, hasSize(3));
 
         assertAll(() ->
@@ -90,20 +90,20 @@ class ExamplesTableToRenderingBrowserInfoConverterTests
 
     @ParameterizedTest
     @CsvSource(value = {
-        "DESKTOP                | viewportSize, browserType",
+        "DESKTOP                | viewportSize, browser",
         "IOS                    | deviceName, screenOrientation, version",
         "CHROME_MOBILE_EMULATION| deviceName, screenOrientation"
     }, delimiter = '|')
-    void shouldFailConversionOnUnknownParameters(String profile, String supportedFields)
+    void shouldFailConversionOnUnknownParameters(String profile, String supportedOptions)
     {
-        String table = "|profile|field1|field2|empty|" + System.lineSeparator()
-                     + "|%s     |value1|value2|     |" + System.lineSeparator();
+        String table = "|profile|option1|option2|empty|" + System.lineSeparator()
+                     + "|%s     |value1 |value2 |     |" + System.lineSeparator();
 
         ExamplesTable examplesTable = createTable(String.format(table, profile));
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
                 () -> converter.convertValue(examplesTable, null));
-        assertEquals(String.format("The %s profile supports only [%s] fields, but got [field1, field2]", profile,
-                supportedFields), thrown.getMessage());
+        assertEquals(String.format("The %s profile supports only [%s] options, but got [option1, option2]", profile,
+                supportedOptions), thrown.getMessage());
     }
 
     @Test
@@ -111,9 +111,9 @@ class ExamplesTableToRenderingBrowserInfoConverterTests
     {
         String table = "|profile|deviceName|" + System.lineSeparator()
                      + "|iOS    |Nokia 3310|";
-
+        ExamplesTable examplesTable = createTable(table);
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-                () -> converter.convertValue(createTable(table), null));
+                () -> converter.convertValue(examplesTable, null));
         assertEquals("Unknown device name: Nokia 3310", thrown.getMessage());
     }
 

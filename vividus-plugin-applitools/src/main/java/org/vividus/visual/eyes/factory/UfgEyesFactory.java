@@ -17,12 +17,10 @@
 package org.vividus.visual.eyes.factory;
 
 import com.applitools.eyes.LogHandler;
-import com.applitools.eyes.config.Configuration;
-import com.applitools.eyes.visualgrid.model.IRenderingBrowserInfo;
 import com.applitools.eyes.visualgrid.services.VisualGridRunner;
 
 import org.vividus.ui.ViewportSizeProvider;
-import org.vividus.visual.eyes.model.UfgVisualCheck;
+import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.ufg.UfgEyes;
 
 public class UfgEyesFactory extends AbstractEyesFactory
@@ -32,18 +30,15 @@ public class UfgEyesFactory extends AbstractEyesFactory
         super(logHandler, viewportSizeProvider);
     }
 
-    public UfgEyes createEyes(UfgVisualCheck ufgVisualCheck)
+    public UfgEyes createEyes(ApplitoolsVisualCheck check)
     {
         VisualGridRunner gridRunner = new VisualGridRunner();
         gridRunner.setLogHandler(getLogHandler());
         gridRunner.setDontCloseBatches(true);
 
         UfgEyes eyes = new UfgEyes(gridRunner);
-        Configuration configuration = createConfiguration(ufgVisualCheck);
-        IRenderingBrowserInfo[] browserInfos = ufgVisualCheck.getRenderInfos()
-                .toArray(IRenderingBrowserInfo[]::new);
-        configuration.addBrowsers(browserInfos);
-        eyes.setConfiguration(configuration);
+        setViewportSize(check);
+        eyes.setConfiguration(check.getConfiguration());
         return eyes;
     }
 }

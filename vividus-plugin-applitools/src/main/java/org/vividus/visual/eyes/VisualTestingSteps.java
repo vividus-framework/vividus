@@ -41,12 +41,12 @@ import org.vividus.visual.steps.AbstractVisualSteps;
 
 public class VisualTestingSteps extends AbstractVisualSteps
 {
-    private final VisualTestingService<ApplitoolsVisualCheckResult, ApplitoolsVisualCheck> visualTestingService;
+    private final VisualTestingService<ApplitoolsVisualCheckResult> visualTestingService;
     private final ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
     private final ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
 
     public VisualTestingSteps(
-            VisualTestingService<ApplitoolsVisualCheckResult, ApplitoolsVisualCheck> visualTestingService,
+            VisualTestingService<ApplitoolsVisualCheckResult> visualTestingService,
             ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory,
             ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory, IUiContext uiContext,
             IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)

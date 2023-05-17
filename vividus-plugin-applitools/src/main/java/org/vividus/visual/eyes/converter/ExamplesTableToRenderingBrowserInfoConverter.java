@@ -40,14 +40,14 @@ import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.jbehave.core.steps.Parameters;
 
 public class ExamplesTableToRenderingBrowserInfoConverter
-        extends AbstractParameterConverter<ExamplesTable, List<IRenderingBrowserInfo>>
+        extends AbstractParameterConverter<ExamplesTable, IRenderingBrowserInfo[]>
 {
     private static final String PROFILE = "profile";
     private static final String SCREEN_ORIENTATION = "screenOrientation";
     private static final String DEVICE_NAME = "deviceName";
 
     @Override
-    public List<IRenderingBrowserInfo> convertValue(ExamplesTable table, Type type)
+    public IRenderingBrowserInfo[] convertValue(ExamplesTable table, Type type)
     {
         return table.getRowsAsParameters(true).stream()
                 .map(params -> {
@@ -55,21 +55,21 @@ public class ExamplesTableToRenderingBrowserInfoConverter
                     checkUnsupportedKeys(profile, params);
                     return profile.create(params);
                 })
-                .collect(Collectors.toList());
+                .toArray(IRenderingBrowserInfo[]::new);
     }
 
     private static void checkUnsupportedKeys(Profile profile, Parameters params)
     {
-        List<String> supportedFields = profile.getSupportedFields();
-        List<String> unsupportedFields = params.values().entrySet()
+        List<String> supportedOptions = profile.getSupportedOptions();
+        List<String> unsupportedOptions = params.values().entrySet()
                 .stream()
-                .filter(e -> !supportedFields.contains(e.getKey()) && StringUtils.isNoneBlank(e.getValue())
+                .filter(e -> !supportedOptions.contains(e.getKey()) && StringUtils.isNoneBlank(e.getValue())
                         && !PROFILE.equals(e.getKey()))
                 .map(Entry::getKey)
                 .collect(Collectors.toList());
 
-        Validate.isTrue(unsupportedFields.isEmpty(), "The %s profile supports only %s fields, but got %s",
-                profile, supportedFields, unsupportedFields);
+        Validate.isTrue(unsupportedOptions.isEmpty(), "The %s profile supports only %s options, but got %s",
+                profile, supportedOptions, unsupportedOptions);
     }
 
     private enum Profile
@@ -77,21 +77,21 @@ public class ExamplesTableToRenderingBrowserInfoConverter
         DESKTOP
         {
             private static final String VIEWPORT_SIZE = "viewportSize";
-            private static final String BROWSER_TYPE = "browserType";
+            private static final String BROWSER = "browser";
 
             @Override
             IRenderingBrowserInfo create(Parameters params)
             {
                 return new DesktopBrowserInfo(
                     RectangleSize.parse(params.valueAs(VIEWPORT_SIZE, String.class)),
-                    params.valueAs(BROWSER_TYPE, BrowserType.class)
+                    params.valueAs(BROWSER, BrowserType.class)
                 );
             }
 
             @Override
-            List<String> getSupportedFields()
+            List<String> getSupportedOptions()
             {
-                return List.of(VIEWPORT_SIZE, BROWSER_TYPE);
+                return List.of(VIEWPORT_SIZE, BROWSER);
             }
         },
         IOS
@@ -109,7 +109,7 @@ public class ExamplesTableToRenderingBrowserInfoConverter
             }
 
             @Override
-            List<String> getSupportedFields()
+            List<String> getSupportedOptions()
             {
                 return List.of(DEVICE_NAME, SCREEN_ORIENTATION, VERSION);
             }
@@ -126,7 +126,7 @@ public class ExamplesTableToRenderingBrowserInfoConverter
             }
 
             @Override
-            List<String> getSupportedFields()
+            List<String> getSupportedOptions()
             {
                 return List.of(DEVICE_NAME, SCREEN_ORIENTATION);
             }
@@ -134,7 +134,7 @@ public class ExamplesTableToRenderingBrowserInfoConverter
 
         abstract IRenderingBrowserInfo create(Parameters params);
 
-        abstract List<String> getSupportedFields();
+        abstract List<String> getSupportedOptions();
 
         private static <T> T getDeviceName(Parameters params, Function<String, T> converter)
         {

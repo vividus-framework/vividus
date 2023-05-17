@@ -16,11 +16,6 @@
 
 package org.vividus.visual.eyes.factory;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.applitools.eyes.BatchInfo;
 import com.applitools.eyes.LogHandler;
 import com.applitools.eyes.RectangleSize;
 import com.applitools.eyes.config.Configuration;
@@ -28,12 +23,10 @@ import com.applitools.eyes.config.Configuration;
 import org.openqa.selenium.Dimension;
 import org.vividus.ui.ViewportSizeProvider;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
-import org.vividus.visual.model.VisualActionType;
 
 public abstract class AbstractEyesFactory
 {
     private final LogHandler logHandler;
-    private final Map<String, BatchInfo> batchStorage = new ConcurrentHashMap<>();
     private final ViewportSizeProvider viewportSizeProvider;
 
     protected AbstractEyesFactory(LogHandler logHandler, ViewportSizeProvider viewportSizeProvider)
@@ -42,26 +35,16 @@ public abstract class AbstractEyesFactory
         this.viewportSizeProvider = viewportSizeProvider;
     }
 
-    protected Configuration createConfiguration(ApplitoolsVisualCheck applitoolsVisualCheck)
+    protected void setViewportSize(ApplitoolsVisualCheck applitoolsVisualCheck)
     {
-        Configuration configuration = new Configuration();
-        configuration.setApiKey(applitoolsVisualCheck.getExecuteApiKey());
-        // Environment
-        Dimension viewportSize = Optional.ofNullable(applitoolsVisualCheck.getViewportSize())
-                .orElseGet(viewportSizeProvider::getViewportSize);
-        configuration.setViewportSize(new RectangleSize(viewportSize.getWidth(), viewportSize.getHeight()));
-        configuration.setHostApp(applitoolsVisualCheck.getHostApp());
-        configuration.setHostOS(applitoolsVisualCheck.getHostOS());
-        configuration.setBaselineEnvName(applitoolsVisualCheck.getBaselineEnvName());
-
-        configuration.setMatchLevel(applitoolsVisualCheck.getMatchLevel());
-        configuration.setServerUrl(applitoolsVisualCheck.getServerUri().toString());
-        boolean saveTests = applitoolsVisualCheck.getAction() == VisualActionType.ESTABLISH;
-        configuration.setSaveFailedTests(saveTests);
-        configuration.setSaveNewTests(saveTests);
-        String batchName = applitoolsVisualCheck.getBatchName();
-        configuration.setBatch(batchStorage.computeIfAbsent(batchName, BatchInfo::new));
-        return configuration;
+        Configuration configuration = applitoolsVisualCheck.getConfiguration();
+        if (configuration.getViewportSize() == null)
+        {
+            Dimension currentViewportSize = viewportSizeProvider.getViewportSize();
+            RectangleSize viewportSize = new RectangleSize(currentViewportSize.getWidth(),
+                    currentViewportSize.getHeight());
+            configuration.setViewportSize(viewportSize);
+        }
     }
 
     protected LogHandler getLogHandler()

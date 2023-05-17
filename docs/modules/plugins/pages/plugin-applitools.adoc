@@ -210,7 +210,7 @@ Performs visual check on the https://applitools.com/platform/ultrafast-grid/[Ult
 When I $actionType baseline `$testName` in batch `$batchName` with Applitools UFG using matrix:$matrix
 ----
 
-NOTE: The expression parameters marked with *bold* are mandatory.
+NOTE: The step parameters marked with *bold* are mandatory.
 
 * `$actionType` - The {visual-testing-actions}.
 * `$testName` - The name of the baseline (visual test name).
@@ -222,17 +222,17 @@ include::partial$ufg-applitools-configuration.adoc[]
 [source,gherkin]
 ----
 When I ESTABLISH baseline `Check site on several configurations` in batch `Smoke Run` with Applitools UFG using matrix:
-|profile                |browserType|viewportSize|deviceName|
-|desktop                |chrome     |1920x1080   |          |
-|ios                    |           |            |iPhone X  |
-|chrome_mobile_emulation|           |            |Galaxy S10|
+|profile                |browser|viewportSize|deviceName|
+|desktop                |chrome |1920x1080   |          |
+|ios                    |       |            |iPhone X  |
+|chrome_mobile_emulation|       |            |Galaxy S10|
 ----
 
 === Ultrafast Grid check with custom Applitools configuration
 
 Performs visual check on the https://applitools.com/platform/ultrafast-grid/[Ultrafast Grid Applitools] visual testing plarform.
 
-Properties in the custom Applitools configuration provided in step take presendence over properties specified in configuration files.
+The custom Applitools configuration provided in the step take precendence over values specified in properties.
 
 It's possible to perform several visual testing checks at once by passing several Applitools configuration into step.
 
@@ -241,7 +241,7 @@ It's possible to perform several visual testing checks at once by passing severa
 When I run visual test with Applitools UFG using:$applitoolsConfigurations and matrix:$matrix
 ----
 
-NOTE: The expression parameters marked with *bold* are mandatory.
+NOTE: The step parameters marked with *bold* are mandatory.
 
 include::partial$applitools-configuration.adoc[]
 
@@ -254,8 +254,8 @@ When I run visual test with Applitools UFG using:
 |baselineName                        |batchName|action   |
 |Check site on several configurations|Smoke Run|ESTABLISH|
  and matrix:
-|profile                |browserType|viewportSize|deviceName|screenOrientation|version|
-|desktop                |firefox    |1920x1080   |          |                 |       |
-|ios                    |           |            |iPhone X  |portrait         |latest |
-|chrome_mobile_emulation|           |            |Galaxy S10|landscape        |       |
+|profile                |browser|viewportSize|deviceName|screenOrientation|version|
+|desktop                |firefox|1920x1080   |          |                 |       |
+|ios                    |       |            |iPhone X  |portrait         |latest |
+|chrome_mobile_emulation|       |            |Galaxy S10|landscape        |       |
 ----

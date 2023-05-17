@@ -7,17 +7,7 @@
         http://www.springframework.org/schema/util
         https://www.springframework.org/schema/util/spring-util.xsd" default-lazy-init="true" profile="web">
 
-    <bean class="org.vividus.visual.eyes.converter.ExamplesTableToApplitoolsVisualChecksConverter" />
-    <bean class="org.vividus.visual.eyes.converter.ExamplesTableToRenderingBrowserInfoConverter" />
-
-    <bean id="visualTestingSteps" class="org.vividus.visual.eyes.VisualTestingSteps" >
-        <constructor-arg index="0" ref="imageVisualTestingService" />
-        <constructor-arg index="2" ref="screenshotParametersFactory" />
-    </bean>
-
-    <bean id="ufgSteps" class="org.vividus.visual.eyes.UfgSteps" />
-
-    <bean id="abstractApplitoolsVisualCheckFactory" abstract="true">
+    <bean class="org.vividus.visual.eyes.converter.ExamplesTableToApplitoolsVisualChecksConverter" >
         <constructor-arg ref="screenshotParametersFactory" />
         <property name="executeApiKey" value="${ui.visual.applitools.execute-api-key}" />
         <property name="readApiKey" value="${ui.visual.applitools.read-api-key}" />
@@ -29,10 +19,13 @@
         <property name="appName" value="${ui.visual.applitools.app-name}" />
         <property name="baselineEnvName" value="${ui.visual.applitools.baseline-env-name}" />
     </bean>
+    <bean class="org.vividus.visual.eyes.converter.ExamplesTableToRenderingBrowserInfoConverter" />
 
-    <bean id="applitoolsVisualCheckFactory" class="org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory"
-        parent="abstractApplitoolsVisualCheckFactory"/>
-    <bean class="org.vividus.visual.eyes.factory.UfgApplitoolsVisualCheckFactory" parent="abstractApplitoolsVisualCheckFactory"/>
+    <bean id="visualTestingSteps" class="org.vividus.visual.eyes.VisualTestingSteps" >
+        <constructor-arg index="2" ref="screenshotParametersFactory" />
+    </bean>
+
+    <bean id="ufgSteps" class="org.vividus.visual.eyes.UfgSteps" />
 
     <bean id="eyesLogHandler" class="org.vividus.visual.eyes.logger.EyesLogHandler">
         <constructor-arg value="org.vividus.visual.eyes.service.ImageVisualTestingService" />
@@ -56,7 +49,7 @@
         </constructor-arg>
     </bean>
 
-    <bean id="imageVisualTestingService" class="org.vividus.visual.eyes.service.ImageVisualTestingService">
+    <bean class="org.vividus.visual.eyes.service.ImageVisualTestingService">
         <constructor-arg index="0">
             <bean class="org.vividus.visual.eyes.factory.ImageEyesFactory" />
         </constructor-arg>

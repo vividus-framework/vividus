@@ -16,77 +16,183 @@
 
 package org.vividus.visual.eyes.converter;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
 
+import com.applitools.eyes.MatchLevel;
+import com.applitools.eyes.RectangleSize;
+import com.applitools.eyes.config.Configuration;
+
+import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.model.ExamplesTableFactory;
+import org.jbehave.core.model.TableParsers;
+import org.jbehave.core.model.TableTransformers;
+import org.jbehave.core.steps.ParameterControls;
+import org.jbehave.core.steps.ParameterConverters;
+import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
+import org.openqa.selenium.Dimension;
+import org.vividus.converter.ui.web.StringToDimensionParameterConverter;
+import org.vividus.ui.action.search.Locator;
+import org.vividus.ui.screenshot.ScreenshotConfiguration;
+import org.vividus.ui.screenshot.ScreenshotParameters;
+import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.model.VisualActionType;
+import org.vividus.visual.screenshot.BaselineIndexer;
 
 @ExtendWith(MockitoExtension.class)
 class ExamplesTableToApplitoolsVisualChecksConverterTests
 {
-    private static final VisualActionType ESTABLISH = VisualActionType.ESTABLISH;
-    private static final String BASELINE = "baseline";
-    private static final String BATCH = "batch";
+    private static final String BASELINE = "baseline-name";
+    private static final String BATCH = "batch-name";
+    private static final RectangleSize DIMENSION = new RectangleSize(1, 1);
 
-    @Mock private ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
-
-    @InjectMocks
-    private ExamplesTableToApplitoolsVisualChecksConverter converter;
+    @Mock private ScreenshotParameters screenshotParameters;
+    @Mock private Locator locator;
+    @Mock private ScreenshotParametersFactory<ScreenshotConfiguration> screenshotParametersFactory;
+    @Mock private BaselineIndexer baselineIndexer;
+    @InjectMocks private ExamplesTableToApplitoolsVisualChecksConverter converter;
 
     @Test
-    void shouldConvertExamplesTableIntoApplitoolsVisualChecks()
+    void shouldConvertExamplesTableIntoApplitoolsVisualChecksAllParameters()
     {
-        ApplitoolsVisualCheck visualCheck =
-                spy(new ApplitoolsVisualCheck(BATCH, BASELINE, ESTABLISH));
-        List<ApplitoolsVisualCheck> checks = List.of(visualCheck, visualCheck);
-        ExamplesTable examplesTable = mockExamplesTable(checks);
-        when(applitoolsVisualCheckFactory.unite(visualCheck)).thenReturn(visualCheck);
-        assertEquals(checks, converter.convertValue(examplesTable, null));
-        verify(applitoolsVisualCheckFactory, times(2)).unite(visualCheck);
+        when(screenshotParametersFactory.create()).thenReturn(Optional.of(screenshotParameters));
+        when(baselineIndexer.createIndexedBaseline(BASELINE)).thenReturn(BASELINE);
+
+         // CHECKSTYLE:OFF
+        String table = "|executeApiKey  |readApiKey  |hostApp |hostOS |viewportSize|matchLevel|serverUri          |appName |batchName |baselineEnvName  |elementsToIgnore|areasToIgnore|baselineName |action   |" + System.lineSeparator()
+                     + "|execute-api-key|read-api-key|host-app|host-os|1x1         |EXACT     |https://example.com|app-name|batch-name|baseline-env-name|elements        |areas        |baseline-name|ESTABLISH|";
+        // CHECKSTYLE:ON
+        ExamplesTable applitoolsCheckTable = createTable(table);
+
+        List<ApplitoolsVisualCheck> checks = converter.convertValue(applitoolsCheckTable, null);
+        assertThat(checks, hasSize(1));
+        ApplitoolsVisualCheck check = checks.get(0);
+        Configuration configuration = check.getConfiguration();
+        assertAll(
+            () -> assertEquals("execute-api-key", configuration.getApiKey()),
+            () -> assertEquals("read-api-key", check.getReadApiKey()),
+            () -> assertEquals("host-app", configuration.getHostApp()),
+            () -> assertEquals("host-os", configuration.getHostOS()),
+            () -> assertEquals(DIMENSION, configuration.getViewportSize()),
+            () -> assertEquals(MatchLevel.EXACT, configuration.getMatchLevel()),
+            () -> assertEquals(URI.create("https://example.com"), configuration.getServerUrl()),
+            () -> assertEquals("app-name", configuration.getAppName()),
+            () -> assertEquals(BATCH, check.getBatchName()),
+            () -> assertEquals("baseline-env-name", configuration.getBaselineEnvName()),
+            () -> assertEquals(Set.of(locator), check.getElementsToIgnore()),
+            () -> assertEquals(Set.of(locator), check.getAreasToIgnore()),
+            () -> assertEquals(BASELINE, check.getBaselineName()),
+            () -> assertEquals(VisualActionType.ESTABLISH, check.getAction()),
+            () -> assertEquals(Optional.of(screenshotParameters), check.getScreenshotParameters()),
+            () -> assertTrue(configuration.getSaveFailedTests()),
+            () -> assertTrue(configuration.getSaveNewTests()),
+            () -> assertEquals(BATCH, configuration.getBatch().getName())
+        );
     }
 
-    private ExamplesTable mockExamplesTable(List<ApplitoolsVisualCheck> checks)
+    @Test
+    void shouldCreateApplitoolsVisualChecksWithDefaultParameters()
     {
-        ExamplesTable examplesTable = mock(ExamplesTable.class);
-        when(examplesTable.getRowsAs(ApplitoolsVisualCheck.class)).thenReturn(checks);
-        return examplesTable;
+        testDefaultParameters(() -> List.of(converter.create(BATCH, BASELINE, VisualActionType.COMPARE_AGAINST)));
     }
 
-    @SuppressWarnings("unused")
-    private static Stream<Arguments> dataProvider()
+    @Test
+    void shouldConvertExamplesTableIntoApplitoolsVisualChecksWithDefaultParameters()
     {
-        return Stream.of(
-                Arguments.of(new ApplitoolsVisualCheck(null, BASELINE, ESTABLISH), "batchName"),
-                Arguments.of(new ApplitoolsVisualCheck(BATCH, null, ESTABLISH), "baselineName"),
-                Arguments.of(new ApplitoolsVisualCheck(BATCH, BATCH, null), "action"));
+        String table = "|batchName |baselineName |action         |" + System.lineSeparator()
+                     + "|batch-name|baseline-name|COMPARE_AGAINST|";
+        ExamplesTable applitoolsCheckTable = createTable(table);
+
+        testDefaultParameters(() -> converter.convertValue(applitoolsCheckTable, null));
     }
 
-    @ParameterizedTest
-    @MethodSource("dataProvider")
-    void shouldThrowExceptionIfMandatoryFieldNotSet(ApplitoolsVisualCheck visualCheck, String fieldName)
+    private void testDefaultParameters(Supplier<List<ApplitoolsVisualCheck>> checksSupplier)
     {
-        ExamplesTable examplesTable = mockExamplesTable(List.of(visualCheck));
-        IllegalArgumentException iae =
-                assertThrows(IllegalArgumentException.class, () -> converter.convertValue(examplesTable, null));
-        assertEquals(fieldName + " should be set", iae.getMessage());
+        when(screenshotParametersFactory.create()).thenReturn(Optional.of(screenshotParameters));
+        when(baselineIndexer.createIndexedBaseline(BASELINE)).thenReturn(BASELINE);
+
+        String executeApiKey = "default-execute-api-key";
+        converter.setExecuteApiKey(executeApiKey);
+        String readApiKey = "default-read-api-key";
+        converter.setReadApiKey(readApiKey);
+        String hostApp = "default-host-app";
+        converter.setHostApp(hostApp);
+        String hostOs = "default-host-os";
+        converter.setHostOS(hostOs);
+        converter.setViewportSize(new Dimension(0, 0));
+        converter.setMatchLevel(MatchLevel.NONE);
+        URI uri = URI.create("https://dev.by");
+        converter.setServerUri(uri);
+        String appName = "default-app-name";
+        converter.setAppName(appName);
+        String baselineEnvName = "default-baseline-env-name";
+        converter.setBaselineEnvName(baselineEnvName);
+
+        List<ApplitoolsVisualCheck> checks = checksSupplier.get();
+        assertThat(checks, hasSize(1));
+        ApplitoolsVisualCheck check = checks.get(0);
+        Configuration configuration = check.getConfiguration();
+        assertAll(
+            () -> assertEquals(executeApiKey, configuration.getApiKey()),
+            () -> assertEquals(readApiKey, check.getReadApiKey()),
+            () -> assertEquals(hostApp, configuration.getHostApp()),
+            () -> assertEquals(hostOs, configuration.getHostOS()),
+            () -> assertEquals(new RectangleSize(0, 0), configuration.getViewportSize()),
+            () -> assertEquals(MatchLevel.NONE, configuration.getMatchLevel()),
+            () -> assertEquals(uri, configuration.getServerUrl()),
+            () -> assertEquals(appName, configuration.getAppName()),
+            () -> assertEquals(BATCH, check.getBatchName()),
+            () -> assertEquals(baselineEnvName, configuration.getBaselineEnvName()),
+            () -> assertEquals(Set.of(), check.getElementsToIgnore()),
+            () -> assertEquals(Set.of(), check.getAreasToIgnore()),
+            () -> assertEquals(BASELINE, check.getBaselineName()),
+            () -> assertEquals(VisualActionType.COMPARE_AGAINST, check.getAction()),
+            () -> assertEquals(Optional.of(screenshotParameters), check.getScreenshotParameters()),
+            () -> assertFalse(configuration.getSaveFailedTests()),
+            () -> assertFalse(configuration.getSaveNewTests()),
+            () -> assertEquals(BATCH, configuration.getBatch().getName())
+        );
+    }
+
+    @Test
+    void shouldFailOnUnknownOptions()
+    {
+        ExamplesTable applitoolsCheckTable = createTable(
+                "|batchName |param1|param2|" + System.lineSeparator() + "|batch-name|val1  |val2  |");
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> converter.convertValue(applitoolsCheckTable, null));
+        assertEquals("Unknown Applitools configuration options: param1, param2", thrown.getMessage());
+    }
+
+    private ExamplesTable createTable(String table)
+    {
+        ParameterConverters parameterConverters = new ParameterConverters();
+        parameterConverters.addConverters(
+            new FunctionalParameterConverter<String, Set<Locator>>(value -> Set.of(locator)) { },
+            new FunctionalParameterConverter<String, Dimension>(StringToDimensionParameterConverter::convert) { },
+            new FunctionalParameterConverter<String, URI>(URI::create) { }
+        );
+        return new ExamplesTableFactory(new Keywords(), null, parameterConverters, new ParameterControls(),
+                new TableParsers(parameterConverters), new TableTransformers()).createExamplesTable(table);
     }
 }

@@ -22,7 +22,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
@@ -30,6 +29,7 @@ import com.applitools.eyes.EyesRunner;
 import com.applitools.eyes.LogHandler;
 import com.applitools.eyes.Logger;
 import com.applitools.eyes.RectangleSize;
+import com.applitools.eyes.config.Configuration;
 import com.applitools.eyes.selenium.BrowserType;
 import com.applitools.eyes.selenium.Eyes;
 import com.applitools.eyes.visualgrid.model.DesktopBrowserInfo;
@@ -42,15 +42,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.Dimension;
 import org.vividus.ui.ViewportSizeProvider;
-import org.vividus.visual.eyes.model.UfgVisualCheck;
+import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.model.VisualActionType;
 
 @ExtendWith(MockitoExtension.class)
 class UfgEyesFactoryTests
 {
-    private static final Dimension DIMENSION = new Dimension(1, 1);
+    private static final RectangleSize RECT_SIZE = new RectangleSize(1, 1);
 
     @Mock private LogHandler logHandler;
     @Mock private ViewportSizeProvider viewportSizeProvider;
@@ -60,14 +59,17 @@ class UfgEyesFactoryTests
     @Test
     void shouldCreateEyes() throws IllegalAccessException
     {
-        DesktopBrowserInfo info = new DesktopBrowserInfo(DIMENSION.getWidth(), DIMENSION.getHeight(),
+        DesktopBrowserInfo info = new DesktopBrowserInfo(RECT_SIZE.getWidth(), RECT_SIZE.getHeight(),
                 BrowserType.CHROME);
 
-        UfgVisualCheck check = new UfgVisualCheck("batch-name", "baseline-name",
-                VisualActionType.ESTABLISH, List.of(info));
-        check.setViewportSize(DIMENSION);
-        check.setServerUri(URI.create("https://eyesapi.applitools.com"));
-        check.setExecuteApiKey("execute-api-key");
+        ApplitoolsVisualCheck check = new ApplitoolsVisualCheck("batch-name", "baseline-name",
+                VisualActionType.ESTABLISH);
+        Configuration configuration = new Configuration()
+                .setViewportSize(RECT_SIZE)
+                .setServerUrl("https://eyesapi.applitools.com")
+                .setApiKey("execute-api-key")
+                .addBrowser(info);
+        check.setConfiguration(configuration);
 
         Eyes eyes = factory.createEyes(check);
 
@@ -81,6 +83,6 @@ class UfgEyesFactoryTests
         assertThat(renderInfos, hasSize(1));
         RenderBrowserInfo renderInfo = renderInfos.get(0);
         assertEquals(BrowserType.CHROME, renderInfo.getBrowserType());
-        assertEquals(new RectangleSize(DIMENSION.getWidth(), DIMENSION.getHeight()), renderInfo.getDeviceSize());
+        assertEquals(RECT_SIZE, renderInfo.getDeviceSize());
     }
 }

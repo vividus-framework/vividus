@@ -37,7 +37,8 @@ public class ImageEyesFactory extends AbstractEyesFactory
         runner.setLogHandler(getLogHandler());
 
         Eyes eyes = new Eyes(runner);
-        eyes.setConfiguration(createConfiguration(applitoolsVisualCheck));
+        setViewportSize(applitoolsVisualCheck);
+        eyes.setConfiguration(applitoolsVisualCheck.getConfiguration());
         return eyes;
     }
 }

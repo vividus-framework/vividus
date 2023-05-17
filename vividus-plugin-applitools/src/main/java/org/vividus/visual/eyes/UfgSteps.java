@@ -24,27 +24,25 @@ import org.jbehave.core.annotations.When;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.visual.eyes.factory.UfgApplitoolsVisualCheckFactory;
+import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.UfgApplitoolsVisualCheckResult;
-import org.vividus.visual.eyes.model.UfgVisualCheck;
 import org.vividus.visual.eyes.service.VisualTestingService;
 import org.vividus.visual.model.VisualActionType;
 import org.vividus.visual.steps.AbstractVisualSteps;
 
 public class UfgSteps extends AbstractVisualSteps
 {
-    private final VisualTestingService<UfgApplitoolsVisualCheckResult, UfgVisualCheck> visualTestingService;
-    private final UfgApplitoolsVisualCheckFactory ufgApplitoolsVisualCheckFactory;
+    private final VisualTestingService<UfgApplitoolsVisualCheckResult> visualTestingService;
+    private final ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
 
-    protected UfgSteps(
-            VisualTestingService<UfgApplitoolsVisualCheckResult, UfgVisualCheck> visualTestingService,
-            UfgApplitoolsVisualCheckFactory ufgApplitoolsVisualCheckFactory, IUiContext uiContext,
+    public UfgSteps(VisualTestingService<UfgApplitoolsVisualCheckResult> visualTestingService,
+            ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory, IUiContext uiContext,
             IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
     {
         super(uiContext, attachmentPublisher, softAssert);
         this.visualTestingService = visualTestingService;
-        this.ufgApplitoolsVisualCheckFactory = ufgApplitoolsVisualCheckFactory;
+        this.applitoolsVisualCheckFactory = applitoolsVisualCheckFactory;
     }
 
     /**
@@ -58,18 +56,17 @@ public class UfgSteps extends AbstractVisualSteps
      */
     @When("I $actionType baseline `$testName` in batch `$batchName` with Applitools UFG using matrix:$matrix")
     public void performCheck(VisualActionType actionType, String testName, String batchName,
-            List<IRenderingBrowserInfo> matrix)
+            IRenderingBrowserInfo[] matrix)
     {
-        execute(() -> ufgApplitoolsVisualCheckFactory.create(batchName, testName, actionType, matrix),
-                visualTestingService::run);
+        ApplitoolsVisualCheck check = applitoolsVisualCheckFactory.create(batchName, testName, actionType);
+        performCheck(List.of(check), matrix);
     }
 
     /**
      * Performs visual check on the <a href="https://applitools.com/platform/ultrafast-grid/">Ultrafast Grid
      * Applitools</a> visual testing plarform.
      * <br>
-     * Properties in the custom Applitools configuration provided in step take presendence over properties
-     * specified in configuration files.
+     * The custom Applitools configuration provided in the step take precendence over values specified in properties.
      * <br>
      * It's possible to perform several visual testing checks at once by passing several Applitools configuration
      * into step.
@@ -78,11 +75,13 @@ public class UfgSteps extends AbstractVisualSteps
      * @param matrix                   The matrix describing target platforms to run visual tests on.
      */
     @When("I run visual test with Applitools UFG using:$applitoolsConfigurations and matrix:$matrix")
-    public void performCheck(List<ApplitoolsVisualCheck> applitoolsConfigurations, List<IRenderingBrowserInfo> matrix)
+    public void performCheck(List<ApplitoolsVisualCheck> applitoolsConfigurations, IRenderingBrowserInfo[] matrix)
     {
-        applitoolsConfigurations.stream()
-                .forEach(check -> execute(() -> ufgApplitoolsVisualCheckFactory.create(check, matrix),
-                        visualTestingService::run));
+        applitoolsConfigurations.stream().forEach(check -> execute(() ->
+        {
+            check.getConfiguration().addBrowsers(matrix);
+            return check;
+        }, visualTestingService::run));
     }
 
     @Override
