@@ -14,7 +14,7 @@ public class EnvironmentVaultConfigurationCustom extends EnvironmentVaultConfigu
     private String nameSpace;
 
     @Bean
-    public RestTemplateCustomizer addNameSpaceHeaderForAllVaultRequests() {
+    public RestTemplateCustomizer addingNamespaceHeaderRestTemplateCustomnizer() {
         return (restTemplate) -> restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor(nameSpace));
     }
 }
