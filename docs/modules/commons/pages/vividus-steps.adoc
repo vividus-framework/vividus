@@ -1,9 +1,8 @@
 = Steps available out of the box
 
-== Description
-
 Here one could find description of the steps that are delivered with Vividus itself without any plugins required.
 
+== Variables initialization
 === Initialize variable
 
 Initializes a variable with the specified value.
@@ -27,127 +26,6 @@ Given I initialize scenario variable `message` with value `Hello World!`
 [source,gherkin]
 ----
 Given I initialize scenario variable `date` with value `#{generateDate(P1DT2h)}`
-----
-
-=== Execute steps
-
-Executes the steps located in the table.
-
-[source,gherkin]
-----
-When I execute steps:$stepsToExecute
-----
-
-* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
-
-.Check and increment the value of a variable
-[source,gherkin]
-----
-Given I initialize story variable `var` with value `0`
-When I execute steps:
-|step                                                                     |
-|Then `${var}` is = `0`                                                   |
-|Given I initialize story variable `var` with value `#{eval(${var} + 1)}` |
-Then `${var}` is = `1`
-----
-
-=== Execute while-like loop
-
-Executes the steps while variable matches the comparison rule or until the maximum number of iterations is reached.
-
-[IMPORTANT]
-If the maximum number of iterations is reached no failure or exception will occur.
-
-[source,gherkin]
-----
-When I execute steps at most $max times while variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute
-----
-
-Alias:
-[source,gherkin]
-----
-When I execute steps at most $max times while variable '$variableName' is $comparisonRule '$expectedValue':$stepsToExecute
-----
-
-* `$max` - The maximum number of iterations
-* `$variableName` - The name of the variable to check
-+
-NOTE: Exactly variable name (e.g. `myVaraible`) is expected here, *not* variable reference: pass:[<s>${myVariable}</s>]
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule]
-* `$expectedValue` - The expected value of the variable
-* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute
-
-.Click button 5 times
-[source,gherkin]
-----
-When I execute steps at most 5 times while variable `var` is less than `3`:
-|step                                                                                                                   |
-|When I click on element located by `id(counter)`                                                                       |
-|When I find <= `1` elements by `xpath(//div[@id='clickResult' and (text()='3' or text()='4')])` and for each element do|
-|{headerSeparator=!,valueSeparator=!}                                                                                   |
-|!step!                                                                                                                 |
-|!When I set the text found in search context to the 'scenario' variable 'var'!                                         |
-Then `${var}` is = `3`
-----
-
-=== Execute while-like loop with delays
-
-Executes the steps while variable matches the comparison rule or until the maximum number of iterations is reached. The delay is used to define the amount of time to wait between iterations.
-
-[IMPORTANT]
-If the maximum number of iterations is reached no failure or exception will occur.
-
-[source,gherkin]
-----
-When I execute steps with delay `$delay` at most $max times while variable variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute
-----
-
-Alias:
-[source,gherkin]
-----
-When I execute steps with delay '$delay' at most $max times while variable '$variableName' is $comparisonRule '$expectedValue':$stepsToExecute
-----
-
-* `$delay` - The delay between iterations
-* `$max` - The maximum number of iterations
-* `$variableName` - The name of the variable to check
-+
-NOTE: Exactly variable name (e.g. `myVaraible`) is expected here, *not* variable reference: pass:[<s>${myVariable}</s>]
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule]
-* `$expectedValue` - The expected value of the variable
-* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute
-
-.Click button 5 times with 1 second delay
-[source,gherkin]
-----
-When I execute steps with delay `PT1S` at most 5 times while variable `var` is less than `3`:
-|step                                                                                                                   |
-|When I click on element located by `id(counter)`                                                                       |
-|When I find <= `1` elements by `xpath(//div[@id='clickResult' and (text()='3' or text()='4')])` and for each element do|
-|{headerSeparator=!,valueSeparator=!}                                                                                   |
-|!step!                                                                                                                 |
-|!When I set the text found in search context to the 'scenario' variable 'var'!                                         |
-Then `${var}` is = `3`
-----
-
-=== Wait for period
-
-Waits during specified period for debug purposes
-
-[WARNING]
-The step is for debugging purpose only
-
-[source,gherkin]
-----
-When I wait `$period` for debug
-----
-
-* `$period` - total duration to wait in {durations-format-link} format.
-
-.Wait 30 seconds for debug
-[source,gherkin]
-----
-When I wait `PT30S` for debug
 ----
 
 === Initialize variable using template
@@ -190,85 +68,24 @@ Given I initialize scenario variable `personalInfo` using template `templates/pe
 |Dagoth Ur|Dunmer|
 ----
 
-=== Assert the value matches regex
+== Simple validations
+=== Compare value against expected one
 
-Asserts that the given value matches the specified regular expression.
-The dotall mode is enabled by default: the expression `.` matches any character,
-including a line terminator.
-
-[source,gherkin]
-----
-Then `$value` matches `$regex`
-----
-
-* `$value` - The value to assert.
-* `$regex` - https://en.wikipedia.org/wiki/Regular_expression[The regular expression].
-
-=== Create a file
-
-Saves the provided content to a file with the specified file path.
-
-[source,gherkin]
-----
-When I create file with content `$fileContent` at path `$filePath`
-----
-
-* `$fileContent` - The content to be saved to the creating file.
-* `$filePath` - The fully qualified file name including parent folders and extension (e.g. `temp/some_file.txt`).
-
-
-=== Create a temporary file
-
-Creates a temporary file with the provided content and puts its path to a variable with the specified name.
-The created file will be removed upon test run completion.
-
-[source,gherkin]
-----
-When I create temporary file with name `$name` and content `$content` and put path to $scopes variable `$variableName`
-----
-
-* `$name` - The logical name of the creating temporary file. For example, when `$name` is equal to `my-file.txt`, then `my-file` will be used as a prefix in the temporary file name and `.txt` - as a suffix.
-* `$content` - The content to be saved to the creating temporary file.
-* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The name of the variable to store the full path of the created temporary file.
-
-If you want to use the created temporary file in further batches of the test suite as an input data, you should use https://datatracker.ietf.org/doc/html/rfc8089#appendix-A[URL with `file` protocol]
-
-.Batch 1 - Create a temporary local file
-[source,gherkin]
-----
-When I create temporary file with name `.table` and content `
-|column|
-|value |
-` and put path to NEXT_BATCHES variable `examples-table-temporary-file`
-----
-
-.Batch 2 - Use the temporary file as xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]
-[source,gherkin]
-----
-Then `<column>` is equal to `value`
-Examples:
-file:///${examples-table-temporary-file}
-----
-
-
-=== Compare variables
-
-Compare the value from the first *variable* with the value from the second *variable* in accordance with the *condition*. Could compare Maps and Lists of maps using EQUAL_TO comparison rule.
+Compare the actual value against the expected value in accordance with the comparison rule. Could compare Maps and Lists of maps using EQUAL_TO comparison rule.
 Other rules will fallback to strings comparison.
 
 NOTE: The step prints the comparison results in the unified diff format for the strings with the legth more than specified in the property xref:ROOT:tests-configuration.adoc#_configuration_properties[report.text-length-diff-threshold].
 
-WARNING: If the variables contain valid numbers than they will be converted into {java-api-docs-base-url}/docs/api/java.base/java/math/BigInteger.html[BigInteger] and compared as numbers.
+WARNING: If the values are valid numbers than they will be converted into {java-api-docs-base-url}/docs/api/java.base/java/math/BigInteger.html[BigInteger] and compared as numbers.
 
 [source,gherkin]
 ----
-Then `$variable1` is $comaprisonRule `$variable2`
+Then `$actualValue` is $comaprisonRule `$expectedValue`
 ----
 
-* `$variable1` - The first variable.
+* `$actualValue` - The actual value.
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `$variable1` - The second variable.
+* `$expectedValue` - The expected value.
 
 
 .Compare Strings
@@ -289,6 +106,43 @@ Then `10` is = `10.0`
 When I execute SQL query `SELECT * FROM test.launch_rockets WHERE name='Proton'` against `preprod` and save result to scenario variable `preprod-date`
 When I execute SQL query `SELECT * FROM test.launch_rockets WHERE name='Proton'` against `prod` and save result to scenario variable `prod-data`
 Then `${preprod-data}` is = `${prod-data}`
+----
+
+=== Assert the value matches regex
+
+Asserts that the given value matches the specified regular expression.
+The dotall mode is enabled by default: the expression `.` matches any character,
+including a line terminator.
+
+[source,gherkin]
+----
+Then `$value` matches `$regex`
+----
+
+* `$value` - The value to assert.
+* `$regex` - https://en.wikipedia.org/wiki/Regular_expression[The regular expression].
+
+== Sub-steps execution
+=== Execute steps
+
+Executes the steps located in the table.
+
+[source,gherkin]
+----
+When I execute steps:$stepsToExecute
+----
+
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
+
+.Check and increment the value of a variable
+[source,gherkin]
+----
+Given I initialize story variable `var` with value `0`
+When I execute steps:
+|step                                                                     |
+|Then `${var}` is = `0`                                                   |
+|Given I initialize story variable `var` with value `#{eval(${var} + 1)}` |
+Then `${var}` is = `1`
 ----
 
 === Execute steps N times
@@ -332,6 +186,86 @@ When I execute steps while counter is less than or equal to `10` with increment 
 !|When I click on element located by `caseSensitiveText(CLICK ME EIGHT TIMES)`            |!
 ----
 
+=== Execute while-like loop
+
+Executes the steps while variable matches the comparison rule or until the maximum number of iterations is reached.
+
+[IMPORTANT]
+If the maximum number of iterations is reached no failure or exception will occur.
+
+[source,gherkin]
+----
+When I execute steps at most $max times while variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute
+----
+
+Alias:
+[source,gherkin]
+----
+When I execute steps at most $max times while variable '$variableName' is $comparisonRule '$expectedValue':$stepsToExecute
+----
+
+* `$max` - The maximum number of iterations
+* `$variableName` - The name of the variable to check
++
+NOTE: Exactly variable name (e.g. `myVaraible`) is expected here, *not* variable reference: pass:[<s>${myVariable}</s>]
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule]
+* `$expectedValue` - The expected value of the variable
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute
+
+.Click button 5 times
+[source,gherkin]
+----
+When I execute steps at most 5 times while variable `var` is less than `3`:
+|step                                                                                                                   |
+|When I click on element located by `id(counter)`                                                                       |
+|When I find <= `1` elements by `xpath(//div[@id='clickResult' and (text()='3' or text()='4')])` and for each element do|
+|{headerSeparator=!,valueSeparator=!}                                                                                   |
+|!step!                                                                                                                 |
+|!When I set the text found in search context to the 'scenario' variable 'var'!                                         |
+Then `${var}` is = `3`
+----
+
+
+=== Execute while-like loop with delays
+
+Executes the steps while variable matches the comparison rule or until the maximum number of iterations is reached. The delay is used to define the amount of time to wait between iterations.
+
+[IMPORTANT]
+If the maximum number of iterations is reached no failure or exception will occur.
+
+[source,gherkin]
+----
+When I execute steps with delay `$delay` at most $max times while variable variable `$variableName` is $comparisonRule `$expectedValue`:$stepsToExecute
+----
+
+Alias:
+[source,gherkin]
+----
+When I execute steps with delay '$delay' at most $max times while variable '$variableName' is $comparisonRule '$expectedValue':$stepsToExecute
+----
+
+* `$delay` - The delay between iterations
+* `$max` - The maximum number of iterations
+* `$variableName` - The name of the variable to check
++
+NOTE: Exactly variable name (e.g. `myVaraible`) is expected here, *not* variable reference: pass:[<s>${myVariable}</s>]
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule]
+* `$expectedValue` - The expected value of the variable
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute
+
+.Click button 5 times with 1 second delay
+[source,gherkin]
+----
+When I execute steps with delay `PT1S` at most 5 times while variable `var` is less than `3`:
+|step                                                                                                                   |
+|When I click on element located by `id(counter)`                                                                       |
+|When I find <= `1` elements by `xpath(//div[@id='clickResult' and (text()='3' or text()='4')])` and for each element do|
+|{headerSeparator=!,valueSeparator=!}                                                                                   |
+|!step!                                                                                                                 |
+|!When I set the text found in search context to the 'scenario' variable 'var'!                                         |
+Then `${var}` is = `3`
+----
+
 === Execute steps if a condition is "true"
 
 Steps designed to execute specified steps if result of a condition is "true".
@@ -350,7 +284,7 @@ When the condition '$condition' is true I do$stepsToExecute
 * `$condition` - The verifiable condition (Case-insensitive).
 +
 [cols="1,1" options="header"]
-|===
+|==
 
 |Steps are performed|Steps are not performed
 
@@ -366,7 +300,7 @@ When the condition '$condition' is true I do$stepsToExecute
 
 |y|n
 
-|===
+|==
 * `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column `step` containing the steps to execute if the result of the `$condition` is true.
 
 WARNING: The error will stop steps execution in case if unsupported condition value is provided.
@@ -431,8 +365,57 @@ When variable `token` is not set I do:
 !|Given I initialize story variable `api-key` with value `as38der4535fdERAnA443mIlb`                 |!
 ----
 
-=== ZIP archives
-==== Save ZIP archive entries
+== Files
+=== Create a file
+
+Saves the provided content to a file with the specified file path.
+
+[source,gherkin]
+----
+When I create file with content `$fileContent` at path `$filePath`
+----
+
+* `$fileContent` - The content to be saved to the creating file.
+* `$filePath` - The fully qualified file name including parent folders and extension (e.g. `temp/some_file.txt`).
+
+
+=== Create a temporary file
+
+Creates a temporary file with the provided content and puts its path to a variable with the specified name.
+The created file will be removed upon test run completion.
+
+[source,gherkin]
+----
+When I create temporary file with name `$name` and content `$content` and put path to $scopes variable `$variableName`
+----
+
+* `$name` - The logical name of the creating temporary file. For example, when `$name` is equal to `my-file.txt`, then `my-file` will be used as a prefix in the temporary file name and `.txt` - as a suffix.
+* `$content` - The content to be saved to the creating temporary file.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to store the full path of the created temporary file.
+
+If you want to use the created temporary file in further batches of the test suite as an input data, you should use https://datatracker.ietf.org/doc/html/rfc8089#appendix-A[URL with `file` protocol]
+
+.Batch 1 - Create a temporary local file
+[source,gherkin]
+----
+When I create temporary file with name `.table` and content `
+|column|
+|value |
+` and put path to NEXT_BATCHES variable `examples-table-temporary-file`
+----
+
+.Batch 2 - Use the temporary file as xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]
+[source,gherkin]
+----
+Then `<column>` is equal to `value`
+Examples:
+file:///${examples-table-temporary-file}
+----
+
+
+== ZIP archives
+=== Save ZIP archive entries
 
 Saves the specified archive entries into variables.
 
@@ -461,7 +444,7 @@ Then `${text}` is = `Response text from ZIP archive`
 Then `${base64}` is = `UmVzcG9uc2UgdGV4dCBmcm9tIFpJUCBhcmNoaXZl`
 ----
 
-==== Validate ZIP archive
+=== Validate ZIP archive
 
 Validates that at least one (or none) entry in the archive matches the specified
 xref:parameters:string-comparison-rule.adoc[string comparison rule]. If comparison
@@ -497,4 +480,25 @@ When I execute HTTP GET request for resource with URL `https://example.com/get-z
 Then `${response-as-bytes}` archive contains entries with names:
 |name                           |
 |responseTextFromZipArchive.txt |
+----
+
+== Debug
+=== Wait for period
+
+Waits during specified period for debug purposes
+
+[WARNING]
+The step is for debugging purpose only
+
+[source,gherkin]
+----
+When I wait `$period` for debug
+----
+
+* `$period` - total duration to wait in {durations-format-link} format.
+
+.Wait 30 seconds for debug
+[source,gherkin]
+----
+When I wait `PT30S` for debug
 ----
