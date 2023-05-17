@@ -8,13 +8,13 @@ import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.config.EnvironmentVaultConfiguration;
 
 @Configuration
-public class EnvironmentVaultConfigurationCustom extends EnvironmentVaultConfiguration
+public class NamespaceAwareEnvironmentVaultConfiguration extends EnvironmentVaultConfiguration
 {
     @Value("${vault.namespace}")
-    private String nameSpace;
+    private String namespace;
 
     @Bean
-    public RestTemplateCustomizer addingNamespaceHeaderRestTemplateCustomnizer() {
-        return (restTemplate) -> restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor(nameSpace));
+    public RestTemplateCustomizer addingNamespaceHeaderRestTemplateCustomizer() {
+        return (restTemplate) -> restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor(namespace));
     }
 }

@@ -79,7 +79,7 @@ public class VaultStoredPropertiesProcessor extends AbstractPropertiesProcessor 
             context = new AnnotationConfigApplicationContext();
             PropertiesPropertySource propertySource = new PropertiesPropertySource("properties", properties);
             context.getEnvironment().getPropertySources().addFirst(propertySource);
-            context.register(EnvironmentVaultConfigurationCustom.class);
+            context.register(NamespaceAwareEnvironmentVaultConfiguration.class);
             context.refresh();
 
             vaultTemplate = context.getBean(VaultTemplate.class);
