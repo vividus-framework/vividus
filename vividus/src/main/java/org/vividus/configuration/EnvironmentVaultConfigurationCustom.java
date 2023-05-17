@@ -10,7 +10,7 @@ import org.springframework.vault.config.EnvironmentVaultConfiguration;
 @Configuration
 public class EnvironmentVaultConfigurationCustom extends EnvironmentVaultConfiguration
 {
-    @Value("${spring.cloud.vault.namespace}")
+    @Value("${vault.namespace}")
     private String nameSpace;
 
     @Bean
