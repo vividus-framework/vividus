@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.Validate;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.PropertiesPropertySource;
-import org.springframework.vault.config.EnvironmentVaultConfiguration;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
@@ -80,7 +79,7 @@ public class VaultStoredPropertiesProcessor extends AbstractPropertiesProcessor 
             context = new AnnotationConfigApplicationContext();
             PropertiesPropertySource propertySource = new PropertiesPropertySource("properties", properties);
             context.getEnvironment().getPropertySources().addFirst(propertySource);
-            context.register(EnvironmentVaultConfiguration.class);
+            context.register(EnvironmentVaultConfigurationCustom.class);
             context.refresh();
 
             vaultTemplate = context.getBean(VaultTemplate.class);
