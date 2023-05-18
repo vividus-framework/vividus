@@ -15,8 +15,9 @@ public class NamespaceAwareEnvironmentVaultConfiguration extends EnvironmentVaul
     private String namespace;
 
     @Bean
-    @ConditionalOnProperty(value="vault.namespace")
-    public RestTemplateCustomizer addingNamespaceHeaderRestTemplateCustomizer() {
-        return (restTemplate) -> restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor(namespace));
+    @ConditionalOnProperty(value = "vault.namespace")
+    public RestTemplateCustomizer addingNamespaceHeaderRestTemplateCustomizer()
+    {
+        return restTemplate -> restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor(namespace));
     }
 }
