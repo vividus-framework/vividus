@@ -654,3 +654,78 @@ When I find = `5` elements by `By.xpath(//script):a` and for each element do
 |When I set 'type' attribute value of the context element to the 'scenario' variable 'type'|
 |Then `${type}` is equal to `text/javascript`                                              |
 ----
+
+=== Context steps
+==== Switch to the default context of page
+
+Switches context to the root https://developer.mozilla.org/en-US/docs/Web/HTML/Element/html[<html>] element of the current page.
+
+[source,gherkin]
+----
+When I switch back to the page
+----
+
+.Switch to user context and back to the default context of page
+----
+Given I am on page with URL `https://vividus-test-site.onrender.com/elementState.html`
+When I change context to element located by `id(button-hide)`
+Then text `Element to hide` does not exist
+When I switch back to the page
+Then text `Element to hide` exists
+----
+
+==== Switch context to a frame
+
+Switches to https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe[<iframe>] or https://developer.mozilla.org/en-US/docs/Web/HTML/Element/frame[<frame>] element using one of the supported locators.
+
+[source,gherkin]
+----
+When I switch to frame located `$locator`
+----
+* `$locator` - <<_locator>>.
+
+.Switch to frame
+----
+Given I am on page with URL `https://vividus-test-site.onrender.com/nestedFrames.html`
+Then text `Modal Frame Example` does not exist
+When I switch to frame located `id(parent)`
+Then text `Modal Frame Example` exists
+----
+
+==== Switch context to new tab
+
+Switch the focus of future browser commands to new tab.
+
+[source,gherkin]
+----
+When I switch to a new window
+----
+
+.Open the new tab by link and switch to it
+----
+Given I am on page with URL `https://the-internet.herokuapp.com/windows`
+When I click on element located by `linkUrlPart(/windows/new)`
+Then text `New Window` does not exist
+When I switch to a new window
+Then text `New Window` exists
+----
+
+==== Switch context to new tab with specified title
+
+Switch the focus of future browser commands to new tab with specified title.
+
+[source,gherkin]
+----
+When I switch to window with title that $stringComparisonRule `$windowName`
+----
+* `$stringComparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule].
+* `$windowName` - The expected tab title.
+
+.Open the new tab by link and switch to it using regex title pattern
+----
+Given I am on page with URL `https://the-internet.herokuapp.com/windows`
+When I click on element located by `linkUrlPart(/windows/new)`
+Then text `New Window` does not exist
+When I switch to window with title that matches `.*[wW]indow.*`
+Then text `New Window` exists
+----
