@@ -16,50 +16,26 @@
 
 package org.vividus.visual.eyes.model;
 
-import java.net.URI;
 import java.util.Set;
 
-import com.applitools.eyes.MatchLevel;
+import com.applitools.eyes.config.Configuration;
 
-import org.openqa.selenium.Dimension;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.visual.model.AbstractVisualCheck;
 import org.vividus.visual.model.VisualActionType;
 
 public class ApplitoolsVisualCheck extends AbstractVisualCheck
 {
-    private String executeApiKey;
     private String readApiKey;
-    private String hostApp;
-    private String hostOS;
-    private Dimension viewportSize;
-    private MatchLevel matchLevel;
-    private URI serverUri;
-    private String appName;
     private String batchName;
-    private String baselineEnvName;
-    private Set<Locator> elementsToIgnore = Set.of();
-    private Set<Locator> areasToIgnore = Set.of();
-
-    public ApplitoolsVisualCheck()
-    {
-        // Necessary for JBehave object instantiation;
-    }
+    private Set<Locator> elementsToIgnore;
+    private Set<Locator> areasToIgnore;
+    private Configuration configuration;
 
     public ApplitoolsVisualCheck(String batchName, String baselineName, VisualActionType action)
     {
         super(baselineName, action);
         this.batchName = batchName;
-    }
-
-    public String getExecuteApiKey()
-    {
-        return executeApiKey;
-    }
-
-    public void setExecuteApiKey(String executeApiKey)
-    {
-        this.executeApiKey = executeApiKey;
     }
 
     public String getReadApiKey()
@@ -72,79 +48,9 @@ public class ApplitoolsVisualCheck extends AbstractVisualCheck
         this.readApiKey = readApiKey;
     }
 
-    public String getHostApp()
-    {
-        return hostApp;
-    }
-
-    public void setHostApp(String hostApp)
-    {
-        this.hostApp = hostApp;
-    }
-
-    public String getHostOS()
-    {
-        return hostOS;
-    }
-
-    public void setHostOS(String hostOS)
-    {
-        this.hostOS = hostOS;
-    }
-
-    public MatchLevel getMatchLevel()
-    {
-        return matchLevel;
-    }
-
-    public void setMatchLevel(MatchLevel matchLevel)
-    {
-        this.matchLevel = matchLevel;
-    }
-
-    public URI getServerUri()
-    {
-        return serverUri;
-    }
-
-    public void setServerUri(URI serverUri)
-    {
-        this.serverUri = serverUri;
-    }
-
-    public String getAppName()
-    {
-        return appName;
-    }
-
-    public void setAppName(String appName)
-    {
-        this.appName = appName;
-    }
-
     public String getBatchName()
     {
         return batchName;
-    }
-
-    public String getBaselineEnvName()
-    {
-        return baselineEnvName;
-    }
-
-    public void setBaselineEnvName(String baselineEnvName)
-    {
-        this.baselineEnvName = baselineEnvName;
-    }
-
-    public Dimension getViewportSize()
-    {
-        return viewportSize;
-    }
-
-    public void setViewportSize(Dimension viewportSize)
-    {
-        this.viewportSize = viewportSize;
     }
 
     public void setElementsToIgnore(Set<Locator> elementsToIgnore)
@@ -165,5 +71,15 @@ public class ApplitoolsVisualCheck extends AbstractVisualCheck
     public Set<Locator> getAreasToIgnore()
     {
         return areasToIgnore;
+    }
+
+    public Configuration getConfiguration()
+    {
+        return configuration;
+    }
+
+    public void setConfiguration(Configuration configuration)
+    {
+        this.configuration = configuration;
     }
 }

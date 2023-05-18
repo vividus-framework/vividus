@@ -16,29 +16,29 @@
 
 package org.vividus.visual.eyes.factory;
 
-import com.applitools.eyes.EyesRunner;
 import com.applitools.eyes.LogHandler;
-import com.applitools.eyes.images.Eyes;
-import com.applitools.eyes.images.ImageRunner;
+import com.applitools.eyes.visualgrid.services.VisualGridRunner;
 
 import org.vividus.ui.ViewportSizeProvider;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
+import org.vividus.visual.eyes.ufg.UfgEyes;
 
-public class ImageEyesFactory extends AbstractEyesFactory
+public class UfgEyesFactory extends AbstractEyesFactory
 {
-    public ImageEyesFactory(LogHandler logHandler, ViewportSizeProvider viewportSizeProvider)
+    protected UfgEyesFactory(LogHandler logHandler, ViewportSizeProvider viewportSizeProvider)
     {
         super(logHandler, viewportSizeProvider);
     }
 
-    public Eyes createEyes(ApplitoolsVisualCheck applitoolsVisualCheck)
+    public UfgEyes createEyes(ApplitoolsVisualCheck check)
     {
-        EyesRunner runner = new ImageRunner();
-        runner.setLogHandler(getLogHandler());
+        VisualGridRunner gridRunner = new VisualGridRunner();
+        gridRunner.setLogHandler(getLogHandler());
+        gridRunner.setDontCloseBatches(true);
 
-        Eyes eyes = new Eyes(runner);
-        setViewportSize(applitoolsVisualCheck);
-        eyes.setConfiguration(applitoolsVisualCheck.getConfiguration());
+        UfgEyes eyes = new UfgEyes(gridRunner);
+        setViewportSize(check);
+        eyes.setConfiguration(check.getConfiguration());
         return eyes;
     }
 }

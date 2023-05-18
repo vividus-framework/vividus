@@ -1,0 +1,12 @@
+* `$matrix` - The matrix describing target platforms to run visual tests on.
+** [subs=+quotes]`profile` - The profile name.
+*** `Desktop` - the desktop profile with supported options:
+**** [subs=+quotes]`*browser*` - The https://applitools.com/docs/api-ref/sdk-api/selenium/java/browsertype[browser].
+**** [subs=+quotes]`*viewportSize*` - The viewport size, e.g. 1920x1080
+*** `iOS` - the iOS profile with supported options:
+**** [subs=+quotes]`*deviceName*` - The https://applitools.com/docs/topics/overview/ufg-devices.html?cshid=ufg-ios#ios[device name].
+**** `screenOrientation` - The screen orientation, either `portrait` or `landscape`, default value is `portrait`.
+**** `version` - The iOS version, either `latest` or `one version back`, default value is `latest`.
+*** `Chrome Mobile Emulation` - the Chrome Mobile Emulation profile with supported options:
+**** [subs=+quotes]`*deviceName*` - The https://applitools.com/docs/topics/overview/ufg-devices.html?cshid=ufg-chrome#chrome[device name].
+**** `screenOrientation` - The screen orientation, either `portrait` or `landscape`, default value is `portrait`.

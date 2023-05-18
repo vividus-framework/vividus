@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 import java.net.URI;
 import java.util.Set;
 
+import com.applitools.eyes.BatchInfo;
 import com.applitools.eyes.EyesRunner;
 import com.applitools.eyes.LogHandler;
 import com.applitools.eyes.Logger;
@@ -79,12 +80,15 @@ class ImageEyesFactoryTests
     void shouldCreateEyesWithMandatoryParametersOnly() throws IllegalAccessException
     {
         ApplitoolsVisualCheck visualCheck = createVisualCheck(VisualActionType.ESTABLISH);
+        visualCheck.getConfiguration().setSaveFailedTests(true)
+                                      .setSaveNewTests(true)
+                                      .setBatch(new BatchInfo(BATCH_NAME));
         Eyes eyes = imageEyesFactory.createEyes(visualCheck);
         Configuration configuration = eyes.getConfiguration();
         assertAll(
             () -> assertNull(configuration.getHostApp()),
             () -> assertNull(configuration.getHostOS()),
-            () -> assertNull(configuration.getMatchLevel()),
+            () -> assertEquals(MatchLevel.STRICT, configuration.getMatchLevel()),
             () -> assertNull(configuration.getBaselineEnvName()),
             () -> assertTrue(configuration.getSaveFailedTests()),
             () -> assertTrue(configuration.getSaveNewTests()),
@@ -100,9 +104,10 @@ class ImageEyesFactoryTests
     private ApplitoolsVisualCheck createVisualCheck(VisualActionType action)
     {
         ApplitoolsVisualCheck visualCheck = new ApplitoolsVisualCheck(BATCH_NAME, BASELINE, action);
-        visualCheck.setServerUri(SERVER_URI);
-        visualCheck.setExecuteApiKey(EXECUTE_API_KEY);
-        visualCheck.setViewportSize(new Dimension(VIEWPORT.getWidth(), VIEWPORT.getHeight()));
+        Configuration config = new Configuration().setServerUrl(SERVER_URI.toString())
+                                                  .setViewportSize(VIEWPORT)
+                                                  .setApiKey(EXECUTE_API_KEY);
+        visualCheck.setConfiguration(config);
         return visualCheck;
     }
 
@@ -110,12 +115,15 @@ class ImageEyesFactoryTests
     void shouldCreateEyesWithAllParameters() throws IllegalAccessException
     {
         ApplitoolsVisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
-        visualCheck.setBaselineEnvName(BASELINE_ENV_NAME);
-        visualCheck.setAppName(APP);
-        visualCheck.setHostApp(HOST_APP);
-        visualCheck.setHostOS(HOST_OS);
-        visualCheck.setMatchLevel(MATCH_LEVEL);
-        visualCheck.setViewportSize(new Dimension(7680, 4320));
+        visualCheck.getConfiguration().setBaselineEnvName(BASELINE_ENV_NAME)
+                                      .setAppName(APP)
+                                      .setHostApp(HOST_APP)
+                                      .setHostOS(HOST_OS)
+                                      .setMatchLevel(MATCH_LEVEL)
+                                      .setViewportSize(new RectangleSize(7680, 4320))
+                                      .setSaveFailedTests(false)
+                                      .setSaveNewTests(false)
+                                      .setBatch(new BatchInfo(BATCH_NAME));
         Eyes eyes = imageEyesFactory.createEyes(visualCheck);
         Configuration configuration = eyes.getConfiguration();
         assertAll(
@@ -140,7 +148,7 @@ class ImageEyesFactoryTests
         when(viewportSizeProvider.getViewportSize()).thenReturn(new Dimension(VIEWPORT.getWidth(),
                 VIEWPORT.getHeight()));
         ApplitoolsVisualCheck visualCheck = createVisualCheck(VisualActionType.COMPARE_AGAINST);
-        visualCheck.setViewportSize(null);
+        visualCheck.getConfiguration().setViewportSize(null);
         Eyes eyes = imageEyesFactory.createEyes(visualCheck);
         assertEquals(VIEWPORT, eyes.getConfiguration().getViewportSize());
     }

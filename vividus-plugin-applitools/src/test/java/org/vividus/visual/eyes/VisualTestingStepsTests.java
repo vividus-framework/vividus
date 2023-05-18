@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ class VisualTestingStepsTests
     private static final VisualActionType ESTABLISH = VisualActionType.ESTABLISH;
     private static final String APPLITOOLS_CONFIGURATION = "applitools configuration";
 
-    @Mock private VisualTestingService visualTestingService;
+    @Mock private VisualTestingService<ApplitoolsVisualCheckResult> visualTestingService;
     @Mock private ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
     private final ISoftAssert softAssert = mock(ISoftAssert.class);
     private final IUiContext uiContext = mock(IUiContext.class);
@@ -119,7 +119,7 @@ class VisualTestingStepsTests
     void shouldRunApplitoolsVisualCheckUsingApplitoolsConfiguration()
     {
         var locator = mock(Locator.class);
-        var check = new ApplitoolsVisualCheck();
+        var check = new ApplitoolsVisualCheck(BATCH_NAME, TEST, ESTABLISH);
         check.setElementsToIgnore(Set.of(locator));
         check.setAreasToIgnore(Set.of(locator));
 
