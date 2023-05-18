@@ -1,0 +1,23 @@
+.passed {
+    background-color: #DFF0D8;
+    color: #3C763D;
+}
+
+.passed:hover {
+    background-color: #D0E8C6 !important;
+    color: #3C763D;
+}
+
+.failed {
+    background-color: #F2DEDE;
+    color: #A94442;
+}
+
+.failed:hover {
+    background-color: #EBCCCC !important;
+    color: #A94442;
+}
+
+body {
+    background-color: #EEEEEE !important;
+}

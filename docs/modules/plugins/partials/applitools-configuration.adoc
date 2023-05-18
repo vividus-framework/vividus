@@ -1,0 +1,16 @@
+* `$applitoolsConfigurations` - The Applitools configurations
+** [subs=+quotes]`*action*` - The {visual-testing-actions}.
+** [subs=+quotes]`*batchName*` - The name of the batch (group of visual tests).
+** [subs=+quotes]`*baselineName*` - The name of the baseline (visual test name).
+** `matchLevel` - The https://applitools.com/docs/common/cmn-eyes-match-levels.html#Available[match level].
+** `appName` - The name of the application under test.
+** `elementsToIgnore` - The comma separated list of locators of elements to ignore.
+** `areasToIgnore` - The comma separated list of locators of page areas to ignore.
+** `hostApp` - The application running the application under test (e.g. Safari, Chrome).
+** `hostOS` - The host OS running the application under test.
+** `viewportSize` - The required viewport size for the environment.
+** `baselineEnvName` - The name of the baseline's environment.
+** `searchContext` - The locator of a search context
+** `readApiKey` - The key to execute tests.
+** `executeApiKey` - The key to access tests and test results.
+** `serverUri` - The URI of the rest server.

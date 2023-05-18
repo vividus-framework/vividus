@@ -38,7 +38,7 @@ import org.vividus.visual.eyes.model.ApplitoolsVisualCheckResult;
 
 import pazone.ashot.Screenshot;
 
-public class ImageVisualTestingService implements VisualTestingService
+public class ImageVisualTestingService implements VisualTestingService<ApplitoolsVisualCheckResult>
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageVisualTestingService.class);
 
@@ -61,7 +61,7 @@ public class ImageVisualTestingService implements VisualTestingService
         TestResults testResults;
         try
         {
-            eyes.open(applitoolsVisualCheck.getAppName(), applitoolsVisualCheck.getBaselineName());
+            eyes.open(applitoolsVisualCheck.getConfiguration().getAppName(), applitoolsVisualCheck.getBaselineName());
             Screenshot screenshot = ashotScreenshotTaker.takeAshotScreenshot(applitoolsVisualCheck.getSearchContext(),
                     applitoolsVisualCheck.getScreenshotParameters());
             eyes.checkImage(screenshot.getImage());

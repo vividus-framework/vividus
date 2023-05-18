@@ -160,22 +160,7 @@ When I run visual test with Applitools using:$applitoolsConfigurations
 
 NOTE: The expression parameters marked with *bold* are mandatory.
 
-* `$applitoolsConfigurations` - The Applitools configurations
-** [subs=+quotes]`*action*` - The {visual-testing-actions}.
-** [subs=+quotes]`*batchName*` - The name of the batch (group of visual tests).
-** [subs=+quotes]`*baselineName*` - The name of the baseline (visual test name).
-** `matchLevel` - The https://applitools.com/docs/common/cmn-eyes-match-levels.html#Available[match level].
-** `appName` - The name of the application under test.
-** `elementsToIgnore` - The comma separated list of locators of elements to ignore.
-** `areasToIgnore` - The comma separated list of locators of page areas to ignore.
-** `hostApp` - The application running the application under test (e.g. Safari, Chrome).
-** `hostOS` - The host OS running the application under test.
-** `viewportSize` - The required viewport size for the environment.
-** `baselineEnvName` - The name of the baseline's environment.
-** `searchContext` - The locator of a search context
-** `readApiKey` - The key to execute tests.
-** `executeApiKey` - The key to access tests and test results.
-** `serverUri` - The URI of the rest server.
+include::partial$applitools-configuration.adoc[]
 
 .Perform visual check using custom configuration
 [source,gherkin]
@@ -200,22 +185,7 @@ When I run visual test with Applitools using:$applitoolsConfigurations and scree
 
 NOTE: The expression parameters marked with *bold* are mandatory.
 
-* `$applitoolsConfigurations` - The Applitools configurations
-** [subs=+quotes]`*action*` - The {visual-testing-actions}.
-** [subs=+quotes]`*batchName*` - The name of the batch (group of visual tests).
-** [subs=+quotes]`*baselineName*` - The name of the baseline (visual test name).
-** `matchLevel` - The https://applitools.com/docs/common/cmn-eyes-match-levels.html#Available[match level].
-** `appName` - The name of the application under test.
-** `elementsToIgnore` - The comma separated list of locators of elements to ignore.
-** `areasToIgnore` - The comma separated list of locators of page areas to ignore.
-** `hostApp` - The application running the application under test (e.g. Safari, Chrome).
-** `hostOS` - The host OS running the application under test.
-** `viewportSize` - The required viewport size for the environment.
-** `baselineEnvName` - The name of the baseline's environment.
-** `searchContext` - The locator of a search context
-** `readApiKey` - The key to execute tests.
-** `executeApiKey` - The key to access tests and test results.
-** `serverUri` - The URI of the rest server.
+include::partial$applitools-configuration.adoc[]
 * `$screenshotConfiguration` - The screenshot configurations.
 
 include::partial$web-screenshot-configuration.adoc[]
@@ -229,4 +199,63 @@ When I run visual test with Applitools using:
  and screenshot config:
 |webFooterToCut|screenshotShootingStrategy|
 |50            |SIMPLE                    |
+----
+
+=== Ultrafast Grid check with default Applitools configuration
+
+Performs visual check on the https://applitools.com/platform/ultrafast-grid/[Ultrafast Grid Applitools] visual testing plarform.
+
+[source,gherkin]
+----
+When I $actionType baseline `$testName` in batch `$batchName` with Applitools UFG using matrix:$matrix
+----
+
+NOTE: The step parameters marked with *bold* are mandatory.
+
+* `$actionType` - The {visual-testing-actions}.
+* `$testName` - The name of the baseline (visual test name).
+* `$batchName` - The name of the batch (group of visual tests).
+
+include::partial$ufg-applitools-configuration.adoc[]
+
+.Perform Ultrafast Grid check using default configuration
+[source,gherkin]
+----
+When I ESTABLISH baseline `Check site on several configurations` in batch `Smoke Run` with Applitools UFG using matrix:
+|profile                |browser|viewportSize|deviceName|
+|desktop                |chrome |1920x1080   |          |
+|ios                    |       |            |iPhone X  |
+|chrome_mobile_emulation|       |            |Galaxy S10|
+----
+
+=== Ultrafast Grid check with custom Applitools configuration
+
+Performs visual check on the https://applitools.com/platform/ultrafast-grid/[Ultrafast Grid Applitools] visual testing plarform.
+
+The custom Applitools configuration provided in the step take precendence over values specified in properties.
+
+It's possible to perform several visual testing checks at once by passing several Applitools configuration into step.
+
+[source,gherkin]
+----
+When I run visual test with Applitools UFG using:$applitoolsConfigurations and matrix:$matrix
+----
+
+NOTE: The step parameters marked with *bold* are mandatory.
+
+include::partial$applitools-configuration.adoc[]
+
+include::partial$ufg-applitools-configuration.adoc[]
+
+.Perform Perform Ultrafast Grid check using custom configuration
+[source,gherkin]
+----
+When I run visual test with Applitools UFG using:
+|baselineName                        |batchName|action   |
+|Check site on several configurations|Smoke Run|ESTABLISH|
+ and matrix:
+|profile                |browser|viewportSize|deviceName|screenOrientation|version|
+|desktop                |firefox|1920x1080   |          |                 |       |
+|ios                    |       |            |iPhone X  |portrait         |latest |
+|chrome_mobile_emulation|       |            |Galaxy S10|landscape        |       |
 ----

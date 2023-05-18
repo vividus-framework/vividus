@@ -39,6 +39,7 @@ import com.applitools.eyes.StepInfo;
 import com.applitools.eyes.StepInfo.ApiUrls;
 import com.applitools.eyes.StepInfo.AppUrls;
 import com.applitools.eyes.TestResults;
+import com.applitools.eyes.config.Configuration;
 import com.applitools.eyes.images.Eyes;
 import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -274,7 +275,7 @@ class ImageVisualTestingServiceTests
     {
         ApplitoolsVisualCheck applitoolsVisualCheck = new ApplitoolsVisualCheck(BATCH_NAME, BASELINE_NAME,
                 ACTION);
-        applitoolsVisualCheck.setAppName(APP_NAME);
+        applitoolsVisualCheck.setConfiguration(new Configuration().setAppName(APP_NAME));
         applitoolsVisualCheck.setReadApiKey(READ_KEY);
         return applitoolsVisualCheck;
     }
