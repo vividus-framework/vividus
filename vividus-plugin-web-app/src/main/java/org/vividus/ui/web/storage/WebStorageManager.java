@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,10 @@ package org.vividus.ui.web.storage;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.html5.Storage;
 import org.openqa.selenium.html5.WebStorage;
-import org.openqa.selenium.remote.Browser;
-import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteExecuteMethod;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.remote.html5.RemoteWebStorage;
+import org.openqa.selenium.remote.html5.AddWebStorage;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.WebDriverManager;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
 public class WebStorageManager
@@ -49,16 +46,11 @@ public class WebStorageManager
     {
         RemoteWebDriver driver = webDriverProvider.getUnwrapped(RemoteWebDriver.class);
         Capabilities capabilities = driver.getCapabilities();
-        if (!WebDriverManager.isBrowserAnyOf(capabilities, Browser.SAFARI) && isWebStorageEnabled(capabilities))
+        AddWebStorage addingWebStorage = new AddWebStorage();
+        if (addingWebStorage.isApplicable().test(capabilities))
         {
-            return new RemoteWebStorage(new RemoteExecuteMethod(driver));
+            return addingWebStorage.getImplementation(capabilities, new RemoteExecuteMethod(driver));
         }
         return new JavascriptWebStorage(javascriptActions);
-    }
-
-    private static boolean isWebStorageEnabled(Capabilities capabilities)
-    {
-        Object webStorageEnabled = capabilities.getCapability(CapabilityType.SUPPORTS_WEB_STORAGE);
-        return null != webStorageEnabled && (boolean) webStorageEnabled;
     }
 }
