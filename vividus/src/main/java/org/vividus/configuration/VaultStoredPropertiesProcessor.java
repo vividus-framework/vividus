@@ -26,6 +26,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.Validate;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.vault.client.RestTemplateCustomizer;
+import org.springframework.vault.client.VaultClients;
+import org.springframework.vault.config.EnvironmentVaultConfiguration;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
@@ -79,7 +82,14 @@ public class VaultStoredPropertiesProcessor extends AbstractPropertiesProcessor 
             context = new AnnotationConfigApplicationContext();
             PropertiesPropertySource propertySource = new PropertiesPropertySource("properties", properties);
             context.getEnvironment().getPropertySources().addFirst(propertySource);
-            context.register(NamespaceAwareEnvironmentVaultConfiguration.class);
+            context.register(EnvironmentVaultConfiguration.class);
+
+            Optional.ofNullable(properties.getProperty("vault.namespace")).ifPresent(namespace ->
+                    context.registerBean(RestTemplateCustomizer.class, () -> restTemplate ->
+                            restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor(namespace))
+                    )
+            );
+            context.register(EnvironmentVaultConfiguration.class);
             context.refresh();
 
             vaultTemplate = context.getBean(VaultTemplate.class);
