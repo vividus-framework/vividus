@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
@@ -64,6 +67,7 @@ class GenericWaitStepsTests
     private static final String VALUE = "value";
     private static final Locator LOCATOR = new Locator(TestLocatorType.SEARCH, VALUE);
     private static final String ELEMENT_TO_VALIDATE_EXISTENCE = "The element to validate existence";
+    private static final String ELEMENT_TO_VALIDATE_STOP_MOVEMENT = "The element to validate stop of its movement";
 
     @Mock private IWaitActions waitActions;
     @Mock private IUiContext uiContext;
@@ -203,10 +207,9 @@ class GenericWaitStepsTests
     @Test
     void shouldWaitForNumberOfElements()
     {
-        var searchContext = mock(SearchContext.class);
         var searchParameters = new SearchParameters(VALUE, Visibility.VISIBLE, true);
+        var searchContext = mockSearchContext();
         var locator = new Locator(TestLocatorType.SEARCH, searchParameters);
-        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
         when(searchActions.findElements(searchContext, locator)).thenReturn(List.of(mock(WebElement.class)));
         waitSteps.waitForElementNumber(locator, ComparisonRule.EQUAL_TO, 1);
         assertFalse(searchParameters.isWaitForElement());
@@ -215,5 +218,88 @@ class GenericWaitStepsTests
             assertTrue((boolean) f.apply(searchContext));
             return true;
         }));
+    }
+
+    @Test
+    void testWaitTillElementStopsMoving()
+    {
+        var searchParameters = new SearchParameters(VALUE, Visibility.VISIBLE, true);
+        var locator = new Locator(TestLocatorType.SEARCH, searchParameters);
+        var searchContext = mockSearchContext();
+        var webElement = mock(WebElement.class);
+        when(baseValidations.assertElementExists(ELEMENT_TO_VALIDATE_STOP_MOVEMENT, searchContext, locator)).thenReturn(
+                Optional.of(webElement));
+        Point point = new Point(10, 10);
+        when(webElement.getLocation()).thenReturn(new Point(0, 0))
+                                      .thenReturn(point)
+                                      .thenReturn(point);
+        waitSteps.waitForElementStopsMoving(locator);
+        assertFalse(searchParameters.isWaitForElement());
+        verify(waitActions).wait(eq(searchContext), argThat(function -> {
+            function.apply(searchContext);
+            function.apply(searchContext);
+            assertTrue((boolean) function.apply(searchContext));
+            return true;
+        }));
+    }
+
+    @Test
+    void testWaitTillElementStopsMovingElementIsNotPresent()
+    {
+        var searchParameters = new SearchParameters(VALUE, Visibility.VISIBLE, true);
+        var searchContext = mockSearchContext();
+        var locator = new Locator(TestLocatorType.SEARCH, searchParameters);
+        when(baseValidations.assertElementExists(ELEMENT_TO_VALIDATE_STOP_MOVEMENT, searchContext, locator))
+                .thenReturn(Optional.empty());
+        waitSteps.waitForElementStopsMoving(locator);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void testWaitTillElementStopsMovingThrowsStaleElementReferenceException()
+    {
+        var searchParameters = new SearchParameters(VALUE, Visibility.VISIBLE, true);
+        var searchContext = mockSearchContext();
+        var locator = new Locator(TestLocatorType.SEARCH, searchParameters);
+        var webElement = mock(WebElement.class);
+        when(baseValidations.assertElementExists(ELEMENT_TO_VALIDATE_STOP_MOVEMENT, searchContext, locator))
+                .thenReturn(Optional.of(webElement));
+        when(webElement.getLocation()).thenThrow(StaleElementReferenceException.class);
+        when(searchActions.findElements(searchContext, locator)).thenReturn(List.of());
+        waitSteps.waitForElementStopsMoving(locator);
+        var conditionCaptor = ArgumentCaptor.forClass(IExpectedSearchContextCondition.class);
+        verify(waitActions).wait(eq(searchContext), conditionCaptor.capture());
+        assertFalse(searchParameters.isWaitForElement());
+        var capturedCondition = conditionCaptor.getValue();
+        assertEquals("element located by \"search 'value' (visible)\" stopped moving", capturedCondition.toString());
+        assertThrows(StaleElementReferenceException.class, () -> capturedCondition.apply(searchContext));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void testWaitTillElementStopsMovingThrowsTwoStaleElementReferenceExceptions()
+    {
+        var searchParameters = new SearchParameters(VALUE, Visibility.VISIBLE, true);
+        var searchContext = mockSearchContext();
+        var locator = new Locator(TestLocatorType.SEARCH, searchParameters);
+        var webElement = mock(WebElement.class);
+        when(baseValidations.assertElementExists(ELEMENT_TO_VALIDATE_STOP_MOVEMENT, searchContext, locator))
+                .thenReturn(Optional.of(webElement));
+        when(webElement.getLocation()).thenThrow(StaleElementReferenceException.class);
+        when(searchActions.findElements(searchContext, locator)).thenReturn(List.of(webElement));
+        waitSteps.waitForElementStopsMoving(locator);
+        var conditionCaptor = ArgumentCaptor.forClass(IExpectedSearchContextCondition.class);
+        verify(waitActions).wait(eq(searchContext), conditionCaptor.capture());
+        assertFalse(searchParameters.isWaitForElement());
+        var capturedCondition = conditionCaptor.getValue();
+        assertFalse((boolean) capturedCondition.apply(searchContext));
+        assertThrows(StaleElementReferenceException.class, () -> capturedCondition.apply(searchContext));
+    }
+
+    private SearchContext mockSearchContext()
+    {
+        var searchContext = mock(SearchContext.class);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(searchContext));
+        return searchContext;
     }
 }

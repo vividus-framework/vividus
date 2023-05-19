@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.steps.ui;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.Validate;
@@ -24,7 +25,12 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.Point;
 import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
@@ -41,6 +47,8 @@ import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 @TakeScreenshotOnFailure
 public class GenericWaitSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GenericWaitSteps.class);
+
     private final IWaitActions waitActions;
     private final IUiContext uiContext;
     private final IExpectedConditions<Locator> expectedSearchActionsConditions;
@@ -130,6 +138,66 @@ public class GenericWaitSteps
             };
             waitActions.wait(context, condition);
         });
+    }
+
+    /**
+     * Waits for an <b><i>element</i></b> with the specified <b>locator</b> to stop moving
+     * @param locator locator to locate element
+     */
+    @When("I wait until element located by `$locator` stops moving")
+    public void waitForElementStopsMoving(Locator locator)
+    {
+        uiContext.getOptionalSearchContext().ifPresent(context ->
+            baseValidations.assertElementExists("The element to validate stop of its movement",
+                    context, locator).ifPresent(webElement -> {
+                        locator.getSearchParameters().setWaitForElement(false);
+                        IExpectedSearchContextCondition<Boolean> condition = new IExpectedSearchContextCondition<>()
+                        {
+                            private Point lastPosition;
+                            private boolean retryOnStaleAttempt;
+                            private WebElement movingWebElement = webElement;
+
+                            @Override
+                            public Boolean apply(SearchContext context)
+                            {
+                                try
+                                {
+                                    Point currentPosition = movingWebElement.getLocation();
+                                    boolean elementStoppedMoving = currentPosition.equals(lastPosition);
+                                    if (!elementStoppedMoving)
+                                    {
+                                        LOGGER.info("The element is moved at '{}'", currentPosition);
+                                    }
+                                    lastPosition = currentPosition;
+                                    return elementStoppedMoving;
+                                }
+                                catch (StaleElementReferenceException e)
+                                {
+                                    if (!retryOnStaleAttempt)
+                                    {
+                                        List<WebElement> movingWebElements = searchActions
+                                                .findElements(context, locator);
+                                        if (movingWebElements.size() == 1)
+                                        {
+                                            movingWebElement = movingWebElements.get(0);
+                                            retryOnStaleAttempt = true;
+                                            return false;
+                                        }
+                                    }
+                                    throw e;
+                                }
+                            }
+
+                            @Override
+                            public String toString()
+                            {
+                                return String.format("element located by \"%s\" stopped moving",
+                                        locator.toHumanReadableString());
+                            }
+                        };
+                        waitActions.wait(context, condition);
+                    })
+        );
     }
 
     /**
