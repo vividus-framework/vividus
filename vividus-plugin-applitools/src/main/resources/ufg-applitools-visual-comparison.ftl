@@ -19,6 +19,7 @@
                 <th scope="col">OS</th>
                 <th scope="col">Browser</th>
                 <th scope="col">Viewport</th>
+                <th scope="col">Device</th>
                 <th scope="col">Link</th>
             </tr>
             </thead>
@@ -31,9 +32,10 @@
                     </#if>
                         <td>${testResult.getStatus()}</td>
                         <td>${testResult.getName()}</td>
-                        <td>${testResult.getHostOS()}</td>
-                        <td>${testResult.getHostApp()}</td>
-                        <td>${testResult.getHostDisplaySize()}</td>
+                        <td>${testResult.getOs()}</td>
+                        <td>${testResult.getBrowser()}</td>
+                        <td>${testResult.getViewport()}</td>
+                        <td>${testResult.getDevice()}</td>
                         <td>
                             <a href="${testResult.getUrl()}" class="btn btn-default btn-sm active" role="button">View in Applitools</a>
                         </td>

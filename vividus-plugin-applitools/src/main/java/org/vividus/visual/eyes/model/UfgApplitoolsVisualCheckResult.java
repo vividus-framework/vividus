@@ -18,26 +18,24 @@ package org.vividus.visual.eyes.model;
 
 import java.util.List;
 
-import com.applitools.eyes.TestResults;
-
 import org.vividus.visual.model.AbstractVisualCheck;
 import org.vividus.visual.model.VisualCheckResult;
 
 public class UfgApplitoolsVisualCheckResult extends VisualCheckResult
 {
-    private List<TestResults> testResults;
+    private List<ApplitoolsTestResults> testResults;
 
     public UfgApplitoolsVisualCheckResult(AbstractVisualCheck visualCheck)
     {
         super(visualCheck);
     }
 
-    public List<TestResults> getTestResults()
+    public List<ApplitoolsTestResults> getTestResults()
     {
         return testResults;
     }
 
-    public void setTestResults(List<TestResults> testResults)
+    public void setTestResults(List<ApplitoolsTestResults> testResults)
     {
         this.testResults = testResults;
     }

@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.applitools.eyes.EyesRunner;
-import com.applitools.eyes.TestResultContainer;
-import com.applitools.eyes.TestResults;
 import com.applitools.eyes.selenium.Eyes;
+
+import org.vividus.visual.eyes.model.ApplitoolsTestResults;
 
 public class UfgEyes extends Eyes
 {
@@ -35,10 +35,10 @@ public class UfgEyes extends Eyes
         this.eyesRunner = eyesRunner;
     }
 
-    public List<TestResults> getTestResults()
+    public List<ApplitoolsTestResults> getTestResults()
     {
         return Stream.of(eyesRunner.getAllTestResults(false).getAllResults())
-                     .map(TestResultContainer::getTestResults)
+                     .map(ApplitoolsTestResults::new)
                      .collect(Collectors.toList());
     }
 }

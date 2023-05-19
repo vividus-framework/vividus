@@ -31,7 +31,6 @@ import java.util.Set;
 import com.applitools.eyes.Padding;
 import com.applitools.eyes.StepInfo;
 import com.applitools.eyes.StepInfo.AppUrls;
-import com.applitools.eyes.TestResults;
 import com.applitools.eyes.config.Configuration;
 import com.applitools.eyes.fluent.GetRegion;
 import com.applitools.eyes.selenium.ElementReference;
@@ -53,6 +52,7 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.visual.eyes.factory.UfgEyesFactory;
+import org.vividus.visual.eyes.model.ApplitoolsTestResults;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.UfgApplitoolsVisualCheckResult;
 import org.vividus.visual.eyes.ufg.UfgEyes;
@@ -72,7 +72,7 @@ class UfgVisualTestingServiceTests
 
     @Captor private ArgumentCaptor<SeleniumCheckSettings> checkSettingsCaptor;
     @Mock private RemoteWebDriver remoteWebDriver;
-    @Mock private TestResults testResults;
+    @Mock private ApplitoolsTestResults testResults;
     @Mock private StepInfo stepInfo;
     @Mock private AppUrls appUrls;
     @Mock private UfgEyes eyes;
