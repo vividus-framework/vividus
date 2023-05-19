@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class FilteringTableTransformerTests
 {
     private static final String TABLE = "|key1|key2|key3|\n|1|2|3|\n|4|5|6|\n|7|8|9|";
+    private static final String TEN_ROWS_TABLE = "|key2|key3|key1|\n|1|2|3|\n|4|5|6|\n|7|8|9|\n|10|11|12|\n|13|14|15|\n"
+            + "|16|17|18|\n|19|20|21|\n|22|23|24|\n|25|26|27|\n|28|29|30|";
 
     private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters = new ParameterConverters();
@@ -61,9 +63,24 @@ class FilteringTableTransformerTests
                 arguments("byMaxColumns=2",                       "|key1|key2|\n|1|2|\n|4|5|\n|7|8|"),
                 arguments("byMaxRows=2, byColumnNames=key1;key3", "|key1|key3|\n|1|3|\n|4|6|"),
                 arguments("byMaxRows=5, byColumnNames=key3;key2", "|key2|key3|\n|2|3|\n|5|6|\n|8|9|"),
-                arguments("byRowIndexes=0;2",                     "|key1|key2|key3|\n|1|2|3|\n|7|8|9|"),
                 arguments("byMaxRows=1, byColumnNames=key1",      "|key1|\n|1|")
         );
+    }
+
+    static Stream<Arguments> tableByRowIndexesSource()
+    {
+        // CHECKSTYLE:OFF
+        // @formatter:off
+        return Stream.of(
+                arguments("byRowIndexes=0;2",                   "|key2|key3|key1|\n|1|2|3|\n|7|8|9|"),
+                arguments("byRowIndexes=1-3;5;7-9",             "|key2|key3|key1|\n|4|5|6|\n|7|8|9|\n|10|11|12|\n|16|17|18|\n|22|23|24|\n|25|26|27|\n|28|29|30|"),
+                arguments("byRowIndexes=0-2",                   "|key2|key3|key1|\n|1|2|3|\n|4|5|6|\n|7|8|9|"),
+                arguments("byRowIndexes=0 - 2 ; 4",             "|key2|key3|key1|\n|1|2|3|\n|4|5|6|\n|7|8|9|\n|13|14|15|"),
+                arguments("byRowIndexes=0-2;5, byMaxColumns=2", "|key2|key3|\n|1|2|\n|4|5|\n|7|8|\n|16|17|")
+
+        );
+        // CHECKSTYLE:ON
+        // @formatter:off
     }
 
     @ParameterizedTest
@@ -72,6 +89,14 @@ class FilteringTableTransformerTests
     {
         var tableProperties = new TableProperties(propertiesAsString, keywords, parameterConverters);
         assertEquals(expectedTable, transformer.transform(TABLE, tableParsers, tableProperties));
+    }
+
+    @ParameterizedTest
+    @MethodSource("tableByRowIndexesSource")
+    void testTransformByRowIndexes(String propertiesAsString, String expectedTable)
+    {
+        var tableProperties = new TableProperties(propertiesAsString, keywords, parameterConverters);
+        assertEquals(expectedTable, transformer.transform(TEN_ROWS_TABLE, tableParsers, tableProperties));
     }
 
     @Test
@@ -86,13 +111,11 @@ class FilteringTableTransformerTests
     void testTransformRandomRows()
     {
         var tableProperties = new TableProperties("byRandomRows=1", keywords, parameterConverters);
-        String table = "|key2|key3|key1|\n|1|2|3|\n|4|5|6|\n|7|8|9|\n|10|11|12|\n|13|14|15|\n|16|17|18|\n|19|20|21|"
-                + "\n|22|23|24|\n|25|26|27|\n|28|29|30|";
         List<String> transformerRandomTables = new ArrayList<>();
         Map<String, Integer> randomTablesCount = new HashMap<>();
         for (int i = 0; i < 1000; i++)
         {
-            transformerRandomTables.add(transformer.transform(table, tableParsers, tableProperties));
+            transformerRandomTables.add(transformer.transform(TEN_ROWS_TABLE, tableParsers, tableProperties));
         }
         for (String tableStr : transformerRandomTables)
         {
@@ -115,7 +138,8 @@ class FilteringTableTransformerTests
             "'byRandomRows=1, byRowIndexes=1;2',   Conflicting properties declaration found: 'byRandomRows' and 'byRowIndexes'",
             "'column.demo=.*, byMaxRows=2',        'Filtering by regex is not allowed to be used together with the following properties: ''byMaxColumns'', ''byColumnNames'', ''byMaxRows'', ''byRowIndexes'', ''byRandomRows'''",
             "'byRandomRows=4',                     '''byRandomRows'' is 4, but it must be less than or equal to 3 (the number of table rows)'",
-            "'byColumnNames=key11;key2;key13',     'byColumnNames' refers columns missing in ExamplesTable: key11; key13"
+            "'byColumnNames=key11;key2;key13',     'byColumnNames' refers columns missing in ExamplesTable: key11; key13",
+            "'byRowIndexes=5-4;12',                'byRowIndexes' has invalid range of indexes: 5-4. The start index must be less than or equal to the end index."
     })
     // CHECKSTYLE:ON
     // @formatter:on
