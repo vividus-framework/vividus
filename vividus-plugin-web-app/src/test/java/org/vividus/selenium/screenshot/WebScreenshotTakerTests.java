@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,9 @@
 
 package org.vividus.selenium.screenshot;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.info;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -32,8 +28,6 @@ import static org.mockito.Mockito.when;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -41,14 +35,9 @@ import java.util.function.Supplier;
 
 import javax.imageio.ImageIO;
 
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -62,17 +51,14 @@ import org.vividus.util.ResourceUtils;
 import pazone.ashot.AShot;
 import pazone.ashot.util.ImageTool;
 
-@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
+@ExtendWith(MockitoExtension.class)
 class WebScreenshotTakerTests
 {
     private static final BufferedImage IMAGE = loadImage();
-    private static final String SCREENSHOT_WAS_TAKEN = "Screenshot was taken: {}";
     private static final AShot ASHOT = mock(AShot.class);
     private static final String SCREENSHOT_NAME = "screenshotName";
     private static final String SCREENSHOT_NAME_GENERATED = SCREENSHOT_NAME + "Generated";
     private static final pazone.ashot.Screenshot SCREENSHOT = new pazone.ashot.Screenshot(IMAGE);
-
-    private final TestLogger testLogger = TestLoggerFactory.getTestLogger(AbstractScreenshotTaker.class);
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
@@ -194,21 +180,6 @@ class WebScreenshotTakerTests
     }
 
     @Test
-    void testTakeViewportScreenshotByPathNotViewport(@TempDir Path tempDir) throws IOException
-    {
-        mockTakeScreenshotWithHighlights();
-        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(ashotFactory.create(Optional.empty())).thenReturn(ASHOT);
-        when(ASHOT.takeScreenshot(webDriver)).thenReturn(SCREENSHOT);
-        Path filePath = tempDir.resolve(SCREENSHOT_NAME_GENERATED);
-        screenshotTaker.takeScreenshot(filePath);
-        assertTrue(Files.exists(filePath));
-        assertThat(testLogger.getLoggingEvents(), equalTo(List.of(
-                info(SCREENSHOT_WAS_TAKEN, filePath.toAbsolutePath()))));
-    }
-
-    @Test
     void shouldTakeAShotScreenshotWithCustomConfiguration() throws IOException
     {
         WebScreenshotParameters parametersMock = mock(WebScreenshotParameters.class);
@@ -225,11 +196,6 @@ class WebScreenshotTakerTests
     private void assertScreenshotWithHighlighter(Optional<Screenshot> actualScreenshot) throws IOException
     {
         assertEquals(SCREENSHOT_NAME_GENERATED, actualScreenshot.get().getFileName());
-        assertScreenshot(actualScreenshot);
-    }
-
-    private void assertScreenshot(Optional<Screenshot> actualScreenshot) throws IOException
-    {
         assertNotEquals(Optional.empty(), actualScreenshot);
         assertArrayEquals(ImageTool.toByteArray(SCREENSHOT), actualScreenshot.get().getData());
     }

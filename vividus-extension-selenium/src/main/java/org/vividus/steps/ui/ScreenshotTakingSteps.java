@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,23 @@
 package org.vividus.steps.ui;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import com.google.common.eventbus.EventBus;
 
+import org.apache.commons.io.FileUtils;
 import org.jbehave.core.annotations.When;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.screenshot.ScreenshotTaker;
 
 public class ScreenshotTakingSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScreenshotTakingSteps.class);
+
     private final ScreenshotTaker screenshotTaker;
     private final EventBus eventBus;
 
@@ -51,21 +57,22 @@ public class ScreenshotTakingSteps
     }
 
     /**
-     * Takes a screenshot and saves it by the specified <b>path</b>
-     * <br>
-     * <i>Possible values:</i>
-     * <ul>
-     * <li>An <b>absolute</b> path contains the root directory and all other
-     * subdirectories that contain a file or folder.
-     * (<i>C:\Windows\screenshot.bmp</i>)
-     * <li>A <b>relative</b> path starts from some given working directory. (<i>screenshot.bmp</i>)
-     * </ul>
-     * @param path Path to the location for saving the screenshot
+     * Takes a screenshot and saves it at the file at the specified path.
+     *
+     * @param screenshotFilePath The path to the file to save the screenshot, the allowed values are:
+     *                           <ul>
+     *                           <li>an absolute path to the file, e.g. {@code C:\Windows\screenshot.png};</li>
+     *                           <li>a relative path (it is resolved from the current working directory, e.g. {@code
+     *                           screenshot.png}</li>
+     *                           </ul>
      * @throws IOException If an input or output exception occurred
      */
-    @When("I take screenshot and save it to folder `$path`")
-    public void takeScreenshotToPath(Path path) throws IOException
+    @When("I take screenshot and save it to file at path `$screenshotFilePath`")
+    public void takeScreenshotToPath(Path screenshotFilePath) throws IOException
     {
-        screenshotTaker.takeScreenshot(path);
+        byte[] screenshotData = screenshotTaker.takeScreenshotAsByteArray();
+        FileUtils.forceMkdirParent(screenshotFilePath.toFile());
+        Files.write(screenshotFilePath, screenshotData);
+        LOGGER.atInfo().addArgument(screenshotFilePath::toAbsolutePath).log("Screenshot is saved at '{}'");
     }
 }

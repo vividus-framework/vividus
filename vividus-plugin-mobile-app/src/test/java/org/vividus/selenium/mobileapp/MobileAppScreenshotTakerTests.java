@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -72,17 +68,6 @@ class MobileAppScreenshotTakerTests
         Screenshot screenshot = takenScreenshot.get();
         assertEquals(FILE_NAME, screenshot.getFileName());
         assertArrayEquals(DATA, screenshot.getData());
-        verifyNoMoreInteractions(screenshotFileNameGenerator, webDriverProvider, takesScreenshot);
-    }
-
-    @Test
-    void shouldSaveScreenshotToAPath(@TempDir Path path) throws IOException
-    {
-        when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(takesScreenshot);
-        when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(DATA);
-
-        Path takenScreenshot = screenshotTaker.takeScreenshot(path.resolve(FILE_NAME));
-        assertArrayEquals(DATA, Files.readAllBytes(takenScreenshot));
         verifyNoMoreInteractions(screenshotFileNameGenerator, webDriverProvider, takesScreenshot);
     }
 }

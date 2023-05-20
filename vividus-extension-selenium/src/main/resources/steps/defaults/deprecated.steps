@@ -13,3 +13,7 @@ Then element located by `<locator>` exists for `<duration>` duration
 Composite: When I change context to element located `$locator` in scope of current context
 !-- WARNING: The step "When I change context to element located `$locator` in scope of current context` duration" is deprecated and will be removed in VIVIDUS 0.7.0
 When I change context to element located by `<locator>` in scope of current context
+
+Composite: When I take screenshot and save it to folder `$screenshotFilePath`
+!-- WARNING: The step "When I take screenshot and save it to folder `$screenshotFilePath`" is deprecated and will be removed in VIVIDUS 0.7.0
+When I take screenshot and save it to file at path `<screenshotFilePath>`
