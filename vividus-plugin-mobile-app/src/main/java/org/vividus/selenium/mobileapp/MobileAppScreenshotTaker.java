@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.vividus.selenium.mobileapp;
 
 import java.util.Optional;
 
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.screenshot.AbstractScreenshotTaker;
 import org.vividus.selenium.screenshot.AshotFactory;
@@ -40,5 +42,11 @@ public class MobileAppScreenshotTaker extends AbstractScreenshotTaker<Screenshot
     {
         String fileName = generateScreenshotFileName(screenshotName);
         return Optional.of(new Screenshot(fileName, takeScreenshotAsByteArray()));
+    }
+
+    @Override
+    public byte[] takeScreenshotAsByteArray()
+    {
+        return getWebDriverProvider().getUnwrapped(TakesScreenshot.class).getScreenshotAs(OutputType.BYTES);
     }
 }
