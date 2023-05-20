@@ -25,8 +25,10 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
+@TakeScreenshotOnFailure
 public class ScrollSteps
 {
     private final IUiContext uiContext;
