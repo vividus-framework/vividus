@@ -20,12 +20,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import com.applitools.eyes.AccessibilityGuidelinesVersion;
+import com.applitools.eyes.AccessibilityLevel;
+import com.applitools.eyes.AccessibilityStatus;
+import com.applitools.eyes.SessionAccessibilityStatus;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +49,8 @@ import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.ui.web.screenshot.WebScreenshotConfiguration;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;
+import org.vividus.visual.eyes.model.AccessibilityCheckResult;
+import org.vividus.visual.eyes.model.ApplitoolsTestResults;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheckResult;
 import org.vividus.visual.eyes.service.VisualTestingService;
@@ -108,11 +116,14 @@ class VisualTestingStepsTests
         );
         when(screenshotParametersFactory.create(Optional.of(screenshotConfiguration), APPLITOOLS_CONFIGURATION,
                 ignores)).thenReturn(screenshotParameters);
+        ApplitoolsTestResults applitoolsTestResults = mock(ApplitoolsTestResults.class);
+        when(result.getApplitoolsTestResults()).thenReturn(applitoolsTestResults);
 
         visualTestingSteps.performCheck(List.of(check, check), screenshotConfiguration);
 
         verifyVisualCheck(result, 2);
         verify(check, times(2)).setScreenshotParameters(Optional.of(screenshotParameters));
+        verifyNoMoreInteractions(softAssert);
     }
 
     @Test
@@ -132,10 +143,20 @@ class VisualTestingStepsTests
         );
         when(screenshotParametersFactory.create(Optional.empty(), APPLITOOLS_CONFIGURATION, ignores)).thenReturn(
                 screenshotParameters);
+        SessionAccessibilityStatus status = mock(SessionAccessibilityStatus.class);
+        when(status.getStatus()).thenReturn(AccessibilityStatus.Passed);
+        when(status.getLevel()).thenReturn(AccessibilityLevel.AA);
+        when(status.getVersion()).thenReturn(AccessibilityGuidelinesVersion.WCAG_2_1);
+        AccessibilityCheckResult accessibilityCheckResult = new AccessibilityCheckResult("https://example.com", status);
+        ApplitoolsTestResults testResults = mock(ApplitoolsTestResults.class);
+        when(result.getApplitoolsTestResults()).thenReturn(testResults);
+        when(testResults.getAccessibilityCheckResult()).thenReturn(accessibilityCheckResult);
+        when(testResults.getTestIdentifier()).thenReturn(TEST);
 
         visualTestingSteps.performCheck(List.of(check));
 
         verifyVisualCheck(result, 1);
         assertEquals(Optional.of(screenshotParameters), check.getScreenshotParameters());
+        verify(softAssert).assertTrue("WCAG 2.1 - AA accessibility check for test: test", true);
     }
 }

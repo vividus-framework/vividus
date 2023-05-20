@@ -29,9 +29,8 @@ import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.UfgApplitoolsVisualCheckResult;
 import org.vividus.visual.eyes.service.VisualTestingService;
 import org.vividus.visual.model.VisualActionType;
-import org.vividus.visual.steps.AbstractVisualSteps;
 
-public class UfgSteps extends AbstractVisualSteps
+public class UfgSteps extends AbstractApplitoolsSteps
 {
     private final VisualTestingService<UfgApplitoolsVisualCheckResult> visualTestingService;
     private final ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
@@ -81,7 +80,7 @@ public class UfgSteps extends AbstractVisualSteps
         {
             check.getConfiguration().addBrowsers(matrix);
             return check;
-        }, visualTestingService::run));
+        }, visualTestingService::run).ifPresent(result -> result.getTestResults().forEach(super::verifyAccessibility)));
     }
 
     @Override

@@ -35,6 +35,10 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import com.applitools.eyes.AccessibilityGuidelinesVersion;
+import com.applitools.eyes.AccessibilityLevel;
+import com.applitools.eyes.AccessibilityStatus;
+import com.applitools.eyes.SessionAccessibilityStatus;
 import com.applitools.eyes.StepInfo;
 import com.applitools.eyes.StepInfo.ApiUrls;
 import com.applitools.eyes.StepInfo.AppUrls;
@@ -58,6 +62,7 @@ import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.screenshot.AshotScreenshotTaker;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.visual.eyes.factory.ImageEyesFactory;
+import org.vividus.visual.eyes.model.AccessibilityCheckResult;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheckResult;
 import org.vividus.visual.model.VisualActionType;
@@ -102,8 +107,13 @@ class ImageVisualTestingServiceTests
     {
         ApplitoolsVisualCheck applitoolsVisualCheck = createCheck();
         Eyes eyes = mockEyes(applitoolsVisualCheck);
+        TestResults testResults = mockTestResult(eyes);
+        SessionAccessibilityStatus accessibilityStatus = mock(SessionAccessibilityStatus.class);
+        when(testResults.getAccessibilityStatus()).thenReturn(accessibilityStatus);
+        when(accessibilityStatus.getLevel()).thenReturn(AccessibilityLevel.AA);
+        when(accessibilityStatus.getStatus()).thenReturn(AccessibilityStatus.Passed);
+        when(accessibilityStatus.getVersion()).thenReturn(AccessibilityGuidelinesVersion.WCAG_2_0);
         BufferedImage image = mockScreenshot(applitoolsVisualCheck);
-        mockTestResult(eyes);
         mockImagesRetrieval();
 
         ApplitoolsVisualCheckResult result = imageVisualTestingService.run(applitoolsVisualCheck);
@@ -112,6 +122,7 @@ class ImageVisualTestingServiceTests
         ordered.verify(eyes).open(APP_NAME, BASELINE_NAME);
         ordered.verify(eyes).checkImage(image);
         ordered.verify(eyes).close(false);
+        AccessibilityCheckResult accessibilityResults = result.getApplitoolsTestResults().getAccessibilityCheckResult();
         Assertions.assertAll(
             () -> assertEquals(ACTION, result.getActionType()),
             () -> assertArrayEquals(BASELINE_AS_BYTES, result.getBaseline()),
@@ -119,7 +130,11 @@ class ImageVisualTestingServiceTests
             () -> assertArrayEquals(DIFF_AS_BYTES, result.getDiff()),
             () -> assertEquals(BATCH_URL, result.getBatchUrl()),
             () -> assertEquals(STEP_EDITOR_URL, result.getStepUrl()),
-            () -> assertTrue(result.isPassed())
+            () -> assertTrue(result.isPassed()),
+            () -> assertEquals(AccessibilityLevel.AA, accessibilityResults.getLevel()),
+            () -> assertEquals("passed", accessibilityResults.getStatus()),
+            () -> assertEquals("WCAG 2.0", accessibilityResults.getVersion()),
+            () -> assertEquals(STEP_EDITOR_URL + "?accessibility=true", accessibilityResults.getUrl())
         );
     }
 
@@ -224,7 +239,7 @@ class ImageVisualTestingServiceTests
         return eyes;
     }
 
-    private void mockTestResult(Eyes eyes)
+    private TestResults mockTestResult(Eyes eyes)
     {
         TestResults results = mockTestResults(eyes);
 
@@ -235,6 +250,8 @@ class ImageVisualTestingServiceTests
         when(apiUrls.getBaselineImage()).thenReturn(BASELINE_IMAGE_URL);
         when(apiUrls.getDiffImage()).thenReturn(DIFF_IMAGE_URL);
         when(apiUrls.getCheckpointImage()).thenReturn(CHECKPOINT_IMAGE_URL);
+
+        return results;
     }
 
     private StepInfo mockStepInfo(TestResults results)

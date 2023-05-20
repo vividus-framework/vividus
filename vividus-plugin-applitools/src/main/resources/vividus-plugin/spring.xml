@@ -20,6 +20,7 @@
         <property name="baselineEnvName" value="${ui.visual.applitools.baseline-env-name}" />
     </bean>
     <bean class="org.vividus.visual.eyes.converter.ExamplesTableToRenderingBrowserInfoConverter" />
+    <bean class="org.vividus.visual.eyes.converter.StringToAccessibilitySettingsConverter" />
 
     <bean id="visualTestingSteps" class="org.vividus.visual.eyes.VisualTestingSteps" >
         <constructor-arg index="2" ref="screenshotParametersFactory" />

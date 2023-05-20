@@ -33,6 +33,7 @@ import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.screenshot.AshotScreenshotTaker;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.visual.eyes.factory.ImageEyesFactory;
+import org.vividus.visual.eyes.model.ApplitoolsTestResults;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheckResult;
 
@@ -82,6 +83,7 @@ public class ImageVisualTestingService implements VisualTestingService<Applitool
         StepInfo stepInfo = testResults.getStepsInfo()[0];
         visualCheckResult.setStepUrl(stepInfo.getAppUrls().getStepEditor());
         setImages(applitoolsVisualCheck.getReadApiKey(), visualCheckResult, stepInfo);
+        visualCheckResult.setApplitoolsTestResults(new ApplitoolsTestResults(testResults));
         return visualCheckResult;
     }
 

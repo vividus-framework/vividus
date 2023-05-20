@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 package org.vividus.visual.steps;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.openqa.selenium.SearchContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
@@ -43,20 +45,23 @@ public abstract class AbstractVisualSteps
         this.softAssert = softAssert;
     }
 
-    protected <T extends AbstractVisualCheck> void execute(Supplier<T> visualCheckFactory,
-            Function<T, VisualCheckResult> checkResultProvider)
+    protected <R extends VisualCheckResult, T extends AbstractVisualCheck> Optional<R>
+            execute(Supplier<T> visualCheckFactory, Function<T, R> checkResultProvider)
     {
-        uiContext.getOptionalSearchContext().ifPresent(searchContext ->
+        Optional<SearchContext> searchContext = uiContext.getOptionalSearchContext();
+        if (searchContext.isPresent())
         {
             try
             {
-                execute(visualCheckFactory, checkResultProvider, vc -> vc.setSearchContext(searchContext));
+                return execute(visualCheckFactory, checkResultProvider, vc -> vc.setSearchContext(searchContext.get()));
             }
             catch (ScreenshotPrecondtionMismatchException e)
             {
                 softAssert.recordFailedAssertion(e);
             }
-        });
+        }
+
+        return Optional.empty();
     }
 
     protected <T extends AbstractVisualCheck> void executeWithoutContext(Supplier<T> visualCheckFactory,
@@ -65,18 +70,20 @@ public abstract class AbstractVisualSteps
         execute(visualCheckFactory, checkResultProvider, vc -> { });
     }
 
-    private <T extends AbstractVisualCheck> void execute(Supplier<T> visualCheckFactory,
-            Function<T, VisualCheckResult> checkResultProvider, Consumer<T> visualCheckConfigurer)
+    private <R extends VisualCheckResult, T extends AbstractVisualCheck> Optional<R> execute(
+            Supplier<T> visualCheckFactory, Function<T, R> checkResultProvider, Consumer<T> visualCheckConfigurer)
     {
         T visualCheck = visualCheckFactory.get();
         visualCheckConfigurer.accept(visualCheck);
-        VisualCheckResult result = checkResultProvider.apply(visualCheck);
+        Optional<R> result = Optional.ofNullable(checkResultProvider.apply(visualCheck));
 
-        if (null != result)
+        result.ifPresent(r ->
         {
-            attachmentPublisher.publishAttachment(getTemplateName(), Map.of("result", result), "Visual comparison");
-            verifyResult(result);
-        }
+            attachmentPublisher.publishAttachment(getTemplateName(), Map.of("result", r), "Visual comparison");
+            verifyResult(r);
+        });
+
+        return result;
     }
 
     protected void verifyResult(VisualCheckResult result)

@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -31,6 +32,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import com.applitools.eyes.AccessibilityGuidelinesVersion;
+import com.applitools.eyes.AccessibilityLevel;
+import com.applitools.eyes.AccessibilitySettings;
 import com.applitools.eyes.MatchLevel;
 import com.applitools.eyes.RectangleSize;
 import com.applitools.eyes.config.Configuration;
@@ -49,6 +53,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
+import org.vividus.converter.FluentTrimmedEnumConverter;
 import org.vividus.converter.ui.web.StringToDimensionParameterConverter;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
@@ -78,8 +83,8 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
         when(baselineIndexer.createIndexedBaseline(BASELINE)).thenReturn(BASELINE);
 
          // CHECKSTYLE:OFF
-        String table = "|executeApiKey  |readApiKey  |hostApp |hostOS |viewportSize|matchLevel|serverUri          |appName |batchName |baselineEnvName  |elementsToIgnore|areasToIgnore|baselineName |action   |" + System.lineSeparator()
-                     + "|execute-api-key|read-api-key|host-app|host-os|1x1         |EXACT     |https://example.com|app-name|batch-name|baseline-env-name|elements        |areas        |baseline-name|ESTABLISH|";
+        String table = "|executeApiKey  |readApiKey  |hostApp |hostOS |viewportSize|matchLevel|serverUri          |appName |batchName |baselineEnvName  |elementsToIgnore|areasToIgnore|baselineName |action   |accessibilityStandard|" + System.lineSeparator()
+                     + "|execute-api-key|read-api-key|host-app|host-os|1x1         |EXACT     |https://example.com|app-name|batch-name|baseline-env-name|elements        |areas        |baseline-name|ESTABLISH|WCAG 2.1 - AA        |";
         // CHECKSTYLE:ON
         ExamplesTable applitoolsCheckTable = createTable(table);
 
@@ -87,6 +92,7 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
         assertThat(checks, hasSize(1));
         ApplitoolsVisualCheck check = checks.get(0);
         Configuration configuration = check.getConfiguration();
+        AccessibilitySettings settings = configuration.getAccessibilityValidation();
         assertAll(
             () -> assertEquals("execute-api-key", configuration.getApiKey()),
             () -> assertEquals("read-api-key", check.getReadApiKey()),
@@ -105,7 +111,9 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
             () -> assertEquals(Optional.of(screenshotParameters), check.getScreenshotParameters()),
             () -> assertTrue(configuration.getSaveFailedTests()),
             () -> assertTrue(configuration.getSaveNewTests()),
-            () -> assertEquals(BATCH, configuration.getBatch().getName())
+            () -> assertEquals(BATCH, configuration.getBatch().getName()),
+            () -> assertEquals(AccessibilityLevel.AA, settings.getLevel()),
+            () -> assertEquals(AccessibilityGuidelinesVersion.WCAG_2_1, settings.getGuidelinesVersion())
         );
     }
 
@@ -169,7 +177,8 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
             () -> assertEquals(Optional.of(screenshotParameters), check.getScreenshotParameters()),
             () -> assertFalse(configuration.getSaveFailedTests()),
             () -> assertFalse(configuration.getSaveNewTests()),
-            () -> assertEquals(BATCH, configuration.getBatch().getName())
+            () -> assertEquals(BATCH, configuration.getBatch().getName()),
+            () -> assertNull(configuration.getAccessibilityValidation())
         );
     }
 
@@ -190,7 +199,8 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
         parameterConverters.addConverters(
             new FunctionalParameterConverter<String, Set<Locator>>(value -> Set.of(locator)) { },
             new FunctionalParameterConverter<String, Dimension>(StringToDimensionParameterConverter::convert) { },
-            new FunctionalParameterConverter<String, URI>(URI::create) { }
+            new FunctionalParameterConverter<String, URI>(URI::create) { },
+            new StringToAccessibilitySettingsConverter(new FluentTrimmedEnumConverter())
         );
         return new ExamplesTableFactory(new Keywords(), null, parameterConverters, new ParameterControls(),
                 new TableParsers(parameterConverters), new TableTransformers()).createExamplesTable(table);

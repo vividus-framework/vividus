@@ -16,11 +16,18 @@
 
 package org.vividus.visual.eyes.model;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.applitools.eyes.RectangleSize;
+import com.applitools.eyes.SessionAccessibilityStatus;
+import com.applitools.eyes.StepInfo;
 import com.applitools.eyes.TestResultContainer;
 import com.applitools.eyes.TestResults;
 import com.applitools.eyes.TestResultsStatus;
 import com.applitools.eyes.visualgrid.model.RenderBrowserInfo;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class ApplitoolsTestResults
 {
@@ -30,13 +37,12 @@ public class ApplitoolsTestResults
     private final String os;
     private final String browser;
     private final RectangleSize viewport;
-    private final String device;
+    private String device = "";
     private final String url;
+    private AccessibilityCheckResult accessibilityCheckResult;
 
-    public ApplitoolsTestResults(TestResultContainer container)
+    public ApplitoolsTestResults(TestResults testResults)
     {
-        TestResults testResults = container.getTestResults();
-
         this.passed = testResults.isPassed();
         this.status = testResults.getStatus();
         this.name = testResults.getName();
@@ -44,6 +50,19 @@ public class ApplitoolsTestResults
         this.browser = testResults.getHostApp();
         this.viewport = testResults.getHostDisplaySize();
         this.url = testResults.getUrl();
+
+        if (testResults.getAccessibilityStatus() != null)
+        {
+            SessionAccessibilityStatus accessibilityStatus = testResults.getAccessibilityStatus();
+            StepInfo stepInfo = testResults.getStepsInfo()[0];
+            this.accessibilityCheckResult = new AccessibilityCheckResult(stepInfo.getAppUrls().getStepEditor(),
+                    accessibilityStatus);
+        }
+    }
+
+    public ApplitoolsTestResults(TestResultContainer container)
+    {
+        this(container.getTestResults());
 
         RenderBrowserInfo renderInfo = container.getBrowserInfo();
 
@@ -55,10 +74,13 @@ public class ApplitoolsTestResults
         {
             this.device = renderInfo.getEmulationInfo().getDeviceName();
         }
-        else
-        {
-            this.device = "";
-        }
+    }
+
+    public String getTestIdentifier()
+    {
+        Stream<String> parameters = device.isEmpty() ? Stream.of(name, browser, viewport.toString())
+                : Stream.of(name, device, os, browser);
+        return parameters.filter(StringUtils::isNoneEmpty).collect(Collectors.joining(" "));
     }
 
     public boolean isPassed()
@@ -66,9 +88,9 @@ public class ApplitoolsTestResults
         return passed;
     }
 
-    public TestResultsStatus getStatus()
+    public String getStatus()
     {
-        return status;
+        return status.name().toLowerCase();
     }
 
     public String getName()
@@ -99,5 +121,10 @@ public class ApplitoolsTestResults
     public String getUrl()
     {
         return url;
+    }
+
+    public AccessibilityCheckResult getAccessibilityCheckResult()
+    {
+        return accessibilityCheckResult;
     }
 }

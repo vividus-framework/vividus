@@ -37,9 +37,8 @@ import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheckResult;
 import org.vividus.visual.eyes.service.VisualTestingService;
 import org.vividus.visual.model.VisualActionType;
-import org.vividus.visual.steps.AbstractVisualSteps;
 
-public class VisualTestingSteps extends AbstractVisualSteps
+public class VisualTestingSteps extends AbstractApplitoolsSteps
 {
     private final VisualTestingService<ApplitoolsVisualCheckResult> visualTestingService;
     private final ApplitoolsVisualCheckFactory applitoolsVisualCheckFactory;
@@ -215,6 +214,8 @@ public class VisualTestingSteps extends AbstractVisualSteps
 
     void runApplitoolsTest(Supplier<ApplitoolsVisualCheck> applitoolsVisualCheckSupplier)
     {
-        execute(applitoolsVisualCheckSupplier, visualTestingService::run);
+        execute(applitoolsVisualCheckSupplier, visualTestingService::run)
+                .map(ApplitoolsVisualCheckResult::getApplitoolsTestResults)
+                .ifPresent(super::verifyAccessibility);
     }
 }
