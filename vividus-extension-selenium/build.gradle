@@ -18,7 +18,7 @@ project.description = 'VIVIDUS extension for Selenium'
      api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver')
      api(group: 'io.appium', name: 'java-client', version: '8.3.0')
 
-     api(group: 'com.github.pazone', name: 'ashot', version: 'd62d99755c')
+     api(group: 'com.github.pazone', name: 'ashot', version: 'a3902515eb')
 
      api(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-core', version: "${browserupProxyVersion}")
      implementation(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-mitm', version: "${browserupProxyVersion}")
