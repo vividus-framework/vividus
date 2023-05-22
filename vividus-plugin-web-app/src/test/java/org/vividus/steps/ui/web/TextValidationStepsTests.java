@@ -16,9 +16,6 @@
 
 package org.vividus.steps.ui.web;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -28,11 +25,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
-
-import com.github.valfirst.slf4jtest.LoggingEvent;
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,20 +50,15 @@ import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.ui.web.util.WebXpathLocatorUtils;
 
-@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
+@ExtendWith(MockitoExtension.class)
 class TextValidationStepsTests
 {
-    private static final String TEXT_NOT_EXIST_LOG_MSG = "The step: \"Then the text '$text' does not exist\""
-            + " is deprecated and will be removed in VIVIDUS 0.7.0. "
-            + "Use step: \"Then text `$text` does not exist\"";
     private static final String TEXT = "text";
     private static final Pattern REGEX = Pattern.compile("[a-zA-Z]+");
     private static final String TEXT_MATCHES_REGEX_MESSAGE = "The text in search context matches regular expression ";
     private static final String THERE_IS_AN_ELEMENT_WITH_TEXT_TEXT_IN_THE_CONTEXT = "There"
             + " is an element with text=text in the context";
     private static final String ELEMENT_TEXT = "1";
-
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(TextValidationSteps.class);
 
     @Mock private IUiContext uiContext;
     @Mock private IBaseValidations baseValidations;
@@ -158,11 +145,9 @@ class TextValidationStepsTests
     @Test
     void testIfTextDoesNotExist()
     {
-        LoggingEvent expectedLoggingEvent = warn(TEXT_NOT_EXIST_LOG_MSG);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webElement));
         when(elementValidations.assertIfElementContainsText(webElement, TEXT, false)).thenReturn(true);
         assertTrue(textValidationSteps.textDoesNotExist(TEXT));
-        assertThat(logger.getLoggingEvents(), is(List.of(expectedLoggingEvent)));
     }
 
     @Test
@@ -177,12 +162,10 @@ class TextValidationStepsTests
     @Test
     void testTextDoesNotExist()
     {
-        LoggingEvent expectedLoggingEvent = warn(TEXT_NOT_EXIST_LOG_MSG);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
         when(baseValidations.assertIfElementDoesNotExist("An element with text 'text'",
                 new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, TEXT))).thenReturn(true);
         assertTrue(textValidationSteps.textDoesNotExist(TEXT));
-        assertThat(logger.getLoggingEvents(), is(List.of(expectedLoggingEvent)));
     }
 
     @Test

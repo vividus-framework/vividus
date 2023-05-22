@@ -62,11 +62,6 @@ import org.vividus.variable.VariableScope;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SetVariableStepsTests
 {
-    private static final String DEPRECATED_LOG_MESSAGE_TEMPLATE = "The step: \"{}\" is deprecated "
-            + "and will be removed in VIVIDUS 0.7.0. "
-            + "Use combination of step and expression: "
-            + "\"Given I initialize $scopes variable `$variableName` with value "
-            + "`#{{}}`\"";
     private static final String THE_SRC_VALUE_WAS_FOUND = "The 'src' attribute value was found";
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
     private static final String NAME = "name";
@@ -98,11 +93,6 @@ class SetVariableStepsTests
         when(webDriver.getCurrentUrl()).thenReturn("http://testurl.com/testvalue");
         setVariableSteps.saveValueFromUrl(VARIABLE_SCOPE, VARIABLE);
         verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE, "testvalue");
-
-        LoggingEvent expectedLoggingEvent = warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
-                "When I get the value from the URL and set it to the '$scopes' variable '$variable'",
-                "replaceFirstByRegExp(.*\\/(?=[^\\/?#]+(?:\\?.+)?(?:#.*)?$),,${current-page-url})");
-        assertThat(logger.getLoggingEvents(), is(List.of(expectedLoggingEvent)));
     }
 
     @Test
@@ -136,13 +126,6 @@ class SetVariableStepsTests
         when(softAssert.assertNotNull(THE_SRC_VALUE_WAS_FOUND, VALUE)).thenReturn(Boolean.TRUE);
         setVariableSteps.saveUrlValueOfVideoWithNumber(1, VARIABLE_SCOPE, URL_VARIABLE);
         verify(variableContext).putVariable(VARIABLE_SCOPE, URL_VARIABLE, VALUE);
-        LoggingEvent expectedLoggingEvent = warn("The step: \"When I get the URL value of a video with sequence"
-                + " number '$number' and set it to the '$scopes' variable '$variable'\""
-                + " is deprecated and will be removed in VIVIDUS 0.7.0."
-                + " Use step: \"When I save `src` attribute value of element located"
-                + " `xpath((div[contains(@class,'video')]/iframe)[$number])` to $scopes variable `$variableName`\""
-                + " instead");
-        assertThat(logger.getLoggingEvents(), is(List.of(expectedLoggingEvent)));
     }
 
     @Test
@@ -244,11 +227,6 @@ class SetVariableStepsTests
         setVariableSteps.savePathFromUrl(VARIABLE_SCOPE, VARIABLE_NAME);
 
         verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, "/relative/path");
-
-        LoggingEvent expectedLoggingEvent = warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
-                "When I get the URL path and set it to the $scopes variable '$variable'",
-                "extractPathFromUrl(${current-page-url})");
-        assertThat(logger.getLoggingEvents(), is(List.of(expectedLoggingEvent)));
     }
 
     @Test

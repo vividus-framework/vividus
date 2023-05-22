@@ -17,7 +17,6 @@
 package org.vividus.steps.kafka;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -158,11 +157,7 @@ class KafkaStepsIntegrationTests
 
         kafkaSteps.stopKafkaListener(CONSUMER);
 
-        LoggingEvent deprecatedStep = warn("The step: \"When I wait with `$timeout` timeout until count of consumed "
-                + "`$consumerKey` Kafka events is $comparisonRule `$expectedCount`\" is deprecated and will be removed"
-                + " in VIVIDUS 0.6.0. Use step: \"`$expectedCount`\"");
-        assertThat(logger.getLoggingEvents(), is(List.of(info(LISTENER_STARTED), deprecatedStep,
-                info(LISTENER_STOPPED))));
+        assertThat(logger.getLoggingEvents(), is(List.of(info(LISTENER_STARTED), info(LISTENER_STOPPED))));
 
         test.accept(kafkaSteps, variableContext);
     }

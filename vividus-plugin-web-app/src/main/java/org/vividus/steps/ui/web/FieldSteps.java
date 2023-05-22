@@ -25,6 +25,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.Browser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.annotation.Replacement;
 import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
@@ -76,6 +77,7 @@ public class FieldSteps
      * @deprecated Use step: When I clear field located by `$locator`.
      */
     @Deprecated(since = "0.5.1", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern = "When I clear field located by `%1$s`")
     @When("I clear field located `$locator`")
     public WebElement clearFieldLocatedBy(Locator locator)
     {
@@ -121,6 +123,8 @@ public class FieldSteps
      * @deprecated Use step: When I clear field located by `$locator` using keyboard
      */
     @Deprecated(since = "0.5.1", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0",
+                 replacementFormatPattern = "When I clear field located by `%1$s` using keyboard")
     @When("I clear field located `$locator` using keyboard")
     public WebElement clearFieldLocatedByUsingKeyboard(Locator locator)
     {
@@ -162,6 +166,8 @@ public class FieldSteps
      * @deprecated Use step: When I add `$text` to field located by `$locator`
      */
     @Deprecated(since = "0.5.1", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0",
+                 replacementFormatPattern = "When I add `%1$s` to field located by `%2$s`")
     @When("I add `$text` to field located `$locator`")
     public void addTextToFieldLocatedBy(String text, Locator locator)
     {
@@ -210,6 +216,8 @@ public class FieldSteps
      * @deprecated Use step: When I enter `$text` in field located by `$locator`
      */
     @Deprecated(since = "0.5.1", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0",
+                 replacementFormatPattern = "When I enter `%1$s` in field located by `%2$s`")
     @When("I enter `$text` in field located `$locator`")
     public void enterTextInFieldLocatedBy(String text, Locator locator)
     {
@@ -328,6 +336,8 @@ public class FieldSteps
      * @deprecated Use step replacement pattern: Then number of elements found by `&lt;locator&gt;` is equal to `0`
      */
     @Deprecated(since = "0.5.1", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0",
+                 replacementFormatPattern = "Then number of elements found by `%1$s` is equal to `0`")
     @Then("field located `$locator` does not exist")
     public void doesNotFieldExist(Locator locator)
     {
@@ -347,6 +357,8 @@ public class FieldSteps
      * @deprecated Use step replacement pattern: Then number of elements found by `&lt;locator&gt;` is equal to `1`
      */
     @Deprecated(since = "0.5.1", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0",
+                 replacementFormatPattern = "Then number of elements found by `%1$s` is equal to `1`")
     @Then("field located `$locator` exists")
     public WebElement findFieldBy(Locator locator)
     {

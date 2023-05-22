@@ -16,10 +16,7 @@
 
 package org.vividus.steps.api;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,10 +34,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.Header;
@@ -67,12 +60,10 @@ import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
-@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
+@ExtendWith(MockitoExtension.class)
 @SuppressWarnings("checkstyle:MethodCount")
 class HttpResponseValidationStepsTests
 {
-    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(HttpResponseValidationSteps.class);
-
     private static final String ACCEPT_ENCODING_HEADER_NAME = "Accept-Encoding";
     private static final Header ACCEPT_ENCODING_HEADER = new BasicHeader(ACCEPT_ENCODING_HEADER_NAME,
             "deflate, gzip;q=1.0, *;q=0.5");
@@ -130,8 +121,6 @@ class HttpResponseValidationStepsTests
                 eq(String.format("%s header contains %s attribute", ACCEPT_ENCODING_HEADER_NAME, HEADER_ELEMENT_NAME)),
                 eq(HEADER_ELEMENT_NAMES),
                 argThat(matcher -> matcher.toString().equals(Matchers.contains(HEADER_ELEMENT_NAME).toString())));
-        validateDeprecateMessage("Then response header '$httpHeaderName' contains attribute:$attributes",
-                "Then response header `$headerName` contains elements:$elements");
     }
 
     @Test
@@ -195,8 +184,6 @@ class HttpResponseValidationStepsTests
         httpResponseValidationSteps.thenTheResponseTimeShouldBeLessThan(responseTime);
         verify(softAssert).assertThat(eq("The response time is less than response time threshold."),
                 eq(responseTime), argThat(matcher -> lessThan(responseTime).toString().equals(matcher.toString())));
-        validateDeprecateMessage("Then the response time should be less than '$responseTimeThresholdMs' milliseconds",
-                "Then response time is $comparisonRule `$responseTime` milliseconds");
     }
 
     @Test
@@ -253,8 +240,6 @@ class HttpResponseValidationStepsTests
         httpResponseValidationSteps.assertResponseCode(ComparisonRule.EQUAL_TO, validCode);
         verify(softAssert).assertThat(eq(HTTP_RESPONSE_STATUS_CODE), eq(validCode), argThat(
                 matcher -> matcher.toString().equals(ComparisonRule.EQUAL_TO.getComparisonRule(validCode).toString())));
-        validateDeprecateMessage("Then the response code is $comparisonRule '$responseCode'",
-                "Then response code is $comparisonRule `$responseCode`");
     }
 
     @Test
@@ -291,10 +276,6 @@ class HttpResponseValidationStepsTests
         httpResponseValidationSteps.doesResponseBodyMatch(IS_EQUAL_TO, body);
         verify(softAssert).assertThat(eq(HTTP_RESPONSE_BODY), eq(body),
                 argThat(arg -> "\"testResponse\"".equals(arg.toString())));
-        assertThat(LOGGER.getLoggingEvents(), is(List.of(warn(
-                "The step: \"Then the response body $comparisonRule '$content'\" is deprecated and will be removed in"
-                + " VIVIDUS 0.6.0. Use ${response} dynamic variable with \"Then `$variable1` is $comparisonRule "
-                + "`$variable2`\" step"))));
     }
 
     @Test
@@ -313,8 +294,6 @@ class HttpResponseValidationStepsTests
         httpResponseValidationSteps.doesResponseBodyMatchResource(ByteArrayValidationRule.IS_EQUAL_TO,
                 RESPONSE_BODY_TXT);
         verify(softAssert).recordPassedAssertion(EQUAL_ARRAYS);
-        validateDeprecateMessage("Then the response body $validationRule resource at '$resourcePath'",
-                "Then response body $validationRule resource at `$resourcePath`");
     }
 
     @Test
@@ -387,9 +366,6 @@ class HttpResponseValidationStepsTests
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
         httpResponseValidationSteps.saveHeaderValue(ACCEPT_ENCODING_HEADER_NAME, scopes, VARIABLE_NAME);
         verify(variableContext).putVariable(scopes, VARIABLE_NAME, headerValue);
-        validateDeprecateMessage(
-                "When I save response header '$httpHeaderName' value to $scopes variable '$variableName'",
-                "When I save response header `$headerName` value to $scopes variable `$variableName`");
     }
 
     @Test
@@ -430,8 +406,6 @@ class HttpResponseValidationStepsTests
                 eq(headerValue),
                 argThat(matcher -> matcher.toString().equals(equalTo(headerValue).toString()))
         );
-        validateDeprecateMessage("Then the value of the response header '$httpHeaderName' $comparisonRule '$value'",
-                "Then value of response header `$headerName` $comparisonRule `$value`");
     }
 
     @Test
@@ -491,7 +465,6 @@ class HttpResponseValidationStepsTests
         httpResponse.setResponseBody(null);
         httpResponseValidationSteps.doesResponseNotContainBody();
         verify(softAssert).assertNull(RESPONSE_WITH_NO_BODY, null);
-        validateDeprecateMessage("Then the response does not contain body", "Then response does not contain body");
     }
 
     @Test
@@ -539,9 +512,6 @@ class HttpResponseValidationStepsTests
         verify(softAssert).assertThat(eq(String.format(NUMBER_RESPONSE_HEADERS_WITH_NAME, ACCEPT_ENCODING_HEADER_NAME)),
                 eq(2),
                 argThat(m -> ComparisonRule.EQUAL_TO.getComparisonRule(2).toString().equals(m.toString())));
-        validateDeprecateMessage(
-                "Then the number of the response headers with the name '$headerName' is $comparisonRule $value",
-                "Then number of response headers with name `$headerName` is $comparisonRule $number");
     }
 
     @Test
@@ -595,8 +565,6 @@ class HttpResponseValidationStepsTests
         when(softAssert.assertTrue(CONNECTION_SECURE_ASSERTION, secure)).thenReturn(Boolean.TRUE);
         httpResponseValidationSteps.isConnectionSecured(TLS_V1_3);
         verify(softAssert).assertEquals(SECURITY_PROTOCOL, TLS_V1_3, TLS_V1_3);
-        validateDeprecateMessage("Then the connection is secured using $securityProtocol protocol",
-                "Then connection is secured using $securityProtocol protocol");
     }
 
     @Test
@@ -695,13 +663,5 @@ class HttpResponseValidationStepsTests
     {
         verify(softAssert).assertNotNull(HTTP_RESPONSE_IS_NOT_NULL, null);
         verifyNoMoreInteractions(softAssert);
-    }
-
-    private void validateDeprecateMessage(String deprecatedStep, String newStep)
-    {
-        assertThat(LOGGER.getLoggingEvents(),
-                is(List.of(warn(
-                        "The step \"{}\" is deprecated and will be removed in VIVIDUS 0.6.0. Please use step \"{}\"",
-                        deprecatedStep, newStep))));
     }
 }

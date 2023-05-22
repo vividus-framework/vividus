@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
+import org.vividus.annotation.Replacement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
@@ -292,11 +293,10 @@ public class ElementSteps implements ResourceLoaderAware
      * @deprecated Use step: "When I click on element located by `$locator`"
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern = "When I click on element located by `%1$s`")
     @When("I click on element located `$locator`")
     public void clickOnElementWithoutRetry(Locator locator)
     {
-        LOGGER.warn("The step: \"When I click on element located `$locator`\" is deprecated and will be removed in "
-                + "VIVIDUS 0.6.0. Use step: \"When I click on element located by `$locator`\"");
         WebElement webElement =
                 baseValidations.assertIfElementExists(String.format(AN_ELEMENT_WITH_ATTRIBUTES, locator), locator);
         mouseActions.click(webElement);

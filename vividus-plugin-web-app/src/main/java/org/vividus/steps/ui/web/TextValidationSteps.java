@@ -25,8 +25,7 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.vividus.annotation.Replacement;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.steps.ui.web.validation.IElementValidations;
@@ -41,8 +40,6 @@ import org.vividus.ui.web.util.WebXpathLocatorUtils;
 @TakeScreenshotOnFailure
 public class TextValidationSteps
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TextValidationSteps.class);
-
     private final IUiContext uiContext;
     private final ISearchActions searchActions;
     private final IWebElementActions webElementActions;
@@ -157,12 +154,10 @@ public class TextValidationSteps
      * @deprecated Use step: "Then text `$text` does not exist"
      */
     @Deprecated(since = "0.5.4", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern = "Then text `%1$s` does not exist")
     @Then("the text '$text' does not exist")
     public boolean textDoesNotExist(String text)
     {
-        LOGGER.warn("The step: \"Then the text '$text' does not exist\" is deprecated "
-                + "and will be removed in VIVIDUS 0.7.0. "
-                + "Use step: \"Then text `$text` does not exist\"");
         return uiContext.getOptionalSearchContext().map(searchContext ->
         {
             if (searchContext instanceof WebElement)

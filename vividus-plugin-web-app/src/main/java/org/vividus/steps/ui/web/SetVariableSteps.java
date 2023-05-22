@@ -25,6 +25,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.annotation.Replacement;
 import org.vividus.context.VariableContext;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
@@ -43,12 +44,6 @@ import org.vividus.variable.VariableScope;
 public class SetVariableSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(SetVariableSteps.class);
-
-    private static final String DEPRECATED_LOG_MESSAGE_TEMPLATE = "The step: \"{}\" is deprecated "
-            + "and will be removed in VIVIDUS 0.7.0. "
-            + "Use combination of step and expression: "
-            + "\"Given I initialize $scopes variable `$variableName` with value "
-            + "`#{{}}`\"";
 
     private final IWebDriverProvider webDriverProvider;
     private final ISoftAssert softAssert;
@@ -96,12 +91,12 @@ public class SetVariableSteps
      *  with value `#{replaceFirstByRegExp(.*\/(?=[^\/?#]+(?:\?.+)?(?:#.*)?$),,${current-page-url})}`"
      */
     @Deprecated(since = "0.5.9", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern =
+            "Given I initialize %1$s variable `%2$s` with value "
+                    + "`#{replaceFirstByRegExp(.*\\/(?=[^\\/?#]+(?:\\?.+)?(?:#.*)?$),,${current-page-url})}`")
     @When("I get the value from the URL and set it to the '$scopes' variable '$variable'")
     public void saveValueFromUrl(Set<VariableScope> scopes, String variable)
     {
-        LOGGER.warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
-                "When I get the value from the URL and set it to the '$scopes' variable '$variable'",
-                "replaceFirstByRegExp(.*\\/(?=[^\\/?#]+(?:\\?.+)?(?:#.*)?$),,${current-page-url})");
         String url = getWebDriver().getCurrentUrl();
         int valueIndex = url.lastIndexOf('/') + 1;
         if (valueIndex != 0 && valueIndex != url.length())
@@ -135,12 +130,11 @@ public class SetVariableSteps
      * "Given I initialize $scopes variable `$variableName` with value `#{extractPathFromUrl(${current-page-url})}`"
      */
     @Deprecated(since = "0.5.9", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern =
+            "Given I initialize %1$s variable `%2$s` with value `#{extractPathFromUrl(${current-page-url})}`")
     @When("I get the URL path and set it to the $scopes variable '$variable'")
     public void savePathFromUrl(Set<VariableScope> scopes, String variable)
     {
-        LOGGER.warn(DEPRECATED_LOG_MESSAGE_TEMPLATE,
-                "When I get the URL path and set it to the $scopes variable '$variable'",
-                "extractPathFromUrl(${current-page-url})");
         String value = UriUtils.createUri(getWebDriver().getCurrentUrl()).getPath();
         saveVariable(scopes, variable, value);
     }
@@ -192,15 +186,12 @@ public class SetVariableSteps
      * to $scopes variable `$variableName`" instead
      */
     @Deprecated(since = "0.5.10", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern = "When I save `src` attribute value of "
+            + "element located `xpath((div[contains(@class,'video')]/iframe)[%1$s])` to %2$s variable `%3$s`")
     @When("I get the URL value of a video with sequence number '$number' and set it to the '$scopes'"
             + " variable '$variable'")
     public void saveUrlValueOfVideoWithNumber(int number, Set<VariableScope> scopes, String variable)
     {
-        LOGGER.warn("The step: \"When I get the URL value of a video with sequence number '$number' and set it"
-                + " to the '$scopes' variable '$variable'\" is deprecated and will be removed in VIVIDUS 0.7.0."
-                + " Use step: \"When I save `src` attribute value of element located"
-                + " `xpath((div[contains(@class,'video')]/iframe)[$number])` to $scopes variable `$variableName`\""
-                + " instead");
         List<WebElement> frames = getVideoIFrames(number);
         if (!frames.isEmpty())
         {

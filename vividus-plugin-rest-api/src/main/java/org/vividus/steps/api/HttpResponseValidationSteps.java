@@ -38,8 +38,7 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.vividus.annotation.Replacement;
 import org.vividus.context.VariableContext;
 import org.vividus.http.ConnectionDetails;
 import org.vividus.http.HttpTestContext;
@@ -57,8 +56,6 @@ import org.vividus.variable.VariableScope;
 
 public class HttpResponseValidationSteps
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpResponseValidationSteps.class);
-
     private static final String HTTP_RESPONSE_STATUS_CODE = "HTTP response status code";
     private static final Tika TIKA = new Tika();
 
@@ -84,10 +81,10 @@ public class HttpResponseValidationSteps
      * Validates that the HTTP response does not contain a body.
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern = "Then response does not contain body")
     @Then("the response does not contain body")
     public void doesResponseNotContainBody()
     {
-        logDeprecated("Then the response does not contain body", "Then response does not contain body");
         doesResponseContainNoBody();
     }
 
@@ -127,12 +124,10 @@ public class HttpResponseValidationSteps
      * @param content        The body content part
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern = "Then `${response}` is %1$s `%2$s`")
     @Then("the response body $comparisonRule '$content'")
     public void doesResponseBodyMatch(StringComparisonRule comparisonRule, String content)
     {
-        LOGGER.warn("The step: \"Then the response body $comparisonRule '$content'\" is deprecated and will be removed"
-                + " in VIVIDUS 0.6.0. Use ${response} dynamic variable with \"Then `$variable1` is $comparisonRule "
-                + "`$variable2`\" step");
         performIfHttpResponseIsPresent(response -> softAssert.assertThat("HTTP response body",
                 response.getResponseBodyAsString(), comparisonRule.createMatcher(content)));
     }
@@ -178,11 +173,10 @@ public class HttpResponseValidationSteps
      * @param resourcePath   The resource path
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern = "Then response body %1$s resource at `%2$s`")
     @Then(value = "the response body $validationRule resource at '$resourcePath'", priority = 1)
     public void doesResponseBodyMatchResource(ByteArrayValidationRule validationRule, String resourcePath)
     {
-        logDeprecated("Then the response body $validationRule resource at '$resourcePath'",
-                "Then response body $validationRule resource at `$resourcePath`");
         compareResponseBodyAgainstResource(validationRule, resourcePath);
     }
 
@@ -242,11 +236,10 @@ public class HttpResponseValidationSteps
      * response status code</a>
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern = "Then response code is %1$s `%2$s`")
     @Then("the response code is $comparisonRule '$responseCode'")
     public void assertResponseCode(ComparisonRule comparisonRule, int responseCode)
     {
-        logDeprecated("Then the response code is $comparisonRule '$responseCode'",
-                "Then response code is $comparisonRule `$responseCode`");
         validateResponseCode(comparisonRule, responseCode);
     }
 
@@ -283,11 +276,11 @@ public class HttpResponseValidationSteps
      * @param responseTimeThresholdMs The maximum response time in milliseconds
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0",
+                 replacementFormatPattern = "Then response time is less than `%1$s` milliseconds")
     @Then("the response time should be less than '$responseTimeThresholdMs' milliseconds")
     public void thenTheResponseTimeShouldBeLessThan(long responseTimeThresholdMs)
     {
-        logDeprecated("Then the response time should be less than '$responseTimeThresholdMs' milliseconds",
-                "Then response time is $comparisonRule `$responseTime` milliseconds");
         performIfHttpResponseIsPresent(
             response -> softAssert.assertThat("The response time is less than response time threshold.",
                     response.getResponseTimeInMs(), Matchers.lessThan(responseTimeThresholdMs)));
@@ -347,11 +340,11 @@ public class HttpResponseValidationSteps
      * @param attributes The ExamplesTable with expected elements
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0",
+                 replacementFormatPattern = "Then response header `%1$s` contains elements:%2$s")
     @Then("response header '$httpHeaderName' contains attribute:$attributes")
     public void assertHeaderContainsAttributes(String httpHeaderName, ExamplesTable attributes)
     {
-        logDeprecated("Then response header '$httpHeaderName' contains attribute:$attributes",
-                "Then response header `$headerName` contains elements:$elements");
         performIfHttpResponseIsPresent(response ->
         {
             getHeaderByName(response, httpHeaderName).ifPresent(header ->
@@ -429,12 +422,12 @@ public class HttpResponseValidationSteps
      * @param value          The expected HTTP header value
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0",
+                 replacementFormatPattern = "Then value of response header `%1$s` %2$s `%3$s`")
     @Then("the value of the response header '$httpHeaderName' $comparisonRule '$value'")
     @Alias("the value of the response header \"$httpHeaderName\" $comparisonRule \"$value\"")
     public void doesHeaderMatch(String httpHeaderName, StringComparisonRule comparisonRule, String value)
     {
-        logDeprecated("Then the value of the response header '$httpHeaderName' $comparisonRule '$value'",
-                "Then value of response header `$headerName` $comparisonRule `$value`");
         validateHeaderValue(httpHeaderName, comparisonRule, value);
     }
 
@@ -482,11 +475,11 @@ public class HttpResponseValidationSteps
      * @param value          The expected number of headers
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0",
+                 replacementFormatPattern = "Then number of response headers with name `%1$s` is %2$s %3$s")
     @Then("the number of the response headers with the name '$headerName' is $comparisonRule $value")
     public void isHeaderWithNameFound(String headerName, ComparisonRule comparisonRule, int value)
     {
-        logDeprecated("Then the number of the response headers with the name '$headerName' is $comparisonRule $value",
-                "Then number of response headers with name `$headerName` is $comparisonRule $number");
         performIfHttpResponseIsPresent(response -> softAssert.assertThat(
                 String.format("The number of the response headers with the name '%s'", headerName),
                 (int) response.getHeadersByName(headerName).count(), comparisonRule.getComparisonRule(value)));
@@ -538,11 +531,11 @@ public class HttpResponseValidationSteps
      * @param variableName   The variable name to store the header value.
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0",
+                 replacementFormatPattern = "When I save response header `%1$s` value to %2$s variable `%3$s`")
     @When("I save response header '$httpHeaderName' value to $scopes variable '$variableName'")
     public void saveHeaderValue(String httpHeaderName, Set<VariableScope> scopes, String variableName)
     {
-        logDeprecated("When I save response header '$httpHeaderName' value to $scopes variable '$variableName'",
-                "When I save response header `$headerName` value to $scopes variable `$variableName`");
         saveHeaderValueToVariable(httpHeaderName, scopes, variableName);
     }
 
@@ -579,11 +572,11 @@ public class HttpResponseValidationSteps
      * @param securityProtocol The expected security protocol, e.g. <b>TLSv1.2</b>, <b>TLSv1.3</b>
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0",
+                 replacementFormatPattern = "Then connection is secured using %1$s protocol")
     @Then("the connection is secured using $securityProtocol protocol")
     public void isConnectionSecured(String securityProtocol)
     {
-        logDeprecated("Then the connection is secured using $securityProtocol protocol",
-                "Then connection is secured using $securityProtocol protocol");
         validateConnectionIsSecured(securityProtocol);
     }
 
@@ -660,12 +653,5 @@ public class HttpResponseValidationSteps
         {
             responseConsumer.accept(response);
         }
-    }
-
-    private void logDeprecated(String deprecatedStep, String newStep)
-    {
-        LOGGER.atWarn().addArgument(deprecatedStep)
-                   .addArgument(newStep)
-                   .log("The step \"{}\" is deprecated and will be removed in VIVIDUS 0.6.0. Please use step \"{}\"");
     }
 }
