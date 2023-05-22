@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,11 @@ package org.vividus.selenium.screenshot;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Optional;
 
-import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.OutputType;
 import org.openqa.selenium.SearchContext;
-import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
@@ -39,8 +32,6 @@ import pazone.ashot.util.ImageTool;
 public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
         implements ScreenshotTaker, AshotScreenshotTaker<T>
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScreenshotTaker.class);
-
     private final IWebDriverProvider webDriverProvider;
     private final IScreenshotFileNameGenerator screenshotFileNameGenerator;
     private final AshotFactory<T> ashotFactory;
@@ -60,26 +51,6 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
     public BufferedImage takeViewportScreenshot() throws IOException
     {
         return ImageTool.toBufferedImage(takeScreenshotAsByteArray());
-    }
-
-    @Override
-    public Path takeScreenshot(Path screenshotFilePath) throws IOException
-    {
-        byte[] screenshotData = takeScreenshotAsByteArray();
-        if (screenshotData.length > 0)
-        {
-            Path parent = screenshotFilePath.getParent();
-            if (parent != null)
-            {
-                FileUtils.forceMkdir(parent.toFile());
-            }
-            Files.write(screenshotFilePath, screenshotData);
-
-            LOGGER.atInfo().addArgument(screenshotFilePath::toAbsolutePath).log("Screenshot was taken: {}");
-
-            return screenshotFilePath;
-        }
-        return null;
     }
 
     @Override
@@ -117,11 +88,6 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
     protected String generateScreenshotFileName(String screenshotName)
     {
         return screenshotFileNameGenerator.generateScreenshotFileName(screenshotName);
-    }
-
-    protected byte[] takeScreenshotAsByteArray()
-    {
-        return webDriverProvider.getUnwrapped(TakesScreenshot.class).getScreenshotAs(OutputType.BYTES);
     }
 
     protected IWebDriverProvider getWebDriverProvider()

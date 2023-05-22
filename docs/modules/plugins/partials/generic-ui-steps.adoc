@@ -1,3 +1,41 @@
+=== Taking screenshot steps
+==== Take screenshot
+
+Takes a screenshot and publish it to the report.
+
+[source,gherkin]
+----
+When I take screenshot
+----
+
+==== Take screenshot and save it to the file
+
+Takes a screenshot and saves it to the file at the specified path.
+
+TIP: The full path to the file with the taken screenshot is posted to logs and report.
+
+[source,gherkin]
+----
+When I take screenshot and save it to file at path `$screenshotFilePath`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+When I take screenshot and save it to folder `$screenshotFilePath`
+----
+
+* `$screenshotFilePath` - The path to the file to save the screenshot, the allowed values are:
++
+** an absolute path to the file, e.g. `C:\Windows\screenshot.png`;
+** a relative path (it is resolved from the current working directory, e.g. `screenshot.png`.
+
+.Take a screenshot and save it to the file
+[source,gherkin]
+----
+When I take screenshot and save it to file at path `${screenshot-directory}/start-page.png`
+----
+
 === Wait for element appearance
 
 Waits for appearance of the element by the locator.
@@ -392,36 +430,6 @@ Then elements located $locator are sorted by text in $sortingOrder order
 Given I am on page with URL `https://grocery.by`
 When I click on element located by `id(a-z)`
 Then elements located by `xpath(//span[@id='item-to-purchase'])` are sorted by text in ascending order
-----
-
-
-=== Take a screenshot
-
-Takes a screenshot and publish it to the report.
-
-[source,gherkin]
-----
-When I take screenshot
-----
-
-
-=== Take a screenshot and save it to the folder
-
-Takes a screenshot and saves it to the default folder defined by user.
-
-TIP: The full path to a screenshot will be posted to logs and allure
-
-[source,gherkin]
-----
-When I take screenshot and save it to folder `$path`
-----
-
-* `$path` - The absolute or relative path to the folder to save taken screenshot.
-
-.Take a screenshot to a path
-[source,gherkin]
-----
-When I take screenshot and save it to folder `${screenshot-directory}/#{generate(Ancient.god)}.png`
 ----
 
 === Scan barcode

@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.applitools.eyes.Padding;
-import com.applitools.eyes.TestResults;
 import com.applitools.eyes.selenium.fluent.SeleniumCheckSettings;
 import com.applitools.eyes.selenium.fluent.Target;
 
@@ -34,6 +33,7 @@ import org.vividus.selenium.WebDriverUtils;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.visual.eyes.factory.UfgEyesFactory;
+import org.vividus.visual.eyes.model.ApplitoolsTestResults;
 import org.vividus.visual.eyes.model.ApplitoolsVisualCheck;
 import org.vividus.visual.eyes.model.UfgApplitoolsVisualCheckResult;
 import org.vividus.visual.eyes.ufg.UfgEyes;
@@ -58,7 +58,7 @@ public class UfgVisualTestingService implements VisualTestingService<UfgApplitoo
     public UfgApplitoolsVisualCheckResult run(ApplitoolsVisualCheck applitoolsVisualCheck)
     {
         UfgEyes eyes = eyesFactory.createEyes(applitoolsVisualCheck);
-        List<TestResults> testResults = List.of();
+        List<ApplitoolsTestResults> testResults = List.of();
 
         eyes.open(webDriverProvider.getUnwrapped(RemoteWebDriver.class),
                 applitoolsVisualCheck.getConfiguration().getAppName(), applitoolsVisualCheck.getBaselineName());
@@ -95,11 +95,11 @@ public class UfgVisualTestingService implements VisualTestingService<UfgApplitoo
         return WebDriverUtils.unwrap(element, RemoteWebElement.class);
     }
 
-    private UfgApplitoolsVisualCheckResult createVisualCheckResult(List<TestResults> testResults,
+    private UfgApplitoolsVisualCheckResult createVisualCheckResult(List<ApplitoolsTestResults> testResults,
             ApplitoolsVisualCheck applitoolsVisualCheck)
     {
         UfgApplitoolsVisualCheckResult visualCheckResult = new UfgApplitoolsVisualCheckResult(applitoolsVisualCheck);
-        boolean passed = testResults.stream().map(TestResults::isPassed).allMatch(testPassed -> testPassed);
+        boolean passed = testResults.stream().map(ApplitoolsTestResults::isPassed).allMatch(testPassed -> testPassed);
         visualCheckResult.setPassed(passed);
         visualCheckResult.setTestResults(testResults);
         return visualCheckResult;

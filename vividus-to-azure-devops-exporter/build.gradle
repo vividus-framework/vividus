@@ -2,7 +2,7 @@ project.description = 'VIVIDUS to Azure DevOps exporter'
 
 buildscript {
     ext {
-        springBootVersion = '2.7.11'
+        springBootVersion = '2.7.12'
     }
 
     repositories {
@@ -32,7 +32,7 @@ dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-exporter-commons')
 
-    implementation platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.15.0')
+    implementation platform(group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.15.1')
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml')
 
     testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test')

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,9 @@
 
 package org.vividus.selenium.screenshot;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -36,25 +29,16 @@ import static org.mockito.Mockito.withSettings;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
-
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.OutputType;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -65,14 +49,12 @@ import org.vividus.util.ResourceUtils;
 
 import pazone.ashot.AShot;
 
-@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
+@ExtendWith(MockitoExtension.class)
 class AbstractScreenshotTakerTests
 {
     private static final String AFTER_A_SHOT = "After_AShot";
 
     private static final String IMAGE_PNG = "image.png";
-
-    private final TestLogger testLogger = TestLoggerFactory.getTestLogger(AbstractScreenshotTaker.class);
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private TakesScreenshot takesScreenshot;
@@ -87,19 +69,9 @@ class AbstractScreenshotTakerTests
         verifyNoMoreInteractions(webDriverProvider, takesScreenshot);
     }
 
-    private void mockScreenshotTaking()
-    {
-        byte[] bytes = ResourceUtils.loadResourceAsByteArray(getClass(), IMAGE_PNG);
-
-        when(webDriverProvider.getUnwrapped(TakesScreenshot.class)).thenReturn(takesScreenshot);
-        when(takesScreenshot.getScreenshotAs(OutputType.BYTES)).thenReturn(bytes);
-    }
-
     @Test
     void shouldTakeViewportScreenshot() throws IOException
     {
-        mockScreenshotTaking();
-
         BufferedImage image = testScreenshotTaker.takeViewportScreenshot();
 
         assertEquals(400, image.getWidth());
@@ -112,25 +84,6 @@ class AbstractScreenshotTakerTests
         String screenshotName = "fileName";
         testScreenshotTaker.generateScreenshotFileName(screenshotName);
         verify(screenshotFileNameGenerator).generateScreenshotFileName(screenshotName);
-    }
-
-    @Test
-    void shouldNotPublishEmptyScreenshotData(@TempDir Path path) throws IOException
-    {
-        testScreenshotTaker.screenshot = new byte[0];
-        assertNull(testScreenshotTaker.takeScreenshot(path.resolve(IMAGE_PNG)));
-        assertThat(testLogger.getLoggingEvents(), empty());
-    }
-
-    @Test
-    void shouldPublishScreenshot(@TempDir Path path) throws IOException
-    {
-        testScreenshotTaker.screenshot = new byte[1];
-        Path screenshotPath = testScreenshotTaker.takeScreenshot(path.resolve(IMAGE_PNG));
-        assertTrue(Files.exists(screenshotPath));
-        assertArrayEquals(testScreenshotTaker.screenshot, Files.readAllBytes(screenshotPath));
-        assertThat(testLogger.getLoggingEvents(), equalTo(List.of(
-                info("Screenshot was taken: {}", screenshotPath.toAbsolutePath()))));
     }
 
     @Test
@@ -215,8 +168,6 @@ class AbstractScreenshotTakerTests
 
     private static class TestScreenshotTaker extends AbstractScreenshotTaker<ScreenshotParameters>
     {
-        private byte[] screenshot;
-
         TestScreenshotTaker(IWebDriverProvider webDriverProvider,
                 IScreenshotFileNameGenerator screenshotFileNameGenerator,
                 AshotFactory<ScreenshotParameters> ashotFactory, ScreenshotDebugger screenshotDebugger)
@@ -231,9 +182,9 @@ class AbstractScreenshotTakerTests
         }
 
         @Override
-        protected byte[] takeScreenshotAsByteArray()
+        public byte[] takeScreenshotAsByteArray()
         {
-            return screenshot == null ? super.takeScreenshotAsByteArray() : screenshot;
+            return ResourceUtils.loadResourceAsByteArray(getClass(), IMAGE_PNG);
         }
     }
 }

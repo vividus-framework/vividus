@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,19 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
         else
         {
             return Stream.of(StringUtils.split(byRowIndexes, ';'))
-                    .mapToInt(Integer::parseInt)
+                    .flatMapToInt(range ->
+                    {
+                        String[] rangeBounds = StringUtils.split(range, "-", 2);
+                        int startInclusive = Integer.parseInt(rangeBounds[0].trim());
+                        if (rangeBounds.length == 1)
+                        {
+                            return IntStream.of(startInclusive);
+                        }
+                        int endInclusive = Integer.parseInt(rangeBounds[1].trim());
+                        isTrue(startInclusive <= endInclusive, "'byRowIndexes' has invalid range of indexes: %s."
+                                + " The start index must be less than or equal to the end index.", range);
+                        return IntStream.rangeClosed(startInclusive, endInclusive);
+                    })
                     .mapToObj(rows::get)
                     .collect(Collectors.toList());
         }

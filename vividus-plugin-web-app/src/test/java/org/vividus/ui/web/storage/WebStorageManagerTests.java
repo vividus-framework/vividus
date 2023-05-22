@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -52,22 +54,35 @@ class WebStorageManagerTests
     @InjectMocks private WebStorageManager webStorageManager;
 
     @Test
-    void shouldGetLocalStorageItemForSafariBrowser()
+    void shouldGetLocalStorageItemForSafari()
     {
-        mockDriver(Browser.SAFARI, null);
+        mockDriver(Browser.SAFARI);
         when(javascriptActions.executeScript("return window.localStorage.getItem(arguments[0])", KEY)).thenReturn(
                 VALUE);
         String storageItem = webStorageManager.getStorage(StorageType.LOCAL).getItem(KEY);
         assertEquals(VALUE, storageItem);
     }
 
+    @CsvSource({
+            "SESSION, sessionStorage",
+            "LOCAL,   localStorage"
+    })
+    @ParameterizedTest
+    void shouldSetStorageItemForIE(StorageType storageType, String jsStorageName)
+    {
+        mockDriver(Browser.IE);
+        webStorageManager.getStorage(storageType).setItem(KEY, VALUE);
+        verify(javascriptActions).executeScript("window." + jsStorageName + ".setItem(arguments[0], arguments[1])", KEY,
+                VALUE);
+    }
+
     @SuppressWarnings("try")
     @Test
-    void shouldGetLocalStorageItemForNonSafariBrowserAndWithWebStorageSupport()
+    void shouldGetLocalStorageItemForFirefox()
     {
         Map<Class<?>, Object> constructedMocks = new HashMap<>();
 
-        RemoteWebDriver driver = mockDriver(Browser.IE, true);
+        RemoteWebDriver driver = mockDriver(Browser.FIREFOX);
         try (
             var remoteExecuteMethodMockedConstruction = mockConstruction(RemoteExecuteMethod.class, (mock, context) -> {
                 assertEquals(1, context.getCount());
@@ -88,30 +103,12 @@ class WebStorageManagerTests
         }
     }
 
-    @Test
-    void shouldSetLocalStorageItemForNonSafariBrowserAndWithoutWebStorageSupport()
-    {
-        mockDriver(Browser.CHROME, false);
-        webStorageManager.getStorage(StorageType.LOCAL).setItem(KEY, VALUE);
-        verify(javascriptActions).executeScript("window.localStorage.setItem(arguments[0], arguments[1])", KEY, VALUE);
-    }
-
-    @Test
-    void shouldSetLocalStorageItemForNonSafariBrowserAndWithUnknownWebStorageSupport()
-    {
-        mockDriver(Browser.FIREFOX, null);
-        webStorageManager.getStorage(StorageType.SESSION).setItem(KEY, VALUE);
-        verify(javascriptActions).executeScript("window.sessionStorage.setItem(arguments[0], arguments[1])", KEY,
-                VALUE);
-    }
-
-    private RemoteWebDriver mockDriver(Browser browser, Boolean supportWebStorage)
+    private RemoteWebDriver mockDriver(Browser browser)
     {
         RemoteWebDriver driver = mock(RemoteWebDriver.class);
         when(webDriverProvider.getUnwrapped(RemoteWebDriver.class)).thenReturn(driver);
         MutableCapabilities capabilities = new MutableCapabilities();
         capabilities.setCapability(CapabilityType.BROWSER_NAME, browser.browserName());
-        capabilities.setCapability(CapabilityType.SUPPORTS_WEB_STORAGE, supportWebStorage);
         when(driver.getCapabilities()).thenReturn(capabilities);
         return driver;
     }
