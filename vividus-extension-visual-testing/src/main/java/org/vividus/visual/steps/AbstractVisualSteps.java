@@ -45,7 +45,7 @@ public abstract class AbstractVisualSteps
         this.softAssert = softAssert;
     }
 
-    protected <R extends VisualCheckResult, T extends AbstractVisualCheck> Optional<R>
+    protected <T extends AbstractVisualCheck, R extends VisualCheckResult> Optional<R>
             execute(Supplier<T> visualCheckFactory, Function<T, R> checkResultProvider)
     {
         Optional<SearchContext> searchContext = uiContext.getOptionalSearchContext();
@@ -70,7 +70,7 @@ public abstract class AbstractVisualSteps
         execute(visualCheckFactory, checkResultProvider, vc -> { });
     }
 
-    private <R extends VisualCheckResult, T extends AbstractVisualCheck> Optional<R> execute(
+    private <T extends AbstractVisualCheck, R extends VisualCheckResult> Optional<R> execute(
             Supplier<T> visualCheckFactory, Function<T, R> checkResultProvider, Consumer<T> visualCheckConfigurer)
     {
         T visualCheck = visualCheckFactory.get();

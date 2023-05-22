@@ -131,9 +131,8 @@ class ImageVisualTestingServiceTests
             () -> assertEquals(BATCH_URL, result.getBatchUrl()),
             () -> assertEquals(STEP_EDITOR_URL, result.getStepUrl()),
             () -> assertTrue(result.isPassed()),
-            () -> assertEquals(AccessibilityLevel.AA, accessibilityResults.getLevel()),
             () -> assertEquals("passed", accessibilityResults.getStatus()),
-            () -> assertEquals("WCAG 2.0", accessibilityResults.getVersion()),
+            () -> assertEquals("WCAG 2.0 - AA", accessibilityResults.getGuideline()),
             () -> assertEquals(STEP_EDITOR_URL + "?accessibility=true", accessibilityResults.getUrl())
         );
     }

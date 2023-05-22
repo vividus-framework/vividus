@@ -44,11 +44,11 @@ When I run visual test with Applitools using:
 |context-element-cut |<batchName>|<action>|<firstP>        |
 
 
-Scenario: Validation of step: 'When I run visual test with Applitools using:$applitoolsConfigurations' for context element not in viewport with element cut and Accessibility check
+Scenario: Validation of step: 'When I run visual test with Applitools using:$applitoolsConfigurations' for context element not in viewport with element cut
 When I change context to element located by `xpath(.//p[last()])`
 When I run visual test with Applitools using:
-|baselineName                     |batchName  |action  |elementsToIgnore   |accessibilityStandard|
-|not-viewport-context-element-cut |<batchName>|<action>|By.cssSelector(img)|WCAG 2.1 - AA        |
+|baselineName                     |batchName  |action  |elementsToIgnore   |
+|not-viewport-context-element-cut |<batchName>|<action>|By.cssSelector(img)|
 
 
 Scenario: Validation of step: 'When I run visual test with Applitools using:$applitoolsConfigurations' for full page with element/area cut

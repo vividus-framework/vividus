@@ -36,10 +36,8 @@ public abstract class AbstractApplitoolsSteps extends AbstractVisualSteps
         AccessibilityCheckResult accessibilityStatus = results.getAccessibilityCheckResult();
         if (accessibilityStatus != null)
         {
-            getSoftAssert().assertTrue(
-                    String.format("%s - %s accessibility check for test: %s", accessibilityStatus.getVersion(),
-                            accessibilityStatus.getLevel(), results.getTestIdentifier()),
-                    accessibilityStatus.isPassed());
+            getSoftAssert().assertTrue(String.format("%s accessibility check for test: %s",
+                    accessibilityStatus.getGuideline(), results.getTestIdentifier()), accessibilityStatus.isPassed());
         }
     }
 }

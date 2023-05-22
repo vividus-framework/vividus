@@ -45,10 +45,9 @@ class AccessibilityCheckResultTests
 
         AccessibilityCheckResult check = new AccessibilityCheckResult("https://accessibility-testing.com", status);
 
-        assertEquals(name, check.getVersion());
+        assertEquals(name + " - AA", check.getGuideline());
         assertEquals(passed, check.isPassed());
         assertEquals("https://accessibility-testing.com?accessibility=true", check.getUrl());
         assertEquals(statusAsString, check.getStatus());
-        assertEquals(AccessibilityLevel.AA, check.getLevel());
     }
 }

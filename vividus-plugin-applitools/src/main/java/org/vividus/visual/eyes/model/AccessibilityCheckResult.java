@@ -18,7 +18,6 @@ package org.vividus.visual.eyes.model;
 
 import java.net.URI;
 
-import com.applitools.eyes.AccessibilityLevel;
 import com.applitools.eyes.AccessibilityStatus;
 import com.applitools.eyes.SessionAccessibilityStatus;
 
@@ -26,24 +25,24 @@ import org.apache.hc.core5.net.URIBuilder;
 
 public class AccessibilityCheckResult
 {
+    private static final String GUIDELINE_FORMAT = "%s - %s";
+
     private final String url;
     private final AccessibilityStatus status;
-    private final AccessibilityLevel level;
-    private final String version;
+    private final String guideline;
 
     public AccessibilityCheckResult(String url, SessionAccessibilityStatus status)
     {
         this.url = new URIBuilder(URI.create(url)).addParameter("accessibility", "true").toString();
         this.status = status.getStatus();
-        this.level = status.getLevel();
 
         switch (status.getVersion())
         {
             case WCAG_2_0:
-                this.version = "WCAG 2.0";
+                this.guideline = String.format(GUIDELINE_FORMAT, "WCAG 2.0", status.getLevel());
                 break;
             case WCAG_2_1:
-                this.version = "WCAG 2.1";
+                this.guideline = String.format(GUIDELINE_FORMAT, "WCAG 2.1", status.getLevel());
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported accessibility standard: " + status.getVersion());
@@ -65,13 +64,8 @@ public class AccessibilityCheckResult
         return status == AccessibilityStatus.Passed;
     }
 
-    public AccessibilityLevel getLevel()
+    public String getGuideline()
     {
-        return level;
-    }
-
-    public String getVersion()
-    {
-        return version;
+        return guideline;
     }
 }

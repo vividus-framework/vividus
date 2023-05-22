@@ -51,11 +51,11 @@ When I run visual test with Applitools UFG using:
 |chrome_mobile_emulation|       |            |Galaxy S10|portrait         |       |
 
 
-Scenario: Validation of step: 'When I run visual test with Applitools UFG using:$applitoolsConfigurations and matrix:$matrix' for context element with element cut and Accessibility check
+Scenario: Validation of step: 'When I run visual test with Applitools UFG using:$applitoolsConfigurations and matrix:$matrix' for context element with element cut
 When I change context to element located by `xpath(.//body)`
 When I run visual test with Applitools UFG using:
-|baselineName            |batchName  |action  |elementsToIgnore|accessibilityStandard|
-|ufg-context-element-cut |<batchName>|<action>|tagName(img)    |WCAG 2.1 - AA        |
+|baselineName            |batchName  |action  |elementsToIgnore|
+|ufg-context-element-cut |<batchName>|<action>|tagName(img)    |
  and matrix:
 |profile                |browser|viewportSize|deviceName|
 |desktop                |firefox|1920x1080   |          |

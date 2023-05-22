@@ -16,6 +16,7 @@
 
 package org.vividus.visual.eyes.model;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,7 +38,7 @@ public class ApplitoolsTestResults
     private final String os;
     private final String browser;
     private final RectangleSize viewport;
-    private String device = "";
+    private Optional<String> device = Optional.empty();
     private final String url;
     private AccessibilityCheckResult accessibilityCheckResult;
 
@@ -68,18 +69,18 @@ public class ApplitoolsTestResults
 
         if (renderInfo.getIosDeviceInfo() != null)
         {
-            this.device = renderInfo.getIosDeviceInfo().getDeviceName();
+            this.device = Optional.of(renderInfo.getIosDeviceInfo().getDeviceName());
         }
         else if (renderInfo.getEmulationInfo() != null)
         {
-            this.device = renderInfo.getEmulationInfo().getDeviceName();
+            this.device = Optional.of(renderInfo.getEmulationInfo().getDeviceName());
         }
     }
 
     public String getTestIdentifier()
     {
         Stream<String> parameters = device.isEmpty() ? Stream.of(name, browser, viewport.toString())
-                : Stream.of(name, device, os, browser);
+                : Stream.of(name, getDevice(), os, browser);
         return parameters.filter(StringUtils::isNoneEmpty).collect(Collectors.joining(" "));
     }
 
@@ -115,7 +116,7 @@ public class ApplitoolsTestResults
 
     public String getDevice()
     {
-        return device;
+        return device.orElse("");
     }
 
     public String getUrl()
