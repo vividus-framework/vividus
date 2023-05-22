@@ -20,6 +20,7 @@
     <#assign compare = result.actionType.name() != "ESTABLISH">
     <#assign hasBaseline = result.baseline?hasContent>
         <h3>Baseline name: ${result.baselineName}</h3>
+        <@custom_section />
         <#if compare>
             <div class="col-md">
                 <#if hasBaseline>
@@ -95,6 +96,8 @@
 </#macro>
 
 <#macro custom_css>
+</#macro>
+<#macro custom_section>
 </#macro>
 <#macro custom_controls>
 </#macro>

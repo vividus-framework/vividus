@@ -93,7 +93,7 @@ class UfgEyesTests
         ApplitoolsTestResults result = results.get(0);
         assertTrue(result.isPassed());
         assertEquals(testResults.getName(), result.getName());
-        assertEquals(testResults.getStatus(), result.getStatus());
+        assertEquals("passed", result.getStatus());
         assertEquals(testResults.getHostOS(), result.getOs());
         assertEquals(testResults.getHostApp(), result.getBrowser());
         assertEquals(testResults.getHostDisplaySize(), result.getViewport());

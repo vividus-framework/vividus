@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ public class ApplitoolsVisualCheckResult extends VisualCheckResult
 {
     private String stepUrl;
     private String batchUrl;
+    private ApplitoolsTestResults applitoolsTestResults;
 
     public ApplitoolsVisualCheckResult(ApplitoolsVisualCheck visualCheck)
     {
@@ -46,5 +47,15 @@ public class ApplitoolsVisualCheckResult extends VisualCheckResult
     public void setBatchUrl(String batchUrl)
     {
         this.batchUrl = batchUrl;
+    }
+
+    public ApplitoolsTestResults getApplitoolsTestResults()
+    {
+        return applitoolsTestResults;
+    }
+
+    public void setApplitoolsTestResults(ApplitoolsTestResults applitoolsTestResults)
+    {
+        this.applitoolsTestResults = applitoolsTestResults;
     }
 }

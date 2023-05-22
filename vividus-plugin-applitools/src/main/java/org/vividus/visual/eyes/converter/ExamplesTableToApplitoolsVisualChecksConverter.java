@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import com.applitools.eyes.AccessibilitySettings;
 import com.applitools.eyes.BatchInfo;
 import com.applitools.eyes.MatchLevel;
 import com.applitools.eyes.RectangleSize;
@@ -60,11 +61,12 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     private static final String BASELINE_ENV_NAME_OPTION = "baselineEnvName";
     private static final String ELEMENTS_TO_IGNORE_OPTION = "elementsToIgnore";
     private static final String AREAS_TO_IGNORE_OPTION = "areasToIgnore";
+    private static final String ACCESSIBILITY_STANDARD_OPTION = "accessibilityStandard";
 
     private static final List<String> SUPPORTED_OPTIONS = List.of(BASELINE_NAME_OPTION, ACTION_OPTION,
             EXECUTE_API_KEY_OPTION, READ_API_KEY_OPTION, HOST_APP_OPTION, HOST_OS_OPTION, VIEWPORT_SIZE_OPTION,
             MATCH_LEVEL_OPTION, SERVER_URI_OPTION, APP_NAME_OPTION, BATCH_NAME_OPTION, BASELINE_ENV_NAME_OPTION,
-            ELEMENTS_TO_IGNORE_OPTION, AREAS_TO_IGNORE_OPTION);
+            ELEMENTS_TO_IGNORE_OPTION, AREAS_TO_IGNORE_OPTION, ACCESSIBILITY_STANDARD_OPTION);
 
     private String executeApiKey;
     private String readApiKey;
@@ -119,7 +121,8 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
                 params.valueAs(BASELINE_ENV_NAME_OPTION, String.class, baselineEnvName),
                 params.valueAs(READ_API_KEY_OPTION, String.class, readApiKey),
                 params.valueAs(ELEMENTS_TO_IGNORE_OPTION, targetType, Set.of()),
-                params.valueAs(AREAS_TO_IGNORE_OPTION, targetType, Set.of())
+                params.valueAs(AREAS_TO_IGNORE_OPTION, targetType, Set.of()),
+                params.valueAs(ACCESSIBILITY_STANDARD_OPTION, AccessibilitySettings.class, null)
             );
 
             return check;
@@ -131,7 +134,7 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     {
         ApplitoolsVisualCheck check = createCheck(batchName, baselineName, action);
         configureEyes(check, executeApiKey, hostApp, hostOS, viewportSize, matchLevel, serverUri, appName,
-                baselineEnvName, readApiKey, Set.of(), Set.of());
+                baselineEnvName, readApiKey, Set.of(), Set.of(), null);
         return check;
     }
 
@@ -143,7 +146,7 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     @SuppressWarnings("paramNum")
     private void configureEyes(ApplitoolsVisualCheck check, String executeApiKey, String hostApp, String hostOS,
             Dimension viewportSize, MatchLevel matchLevel, URI serverUri, String appName, String baselineEnvName,
-            String readApiKey, Set<Locator> elements, Set<Locator> areas)
+            String readApiKey, Set<Locator> elements, Set<Locator> areas, AccessibilitySettings settings)
     {
         check.setScreenshotParameters(screenshotParametersFactory.create());
         check.setReadApiKey(readApiKey);
@@ -162,7 +165,8 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
                 .setMatchLevel(matchLevel)
                 .setServerUrl(Optional.ofNullable(serverUri).map(URI::toString).orElse(null))
                 .setAppName(appName)
-                .setBaselineEnvName(baselineEnvName);
+                .setBaselineEnvName(baselineEnvName)
+                .setAccessibilityValidation(settings);
 
         boolean saveTests = check.getAction() == VisualActionType.ESTABLISH;
         configuration.setSaveFailedTests(saveTests);

@@ -247,7 +247,7 @@ include::partial$applitools-configuration.adoc[]
 
 include::partial$ufg-applitools-configuration.adoc[]
 
-.Perform Perform Ultrafast Grid check using custom configuration
+.Perform Ultrafast Grid check using custom configuration
 [source,gherkin]
 ----
 When I run visual test with Applitools UFG using:
@@ -258,4 +258,17 @@ When I run visual test with Applitools UFG using:
 |desktop                |firefox|1920x1080   |          |                 |       |
 |ios                    |       |            |iPhone X  |portrait         |latest |
 |chrome_mobile_emulation|       |            |Galaxy S10|landscape        |       |
+----
+
+.Perform Ultrafast Grid check combined with Accessibility check
+[source,gherkin]
+----
+When I run visual test with Applitools UFG using:
+|baselineName            |batchName        |action   |accessibilityStandard|
+|Check site accessibility|Accessibility Run|ESTABLISH|WCAG 2.1 - AA        |
+ and matrix:
+|profile                |browser|viewportSize|deviceName|
+|desktop                |firefox|1920x1080   |          |
+|ios                    |       |            |iPhone X  |
+|chrome_mobile_emulation|       |            |Galaxy S10|
 ----
