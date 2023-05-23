@@ -3,7 +3,7 @@
 <html lang="en-us">
 <head>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="../../webjars/highlight.js.9.12.0/highlight.min.js" />
+    <link rel="stylesheet" href="../../webjars/highlight.js.11.7.0/highlight.min.js" />
     <link
             rel="stylesheet"
             type="text/css"
