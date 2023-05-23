@@ -1,6 +1,7 @@
 * xref:index.adoc[What is VIVIDUS]
 * xref:glossary.adoc[Glossary]
 * xref:getting-started.adoc[Getting Started]
-* xref:tests-configuration.adoc[Configuration]
+* Configuration
+** xref:tests-configuration.adoc[Tests Configuration]
 ** xref:secrets-management.adoc[Secrets Management]
 ** xref:reporting.adoc[Reporting]
