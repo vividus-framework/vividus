@@ -22,7 +22,7 @@
     </#if>
     </div>
 
-    <script src="../../webjars/highlight.js/9.12.0/highlight.min.js"></script>
+    <script src="../../webjars/highlight.js/11.7.0/highlight.min.js"></script>
     <script src="../../webjars/js-beautify/1.13.4/beautify-html.min.js"></script>
     <script type="text/javascript">
         (function() {
@@ -37,7 +37,7 @@
                         'extra_liners': []
                     });
             }
-            hljs.highlightBlock(code);
+            hljs.highlightElement(code);
         })();
     </script>
 </body>

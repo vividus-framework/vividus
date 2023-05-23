@@ -98,7 +98,7 @@
 
     <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
     <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <script src="../../webjars/highlight.js/9.12.0/highlight.min.js"></script>
+    <script src="../../webjars/highlight.js/11.7.0/highlight.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
             $("code[id='pretty-code']").each(function(i, e) {
@@ -107,7 +107,7 @@
                     var pretty =  JSON.stringify(JSON.parse(text), null, 2);
                     $(this).text(pretty);
                 }
-                hljs.highlightBlock(e);
+                hljs.highlightElement(e);
             });
         });
     </script>
