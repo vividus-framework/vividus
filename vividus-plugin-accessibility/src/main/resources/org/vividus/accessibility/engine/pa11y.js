@@ -12,6 +12,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with pa11y.  If not, see <https://www.gnu.org/licenses/>.
+//
+// Sources:
+// - https://github.com/pa11y/pa11y/blob/master/lib/runner.js
+// - https://github.com/pa11y/pa11y/blob/master/lib/runners/htmlcs.js
 
 'use strict';
 
@@ -19,13 +23,13 @@
 window.injectPa11y = function(window, options, done) {
 
 	if (options.verifyPage) {
-		var windowHtml = window.document.documentElement.outerHTML;
+		const windowHtml = window.document.documentElement.outerHTML;
 		if (!windowHtml.match(new RegExp(options.verifyPage))) {
 			return reportError('Page not verified - HTML did not contain: "' + options.verifyPage + '"');
 		}
 	}
 
-	var messageTypeMap = {
+	const issueTypeMap = {
 		1: 'error',
 		2: 'warning',
 		3: 'notice'
@@ -42,38 +46,38 @@ window.injectPa11y = function(window, options, done) {
 	}
 
 	function onCodeSnifferComplete() {
-		done(JSON.stringify(processMessages(window.HTMLCS.getMessages())));
+		done(JSON.stringify(processIssues(window.HTMLCS.getMessages())));
 	}
 
-	function processMessages(messages) {
+	function processIssues(issues) {
 		if (options.rootElement) {
-			messages = messages.filter(isMessageInTestArea);
+			issues = issues.filter(issue => isElementInTestArea(issue.element));
 		}
 
 		if (options.hideElements) {
-			messages = messages.filter(isElementOutsideHiddenArea);
+			issues = issues.filter(issue => isElementOutsideHiddenArea(issue.element));
 		}
 
 		if (options.elementsToCheck) {
-			messages = messages.filter(isElementInsideArea);
+			issues = issues.filter(issue => isElementInsideArea(issue.element));
 		}
-		return messages.map(processMessage).filter(isMessageWanted);
+		return issues.map(processIssue).filter(isIssueNotIgnored);
 	}
 
-	function processMessage(message) {
+	function processIssue(issue) {
 		return {
-			code: message.code,
-			context: processMessageHtml(message.element),
-			message: message.msg,
-			type: (messageTypeMap[message.type] || 'unknown'),
-			typeCode: message.type,
-			selector: getCssSelectorForElement(message.element)
+			code: issue.code,
+			context: processIssueHtml(issue.element),
+			message: issue.msg,
+			type: (issueTypeMap[issue.type] || 'unknown'),
+			typeCode: issue.type,
+			selector: getElementSelector(issue.element)
 		};
 	}
 
-	function processMessageHtml(element) {
-		var outerHTML = null;
-		var innerHTML = null;
+	function processIssueHtml(element) {
+		let outerHTML = null;
+		let innerHTML = null;
 		if (!element.outerHTML) {
 			return outerHTML;
 		}
@@ -88,13 +92,12 @@ window.injectPa11y = function(window, options, done) {
 		return outerHTML;
 	}
 
-	function getCssSelectorForElement(element, selectorParts) {
-		selectorParts = selectorParts || [];
+	function getElementSelector(element, selectorParts = []) {
 		if (isElementNode(element)) {
-			var identifier = buildElementIdentifier(element);
+			const identifier = buildElementIdentifier(element);
 			selectorParts.unshift(identifier);
 			if (!element.id && element.parentNode) {
-				return getCssSelectorForElement(element.parentNode, selectorParts);
+				return getElementSelector(element.parentNode, selectorParts);
 			}
 		}
 		return selectorParts.join(' > ');
@@ -102,101 +105,63 @@ window.injectPa11y = function(window, options, done) {
 
 	function buildElementIdentifier(element) {
 		if (element.id) {
-			return '#' + element.id;
+			return `#${element.id}`;
 		}
-		var identifier = element.tagName.toLowerCase();
+		let identifier = element.tagName.toLowerCase();
 		if (!element.parentNode) {
 			return identifier;
 		}
-		var siblings = getSiblings(element);
-		var childIndex = siblings.indexOf(element);
+		const siblings = getSiblings(element);
+		const childIndex = siblings.indexOf(element);
 		if (!isOnlySiblingOfType(element, siblings) && childIndex !== -1) {
-			identifier += ':nth-child(' + (childIndex + 1) + ')';
+			identifier += `:nth-child(${childIndex + 1})`;
 		}
 		return identifier;
 	}
 
 	function getSiblings(element) {
-		return Array.prototype.slice.call(element.parentNode.childNodes).filter(isElementNode);
+		return [...element.parentNode.childNodes].filter(isElementNode);
 	}
 
 	function isOnlySiblingOfType(element, siblings) {
-		var siblingsOfType = siblings.filter(function(sibling) {
+		const siblingsOfType = siblings.filter(sibling => {
 			return (sibling.tagName === element.tagName);
 		});
 		return (siblingsOfType.length <= 1);
 	}
 
 	function isElementNode(element) {
-		return (element.nodeType === 1);
+		return (element.nodeType === window.Node.ELEMENT_NODE);
 	}
 
-	function isMessageInTestArea(message) {
-		var rootElement = window.document.querySelector(options.rootElement);
-
-		if (rootElement) {
-			return isElementWithinTestArea(message.element, rootElement);
-		} else {
-			return true;
-		}
+	function isElementInTestArea(element) {
+		const rootElement = window.document.querySelector(options.rootElement);
+		return (rootElement ? rootElement.contains(element) : true);
 	}
 
-	function isElementOutsideHiddenArea(message) {
-		var hiddenSelectors = options.hideElements.split(',');
-		var element = message.element;
-		var elementsWithinHiddenSelectors = hiddenSelectors.filter(function(selector) {
-			return hiddenAreasContainsElement(element, selector);
+	function isElementOutsideHiddenArea(element) {
+		const hiddenElements = [...window.document.querySelectorAll(options.hideElements)];
+		return !hiddenElements.some(hiddenElement => {
+			return hiddenElement.contains(element);
 		});
-		return elementsWithinHiddenSelectors.length ? false : true;
 	}
 
-	function isElementInsideArea(message) {
-		var selectors = options.elementsToCheck.split(',');
-		var element = message.element;
-		var elementsWithinSelectors = selectors.filter(function(selector) {
-			return hiddenAreasContainsElement(element, selector);
+	function isElementInsideArea(element) {
+		const elementsToCheck = [...window.document.querySelectorAll(options.elementsToCheck)];
+		return elementsToCheck.some(elementToCheck => {
+			return elementToCheck.contains(element);
 		});
-		return elementsWithinSelectors.length ? true : false;
 	}
 
-	function isElementWithinTestArea(child, parent) {
-		var node = child.parentNode;
-		while (node !== null) {
-			if (node === parent) {
-				return true;
-			}
-			node = node.parentNode;
-		}
-		return false;
-	}
-
-	function hiddenAreasContainsElement(element, hiddenSelectors) {
-		/* eslint complexity:["error", 5], max-depth:["error", 3] */
-		var hiddenElements = window.document.querySelectorAll(hiddenSelectors);
-
-		for (var i = 0; i < hiddenElements.length; i++) {
-			if (element.isEqualNode(hiddenElements[i])) {
-				return true;
-			}
-
-			var parent = element.parentNode;
-			while (parent) {
-				if (parent.isEqualNode(hiddenElements[i])) {
-					return true;
-				}
-				parent = parent.parentNode;
-			}
-		}
-	}
-
-	function isMessageWanted(message) {
+	function isIssueNotIgnored(issue) {
 		if (options.include) {
-			return options.include.indexOf(message.code) !== -1;
+			return options.include.indexOf(issue.code) !== -1;
 		}
-		if (options.ignore.indexOf(message.code) !== -1) {
+		// NOTE: Original code has issue.code.toLowerCase()
+		if (options.ignore.indexOf(issue.code) !== -1) {
 			return false;
 		}
-		if (options.ignore.indexOf(message.type) !== -1) {
+		if (options.ignore.indexOf(issue.type) !== -1) {
 			return false;
 		}
 		return true;
