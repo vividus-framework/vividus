@@ -267,8 +267,7 @@ jobs:
                                                 -Pvividus.batch-1.resource-include-patterns=ProxyStepsTests.story \
                                                 -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                 -Pvividus.selenium.grid.password=${SAUCELABS_KEY} \
-                                                -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com" \
-                                                -Pvividus.saucelabs.sauce-connect.use-latest-version=false
+                                                -Pvividus.saucelabs.sauce-connect.command-line-arguments="--proxy-localhost --no-ssl-bump-domains example.com"
         else
             echo No SAUCELABS_USER and/or SAUCELABS_KEY, SauceLabs system tests will be skipped
         fi
