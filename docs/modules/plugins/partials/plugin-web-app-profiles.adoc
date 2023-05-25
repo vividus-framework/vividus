@@ -161,7 +161,7 @@ WARNING: Default selenium grid URL is set to `selenium.grid.url=http://localhost
 .Run chrome in docker container
 [source,properties]
 ----
-confgiguraiton.profiles=web/docker,web/desktop/chrome
+configuraiton.profiles=web/docker,web/desktop/chrome
 ----
 
 === Headless
