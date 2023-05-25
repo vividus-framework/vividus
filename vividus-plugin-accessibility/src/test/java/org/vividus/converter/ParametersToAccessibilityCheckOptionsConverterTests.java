@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -60,16 +61,11 @@ import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.UiContext;
-import org.vividus.ui.web.action.ICssSelectorFactory;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class})
 class ParametersToAccessibilityCheckOptionsConverterTests
 {
-    private static final Locator LOCATOR = new Locator(WebLocatorType.ID, "id");
-
-    private static final String ROOT = "root";
-
     private static final String NOTICE = "notice";
 
     private static final String WARNING = "warning";
@@ -78,7 +74,6 @@ class ParametersToAccessibilityCheckOptionsConverterTests
             TestLoggerFactory.getTestLogger(ParametersToAccessibilityCheckOptionsConverter.class);
 
     @Mock private UiContext uiContext;
-    @Mock private ICssSelectorFactory cssSelectorFactory;
     @Mock private ISearchActions searchActions;
 
     @InjectMocks private ParametersToAccessibilityCheckOptionsConverter converter;
@@ -95,10 +90,10 @@ class ParametersToAccessibilityCheckOptionsConverterTests
                 () -> assertEquals(ViolationLevel.ERROR, checkOptions.getLevel()),
                 () -> assertEquals(List.of(WARNING, NOTICE), checkOptions.getIgnore()),
                 () -> assertNull(checkOptions.getRootElement()),
-                () -> assertNull(checkOptions.getHideElements()),
-                () -> assertNull(checkOptions.getElementsToCheck()),
+                () -> assertThat(checkOptions.getHideElements(), is(empty())),
+                () -> assertThat(checkOptions.getElementsToCheck(), is(empty())),
                 () -> assertNull(checkOptions.getInclude()));
-        verifyNoInteractions(cssSelectorFactory, searchActions);
+        verifyNoInteractions(searchActions);
         assertThat(LOGGER.getLoggingEvents(), empty());
     }
 
@@ -107,19 +102,13 @@ class ParametersToAccessibilityCheckOptionsConverterTests
     {
         ExamplesTable table = mockTable(
                 "|standard|level|elementsToCheck |elementsToIgnore|violationsToIgnore|violationsToCheck|"
-            + "\n|WCAG2AA |error|By.id(id)       |By.id(id)       |toIgnore|         |toCheck          |");
+            + "\n|WCAG2AA |error|check           |ignore          |toIgnore          |toCheck          |");
         WebElement rootElement = mock(WebElement.class);
         when(uiContext.getSearchContext()).thenReturn(rootElement);
-        when(cssSelectorFactory.getCssSelector(rootElement)).thenReturn(ROOT);
-        WebElement webElement = mock(WebElement.class);
-        when(searchActions.findElements(argThat(l -> {
-            Assertions.assertAll(
-                () -> assertEquals(WebLocatorType.ID, l.getLocatorType()),
-                () -> assertEquals(Visibility.ALL, l.getSearchParameters().getVisibility()));
-            return true;
-        }))).thenReturn(List.of(webElement)).thenReturn(List.of());
-        String selectors = "a, div";
-        when(cssSelectorFactory.getCssSelector(List.of(webElement))).thenReturn(selectors);
+        WebElement checkElement = mock(WebElement.class);
+        mockFindElement("check", List.of(checkElement));
+        String ignoreKey = "ignore";
+        mockFindElement(ignoreKey, List.of());
 
         AccessibilityCheckOptions checkOptions = converter.convertValue(table.getRowAsParameters(0),
                 AccessibilityCheckOptions.class);
@@ -128,11 +117,36 @@ class ParametersToAccessibilityCheckOptionsConverterTests
                 () -> assertEquals("WCAG2AA", checkOptions.getStandard()),
                 () -> assertEquals(ViolationLevel.ERROR, checkOptions.getLevel()),
                 () -> assertEquals(List.of("toIgnore", WARNING, NOTICE), checkOptions.getIgnore()),
-                () -> assertEquals(ROOT, checkOptions.getRootElement()),
-                () -> assertNull(checkOptions.getHideElements()),
-                () -> assertEquals(selectors, checkOptions.getElementsToCheck()),
-                () -> assertEquals(List.of(), checkOptions.getInclude()));
-        assertThat(LOGGER.getLoggingEvents(), is(List.of(info("No elements found by {}", LOCATOR))));
+                () -> assertEquals(rootElement, checkOptions.getRootElement()),
+                () -> assertEquals(List.of(checkElement), checkOptions.getElementsToCheck()),
+                () -> assertEquals(List.of(), checkOptions.getHideElements()),
+                () -> assertEquals(List.of("toCheck"), checkOptions.getInclude()));
+        Locator locator = new Locator(WebLocatorType.ID, ignoreKey);
+        locator.getSearchParameters().setVisibility(Visibility.ALL);
+        assertThat(LOGGER.getLoggingEvents(), is(List.of(info("No elements found by {}", locator))));
+    }
+
+    @Test
+    void shouldSetElementsToCheckToNullIfNoElementsByLocatorsWereNotFound()
+    {
+        ExamplesTable table = mockTable(
+                "|standard|level|elementsToCheck |"
+            + "\n|WCAG2AA |error|empty-check     |");
+
+        mockFindElement("empty-check", List.of());
+
+        AccessibilityCheckOptions checkOptions = converter.convertValue(table.getRowAsParameters(0),
+                AccessibilityCheckOptions.class);
+
+        assertNull(checkOptions.getElementsToCheck());
+    }
+
+    private void mockFindElement(String id, List<WebElement> webElements)
+    {
+        doReturn(webElements).when(searchActions)
+                .findElements(argThat(l -> id.equals(l.getSearchParameters().getValue())
+                        && WebLocatorType.ID.equals(l.getLocatorType())
+                        && Visibility.ALL.equals(l.getSearchParameters().getVisibility())));
     }
 
     @CsvSource({"|level|%n|error|, standard", "|standard|%n|wcag2a|, level"})
@@ -143,7 +157,7 @@ class ParametersToAccessibilityCheckOptionsConverterTests
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> converter.convertValue(row, AccessibilityCheckOptions.class));
         assertEquals(notSetParameterName + " should be set", exception.getMessage());
-        verifyNoInteractions(cssSelectorFactory, searchActions, uiContext);
+        verifyNoInteractions(searchActions, uiContext);
         assertThat(LOGGER.getLoggingEvents(), empty());
     }
 
@@ -151,7 +165,8 @@ class ParametersToAccessibilityCheckOptionsConverterTests
     {
         ParameterConverters parameterConverters = new ParameterConverters();
         parameterConverters.addConverters(new FluentEnumConverter(),
-                new FunctionalParameterConverter<String, Set<Locator>>(value -> Set.of(LOCATOR)) { });
+                new FunctionalParameterConverter<String, Set<Locator>>(value -> Set.of(new Locator(
+                        WebLocatorType.ID, value))) { });
         return new ExamplesTableFactory(new Keywords(), null, parameterConverters, new ParameterControls(),
                 new TableParsers(parameterConverters), new TableTransformers()).createExamplesTable(table);
     }

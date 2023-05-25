@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.vividus.converter;
-
-import static java.util.stream.Collectors.collectingAndThen;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -40,7 +38,6 @@ import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.UiContext;
-import org.vividus.ui.web.action.ICssSelectorFactory;
 
 public class ParametersToAccessibilityCheckOptionsConverter
     extends AbstractParameterConverter<Parameters, AccessibilityCheckOptions>
@@ -53,14 +50,11 @@ public class ParametersToAccessibilityCheckOptionsConverter
     private static final String STANDARD = "standard";
 
     private final UiContext uiContext;
-    private final ICssSelectorFactory cssSelectorFactory;
     private final ISearchActions searchActions;
 
-    public ParametersToAccessibilityCheckOptionsConverter(UiContext uiContext, ICssSelectorFactory cssSelectorFactory,
-            ISearchActions searchActions)
+    public ParametersToAccessibilityCheckOptionsConverter(UiContext uiContext, ISearchActions searchActions)
     {
         this.uiContext = uiContext;
-        this.cssSelectorFactory = cssSelectorFactory;
         this.searchActions = searchActions;
     }
 
@@ -96,30 +90,34 @@ public class ParametersToAccessibilityCheckOptionsConverter
         SearchContext context = uiContext.getSearchContext();
         if (context instanceof WebElement)
         {
-            options.setRootElement(cssSelectorFactory.getCssSelector((WebElement) context));
+            options.setRootElement((WebElement) context);
         }
         options.setIgnore(ignore);
         options.setInclude(violationsToCheck);
-        options.setElementsToCheck(generateCssSelector(elementsToCheck));
-        options.setHideElements(generateCssSelector(elementsToIgnore));
+        options.setElementsToCheck(findElements(elementsToCheck, true));
+        options.setHideElements(findElements(elementsToIgnore, false));
         options.setLevel(level);
         return options;
     }
 
-    private String generateCssSelector(Set<Locator> locator)
+    @SuppressWarnings("NoNullForCollectionReturn")
+    private List<WebElement> findElements(Set<Locator> locator, boolean nullOnEmpty)
     {
         if (locator.isEmpty())
         {
-            return null;
+            return List.of();
         }
-        return locator.stream()
-                      .map(s -> {
-                          s.getSearchParameters().setVisibility(Visibility.ALL);
-                          return s;
-                      })
-                      .map(this::findElementsToCheck)
-                      .flatMap(List::stream)
-                      .collect(collectingAndThen(Collectors.toList(), cssSelectorFactory::getCssSelector));
+
+        List<WebElement> elements = locator.stream()
+                                           .map(s -> {
+                                               s.getSearchParameters().setVisibility(Visibility.ALL);
+                                               return s;
+                                           })
+                                           .map(this::findElementsToCheck)
+                                           .flatMap(List::stream)
+                                           .collect(Collectors.toList());
+
+        return elements.isEmpty() && nullOnEmpty ? null : elements;
     }
 
     private List<WebElement> findElementsToCheck(Locator locator)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,9 @@ public class HtmlCsAccessibilityTestEngine implements AccessibilityTestEngine
     {
         String optionsJson = jsonUtils.toJson(options);
         String script = HTML_CS_JS + PA11Y_JS + "injectPa11y(window, " + optionsJson
-                + ", arguments[arguments.length - 1]);";
-        String result = webJavascriptActions.executeAsyncScript(script);
+                + ", arguments[0], arguments[1], arguments[2], arguments[arguments.length - 1]);";
+        String result = webJavascriptActions.executeAsyncScript(script, options.getRootElement(),
+                options.getElementsToCheck(), options.getHideElements());
         return jsonUtils.toObjectList(result, AccessibilityViolation.class);
     }
 }
