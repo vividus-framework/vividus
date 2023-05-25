@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.vividus.accessibility.engine.AccessibilityTestEngine;
 import org.vividus.accessibility.model.AccessibilityCheckOptions;
 import org.vividus.accessibility.model.AccessibilityStandard;
@@ -59,6 +60,7 @@ class AccessibilityStepsTests
     private static final String ASSERTION_MESSAGE =
             "Number of accessibility violations of level Warning and above at the page https://fus-ro.dah";
 
+    @Mock private WebElement elementToCheck;
     @Mock private AccessibilityTestEngine accessibilityTestEngine;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IAttachmentPublisher attachmentPublisher;
@@ -77,9 +79,9 @@ class AccessibilityStepsTests
     @Test
     void shouldExecuteAccessibilityTest()
     {
-        AccessibilityCheckOptions first = createOptions(WCAG2A, WARNING, null);
-        AccessibilityCheckOptions second = createOptions(WCAG2A, WARNING, "a");
-        AccessibilityCheckOptions third = createOptions(WCAG2A, WARNING, "");
+        AccessibilityCheckOptions first = createOptions(WCAG2A, WARNING, List.of());
+        AccessibilityCheckOptions second = createOptions(WCAG2A, WARNING, List.of(elementToCheck));
+        AccessibilityCheckOptions third = createOptions(WCAG2A, WARNING, null);
         List<AccessibilityCheckOptions> checkOptions = List.of(first, second, third);
         AccessibilityViolation warning = createViolation(WARNING, 2);
         AccessibilityViolation notice = createViolation(NOTICE, 1);
@@ -104,10 +106,11 @@ class AccessibilityStepsTests
                 eq(ASSERTION_MESSAGE),
                 eq(0L),
                 argThat(m -> MATCHER.equals(m.toString())));
+        ordered.verifyNoMoreInteractions();
     }
 
     private AccessibilityCheckOptions createOptions(AccessibilityStandard standard, ViolationLevel level,
-        String elementsToCheck)
+            List<WebElement> elementsToCheck)
     {
         AccessibilityCheckOptions options = new AccessibilityCheckOptions(standard);
         options.setElementsToCheck(elementsToCheck);

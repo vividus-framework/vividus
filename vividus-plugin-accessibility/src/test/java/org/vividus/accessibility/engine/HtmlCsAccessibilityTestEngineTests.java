@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.WebElement;
 import org.vividus.accessibility.model.AccessibilityCheckOptions;
 import org.vividus.accessibility.model.AccessibilityStandard;
 import org.vividus.accessibility.model.AccessibilityViolation;
@@ -44,6 +45,10 @@ class HtmlCsAccessibilityTestEngineTests
     private static final String PA11Y_JS =
             ResourceUtils.loadResource(HtmlCsAccessibilityTestEngine.class, "pa11y.js");
 
+    @Mock private WebElement rootElement;
+    @Mock private WebElement elementToCheck;
+    @Mock private WebElement elementToIgnore;
+
     @Mock private WebJavascriptActions webJavaScriptActions;
 
     @InjectMocks private HtmlCsAccessibilityTestEngine engine;
@@ -52,16 +57,16 @@ class HtmlCsAccessibilityTestEngineTests
     void shouldExecuteAccessibilityCheck()
     {
         AccessibilityCheckOptions options = new AccessibilityCheckOptions(AccessibilityStandard.WCAG2AAA);
-        options.setHideElements("a,div");
+        options.setHideElements(List.of(elementToIgnore));
         options.setIgnore(List.of("error"));
         options.setInclude(List.of("no_error"));
         options.setLevel(ViolationLevel.ERROR);
-        options.setRootElement("html");
-        options.setElementsToCheck("body");
+        options.setRootElement(rootElement);
+        options.setElementsToCheck(List.of(elementToCheck));
         when(webJavaScriptActions.executeAsyncScript(HTML_CS_JS + PA11Y_JS
-                + "injectPa11y(window, {\"standard\":\"WCAG2AAA\",\"ignore\":[\"error\"],\"include\":[\"no_error\"],"
-                + "\"rootElement\":\"html\",\"elementsToCheck\":\"body\",\"hideElements\":\"a,div\"},"
-                + " arguments[arguments.length - 1]);"))
+                + "injectPa11y(window, {\"standard\":\"WCAG2AAA\",\"ignore\":[\"error\"],\"include\":[\"no_error\"]},"
+                + " arguments[0], arguments[1], arguments[2], arguments[arguments.length - 1]);",
+                rootElement, List.of(elementToCheck), List.of(elementToIgnore)))
             .thenReturn("[{\"code\":\"WCAG2AAA\","
                         + "\"context\":\"</a>\","
                         + "\"message\":\"BadPuppy\","

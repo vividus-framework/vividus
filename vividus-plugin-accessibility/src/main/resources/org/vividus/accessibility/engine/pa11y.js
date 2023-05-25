@@ -20,7 +20,7 @@
 'use strict';
 
 /* eslint-disable max-statements */
-window.injectPa11y = function(window, options, done) {
+window.injectPa11y = function(window, options, rootElement, elementsToCheck, elementsToIgnore, done) {
 
 	if (options.verifyPage) {
 		const windowHtml = window.document.documentElement.outerHTML;
@@ -50,15 +50,15 @@ window.injectPa11y = function(window, options, done) {
 	}
 
 	function processIssues(issues) {
-		if (options.rootElement) {
+		if (rootElement) {
 			issues = issues.filter(issue => isElementInTestArea(issue.element));
 		}
 
-		if (options.hideElements) {
+		if (elementsToIgnore.length !== 0) {
 			issues = issues.filter(issue => isElementOutsideHiddenArea(issue.element));
 		}
 
-		if (options.elementsToCheck) {
+		if (elementsToCheck.length !== 0) {
 			issues = issues.filter(issue => isElementInsideArea(issue.element));
 		}
 		return issues.map(processIssue).filter(isIssueNotIgnored);
@@ -135,19 +135,16 @@ window.injectPa11y = function(window, options, done) {
 	}
 
 	function isElementInTestArea(element) {
-		const rootElement = window.document.querySelector(options.rootElement);
 		return (rootElement ? rootElement.contains(element) : true);
 	}
 
 	function isElementOutsideHiddenArea(element) {
-		const hiddenElements = [...window.document.querySelectorAll(options.hideElements)];
-		return !hiddenElements.some(hiddenElement => {
-			return hiddenElement.contains(element);
+		return !elementsToIgnore.some(elementToIgnore => {
+			return elementToIgnore.contains(element);
 		});
 	}
 
 	function isElementInsideArea(element) {
-		const elementsToCheck = [...window.document.querySelectorAll(options.elementsToCheck)];
 		return elementsToCheck.some(elementToCheck => {
 			return elementToCheck.contains(element);
 		});

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public class AccessibilitySteps
     {
         URI currentUrl = UriUtils.createUri(webDriverProvider.get().getCurrentUrl());
         checkOptions.stream()
-                    .filter(o -> null == o.getElementsToCheck() || !o.getElementsToCheck().isEmpty())
+                    .filter(o -> null != o.getElementsToCheck())
                     .forEach(options -> {
                         List<AccessibilityViolation> violations = accessibilityTestEngine.analyze(options);
                         ViolationLevel level = options.getLevel();

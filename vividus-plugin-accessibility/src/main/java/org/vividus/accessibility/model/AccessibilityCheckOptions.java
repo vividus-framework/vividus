@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,20 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import org.openqa.selenium.WebElement;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AccessibilityCheckOptions
 {
     private final String standard;
     private List<String> ignore;
     private List<String> include;
-    private String rootElement;
-    private String elementsToCheck;
-    private String hideElements;
+    @JsonIgnore
+    private WebElement rootElement;
+    @JsonIgnore
+    private List<WebElement> elementsToCheck;
+    @JsonIgnore
+    private List<WebElement> hideElements;
     @JsonIgnore
     private ViolationLevel level;
 
@@ -53,22 +58,22 @@ public class AccessibilityCheckOptions
         this.ignore = ignore;
     }
 
-    public String getRootElement()
+    public WebElement getRootElement()
     {
         return rootElement;
     }
 
-    public void setRootElement(String rootElement)
+    public void setRootElement(WebElement rootElement)
     {
         this.rootElement = rootElement;
     }
 
-    public String getElementsToCheck()
+    public List<WebElement> getElementsToCheck()
     {
         return elementsToCheck;
     }
 
-    public void setElementsToCheck(String elementsToCheck)
+    public void setElementsToCheck(List<WebElement> elementsToCheck)
     {
         this.elementsToCheck = elementsToCheck;
     }
@@ -83,12 +88,12 @@ public class AccessibilityCheckOptions
         return include;
     }
 
-    public String getHideElements()
+    public List<WebElement> getHideElements()
     {
         return hideElements;
     }
 
-    public void setHideElements(String hideElements)
+    public void setHideElements(List<WebElement> hideElements)
     {
         this.hideElements = hideElements;
     }
