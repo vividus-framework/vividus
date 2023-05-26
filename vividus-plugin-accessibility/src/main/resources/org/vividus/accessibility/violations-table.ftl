@@ -1,29 +1,30 @@
-<#macro violation_panel container level panelClass>
-	<div class="panel-group" id="accordion">
-	    <div class="panel panel-${panelClass}">
-	        <div class="panel-heading">
-	            <h4 class="panel-title">
+<#macro violation_panel container level>
+	<div class="card-group" id="accordion">
+	    <div class="card ${level}">
+	        <div class="card-header">
+	            <h4 class="card-title">
 	                <#assign violationsCount = 0>
 	                <#list container?keys as violationCode>
 	                    <#assign violationsCount = violationsCount + container[violationCode]?size>
 	                </#list>
-	                <a data-toggle="collapse" data-target="#collapse${level}" href="#collapse${level}" class="collapsed panel-accordion">${level}s (${violationsCount})</a>
+	                <button data-bs-toggle="collapse" data-bs-target="#collapse${level}" href="#collapse${level}" class="btn btn-accordion collapsed ${level}"><span>${level}s (${violationsCount})</span></button>
 	            </h4>
 	        </div>
-	        <div id="collapse${level}" class="panel-collapse collapse">
+	        <div id="collapse${level}" class="collapse collapse-container">
 	            <#list container?keys as violationCode>
 	                <#assign violations = container[violationCode]>
-	                <div class="panel-group-level2" id="accordion">
-	                    <div class="panel panel-${panelClass}">
-	                        <div class="panel-heading">
-	                            <h4 class="panel-title">
-	                                <a data-toggle="collapse" data-target="#collapse${violationCode?replace(".", "\\.")?replace(",", "\\,")}" href="#collapse${violationCode}" class="collapsed panel-accordion">${violationCode} (${violations?size})</a>
+	                <div class="card-group-level2" id="accordion">
+	                    <div class="card ${level}">
+	                        <#assign violationId = violationCode?replace(".", "-")?replace(",", "-") >
+	                        <div class="card-header">
+	                            <h4 class="card-title">
+	                                <button data-bs-toggle="collapse" data-bs-target="#${violationId}" href="#${violationId}" class="btn btn-accordion collapsed ${level}"><span>${violationCode} (${violations?size})</span></button>
 	                            </h4>
 	                        </div>
-	                        <div id="collapse${violationCode}" class="panel-collapse collapse">
-	                            <div class="panel-heading ${(violations[0].type)!}">
-	                                <a target="_blank" href="https://squizlabs.github.io/HTML_CodeSniffer/Standards/${violationCode?starts_with("WCAG2")?then('WCAG2/">WCAG 2.0','Section508/">Section 508')} Standard</a>
-	                                <h4 class="panel-title">Message Name: ${(violations[0].message)!?html}</h4>
+	                        <div id="${violationId}" class="collapse">
+	                            <div class="card-header ${(violations[0].type)!}">
+	                                <button class="btn btn-link" target="_blank" style="padding: 0;" href="https://squizlabs.github.io/HTML_CodeSniffer/Standards/${violationCode?starts_with("WCAG2")?then('WCAG2/">WCAG 2.0','Section508/">Section 508')} Standard</button>
+	                                <h4 class="card-title">Message Name: ${(violations[0].message)!?html}</h4>
 	                            </div>
 	                            <table class="table">
 	                                <tbody>
@@ -57,49 +58,111 @@
     <title>Accessibility check result table</title>
     <link rel="stylesheet" href="../../css/external.css"/>
     <link rel="stylesheet" href="../../styles.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap/3.4.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../../webjars/bootstrap/5.3.0-alpha3/css/bootstrap.min.css"/>
 </head>
 <body>
     <style>
         .Error {
-            background-color: #F2DEDE;
+            background-color: var(--bs-danger-bg-subtle) !important;
         }
         .Warning {
-            background-color: #FFFFE5;
+            background-color: var(--bs-warning-bg-subtle) !important;
         }
         .Notice {
-            background-color: #F2F2F2;
+            background-color: var(--bs-info-bg-subtle) !important;
         }
+
+        button.Error {
+            color: var(--bs-danger) !important;
+            font-size: 18px;
+        }
+        button.Warning {
+            color: var(--bs-warning) !important;
+            font-size: 18px;
+        }
+        button.Notice {
+            color: var(--bs-info) !important;
+            font-size: 18px;
+        }
+
+        .btn {
+            background-color: transparent !important;
+            text-align: left;
+        }
+
+        .btn span:hover {
+            text-decoration: underline;
+        }
+
+        .btn span {
+            width: 95%;
+            display: inline-block;
+        }
+
+        .btn-accordion:before {
+             font-family:'FontAwesome';
+             content:"\F107";
+             margin-right: 10px;
+             color: grey;
+        }
+
+        .btn-accordion.collapsed:before {
+             content:"\F105";
+        }
+
+        .btn-link {
+            text-decoration: none;
+        }
+
+        .btn-link:hover {
+            text-decoration: underline;
+        }
+
         pre {
+            display: block;
+            padding: 8.5px;
+            margin: 0 0 10px;
+            font-size: 13px;
+            line-height: 1.42857143;
+            color: #333;
+            word-break: break-all;
+            word-wrap: break-word;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            border-radius: 4px;
             white-space: pre-wrap;
-            word-break: normal;
         }
-        a[data-toggle='collapse'] {
+        button[data-bs-toggle='collapse'] {
             display: inline-block;
             width: 100%;
             height: 100%;
         }
-        .panel-title:hover {
+        .card-title {
+            margin-top: 0px;
+            margin-bottom: 0px;
+            font-size: 16px;
+            color: inherit;
+        }
+        .card-title:hover {
              cursor: pointer;
         }
-        .panel-accordion:after {
-            font-family:'FontAwesome';
-            content:"\F107";
-            float: right;
-            color: grey;
-        }
-        .panel-accordion.collapsed:after {
-            content:"\F105";
-        }
-        .panel-group-level2 {
-            margin-top: 20px;
+        .card-group-level2 {
+            margin-top: 10px;
+            margin-bottom: 10px;
             margin-left: 5px;
         }
+        .card-group {
+            margin-bottom: 20px;
+        }
+
+        .collapse-container {
+            background: #ffffff;
+        }
     </style>
-    <@violation_panel container=Error level="Error" panelClass="danger" />
-    <@violation_panel container=Warning level="Warning" panelClass="warning" />
-    <@violation_panel container=Notice level="Notice" panelClass="info" />
+    <@violation_panel container=Error level="Error" />
+    <@violation_panel container=Warning level="Warning" />
+    <@violation_panel container=Notice level="Notice" />
     <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
-    <script src="../../webjars/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="../../webjars/bootstrap/5.3.0-alpha3/js/bootstrap.min.js"></script>
 </body>
 </html>
