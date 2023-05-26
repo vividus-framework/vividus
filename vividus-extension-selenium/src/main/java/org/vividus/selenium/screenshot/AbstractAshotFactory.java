@@ -18,13 +18,10 @@ package org.vividus.selenium.screenshot;
 
 import static pazone.ashot.ShootingStrategies.cutting;
 
-import java.util.function.BiFunction;
-
 import org.vividus.ui.screenshot.ScreenshotParameters;
 
 import pazone.ashot.ElementCroppingDecorator;
 import pazone.ashot.ShootingStrategy;
-import pazone.ashot.cutter.CutStrategy;
 import pazone.ashot.cutter.FixedCutStrategy;
 
 public abstract class AbstractAshotFactory<T extends ScreenshotParameters> implements AshotFactory<T>
@@ -40,14 +37,8 @@ public abstract class AbstractAshotFactory<T extends ScreenshotParameters> imple
 
     protected ShootingStrategy decorateWithFixedCutStrategy(ShootingStrategy original, int headerToCut, int footerToCut)
     {
-        return decorateWithCutStrategy(original, headerToCut, footerToCut, FixedCutStrategy::new);
-    }
-
-    protected ShootingStrategy decorateWithCutStrategy(ShootingStrategy original, int headerToCut, int footerToCut,
-            BiFunction<Integer, Integer, CutStrategy> cutStrategyFactory)
-    {
         return footerToCut > 0 || headerToCut > 0
-                ? cutting(original, cutStrategyFactory.apply(headerToCut, footerToCut))
+                ? cutting(original, new FixedCutStrategy(headerToCut, footerToCut))
                 : original;
     }
 

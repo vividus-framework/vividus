@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,14 +60,14 @@ class AdjustingScrollableElementAwareViewportPastingDecoratorTests
     @Mock
     private ShootingStrategy shootingStrategy;
 
-    private AdjustingScrollableElementAwareViewportPastingDecorator strategy;
+    private TestAdjustingScrollableElementAwareViewportPastingDecorator strategy;
 
     @BeforeEach
     void beforeEach()
     {
         when(webCutOptions.getWebHeaderToCut()).thenReturn(THE_ANSWER);
         when(webCutOptions.getWebFooterToCut()).thenReturn(THE_ANSWER);
-        strategy = new AdjustingScrollableElementAwareViewportPastingDecorator(shootingStrategy, scrollableElement,
+        strategy = new TestAdjustingScrollableElementAwareViewportPastingDecorator(shootingStrategy, scrollableElement,
                 javascriptActions, webCutOptions);
     }
 
@@ -100,9 +100,9 @@ class AdjustingScrollableElementAwareViewportPastingDecoratorTests
         WebDriver webDriver = mock(WebDriver.class, withSettings().extraInterfaces(JavascriptExecutor.class));
         when(javascriptActions.executeScript("var scrollTop = arguments[0].scrollTop;"
                 + "if(scrollTop){return scrollTop;} else {return 0;}", scrollableElement)).thenReturn(100);
-        assertEquals(100, strategy.getCurrentScrollY((JavascriptExecutor) webDriver));
-        assertEquals(100, strategy.getCurrentScrollY((JavascriptExecutor) webDriver));
-        assertEquals(142, strategy.getCurrentScrollY((JavascriptExecutor) webDriver));
+        assertEquals(100, strategy.getScrollY((JavascriptExecutor) webDriver, -1));
+        assertEquals(100, strategy.getScrollY((JavascriptExecutor) webDriver, 0));
+        assertEquals(142, strategy.getScrollY((JavascriptExecutor) webDriver, 1));
     }
 
     @Test
@@ -121,5 +121,33 @@ class AdjustingScrollableElementAwareViewportPastingDecoratorTests
                 + "}"
                 + "return [];",
                 THE_ANSWER, scrollableElement);
+    }
+
+    private static final class TestAdjustingScrollableElementAwareViewportPastingDecorator
+            extends AdjustingScrollableElementAwareViewportPastingDecorator
+    {
+        private TestAdjustingScrollableElementAwareViewportPastingDecorator(ShootingStrategy strategy,
+                WebElement scrollableElement, WebJavascriptActions javascriptActions, WebCutOptions webCutOptions)
+        {
+            super(strategy, scrollableElement, javascriptActions, webCutOptions);
+        }
+
+        @Override
+        protected PageDimensions getPageDimensions(WebDriver driver)
+        {
+            return super.getPageDimensions(driver);
+        }
+
+        @Override
+        protected void scrollVertically(JavascriptExecutor js, int scrollY)
+        {
+            super.scrollVertically(js, scrollY);
+        }
+
+        @Override
+        protected int getCurrentScrollY(JavascriptExecutor js)
+        {
+            return super.getCurrentScrollY(js);
+        }
     }
 }

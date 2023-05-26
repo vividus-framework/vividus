@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,25 +20,23 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.time.Duration;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.vividus.util.Sleeper;
 
+import pazone.ashot.HandlingSickyElementsViewportPastingDecorator;
 import pazone.ashot.PageDimensions;
-import pazone.ashot.ShootingDecorator;
 import pazone.ashot.ShootingStrategy;
 import pazone.ashot.coordinates.Coords;
-import pazone.ashot.util.InnerScript;
 
 /**
  *  Modified for debug copy of {@link pazone.ashot.ViewportPastingDecorator}
  */
 // CHECKSTYLE:OFF
-public class DebuggingViewportPastingDecorator extends ShootingDecorator {
-    public static final String PAGE_DIMENSIONS_JS = "js/page_dimensions.js";
+public class DebuggingViewportPastingDecorator extends HandlingSickyElementsViewportPastingDecorator {
+
     private static final String SCROLL_Y_TEMPLATE =
               "if ('scrollBehavior' in document.documentElement.style) {"
             + "    %1$s.scrollTo({"
@@ -52,56 +50,51 @@ public class DebuggingViewportPastingDecorator extends ShootingDecorator {
             + "return [];";
     private static final long serialVersionUID = 4173686031614281540L;
     private static final String CURRENT_SCROLL = "current_scroll_";
-    protected int scrollTimeout;
     private Coords shootingArea;
     private transient ScreenshotDebugger screenshotDebugger;
     private final String scrollVerticallyScript;
 
-    public DebuggingViewportPastingDecorator(ShootingStrategy strategy) {
-        this(strategy, "window");
+    public DebuggingViewportPastingDecorator(ShootingStrategy strategy, int stickyHeaderHeight,
+            int stickyFooterHeight) {
+        this(strategy, "window", stickyHeaderHeight, stickyFooterHeight);
     }
 
-    protected DebuggingViewportPastingDecorator(ShootingStrategy strategy, String target) {
-        super(strategy);
+    protected DebuggingViewportPastingDecorator(ShootingStrategy strategy, String target, int stickyHeaderHeight,
+            int stickyFooterHeight) {
+        super(strategy, stickyHeaderHeight, stickyFooterHeight);
         scrollVerticallyScript = String.format(SCROLL_Y_TEMPLATE, target);
-    }
-
-    public DebuggingViewportPastingDecorator withScrollTimeout(int scrollTimeout) {
-        this.scrollTimeout = scrollTimeout;
-        return this;
-    }
-
-    @Override
-    public BufferedImage getScreenshot(WebDriver wd) {
-        return getScreenshot(wd, null);
     }
 
     @Override
     public BufferedImage getScreenshot(WebDriver wd, Set<Coords> coordsSet) {
         JavascriptExecutor js = (JavascriptExecutor) wd;
-        PageDimensions pageDimensions = getPageDimensions(wd);
-        shootingArea = getShootingCoords(coordsSet, pageDimensions);
-        int startY = getCurrentScrollY(js);
+        int initialY = getScrollY(js, -1);
 
-        BufferedImage finalImage = new BufferedImage(pageDimensions.getViewportWidth(), shootingArea.height,
-                BufferedImage.TYPE_3BYTE_BGR);
-        Graphics2D graphics = finalImage.createGraphics();
+        try {
+            PageDimensions pageDimensions = getPageDimensions(wd);
+            shootingArea = getShootingCoords(coordsSet, pageDimensions);
 
-        int viewportHeight = pageDimensions.getViewportHeight();
-        int scrollTimes = (int) Math.ceil(shootingArea.getHeight() / viewportHeight);
-        for (int n = 0; n < scrollTimes; n++) {
-            scrollVertically(js, shootingArea.y + viewportHeight * n);
-            Sleeper.sleep(Duration.ofMillis(scrollTimeout));
-            BufferedImage part = getShootingStrategy().getScreenshot(wd);
-            int currentScrollY = getCurrentScrollY(js);
-            debugScreenshot(CURRENT_SCROLL + currentScrollY + "_part_" + n, part);
-            graphics.drawImage(part, 0, currentScrollY - shootingArea.y, null);
-            debugScreenshot(CURRENT_SCROLL + currentScrollY, finalImage);
+            BufferedImage finalImage = new BufferedImage(pageDimensions.getViewportWidth(), shootingArea.height,
+                    BufferedImage.TYPE_3BYTE_BGR);
+            Graphics2D graphics = finalImage.createGraphics();
+
+            int viewportHeight = pageDimensions.getViewportHeight();
+            int scrollTimes = (int) Math.ceil(shootingArea.getHeight() / viewportHeight);
+            for (int n = 0; n < scrollTimes; n++) {
+                scrollVertically(js, shootingArea.y + viewportHeight * n);
+                Sleeper.sleep(Duration.ofMillis(scrollTimeout));
+                BufferedImage part = getChunk(wd, n, scrollTimes);
+                int currentScrollY = getScrollY(js, n);
+                debugScreenshot(CURRENT_SCROLL + currentScrollY + "_part_" + n, part);
+                graphics.drawImage(part, 0, currentScrollY - shootingArea.y, null);
+                debugScreenshot(CURRENT_SCROLL + currentScrollY, finalImage);
+            }
+
+            graphics.dispose();
+            return finalImage;
+        } finally {
+            scrollVertically(js, initialY);
         }
-
-        graphics.dispose();
-        scrollVertically(js, startY);
-        return finalImage;
     }
 
     private void debugScreenshot(String debugMessage, BufferedImage debugImage) {
@@ -115,17 +108,12 @@ public class DebuggingViewportPastingDecorator extends ShootingDecorator {
         return shootingArea == null ? coordsSet : shiftCoords(coordsSet, shootingArea);
     }
 
-    protected PageDimensions getPageDimensions(WebDriver driver) {
-        Map<String, Number> pageDimensions = InnerScript.execute(PAGE_DIMENSIONS_JS, driver);
-        return new PageDimensions(pageDimensions.get("pageHeight").intValue(),
-                pageDimensions.get("viewportWidth").intValue(), pageDimensions.get("viewportHeight").intValue());
+    protected int getScrollY(JavascriptExecutor js, int currentChunkIndex)
+    {
+        return super.getCurrentScrollY(js);
     }
 
-    protected int getCurrentScrollY(JavascriptExecutor js) {
-        return ((Number) js.executeScript("var scrY = window.scrollY;"
-                + "if(scrY){return scrY;} else {return 0;}")).intValue();
-    }
-
+    @Override
     protected void scrollVertically(JavascriptExecutor js, int scrollY) {
         js.executeScript(scrollVerticallyScript, scrollY);
     }
@@ -160,7 +148,7 @@ public class DebuggingViewportPastingDecorator extends ShootingDecorator {
         return shootingCoords;
     }
 
-    public ShootingDecorator withDebugger(ScreenshotDebugger screenshotDebugger)
+    public DebuggingViewportPastingDecorator withDebugger(ScreenshotDebugger screenshotDebugger)
     {
         this.screenshotDebugger = screenshotDebugger;
         return this;
