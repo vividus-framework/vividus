@@ -35,14 +35,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
-import org.vividus.selenium.screenshot.strategies.AdjustingViewportPastingDecorator;
-import org.vividus.selenium.screenshot.strategies.StickyHeaderCutStrategy;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 
 import pazone.ashot.AShot;
-import pazone.ashot.CuttingDecorator;
 import pazone.ashot.ElementCroppingDecorator;
 import pazone.ashot.ScalingDecorator;
 import pazone.ashot.ShootingStrategy;
@@ -73,10 +70,7 @@ class WebAshotFactoryTests
         var baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
         assertThat(baseStrategy, instanceOf(ScrollbarHidingDecorator.class));
         var actualShootingStrategy = FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true);
-        assertThat(actualShootingStrategy, instanceOf(AdjustingViewportPastingDecorator.class));
-        var adjustingViewportPastingDecorator = (AdjustingViewportPastingDecorator) actualShootingStrategy;
-        assertEquals(0, adjustingViewportPastingDecorator.getHeaderAdjustment());
-        assertEquals(0, adjustingViewportPastingDecorator.getFooterAdjustment());
+        assertThat(actualShootingStrategy, instanceOf(DebuggingViewportPastingDecorator.class));
     }
 
     @Test
@@ -102,7 +96,7 @@ class WebAshotFactoryTests
         var baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
         assertThat(baseStrategy, instanceOf(ScrollbarHidingDecorator.class));
         assertThat(FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true),
-                instanceOf(AdjustingViewportPastingDecorator.class));
+                instanceOf(DebuggingViewportPastingDecorator.class));
     }
 
     @Test
@@ -145,17 +139,11 @@ class WebAshotFactoryTests
         assertEquals(500, (int) FieldUtils.readField(viewportPastingDecorator, "scrollTimeout", true));
         assertEquals(screenshotDebugger, FieldUtils.readField(viewportPastingDecorator, "screenshotDebugger", true));
 
-        var webCuttingDecorator = getShootingStrategy(viewportPastingDecorator);
-        assertThat(webCuttingDecorator, is(instanceOf(CuttingDecorator.class)));
-        var webCutStrategy = getCutStrategy(webCuttingDecorator);
-        assertThat(webCutStrategy, is(instanceOf(StickyHeaderCutStrategy.class)));
-        webCutStrategy.getHeaderHeight(null);
-        validateCutStrategy(0, 10, webCutStrategy);
-
-        var nativeCuttingDecorator = getShootingStrategy(webCuttingDecorator);
+        var nativeCuttingDecorator = getShootingStrategy(viewportPastingDecorator);
         var nativeCutStrategy = getCutStrategy(nativeCuttingDecorator);
         assertThat(nativeCutStrategy, is(instanceOf(FixedCutStrategy.class)));
-        validateCutStrategy(10, 0, nativeCutStrategy);
+        assertEquals(10, nativeCutStrategy.getFooterHeight(null));
+        assertEquals(0, nativeCutStrategy.getHeaderHeight(null));
 
         var scalingDecorator = getShootingStrategy(nativeCuttingDecorator);
         assertThat(scalingDecorator, is(instanceOf(ScalingDecorator.class)));
@@ -213,12 +201,6 @@ class WebAshotFactoryTests
     private CutStrategy getCutStrategy(Object hasCutStrategy) throws IllegalAccessException
     {
         return (CutStrategy) FieldUtils.readField(hasCutStrategy, "cutStrategy", true);
-    }
-
-    private void validateCutStrategy(int footer, int header, CutStrategy toValidate)
-    {
-        assertEquals(footer, toValidate.getFooterHeight(null));
-        assertEquals(header, toValidate.getHeaderHeight(null));
     }
 
     private ShootingStrategy getShootingStrategy(Object hasShootingStrategy) throws IllegalAccessException

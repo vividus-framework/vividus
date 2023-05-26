@@ -20,8 +20,6 @@ import java.util.Optional;
 
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.screenshot.strategies.AdjustingScrollableElementAwareViewportPastingDecorator;
-import org.vividus.selenium.screenshot.strategies.AdjustingViewportPastingDecorator;
-import org.vividus.selenium.screenshot.strategies.StickyHeaderCutStrategy;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
@@ -64,13 +62,9 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
         decorated = decorateWithFixedCutStrategy(decorated, screenshotParameters.getNativeHeaderToCut(),
                 screenshotParameters.getNativeFooterToCut());
 
-        WebCutOptions webCutOptions = screenshotParameters.getWebCutOptions();
-        decorated = decorateWithCutStrategy(decorated, webCutOptions.getWebHeaderToCut(),
-                webCutOptions.getWebFooterToCut(), StickyHeaderCutStrategy::new);
-
-        decorated = ((DebuggingViewportPastingDecorator) decorateWithViewportPasting(decorated,
-                screenshotParameters))
-                .withDebugger(screenshotDebugger);
+        decorated = decorateWithViewportPasting(decorated, screenshotParameters)
+                .withDebugger(screenshotDebugger)
+                .withScrollTimeout(((Long) screenshotParameters.getScrollTimeout().toMillis()).intValue());
 
         decorated = decorateWithScrollbarHiding(decorated, screenshotParameters.getScrollableElement());
 
@@ -85,17 +79,17 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                 .coordsProvider(scrollBarHidingCoordsProvider);
     }
 
-    private ShootingStrategy decorateWithViewportPasting(ShootingStrategy toDecorate,
+    private DebuggingViewportPastingDecorator decorateWithViewportPasting(ShootingStrategy toDecorate,
             WebScreenshotParameters screenshotParameters)
     {
         WebCutOptions webCutOptions = screenshotParameters.getWebCutOptions();
-        return ((DebuggingViewportPastingDecorator) screenshotParameters.getScrollableElement()
-                       .map(e -> (ShootingStrategy) new AdjustingScrollableElementAwareViewportPastingDecorator(
-                               toDecorate, e, javascriptActions, webCutOptions))
-                       .orElseGet(() ->
-                       new AdjustingViewportPastingDecorator(toDecorate, webCutOptions.getWebHeaderToCut(),
-                               webCutOptions.getWebFooterToCut())))
-                       .withScrollTimeout(((Long) screenshotParameters.getScrollTimeout().toMillis()).intValue());
+        return screenshotParameters.getScrollableElement().map(
+                e -> (DebuggingViewportPastingDecorator) new AdjustingScrollableElementAwareViewportPastingDecorator(
+                        toDecorate, e, javascriptActions, webCutOptions)
+                ).orElseGet(
+                () -> new DebuggingViewportPastingDecorator(toDecorate, webCutOptions.getWebHeaderToCut(),
+                        webCutOptions.getWebFooterToCut())
+        );
     }
 
     private ShootingStrategy decorateWithScrollbarHiding(ShootingStrategy strategy,
@@ -116,7 +110,7 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                 coordsProvider = CeilingJsCoordsProvider.getSimple(javascriptActions);
                 break;
             case "VIEWPORT_PASTING":
-                shootingStrategy = new AdjustingViewportPastingDecorator(baseShootingStrategy, 0, 0)
+                shootingStrategy = new DebuggingViewportPastingDecorator(baseShootingStrategy, 0, 0)
                         .withScrollTimeout(SCROLL_TIMEOUT);
                 coordsProvider = CeilingJsCoordsProvider.getScrollAdjusted(javascriptActions);
                 break;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,57 +14,51 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.screenshot.strategies;
+package pazone.ashot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.vividus.selenium.screenshot.DebuggingViewportPastingDecorator;
 
-import pazone.ashot.PageDimensions;
 import pazone.ashot.util.InnerScript;
 
 @ExtendWith(MockitoExtension.class)
-class AdjustingViewportPastingDecoratorTests
+class DebuggingViewportPastingDecoratorTests
 {
     private static final int HEADER_ADJUSTMENT = 1;
     private static final int FOOTER_ADJUSTMENT = 2;
 
     private static final int WINDOW_HEIGHT = 500;
 
-    private static final String SCROLL_Y_SCRIPT = "var scrY = window.scrollY;if(scrY){return scrY;} else {return 0;}";
+    private static final String SCROLL_Y_SCRIPT = "var scrY = window.pageYOffset;if(scrY){return scrY;} else {return "
+            + "0;}";
 
-    private AdjustingViewportPastingDecorator decorator;
+    private final DebuggingViewportPastingDecorator decorator = new DebuggingViewportPastingDecorator(null,
+            HEADER_ADJUSTMENT, FOOTER_ADJUSTMENT);
 
     @Mock (extraInterfaces = JavascriptExecutor.class)
     private WebDriver webDriver;
 
-    @BeforeEach
-    void beforeEach()
-    {
-        decorator = new AdjustingViewportPastingDecorator(null, HEADER_ADJUSTMENT, FOOTER_ADJUSTMENT);
-    }
-
     @Test
     void testOriginalWindowHeightIsAdjustedWithHeaderAndFooterCorrections()
     {
-        try (MockedStatic<InnerScript> innerScriptMock = mockStatic(InnerScript.class))
+        try (var innerScriptMock = mockStatic(InnerScript.class))
         {
             innerScriptMock
                     .when(() -> InnerScript.execute(DebuggingViewportPastingDecorator.PAGE_DIMENSIONS_JS, webDriver))
                     .thenReturn(Map.of("pageHeight", 200, "viewportWidth", 150, "viewportHeight", WINDOW_HEIGHT));
-            PageDimensions output = decorator.getPageDimensions(webDriver);
+            var output = decorator.getPageDimensions(webDriver);
             assertEquals(WINDOW_HEIGHT - HEADER_ADJUSTMENT - FOOTER_ADJUSTMENT, output.getViewportHeight());
             assertEquals(200, output.getPageHeight());
             assertEquals(150, output.getViewportWidth());
@@ -74,8 +68,8 @@ class AdjustingViewportPastingDecoratorTests
     @Test
     void testNonAdjustedCurrentScrollYIsReturnedBeforeScrolling()
     {
-        JavascriptExecutor jsExecutor = (JavascriptExecutor) webDriver;
-        int currentScrollY = 0;
+        var jsExecutor = (JavascriptExecutor) webDriver;
+        var currentScrollY = 0;
         when(jsExecutor.executeScript(SCROLL_Y_SCRIPT)).thenReturn(currentScrollY);
         assertEquals(currentScrollY, decorator.getCurrentScrollY(jsExecutor));
     }
@@ -83,11 +77,15 @@ class AdjustingViewportPastingDecoratorTests
     @Test
     void testAdjustedCurrentScrollYIsReturnedAfterSecondScrolling()
     {
-        JavascriptExecutor jsExecutor = (JavascriptExecutor) webDriver;
-        int currentScrollY = 100;
+        var jsExecutor = (JavascriptExecutor) webDriver;
+        var currentScrollY = 100;
         when(jsExecutor.executeScript(SCROLL_Y_SCRIPT)).thenReturn(currentScrollY);
-        decorator.getCurrentScrollY(jsExecutor);
-        assertEquals(currentScrollY, decorator.getCurrentScrollY(jsExecutor));
-        assertEquals(currentScrollY + HEADER_ADJUSTMENT, decorator.getCurrentScrollY(jsExecutor));
+        try (var ignored = mockConstruction(CuttingDecorator.class))
+        {
+            decorator.getChunk(webDriver, 0, 2);
+            assertEquals(currentScrollY, decorator.getCurrentScrollY(jsExecutor));
+            decorator.getChunk(webDriver, 1, 3);
+            assertEquals(currentScrollY + HEADER_ADJUSTMENT, decorator.getCurrentScrollY(jsExecutor));
+        }
     }
 }
