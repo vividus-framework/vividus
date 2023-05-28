@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.function.Function;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
+import org.vividus.util.EnumUtils;
 
 public enum StringComparisonRule
 {
@@ -38,5 +39,11 @@ public enum StringComparisonRule
     public Matcher<String> createMatcher(String expected)
     {
         return matcherFactory.apply(expected);
+    }
+
+    @Override
+    public String toString()
+    {
+        return EnumUtils.toHumanReadableForm(this);
     }
 }
