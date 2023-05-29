@@ -31,6 +31,8 @@ import pazone.ashot.coordinates.CoordsProvider;
 
 public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameters>
 {
+    private static final int DEFAULT_STICKY_HEADER_HEIGHT = 100;
+    private static final int DEFAULT_STICKY_FOOTER_HEIGHT = 100;
     private static final int SCROLL_TIMEOUT = 500;
 
     private final ScreenshotDebugger screenshotDebugger;
@@ -110,7 +112,8 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                 coordsProvider = CeilingJsCoordsProvider.getSimple(javascriptActions);
                 break;
             case "VIEWPORT_PASTING":
-                shootingStrategy = new DebuggingViewportPastingDecorator(baseShootingStrategy, 0, 0)
+                shootingStrategy = new DebuggingViewportPastingDecorator(baseShootingStrategy,
+                        DEFAULT_STICKY_HEADER_HEIGHT, DEFAULT_STICKY_FOOTER_HEIGHT)
                         .withScrollTimeout(SCROLL_TIMEOUT);
                 coordsProvider = CeilingJsCoordsProvider.getScrollAdjusted(javascriptActions);
                 break;
