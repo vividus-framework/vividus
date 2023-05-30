@@ -140,7 +140,7 @@ where:
 |Adds margins to coordinates, default one
 
 |`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.scroll-timeout`
-|time in millis
+|The duration in {durations-format-link} format.
 |Timeout for scrolling during performing visual check
 
 |`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.scrollable-element`
