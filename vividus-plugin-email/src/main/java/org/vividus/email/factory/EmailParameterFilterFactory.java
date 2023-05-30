@@ -137,6 +137,7 @@ public enum EmailParameterFilterFactory
         return Stream.of(value.split(",")).map(String::strip).collect(Collectors.toList());
     }
 
+    @SuppressWarnings("checkstyle:TodoComment")
     <T extends Comparable<T>> boolean apply(Object messageData, String rule, T input)
     {
         if (input == null)
@@ -151,8 +152,9 @@ public enum EmailParameterFilterFactory
         StringComparisonRule stringRule = EnumUtils.getEnumIgnoreCase(StringComparisonRule.class, rule);
         if (stringRule != null)
         {
-            Validate.isTrue(input instanceof String, "%s filter is not applicable for %s parameter", stringRule,
-                    this.name());
+            //TODO: change to stringRule.toString() once it will be safe
+            Validate.isTrue(input instanceof String, "%s filter is not applicable for %s parameter",
+                    stringRule.name(), this.name());
             return stringRule.createMatcher((String) input).matches(messageData);
         }
         throw new IllegalArgumentException(getUnknownRuleMessage(rule));

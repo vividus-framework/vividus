@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.StringComparisonRule;
-import org.vividus.util.EnumUtils;
 
 public class SetContextSteps
 {
@@ -85,7 +84,7 @@ public class SetContextSteps
         {
             softAssert.recordFailedAssertion(
                     String.format("The number of web views with name that %s '%s' is expected to be 1, but got %d",
-                            EnumUtils.toHumanReadableForm(rule), value, matchedWebViews.size()));
+                            rule, value, matchedWebViews.size()));
         }
         else
         {
