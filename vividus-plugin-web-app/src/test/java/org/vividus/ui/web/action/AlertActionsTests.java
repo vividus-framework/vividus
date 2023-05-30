@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.ui.web.action;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -35,12 +34,12 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -61,7 +60,6 @@ import org.vividus.ui.web.action.AlertActions.Action;
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class AlertActionsTests
 {
-    private static final String MESSAGE = "message";
     private static final String ERROR_MESSAGE = "error message";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AlertActions.class);
@@ -91,31 +89,28 @@ class AlertActionsTests
     private AlertActions alertActions;
 
     @Test
-    void testProcessAlert()
+    void testSwitchToAlert()
     {
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(webDriver.switchTo()).thenReturn(targetLocator);
-        when(targetLocator.alert()).thenReturn(alert);
-        Matcher<String> matcher = equalTo(MESSAGE);
-        when(alert.getText()).thenReturn(MESSAGE);
-        Action action = mock(Action.class);
-        alertActions.processAlert(matcher, action);
-        verify(action).process(alert, webDriverManager);
-        assertEquals(List.of(), logger.getLoggingEvents());
+        configureDefaultAlertMock();
+        Optional<Alert> actualAlert = alertActions.switchToAlert();
+        assertTrue(actualAlert.isPresent());
     }
 
     @Test
-    void testProcessAlertWithNonEqualMessage()
+    void testSwitchToAlertNoAlert()
+    {
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        when(webDriver.switchTo()).thenReturn(targetLocator);
+        when(targetLocator.alert()).thenReturn(null);
+        Optional<Alert> actualAlert = alertActions.switchToAlert();
+        assertFalse(actualAlert.isPresent());
+    }
+
+    private void configureDefaultAlertMock()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriver.switchTo()).thenReturn(targetLocator);
         when(targetLocator.alert()).thenReturn(alert);
-        Matcher<String> matcher = equalTo(MESSAGE);
-        when(alert.getText()).thenReturn("");
-        Action action = mock(Action.class);
-        alertActions.processAlert(matcher, action);
-        verifyNoInteractions(action);
-        assertEquals(List.of(), logger.getLoggingEvents());
     }
 
     @SuppressWarnings("unchecked")
@@ -134,21 +129,10 @@ class AlertActionsTests
     }
 
     @Test
-    void testIsAlertPresent()
-    {
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(webDriver.switchTo()).thenReturn(targetLocator);
-        when(targetLocator.alert()).thenReturn(alert);
-        boolean answer = alertActions.isAlertPresent();
-        assertTrue(answer);
-        assertEquals(List.of(), logger.getLoggingEvents());
-    }
-
-    @Test
     void testIsAlertPresentMobile()
     {
         when(webDriverManager.isMobile()).thenReturn(true);
-        boolean answer = alertActions.isAlertPresent();
+        boolean answer = alertActions.isAlertPresent(webDriver);
         assertFalse(answer);
         assertThat(logger.getLoggingEvents(), is(List.of(warn("Skipped alert interaction in mobile context"))));
     }
@@ -175,9 +159,7 @@ class AlertActionsTests
     @Test
     void testProcessAlertWithAnyMessage()
     {
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(webDriver.switchTo()).thenReturn(targetLocator);
-        when(targetLocator.alert()).thenReturn(alert);
+        configureDefaultAlertMock();
         Action action = mock(Action.class);
         alertActions.processAlert(action);
         verify(action).process(alert, webDriverManager);
@@ -194,6 +176,15 @@ class AlertActionsTests
         alertActions.processAlert(action);
         verify(action, never()).process(alert, webDriverManager);
         assertEquals(List.of(), logger.getLoggingEvents());
+    }
+
+    @Test
+    void testProcessProvidedAlert()
+    {
+        Action action = mock(Action.class);
+        alertActions.processAlert(action, alert);
+        verifyNoInteractions(webDriverProvider);
+        verify(action).process(alert, webDriverManager);
     }
 
     @Test

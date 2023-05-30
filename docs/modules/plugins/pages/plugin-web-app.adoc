@@ -1054,6 +1054,31 @@ When I save number of open tabs to $scopes variable `$variableName`
 When I save number of open tabs to SCENARIO variable `count`
 ----
 
+=== Alert Steps
+
+==== Type text in the alert input field
+
+This step allows you to type text into the alert input field and then accept the alert.
+
+An *alert* is a small dialog box that appears on the display screen to provide information or to warn about a potentially damaging operation. To proceed, the user needs to confirm or dismiss the alert by clicking the 'OK' or 'Cancel' button, respectively.
+
+[NOTE]
+This step is applicable only for alerts with a single input field. For authorization alerts, basic URL authorization should be used.
+For example, https://user:pass@domain.com
+
+[source,gherkin]
+----
+When I type text `$text` in alert and accept it
+----
+
+* `$text` - The text to be typed into the alert input field.
+
+.Type text 'VIVIDUS' into alert and close it by clicking OK button
+[source,gherkin]
+----
+When I type text `VIVIDUS` in alert and accept it
+----
+
 == Tips & Tricks
 
 === Validate URL host of the opened page

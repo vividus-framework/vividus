@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,7 +152,7 @@ class WindowStepsTests
     void testCloseCurrentWindowWithAlerts()
     {
         mockWindowHandles();
-        when(alertActions.isAlertPresent()).thenReturn(true);
+        when(alertActions.isAlertPresent(driver)).thenReturn(true);
         windowSteps.closeCurrentWindowWithAlertsHandling();
         assertThat(logger.getLoggingEvents(),
                 is(List.of(info("Alert dialog box is shown and must be handled in the subsequent steps."))));
@@ -165,7 +165,7 @@ class WindowStepsTests
     {
         mockWindowHandles();
         var targetLocator = mockTargetLocator();
-        when(alertActions.isAlertPresent()).thenReturn(false);
+        when(alertActions.isAlertPresent(driver)).thenReturn(false);
         windowSteps.closeCurrentWindowWithAlertsHandling();
         verify(javascriptActions).closeCurrentWindow();
         verify(targetLocator).window(WINDOW_TO_SWITCH_TO);

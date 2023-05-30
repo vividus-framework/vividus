@@ -102,7 +102,7 @@ class MouseActionsTests
         assertEquals(newPageLoaded, result.isNewPageLoaded());
         InOrder ordered = inOrder(javascriptActions, alertActions, waitActions, eventBus, uiContext);
         ordered.verify(javascriptActions).scrollElementIntoViewportCenter(webElement);
-        ordered.verify(alertActions).isAlertPresent();
+        ordered.verify(alertActions).isAlertPresent(webDriver);
         if (!alertPresent)
         {
             ordered.verify(waitActions).waitForPageLoad();
@@ -149,7 +149,7 @@ class MouseActionsTests
     {
         boolean alertPresent = true;
         mockBodySearch();
-        when(alertActions.isAlertPresent()).thenReturn(alertPresent);
+        when(alertActions.isAlertPresent(webDriver)).thenReturn(alertPresent);
         testClick(alertPresent, false);
         verifyNoInteractions(uiContext);
     }
@@ -251,7 +251,7 @@ class MouseActionsTests
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
         doThrow(e).doNothing().when(webElement).click();
-        when(alertActions.isAlertPresent()).thenReturn(Boolean.FALSE);
+        when(alertActions.isAlertPresent(webDriver)).thenReturn(Boolean.FALSE);
         testClickWithElementNotClickableException();
         verify(webElement, never()).sendKeys("");
     }
@@ -352,7 +352,7 @@ class MouseActionsTests
     {
         boolean alertPresent = true;
         mockBodySearch();
-        when(alertActions.isAlertPresent()).thenReturn(alertPresent);
+        when(alertActions.isAlertPresent(webDriver)).thenReturn(alertPresent);
         ClickResult result = mouseActions.click(webElement, Optional.of(Action.ACCEPT));
         verifyWebElement(1, alertPresent, false, result);
     }

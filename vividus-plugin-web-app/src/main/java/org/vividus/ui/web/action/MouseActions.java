@@ -161,7 +161,7 @@ public class MouseActions implements IMouseActions
         if (!webDriverManager.isElectronApp())
         {
             defaultAlertAction.ifPresent(alertActions::processAlert);
-            if (!alertActions.isAlertPresent())
+            if (!alertActions.isAlertPresent(webDriver))
             {
                 waitActions.waitForPageLoad();
                 resetContextIfNeeded(clickResult, page);
