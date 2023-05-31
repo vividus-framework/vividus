@@ -9,8 +9,14 @@ include::partial$plugin-installation.adoc[]
 
 == Steps
 
-=== Validate accessibility
+=== Validate site accessibility
 
+[source,gherkin]
+----
+When I perform accessibility scan:$options
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
 [source,gherkin]
 ----
 Then I test accessibility:$options
@@ -38,7 +44,7 @@ The step based on the contextual approach and when it's necessary it could be us
 ----
 Given I am on page with URL `https://vividus-test-site.onrender.com/`
 When I change context to element located by `xpath(//body)`
-Then I test accessibility:
+When I perform accessibility scan:
 |standard|level |elementsToIgnore                                 |elementsToCheck|violationsToIgnore                                                                     |
 |WCAG2AAA|NOTICE|By.id(ignore), By.cssSelector(#errors > h1 > img)|               |WCAG2AAA.Principle1.Guideline1_3.1_3_1.H42.2,WCAG2AAA.Principle2.Guideline2_4.2_4_9.H30|
 |WCAG2AAA|NOTICE|By.xpath(//*)                                    |               |                                                                                       |

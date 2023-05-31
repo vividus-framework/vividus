@@ -25,7 +25,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jbehave.core.annotations.Then;
+import org.jbehave.core.annotations.When;
 import org.vividus.accessibility.engine.AccessibilityTestEngine;
 import org.vividus.accessibility.model.AccessibilityCheckOptions;
 import org.vividus.accessibility.model.AccessibilityViolation;
@@ -57,7 +57,8 @@ public class AccessibilitySteps
     }
 
     /**
-     * Executes accessibility compliance check of the currently opened page, using specified criteria.
+     * Performs an accessibility scan of the currently opened page, using specified criteria.
+     *
      * @param checkOptions Example table with check options, where:
      *        <ul>
      *          <li><b>elementsToCheck</b> -    The locators of elements to check</li>
@@ -81,8 +82,8 @@ public class AccessibilitySteps
      * @see <a href="https://squizlabs.github.io/HTML_CodeSniffer/Standards/WCAG2/">WCAG2.0</a>
      * @see <a href="https://squizlabs.github.io/HTML_CodeSniffer/Standards/Section508/">Section508</a>
      */
-    @Then("I test accessibility:$options")
-    public void checkAccessibility(List<AccessibilityCheckOptions> checkOptions)
+    @When("I perform accessibility scan:$options")
+    public void performAccessibilityScan(List<AccessibilityCheckOptions> checkOptions)
     {
         URI currentUrl = UriUtils.createUri(webDriverProvider.get().getCurrentUrl());
         checkOptions.stream()
