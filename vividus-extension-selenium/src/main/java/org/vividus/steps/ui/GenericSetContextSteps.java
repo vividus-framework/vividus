@@ -20,8 +20,7 @@ import java.util.function.Supplier;
 
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.vividus.annotation.Replacement;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
@@ -32,7 +31,6 @@ import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 public class GenericSetContextSteps
 {
     public static final String ELEMENT_TO_SET_CONTEXT = "Element to set context";
-    private static final Logger LOGGER = LoggerFactory.getLogger(GenericSetContextSteps.class);
     private final IUiContext uiContext;
     private final IBaseValidations baseValidations;
 
@@ -58,12 +56,11 @@ public class GenericSetContextSteps
      * @deprecated Use step: "When I change context to element located by `$locator`"
      */
     @Deprecated(since = "0.5.4", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0",
+                 replacementFormatPattern = "When I change context to element located by `%1$s`")
     @When("I change context to element located `$locator`")
     public void resetAndChangeContextToElement(Locator locator)
     {
-        LOGGER.warn("The step: \"When I change context to element located `$locator`\" is deprecated "
-                + "and will be removed in VIVIDUS 0.7.0. "
-                + "Use step: \"When I change context to element located by `$locator`\"");
         resetContext();
         changeContext(() -> getBaseValidations().assertIfElementExists(ELEMENT_TO_SET_CONTEXT, locator),
             () -> resetAndChangeContextToElement(locator));

@@ -35,6 +35,7 @@ import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.annotation.Replacement;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
@@ -56,10 +57,6 @@ public class PageSteps
     private static final Logger LOGGER = LoggerFactory.getLogger(PageSteps.class);
     private static final String FORWARD_SLASH = "/";
     private static final String PAGE_TITLE = "Page title";
-    private static final String DEPRECATED_LOG_MESSAGE_TEMPLATE =
-            "The step: \"{}\" is deprecated "
-            + "and will be removed in VIVIDUS 0.7.0. "
-            + "Use step: \"{}\"";
 
     @Inject private IUiContext uiContext;
     @Inject private SetContextSteps setContextSteps;
@@ -129,11 +126,11 @@ public class PageSteps
      * "Then `#{extractPathFromUrl(${current-page-url})}` is equal to `$variable2`"
      */
     @Deprecated(since = "0.5.9", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0",
+                 replacementFormatPattern = "Then `#{extractPathFromUrl(${current-page-url})}` is equal to `%1$s`")
     @Then("the page has the relative URL '$relativeURL'")
     public void checkPageRelativeURL(String relativeURL)
     {
-        LOGGER.warn(DEPRECATED_LOG_MESSAGE_TEMPLATE, "Then the page has the relative URL '$relativeURL'",
-                "Then `#{extractPathFromUrl(${current-page-url})}` is equal to `$variable2`");
         URI url = UriUtils.createUri(getWebDriver().getCurrentUrl());
         // If web application under test is unavailable (no page is opened), an empty URL will be returned
         if (url.getPath() != null)
@@ -160,11 +157,11 @@ public class PageSteps
      * "Then `#{extractHostFromUrl(${current-page-url})}` is equal to `$variable2`"
      */
     @Deprecated(since = "0.5.9", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0",
+                 replacementFormatPattern = "Then `#{extractHostFromUrl(${current-page-url})}` is equal to `%1$s`")
     @Then("the host of the page URL is '$host'")
     public void checkPageHost(String host)
     {
-        LOGGER.warn(DEPRECATED_LOG_MESSAGE_TEMPLATE, "Then the host of the page URL is '$host'",
-                "Then `#{extractHostFromUrl(${current-page-url})}` is equal to `$variable2`");
         URI url = UriUtils.createUri(getWebDriver().getCurrentUrl());
         descriptiveSoftAssert.assertEquals("Page has correct host", host, url.getHost());
     }
@@ -205,11 +202,11 @@ public class PageSteps
      * "Then `${current-page-url}` is equal to `$variable2`"
      */
     @Deprecated(since = "0.5.10", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0",
+                 replacementFormatPattern = "Then `${current-page-url}` is equal to `%1$s`")
     @Then("the page with the URL '$URL' is loaded")
     public void checkUriIsLoaded(String url)
     {
-        LOGGER.warn(DEPRECATED_LOG_MESSAGE_TEMPLATE, "Then the page with the URL '$URL' is loaded",
-                "Then `${current-page-url}` is equal to `$variable2`");
         String actualUrl = getWebDriver().getCurrentUrl();
         descriptiveSoftAssert.assertEquals("Page has correct URL", decodeUrl(url), decodeUrl(actualUrl));
     }
@@ -226,11 +223,10 @@ public class PageSteps
      * "Then `${current-page-url}` matches `$regex`"
      */
     @Deprecated(since = "0.5.9", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern = "Then `${current-page-url}` matches `%1$s`")
     @Then("the page with the URL containing '$URLpart' is loaded")
     public void checkUrlPartIsLoaded(String urlPart)
     {
-        LOGGER.warn(DEPRECATED_LOG_MESSAGE_TEMPLATE, "Then the page with the URL containing '$URLpart' is loaded",
-                "Then `${current-page-url}` matches `$regex`");
         URI actualUrl = UriUtils.createUri(getWebDriver().getCurrentUrl());
         String actualDecodedUrl = actualUrl.toString();
         descriptiveSoftAssert.assertThat(String.format("Page with the URLpart '%s' is loaded", urlPart),

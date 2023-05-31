@@ -16,9 +16,6 @@
 
 package org.vividus.steps.ui;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -29,13 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Optional;
-
-import com.github.valfirst.slf4jtest.LoggingEvent;
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -51,12 +42,10 @@ import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.context.SearchContextSetter;
 
-@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
+@ExtendWith(MockitoExtension.class)
 class GenericSetContextStepsTests
 {
     private static final String ELEMENT_TO_SET_CONTEXT = "Element to set context";
-
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(GenericSetContextSteps.class);
 
     @Mock private IUiContext uiContext;
     @Mock private IBaseValidations baseValidations;
@@ -94,11 +83,6 @@ class GenericSetContextStepsTests
         verify(uiContext, times(2)).reset();
         verify(uiContext, times(2)).putSearchContext(eq(webElement), any(SearchContextSetter.class));
         verify(baseValidations, times(2)).assertIfElementExists(ELEMENT_TO_SET_CONTEXT, locator);
-        LoggingEvent expectedLoggingEvent = warn(
-                "The step: \"When I change context to element located `$locator`\" is deprecated "
-                        + "and will be removed in VIVIDUS 0.7.0. "
-                        + "Use step: \"When I change context to element located by `$locator`\"");
-        assertThat(logger.getLoggingEvents(), is(List.of(expectedLoggingEvent, expectedLoggingEvent)));
     }
 
     @Test

@@ -54,6 +54,7 @@ import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.GenericMessageListenerContainer;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
+import org.vividus.annotation.Replacement;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
@@ -197,14 +198,13 @@ public class KafkaSteps
      * $comparisonRule `$expectedCount`"
      */
     @Deprecated(since = "0.5.6", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern =
+            "When I wait with `%1$s` timeout until count of consumed `%2$s` Kafka events is %3$s `%4$s`")
     @When("I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka messages is $comparisonRule"
             + " `$expectedCount`")
     public void waitForKafkaMessages(Duration timeout, String consumerKey, ComparisonRule comparisonRule,
             int expectedCount)
     {
-        LOGGER.warn("The step: \"When I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka "
-                + "events is $comparisonRule `$expectedCount`\" is deprecated and will be removed in VIVIDUS 0.6.0. "
-                + "Use step: \"`$expectedCount`\"");
         Matcher<Integer> countMatcher = comparisonRule.getComparisonRule(expectedCount);
         Integer result = new DurationBasedWaiter(timeout, Duration.ofSeconds(1)).wait(
                 () -> getEventsBy(consumerKey).size(),
