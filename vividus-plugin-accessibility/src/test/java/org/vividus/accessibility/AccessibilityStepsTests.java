@@ -77,7 +77,7 @@ class AccessibilityStepsTests
     }
 
     @Test
-    void shouldExecuteAccessibilityTest()
+    void shouldPerformAccessibilityScan()
     {
         AccessibilityCheckOptions first = createOptions(WCAG2A, WARNING, List.of());
         AccessibilityCheckOptions second = createOptions(WCAG2A, WARNING, List.of(elementToCheck));
@@ -88,7 +88,7 @@ class AccessibilityStepsTests
         AccessibilityViolation error = createViolation(ERROR, 3);
         when(accessibilityTestEngine.analyze(first)).thenReturn(List.of(warning, notice, error));
         when(accessibilityTestEngine.analyze(second)).thenReturn(List.of());
-        accessibilitySteps.checkAccessibility(checkOptions);
+        accessibilitySteps.performAccessibilityScan(checkOptions);
         InOrder ordered = Mockito.inOrder(softAssert, attachmentPublisher);
         ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE_NAME,
                 Map.of(WARNING2, Map.of(CODE, List.of(warning)),
