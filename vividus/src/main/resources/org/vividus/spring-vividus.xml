@@ -34,7 +34,11 @@
     </bean>
 
     <bean id="storyReporter" class="org.vividus.TestContextStoryReporter">
-        <property name="next" ref="runContextStoryReporter" />
+        <property name="next">
+            <bean class="org.vividus.replacement.DeprecatedCompositeStepsReporter">
+                <property name="next" ref="runContextStoryReporter" />
+            </bean>
+        </property>
     </bean>
 
     <bean id="runContextStoryReporter" class="org.vividus.RunContextStoryReporter">
