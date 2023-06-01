@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,9 @@ public final class XmlUtils
     private static final String INDENTATION_LEVEL = "4";
     private static final String YES = "yes";
 
+    private static final String EXTERNAL_PARAMETER_ENTITIES = "http://xml.org/sax/features/external-parameter-entities";
+    private static final String EXTERNAL_GENERAL_ENTITIES = "http://xml.org/sax/features/external-general-entities";
+
     private static final UnsafeGenericObjectPool<XPathFactory> XPATH_FACTORY = new UnsafeGenericObjectPool<>(
             XPathFactory::newInstance);
     private static final UnsafeGenericObjectPool<TransformerFactory> TRANSFORMER_FACTORY =
@@ -69,6 +72,8 @@ public final class XmlUtils
         try
         {
             DOCUMENT_BUILDER_FACTORY.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            DOCUMENT_BUILDER_FACTORY.setFeature(EXTERNAL_GENERAL_ENTITIES, false);
+            DOCUMENT_BUILDER_FACTORY.setFeature(EXTERNAL_PARAMETER_ENTITIES, false);
         }
         catch (ParserConfigurationException e)
         {
