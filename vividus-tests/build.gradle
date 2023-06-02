@@ -35,6 +35,7 @@ dependencies {
     implementation project(':vividus-plugin-json')
     implementation project(':vividus-plugin-kafka')
     implementation project(':vividus-plugin-lambdatest')
+    implementation project(':vividus-plugin-lighthouse')
     implementation project(':vividus-plugin-mobile-app')
     implementation project(':vividus-plugin-mobitru')
     implementation project(':vividus-plugin-mongodb')
