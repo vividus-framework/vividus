@@ -39,6 +39,7 @@
 * xref:plugin-datetime.adoc[Date/Time]
 * xref:plugin-electron.adoc[Electron]
 * xref:plugin-email.adoc[Email]
+* xref:plugin-lighthouse.adoc[Lighthouse]
 * xref:plugin-kafka.adoc[Kafka]
 * xref:plugin-mobile-app.adoc[Mobile Application]
 * xref:plugin-mongodb.adoc[MongoDB]

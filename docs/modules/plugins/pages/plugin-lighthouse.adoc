@@ -1,0 +1,64 @@
+= Lighthouse Plugin
+
+The plugin provides the ability to generate https://developer.chrome.com/docs/lighthouse/overview/[Lighthouse] performance reports on the user experience of a page on both mobile and desktop devices, and provides suggestions on how that page may be improved.
+
+:plugin-short-name: lighthouse
+include::partial$plugin-installation.adoc[]
+
+== Properties
+[cols="2,1,2,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`lighthouse.application-name`
+|<string>
+|
+|The application name to be used in the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent[User-Agent] header.
+
+|`lighthouse.access-token`
+|<string>
+|
+|The OAuth access token. Its recommended to specify the token if you plan to use the plugin in an automated way and make multiple queries per second.
+
+|===
+
+== Steps
+
+=== Perform Lighthouse scan
+
+Performs Lighthouse scan of the specified web page and validates performance metrics against expected thresholds.
+
+[source,gherkin]
+----
+When I perform Lighthouse $scanType scan of `$webPageUrl` page:$metricsValidations
+----
+
+* `$scanType` - The scan type to use:
+** `full` - The scan is performed on both `desktop` and `mobile` devices.
+** `desktop` - The scan is performed on `desktop` device.
+** `mobile` - The scan is performed on `mobile` device.
+* `$webPageUrl` - The page URL to perform scan on.
+* `$metricsValidations` - The metric validations:
+** `$metric` - The Lighthouse metric name such as:
+*** `First Contentful Paint`
+*** `Largest Contentful Paint`
+*** `Total Blocking Time`
+*** `Cumulative Layout Shift`
+*** `Speed Index`
+** `$rule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+** `$threshold` - The expected integer or floating (e.g. `0.35`) number.
+
+.Perform Lighthouse scan on both desktop and mobile devices
+[source]
+----
+When I perform Lighthouse full scan of `https://dequeuniversity.com/demo/mars` page:
+|metric                  |rule     |threshold|
+|First Contentful Paint  |LESS_THAN|500      |
+|Largest Contentful Paint|LESS_THAN|500      |
+|Total Blocking Time     |LESS_THAN|100      |
+|Cumulative Layout Shift |LESS_THAN|100      |
+|Speed Index             |LESS_THAN|1500     |
+----
