@@ -7,8 +7,8 @@
        default-lazy-init="true">
 
     <bean id="lighthouseSteps" class="org.vividus.lighthouse.LighthouseSteps">
-        <constructor-arg index="0" value="lighthouse.application-name" />
-        <constructor-arg index="1" value="lighthouse.access-token" />
+        <constructor-arg index="0" value="${lighthouse.application-name}" />
+        <constructor-arg index="1" value="${lighthouse.access-token}" />
     </bean>
 
     <util:list id="stepBeanNames-Lighthouse" value-type="java.lang.String">
