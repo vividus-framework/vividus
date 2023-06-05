@@ -1,11 +1,11 @@
 Composite: When I collect SQL Servers from resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`
-!-- WARNING: The step "When I collect SQL Servers from resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`" is deprecated and will be removed in VIVIDUS 0.6.0
+!-- Deprecated: 0.6.0, When I get Azure resource with identifier `resourceGroups/%1$s/providers/Microsoft.Sql/servers` using API version `2021-08-01-preview` and save it to %2$s variable `%3$s`
 When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.Sql/servers` using API version `2021-08-01-preview` and save it to <scopes> variable `<variableName>`
 
 Composite: When I collect databases from SQL Server `$sqlServerName` from resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`
-!-- WARNING: The step "When I collect databases from SQL Server `$sqlServerName` from resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`" is deprecated and will be removed in VIVIDUS 0.6.0
+!-- Deprecated: 0.6.0, When I get Azure resource with identifier `resourceGroups/%2$s/providers/Microsoft.Sql/servers/%1$s/databases` using API version `2021-08-01-preview` and save it to %3$s variable `%4$s`
 When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.Sql/servers/<sqlServerName>/databases` using API version `2021-08-01-preview` and save it to <scopes> variable `<variableName>`
 
 Composite: When I retrieve properties of database with name `$databaseName` from SQL Server `$sqlServerName` from resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`
-!-- WARNING: The step "When I retrieve properties of database with name `$databaseName` from SQL Server `$sqlServerName` from resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`" is deprecated and will be removed in VIVIDUS 0.6.0
+!-- Deprecated: 0.6.0, When I get Azure resource with identifier `resourceGroups/%3$s/providers/Microsoft.Sql/servers/%2$s/databases/%1$s` using API version `2021-08-01-preview` and save it to %4$s variable `%5$s`
 When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.Sql/servers/<sqlServerName>/databases/<databaseName>` using API version `2021-08-01-preview` and save it to <scopes> variable `<variableName>`

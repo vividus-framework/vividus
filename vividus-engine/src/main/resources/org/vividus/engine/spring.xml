@@ -75,7 +75,11 @@
 
     <bean class="org.vividus.log.LoggingStepMonitor" />
 
-    <bean class="org.vividus.annotation.ReplacementMonitor" />
+    <bean class="org.vividus.replacement.CollectingStepPatternsMonitor" />
+
+    <bean class="org.vividus.replacement.DeprecatedStepNotificationFactory" />
+
+    <bean class="org.vividus.replacement.DeprecatedCodeStepsReporter" />
 
     <bean id="stepFactory" class="org.vividus.steps.SpringStepFactory">
         <constructor-arg index="0" ref="configuration" />

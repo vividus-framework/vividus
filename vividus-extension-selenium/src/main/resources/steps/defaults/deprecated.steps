@@ -1,19 +1,19 @@
 Composite: When I wait until element located `$locator` appears
-!-- WARNING: The step "When I wait until element located `$locator` appears" is deprecated and will be removed in VIVIDUS 0.6.0
+!-- Deprecated: 0.6.0, When I wait until element located by `%1$s` appears
 When I wait until element located by `<locator>` appears
 
 Composite: When I wait until element located `$locator` disappears
-!-- WARNING: The step "When I wait until element located `$locator` disappears" is deprecated and will be removed in VIVIDUS 0.6.0
+!-- Deprecated: 0.6.0, When I wait until element located by `%1$s` disappears
 When I wait until element located by `<locator>` disappears
 
 Composite: Then element located `$locator` exists for `$duration` duration
-!-- WARNING: The step "Then element located `$locator` exists for `$duration` duration" is deprecated and will be removed in VIVIDUS 0.6.0
+!-- Deprecated: 0.6.0, Then element located by `%1$s` exists for `%2$s` duration
 Then element located by `<locator>` exists for `<duration>` duration
 
 Composite: When I change context to element located `$locator` in scope of current context
-!-- WARNING: The step "When I change context to element located `$locator` in scope of current context` duration" is deprecated and will be removed in VIVIDUS 0.7.0
+!-- Deprecated: 0.7.0, When I change context to element located by `%1$s` in scope of current context
 When I change context to element located by `<locator>` in scope of current context
 
 Composite: When I take screenshot and save it to folder `$screenshotFilePath`
-!-- WARNING: The step "When I take screenshot and save it to folder `$screenshotFilePath`" is deprecated and will be removed in VIVIDUS 0.7.0
+!-- Deprecated: 0.7.0, When I take screenshot and save it to file at path `%1$s`
 When I take screenshot and save it to file at path `<screenshotFilePath>`
