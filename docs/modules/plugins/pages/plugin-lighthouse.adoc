@@ -18,10 +18,10 @@ include::partial$plugin-installation.adoc[]
 |
 |The application name to be used in the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent[User-Agent] header.
 
-|`lighthouse.access-token`
+|`lighthouse.api-key`
 |<string>
 |
-|The OAuth access token. Its recommended to specify the token if you plan to use the plugin in an automated way and make multiple queries per second.
+|The API key that identifies your project and provides you with API access, quota, and reports. Its recommended to specify the key if you plan to use the plugin in an automated way and make multiple queries per second.
 
 |===
 

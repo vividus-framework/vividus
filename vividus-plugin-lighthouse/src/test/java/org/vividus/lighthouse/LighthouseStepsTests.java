@@ -63,7 +63,7 @@ import org.vividus.steps.ComparisonRule;
 class LighthouseStepsTests
 {
     private static final String APP_NAME = "app-name";
-    private static final String ACCESS_TOKEN = "access-token";
+    private static final String API_KEY = "api-token";
     private static final String URL = "https://example.com";
     private static final String SI_METRIC = "speedIndex";
     private static final String FCP_METRIC = "firstContentfulPaint";
@@ -99,7 +99,7 @@ class LighthouseStepsTests
                 Pagespeedapi pagespeedapi = mockPagespeedapiCall(key, metrics);
                 when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
 
-                LighthouseSteps steps = new LighthouseSteps(APP_NAME, ACCESS_TOKEN, attachmentPublisher, softAssert);
+                LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, attachmentPublisher, softAssert);
 
                 PerformanceMetricRule speedIndex = createSpeedIndexRule();
                 PerformanceMetricRule firstContentfulPaint = createRule(FCP_METRIC, 1500);
@@ -134,7 +134,7 @@ class LighthouseStepsTests
 
             when(pagespeedInsights.pagespeedapi()).thenReturn(desktopPagespeedapi).thenReturn(mobilePagespeedapi);
 
-            LighthouseSteps steps = new LighthouseSteps(APP_NAME, ACCESS_TOKEN, attachmentPublisher, softAssert);
+            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, attachmentPublisher, softAssert);
 
             PerformanceMetricRule speedIndex = createSpeedIndexRule();
             steps.performLighthouseScan(ScanType.FULL, URL, List.of(speedIndex));
@@ -179,7 +179,7 @@ class LighthouseStepsTests
         Pagespeedapi pagespeedapi = mock();
         Runpagespeed runpagespeed = mock();
         when(pagespeedapi.runpagespeed(URL)).thenReturn(runpagespeed);
-        when(runpagespeed.setAccessToken(ACCESS_TOKEN)).thenReturn(runpagespeed);
+        when(runpagespeed.setKey(API_KEY)).thenReturn(runpagespeed);
         when(runpagespeed.setStrategy(strategy)).thenReturn(runpagespeed);
         PagespeedApiPagespeedResponseV5 pagespeedApiPagespeedResponseV5 = mock();
         when(runpagespeed.execute()).thenReturn(pagespeedApiPagespeedResponseV5);
