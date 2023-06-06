@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,12 +48,43 @@ import io.qameta.allure.ConfigurationBuilder;
 import io.qameta.allure.Constants;
 import io.qameta.allure.Extension;
 import io.qameta.allure.ReportGenerator;
+import io.qameta.allure.allure1.Allure1Plugin;
+import io.qameta.allure.allure2.Allure2Plugin;
+import io.qameta.allure.category.CategoriesPlugin;
+import io.qameta.allure.category.CategoriesTrendPlugin;
+import io.qameta.allure.context.FreemarkerContext;
+import io.qameta.allure.context.JacksonContext;
+import io.qameta.allure.context.MarkdownContext;
+import io.qameta.allure.context.RandomUidContext;
+import io.qameta.allure.core.AttachmentsPlugin;
 import io.qameta.allure.core.Configuration;
 import io.qameta.allure.core.LaunchResults;
+import io.qameta.allure.core.MarkdownDescriptionsPlugin;
+import io.qameta.allure.core.ReportWebPlugin;
+import io.qameta.allure.core.TestsResultsPlugin;
+import io.qameta.allure.duration.DurationPlugin;
+import io.qameta.allure.duration.DurationTrendPlugin;
 import io.qameta.allure.entity.ExecutorInfo;
 import io.qameta.allure.entity.Status;
+import io.qameta.allure.environment.Allure1EnvironmentPlugin;
+import io.qameta.allure.executor.ExecutorPlugin;
+import io.qameta.allure.history.HistoryPlugin;
+import io.qameta.allure.history.HistoryTrendPlugin;
+import io.qameta.allure.idea.IdeaLinksPlugin;
+import io.qameta.allure.influxdb.InfluxDbExportPlugin;
+import io.qameta.allure.launch.LaunchPlugin;
+import io.qameta.allure.mail.MailPlugin;
+import io.qameta.allure.owner.OwnerPlugin;
+import io.qameta.allure.prometheus.PrometheusExportPlugin;
+import io.qameta.allure.retry.RetryPlugin;
+import io.qameta.allure.retry.RetryTrendPlugin;
+import io.qameta.allure.severity.SeverityPlugin;
+import io.qameta.allure.status.StatusChartPlugin;
+import io.qameta.allure.suites.SuitesPlugin;
 import io.qameta.allure.summary.SummaryData;
 import io.qameta.allure.summary.SummaryPlugin;
+import io.qameta.allure.tags.TagsPlugin;
+import io.qameta.allure.timeline.TimelinePlugin;
 import io.qameta.allure.util.PropertiesUtils;
 
 public class AllureReportGenerator implements IAllureReportGenerator
@@ -180,6 +211,32 @@ public class AllureReportGenerator implements IAllureReportGenerator
     private void generateData() throws IOException
     {
         List<Extension> extensions = List.of(
+                new JacksonContext(),
+                new MarkdownContext(),
+                new FreemarkerContext(),
+                new RandomUidContext(),
+                new MarkdownDescriptionsPlugin(),
+                new RetryPlugin(),
+                new RetryTrendPlugin(),
+                new TagsPlugin(),
+                new SeverityPlugin(),
+                new OwnerPlugin(),
+                new IdeaLinksPlugin(),
+                new HistoryPlugin(),
+                new HistoryTrendPlugin(),
+                new CategoriesPlugin(),
+                new CategoriesTrendPlugin(),
+                new DurationPlugin(),
+                new DurationTrendPlugin(),
+                new StatusChartPlugin(),
+                new TimelinePlugin(),
+                new SuitesPlugin(),
+                new ReportWebPlugin(),
+                new TestsResultsPlugin(),
+                new AttachmentsPlugin(),
+                new MailPlugin(),
+                new InfluxDbExportPlugin(),
+                new PrometheusExportPlugin(),
                 new SummaryPlugin() {
                     @Override
                     protected SummaryData getData(List<LaunchResults> launches)
@@ -188,10 +245,14 @@ public class AllureReportGenerator implements IAllureReportGenerator
                         data.setReportName("Test Report");
                         return data;
                     }
-                }
+                },
+                new ExecutorPlugin(),
+                new LaunchPlugin(),
+                new Allure1Plugin(),
+                new Allure1EnvironmentPlugin(),
+                new Allure2Plugin()
         );
         Configuration configuration = new ConfigurationBuilder()
-                .useDefault()
                 .fromExtensions(extensions)
                 .fromPlugins(allurePluginsProvider.getPlugins())
                 .build();
