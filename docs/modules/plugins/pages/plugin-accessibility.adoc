@@ -1,8 +1,6 @@
 = Accessibility Plugin
 
-The plugin provides functionality to perform accessibility validations.
-For more info please see https://squizlabs.github.io/HTML_CodeSniffer/[HTML Code Sniffer]
-Supported checks against following standards: https://squizlabs.github.io/HTML_CodeSniffer/Standards/WCAG2/[WCAG2] and https://squizlabs.github.io/HTML_CodeSniffer/Standards/Section508/[Section 508]
+The plugin provides functionality to perform accessibility validations using https://squizlabs.github.io/HTML_CodeSniffer/[HTML Code Sniffer] or https://www.deque.com/axe/[Axe Core] engines.
 
 :plugin-short-name: accessibility
 include::partial$plugin-installation.adoc[]
@@ -22,14 +20,67 @@ _Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
 Then I test accessibility:$options
 ----
 
+The step can be used to test accessibility using the following engines:
+
+==== Axe Core
+
+:axe-version: 4.7
+
+Axe Core is a powerful and accurate accessibility toolkit can get you to 80% issue coverage, or more, during development. It supports a wide range of standards such as `WCAG 2.0`, `WCAG 2.1`, `WCAG 2.2`, `Section 508`, `ACT` and so on.
+
+.Configure Axe Core engine
+[source,properties]
+----
+accessibility.engine=AXE_CORE
+----
+
+Accessibility test options:
+
+* `$options` - The accessibility validation options. Where:
+** [subs=+quotes]`*standard*` - The tag of accessibility standard to check a page against, the list of available tags can be found https://www.deque.com/axe/core-documentation/api-documentation/#axe-core-tags[here].
+** `elementsToCheck` - The comma-separated list of xref:vividus:plugins:plugin-web-app.adoc#_locator[locators] of elements to verify.
+** `elementsToIgnore` - The comma-separated list of xref:vividus:plugins:plugin-web-app.adoc#_locator[locators] of elements to ignore.
+** `violationsToIgnore` - The comma-separated list of https://dequeuniversity.com/rules/axe/{axe-version}/[violations] to ignore.
+** `violationsToCheck` - The comma-separated list of https://dequeuniversity.com/rules/axe/{axe-version}/[violations] to check.
+
+.Check page against WCAG 2.2 Level AA
+[source,gherkin]
+----
+Given I am on page with URL `https://vividus-test-site.onrender.com/`
+Then I test accessibility:
+|standard|
+|WCAG22AA|
+----
+
+.Check video elements against no-autoplay-audio and video-caption rules
+[source,gherkin]
+----
+Given I am on page with URL `https://vividus-test-site.onrender.com/`
+Then I test accessibility:
+|violationsToCheck              |elementsToCheck|
+|no-autoplay-audio,video-caption|tagName(video) |
+----
+
+==== HTML CS
+
+The https://squizlabs.github.io/HTML_CodeSniffer/[HTML Code Sniffer] supports checks against https://squizlabs.github.io/HTML_CodeSniffer/Standards/WCAG2/[WCAG2] and https://squizlabs.github.io/HTML_CodeSniffer/Standards/Section508/[Section 508] standards.
+
+.Configure HTML CS engine
+[source,properties]
+----
+accessibility.engine=HTML_CS
+----
+
+Accessibility test options:
+
 * `$options` - The accessibility validation options. Where:
 ** [subs=+quotes]`*standard*` -  The accessibility stanadard to verify against. One of `WCAG2A`, `WCAG2AA`, `WCAG2AAA`, `Section 508`
 ** [subs=+quotes]`*level*` - The violation level used to check. One of:
 *** `ERROR` - only errors will be validated,
 *** `WARNING` - error and warning will be validated,
 *** `NOTICE` - all the levels will be valiadted.
-** `locators` - The comma-separated xref:vividus:plugins:plugin-web-app.adoc#_locator[locators] of elements to verify
-** `elementsToIgnore` - The comma-separated xref:vividus:plugins:plugin-web-app.adoc#_locator[locators] of elements to ignore
+** `elementsToCheck` - The comma-separated list of xref:vividus:plugins:plugin-web-app.adoc#_locator[locators] of elements to verify
+** `elementsToIgnore` - The comma-separated list of xref:vividus:plugins:plugin-web-app.adoc#_locator[locators] of elements to ignore
 ** `violationsToIgnore` - The violations codes which should be ignored
 ** `violationsToCheck` - The violations codes which should be checked
 

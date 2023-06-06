@@ -20,7 +20,7 @@
 'use strict';
 
 /* eslint-disable max-statements */
-window.injectPa11y = function(window, options, rootElement, elementsToCheck, elementsToIgnore, done) {
+window.injectAccessibilityCheck = function(window, options, rootElement, elementsToCheck, elementsToIgnore, done) {
 
 	if (options.verifyPage) {
 		const windowHtml = window.document.documentElement.outerHTML;
@@ -175,5 +175,5 @@ window.injectPa11y = function(window, options, rootElement, elementsToCheck, ele
 
 /* istanbul ignore next */
 if (typeof module !== 'undefined' && module.exports) {
-	module.exports = injectPa11y;
+	module.exports = injectAccessibilityCheck;
 }

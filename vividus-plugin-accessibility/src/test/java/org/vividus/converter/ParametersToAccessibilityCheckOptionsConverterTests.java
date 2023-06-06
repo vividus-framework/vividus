@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -55,8 +56,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
-import org.vividus.accessibility.model.AccessibilityCheckOptions;
-import org.vividus.accessibility.model.ViolationLevel;
+import org.vividus.accessibility.model.htmlcs.HtmlCsCheckOptions;
+import org.vividus.accessibility.model.htmlcs.ViolationLevel;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.Visibility;
@@ -70,8 +71,8 @@ class ParametersToAccessibilityCheckOptionsConverterTests
 
     private static final String WARNING = "warning";
 
-    private static final TestLogger LOGGER =
-            TestLoggerFactory.getTestLogger(ParametersToAccessibilityCheckOptionsConverter.class);
+    private static final TestLogger LOGGER = TestLoggerFactory
+            .getTestLogger(AbstractAccessibilityCheckOptionsConverter.class);
 
     @Mock private UiContext uiContext;
     @Mock private ISearchActions searchActions;
@@ -82,14 +83,14 @@ class ParametersToAccessibilityCheckOptionsConverterTests
     void shouldConvertExamplesTableToOptionsWithMandatoryOptions()
     {
         ExamplesTable table = mockTable("|standard|level|\n|WCAG2AAA|error|");
-        AccessibilityCheckOptions checkOptions = converter.convertValue(table.getRowAsParameters(0),
-                AccessibilityCheckOptions.class);
+        HtmlCsCheckOptions checkOptions = converter.convertValue(table.getRowAsParameters(0),
+                HtmlCsCheckOptions.class);
 
         Assertions.assertAll(
                 () -> assertEquals("WCAG2AAA", checkOptions.getStandard()),
                 () -> assertEquals(ViolationLevel.ERROR, checkOptions.getLevel()),
                 () -> assertEquals(List.of(WARNING, NOTICE), checkOptions.getIgnore()),
-                () -> assertNull(checkOptions.getRootElement()),
+                () -> assertTrue(checkOptions.getRootElement().isEmpty()),
                 () -> assertThat(checkOptions.getHideElements(), is(empty())),
                 () -> assertThat(checkOptions.getElementsToCheck(), is(empty())),
                 () -> assertNull(checkOptions.getInclude()));
@@ -110,14 +111,14 @@ class ParametersToAccessibilityCheckOptionsConverterTests
         String ignoreKey = "ignore";
         mockFindElement(ignoreKey, List.of());
 
-        AccessibilityCheckOptions checkOptions = converter.convertValue(table.getRowAsParameters(0),
-                AccessibilityCheckOptions.class);
+        HtmlCsCheckOptions checkOptions = converter.convertValue(table.getRowAsParameters(0),
+                HtmlCsCheckOptions.class);
 
         Assertions.assertAll(
                 () -> assertEquals("WCAG2AA", checkOptions.getStandard()),
                 () -> assertEquals(ViolationLevel.ERROR, checkOptions.getLevel()),
                 () -> assertEquals(List.of("toIgnore", WARNING, NOTICE), checkOptions.getIgnore()),
-                () -> assertEquals(rootElement, checkOptions.getRootElement()),
+                () -> assertEquals(rootElement, checkOptions.getRootElement().get()),
                 () -> assertEquals(List.of(checkElement), checkOptions.getElementsToCheck()),
                 () -> assertEquals(List.of(), checkOptions.getHideElements()),
                 () -> assertEquals(List.of("toCheck"), checkOptions.getInclude()));
@@ -135,8 +136,8 @@ class ParametersToAccessibilityCheckOptionsConverterTests
 
         mockFindElement("empty-check", List.of());
 
-        AccessibilityCheckOptions checkOptions = converter.convertValue(table.getRowAsParameters(0),
-                AccessibilityCheckOptions.class);
+        HtmlCsCheckOptions checkOptions = converter.convertValue(table.getRowAsParameters(0),
+                HtmlCsCheckOptions.class);
 
         assertNull(checkOptions.getElementsToCheck());
     }
@@ -155,7 +156,7 @@ class ParametersToAccessibilityCheckOptionsConverterTests
     {
         Parameters row = mockTable(String.format(tableAsString)).getRowAsParameters(0);
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> converter.convertValue(row, AccessibilityCheckOptions.class));
+            () -> converter.convertValue(row, HtmlCsCheckOptions.class));
         assertEquals(notSetParameterName + " should be set", exception.getMessage());
         verifyNoInteractions(searchActions, uiContext);
         assertThat(LOGGER.getLoggingEvents(), empty());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,12 @@
  * limitations under the License.
  */
 
-package org.vividus.accessibility.model;
+package org.vividus.accessibility.model.axe;
 
-public enum AccessibilityStandard
+public enum ResultType
 {
-    SECTION_508
-    {
-        @Override
-        public String getStandardName()
-        {
-            return "Section508";
-        }
-    },
-    WCAG2A,
-    WCAG2AA,
-    WCAG2AAA;
-
-    public String getStandardName()
-    {
-        return name();
-    }
+    FAILED,
+    INCOMPLETED,
+    PASSED,
+    INAPPLICABLE;
 }

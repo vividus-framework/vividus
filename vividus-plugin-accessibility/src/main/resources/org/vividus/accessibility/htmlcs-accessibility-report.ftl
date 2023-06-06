@@ -59,8 +59,6 @@
     <link rel="stylesheet" href="../../css/external.css"/>
     <link rel="stylesheet" href="../../styles.css"/>
     <link rel="stylesheet" href="../../webjars/bootstrap/5.3.0-alpha3/css/bootstrap.min.css"/>
-</head>
-<body>
     <style>
         .Error {
             background-color: var(--bs-danger-bg-subtle) !important;
@@ -85,39 +83,6 @@
             font-size: 18px;
         }
 
-        .btn {
-            background-color: transparent !important;
-            text-align: left;
-        }
-
-        .btn span:hover {
-            text-decoration: underline;
-        }
-
-        .btn span {
-            width: 95%;
-            display: inline-block;
-        }
-
-        .btn-accordion:before {
-             font-family:'FontAwesome';
-             content:"\F107";
-             margin-right: 10px;
-             color: grey;
-        }
-
-        .btn-accordion.collapsed:before {
-             content:"\F105";
-        }
-
-        .btn-link {
-            text-decoration: none;
-        }
-
-        .btn-link:hover {
-            text-decoration: underline;
-        }
-
         pre {
             display: block;
             padding: 8.5px;
@@ -132,11 +97,7 @@
             border-radius: 4px;
             white-space: pre-wrap;
         }
-        button[data-bs-toggle='collapse'] {
-            display: inline-block;
-            width: 100%;
-            height: 100%;
-        }
+
         .card-title {
             margin-top: 0px;
             margin-bottom: 0px;
@@ -159,6 +120,9 @@
             background: #ffffff;
         }
     </style>
+    <link rel="stylesheet" href="../../webjars/vividus/buttons.css"/>
+</head>
+<body>
     <@violation_panel container=Error level="Error" />
     <@violation_panel container=Warning level="Warning" />
     <@violation_panel container=Notice level="Notice" />

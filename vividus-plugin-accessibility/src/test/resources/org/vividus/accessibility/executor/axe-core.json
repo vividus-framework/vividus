@@ -1,0 +1,38 @@
+[
+    {
+        "type": "failed",
+        "results": [
+            {
+                "id": "button-name",
+                "impact": "critical",
+                "tags": [
+                    "wcag2a",
+                    "section508"
+                ],
+                "description": "Ensures buttons have discernible text",
+                "help": "Buttons must have discernible text",
+                "helpUrl": "https://dequeuniversity.com/rules/axe/4.7/button-name?application=axeAPI",
+                "nodes": [
+                    {
+                        "any": [
+                            {
+                                "id": "presentational-role",
+                                "data": null,
+                                "relatedNodes": [],
+                                "impact": "minor",
+                                "message": "Element's default semantics were not overridden with role=\"none\" or role=\"presentation\""
+                            }
+                        ],
+                        "all": [],
+                        "none": [],
+                        "impact": "critical",
+                        "html": "<button class=\"ui-datepicker-trigger\" type=\"button\">...</button>",
+                        "target": [
+                            ".departure-date > .ui-datepicker-trigger:nth-child(4)"
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

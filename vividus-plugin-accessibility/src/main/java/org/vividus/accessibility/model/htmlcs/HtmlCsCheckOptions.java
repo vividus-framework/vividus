@@ -14,31 +14,25 @@
  * limitations under the License.
  */
 
-package org.vividus.accessibility.model;
+package org.vividus.accessibility.model.htmlcs;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import org.openqa.selenium.WebElement;
+import org.vividus.accessibility.model.AbstractAccessibilityCheckOptions;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AccessibilityCheckOptions
+public class HtmlCsCheckOptions extends AbstractAccessibilityCheckOptions
 {
     private final String standard;
     private List<String> ignore;
     private List<String> include;
     @JsonIgnore
-    private WebElement rootElement;
-    @JsonIgnore
-    private List<WebElement> elementsToCheck;
-    @JsonIgnore
-    private List<WebElement> hideElements;
-    @JsonIgnore
     private ViolationLevel level;
 
-    public AccessibilityCheckOptions(AccessibilityStandard standard)
+    public HtmlCsCheckOptions(AccessibilityStandard standard)
     {
         this.standard = standard.getStandardName();
     }
@@ -58,26 +52,6 @@ public class AccessibilityCheckOptions
         this.ignore = ignore;
     }
 
-    public WebElement getRootElement()
-    {
-        return rootElement;
-    }
-
-    public void setRootElement(WebElement rootElement)
-    {
-        this.rootElement = rootElement;
-    }
-
-    public List<WebElement> getElementsToCheck()
-    {
-        return elementsToCheck;
-    }
-
-    public void setElementsToCheck(List<WebElement> elementsToCheck)
-    {
-        this.elementsToCheck = elementsToCheck;
-    }
-
     public void setInclude(List<String> include)
     {
         this.include = include;
@@ -86,16 +60,6 @@ public class AccessibilityCheckOptions
     public List<String> getInclude()
     {
         return include;
-    }
-
-    public List<WebElement> getHideElements()
-    {
-        return hideElements;
-    }
-
-    public void setHideElements(List<WebElement> hideElements)
-    {
-        this.hideElements = hideElements;
     }
 
     public ViolationLevel getLevel()
