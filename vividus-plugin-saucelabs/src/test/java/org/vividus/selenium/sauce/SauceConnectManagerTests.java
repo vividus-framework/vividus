@@ -47,7 +47,7 @@ public class SauceConnectManagerTests
     private static final String OPTIONS = "options";
     private static final String USERNAME = "user%";
     private static final String USERKEY = "key";
-    private static final String DATA_CENTER = "EU_CENTRAL";
+    private static final DataCenter DATA_CENTER = DataCenter.EU_CENTRAL;
 
     private SauceTunnelManager sauceTunnelManager;
     private SauceConnectManager sauceConnectManager;
@@ -58,8 +58,7 @@ public class SauceConnectManagerTests
     public void before()
     {
         sauceTunnelManager = mock(SauceTunnelManager.class);
-        sauceConnectManager = new SauceConnectManager(USERNAME, USERKEY, DataCenter.fromString(DATA_CENTER),
-                sauceTunnelManager, context);
+        sauceConnectManager = new SauceConnectManager(USERNAME, USERKEY, DATA_CENTER, sauceTunnelManager, context);
     }
 
     @Test
