@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import com.azure.core.http.HttpHeaderName;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.http.rest.PagedResponse;
 import com.azure.core.util.BinaryData;
@@ -35,7 +36,6 @@ import com.azure.storage.blob.models.BlobItem;
 import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.BlobServiceProperties;
 import com.azure.storage.blob.models.ListBlobsOptions;
-import com.google.common.net.HttpHeaders;
 
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MediaTypeRegistry;
@@ -122,7 +122,7 @@ public class BlobStorageSteps
             BlobDownloadResponse blobDownloadResponse = blobServiceClientFactory.createBlobClient(blobName,
                     containerName, storageAccountKey).downloadStreamWithResponse(outputStream, null, null, null,
                     false, null, Context.NONE);
-            String contentType = blobDownloadResponse.getHeaders().getValue(HttpHeaders.CONTENT_TYPE);
+            String contentType = blobDownloadResponse.getHeaders().getValue(HttpHeaderName.CONTENT_TYPE);
             Object blobContent = MediaTypeRegistry.getDefaultRegistry().isInstanceOf(contentType,
                     MediaType.TEXT_PLAIN) ? outputStream.toString(StandardCharsets.UTF_8) : outputStream.toByteArray();
             variableContext.putVariable(scopes, variableName, blobContent);

@@ -39,6 +39,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.azure.core.http.HttpHeaderName;
 import com.azure.core.http.HttpHeaders;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.http.rest.PagedResponse;
@@ -324,7 +325,7 @@ class BlobStorageStepsTests
             }), eq(null), eq(null), eq(null), eq(false), eq(null), eq(Context.NONE))).thenReturn(blobDownloadResponse);
             HttpHeaders headers = mock(HttpHeaders.class);
             when(blobDownloadResponse.getHeaders()).thenReturn(headers);
-            when(headers.getValue("Content-Type")).thenReturn(mediaType);
+            when(headers.getValue(HttpHeaderName.CONTENT_TYPE)).thenReturn(mediaType);
             blobStorageSteps.downloadBlob(BLOB, CONTAINER, KEY, SCOPES, VARIABLE);
             verify(variableContext).putVariable(SCOPES, VARIABLE, dataOrBytes);
         });
