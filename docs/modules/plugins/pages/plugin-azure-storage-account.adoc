@@ -239,8 +239,8 @@ It should be specified along with `blobNameFilterValue`.
 |`MATCHES`
 
 |`blobNameFilterValue`
-|The full or partial blob name to be matched.
-It should be specified along with `blobNameFilterRule`.
+|The value to use by `blobNameFilterRule`. The filter is applied to the full blob name (including prefix specified in `blobNamePrefix`),
+e.g. regular expression applied with `matches` rule must match the full blob name.
 |`.*`
 |===
 
