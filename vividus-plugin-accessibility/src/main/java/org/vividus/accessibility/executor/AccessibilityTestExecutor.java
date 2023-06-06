@@ -14,43 +14,34 @@
  * limitations under the License.
  */
 
-package org.vividus.accessibility.engine;
+package org.vividus.accessibility.executor;
 
 import java.util.List;
 
-import javax.inject.Named;
-
-import org.vividus.accessibility.model.AccessibilityCheckOptions;
-import org.vividus.accessibility.model.AccessibilityViolation;
+import org.vividus.accessibility.model.AbstractAccessibilityCheckOptions;
 import org.vividus.ui.web.action.WebJavascriptActions;
-import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.json.ObjectMapperFactory;
 
-@Named
-public class HtmlCsAccessibilityTestEngine implements AccessibilityTestEngine
+public class AccessibilityTestExecutor
 {
-    private static final String HTML_CS_JS =
-        ResourceUtils.loadResource(HtmlCsAccessibilityTestEngine.class, "HTMLCS.js");
-    private static final String PA11Y_JS =
-        ResourceUtils.loadResource(HtmlCsAccessibilityTestEngine.class, "pa11y.js");
-
-    private final WebJavascriptActions webJavascriptActions;
     private final JsonUtils jsonUtils = new JsonUtils(ObjectMapperFactory.createWithCaseInsensitiveEnumDeserializer());
 
-    public HtmlCsAccessibilityTestEngine(WebJavascriptActions webJavascriptActions)
+    private final WebJavascriptActions webJavascriptActions;
+
+    public AccessibilityTestExecutor(WebJavascriptActions webJavascriptActions)
     {
         this.webJavascriptActions = webJavascriptActions;
     }
 
-    @Override
-    public List<AccessibilityViolation> analyze(AccessibilityCheckOptions options)
+    public <T> List<T> execute(AccessibilityEngine engine, AbstractAccessibilityCheckOptions options,
+            Class<T> outputType)
     {
         String optionsJson = jsonUtils.toJson(options);
-        String script = HTML_CS_JS + PA11Y_JS + "injectPa11y(window, " + optionsJson
+        String script = engine.getScript() + engine.getRunner() + "injectAccessibilityCheck(window, " + optionsJson
                 + ", arguments[0], arguments[1], arguments[2], arguments[arguments.length - 1]);";
-        String result = webJavascriptActions.executeAsyncScript(script, options.getRootElement(),
+        String result = webJavascriptActions.executeAsyncScript(script, options.getRootElement().orElse(null),
                 options.getElementsToCheck(), options.getHideElements());
-        return jsonUtils.toObjectList(result, AccessibilityViolation.class);
+        return jsonUtils.toObjectList(result, outputType);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,32 @@
  * limitations under the License.
  */
 
-package org.vividus.accessibility.model;
+package org.vividus.accessibility.model.axe;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.List;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-
-class AccessibilityStandardTests
+public class AxeReportEntry
 {
-    @ParameterizedTest
-    @CsvSource({ "WCAG2A, WCAG2A", "WCAG2AA, WCAG2AA", "WCAG2AAA, WCAG2AAA", "SECTION_508, Section508"})
-    void shouldReturnStandardName(AccessibilityStandard standard, String expectedName)
+    private ResultType type;
+    private List<Result> results;
+
+    public ResultType getType()
     {
-        assertEquals(expectedName, standard.getStandardName());
+        return type;
+    }
+
+    public void setType(ResultType type)
+    {
+        this.type = type;
+    }
+
+    public List<Result> getResults()
+    {
+        return results;
+    }
+
+    public void setResults(List<Result> results)
+    {
+        this.results = results;
     }
 }

@@ -19,15 +19,18 @@ package org.vividus.accessibility;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.vividus.accessibility.model.AccessibilityStandard.WCAG2A;
-import static org.vividus.accessibility.model.ViolationLevel.ERROR;
-import static org.vividus.accessibility.model.ViolationLevel.NOTICE;
-import static org.vividus.accessibility.model.ViolationLevel.WARNING;
+import static org.vividus.accessibility.model.htmlcs.AccessibilityStandard.WCAG2A;
+import static org.vividus.accessibility.model.htmlcs.ViolationLevel.ERROR;
+import static org.vividus.accessibility.model.htmlcs.ViolationLevel.NOTICE;
+import static org.vividus.accessibility.model.htmlcs.ViolationLevel.WARNING;
 
 import java.util.List;
 import java.util.Map;
 
+import org.jbehave.core.model.ExamplesTable;
+import org.jbehave.core.steps.Parameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,11 +41,17 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.vividus.accessibility.engine.AccessibilityTestEngine;
-import org.vividus.accessibility.model.AccessibilityCheckOptions;
-import org.vividus.accessibility.model.AccessibilityStandard;
-import org.vividus.accessibility.model.AccessibilityViolation;
-import org.vividus.accessibility.model.ViolationLevel;
+import org.vividus.accessibility.executor.AccessibilityEngine;
+import org.vividus.accessibility.executor.AccessibilityTestExecutor;
+import org.vividus.accessibility.model.axe.AxeCheckOptions;
+import org.vividus.accessibility.model.axe.AxeOptions;
+import org.vividus.accessibility.model.axe.AxeReportEntry;
+import org.vividus.accessibility.model.axe.Result;
+import org.vividus.accessibility.model.axe.ResultType;
+import org.vividus.accessibility.model.htmlcs.AccessibilityStandard;
+import org.vividus.accessibility.model.htmlcs.AccessibilityViolation;
+import org.vividus.accessibility.model.htmlcs.HtmlCsCheckOptions;
+import org.vividus.accessibility.model.htmlcs.ViolationLevel;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
@@ -51,8 +60,9 @@ import org.vividus.softassert.ISoftAssert;
 class AccessibilityStepsTests
 {
     private static final String MATCHER = "<0L>";
-    private static final String TITLE = "Accessibility violations at page https://fus-ro.dah";
-    private static final String TEMPLATE_NAME = "/org/vividus/accessibility/violations-table.ftl";
+    private static final String PAGE = "https://fus-ro.dah";
+    private static final String TITLE = "Accessibility testing report for page: " + PAGE;
+    private static final String TEMPLATE_NAME = "/org/vividus/accessibility/htmlcs-accessibility-report.ftl";
     private static final String NOTICE2 = "Notice";
     private static final String WARNING2 = "Warning";
     private static final String ERROR2 = "Error";
@@ -61,7 +71,7 @@ class AccessibilityStepsTests
             "Number of accessibility violations of level Warning and above at the page https://fus-ro.dah";
 
     @Mock private WebElement elementToCheck;
-    @Mock private AccessibilityTestEngine accessibilityTestEngine;
+    @Mock private AccessibilityTestExecutor accessibilityTestExecutor;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private ISoftAssert softAssert;
@@ -73,22 +83,32 @@ class AccessibilityStepsTests
     {
         WebDriver webDriver = mock(WebDriver.class);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        when(webDriver.getCurrentUrl()).thenReturn("https://fus-ro.dah");
+        when(webDriver.getCurrentUrl()).thenReturn(PAGE);
     }
 
     @Test
-    void shouldPerformAccessibilityScan()
+    void shouldPerformHtmlCsAccessibilityScan()
     {
-        AccessibilityCheckOptions first = createOptions(WCAG2A, WARNING, List.of());
-        AccessibilityCheckOptions second = createOptions(WCAG2A, WARNING, List.of(elementToCheck));
-        AccessibilityCheckOptions third = createOptions(WCAG2A, WARNING, null);
-        List<AccessibilityCheckOptions> checkOptions = List.of(first, second, third);
+        accessibilitySteps.setAccessibilityEngine(AccessibilityEngine.HTML_CS);
+        HtmlCsCheckOptions first = createOptions(WCAG2A, WARNING, List.of());
+        HtmlCsCheckOptions second = createOptions(WCAG2A, WARNING, List.of(elementToCheck));
+        HtmlCsCheckOptions third = createOptions(WCAG2A, WARNING, null);
+        Parameters params = mock(Parameters.class);
+        when(params.as(HtmlCsCheckOptions.class)).thenReturn(first).thenReturn(second).thenReturn(third);
+        ExamplesTable checkOptions = mock(ExamplesTable.class);
+        when(checkOptions.getRowsAsParameters(true)).thenReturn(List.of(params, params, params));
+
         AccessibilityViolation warning = createViolation(WARNING, 2);
         AccessibilityViolation notice = createViolation(NOTICE, 1);
         AccessibilityViolation error = createViolation(ERROR, 3);
-        when(accessibilityTestEngine.analyze(first)).thenReturn(List.of(warning, notice, error));
-        when(accessibilityTestEngine.analyze(second)).thenReturn(List.of());
+
+        when(accessibilityTestExecutor.execute(AccessibilityEngine.HTML_CS, first, AccessibilityViolation.class))
+                .thenReturn(List.of(warning, notice, error));
+        when(accessibilityTestExecutor.execute(AccessibilityEngine.HTML_CS, second, AccessibilityViolation.class))
+                .thenReturn(List.of());
+
         accessibilitySteps.performAccessibilityScan(checkOptions);
+
         InOrder ordered = Mockito.inOrder(softAssert, attachmentPublisher);
         ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE_NAME,
                 Map.of(WARNING2, Map.of(CODE, List.of(warning)),
@@ -109,10 +129,47 @@ class AccessibilityStepsTests
         ordered.verifyNoMoreInteractions();
     }
 
-    private AccessibilityCheckOptions createOptions(AccessibilityStandard standard, ViolationLevel level,
+    @Test
+    void shouldExecuteAxeCoreAccessibilityTest()
+    {
+        accessibilitySteps.setAccessibilityEngine(AccessibilityEngine.AXE_CORE);
+        AxeOptions axeRun = mock(AxeOptions.class);
+        AxeCheckOptions options = mock(AxeCheckOptions.class);
+        when(options.getRunOnly()).thenReturn(axeRun);
+        Parameters params = mock(Parameters.class);
+        when(params.as(AxeCheckOptions.class)).thenReturn(options);
+        ExamplesTable checkOptions = mock(ExamplesTable.class);
+        when(checkOptions.getRowsAsParameters(true)).thenReturn(List.of(params));
+
+        AxeReportEntry failedEntry = createEntry(ResultType.FAILED);
+        AxeReportEntry passedEntry = createEntry(ResultType.PASSED);
+        when(accessibilityTestExecutor.execute(AccessibilityEngine.AXE_CORE, options, AxeReportEntry.class))
+                .thenReturn(List.of(passedEntry, failedEntry));
+
+        accessibilitySteps.performAccessibilityScan(checkOptions);
+
+        verify(attachmentPublisher).publishAttachment(
+            "/org/vividus/accessibility/axe-accessibility-report.ftl",
+            Map.of("entries", List.of(passedEntry, failedEntry), "url", PAGE, "run", axeRun),
+            TITLE
+        );
+        verify(softAssert).assertThat(eq("Number of accessibility violations at the page " + PAGE), eq(1L),
+                argThat(m -> MATCHER.equals(m.toString())));
+    }
+
+    private AxeReportEntry createEntry(ResultType type)
+    {
+        AxeReportEntry entry = new AxeReportEntry();
+        entry.setType(type);
+        Result result = new Result();
+        entry.setResults(List.of(result));
+        return entry;
+    }
+
+    private HtmlCsCheckOptions createOptions(AccessibilityStandard standard, ViolationLevel level,
             List<WebElement> elementsToCheck)
     {
-        AccessibilityCheckOptions options = new AccessibilityCheckOptions(standard);
+        HtmlCsCheckOptions options = new HtmlCsCheckOptions(standard);
         options.setElementsToCheck(elementsToCheck);
         options.setLevel(level);
         return options;

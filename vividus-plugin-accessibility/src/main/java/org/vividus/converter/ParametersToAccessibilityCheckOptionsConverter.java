@@ -19,115 +19,59 @@ package org.vividus.converter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.reflect.TypeLiteral;
-import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.vividus.accessibility.model.AccessibilityCheckOptions;
-import org.vividus.accessibility.model.AccessibilityStandard;
-import org.vividus.accessibility.model.ViolationLevel;
+import org.vividus.accessibility.model.htmlcs.AccessibilityStandard;
+import org.vividus.accessibility.model.htmlcs.HtmlCsCheckOptions;
+import org.vividus.accessibility.model.htmlcs.ViolationLevel;
 import org.vividus.ui.action.ISearchActions;
-import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.UiContext;
 
 public class ParametersToAccessibilityCheckOptionsConverter
-    extends AbstractParameterConverter<Parameters, AccessibilityCheckOptions>
+        extends AbstractAccessibilityCheckOptionsConverter<HtmlCsCheckOptions>
 {
     private static final String LEVEL = "level";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(
-            ParametersToAccessibilityCheckOptionsConverter.class);
 
     private static final String STANDARD = "standard";
 
     private final UiContext uiContext;
-    private final ISearchActions searchActions;
 
     public ParametersToAccessibilityCheckOptionsConverter(UiContext uiContext, ISearchActions searchActions)
     {
+        super(searchActions);
         this.uiContext = uiContext;
-        this.searchActions = searchActions;
     }
 
     @Override
-    public AccessibilityCheckOptions convertValue(Parameters row, Type type)
+    public HtmlCsCheckOptions convertValue(Parameters row, Type type)
     {
-        AccessibilityStandard standardParameter = row.valueAs(STANDARD, AccessibilityStandard.class, null);
+        AccessibilityStandard standardParameter = getStandard(row, AccessibilityStandard.class);
         checkNotNull(standardParameter, STANDARD);
         ViolationLevel level = row.valueAs(LEVEL, ViolationLevel.class, null);
         checkNotNull(level, LEVEL);
-        Set<Locator> locators = row.valueAs("elementsToCheck", new TypeLiteral<Set<Locator>>() { }.getType(), Set.of());
-        Set<Locator> elementsToIgnore = row.valueAs("elementsToIgnore", new TypeLiteral<Set<Locator>>() { }.getType(),
-                Set.of());
-        List<String> violationsToIgnore = row.valueAs("violationsToIgnore",
-                new TypeLiteral<List<String>>() { }.getType(), List.of());
-        List<String> violationsToCheck = row.valueAs("violationsToCheck",
-                new TypeLiteral<List<String>>() { }.getType(), null);
-        return createOptions(standardParameter, violationsToIgnore, violationsToCheck, locators, elementsToIgnore,
-                level);
-    }
 
-    private AccessibilityCheckOptions createOptions(AccessibilityStandard standard, List<String> violationsToIgnore,
-            List<String> violationsToCheck, Set<Locator> elementsToCheck,
-            Set<Locator> elementsToIgnore, ViolationLevel level)
-    {
-        List<String> ignore = new ArrayList<>(violationsToIgnore);
+        List<String> ignore = new ArrayList<>(getViolationsToIgnore(row));
         Stream.of(ViolationLevel.values())
               .filter(l -> l.getCode() > level.getCode())
               .map(ViolationLevel::toString)
               .map(String::toLowerCase)
               .forEach(ignore::add);
-        AccessibilityCheckOptions options = new AccessibilityCheckOptions(standard);
+        HtmlCsCheckOptions options = new HtmlCsCheckOptions(standardParameter);
         SearchContext context = uiContext.getSearchContext();
         if (context instanceof WebElement)
         {
-            options.setRootElement((WebElement) context);
+            options.setRootElement(Optional.of((WebElement) context));
         }
         options.setIgnore(ignore);
-        options.setInclude(violationsToCheck);
-        options.setElementsToCheck(findElements(elementsToCheck, true));
-        options.setHideElements(findElements(elementsToIgnore, false));
+        options.setInclude(getViolationsToCheck(row));
+        configureElements(row, options);
         options.setLevel(level);
         return options;
-    }
-
-    @SuppressWarnings("NoNullForCollectionReturn")
-    private List<WebElement> findElements(Set<Locator> locator, boolean nullOnEmpty)
-    {
-        if (locator.isEmpty())
-        {
-            return List.of();
-        }
-
-        List<WebElement> elements = locator.stream()
-                                           .map(s -> {
-                                               s.getSearchParameters().setVisibility(Visibility.ALL);
-                                               return s;
-                                           })
-                                           .map(this::findElementsToCheck)
-                                           .flatMap(List::stream)
-                                           .collect(Collectors.toList());
-
-        return elements.isEmpty() && nullOnEmpty ? null : elements;
-    }
-
-    private List<WebElement> findElementsToCheck(Locator locator)
-    {
-        List<WebElement> elements = searchActions.findElements(locator);
-        if (elements.isEmpty())
-        {
-            LOGGER.info("No elements found by {}", locator);
-        }
-        return elements;
     }
 
     private <T> void checkNotNull(T toCheck, String fieldName)

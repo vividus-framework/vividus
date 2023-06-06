@@ -1,0 +1,42 @@
+.btn {
+    background-color: transparent !important;
+    text-align: left;
+}
+
+.btn span:hover {
+    text-decoration: underline;
+}
+
+.btn span {
+    width: 95%;
+    display: inline-block;
+}
+
+.btn-accordion:before {
+     font-family:'FontAwesome';
+     content:"\F107";
+     margin-right: 10px;
+     color: grey;
+}
+
+.btn-accordion {
+     font-size: 18px;
+}
+
+.btn-accordion.collapsed:before {
+     content:"\F105";
+}
+
+.btn-link {
+    text-decoration: none;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+button[data-bs-toggle='collapse'] {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+}

@@ -18,39 +18,47 @@ package org.vividus.accessibility;
 
 import static org.hamcrest.Matchers.equalTo;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.accessibility.engine.AccessibilityTestEngine;
-import org.vividus.accessibility.model.AccessibilityCheckOptions;
-import org.vividus.accessibility.model.AccessibilityViolation;
-import org.vividus.accessibility.model.ViolationLevel;
+import org.jbehave.core.model.ExamplesTable;
+import org.vividus.accessibility.executor.AccessibilityEngine;
+import org.vividus.accessibility.executor.AccessibilityTestExecutor;
+import org.vividus.accessibility.model.AbstractAccessibilityCheckOptions;
+import org.vividus.accessibility.model.axe.AxeCheckOptions;
+import org.vividus.accessibility.model.axe.AxeReportEntry;
+import org.vividus.accessibility.model.axe.ResultType;
+import org.vividus.accessibility.model.htmlcs.AccessibilityViolation;
+import org.vividus.accessibility.model.htmlcs.HtmlCsCheckOptions;
+import org.vividus.accessibility.model.htmlcs.ViolationLevel;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.util.UriUtils;
 
 public class AccessibilitySteps
 {
-    private static final String MESSAGE = "Number of accessibility violations of level %s"
+    private static final String HTML_CS_MESSAGE = "Number of accessibility violations of level %s"
             + " and above at the page %s";
+    private static final String AXE_CORE_MESSAGE = "Number of accessibility violations at the page %s";
 
-    private final AccessibilityTestEngine accessibilityTestEngine;
+    private AccessibilityEngine accessibilityEngine;
+
+    private final AccessibilityTestExecutor accessibilityTestExecutor;
     private final IWebDriverProvider webDriverProvider;
     private final IAttachmentPublisher attachmentPublisher;
     private final ISoftAssert softAssert;
 
-    public AccessibilitySteps(AccessibilityTestEngine accessibilityTestEngine,
+    public AccessibilitySteps(AccessibilityTestExecutor accessibilityTestExecutor,
                               IWebDriverProvider webDriverProvider,
                               IAttachmentPublisher attachmentPublisher,
                               ISoftAssert softAssert)
     {
-        this.accessibilityTestEngine = accessibilityTestEngine;
+        this.accessibilityTestExecutor = accessibilityTestExecutor;
         this.webDriverProvider = webDriverProvider;
         this.attachmentPublisher = attachmentPublisher;
         this.softAssert = softAssert;
@@ -83,21 +91,52 @@ public class AccessibilitySteps
      * @see <a href="https://squizlabs.github.io/HTML_CodeSniffer/Standards/Section508/">Section508</a>
      */
     @When("I perform accessibility scan:$options")
-    public void performAccessibilityScan(List<AccessibilityCheckOptions> checkOptions)
+    public void performAccessibilityScan(ExamplesTable checkOptions)
     {
-        URI currentUrl = UriUtils.createUri(webDriverProvider.get().getCurrentUrl());
-        checkOptions.stream()
-                    .filter(o -> null != o.getElementsToCheck())
-                    .forEach(options -> {
-                        List<AccessibilityViolation> violations = accessibilityTestEngine.analyze(options);
-                        ViolationLevel level = options.getLevel();
-                        publishAttachment(currentUrl, violations);
-                        softAssert.assertThat(String.format(MESSAGE, level, currentUrl),
-                            violations.stream().filter(v -> v.getTypeCode() <= level.getCode()).count(), equalTo(0L));
-                    });
+        String currentUrl = webDriverProvider.get().getCurrentUrl();
+
+        if (accessibilityEngine == AccessibilityEngine.HTML_CS)
+        {
+            perform(checkOptions, HtmlCsCheckOptions.class, options ->
+            {
+                List<AccessibilityViolation> violations = accessibilityTestExecutor
+                        .execute(accessibilityEngine, options, AccessibilityViolation.class);
+                ViolationLevel level = options.getLevel();
+                publishAttachment(currentUrl, convertResult(violations));
+                softAssert.assertThat(String.format(HTML_CS_MESSAGE, level, currentUrl),
+                    violations.stream().filter(v -> v.getTypeCode() <= level.getCode()).count(), equalTo(0L));
+            });
+        }
+        else
+        {
+            perform(checkOptions, AxeCheckOptions.class, options ->
+            {
+                List<AxeReportEntry> reportEntries = accessibilityTestExecutor.execute(accessibilityEngine, options,
+                        AxeReportEntry.class);
+
+                publishAttachment(currentUrl, Map.of("entries", reportEntries, "url", currentUrl, "run",
+                        options.getRunOnly()));
+
+                long failures = reportEntries.stream().filter(e -> ResultType.FAILED == e.getType())
+                        .map(AxeReportEntry::getResults).map(List::size).findFirst().orElse(0);
+                softAssert.assertThat(String.format(AXE_CORE_MESSAGE, currentUrl), failures, equalTo(0L));
+            });
+        }
     }
 
-    private void publishAttachment(URI pageUrl, List<AccessibilityViolation> accessibilityViolations)
+    @SuppressWarnings("unchecked")
+    private <T extends AbstractAccessibilityCheckOptions> void perform(ExamplesTable checkOptions, Class<T> type,
+            Consumer<T> onOption)
+    {
+        checkOptions.getRowsAsParameters(true)
+                    .stream()
+                    .map(p -> (T) p.as(type))
+                    .filter(o -> null != o.getElementsToCheck())
+                    .forEach(onOption);
+    }
+
+    private Map<String, Map<String, List<AccessibilityViolation>>>
+            convertResult(List<AccessibilityViolation> accessibilityViolations)
     {
         Map<String, Map<String, List<AccessibilityViolation>>> result =
                 accessibilityViolations.stream()
@@ -107,7 +146,18 @@ public class AccessibilitySteps
         Stream.of(ViolationLevel.values())
               .map(Object::toString)
               .forEach(l -> result.computeIfAbsent(l, k -> Map.of()));
-        attachmentPublisher.publishAttachment("/org/vividus/accessibility/violations-table.ftl",
-                result, "Accessibility violations at page " + pageUrl);
+
+        return result;
+    }
+
+    private void publishAttachment(String pageUrl, Object result)
+    {
+        attachmentPublisher.publishAttachment(accessibilityEngine.getReportTemplate(), result,
+                "Accessibility testing report for page: " + pageUrl);
+    }
+
+    public void setAccessibilityEngine(AccessibilityEngine accessibilityEngine)
+    {
+        this.accessibilityEngine = accessibilityEngine;
     }
 }
