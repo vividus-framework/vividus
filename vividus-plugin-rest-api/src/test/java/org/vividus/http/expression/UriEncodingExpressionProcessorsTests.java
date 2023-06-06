@@ -32,11 +32,16 @@ class UriEncodingExpressionProcessorsTests
     @Test
     void testExecuteWithUnsupportedException()
     {
-        assertEquals(Optional.empty(), processor.execute("encodeUri(value)"));
+        assertEquals(Optional.empty(), processor.execute("encode(value)"));
     }
 
     @ParameterizedTest(name = "{index}: for expression \"{0}\", result is \"{1}\"")
     @CsvSource({
+        // CHECKSTYLE:OFF
+        // @formatter:off
+        "encodeUri(https://user@vividus.dev:vividus.бел/path/segment?a&b=c#fragment), https%3A%2F%2Fuser%40vividus.dev%3Avividus.%D0%B1%D0%B5%D0%BB%2Fpath%2Fsegment%3Fa%26b%3Dc%23fragment",
+        // @formatter:on
+        // CHECKSTYLE:ON
         "encodeUriUserInfo(user@vividus.dev:pass), user%40vividus.dev:pass",
         "encodeUriHost(vividus.бел),               vividus.%D0%B1%D0%B5%D0%BB",
         "encodeUriPath(/path/with spaces/),        /path/with%20spaces/",

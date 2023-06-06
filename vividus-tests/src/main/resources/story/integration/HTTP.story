@@ -23,11 +23,21 @@ Then the response code is equal to '200'
 Then JSON element by JSON path `$.url` is equal to `${http-endpoint}anything/path-with-&-ampersand`
 
 Scenario: Verify handling of ampersand and space characters in URI query parameter
-When I execute HTTP GET request for resource with URL `https://httpbin.org/get?key=#{encodeUriQueryParameter(a & b)}`
+When I execute HTTP GET request for resource with relative URL `/get?key=#{encodeUriQueryParameter(a & b)}`
 Then the response code is equal to '200'
-Then JSON element by JSON path `$.url` is equal to `https://httpbin.org/get?key=a %26 b`
+Then JSON element by JSON path `$.url` is equal to `${http-endpoint}get?key=a%20%26%20b`
 Then JSON element by JSON path `$.args.length()` is equal to `1`
 Then JSON element by JSON path `$.args.key` is equal to `a & b`
+
+Scenario: Verify handling of encoded special characters in URI query parameter
+Given I initialize scenario variable `url` with value `https://user@vividus.dev:vividus.dev/path/segment?a&b=c#fragment`
+Given I initialize scenario variable `encodedUrl` with value `#{encodeUri(${url})}`
+Then `${encodedUrl}` is equal to `https%3A%2F%2Fuser%40vividus.dev%3Avividus.dev%2Fpath%2Fsegment%3Fa%26b%3Dc%23fragment`
+When I execute HTTP GET request for resource with relative URL `/get?key=https:%2F%2Fuser%40vividus.dev:vividus.dev%2Fpath%2Fsegment%3Fa%26b=c%23fragment`
+Then the response code is equal to '200'
+Then JSON element by JSON path `$.url` is equal to `${http-endpoint}get?key=https://user@vividus.dev:vividus.dev/path/segment?a%26b=c%23fragment`
+Then JSON element by JSON path `$.args.length()` is equal to `1`
+Then JSON element by JSON path `$.args.key` is equal to `${url}`
 
 Scenario: Set HTTP cookies
 When I execute HTTP GET request for resource with relative URL `/cookies/set?vividus-cookie=vividus`

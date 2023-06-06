@@ -31,6 +31,7 @@ public class UriEncodingExpressionProcessors extends DelegatingExpressionProcess
     public UriEncodingExpressionProcessors()
     {
         super(List.of(
+            createEncodingExpression("encodeUri",               UriUtils::encode),
             createEncodingExpression("encodeUriUserInfo",       UriUtils::encodeUserInfo),
             createEncodingExpression("encodeUriHost",           UriUtils::encodeHost),
             createEncodingExpression("encodeUriPath",           UriUtils::encodePath),
