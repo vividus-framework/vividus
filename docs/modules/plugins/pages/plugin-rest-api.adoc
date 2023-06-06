@@ -90,7 +90,7 @@ https://tools.ietf.org/html/rfc3986[RFC 3986].
 |`#{encodeUri(*$anyValue*)}`
 |Encodes all characters that are either illegal, or have any reserved meaning, anywhere within a URI, as defined in
 https://tools.ietf.org/html/rfc3986[RFC 3986]. This is useful to ensure that the given value will be preserved as-is
-and will not have any o impact on the structure or meaning of the URI.
+and will not have any impact on the structure or meaning of the URI.
 
 |`#{encodeUriUserInfo(*$userInfo*)}`
 |Encodes the given URI user info.
