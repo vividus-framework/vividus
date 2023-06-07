@@ -31,6 +31,7 @@ import org.vividus.accessibility.executor.AccessibilityEngine;
 import org.vividus.accessibility.executor.AccessibilityTestExecutor;
 import org.vividus.accessibility.model.AbstractAccessibilityCheckOptions;
 import org.vividus.accessibility.model.axe.AxeCheckOptions;
+import org.vividus.accessibility.model.axe.AxeOptions;
 import org.vividus.accessibility.model.axe.AxeReportEntry;
 import org.vividus.accessibility.model.axe.ResultType;
 import org.vividus.accessibility.model.htmlcs.AccessibilityViolation;
@@ -102,7 +103,7 @@ public class AccessibilitySteps
                 List<AccessibilityViolation> violations = accessibilityTestExecutor
                         .execute(accessibilityEngine, options, AccessibilityViolation.class);
                 ViolationLevel level = options.getLevel();
-                publishAttachment(currentUrl, convertResult(violations));
+                publishAttachment(options.getStandard(), currentUrl, convertResult(violations));
                 softAssert.assertThat(String.format(HTML_CS_MESSAGE, level, currentUrl),
                     violations.stream().filter(v -> v.getTypeCode() <= level.getCode()).count(), equalTo(0L));
             });
@@ -114,8 +115,9 @@ public class AccessibilitySteps
                 List<AxeReportEntry> reportEntries = accessibilityTestExecutor.execute(accessibilityEngine, options,
                         AxeReportEntry.class);
 
-                publishAttachment(currentUrl, Map.of("entries", reportEntries, "url", currentUrl, "run",
-                        options.getRunOnly()));
+                AxeOptions axeOptions = options.getRunOnly();
+                publishAttachment(axeOptions, currentUrl, Map.of("entries", reportEntries, "url", currentUrl,
+                        "run", axeOptions));
 
                 long failures = reportEntries.stream().filter(e -> ResultType.FAILED == e.getType())
                         .map(AxeReportEntry::getResults).map(List::size).findFirst().orElse(0);
@@ -150,10 +152,10 @@ public class AccessibilitySteps
         return result;
     }
 
-    private void publishAttachment(String pageUrl, Object result)
+    private void publishAttachment(Object standard, String pageUrl, Object result)
     {
         attachmentPublisher.publishAttachment(accessibilityEngine.getReportTemplate(), result,
-                "Accessibility testing report for page: " + pageUrl);
+                String.format("[%s] Accessibility report for page: %s", standard, pageUrl));
     }
 
     public void setAccessibilityEngine(AccessibilityEngine accessibilityEngine)

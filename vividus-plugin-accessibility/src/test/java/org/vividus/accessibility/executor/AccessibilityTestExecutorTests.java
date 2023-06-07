@@ -101,7 +101,7 @@ class AccessibilityTestExecutorTests
         options.setHideElements(List.of(elementToIgnore));
         options.setElementsToCheck(List.of(elementToCheck));
         String standard = "wcag2a";
-        options.setRunOnly(new AxeOptions("tag", List.of(standard)));
+        options.setRunOnly(AxeOptions.forStandard(standard));
         String output = ResourceUtils.loadResource(getClass(), "axe-core.json");
 
         AccessibilityEngine engine = AccessibilityEngine.AXE_CORE;

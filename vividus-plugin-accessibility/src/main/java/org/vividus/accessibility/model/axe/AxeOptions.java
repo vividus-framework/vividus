@@ -18,12 +18,14 @@ package org.vividus.accessibility.model.axe;
 
 import java.util.List;
 
-public class AxeOptions
+public final class AxeOptions
 {
+    private static final String TAG = "tag";
+
     private final String type;
     private final List<String> values;
 
-    public AxeOptions(String type, List<String> values)
+    private AxeOptions(String type, List<String> values)
     {
         this.type = type;
         this.values = values;
@@ -37,5 +39,27 @@ public class AxeOptions
     public List<String> getValues()
     {
         return values;
+    }
+
+    public static AxeOptions forStandard(String standard)
+    {
+        return new AxeOptions(TAG, List.of(standard.toLowerCase()));
+    }
+
+    public static AxeOptions forRules(List<String> rules)
+    {
+        return new AxeOptions("rule", rules);
+    }
+
+    @Override
+    public String toString()
+    {
+        if (TAG.equals(type))
+        {
+            return values.get(0).toUpperCase();
+        }
+
+        String postfix = values.size() > 1 ? " rules" : " rule";
+        return String.join(", ", values) + postfix;
     }
 }
