@@ -44,9 +44,9 @@ public class LighthouseSteps
     private final ISoftAssert softAssert;
     private final PagespeedInsights pagespeedInsights;
 
-    private final String accessToken;
+    private final String apiKey;
 
-    public LighthouseSteps(String applicationName, String accessToken, IAttachmentPublisher attachmentPublisher,
+    public LighthouseSteps(String applicationName, String apiKey, IAttachmentPublisher attachmentPublisher,
             ISoftAssert softAssert) throws GeneralSecurityException, IOException
     {
         this.attachmentPublisher = attachmentPublisher;
@@ -63,7 +63,7 @@ public class LighthouseSteps
             )
             .setApplicationName(applicationName)
             .build();
-        this.accessToken = accessToken;
+        this.apiKey = apiKey;
     }
 
     /**
@@ -120,7 +120,7 @@ public class LighthouseSteps
     {
         return pagespeedInsights.pagespeedapi()
                                 .runpagespeed(url)
-                                .setAccessToken(accessToken)
+                                .setKey(apiKey)
                                 .setStrategy(strategy)
                                 .execute()
                                 .getLighthouseResult();
