@@ -284,7 +284,7 @@ When the condition '$condition' is true I do$stepsToExecute
 * `$condition` - The verifiable condition (Case-insensitive).
 +
 [cols="1,1" options="header"]
-|==
+|===
 
 |Steps are performed|Steps are not performed
 
@@ -300,7 +300,8 @@ When the condition '$condition' is true I do$stepsToExecute
 
 |y|n
 
-|==
+|===
+
 * `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column `step` containing the steps to execute if the result of the `$condition` is true.
 
 WARNING: The error will stop steps execution in case if unsupported condition value is provided.
