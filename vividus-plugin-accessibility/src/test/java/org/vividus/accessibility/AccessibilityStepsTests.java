@@ -61,7 +61,7 @@ class AccessibilityStepsTests
 {
     private static final String MATCHER = "<0L>";
     private static final String PAGE = "https://fus-ro.dah";
-    private static final String TITLE = "Accessibility testing report for page: " + PAGE;
+    private static final String TITLE = "[WCAG2A] Accessibility report for page: " + PAGE;
     private static final String TEMPLATE_NAME = "/org/vividus/accessibility/htmlcs-accessibility-report.ftl";
     private static final String NOTICE2 = "Notice";
     private static final String WARNING2 = "Warning";
@@ -133,7 +133,7 @@ class AccessibilityStepsTests
     void shouldExecuteAxeCoreAccessibilityTest()
     {
         accessibilitySteps.setAccessibilityEngine(AccessibilityEngine.AXE_CORE);
-        AxeOptions axeRun = mock(AxeOptions.class);
+        AxeOptions axeRun = AxeOptions.forStandard("wcag2a");
         AxeCheckOptions options = mock(AxeCheckOptions.class);
         when(options.getRunOnly()).thenReturn(axeRun);
         Parameters params = mock(Parameters.class);

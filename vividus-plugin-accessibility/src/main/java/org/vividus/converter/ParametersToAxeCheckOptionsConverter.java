@@ -60,8 +60,8 @@ public class ParametersToAxeCheckOptionsConverter extends AbstractAccessibilityC
         }
 
         AxeCheckOptions checkOptions = new AxeCheckOptions();
-        AxeOptions options = standard != null ? new AxeOptions("tag", List.of(standard.toLowerCase()))
-                : new AxeOptions("rule", violationsToCheck);
+        AxeOptions options = standard != null ? AxeOptions.forStandard(standard)
+                : AxeOptions.forRules(violationsToCheck);
         checkOptions.setRunOnly(options);
 
         Map<String, EnableableProperty> ignores = violationsToIgnore.stream()
