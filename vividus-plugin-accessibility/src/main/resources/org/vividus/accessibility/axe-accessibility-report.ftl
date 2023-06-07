@@ -253,7 +253,7 @@ Report source: https://lpelypenko.github.io/axe-html-reporter/
                                                                                 <p>all of the following should pass:</p>
                                                                                 <ul class="text-muted">
                                                                                     <#list node.getAll() as all>
-                                                                                        <li>[${all.getImpact()}] <#outputformat 'HTML'>${all.getMessage()}</#outputformat><</li>
+                                                                                        <li>[${all.getImpact()}] <#outputformat 'HTML'>${all.getMessage()}</#outputformat></li>
                                                                                     </#list>
                                                                                 </ul>
                                                                             </#if>
@@ -261,7 +261,7 @@ Report source: https://lpelypenko.github.io/axe-html-reporter/
                                                                                 <p>any of the following should pass:</p>
                                                                                 <ul class="text-muted">
                                                                                     <#list node.getAny() as any>
-                                                                                        <li>[${any.getImpact()}] <#outputformat 'HTML'>${any.getMessage()}</#outputformat><</li>
+                                                                                        <li>[${any.getImpact()}] <#outputformat 'HTML'>${any.getMessage()}</#outputformat></li>
                                                                                     </#list>
                                                                                 </ul>
                                                                             </#if>
@@ -269,7 +269,7 @@ Report source: https://lpelypenko.github.io/axe-html-reporter/
                                                                                 <p>none of the following should pass:</p>
                                                                                 <ul class="text-muted">
                                                                                     <#list node.getNone() as none>
-                                                                                        <li>[${none.getImpact()}] <#outputformat 'HTML'>${none.getMessage()}</#outputformat><</li>
+                                                                                        <li>[${none.getImpact()}] <#outputformat 'HTML'>${none.getMessage()}</#outputformat></li>
                                                                                     </#list>
                                                                                 </ul>
                                                                             </#if>
