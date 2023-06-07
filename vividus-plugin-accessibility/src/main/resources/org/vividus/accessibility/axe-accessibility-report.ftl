@@ -2,6 +2,17 @@
 Report source: https://lpelypenko.github.io/axe-html-reporter/
 -->
 
+<#macro render_checks key checks>
+    <#if checks?size != 0>
+        <p>${key} of the following should pass:</p>
+        <ul class="text-muted">
+            <#list checks as check>
+                <li>[${check.getImpact()}] <#outputformat 'HTML'>${check.getMessage()}</#outputformat></li>
+            </#list>
+        </ul>
+    </#if>
+</#macro>
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -249,30 +260,9 @@ Report source: https://lpelypenko.github.io/axe-html-reporter/
                                                                     </td>
                                                                     <td>
                                                                         <div class="wrapBreakWord">
-                                                                            <#if node.getAll()?size != 0>
-                                                                                <p>all of the following should pass:</p>
-                                                                                <ul class="text-muted">
-                                                                                    <#list node.getAll() as all>
-                                                                                        <li>[${all.getImpact()}] <#outputformat 'HTML'>${all.getMessage()}</#outputformat></li>
-                                                                                    </#list>
-                                                                                </ul>
-                                                                            </#if>
-                                                                            <#if node.getAny()?size != 0>
-                                                                                <p>any of the following should pass:</p>
-                                                                                <ul class="text-muted">
-                                                                                    <#list node.getAny() as any>
-                                                                                        <li>[${any.getImpact()}] <#outputformat 'HTML'>${any.getMessage()}</#outputformat></li>
-                                                                                    </#list>
-                                                                                </ul>
-                                                                            </#if>
-                                                                            <#if node.getNone()?size != 0>
-                                                                                <p>none of the following should pass:</p>
-                                                                                <ul class="text-muted">
-                                                                                    <#list node.getNone() as none>
-                                                                                        <li>[${none.getImpact()}] <#outputformat 'HTML'>${none.getMessage()}</#outputformat></li>
-                                                                                    </#list>
-                                                                                </ul>
-                                                                            </#if>
+                                                                            <@render_checks key="all" checks=node.getAll() />
+                                                                            <@render_checks key="any" checks=node.getAny() />
+                                                                            <@render_checks key="none" checks=node.getNone() />
                                                                         </div>
                                                                     </td>
                                                                 </tr>
