@@ -205,7 +205,7 @@ class LighthouseStepsTests
 
     private void validateMetric(String key, PerformanceMetricRule rule, BigDecimal actual)
     {
-        verify(softAssert).assertThat(eq(String.format("%s %s metric", key, rule.getMetric())), eq(actual), argThat(
+        verify(softAssert).assertThat(eq(String.format("[%s] %s", key, rule.getMetric())), eq(actual), argThat(
                 arg -> String.format("a value less than <%s>", rule.getThreshold().intValue()).equals(arg.toString())));
     }
 

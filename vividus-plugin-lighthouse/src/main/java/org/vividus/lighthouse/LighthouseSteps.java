@@ -107,7 +107,7 @@ public class LighthouseSteps
                         .filter(m -> m.equalsIgnoreCase(processedMetricKey))
                         .findFirst()
                         .ifPresentOrElse(
-                            m -> softAssert.assertThat(String.format("%s %s metric", strategy, metricKey),
+                            m -> softAssert.assertThat(String.format("[%s] %s", strategy, metricKey),
                                 metrics.get(m), validation.getRule().getComparisonRule(validation.getThreshold())),
                             () -> softAssert.recordFailedAssertion(
                                 String.format("Unknown metric name '%s', available names are: %s", metricKey,
