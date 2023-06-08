@@ -24,17 +24,21 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.steps.Parameters;
+import org.vividus.accessibility.factory.AxeOptionsFactory;
 import org.vividus.accessibility.model.axe.AxeCheckOptions;
-import org.vividus.accessibility.model.axe.AxeOptions;
 import org.vividus.accessibility.model.axe.EnableableProperty;
 import org.vividus.ui.action.ISearchActions;
 
 public class ParametersToAxeCheckOptionsConverter extends AbstractAccessibilityCheckOptionsConverter<AxeCheckOptions>
 {
-    public ParametersToAxeCheckOptionsConverter(ISearchActions searchActions)
+    private final AxeOptionsFactory axeOptionsFactory;
+
+    public ParametersToAxeCheckOptionsConverter(ISearchActions searchActions, AxeOptionsFactory axeOptionsFactory)
     {
         super(searchActions);
+        this.axeOptionsFactory = axeOptionsFactory;
     }
 
     @Override
@@ -60,9 +64,7 @@ public class ParametersToAxeCheckOptionsConverter extends AbstractAccessibilityC
         }
 
         AxeCheckOptions checkOptions = new AxeCheckOptions();
-        AxeOptions options = standard != null ? AxeOptions.forStandard(standard)
-                : AxeOptions.forRules(violationsToCheck);
-        checkOptions.setRunOnly(options);
+        checkOptions.setRunOnly(axeOptionsFactory.createOptions(Pair.of(standard, violationsToCheck)));
 
         Map<String, EnableableProperty> ignores = violationsToIgnore.stream()
                 .collect(Collectors.toMap(Function.identity(), v -> new EnableableProperty(false)));
