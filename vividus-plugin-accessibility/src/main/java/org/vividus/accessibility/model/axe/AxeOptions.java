@@ -16,18 +16,42 @@
 
 package org.vividus.accessibility.model.axe;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public final class AxeOptions
 {
-    private static final String TAG = "tag";
+    private static final Map<String, List<String>> DEFAULT_STANDARDS;
+
+    static
+    {
+        List<String> wcag2xa = List.of("wcag2a", "wcag21a");
+
+        List<String> wcag2xaa = new ArrayList<>(wcag2xa);
+        wcag2xaa.add("wcag2aa");
+        wcag2xaa.add("wcag21aa");
+        wcag2xaa.add("wcag22aa");
+
+        List<String> wcag2xaaa = new ArrayList<>(wcag2xaa);
+        wcag2xaaa.add("wcag2aaa");
+
+        DEFAULT_STANDARDS = Map.of(
+            "WCAG2xA", wcag2xa,
+            "WCAG2xAA", wcag2xaa,
+            "WCAG2xAAA", wcag2xaaa
+        );
+    }
 
     private final String type;
+    private final String key;
     private final List<String> values;
 
-    private AxeOptions(String type, List<String> values)
+    private AxeOptions(String type, String key, List<String> values)
     {
         this.type = type;
+        this.key = key;
         this.values = values;
     }
 
@@ -43,20 +67,22 @@ public final class AxeOptions
 
     public static AxeOptions forStandard(String standard)
     {
-        return new AxeOptions(TAG, List.of(standard.toLowerCase()));
+        List<String> tags = Optional.ofNullable(DEFAULT_STANDARDS.get(standard))
+                .orElseGet(() -> List.of(standard.toLowerCase()));
+        return new AxeOptions("tag", standard, tags);
     }
 
     public static AxeOptions forRules(List<String> rules)
     {
-        return new AxeOptions("rule", rules);
+        return new AxeOptions("rule", null, rules);
     }
 
     @Override
     public String toString()
     {
-        if (TAG.equals(type))
+        if (key != null)
         {
-            return values.get(0).toUpperCase();
+            return key;
         }
 
         String postfix = values.size() > 1 ? " rules" : " rule";
