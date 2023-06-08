@@ -20,14 +20,14 @@ import java.util.List;
 
 public final class AxeOptions
 {
-    private static final String TAG = "tag";
-
     private final String type;
+    private final String key;
     private final List<String> values;
 
-    private AxeOptions(String type, List<String> values)
+    private AxeOptions(String type, String key, List<String> values)
     {
         this.type = type;
+        this.key = key;
         this.values = values;
     }
 
@@ -43,20 +43,25 @@ public final class AxeOptions
 
     public static AxeOptions forStandard(String standard)
     {
-        return new AxeOptions(TAG, List.of(standard.toLowerCase()));
+        return forTags(standard.toUpperCase(), List.of(standard.toLowerCase()));
+    }
+
+    public static AxeOptions forTags(String key, List<String> tags)
+    {
+        return new AxeOptions("tag", key, tags);
     }
 
     public static AxeOptions forRules(List<String> rules)
     {
-        return new AxeOptions("rule", rules);
+        return new AxeOptions("rule", null, rules);
     }
 
     @Override
     public String toString()
     {
-        if (TAG.equals(type))
+        if (key != null)
         {
-            return values.get(0).toUpperCase();
+            return key;
         }
 
         String postfix = values.size() > 1 ? " rules" : " rule";

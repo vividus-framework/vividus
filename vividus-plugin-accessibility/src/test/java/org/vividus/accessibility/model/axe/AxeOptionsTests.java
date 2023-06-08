@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 
 class AxeOptionsTests
 {
+    private static final String STANDARD = "WCAG2A";
+
     @Test
     void shouldReturnRulesAsString()
     {
@@ -40,6 +42,12 @@ class AxeOptionsTests
     @Test
     void shouldReturnStandardAsString()
     {
-        assertEquals("WCAG2A", AxeOptions.forStandard("wcag2a").toString());
+        assertEquals(STANDARD, AxeOptions.forStandard("wcag2a").toString());
+    }
+
+    @Test
+    void shouldReturnKeyAsString()
+    {
+        assertEquals(STANDARD, AxeOptions.forTags(STANDARD, List.of("tag1", "tag2", "tag3")).toString());
     }
 }

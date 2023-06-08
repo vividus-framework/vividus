@@ -16,6 +16,8 @@
     <bean class="org.vividus.converter.ParametersToAccessibilityCheckOptionsConverter" />
     <bean class="org.vividus.converter.ParametersToAxeCheckOptionsConverter" />
 
+    <bean class="org.vividus.accessibility.factory.AxeOptionsFactory" />
+
     <util:list id="stepBeanNames-Accessibility" value-type="java.lang.String">
         <idref bean="accessibilitySteps" />
     </util:list>

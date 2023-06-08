@@ -24,6 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.model.ExamplesTableFactory;
@@ -50,6 +53,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
+import org.vividus.accessibility.factory.AxeOptionsFactory;
 import org.vividus.accessibility.model.axe.AxeCheckOptions;
 import org.vividus.accessibility.model.axe.AxeOptions;
 import org.vividus.accessibility.model.axe.EnableableProperty;
@@ -61,7 +65,6 @@ import org.vividus.ui.web.action.search.WebLocatorType;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class})
 class ParametersToAxeCheckOptionsConverterTests
 {
-    private static final String RULE = "rule";
     private static final String ELEMENT_TO_CHECK = "element-to-check";
     private static final String ELEMENT_TO_IGNORE = "element-to-ignore";
     private static final String REPORTER = "v2";
@@ -70,6 +73,7 @@ class ParametersToAxeCheckOptionsConverterTests
     @Mock private WebElement elementToCheck;
     @Mock private WebElement elementToIgnore;
     @Mock private ISearchActions searchActions;
+    @Mock private AxeOptionsFactory axeOptionsFactory;
 
     @InjectMocks private ParametersToAxeCheckOptionsConverter converter;
 
@@ -81,12 +85,12 @@ class ParametersToAxeCheckOptionsConverterTests
                      + "|color-contrast-enhanced|";
         // CHECKSTYLE:ON
 
+        AxeOptions axeOptions = mock(AxeOptions.class);
+        when(axeOptionsFactory.createOptions(Pair.of(null, List.of(COLOR_CONTRAST_RULE)))).thenReturn(axeOptions);
         Parameters params = createTable(table).getRowsAsParameters(true).get(0);
         AxeCheckOptions options = converter.convertValue(params, null);
-        AxeOptions axeRun = options.getRunOnly();
         assertAll(
-            () -> assertEquals(RULE, axeRun.getType()),
-            () -> assertEquals(List.of(COLOR_CONTRAST_RULE), axeRun.getValues()),
+            () -> assertEquals(axeOptions, options.getRunOnly()),
             () -> assertTrue(options.getRootElement().isEmpty()),
             () -> assertTrue(options.getRules().isEmpty()),
             () -> assertEquals(REPORTER, options.getReporter()),
@@ -105,14 +109,14 @@ class ParametersToAxeCheckOptionsConverterTests
 
         mockFindElement(ELEMENT_TO_CHECK, List.of(elementToCheck));
         mockFindElement(ELEMENT_TO_IGNORE, List.of(elementToIgnore));
+        AxeOptions axeOptions = mock(AxeOptions.class);
+        when(axeOptionsFactory.createOptions(Pair.of("WCAG2A", null))).thenReturn(axeOptions);
 
         Parameters params = createTable(table).getRowsAsParameters(true).get(0);
         AxeCheckOptions options = converter.convertValue(params, null);
-        AxeOptions axeRun = options.getRunOnly();
         Map<String, EnableableProperty> rules = options.getRules();
         assertAll(
-            () -> assertEquals("tag", axeRun.getType()),
-            () -> assertEquals(List.of("wcag2a"), axeRun.getValues()),
+            () -> assertEquals(axeOptions, options.getRunOnly()),
             () -> assertTrue(options.getRootElement().isEmpty()),
             () -> assertFalse(rules.get(COLOR_CONTRAST_RULE).isEnabled()),
             () -> assertEquals(REPORTER, options.getReporter()),
@@ -131,14 +135,14 @@ class ParametersToAxeCheckOptionsConverterTests
 
         mockFindElement(ELEMENT_TO_CHECK, List.of(elementToCheck));
         mockFindElement(ELEMENT_TO_IGNORE, List.of(elementToIgnore));
+        AxeOptions axeOptions = mock(AxeOptions.class);
+        when(axeOptionsFactory.createOptions(Pair.of(null, List.of("aria-required-parent")))).thenReturn(axeOptions);
 
         Parameters params = createTable(table).getRowsAsParameters(true).get(0);
         AxeCheckOptions options = converter.convertValue(params, null);
-        AxeOptions axeRun = options.getRunOnly();
         Map<String, EnableableProperty> rules = options.getRules();
         assertAll(
-            () -> assertEquals(RULE, axeRun.getType()),
-            () -> assertEquals(List.of("aria-required-parent"), axeRun.getValues()),
+            () -> assertEquals(axeOptions, options.getRunOnly()),
             () -> assertTrue(options.getRootElement().isEmpty()),
             () -> assertFalse(rules.get(COLOR_CONTRAST_RULE).isEnabled()),
             () -> assertEquals(REPORTER, options.getReporter()),
