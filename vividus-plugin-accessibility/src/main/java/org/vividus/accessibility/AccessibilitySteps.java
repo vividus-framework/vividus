@@ -45,7 +45,7 @@ public class AccessibilitySteps
 {
     private static final String HTML_CS_MESSAGE = "Number of accessibility violations of level %s"
             + " and above at the page %s";
-    private static final String AXE_CORE_MESSAGE = "Number of accessibility violations at the page %s";
+    private static final String AXE_CORE_MESSAGE = "[%s] Number of accessibility violations at the page %s";
 
     private AccessibilityEngine accessibilityEngine;
 
@@ -121,7 +121,7 @@ public class AccessibilitySteps
 
                 long failures = reportEntries.stream().filter(e -> ResultType.FAILED == e.getType())
                         .map(AxeReportEntry::getResults).map(List::size).findFirst().orElse(0);
-                softAssert.assertThat(String.format(AXE_CORE_MESSAGE, currentUrl), failures, equalTo(0L));
+                softAssert.assertThat(String.format(AXE_CORE_MESSAGE, axeOptions, currentUrl), failures, equalTo(0L));
             });
         }
     }

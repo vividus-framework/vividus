@@ -153,7 +153,7 @@ class AccessibilityStepsTests
             Map.of("entries", List.of(passedEntry, failedEntry), "url", PAGE, "run", axeRun),
             TITLE
         );
-        verify(softAssert).assertThat(eq("Number of accessibility violations at the page " + PAGE), eq(1L),
+        verify(softAssert).assertThat(eq("[WCAG2A] Number of accessibility violations at the page " + PAGE), eq(1L),
                 argThat(m -> MATCHER.equals(m.toString())));
     }
 
