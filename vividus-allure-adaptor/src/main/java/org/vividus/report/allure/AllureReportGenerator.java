@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,9 +45,11 @@ import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.util.property.IPropertyMapper;
 
+import io.qameta.allure.Aggregator;
 import io.qameta.allure.ConfigurationBuilder;
 import io.qameta.allure.Constants;
 import io.qameta.allure.Extension;
+import io.qameta.allure.Reader;
 import io.qameta.allure.ReportGenerator;
 import io.qameta.allure.allure1.Allure1Plugin;
 import io.qameta.allure.allure2.Allure2Plugin;
@@ -60,6 +63,7 @@ import io.qameta.allure.core.AttachmentsPlugin;
 import io.qameta.allure.core.Configuration;
 import io.qameta.allure.core.LaunchResults;
 import io.qameta.allure.core.MarkdownDescriptionsPlugin;
+import io.qameta.allure.core.Plugin;
 import io.qameta.allure.core.ReportWebPlugin;
 import io.qameta.allure.core.TestsResultsPlugin;
 import io.qameta.allure.duration.DurationPlugin;
@@ -231,7 +235,59 @@ public class AllureReportGenerator implements IAllureReportGenerator
                 new StatusChartPlugin(),
                 new TimelinePlugin(),
                 new SuitesPlugin(),
-                new ReportWebPlugin(),
+                new ReportWebPlugin()
+                {
+                    @Override
+                    protected void writeIndexHtml(Configuration configuration, Path outputDirectory) throws IOException
+                    {
+                        super.writeIndexHtml(new Configuration()
+                        {
+                            @Override
+                            public List<Plugin> getPlugins()
+                            {
+                                return configuration.getPlugins();
+                            }
+
+                            @Override
+                            public List<Aggregator> getAggregators()
+                            {
+                                return configuration.getAggregators();
+                            }
+
+                            @Override
+                            public List<Reader> getReaders()
+                            {
+                                return configuration.getReaders();
+                            }
+
+                            @SuppressWarnings("unchecked")
+                            @Override
+                            public <T> Optional<T> getContext(Class<T> contextType)
+                            {
+                                if (contextType.equals(FreemarkerContext.class))
+                                {
+                                    return (Optional<T>) Optional.of(new FreemarkerContext()
+                                    {
+                                        @Override
+                                        public freemarker.template.Configuration getValue()
+                                        {
+                                            freemarker.template.Configuration configuration =
+                                                    new freemarker.template.Configuration(
+                                                    freemarker.template.Configuration.VERSION_2_3_32);
+                                            configuration.setLocalizedLookup(false);
+                                            configuration.setTemplateUpdateDelayMilliseconds(0);
+                                            // Use custom index.html.ftl to avoid collecting analytics by Allure
+                                            configuration.setClassLoaderForTemplateLoading(getClass().getClassLoader(),
+                                                    ALLURE_CUSTOMIZATION_PATH + "templates");
+                                            return configuration;
+                                        }
+                                    });
+                                }
+                                return configuration.getContext(contextType);
+                            }
+                        }, outputDirectory);
+                    }
+                },
                 new TestsResultsPlugin(),
                 new AttachmentsPlugin(),
                 new MailPlugin(),
