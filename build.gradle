@@ -68,7 +68,7 @@ project.description = 'Vividus'
 
 ext {
     versions = [
-        allure:                 '2.22.0',
+        allure:                 '2.22.1',
         jbehave:                '5.1.2-alpha',
         slf4j:                  '2.0.7',
         powermock:              'a0be5c4bbe'

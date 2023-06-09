@@ -19,10 +19,13 @@ package org.vividus.report.allure;
 import static com.github.valfirst.slf4jtest.LoggingEvent.debug;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -74,6 +77,7 @@ import io.qameta.allure.Constants;
 import io.qameta.allure.ReportGenerator;
 import io.qameta.allure.core.Configuration;
 import io.qameta.allure.core.Plugin;
+import io.qameta.allure.core.ReportWebPlugin;
 import io.qameta.allure.entity.ExecutorInfo;
 import io.qameta.allure.summary.SummaryPlugin;
 
@@ -89,6 +93,7 @@ class AllureReportGeneratorTests
 
     private static final String EXECUTOR_JSON = "executor.json";
     private static final String ALLURE_EXECUTOR_PROPERTY_PREFIX = "allure.executor.";
+    private static final String INDEX_HTML = "index.html";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AllureReportGenerator.class);
 
@@ -217,7 +222,7 @@ class AllureReportGeneratorTests
 
     private LoggingEvent buildReportGeneratedLogEvent(Path reportDirectory)
     {
-        String htmlReportPath = reportDirectory.resolve("index.html").toFile().getAbsolutePath();
+        String htmlReportPath = reportDirectory.resolve(INDEX_HTML).toFile().getAbsolutePath();
         return info("Allure report is successfully generated at {}", htmlReportPath);
     }
 
@@ -245,10 +250,19 @@ class AllureReportGeneratorTests
                             assertEquals(plugins, config.getPlugins());
                             assertEquals(26, config.getAggregators().size());
 
+                            Path reportDirectoryPath = reportDirectory.toPath();
+
                             var summaryPlugin = config.getAggregators().stream().filter(SummaryPlugin.class::isInstance)
-                                    .reduce((first, second) -> second).get();
-                            summaryPlugin.aggregate(config, List.of(), resultsDirectory);
-                            assertSummaryJson();
+                                    .reduce((first, second) -> second);
+                            assertTrue(summaryPlugin.isPresent());
+                            summaryPlugin.get().aggregate(config, List.of(), reportDirectoryPath);
+                            assertSummaryJson(reportDirectoryPath);
+
+                            var reportWebPlugin = config.getAggregators().stream().filter(
+                                    ReportWebPlugin.class::isInstance).reduce((first, second) -> second);
+                            assertTrue(reportWebPlugin.isPresent());
+                            reportWebPlugin.get().aggregate(config, List.of(), reportDirectoryPath);
+                            assertIndexHtml(reportDirectoryPath);
                         }))
         {
             String text = "text";
@@ -303,9 +317,14 @@ class AllureReportGeneratorTests
         return executorInfo;
     }
 
-    private void assertSummaryJson() throws IOException
+    private void assertIndexHtml(Path reportDirectory) throws IOException
     {
-        assertResultFile("widgets/summary.json",
+        assertThat(Files.readString(reportDirectory.resolve(INDEX_HTML)), not(containsString("googletagmanager")));
+    }
+
+    private void assertSummaryJson(Path reportDirectory) throws IOException
+    {
+        assertFile(reportDirectory, "widgets/summary.json",
                 "{\"reportName\":\"Test Report\","
                     + "\"testRuns\":[],"
                     + "\"statistic\":{\"failed\":0,\"broken\":0,\"skipped\":0,\"passed\":0,\"unknown\":0,\"total\":0},"
@@ -356,7 +375,12 @@ class AllureReportGeneratorTests
 
     private void assertResultFile(String fileName, String expected) throws IOException
     {
-        assertEquals(expected, Files.readString(resultsDirectory.resolve(fileName)).replace("\r", ""));
+        assertFile(resultsDirectory, fileName, expected);
+    }
+
+    private static void assertFile(Path directory, String fileName, String expected) throws IOException
+    {
+        assertEquals(expected, Files.readString(directory.resolve(fileName)).replace("\r", ""));
     }
 
     private Resource mockResource(String asString) throws IOException
