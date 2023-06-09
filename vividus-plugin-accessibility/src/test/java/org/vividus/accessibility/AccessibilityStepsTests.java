@@ -133,7 +133,7 @@ class AccessibilityStepsTests
     void shouldExecuteAxeCoreAccessibilityTest()
     {
         accessibilitySteps.setAccessibilityEngine(AccessibilityEngine.AXE_CORE);
-        AxeOptions axeRun = AxeOptions.forStandard("wcag2a");
+        AxeOptions axeRun = AxeOptions.forStandard("WCAG2A");
         AxeCheckOptions options = mock(AxeCheckOptions.class);
         when(options.getRunOnly()).thenReturn(axeRun);
         Parameters params = mock(Parameters.class);

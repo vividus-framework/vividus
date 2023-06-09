@@ -17,29 +17,63 @@
 package org.vividus.accessibility.model.axe;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class AxeOptionsTests
 {
+    private static final String STANDARD = "WCAG2A";
+    private static final String RULE = "rule";
+    private static final String TAG = "tag";
+
     @Test
     void shouldReturnRulesAsString()
     {
-        assertEquals("button-name, duplicate-id-active rules",
-                AxeOptions.forRules(List.of("button-name", "duplicate-id-active")).toString());
+        AxeOptions options = AxeOptions.forRules(List.of("button-name", "duplicate-id-active"));
+        assertEquals("button-name, duplicate-id-active rules", options.toString());
+        assertEquals(RULE, options.getType());
     }
 
     @Test
     void shouldReturnRuleAsString()
     {
-        assertEquals("html-has-lang rule", AxeOptions.forRules(List.of("html-has-lang")).toString());
+        AxeOptions options = AxeOptions.forRules(List.of("html-has-lang"));
+        assertEquals("html-has-lang rule", options.toString());
+        assertEquals(RULE, options.getType());
     }
 
     @Test
     void shouldReturnStandardAsString()
     {
-        assertEquals("WCAG2A", AxeOptions.forStandard("wcag2a").toString());
+        AxeOptions options = AxeOptions.forStandard(STANDARD);
+        assertEquals(STANDARD, options.toString());
+        assertEquals(TAG, options.getType());
+    }
+
+    static Stream<Arguments> defaultStandards()
+    {
+        // CHECKSTYLE:OFF
+        return Stream.of(
+                arguments("WCAG2xA", List.of("wcag2a", "wcag21a")),
+                arguments("WCAG2xAA", List.of("wcag2a", "wcag21a", "wcag2aa", "wcag21aa", "wcag22aa")),
+                arguments("WCAG2xAAA", List.of("wcag2a", "wcag21a", "wcag2aa", "wcag21aa", "wcag22aa", "wcag2aaa"))
+        );
+        // CHECKSTYLE:ON
+    }
+
+    @ParameterizedTest
+    @MethodSource("defaultStandards")
+    void shouldReturnOptionsForDefaultStandards(String tag, List<String> values)
+    {
+        AxeOptions options = AxeOptions.forStandard(tag);
+        assertEquals(values, options.getValues());
+        assertEquals(TAG, options.getType());
     }
 }
