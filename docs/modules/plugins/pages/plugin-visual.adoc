@@ -268,9 +268,13 @@ where:
 |Acceptable values
 |Description
 
-|~`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-footer-to-cut`~
-|~size in pixels~
-|~Native footer to cut.~ *DEPRECATED* use `mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-bottom`.
+|`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-footer-to-cut`
+|size in pixels
+a|Native footer to cut.
+[WARNING]
+====
+This property is deprecated and will be removed in VIVIDUS 0.6.0. Use `mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-bottom` property instead.
+====
 
 |`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-top`
 |size in pixels
