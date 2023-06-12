@@ -216,10 +216,10 @@ Then JSON `
     "tags": {
       "description": "Tags for the product",
       "type": "array",
-      "prefixItems": {
+      "prefixItems": [{
         "type": "string",
         "enum": ["lamp", "desk"]
-      },
+      }],
       "minItems": 1,
       "uniqueItems": true
     }

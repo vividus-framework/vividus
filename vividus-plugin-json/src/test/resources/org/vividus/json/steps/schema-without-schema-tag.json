@@ -20,9 +20,9 @@
     "tags": {
       "description": "Tags for the product",
       "type": "array",
-      "prefixItems": {
+      "prefixItems": [{
         "type": "string"
-      },
+      }],
       "minItems": 1,
       "uniqueItems": true
     },
