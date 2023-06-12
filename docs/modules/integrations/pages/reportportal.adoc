@@ -2,13 +2,8 @@
 
 https://reportportal.io/[ReportPortal] is a test automation analytics platform and real-time reporting, powered by Machine Learning.
 
-== Installation
-
-.build.gradle
-[source,gradle,subs="attributes+"]
-----
-implementation(group: 'org.vividus', name: 'vividus-agent-reportportal', version: '{current-version}')
-----
+:dependency-short-name: agent-reportportal
+include::ROOT:partial$dependency-installation.adoc[]
 
 == Properties
 
