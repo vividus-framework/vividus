@@ -103,7 +103,7 @@ jdbc:mysql://host:port/database?parameters
 .build.gradle
 [source,gradle]
 ----
-implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.3.0.jre11')
+implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.3.1.jre11-preview')
 ----
 
 .`environment.properties` to connect using port number
