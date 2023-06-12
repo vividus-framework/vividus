@@ -37,6 +37,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.annotation.Replacement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.TimeoutConfigurer;
 import org.vividus.softassert.ISoftAssert;
@@ -339,7 +340,7 @@ public class WaitSteps
     }
 
     /**
-     * @deprecated Use step: "When I wait until element located `$locator` disappears"
+     * @deprecated Use step: "When I wait until element located by `$locator` disappears"
      *
      * Waits for <b><i>an element</i></b> with the specified <b>id</b> disappearance
      * in the specified search context
@@ -347,10 +348,10 @@ public class WaitSteps
      */
     @Deprecated(since = "0.5.1", forRemoval = true)
     @Then("an element with the id '$id' disappears")
+    @Replacement(versionToRemoveStep = "0.6.0",
+                 replacementFormatPattern = "When I wait until element located by `id(%1$s)` disappears")
     public void elementByIdDisappears(String id)
     {
-        LOGGER.warn("The step: \"Then an element with the id '$id' disappears\" is deprecated and will be removed in "
-                + "VIVIDUS 0.6.0. Use step: \"When I wait until element located `$locator` disappears\"");
         By locator = By.xpath(XpathLocatorUtils.getXPathByAttribute("id", id));
         waitActions.wait(getSearchContext(),
                 State.NOT_VISIBLE.getExpectedCondition(expectedSearchContextConditions, locator));

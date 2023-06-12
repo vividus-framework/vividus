@@ -784,6 +784,18 @@ jobs:
                                 -Pvividus.batch-1.scenario.fail-fast=false \
                                 -Pvividus.batch.fail-fast=true
 
+    - name: Replace and validate deprecated steps
+      if: matrix.platform == 'macos-latest'
+      shell: bash
+      run: |
+        ./gradlew :vividus-tests:replaceDeprecatedSteps
+        actualStory="vividus-tests/src/main/resources/story/replacement/ReplacedStepsActual.story"
+        expectedStory="vividus-tests/src/main/resources/story/replacement/ReplacedStepsExpected.story"
+        actualComposites="vividus-tests/src/main/resources/steps/replacement/replaced_composites_actual.steps"
+        expectedComposites="vividus-tests/src/main/resources/steps/replacement/replaced_composites_expected.steps"
+        cmp -c "$actualStory" "$expectedStory"
+        cmp -c "$actualComposites" "$expectedComposites"
+
     - name: Publish artifacts to GitHub packages
       if: (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/release-')) && matrix.platform == 'ubuntu-latest'
       run: ./gradlew publish

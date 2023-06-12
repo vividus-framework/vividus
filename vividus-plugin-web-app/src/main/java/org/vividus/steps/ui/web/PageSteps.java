@@ -223,7 +223,8 @@ public class PageSteps
      * "Then `${current-page-url}` matches `$regex`"
      */
     @Deprecated(since = "0.5.9", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern = "Then `${current-page-url}` matches `%1$s`")
+    @Replacement(versionToRemoveStep = "0.7.0",
+                 replacementFormatPattern = "Then `${current-page-url}` matches `.*%1$s.*`")
     @Then("the page with the URL containing '$URLpart' is loaded")
     public void checkUrlPartIsLoaded(String urlPart)
     {

@@ -300,3 +300,27 @@ gradlew validateKnownIssues --args='-f assertion-failures.txt'
 Known Issue | Assertion Error
 VVD-6       | .*Doctor Who.*
 ----
+
+== Replace deprecated steps
+
+The task replaces deprecated steps with actual ones in all stories(`\*.story` files) and composite steps (`*.steps` files) along the path `<project-name>/src/main/resources`.
+Please note that some deprecated steps (for example which should be replaced with two steps) cannot be replaced automatically and must be refactored manually.
+
+.macOS / Linux:
+[source,shell]
+----
+./gradlew replaceDeprecatedSteps
+----
+
+.Windows:
+[source,shell]
+----
+gradlew replaceDeprecatedSteps
+----
+
+.Output (for cases when found steps which cannot be replaced automatically)
+[source]
+----
+The step "When I check all checkboxes located by `xpath(.//input)`" from "CheckboxStepsTests.story - Scenario: Validation of step 'When I $checkboxState all checkboxes located by `$checkboxesLocator`'" is deprecated but cannot be replaced automatically, please replace it manually.
+The step "When I check all checkboxes located by `xpath(.//input)`" from "composite.steps - Composite: When I run composite step with table:$table" is deprecated but cannot be replaced automatically, please replace it manually.
+----
