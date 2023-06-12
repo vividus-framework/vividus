@@ -1,0 +1,13 @@
+== Installation
+
+. Copy the below line to `dependencies` section of the project `build.gradle` file
++
+.build.gradle
+[source,gradle,subs="attributes+"]
+----
+implementation(group: 'org.vividus', name: 'vividus-{dependency-short-name}', version: '{current-version}')
+----
+
+. If the project was imported to the IDE before adding new dependency,
+xref:ROOT:getting-started.adoc#_use_ide_for_the_tests_development[re-generate]
+the configuration files for the used IDE and then refresh the project in the used IDE.
