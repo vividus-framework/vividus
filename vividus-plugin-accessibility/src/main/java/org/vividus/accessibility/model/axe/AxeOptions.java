@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public final class AxeOptions
 {
     private static final Map<String, List<String>> DEFAULT_STANDARDS;
@@ -77,12 +79,12 @@ public final class AxeOptions
         return new AxeOptions("rule", null, rules);
     }
 
-    @Override
-    public String toString()
+    @JsonIgnore
+    public String getStandardOrRulesAsString()
     {
         if (key != null)
         {
-            return key;
+            return key + " standard";
         }
 
         String postfix = values.size() > 1 ? " rules" : " rule";

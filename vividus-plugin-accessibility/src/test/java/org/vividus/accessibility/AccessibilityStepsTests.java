@@ -16,10 +16,13 @@
 
 package org.vividus.accessibility;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.vividus.accessibility.model.htmlcs.AccessibilityStandard.WCAG2A;
 import static org.vividus.accessibility.model.htmlcs.ViolationLevel.ERROR;
@@ -61,7 +64,6 @@ class AccessibilityStepsTests
 {
     private static final String MATCHER = "<0L>";
     private static final String PAGE = "https://fus-ro.dah";
-    private static final String TITLE = "[WCAG2A] Accessibility report for page: " + PAGE;
     private static final String TEMPLATE_NAME = "/org/vividus/accessibility/htmlcs-accessibility-report.ftl";
     private static final String NOTICE2 = "Notice";
     private static final String WARNING2 = "Warning";
@@ -110,10 +112,11 @@ class AccessibilityStepsTests
         accessibilitySteps.performAccessibilityScan(checkOptions);
 
         InOrder ordered = Mockito.inOrder(softAssert, attachmentPublisher);
+        String title = "[WCAG2A] Accessibility report for page: " + PAGE;
         ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE_NAME,
                 Map.of(WARNING2, Map.of(CODE, List.of(warning)),
                        NOTICE2, Map.of(CODE, List.of(notice)),
-                       ERROR2, Map.of(CODE, List.of(error))), TITLE);
+                       ERROR2, Map.of(CODE, List.of(error))), title);
         ordered.verify(softAssert).assertThat(
                 eq(ASSERTION_MESSAGE),
                 eq(2L),
@@ -121,7 +124,7 @@ class AccessibilityStepsTests
         ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE_NAME,
                 Map.of(WARNING2, Map.of(),
                        ERROR2, Map.of(),
-                       NOTICE2, Map.of()), TITLE);
+                       NOTICE2, Map.of()), title);
         ordered.verify(softAssert).assertThat(
                 eq(ASSERTION_MESSAGE),
                 eq(0L),
@@ -151,10 +154,35 @@ class AccessibilityStepsTests
         verify(attachmentPublisher).publishAttachment(
             "/org/vividus/accessibility/axe-accessibility-report.ftl",
             Map.of("entries", List.of(passedEntry, failedEntry), "url", PAGE, "run", axeRun),
-            TITLE
+            "[WCAG2A standard] Accessibility report for page: " + PAGE
         );
-        verify(softAssert).assertThat(eq("[WCAG2A] Number of accessibility violations at the page " + PAGE), eq(1L),
-                argThat(m -> MATCHER.equals(m.toString())));
+        verify(softAssert).assertThat(eq("[WCAG2A standard] Number of accessibility violations at the page " + PAGE),
+                eq(1L), argThat(m -> MATCHER.equals(m.toString())));
+    }
+
+    @Test
+    void shouldFailIfAxeCodeDidntReturnAnyResults()
+    {
+        accessibilitySteps.setAccessibilityEngine(AccessibilityEngine.AXE_CORE);
+        AxeOptions axeRun = AxeOptions.forStandard("WCAG2AA");
+        AxeCheckOptions options = mock(AxeCheckOptions.class);
+        when(options.getRunOnly()).thenReturn(axeRun);
+        Parameters params = mock(Parameters.class);
+        when(params.as(AxeCheckOptions.class)).thenReturn(options);
+        ExamplesTable checkOptions = mock(ExamplesTable.class);
+        when(checkOptions.getRowsAsParameters(true)).thenReturn(List.of(params));
+
+        AxeReportEntry failedEntry = createEntry(ResultType.FAILED);
+        failedEntry.setResults(List.of());
+        when(accessibilityTestExecutor.execute(AccessibilityEngine.AXE_CORE, options, AxeReportEntry.class))
+                .thenReturn(List.of(failedEntry));
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> accessibilitySteps.performAccessibilityScan(checkOptions));
+        assertEquals("Axe scan has not returned any results for the provided WCAG2AA standard, please make "
+                + "sure the configuration is valid", thrown.getMessage());
+
+        verifyNoInteractions(attachmentPublisher);
     }
 
     private AxeReportEntry createEntry(ResultType type)

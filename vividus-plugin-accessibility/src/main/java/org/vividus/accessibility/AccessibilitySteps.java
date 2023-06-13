@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.vividus.accessibility.executor.AccessibilityEngine;
@@ -116,12 +117,19 @@ public class AccessibilitySteps
                         AxeReportEntry.class);
 
                 AxeOptions axeOptions = options.getRunOnly();
-                publishAttachment(axeOptions, currentUrl, Map.of("entries", reportEntries, "url", currentUrl,
+                String axeOptionsAsString = axeOptions.getStandardOrRulesAsString();
+                int numberOfResults = reportEntries.stream().map(AxeReportEntry::getResults).map(List::size)
+                        .mapToInt(Integer::intValue).sum();
+                Validate.isTrue(numberOfResults != 0, "Axe scan has not returned any results for the provided %s,"
+                        + " please make sure the configuration is valid", axeOptionsAsString);
+
+                publishAttachment(axeOptionsAsString, currentUrl, Map.of("entries", reportEntries, "url", currentUrl,
                         "run", axeOptions));
 
                 long failures = reportEntries.stream().filter(e -> ResultType.FAILED == e.getType())
                         .map(AxeReportEntry::getResults).map(List::size).findFirst().orElse(0);
-                softAssert.assertThat(String.format(AXE_CORE_MESSAGE, axeOptions, currentUrl), failures, equalTo(0L));
+                softAssert.assertThat(String.format(AXE_CORE_MESSAGE, axeOptionsAsString, currentUrl), failures,
+                        equalTo(0L));
             });
         }
     }
@@ -152,7 +160,7 @@ public class AccessibilitySteps
         return result;
     }
 
-    private void publishAttachment(Object standard, String pageUrl, Object result)
+    private void publishAttachment(String standard, String pageUrl, Object result)
     {
         attachmentPublisher.publishAttachment(accessibilityEngine.getReportTemplate(), result,
                 String.format("[%s] Accessibility report for page: %s", standard, pageUrl));

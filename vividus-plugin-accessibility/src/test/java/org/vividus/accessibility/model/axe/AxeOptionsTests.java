@@ -37,7 +37,7 @@ class AxeOptionsTests
     void shouldReturnRulesAsString()
     {
         AxeOptions options = AxeOptions.forRules(List.of("button-name", "duplicate-id-active"));
-        assertEquals("button-name, duplicate-id-active rules", options.toString());
+        assertEquals("button-name, duplicate-id-active rules", options.getStandardOrRulesAsString());
         assertEquals(RULE, options.getType());
     }
 
@@ -45,7 +45,7 @@ class AxeOptionsTests
     void shouldReturnRuleAsString()
     {
         AxeOptions options = AxeOptions.forRules(List.of("html-has-lang"));
-        assertEquals("html-has-lang rule", options.toString());
+        assertEquals("html-has-lang rule", options.getStandardOrRulesAsString());
         assertEquals(RULE, options.getType());
     }
 
@@ -53,7 +53,7 @@ class AxeOptionsTests
     void shouldReturnStandardAsString()
     {
         AxeOptions options = AxeOptions.forStandard(STANDARD);
-        assertEquals(STANDARD, options.toString());
+        assertEquals(STANDARD + " standard", options.getStandardOrRulesAsString());
         assertEquals(TAG, options.getType());
     }
 
