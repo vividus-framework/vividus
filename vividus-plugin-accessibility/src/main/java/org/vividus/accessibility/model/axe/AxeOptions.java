@@ -16,15 +16,28 @@
 
 package org.vividus.accessibility.model.axe;
 
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static java.util.regex.Pattern.compile;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public final class AxeOptions
 {
+    private static final String TT_V_5_STANDARD = "TTv5";
+
+    private static final Map<Pattern, Function<Matcher, String>> CASE_SENSITIVE_TAGS = Map.of(
+        compile("ACT", CASE_INSENSITIVE), m -> m.group().toUpperCase(),
+        compile(TT_V_5_STANDARD, CASE_INSENSITIVE), m -> TT_V_5_STANDARD,
+        compile("TT(\\d+)\\.([a-z]+)", CASE_INSENSITIVE), m -> "TT" + m.group(1) + "." + m.group(2).toLowerCase()
+    );
+
     private static final Map<String, List<String>> DEFAULT_STANDARDS;
 
     static
@@ -69,9 +82,26 @@ public final class AxeOptions
 
     public static AxeOptions forStandard(String standard)
     {
-        List<String> tags = Optional.ofNullable(DEFAULT_STANDARDS.get(standard))
-                .orElseGet(() -> List.of(standard.toLowerCase()));
-        return new AxeOptions("tag", standard, tags);
+        return new AxeOptions("tag", standard, createTags(standard));
+    }
+
+    private static List<String> createTags(String standard)
+    {
+        if (DEFAULT_STANDARDS.containsKey(standard))
+        {
+            return DEFAULT_STANDARDS.get(standard);
+        }
+
+        for (Map.Entry<Pattern, Function<Matcher, String>> tagEntry : CASE_SENSITIVE_TAGS.entrySet())
+        {
+            Matcher tagMatcher = tagEntry.getKey().matcher(standard);
+            if (tagMatcher.matches())
+            {
+                return List.of(tagEntry.getValue().apply(tagMatcher));
+            }
+        }
+
+        return List.of(standard.toLowerCase());
     }
 
     public static AxeOptions forRules(List<String> rules)
