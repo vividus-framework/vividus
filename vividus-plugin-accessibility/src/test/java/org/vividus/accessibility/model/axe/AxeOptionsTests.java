@@ -68,9 +68,20 @@ class AxeOptionsTests
         // CHECKSTYLE:ON
     }
 
+    static Stream<Arguments> caseSensitiveStandards()
+    {
+        // CHECKSTYLE:OFF
+        return Stream.of(
+                arguments("act", List.of("ACT")),
+                arguments("ttv5", List.of("TTv5")),
+                arguments("tt1.A", List.of("TT1.a"))
+        );
+        // CHECKSTYLE:ON
+    }
+
     @ParameterizedTest
-    @MethodSource("defaultStandards")
-    void shouldReturnOptionsForDefaultStandards(String tag, List<String> values)
+    @MethodSource({"defaultStandards", "caseSensitiveStandards"})
+    void shouldReturnOptionsForStandards(String tag, List<String> values)
     {
         AxeOptions options = AxeOptions.forStandard(tag);
         assertEquals(values, options.getValues());
