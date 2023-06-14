@@ -118,6 +118,27 @@ When I wait until number of elements located by `tagName(img)` is equal to `5`
 When I wait until number of elements located by `tagName(img):1` is equal to `5`
 ----
 
+
+=== Wait for element to stop moving
+
+Waits for element with the specified locator to stop moving.
+
+NOTE: An element is considered _moving_ when its coordinates (position) are changing. For example, an animated GIF is not a _moving_ element unless it changes position.
+
+[source,gherkin]
+----
+When I wait until element located by `$locator` stops moving
+----
+
+* `$locator` - <<_locator>>.
+
+.Wait for element with the specified id to stop moving
+[source,gherkin]
+----
+When I wait until element located by `id(submitForm)` stops moving
+----
+
+
 === Verify elements number
 
 Verifies if the number of elements located by locator matches the desired number.
