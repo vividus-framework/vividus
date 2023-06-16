@@ -11,7 +11,7 @@ include::partial$plugin-installation.adoc[]
 
 NOTE: The properties marked with *bold* are mandatory.
 
-[cols="2,1,3", options="header"]
+[cols="2a,1,3", options="header"]
 
 |===
 
@@ -19,13 +19,32 @@ NOTE: The properties marked with *bold* are mandatory.
 |Default
 |Description
 
-|`ui.visual.applitools.server-uri`
+.^|`applitools.server-uri` +
+[WARNING]
+====
+`ui.visual.applitools.server-uri` property is deprecated in favor of `applitools.server-uri` and will be removed in VIVIDUS 0.7.0.
+====
+
 |`https://eyesapi.applitools.com`
 |The URI of the rest server.
 
-|`ui.visual.applitools.execute-api-key`
+.^|`applitools.execute-api-key` +
+[WARNING]
+====
+`ui.visual.applitools.execute-api-key` property is deprecated in favor of `applitools.execute-api-key` and will be removed in VIVIDUS 0.7.0.
+====
+
 |`empty`
 |Allows users to execute tests but does not allow them to access the tests and test results, change data through the API, or make any changes to the tests. For more details see how to https://applitools.com/docs/topics/overview/obtain-api-key.html[obtain API keys].
+
+.^|`applitools.app-name` +
+[WARNING]
+====
+`ui.visual.applitools.app-name` property is deprecated in favor of `applitools.app-name` and will be removed in VIVIDUS 0.7.0.
+====
+
+|`<empty>`
+|The name of the application under test.
 
 |[subs=+quotes]`*ui.visual.applitools.read-api-key*`
 |`<empty>`
@@ -34,10 +53,6 @@ NOTE: The properties marked with *bold* are mandatory.
 |`ui.visual.applitools.match-level`
 |`EXACT`
 |See https://applitools.com/docs/common/cmn-eyes-match-levels.html#Available[available match levels].
-
-|`ui.visual.applitools.app-name`
-|`<empty>`
-|The name of the application under test.
 
 |===
 

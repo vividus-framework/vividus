@@ -9,14 +9,14 @@
 
     <bean class="org.vividus.visual.eyes.converter.ExamplesTableToApplitoolsVisualChecksConverter" >
         <constructor-arg ref="screenshotParametersFactory" />
-        <property name="executeApiKey" value="${ui.visual.applitools.execute-api-key}" />
+        <property name="executeApiKey" value="${applitools.execute-api-key}" />
         <property name="readApiKey" value="${ui.visual.applitools.read-api-key}" />
         <property name="hostApp" value="${ui.visual.applitools.host-app}" />
         <property name="hostOS" value="${ui.visual.applitools.host-os}" />
         <property name="viewportSize" value="${ui.visual.applitools.viewport-size}" />
         <property name="matchLevel" value="${ui.visual.applitools.match-level}" />
-        <property name="serverUri" value="${ui.visual.applitools.server-uri}" />
-        <property name="appName" value="${ui.visual.applitools.app-name}" />
+        <property name="serverUri" value="${applitools.server-uri}" />
+        <property name="appName" value="${applitools.app-name}" />
         <property name="baselineEnvName" value="${ui.visual.applitools.baseline-env-name}" />
     </bean>
     <bean class="org.vividus.visual.eyes.converter.ExamplesTableToRenderingBrowserInfoConverter" />
