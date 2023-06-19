@@ -1,0 +1,16 @@
+.test-result {
+    height: 100%;
+}
+
+.test-result__content {
+    height: 100%;
+}
+
+.test-result-visual {
+    height: inherit;
+}
+
+.baseline {
+    width: 100%;
+    height: inherit;
+}
