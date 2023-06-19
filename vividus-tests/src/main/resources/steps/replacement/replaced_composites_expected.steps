@@ -1,0 +1,19 @@
+Composite: Given replacing of deprecated step without parameters
+Given deprecated step without parameters but not for replace
+Given actual step without parameters
+
+
+Composite: Given replacing of deprecated step with parameters
+Given actual step with parameters: placeholder1-`placeholder2`-`placeholder3`
+Composite: Given replacing of deprecated nested steps
+When actual code step with parameters `placeholder1`-`placeholder2`-`placeholder3` and SubSteps:
+|step|
+When actual code step with parameters `placeholder1-0Lvl`-`placeholder2-0Lvl`-`placeholder3-0Lvl` and SubSteps:
+{headerSeparator=!, valueSeparator=!}
+!step                                                                                                                     !
+!Given actual step without parameters                                                                                 !
+!When actual code step with parameters `placeholder1-1stLvl`-`placeholder2-1stLvl`-`placeholder3-1stLvl` and SubSteps: !
+!|step                                                                                                                   |!
+!|Given deprecated step without parameters but not for replace                                                           |!
+!|Given actual step with parameters: placeholder1-2ndLvl-`placeholder2-2ndLvl`-`placeholder3-2ndLvl`                 |!
+!|Given actual step without parameters                                                                               |!

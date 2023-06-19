@@ -38,6 +38,8 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.annotation.Replacement;
 import org.vividus.context.VariableContext;
 import org.vividus.http.ConnectionDetails;
@@ -56,6 +58,8 @@ import org.vividus.variable.VariableScope;
 
 public class HttpResponseValidationSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpResponseValidationSteps.class);
+
     private static final String HTTP_RESPONSE_STATUS_CODE = "HTTP response status code";
     private static final Tika TIKA = new Tika();
 
@@ -124,10 +128,12 @@ public class HttpResponseValidationSteps
      * @param content        The body content part
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern = "Then `${response}` is %1$s `%2$s`")
     @Then("the response body $comparisonRule '$content'")
     public void doesResponseBodyMatch(StringComparisonRule comparisonRule, String content)
     {
+        LOGGER.warn("The step: \"Then the response body $comparisonRule '$content'\" is deprecated and will be removed"
+                + " in VIVIDUS 0.6.0. Use ${response} dynamic variable with \"Then `$variable1` is $comparisonRule "
+                + "`$variable2`\" step");
         performIfHttpResponseIsPresent(response -> softAssert.assertThat("HTTP response body",
                 response.getResponseBodyAsString(), comparisonRule.createMatcher(content)));
     }
@@ -340,11 +346,12 @@ public class HttpResponseValidationSteps
      * @param attributes The ExamplesTable with expected elements
      */
     @Deprecated(since = "0.5.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.6.0",
-                 replacementFormatPattern = "Then response header `%1$s` contains elements:%2$s")
     @Then("response header '$httpHeaderName' contains attribute:$attributes")
     public void assertHeaderContainsAttributes(String httpHeaderName, ExamplesTable attributes)
     {
+        LOGGER.warn("The step \"Then response header '$httpHeaderName' contains attribute:$attributes\" "
+                + "is deprecated and will be removed in VIVIDUS 0.6.0. "
+                + "Please use step \"Then response header `$headerName` contains elements:$elements\"");
         performIfHttpResponseIsPresent(response ->
         {
             getHeaderByName(response, httpHeaderName).ifPresent(header ->

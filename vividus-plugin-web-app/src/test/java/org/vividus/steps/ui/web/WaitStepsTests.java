@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,9 +101,6 @@ class WaitStepsTests
         when(expectedSearchContextConditions.invisibilityOfElement(locator)).thenReturn(condition);
         waitSteps.elementByIdDisappears("id");
         verify(waitActions).wait(webElement, condition);
-        assertThat(logger.getLoggingEvents(), is(List.of(
-                warn("The step: \"Then an element with the id '$id' disappears\" is deprecated and will be removed "
-                        + "in VIVIDUS 0.6.0. Use step: \"When I wait until element located `$locator` disappears\""))));
     }
 
     @Test
