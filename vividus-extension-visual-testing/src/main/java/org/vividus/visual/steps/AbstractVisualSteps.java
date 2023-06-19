@@ -79,7 +79,8 @@ public abstract class AbstractVisualSteps
 
         result.ifPresent(r ->
         {
-            attachmentPublisher.publishAttachment(getTemplateName(), Map.of("result", r), "Visual comparison");
+            String attachmentTitle = "Visual comparison: " + r.getBaselineName();
+            attachmentPublisher.publishAttachment(getTemplateName(), Map.of("result", r), attachmentTitle);
             verifyResult(r);
         });
 

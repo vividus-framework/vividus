@@ -89,7 +89,7 @@ class VisualTestingStepsTests
     {
         var check = mock(ApplitoolsVisualCheck.class);
         when(applitoolsVisualCheckFactory.create(BATCH_NAME, TEST, ESTABLISH)).thenReturn(check);
-        var result = mock(ApplitoolsVisualCheckResult.class);
+        var result = mockApplitoolsVisualCheckResult();
         when(visualTestingService.run(check)).thenReturn(result);
         visualTestingSteps.performCheck(ESTABLISH, TEST, BATCH_NAME);
         verifyVisualCheck(result, 1);
@@ -98,7 +98,7 @@ class VisualTestingStepsTests
     private void verifyVisualCheck(ApplitoolsVisualCheckResult result, int times)
     {
         verify(attachmentPublisher, times(times)).publishAttachment("applitools-visual-comparison.ftl",
-                Map.of("result", result), "Visual comparison");
+                Map.of("result", result), "Visual comparison: baseline name");
         verify(softAssert, times(times)).assertTrue("Visual check passed", false);
     }
 
@@ -106,7 +106,7 @@ class VisualTestingStepsTests
     void shouldRunApplitoolsVisualCheckWithCustomConfiguration()
     {
         var check = mock(ApplitoolsVisualCheck.class);
-        var result = mock(ApplitoolsVisualCheckResult.class);
+        var result = mockApplitoolsVisualCheckResult();
         when(visualTestingService.run(check)).thenReturn(result);
         var screenshotConfiguration = mock(WebScreenshotConfiguration.class);
         var screenshotParameters = mock(WebScreenshotParameters.class);
@@ -134,7 +134,7 @@ class VisualTestingStepsTests
         check.setElementsToIgnore(Set.of(locator));
         check.setAreasToIgnore(Set.of(locator));
 
-        var result = mock(ApplitoolsVisualCheckResult.class);
+        var result = mockApplitoolsVisualCheckResult();
         when(visualTestingService.run(check)).thenReturn(result);
         var screenshotParameters = mock(WebScreenshotParameters.class);
         var ignores = Map.of(
@@ -158,5 +158,12 @@ class VisualTestingStepsTests
         verifyVisualCheck(result, 1);
         assertEquals(Optional.of(screenshotParameters), check.getScreenshotParameters());
         verify(softAssert).assertTrue("WCAG 2.1 - AA accessibility check for test: test", true);
+    }
+
+    private ApplitoolsVisualCheckResult mockApplitoolsVisualCheckResult()
+    {
+        var result = mock(ApplitoolsVisualCheckResult.class);
+        when(result.getBaselineName()).thenReturn("baseline name");
+        return result;
     }
 }
