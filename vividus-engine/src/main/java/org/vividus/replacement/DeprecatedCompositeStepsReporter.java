@@ -28,7 +28,7 @@ import org.vividus.testcontext.TestContext;
 public class DeprecatedCompositeStepsReporter extends ChainedStoryReporter
 {
     public static final Pattern DEPRECATED_COMPOSITE_STEP_COMMENT_PATTERN = Pattern
-            .compile("^!--\\s+Deprecated:\\s+(.*),\\s+(.*)$");
+            .compile("^!--\\s+DEPRECATED:\\s+(.*),\\s+(.*)$");
     private static final Object DEPRECATED_STEP_NOTIFICATION_KEY = DeprecatedCompositeStepsReporter.class;
 
     private final TestContext testContext;

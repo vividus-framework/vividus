@@ -203,10 +203,10 @@ class DeprecatedStepsReplacerTests
                 + NEW_LINE + CODE_STEP_UNRESOLVED;
 
         var compositeCandidate = mockCompositeStepCandidate(CODE_STEP_PATTERN_UNPRIORITIZED,
-                CODE_STEP_UNPRIORITIZED, "!-- Deprecated: 0.10.0, Given actual step with parameter %1$s");
+                CODE_STEP_UNPRIORITIZED, "!-- DEPRECATED: 0.10.0, Given actual step with parameter %1$s");
         var compositeCandidateWithoutReplace = mockCompositeStepCandidate(CODE_STEP_UNRESOLVED_PATTERN,
                 CODE_STEP_UNRESOLVED,
-                "!-- WARNING: The step \"Given deprecated step without automatic replacement\" is "
+                "!-- DEPRECATED: The step \"Given deprecated step without automatic replacement\" is "
                         + "deprecated and will be removed in VIVIDUS 3.5.1");
         var notDeprecatedCandidate = mockCompositeStepCandidate("some actual step", notDeprecatedStep);
 

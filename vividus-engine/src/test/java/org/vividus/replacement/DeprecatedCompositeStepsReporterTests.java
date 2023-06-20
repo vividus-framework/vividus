@@ -45,7 +45,7 @@ class DeprecatedCompositeStepsReporterTests
     private static final String DEPRECATED_STEP_STRING = "When I deprecated new step with parameter `value`";
     private static final String ACTUAL_STEP_PATTERN = "When I use actual step with parameter `%1$s`";
     private static final String ACTUAL_STEP_STRING = "When I use actual step with parameter `value`";
-    private static final String DEPRECATION_INFO = String.format("!-- Deprecated: %s, %s",
+    private static final String DEPRECATION_INFO = String.format("!-- DEPRECATED: %s, %s",
             REMOVE_VERSION, ACTUAL_STEP_PATTERN);
     private static final String DEPRECATION_INFO_RESOLVED = String.format(
             "The step: \"%s\" is deprecated and will be removed in VIVIDUS %s. Use step: \"%s\"",

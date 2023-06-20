@@ -13,94 +13,94 @@ Priority: 1
 Then the page title contains '<text>'
 
 Composite: Then invisible element by xpath '$xpath' exists
-!-- Deprecated: 0.6.0, Then number of invisible elements `By.xpath(%1$s)` is = `1`
+!-- DEPRECATED: 0.6.0, Then number of invisible elements `By.xpath(%1$s)` is = `1`
 Then number of invisible elements `By.xpath(<xpath>)` is = `1`
 
 Composite: When I set the number of elements found by xpath '$xpath' to the '$scopes' variable '$variableName'
-!-- Deprecated: 0.6.0, When I save number of elements located `By.xpath(%1$s)` to %2$s variable `%3$s`
+!-- DEPRECATED: 0.6.0, When I save number of elements located `By.xpath(%1$s)` to %2$s variable `%3$s`
 When I save number of elements located `By.xpath(<xpath>)` to <scopes> variable `<variableName>`
 
 Composite: Then the number of elements found by the xpath '$xpath' is $comparisonRule '$quantity'
-!-- Deprecated: 0.6.0, Then number of elements found by `By.xpath(%1$s)` is %2$s `%3$s`
+!-- DEPRECATED: 0.6.0, Then number of elements found by `By.xpath(%1$s)` is %2$s `%3$s`
 Then number of elements found by `By.xpath(<xpath>)` is <comparisonRule> `<quantity>`
 
 Composite: Then a field with the name '$fieldName' exists
-!-- Deprecated: 0.6.0, Then field located `By.fieldName(%1$s)` exists
+!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s)` exists
 Then field located `By.fieldName(<fieldName>)` exists
 
 Composite: When I clear a field with the name '$fieldName'
-!-- Deprecated: 0.6.0, When I clear field located by `fieldName(%1$s)`
+!-- DEPRECATED: 0.6.0, When I clear field located by `fieldName(%1$s)`
 When I clear field located by `fieldName(<fieldName>)`
 
 Composite: When I clear a field with the name '$fieldName' using keyboard
-!-- Deprecated: 0.6.0, When I clear field located by `fieldName(%1$s)` using keyboard
+!-- DEPRECATED: 0.6.0, When I clear field located by `fieldName(%1$s)` using keyboard
 When I clear field located by `fieldName(<fieldName>)` using keyboard
 
 Composite: When I add '$text' to a field with the name '$fieldName'
-!-- Deprecated: 0.6.0, When I add `%1$s` to field located by `fieldName(%2$s)`
+!-- DEPRECATED: 0.6.0, When I add `%1$s` to field located by `fieldName(%2$s)`
 When I add `<text>` to field located by `fieldName(<fieldName>)`
 
 Composite: When I add '$text' to a field by the xpath '$xpath'
-!-- Deprecated: 0.6.0, When I add `%1$s` to field located by `xpath(%2$s)`
+!-- DEPRECATED: 0.6.0, When I add `%1$s` to field located by `xpath(%2$s)`
 When I add `<text>` to field located by `xpath(<xpath>)`
 
 Composite: When I enter '$text' in a field with the name '$fieldName'
-!-- Deprecated: 0.6.0, When I enter `%1$s` in field located by `fieldName(%2$s)`
+!-- DEPRECATED: 0.6.0, When I enter `%1$s` in field located by `fieldName(%2$s)`
 When I enter `<text>` in field located by `fieldName(<fieldName>)`
 
 Composite: When I clear a field by the xpath '$xpath'
-!-- Deprecated: 0.6.0, When I clear field located by `xpath(%1$s)`
+!-- DEPRECATED: 0.6.0, When I clear field located by `xpath(%1$s)`
 When I clear field located by `xpath(<xpath>)`
 
 Composite: When I clear a field by the xpath '$xpath' using keyboard
-!-- Deprecated: 0.6.0, When I clear field located by `xpath(%1$s)` using keyboard
+!-- DEPRECATED: 0.6.0, When I clear field located by `xpath(%1$s)` using keyboard
 When I clear field located by `xpath(<xpath>)` using keyboard
 
 Composite: Then a field with the name '$fieldName' and text containing '$textpart' exists
 Priority: 1
-!-- Deprecated: 0.6.0, Then field located `By.fieldName(%1$s):a->filter.fieldTextPart(%2$s)` exists
+!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s):a->filter.fieldTextPart(%2$s)` exists
 Then field located `By.fieldName(<fieldName>):a->filter.fieldTextPart(<textpart>)` exists
 
 Composite: Then a field with the name '$fieldName' does not exist
-!-- Deprecated: 0.6.0, Then field located `By.fieldName(%1$s)` does not exist
+!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s)` does not exist
 Then field located `By.fieldName(<fieldName>)` does not exist
 
 Composite: Then a [$state] field with the name '$fieldName' and text '$text' exists
 Priority: 1
-!-- Deprecated: 0.6.0, Then field located `By.fieldName(%2$s)->filter.fieldText(%3$s).state(%1$s)` exists
+!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%2$s)->filter.fieldText(%3$s).state(%1$s)` exists
 Then field located `By.fieldName(<fieldName>)->filter.fieldText(<text>).state(<state>)` exists
 
 Composite: Then a field with the name '$fieldName' and text '$text' does not exist
 Priority: 1
-!-- Deprecated: 0.6.0, Then field located `By.fieldName(%1$s):a->filter.fieldText(%2$s)` does not exist
+!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s):a->filter.fieldText(%2$s)` does not exist
 Then field located `By.fieldName(<fieldName>):a->filter.fieldText(<text>)` does not exist
 
 Composite: Then a field with the name '$fieldName' and text '$text' exists
 Priority: 1
-!-- Deprecated: 0.6.0, Then field located `By.fieldName(%1$s)->filter.fieldText(%2$s)` exists
+!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s)->filter.fieldText(%2$s)` exists
 Then field located `By.fieldName(<fieldName>)->filter.fieldText(<text>)` exists
 
 Composite: Then a field with the name '$fieldName' and placeholder text '$text' exists
 Priority: 1
-!-- Deprecated: 0.6.0, Then field located `By.fieldName(%1$s):a->filter.placeholder(%2$s)` exists
+!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s):a->filter.placeholder(%2$s)` exists
 Then field located `By.fieldName(<fieldName>):a->filter.placeholder(<text>)` exists
 
 Composite: Then a [$state] field with the name '$fieldName' and placeholder text '$text' exists
 Priority: 1
-!-- Deprecated: 0.6.0, Then field located `By.fieldName(%2$s)->filter.placeholder(%3$s).state(%1$s)` exists
+!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%2$s)->filter.placeholder(%3$s).state(%1$s)` exists
 Then field located `By.fieldName(<fieldName>)->filter.placeholder(<text>).state(<state>)` exists
 
 Composite: Then a field with the name '$fieldName' placeholder text '$text' does not exist
 Priority: 1
-!-- Deprecated: 0.6.0, Then field located `By.fieldName(%1$s):a->filter.placeholder(%2$s)` does not exist
+!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s):a->filter.placeholder(%2$s)` does not exist
 Then field located `By.fieldName(<fieldName>):a->filter.placeholder(<text>)` does not exist
 
 Composite: Then a [$state] field with the name '$fieldName' exists
-!-- Deprecated: 0.6.0, Then field located `By.fieldName(%2$s):a->filter.state(%1$s)` exists
+!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%2$s):a->filter.state(%1$s)` exists
 Then field located `By.fieldName(<fieldName>):a->filter.state(<state>)` exists
 
 Composite: When I enter '$text' in a field by the xpath '$xpath'
-!-- Deprecated: 0.6.0, When I enter `%1$s` in field located by `xpath(%2$s)`
+!-- DEPRECATED: 0.6.0, When I enter `%1$s` in field located by `xpath(%2$s)`
 When I enter `<text>` in field located by `xpath(<xpath>)`
 
 Composite: When I enter `$text` in field located `$locator` using keyboard
@@ -110,7 +110,7 @@ When I execute sequence of actions:
 |ENTER_TEXT|<text>   |
 
 Composite: When I select '$text' from a drop down by the xpath '$xpath'
-!-- Deprecated: 0.6.0, When I select `%1$s` in dropdown located `By.xpath(%2$s)`
+!-- DEPRECATED: 0.6.0, When I select `%1$s` in dropdown located `By.xpath(%2$s)`
 When I select `<text>` in dropdown located `By.xpath(<xpath>)`
 
 Composite: Then an element with the name '$elementName' containing text '$text' exists
@@ -122,7 +122,7 @@ Then number of elements found by `By.elementName(<elementName>)->filter.caseSens
 
 Composite: Then a [$state] element with the name '$elementName' and text '$text' exists
 Priority: 1
-!-- Deprecated: 0.6.0, Then number of elements found by `By.elementName(%2$s)->filter.caseSensitiveText(%3$s).state(%1$s)` is equal to `1`
+!-- DEPRECATED: 0.6.0, Then number of elements found by `By.elementName(%2$s)->filter.caseSensitiveText(%3$s).state(%1$s)` is equal to `1`
 Then number of elements found by `By.elementName(<elementName>)->filter.caseSensitiveText(<text>).state(<state>)` is equal to `1`
 
 Composite: Then an element with the name '$elementName' exists
@@ -132,26 +132,26 @@ Composite: Then an element with the name '$elementName' does not exist
 Then number of elements found by `By.elementName(<elementName>)` is equal to `0`
 
 Composite: Then an element by the xpath '$xpath' does not exist
-!-- Deprecated: 0.6.0, Then number of elements found by `By.xpath(%1$s)` is equal to `0`
+!-- DEPRECATED: 0.6.0, Then number of elements found by `By.xpath(%1$s)` is equal to `0`
 Then number of elements found by `By.xpath(<xpath>)` is equal to `0`
 
 Composite: Then a [$state] element with the name '$elementName' exists
-!-- Deprecated: 0.7.0, Then number of elements found by `By.elementName(%2$s)->filter.state(%1$s)` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `By.elementName(%2$s)->filter.state(%1$s)` is equal to `1`
 Then number of elements found by `By.elementName(<elementName>)->filter.state(<state>)` is equal to `1`
 
 Composite: Then an element with the tag '$elementTag' and text '$text' exists
 Then number of elements found by `By.tagName(<elementTag>)->filter.caseSensitiveText(<text>)` is equal to `1`
 
 Composite: Then a [$state] element with the tag '$elementTag' does not exist
-!-- Deprecated: 0.7.0, Then number of elements found by `By.tagName(%2$s)->filter.state(%1$s)` is equal to `0`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `By.tagName(%2$s)->filter.state(%1$s)` is equal to `0`
 Then number of elements found by `By.tagName(<elementTag>)->filter.state(<state>)` is equal to `0`
 
 Composite: Then a [$state] element with the tag '$elementTag' exists
-!-- Deprecated: 0.7.0, Then number of elements found by `By.tagName(%2$s)->filter.state(%1$s)` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `By.tagName(%2$s)->filter.state(%1$s)` is equal to `1`
 Then number of elements found by `By.tagName(<elementTag>)->filter.state(<state>)` is equal to `1`
 
 Composite: When I click on an element by the xpath '$xpath'
-!-- Deprecated: 0.6.0, When I click on element located by `xpath(%1$s)`
+!-- DEPRECATED: 0.6.0, When I click on element located by `xpath(%1$s)`
 When I click on element located by `xpath(<xpath>)`
 
 Composite: When I click on an element with the attribute '$attributeType'='$attributeValue'
@@ -161,14 +161,14 @@ Composite: When I click on an element with the text '$text'
 When I click on element located by `caseSensitiveText(<text>)`
 
 Composite: When I click on all elements by xpath '$xpath'
-!-- Deprecated: 0.6.0, When I click on all elements located `By.xpath(%1$s)`
+!-- DEPRECATED: 0.6.0, When I click on all elements located `By.xpath(%1$s)`
 When I click on all elements located `By.xpath(<xpath>)`
 
 Composite: Then an element with the attribute '$attributeType'='$attributeValue' exists
 Then number of elements found by `By.xpath(.//*[@<attributeType>='<attributeValue>'])` is equal to `1`
 
 Composite: Then a [$state] element with the attribute '$attributeType'='$attributeValue' exists
-!-- Deprecated: 0.7.0, Then number of elements found by `By.xpath(.//*[@%2$s='%3$s'])->filter.state(%1$s)` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `By.xpath(.//*[@%2$s='%3$s'])->filter.state(%1$s)` is equal to `1`
 Then number of elements found by `By.xpath(.//*[@<attributeType>='<attributeValue>'])->filter.state(<state>)` is equal to `1`
 
 Composite: Then an element with the tag '$elementTag' and attribute '$attributeType'='$attributeValue' exists
@@ -178,33 +178,33 @@ Composite: Then an element with the attribute '$attributeType' containing '$attr
 Then number of elements found by `By.xpath(.//*[contains(@<attributeType>, '<attributeValue>')])` is equal to `1`
 
 Composite: Then each element by the xpath '$xpath' has same '$dimension'
-!-- Deprecated: 0.6.0, Then each element located `By.xpath(%1$s)` has same `%2$s`
+!-- DEPRECATED: 0.6.0, Then each element located `By.xpath(%1$s)` has same `%2$s`
 Then each element located `By.xpath(<xpath>)` has same `<dimension>`
 
 Composite: Then each element by the xpath '$elementXpath' has '$number' child elements by the xpath '$childXpath'
-!-- Deprecated: 0.6.0, Then each element with locator `By.xpath(%1$s)` has `%2$s` child elements with locator `By.xpath(%3$s)`
+!-- DEPRECATED: 0.6.0, Then each element with locator `By.xpath(%1$s)` has `%2$s` child elements with locator `By.xpath(%3$s)`
 Then each element with locator `By.xpath(<elementXpath>)` has `<number>` child elements with locator `By.xpath(<childXpath>)`
 
 Composite: Then at least one element by the xpath '$xpath' exists
-!-- Deprecated: 0.6.0, Then number of elements found by `By.xpath(%1$s)` is greater than or equal to `1`
+!-- DEPRECATED: 0.6.0, Then number of elements found by `By.xpath(%1$s)` is greater than or equal to `1`
 Then number of elements found by `By.xpath(<xpath>)` is greater than or equal to `1`
 
 Composite: Then at least one element with the attribute '$attributeType'='$attributeValue' exists
 Then number of elements found by `By.xpath(.//*[@<attributeType>='<attributeValue>'])` is greater than or equal to `1`
 
 Composite: Then an element by the xpath '$xpath' exists
-!-- Deprecated: 0.6.0, Then number of elements found by `By.xpath(%1$s)` is equal to `1`
+!-- DEPRECATED: 0.6.0, Then number of elements found by `By.xpath(%1$s)` is equal to `1`
 Then number of elements found by `By.xpath(<xpath>)` is equal to `1`
 
 Composite: Then an element by the cssSelector '$cssSelector' exists
 Then number of elements found by `By.cssSelector(<cssSelector>)` is equal to `1`
 
 Composite: When I hover a mouse over an element with the xpath '$xpath'
-!-- Deprecated: 0.6.0, When I hover mouse over element located `By.xpath(%1$s)`
+!-- DEPRECATED: 0.6.0, When I hover mouse over element located `By.xpath(%1$s)`
 When I hover mouse over element located `By.xpath(<xpath>)`
 
 Composite: When I perform right click on an element by the xpath '$xpath'
-!-- Deprecated: 0.6.0, When I perform right click on element located `By.xpath(%1$s)`
+!-- DEPRECATED: 0.6.0, When I perform right click on element located `By.xpath(%1$s)`
 When I perform right click on element located `By.xpath(<xpath>)`
 
 Composite: When I hover a mouse over a button with the name '$buttonName'
@@ -217,7 +217,7 @@ Composite: When I click on a button with the image src '$imageSrc'
 When I click on element located by `xpath(.//button[./img[@src='<imageSrc>']])`
 
 Composite: Then a [$state] button with the name '$buttonName' exists
-!-- Deprecated: 0.7.0, Then number of elements found by `By.buttonName(%2$s)->filter.state(%1$s)` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `By.buttonName(%2$s)->filter.state(%1$s)` is equal to `1`
 Then number of elements found by `By.buttonName(<buttonName>)->filter.state(<state>)` is equal to `1`
 
 Composite: Then a button with the name '$buttonName' exists
@@ -233,109 +233,109 @@ Composite: Then a button with the tooltip '$tooltip' and image with the src '$im
 Then number of elements found by `By.xpath(.//button[./img[@src='<imageSrc>'] and @title='<tooltip>'])` is equal to `1`
 
 Composite: When I wait until an element with the text '$text' appears
-!-- Deprecated: 0.6.0, When I wait until element located by `caseSensitiveText(%1$s)` appears
+!-- DEPRECATED: 0.6.0, When I wait until element located by `caseSensitiveText(%1$s)` appears
 When I wait until element located by `caseSensitiveText(<text>)` appears
 
 Composite: When I wait until an element with the text '$text' disappears
-!-- Deprecated: 0.6.0, When I wait until element located by `caseSensitiveText(%1$s)` disappears
+!-- DEPRECATED: 0.6.0, When I wait until element located by `caseSensitiveText(%1$s)` disappears
 When I wait until element located by `caseSensitiveText(<text>)` disappears
 
 Composite: When I wait until an element with the name '$elementName' disappears
-!-- Deprecated: 0.6.0, When I wait until element located by `elementName(%1$s)` disappears
+!-- DEPRECATED: 0.6.0, When I wait until element located by `elementName(%1$s)` disappears
 When I wait until element located by `elementName(<elementName>)` disappears
 
 Composite: When I wait until an element with the name '$elementName' appears
-!-- Deprecated: 0.6.0, When I wait until element located by `elementName(%1$s)` appears
+!-- DEPRECATED: 0.6.0, When I wait until element located by `elementName(%1$s)` appears
 When I wait until element located by `elementName(<elementName>)` appears
 
 Composite: When I wait until an element with the xpath '$xpath' appears
-!-- Deprecated: 0.6.0, When I wait until element located by `xpath(%1$s)` appears
+!-- DEPRECATED: 0.6.0, When I wait until element located by `xpath(%1$s)` appears
 When I wait until element located by `xpath(<xpath>)` appears
 
 Composite: When I wait until an element with the xpath '$xpath' disappeares
-!-- Deprecated: 0.6.0, When I wait until element located by `xpath(%1$s)` disappears
+!-- DEPRECATED: 0.6.0, When I wait until element located by `xpath(%1$s)` disappears
 When I wait until element located by `xpath(<xpath>)` disappears
 
 Composite: When I wait until the state of an element with the name '$elementName' becomes [$state]
-!-- Deprecated: 0.6.0, When I wait until state of element located by `elementName(%1$s)` is %2$s
+!-- DEPRECATED: 0.6.0, When I wait until state of element located by `elementName(%1$s)` is %2$s
 When I wait until state of element located by `elementName(<elementName>)` is <state>
 
 Composite: When I wait until an element with the name '$elementName' is stale
-!-- Deprecated: 0.6.0, When I wait until element located by `elementName(%1$s)` is stale
+!-- DEPRECATED: 0.6.0, When I wait until element located by `elementName(%1$s)` is stale
 When I wait until element located by `elementName(<elementName>)` is stale
 
 Composite: When I wait until an element with the name '$elementName' contains the text '$text'
-!-- Deprecated: 0.6.0, When I wait until element located by `elementName(%1$s)` contains text `%2$s`
+!-- DEPRECATED: 0.6.0, When I wait until element located by `elementName(%1$s)` contains text `%2$s`
 When I wait until element located by `elementName(<elementName>)` contains text `<text>`
 
 Composite: Then an element with the name '$elementName' disappears in '$timeout' seconds
-!-- Deprecated: 0.6.0, Then element located by `elementName(%1$s)` disappears in `%2$s`
+!-- DEPRECATED: 0.6.0, Then element located by `elementName(%1$s)` disappears in `%2$s`
 Then element located by `elementName(<elementName>)` disappears in `<timeout>`
 
 Composite: When I wait `$duration` with `$pollingDuration` polling until element located `$locator` becomes $state
-!-- Deprecated: 0.6.0, When I wait `%1$s` with `%2$s` polling until element located by `%3$s` becomes %4$s
+!-- DEPRECATED: 0.6.0, When I wait `%1$s` with `%2$s` polling until element located by `%3$s` becomes %4$s
 When I wait `<duration>` with `<pollingDuration>` polling until element located by `<locator>` becomes <state>
 
 Composite: When I wait until state of element located `$locator` is $state
-!-- Deprecated: 0.6.0, When I wait until state of element located by `%1$s` is %2$s
+!-- DEPRECATED: 0.6.0, When I wait until state of element located by `%1$s` is %2$s
 When I wait until state of element located by `<locator>` is <state>
 
 Composite: When I wait until element located `$locator` is stale
-!-- Deprecated: 0.6.0, When I wait until element located by `%1$s` is stale
+!-- DEPRECATED: 0.6.0, When I wait until element located by `%1$s` is stale
 When I wait until element located by `<locator>` is stale
 
 Composite: When I wait until element located `$locator` contains text '$text'
-!-- Deprecated: 0.6.0, When I wait until element located by `%1$s` contains text `%2$s`
+!-- DEPRECATED: 0.6.0, When I wait until element located by `%1$s` contains text `%2$s`
 When I wait until element located by `<locator>` contains text `<text>`
 
 Composite: Then element located '$locator' disappears in '$timeout'
-!-- Deprecated: 0.6.0, Then element located by `%1$s` disappears in `%2$s`
+!-- DEPRECATED: 0.6.0, Then element located by `%1$s` disappears in `%2$s`
 Then element located by `<locator>` disappears in `<timeout>`
 
 Composite: Given I am on the main application page
-!-- Deprecated: 0.7.0, Given I am on main application page
+!-- DEPRECATED: 0.7.0, Given I am on main application page
 Given I am on main application page
 
 Composite: Given I am on a page with the URL '$pageURL'
-!-- Deprecated: 0.7.0, Given I am on page with URL `%1$s`
+!-- DEPRECATED: 0.7.0, Given I am on page with URL `%1$s`
 Given I am on page with URL `<pageURL>`
 
 Composite: When I go to the relative URL '$relativeURL'
-!-- Deprecated: 0.7.0, When I go to relative URL `%1$s`
+!-- DEPRECATED: 0.7.0, When I go to relative URL `%1$s`
 When I go to relative URL `<relativeURL>`
 
 Composite: Then the text '$text' exists
-!-- Deprecated: 0.6.0, Then text `%1$s` exists
+!-- DEPRECATED: 0.6.0, Then text `%1$s` exists
 Then text `<text>` exists
 
 Composite: When I refresh the page
-!-- Deprecated: 0.6.0, When I refresh page
+!-- DEPRECATED: 0.6.0, When I refresh page
 When I refresh page
 
 Composite: Then the page title $comparisonRule '$text'
-!-- Deprecated: 0.6.0, Then page title %1$s `%2$s`
+!-- DEPRECATED: 0.6.0, Then page title %1$s `%2$s`
 Then page title <comparisonRule> `<text>`
 
 Composite: When I set focus to the context element
-!-- Deprecated: 0.7.0, When I set focus on context element
+!-- DEPRECATED: 0.7.0, When I set focus on context element
 When I set focus on context element
 
 Composite: Then the context element is $focusState
-!-- Deprecated: 0.7.0, Then context element is %1$s
+!-- DEPRECATED: 0.7.0, Then context element is %1$s
 Then context element is <focusState>
 
 Composite: When I save table to $scopes variable '$variableName'
-!-- Deprecated: 0.7.0, When I save table to %1$s variable `%2$s`
+!-- DEPRECATED: 0.7.0, When I save table to %1$s variable `%2$s`
 When I save table to <scopes> variable `<variableName>`
 
 Composite: When I get the number of open windows and set it to the $scopes variable '$variable'
-!-- Deprecated: 0.7.0, When I save number of open tabs to %1$s variable `%2$s`
+!-- DEPRECATED: 0.7.0, When I save number of open tabs to %1$s variable `%2$s`
 When I save number of open tabs to <scopes> variable `<variable>`
 
 Composite: When I scroll element located `$locator` into view
-!-- Deprecated: 0.7.0, When I scroll element located by `%1$s` into view
+!-- DEPRECATED: 0.7.0, When I scroll element located by `%1$s` into view
 When I scroll element located by `<locator>` into view
 
 Composite: Then page is scrolled to element located `$locator`
-!-- Deprecated: 0.7.0, Then page is scrolled to element located by `%1$s`
+!-- DEPRECATED: 0.7.0, Then page is scrolled to element located by `%1$s`
 Then page is scrolled to element located by `<locator>`

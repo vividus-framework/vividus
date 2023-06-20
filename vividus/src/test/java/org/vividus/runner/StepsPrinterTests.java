@@ -44,6 +44,8 @@ import org.vividus.configuration.Vividus;
 
 class StepsPrinterTests
 {
+    private static final String THEN = "Then";
+
     @Test
     @StdIo
     void testPrintHelp(StdOut stdOut) throws IOException, ParseException
@@ -97,25 +99,36 @@ class StepsPrinterTests
         when(stepsFactory.createCandidateSteps()).thenReturn(List.of(candidateSteps));
         var stepCandidate1 = mockStepCandidate("Given", "initial state is '$status'", "simpleMethod");
         var stepCandidate2 = mockStepCandidate("When", "I do '$action'", "deprecatedMethod");
-        var stepCandidate3 = mockStepCandidate("Then", "I perform '$verification'", (Method) null);
-        when(candidateSteps.listCandidates()).thenReturn(List.of(stepCandidate1, stepCandidate2, stepCandidate3));
-        return List.of("                         Given initial state is '$status'",
-                " DEPRECATED              When I do '$action'",
-                " COMPOSITE IN STEPS FILE Then I perform '$verification'");
+        var stepCandidate3 = mockStepCandidate(THEN, "I perform '$verification'", (Method) null);
+        var stepCandidate4 = mockStepCandidate(THEN, "I run composite step with comment", (Method) null,
+            "!-- DEPRECATED: The step \"Then I run composite step with comment\" "
+                       + "is deprecated and will be removed in VIVIDUS 0.6.0");
+        var stepCandidate5 = mockStepCandidate(THEN, "I run composite step with replacement comment", (Method) null,
+                "!-- DEPRECATED: 0.6.0, Some replacement");
+        when(candidateSteps.listCandidates())
+                .thenReturn(List.of(stepCandidate1, stepCandidate2, stepCandidate3, stepCandidate4, stepCandidate5));
+        return List.of("                          Given initial state is '$status'",
+                "  DEPRECATED              When I do '$action'",
+                "COMPOSITE IN STEPS FILE                         Then I perform '$verification'",
+                "COMPOSITE IN STEPS FILE DEPRECATED              Then I run composite step with comment",
+                "COMPOSITE IN STEPS FILE DEPRECATED              Then I run composite step with replacement comment");
     }
 
-    private StepCandidate mockStepCandidate(String startingWord, String patternAsString, String methodName)
-            throws ReflectiveOperationException
+    private StepCandidate mockStepCandidate(String startingWord, String patternAsString, String methodName,
+            String... composedSteps) throws ReflectiveOperationException
     {
-        return mockStepCandidate(startingWord, patternAsString, getClass().getDeclaredMethod(methodName));
+        return mockStepCandidate(startingWord, patternAsString, getClass().getDeclaredMethod(methodName),
+                composedSteps);
     }
 
-    private static StepCandidate mockStepCandidate(String startingWord, String patternAsString, Method method)
+    private static StepCandidate mockStepCandidate(String startingWord, String patternAsString, Method method,
+            String... composedSteps)
     {
         var stepCandidate = mock(StepCandidate.class);
         when(stepCandidate.getStartingWord()).thenReturn(startingWord);
         when(stepCandidate.getPatternAsString()).thenReturn(patternAsString);
         when(stepCandidate.getMethod()).thenReturn(method);
+        when(stepCandidate.composedSteps()).thenReturn(composedSteps);
         return stepCandidate;
     }
 

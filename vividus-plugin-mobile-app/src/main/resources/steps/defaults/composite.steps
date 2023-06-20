@@ -1,14 +1,14 @@
 Composite: When I tap on element located `$locator` with duration `$duration`
 Priority: 1
-!-- Deprecated: 0.6.0, When I tap on element located by `%1$s` with duration `%2$s`
+!-- DEPRECATED: 0.6.0, When I tap on element located by `%1$s` with duration `%2$s`
 When I tap on element located by `<locator>` with duration `<duration>`
 
 
 Composite: When I tap on element located `$locator`
-!-- Deprecated: 0.6.0, When I tap on element located by `%1$s`
+!-- DEPRECATED: 0.6.0, When I tap on element located by `%1$s`
 When I tap on element located by `<locator>`
 
 
 Composite: When I swipe $direction to element located `$locator` with duration $swipeDuration
-!-- Deprecated: 0.6.0, When I swipe %1$s to element located by `%2$s` with duration %3$s
+!-- DEPRECATED: 0.6.0, When I swipe %1$s to element located by `%2$s` with duration %3$s
 When I swipe <direction> to element located by `<locator>` with duration <swipeDuration>

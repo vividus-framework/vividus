@@ -41,13 +41,13 @@ org.vividus.replacement.DeprecatedCodeStepsReporter - The step: "Given the step 
 == Deprecate composite steps
 
 For deprecation of composite steps use the comment with the special pattern:
-`!--\s+Deprecated:\s+(.*),\s+(.*)$` where the first group is version to remove, the second one is formatter pattern for the actual step.
+`!--\s+DEPRECATED:\s+(.*),\s+(.*)$` where the first group is version to remove, the second one is formatter pattern for the actual step.
 
 .Deprecated composite step in `composite.steps` file
 [source,gherkin]
 ----
 Composite: Given the step with parameters '$parameter1' and '$parameter2'
-!-- Deprecated: 0.6.0, Given the step with parameter `%2$s` and `%1$s`
+!-- DEPRECATED: 0.6.0, Given the step with parameter `%2$s` and `%1$s`
 Given the step with parameters `<parameter2>` and `<parameter1>`
 ----
 
@@ -59,13 +59,13 @@ org.vividus.log.LoggingStoryReporter - The step: "Given the step with parameters
 
 [NOTE]
 ====
-If composite step cannot be deprecated using formatter pattern it still must have the comment with the certain pattern for user notification in step replacer: `!--\s+WARNING: The step .* is deprecated and will be removed in .*`.
+If composite step cannot be deprecated using formatter pattern it still must have the comment with the certain pattern for user notification in step replacer: `!--\s+DEPRECATED: The step .* is deprecated and will be removed in .*`.
 
 .Example:
 [source,gherkin]
 ----
 Composite: When I send HTTP $httpMethod to the relative URL '$relativeURL'
-!-- WARNING: The step "When I send HTTP $httpMethod to the relative URL '$relativeURL'" is deprecated and will be removed in VIVIDUS 0.6.0
+!-- DEPRECATED: The step "When I send HTTP $httpMethod to the relative URL '$relativeURL'" is deprecated and will be removed in VIVIDUS 0.6.0
 When I execute HTTP <httpMethod> request for resource with relative URL `<relativeURL>`
 ----
 ====
@@ -93,7 +93,7 @@ image::deprecated-code-step.png[Multiple external systems]
 
 image::deprecated-composite-step.png[Multiple external systems]
 
-=== Using print steps command (only for code steps)
+=== Using print steps command
 
 The xref:commons:cli.adoc#_print_available_steps[`printSteps`] command prints all available steps and mark deprecated ones:
 
@@ -105,6 +105,8 @@ vividus-plugin-rest-api              Then size of decompressed response body is 
 vividus-plugin-rest-api  DEPRECATED  Then the connection is secured using $securityProtocol protocol
 vividus-plugin-rest-api  DEPRECATED  Then the number of the response headers with the name '$headerName' is $comparisonRule $value
 vividus-plugin-rest-api  DEPRECATED  Then the response body $comparisonRule '$content'
+COMPOSITE IN STEPS FILE  DEPRECATED  When I perform right click on an element by the xpath '$xpath'
+COMPOSITE IN STEPS FILE  DEPRECATED  When I refresh the page
 ...
 ----
 
