@@ -1056,11 +1056,35 @@ When I save number of open tabs to SCENARIO variable `count`
 
 === Alert Steps
 
+:alert: https://www.w3schools.com/js/js_popup.asp[popup alert]
+
+==== Perform action in the alert box
+
+Accepts the action in {alert} with matching text by clicking on the "OK" button or dismiss it by clicking "Cancel" button.
+
+Actions performed at this step:
+
+* Finds the appropriate alert with matching message
+* Performs the corresponding action
+
+[source,gherkin]
+----
+When I $alertAction alert with message which $comparisonRule `$message`
+----
+
+* `$alertAction` - Action to perform. Possible values: `ACCEPT`, `DISMISS`.
+* `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule].
+* `$message` - The text message of the alert.
+
+.Accept popup alert with any text message
+[source,gherkin]
+----
+When I accept alert with message which matches `.*`
+----
+
 ==== Type text in the alert input field
 
-This step allows you to type text into the alert input field and then accept the alert.
-
-An *alert* is a small dialog box that appears on the display screen to provide information or to warn about a potentially damaging operation. To proceed, the user needs to confirm or dismiss the alert by clicking the 'OK' or 'Cancel' button, respectively.
+This step allows you to type text into {alert} input field and then accept the alert.
 
 [NOTE]
 This step is applicable only for alerts with a single input field. For authorization alerts, basic URL authorization should be used.
@@ -1077,6 +1101,38 @@ When I type text `$text` in alert and accept it
 [source,gherkin]
 ----
 When I type text `VIVIDUS` in alert and accept it
+----
+
+==== Verify that an alert is present
+
+Checks that there is {alert} on the page.
+
+[source,gherkin]
+----
+Then an alert is present
+----
+
+.Check that an alert appears after clicking on the button
+[source,gherkin]
+----
+When I click on element located by `buttonName(Survey)`
+Then an alert is present
+----
+
+==== Verify that an alert isn't present
+
+Checks that there is no any {popup-alert}[popup alerts] on the page.
+
+[source,gherkin]
+----
+Then an alert is not present
+----
+
+.Check that an alert doesn't appear on the page
+[source,gherkin]
+----
+Given I am on page with URL `http://example.com`
+Then an alert is not present
 ----
 
 == Tips & Tricks
