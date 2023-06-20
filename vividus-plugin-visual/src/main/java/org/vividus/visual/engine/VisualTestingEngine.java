@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.vividus.selenium.screenshot.AshotScreenshotTaker;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.visual.model.VisualActionType;
@@ -95,15 +96,17 @@ public class VisualTestingEngine implements IVisualTestingEngine
             int width = Math.max(baselineScreenshot.getImage().getWidth(), checkpoint.getImage().getWidth());
             double diffPercentage = calculateDiffPercentage(visualCheck, inequalityCheck);
             ImageDiff diff = findImageDiff(baselineScreenshot, checkpoint, height, width, diffPercentage);
-            comparisonResult.setPassed(!diff.hasDiff());
+            boolean passed = !diff.hasDiff();
+            comparisonResult.setPassed(passed);
             comparisonResult.setDiff(imageToBytes(diff.getMarkedImage()));
-            LOGGER.atInfo()
+            LOGGER.atLevel(passed ? Level.INFO : Level.ERROR)
                   .addArgument(() -> inequalityCheck ? "required" : "acceptable")
                   .addArgument(BigDecimal.valueOf(diffPercentage))
+                  .addArgument(() -> passed ? " and" : ", but")
                   .addArgument(() -> BigDecimal.valueOf(
                       (double) (diff.getDiffSize() * ONE_HUNDRED) / (width * height)).setScale(SCALE,
                           RoundingMode.CEILING))
-                  .log("The {} visual difference percentage is {}% , but actual was {}%");
+                  .log("The {} visual difference percentage is {}%{} actual was {}%");
             if (overrideBaselines)
             {
                 getBaselineStorage(visualCheck).saveBaseline(checkpoint, visualCheck.getBaselineName());
