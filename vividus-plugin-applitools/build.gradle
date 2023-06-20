@@ -1,6 +1,6 @@
 project.description = 'VIVIDUS plugin for Applitools'
 
-ext.eyesVersion = '5.50.0'
+ext.eyesVersion = '5.54.0'
 
 dependencies {
     implementation project(':vividus-engine')
