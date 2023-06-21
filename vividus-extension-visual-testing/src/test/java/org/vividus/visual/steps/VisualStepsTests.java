@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class VisualStepsTests
     private static final String TEMPLATE = "template";
     private static final String BASELINE_NAME = "baseline name";
     private static final String RESULT = "result";
-    private static final String VISUAL_COMPARISON = "Visual comparison";
+    private static final String VISUAL_COMPARISON_ATTACHMENT_TITLE = "Visual comparison: " + BASELINE_NAME;
     private static final String VISUAL_CHECK_PASSED = "Visual check passed";
     private static final String COMPARE_AGAINST = "true, COMPARE_AGAINST";
     private static final String CHECK_INEQUALITY_AGAINST = "false, CHECK_INEQUALITY_AGAINST";
@@ -102,7 +102,7 @@ class VisualStepsTests
         visualSteps.execute(() -> visualCheck, checkResultProvider);
         var ordered = inOrder(attachmentPublisher, softAssert);
         ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE, Map.of(RESULT, visualCheckResult),
-                VISUAL_COMPARISON);
+                VISUAL_COMPARISON_ATTACHMENT_TITLE);
         ordered.verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, true);
         assertEquals(searchContext, visualCheck.getSearchContext());
     }
@@ -145,7 +145,7 @@ class VisualStepsTests
         visualSteps.executeWithoutContext(() -> visualCheck, checkResultProvider);
         var ordered = inOrder(attachmentPublisher, softAssert);
         ordered.verify(attachmentPublisher).publishAttachment(TEMPLATE, Map.of(RESULT, visualCheckResult),
-                VISUAL_COMPARISON);
+                VISUAL_COMPARISON_ATTACHMENT_TITLE);
         ordered.verify(softAssert).assertTrue(VISUAL_CHECK_PASSED, true);
         assertNull(visualCheck.getSearchContext());
     }

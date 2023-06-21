@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -297,6 +297,7 @@ class VisualStepsTests
 
     private void mockCheckResult()
     {
+        when(visualCheckResult.getBaselineName()).thenReturn(BASELINE);
         when(visualCheckResult.getBaseline()).thenReturn(new byte[] { });
     }
 
@@ -353,6 +354,7 @@ class VisualStepsTests
         mockUiContext();
         when(visualTestingEngine.establish(visualCheckCaptor.capture())).thenReturn(visualCheckResult);
         when(visualCheckResult.getActionType()).thenReturn(VisualActionType.ESTABLISH);
+        when(visualCheckResult.getBaselineName()).thenReturn(BASELINE);
         var screenshotParameters = mock(ScreenshotParameters.class);
         when(screenshotParametersFactory.create(Optional.empty(), IGNORES_TABLE, createEmptyIgnores())).thenReturn(
                 screenshotParameters);
@@ -514,6 +516,6 @@ class VisualStepsTests
     private void verifyCheckResultPublish()
     {
         verify(attachmentPublisher).publishAttachment("visual-comparison.ftl", Map.of("result", visualCheckResult),
-                "Visual comparison");
+                "Visual comparison: baseline");
     }
 }
