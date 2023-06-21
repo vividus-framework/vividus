@@ -68,4 +68,17 @@
         <idref bean="visualTestingSteps" />
         <idref bean="ufgSteps" />
     </util:list>
+
+    <beans profile="applitools">
+        <bean name="webDriverUrlProvider" class="org.vividus.applitools.executioncloud.ExecutionCloudUrlProvider" />
+
+        <bean class="org.vividus.applitools.executioncloud.ExecutionCloudTestStatusManager" lazy-init="false" />
+
+        <bean class="org.vividus.applitools.executioncloud.ExecutionCloudCapabilitiesConfigurer" >
+            <constructor-arg index="0" value="${applitools.execute-api-key}" />
+            <constructor-arg index="1" value="${applitools.server-uri}" />
+            <constructor-arg index="2" value="${applitools.app-name}" />
+            <constructor-arg index="3" value="${applitools.execution-cloud.batch-name}" />
+        </bean>
+    </beans>
 </beans>

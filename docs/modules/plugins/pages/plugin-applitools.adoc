@@ -1,13 +1,13 @@
 = Applitools Plugin
 
-The plugin provides the ability to perform visual testing using the https://applitools.com/[Applitools] visual testing platform.
+The plugin provides the ability to perform various kinds of testing using the https://applitools.com/[Applitools] services such as https://applitools.com/platform/eyes/[Eyes], https://applitools.com/platform/ultrafast-grid/[Ultrafast Grid] and https://applitools.com/platform/execution-cloud/[Execution Cloud].
 
 :plugin-short-name: applitools
 include::partial$plugin-installation.adoc[]
 
-== Properties
+== General properties
 
-=== General properties
+The following properties should be configured prior to start working with any of the https://applitools.com/[Applitools] services.
 
 NOTE: The properties marked with *bold* are mandatory.
 
@@ -28,13 +28,13 @@ NOTE: The properties marked with *bold* are mandatory.
 |`https://eyesapi.applitools.com`
 |The URI of the rest server.
 
-.^|`applitools.execute-api-key` +
+.^|[subs=+quotes]`*applitools.execute-api-key*` +
 [WARNING]
 ====
 `ui.visual.applitools.execute-api-key` property is deprecated in favor of `applitools.execute-api-key` and will be removed in VIVIDUS 0.7.0.
 ====
 
-|`empty`
+|`<empty>`
 |Allows users to execute tests but does not allow them to access the tests and test results, change data through the API, or make any changes to the tests. For more details see how to https://applitools.com/docs/topics/overview/obtain-api-key.html[obtain API keys].
 
 .^|`applitools.app-name` +
@@ -43,8 +43,28 @@ NOTE: The properties marked with *bold* are mandatory.
 `ui.visual.applitools.app-name` property is deprecated in favor of `applitools.app-name` and will be removed in VIVIDUS 0.7.0.
 ====
 
-|`<empty>`
+|Application under test
 |The name of the application under test.
+
+|===
+
+== Visual Testing
+
+https://applitools.com/platform/eyes/[Applitools Eyes] and https://applitools.com/platform/ultrafast-grid/[Ultrafast Grid] are UI validation tools powered by AI to help write & maintain visual tests and rapidly test across different browsers or devices for massive scalability.
+
+=== Properties
+
+==== General visual testing properties
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="2a,1,3", options="header"]
+
+|===
+
+|Property Name
+|Default
+|Description
 
 |[subs=+quotes]`*ui.visual.applitools.read-api-key*`
 |`<empty>`
@@ -56,7 +76,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 |===
 
-=== Cross-environment properties
+==== Cross-environment properties
 
 See https://applitools.com/docs/topics/general-concepts/working-withcross-environment-tests.html[cross-environment testing] for more details.
 
@@ -86,9 +106,9 @@ See https://applitools.com/docs/topics/general-concepts/working-withcross-enviro
 
 |===
 
-== Common visual testing actions use cases
+=== Common visual testing actions use cases
 
-include::partial$establish.adoc[]
+include::partial$establish.adoc[leveloffset=+1]
 
 .Establish baseline
 [source,gherkin]
@@ -107,7 +127,7 @@ Established baseline details
 
 image::applitools_establish_step_editor.png[Establish step editor]
 
-include::partial$compare-against.adoc[]
+include::partial$compare-against.adoc[leveloffset=+1]
 
 .Compare against established baseline
 [source,gherkin]
@@ -126,7 +146,7 @@ Comparison result details
 
 image::applitools_compare_step_editor.png[Compare step editor]
 
-include::partial$check-inequality-against.adoc[]
+include::partial$check-inequality-against.adoc[leveloffset=+1]
 
 .Check inequality established baseline
 [source,gherkin]
@@ -137,11 +157,11 @@ When I run visual test with Applitools using:
 |example.com|example-testing|main-app-page|CHECK_INEQUALITY_AGAINST|By.tagName(h1)  |
 ----
 
-== Steps
+=== Steps
 
 :visual-testing-actions: `ESTABLISH`, `COMPARE_AGAINST` or `CHECK_INEQUALITY_AGAINST`
 
-=== Visual check with default Applitools configuration
+==== Visual check with default Applitools configuration
 
 Performs visual check on the Applitools visual testing plarform.
 
@@ -160,7 +180,7 @@ When I $actionType baseline `$testName` in batch `$batchName` with Applitools
 When I ESTABLISH baseline `main-app-page` in batch `example-testing` with Applitools
 ----
 
-=== Visual check with custom Applitools configuration
+==== Visual check with custom Applitools configuration
 
 Performs visual check on the Applitools visual testing platform with custom Applitools configuration.
 
@@ -185,7 +205,7 @@ When I run visual test with Applitools using:
 |Demo app|COMPARE_AGAINST|example-testing|main-page-app|EXACT     |
 ----
 
-=== Visual check with custom Applitools and screenshot configuration
+==== Visual check with custom Applitools and screenshot configuration
 
 Performs visual check on the Applitools visual testing platform with custom configuration and screenshot strategy.
 
@@ -216,7 +236,7 @@ When I run visual test with Applitools using:
 |50            |SIMPLE                    |
 ----
 
-=== Ultrafast Grid check with default Applitools configuration
+==== Ultrafast Grid check with default Applitools configuration
 
 Performs visual check on the https://applitools.com/platform/ultrafast-grid/[Ultrafast Grid Applitools] visual testing plarform.
 
@@ -243,7 +263,7 @@ When I ESTABLISH baseline `Check site on several configurations` in batch `Smoke
 |chrome_mobile_emulation|       |            |Galaxy S10|
 ----
 
-=== Ultrafast Grid check with custom Applitools configuration
+==== Ultrafast Grid check with custom Applitools configuration
 
 Performs visual check on the https://applitools.com/platform/ultrafast-grid/[Ultrafast Grid Applitools] visual testing plarform.
 
@@ -286,4 +306,48 @@ When I run visual test with Applitools UFG using:
 |desktop                |firefox|1920x1080   |          |
 |ios                    |       |            |iPhone X  |
 |chrome_mobile_emulation|       |            |Galaxy S10|
+----
+
+== Execution cloud
+
+https://applitools.com/platform/execution-cloud/[Execution Cloud] is a self-healing test infrastructure for running resilient tests.
+
+=== Profiles
+
+[cols="1,2"]
+|===
+
+|`applitools/web`
+|Use in conjunction with web application profiles.
+
+|===
+
+=== Properties
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="2a,1,3", options="header"]
+
+|===
+
+|Property Name
+|Default
+|Description
+
+|[subs=+quotes]`*applitools.execution-cloud.batch-name*`
+|`empty`
+|The batch name used to group stories being run under one batch (i.e. suite name)
+
+|===
+
+.configuration.properties
+[source,json,subs=attributes+, source-highlighter+]
+----
+configuration.profiles=applitools/web,web/desktop/chrome
+
+applitools.server-uri=https://privatecloud.applitools.com/
+applitools.execute-api-key=cee293b00ee1440bcd20
+applitools.app-name=Grocery Store App
+
+applitools.execution-cloud.batch-name=Smoke suite
 ----

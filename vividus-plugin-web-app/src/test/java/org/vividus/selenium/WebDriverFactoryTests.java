@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +87,6 @@ class WebDriverFactoryTests
     private static final String COMMAND_LINE_ARGUMENTS_PROPERTY_FORMAT = "web.driver.%s.command-line-arguments";
     private static final String EXPERIMENTAL_OPTIONS_PROPERTY_FORMAT = "web.driver.%s.experimental-options";
     private static final String CLI_ARGS_NOT_SUPPORTED = "Configuring of command-line-arguments is not supported for ";
-    private static final URI URL = URI.create("http://test");
     private static final String PATH = "testPath";
     private static final String ARG_1 = "--arg1";
     private static final String ARG_2 = "--arg2";
@@ -312,9 +309,8 @@ class WebDriverFactoryTests
     void testGetRemoteWebDriver() throws Exception
     {
         mockCapabilities(remoteWebDriver);
-        setRemoteDriverUrl();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-        when(remoteWebDriverFactory.getRemoteWebDriver(URL.toURL(), desiredCapabilities)).thenReturn(remoteWebDriver);
+        when(remoteWebDriverFactory.getRemoteWebDriver(desiredCapabilities)).thenReturn(remoteWebDriver);
         Timeouts timeouts = mockTimeouts(remoteWebDriver);
         assertEquals(remoteWebDriver,
                 ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
@@ -328,11 +324,10 @@ class WebDriverFactoryTests
             throws MalformedURLException
     {
         mockCapabilities(remoteWebDriver);
-        setRemoteDriverUrl();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName(type);
         when(proxy.isStarted()).thenReturn(true);
-        when(remoteWebDriverFactory.getRemoteWebDriver(any(URL.class), argThat(capabilities -> {
+        when(remoteWebDriverFactory.getRemoteWebDriver(argThat(capabilities -> {
             assertEquals(acceptsInsecureCerts, capabilities.getCapability(CapabilityType.ACCEPT_INSECURE_CERTS));
             return true;
         }))).thenReturn(remoteWebDriver);
@@ -349,9 +344,8 @@ class WebDriverFactoryTests
     void testGetRemoteWebDriverFirefoxDriver() throws MalformedURLException
     {
         mockCapabilities(remoteWebDriver);
-        setRemoteDriverUrl();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities(new FirefoxOptions());
-        when(remoteWebDriverFactory.getRemoteWebDriver(eq(URL.toURL()), argThat(caps ->
+        when(remoteWebDriverFactory.getRemoteWebDriver(argThat(caps ->
         {
             Map<String, Object> options = (Map<String, Object>) caps.getCapability(FirefoxOptions.FIREFOX_OPTIONS);
             Map<String, Object> prefs = (Map<String, Object>) options.get("prefs");
@@ -375,10 +369,9 @@ class WebDriverFactoryTests
     void testGetRemoteWebDriverMarionetteDriver() throws Exception
     {
         mockCapabilities(remoteWebDriver);
-        setRemoteDriverUrl();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName("marionette");
-        when(remoteWebDriverFactory.getRemoteWebDriver(URL.toURL(), desiredCapabilities))
+        when(remoteWebDriverFactory.getRemoteWebDriver(desiredCapabilities))
                 .thenReturn(remoteWebDriver);
         Timeouts timeouts = mockTimeouts(remoteWebDriver);
         assertEquals(remoteWebDriver,
@@ -391,10 +384,9 @@ class WebDriverFactoryTests
     void testGetRemoteWebDriverIEDriver() throws MalformedURLException
     {
         mockCapabilities(remoteWebDriver);
-        setRemoteDriverUrl();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName(Browser.IE.browserName());
-        when(remoteWebDriverFactory.getRemoteWebDriver(any(URL.class), any(DesiredCapabilities.class)))
+        when(remoteWebDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class)))
                 .thenReturn(remoteWebDriver);
         Timeouts timeouts = mockTimeouts(remoteWebDriver);
         desiredCapabilities.setCapability(InternetExplorerDriver.NATIVE_EVENTS, false);
@@ -427,11 +419,10 @@ class WebDriverFactoryTests
     private void testGetRemoteWebDriverIsChrome(ChromeOptions chromeOptions) throws MalformedURLException
     {
         mockCapabilities(remoteWebDriver);
-        setRemoteDriverUrl();
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName(Browser.CHROME.browserName());
         desiredCapabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
-        when(remoteWebDriverFactory.getRemoteWebDriver(URL.toURL(), desiredCapabilities)).thenReturn(remoteWebDriver);
+        when(remoteWebDriverFactory.getRemoteWebDriver(desiredCapabilities)).thenReturn(remoteWebDriver);
         Timeouts timeouts = mockTimeouts(remoteWebDriver);
         assertEquals(remoteWebDriver,
                 ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
@@ -465,11 +456,6 @@ class WebDriverFactoryTests
         Timeouts timeouts = mock(Timeouts.class);
         when(options.timeouts()).thenReturn(timeouts);
         return timeouts;
-    }
-
-    private void setRemoteDriverUrl() throws MalformedURLException
-    {
-        webDriverFactory.setRemoteDriverUrl(URL.toURL());
     }
 
     private void injectConfigurations(WebDriverType webDriverType, WebDriverConfiguration configuration)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,7 +68,6 @@ class AbstractWebDriverFactoryTests
     private static final String KEY2 = "key2";
     private static final String KEY1 = "key1";
     private static final String MAP = "map";
-    private static final URI URL = URI.create("https://example.com");
     private static final String CONFIGURER = "configurer";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractWebDriverFactory.class);
@@ -153,10 +151,9 @@ class AbstractWebDriverFactoryTests
                 withSettings().extraInterfaces(HasCapabilities.class));
         Capabilities capabilities = new DesiredCapabilities(Map.of(KEY1, ARG, KEY2, ARG, KEY3, ARG, KEY4, CONFIGURER));
 
-        testWebDriverFactory.setRemoteDriverUrl(URL.toURL());
         when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES)).thenReturn(Map.of(KEY1, ARG));
         when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES)).thenReturn(Map.of(KEY2, ARG));
-        when(remoteWebDriverFactory.getRemoteWebDriver(URL.toURL(), capabilities)).thenReturn(remoteWebDriver);
+        when(remoteWebDriverFactory.getRemoteWebDriver(capabilities)).thenReturn(remoteWebDriver);
         when(((HasCapabilities) remoteWebDriver).getCapabilities()).thenReturn(capabilities);
 
         testWebDriverFactory.getRemoteWebDriver(new DesiredCapabilities(Map.of(KEY3, ARG)));

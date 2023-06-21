@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import static java.util.stream.Collectors.toMap;
 import static org.vividus.selenium.DesiredCapabilitiesMerger.merge;
 import static org.vividus.selenium.type.CapabilitiesValueTypeAdjuster.adjustType;
 
-import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -54,8 +53,6 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
     private final IPropertyParser propertyParser;
     private final JsonUtils jsonUtils;
     private final Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters;
-
-    private URL remoteDriverUrl;
 
     private final Supplier<DesiredCapabilities> seleniumGridDesiredCapabilities = Suppliers.memoize(
         () -> getCapabilitiesByPrefix(SELENIUM_GRID_PROPERTY_PREFIX));
@@ -104,8 +101,8 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
     {
         DesiredCapabilities mergedDesiredCapabilities = getWebDriverCapabilities(false, desiredCapabilities);
         DesiredCapabilities updatedDesiredCapabilities = updateDesiredCapabilities(mergedDesiredCapabilities);
-        return createWebDriver(() -> remoteWebDriverFactory.getRemoteWebDriver(remoteDriverUrl,
-                updatedDesiredCapabilities), updatedDesiredCapabilities);
+        return createWebDriver(() -> remoteWebDriverFactory.getRemoteWebDriver(updatedDesiredCapabilities),
+                updatedDesiredCapabilities);
     }
 
     protected WebDriver createWebDriver(Supplier<WebDriver> webDriver, DesiredCapabilities sessionRequestCapabilities)
@@ -160,10 +157,5 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
     protected JsonUtils getJsonUtils()
     {
         return jsonUtils;
-    }
-
-    public void setRemoteDriverUrl(URL remoteDriverUrl)
-    {
-        this.remoteDriverUrl = remoteDriverUrl;
     }
 }
