@@ -41,6 +41,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -70,8 +71,15 @@ class RemoteWebDriverFactoryTests
     private static final String HTTP_CONNECT_TIMED_OUT = "HTTP connect timed out";
 
     @Mock private URL url;
+    @Mock private RemoteWebDriverUrlProvider provider;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(RemoteWebDriverFactory.class);
+
+    @BeforeEach
+    void init()
+    {
+        when(provider.getRemoteDriverUrl()).thenReturn(url);
+    }
 
     static Stream<Arguments> platforms()
     {
@@ -96,7 +104,7 @@ class RemoteWebDriverFactoryTests
         try (var driver = mockConstruction(webDriveClass,
                 (mock, context) -> assertEquals(context.arguments(), List.of(url, capabilities))))
         {
-            var actualDriver = new RemoteWebDriverFactory(useW3C, false).getRemoteWebDriver(url, capabilities);
+            var actualDriver = new RemoteWebDriverFactory(useW3C, false, provider).getRemoteWebDriver(capabilities);
             assertEquals(driver.constructed(), List.of(actualDriver));
             assertThat(logger.getLoggingEvents(), is(empty()));
         }
@@ -126,7 +134,7 @@ class RemoteWebDriverFactoryTests
         }))
         {
             when(url.toURI()).thenReturn(GRID_URI);
-            var actualDriver = new RemoteWebDriverFactory(true, true).getRemoteWebDriver(url, desiredCapabilities);
+            var actualDriver = new RemoteWebDriverFactory(true, true, provider).getRemoteWebDriver(desiredCapabilities);
             assertEquals(sessionId, actualDriver.getSessionId().toString());
             assertThat(logger.getLoggingEvents(), is(List.of(
                     warn(exception, "Failed to create a new session due to HTTP connect timout"),
@@ -161,9 +169,10 @@ class RemoteWebDriverFactoryTests
                 (mock, context) -> when(mock.execute(any())).thenThrow(exception)))
         {
             when(url.toURI()).thenReturn(GRID_URI);
-            var remoteWebDriverFactory = new RemoteWebDriverFactory(true, retrySessionCreationOnHttpConnectTimeout);
+            var remoteWebDriverFactory = new RemoteWebDriverFactory(true, retrySessionCreationOnHttpConnectTimeout,
+                    provider);
             var actualException = assertThrows(SessionNotCreatedException.class,
-                    () -> remoteWebDriverFactory.getRemoteWebDriver(url, desiredCapabilities));
+                    () -> remoteWebDriverFactory.getRemoteWebDriver(desiredCapabilities));
             assertEquals(exception, actualException);
             assertThat(logger.getLoggingEvents(), is(empty()));
         }

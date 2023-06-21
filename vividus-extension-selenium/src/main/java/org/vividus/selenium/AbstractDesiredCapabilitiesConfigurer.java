@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public abstract class AbstractDesiredCapabilitiesConfigurer implements DesiredCa
         consumeTestName(name -> desiredCapabilities.setCapability(testNameKey, name));
     }
 
-    private void consumeTestName(Consumer<String> testNameConsumer)
+    protected void consumeTestName(Consumer<String> testNameConsumer)
     {
         Optional.ofNullable(runContext.getRootRunningStory())
                 .map(RunningStory::getName)

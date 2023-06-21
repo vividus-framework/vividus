@@ -14,12 +14,28 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium;
+package org.vividus.applitools.executioncloud;
 
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-public interface IRemoteWebDriverFactory
+import com.applitools.eyes.selenium.Eyes;
+
+import org.vividus.selenium.RemoteWebDriverUrlProvider;
+
+public class ExecutionCloudUrlProvider implements RemoteWebDriverUrlProvider
 {
-    RemoteWebDriver getRemoteWebDriver(Capabilities capabilities);
+    @Override
+    public URL getRemoteDriverUrl()
+    {
+        try
+        {
+            return new URL(Eyes.getExecutionCloudURL());
+        }
+        catch (MalformedURLException e)
+        {
+            throw new UncheckedIOException(e);
+        }
+    }
 }

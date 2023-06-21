@@ -16,10 +16,20 @@
 
 package org.vividus.selenium;
 
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public interface IRemoteWebDriverFactory
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.junit.jupiter.api.Test;
+
+class StaticRemoteWebDriverUrlProviderTests
 {
-    RemoteWebDriver getRemoteWebDriver(Capabilities capabilities);
+    @Test
+    void shouldReturnRemoteWebDriverUrl() throws MalformedURLException
+    {
+        URL url = new URL("https://selenium.grid/");
+        RemoteWebDriverUrlProvider provider = new StaticRemoteWebDriverUrlProvider(url);
+        assertEquals(url, provider.getRemoteDriverUrl());
+    }
 }

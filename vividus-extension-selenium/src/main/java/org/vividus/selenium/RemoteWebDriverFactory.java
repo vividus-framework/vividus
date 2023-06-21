@@ -37,18 +37,22 @@ public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
     private final boolean useW3C;
     private final boolean retrySessionCreationOnHttpConnectTimeout;
 
-    public RemoteWebDriverFactory(boolean useW3C, boolean retrySessionCreationOnHttpConnectTimeout)
+    private final RemoteWebDriverUrlProvider remoteWebDriverUrlProvider;
+
+    public RemoteWebDriverFactory(boolean useW3C, boolean retrySessionCreationOnHttpConnectTimeout,
+            RemoteWebDriverUrlProvider remoteWebDriverUrlProvider)
     {
         this.useW3C = useW3C;
         this.retrySessionCreationOnHttpConnectTimeout = retrySessionCreationOnHttpConnectTimeout;
+        this.remoteWebDriverUrlProvider = remoteWebDriverUrlProvider;
     }
 
     @Override
-    public RemoteWebDriver getRemoteWebDriver(URL url, Capabilities capabilities)
+    public RemoteWebDriver getRemoteWebDriver(Capabilities capabilities)
     {
         try
         {
-            return createRemoteWebDriver(url, capabilities);
+            return createRemoteWebDriver(capabilities);
         }
         catch (SessionNotCreatedException e)
         {
@@ -56,7 +60,7 @@ public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
             {
                 LOGGER.warn("Failed to create a new session due to HTTP connect timout", e);
                 LOGGER.warn("Retrying to create a new session");
-                return createRemoteWebDriver(url, capabilities);
+                return createRemoteWebDriver(capabilities);
             }
             throw e;
         }
@@ -68,23 +72,24 @@ public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
         return cause instanceof TimeoutException && cause.getCause() instanceof HttpConnectTimeoutException;
     }
 
-    private RemoteWebDriver createRemoteWebDriver(URL url, Capabilities capabilities)
+    private RemoteWebDriver createRemoteWebDriver(Capabilities capabilities)
     {
         /* Selenium 4 declares that it only supports W3C and nevertheless still writes  JWP's "desiredCapabilities"
         into "createSession" JSON. Appium Java client eliminates that:https://github.com/appium/java-client/pull/1537.
         But still some clouds (e.g. SmartBear CrossBrowserTesting) are not prepared for W3c, so we should avoid using
         Appium drivers to create sessions for web tests. */
+        URL remoteDriverUrl = remoteWebDriverUrlProvider.getRemoteDriverUrl();
         if (useW3C)
         {
             if (GenericWebDriverManager.isIOS(capabilities) || GenericWebDriverManager.isTvOS(capabilities))
             {
-                return new IOSDriver(url, capabilities);
+                return new IOSDriver(remoteDriverUrl, capabilities);
             }
             else if (GenericWebDriverManager.isAndroid(capabilities))
             {
-                return new AndroidDriver(url, capabilities);
+                return new AndroidDriver(remoteDriverUrl, capabilities);
             }
         }
-        return new RemoteWebDriver(url, capabilities);
+        return new RemoteWebDriver(remoteDriverUrl, capabilities);
     }
 }

@@ -16,10 +16,20 @@
 
 package org.vividus.selenium;
 
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
+import java.net.URL;
 
-public interface IRemoteWebDriverFactory
+public class StaticRemoteWebDriverUrlProvider implements RemoteWebDriverUrlProvider
 {
-    RemoteWebDriver getRemoteWebDriver(Capabilities capabilities);
+    private final URL remoteDriverUrl;
+
+    public StaticRemoteWebDriverUrlProvider(URL remoteDriverUrl)
+    {
+        this.remoteDriverUrl = remoteDriverUrl;
+    }
+
+    @Override
+    public URL getRemoteDriverUrl()
+    {
+        return remoteDriverUrl;
+    }
 }
