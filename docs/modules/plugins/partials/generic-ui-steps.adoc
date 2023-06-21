@@ -44,7 +44,7 @@ WARNING: It's forbidden to use <<_visibility_types>> in the locator.
 
 [source,gherkin]
 ----
-When I wait until element by located `$locator` appears
+When I wait until element located by `$locator` appears
 ----
 
 _Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
