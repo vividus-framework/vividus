@@ -1,7 +1,7 @@
 Composite: When I send HTTP $httpMethod to the relative URL '$relativeURL'
-!-- Deprecated: 0.6.0, When I execute HTTP %1$s request for resource with relative URL `%2$s`
+!-- DEPRECATED: 0.6.0, When I execute HTTP %1$s request for resource with relative URL `%2$s`
 When I execute HTTP <httpMethod> request for resource with relative URL `<relativeURL>`
 
 Composite: When I save response body to the $scopes variable '$variableName'
-!-- Deprecated: 0.6.0, Given I initialize %1$s variable `%2$s` with value `${response}`
+!-- DEPRECATED: 0.6.0, Given I initialize %1$s variable `%2$s` with value `${response}`
 Given I initialize <scopes> variable `<variableName>` with value `${response}`

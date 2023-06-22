@@ -25,7 +25,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -49,6 +51,7 @@ public class StepsPrinter
     private static final String DEPRECATED = "DEPRECATED";
     private static final String COMPOSITE = "COMPOSITE IN STEPS FILE";
     private static final String EMPTY = "";
+    private static final Pattern DEPRECATION_COMMENT_PATTERN = Pattern.compile("^!--\\h+DEPRECATED:\\h+.*");
 
     public static void main(String[] args) throws ParseException, IOException
     {
@@ -71,9 +74,11 @@ public class StepsPrinter
 
         int maxLocationLength = steps.stream().map(Step::getLocation).mapToInt(String::length).max().orElse(0);
 
-        List<String> stepsLines = steps.stream().map(s -> String
-                .format("%-" + (maxLocationLength + 1) + "s%-24s%s %s", s.getLocation(),
-                        s.deprecated ? DEPRECATED : compositeInStepsFile(s), s.startingWord, s.pattern))
+        List<String> stepsLines = steps.stream()
+                .map(s -> String.format("%-" + (maxLocationLength + 1) + "s %-24s%s %s",
+                        s.compositeInStepsFile ? COMPOSITE : s.getLocation(),
+                        s.deprecated ? DEPRECATED : "",
+                        s.startingWord, s.pattern))
                 .collect(Collectors.toList());
 
         String file = commandLine.getOptionValue(fileOption.getOpt());
@@ -87,11 +92,6 @@ public class StepsPrinter
             FileUtils.writeLines(path.toFile(), stepsLines);
             System.out.println("File with steps: " + path.toAbsolutePath());
         }
-    }
-
-    private static String compositeInStepsFile(Step s)
-    {
-        return s.compositeInStepsFile ? COMPOSITE : EMPTY;
     }
 
     private static Set<Step> getSteps()
@@ -112,9 +112,9 @@ public class StepsPrinter
         // Method could be null for composite steps declared in *.steps files
         boolean compositeInStepsFile = method == null;
         step.setCompositeInStepsFile(compositeInStepsFile);
+        step.setDeprecated(isDeprecatedCandidate(candidate));
         if (!compositeInStepsFile)
         {
-            step.setDeprecated(method.isAnnotationPresent(Deprecated.class));
             String baseFileName = FilenameUtils.getBaseName(
                     method.getDeclaringClass().getProtectionDomain().getCodeSource().getLocation().toString());
             step.setLocation(baseFileName.replaceAll("-\\d+\\.\\d+\\.\\d+.*", EMPTY));
@@ -124,6 +124,14 @@ public class StepsPrinter
             step.setLocation(EMPTY);
         }
         return step;
+    }
+
+    private static boolean isDeprecatedCandidate(StepCandidate candidate)
+    {
+        Method method = candidate.getMethod();
+        return method != null ? method.isAnnotationPresent(Deprecated.class)
+                : Stream.ofNullable(candidate.composedSteps()).flatMap(Stream::of)
+                        .anyMatch(s -> DEPRECATION_COMMENT_PATTERN.matcher(s).matches());
     }
 
     private static final class Step implements Comparable<Step>

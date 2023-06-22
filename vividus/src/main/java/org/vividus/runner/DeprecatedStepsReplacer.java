@@ -75,7 +75,7 @@ public final class DeprecatedStepsReplacer
     private static final String END_OF_STEP_LOOKAHEAD = "(?=\\h*(\\v|$))";
     private static final Pattern NESTED_STEPS_TABLE_PATTERN = Pattern.compile("(\\v|^).\\h*step\\h*.\\v");
     private static final Pattern COMPOSITE_DEPRECATION_NOTIFICATION
-            = Pattern.compile("!--\\s+WARNING: The step .* is deprecated and will be removed in .*");
+            = Pattern.compile("!--\\s+DEPRECATED: The step .* is deprecated and will be removed in .*");
 
     private final Configuration configuration;
     private final Keywords keywords;

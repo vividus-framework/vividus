@@ -1,15 +1,15 @@
 Composite: When I initialize the $scopes variable `$variableName` with value `$variableValue`
 Priority: 1
-!-- Deprecated: 0.6.0, Given I initialize %1$s variable `%2$s` with value `%3$s`
+!-- DEPRECATED: 0.6.0, Given I initialize %1$s variable `%2$s` with value `%3$s`
 Given I initialize <scopes> variable `<variableName>` with value `<variableValue>`
 
 
 Composite: Given I initialize the $scopes variable `$variableName` using template `$templatePath` with parameters:$templateParameters
 Priority: 1
-!-- Deprecated: 0.6.0, Given I initialize %1$s variable `%2$s` using template `%3$s` with parameters:%4$s
+!-- DEPRECATED: 0.6.0, Given I initialize %1$s variable `%2$s` using template `%3$s` with parameters:%4$s
 Given I initialize <scopes> variable `<variableName>` using template `<templatePath>` with parameters:<templateParameters>
 
 
 Composite: Then elements located `$locator` are sorted by text in $sortingOrder order
-!-- Deprecated: 0.6.0, Then elements located by `%1$s` are sorted by text in %2$s order
+!-- DEPRECATED: 0.6.0, Then elements located by `%1$s` are sorted by text in %2$s order
 Then elements located by `<locator>` are sorted by text in <sortingOrder> order
