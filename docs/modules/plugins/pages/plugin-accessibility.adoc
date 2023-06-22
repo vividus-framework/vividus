@@ -50,7 +50,7 @@ Accessibility test options:
 [source,gherkin]
 ----
 Given I am on page with URL `https://vividus-test-site.onrender.com/`
-Then I test accessibility:
+When I perform accessibility scan:
 |standard|
 |WCAG22AA|
 ----
@@ -59,7 +59,7 @@ Then I test accessibility:
 [source,gherkin]
 ----
 Given I am on page with URL `https://vividus-test-site.onrender.com/`
-Then I test accessibility:
+When I perform accessibility scan:
 |violationsToCheck              |elementsToCheck|
 |no-autoplay-audio,video-caption|tagName(video) |
 ----
