@@ -18,13 +18,18 @@ package org.vividus.lighthouse;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -32,9 +37,14 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.ArrayMap;
 import com.google.api.services.pagespeedonline.v5.PagespeedInsights;
@@ -49,6 +59,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -70,22 +81,18 @@ class LighthouseStepsTests
     private static final String RESULT_AS_STRING = "{}";
     private static final List<String> CATEGORIES = List.of("performance", "pwa", "best-practices", "accessibility",
             "seo");
+    private static final String DESKTOP_STRATEGY = ScanType.DESKTOP.getStrategies()[0];
+    private static final String UNKNOWN_ERROR_MESSAGE = "Lighthouse returned error: Something went wrong.";
 
     @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private ISoftAssert softAssert;
     @Mock private PagespeedInsights pagespeedInsights;
     @Mock private JsonFactory jsonFactory;
 
-    @SuppressWarnings("rawtypes")
     @BeforeEach
     void init() throws IOException
     {
         when(pagespeedInsights.getJsonFactory()).thenReturn(jsonFactory);
-        doAnswer(a -> {
-            FailableRunnable runnable = a.getArgument(0);
-            runnable.run();
-            return null;
-        }).when(softAssert).runIgnoringTestFailFast(any());
     }
 
     @ParameterizedTest
@@ -94,6 +101,7 @@ class LighthouseStepsTests
     {
         performTest(() ->
         {
+            mockRun();
             assertThat(scanType.getStrategies(), arrayWithSize(1));
             for (String key : scanType.getStrategies())
             {
@@ -124,6 +132,7 @@ class LighthouseStepsTests
     {
         performTest(() ->
         {
+            mockRun();
             String [] strategies = ScanType.FULL.getStrategies();
             assertThat(strategies, arrayWithSize(2));
 
@@ -147,6 +156,77 @@ class LighthouseStepsTests
             validateMetric(desktopKey, speedIndex, desktopMetrics.get(SI_METRIC));
             validateMetric(mobileKey, speedIndex, mobileMetrics.get(SI_METRIC));
         });
+    }
+
+    static Stream<GoogleJsonResponseException> errors()
+    {
+        return Stream.of(
+            createResponseError(400, "Lighthouse returned error: ERRORED_DOCUMENT_REQUEST."),
+            createResponseError(500, "Lighthouse returned error: NO_FCP."),
+            createResponseError(500, UNKNOWN_ERROR_MESSAGE)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("errors")
+    void shouldNotPerformRetryOnErrors(GoogleJsonResponseException thrown) throws Exception
+    {
+        performTest(() ->
+        {
+            Pagespeedapi pagespeedapi = mock();
+            when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
+            Runpagespeed runpagespeed = mockConfiguration(pagespeedapi, DESKTOP_STRATEGY);
+            doThrow(thrown).when(runpagespeed).execute();
+
+            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, attachmentPublisher, softAssert);
+
+            GoogleJsonResponseException actual = assertThrows(GoogleJsonResponseException.class,
+                    () -> steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of()));
+            assertEquals(thrown, actual);
+            verifyNoMoreInteractions(softAssert, attachmentPublisher);
+        });
+    }
+
+    @Test
+    void shouldRetryOnUnknownServerError() throws Exception
+    {
+        performTest(() ->
+        {
+            mockRun();
+            ArrayMap<String, BigDecimal> metrics = createMetrics();
+            Pagespeedapi pagespeedapi = mock();
+            Runpagespeed runpagespeed = mockConfiguration(pagespeedapi, DESKTOP_STRATEGY);
+            GoogleJsonResponseException thrown = createResponseError(500, UNKNOWN_ERROR_MESSAGE);
+            PagespeedApiPagespeedResponseV5 response = mockResponse(metrics);
+            doThrow(thrown).doReturn(response).when(runpagespeed).execute();
+            when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
+
+            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, attachmentPublisher, softAssert);
+
+            PerformanceMetricRule speedIndex = createSpeedIndexRule();
+            steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of(speedIndex));
+
+            verifyAttachments(DESKTOP_STRATEGY);
+            validateMetric(DESKTOP_STRATEGY, speedIndex, metrics.get(SI_METRIC));
+        });
+    }
+
+    private static GoogleJsonResponseException createResponseError(int code, String message)
+    {
+        HttpResponseException.Builder builder = new HttpResponseException.Builder(code, "", new HttpHeaders());
+        GoogleJsonError error = mock();
+        lenient().when(error.get("message")).thenReturn(message);
+        return new GoogleJsonResponseException(builder, error);
+    }
+
+    @SuppressWarnings("rawtypes")
+    private void mockRun()
+    {
+        doAnswer(a -> {
+            FailableRunnable runnable = a.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(softAssert).runIgnoringTestFailFast(any());
     }
 
     private void performTest(FailableRunnable<Exception> testRunner) throws Exception
@@ -180,13 +260,15 @@ class LighthouseStepsTests
     private Pagespeedapi mockPagespeedapiCall(String strategy, ArrayMap<String, BigDecimal> metrics) throws IOException
     {
         Pagespeedapi pagespeedapi = mock();
-        Runpagespeed runpagespeed = mock();
-        when(pagespeedapi.runpagespeed(URL)).thenReturn(runpagespeed);
-        when(runpagespeed.setKey(API_KEY)).thenReturn(runpagespeed);
-        when(runpagespeed.setStrategy(strategy)).thenReturn(runpagespeed);
-        when(runpagespeed.setCategory(CATEGORIES)).thenReturn(runpagespeed);
-        PagespeedApiPagespeedResponseV5 pagespeedApiPagespeedResponseV5 = mock();
+        Runpagespeed runpagespeed = mockConfiguration(pagespeedapi, strategy);
+        PagespeedApiPagespeedResponseV5 pagespeedApiPagespeedResponseV5 = mockResponse(metrics);
         when(runpagespeed.execute()).thenReturn(pagespeedApiPagespeedResponseV5);
+        return pagespeedapi;
+    }
+
+    private PagespeedApiPagespeedResponseV5 mockResponse(ArrayMap<String, BigDecimal> metrics) throws IOException
+    {
+        PagespeedApiPagespeedResponseV5 pagespeedApiPagespeedResponseV5 = mock();
         LighthouseResultV5 lighthouseResultV5 = mock();
         when(pagespeedApiPagespeedResponseV5.getLighthouseResult()).thenReturn(lighthouseResultV5);
         when(jsonFactory.toString(lighthouseResultV5)).thenReturn(RESULT_AS_STRING);
@@ -195,7 +277,17 @@ class LighthouseStepsTests
         List<ArrayMap<String, BigDecimal>> items = List.of(metrics);
         when(lighthouseAuditResultV5.getDetails()).thenReturn(Map.of("items", items));
         when(jsonFactory.toPrettyString(metrics)).thenReturn(RESULT_AS_STRING);
-        return pagespeedapi;
+        return pagespeedApiPagespeedResponseV5;
+    }
+
+    private Runpagespeed mockConfiguration(Pagespeedapi pagespeedapi, String strategy) throws IOException
+    {
+        Runpagespeed runpagespeed = mock();
+        when(pagespeedapi.runpagespeed(URL)).thenReturn(runpagespeed);
+        when(runpagespeed.setKey(API_KEY)).thenReturn(runpagespeed);
+        when(runpagespeed.setStrategy(strategy)).thenReturn(runpagespeed);
+        when(runpagespeed.setCategory(CATEGORIES)).thenReturn(runpagespeed);
+        return runpagespeed;
     }
 
     private ArrayMap<String, BigDecimal> createMetrics()
