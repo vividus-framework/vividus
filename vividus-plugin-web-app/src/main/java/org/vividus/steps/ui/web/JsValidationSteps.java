@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public class JsValidationSteps
      * @param logEntries Comma-separated list of entries to check. Possible values: "errors", "warnings", "infos".
      * @param regex Regular expression to filter log entries
      */
-    @Then(value = "there are no browser console $logEntries by regex '$regex'", priority = 1)
+    @Then(value = "there are no browser console $logEntries by regex `$regex`", priority = 1)
     public void checkJsLogEntriesOnOpenedPageFilteredByRegExp(List<BrowserLogLevel> logEntries, Pattern regex)
     {
         checkLogMessagesAbsence(getLogEntries(logEntries, regex), logEntries);

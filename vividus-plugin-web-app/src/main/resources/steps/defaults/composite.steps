@@ -339,3 +339,8 @@ When I scroll element located by `<locator>` into view
 Composite: Then page is scrolled to element located `$locator`
 !-- DEPRECATED: 0.7.0, Then page is scrolled to element located by `%1$s`
 Then page is scrolled to element located by `<locator>`
+
+Composite: Then there are no browser console $logEntries by regex '$regex'
+Priority: 1
+!-- DEPRECATED: 0.7.0, Then there are no browser console %1$s by regex `%2$s`
+Then there are no browser console <logEntries> by regex `<regex>`
