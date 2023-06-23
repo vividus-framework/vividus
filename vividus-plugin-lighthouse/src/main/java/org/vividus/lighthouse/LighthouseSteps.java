@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.ArrayMap;
@@ -39,6 +40,7 @@ import org.vividus.softassert.ISoftAssert;
 public class LighthouseSteps
 {
     private static final int DEFAULT_TIMEOUT = 0;
+    private static final int INTERNAL_SERVER_ERROR = 500;
 
     private final IAttachmentPublisher attachmentPublisher;
     private final ISoftAssert softAssert;
@@ -86,7 +88,7 @@ public class LighthouseSteps
 
         for (String strategy : scanType.getStrategies())
         {
-            LighthouseResultV5 result = executePagespeed(webPageUrl, strategy);
+            LighthouseResultV5 result = executePagespeed(webPageUrl, strategy, true);
 
             String resultAsString = jsonFactory.toString(result);
 
@@ -119,14 +121,28 @@ public class LighthouseSteps
         }
     }
 
-    private LighthouseResultV5 executePagespeed(String url, String strategy) throws IOException
+    private LighthouseResultV5 executePagespeed(String url, String strategy, boolean retryOnUnknownServerError)
+            throws IOException
     {
-        return pagespeedInsights.pagespeedapi()
-                                .runpagespeed(url)
-                                .setKey(apiKey)
-                                .setStrategy(strategy)
-                                .setCategory(categories)
-                                .execute()
-                                .getLighthouseResult();
+        try
+        {
+            return pagespeedInsights.pagespeedapi()
+                    .runpagespeed(url)
+                    .setKey(apiKey)
+                    .setStrategy(strategy)
+                    .setCategory(categories)
+                    .execute()
+                    .getLighthouseResult();
+        }
+        catch (GoogleJsonResponseException thrown)
+        {
+            if (retryOnUnknownServerError && INTERNAL_SERVER_ERROR == thrown.getStatusCode()
+                    && "Lighthouse returned error: Something went wrong.".equals(thrown.getDetails().get("message")))
+            {
+                return executePagespeed(url, strategy, false);
+            }
+
+            throw thrown;
+        }
     }
 }
