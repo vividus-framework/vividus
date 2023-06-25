@@ -83,7 +83,7 @@ dependencies {
 
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')
     implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.4')
-    implementation(group: 'commons-codec', name: 'commons-codec', version: '1.15')
+    implementation(group: 'commons-codec', name: 'commons-codec', version: '1.16.0')
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
     implementation(group: 'com.google.guava', name: 'guava', version: '32.0.1-jre')
     implementation(group: 'io.github.classgraph', name: 'classgraph', version: '4.8.158')
