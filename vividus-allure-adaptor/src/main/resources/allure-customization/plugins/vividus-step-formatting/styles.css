@@ -2,4 +2,6 @@
   white-space: break-spaces;
   font-family: Lucida Console, monospace;
   font-size: small;
+  /* Workaround for https://github.com/allure-framework/allure2/pull/2015 */
+  display: inline !important;
 }
