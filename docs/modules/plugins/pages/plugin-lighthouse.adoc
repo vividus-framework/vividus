@@ -24,7 +24,8 @@ include::partial$plugin-installation.adoc[]
 |The API key that identifies your project and provides you with API access, quota, and reports. Its recommended to specify the key if you plan to use the plugin in an automated way and make multiple queries per second.
 
 |`lighthouse.categories`
-|`performance`, `pwa`, `best-practices`, `accessibility`, `seo`
+|comma-separated list of categories (`performance`, `pwa`, `best-practices`, `accessibility`, `seo`)
+|`performance,pwa,best-practices,accessibility,seo`
 |The audit catigories to run, by default the scan includes all 5 categories, but you can select particular ones depending on which aspects of your website you wish to analyze.
 
 |===
