@@ -151,7 +151,7 @@ At the end of any test run, VIVIDUS will give you a link to where the correspond
 2022-05-23 13:38:15,523 [main] INFO  org.vividus.report.allure.AllureReportGenerator - Allure report is successfully generated at /dir/to/where/the/results-are-published/.out/vividus-demo/reports/allure/index.html
 ----
 
-It's not allowed to open the report hosted on the local filesystem
+Modern browsers don't allow to open the report hosted on the local filesystem
 https://stackoverflow.com/a/24002146/2067574[due to security restrictions].
 The following options could be considered.
 
