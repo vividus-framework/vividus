@@ -19,7 +19,6 @@ package org.vividus.steps.ui.web;
 import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -215,20 +214,6 @@ class WaitStepsTests
         waitSteps.waitTillElementIsStale(locator);
         verify(waitActions).wait(eq(webDriver), argThat(condition ->
                         condition.toString().equals(String.format("element (%s) to become stale", webElement))));
-    }
-
-    @Test
-    void testWaitDurationWithPollingDurationTillElementDisappears()
-    {
-        when(uiContext.getSearchContext()).thenReturn(webElement);
-        WaitResult<Boolean> waitResult = new WaitResult<>();
-        waitResult.setWaitPassed(true);
-        Locator locator = new Locator(WebLocatorType.XPATH, "xpath");
-        IExpectedSearchContextCondition<Boolean> condition = mock(IExpectedSearchContextCondition.class);
-        when(waitActions.wait(webElement, TIMEOUT, TIMEOUT, condition)).thenReturn(waitResult);
-        when(expectedSearchActionsConditions.invisibilityOfElement(locator)).thenReturn(condition);
-        assertTrue(waitSteps.waitDurationWithPollingDurationTillElementState(TIMEOUT, TIMEOUT, locator,
-                State.NOT_VISIBLE));
     }
 
     @Test

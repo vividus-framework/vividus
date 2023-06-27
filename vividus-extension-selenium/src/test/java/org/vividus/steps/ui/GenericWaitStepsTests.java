@@ -51,6 +51,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.testdouble.TestLocatorType;
+import org.vividus.ui.State;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
 import org.vividus.ui.action.ISearchActions;
@@ -126,6 +127,22 @@ class GenericWaitStepsTests
         when(expectedSearchActionsConditions.invisibilityOfElement(LOCATOR)).thenReturn(condition);
         waitSteps.waitForElementDisappearance(LOCATOR);
         verify(waitActions).wait(searchContext, condition);
+    }
+
+    @Test
+    void shouldWaitDurationWithPollingDurationTillElementDisappears()
+    {
+        var duration = Duration.ofSeconds(30);
+        var pollingDuration = Duration.ofSeconds(10);
+        var searchContext = mock(SearchContext.class);
+        when(uiContext.getSearchContext()).thenReturn(searchContext);
+        var waitResult = new WaitResult<Boolean>();
+        waitResult.setWaitPassed(true);
+        var condition = mock(IExpectedSearchContextCondition.class);
+        when(waitActions.wait(searchContext, duration, pollingDuration, condition)).thenReturn(waitResult);
+        when(expectedSearchActionsConditions.invisibilityOfElement(LOCATOR)).thenReturn(condition);
+        assertTrue(waitSteps.waitDurationWithPollingDurationTillElementState(duration, pollingDuration, LOCATOR,
+                State.NOT_VISIBLE));
     }
 
     @CsvSource({

@@ -17,3 +17,7 @@ When I change context to element located by `<locator>` in scope of current cont
 Composite: When I take screenshot and save it to folder `$screenshotFilePath`
 !-- DEPRECATED: 0.7.0, When I take screenshot and save it to file at path `%1$s`
 When I take screenshot and save it to file at path `<screenshotFilePath>`
+
+Composite: When I wait `$duration` with `$pollingDuration` polling until element located `$locator` becomes $state
+!-- DEPRECATED: 0.6.0, When I wait `%1$s` with `%2$s` polling until element located by `%3$s` becomes %4$s
+When I wait `<duration>` with `<pollingDuration>` polling until element located by `<locator>` becomes <state>

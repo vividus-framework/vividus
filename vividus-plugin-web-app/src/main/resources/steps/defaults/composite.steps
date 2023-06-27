@@ -272,10 +272,6 @@ Composite: Then an element with the name '$elementName' disappears in '$timeout'
 !-- DEPRECATED: 0.6.0, Then element located by `elementName(%1$s)` disappears in `%2$s`
 Then element located by `elementName(<elementName>)` disappears in `<timeout>`
 
-Composite: When I wait `$duration` with `$pollingDuration` polling until element located `$locator` becomes $state
-!-- DEPRECATED: 0.6.0, When I wait `%1$s` with `%2$s` polling until element located by `%3$s` becomes %4$s
-When I wait `<duration>` with `<pollingDuration>` polling until element located by `<locator>` becomes <state>
-
 Composite: When I wait until state of element located `$locator` is $state
 !-- DEPRECATED: 0.6.0, When I wait until state of element located by `%1$s` is %2$s
 When I wait until state of element located by `<locator>` is <state>

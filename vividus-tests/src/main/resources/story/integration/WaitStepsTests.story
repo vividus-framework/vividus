@@ -32,11 +32,11 @@ When I execute sequence of actions:
 Then an alert is not present
 Then an element with the id 'anchor' disappears
 
-Scenario: Step verification I wait '$duration' with '$pollingDuration' polling until element located `$locator` becomes $state
+Scenario: Step verification I wait '$duration' with '$pollingDuration' polling until element located by `$locator` becomes $state
 Given I am on page with URL `${vividus-test-site-url}/elementState.html`
 Then number of elements found by `<element>` is equal to `<before>`
 When I click on element located by `<button>`
-When I wait `PT10S` with `PT1S` polling until element located `<element>` becomes <state>
+When I wait `PT10S` with `PT1S` polling until element located by `<element>` becomes <state>
 Then number of elements found by `<element>` is equal to `<after>`
 Examples:
 |button            |element               |state      |before|after|
