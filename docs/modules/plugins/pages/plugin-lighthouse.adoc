@@ -47,12 +47,19 @@ When I perform Lighthouse $scanType scan of `$webPageUrl` page:$metricsValidatio
 ** `mobile` - The scan is performed on `mobile` device.
 * `$webPageUrl` - The page URL to perform scan on.
 * `$metricsValidations` - The metric validations:
-** `$metric` - The Lighthouse metric name such as:
-*** `First Contentful Paint`
-*** `Largest Contentful Paint`
-*** `Total Blocking Time`
-*** `Cumulative Layout Shift`
-*** `Speed Index`
+** `$metric` - The Lighthouse metric name.
+*** Performance metrics:
+**** `First Contentful Paint`
+**** `Largest Contentful Paint`
+**** `Total Blocking Time`
+**** `Cumulative Layout Shift`
+**** `Speed Index`
+*** Audit scores:
+**** `Accessibility Score`
+**** `Best Practices Score`
+**** `Performance Score`
+**** `PWA Score`
+**** `SEO Score`
 ** `$rule` - xref:parameters:comparison-rule.adoc[The comparison rule].
 ** `$threshold` - The expected integer or floating (e.g. `0.35`) number.
 
@@ -60,10 +67,15 @@ When I perform Lighthouse $scanType scan of `$webPageUrl` page:$metricsValidatio
 [source]
 ----
 When I perform Lighthouse full scan of `https://dequeuniversity.com/demo/mars` page:
-|metric                  |rule     |threshold|
-|First Contentful Paint  |LESS_THAN|500      |
-|Largest Contentful Paint|LESS_THAN|500      |
-|Total Blocking Time     |LESS_THAN|100      |
-|Cumulative Layout Shift |LESS_THAN|100      |
-|Speed Index             |LESS_THAN|1500     |
+|metric                  |rule        |threshold|
+|First Contentful Paint  |LESS_THAN   |500      |
+|Largest Contentful Paint|LESS_THAN   |500      |
+|Total Blocking Time     |LESS_THAN   |100      |
+|Cumulative Layout Shift |LESS_THAN   |100      |
+|Speed Index             |LESS_THAN   |1500     |
+|Accessibility Score     |GREATER_THAN|90       |
+|Best Practices Score    |EQUAL_TO    |100      |
+|Performance Score       |GREATER_THAN|95       |
+|PWA Score               |GREATER_THAN|20       |
+|SEO Score               |GREATER_THAN|85       |
 ----

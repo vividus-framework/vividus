@@ -18,6 +18,8 @@ package org.vividus.lighthouse;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,7 +52,9 @@ import com.google.api.client.util.ArrayMap;
 import com.google.api.services.pagespeedonline.v5.PagespeedInsights;
 import com.google.api.services.pagespeedonline.v5.PagespeedInsights.Pagespeedapi;
 import com.google.api.services.pagespeedonline.v5.PagespeedInsights.Pagespeedapi.Runpagespeed;
+import com.google.api.services.pagespeedonline.v5.model.Categories;
 import com.google.api.services.pagespeedonline.v5.model.LighthouseAuditResultV5;
+import com.google.api.services.pagespeedonline.v5.model.LighthouseCategoryV5;
 import com.google.api.services.pagespeedonline.v5.model.LighthouseResultV5;
 import com.google.api.services.pagespeedonline.v5.model.PagespeedApiPagespeedResponseV5;
 
@@ -60,10 +64,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.lighthouse.model.PerformanceMetricRule;
+import org.vividus.lighthouse.model.MetricRule;
 import org.vividus.lighthouse.model.ScanType;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.FailableRunnable;
@@ -78,6 +83,9 @@ class LighthouseStepsTests
     private static final String URL = "https://example.com";
     private static final String SI_METRIC = "speedIndex";
     private static final String FCP_METRIC = "firstContentfulPaint";
+    private static final String INTERACTIVE_METRIC = "interactive";
+    private static final String PERF_SCORE_METRIC = "performanceScore";
+    private static final BigDecimal PERF_SCORE_METRIC_VAL = new BigDecimal(0.99f);
     private static final String RESULT_AS_STRING = "{}";
     private static final List<String> CATEGORIES = List.of("performance", "pwa", "best-practices", "accessibility",
             "seo");
@@ -112,17 +120,26 @@ class LighthouseStepsTests
                 LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, attachmentPublisher,
                         softAssert);
 
-                PerformanceMetricRule speedIndex = createSpeedIndexRule();
-                PerformanceMetricRule firstContentfulPaint = createRule(FCP_METRIC, 1500);
-                PerformanceMetricRule unknown = createRule("Unknown Metric", 100);
-                steps.performLighthouseScan(scanType, URL, List.of(speedIndex, firstContentfulPaint, unknown));
+                MetricRule speedIndex = createSpeedIndexRule();
+                MetricRule firstContentfulPaint = createRule(FCP_METRIC, 1500);
+                MetricRule performanceScore = createRule(PERF_SCORE_METRIC, 100);
+                MetricRule unknown = createRule("Unknown Metric", 100);
+                steps.performLighthouseScan(scanType, URL,
+                        List.of(speedIndex, firstContentfulPaint, performanceScore, unknown));
 
                 verifyAttachments(key);
                 validateMetric(key, speedIndex, metrics.get(SI_METRIC));
                 validateMetric(key, firstContentfulPaint, metrics.get(FCP_METRIC));
-                verify(softAssert)
-                        .recordFailedAssertion(String.format("Unknown metric name '%s', available names are: %s",
-                                unknown.getMetric(), String.join(", ", metrics.keySet())));
+                validateMetric(key, performanceScore, PERF_SCORE_METRIC_VAL.movePointRight(2));
+                ArgumentCaptor<String> failMesageCaptor = ArgumentCaptor.forClass(String.class);
+                verify(softAssert).recordFailedAssertion(failMesageCaptor.capture());
+                String message = failMesageCaptor.getValue();
+                assertThat(message,
+                        startsWith("Unknown metric name '" + unknown.getMetric() + "', available names are: "));
+                assertThat(message, containsString(SI_METRIC));
+                assertThat(message, containsString(FCP_METRIC));
+                assertThat(message, containsString(INTERACTIVE_METRIC));
+                assertThat(message, containsString(PERF_SCORE_METRIC));
             }
         });
     }
@@ -148,7 +165,7 @@ class LighthouseStepsTests
 
             LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, attachmentPublisher, softAssert);
 
-            PerformanceMetricRule speedIndex = createSpeedIndexRule();
+            MetricRule speedIndex = createSpeedIndexRule();
             steps.performLighthouseScan(ScanType.FULL, URL, List.of(speedIndex));
 
             verifyAttachments(desktopKey);
@@ -203,7 +220,7 @@ class LighthouseStepsTests
 
             LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, attachmentPublisher, softAssert);
 
-            PerformanceMetricRule speedIndex = createSpeedIndexRule();
+            MetricRule speedIndex = createSpeedIndexRule();
             steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of(speedIndex));
 
             verifyAttachments(DESKTOP_STRATEGY);
@@ -276,7 +293,16 @@ class LighthouseStepsTests
         when(lighthouseResultV5.getAudits()).thenReturn(Map.of("metrics", lighthouseAuditResultV5));
         List<ArrayMap<String, BigDecimal>> items = List.of(metrics);
         when(lighthouseAuditResultV5.getDetails()).thenReturn(Map.of("items", items));
-        when(jsonFactory.toPrettyString(metrics)).thenReturn(RESULT_AS_STRING);
+        Categories categories = mock();
+        when(lighthouseResultV5.getCategories()).thenReturn(categories);
+        LighthouseCategoryV5 category = mock();
+        when(categories.getPerformance()).thenReturn(category);
+        when(category.getScore()).thenReturn(PERF_SCORE_METRIC_VAL);
+
+        ArrayMap<String, BigDecimal> actualMetrics = ArrayMap.create();
+        actualMetrics.putAll(metrics);
+        actualMetrics.put(PERF_SCORE_METRIC, PERF_SCORE_METRIC_VAL.movePointRight(2));
+        when(jsonFactory.toPrettyString(actualMetrics)).thenReturn(RESULT_AS_STRING);
         return pagespeedApiPagespeedResponseV5;
     }
 
@@ -295,24 +321,24 @@ class LighthouseStepsTests
         ArrayMap<String, BigDecimal> metrics = new ArrayMap<>();
         metrics.put(SI_METRIC, new BigDecimal(3792));
         metrics.put(FCP_METRIC, new BigDecimal(1082));
-        metrics.put("interactive", new BigDecimal(3969));
+        metrics.put(INTERACTIVE_METRIC, new BigDecimal(3969));
         return metrics;
     }
 
-    private void validateMetric(String key, PerformanceMetricRule rule, BigDecimal actual)
+    private void validateMetric(String key, MetricRule rule, BigDecimal actual)
     {
         verify(softAssert).assertThat(eq(String.format("[%s] %s", key, rule.getMetric())), eq(actual), argThat(
                 arg -> String.format("a value less than <%s>", rule.getThreshold().intValue()).equals(arg.toString())));
     }
 
-    private PerformanceMetricRule createSpeedIndexRule()
+    private MetricRule createSpeedIndexRule()
     {
         return createRule("Speed Index", 3800);
     }
 
-    private PerformanceMetricRule createRule(String name, int value)
+    private MetricRule createRule(String name, int value)
     {
-        PerformanceMetricRule rule = new PerformanceMetricRule();
+        MetricRule rule = new MetricRule();
         rule.setMetric(name);
         rule.setRule(ComparisonRule.LESS_THAN);
         rule.setThreshold(new BigDecimal(value));
