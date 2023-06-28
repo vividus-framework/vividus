@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ class WindowsStrategyTests
     static Stream<Arguments> strategiesSource()
     {
         return Stream.of(
-                Arguments.of(WindowsStrategy.CLOSE_ALL_EXCEPT_ONE, (Consumer<IWindowsActions>) wa -> verify(wa).closeAllWindowsExceptOne()),
+                Arguments.of(WindowsStrategy.CLOSE_ALL_EXCEPT_ONE, (Consumer<IWindowsActions>) wa -> verify(wa).closeAllTabsExceptOne()),
                 Arguments.of(WindowsStrategy.DO_NOTHING,           (Consumer<IWindowsActions>) Mockito::verifyNoInteractions)
                 );
     }

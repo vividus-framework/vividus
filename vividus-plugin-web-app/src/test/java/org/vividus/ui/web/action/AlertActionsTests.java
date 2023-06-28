@@ -153,7 +153,7 @@ class AlertActionsTests
         doThrow(NoSuchWindowException.class).when(targetLocator).alert();
         boolean answer = alertActions.isAlertPresent(webDriver);
         assertFalse(answer);
-        verify(windowsActions).switchToPreviousWindow();
+        verify(windowsActions).switchToPreviousTab();
     }
 
     @Test

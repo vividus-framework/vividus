@@ -340,3 +340,15 @@ Composite: Then there are no browser console $logEntries by regex '$regex'
 Priority: 1
 !-- DEPRECATED: 0.7.0, Then there are no browser console %1$s by regex `%2$s`
 Then there are no browser console <logEntries> by regex `<regex>`
+
+Composite: When I wait `$duration` until window with title that $comparisonRule `$title` appears and switch to it
+!-- DEPRECATED: 0.7.0, When I wait `%1$s` until tab with title that %2$s `%3$s` appears and switch to it
+When I wait `<duration>` until tab with title that <comparisonRule> `<title>` appears and switch to it
+
+Composite: When I close the current window
+!-- DEPRECATED: 0.7.0, When I close current tab
+When I close current tab
+
+Composite: When I attempt to close current window with possibility to handle alert
+!-- DEPRECATED: 0.7.0, When I attempt to close current tab with possibility to handle alert
+When I attempt to close current tab with possibility to handle alert

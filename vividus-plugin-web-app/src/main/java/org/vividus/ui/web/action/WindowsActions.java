@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,45 +39,45 @@ public class WindowsActions implements IWindowsActions
     @Inject private IWebDriverManager webDriverManager;
 
     @Override
-    public void closeAllWindowsExceptOne()
+    public void closeAllTabsExceptOne()
     {
-        Set<String> windows = getWebDriver().getWindowHandles();
-        if (windows.size() > 1)
+        Set<String> tabs = getWebDriver().getWindowHandles();
+        if (tabs.size() > 1)
         {
             if (webDriverManager.isAndroid())
             {
-                closeMobileWindows(windows);
+                closeMobileTabs(tabs);
             }
             else
             {
-                closeSmallerWindows(windows);
+                closeSmallerWindows(tabs);
             }
         }
     }
 
     @Override
-    public String switchToNewWindow(String currentWindow)
+    public String switchToNewTab(String currentTab)
     {
-        return pickWindow((WebDriver driver, String window) ->
+        return pickTab((WebDriver driver, String tab) ->
         {
-            if (!window.equals(currentWindow))
+            if (!tab.equals(currentTab))
             {
-                driver.switchTo().window(window);
-                return window;
+                driver.switchTo().window(tab);
+                return tab;
             }
             return null;
-        }, () -> currentWindow);
+        }, () -> currentTab);
     }
 
     @Override
-    public String switchToWindowWithMatchingTitle(Matcher<String> matcher)
+    public String switchToTabWithMatchingTitle(Matcher<String> matcher)
     {
-        return pickWindow((WebDriver driver, String window) ->
+        return pickTab((WebDriver driver, String tab) ->
         {
-            LOGGER.atInfo().addArgument(window).log("Switching to a window \"{}\"");
-            driver.switchTo().window(window);
+            LOGGER.atInfo().addArgument(tab).log("Switching to a tab \"{}\"");
+            driver.switchTo().window(tab);
             String title = driver.getTitle();
-            LOGGER.atInfo().addArgument(title).log("Switched to a window with the title: \"{}\"");
+            LOGGER.atInfo().addArgument(title).log("Switched to a tab with the title: \"{}\"");
             if (matcher.matches(title))
             {
                 return title;
@@ -87,13 +87,13 @@ public class WindowsActions implements IWindowsActions
     }
 
     @Override
-    public void switchToPreviousWindow()
+    public void switchToPreviousTab()
     {
         WebDriver webDriver = getWebDriver();
         webDriver.switchTo().window(webDriver.getWindowHandles().iterator().next());
     }
 
-    private String pickWindow(BiFunction<WebDriver, String, String> picker, Supplier<String> defaultValueProvider)
+    private String pickTab(BiFunction<WebDriver, String, String> picker, Supplier<String> defaultValueProvider)
     {
         WebDriver driver = getWebDriver();
         for (String window : driver.getWindowHandles())
@@ -107,9 +107,9 @@ public class WindowsActions implements IWindowsActions
         return defaultValueProvider.get();
     }
 
-    private void closeMobileWindows(Set<String> windows)
+    private void closeMobileTabs(Set<String> windows)
     {
-        LOGGER.info("Closing windows except the first one");
+        LOGGER.info("Closing tabs except the first one");
         windows.remove(IWebDriverManager.NATIVE_APP_CONTEXT);
         Iterator<String> iterator = windows.iterator();
         WebDriver driver = getWebDriver();
@@ -118,7 +118,7 @@ public class WindowsActions implements IWindowsActions
             iterator.next();
             driver.navigate().back();
         }
-        switchToPreviousWindow();
+        switchToPreviousTab();
     }
 
     private void closeSmallerWindows(Set<String> windows)
@@ -133,13 +133,13 @@ public class WindowsActions implements IWindowsActions
             int size = getWindowSize(currentId);
             if (size > maxSize)
             {
-                closeWindow(maxId, currentId);
+                closeTab(maxId, currentId);
                 maxId = currentId;
                 maxSize = size;
             }
             else
             {
-                closeWindow(currentId, maxId);
+                closeTab(currentId, maxId);
             }
         }
     }
@@ -152,7 +152,7 @@ public class WindowsActions implements IWindowsActions
         return dimension.getHeight() * dimension.getWidth();
     }
 
-    private void closeWindow(String windowToClose, String windowToSwitch)
+    private void closeTab(String windowToClose, String windowToSwitch)
     {
         WebDriver driver = getWebDriver();
         driver.switchTo().window(windowToClose);

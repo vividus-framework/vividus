@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,10 +55,10 @@ import org.vividus.selenium.manager.IWebDriverManager;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class WindowsActionsTests
 {
-    private static final String WINDOW3 = "window3";
+    private static final String BROWSER_TAB3 = "tab3";
     private static final int DIMENSION_SIZE = 100;
-    private static final String WINDOW2 = "window2";
-    private static final String WINDOW1 = "window1";
+    private static final String BROWSER_TAB2 = "tab2";
+    private static final String BROWSER_TAB1 = "tab1";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(WindowsActions.class);
 
@@ -75,19 +75,19 @@ class WindowsActionsTests
     private WindowsActions windowsActions;
 
     @Test
-    void testCloseAllWindowsExceptOneOneWindow()
+    void testCloseAllTabsExceptOneOneTab()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriver.getWindowHandles()).thenReturn(new HashSet<>());
-        windowsActions.closeAllWindowsExceptOne();
+        windowsActions.closeAllTabsExceptOne();
         verify(webDriver).getWindowHandles();
     }
 
     @Test
-    void testCloseAllWindowsExceptOneNotMobile()
+    void testCloseAllTabsExceptOneNotMobile()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
-        Set<String> windows = new LinkedHashSet<>(List.of(WINDOW1, WINDOW2));
+        Set<String> windows = new LinkedHashSet<>(List.of(BROWSER_TAB1, BROWSER_TAB2));
         TargetLocator targetLocator = mock(TargetLocator.class);
         when(webDriver.getWindowHandles()).thenReturn(windows);
         when(webDriver.switchTo()).thenReturn(targetLocator);
@@ -97,109 +97,109 @@ class WindowsActionsTests
         when(options.window()).thenReturn(window);
         when(window.getSize()).thenAnswer(i -> new Dimension(DIMENSION_SIZE, DIMENSION_SIZE));
         when(webDriverManager.isAndroid()).thenReturn(false);
-        windowsActions.closeAllWindowsExceptOne();
+        windowsActions.closeAllTabsExceptOne();
         verify(webDriver, times(1)).close();
     }
 
     @Test
-    void testCloseAllWindowsExceptOneMobile()
+    void testCloseAllTabsExceptOneMobile()
     {
         WebDriver webDriver = mock(WebDriver.class);
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriverManager.isAndroid()).thenReturn(true);
-        Set<String> windows = new LinkedHashSet<>(List.of(WINDOW1, WINDOW2));
+        Set<String> windows = new LinkedHashSet<>(List.of(BROWSER_TAB1, BROWSER_TAB2));
         TargetLocator targetLocator = mock(TargetLocator.class);
         when(webDriver.getWindowHandles()).thenReturn(windows);
         when(webDriver.switchTo()).thenReturn(targetLocator);
         Navigation navigation = mock(Navigation.class);
         when(webDriver.navigate()).thenReturn(navigation);
-        windowsActions.closeAllWindowsExceptOne();
+        windowsActions.closeAllTabsExceptOne();
         verify(navigation, times(2)).back();
     }
 
     @Test
-    void testSwitchToNewWindow()
+    void testSwitchToNewTab()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         TargetLocator targetLocator = mock(TargetLocator.class);
-        mockWindowHandles(WINDOW1, WINDOW2);
+        mockWindowHandles(BROWSER_TAB1, BROWSER_TAB2);
         when(webDriver.switchTo()).thenReturn(targetLocator);
 
-        assertEquals(WINDOW2, windowsActions.switchToNewWindow(WINDOW1));
-        verify(targetLocator).window(WINDOW2);
+        assertEquals(BROWSER_TAB2, windowsActions.switchToNewTab(BROWSER_TAB1));
+        verify(targetLocator).window(BROWSER_TAB2);
     }
 
     @Test
-    void testSwitchToNewWindowNoNewWindow()
+    void testSwitchToNewTabNoNewTab()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         TargetLocator targetLocator = mock(TargetLocator.class);
-        mockWindowHandles(WINDOW1);
+        mockWindowHandles(BROWSER_TAB1);
 
-        assertEquals(WINDOW1, windowsActions.switchToNewWindow(WINDOW1));
+        assertEquals(BROWSER_TAB1, windowsActions.switchToNewTab(BROWSER_TAB1));
         Mockito.verifyNoInteractions(targetLocator);
     }
 
     @Test
-    void testSwitchToWindowWithMatchingTitle()
+    void testSwitchToTabWithMatchingTitle()
     {
         @SuppressWarnings("unchecked")
         Matcher<String> matcher = mock(Matcher.class);
         TargetLocator targetLocator = mock(TargetLocator.class);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        mockWindowHandles(WINDOW3, WINDOW2, WINDOW1);
+        mockWindowHandles(BROWSER_TAB3, BROWSER_TAB2, BROWSER_TAB1);
         when(webDriver.switchTo()).thenReturn(targetLocator).thenReturn(targetLocator);
-        when(webDriver.getTitle()).thenReturn(WINDOW3).thenReturn(WINDOW2).thenReturn(WINDOW1);
-        when(matcher.matches(WINDOW3)).thenReturn(false);
-        when(matcher.matches(WINDOW2)).thenReturn(false);
-        when(matcher.matches(WINDOW1)).thenReturn(true);
+        when(webDriver.getTitle()).thenReturn(BROWSER_TAB3).thenReturn(BROWSER_TAB2).thenReturn(BROWSER_TAB1);
+        when(matcher.matches(BROWSER_TAB3)).thenReturn(false);
+        when(matcher.matches(BROWSER_TAB2)).thenReturn(false);
+        when(matcher.matches(BROWSER_TAB1)).thenReturn(true);
         InOrder inOrder = Mockito.inOrder(targetLocator, targetLocator);
 
-        assertEquals(WINDOW1, windowsActions.switchToWindowWithMatchingTitle(matcher));
-        inOrder.verify(targetLocator).window(WINDOW3);
-        inOrder.verify(targetLocator).window(WINDOW2);
-        inOrder.verify(targetLocator).window(WINDOW1);
+        assertEquals(BROWSER_TAB1, windowsActions.switchToTabWithMatchingTitle(matcher));
+        inOrder.verify(targetLocator).window(BROWSER_TAB3);
+        inOrder.verify(targetLocator).window(BROWSER_TAB2);
+        inOrder.verify(targetLocator).window(BROWSER_TAB1);
     }
 
     @Test
-    void testSwitchToWindowWithMatchingTitleNoDesiredWindow()
+    void testSwitchToTavWithMatchingTitleNoDesiredTab()
     {
         @SuppressWarnings("unchecked")
         Matcher<String> matcher = mock(Matcher.class);
         TargetLocator targetLocator = mock(TargetLocator.class);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        mockWindowHandles(WINDOW3, WINDOW2, WINDOW1);
+        mockWindowHandles(BROWSER_TAB3, BROWSER_TAB2, BROWSER_TAB1);
         when(webDriver.switchTo()).thenReturn(targetLocator).thenReturn(targetLocator);
-        when(webDriver.getTitle()).thenReturn(WINDOW3).thenReturn(WINDOW2).thenReturn(WINDOW1);
-        when(matcher.matches(WINDOW3)).thenReturn(false);
-        when(matcher.matches(WINDOW2)).thenReturn(false);
-        when(matcher.matches(WINDOW1)).thenReturn(false);
+        when(webDriver.getTitle()).thenReturn(BROWSER_TAB3).thenReturn(BROWSER_TAB2).thenReturn(BROWSER_TAB1);
+        when(matcher.matches(BROWSER_TAB3)).thenReturn(false);
+        when(matcher.matches(BROWSER_TAB2)).thenReturn(false);
+        when(matcher.matches(BROWSER_TAB1)).thenReturn(false);
         InOrder inOrder = Mockito.inOrder(targetLocator, targetLocator, targetLocator);
 
-        assertEquals(WINDOW1, windowsActions.switchToWindowWithMatchingTitle(matcher));
-        inOrder.verify(targetLocator).window(WINDOW3);
-        inOrder.verify(targetLocator).window(WINDOW2);
-        inOrder.verify(targetLocator).window(WINDOW1);
-        String switchMessage = "Switching to a window \"{}\"";
-        String titleMessage = "Switched to a window with the title: \"{}\"";
-        assertThat(logger.getLoggingEvents(), is(List.of(info(switchMessage, WINDOW3),
-                                                         info(titleMessage, WINDOW3),
-                                                         info(switchMessage, WINDOW2),
-                                                         info(titleMessage, WINDOW2),
-                                                         info(switchMessage, WINDOW1),
-                                                         info(titleMessage, WINDOW1))));
+        assertEquals(BROWSER_TAB1, windowsActions.switchToTabWithMatchingTitle(matcher));
+        inOrder.verify(targetLocator).window(BROWSER_TAB3);
+        inOrder.verify(targetLocator).window(BROWSER_TAB2);
+        inOrder.verify(targetLocator).window(BROWSER_TAB1);
+        String switchMessage = "Switching to a tab \"{}\"";
+        String titleMessage = "Switched to a tab with the title: \"{}\"";
+        assertThat(logger.getLoggingEvents(), is(List.of(info(switchMessage, BROWSER_TAB3),
+                                                         info(titleMessage, BROWSER_TAB3),
+                                                         info(switchMessage, BROWSER_TAB2),
+                                                         info(titleMessage, BROWSER_TAB2),
+                                                         info(switchMessage, BROWSER_TAB1),
+                                                         info(titleMessage, BROWSER_TAB1))));
     }
 
     @Test
-    void testSwitchToPreviousWindow()
+    void testSwitchToPreviousTab()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         TargetLocator targetLocator = mock(TargetLocator.class);
-        when(webDriver.getWindowHandles()).thenReturn(Set.of(WINDOW1));
+        when(webDriver.getWindowHandles()).thenReturn(Set.of(BROWSER_TAB1));
         when(webDriver.switchTo()).thenReturn(targetLocator).thenReturn(targetLocator);
-        windowsActions.switchToPreviousWindow();
+        windowsActions.switchToPreviousTab();
 
-        verify(targetLocator).window(WINDOW1);
+        verify(targetLocator).window(BROWSER_TAB1);
     }
 
     private void mockWindowHandles(String... windowHandles)

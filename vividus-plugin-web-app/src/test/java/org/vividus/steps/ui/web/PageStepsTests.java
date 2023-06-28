@@ -238,8 +238,20 @@ class PageStepsTests
     {
         InOrder ordered = Mockito.inOrder(setContextSteps, navigateActions, javascriptActions, uiContext);
         pageSteps.openPageUrlInNewWindow(URL);
-        ordered.verify(javascriptActions).openNewWindow();
+        ordered.verify(javascriptActions).openNewTab();
         ordered.verify(setContextSteps).switchingToWindow();
+        ordered.verify(uiContext).reset();
+        ordered.verify(navigateActions).navigateTo(URL);
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void testOpenPageUrlInNewTab()
+    {
+        InOrder ordered = Mockito.inOrder(setContextSteps, navigateActions, javascriptActions, uiContext);
+        pageSteps.openPageUrlInNewTab(URL);
+        ordered.verify(javascriptActions).openNewTab();
+        ordered.verify(setContextSteps).switchToTab();
         ordered.verify(uiContext).reset();
         ordered.verify(navigateActions).navigateTo(URL);
         ordered.verifyNoMoreInteractions();

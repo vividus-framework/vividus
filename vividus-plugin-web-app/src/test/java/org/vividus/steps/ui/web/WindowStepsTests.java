@@ -131,7 +131,7 @@ class WindowStepsTests
     {
         mockWindowHandles();
         var targetLocator = mockTargetLocator();
-        windowSteps.closeCurrentWindow();
+        windowSteps.closeCurrentTab();
         verify(driver).close();
         verify(targetLocator).window(WINDOW_TO_SWITCH_TO);
     }
@@ -143,7 +143,7 @@ class WindowStepsTests
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getWindowHandle()).thenReturn(currentWindow);
         when(driver.getWindowHandles()).thenReturn(Set.of(currentWindow));
-        windowSteps.closeCurrentWindow();
+        windowSteps.closeCurrentTab();
         verify(softAssert, times(0)).assertThat("New window or browser tab is found",
                 driver.getWindowHandles(), contains(currentWindow));
     }
@@ -153,10 +153,10 @@ class WindowStepsTests
     {
         mockWindowHandles();
         when(alertActions.isAlertPresent(driver)).thenReturn(true);
-        windowSteps.closeCurrentWindowWithAlertsHandling();
+        windowSteps.closeCurrentTabWithAlertsHandling();
         assertThat(logger.getLoggingEvents(),
                 is(List.of(info("Alert dialog box is shown and must be handled in the subsequent steps."))));
-        verify(javascriptActions).closeCurrentWindow();
+        verify(javascriptActions).closeCurrentTab();
         verify(driver, never()).switchTo();
     }
 
@@ -166,8 +166,8 @@ class WindowStepsTests
         mockWindowHandles();
         var targetLocator = mockTargetLocator();
         when(alertActions.isAlertPresent(driver)).thenReturn(false);
-        windowSteps.closeCurrentWindowWithAlertsHandling();
-        verify(javascriptActions).closeCurrentWindow();
+        windowSteps.closeCurrentTabWithAlertsHandling();
+        verify(javascriptActions).closeCurrentTab();
         verify(targetLocator).window(WINDOW_TO_SWITCH_TO);
     }
 

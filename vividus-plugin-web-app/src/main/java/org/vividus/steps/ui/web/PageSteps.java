@@ -184,12 +184,27 @@ public class PageSteps
     /**
      * Opens page with the given <b>pageUrl</b> in a new window object(tab)
      * @param pageUrl An absolute URL of the page
+     * @deprecated Use step: "When I open URL `$pageUrl` in new tab" instead
      */
     @When("I open URL `$pageUrl` in new window")
+    @Deprecated(since = "0.5.10", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern = "When I open URL `%1$s` in new tab")
     public void openPageUrlInNewWindow(String pageUrl)
     {
-        javascriptActions.openNewWindow();
+        javascriptActions.openNewTab();
         setContextSteps.switchingToWindow();
+        openPage(pageUrl);
+    }
+
+    /**
+     * Opens page with the given <b>pageUrl</b> in a new tab
+     * @param pageUrl An absolute URL of the page
+     */
+    @When("I open URL `$pageUrl` in new tab")
+    public void openPageUrlInNewTab(String pageUrl)
+    {
+        javascriptActions.openNewTab();
+        setContextSteps.switchToTab();
         openPage(pageUrl);
     }
 
