@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.vividus.selenium.tunnel.TunnelOptions;
 
 public class SauceConnectOptions extends TunnelOptions
@@ -42,13 +43,18 @@ public class SauceConnectOptions extends TunnelOptions
             + "    // Test HTTP traffic, route it through the custom proxy%n"
             + "    return \"PROXY %s\";%n"
             + "}%n";
+    private static final String FILE_PROTOCOL = "file://";
+    private static final String FULL_FILE_PROTOCOL = FILE_PROTOCOL + (SystemUtils.IS_OS_WINDOWS ? "/" : "");
 
+    private final boolean useLatestSauceConnect;
     private final String restUrl;
     private final String customArguments;
     private final Set<String> skipHostGlobPatterns;
 
-    public SauceConnectOptions(String restUrl, String customArguments, Set<String> skipHostGlobPatterns)
+    public SauceConnectOptions(boolean useLatestSauceConnect, String restUrl, String customArguments,
+            Set<String> skipHostGlobPatterns)
     {
+        this.useLatestSauceConnect = useLatestSauceConnect;
         this.restUrl = restUrl;
         this.customArguments = customArguments;
         this.skipHostGlobPatterns = new TreeSet<>(skipHostGlobPatterns);
@@ -72,8 +78,12 @@ public class SauceConnectOptions extends TunnelOptions
 
         if (getProxy() != null)
         {
-            appendOption(options, "pac",
-                    "file://" + FilenameUtils.separatorsToUnix(createPacFile(tunnelName).toString()));
+            Path pacFilePath = createPacFile(tunnelName);
+
+            String pacFileUrl = useLatestSauceConnect ? FULL_FILE_PROTOCOL + pacFilePath
+                    : FILE_PROTOCOL + FilenameUtils.separatorsToUnix(pacFilePath.toString());
+
+            appendOption(options, "pac", pacFileUrl);
         }
         if (restUrl != null)
         {
@@ -114,19 +124,22 @@ public class SauceConnectOptions extends TunnelOptions
         {
             return true;
         }
-        if (!super.equals(o) || !(o instanceof SauceConnectOptions))
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        if (!super.equals(o))
         {
             return false;
         }
         SauceConnectOptions that = (SauceConnectOptions) o;
-        return Objects.equals(skipHostGlobPatterns, that.skipHostGlobPatterns)
-                && Objects.equals(restUrl, that.restUrl);
+        return useLatestSauceConnect == that.useLatestSauceConnect && Objects.equals(restUrl, that.restUrl)
+                && Objects.equals(skipHostGlobPatterns, that.skipHostGlobPatterns);
     }
 
-    @SuppressWarnings("MagicNumber")
     @Override
     public int hashCode()
     {
-        return 31 * super.hashCode() + Objects.hash(skipHostGlobPatterns, restUrl);
+        return Objects.hash(super.hashCode(), useLatestSauceConnect, restUrl, skipHostGlobPatterns);
     }
 }

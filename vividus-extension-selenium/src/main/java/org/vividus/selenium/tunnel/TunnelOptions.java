@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,17 +45,17 @@ public class TunnelOptions
     }
 
     @Override
-    public boolean equals(Object obj)
+    public boolean equals(Object o)
     {
-        if (this == obj)
+        if (this == o)
         {
             return true;
         }
-        if (!(obj instanceof TunnelOptions))
+        if (o == null || getClass() != o.getClass())
         {
             return false;
         }
-        TunnelOptions other = (TunnelOptions) obj;
-        return Objects.equals(proxy, other.proxy);
+        TunnelOptions that = (TunnelOptions) o;
+        return Objects.equals(proxy, that.proxy);
     }
 }

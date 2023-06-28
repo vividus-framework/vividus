@@ -17,7 +17,6 @@
 package org.vividus.selenium.sauce;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -27,9 +26,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.vividus.util.ResourceUtils;
+
+import nl.jqno.equalsverifier.EqualsVerifier;
 
 class SauceConnectOptionsTests
 {
@@ -73,6 +75,22 @@ class SauceConnectOptionsTests
 
             assertEquals(TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + pacPath + SPACE
                     + TUNNEL_POOL, sauceConnectOptions.build(TUNNEL_NAME));
+        }
+    }
+
+    @Test
+    void testBuildWithProxyForLatestSauceConnect() throws IOException
+    {
+        SauceConnectOptions sauceConnectOptions = new SauceConnectOptions(true, null, null, Set.of());
+        sauceConnectOptions.setProxy(PROXY);
+        try (MockedStatic<ResourceUtils> resources = mockStatic(ResourceUtils.class))
+        {
+            Path pacPath = mockPac(resources, DEFAULT_MATCH_CHAIN);
+            Path pidPath = mockPid(resources);
+
+            assertEquals(TUNNEL_NAME_OPTION + SPACE + PID_FILE + SPACE + pidPath + SPACE + PAC_FILE + (
+                            SystemUtils.IS_OS_WINDOWS ? "/" : "") + pacPath + SPACE + TUNNEL_POOL,
+                    sauceConnectOptions.build(TUNNEL_NAME));
         }
     }
 
@@ -173,9 +191,12 @@ class SauceConnectOptionsTests
     }
 
     @Test
-    void testNotEqualsToNull()
+    void verifyHashCodeAndEquals()
     {
-        assertFalse(createDefaultOptions().equals(null));
+        EqualsVerifier.simple().forClass(SauceConnectOptions.class)
+                .withRedefinedSuperclass()
+                .withIgnoredFields("customArguments")
+                .verify();
     }
 
     @Test
@@ -212,7 +233,7 @@ class SauceConnectOptionsTests
     private SauceConnectOptions createOptions(String restUrl, String customArguments, Set<String> skipHostGlobPatterns,
             String proxy)
     {
-        SauceConnectOptions options = new SauceConnectOptions(restUrl, customArguments, skipHostGlobPatterns);
+        SauceConnectOptions options = new SauceConnectOptions(false, restUrl, customArguments, skipHostGlobPatterns);
         options.setProxy(proxy);
         return options;
     }

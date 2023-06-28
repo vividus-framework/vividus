@@ -27,6 +27,7 @@
     <bean class="org.vividus.saucelabs.SauceLabsTestStatusManager" lazy-init="false"/>
 
     <bean class="org.vividus.selenium.sauce.SauceLabsCapabilitiesConfigurer">
+        <constructor-arg index="0" value="${saucelabs.sauce-connect.use-latest-version}" />
         <property name="tunnellingEnabled" value="${saucelabs.sauce-connect.enabled}"/>
         <property name="sauceConnectArguments" value="${saucelabs.sauce-connect.command-line-arguments}" />
         <property name="skipHostGlobPatterns" value="${saucelabs.sauce-connect.skip-host-glob-patterns}" />

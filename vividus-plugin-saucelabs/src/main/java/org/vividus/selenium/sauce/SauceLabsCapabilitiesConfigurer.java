@@ -28,14 +28,16 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilit
 {
     private static final String SAUCE_OPTIONS = "sauce:options";
 
+    private final boolean useLatestSauceConnect;
     private final String restUrl;
     private String sauceConnectArguments;
     private Set<String> skipHostGlobPatterns;
 
-    public SauceLabsCapabilitiesConfigurer(RunContext runContext, SauceConnectManager sauceConnectManager,
-            DataCenter dataCenter)
+    public SauceLabsCapabilitiesConfigurer(boolean useLatestSauceConnect, RunContext runContext,
+            SauceConnectManager sauceConnectManager, DataCenter dataCenter)
     {
         super(runContext, sauceConnectManager);
+        this.useLatestSauceConnect = useLatestSauceConnect;
         this.restUrl = dataCenter.apiServer() + "rest/v1";
     }
 
@@ -51,7 +53,7 @@ public class SauceLabsCapabilitiesConfigurer extends AbstractTunnellingCapabilit
     @Override
     protected SauceConnectOptions createOptions()
     {
-        return new SauceConnectOptions(restUrl, sauceConnectArguments,
+        return new SauceConnectOptions(useLatestSauceConnect, restUrl, sauceConnectArguments,
                 skipHostGlobPatterns == null ? Set.of() : skipHostGlobPatterns);
     }
 
