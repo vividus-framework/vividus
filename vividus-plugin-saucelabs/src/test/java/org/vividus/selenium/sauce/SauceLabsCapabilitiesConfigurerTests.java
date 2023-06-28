@@ -71,7 +71,7 @@ class SauceLabsCapabilitiesConfigurerTests
     @BeforeEach
     void beforeEach()
     {
-        configurer = new SauceLabsCapabilitiesConfigurer(runContext, sauceConnectManager, DataCenter.EU_CENTRAL);
+        configurer = new SauceLabsCapabilitiesConfigurer(true, runContext, sauceConnectManager, DataCenter.EU_CENTRAL);
     }
 
     @Test
@@ -99,7 +99,7 @@ class SauceLabsCapabilitiesConfigurerTests
         configurer.setTunnellingEnabled(true);
         Map<String, Object> sauceOptions = new HashMap<>();
         var desiredCapabilities = mockDesiredCapabilities(null, sauceOptions);
-        var sauceConnectOptions = new SauceConnectOptions(REST_URL, null, Set.of());
+        var sauceConnectOptions = new SauceConnectOptions(true, REST_URL, null, Set.of());
         when(sauceConnectManager.start(sauceConnectOptions)).thenReturn(TUNNEL_NAME);
 
         configurer.configure(desiredCapabilities);
@@ -118,7 +118,7 @@ class SauceLabsCapabilitiesConfigurerTests
         var httpProxy = "http-proxy:8080";
         when(proxy.getHttpProxy()).thenReturn(httpProxy);
 
-        var sauceConnectOptions = new SauceConnectOptions(REST_URL, CUSTOM_ARGS, SKIP_HOST_GLOB_PATTERNS);
+        var sauceConnectOptions = new SauceConnectOptions(true, REST_URL, CUSTOM_ARGS, SKIP_HOST_GLOB_PATTERNS);
         sauceConnectOptions.setProxy(httpProxy);
 
         Map<String, Object> sauceOptions = new HashMap<>();
@@ -146,7 +146,7 @@ class SauceLabsCapabilitiesConfigurerTests
     {
         configurer.setSauceConnectArguments(CUSTOM_ARGS);
         configurer.setSkipHostGlobPatterns(setValue);
-        assertEquals(new SauceConnectOptions(REST_URL, CUSTOM_ARGS, expectedValue), configurer.createOptions());
+        assertEquals(new SauceConnectOptions(true, REST_URL, CUSTOM_ARGS, expectedValue), configurer.createOptions());
     }
 
     private void mockRunningStory()
