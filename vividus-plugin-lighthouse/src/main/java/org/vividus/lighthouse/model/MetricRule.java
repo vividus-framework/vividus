@@ -22,7 +22,7 @@ import org.jbehave.core.annotations.AsParameters;
 import org.vividus.steps.ComparisonRule;
 
 @AsParameters
-public class PerformanceMetricRule
+public class MetricRule
 {
     private String metric;
     private ComparisonRule rule;

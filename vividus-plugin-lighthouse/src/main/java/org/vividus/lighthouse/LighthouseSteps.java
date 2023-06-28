@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -29,16 +31,26 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.ArrayMap;
 import com.google.api.services.pagespeedonline.v5.PagespeedInsights;
+import com.google.api.services.pagespeedonline.v5.model.Categories;
+import com.google.api.services.pagespeedonline.v5.model.LighthouseCategoryV5;
 import com.google.api.services.pagespeedonline.v5.model.LighthouseResultV5;
 
 import org.jbehave.core.annotations.When;
-import org.vividus.lighthouse.model.PerformanceMetricRule;
+import org.vividus.lighthouse.model.MetricRule;
 import org.vividus.lighthouse.model.ScanType;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 
 public class LighthouseSteps
 {
+    private static final Map<String, Function<Categories, LighthouseCategoryV5>> CUSTOM_METRIC_FATORIES = Map.of(
+        "accessibilityScore", Categories::getAccessibility,
+        "bestPracticesScore", Categories::getBestPractices,
+        "performanceScore", Categories::getPerformance,
+        "pwaScore", Categories::getPwa,
+        "seoScore", Categories::getSeo
+    );
+
     private static final int DEFAULT_TIMEOUT = 0;
     private static final int INTERNAL_SERVER_ERROR = 500;
 
@@ -79,10 +91,9 @@ public class LighthouseSteps
      * @param metricsValidations The metrics validations.
      * @throws IOException if an I/O exception of some sort has occurred
      */
-    @SuppressWarnings("unchecked")
     @When("I perform Lighthouse $scanType scan of `$webPageUrl` page:$metricsValidations")
     public void performLighthouseScan(ScanType scanType, String webPageUrl,
-            List<PerformanceMetricRule> metricsValidations) throws IOException
+            List<MetricRule> metricsValidations) throws IOException
     {
         JsonFactory jsonFactory = pagespeedInsights.getJsonFactory();
 
@@ -96,9 +107,7 @@ public class LighthouseSteps
                     Map.of("result", resultAsString),
                     String.format("Lighthouse %s scan report for page: %s", strategy, webPageUrl));
 
-            List<ArrayMap<String, BigDecimal>> items = (List<ArrayMap<String, BigDecimal>>) result.getAudits()
-                    .get("metrics").getDetails().get("items");
-            ArrayMap<String, BigDecimal> metrics = items.get(0);
+            Map<String, BigDecimal> metrics = getMetrics(result);
 
             attachmentPublisher.publishAttachment(jsonFactory.toPrettyString(metrics).getBytes(StandardCharsets.UTF_8),
                     strategy + "-metrics.json");
@@ -119,6 +128,27 @@ public class LighthouseSteps
                                         String.join(", ", metrics.keySet()))));
             }));
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, BigDecimal> getMetrics(LighthouseResultV5 result)
+    {
+        List<ArrayMap<String, BigDecimal>> items = (List<ArrayMap<String, BigDecimal>>) result.getAudits()
+                .get("metrics").getDetails().get("items");
+        Map<String, BigDecimal> metrics = new HashMap<>(items.get(0));
+
+        Categories scanCategories = result.getCategories();
+        CUSTOM_METRIC_FATORIES.forEach((m, f) ->
+        {
+            LighthouseCategoryV5 categoryValue = f.apply(scanCategories);
+            if (categoryValue != null)
+            {
+                BigDecimal score = (BigDecimal) categoryValue.getScore();
+                metrics.put(m, score.movePointRight(2));
+            }
+        });
+
+        return metrics;
     }
 
     private LighthouseResultV5 executePagespeed(String url, String strategy, boolean retryOnUnknownServerError)
