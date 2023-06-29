@@ -187,7 +187,7 @@ public class PageSteps
      * @deprecated Use step: "When I open URL `$pageUrl` in new tab" instead
      */
     @When("I open URL `$pageUrl` in new window")
-    @Deprecated(since = "0.5.10", forRemoval = true)
+    @Deprecated(since = "0.5.11", forRemoval = true)
     @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern = "When I open URL `%1$s` in new tab")
     public void openPageUrlInNewWindow(String pageUrl)
     {

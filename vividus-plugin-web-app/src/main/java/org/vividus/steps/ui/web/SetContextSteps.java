@@ -133,7 +133,7 @@ public class SetContextSteps
      * @deprecated Use step: "When I switch to new tab" instead
      */
     @When("I switch to a new window")
-    @Deprecated(since = "0.5.10", forRemoval = true)
+    @Deprecated(since = "0.5.11", forRemoval = true)
     @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern = "I switch to new tab")
     public void switchingToWindow()
     {
@@ -186,7 +186,7 @@ public class SetContextSteps
     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
     * @deprecated Use step: "When I switch to tab with title that $stringComparisonRule `$tabName`" instead
     */
-    @Deprecated(since = "0.5.10", forRemoval = true)
+    @Deprecated(since = "0.5.11", forRemoval = true)
     @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern =
             "When I switch to tab with title that %1$s `%2$s`")
     @When("I switch to window with title that $stringComparisonRule `$windowName`")
