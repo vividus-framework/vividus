@@ -70,7 +70,7 @@ When I wait until element located `id(searchInputField)` appears
 
 [TIP]
 ====
-Electron based applications may have one or more windows at the same time. Consider usage of the xref:plugins:plugin-web-app.adoc#_wait_for_window_and_switch[window waiting step] to manipulate with the windows during testing.
+Electron based applications may have one or more windows at the same time. Consider usage of the xref:plugins:plugin-web-app.adoc#_wait_for_tab_and_switch[window waiting step] to manipulate with the windows during testing.
 ====
 
 You could also find the complete example for Elector-based desktop application tests https://github.com/vividus-framework/vividus-sample-tests/tree/main#list-of-the-available-samples[here].
