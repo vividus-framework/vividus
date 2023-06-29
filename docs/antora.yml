@@ -5,8 +5,8 @@ title: VIVIDUS
 asciidoc:
   attributes:
     release-version: 'true'
-    base-version: 0.5.11
-    current-version: 0.5.11
+    base-version: 0.5.12
+    current-version: 0.5.12-SNAPSHOT
     source-language: asciidoc@
     xrefstyle: short@
     listing-caption: Example@
