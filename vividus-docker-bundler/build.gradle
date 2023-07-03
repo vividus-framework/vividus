@@ -87,6 +87,7 @@ task createDockerfile(type: Dockerfile) {
 
     from('eclipse-temurin:17-jre-alpine')
     label(['maintainer': 'Vividus Team "vividus.team@vividus.dev"'])
+    instruction('RUN apk add gcompat')
     workingDir('vividus')
     copyFile('libs', 'libs/')
     entryPoint('java', '-cp', '/vividus/resources:/vividus/libs/*', 'org.vividus.runner.StoriesRunner')
