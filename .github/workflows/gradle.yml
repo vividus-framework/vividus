@@ -74,7 +74,7 @@ jobs:
         java-version: 17
 
     - name: Warm up VIVIDUS test site
-      run: curl https://vividus-test-site.onrender.com/ &
+      run: curl https://vividus-test-site-a92k.onrender.com/ &
 
     - name: Build
       env:
