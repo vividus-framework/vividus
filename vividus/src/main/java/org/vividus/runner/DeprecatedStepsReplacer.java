@@ -17,7 +17,6 @@
 package org.vividus.runner;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -65,6 +64,7 @@ import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 import org.vividus.replacement.DeprecatedCompositeStepsReporter;
 import org.vividus.resource.StoryLoader;
+import org.vividus.util.UriUtils;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 public final class DeprecatedStepsReplacer
@@ -124,7 +124,7 @@ public final class DeprecatedStepsReplacer
     @SuppressWarnings("PMD.NcssCount")
     private void replaceStepsInResource(String resourcePath) throws IOException
     {
-        Path pathToFile = Paths.get(URI.create(FilenameUtils.getFullPath(resourcePath)));
+        Path pathToFile = Paths.get(UriUtils.createUri(FilenameUtils.getFullPath(resourcePath)));
         String resourceName = FilenameUtils.getName(resourcePath);
         Path fullPath = Paths.get(pathToFile.toString(), resourceName);
         StoryLoader storyLoader = BeanFactory.getBean(StoryLoader.class);
