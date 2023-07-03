@@ -34,7 +34,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -75,6 +74,7 @@ import org.vividus.annotation.Replacement;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.resource.StoryLoader;
 import org.vividus.spring.ExtendedConfiguration;
+import org.vividus.util.UriUtils;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class DeprecatedStepsReplacerTests
@@ -104,9 +104,6 @@ class DeprecatedStepsReplacerTests
             "Given deprecated step without automatic replacement (alias)";
     private static final String CODE_STEP_CONDITIONAL_PATTERN = "step for native app";
     private static final String CODE_STEP_CONDITIONAL = "Given step for native app";
-
-    private static final String STEPS_LOCATION = "/story/The Hero's.steps";
-    private static final String STEPS_FULL_PATH_URI = Path.of(RESOURCE_LOCATION + STEPS_LOCATION).toUri().toString();
 
     private static final Configuration CONFIGURATION = new ExtendedConfiguration();
 
@@ -210,6 +207,7 @@ class DeprecatedStepsReplacerTests
                         + "deprecated and will be removed in VIVIDUS 3.5.1");
         var notDeprecatedCandidate = mockCompositeStepCandidate("some actual step", notDeprecatedStep);
 
+        String stepsFileName = "The Hero's.steps";
         try (var ignored = mockConstruction(RegexCompositeParser.class, (mock, context) ->
         {
             var composed = mock(Composite.class);
@@ -220,11 +218,13 @@ class DeprecatedStepsReplacerTests
             when(composed.getStepWithoutStartingWord()).thenReturn(CODE_STEP_UNRESOLVED_PATTERN);
         }))
         {
-            mockAndTestStepsReplacer(STEPS_FULL_PATH_URI, stepsContentDeprecated, stepsContentActual,
+            mockAndTestStepsReplacer("file:/" + RESOURCE_LOCATION + "/folder with spaces/" + stepsFileName,
+                    stepsContentDeprecated, stepsContentActual,
                     List.of(compositeCandidate, compositeCandidateWithoutReplace, notDeprecatedCandidate));
         }
-        assertThat(LOGGER.getLoggingEvents(), is(List.of(warn(UNRESOLVED_DEPRECATION_LOG, CODE_STEP_UNRESOLVED,
-                "The%20Hero's.steps", "Composite: Given deprecated step without automatic replacement"))));
+        assertThat(LOGGER.getLoggingEvents(), is(List.of(
+                warn(UNRESOLVED_DEPRECATION_LOG, CODE_STEP_UNRESOLVED, stepsFileName,
+                        "Composite: Given deprecated step without automatic replacement"))));
     }
 
     private void mockAndTestStepsReplacer(String path, String resourceContentDeprecated, String resourceContentActual,
@@ -256,7 +256,7 @@ class DeprecatedStepsReplacerTests
 
             beanFactory.verify(BeanFactory::open);
 
-            Path pathToFile = Paths.get(URI.create(FilenameUtils.getFullPath(path)));
+            Path pathToFile = Paths.get(UriUtils.createUri(FilenameUtils.getFullPath(path)));
             Path fullPath = Paths.get(pathToFile.toString(), FilenameUtils.getName(path));
             fileUtils.verify(() -> FileUtils.writeStringToFile(fullPath.toFile(), resourceContentActual,
                     StandardCharsets.UTF_8));
