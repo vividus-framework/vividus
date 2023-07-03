@@ -578,7 +578,7 @@ Then there are no browser console $logLevels
 .Validate absence of JS errors
 [source,gherkin]
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/`
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
 Then there are no browser console ERRORS
 ----
 
@@ -603,7 +603,7 @@ Then there are no browser console $logLevels by regex '$regex'
 .Validate absence of JS error referencing user
 [source,gherkin]
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/`
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
 Then there are no browser console ERRORS by regex `.*user.*`
 ----
 
@@ -621,7 +621,7 @@ Then there are browser console $logLevels by regex `$regex`
 .Validate presence of JS errors referencing user
 [source,gherkin]
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/`
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
 Then there are browser console ERRORS by regex `.*user.*`
 ----
 
@@ -642,7 +642,7 @@ When I wait until browser console $logEntries by regex `$regex` appear and save 
 
 .Wait for application readiness
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/`
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
 When I wait until browser console infos by regex `.*Application ready.*` appear and save all entries into scenario variable `logs`
 Then `${logs}` matches `.*Application ready in \d+ seconds.*`
 ----
@@ -692,7 +692,7 @@ When I switch back to the page
 
 .Switch to user context and back to the default context of page
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/elementState.html`
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/elementState.html`
 When I change context to element located by `id(button-hide)`
 Then text `Element to hide` does not exist
 When I switch back to the page
@@ -711,7 +711,7 @@ When I switch to frame located `$locator`
 
 .Switch to frame
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/nestedFrames.html`
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/nestedFrames.html`
 Then text `Modal Frame Example` does not exist
 When I switch to frame located `id(parent)`
 Then text `Modal Frame Example` exists

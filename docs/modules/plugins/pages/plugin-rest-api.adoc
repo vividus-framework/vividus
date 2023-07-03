@@ -362,7 +362,7 @@ a|
 When I set HTTP request configuration:
 |socketTimeout |
 |25000         |
-When I execute HTTP GET request for resource with URL `https://vividus-test-site.onrender.com/?pageTimeout=20000`
+When I execute HTTP GET request for resource with URL `https://vividus-test-site-a92k.onrender.com/?pageTimeout=20000`
 Then '${responseStatusCode}' is = '200'
 ----
 
@@ -786,7 +786,7 @@ Then server `$hostname` supports secure protocols that $rule `$protocols`
 .Validate the server supports TLSv1.2 and TLSv1.3 protocols
 [source,gherkin]
 ----
-Then server `vividus-test-site.onrender.com` supports secure protocols that contain `TLSv1.2,TLSv1.3`
+Then server `vividus-test-site-a92k.onrender.com` supports secure protocols that contain `TLSv1.2,TLSv1.3`
 ----
 
 === Wait for expected HTTP status code in response
@@ -906,9 +906,9 @@ Then HTTP resources are valid:$resources
 [source,gherkin]
 ----
 Then HTTP resources are valid:
-|url                                                   |
-|https://saucelabs.com                                 |
-|https://vividus-test-site.onrender.com/img/vividus.png|
+| url                                                         |
+| https://saucelabs.com                                       |
+| https://vividus-test-site-a92k.onrender.com/img/vividus.png |
 ----
 
 

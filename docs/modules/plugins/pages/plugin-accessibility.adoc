@@ -49,7 +49,7 @@ Accessibility test options:
 .Check page against WCAG 2.2 Level AA
 [source,gherkin]
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/`
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
 When I perform accessibility scan:
 |standard|
 |WCAG22AA|
@@ -58,7 +58,7 @@ When I perform accessibility scan:
 .Check video elements against no-autoplay-audio and video-caption rules
 [source,gherkin]
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/`
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
 When I perform accessibility scan:
 |violationsToCheck              |elementsToCheck|
 |no-autoplay-audio,video-caption|tagName(video) |
@@ -96,7 +96,7 @@ The step based on the contextual approach and when it's necessary it could be us
 .Check accessibility
 [source,gherkin]
 ----
-Given I am on page with URL `https://vividus-test-site.onrender.com/`
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
 When I change context to element located by `xpath(//body)`
 When I perform accessibility scan:
 |standard|level |elementsToIgnore                                 |elementsToCheck|violationsToIgnore                                                                     |
