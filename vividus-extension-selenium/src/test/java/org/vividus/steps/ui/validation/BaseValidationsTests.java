@@ -55,7 +55,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.ComparisonRule;
-import org.vividus.ui.State;
+import org.vividus.ui.IState;
 import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
@@ -214,7 +214,7 @@ class BaseValidationsTests
     @Test
     void testAssertElementStateNullWebElement()
     {
-        var state = mock(State.class);
+        var state = mock(IState.class);
         var result = baseValidations.assertElementState(BUSINESS_DESCRIPTION, state, null);
         verifyNoInteractions(state);
         assertFalse(result);
@@ -226,7 +226,7 @@ class BaseValidationsTests
     {
         when(mockedWebDriverProvider.get()).thenReturn(mockedWebDriver);
         var mockedExpectedConditionToString = mockedExpectedCondition.toString();
-        var state = mock(State.class);
+        var state = mock(IState.class);
         doReturn(mockedExpectedCondition).when(state).getExpectedCondition(mockedWebElement);
         when(softAssert.assertThat(eq(BUSINESS_DESCRIPTION), eq(mockedExpectedConditionToString),
                 eq(mockedWebDriver), argThat(matcher -> matcher instanceof ExpectedConditionsMatcher)))
@@ -240,7 +240,7 @@ class BaseValidationsTests
         spy = Mockito.spy(baseValidations);
         when(mockedWebDriverProvider.get()).thenReturn(mockedWebDriver);
         var mockedExpectedConditionToString = mockedExpectedCondition.toString();
-        var state = mock(State.class);
+        var state = mock(IState.class);
         doReturn(mockedExpectedCondition).when(state).getExpectedCondition(mockedWebElement);
         spy.assertElementState(BUSINESS_DESCRIPTION, state, mockedWebElement);
         verify(softAssert).assertThat(eq(BUSINESS_DESCRIPTION), eq(mockedExpectedConditionToString),

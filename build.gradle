@@ -39,7 +39,6 @@ configure([project(':vividus-tests'), project(':vividus-docker-bundler')]) {
 def nonTestSubprojects = subprojects.findAll { !it.name.equals('vividus-tests') && !it.name.equals('vividus-docker-bundler') }
 configure(nonTestSubprojects) {
     apply from: "${buildSystemPath}/vividus-library-subproject.gradle"
-    sourceCompatibility = JavaVersion.VERSION_11
 
     publishing {
         repositories {

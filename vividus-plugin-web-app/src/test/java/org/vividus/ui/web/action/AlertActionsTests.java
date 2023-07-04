@@ -26,10 +26,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -160,9 +159,11 @@ class AlertActionsTests
     void testProcessAlertWithAnyMessage()
     {
         configureDefaultAlertMock();
-        Action action = mock(Action.class);
+        when(webDriverManager.isMobile()).thenReturn(false);
+        Action action = Action.ACCEPT;
         alertActions.processAlert(action);
-        verify(action).process(alert, webDriverManager);
+        verify(alert).accept();
+        verifyNoMoreInteractions(webDriverManager);
         assertEquals(List.of(), logger.getLoggingEvents());
     }
 
@@ -172,19 +173,21 @@ class AlertActionsTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriver.switchTo()).thenReturn(targetLocator);
         when(targetLocator.alert()).thenReturn(null);
-        Action action = mock(Action.class);
+        when(webDriverManager.isMobile()).thenReturn(false);
+        Action action = Action.ACCEPT;
         alertActions.processAlert(action);
-        verify(action, never()).process(alert, webDriverManager);
+        verifyNoMoreInteractions(webDriverManager);
+        verifyNoInteractions(alert);
         assertEquals(List.of(), logger.getLoggingEvents());
     }
 
     @Test
     void testProcessProvidedAlert()
     {
-        Action action = mock(Action.class);
+        Action action = Action.ACCEPT;
         alertActions.processAlert(action, alert);
-        verifyNoInteractions(webDriverProvider);
-        verify(action).process(alert, webDriverManager);
+        verify(alert).accept();
+        verifyNoInteractions(webDriverManager);
     }
 
     @Test

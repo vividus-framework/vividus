@@ -19,37 +19,37 @@ package org.vividus.selenium;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junitpioneer.jupiter.ClearSystemProperty;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Capabilities;
@@ -58,6 +58,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.WrapsDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
@@ -70,52 +72,33 @@ import org.vividus.selenium.driver.TextFormattingWebDriver;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
+
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class WebDriverFactoryTests
 {
     private static final String SESSION_CAPABILITIES = "Session capabilities:\n{}";
     private static final String CAPS_AS_STRING = String.format("{%n  \"key\" : \"value\"%n}");
-    private static final Map<String, Object> CAPS = Map.of("key", "value");
-    private static final String SELENIUM_CAPABILITIES = "selenium.capabilities.";
-    private static final String SELENIUM_GRID_CAPABILITIES = "selenium.grid.capabilities.";
-    private static final String FALSE = "false";
-    private static final String TRUE = "true";
-    private static final String KEY2 = "key2";
-    private static final String KEY1 = "key1";
     private static final String PROPERTY_FORMAT = "web.driver.%s.%s";
     private static final String BINARY_PATH = "binary-path";
     private static final String COMMAND_LINE_ARGUMENTS = "command-line-arguments";
     private static final String EXPERIMENTAL_OPTIONS = "experimental-options";
     private static final String CLI_ARGS_NOT_SUPPORTED = "Configuring of command-line-arguments is not supported for ";
-    private static final String PATH = "testPath";
     private static final String ARG_1 = "--arg1";
     private static final String ARG_2 = "--arg2";
     private static final String ARGS = ARG_1 + " " + ARG_2;
-    private static final String CHROME_BROWSER_NAME = "chrome";
-    private static final String FIREFOX_BROWSER_NAME = "firefox";
+    private static final String CHROME_BROWSER_NAME = Browser.CHROME.browserName();
+    private static final String SAFARI_BROWSER_NAME = Browser.SAFARI.browserName();
+    private static final String DRIVER_PATH = "/path/to/driver";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractWebDriverFactory.class);
 
-    @Mock(extraInterfaces = HasCapabilities.class)
-    private WebDriver driver;
-
-    @Mock
-    private RemoteWebDriver remoteWebDriver;
-
-    @Mock
-    private IRemoteWebDriverFactory remoteWebDriverFactory;
-
-    @Mock
-    private TimeoutConfigurer timeoutConfigurer;
-
-    @Mock
-    private IPropertyParser propertyParser;
-
-    @Mock
-    private IProxy proxy;
-
-    @Mock
-    private WebDriverStartContext webDriverStartContext;
+    @Mock private RemoteWebDriver remoteWebDriver;
+    @Mock private IRemoteWebDriverFactory remoteWebDriverFactory;
+    @Mock private TimeoutConfigurer timeoutConfigurer;
+    @Mock private IPropertyParser propertyParser;
+    @Mock private IProxy proxy;
+    @Mock private WebDriverStartContext webDriverStartContext;
 
     private WebDriverFactory webDriverFactory;
 
@@ -127,188 +110,146 @@ class WebDriverFactoryTests
     }
 
     @ParameterizedTest
-    @CsvSource({ "true, true", "false," })
-    void testGetWebDriverWithWebDriverType(boolean proxyStarted,
-            Boolean acceptsInsecureCerts) throws IllegalAccessException
+    @CsvSource({
+            "true, true",
+            "false,"
+    })
+    void testGetWebDriverWithWebDriverType(boolean proxyStarted, Boolean acceptsInsecureCerts)
     {
-        mockCapabilities((HasCapabilities) driver);
-        WebDriverType webDriverType = mock();
-        webDriverFactory.setWebDriverType(webDriverType);
-        WebDriverConfiguration configuration = mock();
-        Map<String, Object> capabilities = Map.of(KEY1, TRUE, KEY2, FALSE);
-        when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES)).thenReturn(capabilities);
+        var key1 = "key1";
+        var key2 = "key2";
+        when(propertyParser.getPropertyValuesTreeByPrefix("selenium.capabilities.")).thenReturn(
+                Map.of(key1, "true", key2, "false"));
         when(proxy.isStarted()).thenReturn(proxyStarted);
-        configuration.setBinaryPath(Optional.of(PATH));
-        injectConfigurations(webDriverType, configuration);
-        DesiredCapabilities desiredCapabilities = new DesiredCapabilities(Map.of(KEY2, true));
-        when(webDriverType.getWebDriver(argThat(caps -> {
-            Assertions.assertAll(() -> assertTrue((boolean) caps.getCapability(KEY1)),
-                                 () -> assertTrue((boolean) caps.getCapability(KEY2)),
-                                 () -> assertEquals(acceptsInsecureCerts,
-                                         caps.getCapability(CapabilityType.ACCEPT_INSECURE_CERTS)));
-            return true;
-        }), eq(configuration))).thenReturn(driver);
-        mockTimeouts(driver);
-        WebDriver actualDriver = webDriverFactory.getWebDriver(desiredCapabilities);
-        assertThat(actualDriver, instanceOf(TextFormattingWebDriver.class));
-        assertEquals(driver, ((WrapsDriver) actualDriver).getWrappedDriver());
-        assertLogger();
-        verify(propertyParser, never()).getPropertyValuesTreeByPrefix(SELENIUM_GRID_CAPABILITIES);
+        testGetChromeWebDriver(new DesiredCapabilities(Map.of(key2, true)), null, DRIVER_PATH, null, args -> { },
+                chromeOptions -> assertAll(
+                        () -> assertEquals(Boolean.TRUE, chromeOptions.getCapability(key1)),
+                        () -> assertEquals(Boolean.TRUE, chromeOptions.getCapability(key2)),
+                        () -> assertEquals(acceptsInsecureCerts,
+                                chromeOptions.getCapability(CapabilityType.ACCEPT_INSECURE_CERTS))
+                ));
+
+        verify(propertyParser, never()).getPropertyValuesTreeByPrefix("selenium.grid.capabilities.");
     }
 
     @Test
-    void testGetWebDriverWithWebDriverTypeWOBinary() throws IllegalAccessException
+    @ClearSystemProperty(key = ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY)
+    void testGetWebDriverWithCommandLineArgumentsConfigurationAndBinaryPath()
     {
-        mockCapabilities((HasCapabilities) driver);
-        WebDriverConfiguration configuration = new WebDriverConfiguration();
-        WebDriverType webDriverType = mock();
-        webDriverFactory.setWebDriverType(webDriverType);
-        injectConfigurations(webDriverType, configuration);
-        DesiredCapabilities desiredCapabilities = mock();
-        when(webDriverType.getWebDriver(new DesiredCapabilities(), configuration)).thenReturn(driver);
-        Timeouts timeouts = mockTimeouts(driver);
-        assertEquals(driver, ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
-        verify(timeoutConfigurer).configure(timeouts);
-        assertLogger();
+        when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, COMMAND_LINE_ARGUMENTS)).thenReturn(
+                ARGS);
+        try (var webDriverManagerStaticMock = mockStatic(WebDriverManager.class))
+        {
+            WebDriverManager webDriverManagerMock = mock();
+            webDriverManagerStaticMock.when(WebDriverManager::chromedriver).thenReturn(webDriverManagerMock);
+            testGetChromeWebDriver(new DesiredCapabilities(), "/path/to/binary", null, null,
+                    args -> assertThat(args, hasItems(ARG_1, ARG_2)), chromeOptions -> { });
+            verify(webDriverManagerMock).setup();
+        }
     }
 
     @Test
-    void testGetWebDriverWithWebDriverTypeAndBinaryPathConfiguration()
-    {
-        mockCapabilities((HasCapabilities) driver);
-        WebDriverType webDriverType = mock();
-        when(webDriverType.toString()).thenReturn(WebDriverType.EDGE.toString());
-        when(webDriverType.isBinaryPathSupported()).thenReturn(Boolean.TRUE);
-        webDriverFactory.setWebDriverType(webDriverType);
-        String browserName = "edge";
-        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, browserName, "driver-executable-path"))
-                .thenReturn(PATH);
-        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, browserName, BINARY_PATH)).thenReturn(PATH);
-        DesiredCapabilities desiredCapabilities = mock();
-        when(webDriverType.getWebDriver(eq(new DesiredCapabilities()),
-                argThat(config -> Optional.of(PATH).equals(config.getBinaryPath())
-                        && Optional.of(PATH).equals(config.getDriverExecutablePath())))).thenReturn(driver);
-        Timeouts timeouts = mockTimeouts(driver);
-        assertEquals(driver,
-                ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
-        verify(timeoutConfigurer).configure(timeouts);
-        assertLogger();
-    }
-
-    @Test
-    void testGetWebDriverWithWebDriverTypeAndCommandLineArgumentsConfiguration()
-    {
-        mockCapabilities((HasCapabilities) driver);
-        WebDriverType webDriverType = mock();
-        when(webDriverType.toString()).thenReturn(WebDriverType.FIREFOX.toString());
-        when(webDriverType.isCommandLineArgumentsSupported()).thenReturn(Boolean.TRUE);
-        webDriverFactory.setWebDriverType(webDriverType);
-        String browserName = FIREFOX_BROWSER_NAME;
-        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, browserName, BINARY_PATH)).thenReturn(null);
-        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, browserName, COMMAND_LINE_ARGUMENTS))
-                .thenReturn(ARGS);
-        DesiredCapabilities desiredCapabilities = mock();
-        when(webDriverType.getWebDriver(eq(new DesiredCapabilities()),
-                argThat(config -> Arrays.equals(new String[] { ARG_1, ARG_2 }, config.getCommandLineArguments()))))
-                .thenReturn(driver);
-        Timeouts timeouts = mockTimeouts(driver);
-        assertEquals(driver,
-                ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
-        verify(timeoutConfigurer).configure(timeouts);
-        assertLogger();
-    }
-
-    @Test
+    @ClearSystemProperty(key = ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY)
     void testGetWebDriverWithCommandLineArgumentsOverride()
     {
-        mockCapabilities((HasCapabilities) driver);
-        WebDriverType webDriverType = mock();
-        when(webDriverType.toString()).thenReturn(WebDriverType.CHROME.toString());
-        when(webDriverType.isCommandLineArgumentsSupported()).thenReturn(Boolean.TRUE);
+        when(webDriverStartContext.get(WebDriverStartParameters.COMMAND_LINE_ARGUMENTS)).thenReturn(ARGS);
+        testGetChromeWebDriver(new DesiredCapabilities(), null, DRIVER_PATH, null,
+                args -> assertThat(args, hasItems(ARG_1, ARG_2)), chromeOptions -> { });
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    @ClearSystemProperty(key = ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY)
+    void testGetWebDriverWithWebDriverTypeAndExperimentalOptionsConfiguration()
+    {
+        testGetChromeWebDriver(new DesiredCapabilities(), null, DRIVER_PATH,
+                "{\"mobileEmulation\": {\"deviceName\": \"iPhone 8\"}}", args -> { },
+                chromeOptions -> {
+                    var chromeOptionsCapabilities = (Map<String, Object>) chromeOptions.getCapability(
+                            ChromeOptions.CAPABILITY);
+                    assertEquals(Map.of("deviceName", "iPhone 8"), chromeOptionsCapabilities.get("mobileEmulation"));
+                });
+    }
+
+    @SuppressWarnings("unchecked")
+    private void testGetChromeWebDriver(DesiredCapabilities desiredCapabilities, String binaryPath, String driverPath,
+            String experimentalOptions, Consumer<List<String>> argsValidator,
+            Consumer<ChromeOptions> capabilitiesValidator)
+    {
+        var webDriverType = WebDriverType.CHROME;
         webDriverFactory.setWebDriverType(webDriverType);
-        lenient().when(
-                        propertyParser.getPropertyValue(String.format(PROPERTY_FORMAT, CHROME_BROWSER_NAME,
-                                BINARY_PATH)))
-                .thenReturn(null);
-        when(webDriverStartContext.get(WebDriverStartParameters.COMMAND_LINE_ARGUMENTS))
-                .thenReturn(ARGS);
-        DesiredCapabilities desiredCapabilities = mock();
-        when(webDriverType.getWebDriver(eq(new DesiredCapabilities()),
-                argThat(config -> Arrays.equals(new String[] { ARG_1, ARG_2 }, config.getCommandLineArguments()))))
-                .thenReturn(driver);
-        Timeouts timeouts = mockTimeouts(driver);
-        assertEquals(driver,
-                ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
-        verify(timeoutConfigurer).configure(timeouts);
+        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, BINARY_PATH)).thenReturn(
+                binaryPath);
+        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, "driver-executable-path"))
+                .thenReturn(driverPath);
+        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, EXPERIMENTAL_OPTIONS))
+                .thenReturn(experimentalOptions);
+        Timeouts timeouts = mock();
+        try (var chromeDriverMockedConstruction = mockConstruction(ChromeDriver.class, (mock, context) -> {
+            mockCapabilities(mock);
+            mockTimeouts(mock, timeouts);
+            assertEquals(1, context.getCount());
+            var arguments = context.arguments();
+            assertEquals(1, arguments.size());
+            var chromeOptions = (ChromeOptions) arguments.get(0);
+            var chromeOptionsCapabilities = (Map<String, Object>) chromeOptions.getCapability(ChromeOptions.CAPABILITY);
+            assertAll(() -> {
+                var args = (List<String>) chromeOptionsCapabilities.get("args");
+                argsValidator.accept(args);
+            }, () -> {
+                var actualBinary = (String) chromeOptionsCapabilities.get("binary");
+                assertEquals(binaryPath, actualBinary);
+            }, () -> {
+                capabilitiesValidator.accept(chromeOptions);
+            });
+        }))
+        {
+            var actualDriver = webDriverFactory.getWebDriver(desiredCapabilities);
+            assertThat(actualDriver, instanceOf(TextFormattingWebDriver.class));
+            var expected = chromeDriverMockedConstruction.constructed().get(0);
+            assertEquals(expected, ((WrapsDriver) actualDriver).getWrappedDriver());
+            verify(timeoutConfigurer).configure(timeouts);
+            assertEquals(driverPath, System.getProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY));
+        }
         assertLogger();
     }
 
     @Test
     void testGetWebDriverWithCommandLineArgumentsOverrideNotSupported()
     {
-        WebDriverType webDriverType = mock();
-        when(webDriverType.toString()).thenReturn(WebDriverType.CHROME.toString());
+        var webDriverType = WebDriverType.SAFARI;
         webDriverFactory.setWebDriverType(webDriverType);
-        when(webDriverType.isCommandLineArgumentsSupported()).thenReturn(Boolean.FALSE);
-        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, BINARY_PATH)).thenReturn(
-                null);
+        when(propertyParser.getPropertyValue(PROPERTY_FORMAT, SAFARI_BROWSER_NAME, BINARY_PATH)).thenReturn(null);
         when(webDriverStartContext.get(WebDriverStartParameters.COMMAND_LINE_ARGUMENTS)).thenReturn(ARG_1);
         DesiredCapabilities desiredCapabilities = mock();
-        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
-            () -> webDriverFactory.getWebDriver(desiredCapabilities));
+        var exception = assertThrows(UnsupportedOperationException.class,
+                () -> webDriverFactory.getWebDriver(desiredCapabilities));
         assertEquals(CLI_ARGS_NOT_SUPPORTED + webDriverType, exception.getMessage());
-    }
-
-    @Test
-    void testGetWebDriverWithWebDriverTypeAndExperimentalOptionsConfiguration()
-    {
-        mockCapabilities((HasCapabilities) driver);
-        WebDriverType webDriverType = mock();
-        when(webDriverType.toString()).thenReturn(WebDriverType.CHROME.toString());
-        webDriverFactory.setWebDriverType(webDriverType);
-        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, BINARY_PATH)).thenReturn(
-                null);
-        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, EXPERIMENTAL_OPTIONS))
-                .thenReturn("{\"mobileEmulation\": {\"deviceName\": \"iPhone 8\"}}");
-        DesiredCapabilities desiredCapabilities = mock();
-        when(webDriverType.getWebDriver(eq(new DesiredCapabilities()),
-                argThat(config ->  Map.of("mobileEmulation", Map.of("deviceName", "iPhone 8"))
-                        .equals(config.getExperimentalOptions())))).thenReturn(driver);
-        Timeouts timeouts = mockTimeouts(driver);
-        assertEquals(driver,
-                ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
-        verify(timeoutConfigurer).configure(timeouts);
-        assertLogger();
     }
 
     @Test
     void testGetWebDriverWithWebDriverTypeAndInvalidBinaryPathConfiguration()
     {
-        WebDriverType webDriverType = mock();
-        when(webDriverType.toString()).thenReturn(WebDriverType.OPERA.toString());
+        var webDriverType = WebDriverType.SAFARI;
         webDriverFactory.setWebDriverType(webDriverType);
-        when(webDriverType.isBinaryPathSupported()).thenReturn(Boolean.FALSE);
-        when(propertyParser.getPropertyValue(PROPERTY_FORMAT, "opera", BINARY_PATH)).thenReturn(PATH);
+        when(propertyParser.getPropertyValue(PROPERTY_FORMAT, SAFARI_BROWSER_NAME, BINARY_PATH)).thenReturn("testPath");
         DesiredCapabilities desiredCapabilities = mock();
-        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
-            () -> webDriverFactory.getWebDriver(desiredCapabilities));
+        var exception = assertThrows(UnsupportedOperationException.class,
+                () -> webDriverFactory.getWebDriver(desiredCapabilities));
         assertEquals("Configuring of binary-path is not supported for " + webDriverType, exception.getMessage());
     }
 
     @Test
     void testGetWebDriverWithWebDriverTypeAndInvalidCommandLineArgumentsConfiguration()
     {
-        WebDriverType webDriverType = mock();
-        when(webDriverType.toString()).thenReturn(WebDriverType.CHROME.toString());
+        var webDriverType = WebDriverType.SAFARI;
         webDriverFactory.setWebDriverType(webDriverType);
-        when(webDriverType.isCommandLineArgumentsSupported()).thenReturn(Boolean.FALSE);
-        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, BINARY_PATH)).thenReturn(
-                null);
-        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, COMMAND_LINE_ARGUMENTS))
-                .thenReturn(ARG_1);
+        when(propertyParser.getPropertyValue(PROPERTY_FORMAT, SAFARI_BROWSER_NAME, BINARY_PATH)).thenReturn(null);
+        when(propertyParser.getPropertyValue(PROPERTY_FORMAT, SAFARI_BROWSER_NAME, COMMAND_LINE_ARGUMENTS)).thenReturn(
+                ARG_1);
         DesiredCapabilities desiredCapabilities = mock();
-        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
-            () -> webDriverFactory.getWebDriver(desiredCapabilities));
+        var exception = assertThrows(UnsupportedOperationException.class,
+                () -> webDriverFactory.getWebDriver(desiredCapabilities));
         assertEquals(CLI_ARGS_NOT_SUPPORTED + webDriverType, exception.getMessage());
     }
 
@@ -316,31 +257,35 @@ class WebDriverFactoryTests
     void testGetRemoteWebDriver()
     {
         mockCapabilities(remoteWebDriver);
-        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        var desiredCapabilities = new DesiredCapabilities();
         when(remoteWebDriverFactory.getRemoteWebDriver(desiredCapabilities)).thenReturn(remoteWebDriver);
-        Timeouts timeouts = mockTimeouts(remoteWebDriver);
-        assertEquals(remoteWebDriver,
-                ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
+        var timeouts = mockTimeouts(remoteWebDriver);
+        assertEquals(remoteWebDriver, ((WrapsDriver) webDriverFactory.getRemoteWebDriver(
+                desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
         assertLogger();
     }
 
     @ParameterizedTest
-    @CsvSource({"chrome, true", "internet explorer,", "SAFARI,"})
+    @CsvSource({
+            "chrome, true",
+            "internet explorer,",
+            "SAFARI,"
+    })
     void shouldSetAcceptInsecureCertsForSupportingBrowsers(String type, Boolean acceptsInsecureCerts)
     {
         mockCapabilities(remoteWebDriver);
-        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        var desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName(type);
         when(proxy.isStarted()).thenReturn(true);
         when(remoteWebDriverFactory.getRemoteWebDriver(argThat(capabilities -> {
             assertEquals(acceptsInsecureCerts, capabilities.getCapability(CapabilityType.ACCEPT_INSECURE_CERTS));
             return true;
         }))).thenReturn(remoteWebDriver);
-        Timeouts timeouts = mockTimeouts(remoteWebDriver);
+        var timeouts = mockTimeouts(remoteWebDriver);
         desiredCapabilities.setCapability(InternetExplorerDriver.NATIVE_EVENTS, false);
-        assertEquals(remoteWebDriver,
-                ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
+        assertEquals(remoteWebDriver, ((WrapsDriver) webDriverFactory.getRemoteWebDriver(
+                desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
         assertLogger();
     }
@@ -350,38 +295,35 @@ class WebDriverFactoryTests
     void testGetRemoteWebDriverFirefoxDriver()
     {
         mockCapabilities(remoteWebDriver);
-        DesiredCapabilities desiredCapabilities = new DesiredCapabilities(new FirefoxOptions());
-        when(remoteWebDriverFactory.getRemoteWebDriver(argThat(caps ->
-        {
-            Map<String, Object> options = (Map<String, Object>) caps.getCapability(FirefoxOptions.FIREFOX_OPTIONS);
-            Map<String, Object> prefs = (Map<String, Object>) options.get("prefs");
-            return "about:blank".equals(prefs.get("startup.homepage_welcome_url.additional"))
-                    && FIREFOX_BROWSER_NAME.equals(caps.getBrowserName());
+        var desiredCapabilities = new DesiredCapabilities(new FirefoxOptions());
+        when(remoteWebDriverFactory.getRemoteWebDriver(argThat(caps -> {
+            var options = (Map<String, Object>) caps.getCapability(FirefoxOptions.FIREFOX_OPTIONS);
+            var prefs = (Map<String, Object>) options.get("prefs");
+            return "about:blank".equals(prefs.get("startup.homepage_welcome_url.additional")) && "firefox".equals(
+                    caps.getBrowserName());
         }))).thenReturn(remoteWebDriver);
-        Timeouts timeouts = mockTimeouts(remoteWebDriver);
-        assertEquals(remoteWebDriver,
-                ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
+        var timeouts = mockTimeouts(remoteWebDriver);
+        assertEquals(remoteWebDriver, ((WrapsDriver) webDriverFactory.getRemoteWebDriver(
+                desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
-        assertLogger("{%n  \"acceptInsecureCerts\" : true,%n"
-                        + "  \"browserName\" : \"firefox\",%n"
-                        + "  \"moz:debuggerAddress\" : true,%n"
-                        + "  \"moz:firefoxOptions\" : {%n"
-                        + "    \"prefs\" : {%n"
-                        + "      \"startup.homepage_welcome_url.additional\" : \"about:blank\"%n"
-                        + "    }%n  }%n}");
+        var sessionCaps = "{%n  \"acceptInsecureCerts\" : true,%n" + "  \"browserName\" : \"firefox\",%n"
+                + "  \"moz:debuggerAddress\" : true,%n" + "  \"moz:firefoxOptions\" : {%n" + "    \"prefs\" : {%n"
+                + "      \"startup.homepage_welcome_url.additional\" : \"about:blank\"%n" + "    }%n  }%n}";
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(info("Requested capabilities:\n{}", String.format(sessionCaps)),
+                        info(SESSION_CAPABILITIES, CAPS_AS_STRING))));
     }
 
     @Test
     void testGetRemoteWebDriverMarionetteDriver()
     {
         mockCapabilities(remoteWebDriver);
-        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        var desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName("marionette");
-        when(remoteWebDriverFactory.getRemoteWebDriver(desiredCapabilities))
-                .thenReturn(remoteWebDriver);
-        Timeouts timeouts = mockTimeouts(remoteWebDriver);
-        assertEquals(remoteWebDriver,
-            ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
+        when(remoteWebDriverFactory.getRemoteWebDriver(desiredCapabilities)).thenReturn(remoteWebDriver);
+        var timeouts = mockTimeouts(remoteWebDriver);
+        assertEquals(remoteWebDriver, ((WrapsDriver) webDriverFactory.getRemoteWebDriver(
+                desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
         assertLogger();
     }
@@ -390,14 +332,13 @@ class WebDriverFactoryTests
     void testGetRemoteWebDriverIEDriver()
     {
         mockCapabilities(remoteWebDriver);
-        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        var desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName(Browser.IE.browserName());
-        when(remoteWebDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class)))
-                .thenReturn(remoteWebDriver);
-        Timeouts timeouts = mockTimeouts(remoteWebDriver);
+        when(remoteWebDriverFactory.getRemoteWebDriver(any(DesiredCapabilities.class))).thenReturn(remoteWebDriver);
+        var timeouts = mockTimeouts(remoteWebDriver);
         desiredCapabilities.setCapability(InternetExplorerDriver.NATIVE_EVENTS, false);
-        assertEquals(remoteWebDriver,
-                ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
+        assertEquals(remoteWebDriver, ((WrapsDriver) webDriverFactory.getRemoteWebDriver(
+                desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
         assertLogger();
     }
@@ -405,8 +346,8 @@ class WebDriverFactoryTests
     @Test
     void testGetRemoteWebDriverIsChromeWithAdditionalOptions()
     {
-        String args = "disable-blink-features=BlockCredentialedSubresources";
-        ChromeOptions chromeOptions = new ChromeOptions();
+        var args = "disable-blink-features=BlockCredentialedSubresources";
+        var chromeOptions = new ChromeOptions();
         chromeOptions.addArguments(args);
         chromeOptions.setExperimentalOption("w3c", Boolean.TRUE);
         lenient().doReturn(args).when(propertyParser).getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME,
@@ -425,13 +366,13 @@ class WebDriverFactoryTests
     private void testGetRemoteWebDriverIsChrome(ChromeOptions chromeOptions)
     {
         mockCapabilities(remoteWebDriver);
-        DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+        var desiredCapabilities = new DesiredCapabilities();
         desiredCapabilities.setBrowserName(Browser.CHROME.browserName());
         desiredCapabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
         when(remoteWebDriverFactory.getRemoteWebDriver(desiredCapabilities)).thenReturn(remoteWebDriver);
-        Timeouts timeouts = mockTimeouts(remoteWebDriver);
-        assertEquals(remoteWebDriver,
-                ((WrapsDriver) webDriverFactory.getRemoteWebDriver(desiredCapabilities)).getWrappedDriver());
+        var timeouts = mockTimeouts(remoteWebDriver);
+        assertEquals(remoteWebDriver, ((WrapsDriver) webDriverFactory.getRemoteWebDriver(
+                desiredCapabilities)).getWrappedDriver());
         verify(timeoutConfigurer).configure(timeouts);
         assertLogger();
     }
@@ -440,7 +381,7 @@ class WebDriverFactoryTests
     {
         Capabilities capabilities = mock();
         when(hasCapabilities.getCapabilities()).thenReturn(capabilities);
-        when(capabilities.asMap()).thenReturn(CAPS);
+        when(capabilities.asMap()).thenReturn(Map.of("key", "value"));
     }
 
     private void assertLogger()
@@ -448,27 +389,17 @@ class WebDriverFactoryTests
         assertThat(logger.getLoggingEvents(), hasItem(info(SESSION_CAPABILITIES, CAPS_AS_STRING)));
     }
 
-    private void assertLogger(String sessionCaps)
-    {
-        assertThat(logger.getLoggingEvents(), is(List.of(
-                info("Requested capabilities:\n{}", String.format(sessionCaps)),
-                info(SESSION_CAPABILITIES, CAPS_AS_STRING))));
-    }
-
     private static Timeouts mockTimeouts(WebDriver webDriver)
     {
-        Options options = mock();
-        when(webDriver.manage()).thenReturn(options);
         Timeouts timeouts = mock();
-        when(options.timeouts()).thenReturn(timeouts);
+        mockTimeouts(webDriver, timeouts);
         return timeouts;
     }
 
-    private void injectConfigurations(WebDriverType webDriverType, WebDriverConfiguration configuration)
-            throws IllegalAccessException
+    private static void mockTimeouts(WebDriver webDriver, Timeouts timeouts)
     {
-        Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
-        configurations.put(webDriverType, configuration);
-        FieldUtils.writeField(webDriverFactory, "configurations", configurations, true);
+        Options options = mock();
+        when(webDriver.manage()).thenReturn(options);
+        when(options.timeouts()).thenReturn(timeouts);
     }
 }
