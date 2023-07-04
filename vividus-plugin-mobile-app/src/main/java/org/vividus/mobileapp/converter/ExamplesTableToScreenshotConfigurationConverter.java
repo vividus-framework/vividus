@@ -16,33 +16,14 @@
 
 package org.vividus.mobileapp.converter;
 
-import java.lang.reflect.Type;
-
-import org.jbehave.core.model.ExamplesTable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vividus.converter.ui.AbstractExamplesTableToScreenshotConfigurationConverter;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 
 public class ExamplesTableToScreenshotConfigurationConverter
         extends AbstractExamplesTableToScreenshotConfigurationConverter<ScreenshotConfiguration>
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExamplesTableToScreenshotConfigurationConverter.class);
-
     protected ExamplesTableToScreenshotConfigurationConverter()
     {
         super(ScreenshotConfiguration.class);
-    }
-
-    @Override
-    public ScreenshotConfiguration convertValue(ExamplesTable value, Type type)
-    {
-        ScreenshotConfiguration screenshotConfiguration = super.convertValue(value, type);
-        if (screenshotConfiguration.getNativeFooterToCut() != 0)
-        {
-            LOGGER.atWarn().log("Screenshot configuration `nativeFooterToCut` is deprecated, use `cutBottom` instead.");
-            screenshotConfiguration.setCutBottom(screenshotConfiguration.getNativeFooterToCut());
-        }
-        return screenshotConfiguration;
     }
 }

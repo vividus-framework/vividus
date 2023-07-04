@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.vividus.converter.ui;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Optional;
 
 import org.jbehave.core.model.ExamplesTable;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParameters;
@@ -33,19 +33,21 @@ class AbstractExamplesTableToScreenshotConfigurationConverterTests
         new TestExamplesTableToScreenshotConfigurationConverter();
 
     @Test
-    void shouldConvertExamplesTableToScreenshotConfiguraiton()
+    void shouldConvertExamplesTableToScreenshotConfiguration()
     {
-        ExamplesTable table = new ExamplesTable("|nativeFooterToCut|\n|101|");
-        ScreenshotConfiguration configuration = CONVERTER.convertValue(table, ScreenshotConfiguration.class);
-        Assertions.assertAll(() -> assertEquals(Optional.empty(), configuration.getShootingStrategy()),
-                             () -> assertEquals(101, configuration.getNativeFooterToCut()));
+        var table = new ExamplesTable("|cutBottom|\n|101|");
+        var configuration = CONVERTER.convertValue(table, ScreenshotConfiguration.class);
+        assertAll(
+                () -> assertEquals(Optional.empty(), configuration.getShootingStrategy()),
+                () -> assertEquals(101, configuration.getCutBottom())
+        );
     }
 
     @Test
     void shouldThrowAnException()
     {
-        ExamplesTable table = new ExamplesTable("|nativeFooterToCut|\n|101|\n|102|");
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        var table = new ExamplesTable("|cutBottom|\n|101|\n|102|");
+        var exception = assertThrows(IllegalArgumentException.class,
             () -> CONVERTER.convertValue(table, ScreenshotParameters.class));
         assertEquals("Only one row is acceptable for screenshot configurations", exception.getMessage());
     }
