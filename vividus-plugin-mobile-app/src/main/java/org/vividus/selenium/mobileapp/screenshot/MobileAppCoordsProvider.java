@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,11 @@ public class MobileAppCoordsProvider extends WebDriverCoordsProvider
 
     private final transient MobileAppWebDriverManager mobileAppWebDriverManager;
     private final transient IUiContext uiContext;
-    private final boolean downscale;
 
-    public MobileAppCoordsProvider(boolean downscale, MobileAppWebDriverManager mobileAppWebDriverManager,
-        IUiContext uiContext)
+    public MobileAppCoordsProvider(MobileAppWebDriverManager mobileAppWebDriverManager, IUiContext uiContext)
     {
         this.mobileAppWebDriverManager = mobileAppWebDriverManager;
         this.uiContext = uiContext;
-        this.downscale = downscale;
     }
 
     @Override
@@ -46,11 +43,6 @@ public class MobileAppCoordsProvider extends WebDriverCoordsProvider
     {
         Coords coords = super.ofElement(null, element);
         Coords barSizeAdjustedCoords = cutBarSize(coords);
-
-        if (downscale)
-        {
-            return barSizeAdjustedCoords;
-        }
 
         return uiContext.getOptionalSearchContext()
                 .filter(context -> !context.equals(element) && context instanceof WebElement)

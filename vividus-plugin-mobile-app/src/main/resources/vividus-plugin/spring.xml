@@ -111,7 +111,6 @@
     <bean class="org.vividus.ui.mobile.action.MobileAppElementActions" />
 
     <bean class="org.vividus.selenium.mobileapp.screenshot.MobileAppAshotFactory" parent="abstractAshotFactory">
-        <property name="downscale" value="${mobile.screenshot.downscale}" />
         <property name="appendBottomNavigationBarOnAndroid" value="${mobile.screenshot.android.append-bottom-navigation-bar}" />
     </bean>
 
@@ -130,9 +129,7 @@
 
     <bean class="org.vividus.selenium.mobileapp.MobileAppWebDriverManager" />
 
-    <bean class="org.vividus.selenium.mobileapp.screenshot.MobileAppCoordsProvider">
-        <constructor-arg index="0" value="${mobile.screenshot.downscale}" />
-    </bean>
+    <bean class="org.vividus.selenium.mobileapp.screenshot.MobileAppCoordsProvider" />
 
     <bean class="org.vividus.mobileapp.action.MobileAtomicActionFactories$Tap" />
     <bean class="org.vividus.mobileapp.action.MobileAtomicActionFactories$TapAndHold" />

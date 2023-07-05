@@ -16,8 +16,6 @@
 
 package org.vividus.selenium.mobileapp.screenshot;
 
-import static pazone.ashot.ShootingStrategies.scaling;
-
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -42,7 +40,6 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotParame
 
     private final MobileAppWebDriverManager mobileAppWebDriverManager;
     private final CoordsProvider coordsProvider;
-    private boolean downscale;
     private boolean appendBottomNavigationBarOnAndroid;
 
     public MobileAppAshotFactory(ScreenshotCropper screenshotCropper, MobileAppWebDriverManager genericWebDriverManager,
@@ -93,19 +90,7 @@ public class MobileAppAshotFactory extends AbstractAshotFactory<ScreenshotParame
             int statusBarSize = mobileAppWebDriverManager.getStatusBarSize();
             return decorateWithFixedCutStrategy(ShootingStrategies.simple(), statusBarSize, 0);
         }
-        ShootingStrategy strategy = new MobileViewportShootingStrategy();
-        return downscale ? scaling(strategy, (float) this.getDpr()) : strategy;
-    }
-
-    @Override
-    protected double getDpr()
-    {
-        return mobileAppWebDriverManager.getDpr();
-    }
-
-    public void setDownscale(boolean downscale)
-    {
-        this.downscale = downscale;
+        return new MobileViewportShootingStrategy();
     }
 
     public void setAppendBottomNavigationBarOnAndroid(boolean appendBottomNavigationBarOnAndroid)

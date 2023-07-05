@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,16 @@
 
 package org.vividus.selenium.mobileapp.screenshot;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
@@ -54,45 +50,48 @@ class MobileAppCoordsProviderTests
     @Test
     void shouldProvideAdjustedWithNativeHeaderHeightCoordinates()
     {
-        MobileAppCoordsProvider coordsProvider = new MobileAppCoordsProvider(true, driverManager, uiContext);
+        MobileAppCoordsProvider coordsProvider = new MobileAppCoordsProvider(driverManager, uiContext);
+        when(driverManager.getDpr()).thenReturn(1.0);
         when(driverManager.getStatusBarSize()).thenReturn(100);
         when(webElement.getLocation()).thenReturn(new Point(0, 234));
         when(webElement.getSize()).thenReturn(DIMENSION);
         Coords coords = coordsProvider.ofElement(null, webElement);
-        Assertions.assertAll(() -> assertEquals(0, coords.getX()),
-                             () -> assertEquals(134, coords.getY()),
-                             () -> assertEquals(1, coords.getWidth()),
-                             () -> assertEquals(1, coords.getHeight()));
+        assertAll(
+                () -> assertEquals(0, coords.getX()),
+                () -> assertEquals(134, coords.getY()),
+                () -> assertEquals(1, coords.getWidth()),
+                () -> assertEquals(1, coords.getHeight())
+        );
     }
 
     @Test
     void shouldNotAdjustCoordsForTheCurrentSearchContext()
     {
-        MobileAppCoordsProvider coordsProvider = new MobileAppCoordsProvider(true, driverManager, uiContext);
+        MobileAppCoordsProvider coordsProvider = new MobileAppCoordsProvider(driverManager, uiContext);
+        when(driverManager.getDpr()).thenReturn(1.0);
         WebElement contextElement = mock(WebElement.class);
         when(contextElement.getLocation()).thenReturn(POINT);
         when(contextElement.getSize()).thenReturn(new Dimension(100, 50));
         Coords coords = coordsProvider.ofElement(null, contextElement);
-        Assertions.assertAll(
+        assertAll(
                 () -> assertEquals(10, coords.getX()),
                 () -> assertEquals(10, coords.getY()),
                 () -> assertEquals(100, coords.getWidth()),
-                () -> assertEquals(50, coords.getHeight()));
+                () -> assertEquals(50, coords.getHeight())
+        );
     }
 
-    @ParameterizedTest
-    @MethodSource("coordsSource")
-    void testCoordsIsMultipliedWithDpr(boolean downscale, Coords expectedCoords)
+    @Test
+    void testCoordsIsMultipliedWithDpr()
     {
-        MobileAppCoordsProvider coordsDecorator =
-            new MobileAppCoordsProvider(downscale, driverManager, uiContext);
+        MobileAppCoordsProvider coordsDecorator = new MobileAppCoordsProvider(driverManager, uiContext);
         WebElement element = mock(WebElement.class);
         when(element.getLocation()).thenReturn(POINT);
         when(element.getSize()).thenReturn(DIMENSION);
         lenient().when(driverManager.getDpr()).thenReturn(2.0);
 
         WebDriver driver = mock(WebDriver.class);
-        assertEquals(expectedCoords, coordsDecorator.ofElement(driver, element));
+        assertEquals(new Coords(20, 20, 2, 2), coordsDecorator.ofElement(driver, element));
     }
 
     @Test
@@ -106,9 +105,9 @@ class MobileAppCoordsProviderTests
         when(driverManager.getStatusBarSize()).thenReturn(48);
         when(driverManager.getDpr()).thenReturn(1.0810810327529907d);
 
-        MobileAppCoordsProvider coordsDecorator = new MobileAppCoordsProvider(false, driverManager, uiContext);
+        MobileAppCoordsProvider coordsDecorator = new MobileAppCoordsProvider(driverManager, uiContext);
         Coords coords = coordsDecorator.ofElement(null, element);
-        Assertions.assertAll(
+        assertAll(
                 () -> assertEquals(0, coords.getX()),
                 () -> assertEquals(182, coords.getY()),
                 () -> assertEquals(831, coords.getWidth()),
@@ -118,7 +117,7 @@ class MobileAppCoordsProviderTests
     @Test
     void shouldNotAdjustCoordsForTheWebDriverSearchContext()
     {
-        MobileAppCoordsProvider coordsDecorator = new MobileAppCoordsProvider(false, driverManager, uiContext);
+        MobileAppCoordsProvider coordsDecorator = new MobileAppCoordsProvider(driverManager, uiContext);
         WebElement element = mock(WebElement.class);
         when(element.getLocation()).thenReturn(POINT);
         when(element.getSize()).thenReturn(DIMENSION);
@@ -132,7 +131,7 @@ class MobileAppCoordsProviderTests
     @Test
     void shouldNotAdjustCoordsIfElementIsSearchContextElement()
     {
-        MobileAppCoordsProvider coordsDecorator = new MobileAppCoordsProvider(false, driverManager, uiContext);
+        MobileAppCoordsProvider coordsDecorator = new MobileAppCoordsProvider(driverManager, uiContext);
         WebElement element = mock(WebElement.class);
         when(element.getLocation()).thenReturn(POINT);
         when(element.getSize()).thenReturn(DIMENSION);
@@ -153,12 +152,5 @@ class MobileAppCoordsProviderTests
         when(element.getSize()).thenReturn(dimension);
         when(dimension.getWidth()).thenReturn(w);
         when(dimension.getHeight()).thenReturn(h);
-    }
-
-    static Stream<Arguments> coordsSource()
-    {
-        return Stream.of(Arguments.of(true, new Coords(10, 10, 1, 1)),
-            Arguments.of(false, new Coords(20, 20, 2, 2))
-        );
     }
 }

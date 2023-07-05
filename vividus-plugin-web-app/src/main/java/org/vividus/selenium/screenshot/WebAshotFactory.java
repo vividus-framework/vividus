@@ -128,12 +128,6 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
 
     private ShootingStrategy getBaseShootingStrategy()
     {
-        return ShootingStrategies.scaling((float) this.getDpr());
-    }
-
-    @Override
-    protected double getDpr()
-    {
-        return javascriptActions.getDevicePixelRatio();
+        return ShootingStrategies.scaling((float) javascriptActions.getDevicePixelRatio());
     }
 }

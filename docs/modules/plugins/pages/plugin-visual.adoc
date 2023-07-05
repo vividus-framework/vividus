@@ -244,16 +244,7 @@ be appended.
 - If you are in the middle of your tests lifecycle, please, find some convenient time and re-establish baselines with the property set to `false`.
 ====
 
-|`mobile.screenshot.downscale`
-|`boolean`
-|`false`
-|Downscale checkpoint image according to a device https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio[DPR] value
-
 |===
-
-Please see the image to get a clue about difference between original and downscaled images.
-
-image::original_and_downscaled_checkpoints.png[Difference between original and dpr downscaled image]
 
 Property based configuration could be specified using `mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.<PROPERTY_NAME>= pattern`,
 where:
