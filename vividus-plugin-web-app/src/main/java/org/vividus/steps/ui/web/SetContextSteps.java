@@ -134,7 +134,7 @@ public class SetContextSteps
      */
     @When("I switch to a new window")
     @Deprecated(since = "0.5.11", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern = "I switch to new tab")
+    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern = "When I switch to new tab")
     public void switchingToWindow()
     {
         String currentWindow = getWebDriver().getWindowHandle();
