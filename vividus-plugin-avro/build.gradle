@@ -4,7 +4,7 @@ dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-util')
 
-    implementation(group: 'org.apache.avro', name: 'avro', version: '1.11.1')
+    implementation(group: 'org.apache.avro', name: 'avro', version: '1.11.2')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.9.3')
