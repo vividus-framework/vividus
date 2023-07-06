@@ -69,7 +69,7 @@ dependencies {
     implementation(group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.19.0.0')
     implementation(group: 'com.ibm.db2.jcc', name: 'db2jcc', version: 'db2jcc4')
     implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.40')
-    implementation(group: 'com.h2database', name: 'h2', version: '2.1.214')
+    implementation(group: 'com.h2database', name: 'h2', version: '2.2.220')
     implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.13.33')
 }
 
