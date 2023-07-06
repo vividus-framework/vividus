@@ -4,7 +4,7 @@ VIVIDUS provides a set of pre-defined expressions. Also plugins may define own
 xref:ROOT:glossary.adoc#_expression[expressions] (they are documented in the
 corresponding plugins articles).
 
-NOTE: The expression parameters marked with *bold* are mandatory.
+NOTE: The expression arguments marked with *bold* are mandatory.
 
 == Data generation
 
@@ -14,16 +14,16 @@ Generates random data from various domain areas.
 
 [source, subs="+quotes"]
 ----
-`#{generate(*<expression>*)}`
+`#{generate(*$data-provider-and-its-arguments*)}`
 ----
 
-* *`$expression`* - one of the https://www.datafaker.net/documentation/providers/[data providers],
-its dot-separated method and space separated parameters wrapped into single
-quotes (for majority of cases parameters are not needed, their number and
+* *`$data-provider-and-its-arguments`* - one of the https://www.datafaker.net/documentation/providers/[data providers],
+its dot-separated method and space separated arguments wrapped into single
+quotes (for majority of cases arguments are not needed, their number and
 possible values depend on the chosen data provider method).
 
 Below you can find a complete list of the supported expressions with results
-examples. Descriptions of the data providers and their parameters can be found
+examples. Descriptions of the data providers and their arguments can be found
 https://www.datafaker.net/documentation/providers/[in DataFaker documentation]:
 click on the data provider name to find details.
 
@@ -51,7 +51,7 @@ Let's see the structure of the expression for the following example:
 <1> Generate expression itself.
 <2> Data provider from the https://www.datafaker.net/documentation/providers/[list]. In this case - `Internet`. Click on its name to see the methods it contains.
 <3> One of the available https://s01.oss.sonatype.org/service/local/repositories/releases/archive/net/datafaker/datafaker/1.6.0/datafaker-1.6.0-javadoc.jar/!/net/datafaker/Internet.html[methods] within `Internet` data provider - `password`. There are multiple choices, we picked the fourth one.
-<4> Available parameters for the chosen https://s01.oss.sonatype.org/service/local/repositories/releases/archive/net/datafaker/datafaker/1.6.0/datafaker-1.6.0-javadoc.jar/!/net/datafaker/Internet.html#password-int-int-boolean-[method].
+<4> Available arguments for the chosen https://s01.oss.sonatype.org/service/local/repositories/releases/archive/net/datafaker/datafaker/1.6.0/datafaker-1.6.0-javadoc.jar/!/net/datafaker/Internet.html#password-int-int-boolean-[method].
 +
 There are three of them:
 
@@ -399,7 +399,7 @@ Rounds a number with an approximate value based on specific rounding definitions
 |Asserts that the requested operation has an exact result, hence no rounding is necessary.
 |===
 
-.Examples of rounding operations with different parameters
+.Examples of rounding operations with different arguments
 |===
 |Expression |Result
 
@@ -976,7 +976,7 @@ Calculates the {resource-info}[resource] or file hash using the specified hashin
 |===
 
 == Resources
-:resource-name-parameter: pass:quotes[*`$resourceName`* - the name of the xref:ROOT:glossary.adoc#_resource[resource] to load]
+:resource-name-argument: pass:quotes[*`$resourceName`* - the name of the xref:ROOT:glossary.adoc#_resource[resource] to load]
 
 === `loadResource`
 
@@ -987,7 +987,7 @@ Loads the resource by its name and replaces the expression with the content of t
 #{loadResource(*$resourceName*)}
 ----
 
-* {resource-name-parameter}
+* {resource-name-argument}
 
 .Load data from the project resource
 [source,gherkin]
@@ -1004,7 +1004,7 @@ Loads the resource by its name as bytes. It could be useful for the steps that a
 #{loadBinaryResource(*$resourceName*)}
 ----
 
-* {resource-name-parameter}
+* {resource-name-argument}
 
 .Load data from the project resource as bytes
 [source,gherkin]
@@ -1024,7 +1024,7 @@ Finds the resource by its name and replaces the expression with the content of t
 ----
 
 [subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
-* {resource-name-parameter}
+* {resource-name-argument}
 
 .Load data as Base64 from the project resource
 [source,gherkin]
@@ -1033,7 +1033,7 @@ Given I initialize scenario variable `my-data` with value `#{resourceToBase64(/d
 ----
 
 == URL parsing
-:url-parameter: pass:quotes[*`$url`* - the URL to extract component from.]
+:url-argument: pass:quotes[*`$url`* - the URL to extract component from.]
 
 === `extractHostFromUrl`
 
@@ -1045,7 +1045,7 @@ Extracts host component from the given URL.
 ----
 
 [subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
-* {url-parameter}
+* {url-argument}
 
 .Validate host component from URL
 [source,gherkin]
@@ -1064,7 +1064,7 @@ Extracts decoded path component from the given URL.
 ----
 
 [subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
-* {url-parameter}
+* {url-argument}
 
 .Validate path component from URL
 [source,gherkin]
@@ -1083,7 +1083,7 @@ Extracts decoded query component from the given URL.
 ----
 
 [subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
-* {url-parameter}
+* {url-argument}
 
 .Validate query component from URL
 [source,gherkin]
