@@ -50,8 +50,8 @@ Let's see the structure of the expression for the following example:
 ----
 <1> Generate expression itself.
 <2> Data provider from the https://www.datafaker.net/documentation/providers/[list]. In this case - `Internet`. Click on its name to see the methods it contains.
-<3> One of the available https://s01.oss.sonatype.org/service/local/repositories/releases/archive/net/datafaker/datafaker/1.6.0/datafaker-1.6.0-javadoc.jar/!/net/datafaker/Internet.html[methods] within `Internet` data provider - `password`. There are multiple choices, we picked the fourth one.
-<4> Available arguments for the chosen https://s01.oss.sonatype.org/service/local/repositories/releases/archive/net/datafaker/datafaker/1.6.0/datafaker-1.6.0-javadoc.jar/!/net/datafaker/Internet.html#password-int-int-boolean-[method].
+<3> One of the available https://javadoc.io/doc/net.datafaker/datafaker/1.9.0/net/datafaker/providers/base/Internet.html[methods] within `Internet` data provider - `password`. There are multiple choices, we picked the fourth one.
+<4> Available arguments for the chosen https://javadoc.io/doc/net.datafaker/datafaker/1.9.0/net/datafaker/providers/base/Internet.html#password-int-int-boolean-[method].
 +
 There are three of them:
 
