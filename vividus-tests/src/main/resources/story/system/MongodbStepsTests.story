@@ -64,14 +64,15 @@ When I execute SQL query `
 
 Scenario: Find and collect
 When I execute commands
-|command   |argument                                    |
-|find      |{ age: { $gte: 25 }, "pets.type": "cat" }   |
-|projection|{ name: 1, email: 1, "pets.$": 1, "_id": 0 }|
-|collect   |                                            |
+| command    | argument                                  |
+| find       | { age: { $gte: 25 }, "pets.type": "cat" } |
+| projection | { name: 1, email: 1, "pets.$": 1 }        |
+| collect    |                                           |
  in `${collectionName}` collection against `${db-name}` database on `${instance-key}` MongoDB instance and save result to SCENARIO variable `find`
 Then JSON element from `${find}` by JSON path `$` is equal to `
 [
    {
+      "_id":"${json-unit.any-string}",
       "name":"Joanna Pierce",
       "email":"joannapierce@lingoage.com",
       "pets":[
@@ -82,6 +83,7 @@ Then JSON element from `${find}` by JSON path `$` is equal to `
       ]
    },
    {
+      "_id":"${json-unit.any-string}",
       "name":"Buck Frazier",
       "email":"buckfrazier@autograte.com",
       "pets":[
