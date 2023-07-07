@@ -264,7 +264,7 @@ finished. Please see the xref:user-guides:use-in-memory-db-to-manage-test-data.a
 .build.gradle
 [source,gradle]
 ----
-implementation(group: 'com.h2database', name: 'h2', version: '2.1.214')
+implementation(group: 'com.h2database', name: 'h2', version: '2.2.220')
 ----
 
 .environment.properties
