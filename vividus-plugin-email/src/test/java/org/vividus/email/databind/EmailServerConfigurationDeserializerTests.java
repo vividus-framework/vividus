@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,59 +14,36 @@
  * limitations under the License.
  */
 
-package org.vividus.jackson.databind.email;
+package org.vividus.email.databind;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.email.model.EmailServerConfiguration;
 
 @ExtendWith(MockitoExtension.class)
 class EmailServerConfigurationDeserializerTests
 {
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
-    @Mock
-    private JsonParser parser;
-
-    @Mock
-    private ObjectCodec objectCodec;
-
-    private final EmailServerConfigurationDeserializer deserializer = new EmailServerConfigurationDeserializer();
-
-    @BeforeEach
-    void init()
-    {
-        when(parser.getCodec()).thenReturn(objectCodec);
-    }
+    private static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
 
     @Test
     void testDeserialize() throws IOException
     {
-        JsonNode root = MAPPER.readTree(
+        var config =  MAPPER.readValue(
                 "{\"username\":\"Bob\",\"password\":\"pass$123\",\"properties\":"
                         + "{\"simpleKey\":\"simpleValue\","
-                        + "\"objectKey\":{\"subKey1\":\"subValue1\", \"subKey2\":\"subValue2\"}}}");
-
-        when(objectCodec.readTree(parser)).thenReturn(root);
-
-        EmailServerConfiguration config = deserializer.deserialize(parser, null);
+                        + "\"objectKey\":{\"subKey1\":\"subValue1\", \"subKey2\":\"subValue2\"}}}",
+                EmailServerConfiguration.class);
 
         assertEquals("Bob", config.getUsername());
         assertEquals("pass$123", config.getPassword());
@@ -78,9 +55,8 @@ class EmailServerConfigurationDeserializerTests
     @Test
     void testDeserializeMissingProperties() throws IOException
     {
-        JsonNode root = MAPPER.readTree("{\"username\":\"Jack\",\"password\":\"pass$228\"}");
-        when(objectCodec.readTree(parser)).thenReturn(root);
-        EmailServerConfiguration config = deserializer.deserialize(parser, null);
+        var config = MAPPER.readValue("{\"username\":\"Jack\",\"password\":\"pass$228\"}",
+                EmailServerConfiguration.class);
         assertEquals("Jack", config.getUsername());
         assertEquals("pass$228", config.getPassword());
         assertEquals(Map.of(), config.getProperties());
@@ -91,13 +67,11 @@ class EmailServerConfigurationDeserializerTests
         "password, {\"username\":\"-\"}",
         "username, {\"password\":\"-\"}"
     })
-    void testRequiredPropertiesAreMissing(String property, String json) throws IOException
+    void testRequiredPropertiesAreMissing(String property, String json)
     {
-        JsonNode root = MAPPER.readTree(json);
-        when(objectCodec.readTree(parser)).thenReturn(root);
-        Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> deserializer.deserialize(parser, null));
-        String errorMessage = String.format("Required property '%s' is not set", property);
+        var exception = assertThrows(IllegalArgumentException.class,
+            () -> MAPPER.readValue(json, EmailServerConfiguration.class));
+        var errorMessage = String.format("Required property '%s' is not set", property);
         assertEquals(errorMessage, exception.getMessage());
     }
 }

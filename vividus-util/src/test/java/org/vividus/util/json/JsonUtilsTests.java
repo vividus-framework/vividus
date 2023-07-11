@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 
@@ -158,6 +159,14 @@ class JsonUtilsTests
     {
         assertEquals(String.format("{%n  \"key\" : \"value\"%n}"),  jsonUtils.readTree("{\"key\" : \"value\"}"
             ).toPrettyString());
+    }
+
+    @Test
+    void shouldCreatePattern()
+    {
+        var regex = ".*";
+        var actual = jsonUtils.toObject(String.format("\"%s\"", regex), Pattern.class);
+        assertEquals(regex, actual.toString());
     }
 
     public static class TestClass
