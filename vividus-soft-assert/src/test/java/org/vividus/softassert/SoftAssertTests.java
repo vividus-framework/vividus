@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.org.lidalia.slf4jext.Level.ERROR;
+import static org.slf4j.event.Level.ERROR;
 
 import java.util.List;
 import java.util.function.Consumer;
