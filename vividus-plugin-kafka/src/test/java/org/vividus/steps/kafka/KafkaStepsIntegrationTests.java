@@ -54,6 +54,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
@@ -66,8 +67,6 @@ import org.vividus.steps.kafka.KafkaSteps.QueueOperation;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.util.property.IPropertyParser;
 import org.vividus.variable.VariableScope;
-
-import uk.org.lidalia.slf4jext.Level;
 
 @EmbeddedKafka(topics = KafkaStepsIntegrationTests.TOPIC)
 @ExtendWith({ MockitoExtension.class, SpringExtension.class, TestLoggerFactoryExtension.class })
