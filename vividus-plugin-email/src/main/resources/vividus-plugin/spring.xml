@@ -9,7 +9,6 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
         default-lazy-init="true" >
 
-    <context:component-scan base-package="org.vividus.jackson.databind.email"/>
     <context:component-scan base-package="org.vividus.email"/>
 
     <bean id="emailSteps" class="org.vividus.email.steps.EmailSteps">

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,29 @@
  * limitations under the License.
  */
 
-package org.vividus.jackson.databind;
+package org.vividus.util.databind;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.regex.Pattern;
-
-import javax.inject.Named;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
-@Named
-public class PatternDeserializer extends JsonDeserializer<Pattern>
+public class CommonJacksonMapperModule extends SimpleModule
 {
-    @Override
-    public Pattern deserialize(JsonParser p, DeserializationContext ctxt) throws IOException
+    private static final long serialVersionUID = -7139230038016853680L;
+
+    public CommonJacksonMapperModule()
     {
-        return Optional.ofNullable(p.getText())
-                       .map(Pattern::compile)
-                       .orElseThrow(() -> new IllegalArgumentException("Pattern could not be empty"));
+        addDeserializer(Pattern.class, new JsonDeserializer<>()
+        {
+            @Override
+            public Pattern deserialize(JsonParser parser, DeserializationContext context) throws IOException
+            {
+                return Pattern.compile(parser.getText());
+            }
+        });
     }
 }
