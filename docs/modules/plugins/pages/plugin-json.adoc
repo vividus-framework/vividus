@@ -276,7 +276,7 @@ When I find $comparisonRule `$elementsNumber` JSON elements by `$jsonPath` and f
 .Alias
 [source,gherkin]
 ----
-When I find $comparisonRule '$elementsNumber' JSON elements by '$jsonPath' and for each element doa$stepsToExecute
+When I find $comparisonRule '$elementsNumber' JSON elements by '$jsonPath' and for each element do$stepsToExecute
 ----
 
 * `comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].

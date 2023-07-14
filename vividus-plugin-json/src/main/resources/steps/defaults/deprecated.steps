@@ -19,7 +19,7 @@ Priority: 6
 !-- DEPRECATED: 0.6.0, When I find %1$s `%2$s` JSON elements from `${json-context}` by `%3$s` and for each element do%4$s
 When I find <comparisonRule> `<elementsNumber>` JSON elements from `${json-context}` by `<jsonPath>` and for each element do<stepsToExecute>
 
-Composite: When I find $comparisonRule '$elementsNumber' JSON elements by '$jsonPath' and for each element doa$stepsToExecute
+Composite: When I find $comparisonRule '$elementsNumber' JSON elements by '$jsonPath' and for each element do$stepsToExecute
 !-- DEPRECATED: 0.6.0, When I find %1$s '%2$s' JSON elements from '${json-context}' by '%3$s' and for each element do%4$s
 When I find $comparisonRule '<elementsNumber>' JSON elements from '${json-context}' by '<jsonPath>' and for each element do<stepsToExecute>
 
