@@ -59,7 +59,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
-import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
@@ -377,7 +376,7 @@ class MouseActionsTests
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         mouseActions.moveToAndClick(webElement);
-        verifyActionsWithMove(createClickActions(0));
+        verifyActionsWithMove(verify((Interactive) webDriver), createClickActions(0));
     }
 
     @Test
@@ -385,7 +384,7 @@ class MouseActionsTests
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         mouseActions.contextClick(webElement);
-        verifyActionsWithMove(createClickActions(2));
+        verifyActionsWithMove(verify((Interactive) webDriver), createClickActions(2));
     }
 
     private List<Map<String, Object>> createClickActions(int button)
@@ -408,7 +407,9 @@ class MouseActionsTests
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         mouseActions.moveToElement(webElement);
-        verifyActionsWithMove(List.of());
+        InOrder ordered = inOrder(javascriptActions, webDriver);
+        ordered.verify(javascriptActions).scrollIntoView(webElement, true);
+        verifyActionsWithMove(ordered.verify((Interactive) webDriver), List.of());
     }
 
     @Test
@@ -418,30 +419,9 @@ class MouseActionsTests
         verifyNoInteractions(webDriverProvider, javascriptActions, softAssert);
     }
 
-    @Test
-    void shouldMoveToElementOnMobileDevice()
+    private void verifyActionsWithMove(Interactive interactiveVerification, List<Map<String, Object>> actions)
     {
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(webDriverManager.isMobile()).thenReturn(true);
-        mouseActions.moveToElement(webElement);
-        verify(javascriptActions).scrollIntoView(webElement, true);
-        verifyActionsWithMove(List.of());
-    }
-
-    @Test
-    void shouldScrollToElementOnBrowsersNotPerformingScrollAutomatically()
-    {
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(webDriverManager.isMobile()).thenReturn(false);
-        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.FIREFOX)).thenReturn(true);
-        mouseActions.moveToElement(webElement);
-        verify(javascriptActions).scrollIntoView(webElement, true);
-        verifyActionsWithMove(List.of());
-    }
-
-    private void verifyActionsWithMove(List<Map<String, Object>> actions)
-    {
-        verify((Interactive) webDriver).perform(sequencesCaptor.capture());
+        interactiveVerification.perform(sequencesCaptor.capture());
         Collection<Sequence> sequences = sequencesCaptor.getValue();
         assertEquals(1, sequences.size());
         List<Map<String, Object>> allActions = new ArrayList<>();

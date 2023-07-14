@@ -30,7 +30,6 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
@@ -192,11 +191,7 @@ public class MouseActions implements IMouseActions
     {
         if (element != null)
         {
-            // Safari and Firefox Drivers don't scroll to element before moveTo action
-            if (webDriverManager.isMobile() || webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.FIREFOX))
-            {
-                javascriptActions.scrollIntoView(element, true);
-            }
+            javascriptActions.scrollIntoView(element, true);
             new Actions(getWebDriver()).moveToElement(element).perform();
         }
     }
