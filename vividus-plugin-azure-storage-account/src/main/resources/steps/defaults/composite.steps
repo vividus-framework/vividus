@@ -1,7 +1,0 @@
-Composite: When I collect storage accounts in resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`
-!-- DEPRECATED: 0.6.0, When I get Azure resource with identifier `resourceGroups/%1$s/providers/Microsoft.Storage/storageAccounts` using API version `2021-08-01` and save it to %2$s variable `%3$s`
-When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.Storage/storageAccounts` using API version `2021-08-01` and save it to <scopes> variable `<variableName>`
-
-Composite: When I retrieve blob service properties of storage account with name `$storageAccountName` from resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`
-!-- DEPRECATED: 0.6.0, When I get Azure resource with identifier `resourceGroups/%2$s/providers/Microsoft.Storage/storageAccounts/%1$s/blobServices/default` using API version `2021-08-01` and save it to %3$s variable `%4$s`
-When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.Storage/storageAccounts/<storageAccountName>/blobServices/default` using API version `2021-08-01` and save it to <scopes> variable `<variableName>`
