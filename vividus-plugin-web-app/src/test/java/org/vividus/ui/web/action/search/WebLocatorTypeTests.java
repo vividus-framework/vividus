@@ -104,7 +104,8 @@ class WebLocatorTypeTests
     {
         var value = "field";
         assertEquals(By.xpath(".//*[(local-name() = 'input' or local-name() = 'textarea' or local-name()='body') and "
-                + "((@* | text())=\"field\")]"), WebLocatorType.FIELD_NAME.buildBy(value));
+                + "((@* | text())=\"field\" or @id=(//label[text()[normalize-space()=\"field\"]]/@for))]"),
+                WebLocatorType.FIELD_NAME.buildBy(value));
     }
 
     @Test

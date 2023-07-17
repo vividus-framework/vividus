@@ -87,7 +87,7 @@ public enum WebLocatorType implements LocatorType
             // due to firefox bug, we can't use name() and must use local-name()
             // as workaround 'body' represents CKE editor
             return XpathLocatorUtils.getXPathLocator(".//*[(local-name() = 'input' or local-name() = 'textarea' or "
-                    + "local-name()='body') and ((@* | text())=%s)]", value);
+                    + "local-name()='body') and ((@* | text())=%1$s or @id=(//label[text() = '%1$s']/@for))]", value);
         }
     },
     TEXT_PART("Text part", GenericTextFilter.class),

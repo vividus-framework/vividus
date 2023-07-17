@@ -110,10 +110,10 @@ When I press ${watch-brand} on keyboard
 When I reset context
 Then text `${watch-brand}` exists
 
-Scenario: Step verification When I enter `$text` in field located `$locator` using keyboard
+Scenario: Verification of step "When I enter `$text` in field located `$locator` using keyboard" and locator "fieldName(with-label-name)"
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
 Given I initialize scenario variable `text` with value `#{generate(regexify '[a-z]{15}')}`
-When I enter `${text}` in field located `By.id(text)` using keyboard
+When I enter `${text}` in field located `fieldName(Input:)` using keyboard
 Then text `${text}` exists
 
 Scenario: Step verification Then an element with the name '$elementName' containing text '$text' exists
