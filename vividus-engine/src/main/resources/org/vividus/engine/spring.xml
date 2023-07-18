@@ -38,7 +38,9 @@
 
     <bean class="org.vividus.parser.StepExamplesTableParser" />
 
-    <bean id="testResourceLoader" class="org.vividus.resource.TestResourceLoader" />
+    <bean id="testResourceLoader" class="org.vividus.resource.TestResourceLoader">
+        <constructor-arg index="2" value="${engine.dynamic-resource-search-enabled}" />
+    </bean>
 
     <bean id="batchedPerformableTree" class="org.vividus.BatchedPerformableTree" />
 

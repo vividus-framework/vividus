@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.util.property.IPropertyParser;
 
 public class TestResourceLoader implements ITestResourceLoader
 {
+    public static final Logger LOGGER = LoggerFactory.getLogger(TestResourceLoader.class);
+
     private static final String VARIABLES_PROPERTY_PREFIX = "bdd.resource-loader.";
     private static final String SEPARATOR = "/";
     private static final String FILE_URL_PREFIX = "file://";
@@ -40,12 +44,18 @@ public class TestResourceLoader implements ITestResourceLoader
     private final List<String> resourceLoadParameters;
     private final ResourcePatternResolver resourcePatternResolver;
 
-    public TestResourceLoader(IPropertyParser propertyParser, ResourcePatternResolver resourcePatternResolver)
+    private final boolean dynamicResourceSearchEnabled;
+
+    public TestResourceLoader(IPropertyParser propertyParser, ResourcePatternResolver resourcePatternResolver,
+            boolean dynamicResourceSearchEnabled)
     {
-        resourceLoadParameters = propertyParser.getPropertyValuesByPrefix(VARIABLES_PROPERTY_PREFIX).values().stream()
+        resourceLoadParameters = dynamicResourceSearchEnabled
+                ? propertyParser.getPropertyValuesByPrefix(VARIABLES_PROPERTY_PREFIX).values().stream()
                 .filter(p -> p != null && !p.isEmpty())
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())
+                : List.of();
         this.resourcePatternResolver = resourcePatternResolver;
+        this.dynamicResourceSearchEnabled = dynamicResourceSearchEnabled;
     }
 
     @Override
@@ -66,19 +76,27 @@ public class TestResourceLoader implements ITestResourceLoader
                 locationPattern = CLASSPATH_ALL_URL_PREFIX + normalizedResourceLocation;
                 fullLocationPattern = locationPattern + "**/" + resourcePattern;
             }
-            Resource[] allResources = resourcePatternResolver.getResources(fullLocationPattern);
-            List<URL> resourceUrls = new ArrayList<>(allResources.length);
-            for (Resource resource : allResources)
-            {
-                resourceUrls.add(resource.getURL());
-            }
-            Optional<String> deepestResourcePath = resourceUrls.stream()
-                    .map(URL::toString)
-                    .map(resourceUrl -> StringUtils.substringAfter(resourceUrl, normalizedResourceLocation))
-                    .map(this::generatePathByLoadConfig)
-                    .max(Comparator.comparing(String::length));
+
             StringBuilder resourcePatternBuilder = new StringBuilder(locationPattern);
-            deepestResourcePath.ifPresent(resourcePatternBuilder::append);
+            if (dynamicResourceSearchEnabled && !resourceLoadParameters.isEmpty())
+            {
+                LOGGER.warn("Resource loading using dynamic configuration via \"bdd.resource-loader.<name>\" "
+                        + "properties is deprecated and will be removed in VIVIDUS 0.7.0. To disable the feature "
+                        + "use property \"engine.dynamic-resource-search-enabled\" with \"false\" value.");
+
+                Resource[] allResources = resourcePatternResolver.getResources(fullLocationPattern);
+                List<URL> resourceUrls = new ArrayList<>(allResources.length);
+                for (Resource resource : allResources)
+                {
+                    resourceUrls.add(resource.getURL());
+                }
+                Optional<String> deepestResourcePath = resourceUrls.stream()
+                        .map(URL::toString)
+                        .map(resourceUrl -> StringUtils.substringAfter(resourceUrl, normalizedResourceLocation))
+                        .map(this::generatePathByLoadConfig)
+                        .max(Comparator.comparing(String::length));
+                deepestResourcePath.ifPresent(resourcePatternBuilder::append);
+            }
             String baseResourcePattern = resourcePatternBuilder.toString();
             return resourcePatternResolver.getResources(baseResourcePattern + resourcePattern);
         }

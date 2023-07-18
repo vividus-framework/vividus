@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,28 @@
 
 package org.vividus.resource;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.startsWith;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.core.io.support.ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +47,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.util.property.IPropertyParser;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class TestResourceLoaderTests
 {
     private static final String STORY_LOCATION = "story/any/dir";
@@ -54,6 +64,11 @@ class TestResourceLoaderTests
 
     private static final String BRANDED_FULL_PATH = "file:/src/resources/story/bvt/vividus/bvt.story";
 
+    private static final String TABLE_PATH = "file:///C:/Users/test/";
+    private static final String TABLE_NAME = "temp.table";
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(TestResourceLoader.class);
+
     @Mock private ResourcePatternResolver resourcePatternResolver;
 
     private TestResourceLoader testResourceLoader;
@@ -62,7 +77,7 @@ class TestResourceLoaderTests
     {
         var propertyParser = mock(IPropertyParser.class);
         when(propertyParser.getPropertyValuesByPrefix("bdd.resource-loader.")).thenReturn(props);
-        testResourceLoader = new TestResourceLoader(propertyParser, resourcePatternResolver);
+        testResourceLoader = new TestResourceLoader(propertyParser, resourcePatternResolver, true);
     }
 
     private Resource[] mockResources(String... urls) throws IOException
@@ -71,7 +86,7 @@ class TestResourceLoaderTests
         for (int i = 0; i < urls.length; i++)
         {
             Resource resource = mock(Resource.class);
-            when(resource.getURL()).thenReturn(new URL(urls[i]));
+            lenient().when(resource.getURL()).thenReturn(new URL(urls[i]));
             allResources[i] = resource;
         }
         return allResources;
@@ -87,14 +102,32 @@ class TestResourceLoaderTests
     @Test
     void testGetFileResources() throws IOException
     {
-        var path = "file:///C:/Users/test/";
-        var fileName = "temp.table";
         initLoader(Map.of(BRAND_KEY, BRAND_VALUE));
         Resource[] allResources = mockResources("file:///C:/Users/test/vividus/ca/temp.table");
-        when(resourcePatternResolver.getResources(path + fileName)).thenReturn(allResources);
+        when(resourcePatternResolver.getResources(TABLE_PATH + TABLE_NAME)).thenReturn(allResources);
 
-        var actualResources = testResourceLoader.getResources(path, fileName);
+        var actualResources = testResourceLoader.getResources(TABLE_PATH, TABLE_NAME);
         assertArrayEquals(allResources, actualResources);
+        String warnMessage = "Resource loading using dynamic configuration via \"bdd.resource-loader.<name>\" "
+                + "properties is deprecated and will be removed in VIVIDUS 0.7.0. To disable the feature use "
+                + "property \"engine.dynamic-resource-search-enabled\" with \"false\" value.";
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(warnMessage))));
+    }
+
+    @Test
+    void testGetFileResourcesWithDisabledResourceLoaderConfiguration() throws IOException
+    {
+        var propertyParser = mock(IPropertyParser.class);
+        testResourceLoader = new TestResourceLoader(propertyParser, resourcePatternResolver, false);
+        var resource = mock(Resource.class);
+        Resource[] expectedResources = new Resource[] { resource };
+        when(resourcePatternResolver.getResources(TABLE_PATH + TABLE_NAME)).thenReturn(expectedResources);
+
+        var actualResources = testResourceLoader.getResources(TABLE_PATH, TABLE_NAME);
+        assertArrayEquals(expectedResources, actualResources);
+        verifyNoInteractions(propertyParser);
+        verifyNoInteractions(resource);
+        assertThat(logger.getLoggingEvents(), is(List.of()));
     }
 
     @Test
@@ -137,7 +170,7 @@ class TestResourceLoaderTests
     @Test
     void testGetResourcesThrowsExceptionAtGettingUri() throws IOException
     {
-        initLoader(Map.of());
+        initLoader(Map.of(BRAND_KEY, BRAND_VALUE));
         IOException ioException = new IOException();
         Resource resource = when(mock(Resource.class).getURL()).thenThrow(ioException).getMock();
         when(resourcePatternResolver.getResources(startsWith(CLASSPATH_ALL_URL_PREFIX))).thenReturn(
@@ -208,6 +241,7 @@ class TestResourceLoaderTests
                 "file:/src/resources/story/bvt/vividus/super.story",
                 "file:/src/resources/story/bvt/sit.story");
         testSingleResourceRetrieval("");
+        assertThat(logger.getLoggingEvents(), is(List.of()));
     }
 
     private void testSingleResourceRetrieval(String dynamicPathPart) throws IOException
