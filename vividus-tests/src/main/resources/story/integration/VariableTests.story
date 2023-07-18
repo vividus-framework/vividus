@@ -17,9 +17,6 @@ Then `${scope-priority-check}` is equal to `should be batch`
 Scenario: Validate variable initialization
 Given I initialize scenario variable `java` with value `NIO`
 Then `${java}` is equal to `NIO`
-!-- Deprecated
-When I initialize the scenario variable `java` with value `IO`
-Then `${java}` is equal to `IO`
 
 Scenario: Verify step for saving examples table to variable as list of maps
 When I initialize SCENARIO variable `testMap` with values:
