@@ -139,7 +139,7 @@ Chrome allows to emulate view on mobile devices using https://developer.chrome.c
 +
 [source, properties]
 ----
-web.driver.CHROME.mobile-emulation.device-name=DEVICE_NAME
+web.driver.chrome.mobile-emulation.device-name=DEVICE_NAME
 ----
 Available for emulation devices you can find in the https://developer.chrome.com/docs/devtools/device-mode/#device[Dimensions list] in chrome.
 
@@ -149,8 +149,8 @@ In case you need to use https://developer.chrome.com/docs/devtools/device-mode/#
 +
 [source, properties]
 ----
-web.driver.CHROME.mobile-emulation.width=1440
-web.driver.CHROME.mobile-emulation.height=900
+web.driver.chrome.mobile-emulation.width=1440
+web.driver.chrome.mobile-emulation.height=900
 ----
 
 === Docker

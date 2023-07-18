@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public class ApplicationSteps
     /**
      * Starts Electron application by creation of chrome driver session;
      * Please mind that you should pass path to an executable via property:
-     * <br> <b>web.driver.CHROME.binary-path</b>
+     * <br> <b>web.driver.chrome.binary-path</b>
      */
     @Given("I start electron application")
     public void startApplication()

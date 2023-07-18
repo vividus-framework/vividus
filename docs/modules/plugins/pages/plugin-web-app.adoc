@@ -48,9 +48,9 @@ a|The command line (CLI) arguments to use when starting browser.
 
 `<browser-name>` is one of the browsers supporting CLI arguments:
 
-* https://peter.sh/experiments/chromium-command-line-switches/[`CHROME`]
-* https://www-archive.mozilla.org/docs/command-line-args/[`FIREFOX`],
-* https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)?redirectedfrom=MSDN/[`IEXPLORE`].
+* https://peter.sh/experiments/chromium-command-line-switches/[`chrome`]
+* https://www-archive.mozilla.org/docs/command-line-args/[`firefox`],
+* https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)?redirectedfrom=MSDN/[`iexplore`].
 
 |`web-application.sticky-header-size-percentage`
 |header size as a viewport size percent
@@ -67,7 +67,7 @@ Here is an example how to configure third-party cookies behaviour.
 .Add the following property to allow all cookies
 [source,properties]
 ----
-web.driver.CHROME.experimental-options={"prefs": {"profile": {"cookie_controls_mode": 0}}}
+web.driver.chrome.experimental-options={"prefs": {"profile": {"cookie_controls_mode": 0}}}
 ----
 The allowed values for the preference from the example are:
 
