@@ -33,7 +33,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -83,14 +82,17 @@ class WebDriverFactoryTests
     private static final String TRUE = "true";
     private static final String KEY2 = "key2";
     private static final String KEY1 = "key1";
-    private static final String BINARY_PATH_PROPERTY_FORMAT = "web.driver.%s.binary-path";
-    private static final String COMMAND_LINE_ARGUMENTS_PROPERTY_FORMAT = "web.driver.%s.command-line-arguments";
-    private static final String EXPERIMENTAL_OPTIONS_PROPERTY_FORMAT = "web.driver.%s.experimental-options";
+    private static final String PROPERTY_FORMAT = "web.driver.%s.%s";
+    private static final String BINARY_PATH = "binary-path";
+    private static final String COMMAND_LINE_ARGUMENTS = "command-line-arguments";
+    private static final String EXPERIMENTAL_OPTIONS = "experimental-options";
     private static final String CLI_ARGS_NOT_SUPPORTED = "Configuring of command-line-arguments is not supported for ";
     private static final String PATH = "testPath";
     private static final String ARG_1 = "--arg1";
     private static final String ARG_2 = "--arg2";
     private static final String ARGS = ARG_1 + " " + ARG_2;
+    private static final String CHROME_BROWSER_NAME = "chrome";
+    private static final String FIREFOX_BROWSER_NAME = "firefox";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractWebDriverFactory.class);
 
@@ -130,9 +132,9 @@ class WebDriverFactoryTests
             Boolean acceptsInsecureCerts) throws IllegalAccessException
     {
         mockCapabilities((HasCapabilities) driver);
-        WebDriverType webDriverType = mock(WebDriverType.class);
+        WebDriverType webDriverType = mock();
         webDriverFactory.setWebDriverType(webDriverType);
-        WebDriverConfiguration configuration = mock(WebDriverConfiguration.class);
+        WebDriverConfiguration configuration = mock();
         Map<String, Object> capabilities = Map.of(KEY1, TRUE, KEY2, FALSE);
         when(propertyParser.getPropertyValuesTreeByPrefix(SELENIUM_CAPABILITIES)).thenReturn(capabilities);
         when(proxy.isStarted()).thenReturn(proxyStarted);
@@ -159,10 +161,10 @@ class WebDriverFactoryTests
     {
         mockCapabilities((HasCapabilities) driver);
         WebDriverConfiguration configuration = new WebDriverConfiguration();
-        WebDriverType webDriverType = mock(WebDriverType.class);
+        WebDriverType webDriverType = mock();
         webDriverFactory.setWebDriverType(webDriverType);
         injectConfigurations(webDriverType, configuration);
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
+        DesiredCapabilities desiredCapabilities = mock();
         when(webDriverType.getWebDriver(new DesiredCapabilities(), configuration)).thenReturn(driver);
         Timeouts timeouts = mockTimeouts(driver);
         assertEquals(driver, ((WrapsDriver) webDriverFactory.getWebDriver(desiredCapabilities)).getWrappedDriver());
@@ -174,14 +176,15 @@ class WebDriverFactoryTests
     void testGetWebDriverWithWebDriverTypeAndBinaryPathConfiguration()
     {
         mockCapabilities((HasCapabilities) driver);
-        WebDriverType webDriverType = mock(WebDriverType.class);
+        WebDriverType webDriverType = mock();
+        when(webDriverType.toString()).thenReturn(WebDriverType.EDGE.toString());
         when(webDriverType.isBinaryPathSupported()).thenReturn(Boolean.TRUE);
         webDriverFactory.setWebDriverType(webDriverType);
-        lenient().when(propertyParser.getPropertyValue("web.driver." + webDriverType + ".driver-executable-path"))
+        String browserName = "edge";
+        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, browserName, "driver-executable-path"))
                 .thenReturn(PATH);
-        lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
-                .thenReturn(PATH);
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
+        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, browserName, BINARY_PATH)).thenReturn(PATH);
+        DesiredCapabilities desiredCapabilities = mock();
         when(webDriverType.getWebDriver(eq(new DesiredCapabilities()),
                 argThat(config -> Optional.of(PATH).equals(config.getBinaryPath())
                         && Optional.of(PATH).equals(config.getDriverExecutablePath())))).thenReturn(driver);
@@ -196,15 +199,15 @@ class WebDriverFactoryTests
     void testGetWebDriverWithWebDriverTypeAndCommandLineArgumentsConfiguration()
     {
         mockCapabilities((HasCapabilities) driver);
-        WebDriverType webDriverType = mock(WebDriverType.class);
+        WebDriverType webDriverType = mock();
+        when(webDriverType.toString()).thenReturn(WebDriverType.FIREFOX.toString());
         when(webDriverType.isCommandLineArgumentsSupported()).thenReturn(Boolean.TRUE);
         webDriverFactory.setWebDriverType(webDriverType);
-        lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
-                .thenReturn(null);
-        lenient().when(
-                propertyParser.getPropertyValue(String.format(COMMAND_LINE_ARGUMENTS_PROPERTY_FORMAT, webDriverType)))
+        String browserName = FIREFOX_BROWSER_NAME;
+        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, browserName, BINARY_PATH)).thenReturn(null);
+        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, browserName, COMMAND_LINE_ARGUMENTS))
                 .thenReturn(ARGS);
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
+        DesiredCapabilities desiredCapabilities = mock();
         when(webDriverType.getWebDriver(eq(new DesiredCapabilities()),
                 argThat(config -> Arrays.equals(new String[] { ARG_1, ARG_2 }, config.getCommandLineArguments()))))
                 .thenReturn(driver);
@@ -219,14 +222,17 @@ class WebDriverFactoryTests
     void testGetWebDriverWithCommandLineArgumentsOverride()
     {
         mockCapabilities((HasCapabilities) driver);
-        WebDriverType webDriverType = mock(WebDriverType.class);
+        WebDriverType webDriverType = mock();
+        when(webDriverType.toString()).thenReturn(WebDriverType.CHROME.toString());
         when(webDriverType.isCommandLineArgumentsSupported()).thenReturn(Boolean.TRUE);
         webDriverFactory.setWebDriverType(webDriverType);
-        lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
+        lenient().when(
+                        propertyParser.getPropertyValue(String.format(PROPERTY_FORMAT, CHROME_BROWSER_NAME,
+                                BINARY_PATH)))
                 .thenReturn(null);
         when(webDriverStartContext.get(WebDriverStartParameters.COMMAND_LINE_ARGUMENTS))
                 .thenReturn(ARGS);
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
+        DesiredCapabilities desiredCapabilities = mock();
         when(webDriverType.getWebDriver(eq(new DesiredCapabilities()),
                 argThat(config -> Arrays.equals(new String[] { ARG_1, ARG_2 }, config.getCommandLineArguments()))))
                 .thenReturn(driver);
@@ -240,13 +246,14 @@ class WebDriverFactoryTests
     @Test
     void testGetWebDriverWithCommandLineArgumentsOverrideNotSupported()
     {
-        WebDriverType webDriverType = mock(WebDriverType.class);
+        WebDriverType webDriverType = mock();
+        when(webDriverType.toString()).thenReturn(WebDriverType.CHROME.toString());
         webDriverFactory.setWebDriverType(webDriverType);
         when(webDriverType.isCommandLineArgumentsSupported()).thenReturn(Boolean.FALSE);
-        lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
-                .thenReturn(null);
+        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, BINARY_PATH)).thenReturn(
+                null);
         when(webDriverStartContext.get(WebDriverStartParameters.COMMAND_LINE_ARGUMENTS)).thenReturn(ARG_1);
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
+        DesiredCapabilities desiredCapabilities = mock();
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
             () -> webDriverFactory.getWebDriver(desiredCapabilities));
         assertEquals(CLI_ARGS_NOT_SUPPORTED + webDriverType, exception.getMessage());
@@ -256,14 +263,14 @@ class WebDriverFactoryTests
     void testGetWebDriverWithWebDriverTypeAndExperimentalOptionsConfiguration()
     {
         mockCapabilities((HasCapabilities) driver);
-        WebDriverType webDriverType = mock(WebDriverType.class);
+        WebDriverType webDriverType = mock();
+        when(webDriverType.toString()).thenReturn(WebDriverType.CHROME.toString());
         webDriverFactory.setWebDriverType(webDriverType);
-        lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
-                .thenReturn(null);
-        lenient().when(
-                propertyParser.getPropertyValue(String.format(EXPERIMENTAL_OPTIONS_PROPERTY_FORMAT, webDriverType)))
+        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, BINARY_PATH)).thenReturn(
+                null);
+        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, EXPERIMENTAL_OPTIONS))
                 .thenReturn("{\"mobileEmulation\": {\"deviceName\": \"iPhone 8\"}}");
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
+        DesiredCapabilities desiredCapabilities = mock();
         when(webDriverType.getWebDriver(eq(new DesiredCapabilities()),
                 argThat(config ->  Map.of("mobileEmulation", Map.of("deviceName", "iPhone 8"))
                         .equals(config.getExperimentalOptions())))).thenReturn(driver);
@@ -277,12 +284,12 @@ class WebDriverFactoryTests
     @Test
     void testGetWebDriverWithWebDriverTypeAndInvalidBinaryPathConfiguration()
     {
-        WebDriverType webDriverType = mock(WebDriverType.class);
+        WebDriverType webDriverType = mock();
+        when(webDriverType.toString()).thenReturn(WebDriverType.OPERA.toString());
         webDriverFactory.setWebDriverType(webDriverType);
         when(webDriverType.isBinaryPathSupported()).thenReturn(Boolean.FALSE);
-        when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType))).thenReturn(
-                PATH);
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
+        when(propertyParser.getPropertyValue(PROPERTY_FORMAT, "opera", BINARY_PATH)).thenReturn(PATH);
+        DesiredCapabilities desiredCapabilities = mock();
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
             () -> webDriverFactory.getWebDriver(desiredCapabilities));
         assertEquals("Configuring of binary-path is not supported for " + webDriverType, exception.getMessage());
@@ -291,22 +298,22 @@ class WebDriverFactoryTests
     @Test
     void testGetWebDriverWithWebDriverTypeAndInvalidCommandLineArgumentsConfiguration()
     {
-        WebDriverType webDriverType = mock(WebDriverType.class);
+        WebDriverType webDriverType = mock();
+        when(webDriverType.toString()).thenReturn(WebDriverType.CHROME.toString());
         webDriverFactory.setWebDriverType(webDriverType);
         when(webDriverType.isCommandLineArgumentsSupported()).thenReturn(Boolean.FALSE);
-        lenient().when(propertyParser.getPropertyValue(String.format(BINARY_PATH_PROPERTY_FORMAT, webDriverType)))
-                .thenReturn(null);
-        lenient().when(
-                propertyParser.getPropertyValue(String.format(COMMAND_LINE_ARGUMENTS_PROPERTY_FORMAT, webDriverType)))
+        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, BINARY_PATH)).thenReturn(
+                null);
+        lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, COMMAND_LINE_ARGUMENTS))
                 .thenReturn(ARG_1);
-        DesiredCapabilities desiredCapabilities = mock(DesiredCapabilities.class);
+        DesiredCapabilities desiredCapabilities = mock();
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
             () -> webDriverFactory.getWebDriver(desiredCapabilities));
         assertEquals(CLI_ARGS_NOT_SUPPORTED + webDriverType, exception.getMessage());
     }
 
     @Test
-    void testGetRemoteWebDriver() throws Exception
+    void testGetRemoteWebDriver()
     {
         mockCapabilities(remoteWebDriver);
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
@@ -321,7 +328,6 @@ class WebDriverFactoryTests
     @ParameterizedTest
     @CsvSource({"chrome, true", "internet explorer,", "SAFARI,"})
     void shouldSetAcceptInsecureCertsForSupportingBrowsers(String type, Boolean acceptsInsecureCerts)
-            throws MalformedURLException
     {
         mockCapabilities(remoteWebDriver);
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
@@ -341,7 +347,7 @@ class WebDriverFactoryTests
 
     @Test
     @SuppressWarnings("unchecked")
-    void testGetRemoteWebDriverFirefoxDriver() throws MalformedURLException
+    void testGetRemoteWebDriverFirefoxDriver()
     {
         mockCapabilities(remoteWebDriver);
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities(new FirefoxOptions());
@@ -350,7 +356,7 @@ class WebDriverFactoryTests
             Map<String, Object> options = (Map<String, Object>) caps.getCapability(FirefoxOptions.FIREFOX_OPTIONS);
             Map<String, Object> prefs = (Map<String, Object>) options.get("prefs");
             return "about:blank".equals(prefs.get("startup.homepage_welcome_url.additional"))
-                    && "firefox".equals(caps.getBrowserName());
+                    && FIREFOX_BROWSER_NAME.equals(caps.getBrowserName());
         }))).thenReturn(remoteWebDriver);
         Timeouts timeouts = mockTimeouts(remoteWebDriver);
         assertEquals(remoteWebDriver,
@@ -366,7 +372,7 @@ class WebDriverFactoryTests
     }
 
     @Test
-    void testGetRemoteWebDriverMarionetteDriver() throws Exception
+    void testGetRemoteWebDriverMarionetteDriver()
     {
         mockCapabilities(remoteWebDriver);
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
@@ -381,7 +387,7 @@ class WebDriverFactoryTests
     }
 
     @Test
-    void testGetRemoteWebDriverIEDriver() throws MalformedURLException
+    void testGetRemoteWebDriverIEDriver()
     {
         mockCapabilities(remoteWebDriver);
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
@@ -397,26 +403,26 @@ class WebDriverFactoryTests
     }
 
     @Test
-    void testGetRemoteWebDriverIsChromeWithAdditionalOptions() throws Exception
+    void testGetRemoteWebDriverIsChromeWithAdditionalOptions()
     {
         String args = "disable-blink-features=BlockCredentialedSubresources";
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments(args);
         chromeOptions.setExperimentalOption("w3c", Boolean.TRUE);
-        lenient().doReturn(args).when(propertyParser).getPropertyValue(
-                String.format(COMMAND_LINE_ARGUMENTS_PROPERTY_FORMAT, WebDriverType.CHROME));
-        lenient().doReturn("{\"w3c\":true}").when(propertyParser).getPropertyValue(
-                String.format(EXPERIMENTAL_OPTIONS_PROPERTY_FORMAT, WebDriverType.CHROME));
+        lenient().doReturn(args).when(propertyParser).getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME,
+                COMMAND_LINE_ARGUMENTS);
+        lenient().doReturn("{\"w3c\":true}").when(propertyParser).getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME,
+                EXPERIMENTAL_OPTIONS);
         testGetRemoteWebDriverIsChrome(chromeOptions);
     }
 
     @Test
-    void testGetRemoteWebDriverIsChromeWithoutAdditionalOptions() throws Exception
+    void testGetRemoteWebDriverIsChromeWithoutAdditionalOptions()
     {
         testGetRemoteWebDriverIsChrome(new ChromeOptions());
     }
 
-    private void testGetRemoteWebDriverIsChrome(ChromeOptions chromeOptions) throws MalformedURLException
+    private void testGetRemoteWebDriverIsChrome(ChromeOptions chromeOptions)
     {
         mockCapabilities(remoteWebDriver);
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
@@ -432,7 +438,7 @@ class WebDriverFactoryTests
 
     private static void mockCapabilities(HasCapabilities hasCapabilities)
     {
-        Capabilities capabilities = mock(Capabilities.class);
+        Capabilities capabilities = mock();
         when(hasCapabilities.getCapabilities()).thenReturn(capabilities);
         when(capabilities.asMap()).thenReturn(CAPS);
     }
@@ -451,9 +457,9 @@ class WebDriverFactoryTests
 
     private static Timeouts mockTimeouts(WebDriver webDriver)
     {
-        Options options = mock(Options.class);
+        Options options = mock();
         when(webDriver.manage()).thenReturn(options);
-        Timeouts timeouts = mock(Timeouts.class);
+        Timeouts timeouts = mock();
         when(options.timeouts()).thenReturn(timeouts);
         return timeouts;
     }
