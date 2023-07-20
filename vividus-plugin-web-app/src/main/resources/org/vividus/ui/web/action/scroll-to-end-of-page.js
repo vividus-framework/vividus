@@ -4,7 +4,7 @@ var exit = arguments[arguments.length-1];
     current = window.innerHeight + Math.round(window.scrollY);
     if((bottom - current) > 0) { 
         window.scrollTo(0, bottom);
-        setTimeout('scrollToEndOfPage()', 40);
+        setTimeout('scrollToEndOfPage()', 500);
     } else {
         exit();
     }
