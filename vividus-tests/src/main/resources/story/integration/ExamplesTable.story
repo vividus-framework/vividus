@@ -33,3 +33,8 @@ Then `<<x>>` is equal to `hello`
 Examples:
 |x   |xy.z |
 |xy.z|hello|
+
+Scenario: Load ExamplesTable with user's resource loader configuration
+Then `<localeBasedVar>` is equal to `na`
+Examples:
+/data/tables/locales/locale-based.table
