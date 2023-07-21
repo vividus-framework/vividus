@@ -34,7 +34,9 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -42,8 +44,10 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.protocol.RedirectLocations;
+import org.apache.hc.core5.http.HttpHost;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,6 +56,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptException;
@@ -289,35 +294,49 @@ class PageStepsTests
     @Test
     void testOpenMainApplicationPageRedirect() throws IOException
     {
-        mockPageRedirect(URL, HTTP_EXAMPLE_COM);
+        mockPageRedirect(URL, URL, HTTP_EXAMPLE_COM);
         pageSteps.openMainApplicationPage();
         verify(navigateActions).navigateTo(URI.create(URL));
         verifyNoMoreInteractions(navigateActions);
     }
 
     @Test
-    void testOpenMainApplicationPageRedirectSameHost() throws IOException
+    void testOpenMainApplicationPageRedirectSameHost() throws IOException, URISyntaxException
     {
+        String httpExampleComWithUserInfo = "http://user:password@example.com";
         WebApplicationListener webApplicationListener1 = mock();
         when(webApplicationListener1.onLoad()).thenReturn(false);
         webApplicationListeners.add(webApplicationListener1);
         WebApplicationListener webApplicationListener2 = mock();
         when(webApplicationListener2.onLoad()).thenReturn(false);
         webApplicationListeners.add(webApplicationListener2);
-        mockPageRedirect(HTTP_EXAMPLE_COM, "https://example.com");
+        mockPageRedirect(httpExampleComWithUserInfo, HTTP_EXAMPLE_COM, "https://example.com");
         when(webApplicationConfiguration.getBasicAuthUser()).thenReturn("user:password");
-        pageSteps.openMainApplicationPage();
+        HttpHost expectedHost = HttpHost.create(HTTP_EXAMPLE_COM);
+        var contextBuilder = mock(ContextBuilder.class);
+
+        try (MockedStatic<ContextBuilder> contextBuilderStatic = Mockito.mockStatic(ContextBuilder.class))
+        {
+            contextBuilderStatic.when(ContextBuilder::create).thenReturn(contextBuilder);
+            when(contextBuilder.preemptiveBasicAuth(argThat(expectedHost::equals),
+                    argThat(credentials -> credentials.getUserPrincipal().getName().equals("user")
+                            && Arrays.equals(credentials.getPassword(), "password".toCharArray()))))
+                                    .thenReturn(contextBuilder);
+            when(contextBuilder.build()).thenReturn(new HttpClientContext());
+            pageSteps.openMainApplicationPage();
+        }
         verify(navigateActions).navigateTo(URI.create("https://user:password@example.com"));
         verifyNoMoreInteractions(navigateActions);
     }
 
-    private void mockPageRedirect(String mainPageUrl, String redirectPageUrl) throws IOException
+    private void mockPageRedirect(String mainPageUrl, String expectedHeadUrl, String redirectPageUrl) throws IOException
     {
         pageSteps.setKeepUserInfoForProtocolRedirects(true);
         when(webApplicationConfiguration.getAuthenticationMode()).thenReturn(AuthenticationMode.URL);
         URI mainPage = URI.create(mainPageUrl);
+        URI requestUrl = URI.create(expectedHeadUrl);
         URI redirectPage = URI.create(redirectPageUrl);
-        when(httpClient.doHttpHead(eq(mainPage), argThat(context ->
+        when(httpClient.doHttpHead(eq(requestUrl), argThat(context ->
         {
             RedirectLocations redirectLocations = new RedirectLocations();
             redirectLocations.add(redirectPage);
