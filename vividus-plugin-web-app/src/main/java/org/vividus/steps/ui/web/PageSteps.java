@@ -26,7 +26,10 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.hc.client5.http.ContextBuilder;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpHost;
 import org.hamcrest.Matchers;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
@@ -50,6 +53,7 @@ import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.ui.web.listener.WebApplicationListener;
 import org.vividus.util.UriUtils;
+import org.vividus.util.UriUtils.UserInfo;
 
 @TakeScreenshotOnFailure
 public class PageSteps
@@ -331,8 +335,19 @@ public class PageSteps
         {
             try
             {
-                HttpClientContext context = HttpClientContext.create();
-                httpClient.doHttpHead(pageUrl, context);
+                URI pageUriToCheck = pageUrl;
+                UserInfo userInfo = UriUtils.getUserInfo(pageUriToCheck);
+                ContextBuilder contextBuilder = ContextBuilder.create();
+                if (userInfo != null)
+                {
+                    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(userInfo.getUser(),
+                            userInfo.getPassword().toCharArray());
+                    HttpHost host = HttpHost.create(pageUriToCheck);
+                    contextBuilder = contextBuilder.preemptiveBasicAuth(host, credentials);
+                    pageUriToCheck = UriUtils.removeUserInfo(pageUriToCheck);
+                }
+                HttpClientContext context = contextBuilder.build();
+                httpClient.doHttpHead(pageUriToCheck, context);
                 List<URI> redirectLocations = context.getRedirectLocations().getAll();
                 if (!redirectLocations.isEmpty())
                 {
