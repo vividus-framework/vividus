@@ -2,16 +2,20 @@ project.description = 'VIVIDUS Allure report adaptor'
 
 nohttp.source.excludes += '**/webjars/**'
 
+ext.allureReportVersion = '2.23.1'
+
 dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-reporter')
     implementation project(':vividus-util')
 
-    implementation(group: 'io.qameta.allure', name: 'allure-java-commons', version: versions.allure)
-    implementation(group: 'io.qameta.allure', name: 'allure-generator', version: versions.allure)
-    implementation(group: 'io.qameta.allure', name: 'allure-plugin-api', version: versions.allure)
-    implementation(group: 'io.qameta.allure.plugins', name: 'behaviors-plugin', version: versions.allure)
+    implementation(group: 'io.qameta.allure', name: 'allure-generator', version: "${allureReportVersion}")
+    implementation(group: 'io.qameta.allure', name: 'allure-plugin-api', version: "${allureReportVersion}")
+    implementation(group: 'io.qameta.allure.plugins', name: 'behaviors-plugin', version: "${allureReportVersion}")
+
+    implementation platform(group: 'io.qameta.allure', name: 'allure-bom', version: '2.23.0')
+    implementation(group: 'io.qameta.allure', name: 'allure-java-commons')
 
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.29')
     implementation(group: 'org.springframework', name: 'spring-core')
