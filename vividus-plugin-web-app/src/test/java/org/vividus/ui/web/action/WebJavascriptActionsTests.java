@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -61,17 +62,13 @@ class WebJavascriptActionsTests
     private static final Map<String, ?> BROWSER_CONFIG = Map.of("userAgent", USER_AGENT_VALUE, "devicePixelRatio",
             DEVICE_PIXEL_RATIO_VALUE);
 
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private IWebDriverManager webDriverManager;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private IWebDriverManager webDriverManager;
 
     @Mock(extraInterfaces = { JavascriptExecutor.class, HasCapabilities.class })
     private WebDriver webDriver;
 
-    @InjectMocks
-    private WebJavascriptActions javascriptActions;
+    @InjectMocks private WebJavascriptActions javascriptActions;
 
     @BeforeEach
     void beforeEach()
@@ -96,11 +93,11 @@ class WebJavascriptActionsTests
     }
 
     @Test
-    void testExecuteAsyncSript()
+    void testExecuteAsyncScript()
     {
-        String script = "asyncScript";
-        String arg1 = "asyncScriptArg1";
-        String arg2 = "asyncScriptArg2";
+        var script = "asyncScript";
+        var arg1 = "asyncScriptArg1";
+        var arg2 = "asyncScriptArg2";
         javascriptActions.executeAsyncScript(script, arg1, arg2);
         verify((JavascriptExecutor) webDriver).executeAsyncScript(script, arg1, arg2);
     }
@@ -108,17 +105,19 @@ class WebJavascriptActionsTests
     @Test
     void testScrollIntoView()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         javascriptActions.scrollIntoView(webElement, true);
         verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollIntoView(arguments[1])", webElement,
                 true);
+        verifyWaitingForScrollFinish();
+        verifyNoMoreInteractions(webDriver);
     }
 
     @Test
     void testScrollElementIntoViewportCenter()
     {
-        WebElement webElement = mock(WebElement.class);
-        var stickyHeaderSize = 111122;
+        var webElement = mock(WebElement.class);
+        var stickyHeaderSize = 111_122;
         javascriptActions.setStickyHeaderSizePercentage(stickyHeaderSize);
         javascriptActions.scrollElementIntoViewportCenter(webElement);
         verify((JavascriptExecutor) webDriver).executeAsyncScript(
@@ -145,7 +144,7 @@ class WebJavascriptActionsTests
     @Test
     void testScrollToEndOf()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         javascriptActions.scrollToEndOf(webElement);
         verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollTop = arguments[0].scrollHeight",
                 webElement);
@@ -154,7 +153,7 @@ class WebJavascriptActionsTests
     @Test
     void testScrollToStartOf()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         javascriptActions.scrollToStartOf(webElement);
         verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollTop = 0", webElement);
     }
@@ -176,8 +175,8 @@ class WebJavascriptActionsTests
     @Test
     void testTriggerEvents()
     {
-        WebElement webElement = mock(WebElement.class);
-        String script = "if(document.createEvent){var evObj = document.createEvent('MouseEvents');"
+        var webElement = mock(WebElement.class);
+        var script = "if(document.createEvent){var evObj = document.createEvent('MouseEvents');"
                 + "evObj.initEvent('click', true, false); arguments[0].dispatchEvent(evObj);}"
                 + " else if(document.createEventObject) { arguments[0].fireEvent('onclick');}";
         javascriptActions.triggerMouseEvents(webElement, "click");
@@ -187,7 +186,7 @@ class WebJavascriptActionsTests
     @Test
     void testClick()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         javascriptActions.click(webElement);
         verify((JavascriptExecutor) webDriver).executeScript("arguments[0].click()", webElement);
     }
@@ -212,7 +211,7 @@ class WebJavascriptActionsTests
     @Test
     void testGetElementTextNotFirefox()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         mockIsFirefox(false);
         when(((JavascriptExecutor) webDriver).executeScript(ELEMENT_INNER_TEXT, webElement)).thenReturn(TEXT);
         assertEquals(TEXT, javascriptActions.getElementText(webElement));
@@ -221,7 +220,7 @@ class WebJavascriptActionsTests
     @Test
     void testGetElementValue()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         when(((JavascriptExecutor) webDriver).executeScript("return arguments[0].value", webElement))
                 .thenReturn(TEXT);
         assertEquals(TEXT, javascriptActions.getElementValue(webElement));
@@ -248,8 +247,8 @@ class WebJavascriptActionsTests
     @Test
     void testGetElementAttributesValues()
     {
-        WebElement webElement = mock(WebElement.class);
-        Map<String, String> attributes = Map.of(TEXT, TEXT);
+        var webElement = mock(WebElement.class);
+        var attributes = Map.of(TEXT, TEXT);
         when(((JavascriptExecutor) webDriver).executeScript(SCRIPT_GET_ELEMENT_ATTRIBUTES, webElement))
                 .thenReturn(attributes);
         assertEquals(javascriptActions.getElementAttributes(webElement), attributes);
@@ -258,11 +257,11 @@ class WebJavascriptActionsTests
     @Test
     void testSetElementTopPosition()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         Long top = 10L;
         when(((JavascriptExecutor) webDriver).executeScript(String.format(SCRIPT_SET_TOP_POSITION, top), webElement))
                 .thenReturn(top);
-        int resultTop = javascriptActions.setElementTopPosition(webElement, top.intValue());
+        var resultTop = javascriptActions.setElementTopPosition(webElement, top.intValue());
         assertEquals(top.intValue(), resultTop);
     }
 
@@ -274,17 +273,17 @@ class WebJavascriptActionsTests
         Long height = 600L;
         map.put("width", width);
         map.put("height", height);
-        String viewportSize = "return {width: Math.max(document.documentElement.clientWidth, window.innerWidth || 0),"
+        var viewportSize = "return {width: Math.max(document.documentElement.clientWidth, window.innerWidth || 0),"
                 + "height: Math.max(document.documentElement.clientHeight, window.innerHeight || 0)}";
         when(((JavascriptExecutor) webDriver).executeScript(viewportSize)).thenReturn(map);
-        Dimension size = javascriptActions.getViewportSize();
+        var size = javascriptActions.getViewportSize();
         assertEquals(new Dimension(width.intValue(), height.intValue()), size);
     }
 
     @Test
     void shouldScrollToTheStartOfWebElement()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         javascriptActions.scrollToLeftOf(webElement);
         verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollLeft=0;", webElement);
     }
@@ -292,7 +291,7 @@ class WebJavascriptActionsTests
     @Test
     void shouldScrollToTheEndOfWebElement()
     {
-        WebElement webElement = mock(WebElement.class);
+        var webElement = mock(WebElement.class);
         javascriptActions.scrollToRightOf(webElement);
         verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollLeft=arguments[0].scrollWidth;",
                 webElement);
@@ -302,17 +301,17 @@ class WebJavascriptActionsTests
     void shouldExecuteScriptWaitingForScrollFinish()
     {
         javascriptActions.waitUntilScrollFinished();
-        verify((JavascriptExecutor) webDriver).executeAsyncScript(
-                ResourceUtils.loadResource(WebJavascriptActionsTests.class, "wait-for-scroll.js"));
+        verifyWaitingForScrollFinish();
+        verifyNoMoreInteractions(webDriver);
     }
 
     @Test
     void shouldStopPageLoadingAndReturnResult()
     {
-        String script =   "let before = document.readyState;"
+        var script =   "let before = document.readyState;"
                         + "window.stop();"
                         + "return {before: before, after: document.readyState};";
-        Map<String, String> result = Map.of("before", "interactive", "after", "complete");
+        var result = Map.of("before", "interactive", "after", "complete");
         when(((JavascriptExecutor) webDriver).executeScript(script)).thenReturn(result);
         assertEquals(result, javascriptActions.stopPageLoading());
     }
@@ -325,5 +324,11 @@ class WebJavascriptActionsTests
     private void mockIsFirefox(boolean firefox)
     {
         when(webDriverManager.isBrowserAnyOf(Browser.FIREFOX)).thenReturn(firefox);
+    }
+
+    private void verifyWaitingForScrollFinish()
+    {
+        verify((JavascriptExecutor) webDriver).executeAsyncScript(
+                ResourceUtils.loadResource(WebJavascriptActions.class, "wait-for-scroll.js"));
     }
 }

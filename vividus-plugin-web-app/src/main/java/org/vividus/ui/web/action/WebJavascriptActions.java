@@ -109,6 +109,7 @@ public class WebJavascriptActions extends JavascriptActions implements WebApplic
     public void scrollIntoView(WebElement webElement, boolean alignedToTheTop)
     {
         executeScript("arguments[0].scrollIntoView(arguments[1])", webElement, alignedToTheTop);
+        waitUntilScrollFinished();
     }
 
     public void scrollElementIntoViewportCenter(WebElement webElement)
