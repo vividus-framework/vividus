@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,9 @@ package org.vividus.ui.web.action.search;
 
 import java.lang.reflect.ParameterizedType;
 
-import javax.inject.Inject;
-
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.vividus.converter.FluentTrimmedEnumConverter;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.IState;
 import org.vividus.ui.action.search.IElementFilterAction;
@@ -31,19 +30,23 @@ public abstract class AbstractStateFilter<T extends Enum<T> & IState> implements
 {
     private final Class<T> enumType;
     private final LocatorType locatorType;
-    @Inject private IWebDriverProvider webDriverProvider;
+    private final IWebDriverProvider webDriverProvider;
+    private final FluentTrimmedEnumConverter fluentTrimmedEnumConverter;
 
     @SuppressWarnings("unchecked")
-    public AbstractStateFilter(LocatorType locatorType)
+    public AbstractStateFilter(LocatorType locatorType, IWebDriverProvider webDriverProvider,
+            FluentTrimmedEnumConverter fluentTrimmedEnumConverter)
     {
         this.locatorType = locatorType;
         this.enumType = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        this.webDriverProvider = webDriverProvider;
+        this.fluentTrimmedEnumConverter = fluentTrimmedEnumConverter;
     }
 
     @Override
     public boolean matches(WebElement element, String stateName)
     {
-        T state = Enum.valueOf(enumType, stateName);
+        IState state = (IState) fluentTrimmedEnumConverter.convertValue(stateName, enumType);
         return matches(state.getExpectedCondition(element));
     }
 

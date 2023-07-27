@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package org.vividus.ui.web.action.search;
 
+import org.vividus.converter.FluentTrimmedEnumConverter;
+import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.State;
 
 public class StateFilter extends AbstractStateFilter<State>
 {
-    public StateFilter()
+    public StateFilter(IWebDriverProvider webDriverProvider, FluentTrimmedEnumConverter fluentTrimmedEnumConverter)
     {
-        super(WebLocatorType.STATE);
+        super(WebLocatorType.STATE, webDriverProvider, fluentTrimmedEnumConverter);
     }
 }
