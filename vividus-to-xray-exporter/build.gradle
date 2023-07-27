@@ -2,7 +2,7 @@ project.description = 'VIVIDUS to Xray exporter'
 
 buildscript {
     ext {
-        springBootVersion = '2.7.13'
+        springBootVersion = '2.7.14'
     }
 
     repositories {
