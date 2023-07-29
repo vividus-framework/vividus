@@ -23,7 +23,7 @@ dependencies {
     implementation(group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0')
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.13.0')
     implementation(group: 'com.github.valfirst', name: 'allure-notifications', version: 'f8fbcfdf2d')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.0')
