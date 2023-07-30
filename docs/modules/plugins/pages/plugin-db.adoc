@@ -286,7 +286,7 @@ jdbc:h2:mem:databaseName
 .build.gradle
 [source,gradle]
 ----
-implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.13.33')
+implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.14.0')
 ----
 
 .environment.properties
