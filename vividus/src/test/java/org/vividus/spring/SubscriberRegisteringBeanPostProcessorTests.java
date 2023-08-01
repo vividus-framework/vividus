@@ -75,11 +75,11 @@ class SubscriberRegisteringBeanPostProcessorTests
         }
     }
 
-    private static class InheritedSubscriber extends Subscriber
+    private static final class InheritedSubscriber extends Subscriber
     {
     }
 
-    private static class NonSubscriber
+    private static final class NonSubscriber
     {
         public void doNothing()
         {

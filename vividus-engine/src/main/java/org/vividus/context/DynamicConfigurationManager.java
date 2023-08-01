@@ -78,7 +78,7 @@ public class DynamicConfigurationManager<T>
         return testContext.get(key, ConfigurationData::new);
     }
 
-    private static class ConfigurationData<T>
+    private static final class ConfigurationData<T>
     {
         private final Map<String, T> dynamicConfigurations = new HashMap<>();
     }

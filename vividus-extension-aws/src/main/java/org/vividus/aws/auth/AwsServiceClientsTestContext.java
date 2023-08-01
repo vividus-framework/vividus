@@ -84,13 +84,13 @@ public class AwsServiceClientsTestContext implements AwsServiceClientsContext
         return testContext.get(AWS_SERVICE_CLIENTS_KEY, ScopedAwsServiceClients::new);
     }
 
-    private static class ScopedAwsServiceClients
+    private static final class ScopedAwsServiceClients
     {
         private final Map<AwsServiceClientScope, AwsServiceClients> clients = new EnumMap<>(
                 AwsServiceClientScope.class);
     }
 
-    private static class AwsServiceClients
+    private static final class AwsServiceClients
     {
         private AWSCredentialsProvider credentialsProvider;
         private final Map<Class<?>, Object> clients = new HashMap<>();

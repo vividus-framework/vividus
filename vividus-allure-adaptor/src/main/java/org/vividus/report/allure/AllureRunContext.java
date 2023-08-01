@@ -150,7 +150,7 @@ public class AllureRunContext implements IAllureRunContext
         return testContext.get(ExecutionStages.class, LinkedList::new);
     }
 
-    private static class ExecutionStages
+    private static final class ExecutionStages
     {
         private StoryExecutionStage storyStage;
         private ScenarioExecutionStage scenarioStage;
