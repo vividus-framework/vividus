@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,11 @@
 
 package org.vividus.ui.web.action;
 
-import java.util.Optional;
-
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.WrapsElement;
-import org.vividus.ui.web.action.AlertActions.Action;
 
 public interface IMouseActions
 {
     ClickResult click(WebElement element);
-
-    ClickResult click(WrapsElement element);
-
-    void moveToAndClick(WebElement element);
-
-    ClickResult clickViaJavascript(WebElement element);
-
-    /**
-     * Clicks on element and process alert with specified action if it occurs
-     * @param element web element to click on
-     * @param defaultAlertAction action to process alert by default
-     * @return ClickResult
-     */
-    ClickResult click(WebElement element, Optional<Action> defaultAlertAction);
 
     void moveToElement(WebElement element);
 

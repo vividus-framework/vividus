@@ -22,13 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -38,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.google.common.eventbus.EventBus;
 
@@ -56,15 +52,12 @@ import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
-import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.AlertActions.Action;
 import org.vividus.ui.web.event.PageLoadEndEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -157,27 +150,6 @@ class MouseActionsTests
     void clickElementNull()
     {
         mouseActions.click((WebElement) null);
-        verifyNoInteractions(webDriverProvider);
-        verifyNoInteractions(uiContext);
-    }
-
-    @Test
-    void clickWrapsElement()
-    {
-        WrapsElement wrapsElement = mock(WrapsElement.class);
-        WebElement webElement = mock(WebElement.class);
-        when(wrapsElement.getWrappedElement()).thenReturn(webElement);
-        MouseActions spy = spy(mouseActions);
-        ClickResult expectedResult = new ClickResult();
-        doReturn(expectedResult).when(spy).click(webElement);
-        ClickResult actualResult = spy.click(wrapsElement);
-        assertEquals(expectedResult, actualResult);
-    }
-
-    @Test
-    void clickWrapsElementNull()
-    {
-        mouseActions.click((WrapsElement) null);
         verifyNoInteractions(webDriverProvider);
         verifyNoInteractions(uiContext);
     }
@@ -301,82 +273,12 @@ class MouseActionsTests
         testClickWithElementNotClickableException();
     }
 
-    @Test
-    void testClickViaJavascript()
-    {
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        WebElement body = mock(WebElement.class);
-        WebDriverEventListener webDriverEventListener = mock(WebDriverEventListener.class);
-        List<WebDriverEventListener> webDriverEventListeners = new ArrayList<>();
-        webDriverEventListeners.add(webDriverEventListener);
-        mouseActions.setWebDriverEventListeners(webDriverEventListeners);
-        when(webDriver.findElement(BODY_XPATH_LOCATOR)).thenReturn(body);
-        ClickResult result = mouseActions.clickViaJavascript(webElement);
-        verify(webDriverEventListener).beforeClickOn(webElement, webDriver);
-        verify(webDriverEventListener).afterClickOn(webElement, webDriver);
-        assertFalse(result.isNewPageLoaded());
-        verify(alertActions).waitForAlert(webDriver);
-        verify(eventBus).post(any(PageLoadEndEvent.class));
-        verifyNoInteractions(uiContext);
-    }
-
-    @Test
-    void shouldNotProcessAlertsAfterClickForElectronApps()
-    {
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        WebElement body = mock(WebElement.class);
-        WebDriverEventListener webDriverEventListener = mock(WebDriverEventListener.class);
-        mouseActions.setWebDriverEventListeners(List.of(webDriverEventListener));
-        when(webDriver.findElement(BODY_XPATH_LOCATOR)).thenReturn(body);
-        when(webDriverManager.isElectronApp()).thenReturn(true);
-        ClickResult result = mouseActions.clickViaJavascript(webElement);
-        verify(webDriverEventListener).beforeClickOn(webElement, webDriver);
-        verify(webDriverEventListener).afterClickOn(webElement, webDriver);
-        assertFalse(result.isNewPageLoaded());
-        verifyNoInteractions(uiContext, alertActions, eventBus);
-    }
-
-    @Test
-    void testClickViaJavascriptNullElement()
-    {
-        ClickResult result = mouseActions.clickViaJavascript(null);
-        assertFalse(result.isClicked());
-        verify(alertActions, never()).waitForAlert(webDriver);
-        verify(eventBus, never()).post(any(PageLoadEndEvent.class));
-        verifyNoInteractions(uiContext);
-    }
-
-    @Test
-    void clickElementWithAcceptAlert()
-    {
-        boolean alertPresent = true;
-        mockBodySearch();
-        when(alertActions.isAlertPresent(webDriver)).thenReturn(alertPresent);
-        ClickResult result = mouseActions.click(webElement, Optional.of(Action.ACCEPT));
-        verifyWebElement(1, alertPresent, false, result);
-    }
-
     private WebElement mockBodySearch()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         WebElement body = mock(WebElement.class);
         when(webDriver.findElement(BODY_XPATH_LOCATOR)).thenReturn(body);
         return body;
-    }
-
-    @Test
-    void shouldNotPerformActionsAtAttemptToClickNullElement()
-    {
-        mouseActions.moveToAndClick(null);
-        verifyNoInteractions(webDriver);
-    }
-
-    @Test
-    void clickInvisibleElement()
-    {
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        mouseActions.moveToAndClick(webElement);
-        verifyActionsWithMove(verify((Interactive) webDriver), createClickActions(0));
     }
 
     @Test

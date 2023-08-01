@@ -16,10 +16,6 @@
 
 package org.vividus.ui.web.action;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import com.google.common.eventbus.EventBus;
@@ -28,14 +24,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.web.action.AlertActions.Action;
 import org.vividus.ui.web.event.PageLoadEndEvent;
 
 public class MouseActions implements IMouseActions
@@ -51,16 +44,9 @@ public class MouseActions implements IMouseActions
     @Inject private IAlertActions alertActions;
     @Inject private EventBus eventBus;
     @Inject private IUiContext uiContext;
-    private List<WebDriverEventListener> webDriverEventListeners;
 
     @Override
     public ClickResult click(WebElement element)
-    {
-        return click(element, Optional.empty());
-    }
-
-    @Override
-    public ClickResult click(WebElement element, Optional<Action> defaultAlertAction)
     {
         ClickResult clickResult = new ClickResult();
         if (element != null)
@@ -71,19 +57,18 @@ public class MouseActions implements IMouseActions
             {
                 javascriptActions.scrollElementIntoViewportCenter(element);
                 element.click();
-                afterClick(clickResult, page, webDriver, defaultAlertAction);
+                afterClick(clickResult, page, webDriver);
             }
             catch (WebDriverException webDriverException)
             {
-                tryToWorkaroundException(element, defaultAlertAction, clickResult, webDriver, page,
-                        webDriverException);
+                tryToWorkaroundException(element, clickResult, webDriver, page, webDriverException);
             }
         }
         return clickResult;
     }
 
-    private void tryToWorkaroundException(WebElement element, Optional<Action> defaultAlertAction,
-            ClickResult clickResult, WebDriver webDriver, WebElement page, WebDriverException webDriverException)
+    private void tryToWorkaroundException(WebElement element, ClickResult clickResult, WebDriver webDriver,
+            WebElement page, WebDriverException webDriverException)
     {
         String message = webDriverException.getMessage();
         if (message.contains("is not clickable at point"))
@@ -98,7 +83,7 @@ public class MouseActions implements IMouseActions
                 {
                     element.click();
                 }
-                afterClick(clickResult, page, webDriver, defaultAlertAction);
+                afterClick(clickResult, page, webDriver);
             }
             catch (WebDriverException e)
             {
@@ -111,7 +96,7 @@ public class MouseActions implements IMouseActions
         }
         else if (message.contains("Timed out waiting for page to load"))
         {
-            afterClick(clickResult, page, webDriver, defaultAlertAction);
+            afterClick(clickResult, page, webDriver);
         }
         else
         {
@@ -119,53 +104,13 @@ public class MouseActions implements IMouseActions
         }
     }
 
-    @Override
-    public ClickResult click(WrapsElement element)
+    private void afterClick(ClickResult clickResult, WebElement page, WebDriver webDriver)
     {
-        if (element != null)
+        if (!webDriverManager.isElectronApp() && !alertActions.isAlertPresent(webDriver))
         {
-            return click(element.getWrappedElement());
-        }
-        return new ClickResult();
-    }
-
-    @Override
-    public void moveToAndClick(WebElement element)
-    {
-        if (element != null)
-        {
-            new Actions(getWebDriver()).moveToElement(element).click().perform();
-        }
-    }
-
-    @Override
-    public ClickResult clickViaJavascript(WebElement element)
-    {
-        ClickResult clickResult = new ClickResult();
-        if (element != null)
-        {
-            WebDriver webDriver = getWebDriver();
-            WebElement page = webDriver.findElement(BODY_XPATH_LOCATOR);
-            webDriverEventListeners.forEach(listener -> listener.beforeClickOn(element, webDriver));
-            javascriptActions.click(element);
-            webDriverEventListeners.forEach(listener -> listener.afterClickOn(element, webDriver));
-            afterClick(clickResult, page, webDriver, Optional.empty());
-        }
-        return clickResult;
-    }
-
-    private void afterClick(ClickResult clickResult, WebElement page, WebDriver webDriver,
-            Optional<Action> defaultAlertAction)
-    {
-        if (!webDriverManager.isElectronApp())
-        {
-            defaultAlertAction.ifPresent(alertActions::processAlert);
-            if (!alertActions.isAlertPresent(webDriver))
-            {
-                waitActions.waitForPageLoad();
-                resetContextIfNeeded(clickResult, page);
-                eventBus.post(new PageLoadEndEvent(clickResult.isNewPageLoaded(), webDriver));
-            }
+            waitActions.waitForPageLoad();
+            resetContextIfNeeded(clickResult, page);
+            eventBus.post(new PageLoadEndEvent(clickResult.isNewPageLoaded(), webDriver));
         }
         clickResult.setClicked(true);
     }
@@ -208,10 +153,5 @@ public class MouseActions implements IMouseActions
     private WebDriver getWebDriver()
     {
         return webDriverProvider.get();
-    }
-
-    public void setWebDriverEventListeners(List<WebDriverEventListener> webDriverEventListeners)
-    {
-        this.webDriverEventListeners = Collections.unmodifiableList(webDriverEventListeners);
     }
 }
