@@ -48,7 +48,6 @@ import org.vividus.ui.screenshot.ScreenshotParameters;
 import pazone.ashot.AShot;
 import pazone.ashot.CuttingDecorator;
 import pazone.ashot.ElementCroppingDecorator;
-import pazone.ashot.ScalingDecorator;
 import pazone.ashot.ShootingStrategy;
 import pazone.ashot.SimpleShootingStrategy;
 import pazone.ashot.coordinates.CoordsProvider;
@@ -73,23 +72,20 @@ class MobileAppAshotFactoryTests
     @ValueSource(strings = { SIMPLE, VIEWPORT })
     void shouldCreateAshotWithMergedConfiguration(String strategyName) throws IllegalAccessException
     {
-        ashotFactory.setDownscale(true);
-        when(mobileAppWebDriverManager.getDpr()).thenReturn(2d);
         ashotFactory.setAppendBottomNavigationBarOnAndroid(true);
         when(mobileAppWebDriverManager.isAndroid()).thenReturn(false);
         var parameters = new ScreenshotParameters();
         parameters.setShootingStrategy(Optional.of(strategyName));
         var aShot = ashotFactory.create(Optional.of(parameters));
         var croppingDecorator = (ElementCroppingDecorator) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
-        var strategy = (ScalingDecorator) FieldUtils.readField(croppingDecorator, SHOOTING_STRATEGY, true);
-        assertInstanceOf(MobileViewportShootingStrategy.class, FieldUtils.readField(strategy, SHOOTING_STRATEGY, true));
+        assertInstanceOf(MobileViewportShootingStrategy.class,
+                FieldUtils.readField(croppingDecorator, SHOOTING_STRATEGY, true));
         assertCoordsProvider(aShot);
     }
 
     @Test
     void shouldCreateAshotWithDefaultConfigurationWithoutBottomNavigationBar() throws IllegalAccessException
     {
-        ashotFactory.setDownscale(false);
         ashotFactory.setAppendBottomNavigationBarOnAndroid(false);
         ashotFactory.setScreenshotShootingStrategy(SIMPLE);
         var aShot = ashotFactory.create(Optional.empty());
@@ -100,7 +96,6 @@ class MobileAppAshotFactoryTests
     @Test
     void shouldCreateAshotWithDefaultConfigurationWithBottomNavigationBarOnAndroid() throws IllegalAccessException
     {
-        ashotFactory.setDownscale(false);
         when(mobileAppWebDriverManager.getStatusBarSize()).thenReturn(2);
         ashotFactory.setAppendBottomNavigationBarOnAndroid(true);
         when(mobileAppWebDriverManager.isAndroid()).thenReturn(true);

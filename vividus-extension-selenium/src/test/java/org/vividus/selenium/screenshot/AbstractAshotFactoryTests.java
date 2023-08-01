@@ -99,11 +99,5 @@ class AbstractAshotFactoryTests
         {
             throw new UnsupportedOperationException();
         }
-
-        @Override
-        protected double getDpr()
-        {
-            throw new UnsupportedOperationException();
-        }
     }
 }

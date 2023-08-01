@@ -48,8 +48,6 @@ public abstract class AbstractAshotFactory<T extends ScreenshotParameters> imple
         return new ElementCroppingDecorator(strategy, screenshotCropper, screenshotParameters.getIgnoreStrategies());
     }
 
-    protected abstract double getDpr();
-
     protected String getScreenshotShootingStrategy()
     {
         return screenshotShootingStrategy;
