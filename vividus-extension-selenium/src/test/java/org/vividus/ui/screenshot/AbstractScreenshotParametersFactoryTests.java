@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ class AbstractScreenshotParametersFactoryTests
         configuration.setElementsToIgnore(Set.of(stepElementLocator));
         configuration.setAreasToIgnore(Set.of(stepAreaLocator));
         configuration.setShootingStrategy(Optional.of(DEFAULT));
-        configuration.setNativeFooterToCut(1);
+        configuration.setCutBottom(1);
 
         var globalElementLocator = mock(Locator.class);
         var globalAreaLocator = mock(Locator.class);
@@ -193,10 +193,10 @@ class AbstractScreenshotParametersFactoryTests
     @Test
     void shouldCreateParametersFromDefaultConfiguration()
     {
-        var nativeFooterToCut = 5;
+        var cutBottom = 5;
 
         factory.setScreenshotConfigurations(
-                new PropertyMappedCollection<>(Map.of(DEFAULT, createConfiguration(nativeFooterToCut))));
+                new PropertyMappedCollection<>(Map.of(DEFAULT, createConfiguration(cutBottom))));
         factory.setShootingStrategy(DEFAULT);
         factory.setIgnoreStrategies(createEmptyIgnores());
 

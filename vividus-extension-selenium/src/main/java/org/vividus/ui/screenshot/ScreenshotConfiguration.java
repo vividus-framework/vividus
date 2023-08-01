@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,35 +27,10 @@ public class ScreenshotConfiguration
     private int cutBottom;
     private int cutLeft;
     private int cutRight;
-    /**
-     * @deprecated use {@link ScreenshotConfiguration#cutTop} instead.
-     */
-    @Deprecated(since = "0.4.16", forRemoval = true)
-    private int nativeFooterToCut;
 
     private Optional<String> shootingStrategy = Optional.empty();
     private Set<Locator> elementsToIgnore = Set.of();
     private Set<Locator> areasToIgnore = Set.of();
-
-    /**
-     * @deprecated use {@link ScreenshotConfiguration#getCutTop()} instead.
-     * @return Native footer to cut.
-     */
-    @Deprecated(since = "0.4.16", forRemoval = true)
-    public int getNativeFooterToCut()
-    {
-        return nativeFooterToCut;
-    }
-
-    /**
-     * @deprecated use {@link ScreenshotConfiguration#setCutTop(int)} instead.
-     * @param nativeFooterToCut The native footer to cut in pixels.
-     */
-    @Deprecated(since = "0.4.16", forRemoval = true)
-    public void setNativeFooterToCut(int nativeFooterToCut)
-    {
-        this.nativeFooterToCut = nativeFooterToCut;
-    }
 
     public int getCutTop()
     {

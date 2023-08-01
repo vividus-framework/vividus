@@ -259,14 +259,6 @@ where:
 |Acceptable values
 |Description
 
-|`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-footer-to-cut`
-|size in pixels
-a|Native footer to cut.
-[WARNING]
-====
-This property is deprecated and will be removed in VIVIDUS 0.6.0. Use `mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-bottom` property instead.
-====
-
 |`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-top`
 |size in pixels
 |The size of top part of the final screenshot to cut.
@@ -301,7 +293,6 @@ The shooting strategy `SIMPLE` is deprecated and will be removed in VIVIDUS 0.6.
 
 [source,gherkin]
 ----
-mobile.screenshot.strategy.bombaysapphire.native-footer-to-cut=100
 mobile.screenshot.strategy.custom.cut-top=100
 mobile.screenshot.strategy.custom.cut-left=100
 mobile.screenshot.strategy.custom.cut-right=100

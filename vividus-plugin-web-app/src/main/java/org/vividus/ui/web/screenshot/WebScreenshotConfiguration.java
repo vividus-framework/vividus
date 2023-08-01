@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.vividus.ui.screenshot.ScreenshotConfiguration;
 public class WebScreenshotConfiguration extends ScreenshotConfiguration
 {
     private int nativeHeaderToCut;
+    private int nativeFooterToCut;
     private int webHeaderToCut;
     private int webFooterToCut;
     private Optional<Locator> scrollableElement = Optional.empty();
@@ -41,6 +42,16 @@ public class WebScreenshotConfiguration extends ScreenshotConfiguration
     public void setWebHeaderToCut(int webHeaderToCut)
     {
         this.webHeaderToCut = webHeaderToCut;
+    }
+
+    public int getNativeFooterToCut()
+    {
+        return nativeFooterToCut;
+    }
+
+    public void setNativeFooterToCut(int nativeFooterToCut)
+    {
+        this.nativeFooterToCut = nativeFooterToCut;
     }
 
     public int getWebFooterToCut()
