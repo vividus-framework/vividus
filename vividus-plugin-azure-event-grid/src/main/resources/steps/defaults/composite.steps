@@ -1,3 +1,0 @@
-Composite: When I collect system topics in resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`
-!-- DEPRECATED: 0.6.0, When I get Azure resource with identifier `resourceGroups/%1$s/providers/Microsoft.EventGrid/systemTopics` using API version `2021-12-01` and save it to %2$s variable `%3$s`
-When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.EventGrid/systemTopics` using API version `2021-12-01` and save it to <scopes> variable `<variableName>`

@@ -1,3 +1,0 @@
-Composite: When I retrieve properties of key vault with name `$keyVaultName` from resource group `$resourceGroupName` and save them as JSON to $scopes variable `$variableName`
-!-- DEPRECATED: 0.6.0, When I get Azure resource with identifier `resourceGroups/%2$s/providers/Microsoft.KeyVault/vaults/%1$s` using API version `2021-10-01` and save it to %3$s variable `%4$s`
-When I get Azure resource with identifier `resourceGroups/<resourceGroupName>/providers/Microsoft.KeyVault/vaults/<keyVaultName>` using API version `2021-10-01` and save it to <scopes> variable `<variableName>`

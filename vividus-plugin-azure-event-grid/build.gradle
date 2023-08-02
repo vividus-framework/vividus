@@ -5,7 +5,6 @@ dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-extension-azure')
     implementation project(':vividus-soft-assert')
-    implementation project(':vividus-plugin-azure-resource-manager')
     implementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.15')
     implementation(group: 'com.azure', name: 'azure-messaging-eventgrid')
 

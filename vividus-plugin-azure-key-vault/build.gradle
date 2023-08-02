@@ -1,5 +1,0 @@
-project.description = 'VIVIDUS plugin for Azure Key Vault'
-
-dependencies {
-    implementation project(':vividus-plugin-azure-resource-manager')
-}
