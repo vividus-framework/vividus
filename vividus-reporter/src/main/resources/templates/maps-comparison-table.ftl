@@ -1,7 +1,7 @@
 <#ftl strip_whitespace=true>
 <#setting boolean_format="true ,false ">
-<#assign valueLimit = 10>
-<#assign visibilityThreshold = 13>
+<#assign valueLimit = 17>
+<#assign visibilityThreshold = 20>
 <#assign abbreviation = '...'>
 <#assign more = 'more'>
 <#assign less = 'less'>
