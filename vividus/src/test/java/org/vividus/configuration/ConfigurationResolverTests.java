@@ -58,7 +58,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 class ConfigurationResolverTests
 {
     private static final String DESKTOP_CHROME = "desktop/chrome";
-    private static final String DEPRECATED_PROFILE = "web/phone/iphone/landscape";
+    private static final String DEPRECATED_PROFILE = "web/desktop/edge/chromium";
     private static final String CONFIGURATION = "configuration";
     private static final String PROPERTY_1 = "property1";
     private static final String PROPERTY_2 = "property2";
