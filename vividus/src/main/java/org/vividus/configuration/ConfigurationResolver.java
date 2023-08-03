@@ -32,8 +32,6 @@ import com.google.common.collect.Multimap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.vividus.spring.SpelExpressionResolver;
 
@@ -56,13 +54,6 @@ public final class ConfigurationResolver
         "org/vividus/http/client",
         "org/vividus/util"
     };
-
-    // This is the cheapest solution, it breaks low-coupling and other design principles. BUT the implementation of the
-    // solid solution requires much time and effort and the solution will become useless with removal of the deprecated
-    // profiles (in general deprecation of the profile is a very rare case). Summing up this is an acceptable trade-off.
-    private static final String DEPRECATED_EDGE_CHROMIUM_PROFILE = "web/desktop/edge/chromium";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationResolver.class);
 
     private static ConfigurationResolver instance;
 
@@ -175,13 +166,7 @@ public final class ConfigurationResolver
         suites = propertyPlaceholderHelper.replacePlaceholders(suites, mergedProperties::getProperty);
 
         Multimap<String, String> configuration = LinkedHashMultimap.create();
-        List<String> parsedProfiles = asPaths(resolveSpel(profiles));
-        if (parsedProfiles.contains(DEPRECATED_EDGE_CHROMIUM_PROFILE))
-        {
-            LOGGER.warn("`{}` profile is deprecated and will be removed in VIVIDUS 0.6.0",
-                    DEPRECATED_EDGE_CHROMIUM_PROFILE);
-        }
-        configuration.putAll("profile", parsedProfiles);
+        configuration.putAll("profile", asPaths(resolveSpel(profiles)));
         configuration.putAll("environment", asPaths(resolveSpel(environments)));
         configuration.putAll("suite", asPaths(resolveSpel(suites)));
         return configuration;
