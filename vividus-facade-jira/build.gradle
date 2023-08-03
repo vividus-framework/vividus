@@ -4,7 +4,7 @@ dependencies {
     implementation project(':vividus-http-client')
     implementation project(':vividus-util')
 
-    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.1-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.2-jre')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.0')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')

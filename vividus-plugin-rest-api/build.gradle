@@ -17,7 +17,7 @@ dependencies {
     implementation(group: 'com.jayway.jsonpath', name: 'json-path', version: "${jsonPathVersion}")
     implementation(group: 'com.jayway.jsonpath', name: 'json-path-assert', version: "${jsonPathVersion}")
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
-    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.1-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.2-jre')
     implementation(group: 'org.apache.tika', name: 'tika-core', version: '2.8.0')
     implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
 

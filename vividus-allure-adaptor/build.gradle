@@ -19,7 +19,7 @@ dependencies {
 
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.29')
     implementation(group: 'org.springframework', name: 'spring-core')
-    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.1-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.2-jre')
     implementation(group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')

@@ -31,7 +31,7 @@ dependencies {
     implementation project(':vividus-facade-jira')
     implementation project(':vividus-exporter-commons')
 
-    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.1-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.2-jre')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.13.0')
 
     testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test')

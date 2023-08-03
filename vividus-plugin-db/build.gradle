@@ -9,7 +9,7 @@ dependencies {
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.29')
     implementation(group: 'org.springframework', name: 'spring-jdbc')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
-    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.1-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.2-jre')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.13.0')
 
     testCompileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
