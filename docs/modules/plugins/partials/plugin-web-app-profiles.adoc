@@ -73,14 +73,6 @@ web.driver.chrome.command-line-arguments=--disable-auto-reload
 ----
 
 .^|`web/desktop/edge` +
-[WARNING]
-====
-`web/desktop/edge/chromium` profile is deprecated in favor of `web/desktop/edge` and will be removed in VIVIDUS 0.6.0.
-
-EdgeHTML was https://techcommunity.microsoft.com/t5/microsoft-365-blog/new-microsoft-edge-to-replace-microsoft-edge-legacy-with-april-s/ba-p/2114224[retired] some time ago,
-so only Chromium backed Edge is available now, thus there is no need to distinguish Edge builds anymore.
-====
-
 |
 [source, properties]
 ----
