@@ -40,20 +40,6 @@ Examples:
 |A      |${for-merging-transformer}|
 
 
-Scenario: [Deprecated] Create a counter
-Given I initialize story variable `updatedNumber` with value `0`
-
-
-Scenario: [Deprecated] Update the counter through ITERATING with a global variable
-Given I initialize story variable `updatedNumber` with value `#{eval(${updatedNumber} + 1)}`
-Examples:
-{transformer=ITERATING, limit=$\{iterationLimit\}}
-
-
-Scenario: [Deprecated] Verify the number of actual iterations
-Then `${updatedNumber}` is = `${iterationLimit}`
-
-
 Scenario: Create a counter
 Given I initialize story variable `counter` with value `0`
 

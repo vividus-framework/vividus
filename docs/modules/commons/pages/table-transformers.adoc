@@ -202,11 +202,6 @@ will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTabl
 |Parameter
 |Description
 
-|`limit`
-|WARNING: The property is deprecated and will be removed in VIVIDUS 0.6.0. Use `startInclusive` and `endInclusive` instead
-
-threshold value, so values are generated from 0 to (`limit` - 1).
-
 |`startInclusive`
 |value specifying which number to start generating values from, it should be less than or equal to `endInclusive` value
 
