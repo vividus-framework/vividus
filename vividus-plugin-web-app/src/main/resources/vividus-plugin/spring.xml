@@ -190,7 +190,6 @@
     </bean>
 
     <bean id="keyboardSteps" class="org.vividus.steps.ui.web.KeyboardSteps" />
-    <bean id="linkSteps" class="org.vividus.steps.ui.web.LinkSteps" />
     <bean id="webStorageSteps" class="org.vividus.steps.ui.web.WebStorageSteps" />
     <bean id="nestedSteps" class="org.vividus.steps.ui.web.NestedSteps" />
 
@@ -295,7 +294,6 @@
         <idref bean="dropdownSteps" />
         <idref bean="elementSteps" />
         <idref bean="fieldSteps" />
-        <idref bean="linkSteps" />
         <idref bean="pageSteps" />
         <idref bean="textValidationSteps" />
         <idref bean="jsValidationSteps" />
