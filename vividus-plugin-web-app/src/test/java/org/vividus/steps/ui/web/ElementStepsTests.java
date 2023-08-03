@@ -130,16 +130,6 @@ class ElementStepsTests
     }
 
     @Test
-    void shouldClickOnElementWithoutRetry()
-    {
-        var locator = new Locator(WebLocatorType.ELEMENT_NAME, ELEMENT_NAME);
-        when(baseValidations.assertIfElementExists(AN_ELEMENT_WITH_THE_ATTRIBUTES, locator))
-                .thenReturn(webElement);
-        elementSteps.clickOnElementWithoutRetry(locator);
-        verify(mouseActions).click(webElement);
-    }
-
-    @Test
     void shouldClickOnElement()
     {
         var locator = mock(Locator.class);
