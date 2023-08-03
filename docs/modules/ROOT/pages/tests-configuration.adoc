@@ -403,7 +403,7 @@ bdd.all-meta-filters=groovy: !this['test-stand']
 |`@severity 1`
 
 |@layout
-|`desktop`, `phone`, `phone_portrait`, `phone_landscape`, `chrome_phone`, `chrome_responsive`, `chrome_tablet`, `tablet`, `tablet_landscape`, `tablet_portrait`
+|`desktop`, `phone`, `chrome_phone`, `chrome_responsive`, `chrome_tablet`, `tablet`
 |Used to specify layout, using which marked story or scenario should be executed. In case if this meta tag is not specified, default (`desktop`) value is used for web applications.
 |`@layout desktop`
 

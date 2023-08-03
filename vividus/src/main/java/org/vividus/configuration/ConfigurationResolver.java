@@ -60,13 +60,7 @@ public final class ConfigurationResolver
     // This is the cheapest solution, it breaks low-coupling and other design principles. BUT the implementation of the
     // solid solution requires much time and effort and the solution will become useless with removal of the deprecated
     // profiles (in general deprecation of the profile is a very rare case). Summing up this is an acceptable trade-off.
-    private static final Set<String> DEPRECATED_PROFILES = Set.of(
-            "web/desktop/edge/chromium",
-            "web/phone/iphone/landscape",
-            "web/phone/iphone/portrait",
-            "web/tablet/ipad/landscape",
-            "web/tablet/ipad/portrait"
-    );
+    private static final String DEPRECATED_EDGE_CHROMIUM_PROFILE = "web/desktop/edge/chromium";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationResolver.class);
 
@@ -182,9 +176,11 @@ public final class ConfigurationResolver
 
         Multimap<String, String> configuration = LinkedHashMultimap.create();
         List<String> parsedProfiles = asPaths(resolveSpel(profiles));
-        parsedProfiles.stream().filter(DEPRECATED_PROFILES::contains).forEach(profile ->
-            LOGGER.warn("`{}` profile is deprecated and will be removed in VIVIDUS 0.6.0", profile)
-        );
+        if (parsedProfiles.contains(DEPRECATED_EDGE_CHROMIUM_PROFILE))
+        {
+            LOGGER.warn("`{}` profile is deprecated and will be removed in VIVIDUS 0.6.0",
+                    DEPRECATED_EDGE_CHROMIUM_PROFILE);
+        }
         configuration.putAll("profile", parsedProfiles);
         configuration.putAll("environment", asPaths(resolveSpel(environments)));
         configuration.putAll("suite", asPaths(resolveSpel(suites)));
