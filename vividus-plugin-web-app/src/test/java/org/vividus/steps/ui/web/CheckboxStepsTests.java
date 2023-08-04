@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,9 @@ package org.vividus.steps.ui.web;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -100,16 +97,6 @@ class CheckboxStepsTests
         CheckboxAction action = CheckboxAction.CHECK;
         checkboxSteps.changeStateOfCheckbox(action, LOCATOR);
         verify(mouseActions).click(label);
-    }
-
-    @Test
-    void shouldCheckAllFoundCheckboxes()
-    {
-        when(baseValidations.assertIfElementsExist("Checkboxes", LOCATOR))
-            .thenReturn(List.of(checkbox, checkbox, checkbox));
-        when(checkbox.isDisplayed()).thenReturn(true);
-        checkboxSteps.changeStateOfAllCheckboxes(CheckboxAction.CHECK, LOCATOR);
-        verify(mouseActions, times(3)).click(verifyWrappedCheckbox());
     }
 
     private WebElement verifyWrappedCheckbox()
