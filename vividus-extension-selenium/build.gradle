@@ -12,7 +12,7 @@ project.description = 'VIVIDUS extension for Selenium'
      implementation project(':vividus-util')
      implementation project(':vividus-soft-assert')
 
-     api platform(group: 'org.seleniumhq.selenium', name: 'selenium-bom', version: '4.10.0')
+     api platform(group: 'org.seleniumhq.selenium', name: 'selenium-bom', version: '4.11.0')
      api(group: 'org.seleniumhq.selenium', name: 'selenium-api')
      api(group: 'org.seleniumhq.selenium', name: 'selenium-support')
      api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver')
