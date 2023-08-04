@@ -204,6 +204,7 @@ class JSchExecutorTests
         ordered.verify(session).connect(30_000);
     }
 
+    @SuppressWarnings("checkstyle:FinalClass")
     private static class TestJSchExecutor extends JSchExecutor<ChannelExec, SshOutput>
     {
         @Override

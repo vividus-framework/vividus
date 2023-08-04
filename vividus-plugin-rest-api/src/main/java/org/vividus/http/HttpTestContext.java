@@ -129,7 +129,7 @@ public class HttpTestContext implements JsonContext
         return testContext.get(KEY, HttpTestContextData::new);
     }
 
-    private static class HttpTestContextData
+    private static final class HttpTestContextData
     {
         private HttpEntity requestEntity;
         private List<Header> requestHeaders = new ArrayList<>();
