@@ -132,9 +132,7 @@ Then page title is equal to `What is VIVIDUS :: VIVIDUS`
 Then page title contains `VIVIDUS`
 ----
 
-=== Clicking steps
-
-==== Click on element
+=== Click on element
 
 Clicks on the element found by the specified locator.
 
@@ -168,34 +166,6 @@ When I click on element located by `$locator`
 [source,gherkin]
 ----
 When I click on element located by `name(Submit)`
-----
-
-==== Click on element without retry
-
-[WARNING]
-====
-The step is deprecated and will be removed in VIVIDUS 0.6.0.
-The replacement is <<_click_on_element>>.
-The replacement pattern is:
-[source,gherkin]
-----
-When I click on element located by `<locator>`
-----
-====
-
-Clicks on an element found by the locator.
-
-[source,gherkin]
-----
-When I click on element located `$locator`
-----
-
-* `$locator` - The <<_locator,locator>> used to find element.
-
-.Click on element
-[source,gherkin]
-----
-When I click on element located `name(Submit)`
 ----
 
 === Scrolling steps

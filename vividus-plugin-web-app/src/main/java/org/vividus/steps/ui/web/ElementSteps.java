@@ -37,7 +37,6 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
-import org.vividus.annotation.Replacement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
@@ -285,21 +284,6 @@ public class ElementSteps implements ResourceLoaderAware
             WebElement elementParent = baseValidations.assertIfElementExists("Parent element", parentLocator);
             elementValidations.assertIfElementHasWidthInPerc(elementParent, elementChild, width);
         });
-    }
-
-    /**
-     * Clicks on an <b>element</b> found by the <b>locator</b>
-     * @param locator The locator to find an element.
-     * @deprecated Use step: "When I click on element located by `$locator`"
-     */
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern = "When I click on element located by `%1$s`")
-    @When("I click on element located `$locator`")
-    public void clickOnElementWithoutRetry(Locator locator)
-    {
-        WebElement webElement =
-                baseValidations.assertIfElementExists(String.format(AN_ELEMENT_WITH_ATTRIBUTES, locator), locator);
-        mouseActions.click(webElement);
     }
 
     /**

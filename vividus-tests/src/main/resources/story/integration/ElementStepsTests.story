@@ -10,13 +10,6 @@ When I click on element located by `id(button-hide)`
 When I wait until element located by `id(element-to-hide)` disappears
 Then number of elements found by `id(element-to-hide)` is equal to `0`
 
-Scenario: Deprecated steps verification: "When I click on element located `$locator`" and "When I wait until element located `$locator` disappears"
-!-- Deprecated
-Given I am on page with URL `${vividus-test-site-url}/elementState.html`
-Then number of elements found by `id(element-to-hide)` is equal to `1`
-When I click on element located `id(button-hide)`
-When I wait until element located `id(element-to-hide)` disappears
-
 Scenario: Step verification When I click on all elements located `$locator`
 Given I am on page with URL `${vividus-test-site-url}/checkboxes.html`
 Then number of not selected elements found by `xpath(//*[@id = 'one' or @id = 'two' or @id = 'three'])` is equal to `3`
