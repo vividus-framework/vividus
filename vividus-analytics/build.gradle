@@ -6,7 +6,7 @@ dependencies {
     implementation project(':vividus-reporter')
     implementation project(':vividus-util')
 
-    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.1-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.2-jre')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.4')
     implementation(group: 'commons-codec', name: 'commons-codec', version: '1.16.0')

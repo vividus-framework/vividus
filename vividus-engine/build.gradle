@@ -10,7 +10,7 @@ dependencies {
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '5.3.29')
     implementation(group: 'org.springframework', name: 'spring-beans')
-    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.1-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '32.1.2-jre')
     implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
     runtimeOnly(group: 'org.vividus', name: 'jbehave-spring', version: versions.jbehave)
 
