@@ -23,7 +23,7 @@ project.description = 'VIVIDUS extension for Selenium'
      api(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-core', version: "${browserupProxyVersion}")
      implementation(group: 'com.github.valfirst.browserup-proxy', name: 'browserup-proxy-mitm', version: "${browserupProxyVersion}")
 
-     implementation platform(group: 'com.google.zxing', name: 'zxing-parent', version: '3.5.1')
+     implementation platform(group: 'com.google.zxing', name: 'zxing-parent', version: '3.5.2')
      implementation(group: 'com.google.zxing', name: 'core')
      implementation(group: 'com.google.zxing', name: 'javase')
 
