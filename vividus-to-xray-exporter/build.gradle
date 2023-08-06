@@ -35,7 +35,7 @@ dependencies {
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.13.0')
     implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.4')
 
-    implementation(group: 'org.zeroturnaround', name: 'zt-zip', version: '1.15')
+    implementation(group: 'org.zeroturnaround', name: 'zt-zip', version: '1.16')
 
     testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test')
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.0')
