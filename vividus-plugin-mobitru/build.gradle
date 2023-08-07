@@ -14,5 +14,5 @@ dependencies {
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.4.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
-    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.15')
+    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.15.1')
 }
