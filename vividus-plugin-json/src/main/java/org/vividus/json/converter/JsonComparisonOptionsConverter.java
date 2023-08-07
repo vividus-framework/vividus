@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,7 @@
 package org.vividus.json.converter;
 
 import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.jbehave.core.steps.ParameterConverters.FromStringParameterConverter;
@@ -41,17 +38,12 @@ public class JsonComparisonOptionsConverter extends FromStringParameterConverter
     @SuppressWarnings({"rawtypes", "unchecked"})
     public Options convertValue(String value, Type type)
     {
-        Type listOfOption = new TypeLiteral<List<Option>>() { }.getType();
-        Set options = new HashSet<>(fluentEnumListConverter.convertValue(value, listOfOption));
-        if (options.isEmpty())
+        Type listOfOptions = new TypeLiteral<List<Option>>() { }.getType();
+        List options = fluentEnumListConverter.convertValue(value, listOfOptions);
+        Options jsonComparisonOptions = Options.empty();
+        for (Option option : (Iterable<Option>) options)
         {
-            return Options.empty();
-        }
-        Iterator<Option> iterator = options.iterator();
-        Options jsonComparisonOptions = new Options(iterator.next());
-        while (iterator.hasNext())
-        {
-            jsonComparisonOptions = jsonComparisonOptions.with(iterator.next());
+            jsonComparisonOptions = jsonComparisonOptions.with(option);
         }
         return jsonComparisonOptions;
     }
