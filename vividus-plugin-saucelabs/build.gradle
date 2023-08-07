@@ -29,5 +29,5 @@ dependencies {
     testImplementation(group: 'com.github.powermock.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
     testImplementation(group: 'com.github.powermock.powermock', name: 'powermock-module-junit4', version: versions.powermock)
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
-    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.15')
+    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.15.1')
 }
