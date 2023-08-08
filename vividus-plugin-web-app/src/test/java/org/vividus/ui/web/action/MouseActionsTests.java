@@ -31,7 +31,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -70,8 +69,14 @@ class MouseActionsTests
             + " (75, 975). Other element would receive the click: <div..";
     private static final String COULD_NOT_CLICK_ERROR_MESSAGE = "Could not click on the element: ";
 
-    private static final String BUTTON = "button";
+    private static final String ID = "id";
     private static final String TYPE = "type";
+    private static final String ACTIONS = "actions";
+    private static final String DURATION = "duration";
+    private static final String X = "x";
+    private static final String Y = "y";
+    private static final String ORIGIN = "origin";
+    private static final String BUTTON = "button";
 
     @Mock(extraInterfaces = { HasCapabilities.class, Interactive.class })
     private WebDriver webDriver;
@@ -286,14 +291,14 @@ class MouseActionsTests
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         mouseActions.contextClick(webElement);
-        verifyActionsWithMove(verify((Interactive) webDriver), createClickActions(2));
-    }
-
-    private List<Map<String, Object>> createClickActions(int button)
-    {
-        return List.of(
-                Map.of(BUTTON, button, TYPE, "pointerDown"),
-                Map.of(BUTTON, button, TYPE, "pointerUp")
+        verify((Interactive) webDriver).perform(sequencesCaptor.capture());
+        Collection<Sequence> sequences = sequencesCaptor.getValue();
+        assertEquals(1, sequences.size());
+        assertEquals(mouseSequence(List.of(
+                pointerMoveAction(),
+                Map.of(BUTTON, 2, TYPE, "pointerDown"),
+                Map.of(BUTTON, 2, TYPE, "pointerUp"))
+            ), sequences.iterator().next().toJson()
         );
     }
 
@@ -309,37 +314,50 @@ class MouseActionsTests
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         mouseActions.moveToElement(webElement);
-        InOrder ordered = inOrder(javascriptActions, webDriver);
-        ordered.verify(javascriptActions).scrollIntoView(webElement, true);
-        verifyActionsWithMove(ordered.verify((Interactive) webDriver), List.of());
+        verify((Interactive) webDriver, times(2)).perform(sequencesCaptor.capture());
+        List<Collection<Sequence>> sequences = sequencesCaptor.getAllValues();
+        assertEquals(2, sequences.size());
+        assertEquals(Map.of(
+                ID, "default wheel",
+                TYPE, "wheel",
+                ACTIONS, List.of(
+                        Map.of(
+                                DURATION, 250L,
+                                X, 0,
+                                Y, 0,
+                                "deltaX", 0,
+                                "deltaY", 0,
+                                TYPE, "scroll",
+                                ORIGIN, webElement
+                        )
+                )), sequences.get(0).iterator().next().toJson());
+        assertEquals(mouseSequence(List.of(pointerMoveAction())), sequences.get(1).iterator().next().toJson());
+    }
+
+    private static Map<String, Object> mouseSequence(List<Map<String, ?>> mouseActions)
+    {
+        return Map.of(
+                ID, "default mouse",
+                TYPE, "pointer",
+                "parameters", Map.of("pointerType", "mouse"), ACTIONS, mouseActions
+        );
+    }
+
+    private Map<String, Object> pointerMoveAction()
+    {
+        return Map.of(
+                DURATION, 100L,
+                X, 0,
+                Y, 0,
+                TYPE, "pointerMove",
+                ORIGIN, webElement
+        );
     }
 
     @Test
     void shouldNotPerformActionsAtAttemptToMoveToNullElement()
     {
         mouseActions.moveToElement(null);
-        verifyNoInteractions(webDriverProvider, javascriptActions, softAssert);
-    }
-
-    private void verifyActionsWithMove(Interactive interactiveVerification, List<Map<String, Object>> actions)
-    {
-        interactiveVerification.perform(sequencesCaptor.capture());
-        Collection<Sequence> sequences = sequencesCaptor.getValue();
-        assertEquals(1, sequences.size());
-        List<Map<String, Object>> allActions = new ArrayList<>();
-        allActions.add(Map.of(
-                "duration", 100L,
-                "x", 0,
-                "y", 0,
-                TYPE, "pointerMove",
-                "origin", webElement));
-        allActions.addAll(actions);
-        assertEquals(Map.of(
-                "id", "default mouse",
-                TYPE, "pointer",
-                "parameters", Map.of("pointerType", "mouse"),
-                "actions", allActions
-            ), sequences.iterator().next().toJson()
-        );
+        verifyNoInteractions(webDriverProvider, softAssert);
     }
 }
