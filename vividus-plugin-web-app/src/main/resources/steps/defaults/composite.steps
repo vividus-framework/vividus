@@ -12,18 +12,6 @@ Composite: Then the page title contains the text '$text'
 Priority: 1
 Then the page title contains '<text>'
 
-Composite: Then invisible element by xpath '$xpath' exists
-!-- DEPRECATED: 0.6.0, Then number of invisible elements `By.xpath(%1$s)` is = `1`
-Then number of invisible elements `By.xpath(<xpath>)` is = `1`
-
-Composite: When I set the number of elements found by xpath '$xpath' to the '$scopes' variable '$variableName'
-!-- DEPRECATED: 0.6.0, When I save number of elements located `By.xpath(%1$s)` to %2$s variable `%3$s`
-When I save number of elements located `By.xpath(<xpath>)` to <scopes> variable `<variableName>`
-
-Composite: Then the number of elements found by the xpath '$xpath' is $comparisonRule '$quantity'
-!-- DEPRECATED: 0.6.0, Then number of elements found by `By.xpath(%1$s)` is %2$s `%3$s`
-Then number of elements found by `By.xpath(<xpath>)` is <comparisonRule> `<quantity>`
-
 Composite: Then a field with the name '$fieldName' exists
 !-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s)` exists
 Then field located `By.fieldName(<fieldName>)` exists
@@ -40,21 +28,9 @@ Composite: When I add '$text' to a field with the name '$fieldName'
 !-- DEPRECATED: 0.6.0, When I add `%1$s` to field located by `fieldName(%2$s)`
 When I add `<text>` to field located by `fieldName(<fieldName>)`
 
-Composite: When I add '$text' to a field by the xpath '$xpath'
-!-- DEPRECATED: 0.6.0, When I add `%1$s` to field located by `xpath(%2$s)`
-When I add `<text>` to field located by `xpath(<xpath>)`
-
 Composite: When I enter '$text' in a field with the name '$fieldName'
 !-- DEPRECATED: 0.6.0, When I enter `%1$s` in field located by `fieldName(%2$s)`
 When I enter `<text>` in field located by `fieldName(<fieldName>)`
-
-Composite: When I clear a field by the xpath '$xpath'
-!-- DEPRECATED: 0.6.0, When I clear field located by `xpath(%1$s)`
-When I clear field located by `xpath(<xpath>)`
-
-Composite: When I clear a field by the xpath '$xpath' using keyboard
-!-- DEPRECATED: 0.6.0, When I clear field located by `xpath(%1$s)` using keyboard
-When I clear field located by `xpath(<xpath>)` using keyboard
 
 Composite: Then a field with the name '$fieldName' and text containing '$textpart' exists
 Priority: 1
@@ -99,19 +75,11 @@ Composite: Then a [$state] field with the name '$fieldName' exists
 !-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%2$s):a->filter.state(%1$s)` exists
 Then field located `By.fieldName(<fieldName>):a->filter.state(<state>)` exists
 
-Composite: When I enter '$text' in a field by the xpath '$xpath'
-!-- DEPRECATED: 0.6.0, When I enter `%1$s` in field located by `xpath(%2$s)`
-When I enter `<text>` in field located by `xpath(<xpath>)`
-
 Composite: When I enter `$text` in field located `$locator` using keyboard
 When I execute sequence of actions:
 |type      |argument |
 |CLICK     |<locator>|
 |ENTER_TEXT|<text>   |
-
-Composite: When I select '$text' from a drop down by the xpath '$xpath'
-!-- DEPRECATED: 0.6.0, When I select `%1$s` in dropdown located `By.xpath(%2$s)`
-When I select `<text>` in dropdown located `By.xpath(<xpath>)`
 
 Composite: Then an element with the name '$elementName' containing text '$text' exists
 Priority: 1
@@ -131,10 +99,6 @@ Then number of elements found by `By.elementName(<elementName>)` is equal to `1`
 Composite: Then an element with the name '$elementName' does not exist
 Then number of elements found by `By.elementName(<elementName>)` is equal to `0`
 
-Composite: Then an element by the xpath '$xpath' does not exist
-!-- DEPRECATED: 0.6.0, Then number of elements found by `By.xpath(%1$s)` is equal to `0`
-Then number of elements found by `By.xpath(<xpath>)` is equal to `0`
-
 Composite: Then a [$state] element with the name '$elementName' exists
 !-- DEPRECATED: 0.7.0, Then number of elements found by `By.elementName(%2$s)->filter.state(%1$s)` is equal to `1`
 Then number of elements found by `By.elementName(<elementName>)->filter.state(<state>)` is equal to `1`
@@ -150,19 +114,11 @@ Composite: Then a [$state] element with the tag '$elementTag' exists
 !-- DEPRECATED: 0.7.0, Then number of elements found by `By.tagName(%2$s)->filter.state(%1$s)` is equal to `1`
 Then number of elements found by `By.tagName(<elementTag>)->filter.state(<state>)` is equal to `1`
 
-Composite: When I click on an element by the xpath '$xpath'
-!-- DEPRECATED: 0.6.0, When I click on element located by `xpath(%1$s)`
-When I click on element located by `xpath(<xpath>)`
-
 Composite: When I click on an element with the attribute '$attributeType'='$attributeValue'
 When I click on element located by `xpath(.//*[@<attributeType>='<attributeValue>'])`
 
 Composite: When I click on an element with the text '$text'
 When I click on element located by `caseSensitiveText(<text>)`
-
-Composite: When I click on all elements by xpath '$xpath'
-!-- DEPRECATED: 0.6.0, When I click on all elements located `By.xpath(%1$s)`
-When I click on all elements located `By.xpath(<xpath>)`
 
 Composite: Then an element with the attribute '$attributeType'='$attributeValue' exists
 Then number of elements found by `By.xpath(.//*[@<attributeType>='<attributeValue>'])` is equal to `1`
@@ -177,35 +133,11 @@ Then number of elements found by `By.xpath(.//<elementTag>[@<attributeType>='<at
 Composite: Then an element with the attribute '$attributeType' containing '$attributeValue' exists
 Then number of elements found by `By.xpath(.//*[contains(@<attributeType>, '<attributeValue>')])` is equal to `1`
 
-Composite: Then each element by the xpath '$xpath' has same '$dimension'
-!-- DEPRECATED: 0.6.0, Then each element located `By.xpath(%1$s)` has same `%2$s`
-Then each element located `By.xpath(<xpath>)` has same `<dimension>`
-
-Composite: Then each element by the xpath '$elementXpath' has '$number' child elements by the xpath '$childXpath'
-!-- DEPRECATED: 0.6.0, Then each element with locator `By.xpath(%1$s)` has `%2$s` child elements with locator `By.xpath(%3$s)`
-Then each element with locator `By.xpath(<elementXpath>)` has `<number>` child elements with locator `By.xpath(<childXpath>)`
-
-Composite: Then at least one element by the xpath '$xpath' exists
-!-- DEPRECATED: 0.6.0, Then number of elements found by `By.xpath(%1$s)` is greater than or equal to `1`
-Then number of elements found by `By.xpath(<xpath>)` is greater than or equal to `1`
-
 Composite: Then at least one element with the attribute '$attributeType'='$attributeValue' exists
 Then number of elements found by `By.xpath(.//*[@<attributeType>='<attributeValue>'])` is greater than or equal to `1`
 
-Composite: Then an element by the xpath '$xpath' exists
-!-- DEPRECATED: 0.6.0, Then number of elements found by `By.xpath(%1$s)` is equal to `1`
-Then number of elements found by `By.xpath(<xpath>)` is equal to `1`
-
 Composite: Then an element by the cssSelector '$cssSelector' exists
 Then number of elements found by `By.cssSelector(<cssSelector>)` is equal to `1`
-
-Composite: When I hover a mouse over an element with the xpath '$xpath'
-!-- DEPRECATED: 0.6.0, When I hover mouse over element located `By.xpath(%1$s)`
-When I hover mouse over element located `By.xpath(<xpath>)`
-
-Composite: When I perform right click on an element by the xpath '$xpath'
-!-- DEPRECATED: 0.6.0, When I perform right click on element located `By.xpath(%1$s)`
-When I perform right click on element located `By.xpath(<xpath>)`
 
 Composite: When I hover a mouse over a button with the name '$buttonName'
 When I hover mouse over element located `By.buttonName(<buttonName>)`
@@ -247,14 +179,6 @@ When I wait until element located by `elementName(<elementName>)` disappears
 Composite: When I wait until an element with the name '$elementName' appears
 !-- DEPRECATED: 0.6.0, When I wait until element located by `elementName(%1$s)` appears
 When I wait until element located by `elementName(<elementName>)` appears
-
-Composite: When I wait until an element with the xpath '$xpath' appears
-!-- DEPRECATED: 0.6.0, When I wait until element located by `xpath(%1$s)` appears
-When I wait until element located by `xpath(<xpath>)` appears
-
-Composite: When I wait until an element with the xpath '$xpath' disappeares
-!-- DEPRECATED: 0.6.0, When I wait until element located by `xpath(%1$s)` disappears
-When I wait until element located by `xpath(<xpath>)` disappears
 
 Composite: When I wait until the state of an element with the name '$elementName' becomes [$state]
 !-- DEPRECATED: 0.6.0, When I wait until state of element located by `elementName(%1$s)` is %2$s

@@ -54,5 +54,3 @@ Scenario: Verify save number of elements steps
 Given I am on page with URL `${vividus-test-site-url}/links.html`
 When I save number of elements located `tagName(a)` to SCENARIO variable `numberOfLinks`
 Then `${numberOfLinks}` is equal to `2`
-When I set the number of elements found by xpath '//a' to the 'SCENARIO' variable 'numberOfLinks'
-Then `${numberOfLinks}` is equal to `2`

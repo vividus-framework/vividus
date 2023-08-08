@@ -153,22 +153,6 @@ Scenario: Step verification Then an element with the attribute '$attributeType' 
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
 Then an element with the attribute 'rows' containing '5' exists
 
-Scenario: Step verification Then each element by the xpath '$xpath' has same '$dimension'
-Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
-Then each element by the xpath './/input[@type='radio']' has same 'width'
-
-Scenario: Step verification Then each element by the xpath '$elementXpath' has '$number' child elements by the xpath '$childXpath'
-Given I am on page with URL `${vividus-test-site-url}/dropdowns.html`
-Then each element by the xpath './/select' has '3' child elements by the xpath './/option'
-
-Scenario: Step verification Then at least one element by the xpath '$xpath' exists
-Given I am on page with URL `${vividus-test-site-url}/dropdowns.html`
-Then at least one element by the xpath './/option' exists
-
-Scenario: Step verification Then an element by the xpath '$xpath' exists
-Given I am on page with URL `${vividus-test-site-url}/elementState.html`
-Then an element by the xpath './/*[@id='element-to-hide']' exists
-
 Scenario: Step verification Then an element by the cssSelector '$cssSelector' exists
 Given I am on page with URL `${vividus-test-site-url}/elementState.html`
 Then an element by the cssSelector '#element-to-hide' exists
@@ -188,32 +172,6 @@ Given I am on page with URL `${vividus-test-site-url}/elementState.html`
 Then number of elements found by `id(element-to-hide)` is equal to `1`
 When I click on an element with the text 'hide'
 When I wait until element located by `id(element-to-hide)` disappears
-
-Scenario: Step verification When I click on all elements by xpath '$xpath'
-Given I am on page with URL `${vividus-test-site-url}/checkboxes.html`
-Then number of not selected elements found by `xpath(//*[@id = 'one' or @id = 'two' or @id = 'three'])` is equal to `3`
-When I click on all elements by xpath './/label'
-Then number of selected elements found by `xpath(//*[@id = 'one' or @id = 'two' or @id = 'three'])` is equal to `3`
-
-Scenario: Step verification When I click on an element by the xpath '$xpath'
-Given I am on page with URL `${vividus-test-site-url}/elementState.html`
-Then number of elements found by `id(element-to-hide)` is equal to `1`
-When I click on an element by the xpath './/button[@id="button-hide"]'
-When I wait until element located by `id(element-to-hide)` disappears
-
-Scenario: Step verification When I hover a mouse over an element with the xpath '$xpath'
-Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
-When I hover a mouse over an element with the xpath './/div[contains(., 'Mouse enter!')]'
-Then text `Mouse enter count: 1` exists
-
-Scenario: Step verification When I perform right click on an element by the xpath '$xpath'
-!-- Deprecated
-Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
-Then number of elements found by `elementName(Foo)` is = `1`
-Then number of elements found by `elementName(Bar)` is = `0`
-When I perform right click on an element by the xpath './/*[@id = 'context-menu']'
-Then number of elements found by `elementName(Foo)` is = `0`
-Then number of elements found by `elementName(Bar)` is = `1`
 
 Scenario: Step verification 'Then number of $state elements found by `$locator` is $comparisonRule `$quantity`'
 Given I am on page with URL `${vividus-test-site-url}`

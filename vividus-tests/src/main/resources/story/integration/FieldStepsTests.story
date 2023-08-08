@@ -44,10 +44,6 @@ Scenario: Step verification When I clear a field with the name '$fieldName'
 When I clear a field with the name '<inputId>'
 Then field value is ``
 
-Scenario: Step verification When I add '$text' to a field by the xpath '$xpath'
-When I add 'text' to a field by the xpath './/input[@id='<inputId>']'
-Then field value is `text`
-
 Scenario: Step verification When I clear a field with the name '$fieldName' using keyboard
 When I clear a field with the name '<inputId>' using keyboard
 Then field value is ``
@@ -56,22 +52,11 @@ Scenario: Step verification When I enter '$text' in a field with the name '$fiel
 When I enter 'text' in a field with the name '<inputId>'
 Then field value is `text`
 
-Scenario: Step verification When I clear a field by the xpath '$xpath'
-When I clear a field by the xpath './/input[@id='<inputId>']'
-Then field value is ``
-
-Scenario: Step verification When I enter '$text' in a field by the xpath '$xpath'
-When I enter 'text' in a field by the xpath './/input[@id='<inputId>']'
-Then field value is `text`
-
-Scenario: Step verification When I clear a field by the xpath '$xpath' using keyboard
-When I clear a field by the xpath './/input[@id='<inputId>']' using keyboard
-Then field value is ``
-
 Scenario: Step verification Then a field with the name '$fieldName' does not exist
 Then a field with the name 'noSuchFieldOnThePage' does not exist
 
 Scenario: Step verification Then a [$state] field with the name '$fieldName' and text '$text' exists
+When I clear field located `<inputLocator>`
 Then a [VISIBLE] field with the name '<inputId>' and text '' exists
 
 Scenario: Step verification Then a field with the name '$fieldName' and text containing '$textpart' exists
