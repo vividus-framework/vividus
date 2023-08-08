@@ -33,6 +33,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -67,7 +68,6 @@ import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
 import net.javacrumbs.jsonunit.core.Option;
-import net.javacrumbs.jsonunit.core.internal.Options;
 
 @SuppressWarnings("MethodCount")
 @ExtendWith(MockitoExtension.class)
@@ -376,7 +376,7 @@ class JsonStepsTests
     {
         var json = ResourceUtils.loadResource(getClass(), "missmatches-actual-data.json");
         var expected = ResourceUtils.loadResource(getClass(), "missmatches-expected-data.json");
-        steps.assertElementByJsonPath(json, "$", expected, new Options(Option.IGNORING_ARRAY_ORDER));
+        steps.assertElementByJsonPath(json, "$", expected, EnumSet.of(Option.IGNORING_ARRAY_ORDER));
         verify(softAssert).recordFailedAssertion("Different value found when comparing expected array element [0] to"
                 + " actual element [0].");
         verify(softAssert).recordFailedAssertion("Different keys found in node \"[0]\", missing: \"[0].missing_value\""
@@ -411,7 +411,7 @@ class JsonStepsTests
     @MethodSource("jsonValuesAndElements")
     void shouldAssertDataByJsonPathIsEqualToExpectedOne(String jsonPath, String expectedData)
     {
-        steps.assertElementByJsonPath(JSON, jsonPath, expectedData, Options.empty());
+        steps.assertElementByJsonPath(JSON, jsonPath, expectedData, Set.of());
         verifyJsonEqualityAssertion(jsonPath, expectedData, expectedData);
     }
 
@@ -419,7 +419,7 @@ class JsonStepsTests
     void shouldAssertArrayByJsonPathIsEqualToExpectedOneIgnoringArrayOrder()
     {
         var expectedJson = "[2,1]";
-        steps.assertElementByJsonPath(JSON, ARRAY_PATH, expectedJson, new Options(Option.IGNORING_ARRAY_ORDER));
+        steps.assertElementByJsonPath(JSON, ARRAY_PATH, expectedJson, EnumSet.of(Option.IGNORING_ARRAY_ORDER));
         verifyJsonEqualityAssertion(ARRAY_PATH, expectedJson, ARRAY_PATH_RESULT);
     }
 
@@ -428,7 +428,7 @@ class JsonStepsTests
     {
         var expectedJson = "[2]";
         steps.assertElementByJsonPath(JSON, ARRAY_PATH, expectedJson,
-                new Options(Option.IGNORING_ARRAY_ORDER, Option.IGNORING_EXTRA_ARRAY_ITEMS));
+                EnumSet.of(Option.IGNORING_ARRAY_ORDER, Option.IGNORING_EXTRA_ARRAY_ITEMS));
         verifyJsonEqualityAssertion(ARRAY_PATH, expectedJson, ARRAY_PATH_RESULT);
     }
 
@@ -437,7 +437,7 @@ class JsonStepsTests
     {
         var expectedJson = "[1,2,3]";
 
-        steps.assertElementByJsonPath(JSON, ARRAY_PATH, expectedJson, new Options(Option.IGNORING_EXTRA_ARRAY_ITEMS));
+        steps.assertElementByJsonPath(JSON, ARRAY_PATH, expectedJson, EnumSet.of(Option.IGNORING_EXTRA_ARRAY_ITEMS));
 
         verify(softAssert).recordFailedAssertion("Array \"\" has invalid length, expected: <at least 3> but was: <2>.");
         verify(softAssert).recordFailedAssertion(
@@ -450,7 +450,7 @@ class JsonStepsTests
     {
         var expectedJson = NUMBER_PATH_RESULT;
         String jsonPath = NUMBER_INDEFINITE_PATH;
-        steps.assertElementByJsonPath(JSON, jsonPath, expectedJson, Options.empty());
+        steps.assertElementByJsonPath(JSON, jsonPath, expectedJson, Set.of());
         verifyJsonEqualityAssertion(jsonPath, expectedJson, expectedJson);
     }
 
@@ -467,8 +467,7 @@ class JsonStepsTests
         var json = "{ \"arrayKey\": [ { \"idKey\": \"q4jn0f8\", \"randValueKey\": \"i4t8ivC\"} ] }";
         var expected = "[ { \"idKey\": \"b54Y8id\", \"randValueKey\": \"i4t8ivC\"} ]";
 
-        steps.assertElementByJsonPath(json, "$.arrayKey.[?(@.idKey==\"b54Y8id\")]", expected,
-                Options.empty());
+        steps.assertElementByJsonPath(json, "$.arrayKey.[?(@.idKey==\"b54Y8id\")]", expected, Set.of());
 
         verify(softAssert).recordFailedAssertion("Array \"\" has different length, expected: <1> but was: <0>.");
         verify(softAssert).recordFailedAssertion("Array \"\" has different content. Missing values: "
