@@ -86,7 +86,7 @@ dependencies {
     implementation(group: 'commons-codec', name: 'commons-codec', version: '1.16.0')
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
     implementation(group: 'com.google.guava', name: 'guava', version: '32.1.2-jre')
-    implementation(group: 'io.github.classgraph', name: 'classgraph', version: '4.8.161')
+    implementation(group: 'io.github.classgraph', name: 'classgraph', version: '4.8.162')
     implementation(group:  'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.12')
     implementation(group: 'org.apache.commons', name: 'commons-jexl3', version: '3.3')
     implementation(group: 'net.datafaker', name: 'datafaker', version: '1.9.0')
