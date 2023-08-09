@@ -102,7 +102,7 @@ When I set request headers:
 \|name        \|value           \|
 \|Content-Type\|application/json\|
 When I execute HTTP POST request for resource with URL `${login-endpoint}`
-Then the response code is equal to '200'
+Then response code is equal to `200`
 ----
 
 [WARNING]
@@ -129,7 +129,7 @@ When I set request headers:
 \|name        \|value           \|
 \|Content-Type\|application/json\|
 When I execute HTTP POST request for resource with URL `/authenticate`
-Then the response code is equal to '200'
+Then response code is equal to `200`
 ----
 
 |===

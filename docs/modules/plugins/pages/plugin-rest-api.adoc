@@ -55,7 +55,7 @@ This expression allows to remove wrapping double quotes and use the value as is.
 [source,gherkin]
 ----
 When I save a JSON element from '${response}' by JSON path '$.id' to story variable 'id'
-When I send HTTP GET to the relative URL 'rest/#{removeWrappingDoubleQuotes(${id})}'
+When I execute HTTP GET request for resource with relative URL `rest/#{removeWrappingDoubleQuotes(${id})}`
 ----
 
 .Examples of the expressions removing wrapping double quotes
@@ -160,7 +160,7 @@ ${response}
 .Validate the HTTP response matches the regular expression
 [source,gherkin]
 ----
-When I send HTTP GET to the relative URL '/get?name=Content'
+When I execute HTTP GET request for resource with relative URL `/get?name=Content`
 Then `${response}` matches `.+Home.+`
 ----
 
@@ -194,7 +194,7 @@ ${response-code}
 .Validate the HTTP response code
 [source,gherkin]
 ----
-When I send HTTP GET to the relative URL '/get?name=Content'
+When I execute HTTP GET request for resource with relative URL `/get?name=Content`
 Then `${response-code}` is equal to `200`
 ----
 
@@ -393,7 +393,7 @@ Given request body: #{loadBinaryResource(/data/image.png)}
 When I set request headers:
 |name        |value    |
 |Content-Type|image/png|
-When I send HTTP POST to the relative URL '/upload/png'
+When I execute HTTP POST request for resource with relative URL `/upload/png`
 ----
 
 === Prepare multipart HTTP request
@@ -807,8 +807,8 @@ When I wait for response code $responseCode for $duration duration retrying $ret
 [source,gherkin]
 ----
 When I wait for response code `200` for `PT10S` duration retrying 3 times
-|step                                                        |
-|When I send HTTP GET to the relative URL '/delayed-resource'|
+|step                                                                               |
+|When I execute HTTP GET request for resource with relative URL `/delayed-resource` |
 ----
 
 === Validate content type of response body
