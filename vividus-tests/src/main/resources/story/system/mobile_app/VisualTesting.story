@@ -103,8 +103,8 @@ Examples:
 
 
 Scenario: Verify contextual check with ignored element
-When I tap on element located `accessibilityId(menuToggler)`
-When I tap on element located `xpath(<menuScrollViewXpath>)`
+When I tap on element located by `accessibilityId(menuToggler)`
+When I tap on element located by `xpath(<menuScrollViewXpath>)`
 When I wait until element located by `xpath(<scrollViewXpath>)` appears
 When I change context to element located by `xpath(<scrollViewXpath>)`
 When I <action> baseline with name `${target-platform}-context-with-ignore` ignoring:

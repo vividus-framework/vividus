@@ -578,12 +578,6 @@ The atomic actions performed are:
 When I tap on element located by `$locator`
 ----
 
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-When I tap on element located `$locator`
-----
-
 * `$locator` - <<_locator>>.
 
 .Tap on element
@@ -606,12 +600,6 @@ The atomic actions performed are:
 [source,gherkin]
 ----
 When I tap on element located by `$locator` with duration `$duration`
-----
-
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-When I tap on element located `$locator` with duration `$duration`
 ----
 
 * `$locator` - <<_locator>>.
@@ -845,12 +833,6 @@ the element, you need to switch the context to this element.
 When I swipe $direction to element located by `$locator` with duration $swipeDuration
 ----
 
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-When I swipe $direction to element located `$locator` with duration $swipeDuration
-----
-
 * `$direction` - The direction to swipe: `UP`, `DOWN`, `LEFT` or `RIGHT`.
 * `$locator` - <<_locator>>.
 * `$swipeDuration` - The swipe duration in {durations-format-link} format.
@@ -869,7 +851,7 @@ Then number of elements found by `accessibilityId(end-of-screen)` is equal to `1
 Scenario: Switch slides
 When I change context to element located by `accessibilityId(carousel)`
 Then number of elements found by `accessibilityId(slide 2)` is equal to `0`
-When I swipe LEFT to element located `accessibilityId(slide 2)` with duration PT1S
+When I swipe LEFT to element located by `accessibilityId(slide 2)` with duration PT1S
 Then number of elements found by `accessibilityId(slide 2)` is equal to `1`
 ----
 
