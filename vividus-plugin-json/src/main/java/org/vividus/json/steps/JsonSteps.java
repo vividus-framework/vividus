@@ -51,7 +51,7 @@ import org.vividus.util.json.JsonPathUtils;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
-import net.javacrumbs.jsonunit.core.internal.Options;
+import net.javacrumbs.jsonunit.core.Option;
 
 public class JsonSteps
 {
@@ -433,12 +433,15 @@ public class JsonSteps
      *                     IGNORING_ARRAY_ORDER, IGNORING_EXTRA_FIELDS, IGNORING_EXTRA_ARRAY_ITEMS, IGNORING_VALUES.
      */
     @Then("JSON element from `$json` by JSON path `$jsonPath` is equal to `$expectedJson`$options")
-    public void assertElementByJsonPath(String json, String jsonPath, String expectedJson, Options options)
+    public void assertElementByJsonPath(String json, String jsonPath, String expectedJson, Set<Option> options)
     {
         getJsonElementByJsonPath(json, jsonPath, expectedJson).ifPresent(actualData -> {
             JsonDiffMatcher jsonMatcher = new JsonDiffMatcher(attachmentPublisher, expectedJson)
-                    .withOptions(options)
                     .withTolerance(BigDecimal.ZERO);
+            for (Option option : options)
+            {
+                jsonMatcher = jsonMatcher.when(option);
+            }
             customJsonMatchers.forEach(jsonMatcher::withMatcher);
 
             jsonMatcher.matches(actualData);
