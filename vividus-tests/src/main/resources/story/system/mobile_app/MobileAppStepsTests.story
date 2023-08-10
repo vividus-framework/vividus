@@ -22,8 +22,7 @@ Scenario: Verify step: 'When I reinstall mobile application with bundle identifi
 Meta:
     @requirementId 2073
 When I tap on element located by `accessibilityId(menuToggler)`
-!-- Deprecated, replace with "When I tap on element located by `$locator`" after removal
-When I tap on element located `xpath(<menuInputXpath>)`
+When I tap on element located by `xpath(<menuInputXpath>)`
 When I reinstall mobile application with bundle identifier `${main-app}`
 When I wait until element located by `xpath(<textElementXpath>)->filter.text(Home)` appears
 
@@ -90,10 +89,6 @@ Scenario: Verify step: 'When I tap on element located by `$locator` with duratio
 Then number of elements found by `xpath(<menuButtonXpath>)` is equal to `0`
 When I tap on element located by `accessibilityId(menuToggler)` with duration `PT0.5S`
 Then number of elements found by `xpath(<menuButtonXpath>)` is equal to `1`
-!-- Deprecated, remove the rest of scenario after "When I tap on element located `$locator` with duration `$duration`" removal
-When I tap on element located `xpath(<menuInputXpath>)` with duration `PT0.5S`
-Then number of elements found by `xpath(<menuButtonXpath>)` is equal to `0`
-When I tap on element located by `accessibilityId(menuToggler)`
 
 
 Scenario: Verify step: 'When I tap on element located by `$locator`' and Attribute Filter
@@ -212,8 +207,7 @@ When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `xpath(<menuScrollViewXpath>)`
 Then number of elements found by `accessibilityId(header)` is equal to `1`
 Then number of elements found by `accessibilityId(footer)` is equal to `0`
-!-- Deprecated, replace with "When I swipe $direction to element located by `$locator` with duration $swipeDuration`" after removal
-When I swipe UP to element located `accessibilityId(footer)` with duration PT1S
+When I swipe UP to element located by `accessibilityId(footer)` with duration PT1S
 Then number of elements found by `accessibilityId(header)` is equal to `0`
 Then number of elements found by `accessibilityId(footer)` is equal to `1`
 When I swipe DOWN to element located by `accessibilityId(header)` with duration PT1S
@@ -248,7 +242,7 @@ Meta:
 When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `iosClassChain(**/XCUIElementTypeButton[$name == "Image"$])`
 When I upload file `/data/mobile-upload-image.png` to device
-When I tap on element located `iosNsPredicate(name == 'selectImage')`
+When I tap on element located by `iosNsPredicate(name == 'selectImage')`
 When I wait until element located by `accessibilityId(Photos)` appears
 When I tap on element located by `xpath((//XCUIElementTypeImage[contains(@name, "Photo")])[1])`
 Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` is equal to `1`
