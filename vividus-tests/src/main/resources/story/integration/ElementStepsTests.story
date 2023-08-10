@@ -177,10 +177,6 @@ Scenario: Step verification 'Then number of $state elements found by `$locator` 
 Given I am on page with URL `${vividus-test-site-url}`
 Then number of VISIBLE elements found by `tagName(img):a` is = `1`
 
-Scenario: Step verification Then elements located `$locator` are sorted by text in $sortingOrder order
-!-- Deprecated
-Given I am on page with URL `${vividus-test-site-url}/sortedListOfElement.html`
-Then elements located `By.tagName(h3)` are sorted by text in ASCENDING order
-
 Scenario: Step verification Then elements located by `$locator` are sorted by text in $sortingOrder order
+Given I am on page with URL `${vividus-test-site-url}/sortedListOfElement.html`
 Then elements located by `tagName(h3)` are sorted by text in ASCENDING order

@@ -1,3 +1,0 @@
-Composite: Then elements located `$locator` are sorted by text in $sortingOrder order
-!-- DEPRECATED: 0.6.0, Then elements located by `%1$s` are sorted by text in %2$s order
-Then elements located by `<locator>` are sorted by text in <sortingOrder> order

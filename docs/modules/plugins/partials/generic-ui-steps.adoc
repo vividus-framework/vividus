@@ -435,13 +435,7 @@ element with not empty text, otherwise the step fails.
 
 [source,gherkin]
 ----
-Then elements located by $locator are sorted by text in $sortingOrder order
-----
-
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-Then elements located $locator are sorted by text in $sortingOrder order
+Then elements located by `$locator` are sorted by text in $sortingOrder order
 ----
 
 * `$locator` - <<_locator>>.
