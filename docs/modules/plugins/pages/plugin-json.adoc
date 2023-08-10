@@ -39,40 +39,6 @@ The steps syntax uses two internal (VIVIDUS-only) terms:
 
 TIP: Use https://jsonpath-c48u.onrender.com/[JsonPath online validator] to test your JsonPath.
 
-=== Save JSON element value from context
-
-[WARNING]
-====
-The step is deprecated and will be removed in VIVIDUS 0.6.0. The replacement is
-the combination of the <<_json_context,dynamic variable>> and the
-<<_save_json_element_value,step saving JSON element value from the input>>.
-The replacement pattern is:
-[source,gherkin]
-----
-When I save JSON element value from `${json-context}` by JSON path `<jsonPath>` to <scopes> variable `<variableName>`
-----
-====
-
-Saves a value of JSON element found in JSON context into the variable with the
-specified name and scope.
-
-[source,gherkin]
-----
-When I save JSON element value from context by JSON path `$jsonPath` to $scopes variable `$variableName`
-----
-
-* `$jsonPath` - The {json-path} used to find JSON element value.
-* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The name of the variable to save the found JSON element value.
-
-.Validate the author of the first book
-[source,gherkin]
-----
-When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/json-path/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
-When I save JSON element value from context by JSON path `$.store.book[0].author` to scenario variable `author-of-first-book`
-Then `${author-of-first-book}` is equal to `Nigel Rees`
-----
-
 === Save JSON element value
 
 Saves a value of JSON element found in the given JSON into the variable with
@@ -177,38 +143,6 @@ When I convert JSON `{
 Then `${jsonData.store.book[1].title}` is equal to `Sword of Honour`
 ----
 
-=== Convert JSON to variable from context
-
-[WARNING]
-====
-The step is deprecated and will be removed in VIVIDUS 0.6.0. The replacement is
-the combination of the <<_json_context,dynamic variable>> and the
-<<_convert_json_to_variable,step converting JSON element from the input>>.
-The replacement pattern is:
-[source,gherkin]
-----
-When I convert JSON `${json-context}` to <scopes> variable `<variableName>`
-----
-====
-
-Converts JSON element into the variable with the specified name and scope.
-
-[source,gherkin]
-----
-When I convert JSON from context to $scopes variable `$variableName`
-----
-
-* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
-* `$variableName` - The name of the variable to save the found JSON element value.
-
-.Validate the price of the second book
-[source,gherkin]
-----
-When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/json-path/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
-When I convert JSON from context to scenario variable `jsonData`
-Then `${jsonData.store.book[1].price}` is = `12.99`
-----
-
 === Patch JSON
 
 Modified an input JSON using a sequence of operations defined in JSON patch.
@@ -258,32 +192,6 @@ When I find $comparisonRule '$elementsNumber' JSON elements from '$json' by '$js
 * `jsonPath` - The {json-path} used to find JSON elements.
 * `stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute for each found JSON element.
 
-[WARNING]
-====
-The context-based step is deprecated and will be removed in VIVIDUS 0.6.0. The
-<<_json_context,dynamic variable>> must be used instead. The replacement pattern is:
-[source,gherkin]
-----
-When I find $comparisonRule `<elementsNumber>` JSON elements from `${json-context}` by `<jsonPath>` and for each element do<stepsToExecute>
-----
-====
-
-.Context-based step
-[source,gherkin]
-----
-When I find $comparisonRule `$elementsNumber` JSON elements by `$jsonPath` and for each element do$stepsToExecute
-----
-.Alias
-[source,gherkin]
-----
-When I find $comparisonRule '$elementsNumber' JSON elements by '$jsonPath' and for each element doa$stepsToExecute
-----
-
-* `comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `elementsNumber` - The expected number of elements.
-* `jsonPath` - The {json-path} used to find JSON elements.
-* `stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute for each found JSON element.
-
 .Validate each `accountId` consists of digits
 [source,gherkin]
 ----
@@ -305,8 +213,8 @@ When I find > `0` JSON elements from `
   ]
 }
 ` by `$.accounts.*` and for each element do
-|step                                                                                 |
-|Then number of JSON elements by JSON path `$[?(@.accountId =~ /\d+/i)]` is equal to 1|
+|step                                                                                                         |
+|Then number of JSON elements from `${json-context}` by JSON path `$[?(@.accountId =~ /\d+/i)]` is equal to 1 |
 ----
 
 === Execute steps on JSON elements and exit on condition
@@ -342,83 +250,14 @@ When I find $comparisonRule '$elementsNumber' JSON elements in '$json' by '$json
 * `expectedValue` - The expected value of the variable.
 * `stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute for each found JSON element.
 
-[WARNING]
-====
-The context-based step is deprecated and will be removed in VIVIDUS 0.6.0. The
-<<_json_context,dynamic variable>> must be used instead. The replacement pattern is:
-[source,gherkin]
-----
-When I find <comparisonRule> `<elementsNumber>` JSON elements in `${json-context}` by `<jsonPath>` and until variable `<variableName>` <variableMatcher> `<expectedValue>` for each element I do:<stepsToExecute>
-----
-====
-
-.Context-based step
-[source,gherkin]
-----
-When I find $comparisonRule `$elementsNumber` JSON elements in context by `$jsonPath` and until variable `$variableName` $variableMatcher `$expectedValue` for each element I do:$stepsToExecute
-----
-
-.Context-based step alias
-[source,gherkin]
-----
-When I find $comparisonRule '$elementsNumber' JSON elements in context by '$jsonPath' and until variable '$variableName' $variableMatcher '$expectedValue' for each element I do:$stepsToExecute
-----
-
-* `comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `elementsNumber` - The expected number of elements.
-* `jsonPath` - The {json-path} used to find JSON elements.
-* `variableName` - The name of the variable to validate.
-* `variableMatcher` - xref:parameters:string-comparison-rule.adoc[The string comparison rule].
-* `expectedValue` - The expected value of the variable.
-* `stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute for each found JSON element.
-
 .Find the title from JSON
 [source,gherkin]
 ----
 When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/json-path/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
 When I find > `1` JSON elements in `${response}` by `$.store.book` and until variable `title` matches `M.+` for each element I do:
 |step|
-|When I save JSON element value from context by JSON path `$.title` to scenario variable `title`|
+|When I save JSON element value from `${json-context}` by JSON path `$.title` to scenario variable `title`|
 Then `Moby Dick` is = `${title}`
-----
-
-
-=== Validate JSON element value from context
-
-[WARNING]
-====
-The step is deprecated and will be removed in VIVIDUS 0.6.0. The replacement is
-the combination of the <<_json_context,dynamic variable>> and the
-<<_validate_json_element_value,step validating JSON element value from the input>>.
-The replacement pattern is:
-[source,gherkin]
-----
-Then JSON element value from `${json-context}` by JSON path `<jsonPath` <comparisonRule> `<expectedValue>`
-----
-====
-
-Validates if the JSON context contains the expected JSON element value matching
-the comparison rule by the specified JSON path.
-
-[source,gherkin]
-----
-Then JSON element value from context by JSON path `$jsonPath` $comparisonRule `$expectedValue`
-----
-
-* `$jsonPath` - The {json-path} used to find JSON element value.
-* `$comparisonRule` - The comparison rule to match JSON element value depending on the https://www.json.org/json-en.html[element type]:
-  ** for `string` - xref:parameters:string-comparison-rule.adoc[string comparison rules] are applicable,
-  ** for `number` - xref:parameters:comparison-rule.adoc[regular comparison rules] are applicable,
-  ** for `boolean` - only single rule `IS_EQUAL_TO` (readable form: `is equal to`) is allowed,
-  ** for `null` - only two rules `IS_EQUAL_TO` and `IS_NOT_EQUAL_TO` (readable forms: `is equal to` and `is not equal to`) are allowed
-  ** `array` and `object` are complex types and must be validated using another steps dedicated for JSON elements.
-* `$expectedValue` - The expected value of JSON element to match according to the comparison rule.
-
-.Validate the price of the third book is less than 9
-[source,gherkin]
-----
-When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/json-path/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
-Then JSON element value from context by JSON path `$.store.book[2].price` is less than `9`
 ----
 
 === Validate JSON element value

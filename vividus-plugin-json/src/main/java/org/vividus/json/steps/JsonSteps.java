@@ -222,8 +222,8 @@ public class JsonSteps
      * <pre>
      * When I find equal to `1` JSON elements from `{"parent_id":"","elements":[{"name": "1"},{"name": "2"}]}` by
      * `$.[?(@.parent_id=="")]` and for each element do
-     * |step                                                      |
-     * |Then number of JSON elements by JSON path `$..name` is = 2|
+     * |step                                                                              |
+     * |Then number of JSON elements from `${json-context}` by JSON path `$..name` is = 2 |
      * </pre>
      *
      * @param comparisonRule The rule to match the number of elements. The supported rules:
@@ -267,7 +267,7 @@ public class JsonSteps
      * When I find &gt; `1` JSON elements in `${json}` by `$.store.book` and until variable `title` matches `M.+`
      * for each element I do:
      * |step|
-     * |When I save JSON element value from context by JSON path `$.title` to scenario variable `title`|
+     * |When I save JSON element value from `${json-context}` by JSON path `$.title` to scenario variable `title`|
      * </pre>
      *
      * @param comparisonRule  The rule to match the number of elements. The supported rules:
