@@ -8,6 +8,8 @@ dependencies {
 
     implementation project(':vividus-extension-selenium')
 
+    implementation(group: 'io.qameta.allure', name: 'allure-plugin-api', version: versions.allure)
+
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
     implementation(group: 'javax.inject', name: 'javax.inject', version: '1')
 

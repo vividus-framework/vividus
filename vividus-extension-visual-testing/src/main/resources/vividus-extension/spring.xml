@@ -16,5 +16,24 @@
         <util:list id="stepBeanNames-Visual-Hooks">
             <idref bean="scenario" />
         </util:list>
+
+        <bean id="allureVisualPlugin" class="org.vividus.report.allure.plugin.EmbeddedPlugin">
+            <constructor-arg value="visual" />
+            <constructor-arg>
+                <util:list value-type="java.lang.String">
+                    <value>index.js</value>
+                </util:list>
+            </constructor-arg>
+            <constructor-arg>
+                <util:list value-type="java.lang.String">
+                    <value>styles.css</value>
+                </util:list>
+            </constructor-arg>
+            <constructor-arg>
+                <util:list value-type="java.lang.String">
+                    <bean class="org.vividus.report.allure.plugin.VisualPlugin" />
+                </util:list>
+            </constructor-arg>
+        </bean>
     </beans>
 </beans>

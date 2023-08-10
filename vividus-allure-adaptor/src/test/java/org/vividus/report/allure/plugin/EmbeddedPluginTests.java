@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.report.allure.plugin;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
@@ -32,9 +33,25 @@ class EmbeddedPluginTests
 {
     private static final String ID = "id";
     private static final List<String> RESOURCE_LIST = List.of();
+    private static final String CSS_RESOURCE = "styles.css";
 
     @Mock
     private Extension extension;
+
+    @Test
+    void testInitializationPluginWithJsAndCsAndExtensions()
+    {
+        var anotherExtension = mock(Extension.class);
+        var extensions = List.of(extension, anotherExtension);
+        var cssResourceList = List.of(CSS_RESOURCE);
+
+        EmbeddedPlugin plugin = new EmbeddedPlugin(ID, RESOURCE_LIST, cssResourceList, extensions);
+
+        assertEquals(ID, plugin.getConfig().getId());
+        assertEquals(RESOURCE_LIST, plugin.getConfig().getJsFiles());
+        assertEquals(cssResourceList, plugin.getConfig().getCssFiles());
+        assertEquals(extensions, plugin.getExtensions());
+    }
 
     @Test
     void testInitializationPluginWithJsAndExtension()
@@ -53,7 +70,7 @@ class EmbeddedPluginTests
         EmbeddedPlugin plugin = new EmbeddedPlugin(ID);
 
         assertEquals(ID, plugin.getConfig().getId());
-        assertEquals(List.of("styles.css"), plugin.getConfig().getCssFiles());
+        assertEquals(List.of(CSS_RESOURCE), plugin.getConfig().getCssFiles());
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,11 @@ import io.qameta.allure.plugin.DefaultPlugin;
 
 public class EmbeddedPlugin extends DefaultPlugin
 {
+    public EmbeddedPlugin(String id, List<String> jsFiles, List<String> cssFiles, List<Extension> extensions)
+    {
+        super(new PluginConfiguration().setId(id).setJsFiles(jsFiles).setCssFiles(cssFiles), extensions, null);
+    }
+
     public EmbeddedPlugin(String id, List<String> jsFiles, Extension extension)
     {
         super(new PluginConfiguration().setId(id).setJsFiles(jsFiles), List.of(extension), null);
