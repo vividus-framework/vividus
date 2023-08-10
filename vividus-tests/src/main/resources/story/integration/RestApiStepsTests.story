@@ -17,17 +17,13 @@ When I set request headers:
 |Content-Type|application/json|
 After:
 Scope: SCENARIO
-Then the response code is equal to '200'
+Then response code is equal to `200`
 Then JSON element by JSON path `$.json` is equal to `${request-body}`
 Then JSON element by JSON path `$.headers.Content-Type` is equal to `"application/json"`
 
 Scenario: Verify steps "Given request body: $content" and "When I execute HTTP $httpMethod request for resource with relative URL `$relativeURL`"
 Given request body: ${request-body}
 When I execute HTTP PUT request for resource with relative URL `/put`
-
-Scenario: Verify deprecated step "When I send HTTP $httpMethod to the relative URL '$relativeURL'"
-Given request body: ${request-body}
-When I send HTTP PUT to the relative URL '/put'
 
 Scenario: Verify steps "Given request body: $content" and "When I execute HTTP $httpMethod request for resource with URL `$url`"
 Given request body: ${request-body}

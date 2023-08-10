@@ -32,15 +32,9 @@ import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HeaderElement;
 import org.apache.hc.core5.http.message.MessageSupport;
 import org.apache.tika.Tika;
-import org.hamcrest.Matchers;
-import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
-import org.jbehave.core.steps.Parameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.vividus.annotation.Replacement;
 import org.vividus.context.VariableContext;
 import org.vividus.http.ConnectionDetails;
 import org.vividus.http.HttpTestContext;
@@ -58,8 +52,6 @@ import org.vividus.variable.VariableScope;
 
 public class HttpResponseValidationSteps
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpResponseValidationSteps.class);
-
     private static final String HTTP_RESPONSE_STATUS_CODE = "HTTP response status code";
     private static final Tika TIKA = new Tika();
 
@@ -78,21 +70,6 @@ public class HttpResponseValidationSteps
     }
 
     /**
-     * @deprecated Please use step <b>Then response does not contain body</b>
-     * <br>
-     * <br>
-     *
-     * Validates that the HTTP response does not contain a body.
-     */
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern = "Then response does not contain body")
-    @Then("the response does not contain body")
-    public void doesResponseNotContainBody()
-    {
-        doesResponseContainNoBody();
-    }
-
-    /**
      * Validates that the HTTP response does not contain a body.
      */
     @Then("response does not contain body")
@@ -100,42 +77,6 @@ public class HttpResponseValidationSteps
     {
         performIfHttpResponseIsPresent(
             response -> softAssert.assertNull("The response does not contain body", response.getResponseBody()));
-    }
-
-    /**
-     * @deprecated Please use step <b>Then `$variable1` is $comparisonRule `$variable2`</b> in conjunction with the
-     * <b>${response}</b> dynamic variable
-     * <br>
-     * <br>
-     *
-     * Checks HTTP response body matches to the specified content according to the provided string validation rule
-     * <p>
-     * <b>Actions performed at this step:</b>
-     * </p>
-     * <ul>
-     * <li>Retrieves response body from HTTP response</li>
-     * <li>Checks that response matches to the specified content according to the provided string validation rule</li>
-     * </ul>
-     * <p><i>Step can't be used without previous step with HTTP-method</i></p>
-     *
-     * @param comparisonRule The rule to match the variable value. The supported rules:
-     *                       <ul>
-     *                       <li>is equal to</li>
-     *                       <li>contains</li>
-     *                       <li>does not contain</li>
-     *                       <li>matches</li>
-     *                       </ul>
-     * @param content        The body content part
-     */
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    @Then("the response body $comparisonRule '$content'")
-    public void doesResponseBodyMatch(StringComparisonRule comparisonRule, String content)
-    {
-        LOGGER.warn("The step: \"Then the response body $comparisonRule '$content'\" is deprecated and will be removed"
-                + " in VIVIDUS 0.6.0. Use ${response} dynamic variable with \"Then `$variable1` is $comparisonRule "
-                + "`$variable2`\" step");
-        performIfHttpResponseIsPresent(response -> softAssert.assertThat("HTTP response body",
-                response.getResponseBodyAsString(), comparisonRule.createMatcher(content)));
     }
 
     /**
@@ -166,24 +107,6 @@ public class HttpResponseValidationSteps
             softAssert.assertThat("Content type of response body", actualContentType,
                     comparisonRule.createMatcher(contentType));
         });
-    }
-
-    /**
-     * @deprecated Please use step <b>Then response body $validationRule resource at `$resourcePath`</b>
-     * <br>
-     * <br>
-     *
-     * Compares the HTTP response body against the resource data according to the provided rule.
-     *
-     * @param validationRule The validation rule, either <b>is equal to</b> or <b>is not equal to</b>
-     * @param resourcePath   The resource path
-     */
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern = "Then response body %1$s resource at `%2$s`")
-    @Then(value = "the response body $validationRule resource at '$resourcePath'", priority = 1)
-    public void doesResponseBodyMatchResource(ByteArrayValidationRule validationRule, String resourcePath)
-    {
-        compareResponseBodyAgainstResource(validationRule, resourcePath);
     }
 
     /**
@@ -222,34 +145,6 @@ public class HttpResponseValidationSteps
     }
 
     /**
-     * @deprecated Please use step <b>Then response code is $comparisonRule `$responseCode`</b>
-     * <br>
-     * <br>
-     *
-     * Compares the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">HTTP response status code</a>
-     * against the expected number.
-     *
-     * @param comparisonRule The rule to match the variable value. The supported rules:
-     *                       <ul>
-     *                       <li>less than (&lt;)</li>
-     *                       <li>less than or equal to (&lt;=)</li>
-     *                       <li>greater than (&gt;)</li>
-     *                       <li>greater than or equal to (&gt;=)</li>
-     *                       <li>equal to (=)</li>
-     *                       <li>not equal to (!=)</li>
-     *                       </ul>
-     * @param responseCode   The expected <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">HTTP
-     * response status code</a>
-     */
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern = "Then response code is %1$s `%2$s`")
-    @Then("the response code is $comparisonRule '$responseCode'")
-    public void assertResponseCode(ComparisonRule comparisonRule, int responseCode)
-    {
-        validateResponseCode(comparisonRule, responseCode);
-    }
-
-    /**
      * Compares the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">HTTP response status code</a>
      * against the expected number.
      *
@@ -273,26 +168,6 @@ public class HttpResponseValidationSteps
     }
 
     /**
-     * @deprecated Please use step <b>Then response time is $comparisonRule `$responseTime` milliseconds</b>
-     * <br>
-     * <br>
-     *
-     * Validates that the HTTP response is less than the expected number in milliseconds.
-     *
-     * @param responseTimeThresholdMs The maximum response time in milliseconds
-     */
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.6.0",
-                 replacementFormatPattern = "Then response time is less than `%1$s` milliseconds")
-    @Then("the response time should be less than '$responseTimeThresholdMs' milliseconds")
-    public void thenTheResponseTimeShouldBeLessThan(long responseTimeThresholdMs)
-    {
-        performIfHttpResponseIsPresent(
-            response -> softAssert.assertThat("The response time is less than response time threshold.",
-                    response.getResponseTimeInMs(), Matchers.lessThan(responseTimeThresholdMs)));
-    }
-
-    /**
      * Compares the HTTP response time against the expected number in milliseconds.
      *
      * @param comparisonRule The rule to match the variable value. The supported rules:
@@ -311,61 +186,6 @@ public class HttpResponseValidationSteps
     {
         performIfHttpResponseIsPresent(response -> softAssert.assertThat("HTTP response time",
                 response.getResponseTimeInMs(), comparisonRule.getComparisonRule(responseTime)));
-    }
-
-    /**
-     * @deprecated Please use step <b>Then response header `$headerName` contains elements:$elements</b>
-     * <br>
-     * <br>
-     *
-     * Validates that the response header with the specified name contains elements. Might be useful to verify such
-     * HTTP headers as <b>Set-Cookie</b> that have values that can be decomposed into multiple elements.
-     * <br>
-     * <br>
-     * <i>HTTP header with elements format:</i>
-     * <br>
-     * <code>
-     * header = [ element ] *( "," [ element ] )
-     * </code>
-     * <br>
-     * <br>
-     * <i>Step example:</i>
-     * <br>
-     * <code>
-     * Then response header 'Set-Cookie' contains attribute:
-     * <br>
-     * |attribute|
-     * <br>
-     * |JSESSION |
-     * <br>
-     * |clientId |
-     * </code>
-     *
-     * @param httpHeaderName The <a href="https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Response_fields">
-     * HTTP response header</a> name
-     * @param attributes The ExamplesTable with expected elements
-     */
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    @Then("response header '$httpHeaderName' contains attribute:$attributes")
-    public void assertHeaderContainsAttributes(String httpHeaderName, ExamplesTable attributes)
-    {
-        LOGGER.warn("The step \"Then response header '$httpHeaderName' contains attribute:$attributes\" "
-                + "is deprecated and will be removed in VIVIDUS 0.6.0. "
-                + "Please use step \"Then response header `$headerName` contains elements:$elements\"");
-        performIfHttpResponseIsPresent(response ->
-        {
-            getHeaderByName(response, httpHeaderName).ifPresent(header ->
-            {
-                List<String> actualAttributes = extractHeaderElementsNames(header);
-                for (Parameters row : attributes.getRowsAsParameters(true))
-                {
-                    String expectedAttribute = row.valueAs("attribute", String.class);
-                    softAssert.assertThat(
-                            String.format("%s header contains %s attribute", httpHeaderName, expectedAttribute),
-                            actualAttributes, contains(expectedAttribute));
-                }
-            });
-        });
     }
 
     /**
@@ -411,34 +231,6 @@ public class HttpResponseValidationSteps
     }
 
     /**
-     * @deprecated Please use step <b>Then value of response header `$headerName` $comparisonRule `$value`</b>
-     * <br>
-     * <br>
-     *
-     * Compares the header value against the expected value according to the comparison rule.
-     *
-     * @param httpHeaderName The <a href="https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Response_fields">
-     * HTTP response header</a> name
-     * @param comparisonRule The rule to match the variable value. The supported rules:
-     *                       <ul>
-     *                       <li>is equal to</li>
-     *                       <li>contains</li>
-     *                       <li>does not contain</li>
-     *                       <li>matches</li>
-     *                       </ul>
-     * @param value          The expected HTTP header value
-     */
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.6.0",
-                 replacementFormatPattern = "Then value of response header `%1$s` %2$s `%3$s`")
-    @Then("the value of the response header '$httpHeaderName' $comparisonRule '$value'")
-    @Alias("the value of the response header \"$httpHeaderName\" $comparisonRule \"$value\"")
-    public void doesHeaderMatch(String httpHeaderName, StringComparisonRule comparisonRule, String value)
-    {
-        validateHeaderValue(httpHeaderName, comparisonRule, value);
-    }
-
-    /**
      * Compares the header value against the expected value according to the comparison rule.
      *
      * @param headerName     The <a href="https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Response_fields">
@@ -458,38 +250,6 @@ public class HttpResponseValidationSteps
         performIfHttpResponseIsPresent(response -> getHeaderValueByName(response, headerName)
                 .ifPresent(actualValue -> softAssert.assertThat("'" + headerName + "' header value", actualValue,
                         comparisonRule.createMatcher(value))));
-    }
-
-    /**
-     * @deprecated Please use step <b>Then number of response headers with name `$headerName` is $comparisonRule
-     * $number</b>
-     * <br>
-     * <br>
-     *
-     * Validates the number of HTTP response headers filtered by the specified name.
-     *
-     * @param headerName     The <a href="https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Response_fields">
-     * HTTP response header</a> name
-     * @param comparisonRule The rule to match the quantity of headers. The supported rules:
-     *                       <ul>
-     *                       <li>less than (&lt;)</li>
-     *                       <li>less than or equal to (&lt;=)</li>
-     *                       <li>greater than (&gt;)</li>
-     *                       <li>greater than or equal to (&gt;=)</li>
-     *                       <li>equal to (=)</li>
-     *                       <li>not equal to (!=)</li>
-     *                       </ul>
-     * @param value          The expected number of headers
-     */
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.6.0",
-                 replacementFormatPattern = "Then number of response headers with name `%1$s` is %2$s %3$s")
-    @Then("the number of the response headers with the name '$headerName' is $comparisonRule $value")
-    public void isHeaderWithNameFound(String headerName, ComparisonRule comparisonRule, int value)
-    {
-        performIfHttpResponseIsPresent(response -> softAssert.assertThat(
-                String.format("The number of the response headers with the name '%s'", headerName),
-                (int) response.getHeadersByName(headerName).count(), comparisonRule.getComparisonRule(value)));
     }
 
     /**
@@ -517,36 +277,6 @@ public class HttpResponseValidationSteps
     }
 
     /**
-     * @deprecated Please use step <b>When I save response header `$headerName` value to $scopes variable
-     * `$variableName`</b>
-     * <br>
-     * <br>
-     *
-     * Saves the HTTP response header value into a variable.
-     *
-     * @param httpHeaderName The <a href="https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Response_fields">
-     * HTTP response header</a> name
-     * @param scopes         The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable
-     *                       scopes.<br>
-     *                       <i>Available scopes:</i>
-     *                       <ul>
-     *                       <li><b>STEP</b> - the variable will be available only within the step,
-     *                       <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     *                       <li><b>STORY</b> - the variable will be available within the whole story,
-     *                       <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     *                       </ul>
-     * @param variableName   The variable name to store the header value.
-     */
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.6.0",
-                 replacementFormatPattern = "When I save response header `%1$s` value to %2$s variable `%3$s`")
-    @When("I save response header '$httpHeaderName' value to $scopes variable '$variableName'")
-    public void saveHeaderValue(String httpHeaderName, Set<VariableScope> scopes, String variableName)
-    {
-        saveHeaderValueToVariable(httpHeaderName, scopes, variableName);
-    }
-
-    /**
      * Saves the HTTP response header value into a variable.
      *
      * @param headerName   The <a href="https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Response_fields">
@@ -567,24 +297,6 @@ public class HttpResponseValidationSteps
     {
         performIfHttpResponseIsPresent(response -> getHeaderValueByName(response, headerName)
                 .ifPresent(value -> variableContext.putVariable(scopes, variableName, value)));
-    }
-
-    /**
-     * @deprecated Please use step <b>Then connection is secured using $securityProtocol protocol</b>
-     * <br>
-     * <br>
-     *
-     * Validates that the HTTP connection is secured with the defined security protocol.
-     *
-     * @param securityProtocol The expected security protocol, e.g. <b>TLSv1.2</b>, <b>TLSv1.3</b>
-     */
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.6.0",
-                 replacementFormatPattern = "Then connection is secured using %1$s protocol")
-    @Then("the connection is secured using $securityProtocol protocol")
-    public void isConnectionSecured(String securityProtocol)
-    {
-        validateConnectionIsSecured(securityProtocol);
     }
 
     /**

@@ -16,10 +16,7 @@
 
 package org.vividus.steps.api;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -38,11 +35,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
-
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.hamcrest.Matchers;
@@ -67,12 +59,9 @@ import org.vividus.util.ResourceUtils;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
-@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
-@SuppressWarnings("checkstyle:MethodCount")
+@ExtendWith(MockitoExtension.class)
 class HttpResponseValidationStepsTests
 {
-    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(HttpResponseValidationSteps.class);
-
     private static final String ACCEPT_ENCODING_HEADER_NAME = "Accept-Encoding";
     private static final Header ACCEPT_ENCODING_HEADER = new BasicHeader(ACCEPT_ENCODING_HEADER_NAME,
             "deflate, gzip;q=1.0, *;q=0.5");
@@ -81,10 +70,7 @@ class HttpResponseValidationStepsTests
 
     private static final String HEADER_IS_PRESENT = " header is present";
     private static final String RESPONSE_BODY = "testResponse";
-    private static final String HTTP_RESPONSE_BODY = "HTTP response body";
     private static final String VARIABLE_NAME = "variableName";
-    private static final String NUMBER_RESPONSE_HEADERS_WITH_NAME =
-            "The number of the response headers with the name '%s'";
     private static final String NUMBER_OF_RESPONSE_HEADERS = "Number of the response headers with name '%s'";
     private static final String HTTP_RESPONSE_IS_NOT_NULL = "HTTP response is not null";
     private static final String TLS_V1_3 = "TLSv1.3";
@@ -119,43 +105,6 @@ class HttpResponseValidationStepsTests
     private final HttpResponse httpResponse = new HttpResponse();
 
     @Test
-    void testGetHeaderAttributes()
-    {
-        mockHttpResponse();
-        httpResponse.setResponseHeaders(ACCEPT_ENCODING_HEADER);
-        when(softAssert.assertTrue(ACCEPT_ENCODING_HEADER_NAME + HEADER_IS_PRESENT, true)).thenReturn(true);
-        ExamplesTable attributes = new ExamplesTable("|attribute|\n|gzip|");
-        httpResponseValidationSteps.assertHeaderContainsAttributes(ACCEPT_ENCODING_HEADER_NAME, attributes);
-        verify(softAssert).assertThat(
-                eq(String.format("%s header contains %s attribute", ACCEPT_ENCODING_HEADER_NAME, HEADER_ELEMENT_NAME)),
-                eq(HEADER_ELEMENT_NAMES),
-                argThat(matcher -> matcher.toString().equals(Matchers.contains(HEADER_ELEMENT_NAME).toString())));
-        assertThat(LOGGER.getLoggingEvents(),
-                is(List.of(warn("The step \"Then response header '$httpHeaderName' contains attribute:$attributes\" "
-                        + "is deprecated and will be removed in VIVIDUS 0.6.0. "
-                        + "Please use step \"Then response header `$headerName` contains elements:$elements\""))));
-    }
-
-    @Test
-    void testGetHeaderAttributesHeaderNotFound()
-    {
-        mockHttpResponse();
-        Header header = mock(Header.class);
-        when(header.getName()).thenReturn("Vary");
-        httpResponse.setResponseHeaders(header);
-        ExamplesTable attribute = new ExamplesTable("|attribute|\n|any|");
-        httpResponseValidationSteps.assertHeaderContainsAttributes(ACCEPT_ENCODING_HEADER_NAME, attribute);
-        verify(softAssert).assertTrue(ACCEPT_ENCODING_HEADER_NAME + HEADER_IS_PRESENT, false);
-    }
-
-    @Test
-    void testGetHeaderAttributesNoHttpResponse()
-    {
-        httpResponseValidationSteps.assertHeaderContainsAttributes(ACCEPT_ENCODING_HEADER_NAME, ExamplesTable.empty());
-        verifyNoHttpResponse();
-    }
-
-    @Test
     void shouldCheckThatHeaderWithNameContainsElements()
     {
         mockHttpResponse();
@@ -185,24 +134,6 @@ class HttpResponseValidationStepsTests
     void shouldNotCheckHeaderElementsIfHttpCallWasNotPerformed()
     {
         httpResponseValidationSteps.checkHeaderContainsElements(ACCEPT_ENCODING_HEADER_NAME, ExamplesTable.empty());
-        verifyNoHttpResponse();
-    }
-
-    @Test
-    void testThenTheResponseTimeShouldBeLessThan()
-    {
-        mockHttpResponse();
-        long responseTime = 1000L;
-        httpResponse.setResponseTimeInMs(responseTime);
-        httpResponseValidationSteps.thenTheResponseTimeShouldBeLessThan(responseTime);
-        verify(softAssert).assertThat(eq("The response time is less than response time threshold."),
-                eq(responseTime), argThat(matcher -> lessThan(responseTime).toString().equals(matcher.toString())));
-    }
-
-    @Test
-    void testThenTheResponseTimeShouldBeLessThanNoHttpResponse()
-    {
-        httpResponseValidationSteps.thenTheResponseTimeShouldBeLessThan(1000L);
         verifyNoHttpResponse();
     }
 
@@ -245,24 +176,6 @@ class HttpResponseValidationStepsTests
     }
 
     @Test
-    void testThenTheResponseCodeShouldBeEqualTo()
-    {
-        mockHttpResponse();
-        int validCode = 200;
-        httpResponse.setStatusCode(validCode);
-        httpResponseValidationSteps.assertResponseCode(ComparisonRule.EQUAL_TO, validCode);
-        verify(softAssert).assertThat(eq(HTTP_RESPONSE_STATUS_CODE), eq(validCode), argThat(
-                matcher -> matcher.toString().equals(ComparisonRule.EQUAL_TO.getComparisonRule(validCode).toString())));
-    }
-
-    @Test
-    void testThenTheResponseCodeShouldBeEqualToNoHttpResponse()
-    {
-        httpResponseValidationSteps.assertResponseCode(ComparisonRule.EQUAL_TO, 200);
-        verifyNoHttpResponse();
-    }
-
-    @Test
     void shouldValidateResponseCode()
     {
         mockHttpResponse();
@@ -277,46 +190,6 @@ class HttpResponseValidationStepsTests
     void shouldNotValidateResponseCodeIfHttpCallWasNotPerformed()
     {
         httpResponseValidationSteps.validateResponseCode(ComparisonRule.EQUAL_TO, 200);
-        verifyNoHttpResponse();
-    }
-
-    @Test
-    void testDoesResponseBodyEqualToContent()
-    {
-        mockHttpResponse();
-        String body = RESPONSE_BODY;
-        httpResponse.setResponseBody(body.getBytes(StandardCharsets.UTF_8));
-        httpResponseValidationSteps.doesResponseBodyMatch(IS_EQUAL_TO, body);
-        verify(softAssert).assertThat(eq(HTTP_RESPONSE_BODY), eq(body),
-                argThat(arg -> "\"testResponse\"".equals(arg.toString())));
-        assertThat(LOGGER.getLoggingEvents(), is(List.of(warn(
-                "The step: \"Then the response body $comparisonRule '$content'\" is deprecated and will be removed in"
-                + " VIVIDUS 0.6.0. Use ${response} dynamic variable with \"Then `$variable1` is $comparisonRule "
-                + "`$variable2`\" step"))));
-    }
-
-    @Test
-    void testDoesResponseBodyEqualToContentNoHttpResponse()
-    {
-        httpResponseValidationSteps.doesResponseBodyMatch(IS_EQUAL_TO, StringUtils.EMPTY);
-        verifyNoHttpResponse();
-    }
-
-    @Test
-    void testDoesResponseBodyMatchResource()
-    {
-        mockHttpResponse();
-        when(softAssert.assertEquals(ARRAY_SIZE, 6, 6)).thenReturn(true);
-        httpResponse.setResponseBody(new byte[] { 123, 98, 111, 100, 121, 125 });
-        httpResponseValidationSteps.doesResponseBodyMatchResource(ByteArrayValidationRule.IS_EQUAL_TO,
-                RESPONSE_BODY_TXT);
-        verify(softAssert).recordPassedAssertion(EQUAL_ARRAYS);
-    }
-
-    @Test
-    void testDoesResponseBodyMatchResourceNoHttpResponse()
-    {
-        httpResponseValidationSteps.doesResponseBodyMatchResource(ByteArrayValidationRule.IS_EQUAL_TO, "body.txt");
         verifyNoHttpResponse();
     }
 
@@ -376,24 +249,6 @@ class HttpResponseValidationStepsTests
     }
 
     @Test
-    void testSaveHeaderValue()
-    {
-        mockHttpResponse();
-        String headerValue = mockHeaderRetrieval();
-        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        httpResponseValidationSteps.saveHeaderValue(ACCEPT_ENCODING_HEADER_NAME, scopes, VARIABLE_NAME);
-        verify(variableContext).putVariable(scopes, VARIABLE_NAME, headerValue);
-    }
-
-    @Test
-    void testSaveHeaderValueNoHttpResponse()
-    {
-        httpResponseValidationSteps.saveHeaderValue(ACCEPT_ENCODING_HEADER_NAME, Set.of(VariableScope.SCENARIO),
-                VARIABLE_NAME);
-        verifyNoHttpResponse();
-    }
-
-    @Test
     void shouldSaveHeaderValueToVariable()
     {
         mockHttpResponse();
@@ -408,27 +263,6 @@ class HttpResponseValidationStepsTests
     {
         httpResponseValidationSteps.saveHeaderValueToVariable(ACCEPT_ENCODING_HEADER_NAME,
                 Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
-        verifyNoHttpResponse();
-    }
-
-    @Test
-    void testDoesHeaderEqualToValue()
-    {
-        mockHttpResponse();
-        String headerValue = mockHeaderRetrieval();
-        httpResponseValidationSteps.doesHeaderMatch(ACCEPT_ENCODING_HEADER_NAME, IS_EQUAL_TO,
-                headerValue);
-        verify(softAssert).assertThat(
-                eq(String.format(HEADER_VALUE, ACCEPT_ENCODING_HEADER_NAME)),
-                eq(headerValue),
-                argThat(matcher -> matcher.toString().equals(equalTo(headerValue).toString()))
-        );
-    }
-
-    @Test
-    void testDoesHeaderEqualToValueNoHttpResponse()
-    {
-        httpResponseValidationSteps.doesHeaderMatch(ACCEPT_ENCODING_HEADER_NAME, IS_EQUAL_TO, "value");
         verifyNoHttpResponse();
     }
 
@@ -454,17 +288,6 @@ class HttpResponseValidationStepsTests
     }
 
     @Test
-    void testSaveHeaderValueHeaderNotFound()
-    {
-        mockHttpResponse();
-        httpResponse.setResponseHeaders();
-        httpResponseValidationSteps.saveHeaderValue(ACCEPT_ENCODING_HEADER_NAME, Set.of(VariableScope.SCENARIO),
-                VARIABLE_NAME);
-        verify(softAssert).assertTrue(ACCEPT_ENCODING_HEADER_NAME + HEADER_IS_PRESENT, false);
-        verifyNoInteractions(variableContext);
-    }
-
-    @Test
     void shouldNotSaveHeaderValueIfHeaderByNameIsNotFound()
     {
         mockHttpResponse();
@@ -473,15 +296,6 @@ class HttpResponseValidationStepsTests
                 Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
         verify(softAssert).assertTrue(ACCEPT_ENCODING_HEADER_NAME + HEADER_IS_PRESENT, false);
         verifyNoInteractions(variableContext);
-    }
-
-    @Test
-    void testDoesResponseNotContainBody()
-    {
-        mockHttpResponse();
-        httpResponse.setResponseBody(null);
-        httpResponseValidationSteps.doesResponseNotContainBody();
-        verify(softAssert).assertNull(RESPONSE_WITH_NO_BODY, null);
     }
 
     @Test
@@ -494,47 +308,9 @@ class HttpResponseValidationStepsTests
     }
 
     @Test
-    void testDoesResponseNotContainBodyNoHttpResponse()
-    {
-        httpResponseValidationSteps.doesResponseNotContainBody();
-        verifyNoHttpResponse();
-    }
-
-    @Test
     void shouldNotCheckResponseIfHttpCallWasNotPerformed()
     {
         httpResponseValidationSteps.doesResponseContainNoBody();
-        verifyNoHttpResponse();
-    }
-
-    @Test
-    void testResponseNotContainsHeadersWithName()
-    {
-        mockHttpResponse();
-        httpResponse.setResponseHeaders();
-        httpResponseValidationSteps.isHeaderWithNameFound(ACCEPT_ENCODING_HEADER_NAME, ComparisonRule.EQUAL_TO, 1);
-        verify(softAssert).assertThat(eq(String.format(NUMBER_RESPONSE_HEADERS_WITH_NAME, ACCEPT_ENCODING_HEADER_NAME)),
-                eq(0),
-                argThat(m -> ComparisonRule.EQUAL_TO.getComparisonRule(1).toString().equals(m.toString())));
-    }
-
-    @Test
-    void testResponseContainsHeadersWithName()
-    {
-        mockHttpResponse();
-        Header header = mock(Header.class);
-        when(header.getName()).thenReturn(ACCEPT_ENCODING_HEADER_NAME);
-        httpResponse.setResponseHeaders(header, header);
-        httpResponseValidationSteps.isHeaderWithNameFound(ACCEPT_ENCODING_HEADER_NAME, ComparisonRule.EQUAL_TO, 2);
-        verify(softAssert).assertThat(eq(String.format(NUMBER_RESPONSE_HEADERS_WITH_NAME, ACCEPT_ENCODING_HEADER_NAME)),
-                eq(2),
-                argThat(m -> ComparisonRule.EQUAL_TO.getComparisonRule(2).toString().equals(m.toString())));
-    }
-
-    @Test
-    void testResponseContainsHeadersWithNameNoHttpResponse()
-    {
-        httpResponseValidationSteps.isHeaderWithNameFound(ACCEPT_ENCODING_HEADER_NAME, ComparisonRule.EQUAL_TO, 1);
         verifyNoHttpResponse();
     }
 
@@ -568,20 +344,6 @@ class HttpResponseValidationStepsTests
         httpResponseValidationSteps.validateNumberOfResponseHeaders(ACCEPT_ENCODING_HEADER_NAME,
                 ComparisonRule.EQUAL_TO, 1);
         verifyNoHttpResponse();
-    }
-
-    @Test
-    void shouldValidateSecuredConnectionDeprecated()
-    {
-        boolean secure = true;
-        ConnectionDetails connectionDetails = new ConnectionDetails();
-        connectionDetails.setSecure(secure);
-        connectionDetails.setSecurityProtocol(TLS_V1_3);
-
-        when(httpTestContext.getConnectionDetails()).thenReturn(connectionDetails);
-        when(softAssert.assertTrue(CONNECTION_SECURE_ASSERTION, secure)).thenReturn(Boolean.TRUE);
-        httpResponseValidationSteps.isConnectionSecured(TLS_V1_3);
-        verify(softAssert).assertEquals(SECURITY_PROTOCOL, TLS_V1_3, TLS_V1_3);
     }
 
     @Test

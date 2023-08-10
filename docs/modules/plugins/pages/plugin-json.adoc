@@ -19,7 +19,7 @@ ${json-context}
 .Validate the HTTP response matches the regular expression
 [source,gherkin]
 ----
-When I send HTTP GET to the relative URL '/get?productsPerPage=5'
+When I execute HTTP GET request for resource with relative URL `/get?productsPerPage=5`
 Then number of JSON elements from `${json-context}` by JSON path `$.product` is equal to 5
 ----
 
