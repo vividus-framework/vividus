@@ -18,8 +18,8 @@ When I set request headers:
 After:
 Scope: SCENARIO
 Then response code is equal to `200`
-Then JSON element by JSON path `$.json` is equal to `${request-body}`
-Then JSON element by JSON path `$.headers.Content-Type` is equal to `"application/json"`
+Then JSON element from `${json-context}` by JSON path `$.json` is equal to `${request-body}`
+Then JSON element from `${json-context}` by JSON path `$.headers.Content-Type` is equal to `"application/json"`
 
 Scenario: Verify steps "Given request body: $content" and "When I execute HTTP $httpMethod request for resource with relative URL `$relativeURL`"
 Given request body: ${request-body}

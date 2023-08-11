@@ -72,23 +72,6 @@ Examples:
 |$.store.book[3].hardcover |true           |
 |$.expensive               |10             |
 
-Scenario: Step verification 'When I save JSON element value from context by JSON path `$jsonPath` to $scopes variable `$variableName`'
-Meta:
-    @requirementId 2114
-When I find = `1` JSON elements from `${json}` by `$.store` and for each element do
-|step                                                                                                         |
-|When I save JSON element value from context by JSON path `<jsonPath>` to scenario variable `jsonElementValue`|
-|Then `${jsonElementValue}` is equal to `<expected>`                                                          |
-Examples:
-|jsonPath            |expected       |
-|$.book[0].category  |reference      |
-|$.book[0].isbn      |null           |
-|$.book[1].price     |12.99          |
-|$.book[1].hardcover |false          |
-|$.book[2].price     |9              |
-|$.book[2].attributes|{"used": false}|
-|$.book[3].hardcover |true           |
-
 Scenario: Step verification 'Then JSON element value from `$json` by JSON path `$jsonPath` $comparisonRule `$expectedValue`'
 Meta:
     @requirementId 2114
@@ -108,51 +91,19 @@ Examples:
 |$.store.book[1]           |is not equal to|#{null}        |
 |$.store.book[0].isbn      |is not equal to|12             |
 
-Scenario: Step verification 'Then JSON element value from context by JSON path `$jsonPath` $comparisonRule `$expectedValue`'
-Meta:
-    @requirementId 2114
-When I find = `1` JSON elements from `${json}` by `$.store` and for each element do
-|step                                                                                   |
-|Then JSON element value from context by JSON path `<jsonPath>` <rule> `<expected>`|
-Examples:
-|jsonPath            |rule           |expected       |
-|$.book[0].category  |contains       |feren          |
-!-- |$.book[0].isbn      |is equal to    |#{null}        | <- TODO: think of ability to pass #{null} to sub-steps
-|$.book[1].price     |is greater than|12.50          |
-|$.book[1].hardcover |is equal to    |false          |
-|$.book[2].price     |is equal to    |9              |
-|$.book[2].attributes|is equal to    |{"used": false}|
-|$.book[3].hardcover |is equal to    |true           |
-
-Scenario: Step verification: 'When I convert JSON `$json` to $scopes variable `$variableName`' and 'When I convert JSON from context to $scopes variable `$variableName`'
+Scenario: Step verification: 'When I convert JSON `$json` to $scopes variable `$variableName`'
 When I convert JSON `${json}` to scenario variable `jsonData`
 Then `${jsonData.store.book[0].price}` is = `8.95`
-When I find = `1` JSON elements from `${json}` by `$..book[?(@.title == 'Sword of Honour')]` and for each element do
-|step|
-|When I convert JSON from context to scenario variable `jsonData`|
-Then `${jsonData.title}` is = `Sword of Honour`
 
 
 Scenario: Step verification 'When I find $comparisonRule `$elementsNumber` JSON elements in `$json` by `$jsonPath` and until variable `$variableName` $comparisonRule `$expectedValue` for each element I do:$stepsToExecute'
 When I find > `1` JSON elements in `${json}` by `$.store.book` and until variable `title` matches `M.+` for each element I do:
 |step|
-|When I save JSON element value from context by JSON path `$.title` to scenario variable `title`|
+|When I save JSON element value from `${json-context}` by JSON path `$.title` to scenario variable `title`|
 Then `Moby Dick` is = `${title}`
 When I find > `1` JSON elements in `${json}` by `$.store.book` and until variable `title` matches `S.+` for each element I do:
 |step|
-|When I save JSON element value from context by JSON path `$.title` to scenario variable `title`|
-Then `Sayings of the Century` is = `${title}`
-
-
-Scenario: Step verification 'When I find $comparisonRule `$elementsNumber` JSON elements in context by `$jsonPath` and until variable `$variableName` $comparisonRule `$expectedValue` for each element I do:$stepsToExecute'
-When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/json-path/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
-When I find > `1` JSON elements in context by `$.store.book` and until variable `title` matches `M.+` for each element I do:
-|step                                                                                           |
-|When I save JSON element value from context by JSON path `$.title` to scenario variable `title`|
-Then `Moby Dick` is = `${title}`
-When I find > `1` JSON elements in context by `$.store.book` and until variable `title` matches `S.+` for each element I do:
-|step                                                                                           |
-|When I save JSON element value from context by JSON path `$.title` to scenario variable `title`|
+|When I save JSON element value from `${json-context}` by JSON path `$.title` to scenario variable `title`|
 Then `Sayings of the Century` is = `${title}`
 
 
