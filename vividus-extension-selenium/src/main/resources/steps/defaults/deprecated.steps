@@ -1,15 +1,3 @@
-Composite: When I wait until element located `$locator` appears
-!-- DEPRECATED: 0.6.0, When I wait until element located by `%1$s` appears
-When I wait until element located by `<locator>` appears
-
-Composite: When I wait until element located `$locator` disappears
-!-- DEPRECATED: 0.6.0, When I wait until element located by `%1$s` disappears
-When I wait until element located by `<locator>` disappears
-
-Composite: Then element located `$locator` exists for `$duration` duration
-!-- DEPRECATED: 0.6.0, Then element located by `%1$s` exists for `%2$s` duration
-Then element located by `<locator>` exists for `<duration>` duration
-
 Composite: When I change context to element located `$locator` in scope of current context
 !-- DEPRECATED: 0.7.0, When I change context to element located by `%1$s` in scope of current context
 When I change context to element located by `<locator>` in scope of current context
