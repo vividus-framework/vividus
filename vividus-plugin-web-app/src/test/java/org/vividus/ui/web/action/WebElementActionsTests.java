@@ -46,6 +46,7 @@ class WebElementActionsTests
     private static final String QUOTE = "'";
     private static final String TEXT = "text";
 
+    @Mock private IMouseActions mouseActions;
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private WebElement webElement;
     @InjectMocks private WebElementActions webElementActions;
@@ -171,7 +172,7 @@ class WebElementActionsTests
 
         assertEquals(visibilityAfterScroll, webElementActions.isElementVisible(webElement));
 
-        verify(javascriptActions).scrollIntoView(webElement, true);
+        verify(mouseActions).scrollToElement(webElement);
         verifyNoMoreInteractions(javascriptActions);
     }
 }

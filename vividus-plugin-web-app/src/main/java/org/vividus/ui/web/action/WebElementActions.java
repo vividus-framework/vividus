@@ -26,10 +26,12 @@ public class WebElementActions implements IWebElementActions
     private static final char APOSTROPHE = '\'';
     private static final char QUOTE = '"';
 
+    private final IMouseActions mouseActions;
     private final WebJavascriptActions javascriptActions;
 
-    public WebElementActions(WebJavascriptActions javascriptActions)
+    public WebElementActions(IMouseActions mouseActions, WebJavascriptActions javascriptActions)
     {
+        this.mouseActions = mouseActions;
         this.javascriptActions = javascriptActions;
     }
 
@@ -99,7 +101,7 @@ public class WebElementActions implements IWebElementActions
         {
             if (!scrolled)
             {
-                javascriptActions.scrollIntoView(element, true);
+                mouseActions.scrollToElement(element);
                 return isElementVisible(element, true);
             }
             return false;

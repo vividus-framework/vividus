@@ -132,11 +132,17 @@ public class MouseActions implements IMouseActions
     }
 
     @Override
+    public void scrollToElement(WebElement element)
+    {
+        new Actions(getWebDriver()).scrollToElement(element).perform();
+    }
+
+    @Override
     public void moveToElement(WebElement element)
     {
         if (element != null)
         {
-            new Actions(getWebDriver()).scrollToElement(element).perform();
+            scrollToElement(element);
             new Actions(getWebDriver()).moveToElement(element).perform();
         }
     }

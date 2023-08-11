@@ -22,6 +22,8 @@ public interface IMouseActions
 {
     ClickResult click(WebElement element);
 
+    void scrollToElement(WebElement element);
+
     void moveToElement(WebElement element);
 
     void contextClick(WebElement element);

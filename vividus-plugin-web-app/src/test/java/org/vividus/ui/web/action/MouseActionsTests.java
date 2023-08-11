@@ -310,6 +310,17 @@ class MouseActionsTests
     }
 
     @Test
+    void shouldScrollToElement()
+    {
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        mouseActions.scrollToElement(webElement);
+        verify((Interactive) webDriver, times(1)).perform(sequencesCaptor.capture());
+        List<Collection<Sequence>> sequences = sequencesCaptor.getAllValues();
+        assertEquals(1, sequences.size());
+        assertScrollToElement(sequences.get(0).iterator().next());
+    }
+
+    @Test
     void shouldMoveToElement()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
@@ -317,6 +328,12 @@ class MouseActionsTests
         verify((Interactive) webDriver, times(2)).perform(sequencesCaptor.capture());
         List<Collection<Sequence>> sequences = sequencesCaptor.getAllValues();
         assertEquals(2, sequences.size());
+        assertScrollToElement(sequences.get(0).iterator().next());
+        assertEquals(mouseSequence(List.of(pointerMoveAction())), sequences.get(1).iterator().next().toJson());
+    }
+
+    private void assertScrollToElement(Sequence sequence)
+    {
         assertEquals(Map.of(
                 ID, "default wheel",
                 TYPE, "wheel",
@@ -330,8 +347,7 @@ class MouseActionsTests
                                 TYPE, "scroll",
                                 ORIGIN, webElement
                         )
-                )), sequences.get(0).iterator().next().toJson());
-        assertEquals(mouseSequence(List.of(pointerMoveAction())), sequences.get(1).iterator().next().toJson());
+                )), sequence.toJson());
     }
 
     private static Map<String, Object> mouseSequence(List<Map<String, ?>> mouseActions)
