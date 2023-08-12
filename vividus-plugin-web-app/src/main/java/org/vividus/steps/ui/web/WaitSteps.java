@@ -72,7 +72,7 @@ public class WaitSteps
     @Inject private TimeoutConfigurer timeoutConfigurer;
 
     /**
-     * @deprecated Use step: "When I wait until element located `$locator` disappears"
+     * @deprecated Use step: "When I wait until element located by `$locator` disappears"
      *
      * Waits for <b><i>an element</i></b> with the specified <b>tag</b> and <b>attribute type and value</b>
      * disappearance in the specified search context
@@ -97,7 +97,7 @@ public class WaitSteps
     {
         LOGGER.warn("The step: \"When I wait until an element with the tag '$elementTag' and attribute '$attributeType'"
                 + "='$attributeValue' disappears\" is deprecated and will be removed in VIVIDUS 0.6.0."
-                + " Use step: \"When I wait until element located `$locator` disappears\"");
+                + " Use step: \"When I wait until element located by `$locator` disappears\"");
         String elementXpath = XpathLocatorUtils.getXPathByTagNameAndAttribute(elementTag, attributeType,
             attributeValue);
         Locator locator = new Locator(WebLocatorType.XPATH, elementXpath);
@@ -116,7 +116,7 @@ public class WaitSteps
     }
 
     /**
-     * @deprecated Use step: "When I wait until element located `$locator` appears"
+     * @deprecated Use step: "When I wait until element located by `$locator` appears"
      *
      * Waits for <b><i>an element</i></b> with the specified <b>tag</b> and <b>attribute type and value</b>
      * appearance in the specified search context
@@ -138,7 +138,7 @@ public class WaitSteps
     {
         LOGGER.warn("The step: \"When I wait until an element with the tag '$elementTag' and attribute "
                 + "'$attributeType'='$attributeValue' appears\" is deprecated and will be removed in VIVIDUS 0.6.0."
-                + " Use step: \"When I wait until element located `$locator` appears\"");
+                + " Use step: \"When I wait until element located by `$locator` appears\"");
         waitForElementAppearance(getSearchContext(),
                 By.xpath(XpathLocatorUtils.getXPathByTagNameAndAttribute(elementTag, attributeType, attributeValue)));
     }

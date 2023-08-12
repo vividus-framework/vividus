@@ -47,12 +47,6 @@ WARNING: It's forbidden to use <<_visibility_types>> in the locator.
 When I wait until element located by `$locator` appears
 ----
 
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-When I wait until element located `$locator` appears
-----
-
 * `$locator` - <<_locator>>.
 
 .Wait for appearance of the element with the specified name
@@ -74,12 +68,6 @@ WARNING: It's forbidden to use <<_visibility_types>> in the locator.
 [source,gherkin]
 ----
 When I wait until element located by `$locator` disappears
-----
-
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-When I wait until element located `$locator` disappears
 ----
 
 * `$locator` - <<_locator>>.
@@ -391,12 +379,6 @@ The actions performed by the step:
 [source,gherkin]
 ----
 Then element located by `$locator` exists for `$duration` duration
-----
-
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-Then element located `$locator` exists for `$duration` duration
 ----
 
 * `$locator` - The <<_locator>> to find an element.

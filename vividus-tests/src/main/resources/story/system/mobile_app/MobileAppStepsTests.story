@@ -186,22 +186,6 @@ When I tap on element located by `accessibilityId(Return)`
 Then number of elements found by `<keyboardLocator>` is equal to `0`
 
 
-Scenario: Verify deprecated step: 'When I wait until element located `$locator` disappears'
-When I tap on element located by `accessibilityId(menuToggler)`
-When I tap on element located by `xpath(<menuWaitXpath>)`
-Then number of elements found by `accessibilityId(picture)` is equal to `1`
-When I tap on element located by `accessibilityId(hidePicture)`
-When I wait until element located `accessibilityId(picture)` disappears
-Then number of elements found by `accessibilityId(picture)` is equal to `0`
-
-
-Scenario: Verify deprecated step: 'When I wait until element located `$locator` appears'
-Then number of elements found by `accessibilityId(picture)` is equal to `0`
-When I tap on element located by `accessibilityId(showPicture)`
-When I wait until element located `accessibilityId(picture)` appears
-Then number of elements found by `accessibilityId(picture)` is equal to `1`
-
-
 Scenario: Verify step: 'When I swipe $direction to element located by `$locator` with duration $swipeDuration'
 When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `xpath(<menuScrollViewXpath>)`

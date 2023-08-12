@@ -145,7 +145,7 @@ class WaitStepsTests
         verify(waitResult).isWaitPassed();
         assertThat(logger.getLoggingEvents(), is(List.of(warn("The step: \"When I wait until an element with the tag "
                 + "'$elementTag' and attribute '$attributeType'='$attributeValue' appears\" is deprecated and will be "
-                + "removed in VIVIDUS 0.6.0. Use step: \"When I wait until element located `$locator` appears\""))));
+                + "removed in VIVIDUS 0.6.0. Use step: \"When I wait until element located by `$locator` appears\""))));
     }
 
     @Test
@@ -174,7 +174,7 @@ class WaitStepsTests
         assertThat(logger.getLoggingEvents(), is(List.of(
                 warn("The step: \"When I wait until an element with the tag '$elementTag' and attribute "
                         + "'$attributeType'='$attributeValue' disappears\" is deprecated and will be removed in "
-                        + "VIVIDUS 0.6.0. Use step: \"When I wait until element located `$locator` disappears\""))));
+                        + "VIVIDUS 0.6.0. Use step: \"When I wait until element located by `$locator` disappears\""))));
     }
 
     @Test
@@ -189,7 +189,7 @@ class WaitStepsTests
                 "There is no element present with the tag 'elementTag' and attribute 'attributeType'='attributeValue'");
         assertThat(logger.getLoggingEvents(), is(List.of(warn("The step: \"When I wait until an element with"
                 + " the tag '$elementTag' and attribute '$attributeType'='$attributeValue' disappears\" is deprecated"
-                + " and will be removed in VIVIDUS 0.6.0. Use step: \"When I wait until element located `$locator`"
+                + " and will be removed in VIVIDUS 0.6.0. Use step: \"When I wait until element located by `$locator`"
                 + " disappears\""))));
     }
 
