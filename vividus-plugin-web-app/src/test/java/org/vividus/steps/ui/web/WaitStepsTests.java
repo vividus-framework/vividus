@@ -16,24 +16,16 @@
 
 package org.vividus.steps.ui.web;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +45,6 @@ import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.State;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
-import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
@@ -63,16 +54,12 @@ import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
 @SuppressWarnings("unchecked")
-@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
+@ExtendWith(MockitoExtension.class)
 class WaitStepsTests
 {
-    private static final String ATTRIBUTE_VALUE = "attributeValue";
-    private static final String ATTRIBUTE_TYPE = "attributeType";
-    private static final String ELEMENT_TAG = "elementTag";
     private static final String NAME = "name";
     private static final String TEXT = "text";
     private static final Duration TIMEOUT = Duration.ofSeconds(1L);
-    private static final String ELEMENT_WITH_TAG = ".//elementTag[normalize-space(@attributeType)=\"attributeValue\"]";
     private static final String ALERT_TO_BE_PRESENT = "alert to be present";
 
     @Mock private IWebDriverProvider webDriverProvider;
@@ -84,23 +71,9 @@ class WaitStepsTests
     @Mock private IExpectedConditions<By> expectedSearchContextConditions;
     @Mock private IExpectedConditions<Locator> expectedSearchActionsConditions;
     @Mock private IBaseValidations baseValidations;
-    @Mock private ISearchActions searchActions;
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private TimeoutConfigurer timeoutConfigurer;
     @InjectMocks private WaitSteps waitSteps;
-
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(WaitSteps.class);
-
-    @Test
-    void testElementByIdDisappears()
-    {
-        By locator = By.xpath(".//*[normalize-space(@id)=\"id\"]");
-        when(uiContext.getSearchContext()).thenReturn(webElement);
-        IExpectedSearchContextCondition<Boolean> condition = mock(IExpectedSearchContextCondition.class);
-        when(expectedSearchContextConditions.invisibilityOfElement(locator)).thenReturn(condition);
-        waitSteps.elementByIdDisappears("id");
-        verify(waitActions).wait(webElement, condition);
-    }
 
     @Test
     void testElementByNameDisappearsWithTimeout()
@@ -133,22 +106,6 @@ class WaitStepsTests
     }
 
     @Test
-    void testWaitTillElementWithTagAndAttributeAppears()
-    {
-        when(uiContext.getSearchContext()).thenReturn(webElement);
-        By locator = By.xpath(ELEMENT_WITH_TAG);
-        WaitResult<List<WebElement>> waitResult = mock(WaitResult.class);
-        IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
-        when(expectedSearchContextConditions.visibilityOfAllElementsLocatedBy(locator)).thenReturn(condition);
-        when(waitActions.wait(webElement, condition)).thenReturn(waitResult);
-        waitSteps.waitTillElementAppears(ELEMENT_TAG, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verify(waitResult).isWaitPassed();
-        assertThat(logger.getLoggingEvents(), is(List.of(warn("The step: \"When I wait until an element with the tag "
-                + "'$elementTag' and attribute '$attributeType'='$attributeValue' appears\" is deprecated and will be "
-                + "removed in VIVIDUS 0.6.0. Use step: \"When I wait until element located by `$locator` appears\""))));
-    }
-
-    @Test
     void testWaitTillElementContainsText()
     {
         when(uiContext.getSearchContext()).thenReturn(webElement);
@@ -157,40 +114,6 @@ class WaitStepsTests
         when(expectedSearchActionsConditions.textToBePresentInElementLocated(locator, TEXT)).thenReturn(condition);
         waitSteps.waitTillElementContainsText(locator, TEXT);
         verify(waitActions).wait(webElement, condition);
-    }
-
-    @Test
-    void testWaitTillElementWithTagAndAttributeDisappears()
-    {
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        List<WebElement> elements = List.of(webElement);
-        Locator locator = new Locator(WebLocatorType.XPATH, ELEMENT_WITH_TAG);
-        locator.getSearchParameters().setWaitForElement(false);
-        when(searchActions.findElements(locator)).thenReturn(elements);
-        waitSteps.waitTillElementDisappears(ELEMENT_TAG, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verify(waitActions).wait(eq(webDriver),
-                argThat(condition -> condition.toString().equals("invisibility of " + webElement)));
-        verifyNoInteractions(softAssert);
-        assertThat(logger.getLoggingEvents(), is(List.of(
-                warn("The step: \"When I wait until an element with the tag '$elementTag' and attribute "
-                        + "'$attributeType'='$attributeValue' disappears\" is deprecated and will be removed in "
-                        + "VIVIDUS 0.6.0. Use step: \"When I wait until element located by `$locator` disappears\""))));
-    }
-
-    @Test
-    void testWaitTillElementWithTagAndAttributeDisappearsElementIsNotPresent()
-    {
-        Locator locator = new Locator(WebLocatorType.XPATH, ELEMENT_WITH_TAG);
-        when(searchActions.findElements(locator)).thenReturn(List.of());
-        locator.getSearchParameters().setWaitForElement(false);
-        waitSteps.waitTillElementDisappears(ELEMENT_TAG, ATTRIBUTE_TYPE, ATTRIBUTE_VALUE);
-        verifyNoInteractions(waitActions);
-        verify(softAssert).recordPassedAssertion(
-                "There is no element present with the tag 'elementTag' and attribute 'attributeType'='attributeValue'");
-        assertThat(logger.getLoggingEvents(), is(List.of(warn("The step: \"When I wait until an element with"
-                + " the tag '$elementTag' and attribute '$attributeType'='$attributeValue' disappears\" is deprecated"
-                + " and will be removed in VIVIDUS 0.6.0. Use step: \"When I wait until element located by `$locator`"
-                + " disappears\""))));
     }
 
     @Test

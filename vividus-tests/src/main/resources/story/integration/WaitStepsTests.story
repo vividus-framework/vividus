@@ -20,7 +20,7 @@ When I execute sequence of actions:
 |type          |argument                                        |
 |CLICK         |By.id(toClick)                                  |
 Then an alert is not present
-Then an element with the id 'anchor' disappears
+When I wait until element located by `id(anchor)` disappears
 
 
 Scenario: Verify step: When I wait until scroll finished should not lock the tests when no scroll performing
@@ -30,7 +30,7 @@ When I execute sequence of actions:
 |type          |argument                                        |
 |CLICK         |By.id(toClick)                                  |
 Then an alert is not present
-Then an element with the id 'anchor' disappears
+When I wait until element located by `id(anchor)` disappears
 
 Scenario: Step verification I wait '$duration' with '$pollingDuration' polling until element located by `$locator` becomes $state
 Given I am on page with URL `${vividus-test-site-url}/elementState.html`
