@@ -187,7 +187,7 @@ jdbc:postgresql://host:port/database?parameters
 .build.gradle
 [source,gradle]
 ----
-implementation(group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.19.0.0')
+implementation(group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.20.0.0')
 ----
 
 .environment.properties
