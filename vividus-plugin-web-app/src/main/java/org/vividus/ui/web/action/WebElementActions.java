@@ -99,7 +99,7 @@ public class WebElementActions implements IWebElementActions
         {
             if (!scrolled)
             {
-                javascriptActions.scrollIntoView(element, true);
+                javascriptActions.scrollElementIntoViewportCenter(element);
                 return isElementVisible(element, true);
             }
             return false;

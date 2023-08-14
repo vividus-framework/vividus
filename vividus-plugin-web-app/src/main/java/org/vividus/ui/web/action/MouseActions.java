@@ -136,7 +136,7 @@ public class MouseActions implements IMouseActions
     {
         if (element != null)
         {
-            new Actions(getWebDriver()).scrollToElement(element).perform();
+            javascriptActions.scrollElementIntoViewportCenter(element);
             new Actions(getWebDriver()).moveToElement(element).perform();
         }
     }

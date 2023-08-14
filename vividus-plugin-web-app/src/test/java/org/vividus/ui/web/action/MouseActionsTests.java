@@ -314,24 +314,10 @@ class MouseActionsTests
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
         mouseActions.moveToElement(webElement);
-        verify((Interactive) webDriver, times(2)).perform(sequencesCaptor.capture());
+        verify((Interactive) webDriver).perform(sequencesCaptor.capture());
         List<Collection<Sequence>> sequences = sequencesCaptor.getAllValues();
-        assertEquals(2, sequences.size());
-        assertEquals(Map.of(
-                ID, "default wheel",
-                TYPE, "wheel",
-                ACTIONS, List.of(
-                        Map.of(
-                                DURATION, 250L,
-                                X, 0,
-                                Y, 0,
-                                "deltaX", 0,
-                                "deltaY", 0,
-                                TYPE, "scroll",
-                                ORIGIN, webElement
-                        )
-                )), sequences.get(0).iterator().next().toJson());
-        assertEquals(mouseSequence(List.of(pointerMoveAction())), sequences.get(1).iterator().next().toJson());
+        assertEquals(1, sequences.size());
+        assertEquals(mouseSequence(List.of(pointerMoveAction())), sequences.get(0).iterator().next().toJson());
     }
 
     private static Map<String, Object> mouseSequence(List<Map<String, ?>> mouseActions)

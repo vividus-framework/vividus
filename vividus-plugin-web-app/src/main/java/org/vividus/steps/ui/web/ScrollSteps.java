@@ -62,8 +62,7 @@ public class ScrollSteps
     }
 
     /**
-     * Scroll the element into view by calling API:
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView">Scroll into view</a>
+     * Scroll the element into viewport center
      * @param locator to locate an element
      */
     @When("I scroll element located by `$locator` into view")
@@ -72,7 +71,7 @@ public class ScrollSteps
         List<WebElement> toScroll = baseValidations.assertIfElementsExist("Element to scroll into view", locator);
         if (!toScroll.isEmpty())
         {
-            javascriptActions.scrollIntoView(toScroll.get(0), true);
+            javascriptActions.scrollElementIntoViewportCenter(toScroll.get(0));
         }
     }
 

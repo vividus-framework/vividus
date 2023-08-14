@@ -103,17 +103,6 @@ class WebJavascriptActionsTests
     }
 
     @Test
-    void testScrollIntoView()
-    {
-        var webElement = mock(WebElement.class);
-        javascriptActions.scrollIntoView(webElement, true);
-        verify((JavascriptExecutor) webDriver).executeScript("arguments[0].scrollIntoView(arguments[1])", webElement,
-                true);
-        verifyWaitingForScrollFinish();
-        verifyNoMoreInteractions(webDriver);
-    }
-
-    @Test
     void testScrollElementIntoViewportCenter()
     {
         var webElement = mock(WebElement.class);

@@ -133,7 +133,7 @@ class ScrollStepsTests
         when(baseValidations.assertIfElementsExist(ELEMENT_TO_SCROLL_INTO_VIEW, locator)).thenReturn(
                 List.of(webElement));
         scrollSteps.scrollIntoView(locator);
-        verify(javascriptActions).scrollIntoView(webElement, true);
+        verify(javascriptActions).scrollElementIntoViewportCenter(webElement);
     }
 
     @Test

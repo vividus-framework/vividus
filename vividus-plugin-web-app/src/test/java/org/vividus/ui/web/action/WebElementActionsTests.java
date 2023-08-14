@@ -171,7 +171,7 @@ class WebElementActionsTests
 
         assertEquals(visibilityAfterScroll, webElementActions.isElementVisible(webElement));
 
-        verify(javascriptActions).scrollIntoView(webElement, true);
+        verify(javascriptActions).scrollElementIntoViewportCenter(webElement);
         verifyNoMoreInteractions(javascriptActions);
     }
 }
