@@ -55,7 +55,6 @@ public class MouseActions implements IMouseActions
             WebElement page = webDriver.findElement(BODY_XPATH_LOCATOR);
             try
             {
-                javascriptActions.scrollElementIntoViewportCenter(element);
                 element.click();
                 afterClick(clickResult, page, webDriver);
             }
@@ -71,18 +70,12 @@ public class MouseActions implements IMouseActions
             WebElement page, WebDriverException webDriverException)
     {
         String message = webDriverException.getMessage();
-        if (message.contains("is not clickable at point"))
+        if (message.contains("is not clickable at point") && message.contains("Other element would receive the click"))
         {
             try
             {
-                if (message.contains(". Other element would receive the click"))
-                {
-                    softAssert.recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + webDriverException);
-                }
-                else
-                {
-                    element.click();
-                }
+                javascriptActions.scrollElementIntoViewportCenter(element);
+                element.click();
                 afterClick(clickResult, page, webDriver);
             }
             catch (WebDriverException e)

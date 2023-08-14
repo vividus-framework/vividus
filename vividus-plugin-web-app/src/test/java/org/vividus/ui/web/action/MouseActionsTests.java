@@ -97,8 +97,7 @@ class MouseActionsTests
         verify(webElement, times(clickAttempts)).click();
         assertTrue(result.isClicked());
         assertEquals(newPageLoaded, result.isNewPageLoaded());
-        InOrder ordered = inOrder(javascriptActions, alertActions, waitActions, eventBus, uiContext);
-        ordered.verify(javascriptActions).scrollElementIntoViewportCenter(webElement);
+        InOrder ordered = inOrder(alertActions, waitActions, eventBus, uiContext);
         ordered.verify(alertActions).isAlertPresent(webDriver);
         if (!alertPresent)
         {
@@ -169,15 +168,14 @@ class MouseActionsTests
     }
 
     @Test
-    void clickElementNotClickableStaleReferenceExceptionNotChrome()
+    void clickElementNotClickableStaleReferenceException()
     {
         mockBodySearch();
 
-        WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
+        WebDriverException e = new WebDriverException(OTHER_ELEMENT_WOULD_RECEIVE_CLICK);
         WebDriverException e2 = new WebDriverException(STALE_EXCEPTION);
         doThrow(e).doThrow(e2).when(webElement).click();
         ClickResult result = mouseActions.click(webElement);
-        verify(webElement, never()).sendKeys("");
         assertFalse(result.isNewPageLoaded());
         InOrder ordered = inOrder(javascriptActions, alertActions, eventBus, uiContext, softAssert);
         ordered.verify(javascriptActions).scrollElementIntoViewportCenter(webElement);
@@ -194,7 +192,6 @@ class MouseActionsTests
                 "TimeoutException : timeout: Timed out receiving message from renderer ");
         doThrow(e).doThrow(e).when(webElement).click();
         mouseActions.click(webElement);
-        verify(webElement, never()).sendKeys("");
         verify(alertActions, never()).waitForAlert(webDriver);
         verifyNoInteractions(uiContext);
     }
@@ -215,36 +212,9 @@ class MouseActionsTests
         when(webDriverProvider.get()).thenReturn(webDriver);
         String exceptionMessage = "Something goes wrong";
         doThrow(new WebDriverException(exceptionMessage)).when(webElement).click();
-        WebDriverException exception = assertThrows(WebDriverException.class, () ->  mouseActions.click(webElement));
+        WebDriverException exception = assertThrows(WebDriverException.class, () -> mouseActions.click(webElement));
         assertThat(exception.getMessage(), containsString(exceptionMessage));
         verifyNoInteractions(uiContext);
-    }
-
-    @Test
-    void clickElementNotClickableExceptionNoExceptionNotChrome()
-    {
-        mockBodySearch();
-
-        WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
-        doThrow(e).doNothing().when(webElement).click();
-        when(alertActions.isAlertPresent(webDriver)).thenReturn(Boolean.FALSE);
-        testClickWithElementNotClickableException();
-        verify(webElement, never()).sendKeys("");
-    }
-
-    @Test
-    void clickElementNotClickableExceptionStaleExceptionChrome()
-    {
-        mockBodySearch();
-
-        WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
-        WebDriverException e2 = new WebDriverException(STALE_EXCEPTION);
-        doThrow(e).doThrow(e2).when(webElement).click();
-        mouseActions.click(webElement);
-        InOrder ordered = inOrder(javascriptActions, alertActions, eventBus, uiContext, softAssert);
-        ordered.verify(javascriptActions).scrollElementIntoViewportCenter(webElement);
-        ordered.verify(softAssert).recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + e2);
-        ordered.verifyNoMoreInteractions();
     }
 
     @Test
@@ -252,30 +222,31 @@ class MouseActionsTests
     {
         mockBodySearch();
 
-        WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
+        WebDriverException e = new WebDriverException(OTHER_ELEMENT_WOULD_RECEIVE_CLICK);
         doThrow(e).doNothing().when(webElement).click();
         testClickWithElementNotClickableException();
     }
 
     @Test
-    void shouldRecordFailedAssertionWhenClickOverlappedElement()
+    void shouldNotRetryClickOnMatchingError()
     {
         mockBodySearch();
 
-        var exception = new WebDriverException(OTHER_ELEMENT_WOULD_RECEIVE_CLICK);
-        doThrow(exception).when(webElement).click();
-        testClick(false, false);
-        verify(softAssert).recordFailedAssertion(COULD_NOT_CLICK_ERROR_MESSAGE + exception);
+        WebDriverException e = new WebDriverException(OTHER_ELEMENT_WOULD_RECEIVE_CLICK);
+        doThrow(e).doNothing().when(webElement).click();
+        when(alertActions.isAlertPresent(webDriver)).thenReturn(Boolean.FALSE);
+        testClickWithElementNotClickableException();
     }
 
     @Test
-    void clickElementNotClickableExceptionAndWebDriverExceptionInChromeWorkaround()
+    void shouldNotRetryClickOnNonMatchingError()
     {
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
         doThrow(e).doNothing().when(webElement).click();
-        testClickWithElementNotClickableException();
+        WebDriverException exception = assertThrows(WebDriverException.class, () -> mouseActions.click(webElement));
+        assertThat(exception.getMessage(), containsString(ELEMENT_IS_NOT_CLICKABLE_AT_POINT));
     }
 
     private WebElement mockBodySearch()
