@@ -37,15 +37,12 @@
         factory-bean="httpClientFactory"
         factory-method="buildHttpClient">
         <constructor-arg>
-            <bean parent="restApiHttpClientConfig">
+            <bean parent="httpClientConfig">
                 <property name="firstRequestInterceptor">
                     <bean class="org.vividus.http.client.LoggingHttpRequestInterceptor">
                         <constructor-arg value="org.vividus.visual.eyes.ApplitoolsHttpClient" />
                     </bean>
                 </property>
-                <property name="lastRequestInterceptor"><null/></property>
-                <property name="lastResponseInterceptor"><null/></property>
-                <property name="httpResponseHandlers"><list/></property>
             </bean>
         </constructor-arg>
     </bean>
