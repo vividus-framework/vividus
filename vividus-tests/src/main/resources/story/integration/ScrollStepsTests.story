@@ -11,8 +11,8 @@ Then the text matches '\d+'
 Scenario: Scroll LEFT for element Verify step: When I scroll context to $scrollDirection edge
 When I change context to element located by `id(scrollable)`
 When I scroll context to LEFT edge
-When I change context to element located by `id(current-horizontal):a`
-Then the text matches '0'
+When I reset context
+When I wait until element located by `id(current-horizontal):a` contains text `0`
 
 Scenario: Scroll BOTTOM for element Verify step: When I scroll context to $scrollDirection edge
 When I change context to element located by `id(current-vertical):a`
@@ -24,8 +24,8 @@ Then the text matches '\d+'
 Scenario: Scroll TOP for element Verify step: When I scroll context to $scrollDirection edge
 When I change context to element located by `id(scrollable)`
 When I scroll context to TOP edge
-When I change context to element located by `id(current-vertical):a`
-Then the text matches '0'
+When I reset context
+When I wait until element located by `id(current-vertical):a` contains text `0`
 
 Scenario: Verify steps: "When I scroll element located by `$locator` into view", "Then page is scrolled to element located by `$locator`"
 Meta:
