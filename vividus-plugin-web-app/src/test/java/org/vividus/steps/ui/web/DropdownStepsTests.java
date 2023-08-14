@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
@@ -64,6 +65,7 @@ class DropdownStepsTests
             "Expected dropdown is of the same size as actual dropdown: ";
     private static final String TEXT_OF_ITEM_MESSAGE = "Text of actual option at position [%s]";
     private static final String STATE_OF_ITEM_MESSAGE = "State of actual option at position [%s]";
+    private static final String ITEM_VALUE_TEXT = "itemValue";
 
     @Mock
     private IWebElementActions webElementActions;
@@ -85,9 +87,25 @@ class DropdownStepsTests
 
     @ParameterizedTest
     @ValueSource(strings = { TEXT, TEXT + " "})
-    void shouldVerifySelectWithSelectedOptionExists(String text)
+    void shouldVerifySelectWithSelectedOptionExistsDeprecated(String text)
     {
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
+        when(webElement.getTagName()).thenReturn(SELECT);
+        List<WebElement> options = List.of(mock(WebElement.class));
+        when(softAssert.assertTrue(SELECTED_OPTIONS_ARE_PRESENT_IN_DROP_DOWN, true)).thenReturn(Boolean.TRUE);
+        WebElement firstSelectedOption = options.get(0);
+        when(webElement.findElements(By.tagName(OPTION))).thenReturn(singletonList(firstSelectedOption));
+        when(firstSelectedOption.isSelected()).thenReturn(true);
+        when(firstSelectedOption.getText()).thenReturn(text);
+        dropdownSteps.doesDropdownHaveFirstSelectedOptionDeprecated(LOCATOR, TEXT);
+        verify(softAssert).assertEquals(SELECTED_OPTION_IN_DROP_DOWN, TEXT, TEXT);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { TEXT, TEXT + " "})
+    void shouldVerifySelectWithSelectedOptionExists(String text)
+    {
+        when(baseValidations.assertElementExists(DROPDOWN, LOCATOR)).thenReturn(Optional.of(webElement));
         when(webElement.getTagName()).thenReturn(SELECT);
         List<WebElement> options = List.of(mock(WebElement.class));
         when(softAssert.assertTrue(SELECTED_OPTIONS_ARE_PRESENT_IN_DROP_DOWN, true)).thenReturn(Boolean.TRUE);
@@ -100,9 +118,20 @@ class DropdownStepsTests
     }
 
     @Test
-    void shouldFailIfNoOptionsSelected()
+    void shouldFailIfNoOptionsSelectedDeprecated()
     {
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
+        when(webElement.getTagName()).thenReturn(SELECT);
+        when(softAssert.assertTrue(SELECTED_OPTIONS_ARE_PRESENT_IN_DROP_DOWN, false)).thenReturn(Boolean.FALSE);
+        when(webElement.findElements(By.tagName(OPTION))).thenReturn(List.of());
+        dropdownSteps.doesDropdownHaveFirstSelectedOptionDeprecated(LOCATOR, TEXT);
+        verify(softAssert, never()).assertEquals(SELECTED_OPTION_IN_DROP_DOWN, TEXT, TEXT);
+    }
+
+    @Test
+    void shouldFailIfNoOptionsSelected()
+    {
+        when(baseValidations.assertElementExists(DROPDOWN, LOCATOR)).thenReturn(Optional.of(webElement));
         when(webElement.getTagName()).thenReturn(SELECT);
         when(softAssert.assertTrue(SELECTED_OPTIONS_ARE_PRESENT_IN_DROP_DOWN, false)).thenReturn(Boolean.FALSE);
         when(webElement.findElements(By.tagName(OPTION))).thenReturn(List.of());
@@ -111,17 +140,37 @@ class DropdownStepsTests
     }
 
     @Test
-    void shouldFailIfNoSelectFound()
+    void shouldFailIfNoSelectFoundDeprecated()
     {
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(null);
+        dropdownSteps.doesDropdownHaveFirstSelectedOptionDeprecated(LOCATOR, TEXT);
+        verifyNoInteractions(softAssert);
+    }
+
+    @Test
+    void shouldFailIfNoSelectFound()
+    {
+        when(baseValidations.assertElementExists(DROPDOWN, LOCATOR)).thenReturn(Optional.empty());
         dropdownSteps.doesDropdownHaveFirstSelectedOption(LOCATOR, TEXT);
         verifyNoInteractions(softAssert);
     }
 
     @Test
-    void testSelectItemInDDLSingleSelectAdditable()
+    void testSelectItemInDDLSingleSelectAdditableDeprecated()
     {
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
+        when(webElement.getTagName()).thenReturn(SELECT);
+        when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(false));
+        WebElement element = webElement;
+        dropdownSteps.addOptionInDropdownDeprecated(TEXT, LOCATOR);
+        verify(fieldActions).selectItemInDropDownList(
+                argThat((Select select) -> select.getWrappedElement().equals(element)), eq(TEXT), eq(true));
+    }
+
+    @Test
+    void testSelectItemInDDLSingleSelectAdditable()
+    {
+        when(baseValidations.assertElementExists(DROPDOWN, LOCATOR)).thenReturn(Optional.of(webElement));
         when(webElement.getTagName()).thenReturn(SELECT);
         when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(false));
         WebElement element = webElement;
@@ -131,10 +180,29 @@ class DropdownStepsTests
     }
 
     @Test
-    void testDoesDropDownListContainItems()
+    void testDoesDropDownListContainItemsDeprecated()
     {
         ExamplesTable dropDownItems = new ExamplesTable(DROPDOWN_EXAMPLES_TABLE);
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
+        when(webElement.getTagName()).thenReturn(SELECT);
+        when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(true));
+        WebElement element = webElement;
+        addOptionsToSelect(element, TEXT);
+        when(softAssert.assertEquals(DROPDOWN_SIZE_ASSERTION_MESSAGE,
+                dropDownItems.getRowsAsParameters(true).size(), 1)).thenReturn(true);
+        when(webElement.isSelected()).thenReturn(true);
+        dropdownSteps.doesDropdownContainOptionsDeprecated(LOCATOR, dropDownItems);
+        verify(softAssert).assertEquals(String.format(TEXT_OF_ITEM_MESSAGE, ITEM_VALUE), TEXT,
+                TEXT);
+        verify(softAssert).assertEquals(String.format(STATE_OF_ITEM_MESSAGE, ITEM_VALUE), true,
+                true);
+    }
+
+    @Test
+    void testDoesDropDownListContainItems()
+    {
+        ExamplesTable dropDownItems = new ExamplesTable(DROPDOWN_EXAMPLES_TABLE);
+        when(baseValidations.assertElementExists(DROPDOWN, LOCATOR)).thenReturn(Optional.of(webElement));
         when(webElement.getTagName()).thenReturn(SELECT);
         when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(true));
         WebElement element = webElement;
@@ -150,6 +218,17 @@ class DropdownStepsTests
     }
 
     @Test
+    void testDoesDropDownListContainItemsNullDropDownDeprecated()
+    {
+        ExamplesTable dropDownItems = new ExamplesTable(DROPDOWN_EXAMPLES_TABLE);
+        dropdownSteps.doesDropdownContainOptionsDeprecated(LOCATOR, dropDownItems);
+        verify(softAssert, never()).assertEquals(String.format(TEXT_OF_ITEM_MESSAGE, ITEM_VALUE),
+                TEXT, TEXT);
+        verify(softAssert, never())
+                .assertEquals(String.format(STATE_OF_ITEM_MESSAGE, ITEM_VALUE), true, true);
+    }
+
+    @Test
     void testDoesDropDownListContainItemsNullDropDown()
     {
         ExamplesTable dropDownItems = new ExamplesTable(DROPDOWN_EXAMPLES_TABLE);
@@ -161,14 +240,32 @@ class DropdownStepsTests
     }
 
     @Test
-    void testDoesDropDownListContainItemsListIsEmpty()
+    void testDoesDropDownListContainItemsListIsEmptyDeprecated()
     {
         ExamplesTable dropDownItems = new ExamplesTable(DROPDOWN_EXAMPLES_TABLE);
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
         when(webElement.getTagName()).thenReturn(SELECT);
         when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(true));
         WebElement element = webElement;
-        addOptionsToSelect(element, "itemValue");
+        addOptionsToSelect(element, ITEM_VALUE_TEXT);
+        when(softAssert.assertEquals(DROPDOWN_SIZE_ASSERTION_MESSAGE,
+                dropDownItems.getRowsAsParameters(true).size(), 1)).thenReturn(false);
+        dropdownSteps.doesDropdownContainOptionsDeprecated(LOCATOR, dropDownItems);
+        verify(softAssert, never()).assertEquals(String.format(TEXT_OF_ITEM_MESSAGE, ITEM_VALUE),
+                TEXT, TEXT);
+        verify(softAssert, never())
+                .assertEquals(String.format(STATE_OF_ITEM_MESSAGE, ITEM_VALUE), true, true);
+    }
+
+    @Test
+    void testDoesDropDownListContainItemsListIsEmpty()
+    {
+        ExamplesTable dropDownItems = new ExamplesTable(DROPDOWN_EXAMPLES_TABLE);
+        when(baseValidations.assertElementExists(DROPDOWN, LOCATOR)).thenReturn(Optional.of(webElement));
+        when(webElement.getTagName()).thenReturn(SELECT);
+        when(webElement.getDomAttribute(MULTIPLE)).thenReturn(Boolean.toString(true));
+        WebElement element = webElement;
+        addOptionsToSelect(element, ITEM_VALUE_TEXT);
         when(softAssert.assertEquals(DROPDOWN_SIZE_ASSERTION_MESSAGE,
                 dropDownItems.getRowsAsParameters(true).size(), 1)).thenReturn(false);
         dropdownSteps.doesDropdownContainOptions(LOCATOR, dropDownItems);
@@ -179,18 +276,34 @@ class DropdownStepsTests
     }
 
     @Test
-    void testSelectTextFromDropDownByLocatorXpath()
+    void testSelectTextFromDropDownByLocatorXpathDeprecated()
     {
         when(baseValidations.assertIfElementExists(DROPDOWN, LOCATOR)).thenReturn(webElement);
+        when(webElement.getTagName()).thenReturn(SELECT);
+        dropdownSteps.selectOptionInDropdownDeprecated(TEXT, LOCATOR);
+        verify(fieldActions).selectItemInDropDownList(any(Select.class), eq(TEXT), eq(false));
+    }
+
+    @Test
+    void testSelectTextFromDropDownByLocatorXpath()
+    {
+        when(baseValidations.assertElementExists(DROPDOWN, LOCATOR)).thenReturn(Optional.of(webElement));
         when(webElement.getTagName()).thenReturn(SELECT);
         dropdownSteps.selectOptionInDropdown(TEXT, LOCATOR);
         verify(fieldActions).selectItemInDropDownList(any(Select.class), eq(TEXT), eq(false));
     }
 
     @Test
-    void testSelectTextFromDropDownByLocatorXpathNoElement()
+    void testSelectTextFromDropDownByLocatorXpathNoElementDeprecated()
     {
         dropdownSteps.selectOptionInDropdown(TEXT, LOCATOR);
+        verifyNoInteractions(fieldActions);
+    }
+
+    @Test
+    void testSelectTextFromDropDownByLocatorXpathNoElement()
+    {
+        dropdownSteps.selectOptionInDropdownDeprecated(TEXT, LOCATOR);
         verifyNoInteractions(fieldActions);
     }
 
