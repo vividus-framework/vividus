@@ -92,9 +92,9 @@ public class ScenariosCounter
     private static void configureStoryLocation(String storyLocation)
     {
         Properties properties = BeanFactory.getBean("properties", Properties.class);
-        properties.put("bdd.story-loader.batch1.resource-location", storyLocation);
-        properties.put("bdd.story-loader.batch1.resource-include-patterns", "**/*.story");
-        properties.put("bdd.story-loader.batch1.resource-exclude-patterns", "");
+        properties.put("batch-1.resource-location", storyLocation);
+        properties.put("batch-1.resource-include-patterns", "**/*.story");
+        properties.put("batch-1.resource-exclude-patterns", "");
     }
 
     private enum Level
