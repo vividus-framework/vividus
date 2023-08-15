@@ -59,10 +59,11 @@ public class ImageVisualTestingService implements VisualTestingService<Applitool
     public ApplitoolsVisualCheckResult run(ApplitoolsVisualCheck applitoolsVisualCheck)
     {
         Eyes eyes = eyesFactory.createEyes(applitoolsVisualCheck);
+        eyes.open(applitoolsVisualCheck.getConfiguration().getAppName(), applitoolsVisualCheck.getBaselineName());
+
         TestResults testResults;
         try
         {
-            eyes.open(applitoolsVisualCheck.getConfiguration().getAppName(), applitoolsVisualCheck.getBaselineName());
             Screenshot screenshot = ashotScreenshotTaker.takeAshotScreenshot(applitoolsVisualCheck.getSearchContext(),
                     applitoolsVisualCheck.getScreenshotParameters());
             eyes.checkImage(screenshot.getImage());

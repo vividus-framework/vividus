@@ -21,12 +21,15 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.awt.image.BufferedImage;
@@ -38,6 +41,7 @@ import java.util.List;
 import com.applitools.eyes.AccessibilityGuidelinesVersion;
 import com.applitools.eyes.AccessibilityLevel;
 import com.applitools.eyes.AccessibilityStatus;
+import com.applitools.eyes.EyesException;
 import com.applitools.eyes.SessionAccessibilityStatus;
 import com.applitools.eyes.StepInfo;
 import com.applitools.eyes.StepInfo.ApiUrls;
@@ -219,6 +223,20 @@ class ImageVisualTestingServiceTests
                         + "Checkpoint and baseline images are not available in the attachment. "
                         + "You can use the \"Step editor\" button to view them on Applitools."))));
         verify(httpClient).doHttpGet(any(URI.class));
+    }
+
+    @Test
+    void shouldNotCallAnythingOnEyesIfOpeningThrownAnException()
+    {
+        ApplitoolsVisualCheck applitoolsVisualCheck = createCheck();
+        Eyes eyes = mockEyes(applitoolsVisualCheck);
+        EyesException eyesException = mock(EyesException.class);
+        doThrow(eyesException).when(eyes).open(APP_NAME, BASELINE_NAME);
+
+        EyesException thrown = assertThrows(EyesException.class,
+                () -> imageVisualTestingService.run(applitoolsVisualCheck));
+        assertEquals(eyesException, thrown);
+        verifyNoMoreInteractions(eyes);
     }
 
     private BufferedImage mockScreenshot(ApplitoolsVisualCheck applitoolsVisualCheck)
