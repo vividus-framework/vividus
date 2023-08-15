@@ -19,7 +19,7 @@ function wait() {
 waitForScroll = setTimeout(() => {
         currentWindow.removeEventListener('scroll', cleanTimeoutAndWait);
         exit(true);
-    }, 50);
+    }, 100);
 }
 
 function cleanTimeoutAndWait(event) {
