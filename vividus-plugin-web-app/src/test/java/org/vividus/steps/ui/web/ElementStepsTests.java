@@ -16,9 +16,6 @@
 
 package org.vividus.steps.ui.web;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,10 +38,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
@@ -73,7 +66,7 @@ import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.WebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
-@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
+@ExtendWith(MockitoExtension.class)
 class ElementStepsTests
 {
     private static final String PARENT_ELEMENT_HAS_CHILD = "Parent element has number of child elements which";
@@ -101,14 +94,7 @@ class ElementStepsTests
     private static final String ELEMENT_XPATH = "elementXpath";
     private static final String CHILD_XPATH = "childXpath";
     private static final String THE_NUMBER_OF_PARENT_ELEMENTS = "The number of parent elements";
-    private static final String ELEMENTS_TO_CLICK = "The elements to click";
     private static final String ELEMENT_TO_CLICK = "Element to click";
-    private static final String CLICK_ALL_STEP_DEPRECATION = "The step: \"When I click on all elements located "
-            + "`$locator`\" is deprecated and will be removed in VIVIDUS 0.6.0. Use steps: \"When I click on element "
-            + "located by `$locator\" and \"When I find $comparisonRule `$number` elements by `$locator` and for each"
-            + " element do$stepsToExecute\"";
-
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(ElementSteps.class);
 
     @Mock private IBaseValidations baseValidations;
     @Mock private IMouseActions mouseActions;
@@ -152,27 +138,6 @@ class ElementStepsTests
 
         verify(mouseActions, times(2)).click(webElement);
         verify(baseValidations, times(2)).assertElementExists(ELEMENT_TO_CLICK, locator);
-    }
-
-    @Test
-    void testClickAllElementsByLocator()
-    {
-        var locator = new Locator(WebLocatorType.XPATH, XPATH);
-        when(baseValidations.assertIfElementsExist(ELEMENTS_TO_CLICK, locator)).thenReturn(
-                List.of(webElement, webElement));
-        elementSteps.clickOnAllElements(locator);
-        verify(mouseActions, times(2)).click(webElement);
-        assertThat(logger.getLoggingEvents(), is(List.of(warn(CLICK_ALL_STEP_DEPRECATION))));
-    }
-
-    @Test
-    void testClickAllElementsByLocatorNoElements()
-    {
-        var locator = new Locator(WebLocatorType.XPATH, XPATH);
-        when(baseValidations.assertIfElementsExist(ELEMENTS_TO_CLICK, locator)).thenReturn(List.of());
-        elementSteps.clickOnAllElements(locator);
-        verifyNoInteractions(mouseActions);
-        assertThat(logger.getLoggingEvents(), is(List.of(warn(CLICK_ALL_STEP_DEPRECATION))));
     }
 
     @Test

@@ -31,8 +31,6 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -56,8 +54,6 @@ import org.vividus.ui.web.action.search.WebLocatorType;
 @TakeScreenshotOnFailure
 public class ElementSteps implements ResourceLoaderAware
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ElementSteps.class);
-
     private static final String AN_ELEMENT_TO_CLICK = "An element to click";
     private static final String AN_ELEMENT_WITH_ATTRIBUTES = "An element with attributes%1$s";
     private static final String AN_ELEMENT = "An element";
@@ -314,23 +310,6 @@ public class ElementSteps implements ResourceLoaderAware
     private void findAndClick(Locator locator)
     {
         baseValidations.assertElementExists("Element to click", locator).ifPresent(mouseActions::click);
-    }
-
-    /**
-     * @deprecated Use steps: "When I click on element located by `$locator`" and
-     * "When I find $comparisonRule `$number` elements by `$locator` and for each element do$stepsToExecute".
-     *
-     * Clicks on <b>elements</b> located by <b>locator</b>
-     * @param locator to locate elements
-     */
-    @Deprecated(since = "0.5.1", forRemoval = true)
-    @When("I click on all elements located `$locator`")
-    public void clickOnAllElements(Locator locator)
-    {
-        LOGGER.warn("The step: \"When I click on all elements located `$locator`\" is deprecated and will be removed "
-                + "in VIVIDUS 0.6.0. Use steps: \"When I click on element located by `$locator\" and \"When "
-                + "I find $comparisonRule `$number` elements by `$locator` and for each element do$stepsToExecute\"");
-        baseValidations.assertIfElementsExist("The elements to click", locator).forEach(mouseActions::click);
     }
 
     @Override

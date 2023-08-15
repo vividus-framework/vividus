@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class NestedSteps
      * <br>When I find equal to 1 elements by By.xpath(.//*[contains(@class,'fancybox-wrap')]) and for each element do
      * <br>|step|
      * <br>|When I compare against baseline with name 'test_composit1_step'|
-     * <br>|When I click on all elements located `By.xpath(.//a[@title='Close'])`|
+     * <br>|When I click on element located by `xpath(.//a[@title='Close'])`|
      * </code>
      * @param comparisonRule The rule to match the quantity of elements. The supported rules:
      *                       <ul>
