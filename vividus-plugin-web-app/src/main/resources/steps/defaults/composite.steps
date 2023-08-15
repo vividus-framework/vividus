@@ -12,69 +12,6 @@ Composite: Then the page title contains the text '$text'
 Priority: 1
 Then the page title contains '<text>'
 
-Composite: Then a field with the name '$fieldName' exists
-!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s)` exists
-Then field located `By.fieldName(<fieldName>)` exists
-
-Composite: When I clear a field with the name '$fieldName'
-!-- DEPRECATED: 0.6.0, When I clear field located by `fieldName(%1$s)`
-When I clear field located by `fieldName(<fieldName>)`
-
-Composite: When I clear a field with the name '$fieldName' using keyboard
-!-- DEPRECATED: 0.6.0, When I clear field located by `fieldName(%1$s)` using keyboard
-When I clear field located by `fieldName(<fieldName>)` using keyboard
-
-Composite: When I add '$text' to a field with the name '$fieldName'
-!-- DEPRECATED: 0.6.0, When I add `%1$s` to field located by `fieldName(%2$s)`
-When I add `<text>` to field located by `fieldName(<fieldName>)`
-
-Composite: When I enter '$text' in a field with the name '$fieldName'
-!-- DEPRECATED: 0.6.0, When I enter `%1$s` in field located by `fieldName(%2$s)`
-When I enter `<text>` in field located by `fieldName(<fieldName>)`
-
-Composite: Then a field with the name '$fieldName' and text containing '$textpart' exists
-Priority: 1
-!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s):a->filter.fieldTextPart(%2$s)` exists
-Then field located `By.fieldName(<fieldName>):a->filter.fieldTextPart(<textpart>)` exists
-
-Composite: Then a field with the name '$fieldName' does not exist
-!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s)` does not exist
-Then field located `By.fieldName(<fieldName>)` does not exist
-
-Composite: Then a [$state] field with the name '$fieldName' and text '$text' exists
-Priority: 1
-!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%2$s)->filter.fieldText(%3$s).state(%1$s)` exists
-Then field located `By.fieldName(<fieldName>)->filter.fieldText(<text>).state(<state>)` exists
-
-Composite: Then a field with the name '$fieldName' and text '$text' does not exist
-Priority: 1
-!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s):a->filter.fieldText(%2$s)` does not exist
-Then field located `By.fieldName(<fieldName>):a->filter.fieldText(<text>)` does not exist
-
-Composite: Then a field with the name '$fieldName' and text '$text' exists
-Priority: 1
-!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s)->filter.fieldText(%2$s)` exists
-Then field located `By.fieldName(<fieldName>)->filter.fieldText(<text>)` exists
-
-Composite: Then a field with the name '$fieldName' and placeholder text '$text' exists
-Priority: 1
-!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s):a->filter.placeholder(%2$s)` exists
-Then field located `By.fieldName(<fieldName>):a->filter.placeholder(<text>)` exists
-
-Composite: Then a [$state] field with the name '$fieldName' and placeholder text '$text' exists
-Priority: 1
-!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%2$s)->filter.placeholder(%3$s).state(%1$s)` exists
-Then field located `By.fieldName(<fieldName>)->filter.placeholder(<text>).state(<state>)` exists
-
-Composite: Then a field with the name '$fieldName' placeholder text '$text' does not exist
-Priority: 1
-!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%1$s):a->filter.placeholder(%2$s)` does not exist
-Then field located `By.fieldName(<fieldName>):a->filter.placeholder(<text>)` does not exist
-
-Composite: Then a [$state] field with the name '$fieldName' exists
-!-- DEPRECATED: 0.6.0, Then field located `By.fieldName(%2$s):a->filter.state(%1$s)` exists
-Then field located `By.fieldName(<fieldName>):a->filter.state(<state>)` exists
-
 Composite: When I enter `$text` in field located `$locator` using keyboard
 When I execute sequence of actions:
 |type      |argument |
