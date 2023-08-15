@@ -24,7 +24,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.titleContains;
 import static org.openqa.selenium.support.ui.ExpectedConditions.titleIs;
 
 import java.time.Duration;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -35,16 +34,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.vividus.annotation.Replacement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.TimeoutConfigurer;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.State;
 import org.vividus.ui.action.IExpectedConditions;
-import org.vividus.ui.action.ISearchActions;
 import org.vividus.ui.action.IWaitActions;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
@@ -52,17 +47,14 @@ import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.WebJavascriptActions;
-import org.vividus.ui.web.action.search.WebLocatorType;
 
 @TakeScreenshotOnFailure
 public class WaitSteps
 {
     private static final long DIVISOR = 10;
-    private static final Logger LOGGER = LoggerFactory.getLogger(WaitSteps.class);
 
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IWaitActions waitActions;
-    @Inject private ISearchActions searchActions;
     @Inject private IUiContext uiContext;
     @Inject private ISoftAssert softAssert;
     @Inject private IExpectedConditions<By> expectedSearchContextConditions;
@@ -70,78 +62,6 @@ public class WaitSteps
     @Inject private IBaseValidations baseValidations;
     @Inject private WebJavascriptActions javascriptActions;
     @Inject private TimeoutConfigurer timeoutConfigurer;
-
-    /**
-     * @deprecated Use step: "When I wait until element located by `$locator` disappears"
-     *
-     * Waits for <b><i>an element</i></b> with the specified <b>tag</b> and <b>attribute type and value</b>
-     * disappearance in the specified search context
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li><b>Searches</b> for an element with the <b>specified attribute and tag</b> within search context</li>
-     * <li><i>If there are <b>no elements</b> by specified attribute and tag</i>, step provides passed assertion and
-     * don't check disappearance of an element</li>
-     * <li><i>If <b>there are elements</b> by specified attribute and tag, </i><b>waits</b> until this element becomes
-     * not visible</li>
-     * </ul>
-     * @param elementTag Type of the html tag (for ex. &lt;div&gt;, &lt;iframe&gt;)
-     * @param attributeType Type of the tag attribute (for ex. 'name', 'id')
-     * @param attributeValue Value of the attribute
-     */
-    @Deprecated(since = "0.5.1", forRemoval = true)
-    @When("I wait until an element with the tag '$elementTag' and attribute"
-            + " '$attributeType'='$attributeValue' disappears")
-    public void waitTillElementDisappears(String elementTag, String attributeType, String attributeValue)
-    {
-        LOGGER.warn("The step: \"When I wait until an element with the tag '$elementTag' and attribute '$attributeType'"
-                + "='$attributeValue' disappears\" is deprecated and will be removed in VIVIDUS 0.6.0."
-                + " Use step: \"When I wait until element located by `$locator` disappears\"");
-        String elementXpath = XpathLocatorUtils.getXPathByTagNameAndAttribute(elementTag, attributeType,
-            attributeValue);
-        Locator locator = new Locator(WebLocatorType.XPATH, elementXpath);
-        locator.getSearchParameters().setWaitForElement(false);
-        List<WebElement> elements = searchActions.findElements(locator);
-        if (!elements.isEmpty())
-        {
-            waitActions.wait(getWebDriver(), State.NOT_VISIBLE.getExpectedCondition(elements.get(0)));
-        }
-        else
-        {
-            String assertionDescription = "There is no element present with the tag '%s' and attribute '%s'='%s'";
-            String description = String.format(assertionDescription, elementTag, attributeType, attributeValue);
-            softAssert.recordPassedAssertion(description);
-        }
-    }
-
-    /**
-     * @deprecated Use step: "When I wait until element located by `$locator` appears"
-     *
-     * Waits for <b><i>an element</i></b> with the specified <b>tag</b> and <b>attribute type and value</b>
-     * appearance in the specified search context
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li><i>Finds</i> an element with the <b>specified attribute and tag</b> within search context
-     * <li><i>Waits</i> until this element becomes visible
-     * </ul>
-     * @param elementTag Type of the html tag (for ex. &lt;div&gt;, &lt;iframe&gt;)
-     * @param attributeType Type of the tag attribute (for ex. 'name', 'id')
-     * @param attributeValue Value of the attribute
-     */
-    @Deprecated(since = "0.5.1", forRemoval = true)
-    @When("I wait until an element with the tag '$elementTag' and attribute"
-            + " '$attributeType'='$attributeValue' appears")
-    public void waitTillElementAppears(String elementTag, String attributeType, String attributeValue)
-    {
-        LOGGER.warn("The step: \"When I wait until an element with the tag '$elementTag' and attribute "
-                + "'$attributeType'='$attributeValue' appears\" is deprecated and will be removed in VIVIDUS 0.6.0."
-                + " Use step: \"When I wait until element located by `$locator` appears\"");
-        waitForElementAppearance(getSearchContext(),
-                By.xpath(XpathLocatorUtils.getXPathByTagNameAndAttribute(elementTag, attributeType, attributeValue)));
-    }
 
     /**
      * Waits for <b><i>an alert</i></b> appearance on the page
@@ -306,24 +226,6 @@ public class WaitSteps
                     waitForElementAppearance(searchContext, locator);
                 }
         );
-    }
-
-    /**
-     * @deprecated Use step: "When I wait until element located by `$locator` disappears"
-     *
-     * Waits for <b><i>an element</i></b> with the specified <b>id</b> disappearance
-     * in the specified search context
-     * @param id Value of the 'id' attribute of the element
-     */
-    @Deprecated(since = "0.5.1", forRemoval = true)
-    @Then("an element with the id '$id' disappears")
-    @Replacement(versionToRemoveStep = "0.6.0",
-                 replacementFormatPattern = "When I wait until element located by `id(%1$s)` disappears")
-    public void elementByIdDisappears(String id)
-    {
-        By locator = By.xpath(XpathLocatorUtils.getXPathByAttribute("id", id));
-        waitActions.wait(getSearchContext(),
-                State.NOT_VISIBLE.getExpectedCondition(expectedSearchContextConditions, locator));
     }
 
     /**

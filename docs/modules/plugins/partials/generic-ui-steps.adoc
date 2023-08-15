@@ -88,12 +88,6 @@ Waits for an element with the specified state to be found using the specified ti
 When I wait `$duration` with `$pollingDuration` polling until element located by `$locator` becomes $state
 ----
 
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-When I wait `$duration` with `$pollingDuration` polling until element located `$locator` becomes $state
-----
-
 * `$duration` - Total duration to wait in the {iso-date-format-link} format.
 * `$pollingDuration` - The duration to wait between search retries in the {iso-date-format-link} format.
 * `$locator` - The <<_locator,locator>> of the element to wait for state change.

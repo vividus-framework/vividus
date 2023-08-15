@@ -950,57 +950,15 @@ Then `${response}` matcher `.+`
 
 === Element wait steps
 
-:disappearance-check-note: If the element doesn't exist on the page/context, the step will immediately complete successfully. Checking the element on the page (if needed) should be done in a separate step (e.g. <<_wait_for_element_appearance>> or xref:plugin-html.adoc#_validate_elements[Validate elements]).
-
-==== Wait for disappearance of an element with a tag
-
-[WARNING]
-====
-The step is deprecated and will be removed in VIVIDUS 0.6.0.
-The replacement is a <<_wait_for_element_disappearance,generic step waiting for element disappearance>>.
-====
-
-Waits for an element with the specified tag, attribute type and value disappearance.
-
-Actions performed by step:
-
-* Searches for an element with the specified attribute and tag within search context
-* If there are no elements by specified attribute and tag, step provides passed assertion and don't check disappearance of an element
-* If there are elements by specified attribute and tag, waits until this element becomes not visible
-
-NOTE: {disappearance-check-note}
-
-[source,gherkin]
-----
-When I wait until an element with the tag '$elementTag' and attribute '$attributeType'='$attributeValue' disappears
-----
-
-* `$elementTag` - Type of the https://www.w3schools.com/TAgs/default.asp[html tag] (e.g. `div` or `iframe`).
-* `$attributeType` - Type of the https://www.w3schools.com/html/html_attributes.asp[tag attribute] (e.g. `name` or `id`).
-* `$attributeValue` - Value of the attribute.
-
-.Click on the button and waiting for disappearance of the `div` element with a certain attribute and value
-[source,gherkin]
-----
-When I click on a button with the name 'Toggle element visibility with delay'
-When I wait until an element with the tag 'div' and attribute 'id'='delayed' disappears
-----
-
 ==== Wait for element disappearance with timeout
 
 Waits for element disappearance with desired timeout.
 
-NOTE: {disappearance-check-note}
+NOTE: If the element doesn't exist on the page/context, the step will immediately complete successfully. Checking the element on the page (if needed) should be done in a separate step (e.g. <<_wait_for_element_appearance>> or xref:plugin-html.adoc#_validate_elements[Validate elements]).
 
 [source,gherkin]
 ----
 Then element located by `$locator` disappears in `$timeout`
-----
-
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-Then element located '$locator' disappears in '$timeout'
 ----
 
 * `$locator` - The <<_locator,locator>> used to element.
@@ -1010,7 +968,7 @@ Then element located '$locator' disappears in '$timeout'
 [source,gherkin]
 ----
 When I click on a button with the name 'Toggle element visibility with delay'
-Then element located 'By.xpath(//div[@id='delayed'])' disappears in 'PT3S'
+Then element located by 'xpath(//div[@id='delayed'])' disappears in 'PT3S'
 ----
 
 === Set Variable Steps

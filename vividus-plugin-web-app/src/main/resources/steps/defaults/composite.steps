@@ -164,54 +164,6 @@ Then number of elements found by `By.xpath(.//button[./img[@src='<imageSrc>']])`
 Composite: Then a button with the tooltip '$tooltip' and image with the src '$imageSrc' exists
 Then number of elements found by `By.xpath(.//button[./img[@src='<imageSrc>'] and @title='<tooltip>'])` is equal to `1`
 
-Composite: When I wait until an element with the text '$text' appears
-!-- DEPRECATED: 0.6.0, When I wait until element located by `caseSensitiveText(%1$s)` appears
-When I wait until element located by `caseSensitiveText(<text>)` appears
-
-Composite: When I wait until an element with the text '$text' disappears
-!-- DEPRECATED: 0.6.0, When I wait until element located by `caseSensitiveText(%1$s)` disappears
-When I wait until element located by `caseSensitiveText(<text>)` disappears
-
-Composite: When I wait until an element with the name '$elementName' disappears
-!-- DEPRECATED: 0.6.0, When I wait until element located by `elementName(%1$s)` disappears
-When I wait until element located by `elementName(<elementName>)` disappears
-
-Composite: When I wait until an element with the name '$elementName' appears
-!-- DEPRECATED: 0.6.0, When I wait until element located by `elementName(%1$s)` appears
-When I wait until element located by `elementName(<elementName>)` appears
-
-Composite: When I wait until the state of an element with the name '$elementName' becomes [$state]
-!-- DEPRECATED: 0.6.0, When I wait until state of element located by `elementName(%1$s)` is %2$s
-When I wait until state of element located by `elementName(<elementName>)` is <state>
-
-Composite: When I wait until an element with the name '$elementName' is stale
-!-- DEPRECATED: 0.6.0, When I wait until element located by `elementName(%1$s)` is stale
-When I wait until element located by `elementName(<elementName>)` is stale
-
-Composite: When I wait until an element with the name '$elementName' contains the text '$text'
-!-- DEPRECATED: 0.6.0, When I wait until element located by `elementName(%1$s)` contains text `%2$s`
-When I wait until element located by `elementName(<elementName>)` contains text `<text>`
-
-Composite: Then an element with the name '$elementName' disappears in '$timeout' seconds
-!-- DEPRECATED: 0.6.0, Then element located by `elementName(%1$s)` disappears in `%2$s`
-Then element located by `elementName(<elementName>)` disappears in `<timeout>`
-
-Composite: When I wait until state of element located `$locator` is $state
-!-- DEPRECATED: 0.6.0, When I wait until state of element located by `%1$s` is %2$s
-When I wait until state of element located by `<locator>` is <state>
-
-Composite: When I wait until element located `$locator` is stale
-!-- DEPRECATED: 0.6.0, When I wait until element located by `%1$s` is stale
-When I wait until element located by `<locator>` is stale
-
-Composite: When I wait until element located `$locator` contains text '$text'
-!-- DEPRECATED: 0.6.0, When I wait until element located by `%1$s` contains text `%2$s`
-When I wait until element located by `<locator>` contains text `<text>`
-
-Composite: Then element located '$locator' disappears in '$timeout'
-!-- DEPRECATED: 0.6.0, Then element located by `%1$s` disappears in `%2$s`
-Then element located by `<locator>` disappears in `<timeout>`
-
 Composite: Given I am on the main application page
 !-- DEPRECATED: 0.7.0, Given I am on main application page
 Given I am on main application page
