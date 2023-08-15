@@ -54,7 +54,7 @@ class ScenariosCounterTests
     private static final String SCENARIO = "scenario description";
     private static final String EXAMPLE = "example description";
     private static final String BEFORE = "before description";
-    private static final String RESOURCE_LOCATION = "bdd.story-loader.batch1.resource-location";
+    private static final String RESOURCE_LOCATION = "batch-1.resource-location";
     private static final String PARSING_NOTIFICATION = "Story parsing may take up to 5 minutes. Please be patient.";
     private static final String OUTPUT_LINE_FORMAT = "    %d | %s";
 
