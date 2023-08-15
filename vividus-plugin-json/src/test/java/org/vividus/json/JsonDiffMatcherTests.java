@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -55,10 +54,8 @@ class JsonDiffMatcherTests
         var diffModel = new DiffModel(ACTUAL_DATA, EXPECTED_DATA, patch);
         var listener = mock(JsonPatchListener.class);
         when(listener.getDiffModel()).thenReturn(diffModel);
-        var matcher = spy(createMatcher(EXPECTED_DATA));
-        matcher.render(listener);
+        createMatcher(EXPECTED_DATA).render(listener);
         verify(listener).getDiffModel();
-        verify(matcher).render(listener);
         verify(attachmentPublisher).publishAttachment(eq("tpl/diff.ftl"), argThat(e ->
         {
             @SuppressWarnings("unchecked") var diff = ((Map<String, DiffModel>) e).get("data");
@@ -66,7 +63,7 @@ class JsonDiffMatcherTests
                     && Objects.equals(diff.getExpected(), EXPECTED_DATA)
                     && Objects.equals(diff.getPatch(), patch);
         }), eq("JSON Diff"));
-        verifyNoMoreInteractions(listener, attachmentPublisher, matcher);
+        verifyNoMoreInteractions(listener, attachmentPublisher);
     }
 
     @Test
@@ -112,11 +109,9 @@ class JsonDiffMatcherTests
     void testDescribeTo()
     {
         var description = mock(Description.class);
-        var matcher = spy(createMatcher(EXPECTED_DATA));
-        matcher.describeTo(description);
+        createMatcher(EXPECTED_DATA).describeTo(description);
         verify(description).appendText(EXPECTED_DATA);
-        verify(matcher).describeTo(description);
-        verifyNoMoreInteractions(description, matcher);
+        verifyNoMoreInteractions(description);
     }
 
     private JsonDiffMatcher createMatcher(String expected)
