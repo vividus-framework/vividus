@@ -113,7 +113,7 @@ Then text `${input}` exists
 Scenario: Action verification PRESS_KEYS
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
 Given I initialize scenario variable `input` with value `mark#{generate(regexify '[a-z]{10}')}`
-When I enter `${input}` in field located `By.id(text)`
+When I enter `${input}` in field located by `id(text)`
 Then text `${input}` exists
 When I click on element located by `xpath(//label[@for='text'])`
 When I find = `1` elements `By.xpath(//div[@id='output' and text()!='mark'])` and while they exist do up to 11 iteration of
@@ -130,7 +130,7 @@ Meta:
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
 Given I initialize scenario variable `inputText` with value `mark#{generate(regexify '[a-z]{10}')}`
 Given I initialize scenario variable `inputLocator` with value `By.id(text)`
-When I enter `${inputText}` in field located `${inputLocator}`
+When I enter `${inputText}` in field located by `${inputLocator}`
 Then field value is `${inputText}`
 When I click on element located by `${inputLocator}`
 When I execute sequence of actions:
