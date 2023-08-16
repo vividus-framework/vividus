@@ -142,27 +142,6 @@ class KafkaStepsIntegrationTests
 
     @ParameterizedTest
     @MethodSource("kafkaOperations")
-    void shouldProduceMessagesToAndConsumeMessagesFromKafka(BiConsumer<KafkaSteps, VariableContext> test)
-            throws InterruptedException, ExecutionException, TimeoutException
-    {
-        kafkaSteps.startKafkaListener(CONSUMER, Set.of(TOPIC));
-
-        kafkaSteps.sendEvent(ANY_DATA, PRODUCER, TOPIC);
-
-        ComparisonRule comparisonRule = ComparisonRule.EQUAL_TO;
-        kafkaSteps.waitForKafkaMessages(Duration.ofSeconds(10), CONSUMER, comparisonRule, 1);
-        verify(softAssert).assertThat(eq("Total count of consumed Kafka messages"), eq(1),
-                argThat(matcher -> EQUAL_TO_ONE_MATCHER.equals(matcher.toString())));
-
-        kafkaSteps.stopKafkaListener(CONSUMER);
-
-        assertThat(logger.getLoggingEvents(), is(List.of(info(LISTENER_STARTED), info(LISTENER_STOPPED))));
-
-        test.accept(kafkaSteps, variableContext);
-    }
-
-    @ParameterizedTest
-    @MethodSource("kafkaOperations")
     void shouldProduceEventsToAndConsumeEventsFromKafka(BiConsumer<KafkaSteps, VariableContext> test)
             throws InterruptedException, ExecutionException, TimeoutException
     {

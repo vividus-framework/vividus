@@ -38,11 +38,6 @@ Sends the event with the value to the provided topic with no key or partition.
 When I send event with value `$value` to `$producerKey` Kafka topic `$topic`
 ----
 
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-When I send data `$data` to `$producerKey` Kafka topic `$topic`
-----
 * `$value` - The event value.
 * `$producerKey` - The key of Kafka producer configuration.
 * `$topic` - The topic name.
@@ -115,12 +110,6 @@ Starts the Kafka consumer with the provided configuration to listen the specifie
 When I start consuming events from `$consumerKey` Kafka topics `$topics`
 ----
 
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-When I start consuming messages from `$consumerKey` Kafka topics `$topics`
-----
-
 * `$consumerKey` - The key of the Kafka consumer configuration.
 * `$topics` - The comma-separated set of topics to listen.
 
@@ -131,12 +120,6 @@ Drains/Peeks the consumed events to the specified variable. If the consumer is n
 [source,gherkin]
 ----
 When I $queueOperation consumed `$consumerKey` Kafka events to $scopes variable `$variableName`
-----
-
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-When I $queueOperation consumed `$consumerKey` Kafka messages to $scopes variable `$variableName`
 ----
 
 * `$queueOperation` -  `DRAIN` - saves the events consumed since the last drain or from the consumption start and moves the consumer cursor to the position after the last consumed event, `PEEK` - saves the events consumed since the last drain or from the consumption start and doesn't change the consumer cursor position
@@ -153,12 +136,6 @@ Waits until the count of the consumed events (from the consumer start or after t
 When I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka events is $comparisonRule `$expectedCount`
 ----
 
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-When I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka messages is $comparisonRule `$expectedCount`
-----
-
 * `$timeout` - The maximum time to wait for the events in {durations-format-link} format.
 * `$consumerKey` - The key of the Kafka consumer configuration.
 * `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
@@ -171,12 +148,6 @@ Stops the Kafka consumer started by the corresponding step before. All recorded 
 [source,gherkin]
 ----
 When I stop consuming events from `$consumerKey` Kafka
-----
-
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-When I stop consuming messages from `$consumerKey` Kafka
 ----
 
 * `$consumerKey` - The key of the Kafka consumer configuration.
