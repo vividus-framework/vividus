@@ -48,26 +48,15 @@ public class CheckboxSteps
     public void changeStateOfCheckbox(CheckboxAction checkBoxAction, Locator checkboxLocator)
     {
         WebElement checkboxElement = baseValidations.assertIfElementExists(CHECKBOX, checkboxLocator);
-        Checkbox checkbox = createCheckbox(checkboxElement);
-        changeCheckboxState(checkbox, checkBoxAction);
-    }
-
-    private Checkbox createCheckbox(WebElement checkbox)
-    {
-        return checkbox == null || checkbox instanceof Checkbox ? (Checkbox) checkbox : new Checkbox(checkbox);
-    }
-
-    private void changeCheckboxState(Checkbox checkbox, CheckboxAction action)
-    {
-        if (checkbox != null && checkbox.getWrappedElement() != null && checkbox.isSelected() != action.isSelected())
+        if (checkboxElement != null)
         {
-            WebElement elementToClick = getClickableElement(checkbox);
-            mouseActions.click(elementToClick);
+            Checkbox checkbox = checkboxElement instanceof Checkbox ? (Checkbox) checkboxElement : new Checkbox(
+                    checkboxElement);
+            if (checkbox.getWrappedElement() != null && checkbox.isSelected() != checkBoxAction.isSelected())
+            {
+                WebElement elementToClick = checkbox.isDisplayed() ? checkbox : checkbox.getLabelElement();
+                mouseActions.click(elementToClick);
+            }
         }
-    }
-
-    private WebElement getClickableElement(Checkbox checkbox)
-    {
-        return checkbox.isDisplayed() ? checkbox : checkbox.getLabelElement();
     }
 }
