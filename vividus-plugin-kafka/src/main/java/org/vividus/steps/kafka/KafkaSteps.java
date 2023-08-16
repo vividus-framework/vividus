@@ -54,7 +54,6 @@ import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.GenericMessageListenerContainer;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
-import org.vividus.annotation.Replacement;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
@@ -176,40 +175,6 @@ public class KafkaSteps
         getListeners().put(consumerKey, container);
 
         LOGGER.info("Kafka event listener is started");
-    }
-
-    /**
-     * Waits until the count of the consumed messages (from the consumer start or after the last draining operation)
-     * matches to the rule or until the timeout is exceeded.
-     *
-     * @param timeout        The maximum time to wait for the messages in ISO-8601 format
-     * @param consumerKey    The key of the producer configuration
-     * @param comparisonRule The rule to match the quantity of messages. The supported rules:
-     *                       <ul>
-     *                       <li>less than (&lt;)</li>
-     *                       <li>less than or equal to (&lt;=)</li>
-     *                       <li>greater than (&gt;)</li>
-     *                       <li>greater than or equal to (&gt;=)</li>
-     *                       <li>equal to (=)</li>
-     *                       <li>not equal to (!=)</li>
-     *                       </ul>
-     * @param expectedCount  The expected count of the messages to be matched by the rule
-     * @deprecated Use step: "When I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka events is
-     * $comparisonRule `$expectedCount`"
-     */
-    @Deprecated(since = "0.5.6", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern =
-            "When I wait with `%1$s` timeout until count of consumed `%2$s` Kafka events is %3$s `%4$s`")
-    @When("I wait with `$timeout` timeout until count of consumed `$consumerKey` Kafka messages is $comparisonRule"
-            + " `$expectedCount`")
-    public void waitForKafkaMessages(Duration timeout, String consumerKey, ComparisonRule comparisonRule,
-            int expectedCount)
-    {
-        Matcher<Integer> countMatcher = comparisonRule.getComparisonRule(expectedCount);
-        Integer result = new DurationBasedWaiter(timeout, Duration.ofSeconds(1)).wait(
-                () -> getEventsBy(consumerKey).size(),
-                countMatcher::matches);
-        softAssert.assertThat("Total count of consumed Kafka messages", result, countMatcher);
     }
 
     /**
