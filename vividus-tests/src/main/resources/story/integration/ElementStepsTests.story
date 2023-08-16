@@ -10,12 +10,6 @@ When I click on element located by `id(button-hide)`
 When I wait until element located by `id(element-to-hide)` disappears
 Then number of elements found by `id(element-to-hide)` is equal to `0`
 
-Scenario: Step verification When I click on all elements located `$locator`
-Given I am on page with URL `${vividus-test-site-url}/checkboxes.html`
-Then number of not selected elements found by `xpath(//*[@id = 'one' or @id = 'two' or @id = 'three'])` is equal to `3`
-When I click on all elements located `tagName(label)`
-Then number of selected elements found by `xpath(//*[@id = 'one' or @id = 'two' or @id = 'three'])` is equal to `3`
-
 Scenario: Step verification Then each element located `$locator` has same '$dimension'
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
 Then each element located `xpath(.//input[@type='radio'])` has same `width`
