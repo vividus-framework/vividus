@@ -30,6 +30,7 @@ import org.vividus.context.RunTestContext;
 
 public class DeprecatedStepNotificationFactory
 {
+    private static final String PERCENT_ESCAPE_PATTERN = "(?<!%)%(?![a-zA-Z0-9]|%(?![a-zA-Z0-9]))";
     private final RunTestContext runTestContext;
     private final Configuration configuration;
     private final StepPatternsRegistry stepPatternsRegistry;
@@ -49,9 +50,10 @@ public class DeprecatedStepNotificationFactory
         String[] stepParams = getParametersFromStep(stepMatcher);
 
         String notification;
+        String normalizedFormatPattern = replacementFormatPattern.replaceAll(PERCENT_ESCAPE_PATTERN, "%%");
         try (Formatter newStep = new Formatter())
         {
-            newStep.format(replacementFormatPattern, (Object[]) stepParams);
+            newStep.format(normalizedFormatPattern, (Object[]) stepParams);
             notification = String.format(
                     "The step: \"%s\" is deprecated and will be removed in VIVIDUS %s. Use step: \"%s\"",
                     runningDeprecatedStep, versionToRemove, newStep);

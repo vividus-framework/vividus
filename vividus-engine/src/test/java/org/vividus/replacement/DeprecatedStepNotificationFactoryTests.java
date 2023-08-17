@@ -65,6 +65,17 @@ class DeprecatedStepNotificationFactoryTests
     private static final String MULTI_PARAMETERIZED_STEP_REPLACE_PATTERN =
             "Given actual step with parameters `%2$s` & `%1$s`";
 
+    private static final String PERCENT_CHAR_STEP_VALUE =
+            "deprecated step with parameters param1% & `param2`% & %param3 & % & %%";
+    private static final String PERCENT_CHAR_STEP_PATTERN =
+            "deprecated\\sstep\\swith\\sparameters\\s(.*)%\\s&\\s`(.*)`%\\s&\\s%(.*)\\s&\\s%\\s&\\s%%";
+    private static final String PERCENT_CHAR_STEP_DEPR =
+            "Given deprecated step with parameters param1% & `param2`% & %param3 & % & %%";
+    private static final String PERCENT_CHAR_STEP_ACTUAL =
+            "Given actual step with parameters param1% & `param2`% & %param3 & % & %";
+    private static final String PERCENT_CHAR_STEP_REPLACE_PATTERN =
+            "Given actual step with parameters %1$s% & `%2$s`% & %%3$s & % & %%";
+
     @Mock private RunTestContext runTestContext;
     @Mock private Configuration configuration;
     @Mock private CollectingStepPatternsMonitor collectingStepPatternsMonitor;
@@ -76,7 +87,8 @@ class DeprecatedStepNotificationFactoryTests
         return Stream.of(
                 Arguments.of(NOT_PARAMETERIZED_STEP_VALUE,   NOT_PARAMETERIZED_STEP_VALUE,     NOT_PARAMETERIZED_STEP_DEPR,   NOT_PARAMETERIZED_STEP_ACTUAL,   NOT_PARAMETERIZED_STEP_ACTUAL),
                 Arguments.of(PARAMETERIZED_STEP_VALUE,       PARAMETERIZED_STEP_PATTERN,       PARAMETERIZED_STEP_DEPR,       PARAMETERIZED_STEP_ACTUAL,       PARAMETERIZED_STEP_REPLACE_PATTERN),
-                Arguments.of(MULTI_PARAMETERIZED_STEP_VALUE, MULTI_PARAMETERIZED_STEP_PATTERN, MULTI_PARAMETERIZED_STEP_DEPR, MULTI_PARAMETERIZED_STEP_ACTUAL, MULTI_PARAMETERIZED_STEP_REPLACE_PATTERN)
+                Arguments.of(MULTI_PARAMETERIZED_STEP_VALUE, MULTI_PARAMETERIZED_STEP_PATTERN, MULTI_PARAMETERIZED_STEP_DEPR, MULTI_PARAMETERIZED_STEP_ACTUAL, MULTI_PARAMETERIZED_STEP_REPLACE_PATTERN),
+                Arguments.of(PERCENT_CHAR_STEP_VALUE, PERCENT_CHAR_STEP_PATTERN, PERCENT_CHAR_STEP_DEPR, PERCENT_CHAR_STEP_ACTUAL, PERCENT_CHAR_STEP_REPLACE_PATTERN)
         );
         // CHECKSTYLE:ON
     }
