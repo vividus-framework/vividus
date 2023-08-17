@@ -22,8 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.apache.commons.io.FileUtils;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -36,6 +34,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.manager.WebDriverManager;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.steps.ui.web.validation.IElementValidations;
@@ -59,14 +58,30 @@ public class ElementSteps implements ResourceLoaderAware
     private static final String AN_ELEMENT = "An element";
     private static final String THE_NUMBER_OF_FOUND_ELEMENTS = "The number of found elements";
 
-    @Inject private IWebElementActions webElementActions;
-    @Inject private IDescriptiveSoftAssert descriptiveSoftAssert;
-    @Inject private IWebDriverProvider webDriverProvider;
-    @Inject private IBaseValidations baseValidations;
-    @Inject private IUiContext uiContext;
-    @Inject private IElementValidations elementValidations;
-    @Inject private IMouseActions mouseActions;
+    private final IMouseActions mouseActions;
+    private final IWebElementActions webElementActions;
+    private final IWebDriverProvider webDriverProvider;
+    private final WebDriverManager webDriverManager;
+    private final IUiContext uiContext;
+    private final IDescriptiveSoftAssert descriptiveSoftAssert;
+    private final IBaseValidations baseValidations;
+    private final IElementValidations elementValidations;
     private ResourceLoader resourceLoader;
+
+    public ElementSteps(IMouseActions mouseActions, IWebElementActions webElementActions,
+            IWebDriverProvider webDriverProvider, WebDriverManager webDriverManager, IUiContext uiContext,
+            IDescriptiveSoftAssert descriptiveSoftAssert, IBaseValidations baseValidations,
+            IElementValidations elementValidations)
+    {
+        this.mouseActions = mouseActions;
+        this.webElementActions = webElementActions;
+        this.webDriverProvider = webDriverProvider;
+        this.webDriverManager = webDriverManager;
+        this.uiContext = uiContext;
+        this.descriptiveSoftAssert = descriptiveSoftAssert;
+        this.baseValidations = baseValidations;
+        this.elementValidations = elementValidations;
+    }
 
     /**
      * This step uploads a file with the given relative path
@@ -93,7 +108,7 @@ public class ElementSteps implements ResourceLoaderAware
         if (descriptiveSoftAssert.assertTrue("File " + filePath + " exists", fileForUpload.exists()))
         {
             String fullFilePath = fileForUpload.getAbsolutePath();
-            if (isRemoteExecution())
+            if (webDriverManager.isRemoteExecution())
             {
                 webDriverProvider.getUnwrapped(RemoteWebDriver.class).setFileDetector(new LocalFileDetector());
             }
@@ -316,10 +331,5 @@ public class ElementSteps implements ResourceLoaderAware
     public void setResourceLoader(ResourceLoader resourceLoader)
     {
         this.resourceLoader = resourceLoader;
-    }
-
-    private boolean isRemoteExecution()
-    {
-        return webDriverProvider.isRemoteExecution();
     }
 }

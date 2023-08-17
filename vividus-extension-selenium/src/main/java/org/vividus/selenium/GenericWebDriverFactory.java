@@ -33,7 +33,6 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
 import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
@@ -42,9 +41,9 @@ import org.vividus.selenium.driver.TextFormattingWebDriver;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
 
-public abstract class AbstractWebDriverFactory implements IGenericWebDriverFactory
+public class GenericWebDriverFactory implements IGenericWebDriverFactory
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractWebDriverFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GenericWebDriverFactory.class);
 
     private static final String SELENIUM_GRID_PROPERTY_PREFIX = "selenium.grid.capabilities.";
     private static final String LOCAL_DRIVER_PROPERTY_PREFIX = "selenium.capabilities.";
@@ -75,7 +74,7 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
                 }
             });
 
-    public AbstractWebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
+    public GenericWebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
             JsonUtils jsonUtils, Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters)
     {
         this.remoteWebDriverFactory = remoteWebDriverFactory;
@@ -97,7 +96,7 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
     }
 
     @Override
-    public WebDriver getRemoteWebDriver(DesiredCapabilities desiredCapabilities)
+    public WebDriver createWebDriver(DesiredCapabilities desiredCapabilities)
     {
         DesiredCapabilities mergedDesiredCapabilities = getWebDriverCapabilities(false, desiredCapabilities);
         DesiredCapabilities updatedDesiredCapabilities = updateDesiredCapabilities(mergedDesiredCapabilities);
@@ -108,11 +107,8 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
     protected WebDriver createWebDriver(Supplier<WebDriver> webDriver, DesiredCapabilities sessionRequestCapabilities)
     {
         logCapabilities(sessionRequestCapabilities, "Requested capabilities:\n{}");
-        WebDriver driver = new TextFormattingWebDriver(webDriver.get());
-        configureWebDriver(driver);
-
-        logCapabilities(WebDriverUtils.unwrap(driver, HasCapabilities.class).getCapabilities(),
-                "Session capabilities:\n{}");
+        TextFormattingWebDriver driver = new TextFormattingWebDriver(webDriver.get());
+        logCapabilities(driver.getCapabilities(), "Session capabilities:\n{}");
         return driver;
     }
 
@@ -130,23 +126,9 @@ public abstract class AbstractWebDriverFactory implements IGenericWebDriverFacto
         return desiredCapabilities;
     }
 
-    protected abstract void configureWebDriver(WebDriver webDriver);
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> T getCapability(String capabilityName, boolean localRun)
-    {
-        return (T) getWebDriverCapabilities(localRun).getCapability(capabilityName);
-    }
-
-    private DesiredCapabilities getWebDriverCapabilities(boolean localRun)
-    {
-        return webDriverCapabilities.getUnchecked(localRun);
-    }
-
     protected DesiredCapabilities getWebDriverCapabilities(boolean localRun, DesiredCapabilities toMerge)
     {
-        return merge(getWebDriverCapabilities(localRun), toMerge);
+        return merge(webDriverCapabilities.getUnchecked(localRun), toMerge);
     }
 
     protected IPropertyParser getPropertyParser()

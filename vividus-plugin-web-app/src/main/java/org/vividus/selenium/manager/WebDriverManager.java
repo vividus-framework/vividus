@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,15 @@ import org.vividus.selenium.session.WebDriverSessionInfo;
 
 public class WebDriverManager extends GenericWebDriverManager implements IWebDriverManager
 {
+    private final boolean remoteExecution;
     private boolean electronApp;
     private Dimension remoteScreenResolution;
 
-    public WebDriverManager(IWebDriverProvider webDriverProvider, WebDriverSessionInfo webDriverSessionInfo)
+    public WebDriverManager(boolean remoteExecution, IWebDriverProvider webDriverProvider,
+            WebDriverSessionInfo webDriverSessionInfo)
     {
         super(webDriverProvider, webDriverSessionInfo);
+        this.remoteExecution = remoteExecution;
     }
 
     @Override
@@ -69,7 +72,7 @@ public class WebDriverManager extends GenericWebDriverManager implements IWebDri
     @Override
     public Optional<Dimension> getScreenResolution()
     {
-        if (getWebDriverProvider().isRemoteExecution())
+        if (isRemoteExecution())
         {
             return Optional.ofNullable(remoteScreenResolution);
         }
@@ -79,6 +82,12 @@ public class WebDriverManager extends GenericWebDriverManager implements IWebDri
         }
         java.awt.Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         return Optional.of(new Dimension(screenSize.width, screenSize.height));
+    }
+
+    @Override
+    public boolean isRemoteExecution()
+    {
+        return getWebDriverProvider().isWebDriverInitialized() && remoteExecution;
     }
 
     public void setElectronApp(boolean electronApp)

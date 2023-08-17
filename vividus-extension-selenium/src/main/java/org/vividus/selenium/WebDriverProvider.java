@@ -34,32 +34,30 @@ public class WebDriverProvider implements IWebDriverProvider
     private IVividusWebDriverFactory vividusWebDriverFactory;
     private final ConcurrentLinkedQueue<WebDriver> webDrivers = new ConcurrentLinkedQueue<>();
     @Inject private EventBus eventBus;
-    private TestContext testContext;
+    private final TestContext testContext;
 
-    @Override
-    public boolean isRemoteExecution()
+    public WebDriverProvider(TestContext testContext)
     {
-        return isWebDriverInitialized() && getVividusWebDriver().isRemote();
+        this.testContext = testContext;
     }
 
-    private VividusWebDriver getVividusWebDriver()
+    private WebDriver getWebDriver()
     {
-        return testContext.get(VividusWebDriver.class, VividusWebDriver.class);
+        return testContext.get(WebDriver.class, WebDriver.class);
     }
 
     @Override
     public WebDriver get()
     {
-        VividusWebDriver vividusWebDriver = testContext.get(VividusWebDriver.class);
-        if (vividusWebDriver == null)
+        WebDriver webDriver = testContext.get(WebDriver.class);
+        if (webDriver == null)
         {
-            vividusWebDriver = vividusWebDriverFactory.create();
-            testContext.put(VividusWebDriver.class, vividusWebDriver);
-            WebDriver driver = vividusWebDriver.getWrappedDriver();
-            webDrivers.add(driver);
-            eventBus.post(new WebDriverCreateEvent(driver));
+            webDriver = vividusWebDriverFactory.createWebDriver();
+            testContext.put(WebDriver.class, webDriver);
+            webDrivers.add(webDriver);
+            eventBus.post(new WebDriverCreateEvent(webDriver));
         }
-        return vividusWebDriver.getWrappedDriver();
+        return webDriver;
     }
 
     @Override
@@ -73,7 +71,7 @@ public class WebDriverProvider implements IWebDriverProvider
     {
         if (isWebDriverInitialized())
         {
-            WebDriver webDriver = getVividusWebDriver().getWrappedDriver();
+            WebDriver webDriver = getWebDriver();
             String sessionId = WebDriverUtils.unwrap(webDriver, RemoteWebDriver.class).getSessionId().toString();
             try
             {
@@ -83,7 +81,7 @@ public class WebDriverProvider implements IWebDriverProvider
             finally
             {
                 webDrivers.remove(webDriver);
-                testContext.remove(VividusWebDriver.class);
+                testContext.remove(WebDriver.class);
                 eventBus.post(new AfterWebDriverQuitEvent(sessionId));
             }
         }
@@ -92,7 +90,7 @@ public class WebDriverProvider implements IWebDriverProvider
     @Override
     public boolean isWebDriverInitialized()
     {
-        return null != testContext.get(VividusWebDriver.class);
+        return null != testContext.get(WebDriver.class);
     }
 
     public void destroy()
@@ -103,10 +101,5 @@ public class WebDriverProvider implements IWebDriverProvider
     public void setVividusWebDriverFactory(IVividusWebDriverFactory vividusWebDriverFactory)
     {
         this.vividusWebDriverFactory = vividusWebDriverFactory;
-    }
-
-    public void setTestContext(TestContext testContext)
-    {
-        this.testContext = testContext;
     }
 }
