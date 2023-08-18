@@ -1,5 +1,11 @@
 project.description = 'VIVIDUS plugin for Apache Kafka'
 
+// give test dependencies access to compileOnly dependencies to emulate providedCompile
+// https://discuss.gradle.org/t/compileonly-dependencies-are-not-available-in-tests/15366/7
+configurations {
+    testImplementation.extendsFrom compileOnly
+}
+
 ext.springKafkaVersion = '2.9.10'
 
 dependencies {

@@ -1,5 +1,11 @@
 project.description = 'VIVIDUS plugin for interation with email message servers'
 
+// give test dependencies access to compileOnly dependencies to emulate providedCompile
+// https://discuss.gradle.org/t/compileonly-dependencies-are-not-available-in-tests/15366/7
+configurations {
+    testImplementation.extendsFrom compileOnly
+}
+
 ext {
     mailVersion = '2.0.1'
 }
