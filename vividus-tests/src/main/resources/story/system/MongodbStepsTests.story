@@ -139,7 +139,7 @@ When I execute commands
 |collect   |                                            |
  in `${collectionName}` collection against `${db-name}` database on `${instance-key}` MongoDB instance and save result to SCENARIO variable `documentSource`
 Then `${tableSource}` is equal to table:
-{transformer=FROM_JSON, variable=documentSource, columns=name=$.[*].name;email=$.[*].email;type=$.[*].pets.[0].type;nickname=$.[*].pets.[0].nickname}
+{transformer=FROM_JSON, variableName=documentSource, columns=name=$.[*].name;email=$.[*].email;type=$.[*].pets.[0].type;nickname=$.[*].pets.[0].nickname}
 
 Scenario: Tear down
 When I execute command `{ drop: "${collectionName}" }` against `${db-name}` database on `${instance-key}` MongoDB instance and save result to SCENARIO variable `drop`

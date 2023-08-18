@@ -28,6 +28,37 @@ Given I initialize scenario variable `message` with value `Hello World!`
 Given I initialize scenario variable `date` with value `#{generateDate(P1DT2h)}`
 ----
 
+=== Initialize variable with a table
+
+Initializes a variable with xref:ROOT:glossary.adoc#_examplestable[ExamplesTable].
+
+[source,gherkin]
+----
+When I initialize $scopes variable `$variableName` with values:$examplesTable
+----
+
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to refer to the variable value.
+* `$examplesTable` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with data.
+
+.Initialize variable with xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]
+[source,gherkin]
+----
+When I initialize scenario variable `expectedTable` with values:
+|StringValue|NumericValue|BooleanValue|
+|City       |17.0        |false       |
+|Country    |4.0         |true        |
+Then `${expectedTable[1].BooleanValue}` is equal to `true`
+----
+
+.Initialize variable with xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] using transformer
+[source,gherkin]
+----
+When I initialize scenario variable `sitemapTransformerTable` with values:
+{transformer=FROM_SITEMAP, siteMapRelativeUrl=/index.html, column=sitemapUrl, ignoreErrors=true}
+Then `${sitemapTransformerTable[0].sitemapUrl}` is equal to `/index.html`
+----
+
 === Initialize variable using template
 
 Initializes a variable with a result of the processed https://freemarker.apache.org/docs/dgui_template_overallstructure.html[Freemarker template]
