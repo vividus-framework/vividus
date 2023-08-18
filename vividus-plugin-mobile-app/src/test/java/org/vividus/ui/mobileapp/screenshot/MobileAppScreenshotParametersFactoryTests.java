@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,16 @@
 package org.vividus.ui.mobileapp.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
@@ -37,37 +34,31 @@ import org.vividus.util.property.PropertyMappedCollection;
 
 class MobileAppScreenshotParametersFactoryTests
 {
-    private static final String SIMPLE = "simple";
-    private static final int TEN = 10;
+    private static final String VIEWPORT = "VIEWPORT";
 
     private final MobileAppScreenshotParametersFactory factory = new MobileAppScreenshotParametersFactory();
 
-    static Stream<Arguments> args()
-    {
-        return Stream.of(
-                    arguments(Optional.of(SIMPLE), Optional.empty()),
-                    arguments(Optional.empty(),    Optional.of(SIMPLE))
-                );
-    }
-
     @ParameterizedTest
-    @MethodSource("args")
-    void shouldCreateScreenshotConfiguration(Optional<String> defaultStrategy, Optional<String> userStrategy)
+    @CsvSource({
+            "VIEWPORT,",
+            ",VIEWPORT"
+    })
+    void shouldCreateScreenshotConfiguration(String defaultStrategy, String userStrategy)
     {
         var defaultConfiguration = new ScreenshotConfiguration();
-        defaultConfiguration.setShootingStrategy(defaultStrategy);
-        factory.setShootingStrategy(SIMPLE);
+        defaultConfiguration.setShootingStrategy(Optional.ofNullable(defaultStrategy));
+        factory.setShootingStrategy(VIEWPORT);
         factory.setIgnoreStrategies(Map.of());
-        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of(SIMPLE, defaultConfiguration)));
+        factory.setScreenshotConfigurations(new PropertyMappedCollection<>(Map.of(VIEWPORT, defaultConfiguration)));
 
         var configuration = new ScreenshotConfiguration();
-        configuration.setShootingStrategy(userStrategy);
+        configuration.setShootingStrategy(Optional.ofNullable(userStrategy));
         Map<IgnoreStrategy, Set<Locator>> ignores = Map.of(
                 IgnoreStrategy.ELEMENT, Set.of(),
                 IgnoreStrategy.AREA, Set.of()
         );
         var parameters = factory.create(Optional.of(configuration), null, ignores);
-        assertEquals(Optional.of(SIMPLE), parameters.getShootingStrategy());
+        assertEquals(Optional.of(VIEWPORT), parameters.getShootingStrategy());
     }
 
     @Test
