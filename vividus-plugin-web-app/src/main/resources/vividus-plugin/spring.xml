@@ -19,7 +19,9 @@
     </bean>
 
     <bean id="webDriverFactory" class="org.vividus.selenium.WebDriverFactory" parent="parentWebDriverFactory">
+        <constructor-arg index="0" value="${selenium.grid.enabled}"/>
         <property name="webDriverType" value="${selenium.browser}" />
+        <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers"/>
     </bean>
 
     <bean class="org.vividus.selenium.screenshot.WebCoordsProvider" />
@@ -51,6 +53,7 @@
     </bean>
 
     <bean id="webDriverManager" class="org.vividus.selenium.manager.WebDriverManager">
+        <constructor-arg index="0" value="${selenium.grid.enabled}"/>
         <property name="electronApp" value="${desktop-electron-app}" />
         <property name="remoteScreenResolution" value="${selenium.grid.screen-resolution}" />
     </bean>
@@ -230,11 +233,6 @@
 
     <bean class="org.vividus.selenium.BrowserWindowSizeListener" lazy-init="false">
          <property name="webDriverManager" ref="webDriverManager" />
-    </bean>
-
-    <bean id="vividusWebDriverFactory" class="org.vividus.selenium.VividusWebDriverFactory">
-        <constructor-arg index="0" value="${selenium.grid.enabled}"/>
-        <property name="webDriverEventListeners" ref="webDriverEventListener-EventHandlers"/>
     </bean>
 
     <bean id="webDriverEventListener-EventHandlers" class="org.vividus.spring.ListMergerFactoryBean">

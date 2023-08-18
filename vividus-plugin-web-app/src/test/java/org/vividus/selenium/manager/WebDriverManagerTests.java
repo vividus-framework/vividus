@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,13 @@ import java.awt.Toolkit;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Capabilities;
@@ -42,12 +43,20 @@ import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.session.WebDriverSessionInfo;
 
 @ExtendWith(MockitoExtension.class)
 class WebDriverManagerTests
 {
+    @Mock private WebDriverSessionInfo webDriverSessionInfo;
     @Mock private IWebDriverProvider webDriverProvider;
-    @InjectMocks private WebDriverManager webDriverManager;
+    private WebDriverManager webDriverManager;
+
+    @BeforeEach
+    void beforeEach()
+    {
+        webDriverManager = new WebDriverManager(false, webDriverProvider, webDriverSessionInfo);
+    }
 
     static Stream<Arguments> browserChecks()
     {
@@ -105,7 +114,7 @@ class WebDriverManagerTests
     {
         try (var graphicsEnvironment = mockStatic(GraphicsEnvironment.class); var toolkit = mockStatic(Toolkit.class))
         {
-            when(webDriverProvider.isRemoteExecution()).thenReturn(false);
+            when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
             graphicsEnvironment.when(GraphicsEnvironment::isHeadless).thenReturn(false);
             var defaultToolkit = mock(Toolkit.class);
             toolkit.when(Toolkit::getDefaultToolkit).thenReturn(defaultToolkit);
@@ -123,7 +132,7 @@ class WebDriverManagerTests
     {
         try (var graphicsEnvironment = mockStatic(GraphicsEnvironment.class))
         {
-            when(webDriverProvider.isRemoteExecution()).thenReturn(false);
+            when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
             graphicsEnvironment.when(GraphicsEnvironment::isHeadless).thenReturn(true);
             var result = webDriverManager.getScreenResolution();
             assertEquals(Optional.empty(), result);
@@ -133,9 +142,24 @@ class WebDriverManagerTests
     @Test
     void shouldReturnEmptyScreenSizeWhenRemoteResolutionIsUnknown()
     {
+        webDriverManager = new WebDriverManager(true, webDriverProvider, webDriverSessionInfo);
         webDriverManager.setRemoteScreenResolution(null);
-        when(webDriverProvider.isRemoteExecution()).thenReturn(true);
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         var result = webDriverManager.getScreenResolution();
         assertEquals(Optional.empty(), result);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "false, false, false",
+            "true, false, false",
+            "true, true, true"
+    })
+    void testIsRemoteExecution(boolean initialized, boolean remote, boolean expected)
+    {
+        webDriverManager = new WebDriverManager(remote, webDriverProvider, webDriverSessionInfo);
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(initialized);
+
+        assertEquals(expected, webDriverManager.isRemoteExecution());
     }
 }

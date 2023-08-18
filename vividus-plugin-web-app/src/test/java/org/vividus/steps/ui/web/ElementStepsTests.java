@@ -53,6 +53,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.manager.WebDriverManager;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.steps.ui.web.validation.IElementValidations;
@@ -99,6 +100,7 @@ class ElementStepsTests
     @Mock private IBaseValidations baseValidations;
     @Mock private IMouseActions mouseActions;
     @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private WebDriverManager webDriverManager;
     @Mock private IElementValidations elementValidations;
     @Mock private IUiContext uiContext;
     @Mock private WebElementActions webElementActions;
@@ -257,7 +259,7 @@ class ElementStepsTests
         var file = mockFileForUpload();
         mockResourceLoader(mockResource(file, true));
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
-        when(webDriverProvider.isRemoteExecution()).thenReturn(false);
+        when(webDriverManager.isRemoteExecution()).thenReturn(false);
         var locator = new Locator(WebLocatorType.XPATH,
                 new SearchParameters(XPATH).setVisibility(Visibility.ALL));
         when(baseValidations.assertIfElementExists(AN_ELEMENT, locator)).thenReturn(webElement);
@@ -301,7 +303,7 @@ class ElementStepsTests
         mockResourceLoader(mockResource(file, true));
         mockRemoteWebDriver();
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
-        when(webDriverProvider.isRemoteExecution()).thenReturn(true);
+        when(webDriverManager.isRemoteExecution()).thenReturn(true);
         var locator = new Locator(WebLocatorType.XPATH,
                 new SearchParameters(XPATH).setVisibility(Visibility.ALL));
         when(baseValidations.assertIfElementExists(AN_ELEMENT, locator)).thenReturn(webElement);
@@ -317,7 +319,7 @@ class ElementStepsTests
         when(resourceLoader.getResource(ResourceUtils.FILE_URL_PREFIX + FILE_PATH)).thenReturn(resource);
         mockRemoteWebDriver();
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
-        when(webDriverProvider.isRemoteExecution()).thenReturn(true);
+        when(webDriverManager.isRemoteExecution()).thenReturn(true);
         var locator = new Locator(WebLocatorType.XPATH,
                 new SearchParameters(XPATH).setVisibility(Visibility.ALL));
         when(baseValidations.assertIfElementExists(AN_ELEMENT, locator)).thenReturn(webElement);
@@ -332,7 +334,7 @@ class ElementStepsTests
         mockResourceLoader(mockResource(file, true));
         mockRemoteWebDriver();
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
-        when(webDriverProvider.isRemoteExecution()).thenReturn(true);
+        when(webDriverManager.isRemoteExecution()).thenReturn(true);
         var locator = new Locator(WebLocatorType.XPATH,
                 new SearchParameters(XPATH).setVisibility(Visibility.ALL));
         when(baseValidations.assertIfElementExists(AN_ELEMENT, locator)).thenReturn(webElement);
@@ -358,7 +360,7 @@ class ElementStepsTests
         var file = mockFileForUpload();
         mockResourceLoader(mockResource(file, true));
         when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);
-        when(webDriverProvider.isRemoteExecution()).thenReturn(false);
+        when(webDriverManager.isRemoteExecution()).thenReturn(false);
         var locator = new Locator(WebLocatorType.XPATH,
                 new SearchParameters(LOCATOR_BY_ATTRIBUTE).setVisibility(Visibility.ALL));
         when(baseValidations.assertIfElementExists(AN_ELEMENT, locator)).thenReturn(null);

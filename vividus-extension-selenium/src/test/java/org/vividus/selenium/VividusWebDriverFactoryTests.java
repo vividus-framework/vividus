@@ -17,9 +17,7 @@
 package org.vividus.selenium;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -35,7 +33,8 @@ import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Story;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -61,9 +60,12 @@ class VividusWebDriverFactoryTests
     private static final String INNER_KEY = "inner-key";
 
     @Mock private WebDriver webDriver;
+    @Mock private IGenericWebDriverFactory webDriverFactory;
     @Mock private WebDriverStartContext webDriverStartContext;
     @Mock private RunContext runContext;
     @Mock private IProxy proxy;
+
+    @Captor private ArgumentCaptor<DesiredCapabilities> desiredCapabilitiesCaptor;
 
     @Test
     void shouldCreateWebDriverWithCapabilitiesFromConfigurersAndFromMeta()
@@ -77,11 +79,11 @@ class VividusWebDriverFactoryTests
         DesiredCapabilitiesConfigurer fourthCapabilitiesConfigurer = caps -> caps.setCapability(OUTER_KEY,
                 Map.of(INNER_KEY, "configurer-value"));
 
-        String valueWebDriverManager1 = "valueWebDriverManager1";
-        String valueFromWebDriverManager5 = "valueFromWebDriverManager5";
-        String parameterValue = "parameter-value";
+        var valueWebDriverManager1 = "valueWebDriverManager1";
+        var valueFromWebDriverManager5 = "valueFromWebDriverManager5";
+        var parameterValue = "parameter-value";
 
-        Map<String, Object> parameterCapabilities = Map.of(
+        var parameterCapabilities = Map.of(
             KEY1, valueWebDriverManager1,
             KEY4, "valueFromWebDriverManager4",
             KEY5, valueFromWebDriverManager5,
@@ -91,31 +93,32 @@ class VividusWebDriverFactoryTests
         when(webDriverStartContext.get(WebDriverStartParameters.DESIRED_CAPABILITIES))
                 .thenReturn(new DesiredCapabilities(parameterCapabilities));
 
-        RunningStory runningStory = mock(RunningStory.class);
+        var runningStory = mock(RunningStory.class);
         when(runContext.getRunningStory()).thenReturn(runningStory);
-        Story story = mock(Story.class);
+        var story = mock(Story.class);
         when(runningStory.getStory()).thenReturn(story);
         when(story.getMeta())
                 .thenReturn(metaOf("capability.key2 valueFromStoryMeta2", "capability.key4 valueFromStoryMeta4",
                         "capability.key6 valueFromStoryMeta6", "capability.key7 valueFromStoryMeta7"));
-        RunningScenario runningScenario = mock(RunningScenario.class);
+        var runningScenario = mock(RunningScenario.class);
         when(runningStory.getRunningScenario()).thenReturn(runningScenario);
-        Scenario scenario = mock(Scenario.class);
+        var scenario = mock(Scenario.class);
         when(runningScenario.getScenario()).thenReturn(scenario);
         when(scenario.getMeta())
                 .thenReturn(metaOf("capability.key6 valueFromScenarioMeta6", "capability.key7 valueFromScenarioMeta7"));
 
-        Proxy proxyMock = mock(Proxy.class);
+        var proxyMock = mock(Proxy.class);
         when(proxy.isStarted()).thenReturn(true);
         when(proxy.createSeleniumProxy()).thenReturn(proxyMock);
 
-        TestVividusWebDriverFactory factory = new TestVividusWebDriverFactory(true, webDriverStartContext,
-                runContext, proxy, Optional.of(Set.of(firstCapabilitiesConfigurer, secondCapabilitiesConfigurer,
+        when(webDriverFactory.createWebDriver(desiredCapabilitiesCaptor.capture())).thenReturn(webDriver);
+
+        var factory = new VividusWebDriverFactory(webDriverFactory, webDriverStartContext, runContext, proxy,
+                Optional.of(Set.of(firstCapabilitiesConfigurer, secondCapabilitiesConfigurer,
                         thirdCapabilitiesConfigurer, fourthCapabilitiesConfigurer)));
 
-        VividusWebDriver vividusWebDriver = factory.create();
+        var driver = factory.createWebDriver();
 
-        assertTrue(vividusWebDriver.isRemote());
         assertEquals(Map.of(KEY1,   valueWebDriverManager1,
                             KEY2,   "valueFromStoryMeta2",
                             KEY3,   VALUE_FROM_CONFIGURER3,
@@ -125,65 +128,38 @@ class VividusWebDriverFactoryTests
                             "key7", "valueFromScenarioMeta7",
                             CapabilityType.PROXY, proxyMock,
                             OUTER_KEY, Map.of(INNER_KEY, parameterValue)),
-                factory.desiredCapabilities.asMap());
-        InOrder ordered = Mockito.inOrder(webDriverStartContext, runContext);
+                desiredCapabilitiesCaptor.getValue().asMap());
+        var ordered = Mockito.inOrder(webDriverStartContext, runContext);
         ordered.verify(webDriverStartContext).get(WebDriverStartParameters.DESIRED_CAPABILITIES);
         ordered.verify(runContext).getRunningStory();
         verifyNoMoreInteractions(webDriverStartContext);
-        assertSame(webDriver, vividusWebDriver.getWrappedDriver());
+        assertSame(webDriver, driver);
     }
 
     @Test
     void shouldCreateDriverWithoutMetaCapabilities()
     {
-        String value = "value1";
+        var value = "value1";
         when(webDriverStartContext.get(WebDriverStartParameters.DESIRED_CAPABILITIES))
                 .thenReturn(new DesiredCapabilities(Map.of(KEY1, value)));
+        when(webDriverFactory.createWebDriver(desiredCapabilitiesCaptor.capture())).thenReturn(webDriver);
 
-        TestVividusWebDriverFactory factory = new TestVividusWebDriverFactory(false, webDriverStartContext,
-                runContext, proxy, Optional.empty());
+        var factory = new VividusWebDriverFactory(webDriverFactory, webDriverStartContext, runContext, proxy,
+                Optional.empty());
 
-        VividusWebDriver vividusWebDriver = factory.create();
+        var driver = factory.createWebDriver();
 
-        assertFalse(vividusWebDriver.isRemote());
-        assertEquals(Map.of(KEY1, value), factory.desiredCapabilities.asMap());
-        InOrder ordered = Mockito.inOrder(webDriverStartContext, runContext);
+        assertEquals(Map.of(KEY1, value), desiredCapabilitiesCaptor.getValue().asMap());
+        var ordered = Mockito.inOrder(webDriverStartContext, runContext);
         ordered.verify(webDriverStartContext).get(WebDriverStartParameters.DESIRED_CAPABILITIES);
         ordered.verify(runContext).getRunningStory();
         verifyNoMoreInteractions(webDriverStartContext);
-        assertSame(webDriver, vividusWebDriver.getWrappedDriver());
+        assertSame(webDriver, driver);
         verify(runContext).getRunningStory();
-    }
-
-    @Test
-    void shouldReturnRemoteExecution()
-    {
-        TestVividusWebDriverFactory factory = new TestVividusWebDriverFactory(true, webDriverStartContext,
-                runContext, proxy, Optional.empty());
-        assertTrue(factory.isRemoteExecution());
     }
 
     private Meta metaOf(String... properties)
     {
         return new Meta(List.of(properties));
-    }
-
-    private final class TestVividusWebDriverFactory extends AbstractVividusWebDriverFactory
-    {
-        private DesiredCapabilities desiredCapabilities;
-
-        private TestVividusWebDriverFactory(boolean remoteExecution, WebDriverStartContext webDriverStartContext,
-                RunContext runContext, IProxy proxy,
-                Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers)
-        {
-            super(remoteExecution, webDriverStartContext, runContext, proxy, desiredCapabilitiesConfigurers);
-        }
-
-        @Override
-        protected WebDriver createWebDriver(DesiredCapabilities desiredCapabilities)
-        {
-            this.desiredCapabilities = desiredCapabilities;
-            return webDriver;
-        }
     }
 }

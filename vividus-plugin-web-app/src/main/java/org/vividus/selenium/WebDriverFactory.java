@@ -16,6 +16,8 @@
 
 package org.vividus.selenium;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -28,35 +30,52 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
+import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.manager.WebDriverManager;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
 
-public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDriverFactory
+public class WebDriverFactory extends GenericWebDriverFactory
 {
     private static final String COMMAND_LINE_ARGUMENTS = "command-line-arguments";
 
-    private final TimeoutConfigurer timeoutConfigurer;
     private final IProxy proxy;
     private final WebDriverStartContext webDriverStartContext;
+    private final TimeoutConfigurer timeoutConfigurer;
     private WebDriverType webDriverType;
+    private List<WebDriverEventListener> webDriverEventListeners;
+    private final boolean remoteExecution;
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
 
-    public WebDriverFactory(IRemoteWebDriverFactory remoteWebDriverFactory, IPropertyParser propertyParser,
-            JsonUtils jsonUtils, TimeoutConfigurer timeoutConfigurer, IProxy proxy,
+    public WebDriverFactory(boolean remoteExecution, IRemoteWebDriverFactory remoteWebDriverFactory,
+            IPropertyParser propertyParser, JsonUtils jsonUtils, IProxy proxy,
             WebDriverStartContext webDriverStartContext,
-            Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters)
+            Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters,
+            TimeoutConfigurer timeoutConfigurer)
     {
         super(remoteWebDriverFactory, propertyParser, jsonUtils, desiredCapabilitiesAdjusters);
-        this.timeoutConfigurer = timeoutConfigurer;
+        this.remoteExecution = remoteExecution;
         this.proxy = proxy;
         this.webDriverStartContext = webDriverStartContext;
+        this.timeoutConfigurer = timeoutConfigurer;
     }
 
     @Override
-    public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities)
+    public WebDriver createWebDriver(DesiredCapabilities desiredCapabilities)
+    {
+        WebDriver webDriver = remoteExecution ? super.createWebDriver(desiredCapabilities) : createLocalWebDriver(
+                desiredCapabilities);
+        timeoutConfigurer.configure(webDriver.manage().timeouts());
+
+        EventFiringWebDriver eventFiringWebDriver = new EventFiringWebDriver(webDriver);
+        webDriverEventListeners.forEach(eventFiringWebDriver::register);
+        return eventFiringWebDriver;
+    }
+
+    private WebDriver createLocalWebDriver(DesiredCapabilities desiredCapabilities)
     {
         WebDriverType driverType =
             Optional.ofNullable(desiredCapabilities.getCapability(CapabilityType.BROWSER_NAME))
@@ -94,12 +113,6 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
                 })
                 .orElse(desiredCapabilities);
         return new DesiredCapabilities(capabilities);
-    }
-
-    @Override
-    protected void configureWebDriver(WebDriver webDriver)
-    {
-        timeoutConfigurer.configure(webDriver.manage().timeouts());
     }
 
     private void configureProxy(WebDriverType webDriverType, DesiredCapabilities desiredCapabilities)
@@ -191,5 +204,10 @@ public class WebDriverFactory extends AbstractWebDriverFactory implements IWebDr
     public void setWebDriverType(WebDriverType webDriverType)
     {
         this.webDriverType = webDriverType;
+    }
+
+    public void setWebDriverEventListeners(List<WebDriverEventListener> webDriverEventListeners)
+    {
+        this.webDriverEventListeners = Collections.unmodifiableList(webDriverEventListeners);
     }
 }

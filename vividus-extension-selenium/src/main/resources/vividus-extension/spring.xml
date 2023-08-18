@@ -14,7 +14,7 @@
          <context:exclude-filter type="regex" expression="org\.vividus\.converter\.ui\..*\..*"/>
     </context:component-scan>
 
-    <bean id="parentWebDriverFactory" class="org.vividus.selenium.AbstractWebDriverFactory" abstract="true" />
+    <bean id="parentWebDriverFactory" class="org.vividus.selenium.GenericWebDriverFactory" abstract="true" />
 
     <bean name="webDriverUrlProvider" class="org.vividus.selenium.StaticRemoteWebDriverUrlProvider">
         <constructor-arg index="0" value="${selenium.grid.url}" />
@@ -27,8 +27,9 @@
 
     <bean id="webDriverProvider" class="org.vividus.selenium.WebDriverProvider"
           destroy-method="destroy">
-        <property name="vividusWebDriverFactory" ref="vividusWebDriverFactory" />
-        <property name="testContext" ref="testContext" />
+        <property name="vividusWebDriverFactory">
+            <bean class="org.vividus.selenium.VividusWebDriverFactory" />
+        </property>
     </bean>
 
     <bean class="org.vividus.selenium.session.WebDriverSessionInfo" lazy-init="false" />

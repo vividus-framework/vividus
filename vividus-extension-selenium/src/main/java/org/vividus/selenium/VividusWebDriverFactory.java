@@ -30,19 +30,19 @@ import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
 import org.vividus.proxy.IProxy;
 
-public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriverFactory
+public class VividusWebDriverFactory implements IVividusWebDriverFactory
 {
-    private final boolean remoteExecution;
+    private final IGenericWebDriverFactory webDriverFactory;
     private final WebDriverStartContext webDriverStartContext;
     private final RunContext runContext;
     private final IProxy proxy;
     private final Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers;
 
-    protected AbstractVividusWebDriverFactory(boolean remoteExecution, WebDriverStartContext webDriverStartContext,
-            RunContext runContext, IProxy proxy,
+    public VividusWebDriverFactory(IGenericWebDriverFactory webDriverFactory,
+            WebDriverStartContext webDriverStartContext, RunContext runContext, IProxy proxy,
             Optional<Set<DesiredCapabilitiesConfigurer>> desiredCapabilitiesConfigurers)
     {
-        this.remoteExecution = remoteExecution;
+        this.webDriverFactory = webDriverFactory;
         this.webDriverStartContext = webDriverStartContext;
         this.runContext = runContext;
         this.proxy = proxy;
@@ -50,12 +50,9 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
     }
 
     @Override
-    public VividusWebDriver create()
+    public WebDriver createWebDriver()
     {
-        VividusWebDriver vividusWebDriver = new VividusWebDriver();
-        vividusWebDriver.setWebDriver(createWebDriver(getDesiredCapabilities()));
-        vividusWebDriver.setRemote(remoteExecution);
-        return vividusWebDriver;
+        return webDriverFactory.createWebDriver(getDesiredCapabilities());
     }
 
     private DesiredCapabilities getDesiredCapabilities()
@@ -85,12 +82,5 @@ public abstract class AbstractVividusWebDriverFactory implements IVividusWebDriv
         }
 
         return mergedCapabilities;
-    }
-
-    protected abstract WebDriver createWebDriver(DesiredCapabilities desiredCapabilities);
-
-    protected boolean isRemoteExecution()
-    {
-        return remoteExecution;
     }
 }

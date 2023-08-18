@@ -58,8 +58,6 @@
         </constructor-arg>
     </bean>
 
-    <bean id="vividusWebDriverFactory" class="org.vividus.selenium.mobileapp.VividusMobileAppDriverFactory" />
-
     <bean class="org.vividus.mobileapp.configuration.MobileApplicationConfiguration" >
         <constructor-arg>
             <bean class="org.vividus.mobileapp.configuration.SwipeConfiguration">
@@ -79,8 +77,7 @@
         </constructor-arg>
     </bean>
 
-    <bean class="org.vividus.selenium.mobileapp.MobileAppDriverFactory"
-        parent="parentWebDriverFactory"/>
+    <bean parent="parentWebDriverFactory"/>
 
     <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
         <constructor-arg  value="#{T(org.vividus.ui.mobile.action.search.AppiumLocatorType).XPATH}" />
