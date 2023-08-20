@@ -49,13 +49,8 @@ When I <action> baseline with name `${target-platform}-cuts-full-page` using scr
 
 Scenario: Verify cuts for full-page
 When I <action> baseline with name `${target-platform}-cuts-full-page` using screenshot configuration:
-|shootingStrategy  |cutTop|cutBottom|cutLeft|cutRight|
-|<shootingStrategy>|400   |300      |200    |100     |
-Examples:
-|shootingStrategy|
-|VIEWPORT        |
-|SIMPLE          |
-!-- SIMPLE shooting strategy is deprecated
+|shootingStrategy|cutTop|cutBottom|cutLeft|cutRight|
+|VIEWPORT        |400   |300      |200    |100     |
 
 
 Scenario: Verify cuts for context

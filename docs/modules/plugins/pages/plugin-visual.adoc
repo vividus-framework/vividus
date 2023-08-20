@@ -276,12 +276,8 @@ where:
 |The size of right part of the final screenshot to cut.
 
 |`mobile.screenshot.strategy.<YOUR_STRATEGY_NAME>.shooting-strategy`
-|`VIEWPORT`, `FULL_SCREEN`, `SIMPLE`
-a|Screenshot shooting strategy name (`VIEWPORT` by default)
-[WARNING]
-====
-The shooting strategy `SIMPLE` is deprecated and will be removed in VIVIDUS 0.6.0. Use `VIEWPORT` instead. `VIEWPORT` is equal to `SIMPLE` shooting strategy
-====
+|`VIEWPORT`, `FULL_SCREEN`
+|Screenshot shooting strategy name (`VIEWPORT` by default)
 
 |`mobile.screenshot.strategy=YOUR_STRATEGY_NAME`
 |string
