@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package org.vividus.http.transformer;
+package org.vividus.json.transformer;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import com.google.common.base.Splitter;
 
@@ -32,9 +30,14 @@ import org.vividus.transformer.ExtendedTableTransformer;
 import org.vividus.util.ExamplesTableProcessor;
 import org.vividus.util.json.JsonPathUtils;
 
-public class JsonRestApiTableTransformer implements ExtendedTableTransformer
+public class JsonTableTransformer implements ExtendedTableTransformer
 {
-    @Inject private VariableContext variableContext;
+    private final VariableContext variableContext;
+
+    public JsonTableTransformer(VariableContext variableContext)
+    {
+        this.variableContext = variableContext;
+    }
 
     @SuppressWarnings("unchecked")
     @Override

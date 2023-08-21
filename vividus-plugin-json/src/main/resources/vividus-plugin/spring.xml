@@ -7,6 +7,8 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
+    <bean name="FROM_JSON" class="org.vividus.json.transformer.JsonTableTransformer" />
+
     <bean id="json-context" class="org.vividus.json.variable.JsonContextVariable" />
 
     <bean id="anyOf" class="org.vividus.json.steps.JsonArrayContainsAnyOf">
