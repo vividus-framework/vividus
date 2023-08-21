@@ -84,27 +84,23 @@ class RemoteWebDriverFactoryTests
     static Stream<Arguments> platforms()
     {
         return Stream.of(
-                arguments(Platform.IOS, true, IOSDriver.class),
-                arguments(Platform.IOS, false, RemoteWebDriver.class),
-                arguments(MobilePlatform.TVOS, true, IOSDriver.class),
-                arguments(MobilePlatform.TVOS, false, RemoteWebDriver.class),
-                arguments(Platform.ANDROID, true, AndroidDriver.class),
-                arguments(Platform.ANDROID, false, RemoteWebDriver.class),
-                arguments(Platform.WINDOWS, true, RemoteWebDriver.class),
-                arguments(Platform.WINDOWS, false, RemoteWebDriver.class)
+                arguments(Platform.IOS, IOSDriver.class),
+                arguments(MobilePlatform.TVOS, IOSDriver.class),
+                arguments(Platform.ANDROID, AndroidDriver.class),
+                arguments(Platform.WINDOWS, RemoteWebDriver.class)
         );
     }
 
     @MethodSource("platforms")
     @ParameterizedTest
-    void shouldCreateDriver(Object platform, boolean useW3C, Class<?> webDriveClass)
+    void shouldCreateDriver(Object platform, Class<?> webDriveClass)
     {
         var capabilities = new DesiredCapabilities();
         capabilities.setCapability(CapabilityType.PLATFORM_NAME, platform);
         try (var driver = mockConstruction(webDriveClass,
                 (mock, context) -> assertEquals(context.arguments(), List.of(url, capabilities))))
         {
-            var actualDriver = new RemoteWebDriverFactory(useW3C, false, provider).getRemoteWebDriver(capabilities);
+            var actualDriver = new RemoteWebDriverFactory(false, provider).getRemoteWebDriver(capabilities);
             assertEquals(driver.constructed(), List.of(actualDriver));
             assertThat(logger.getLoggingEvents(), is(empty()));
         }
@@ -134,7 +130,7 @@ class RemoteWebDriverFactoryTests
         }))
         {
             when(url.toURI()).thenReturn(GRID_URI);
-            var actualDriver = new RemoteWebDriverFactory(true, true, provider).getRemoteWebDriver(desiredCapabilities);
+            var actualDriver = new RemoteWebDriverFactory(true, provider).getRemoteWebDriver(desiredCapabilities);
             assertEquals(sessionId, actualDriver.getSessionId().toString());
             assertThat(logger.getLoggingEvents(), is(List.of(
                     warn(exception, "Failed to create a new session due to HTTP connect timout"),
@@ -169,8 +165,7 @@ class RemoteWebDriverFactoryTests
                 (mock, context) -> when(mock.execute(any())).thenThrow(exception)))
         {
             when(url.toURI()).thenReturn(GRID_URI);
-            var remoteWebDriverFactory = new RemoteWebDriverFactory(true, retrySessionCreationOnHttpConnectTimeout,
-                    provider);
+            var remoteWebDriverFactory = new RemoteWebDriverFactory(retrySessionCreationOnHttpConnectTimeout, provider);
             var actualException = assertThrows(SessionNotCreatedException.class,
                     () -> remoteWebDriverFactory.getRemoteWebDriver(desiredCapabilities));
             assertEquals(exception, actualException);

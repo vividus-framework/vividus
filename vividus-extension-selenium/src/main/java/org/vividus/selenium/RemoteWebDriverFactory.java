@@ -34,15 +34,13 @@ public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoteWebDriverFactory.class);
 
-    private final boolean useW3C;
     private final boolean retrySessionCreationOnHttpConnectTimeout;
 
     private final RemoteWebDriverUrlProvider remoteWebDriverUrlProvider;
 
-    public RemoteWebDriverFactory(boolean useW3C, boolean retrySessionCreationOnHttpConnectTimeout,
+    public RemoteWebDriverFactory(boolean retrySessionCreationOnHttpConnectTimeout,
             RemoteWebDriverUrlProvider remoteWebDriverUrlProvider)
     {
-        this.useW3C = useW3C;
         this.retrySessionCreationOnHttpConnectTimeout = retrySessionCreationOnHttpConnectTimeout;
         this.remoteWebDriverUrlProvider = remoteWebDriverUrlProvider;
     }
@@ -74,21 +72,14 @@ public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
 
     private RemoteWebDriver createRemoteWebDriver(Capabilities capabilities)
     {
-        /* Selenium 4 declares that it only supports W3C and nevertheless still writes  JWP's "desiredCapabilities"
-        into "createSession" JSON. Appium Java client eliminates that:https://github.com/appium/java-client/pull/1537.
-        But still some clouds (e.g. SmartBear CrossBrowserTesting) are not prepared for W3c, so we should avoid using
-        Appium drivers to create sessions for web tests. */
         URL remoteDriverUrl = remoteWebDriverUrlProvider.getRemoteDriverUrl();
-        if (useW3C)
+        if (GenericWebDriverManager.isIOS(capabilities) || GenericWebDriverManager.isTvOS(capabilities))
         {
-            if (GenericWebDriverManager.isIOS(capabilities) || GenericWebDriverManager.isTvOS(capabilities))
-            {
-                return new IOSDriver(remoteDriverUrl, capabilities);
-            }
-            else if (GenericWebDriverManager.isAndroid(capabilities))
-            {
-                return new AndroidDriver(remoteDriverUrl, capabilities);
-            }
+            return new IOSDriver(remoteDriverUrl, capabilities);
+        }
+        else if (GenericWebDriverManager.isAndroid(capabilities))
+        {
+            return new AndroidDriver(remoteDriverUrl, capabilities);
         }
         return new RemoteWebDriver(remoteDriverUrl, capabilities);
     }
