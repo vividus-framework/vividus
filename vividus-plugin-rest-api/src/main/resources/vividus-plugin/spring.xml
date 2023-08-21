@@ -22,8 +22,6 @@
 
     <bean id="httpTestContext" class="org.vividus.http.HttpTestContext" />
 
-    <bean name="FROM_JSON" class="org.vividus.http.transformer.JsonRestApiTableTransformer" />
-
     <bean id="apiSteps" class="org.vividus.steps.api.HttpRequestSteps">
         <property name="apiEndpoint" value="${rest-api.http.endpoint}"/>
     </bean>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.http.transformer;
+package org.vividus.json.transformer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,6 +26,8 @@ import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.steps.ParameterConverters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,34 +35,21 @@ import org.vividus.context.VariableContext;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
-class JsonRestApiTableTransformerTests
+class JsonTableTransformerTests
 {
-    private static final String COMMA = ",";
-
-    private static final String JSON_DATA = ResourceUtils.loadResource(JsonRestApiTableTransformerTests.class,
-            "data.json");
-    private static final String VAR_NAME = "varName";
-    private static final String VARIABLE_NAME_PROPERTY = "variableName";
-
-    private static final String EQUAL = "=";
-    private static final String VARIABLE_NAME_PARAMETER = VARIABLE_NAME_PROPERTY + EQUAL;
-
     @Mock private VariableContext variableContext;
-    @InjectMocks private JsonRestApiTableTransformer jsonTableGenerator;
-
-    private final Keywords keywords = new Keywords();
-    private final ParameterConverters parameterConverters =  new ParameterConverters();
+    @InjectMocks private JsonTableTransformer jsonTableTransformer;
 
     @Test
     void testTransformFromVariable()
     {
-        when(variableContext.getVariable(VAR_NAME)).thenReturn(JSON_DATA);
+        when(variableContext.getVariable("varName")).thenReturn(readJsonData());
 
-        var tableProperties = createProperties(VARIABLE_NAME_PARAMETER + VAR_NAME
+        var tableProperties = createProperties("variableName=varName"
                 + ",columns=column_code=$.superCodes..code;"
                 + "column_codeSystem=$.superCodes..codeSystem;"
                 + "column_type=$.superCodes..type");
-        var table = jsonTableGenerator.transform(StringUtils.EMPTY, null, tableProperties);
+        var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
         var expectedTable =
                 "|column_code|column_codeSystem|column_type|\n"
                         + "|107214|VIVIDUS|A|\n"
@@ -75,36 +64,36 @@ class JsonRestApiTableTransformerTests
     @Test
     void testTransformFromVariableWithComplexJsonPath()
     {
-        var variableName = "varWithJson";
-        when(variableContext.getVariable(variableName)).thenReturn(JSON_DATA);
-        var columns = "columns=type=$..[?(@.codes[0].code==\"107214\")].type";
-        var tableProperties = createProperties(columns + COMMA + VARIABLE_NAME_PARAMETER + variableName);
-        var table = jsonTableGenerator.transform(StringUtils.EMPTY, null, tableProperties);
+        when(variableContext.getVariable("varWithJson")).thenReturn(readJsonData());
+        var tableProperties = createProperties("columns=type=$..[?(@.codes[0].code==\"107214\")].type,"
+                + "variableName=varWithJson");
+        var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
         var expectedTable = "|type|\n|A|";
         assertEquals(expectedTable, table);
     }
 
-    @Test
-    void testVariableNameTransformPropertyIsNotSpecifiedException()
+    @ParameterizedTest
+    @CsvSource({
+            "'columns=key=value\\,url', variableName",
+            "variableName=any,          columns"
+    })
+    void shouldThrowAnErrorOnMissingParameters(String propertiesAsString,
+            String nameOfMissingProperty)
     {
-        var properties = createProperties("columns=key=value\\,url");
+        var properties = createProperties(propertiesAsString);
         var exception = assertThrows(IllegalArgumentException.class,
-                () -> jsonTableGenerator.transform(StringUtils.EMPTY, null, properties));
-        assertEquals("'variableName' is not set in ExamplesTable properties",
+                () -> jsonTableTransformer.transform(StringUtils.EMPTY, null, properties));
+        assertEquals("'" + nameOfMissingProperty + "' is not set in ExamplesTable properties",
                 exception.getMessage());
-    }
-
-    @Test
-    void testColumnsTransformPropertyIsNotSpecifiedException()
-    {
-        var properties = createProperties(VARIABLE_NAME_PROPERTY + EQUAL + "any");
-        var exception = assertThrows(IllegalArgumentException.class,
-            () -> jsonTableGenerator.transform(StringUtils.EMPTY, null, properties));
-        assertEquals("'columns' is not set in ExamplesTable properties", exception.getMessage());
     }
 
     private TableProperties createProperties(String propertiesAsString)
     {
-        return new TableProperties(propertiesAsString, keywords, parameterConverters);
+        return new TableProperties(propertiesAsString, new Keywords(), new ParameterConverters());
+    }
+
+    private static String readJsonData()
+    {
+        return ResourceUtils.loadResource(JsonTableTransformerTests.class, "data.json");
     }
 }

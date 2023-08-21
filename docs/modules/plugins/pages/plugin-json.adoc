@@ -23,6 +23,88 @@ When I execute HTTP GET request for resource with relative URL `/get?productsPer
 Then number of JSON elements from `${json-context}` by JSON path `$.product` is equal to 5
 ----
 
+== xref:ROOT:glossary.adoc#_table_transformer[Table Transformers]
+
+=== FROM_JSON
+
+:json-paths: https://github.com/json-path/JsonPath#path-examples[JSON Paths]
+
+`FROM_JSON` transformer constructs a table by mapping table columns to values found by {json-paths} in the source JSON.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`variableName`
+a|The name of the variable containing source JSON, only variables of scopes `global` and `next_batches` are allowed.
+Exceptions are cases when the transformer using in xref:commons:vividus-steps.adoc#_initialize_variable_with_a_table[step]
+which initializes a variable with a table.
+
+|columns
+a|The semicolon-separated list of mappings between column names and {json-paths} used to get column values.
+
+.Columns parameter format
+[source]
+----
+columns=column_name_1=json_path_1;column_name_2=json_path_2;column_name_N=json_path_N
+----
+
+* `column_name` - The user-defined column name in the resulting table.
+* `json_path` - The json path used to retrieve a value from the source JSON for a particular column name.
+
+IMPORTANT: The number of elements found by the {json-paths} for each column must be the same.
+
+|===
+
+.Source JSON from xref:commons:variables.adoc#_scopes[`next_batches` or `global` variable] `registrationDataJson`
+[source,json]
+----
+[
+    {
+        "firstName": "Cheryl",
+        "lastName": "Wilkerson",
+        "age": 36,
+        "address": {
+            "streetAddress": "690 Selah Way",
+            "city": "Waitsfield",
+            "postalCode": "05673"
+        }
+    },
+    {
+        "firstName": "Zachary",
+        "lastName": "Harrington",
+        "age": 63,
+        "address": {
+            "streetAddress": "4803 Duncan Avenue",
+            "city": "New York",
+            "postalCode": "10014"
+        }
+    }
+]
+----
+
+.Usage of FROM_JSON transformer
+[source,gherkin]
+----
+Given request body: {
+  "fullName": "<fname> <lname>"
+}
+When I execute HTTP POST request for resource with URL `https://service-under-test.com/register`
+Examples:
+{transformer=FROM_JSON, variableName=registrationDataJson, columns=fname=$..firstName;lname=$..lastName}
+----
+
+.Usage of FROM_JSON transformer using xref:commons:vividus-steps.adoc#_initialize_variable_with_a_table[step] which initializes a variable with a table
+[source,gherkin]
+----
+When I execute HTTP POST request for resource with URL `https://httpbingo.org/anything/path-with-&-ampersand`
+Given I initialize scenario variable `jsonData` with value `${json-context}`
+When I initialize scenario variable `jsonDataTable` with values:
+{transformer=FROM_JSON, variableName=jsonData, columns=host=$..Host}
+Then `${jsonDataTable[0].host}` is not equal to `[httpbingo.org]`
+----
+
 == Steps
 
 :json-path: https://github.com/json-path/JsonPath#path-examples[JSON Path]
