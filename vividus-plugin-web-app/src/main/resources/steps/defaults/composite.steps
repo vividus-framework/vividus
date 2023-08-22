@@ -117,10 +117,6 @@ Composite: Then the text '$text' exists
 !-- DEPRECATED: 0.7.0, Then text `%1$s` exists
 Then text `<text>` exists
 
-Composite: When I refresh the page
-!-- DEPRECATED: 0.6.0, When I refresh page
-When I refresh page
-
 Composite: Then the page title $comparisonRule '$text'
 !-- DEPRECATED: 0.6.0, Then page title %1$s `%2$s`
 Then page title <comparisonRule> `<text>`

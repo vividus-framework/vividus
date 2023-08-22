@@ -106,7 +106,7 @@ vividus-plugin-rest-api  DEPRECATED  Then the connection is secured using $secur
 vividus-plugin-rest-api  DEPRECATED  Then the number of the response headers with the name '$headerName' is $comparisonRule $value
 vividus-plugin-rest-api  DEPRECATED  Then the response body $comparisonRule '$content'
 COMPOSITE IN STEPS FILE  DEPRECATED  When I perform right click on an element by the xpath '$xpath'
-COMPOSITE IN STEPS FILE  DEPRECATED  When I refresh the page
+COMPOSITE IN STEPS FILE  DEPRECATED  When I go to the relative URL '$relativeURL'
 ...
 ----
 
