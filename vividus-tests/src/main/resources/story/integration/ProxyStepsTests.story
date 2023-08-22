@@ -89,7 +89,7 @@ When I mock HTTP responses with request URL which CONTAINS `frames.html` using r
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
 Then number of elements found by `id(sw)` is = `1`
 
-Scenario: Verify step When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode` and headers:$headers and deprecated composite step "When I refresh the page"
+Scenario: Verify step When I mock HTTP responses with request URL which $comparisonRule `$url` using response code `$responseCode` and headers:$headers
 Meta:
     @requirementId 1104
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
@@ -98,7 +98,7 @@ Then number of elements found by `<elementSelector>` is = `1`
 When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `404` and headers:
 |name          |value|
 |Content-Length|0    |
-When I refresh the page
+When I refresh page
 When I switch to frame located `<frameId>`
 Then number of elements found by `<elementSelector>` is = `0`
 Examples:

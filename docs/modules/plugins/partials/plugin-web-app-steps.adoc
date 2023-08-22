@@ -93,12 +93,6 @@ Refreshes the page: the step does the same as the reload button in the browser.
 When I refresh page
 ----
 
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-When I refresh the page
-----
-
 ==== Validate the page title
 
 Checks the page title matches to the text according to the provided string validation rule
