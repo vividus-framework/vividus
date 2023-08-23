@@ -7,7 +7,7 @@
        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        profile="saucelabs" default-lazy-init="true">
 
-    <bean class="org.vividus.saucelabs.DataCenterFactory" factory-method="createDataCenter">
+    <bean class="com.saucelabs.saucerest.DataCenter" factory-method="fromString">
         <constructor-arg value="${saucelabs.data-center}" />
     </bean>
 

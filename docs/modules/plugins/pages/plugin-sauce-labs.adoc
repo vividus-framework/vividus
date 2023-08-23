@@ -74,15 +74,6 @@ a|
 * `US_WEST` +
 * `US_EAST` +
 * `EU_CENTRAL` +
-
-[WARNING]
-====
-The data centers listed below are deprecated and will be removed in VIVIDUS 0.6.0:
-
-* `US` (use `US_WEST` instead)
-* `EU` (use `EU_CENTRAL` instead)
-====
-
 |
 |https://wiki.saucelabs.com/display/DOCS/Data+Center+Endpoints[Sauce Labs data center] to use
 
