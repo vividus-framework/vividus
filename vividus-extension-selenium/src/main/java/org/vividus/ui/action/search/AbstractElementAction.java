@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
@@ -33,6 +31,8 @@ import org.slf4j.LoggerFactory;
 import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
 import org.vividus.ui.action.IWaitActions;
+
+import jakarta.inject.Inject;
 
 public abstract class AbstractElementAction implements IElementAction
 {

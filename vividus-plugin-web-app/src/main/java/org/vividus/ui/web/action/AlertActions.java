@@ -22,8 +22,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Inject;
-
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
@@ -36,6 +34,8 @@ import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.action.IWaitActions;
+
+import jakarta.inject.Inject;
 
 public class AlertActions implements IAlertActions
 {

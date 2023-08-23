@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.Then;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.DateUtils;
@@ -34,7 +32,6 @@ public class DateValidationSteps
     private final DateUtils dateUtils;
     private ISoftAssert softAssert;
 
-    @Inject
     public DateValidationSteps(DateUtils dateUtils)
     {
         this.dateUtils = dateUtils;

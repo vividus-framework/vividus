@@ -16,8 +16,6 @@
 
 package org.vividus.ui.web.action;
 
-import javax.inject.Inject;
-
 import com.google.common.eventbus.EventBus;
 
 import org.openqa.selenium.By;
@@ -30,6 +28,8 @@ import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.event.PageLoadEndEvent;
+
+import jakarta.inject.Inject;
 
 public class MouseActions implements IMouseActions
 {

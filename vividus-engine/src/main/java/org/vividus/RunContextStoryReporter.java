@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.vividus;
 
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.embedder.PerformableTree.Status;
 import org.jbehave.core.model.Scenario;
 import org.jbehave.core.model.Step;
@@ -29,6 +27,8 @@ import org.jbehave.core.steps.Timing;
 import org.vividus.context.RunTestContext;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
+
+import jakarta.inject.Inject;
 
 public class RunContextStoryReporter extends ChainedStoryReporter
 {

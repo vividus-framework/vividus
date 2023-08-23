@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -43,28 +44,24 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.testcontext.SimpleTestContext;
-import org.vividus.util.UriUtils;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
 class WebSocketStepsTests
 {
     private static final String WEB_SOCKET_KEY = "web-socket-key";
-    private static final String WEB_SOCKET_ADDR = "ws://websocket.example.com";
+    private static final String WEB_SOCKET_ENDPOINT = "ws://websocket.example.com";
     private static final String MESSAGE = "message";
     private static final String CONNECTION_IS_CLOSED = "WebSocket connection by the key 'web-socket-key' to the "
             + "'ws://websocket.example.com' is either not established or already closed";
@@ -76,25 +73,9 @@ class WebSocketStepsTests
     private WebSocketSteps webSocketSteps;
 
     @Test
-    void shouldInit()
-    {
-        JettyWebSocketClient jettyClient = captureJettyClient();
-        webSocketSteps.init();
-        verify(jettyClient).start();
-    }
-
-    @Test
-    void shouldDestroy()
-    {
-        JettyWebSocketClient jettyClient = captureJettyClient();
-        webSocketSteps.destroy();
-        verify(jettyClient).stop();
-    }
-
-    @Test
     void shouldSendTextMessage() throws InterruptedException, ExecutionException, TimeoutException, IOException
     {
-        WebSocketSession session = prepareWebSocketSession(null);
+        var session = prepareWebSocketSession(null);
         when(session.isOpen()).thenReturn(true);
 
         webSocketSteps.connect(WEB_SOCKET_KEY);
@@ -103,7 +84,7 @@ class WebSocketStepsTests
 
         verify(session).sendMessage(argThat(msg ->
         {
-            TextMessage textMessage = (TextMessage) msg;
+            var textMessage = (TextMessage) msg;
             return MESSAGE.equals(textMessage.getPayload());
         }));
         verifyNoMoreInteractions(session);
@@ -112,30 +93,30 @@ class WebSocketStepsTests
     @Test
     void shouldFailOnClosedSocket() throws InterruptedException, ExecutionException, TimeoutException, IOException
     {
-        WebSocketSession session = prepareWebSocketSession(null);
+        var session = prepareWebSocketSession(null);
         when(session.isOpen()).thenReturn(false);
 
         webSocketSteps.connect(WEB_SOCKET_KEY);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        var exception = assertThrows(IllegalArgumentException.class,
             () -> webSocketSteps.sendTextMessage(MESSAGE, WEB_SOCKET_KEY));
         assertEquals(CONNECTION_IS_CLOSED, exception.getMessage());
     }
 
     @Test
-    void shouldFailOnUnexsitingKey() throws IOException
+    void shouldFailOnUnexsitingKey()
     {
         initSteps();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        var exception = assertThrows(IllegalArgumentException.class,
             () -> webSocketSteps.disconnect("unexisting-web-socket-key"));
         assertEquals("WebSocket with the key 'unexisting-web-socket-key' does not exists", exception.getMessage());
     }
 
     @Test
-    void shouldFailOnUnexsitingWebSocket() throws IOException
+    void shouldFailOnUnexsitingWebSocket()
     {
         initSteps();
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        var exception = assertThrows(IllegalArgumentException.class,
             () -> webSocketSteps.disconnect(WEB_SOCKET_KEY));
         assertEquals(CONNECTION_IS_CLOSED, exception.getMessage());
     }
@@ -143,7 +124,7 @@ class WebSocketStepsTests
     @Test
     void shouldDisconnect() throws InterruptedException, ExecutionException, TimeoutException, IOException
     {
-        WebSocketSession session = prepareWebSocketSession(null);
+        var session = prepareWebSocketSession(null);
         when(session.isOpen()).thenReturn(true);
 
         webSocketSteps.connect(WEB_SOCKET_KEY);
@@ -158,7 +139,7 @@ class WebSocketStepsTests
     void shouldCloseExistingWebSocketIfNewIsStarted() throws InterruptedException, ExecutionException, TimeoutException,
         IOException
     {
-        WebSocketSession session = prepareWebSocketSession(null);
+        var session = prepareWebSocketSession(null);
 
         webSocketSteps.connect(WEB_SOCKET_KEY);
         webSocketSteps.connect(WEB_SOCKET_KEY);
@@ -170,7 +151,7 @@ class WebSocketStepsTests
     @Test
     void shouldCleanUp() throws InterruptedException, ExecutionException, TimeoutException, IOException
     {
-        WebSocketSession session = prepareWebSocketSession(null);
+        var session = prepareWebSocketSession(null);
 
         webSocketSteps.connect(WEB_SOCKET_KEY);
 
@@ -184,13 +165,13 @@ class WebSocketStepsTests
     @ValueSource(booleans = { true, false })
     void shouldDrainTextMessagesToVariable(boolean open) throws Exception
     {
-        ArgumentCaptor<TextWebSocketHandler> captor = ArgumentCaptor.forClass(TextWebSocketHandler.class);
-        WebSocketSession session = prepareWebSocketSession(captor);
+        var captor = ArgumentCaptor.forClass(TextWebSocketHandler.class);
+        var session = prepareWebSocketSession(captor);
         when(session.isOpen()).thenReturn(open);
 
         webSocketSteps.connect(WEB_SOCKET_KEY);
 
-        String varableName = "variable-name";
+        var varableName = "variable-name";
         captor.getValue().handleMessage(session, new TextMessage(MESSAGE));
         webSocketSteps.drainTextMessagesToVariable(WEB_SOCKET_KEY, Set.of(VariableScope.STORY), varableName);
 
@@ -201,8 +182,8 @@ class WebSocketStepsTests
     @Test
     void shouldWaitForTextMessages() throws Exception
     {
-        ArgumentCaptor<TextWebSocketHandler> captor = ArgumentCaptor.forClass(TextWebSocketHandler.class);
-        WebSocketSession session = prepareWebSocketSession(captor);
+        var captor = ArgumentCaptor.forClass(TextWebSocketHandler.class);
+        var session = prepareWebSocketSession(captor);
         when(session.isOpen()).thenReturn(true);
 
         webSocketSteps.connect(WEB_SOCKET_KEY);
@@ -215,16 +196,15 @@ class WebSocketStepsTests
         verifyNoMoreInteractions(session);
     }
 
-    @SuppressWarnings("unchecked")
     private WebSocketSession prepareWebSocketSession(ArgumentCaptor<TextWebSocketHandler> handlerCaptor)
             throws InterruptedException, ExecutionException, TimeoutException
     {
-        JettyWebSocketClient jettyClient = captureJettyClient();
-        ListenableFuture<WebSocketSession> future = mock(ListenableFuture.class);
-        WebSocketSession session = mock(WebSocketSession.class);
+        var webSocketClient = captureWebSocketClient();
+        CompletableFuture<WebSocketSession> future = mock();
+        var session = mock(WebSocketSession.class);
 
-        when(jettyClient.doHandshake(handlerCaptor == null ? any() : handlerCaptor.capture(),
-                any(WebSocketHttpHeaders.class), eq(UriUtils.createUri(WEB_SOCKET_ADDR)))).thenReturn(future);
+        when(webSocketClient.execute(handlerCaptor == null ? any() : handlerCaptor.capture(),
+                eq(WEB_SOCKET_ENDPOINT))).thenReturn(future);
         when(future.get(60, TimeUnit.SECONDS)).thenReturn(session);
 
         return session;
@@ -232,20 +212,19 @@ class WebSocketStepsTests
 
     private void initSteps()
     {
-        this.webSocketSteps = new WebSocketSteps(Map.of(WEB_SOCKET_KEY, UriUtils.createUri(WEB_SOCKET_ADDR)),
-                testContext, variableContext, softAssert);
+        this.webSocketSteps = new WebSocketSteps(Map.of(WEB_SOCKET_KEY, WEB_SOCKET_ENDPOINT), testContext,
+                variableContext, softAssert);
     }
 
-    private JettyWebSocketClient captureJettyClient()
+    private StandardWebSocketClient captureWebSocketClient()
     {
-        try (MockedConstruction<JettyWebSocketClient> jettyClientConstruction = Mockito
-                .mockConstruction(JettyWebSocketClient.class))
+        try (var webSocketClientConstruction = Mockito.mockConstruction(StandardWebSocketClient.class))
         {
             initSteps();
 
-            assertThat(jettyClientConstruction.constructed(), hasSize(1));
+            assertThat(webSocketClientConstruction.constructed(), hasSize(1));
 
-            return jettyClientConstruction.constructed().get(0);
+            return webSocketClientConstruction.constructed().get(0);
         }
     }
 }

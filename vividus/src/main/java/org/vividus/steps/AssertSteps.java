@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ package org.vividus.steps;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.AfterScenario;
 import org.jbehave.core.annotations.Then;
 import org.vividus.context.RunContext;
 import org.vividus.model.RunningStory;
 import org.vividus.softassert.ISoftAssert;
+
+import jakarta.inject.Inject;
 
 public class AssertSteps
 {

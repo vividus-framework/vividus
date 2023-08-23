@@ -16,8 +16,6 @@
 
 package org.vividus.steps.ui.web;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.Then;
 import org.openqa.selenium.WebElement;
 import org.vividus.steps.ui.validation.IBaseValidations;
@@ -26,6 +24,8 @@ import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.search.WebLocatorType;
+
+import jakarta.inject.Inject;
 
 public class ScriptSteps
 {

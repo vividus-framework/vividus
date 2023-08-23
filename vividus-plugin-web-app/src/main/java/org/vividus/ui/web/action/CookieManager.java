@@ -21,8 +21,6 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
 
@@ -34,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.http.client.CookieStoreCollector;
 import org.vividus.selenium.IWebDriverProvider;
+
+import jakarta.inject.Inject;
 
 public class CookieManager implements ICookieManager
 {

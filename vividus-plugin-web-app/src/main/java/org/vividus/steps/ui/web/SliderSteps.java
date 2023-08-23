@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.vividus.steps.ui.web;
 
 import static org.hamcrest.Matchers.equalTo;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
@@ -30,6 +28,8 @@ import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
+
+import jakarta.inject.Inject;
 
 @TakeScreenshotOnFailure
 public class SliderSteps

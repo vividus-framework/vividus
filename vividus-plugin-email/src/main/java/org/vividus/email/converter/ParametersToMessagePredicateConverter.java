@@ -18,13 +18,12 @@ package org.vividus.email.converter;
 
 import java.lang.reflect.Type;
 
-import javax.inject.Named;
-
 import org.apache.commons.lang3.function.FailablePredicate;
 import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.jbehave.core.steps.Parameters;
 import org.vividus.email.factory.EmailParameterFilterFactory;
 
+import jakarta.inject.Named;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.vividus.visual.storage;
 import java.io.IOException;
 import java.util.Optional;
 
-import javax.inject.Named;
-
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.models.BlobStorageException;
@@ -32,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Conditional;
 import org.vividus.azure.storage.blob.BlobServiceClientFactory;
 
+import jakarta.inject.Named;
 import pazone.ashot.Screenshot;
 import pazone.ashot.util.ImageTool;
 

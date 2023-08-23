@@ -27,8 +27,6 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import com.browserup.bup.util.HttpMessageInfo;
 import com.browserup.harreader.model.HarEntry;
 import com.browserup.harreader.model.HttpMethod;
@@ -58,6 +56,7 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import jakarta.inject.Inject;
 
 @SuppressWarnings("PMD.ExcessiveImports")
 @TakeScreenshotOnFailure(onlyInDebugMode = "proxy")

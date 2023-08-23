@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.vividus.ui.action;
 import java.time.Duration;
 import java.util.function.Function;
 
-import javax.inject.Inject;
-
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
@@ -30,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.vividus.softassert.ISoftAssert;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import jakarta.inject.Inject;
 
 public class WaitActions implements IWaitActions
 {

@@ -18,8 +18,6 @@ package org.vividus.selenium;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.inject.Inject;
-
 import com.google.common.eventbus.EventBus;
 
 import org.openqa.selenium.WebDriver;
@@ -28,6 +26,8 @@ import org.vividus.selenium.event.AfterWebDriverQuitEvent;
 import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
 import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.testcontext.TestContext;
+
+import jakarta.inject.Inject;
 
 public class WebDriverProvider implements IWebDriverProvider
 {

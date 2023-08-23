@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 
 package org.vividus.converter;
 
-import javax.inject.Named;
-
 import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.openqa.selenium.By;
 import org.vividus.selenium.LocatorFactory;
+
+import jakarta.inject.Named;
 
 @Named
 public class StringToSeleniumLocatorParameterConverter extends FunctionalParameterConverter<String, By>

@@ -25,8 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.embedder.StoryControls;
@@ -48,6 +46,8 @@ import org.vividus.converter.ResolvingPlaceholdersExamplesTableConverter;
 import org.vividus.log.LoggingTableTransformerMonitor;
 import org.vividus.steps.ParameterConvertersDecorator;
 import org.vividus.steps.PlaceholderResolver;
+
+import jakarta.inject.Inject;
 
 public class ExtendedConfiguration extends Configuration
 {

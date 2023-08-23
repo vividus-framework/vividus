@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import static org.hamcrest.Matchers.not;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matcher;
 import org.openqa.selenium.WebElement;
@@ -31,6 +29,8 @@ import org.vividus.steps.ui.web.Dimension;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.util.ElementUtils;
+
+import jakarta.inject.Inject;
 
 public class ElementValidations implements IElementValidations
 {

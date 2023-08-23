@@ -24,8 +24,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.vividus.selenium.LocatorFactory;
 import org.vividus.ui.action.search.ElementActionService;
@@ -34,6 +32,8 @@ import org.vividus.ui.action.search.LocatorPattern;
 import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.util.property.PropertyMappedCollection;
+
+import jakarta.inject.Inject;
 
 public class LocatorConversionUtils
 {

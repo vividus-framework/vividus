@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.vividus.selenium.screenshot;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javax.inject.Inject;
-
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -28,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.WebJavascriptActions;
+
+import jakarta.inject.Inject;
 
 public class WebElementHighlighter implements IWebElementHighlighter
 {

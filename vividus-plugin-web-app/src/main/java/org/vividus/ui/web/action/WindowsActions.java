@@ -21,8 +21,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import javax.inject.Inject;
-
 import org.hamcrest.Matcher;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
@@ -30,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
+
+import jakarta.inject.Inject;
 
 public class WindowsActions implements IWindowsActions
 {

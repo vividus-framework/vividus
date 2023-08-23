@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.vividus.proxy;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.model.Meta;
 import org.jbehave.core.model.Scenario;
@@ -26,6 +24,8 @@ import org.jbehave.core.steps.Timing;
 import org.vividus.ChainedStoryReporter;
 import org.vividus.context.RunContext;
 import org.vividus.selenium.ControllingMetaTag;
+
+import jakarta.inject.Inject;
 
 public class ProxyAgentStoryReporter extends ChainedStoryReporter
 {
