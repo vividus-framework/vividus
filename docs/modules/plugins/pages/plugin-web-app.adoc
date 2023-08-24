@@ -470,7 +470,13 @@ of the expected options.
 
 [source,gherkin]
 ----
-Then dropdown located `$locator` contains options: $option
+Then dropdown located by `$locator` contains options:$options
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+Then dropdown located `$locator` contains options:$options
 ----
 * `$locator` - The <<_locator,locator>> used to find a dropdown.
 * `$options` - examples table describing expected options
@@ -478,7 +484,7 @@ Then dropdown located `$locator` contains options: $option
 .Validate dropdown contains a set of colors
 [source,gherkin]
 ----
-Then a drop down with the name 'colors' contains the items:
+Then dropdown located by `id(colors)` contains options:
 |state|item |
 |false|Red  |
 |false|Green|
@@ -494,6 +500,12 @@ Verifies if dropdown located by locator exists and first selected option.
 
 [source,gherkin]
 ----
+Then dropdown located by `$locator` exists and selected option is `$option`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 Then dropdown located `$locator` exists and selected option is `$option`
 ----
 * `$locator` - The <<_locator,locator>> used to find a dropdown.
@@ -502,7 +514,7 @@ Then dropdown located `$locator` exists and selected option is `$option`
 .Dropdown.story
 [source,gherkin]
 ----
-Then dropdown located `id(colors)` exists and selected option is `Blue`
+Then dropdown located by `id(colors)` exists and selected option is `Blue`
 ----
 
 
@@ -515,6 +527,12 @@ Step will fail if target dropdown is not multi-select
 
 [source,gherkin]
 ----
+When I add `$option` to selection in dropdown located by `$locator`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I add `$option` to selection in dropdown located `$locator`
 ----
 * `$option` - option to select
@@ -523,7 +541,7 @@ When I add `$option` to selection in dropdown located `$locator`
 .Dropdown.story
 [source,gherkin]
 ----
-When I add `Two` to selection in dropdown located `id(numbers)`
+When I add `Two` to selection in dropdown located by `id(numbers)`
 ----
 
 
@@ -536,6 +554,12 @@ Does not support multi-selection
 
 [source,gherkin]
 ----
+When I select `$option` in dropdown located by `$locator``
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I select `$option` in dropdown located `$locator``
 ----
 * `$option` - option to select
@@ -544,7 +568,7 @@ When I select `$option` in dropdown located `$locator``
 .Dropdown.story
 [source,gherkin]
 ----
-When I select `Red` in dropdown located `id(colors)`
+When I select `Red` in dropdown located by `id(colors)`
 ----
 
 
