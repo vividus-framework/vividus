@@ -270,7 +270,7 @@ implementation(group: 'com.h2database', name: 'h2', version: '2.2.220')
 .environment.properties
 [source,properties]
 ----
-db.connection.csv-data.url=jdbc:relique:csv:classpath:path/to/csv/data
+db.connection.test-h2-db.url=jdbc:h2:mem:test;DATABASE_TO_UPPER=FALSE;DB_CLOSE_DELAY=-1;
 ----
 
 .https://h2database.com/html/features.html#database_url[URL template] for in-memory named database
