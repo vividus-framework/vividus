@@ -102,12 +102,6 @@ Checks the page title matches to the text according to the provided string valid
 Then page title $comparisonRule `$text`
 ----
 
-_Deprecated syntax (will be removed in VIVIDUS 0.6.0)_:
-[source,gherkin]
-----
-Then the page title $comparisonRule '$text'
-----
-
 * `$comparisonRule` - string validation rule. One of:
 ** `is equal to` - title should be equal to `text`
 ** `contains` - title should contain `text`

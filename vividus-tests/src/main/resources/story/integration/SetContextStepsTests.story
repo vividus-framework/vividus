@@ -7,9 +7,9 @@ Examples:
 |Windows     |Vividus Test Site|
 
 
-Scenario: Verify deprecated step with "is equal to": "When I switch to window with title that $stringComparisonRule `$title`"; Verify deprecated composite step "Then the page title $comparisonRule '$text'"
+Scenario: Verify deprecated step with "is equal to": "When I switch to window with title that $stringComparisonRule `$title`"
 Given I am on page with URL `${vividus-test-site-url}/windows.html`
-Then the page title is equal to '<windowsTitle>'
+Then page title is equal to `<windowsTitle>`
 When I click on element located by `id(plain)`
 When I switch to window with title that is equal to `<indexTitle>`
 Then page title is equal to `<indexTitle>`
