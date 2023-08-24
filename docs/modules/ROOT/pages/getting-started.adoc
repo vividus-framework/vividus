@@ -175,7 +175,7 @@ cd /dir/to/where/the/results-are-published/.out/vividus-demo/reports/allure
 . Launch a browser, type `localhost:3456` into the URL. If you followed the instructions properly, you should see your report.
 
 ### Option 2 (Relax browser security)
-. Tune https://testingfreak.com/how-to-fix-cross-origin-request-security-cors-error-in-firefox-chrome-and-ie/[CORS option in the browser of your choice].
+. Tune https://web.archive.org/web/20230329174755/https://testingfreak.com/how-to-fix-cross-origin-request-security-cors-error-in-firefox-chrome-and-ie/[CORS option in the browser of your choice].
 +
 WARNING: Make sure this browser will be used to view test reports only, it's not safe to surf the Internet with relaxed security rules.
 . Go to the test report directory and open `index.html` in the configured browser.
