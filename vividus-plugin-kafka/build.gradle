@@ -6,7 +6,7 @@ configurations {
     testImplementation.extendsFrom compileOnly
 }
 
-ext.springKafkaVersion = '2.9.10'
+ext.springKafkaVersion = '3.0.10'
 
 dependencies {
     api project(':vividus-engine')
