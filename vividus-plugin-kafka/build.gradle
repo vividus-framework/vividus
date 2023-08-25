@@ -6,14 +6,13 @@ configurations {
     testImplementation.extendsFrom compileOnly
 }
 
-ext.springKafkaVersion = '3.0.10'
-
 dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation(group: 'org.springframework.kafka', name: 'spring-kafka', version: "${springKafkaVersion}")
+    implementation platform(group: 'org.springframework.kafka', name: 'spring-kafka-bom', version: '3.0.10')
+    implementation(group: 'org.springframework.kafka', name: 'spring-kafka')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
@@ -22,6 +21,6 @@ dependencies {
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.5.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'org.springframework.kafka', name: 'spring-kafka-test', version: "${springKafkaVersion}")
+    testImplementation(group: 'org.springframework.kafka', name: 'spring-kafka-test')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
 }
