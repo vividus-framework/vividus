@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.vividus.steps.websocket;
 import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.io.IOException;
-import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,9 +36,8 @@ import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.AfterStory;
 import org.jbehave.core.annotations.When;
 import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.client.jetty.JettyWebSocketClient;
+import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
@@ -53,30 +51,20 @@ public class WebSocketSteps
     private static final Object KEY = WebSocketContainer.class;
     private static final long DEFAULT_TIMEOUT = 60;
 
-    private final Map<String, URI> webSocketConnections;
+    private final Map<String, String> webSocketConnections;
     private final TestContext testContext;
     private final VariableContext variableContext;
     private final ISoftAssert softAssert;
-    private final JettyWebSocketClient webSocketClient;
+    private final StandardWebSocketClient webSocketClient;
 
-    public WebSocketSteps(Map<String, URI> webSocketConnections, TestContext testContext,
+    public WebSocketSteps(Map<String, String> webSocketConnections, TestContext testContext,
             VariableContext variableContext, ISoftAssert softAssert)
     {
         this.webSocketConnections = webSocketConnections;
         this.testContext = testContext;
         this.variableContext = variableContext;
         this.softAssert = softAssert;
-        this.webSocketClient = new JettyWebSocketClient();
-    }
-
-    public void init()
-    {
-        this.webSocketClient.start();
-    }
-
-    public void destroy()
-    {
-        this.webSocketClient.stop();
+        this.webSocketClient = new StandardWebSocketClient();
     }
 
     /**
@@ -92,7 +80,7 @@ public class WebSocketSteps
     public void connect(String webSocketConnectionKey) throws InterruptedException, ExecutionException,
         TimeoutException, IOException
     {
-        URI webSocketEndpoint = getWebSocketEndpoint(webSocketConnectionKey);
+        String webSocketEndpoint = getWebSocketEndpoint(webSocketConnectionKey);
         WebSocket webSocket = getContainer().getSocket(webSocketEndpoint);
         if (webSocket != null)
         {
@@ -100,8 +88,8 @@ public class WebSocketSteps
         }
 
         WebSocketTextMessageCollector collector = new WebSocketTextMessageCollector();
-        WebSocketSession session = webSocketClient.doHandshake(collector, new WebSocketHttpHeaders(), webSocketEndpoint)
-                .get(DEFAULT_TIMEOUT, TimeUnit.SECONDS);
+        WebSocketSession session = webSocketClient.execute(collector, webSocketEndpoint).get(DEFAULT_TIMEOUT,
+                TimeUnit.SECONDS);
 
         getContainer().putSocket(webSocketEndpoint, new WebSocket(session, collector));
     }
@@ -199,16 +187,16 @@ public class WebSocketSteps
         }
     }
 
-    private URI getWebSocketEndpoint(String webSocketConnectionKey)
+    private String getWebSocketEndpoint(String webSocketConnectionKey)
     {
-        URI webSocketEndpoint = webSocketConnections.get(webSocketConnectionKey);
+        String webSocketEndpoint = webSocketConnections.get(webSocketConnectionKey);
         isTrue(webSocketEndpoint != null, "WebSocket with the key '%s' does not exists", webSocketConnectionKey);
         return webSocketEndpoint;
     }
 
     private WebSocket getWebSocket(String webSocketConnectionKey, boolean allowClosed)
     {
-        URI webSocketEndpoint = getWebSocketEndpoint(webSocketConnectionKey);
+        String webSocketEndpoint = getWebSocketEndpoint(webSocketConnectionKey);
         WebSocket webSocket = getContainer().getSocket(webSocketEndpoint);
         isTrue(webSocket != null && (webSocket.isOpen() || allowClosed),
                 "WebSocket connection by the key '%s' to the '%s' is either not established or already closed",
@@ -223,9 +211,9 @@ public class WebSocketSteps
 
     private static final class WebSocketContainer
     {
-        private final Map<URI, WebSocket> sockets = new HashMap<>();
+        private final Map<String, WebSocket> sockets = new HashMap<>();
 
-        private WebSocket getSocket(URI endpoint)
+        private WebSocket getSocket(String endpoint)
         {
             return sockets.get(endpoint);
         }
@@ -235,7 +223,7 @@ public class WebSocketSteps
             return sockets.values();
         }
 
-        private void putSocket(URI endpoint, WebSocket socket)
+        private void putSocket(String endpoint, WebSocket socket)
         {
             this.sockets.put(endpoint, socket);
         }

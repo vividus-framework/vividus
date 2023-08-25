@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@ package org.vividus.jackson.databind.ui;
 
 import java.io.IOException;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.util.LocatorConversionUtils;
+
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @Named
 public class LocatorDeserializer extends JsonDeserializer<Locator>

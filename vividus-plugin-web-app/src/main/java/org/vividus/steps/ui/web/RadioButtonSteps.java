@@ -16,8 +16,6 @@
 
 package org.vividus.steps.ui.web;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
@@ -31,6 +29,8 @@ import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
+
+import jakarta.inject.Inject;
 
 @TakeScreenshotOnFailure
 public class RadioButtonSteps

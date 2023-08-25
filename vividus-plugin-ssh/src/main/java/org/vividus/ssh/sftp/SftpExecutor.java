@@ -19,8 +19,6 @@ package org.vividus.ssh.sftp;
 import java.io.IOException;
 import java.util.Optional;
 
-import javax.inject.Named;
-
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
@@ -30,6 +28,8 @@ import org.vividus.ssh.Commands;
 import org.vividus.ssh.JSchExecutor;
 import org.vividus.ssh.SingleCommand;
 import org.vividus.ssh.SshConnectionParameters;
+
+import jakarta.inject.Named;
 
 @Named
 public class SftpExecutor extends JSchExecutor<ChannelSftp, SftpOutput>

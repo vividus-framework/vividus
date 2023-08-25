@@ -23,8 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
@@ -54,6 +52,8 @@ import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.ui.web.listener.WebApplicationListener;
 import org.vividus.util.UriUtils;
 import org.vividus.util.UriUtils.UserInfo;
+
+import jakarta.inject.Inject;
 
 @TakeScreenshotOnFailure
 public class PageSteps

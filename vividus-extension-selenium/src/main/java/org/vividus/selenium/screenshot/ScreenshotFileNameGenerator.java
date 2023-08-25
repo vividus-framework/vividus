@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import javax.inject.Inject;
-
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
+
+import jakarta.inject.Inject;
 
 public class ScreenshotFileNameGenerator implements IScreenshotFileNameGenerator
 {

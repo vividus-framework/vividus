@@ -25,8 +25,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.titleIs;
 
 import java.time.Duration;
 
-import javax.inject.Inject;
-
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.Alert;
@@ -47,6 +45,8 @@ import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.WebJavascriptActions;
+
+import jakarta.inject.Inject;
 
 @TakeScreenshotOnFailure
 public class WaitSteps

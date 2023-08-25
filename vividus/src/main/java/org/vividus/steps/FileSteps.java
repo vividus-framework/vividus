@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,14 +23,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
 import org.vividus.util.ResourceUtils;
 import org.vividus.variable.VariableScope;
+
+import jakarta.inject.Inject;
 
 public class FileSteps
 {

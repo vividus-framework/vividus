@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package org.vividus.zephyr.configuration;
 import java.nio.file.Path;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 import org.vividus.zephyr.model.TestCaseStatus;
+
+import jakarta.validation.constraints.NotNull;
 
 @Validated
 @ConfigurationProperties("zephyr.exporter")

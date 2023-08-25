@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.vividus.ui.web.action;
 import java.time.Duration;
 import java.util.function.Function;
 
-import javax.inject.Inject;
-
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.Browser;
@@ -28,6 +26,8 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.action.WaitActions;
 import org.vividus.util.Sleeper;
+
+import jakarta.inject.Inject;
 
 public class WebWaitActions extends WaitActions implements IWebWaitActions
 {
