@@ -309,6 +309,221 @@ When I scan barcode from context and save result to scenario variable `qrCodeLin
 Then `${qrCodeLink}` is equal to `https://www.example.com`
 ----
 
+=== Upload file
+
+Uploads the {xref:ROOT:glossary.adoc#_resource}[resource] or file via web interface.
+
+[source,gherkin]
+----
+When I select element located by `$locator` and upload `$resourceNameOrFilePath`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+When I select element located `$locator` and upload file `$filePath`
+----
+
+* `$locator` - the <<_locator,locator>> of the web element with *input* tag and attribute *type=file*
+* `$resourceNameOrFilePath` - relative path to the file to be uploaded
+
+.Upload file_for_upload.png file
+[source,gherkin]
+----
+When I select element located by `id(uploadfile)` and upload file `/folder/file_for_upload.png`
+----
+
+=== Verify page is not refreshed after click on element
+
+Clicks on the element and checks that the page has not been refreshed after the click.
+
+[source,gherkin]
+----
+When I click on element located by `$locator` then page does not refresh
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+When I click on an element '$locator' then the page does not refresh
+----
+
+* `$locator` - The <<_locator,locator>> to find an element to click.
+
+.Step example
+[source,gherkin]
+----
+When I click on element located by `id(send)` then page does not refresh
+----
+
+=== Right-click on the element
+
+Performs right-click on the element.
+
+[source,gherkin]
+----
+When I perform right-click on element located by `$locator`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+When I perform right click on element located `$locator`
+----
+
+* `$locator` - The <<_locator,locator>> to find an element to click.
+
+.Step example
+[source,gherkin]
+----
+When I perform right-click on element located by `id(clickme)`
+----
+
+=== Hover mouse over the element
+
+Moves a mouse cursor on the element.
+
+[source,gherkin]
+----
+When I hover mouse over element located by `$locator`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+When I hover mouse over element located `$locator`
+----
+
+* `$locator` - The <<_locator,locator>> to an element to hover.
+
+.Step example
+[source,gherkin]
+----
+When I hover mouse over element located by `id(hoverme)`
+----
+
+=== Check each element has a specific number of children elements
+
+Checks that each element specified by the locator contains an exact number of visible child elements specified by another locator
+
+[source,gherkin]
+----
+Then each element with locator `$elementLocator` has `$number` child elements with locator `$childLocator`
+----
+
+* `$elementLocator` - The <<_locator,locator>> to the parent element.
+* `$number` - The expected number of children elements
+* `$childLocator` - The <<_locator,locator>> to the child elements.
+
+.Step example
+[source,gherkin]
+----
+Then each element with locator `id(menu)` has `5` child elements with locator `id(menu-item)`
+----
+
+=== Check an element CSS property
+
+Checks the context element has the expected CSS property.
+
+The context can be set by the <<_change_context,corresponding steps>>.
+
+[source,gherkin]
+----
+Then context element has CSS property `$cssName` with value that $comparisonRule `$cssValue`
+----
+
+* `$cssName` - A name of the CSS property.
+* `$comparisonRule` - CSS property xref:parameters:string-comparison-rule.adoc[comparison rule].
+* `$cssValue` - The expected value of the CSS property.
+
+.Change context to element and verify it color CSS property value
+[source,gherkin]
+----
+When I change context to element located by `id(rainbow)`
+Then context element has CSS property `color` with value that is equal to `rgba(0, 0, 0, 1)`
+----
+
+=== Compare sizes of the elements
+
+Check that all elements found on the page by the given locator have the same dimension: width / height.
+
+NOTE: Element's dimension is measured in *pixels* and means the size that given element occupies on the web-page
+in a browser. Element size may vary in different browsers, it also depends on screen resolution, page scaling,
+scripts running on the page.
+
+[source,gherkin]
+----
+Then each element located by `$locator` has same `$dimension`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+Then each element located `$locator` has same `$dimension`
+----
+
+* `$locator` - The <<_locator,locator>> to find an elements to compare.
+* `$dimension` - The elements dimension to compare. Possible values: _width_, _height_
+
+.Check that all menu items have the same size (width and height)
+[source,gherkin]
+----
+Then each element located `id(context-menu-item)` has same `width`
+Then each element located `id(context-menu-item)` has same `height`
+----
+
+=== Check element width in a percentage
+
+Checks that the context element has an expected *width in a percentage* (from the style attribute) relative to the page body.
+
+The context can be set by the <<_change_context,corresponding steps>>.
+
+[source,gherkin]
+----
+Then context element has width of $widthPercentage%
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+Then the context has a width of '$widthPercentage'%
+----
+
+* `widthPercentage` - An expected element width in a percentage relative to the page body.
+
+.Check element width
+[source,gherkin]
+----
+When I change context to element located by `id(menu)`
+Then context element has width of 30%
+----
+
+=== Check element width in a percentage relative to the parent element
+
+Checks that the context element has an expected *width in a percentage* (from the style attribute) relative to the parent element
+
+The context can be set by the <<_change_context,corresponding steps>>.
+
+[source,gherkin]
+----
+Then context element has width of $widthPercentage% relative to parent element
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+Then the context element has a width of 'widthPercentage'% relative to the parent element
+----
+
+* `widthPercentage` - An expected element width in a percentage.
+
+.Check element width
+[source,gherkin]
+----
+When I change context to element located by `id(menu)`
+Then context element has width of 13% relative to parent element
+----
+
 === https://en.wikipedia.org/wiki/Focus_(computing)[Focus] Steps
 
 Focus indicates the act of selecting an element of a graphical user interface. Text entered at the keyboard or pasted

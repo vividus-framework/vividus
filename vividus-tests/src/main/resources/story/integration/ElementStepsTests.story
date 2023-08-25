@@ -14,26 +14,45 @@ Scenario: Step verification Then each element located `$locator` has same '$dime
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
 Then each element located `xpath(.//input[@type='radio'])` has same `width`
 
-Scenario: Step verification Then each element with locator `$elementXpath` has `$number` child elements with locator `$childXpath`
+Scenario: Step verification Then each element located by `$locator` has same '$dimension'
+Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
+Then each element located by `xpath(.//input[@type='radio'])` has same `width`
+
+Scenario: Deprecated step verification Then each element with locator `$elementXpath` has `$number` child elements with locator `$childXpath`
 Given I am on page with URL `${vividus-test-site-url}/dropdowns.html`
 Then each element with locator `tagName(select)` has `3` child elements with locator `tagName(option)`
 
-Scenario: Step verification When I hover a mouse over an element located '$locator'
+Scenario: Deprecated step verification When I hover a mouse over an element located '$locator'
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
 When I hover mouse over element located `xpath(//div[contains(., 'Mouse enter!')])`
 Then text `Mouse enter count: 1` exists
 
-Scenario: Step verification When I click on an element '$searchAttributes' then the page does not refresh
+Scenario: Step verification When I hover mouse over element located by `$locator`
+Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
+When I hover mouse over element located by `xpath(//div[contains(., 'Mouse enter!')])`
+Then text `Mouse enter count: 1` exists
+
+Scenario: Deprecated step verification When I click on an element '$searchAttributes' then the page does not refresh
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
 When I click on an element 'xpath((.//*[@type='radio'])[1])' then the page does not refresh
+Then the page has the relative URL '/mouseEvents.html'
+
+Scenario: Step verification When I click on element located by `$locator` then page does not refresh
+Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
+When I click on element located by `xpath((.//*[@type='radio'])[1])` then page does not refresh
 Then the page has the relative URL '/mouseEvents.html'
 
 Scenario: Step verification Then the context element has a width of '$widthInPerc'% relative to the parent element
 Given I am on page with URL `${vividus-test-site-url}/dropdowns.html`
 When I change context to element located by `xpath(.//*[@for='colors'])`
+Then context element has width of 13% relative to parent element
+
+Scenario: Deprecated step verification Then the context element has a width of '$widthInPerc'% relative to the parent element
+Given I am on page with URL `${vividus-test-site-url}/dropdowns.html`
+When I change context to element located by `xpath(.//*[@for='colors'])`
 Then the context element has a width of '13'% relative to the parent element
 
-Scenario: Step verification When I perform right click on an element located `$locator`
+Scenario: Deprecated step verification When I perform right click on an element located `$locator`
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
 Then number of elements found by `elementName(Foo)` is = `1`
 Then number of elements found by `elementName(Bar)` is = `0`
@@ -41,19 +60,38 @@ When I perform right click on element located `id(context-menu)`
 Then number of elements found by `elementName(Foo)` is = `0`
 Then number of elements found by `elementName(Bar)` is = `1`
 
-Scenario: Step verification Then the context element has the CSS property '$cssName'='$cssValue'
+Scenario: Step verification When I perform right-click on an element located by `$locator`
+Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
+Then number of elements found by `elementName(Foo)` is = `1`
+Then number of elements found by `elementName(Bar)` is = `0`
+When I perform right-click on element located by `id(context-menu)`
+Then number of elements found by `elementName(Foo)` is = `0`
+Then number of elements found by `elementName(Bar)` is = `1`
+
+Scenario: Deprecated step verification Then the context element has the CSS property '$cssName'='$cssValue'
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
 When I change context to element located by `xpath(.//*[@title='Text input section'])`
 Then the context element has the CSS property 'color'='rgba(0, 0, 0, 1)'
 
-Scenario: Step verification Then the context element has the CSS property '$cssName' containing '$cssValue'
+Scenario: Step verification context element has CSS property `$cssName` with value that $comparisonRule `$cssValue`
+Given I am on page with URL `${vividus-test-site-url}/inputs.html`
+When I change context to element located by `xpath(.//*[@title='Text input section'])`
+Then context element has CSS property `color` with value that is equal to `rgba(0, 0, 0, 1)`
+
+Scenario: Deprecated step verification Then the context element has the CSS property '$cssName' containing '$cssValue'
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
 When I change context to element located by `xpath(.//*[@title='Text input section'])`
 Then the context element has the CSS property 'color' containing '(0, 0, 0, 1)'
 
-Scenario: Step verification When I select an element '$locator' and upload the file '$filePath'
+Scenario: Deprecated step verification When I select element `$locator` and upload file `$filePath`
 Given I am on page with URL `${vividus-test-site-url}/upload.html`
 When I select element located `By.id(uploadInput)` and upload file `/data/file_for_upload_step.png`
+When I click on element located by `id(submit)`
+Then text `File has been successfully uploaded. Server received: 445508 bytes` exists
+
+Scenario: Step verification When I select element located by `$locator` and upload `$resourceNameOrFilePath`
+Given I am on page with URL `${vividus-test-site-url}/upload.html`
+When I select element located by `id(uploadInput)` and upload `/data/file_for_upload_step.png`
 When I click on element located by `id(submit)`
 Then text `File has been successfully uploaded. Server received: 445508 bytes` exists
 
