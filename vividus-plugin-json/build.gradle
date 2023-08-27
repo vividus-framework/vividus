@@ -11,7 +11,7 @@ dependencies {
     implementation(group: 'com.jayway.jsonpath', name: 'json-path', version: "${jsonPathVersion}")
     implementation(group: 'com.jayway.jsonpath', name: 'json-path-assert', version: "${jsonPathVersion}")
     implementation(group: 'com.flipkart.zjsonpatch', name: 'zjsonpatch', version: '0.4.14')
-    implementation platform(group: 'io.qameta.allure', name: 'allure-bom', version: '2.23.0')
+    implementation platform(group: 'io.qameta.allure', name: 'allure-bom', version: '2.24.0')
     implementation(group: 'io.qameta.allure', name: 'allure-jsonunit') {
         exclude (group: 'io.qameta.allure')
     }
