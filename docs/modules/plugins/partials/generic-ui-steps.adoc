@@ -197,6 +197,25 @@ Then number of $state elements found by `$locator` is $comparisonRule `$quantity
 Then number of VISIBLE elements found by `tagName(img)` is = `1`
 ----
 
+=== Save text of an element
+
+Saves text of an element into a variable.
+
+[source,gherkin]
+----
+When I save text of element located by `$locator` to $scopes variable `$variableName`
+----
+
+* `$locator` - <<_locator>>.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the text.
+
+.Save the text of H1 element
+[source,gherkin]
+----
+When I save text of element located by `tagName(h1)` to scenario variable `headingText`
+----
+
 
 === Save the text of the context
 
