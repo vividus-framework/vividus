@@ -25,13 +25,10 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -62,8 +59,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junitpioneer.jupiter.ClearSystemProperty;
 import org.mockito.Mock;
-import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
@@ -74,20 +71,16 @@ import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.util.property.PropertyMapper;
 
 import io.qameta.allure.Constants;
-import io.qameta.allure.ReportGenerator;
-import io.qameta.allure.core.Configuration;
-import io.qameta.allure.core.Plugin;
-import io.qameta.allure.core.ReportWebPlugin;
 import io.qameta.allure.entity.ExecutorInfo;
-import io.qameta.allure.summary.SummaryPlugin;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
+@ClearSystemProperty(key = AllureReportGeneratorTests.ALLURE_RESULTS_DIRECTORY_PROPERTY)
 class AllureReportGeneratorTests
 {
+    static final String ALLURE_RESULTS_DIRECTORY_PROPERTY = "allure.results.directory";
     private static final String ALLURE_CUSTOMIZATION_PATH = "/allure-customization/";
     private static final String ALLURE_CUSTOMIZATION_PATTERN = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
             + ALLURE_CUSTOMIZATION_PATH + "**";
-    private static final String ALLURE_RESULTS_DIRECTORY_PROPERTY = "allure.results.directory";
     private static final String RESULTS = "results";
     private static final String REPORT = "report";
 
@@ -102,8 +95,9 @@ class AllureReportGeneratorTests
 
     @Mock private PropertyMapper propertyMapper;
     @Mock private ResourcePatternResolver resourcePatternResolver;
-    @Mock private AllurePluginsProvider allurePluginsProvider;
     @Mock private NotificationsSender notificationsSender;
+
+    private final AllurePluginsProvider allurePluginsProvider = new AllurePluginsProvider(List.of());
 
     private AllureReportGenerator allureReportGenerator;
 
@@ -121,7 +115,6 @@ class AllureReportGeneratorTests
     @AfterEach
     void afterEach()
     {
-        System.clearProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY);
         EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(Map::clear);
     }
 
@@ -229,53 +222,22 @@ class AllureReportGeneratorTests
     @SuppressWarnings("unchecked")
     private void testEnd(File reportDirectory) throws IOException
     {
-        Path historyDirectory = tempDir.resolve("history");
-        List<Plugin> plugins = List.of();
+        var historyDirectory = tempDir.resolve("history");
         Files.createDirectories(historyDirectory);
         allureReportGenerator.setHistoryDirectory(historyDirectory.toFile());
         allureReportGenerator.setReportDirectory(reportDirectory);
-        try (MockedStatic<FileUtils> fileUtils = mockStatic(FileUtils.class);
-                MockedConstruction<ReportGenerator> reportGenerator = mockConstruction(ReportGenerator.class,
-                        (mock, context) -> {
-                            doAnswer(a -> {
-                                resolveTrendsDir(reportDirectory);
-                                return a;
-                            }).when(mock).generate(any(Path.class), any(List.class));
-
-                            assertEquals(1, context.getCount());
-                            List<?> arguments = context.arguments();
-                            assertEquals(1, arguments.size());
-                            Configuration config = (Configuration) arguments.get(0);
-
-                            assertEquals(plugins, config.getPlugins());
-                            assertEquals(26, config.getAggregators().size());
-
-                            Path reportDirectoryPath = reportDirectory.toPath();
-
-                            var summaryPlugin = config.getAggregators().stream().filter(SummaryPlugin.class::isInstance)
-                                    .reduce((first, second) -> second);
-                            assertTrue(summaryPlugin.isPresent());
-                            summaryPlugin.get().aggregate(config, List.of(), reportDirectoryPath);
-                            assertSummaryJson(reportDirectoryPath);
-
-                            var reportWebPlugin = config.getAggregators().stream().filter(
-                                    ReportWebPlugin.class::isInstance).reduce((first, second) -> second);
-                            assertTrue(reportWebPlugin.isPresent());
-                            reportWebPlugin.get().aggregate(config, List.of(), reportDirectoryPath);
-                            assertIndexHtml(reportDirectoryPath);
-                        }))
+        try (var fileUtils = mockStatic(FileUtils.class))
         {
-            String text = "text";
+            var text = "text";
             fileUtils.when(() -> FileUtils.readFileToString(any(File.class), eq(StandardCharsets.UTF_8))).thenReturn(
                     text);
             allureReportGenerator.setReportDirectory(reportDirectory);
-            Resource resource = mockResource("/allure-customization/some_file.txt");
-            Resource folder = mockResource("/allure-customization/folder/");
+            var resource = mockResource("/allure-customization/some_file.txt");
+            var folder = mockResource("/allure-customization/folder/");
             Resource[] resources = { resource, folder };
             when(resourcePatternResolver.getResources(ALLURE_CUSTOMIZATION_PATTERN)).thenReturn(resources);
             prepareEnvironmentConfiguration();
 
-            when(allurePluginsProvider.getPlugins()).thenReturn(plugins);
             allureReportGenerator.start();
             allureReportGenerator.end();
             fileUtils.verify(() -> FileUtils.copyInputStreamToFile(eq(folder.getInputStream()), any(File.class)),
@@ -286,9 +248,15 @@ class AllureReportGeneratorTests
             fileUtils.verify(() -> FileUtils
                     .copyDirectory(argThat(arg -> arg.getAbsolutePath().equals(resolveTrendsDir(reportDirectory))),
                             eq(historyDirectory.toFile())));
-            verify(reportGenerator.constructed().get(0)).generate(any(Path.class), any(List.class));
+
             assertEnvironmentProperties();
             assertCategoriesJson();
+
+            var reportDirectoryPath = reportDirectory.toPath();
+            assertIndexHtml(reportDirectoryPath);
+            assertSummaryJson(reportDirectoryPath);
+            assertMailHtml(reportDirectoryPath);
+
             verify(notificationsSender).sendNotifications(reportDirectory);
         }
     }
@@ -330,6 +298,22 @@ class AllureReportGeneratorTests
                     + "\"statistic\":{\"failed\":0,\"broken\":0,\"skipped\":0,\"passed\":0,\"unknown\":0,\"total\":0},"
                     + "\"time\":{}"
                     + "}"
+        );
+    }
+
+    private void assertMailHtml(Path reportDirectory) throws IOException
+    {
+        assertFile(reportDirectory, "export/mail.html",
+                "<!DOCTYPE html>\n"
+                        + "<html>\n"
+                        + "<head>\n"
+                        + "    <meta charset=\"utf-8\">\n"
+                        + "    <title>Allure Report summary mail</title>\n"
+                        + "</head>\n"
+                        + "<body>\n"
+                        + "    Mail body\n"
+                        + "</body>\n"
+                        + "</html>\n"
         );
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,20 @@
 
 package org.vividus.report.allure.plugin;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.qameta.allure.Extension;
@@ -30,39 +37,59 @@ import io.qameta.allure.Extension;
 @ExtendWith(MockitoExtension.class)
 class EmbeddedPluginTests
 {
-    private static final String ID = "id";
-    private static final List<String> RESOURCE_LIST = List.of();
+    private static final String INDEX_JS = "index.js";
 
-    @Mock
-    private Extension extension;
+    private final PluginFilesLoader pluginFilesLoader = new PluginFilesLoader();
 
-    @Test
-    void testInitializationPluginWithJsAndExtension()
+    @AfterEach
+    void afterEach() throws IOException
     {
-        EmbeddedPlugin plugin = new EmbeddedPlugin(ID, RESOURCE_LIST, extension);
-
-        assertEquals(ID, plugin.getConfig().getId());
-        assertEquals(RESOURCE_LIST, plugin.getConfig().getJsFiles());
-        assertEquals(1, plugin.getExtensions().size());
-        assertEquals(extension, plugin.getExtensions().get(0));
+        pluginFilesLoader.destroy();
     }
 
     @Test
-    void testInitializationPluginWithCss()
+    void shouldCreatePluginWithAllTypesOfResources()
     {
-        EmbeddedPlugin plugin = new EmbeddedPlugin(ID);
+        Extension extension = mock();
+        var id = "all-types-of-resources";
+        var jsFile = INDEX_JS;
+        var cssFile = "styles.css";
+        var logoFile = "logo.csv";
+        var plugin = new EmbeddedPlugin(id, List.of(jsFile, cssFile, logoFile), extension, pluginFilesLoader);
 
-        assertEquals(ID, plugin.getConfig().getId());
-        assertEquals(List.of("styles.css"), plugin.getConfig().getCssFiles());
+        assertEquals(id, plugin.getConfig().getId());
+        assertEquals(List.of(jsFile), plugin.getConfig().getJsFiles());
+        assertEquals(List.of(cssFile), plugin.getConfig().getCssFiles());
+        assertEquals(List.of(extension), plugin.getExtensions());
+
+        var pluginFiles = plugin.getPluginFiles();
+        assertEquals(3, pluginFiles.size());
+        assertPluginFile(pluginFiles, id, jsFile);
+        assertPluginFile(pluginFiles, id, cssFile);
+        assertPluginFile(pluginFiles, id, logoFile);
     }
 
     @Test
-    void testInitializationPluginWithExtension()
+    void shouldCreateMinimalPlugin()
     {
-        EmbeddedPlugin plugin = new EmbeddedPlugin(ID, extension);
+        var id = "behaviors";
+        var jsFile = INDEX_JS;
+        var plugin = new EmbeddedPlugin(id, List.of(jsFile), pluginFilesLoader);
 
-        assertEquals(ID, plugin.getConfig().getId());
-        assertEquals(1, plugin.getExtensions().size());
-        assertEquals(extension, plugin.getExtensions().get(0));
+        assertEquals(id, plugin.getConfig().getId());
+        assertEquals(id, plugin.getConfig().getId());
+        assertEquals(List.of(jsFile), plugin.getConfig().getJsFiles());
+        assertEquals(List.of(), plugin.getConfig().getCssFiles());
+        assertEquals(List.of(), plugin.getExtensions());
+
+        var pluginFiles = plugin.getPluginFiles();
+        assertEquals(1, pluginFiles.size());
+        assertPluginFile(pluginFiles, id, jsFile);
+    }
+
+    private static void assertPluginFile(Map<String, Path> pluginFiles, String pluginId, String file)
+    {
+        assertThat(pluginFiles.get(file).toString(), endsWith(
+                File.separatorChar + "allure-plugins" + File.separatorChar + pluginId + File.separatorChar + file));
     }
 }
