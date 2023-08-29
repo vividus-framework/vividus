@@ -19,7 +19,7 @@ Report source: https://lpelypenko.github.io/axe-html-reporter/
         <!-- Required meta tags -->
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <link rel="stylesheet" href="../../webjars/bootstrap/5.3.0-alpha3/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="../../webjars/bootstrap/5.3.1/css/bootstrap.min.css"/>
         <style>
             body, html {
               font-size: 16px !important;
@@ -118,7 +118,7 @@ Report source: https://lpelypenko.github.io/axe-html-reporter/
         </style>
         <link rel="stylesheet" href="../../styles.css"/>
         <link rel="stylesheet" href="../../webjars/vividus/buttons.css"/>
-        <script src="../../webjars/bootstrap/5.3.0-alpha3/js/bootstrap.min.js"></script>
+        <script src="../../webjars/bootstrap/5.3.1/js/bootstrap.min.js"></script>
         <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
         <script src="../../webjars/highlight.js/11.7.0/highlight.min.js"></script>
         <script>

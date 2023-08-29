@@ -58,7 +58,7 @@
     <title>Accessibility check result table</title>
     <link rel="stylesheet" href="../../css/external.css"/>
     <link rel="stylesheet" href="../../styles.css"/>
-    <link rel="stylesheet" href="../../webjars/bootstrap/5.3.0-alpha3/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../../webjars/bootstrap/5.3.1/css/bootstrap.min.css"/>
     <style>
         .Error {
             background-color: var(--bs-danger-bg-subtle) !important;
@@ -127,6 +127,6 @@
     <@violation_panel container=Warning level="Warning" />
     <@violation_panel container=Notice level="Notice" />
     <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
-    <script src="../../webjars/bootstrap/5.3.0-alpha3/js/bootstrap.min.js"></script>
+    <script src="../../webjars/bootstrap/5.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>
