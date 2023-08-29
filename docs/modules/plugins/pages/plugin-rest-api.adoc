@@ -887,17 +887,13 @@ Then '${value}' is equal to 'newCookieValue'
 [WARNING]
 ====
 The step xref:plugins:plugin-json.adoc#_validate_json_element[is moved] to `vividus-plugin-json`.
-The step is still available via `vividus-plugin-rest-api`, but it'll be required
-to install `vividus-plugin-json` explicitly starting from VIVIDUS 0.6.0.
 ====
 
 === Verify number of elements in JSON
 
 [WARNING]
 ====
-The step xref:plugins:plugin-json.adoc#_validate_number_of_json_elements[is moved]
-to `vividus-plugin-json`. The step is still available via `vividus-plugin-rest-api`,
-but it'll be required to install `vividus-plugin-json` explicitly starting from VIVIDUS 0.6.0.
+The step xref:plugins:plugin-json.adoc#_validate_number_of_json_elements[is moved] to `vividus-plugin-json`.
 ====
 
 === Save element from JSON
@@ -905,8 +901,6 @@ but it'll be required to install `vividus-plugin-json` explicitly starting from 
 [WARNING]
 ====
 The step xref:plugins:plugin-json.adoc#_save_json_element[is moved] to `vividus-plugin-json`.
-The step is still available via `vividus-plugin-rest-api`, but it'll be required
-to install `vividus-plugin-json` explicitly starting from VIVIDUS 0.6.0.
 ====
 
 === Save number of elements from JSON
@@ -914,8 +908,6 @@ to install `vividus-plugin-json` explicitly starting from VIVIDUS 0.6.0.
 [WARNING]
 ====
 The step xref:plugins:plugin-json.adoc#_save_number_of_json_elements[is moved] to `vividus-plugin-json`.
-The step is still available via `vividus-plugin-rest-api`, but it'll be required
-to install `vividus-plugin-json` explicitly starting from VIVIDUS 0.6.0.
 ====
 
 
