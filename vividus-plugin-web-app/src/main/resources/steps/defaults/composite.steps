@@ -27,7 +27,7 @@ Then number of elements found by `By.elementName(<elementName>)->filter.caseSens
 
 Composite: Then a [$state] element with the name '$elementName' and text '$text' exists
 Priority: 1
-!-- DEPRECATED: 0.6.0, Then number of elements found by `By.elementName(%2$s)->filter.caseSensitiveText(%3$s).state(%1$s)` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `By.elementName(%2$s)->filter.caseSensitiveText(%3$s).state(%1$s)` is equal to `1`
 Then number of elements found by `By.elementName(<elementName>)->filter.caseSensitiveText(<text>).state(<state>)` is equal to `1`
 
 Composite: Then an element with the name '$elementName' exists
