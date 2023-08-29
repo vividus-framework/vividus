@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,20 @@ class GenericSetVariableStepsTests
     void afterEach()
     {
         verifyNoMoreInteractions(softAssert, baseValidations, variableContext, elementActions, uiContext);
+    }
+
+    @Test
+    void shouldSaveTextOfElement()
+    {
+        Locator locator = mock(Locator.class);
+        WebElement webElement = mock(WebElement.class);
+        when(baseValidations.assertElementExists("The element to get text", locator))
+                .thenReturn(Optional.of(webElement));
+        when(elementActions.getElementText(webElement)).thenReturn(TEXT);
+
+        genericSetVariableSteps.saveTextOfElement(locator, VARIABLE_SCOPE, VARIABLE_NAME);
+
+        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, TEXT);
     }
 
     @Test

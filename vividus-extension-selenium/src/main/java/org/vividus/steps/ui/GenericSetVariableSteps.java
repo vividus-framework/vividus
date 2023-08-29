@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,10 +74,34 @@ public class GenericSetVariableSteps
     @When("I save text of context element to $scopes variable `$variableName`")
     public void saveContextElementTextToVariable(Set<VariableScope> scopes, String variableName)
     {
-        uiContext.getSearchContext(WebElement.class).ifPresent(element -> {
-            String elementText = elementActions.getElementText(element);
-            variableContext.putVariable(scopes, variableName, elementText);
-        });
+        saveTextOfElement(uiContext.getSearchContext(WebElement.class), scopes, variableName);
+    }
+
+    /**
+     * Saves text of an element into a variable.
+     *
+     * @param locator        The locator to find an element
+     * @param scopes         The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                       <i>Available scopes:</i>
+     *                       <ul>
+     *                       <li><b>STEP</b> - the variable will be available only within the step,
+     *                       <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                       <li><b>STORY</b> - the variable will be available within the whole story,
+     *                       <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                       </ul>
+     * @param variableName   the variable name to store the text.
+     */
+    @When("I save text of element located by `$locator` to $scopes variable `$variableName`")
+    public void saveTextOfElement(Locator locator, Set<VariableScope> scopes, String variableName)
+    {
+        saveTextOfElement(baseValidations.assertElementExists("The element to get text", locator), scopes,
+                variableName);
+    }
+
+    private void saveTextOfElement(Optional<WebElement> element, Set<VariableScope> scopes, String variableName)
+    {
+        element.map(elementActions::getElementText)
+               .ifPresent(text -> variableContext.putVariable(scopes, variableName, text));
     }
 
     /**

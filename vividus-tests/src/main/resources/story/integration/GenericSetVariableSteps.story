@@ -22,12 +22,14 @@ When I set 'name' attribute value of the element by By.id(text) to the SCENARIO 
 Then `text` is equal to `${variableName}`
 
 
-Scenario: Verify step: "When I save text of context element to $scopes variable `$variableName`"
+Scenario: Verify step: "When I save text of context element to $scopes variable `$variableName`", "When I save text of element located by `$locator` to $scopes variable `$variableName`"
 When I enter `text` in field located by `id(text)`
 When I change context to element located by `id(output)`
 When I save text of context element to SCENARIO variable `variableName`
 Then `text` is equal to `${variableName}`
 When I reset context
+When I save text of element located by `id(output)` to SCENARIO variable `variableName`
+Then `text` is equal to `${variableName}`
 
 
 Scenario: Verify step: "When I save `$attributeName` attribute value of context element to $scopes variable `$variableName`"
