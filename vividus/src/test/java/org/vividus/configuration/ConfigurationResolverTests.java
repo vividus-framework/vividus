@@ -39,6 +39,7 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junitpioneer.jupiter.ClearSystemProperty;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
@@ -89,10 +90,12 @@ class ConfigurationResolverTests
     private static final String PLACEHOLDER_SUFFIX = "}";
     private static final String SET = "set";
     private static final String CONFIGURATION_PROPERTIES = "configuration.properties";
+    private static final String ENCRYPTOR_PASSWORD = "vividus.encryptor.password";
 
     @Mock private ResourcePatternResolver resourcePatternResolver;
 
     @Test
+    @ClearSystemProperty(key = ENCRYPTOR_PASSWORD)
     void shouldLoadProperties() throws IOException
     {
         try (var beanFactory = mockStatic(BeanFactory.class);
@@ -132,9 +135,10 @@ class ConfigurationResolverTests
                                 PROPERTY_3, DEFAULTS,
                                 PROPERTY_8, DEFAULTS)));
 
-                     when(mock.loadFromResourceTreeRecursively(eq(true), any(Predicate.class),
-                         eq(EMPTY_STRING))).thenReturn(toProperties(
-                             Map.of(PROPERTY_3, ROOT,
+                     when(mock.loadFromResourceTreeRecursively(eq(true), any(Predicate.class), eq(EMPTY_STRING)))
+                             .thenReturn(toProperties(Map.of(
+                                     PROPERTY_3, ROOT,
+                                     "system." + ENCRYPTOR_PASSWORD, "82=thuMUH@",
                                     ENCRYPTED, "ENC(0owj4MADNEoWpkeE22n5bFfkjEfaA4Tv)")));
 
                      when(mock.loadFromResourceTreeRecursively(true, PROFILE, NOSECURITY))
