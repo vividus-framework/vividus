@@ -182,7 +182,7 @@ public class SetVariableSteps
      * </ul>
      * @param variable A name under which the value should be saved
      * @deprecated Use step:
-     * "When I save `src` attribute value of element located `xpath((div[contains(@class,'video')]/iframe)[$number])`
+     * "When I save `src` attribute value of element located by `xpath((div[contains(@class,'video')]/iframe)[$number])`
      * to $scopes variable `$variableName`" instead
      */
     @Deprecated(since = "0.5.10", forRemoval = true)

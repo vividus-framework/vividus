@@ -5,3 +5,7 @@ When I change context to element located by `<locator>` in scope of current cont
 Composite: When I take screenshot and save it to folder `$screenshotFilePath`
 !-- DEPRECATED: 0.7.0, When I take screenshot and save it to file at path `%1$s`
 When I take screenshot and save it to file at path `<screenshotFilePath>`
+
+Composite: When I save number of elements located `$locator` to $scopes variable `$variableName`
+!-- DEPRECATED: 0.7.0, When I save number of elements located by `%1$s` to %2$s variable `%3$s`
+When I save number of elements located by `<locator>` to <scopes> variable `<variableName>`

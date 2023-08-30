@@ -49,5 +49,5 @@ Scenario: Verify deprecated step: "When I get the URL value of a video with sequ
 Given I am on page with URL `${vividus-test-site-url}/severalvideos.html`
 When I change context to element located `xpath(//div[@class='container'])`
 When I get the URL value of a video with sequence number '2' and set it to the 'SCENARIO' variable 'vidSrc1'
-When I save `src` attribute value of element located `xpath((div[contains(@class,'video')]/iframe)[2])` to SCENARIO variable `vidSrc2`
+When I save `src` attribute value of element located by `xpath((div[contains(@class,'video')]/iframe)[2])` to SCENARIO variable `vidSrc2`
 Then `${vidSrc1}` is = `${vidSrc2}`

@@ -97,7 +97,7 @@ WARNING: If expression is applied to invalid Data URL the error will be thrown.
 .Decoding inlined image
 [source,gherkin]
 ----
-When I save `src` attribute value of element located `By.id(image)` to scenario variable `image`
+When I save `src` attribute value of element located by `id(image)` to scenario variable `image`
 When I compare against baseline with name `inlined-image` from image `#{decodeDataUrl(${image})}`
 ----
 
