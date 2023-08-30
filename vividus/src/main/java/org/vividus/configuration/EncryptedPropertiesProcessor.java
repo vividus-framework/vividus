@@ -22,13 +22,9 @@ import java.util.Properties;
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class EncryptedPropertiesProcessor extends AbstractPropertiesProcessor
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EncryptedPropertiesProcessor.class);
-
     private static final String ENC = "ENC";
     private Properties properties;
     private StringEncryptor stringEncryptor;
@@ -69,12 +65,7 @@ public class EncryptedPropertiesProcessor extends AbstractPropertiesProcessor
             String password = Optional.ofNullable(System.getProperty("vividus.encryptor.password"))
                     .or(() -> Optional.ofNullable(properties.getProperty("system.vividus.encryptor.password")))
                     .or(() -> Optional.ofNullable(System.getenv("VIVIDUS_ENCRYPTOR_PASSWORD")))
-                    .orElseGet(() -> {
-                        LOGGER.warn(
-                                "Usage of default VIVIDUS password for encryption of sensitive data is prohibited. "
-                                        + "The default VIVIDUS encryption password will be removed in VIVIDUS 0.6.0");
-                        return "82=thuMUH@";
-                    });
+                    .orElseThrow(() -> new IllegalStateException("Encryption password is not provided"));
 
             StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
             encryptor.setAlgorithm("PBEWithMD5AndDES");
