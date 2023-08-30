@@ -16,14 +16,11 @@
 
 package org.vividus.report.allure;
 
-import static org.apache.commons.io.FileUtils.copyDirectory;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,11 +42,10 @@ import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.util.property.IPropertyMapper;
 
-import io.qameta.allure.Aggregator;
+import freemarker.template.Template;
 import io.qameta.allure.ConfigurationBuilder;
 import io.qameta.allure.Constants;
 import io.qameta.allure.Extension;
-import io.qameta.allure.Reader;
 import io.qameta.allure.ReportGenerator;
 import io.qameta.allure.allure1.Allure1Plugin;
 import io.qameta.allure.allure2.Allure2Plugin;
@@ -64,8 +60,6 @@ import io.qameta.allure.core.AttachmentsPlugin;
 import io.qameta.allure.core.Configuration;
 import io.qameta.allure.core.LaunchResults;
 import io.qameta.allure.core.MarkdownDescriptionsPlugin;
-import io.qameta.allure.core.Plugin;
-import io.qameta.allure.core.ReportWebPlugin;
 import io.qameta.allure.core.TestsResultsPlugin;
 import io.qameta.allure.duration.DurationPlugin;
 import io.qameta.allure.duration.DurationTrendPlugin;
@@ -95,10 +89,6 @@ import io.qameta.allure.util.PropertiesUtils;
 public class AllureReportGenerator implements IAllureReportGenerator
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AllureReportGenerator.class);
-    private static final String ALLURE_CUSTOMIZATION_PATH = "/allure-customization/";
-    private static final String ALLURE_CUSTOMIZATION_PATTERN = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
-            + ALLURE_CUSTOMIZATION_PATH + "**";
-    private static final String STYLES_CSS = "styles.css";
 
     private File historyDirectory;
     private File reportDirectory;
@@ -126,8 +116,8 @@ public class AllureReportGenerator implements IAllureReportGenerator
     @Override
     public void start()
     {
-        deleteResultsDirectory();
-        deleteReportDirectory();
+        deleteDirectory("results", resultsDirectory);
+        deleteDirectory("report", reportDirectory);
         started = true;
     }
 
@@ -142,28 +132,20 @@ public class AllureReportGenerator implements IAllureReportGenerator
         started = false;
     }
 
-    private void deleteReportDirectory()
-    {
-        deleteDirectory("report", reportDirectory);
-    }
-
-    private void deleteResultsDirectory()
-    {
-        deleteDirectory("results", resultsDirectory);
-    }
-
     private void generateReport()
     {
         wrap(() ->
         {
-            createDirectories(resultsDirectory, reportDirectory, historyDirectory);
-            writeEnvironmentProperties();
+            Files.createDirectories(resultsDirectory.toPath());
+            Files.createDirectories(reportDirectory.toPath());
+            Files.createDirectories(historyDirectory.toPath());
+            writeEnvironmentProperties(resultsDirectory);
             writeCategoriesInfo();
             writeExecutorInfo();
-            copyDirectory(historyDirectory, resolveHistoryDir(resultsDirectory));
+            FileUtils.copyDirectory(historyDirectory, resolveHistoryDir(resultsDirectory));
             generateData();
             customizeReport();
-            copyDirectory(resolveHistoryDir(reportDirectory), historyDirectory);
+            FileUtils.copyDirectory(resolveHistoryDir(reportDirectory), historyDirectory);
         });
         LOGGER.atInfo()
                 .addArgument(() -> new File(reportDirectory, "index.html").getAbsolutePath())
@@ -196,7 +178,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
         }
     }
 
-    private void writeEnvironmentProperties() throws IOException
+    private static void writeEnvironmentProperties(File resultsDirectory) throws IOException
     {
         Map<String, String> testExecutionProperties = new LinkedHashMap<>();
         Map<PropertyCategory, Map<String, String>> environmentConfig = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION;
@@ -213,13 +195,50 @@ public class AllureReportGenerator implements IAllureReportGenerator
         return new File(root, Constants.HISTORY_DIR);
     }
 
-    private void generateData() throws IOException
+    private void generateData()
     {
         List<Extension> extensions = List.of(
                 new ReportInfoContext("VIVIDUS"),
                 new JacksonContext(),
                 new MarkdownContext(),
-                new FreemarkerContext(),
+                new FreemarkerContext()
+                {
+                    private static final String BASE_PACKAGE_PATH = "tpl";
+
+                    @Override
+                    public freemarker.template.Configuration getValue()
+                    {
+                        freemarker.template.Configuration configuration = new freemarker.template.Configuration(
+                                freemarker.template.Configuration.VERSION_2_3_32) {
+                            @Override
+                            public Template getTemplate(String name)
+                                    throws IOException
+                            {
+                                if ("index.html.ftl".equals(name))
+                                {
+                                    try
+                                    {
+                                        // Use custom index.html.ftl to avoid collecting analytics by Allure
+                                        setClassLoaderForTemplateLoading(getClass().getClassLoader(),
+                                                "/allure-templates/");
+                                        return super.getTemplate(name);
+                                    }
+                                    finally
+                                    {
+                                        setClassLoaderForTemplateLoading(getClass().getClassLoader(),
+                                                BASE_PACKAGE_PATH);
+                                    }
+                                }
+                                return super.getTemplate(name);
+                            }
+                        };
+                        configuration.setLocalizedLookup(false);
+                        configuration.setTemplateUpdateDelayMilliseconds(0);
+                        configuration.setClassLoaderForTemplateLoading(getClass().getClassLoader(), BASE_PACKAGE_PATH);
+
+                        return configuration;
+                    }
+                },
                 new RandomUidContext(),
                 new MarkdownDescriptionsPlugin(),
                 new RetryPlugin(),
@@ -237,59 +256,6 @@ public class AllureReportGenerator implements IAllureReportGenerator
                 new StatusChartPlugin(),
                 new TimelinePlugin(),
                 new SuitesPlugin(),
-                new ReportWebPlugin()
-                {
-                    @Override
-                    protected void writeIndexHtml(Configuration configuration, Path outputDirectory) throws IOException
-                    {
-                        super.writeIndexHtml(new Configuration()
-                        {
-                            @Override
-                            public List<Plugin> getPlugins()
-                            {
-                                return configuration.getPlugins();
-                            }
-
-                            @Override
-                            public List<Aggregator> getAggregators()
-                            {
-                                return configuration.getAggregators();
-                            }
-
-                            @Override
-                            public List<Reader> getReaders()
-                            {
-                                return configuration.getReaders();
-                            }
-
-                            @SuppressWarnings("unchecked")
-                            @Override
-                            public <T> Optional<T> getContext(Class<T> contextType)
-                            {
-                                if (contextType.equals(FreemarkerContext.class))
-                                {
-                                    return (Optional<T>) Optional.of(new FreemarkerContext()
-                                    {
-                                        @Override
-                                        public freemarker.template.Configuration getValue()
-                                        {
-                                            freemarker.template.Configuration configuration =
-                                                    new freemarker.template.Configuration(
-                                                    freemarker.template.Configuration.VERSION_2_3_32);
-                                            configuration.setLocalizedLookup(false);
-                                            configuration.setTemplateUpdateDelayMilliseconds(0);
-                                            // Use custom index.html.ftl to avoid collecting analytics by Allure
-                                            configuration.setClassLoaderForTemplateLoading(getClass().getClassLoader(),
-                                                    ALLURE_CUSTOMIZATION_PATH + "templates");
-                                            return configuration;
-                                        }
-                                    });
-                                }
-                                return configuration.getContext(contextType);
-                            }
-                        }, outputDirectory);
-                    }
-                },
                 new TestsResultsPlugin(),
                 new AttachmentsPlugin(),
                 new MailPlugin(),
@@ -319,11 +285,13 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
     private void customizeReport() throws IOException
     {
-        for (Resource resource : resourcePatternResolver.getResources(ALLURE_CUSTOMIZATION_PATTERN))
+        String allureCustomizationPath = "/allure-customization/";
+        String locationPattern = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + allureCustomizationPath + "**";
+        for (Resource resource : resourcePatternResolver.getResources(locationPattern))
         {
             String path = resource.getURL().toString();
             String relativePath = path
-                    .substring(path.lastIndexOf(ALLURE_CUSTOMIZATION_PATH) + ALLURE_CUSTOMIZATION_PATH.length());
+                    .substring(path.lastIndexOf(allureCustomizationPath) + allureCustomizationPath.length());
             if (!relativePath.endsWith("/"))
             {
                 File destination = new File(reportDirectory, relativePath);
@@ -340,7 +308,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
     private void patchAllureFiles() throws IOException
     {
         File javascriptFile = new File(reportDirectory, "app.js");
-        File cssFile = new File(reportDirectory, STYLES_CSS);
+        File cssFile = new File(reportDirectory, "styles.css");
         String javascriptString = FileUtils.readFileToString(javascriptFile, StandardCharsets.UTF_8);
         String cssString = FileUtils.readFileToString(cssFile, StandardCharsets.UTF_8);
 
@@ -362,14 +330,6 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
         FileUtils.writeStringToFile(javascriptFile, javascriptString, StandardCharsets.UTF_8);
         FileUtils.writeStringToFile(cssFile, cssString, StandardCharsets.UTF_8);
-    }
-
-    private static void createDirectories(File... directories) throws IOException
-    {
-        for (File directory : directories)
-        {
-            Files.createDirectories(directory.toPath());
-        }
     }
 
     private static void deleteDirectory(String directoryDescription, File directory)

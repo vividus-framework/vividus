@@ -1,4 +1,4 @@
-// Copy of https://github.com/allure-framework/allure2/blob/2.14.0/plugins/behaviors-plugin/src/dist/static/index.js
+// Copy of https://github.com/allure-framework/allure2/blob/2.24.0/plugins/behaviors-plugin/src/dist/static/index.js
 'use strict';
 
 allure.api.addTranslation('en', {
@@ -151,6 +151,34 @@ allure.api.addTranslation('fr', {
         behaviors: {
             name: 'Thèmes par histoires',
             showAll: 'Montrer tout'
+        }
+    }
+});
+
+allure.api.addTranslation('pl', {
+    tab: {
+        behaviors: {
+            name: 'Zachowania'
+        }
+    },
+    widget: {
+        behaviors: {
+            name: 'Funkcje według historii',
+            showAll: 'pokaż wszystko'
+        }
+    }
+});
+
+allure.api.addTranslation('az', {
+    tab: {
+        behaviors: {
+            name: 'Davranışlar'
+        }
+    },
+    widget: {
+        behaviors: {
+            name: 'Hekayələr üzrə xüsusiyyətlər',
+            showAll: 'hamısını göstər'
         }
     }
 });

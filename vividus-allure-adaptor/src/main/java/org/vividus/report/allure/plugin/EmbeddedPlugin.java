@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package org.vividus.report.allure.plugin;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import io.qameta.allure.Extension;
 import io.qameta.allure.PluginConfiguration;
@@ -25,24 +28,41 @@ import io.qameta.allure.plugin.DefaultPlugin;
 
 public class EmbeddedPlugin extends DefaultPlugin
 {
-    public EmbeddedPlugin(String id, List<String> jsFiles, Extension extension)
+    private final List<String> pluginFiles;
+    private final PluginFilesLoader pluginFilesLoader;
+
+    public EmbeddedPlugin(String id, List<String> pluginFiles, PluginFilesLoader pluginFilesLoader)
     {
-        super(new PluginConfiguration().setId(id).setJsFiles(jsFiles), List.of(extension), null);
+        this(id, pluginFiles, List.of(), pluginFilesLoader);
     }
 
-    public EmbeddedPlugin(String id)
+    public EmbeddedPlugin(String id, List<String> pluginFiles, Extension extension, PluginFilesLoader pluginFilesLoader)
     {
-        super(new PluginConfiguration().setId(id).setCssFiles(List.of("styles.css")), List.of(), null);
+        this(id, pluginFiles, List.of(extension), pluginFilesLoader);
     }
 
-    public EmbeddedPlugin(String id, Extension extension)
+    private EmbeddedPlugin(String id, List<String> pluginFiles, List<Extension> extensions,
+            PluginFilesLoader pluginFilesLoader)
     {
-        super(new PluginConfiguration().setId(id), List.of(extension), null);
+        super(new PluginConfiguration()
+                        .setId(id)
+                        .setJsFiles(filterFilesByExtension(pluginFiles, ".js"))
+                        .setCssFiles(filterFilesByExtension(pluginFiles, ".css")),
+                extensions, null);
+        this.pluginFiles = pluginFiles;
+        this.pluginFilesLoader = pluginFilesLoader;
+    }
+
+    private static List<String> filterFilesByExtension(List<String> pluginFiles, String extension)
+    {
+        return pluginFiles.stream().filter(file -> file.endsWith(extension)).toList();
     }
 
     @Override
-    public void unpackReportStatic(Path outputDirectory)
+    public Map<String, Path> getPluginFiles()
     {
-        // do nothing
+        return pluginFiles.stream().collect(Collectors.toMap(Function.identity(),
+                pluginFile -> pluginFilesLoader.loadPluginFile(getConfig().getId(), pluginFile)
+        ));
     }
 }

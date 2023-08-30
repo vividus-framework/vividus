@@ -2,7 +2,7 @@ project.description = 'VIVIDUS Allure report adaptor'
 
 nohttp.source.excludes += '**/webjars/**'
 
-ext.allureReportVersion = '2.23.1'
+ext.allureReportVersion = '2.24.0'
 
 dependencies {
     implementation project(':vividus-engine')
@@ -30,5 +30,6 @@ dependencies {
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.5.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.0.1')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
 }
