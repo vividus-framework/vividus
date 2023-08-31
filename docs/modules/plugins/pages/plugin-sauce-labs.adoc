@@ -110,3 +110,14 @@ host patterns to avoid sending of status information by SauceConnect to SauceLab
 a tunnel via proxy used by tests.
 
 |===
+
+.Configuration snippet to run tests in Chrome browser on Sauce Labs US West data center
+[source,properties]
+----
+configuration.profiles=saucelabs/web,web/desktop/chrome
+
+selenium.grid.host=ondemand.us-west-1.saucelabs.com
+selenium.grid.username=secretsauce
+selenium.grid.password=87380d3afd8fd8aed55a
+saucelabs.data-center=US_WEST
+----
