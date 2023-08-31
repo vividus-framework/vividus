@@ -3,3 +3,4 @@
 ** xref:extensions.adoc[Extensions]
 ** xref:plugins.adoc[Plugins]
 ** xref:custom-modules.adoc[Custom modules]
+* xref:deprecating-steps.adoc[Steps deprecation]
