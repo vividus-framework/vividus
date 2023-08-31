@@ -23,11 +23,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
@@ -71,8 +73,9 @@ class SetContextStepsTests
     private static final String NEW_WINDOW = "New window '";
     private static final String NEW_TAB_IS_FOUND = "New tab is found";
     private static final String A_FRAME = "A frame";
+    private static final String FRAME_TO_SWITCH = "The frame to switch context";
 
-    @Mock private IBaseValidations mockedBaseValidations;
+    @Mock private IBaseValidations baseValidations;
     @Mock private IUiContext uiContext;
     @Mock private WebElement mockedWebElement;
     @Mock private IWebDriverProvider webDriverProvider;
@@ -197,7 +200,7 @@ class SetContextStepsTests
     {
         Locator locator = new Locator(WebLocatorType.XPATH,
                 XpathLocatorUtils.getXPath(XPATH));
-        when(mockedBaseValidations.assertIfElementExists(A_FRAME, locator)).thenReturn(mockedWebElement);
+        when(baseValidations.assertIfElementExists(A_FRAME, locator)).thenReturn(mockedWebElement);
         InOrder ordered = inOrder(frameActions, uiContext);
         setContextSteps.switchingToFrame(locator);
         ordered.verify(uiContext).reset();
@@ -209,8 +212,30 @@ class SetContextStepsTests
     void testSwitchingToFrameByXpathIfElementNotExist()
     {
         Locator locator = new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(XPATH));
-        when(mockedBaseValidations.assertIfElementExists(A_FRAME, locator)).thenReturn(null);
+        when(baseValidations.assertIfElementExists(A_FRAME, locator)).thenReturn(null);
         setContextSteps.switchingToFrame(locator);
+        verifyNoInteractions(frameActions);
+    }
+
+    @Test
+    void shouldSwitchToFrame()
+    {
+        Locator locator = mock();
+        when(baseValidations.assertElementExists(FRAME_TO_SWITCH, locator)).thenReturn(Optional.of(mockedWebElement));
+
+        setContextSteps.switchToFrame(locator);
+
+        verify(frameActions).switchToFrame(mockedWebElement);
+    }
+
+    @Test
+    void shouldNotSwitchToFrameIfItDoesnNotExist()
+    {
+        Locator locator = mock();
+        when(baseValidations.assertElementExists(FRAME_TO_SWITCH, locator)).thenReturn(Optional.empty());
+
+        setContextSteps.switchToFrame(locator);
+
         verifyNoInteractions(frameActions);
     }
 

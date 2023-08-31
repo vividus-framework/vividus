@@ -49,16 +49,15 @@ When I close current tab
 Then page title is equal to `<windowsTitle>`
 
 
-Scenario: Verify step: "When I switch to frame located `$locator`"
+Scenario: Verify steps: "When I switch to frame located by `$locator`", "When I switch back to page"
 Given I am on page with URL `${vividus-test-site-url}/nestedFrames.html`
-When I change context to element located by `id(toRemove):a`
-When I execute javascript `
-document.querySelector('#toRemove').remove();
-return [];
-` and save result to scenario variable `result`
+Then number of elements found by `tagName(h1)` is equal to `0`
+!-- The following step is deprecated and should be replaced with new syntax during removal
 When I switch to frame located `id(parent)`
-When I switch to frame located `id(exampleCom)`
-When I click on element located by `xpath(//a)`
+When I switch to frame located by `id(exampleCom)`
+Then number of elements found by `tagName(h1)` is equal to `1`
+When I switch back to page
+Then number of elements found by `tagName(h1)` is equal to `0`
 
 
 Scenario: Verify steps: "When I reset context" AND "When I change context to element located by `$locator`"
@@ -87,8 +86,8 @@ Scenario: Should switch to first visible parent frame or main document if the cu
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
 When I click on element located by `id(modalButton)`
 When I wait until element located by `id(modalWindow)` appears
-When I switch to frame located `id(firstFrame)`
-When I switch to frame located `id(secondFrame)`
+When I switch to frame located by `id(firstFrame)`
+When I switch to frame located by `id(secondFrame)`
 When I click on element located by `id(close)`
 Then number of elements found by `id(modalButton)` is equal to `1`
 

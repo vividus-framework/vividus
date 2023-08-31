@@ -75,7 +75,7 @@ public class SetContextSteps
      * <li>Switches focus to the root tag of the page, this is as a rule {@code <html>} tag.
      * </ul>
      */
-    @When("I switch back to the page")
+    @When("I switch back to page")
     public void switchingToDefault()
     {
         resetContext();
@@ -83,28 +83,31 @@ public class SetContextSteps
     }
 
     /**
-     * Switching to the frame using one of supported locators
+     * Switches to a frame found by locator.
      * <p>
      * A <b>frame</b> is used for splitting browser page into several segments, each of which can show a different
      * document (content). This enables updates of parts of a website while the user browses without making them reload
      * the whole page (this is now largely replaced by AJAX).
      * <p>
-     * <b>Frames</b> are located inside {@code <iframe>} tag.
-     * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Finds the frame with desired parameters;
-     * <li>If frame is found, switches focus to it.
-     * </ul>
-     * @see <a href="https://en.wikipedia.org/wiki/HTML_element#Frames"><i>Frames</i></a>
-     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
-     * @param locator to locate frame element
-     * <p>
-     * <b>Example:</b>
+     * <b>Frame</b> elements are specified by {@code <iframe>} tag as the following example shows:
      * <pre>
      * {@code <iframe attributeType=}<b>'attributeValue'</b>{@code > some iframe content</iframe>}
      * </pre>
+     * <p>
+     * Actions performed at this step:
+     * <ul>
+     * <li>Resets the context;
+     * <li>Finds a frame using specified locator;
+     * <li>If the frame is found, performs switch to it.
+     * </ul>
+     * @see <a href="https://en.wikipedia.org/wiki/HTML_element#Frames"><i>Frames</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @param locator The locator to locate frame element
+     * @deprecated Use step: When I switch to frame located by `$locator`
      */
+    @Deprecated(since = "0.6.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0",
+            replacementFormatPattern = "When I switch to frame located by `%1$s`")
     @When("I switch to frame located `$locator`")
     public void switchingToFrame(Locator locator)
     {
@@ -114,6 +117,36 @@ public class SetContextSteps
         {
             frameActions.switchToFrame(element);
         }
+    }
+
+    /**
+     * Switches to a frame found by locator.
+     * <p>
+     * A <b>frame</b> is used for splitting browser page into several segments, each of which can show a different
+     * document (content). This enables updates of parts of a website while the user browses without making them reload
+     * the whole page (this is now largely replaced by AJAX).
+     * <p>
+     * <b>Frame</b> elements are specified by {@code <iframe>} tag as the following example shows:
+     * <pre>
+     * {@code <iframe attributeType=}<b>'attributeValue'</b>{@code > some iframe content</iframe>}
+     * </pre>
+     * <p>
+     * Actions performed at this step:
+     * <ul>
+     * <li>Resets the context;
+     * <li>Finds a frame using specified locator;
+     * <li>If the frame is found, performs switch to it.
+     * </ul>
+     * @see <a href="https://en.wikipedia.org/wiki/HTML_element#Frames"><i>Frames</i></a>
+     * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @param locator The locator to locate frame element
+     */
+    @When("I switch to frame located by `$locator`")
+    public void switchToFrame(Locator locator)
+    {
+        resetContext();
+        baseValidations.assertElementExists("The frame to switch context", locator)
+                       .ifPresent(frameActions::switchToFrame);
     }
 
     /**
