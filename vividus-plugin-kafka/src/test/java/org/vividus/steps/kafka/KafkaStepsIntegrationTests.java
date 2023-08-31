@@ -35,7 +35,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.LoggingEvent;
@@ -185,8 +184,7 @@ class KafkaStepsIntegrationTests
         assertEquals("Saving events with the keys: {}", keysLogEvent.getMessage());
         List<Object> arguments = keysLogEvent.getArguments();
         assertThat(arguments, hasSize(1));
-        List<String> keys = Stream.of(arguments.get(0).toString().split(",")).map(String::strip).sorted()
-                .collect(Collectors.toList());
+        List<String> keys = Stream.of(arguments.get(0).toString().split(",")).map(String::strip).sorted().toList();
         String noKey = "<no key>";
         assertEquals(List.of(noKey, noKey, noKey, KEY + 1, KEY + 2, KEY + 3), keys);
 

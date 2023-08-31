@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -55,9 +54,7 @@ public class TestExecutionFactory
                     testExecution.setInfo(info);
                 });
 
-        List<TestExecutionItem> tests = scenarios.stream()
-                                    .map(TestExecutionFactory::createTestInfo)
-                                    .collect(Collectors.toList());
+        List<TestExecutionItem> tests = scenarios.stream().map(TestExecutionFactory::createTestInfo).toList();
         testExecution.setTests(tests);
 
         return testExecution;
@@ -86,7 +83,7 @@ public class TestExecutionFactory
         {
             List<TestExecutionItemStatus> exampleStatuses = scenario.getExamples().getExamples().stream()
                     .map(TestExecutionFactory::calculateStatus)
-                    .collect(Collectors.toList());
+                    .toList();
             test.setExamples(exampleStatuses);
 
             TestExecutionItemStatus status = exampleStatuses.stream()

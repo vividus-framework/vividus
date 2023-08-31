@@ -380,20 +380,14 @@ public class JsonSteps
             String normalizedComparisonRule = normalizeToEnumConstant(comparisonRule);
             if (jsonValue == null || expectedData == null)
             {
-                Matcher<Object> matcher;
-                switch (normalizedComparisonRule)
+                @SuppressWarnings("checkstyle:Indentation")
+                Matcher<Object> matcher = switch (normalizedComparisonRule)
                 {
-                    case IS_EQUAL_TO:
-                        matcher = equalTo(expectedData);
-                        break;
-                    case IS_NOT_EQUAL_TO:
-                        matcher = not(equalTo(expectedData));
-                        break;
-                    default:
-                        throw new IllegalArgumentException(
-                                String.format(INVALID_COMPARISON_RULE_MESSAGE, jsonValue, expectedData,
-                                        comparisonRule));
-                }
+                    case IS_EQUAL_TO -> equalTo(expectedData);
+                    case IS_NOT_EQUAL_TO -> not(equalTo(expectedData));
+                    default -> throw new IllegalArgumentException(
+                            String.format(INVALID_COMPARISON_RULE_MESSAGE, jsonValue, expectedData, comparisonRule));
+                };
                 assertThat(jsonPath, jsonValue, matcher);
             }
             else if (jsonValue instanceof Boolean)

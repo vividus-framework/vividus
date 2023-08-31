@@ -16,8 +16,6 @@
 
 package org.vividus.proxy.steps;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -322,7 +320,7 @@ public class ProxySteps
                 .stream()
                 .filter(entry -> entry.getResponse().getStatus() != HttpStatus.SC_MOVED_TEMPORARILY
                         && httpMethods.contains(entry.getRequest().getMethod()))
-                .collect(toList());
+                .toList();
     }
 
     private String methodsToString(Set<HttpMethod> httpMethods, String delimiter)

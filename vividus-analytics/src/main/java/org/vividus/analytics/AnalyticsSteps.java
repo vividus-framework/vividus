@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.google.common.eventbus.EventBus;
 
@@ -97,7 +96,7 @@ public class AnalyticsSteps
             Map<String, String> payload = new HashMap<>();
             CustomDefinitions.PLUGIN_VERSION.add(payload, module.getValue());
             return new AnalyticsEvent(module.getKey(), "use", payload);
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     private Map<String, String> getEnvironmentProperties(PropertyCategory propertyCategory)

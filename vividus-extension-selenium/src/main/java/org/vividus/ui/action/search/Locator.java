@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,11 +160,10 @@ public class Locator
         {
             return false;
         }
-        if (!(obj instanceof Locator))
+        if (!(obj instanceof Locator other))
         {
             return false;
         }
-        Locator other = (Locator) obj;
         return Objects.equals(locatorType, other.locatorType)
                 && Objects.equals(searchParameters, other.searchParameters)
                 && Objects.equals(filterAttributes, other.filterAttributes);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,20 +77,11 @@ public class VariableTestContext implements VariableContext
 
         switch (variableScope)
         {
-            case NEXT_BATCHES:
-                variablesFactory.addNextBatchesVariable(variableKey, variableValue);
-                break;
-            case STORY:
-                getScopedVariables().putStoryVariable(variableKey, variableValue);
-                break;
-            case SCENARIO:
-                getScopedVariables().putScenarioVariable(variableKey, variableValue);
-                break;
-            case STEP:
-                getScopedVariables().putStepVariable(variableKey, variableValue);
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported variable scope: " + variableScope);
+            case NEXT_BATCHES -> variablesFactory.addNextBatchesVariable(variableKey, variableValue);
+            case STORY -> getScopedVariables().putStoryVariable(variableKey, variableValue);
+            case SCENARIO -> getScopedVariables().putScenarioVariable(variableKey, variableValue);
+            case STEP -> getScopedVariables().putStepVariable(variableKey, variableValue);
+            default -> throw new IllegalArgumentException("Unsupported variable scope: " + variableScope);
         }
     }
 

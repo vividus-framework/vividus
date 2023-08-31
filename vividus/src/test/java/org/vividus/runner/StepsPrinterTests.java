@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
@@ -86,8 +85,7 @@ class StepsPrinterTests
             assertThat(stdOut.capturedLines(), arrayContaining("File with steps: " + file.toAbsolutePath()));
             vividus.verify(Vividus::init);
             fileUtils.verify(() -> FileUtils.writeLines(argThat(f -> filePath.equals(f.toString())),
-                    argThat(steps -> steps.stream().map(Object::toString).collect(Collectors.toList())
-                            .equals(expectedOutput))));
+                    argThat(steps -> steps.stream().map(Object::toString).toList().equals(expectedOutput))));
         }
     }
 

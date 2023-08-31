@@ -145,11 +145,11 @@ public final class DeprecatedStepsReplacer
             Lifecycle lifecycle = story.getLifecycle();
             steps = story.getScenarios().stream().collect(Collectors.toMap(e -> "Scenario: " + e.getTitle(),
                     Scenario::getSteps,
-                    (left, right) -> Stream.concat(left.stream(), right.stream()).collect(Collectors.toList())));
+                    (left, right) -> Stream.concat(left.stream(), right.stream()).toList()));
             steps.put("lifecycle (before steps)", lifecycle.getScopes().stream().map(lifecycle::getBeforeSteps)
-                    .flatMap(List::stream).collect(Collectors.toList()));
+                    .flatMap(List::stream).toList());
             steps.put("lifecycle (after steps)", lifecycle.getScopes().stream().map(lifecycle::getAfterSteps)
-                    .flatMap(List::stream).collect(Collectors.toList()));
+                    .flatMap(List::stream).toList());
         }
         else
         {

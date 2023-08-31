@@ -134,7 +134,7 @@ public enum EmailParameterFilterFactory
 
     private static List<String> split(String value)
     {
-        return Stream.of(value.split(",")).map(String::strip).collect(Collectors.toList());
+        return Stream.of(value.split(",")).map(String::strip).toList();
     }
 
     @SuppressWarnings("checkstyle:TodoComment")

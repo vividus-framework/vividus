@@ -79,7 +79,7 @@ public class StepsPrinter
                         s.compositeInStepsFile ? COMPOSITE : s.getLocation(),
                         s.deprecated ? DEPRECATED : "",
                         s.startingWord, s.pattern))
-                .collect(Collectors.toList());
+                .toList();
 
         String file = commandLine.getOptionValue(fileOption.getOpt());
         if (file == null)

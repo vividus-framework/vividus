@@ -20,7 +20,6 @@ import static java.util.function.Predicate.not;
 
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
@@ -66,7 +65,7 @@ public class SetContextSteps
         List<String> webViews = getContextAware().getContextHandles()
                 .stream()
                 .filter(not(IGenericWebDriverManager.NATIVE_APP_CONTEXT::equals))
-                .collect(Collectors.toList());
+                .toList();
         if (webViews.isEmpty())
         {
             softAssert.recordFailedAssertion("No web views found");
@@ -78,7 +77,7 @@ public class SetContextSteps
         Matcher<String> webViewMatcher = rule.createMatcher(value);
         Predicate<String> webViewFilter = webViewMatcher::matches;
 
-        List<String> matchedWebViews = webViews.stream().filter(webViewFilter).collect(Collectors.toList());
+        List<String> matchedWebViews = webViews.stream().filter(webViewFilter).toList();
 
         if (matchedWebViews.size() != 1)
         {

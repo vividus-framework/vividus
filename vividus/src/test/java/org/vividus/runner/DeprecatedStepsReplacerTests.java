@@ -117,25 +117,34 @@ class DeprecatedStepsReplacerTests
     @SuppressWarnings({ "PMD.MultipleStringLiteralsExtended", "PMD.MultipleStringLiterals" })
     void shouldReplaceDeprecatedJavaSteps() throws IOException, ParseException, NoSuchMethodException
     {
-        String lifecycleBlock = "Lifecycle:\n"
-                + "Before:\nScope: STORY\nGiven deprecated step without automatic replacement\n"
-                + "After:\nScope: SCENARIO\nGiven deprecated step without automatic replacement (alias)\n\n";
+        String lifecycleBlock = """
+                Lifecycle:
+                Before:
+                Scope: STORY
+                Given deprecated step without automatic replacement
+                After:
+                Scope: SCENARIO
+                Given deprecated step without automatic replacement (alias)
+
+                """;
         Lifecycle lifecycle = new Lifecycle(List.of(new Lifecycle.Steps(Scope.STORY, List.of(CODE_STEP_UNRESOLVED))),
                 List.of(new Lifecycle.Steps(Scope.SCENARIO, List.of(CODE_STEP_UNRESOLVED_ALIAS))));
         String codeStepPrioritized = "codeStepPrioritized";
-        String codeStep = "Given deprecated step with parameters ${p1}-`<p2>` and SubSteps:\n"
-                        + "{headerSeparator=!, valueSeparator=!}\n"
-                        + "!step!\n"
-                        + "!Given deprecated step with parameters ${p1}-'<p2>' and SubSteps:!\n"
-                        + "!|step|!";
+        String codeStep = """
+                Given deprecated step with parameters ${p1}-`<p2>` and SubSteps:
+                {headerSeparator=!, valueSeparator=!}
+                !step!
+                !Given deprecated step with parameters ${p1}-'<p2>' and SubSteps:!
+                !|step|!""";
         String codeStepNested =
                             "Given deprecated step with parameters ${p1}-'<p2>' and SubSteps:" + System.lineSeparator()
                           + "|step|";
-        String codeStepActual = "Given actual step with parameters ${p1}-`<p2>` and SubSteps:\n"
-                              + "{headerSeparator=!, valueSeparator=!}\n"
-                              + "!step!\n"
-                              + "!Given actual step with parameters ${p1}-`<p2>` and SubSteps:!\n"
-                              + "!|step|!";
+        String codeStepActual = """
+                Given actual step with parameters ${p1}-`<p2>` and SubSteps:
+                {headerSeparator=!, valueSeparator=!}
+                !step!
+                !Given actual step with parameters ${p1}-`<p2>` and SubSteps:!
+                !|step|!""";
         String storyContentDeprecated = lifecycleBlock + SCENARIO_HEADER + codeStep + NEW_LINE + CODE_STEP_UNRESOLVED
                 + NEW_LINE + CODE_STEP_CONDITIONAL;
         String storyContentActual = lifecycleBlock + SCENARIO_HEADER + codeStepActual + NEW_LINE + CODE_STEP_UNRESOLVED

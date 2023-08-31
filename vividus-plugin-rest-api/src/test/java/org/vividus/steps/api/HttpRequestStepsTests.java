@@ -96,21 +96,36 @@ class HttpRequestStepsTests
     static Stream<Arguments> multipartRequests()
     {
         return Stream.of(
-                arguments("|name|type|value|\n|part|STRING|content|",
-                        "Content-Disposition: form-data; name=\"part\"\r\n"
-                                + "Content-Type: text/plain; charset=ISO-8859-1\r\n\r\ncontent\r\n"),
-                arguments("|name|type|value|contentType|\n|part|STRING|content|text/html; charset=utf-8|",
-                        "Content-Disposition: form-data; name=\"part\"\r\n"
-                                + "Content-Type: text/html; charset=utf-8\r\n\r\ncontent\r\n"),
-                arguments("|name|type|value|fileName|\n|part|FILE|/requestBody.txt|file.txt|",
-                        "Content-Disposition: form-data; name=\"part\"; filename=\"file.txt\"\r\n"
-                                + "Content-Type: application/octet-stream\r\n\r\n{body}\r\n"),
-                arguments("|name|type|value|contentType|\n|part|FILE|/requestBody.txt|text/plain; charset=utf-8|",
-                        "Content-Disposition: form-data; name=\"part\"; filename=\"requestBody.txt\"\r\n"
-                                + "Content-Type: text/plain; charset=utf-8\r\n\r\n{body}\r\n"),
-                arguments("|name|type|value|fileName|\n|part|BINARY|data|file.bin|",
-                        "Content-Disposition: form-data; name=\"part\"; filename=\"file.bin\"\r\n"
-                                + "Content-Type: application/octet-stream\r\n\r\ndata\r\n")
+                arguments("|name|type|value|\n|part|STRING|content|", """
+                        Content-Disposition: form-data; name="part"\r
+                        Content-Type: text/plain; charset=ISO-8859-1\r
+                        \r
+                        content\r
+                        """),
+                arguments("|name|type|value|contentType|\n|part|STRING|content|text/html; charset=utf-8|", """
+                        Content-Disposition: form-data; name="part"\r
+                        Content-Type: text/html; charset=utf-8\r
+                        \r
+                        content\r
+                        """),
+                arguments("|name|type|value|fileName|\n|part|FILE|/requestBody.txt|file.txt|", """
+                        Content-Disposition: form-data; name="part"; filename="file.txt"\r
+                        Content-Type: application/octet-stream\r
+                        \r
+                        {body}\r
+                        """),
+                arguments("|name|type|value|contentType|\n|part|FILE|/requestBody.txt|text/plain; charset=utf-8|", """
+                        Content-Disposition: form-data; name="part"; filename="requestBody.txt"\r
+                        Content-Type: text/plain; charset=utf-8\r
+                        \r
+                        {body}\r
+                        """),
+                arguments("|name|type|value|fileName|\n|part|BINARY|data|file.bin|", """
+                        Content-Disposition: form-data; name="part"; filename="file.bin"\r
+                        Content-Type: application/octet-stream\r
+                        \r
+                        data\r
+                        """)
         );
     }
 

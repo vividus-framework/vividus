@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.hamcrest.Matcher;
@@ -70,7 +69,7 @@ public class ArchiveSteps
     @When("I save content of `$archiveData` archive entries to variables:$parameters")
     public void saveArchiveEntriesToVariables(DataWrapper archiveData, List<ArchiveVariable> parameters)
     {
-        List<String> expectedEntries = parameters.stream().map(ArchiveVariable::getPath).collect(Collectors.toList());
+        List<String> expectedEntries = parameters.stream().map(ArchiveVariable::getPath).toList();
         Map<String, byte[]> zipEntries = ZipUtils.readZipEntriesFromBytes(archiveData.getBytes(),
                 expectedEntries::contains);
         parameters.forEach(arcVar ->

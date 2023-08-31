@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ public final class JiraConfigurationProvider
         else if (configurations.size() > 1)
         {
             throw error("More than one JIRA configuration is mapped to %s project key: %s", projectKey,
-                    configurations.stream().map(Entry::getKey).collect(Collectors.toList()));
+                    configurations.stream().map(Entry::getKey).toList());
         }
 
         return getDefaultOrElseThrow(() -> error("Unable to find configuration for JIRA project key %s", projectKey));

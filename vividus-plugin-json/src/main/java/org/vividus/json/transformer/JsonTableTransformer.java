@@ -19,7 +19,6 @@ package org.vividus.json.transformer;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.google.common.base.Splitter;
 
@@ -56,8 +55,8 @@ public class JsonTableTransformer implements ExtendedTableTransformer
         List<List<String>> values = JsonPathUtils.getData(jsonData, columnsPerJsonPaths.values()).stream().map(e ->
         {
             List<Object> columnValues = e instanceof List ? (List<Object>) e : Collections.singletonList(e);
-            return columnValues.stream().map(String::valueOf).collect(Collectors.toList());
-        }).collect(Collectors.toList());
+            return columnValues.stream().map(String::valueOf).toList();
+        }).toList();
 
         return ExamplesTableProcessor.buildExamplesTableFromColumns(columnsPerJsonPaths.keySet(), values, properties);
     }

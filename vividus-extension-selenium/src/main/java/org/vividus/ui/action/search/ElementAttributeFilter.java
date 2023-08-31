@@ -34,10 +34,11 @@ public class ElementAttributeFilter implements IElementFilterAction
         String[] values = StringUtils.splitPreserveAllTokens(value, "=", 2);
         int length = values.length;
 
-        Validate.isTrue(values.length > 0, "Attribute value can not be empty, expected formats are:"
-                + "\n* attribute - an element has the attribute with any value"
-                + "\n* attribute= - an element has the attribute with an empty value"
-                + "\n* attribute=value - an element has the attribute with the value");
+        Validate.isTrue(values.length > 0, """
+                Attribute value can not be empty, expected formats are:
+                * attribute - an element has the attribute with any value
+                * attribute= - an element has the attribute with an empty value
+                * attribute=value - an element has the attribute with the value""");
 
         String attributeValue = element.getAttribute(values[0]);
         return length > 1 ? values[1].equals(attributeValue) : attributeValue != null;

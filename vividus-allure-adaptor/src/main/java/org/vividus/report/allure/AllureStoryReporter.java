@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -416,15 +416,9 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
             StepResult log = new StepResult();
             switch (logLevel)
             {
-                case "DEBUG":
-                    log.setStatusDetails(new StatusDetails().setMuted(true));
-                    break;
-                case "ERROR":
-                    log.setStatus(io.qameta.allure.model.Status.FAILED);
-                    break;
-                default:
-                    log.setStatus(io.qameta.allure.model.Status.PASSED);
-                    break;
+                case "DEBUG" -> log.setStatusDetails(new StatusDetails().setMuted(true));
+                case "ERROR" -> log.setStatus(io.qameta.allure.model.Status.FAILED);
+                default -> log.setStatus(io.qameta.allure.model.Status.PASSED);
             }
             log.setName(logEntry);
             String logUid = UUID.randomUUID().toString();

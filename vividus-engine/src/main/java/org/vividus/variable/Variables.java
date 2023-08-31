@@ -137,9 +137,8 @@ public class Variables
     private Object resolveAsListItem(Matcher variableMatcher, Object variable)
     {
         String listIndex = variableMatcher.group(LIST_INDEX_GROUP);
-        if (listIndex != null && variable instanceof List)
+        if (listIndex != null && variable instanceof List<?> listVariable)
         {
-            List<?> listVariable = (List<?>) variable;
             int elementIndex = Integer.parseInt(listIndex);
             return elementIndex < listVariable.size() ? getElementOrNullValue(listVariable, elementIndex) : null;
         }

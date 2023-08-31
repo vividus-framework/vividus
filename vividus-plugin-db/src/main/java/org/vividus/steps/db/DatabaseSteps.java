@@ -385,7 +385,7 @@ public class DatabaseSteps
         List<List<EntryComparisonResult>> comparisonResult = comparison.stream()
                 .parallel()
                 .map(p -> ComparisonUtils.compareMaps(p.getLeft(), p.getRight()))
-                .collect(Collectors.toList());
+                .toList();
         List<List<EntryComparisonResult>> mismatchedRows = filterPassedChecks(comparisonResult);
         dataSourceStatistics.setMismatched(mismatchedRows.size());
         dataSourceStatistics.setTotalRows(comparisonResult.size());
@@ -396,7 +396,7 @@ public class DatabaseSteps
     {
         return comparisonResult.stream()
                         .filter(r -> !r.stream().allMatch(EntryComparisonResult::isPassed))
-                        .collect(Collectors.toList());
+                        .toList();
     }
 
     private CompletableFuture<ListMultimap<Object, Map<String, Object>>> createCompletableRequest(

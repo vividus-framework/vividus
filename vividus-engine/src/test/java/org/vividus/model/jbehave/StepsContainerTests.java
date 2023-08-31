@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -47,6 +46,6 @@ class StepsContainerTests
         container.setAfterSystemScenarioSteps(List.of(afterSystemStep));
 
         assertEquals(List.of(beforeSystemStep, beforeUserStep, step, afterUserStep, afterSystemStep),
-                container.createStreamOfAllSteps().collect(Collectors.toList()));
+                container.createStreamOfAllSteps().toList());
     }
 }

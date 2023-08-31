@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.Validate;
@@ -232,7 +231,7 @@ public class KeyboardSteps
                                   .boxed()
                                   .map(Character::toString)
                                   .map(mapper)
-                                  .collect(Collectors.toList());
+                                  .toList();
         pressKeys(toType);
     }
 

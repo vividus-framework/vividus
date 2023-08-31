@@ -254,7 +254,7 @@ public class KafkaSteps
                                                          .map(key -> key == null ? "<no key>" : key)
                                                          .collect(Collectors.joining(", ")))
                        .log("Saving events with the keys: {}");
-        List<String> eventValues = events.stream().map(ConsumerRecord::value).collect(Collectors.toList());
+        List<String> eventValues = events.stream().map(ConsumerRecord::value).toList();
         variableContext.putVariable(scopes, variableName, eventValues);
     }
 

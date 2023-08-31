@@ -358,9 +358,8 @@ class SoftAssertTests
     private void verifyAssertionFailedEventPosted(boolean knownIssue)
     {
         verify(eventBus).post(argThat(event -> {
-            if (event instanceof AssertionFailedEvent)
+            if (event instanceof AssertionFailedEvent failedEvent)
             {
-                AssertionFailedEvent failedEvent = (AssertionFailedEvent) event;
                 SoftAssertionError softAssertionError = failedEvent.getSoftAssertionError();
                 return softAssertionError != null && knownIssue == softAssertionError.isKnownIssue()
                         && softAssertionError.getError() != null;

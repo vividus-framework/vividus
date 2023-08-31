@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,20 +44,10 @@ public class EyesLogHandler extends NullLogHandler
         TraceLevel actualLevel = level == null ? TraceLevel.Notice : level;
         switch (actualLevel)
         {
-            case Debug:
-                logMessage(event, logger::debug);
-                break;
-            case Warn:
-                logMessage(event, logger::warn);
-                break;
-            case Error:
-                logMessage(event, logger::error);
-                break;
-            case Info:
-            case Notice:
-            default:
-                logMessage(event, logger::info);
-                break;
+            case Debug -> logMessage(event, logger::debug);
+            case Warn -> logMessage(event, logger::warn);
+            case Error -> logMessage(event, logger::error);
+            default -> logMessage(event, logger::info);
         }
     }
 

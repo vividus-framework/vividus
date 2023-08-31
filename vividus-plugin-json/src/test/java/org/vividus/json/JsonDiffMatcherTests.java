@@ -80,8 +80,10 @@ class JsonDiffMatcherTests
         var matcher = createMatcher(EXPECTED_DATA);
         matcher.matches(JSON);
         matcher.describeMismatch(object, description);
-        verify(description).appendText("JSON documents are different:\nDifferent value found in node \"\", expected:"
-                + " <\"expected\"> but was: <{\"version\":1}>.\n");
+        verify(description).appendText("""
+                JSON documents are different:
+                Different value found in node "", expected: <"expected"> but was: <{"version":1}>.
+                """);
         verifyNoMoreInteractions(description, object);
     }
 

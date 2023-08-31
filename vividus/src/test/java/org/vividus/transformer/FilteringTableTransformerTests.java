@@ -45,8 +45,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class FilteringTableTransformerTests
 {
     private static final String TABLE = "|key1|key2|key3|\n|1|2|3|\n|4|5|6|\n|7|8|9|";
-    private static final String TEN_ROWS_TABLE = "|key2|key3|key1|\n|1|2|3|\n|4|5|6|\n|7|8|9|\n|10|11|12|\n|13|14|15|\n"
-            + "|16|17|18|\n|19|20|21|\n|22|23|24|\n|25|26|27|\n|28|29|30|";
+    private static final String TEN_ROWS_TABLE = """
+            |key2|key3|key1|
+            |1|2|3|
+            |4|5|6|
+            |7|8|9|
+            |10|11|12|
+            |13|14|15|
+            |16|17|18|
+            |19|20|21|
+            |22|23|24|
+            |25|26|27|
+            |28|29|30|""";
 
     private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters = new ParameterConverters();
@@ -154,19 +164,22 @@ class FilteringTableTransformerTests
     @Test
     void testTransformUsingRegex()
     {
-        var table = "|city    |rand |capital |founded |\n"
-                     + "|Minsk   |2152 |true    |1067    |\n"
-                     + "|Norilsk |1103 |false   |1920    |\n"
-                     + "|Magadan |9843 |false   |1939    |\n";
+        var table = """
+                |city    |rand |capital |founded |
+                |Minsk   |2152 |true    |1067    |
+                |Norilsk |1103 |false   |1920    |
+                |Magadan |9843 |false   |1939    |
+                """;
 
         var tableProperties = new TableProperties(
                 "column.city=(?i).*?n.*, column.capital=false, column.founded=\\d9[23](0|9)", keywords,
                 parameterConverters);
         String transformed = transformer.transform(table, tableParsers, tableProperties);
 
-        var expected = "|city|rand|capital|founded|\n"
-                        + "|Norilsk|1103|false|1920|\n"
-                        + "|Magadan|9843|false|1939|";
+        var expected = """
+                |city|rand|capital|founded|
+                |Norilsk|1103|false|1920|
+                |Magadan|9843|false|1939|""";
 
         assertEquals(expected, transformed);
     }

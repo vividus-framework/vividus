@@ -124,7 +124,7 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
                     .distinct()
                     .limit(randomRowsCount)
                     .mapToObj(rows::get)
-                    .collect(Collectors.toList());
+                    .toList();
         }
         else
         {
@@ -143,7 +143,7 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
                         return IntStream.rangeClosed(startInclusive, endInclusive);
                     })
                     .mapToObj(rows::get)
-                    .collect(Collectors.toList());
+                    .toList();
         }
     }
 
@@ -189,7 +189,7 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
     {
         return rows.stream()
                    .filter(row -> applyFilters(allColumnNames, row, columnFilters))
-                   .collect(Collectors.toList());
+                   .toList();
     }
 
     private static boolean applyFilters(List<String> allColumnNames, List<String> row,

@@ -18,7 +18,6 @@ package org.vividus.converter;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
@@ -80,13 +79,10 @@ public abstract class AbstractAccessibilityCheckOptionsConverter<T extends Abstr
         }
 
         List<WebElement> elements = locator.stream()
-                                           .map(s -> {
-                                               s.getSearchParameters().setVisibility(Visibility.ALL);
-                                               return s;
-                                           })
+                                           .peek(s -> s.getSearchParameters().setVisibility(Visibility.ALL))
                                            .map(this::findElementsToCheck)
                                            .flatMap(List::stream)
-                                           .collect(Collectors.toList());
+                                           .toList();
 
         return elements.isEmpty() && nullOnEmpty ? null : elements;
     }

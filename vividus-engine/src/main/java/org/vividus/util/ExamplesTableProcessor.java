@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,11 +137,11 @@ public final class ExamplesTableProcessor
     {
         return IntStream.range(0, columnsData.iterator().next().size())
                 .mapToObj(index -> buildRow(index, columnsData))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static List<String> buildRow(int rowIndex, Collection<List<String>> columnsData)
     {
-        return columnsData.stream().map(l -> l.get(rowIndex)).collect(Collectors.toList());
+        return columnsData.stream().map(l -> l.get(rowIndex)).toList();
     }
 }

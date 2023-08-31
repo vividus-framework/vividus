@@ -30,7 +30,6 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.reflect.TypeToken;
@@ -96,9 +95,10 @@ class ParametersToAtomicActionConverterTests
         var by = "By.caseSensitiveText(" + TEXT + ")";
         var locator = mock(Locator.class);
         when(stringToLocatorConverter.convertValue(by, null)).thenReturn(locator);
-        var value = "|type        |argument                  |\n"
-                  + "|CLICK       |By.caseSensitiveText(text)|\n"
-                  + "|DOUBLE_CLICK|By.caseSensitiveText(text)|";
+        var value = """
+                |type        |argument                  |
+                |CLICK       |By.caseSensitiveText(text)|
+                |DOUBLE_CLICK|By.caseSensitiveText(text)|""";
         var actions = asActions(value);
         assertThat(actions, hasSize(2));
         verifySequenceAction(actions.get(0), CLICK, locator);
@@ -110,9 +110,10 @@ class ParametersToAtomicActionConverterTests
     @Test
     void testConvertNullableAction()
     {
-        var value = "|type   |argument|\n"
-                  + "|CLICK  |        |\n"
-                  + "|RELEASE|        |";
+        var value = """
+                |type   |argument|
+                |CLICK  |        |
+                |RELEASE|        |""";
         var actions = asActions(value);
         assertThat(actions, hasSize(2));
         verifySequenceAction(actions.get(0), CLICK, null);
@@ -145,7 +146,7 @@ class ParametersToAtomicActionConverterTests
         return new ExamplesTable(table).getRowsAsParameters()
                                        .stream()
                                        .map(p -> converter.convertValue(p, null))
-                                       .collect(Collectors.toList());
+                                       .toList();
     }
 
     private static void verifySequenceAction(AtomicAction<Actions> action,

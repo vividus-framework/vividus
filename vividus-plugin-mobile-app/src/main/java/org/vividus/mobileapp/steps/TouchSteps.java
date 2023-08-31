@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,9 +156,8 @@ public class TouchSteps
     private Rectangle getSearchContextRectangle()
     {
         SearchContext searchContext = uiContext.getSearchContext();
-        if (searchContext instanceof WebElement)
+        if (searchContext instanceof WebElement contextElement)
         {
-            WebElement contextElement = (WebElement) searchContext;
             return contextElement.getRect();
         }
         return new Rectangle(new Point(0, 0), genericWebDriverManager.getSize());

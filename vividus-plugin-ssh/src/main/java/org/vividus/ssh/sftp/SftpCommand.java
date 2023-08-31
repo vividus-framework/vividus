@@ -148,18 +148,14 @@ public enum SftpCommand
     public String execute(ChannelSftp channel, List<String> parameters) throws SftpException, IOException
     {
         int numberOfParameters = parameters.size();
-        switch (numberOfParameters)
+        return switch (numberOfParameters)
         {
-            case 0:
-                return execute(channel);
-            case 1:
-                return execute(channel, parameters.get(0));
-            case 2:
-                return execute(channel, parameters.get(0), parameters.get(1));
-            default:
-                throw new IllegalArgumentException(
-                        String.format("Command %s doesn't support %d parameters", name(), numberOfParameters));
-        }
+            case 0 -> execute(channel);
+            case 1 -> execute(channel, parameters.get(0));
+            case 2 -> execute(channel, parameters.get(0), parameters.get(1));
+            default -> throw new IllegalArgumentException(
+                    String.format("Command %s doesn't support %d parameters", name(), numberOfParameters));
+        };
     }
 
     public static SftpCommand fromString(String text)

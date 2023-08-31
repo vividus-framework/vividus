@@ -71,10 +71,11 @@ class ElementAttributeFilterTests
     {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> filter.matches(webElement, StringUtils.EMPTY));
-        assertEquals("Attribute value can not be empty, expected formats are:"
-                + "\n* attribute - an element has the attribute with any value"
-                + "\n* attribute= - an element has the attribute with an empty value"
-                + "\n* attribute=value - an element has the attribute with the value",
+        assertEquals("""
+                        Attribute value can not be empty, expected formats are:
+                        * attribute - an element has the attribute with any value
+                        * attribute= - an element has the attribute with an empty value
+                        * attribute=value - an element has the attribute with the value""",
                 exception.getMessage());
     }
 

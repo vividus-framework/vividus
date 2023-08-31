@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,18 +33,13 @@ public final class CellUtils
 
     private static String getCellValueAsString(Cell cell, CellType cellType)
     {
-        switch (cellType)
+        return switch (cellType)
         {
-            case NUMERIC:
-                return String.valueOf(cell.getNumericCellValue());
-            case BOOLEAN:
-                return String.valueOf(cell.getBooleanCellValue());
-            case FORMULA:
-                return getCellValueAsString(cell, cell.getCachedFormulaResultType());
-            case STRING:
-                return cell.getStringCellValue();
-            default:
-                return StringUtils.EMPTY;
-        }
+            case NUMERIC -> String.valueOf(cell.getNumericCellValue());
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+            case FORMULA -> getCellValueAsString(cell, cell.getCachedFormulaResultType());
+            case STRING -> cell.getStringCellValue();
+            default -> StringUtils.EMPTY;
+        };
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,11 +62,12 @@ public final class ExpectedSearchContextConditions extends AbstractExpectedCondi
 
         private StaleContextException(Throwable throwable)
         {
-            super("Search context used for search is stale.\n"
-                + "Please double check the tests.\n"
-                + "You have a few options:\n"
-                + "1. Reset context;\n"
-                + "2. Synchronize the tests to wait for context's stabilization;", throwable);
+            super("""
+                    Search context used for search is stale.
+                    Please double check the tests.
+                    You have a few options:
+                    1. Reset context;
+                    2. Synchronize the tests to wait for context's stabilization;""", throwable);
         }
     }
 }

@@ -17,7 +17,6 @@
 package org.vividus;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.jbehave.core.embedder.PerformableTree;
 import org.jbehave.core.model.Story;
@@ -39,7 +38,7 @@ public class BatchedPerformableTree extends PerformableTree
             List<Story> currentBatchStories = getRoot().getStories().stream()
                     .filter(p -> p.getStatus() == null)
                     .map(PerformableStory::getStory)
-                    .collect(Collectors.toList());
+                    .toList();
             IDENTICAL_STORY_NAMES_RESOLVER.resolveIdenticalNames(currentBatchStories);
         }
         if (reportBeforeStories && Stage.BEFORE.equals(stage) || Stage.AFTER.equals(stage)

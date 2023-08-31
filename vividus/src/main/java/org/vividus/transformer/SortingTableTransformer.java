@@ -21,7 +21,6 @@ import static org.apache.commons.lang3.Validate.isTrue;
 import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,11 +51,11 @@ public class SortingTableTransformer implements ExtendedTableTransformer
         List<String> headerValues = tableRows.getHeaders();
         List<String> columnsToCompare = Stream.of(StringUtils.split(byColumns, DELIMITER))
                 .map(String::trim)
-                .collect(Collectors.toList());
+                .toList();
         String sortingTypes = properties.getProperties().getProperty("sortingTypes", "STRING");
         List<SortingType> sortingTypesToCompare = Stream.of(StringUtils.split(sortingTypes, DELIMITER))
                 .map(s -> (SortingType) fluentTrimmedEnumConverter.convertValue(s, SortingType.class))
-                .collect(Collectors.toList());
+                .toList();
         int sortingTypesSize = sortingTypesToCompare.size();
         isTrue(sortingTypesSize == 1 || sortingTypesSize == columnsToCompare.size(),
                 "Please, specify parameter 'sortingType' (%s) with the same count of types as count of column"
@@ -91,7 +90,7 @@ public class SortingTableTransformer implements ExtendedTableTransformer
                     }
                     return result;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private enum SortingType

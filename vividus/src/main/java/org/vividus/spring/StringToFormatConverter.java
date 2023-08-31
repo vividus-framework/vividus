@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.spring;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.jbehave.core.reporters.Format;
@@ -42,6 +41,6 @@ public class StringToFormatConverter implements Converter<String, Format>
     private List<String> getSupportedFormats()
     {
         return FieldUtils.getAllFieldsList(Format.class).stream().filter(ReflectionUtils::isPublicStaticFinal)
-                .map(Field::getName).collect(Collectors.toList());
+                .map(Field::getName).toList();
     }
 }

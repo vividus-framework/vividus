@@ -48,17 +48,21 @@ class InnerJoinTableTransformerTests
     private static final String PATH_3 = "/test3.table";
     private static final String TABLES_DELIMITER = "; ";
     private static final String THREE_PATHS = String.join(TABLES_DELIMITER, PATH_1, PATH_2, PATH_3);
-    private static final String FIRST_TABLE = "|column1|joinID|column2|column3|\n"
-            + "|row11  |1     |row21  |row31  |\n"
-            + "|row12  |2     |row22  |row32  |\n"
-            + "|row13  |3     |row23  |row33  |\n"
-            + "|row133 |3     |row233 |row333 |\n"
-            + "|row14  |4     |row24  |row34  |\n";
-    private static final String SECOND_TABLE = "|joinID|column4|column5|\n"
-            + "|5     |row45  |row51  |\n"
-            + "|3     |row43  |row53  |\n"
-            + "|1     |row41  |row51  |\n"
-            + "|3     |row433 |row533 |\n";
+    private static final String FIRST_TABLE = """
+            |column1|joinID|column2|column3|
+            |row11  |1     |row21  |row31  |
+            |row12  |2     |row22  |row32  |
+            |row13  |3     |row23  |row33  |
+            |row133 |3     |row233 |row333 |
+            |row14  |4     |row24  |row34  |
+            """;
+    private static final String SECOND_TABLE = """
+            |joinID|column4|column5|
+            |5     |row45  |row51  |
+            |3     |row43  |row53  |
+            |1     |row41  |row51  |
+            |3     |row433 |row533 |
+            """;
     private static final String EMPTY_TABLE = "|joinID|\n";
 
     private final Keywords keywords = new Keywords();
@@ -75,12 +79,14 @@ class InnerJoinTableTransformerTests
         Properties properties = createProperties(JOINT_COLUMN, JOINT_COLUMN, PATH_1);
         mockCreateExamplesTable(PATH_1, FIRST_TABLE);
         mockCreateExamplesTable(SECOND_TABLE);
-        String expectedTable = "|column1|joinID|column5|column4|column3|column2|\n"
-                + "|row11|1|row51|row41|row31|row21|\n"
-                + "|row13|3|row53|row43|row33|row23|\n"
-                + "|row13|3|row533|row433|row33|row23|\n"
-                + "|row133|3|row53|row43|row333|row233|\n"
-                + "|row133|3|row533|row433|row333|row233|\n";
+        String expectedTable = """
+                |column1|joinID|column5|column4|column3|column2|
+                |row11|1|row51|row41|row31|row21|
+                |row13|3|row53|row43|row33|row23|
+                |row13|3|row533|row433|row33|row23|
+                |row133|3|row53|row43|row333|row233|
+                |row133|3|row533|row433|row333|row233|
+                """;
         assertInnerJoin(SECOND_TABLE, properties, expectedTable);
     }
 
@@ -88,12 +94,14 @@ class InnerJoinTableTransformerTests
     void shouldFailIfTablesContainEqualColumns()
     {
         Properties properties = createProperties(JOINT_COLUMN, JOINT_COLUMN, PATH_1);
-        String tableWithEqualColumns = "|column1|joinID|column6|\n"
-                + "|row11  |1     |row21  |\n"
-                + "|row12  |2     |row22  |\n"
-                + "|row13  |3     |row23  |\n"
-                + "|row133 |3     |row233 |\n"
-                + "|row14  |4     |row24  |\n";
+        String tableWithEqualColumns = """
+                |column1|joinID|column6|
+                |row11  |1     |row21  |
+                |row12  |2     |row22  |
+                |row13  |3     |row23  |
+                |row133 |3     |row233 |
+                |row14  |4     |row24  |
+                """;
         mockCreateExamplesTable(PATH_1, FIRST_TABLE);
         mockCreateExamplesTable(tableWithEqualColumns);
         verifyIllegalArgumentException(tableWithEqualColumns, properties, "Tables must contain different "

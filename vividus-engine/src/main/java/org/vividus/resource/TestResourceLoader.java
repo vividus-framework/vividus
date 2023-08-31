@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -52,7 +51,7 @@ public class TestResourceLoader implements ITestResourceLoader
         resourceLoadParameters = dynamicResourceSearchEnabled
                 ? propertyParser.getPropertyValuesByPrefix(VARIABLES_PROPERTY_PREFIX).values().stream()
                 .filter(p -> p != null && !p.isEmpty())
-                .collect(Collectors.toList())
+                .toList()
                 : List.of();
         this.resourcePatternResolver = resourcePatternResolver;
         this.dynamicResourceSearchEnabled = dynamicResourceSearchEnabled;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,17 +112,11 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
     @Override
     public ExitCode calculateExitCode()
     {
-        return status.get().map(s ->
+        return status.get().map(s -> switch (s)
         {
-            switch (s)
-            {
-                case PASSED:
-                    return ExitCode.PASSED;
-                case KNOWN_ISSUES_ONLY:
-                    return ExitCode.KNOWN_ISSUES;
-                default:
-                    return ExitCode.FAILED;
-            }
+            case PASSED -> ExitCode.PASSED;
+            case KNOWN_ISSUES_ONLY -> ExitCode.KNOWN_ISSUES;
+            default -> ExitCode.FAILED;
         }).orElse(ExitCode.FAILED);
     }
 

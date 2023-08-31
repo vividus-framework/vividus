@@ -18,7 +18,6 @@ package org.vividus.steps.http;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
@@ -62,7 +61,7 @@ public class HttpResourceValidationSteps
                                                         .map(ResourceValidation::new)
                                                         .map(resourceValidator::perform)
                                                         .sorted()
-                                                        .collect(Collectors.toList());
+                                                        .toList();
 
             attachmentPublisher.publishAttachment("http-resources-validation-results.ftl",
                     Map.of("results", validations), "HTTP resources validation results");

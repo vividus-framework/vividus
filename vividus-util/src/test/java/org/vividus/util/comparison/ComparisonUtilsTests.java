@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.hamcrest.collection.IsIterableWithSize;
 import org.junit.jupiter.api.Assertions;
@@ -50,7 +49,7 @@ class ComparisonUtilsTests
                 Map.of(FIRST_COLUMN, 1.000d, SECOND_COLUMN, 1, THIRD_COLUMN, 1.0f, FOURTH_COLUMN, ONE, FIFTH_COLUMN, 1))
                 .stream()
                 .sorted(Comparator.comparing(e -> e.getKey().toString(), Comparator.naturalOrder()))
-                .collect(Collectors.toList());
+                .toList();
         EntryComparisonResult result1 = results.get(0);
         EntryComparisonResult result2 = results.get(1);
         EntryComparisonResult result3 = results.get(2);
@@ -83,7 +82,7 @@ class ComparisonUtilsTests
                 Map.of(FIRST_COLUMN, 1.000d, SECOND_COLUMN, 1, THIRD_COLUMN, 1.0f, FOURTH_COLUMN, ONE))
                 .stream()
                 .sorted(Comparator.comparing(e -> e.getKey().toString(), Comparator.naturalOrder()))
-                .collect(Collectors.toList());
+                .toList();
         EntryComparisonResult result1 = results.get(0);
         EntryComparisonResult result2 = results.get(1);
         EntryComparisonResult result3 = results.get(2);

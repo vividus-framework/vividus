@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,11 @@ import org.vividus.csv.CsvReader;
 class CsvTableTransformerTests
 {
     private static final String EMPTY_EXAMPLES_TABLE = "";
-    private static final String EXPECTED_EXAMPLES_TABLE = "|Country|ID|Capital|Akey|\n"
-            + "|Belarus|1|Minsk|11|\n"
-            + "|USA|2|Washington|22|\n"
-            + "|Armenia|3|Yerevan|33|";
+    private static final String EXPECTED_EXAMPLES_TABLE = """
+            |Country|ID|Capital|Akey|
+            |Belarus|1|Minsk|11|
+            |USA|2|Washington|22|
+            |Armenia|3|Yerevan|33|""";
 
     private final Keywords keywords = new Keywords();
     private final ParameterConverters converters = new ParameterConverters();

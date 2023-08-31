@@ -104,23 +104,23 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
     {
         ShootingStrategy baseShootingStrategy = getBaseShootingStrategy();
         ShootingStrategy shootingStrategy;
-        CoordsProvider coordsProvider;
-        switch (strategyName)
+        @SuppressWarnings("checkstyle:Indentation")
+        CoordsProvider coordsProvider = switch (strategyName)
         {
-            case "SIMPLE":
+            case "SIMPLE" ->
+            {
                 shootingStrategy = baseShootingStrategy;
-                coordsProvider = CeilingJsCoordsProvider.getSimple(javascriptActions);
-                break;
-            case "VIEWPORT_PASTING":
+                yield CeilingJsCoordsProvider.getSimple(javascriptActions);
+            }
+            case "VIEWPORT_PASTING" ->
+            {
                 shootingStrategy = new DebuggingViewportPastingDecorator(baseShootingStrategy,
-                        DEFAULT_STICKY_HEADER_HEIGHT, DEFAULT_STICKY_FOOTER_HEIGHT)
-                        .withScrollTimeout(SCROLL_TIMEOUT);
-                coordsProvider = CeilingJsCoordsProvider.getScrollAdjusted(javascriptActions);
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        String.format("Unknown shooting strategy with the name: %s", strategyName));
-        }
+                        DEFAULT_STICKY_HEADER_HEIGHT, DEFAULT_STICKY_FOOTER_HEIGHT).withScrollTimeout(SCROLL_TIMEOUT);
+                yield CeilingJsCoordsProvider.getScrollAdjusted(javascriptActions);
+            }
+            default -> throw new IllegalArgumentException(
+                    String.format("Unknown shooting strategy with the name: %s", strategyName));
+        };
         shootingStrategy = decorateWithScrollbarHiding(shootingStrategy, Optional.empty());
         return new AShot().shootingStrategy(shootingStrategy)
                 .coordsProvider(new ScrollBarHidingCoordsProviderDecorator(coordsProvider, scrollbarHandler));

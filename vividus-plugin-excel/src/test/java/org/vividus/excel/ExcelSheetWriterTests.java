@@ -37,9 +37,10 @@ import org.vividus.util.ResourceUtils;
 
 class ExcelSheetWriterTests
 {
-    private static final ExamplesTable CONTENT = new ExamplesTable("|name|status|name|\n"
-            + "|First |OPEN   |MoreFirst|\n"
-            + "|Second|closed|MoreSecond|");
+    private static final ExamplesTable CONTENT = new ExamplesTable("""
+            |name|status|name|
+            |First |OPEN   |MoreFirst|
+            |Second|closed|MoreSecond|""");
 
     @CsvSource({
         "User-defined sheet name, User-defined sheet name",

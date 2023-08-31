@@ -19,7 +19,6 @@ package org.vividus.ui.action.search;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
@@ -129,7 +128,7 @@ public abstract class AbstractElementAction implements IElementAction
                 LOGGER.warn(e.getMessage(), e);
                 return false;
             }
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     private List<WebElement> waitForElement(SearchContext searchContext, By locator, Visibility visibility)

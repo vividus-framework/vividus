@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpStatus;
@@ -91,7 +90,7 @@ class HttpResponseTests
         when(header.getName()).thenReturn(HEADER_NAME);
         Header[] headers = { header, header };
         httpResponse.setResponseHeaders(headers);
-        assertEquals(List.of(headers), httpResponse.getHeadersByName(HEADER_NAME).collect(Collectors.toList()));
+        assertEquals(List.of(headers), httpResponse.getHeadersByName(HEADER_NAME).toList());
     }
 
     @Test
@@ -101,7 +100,7 @@ class HttpResponseTests
         when(header.getName()).thenReturn(OTHER_HEADER_NAME);
         Header[] headers = { header, header };
         httpResponse.setResponseHeaders(headers);
-        assertEquals(List.of(), httpResponse.getHeadersByName(HEADER_NAME).collect(Collectors.toList()));
+        assertEquals(List.of(), httpResponse.getHeadersByName(HEADER_NAME).toList());
     }
 
     @Test

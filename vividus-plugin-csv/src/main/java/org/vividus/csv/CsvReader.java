@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -68,13 +67,13 @@ public class CsvReader
     {
         try (Reader reader = new InputStreamReader(resourceUrl.openStream(), StandardCharsets.UTF_8))
         {
-            return readCsvFile(reader, header).collect(Collectors.toList());
+            return readCsvFile(reader, header).toList();
         }
     }
 
     private List<Map<String, String>> collectCsv(Reader reader, String... header) throws IOException
     {
-        return readCsvFile(reader, header).map(CSVRecord::toMap).collect(Collectors.toList());
+        return readCsvFile(reader, header).map(CSVRecord::toMap).toList();
     }
 
     private Stream<CSVRecord> readCsvFile(Reader reader, String... header) throws IOException

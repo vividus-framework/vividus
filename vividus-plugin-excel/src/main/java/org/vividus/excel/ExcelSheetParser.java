@@ -107,7 +107,7 @@ public class ExcelSheetParser implements IExcelSheetParser
     public List<String> getRow(int rowNumber)
     {
         return StreamSupport.stream(sheet.getRow(rowNumber).spliterator(), false)
-                .map(this::getCellValueAndTrimIfNeeded).collect(Collectors.toList());
+                .map(this::getCellValueAndTrimIfNeeded).toList();
     }
 
     @Override
@@ -210,7 +210,7 @@ public class ExcelSheetParser implements IExcelSheetParser
         return StreamSupport.stream(CellRangeAddress.valueOf(range).spliterator(), false)
                 .map(CellAddress::formatAsString)
                 .map(addr -> new CellValue(getDataFromCell(addr), addr))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

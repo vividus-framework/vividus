@@ -303,27 +303,29 @@ class AllureReportGeneratorTests
 
     private void assertMailHtml(Path reportDirectory) throws IOException
     {
-        assertFile(reportDirectory, "export/mail.html",
-                "<!DOCTYPE html>\n"
-                        + "<html>\n"
-                        + "<head>\n"
-                        + "    <meta charset=\"utf-8\">\n"
-                        + "    <title>Allure Report summary mail</title>\n"
-                        + "</head>\n"
-                        + "<body>\n"
-                        + "    Mail body\n"
-                        + "</body>\n"
-                        + "</html>\n"
+        assertFile(reportDirectory, "export/mail.html", """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <title>Allure Report summary mail</title>
+                </head>
+                <body>
+                    Mail body
+                </body>
+                </html>
+                """
         );
     }
 
     private void assertEnvironmentProperties() throws IOException
     {
-        assertResultFile("environment.properties",
-                      "Suite=allure-test\n"
-                    + "Operating\\ System=Mac OS X\n"
-                    + "Global\\ Meta\\ Filters=groovy: !skip\n"
-                    + "Main\\ Application\\ Page=https://vividus.dev/\n"
+        assertResultFile("environment.properties", """
+                Suite=allure-test
+                Operating\\ System=Mac OS X
+                Global\\ Meta\\ Filters=groovy: !skip
+                Main\\ Application\\ Page=https://vividus.dev/
+                """
         );
     }
 

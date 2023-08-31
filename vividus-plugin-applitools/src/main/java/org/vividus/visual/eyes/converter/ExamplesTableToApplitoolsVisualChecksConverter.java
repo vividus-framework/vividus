@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import com.applitools.eyes.AccessibilitySettings;
 import com.applitools.eyes.BatchInfo;
@@ -96,7 +95,7 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     {
         List<String> unsupportedOptions = table.getHeaders().stream()
                 .filter(option -> !SUPPORTED_OPTIONS.contains(option))
-                .collect(Collectors.toList());
+                .toList();
         Validate.isTrue(unsupportedOptions.isEmpty(), "Unknown Applitools configuration options: %s",
                 String.join(", ", unsupportedOptions));
 
@@ -126,7 +125,7 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
             );
 
             return check;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     @Override

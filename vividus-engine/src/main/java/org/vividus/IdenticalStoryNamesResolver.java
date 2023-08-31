@@ -22,7 +22,6 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.jbehave.core.model.Story;
@@ -38,14 +37,14 @@ public class IdenticalStoryNamesResolver
             String storyName = story.getName();
             List<Story> sameNameStories = stories.stream()
                     .filter(s -> storyName.equals(s.getName()))
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (sameNameStories.size() > 1)
             {
                 Path currentPath = getPathSafely(story.getPath());
                 List<Path> similarPaths = sameNameStories.stream()
                         .map(s -> getPathSafely(s.getPath()))
-                        .collect(Collectors.toList());
+                        .toList();
 
                 Path commonPath = findCommonPath(currentPath, similarPaths);
                 updateStoryNames(commonPath, sameNameStories);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -249,7 +248,7 @@ class HeadlessCrawlerTableTransformerTests
         ordered.verify(crawlControllerFactory).createCrawlController(mainAppPageUri);
         List<String> urlsToVerify = Stream.concat(Stream.of(mainAppPage),
                 expectedSeedRelativeUrls.stream().map(HeadlessCrawlerTableTransformerTests::buildAppPageUrl))
-                .collect(Collectors.toList());
+                .toList();
         for (String url : urlsToVerify)
         {
             ordered.verify(crawlController).addSeed(url);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -96,19 +95,19 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
             return IntStream.range(0, data.size())
                     .filter(n -> n % Integer.parseInt(incrementAsString) == 0)
                     .mapToObj(data::get)
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return data;
     }
 
     private List<String> extractValues(IExcelSheetParser sheetParser, String range)
     {
-        return sheetParser.getDataFromRange(range).stream().map(CellValue::getValue).collect(Collectors.toList());
+        return sheetParser.getDataFromRange(range).stream().map(CellValue::getValue).toList();
     }
 
     private List<String> extractDataFromAddresses(IExcelSheetParser sheetParser, String addresses)
     {
-        return Stream.of(addresses.split(";")).map(sheetParser::getDataFromCell).collect(Collectors.toList());
+        return Stream.of(addresses.split(";")).map(sheetParser::getDataFromCell).toList();
     }
 
     private String build(Collection<String> headers, Collection<List<String>> data, TableProperties properties)
@@ -118,7 +117,7 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
             : lineBreakReplacementPropertyValue;
         List<List<String>> result = data.stream()
                                           .map(element -> replaceLineBreaks(element, lineBreakReplacement))
-                                          .collect(Collectors.toList());
+                                          .toList();
         return ExamplesTableProcessor.buildExamplesTableFromColumns(headers, result, properties);
     }
 
@@ -126,6 +125,6 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
     {
         return list.stream()
                      .map(e -> e.replace("\n", lineBreakReplacement))
-                     .collect(Collectors.toList());
+                     .toList();
     }
 }

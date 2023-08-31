@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -300,44 +300,45 @@ class CollectingStatisticsStoryReporterTests
         reporterFlowProvider();
 
         var output = readStatistics(tempDirectory);
-        var expected = "{\n"
-                + "  \"STORY\" : {\n"
-                + "    \"total\" : 1,\n"
-                + "    \"passed\" : 0,\n"
-                + "    \"failed\" : 0,\n"
-                + "    \"broken\" : 1,\n"
-                + "    \"skipped\" : 0,\n"
-                + "    \"pending\" : 0,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  },\n"
-                + "  \"SCENARIO\" : {\n"
-                + "    \"total\" : 10,\n"
-                + "    \"passed\" : 3,\n"
-                + "    \"failed\" : 1,\n"
-                + "    \"broken\" : 1,\n"
-                + "    \"skipped\" : 2,\n"
-                + "    \"pending\" : 2,\n"
-                + "    \"knownIssue\" : 1\n"
-                + "  },\n"
-                + "  \"STEP\" : {\n"
-                + "    \"total\" : 17,\n"
-                + "    \"passed\" : 11,\n"
-                + "    \"failed\" : 1,\n"
-                + "    \"broken\" : 1,\n"
-                + "    \"skipped\" : 2,\n"
-                + "    \"pending\" : 1,\n"
-                + "    \"knownIssue\" : 1\n"
-                + "  },\n"
-                + "  \"GIVEN_STORY\" : {\n"
-                + "    \"total\" : 5,\n"
-                + "    \"passed\" : 2,\n"
-                + "    \"failed\" : 0,\n"
-                + "    \"broken\" : 0,\n"
-                + "    \"skipped\" : 1,\n"
-                + "    \"pending\" : 2,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  }\n"
-                + "}";
+        var expected = """
+                {
+                  "STORY" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 1,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "SCENARIO" : {
+                    "total" : 10,
+                    "passed" : 3,
+                    "failed" : 1,
+                    "broken" : 1,
+                    "skipped" : 2,
+                    "pending" : 2,
+                    "knownIssue" : 1
+                  },
+                  "STEP" : {
+                    "total" : 17,
+                    "passed" : 11,
+                    "failed" : 1,
+                    "broken" : 1,
+                    "skipped" : 2,
+                    "pending" : 1,
+                    "knownIssue" : 1
+                  },
+                  "GIVEN_STORY" : {
+                    "total" : 5,
+                    "passed" : 2,
+                    "failed" : 0,
+                    "broken" : 0,
+                    "skipped" : 1,
+                    "pending" : 2,
+                    "knownIssue" : 0
+                  }
+                }""";
         assertEquals(expected, output);
         verify(runContext, times(34)).isRunInProgress();
         verifyNoMoreInteractions(runContext);
@@ -585,44 +586,45 @@ class CollectingStatisticsStoryReporterTests
         reporter.afterStoriesSteps(Stage.AFTER);
 
         var statistic = readStatistics(tempDirectory);
-        var expected = "{\n"
-                + "  \"STORY\" : {\n"
-                + "    \"total\" : 1,\n"
-                + "    \"passed\" : 0,\n"
-                + "    \"failed\" : 1,\n"
-                + "    \"broken\" : 0,\n"
-                + "    \"skipped\" : 0,\n"
-                + "    \"pending\" : 0,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  },\n"
-                + "  \"SCENARIO\" : {\n"
-                + "    \"total\" : 1,\n"
-                + "    \"passed\" : 0,\n"
-                + "    \"failed\" : 1,\n"
-                + "    \"broken\" : 0,\n"
-                + "    \"skipped\" : 0,\n"
-                + "    \"pending\" : 0,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  },\n"
-                + "  \"STEP\" : {\n"
-                + "    \"total\" : 6,\n"
-                + "    \"passed\" : 5,\n"
-                + "    \"failed\" : 1,\n"
-                + "    \"broken\" : 0,\n"
-                + "    \"skipped\" : 0,\n"
-                + "    \"pending\" : 0,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  },\n"
-                + "  \"GIVEN_STORY\" : {\n"
-                + "    \"total\" : 0,\n"
-                + "    \"passed\" : 0,\n"
-                + "    \"failed\" : 0,\n"
-                + "    \"broken\" : 0,\n"
-                + "    \"skipped\" : 0,\n"
-                + "    \"pending\" : 0,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  }\n"
-                + "}";
+        var expected = """
+                {
+                  "STORY" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 1,
+                    "broken" : 0,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "SCENARIO" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 1,
+                    "broken" : 0,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "STEP" : {
+                    "total" : 6,
+                    "passed" : 5,
+                    "failed" : 1,
+                    "broken" : 0,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "GIVEN_STORY" : {
+                    "total" : 0,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 0,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  }
+                }""";
         assertEquals(expected, statistic);
         verify(runContext, times(12)).isRunInProgress();
         verifyNoMoreInteractions(runContext);
@@ -649,44 +651,45 @@ class CollectingStatisticsStoryReporterTests
         reporter.beforeStoriesSteps(Stage.AFTER);
         reporter.afterStoriesSteps(Stage.AFTER);
         var statistic = readStatistics(tempDirectory);
-        var expected = "{\n"
-                + "  \"STORY\" : {\n"
-                + "    \"total\" : 1,\n"
-                + "    \"passed\" : 0,\n"
-                + "    \"failed\" : 1,\n"
-                + "    \"broken\" : 0,\n"
-                + "    \"skipped\" : 0,\n"
-                + "    \"pending\" : 0,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  },\n"
-                + "  \"SCENARIO\" : {\n"
-                + "    \"total\" : 1,\n"
-                + "    \"passed\" : 0,\n"
-                + "    \"failed\" : 1,\n"
-                + "    \"broken\" : 0,\n"
-                + "    \"skipped\" : 0,\n"
-                + "    \"pending\" : 0,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  },\n"
-                + "  \"STEP\" : {\n"
-                + "    \"total\" : 4,\n"
-                + "    \"passed\" : 3,\n"
-                + "    \"failed\" : 1,\n"
-                + "    \"broken\" : 0,\n"
-                + "    \"skipped\" : 0,\n"
-                + "    \"pending\" : 0,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  },\n"
-                + "  \"GIVEN_STORY\" : {\n"
-                + "    \"total\" : 0,\n"
-                + "    \"passed\" : 0,\n"
-                + "    \"failed\" : 0,\n"
-                + "    \"broken\" : 0,\n"
-                + "    \"skipped\" : 0,\n"
-                + "    \"pending\" : 0,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  }\n"
-                + "}";
+        var expected = """
+                {
+                  "STORY" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 1,
+                    "broken" : 0,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "SCENARIO" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 1,
+                    "broken" : 0,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "STEP" : {
+                    "total" : 4,
+                    "passed" : 3,
+                    "failed" : 1,
+                    "broken" : 0,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "GIVEN_STORY" : {
+                    "total" : 0,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 0,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  }
+                }""";
         assertEquals(expected, statistic);
         verify(runContext, times(8)).isRunInProgress();
         verifyNoMoreInteractions(runContext);
@@ -714,44 +717,45 @@ class CollectingStatisticsStoryReporterTests
         reporter.afterStoriesSteps(Stage.AFTER);
 
         var statistic = readStatistics(tempDirectory);
-        var expected = "{\n"
-                + "  \"STORY\" : {\n"
-                + "    \"total\" : 1,\n"
-                + "    \"passed\" : 0,\n"
-                + "    \"failed\" : 0,\n"
-                + "    \"broken\" : 1,\n"
-                + "    \"skipped\" : 0,\n"
-                + "    \"pending\" : 0,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  },\n"
-                + "  \"SCENARIO\" : {\n"
-                + "    \"total\" : 1,\n"
-                + "    \"passed\" : 0,\n"
-                + "    \"failed\" : 1,\n"
-                + "    \"broken\" : 0,\n"
-                + "    \"skipped\" : 0,\n"
-                + "    \"pending\" : 0,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  },\n"
-                + "  \"STEP\" : {\n"
-                + "    \"total\" : 4,\n"
-                + "    \"passed\" : 2,\n"
-                + "    \"failed\" : 1,\n"
-                + "    \"broken\" : 1,\n"
-                + "    \"skipped\" : 0,\n"
-                + "    \"pending\" : 0,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  },\n"
-                + "  \"GIVEN_STORY\" : {\n"
-                + "    \"total\" : 0,\n"
-                + "    \"passed\" : 0,\n"
-                + "    \"failed\" : 0,\n"
-                + "    \"broken\" : 0,\n"
-                + "    \"skipped\" : 0,\n"
-                + "    \"pending\" : 0,\n"
-                + "    \"knownIssue\" : 0\n"
-                + "  }\n"
-                + "}";
+        var expected = """
+                {
+                  "STORY" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 1,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "SCENARIO" : {
+                    "total" : 1,
+                    "passed" : 0,
+                    "failed" : 1,
+                    "broken" : 0,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "STEP" : {
+                    "total" : 4,
+                    "passed" : 2,
+                    "failed" : 1,
+                    "broken" : 1,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  },
+                  "GIVEN_STORY" : {
+                    "total" : 0,
+                    "passed" : 0,
+                    "failed" : 0,
+                    "broken" : 0,
+                    "skipped" : 0,
+                    "pending" : 0,
+                    "knownIssue" : 0
+                  }
+                }""";
         assertEquals(expected, statistic);
         verify(runContext, times(8)).isRunInProgress();
         verifyNoMoreInteractions(runContext);
