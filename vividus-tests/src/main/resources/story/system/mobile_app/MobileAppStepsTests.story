@@ -164,7 +164,7 @@ Meta:
 !-- Typing on android emulator doesn't shows a keyboard.
 Given I initialize story variable `text` with value `#{generate(regexify '[a-z]{10}')}`
 When I type `${text}` in field located `accessibilityId(nameInput)` and keep keyboard opened
-When I save `<textFieldValueAttribute>` attribute value of element located `accessibilityId(nameInput)` to scenario variable `typedText`
+When I save `<textFieldValueAttribute>` attribute value of element located by `accessibilityId(nameInput)` to scenario variable `typedText`
 Then number of elements found by `xpath(<nameDisplayXpath>)` is equal to `1`
 Then number of elements found by `<keyboardLocator>` is equal to `1`
 Then `${text}` is equal to `${typedText}`
@@ -487,7 +487,7 @@ Scenario: Verify steps: "When I set value of Android slider located `$locator` t
 Meta:
     @targetPlatform android
 When I set value of Android slider located `accessibilityId(<slider>)` to `<targetValue>`
-When I save `text` attribute value of element located `accessibilityId(<slider>Position)` to scenario variable `sliderState`
+When I save `text` attribute value of element located by `accessibilityId(<slider>Position)` to scenario variable `sliderState`
 Then `${sliderState}` is equal to `<actualValue>`
 Examples:
 |slider                    |targetValue|actualValue|
@@ -504,7 +504,7 @@ Scenario: Verify steps: "When I set value of iOS slider located `$locator` to `$
 Meta:
     @targetPlatform ios
 When I set value of iOS slider located `accessibilityId(<slider>)` to `<targetValue>` percents
-When I save `value` attribute value of element located `accessibilityId(<slider>Position)` to scenario variable `sliderState`
+When I save `value` attribute value of element located by `accessibilityId(<slider>Position)` to scenario variable `sliderState`
 Then `${sliderState}` is greater than or equal to `<leftLimitValue>`
 Then `${sliderState}` is less than or equal to `<rightLimitValue>`
 Examples:
@@ -538,9 +538,9 @@ When I activate application with bundle identifier `${main-app}`
 When I wait until element located by `accessibilityId(menuToggler)` appears
 
 Scenario: Verify step: 'When I change device screen orientation to $orientation'
-When I save `${size-attribute}` attribute value of element located `accessibilityId(menuToggler)` to scenario variable `portraitSize`
+When I save `${size-attribute}` attribute value of element located by `accessibilityId(menuToggler)` to scenario variable `portraitSize`
 When I change device screen orientation to LANDSCAPE
-When I save `${size-attribute}` attribute value of element located `accessibilityId(menuToggler)` to scenario variable `landscapeSize`
+When I save `${size-attribute}` attribute value of element located by `accessibilityId(menuToggler)` to scenario variable `landscapeSize`
 Then `${portraitSize}` is not equal to `${landscapeSize}`
 
 Scenario: Verify step: 'When I close mobile application'

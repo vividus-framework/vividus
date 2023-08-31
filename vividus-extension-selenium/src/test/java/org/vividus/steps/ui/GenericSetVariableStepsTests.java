@@ -50,8 +50,10 @@ class GenericSetVariableStepsTests
 {
     private static final String TEXT = "text";
     private static final String ATTRIBUTE_NAME = "attribute";
-    private static final String ATTRIBUTE_VALUE_MESSAGE = "The '" + ATTRIBUTE_NAME + "' attribute value was found";
+    private static final String ATTRIBUTE_VALUE_MESSAGE = String.format("The '%s' attribute value was found",
+            ATTRIBUTE_NAME);
     private static final String VARIABLE_NAME = "variableName";
+    private static final String GET_ATTR_VALUE_MESSAGE = "The element to get the attribute value";
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
 
     @Mock private ISoftAssert softAssert;
@@ -140,5 +142,33 @@ class GenericSetVariableStepsTests
         genericSetVariableSteps.saveNumberOfElementsToVariable(locator, VARIABLE_SCOPE, VARIABLE_NAME);
 
         verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, 1);
+    }
+
+    @Test
+    void shouldSaveAttributeValueOfElement()
+    {
+        Locator locator = mock(Locator.class);
+        WebElement webElement = mock(WebElement.class);
+        when(baseValidations.assertElementExists(GET_ATTR_VALUE_MESSAGE, locator))
+                .thenReturn(Optional.of(webElement));
+        when(webElement.getAttribute(ATTRIBUTE_NAME)).thenReturn(TEXT);
+
+        genericSetVariableSteps.saveAttributeValueOfElement(ATTRIBUTE_NAME, locator, VARIABLE_SCOPE, VARIABLE_NAME);
+
+        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, TEXT);
+        verifyNoInteractions(softAssert);
+    }
+
+    @Test
+    void shouldNotSaveAttributeValueOfElementIfTheValueIsNotFound()
+    {
+        Locator locator = mock(Locator.class);
+        when(baseValidations.assertElementExists(GET_ATTR_VALUE_MESSAGE, locator))
+                .thenReturn(Optional.empty());
+
+        genericSetVariableSteps.saveAttributeValueOfElement(ATTRIBUTE_NAME, locator, VARIABLE_SCOPE, VARIABLE_NAME);
+
+        verify(softAssert).recordFailedAssertion(String.format("The '%s' attribute does not exist", ATTRIBUTE_NAME));
+        verifyNoInteractions(variableContext);
     }
 }

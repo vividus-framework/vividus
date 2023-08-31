@@ -340,7 +340,7 @@ WARNING: The error will stop steps execution in case if unsupported condition va
 .Click on the element if parent element is found
 [source,gherkin]
 ----
-When I save number of elements located `By.xpath(//*[@class='outerElement'])` to SCENARIO variable `numberOfOuterElements`
+When I save number of elements located by `xpath(//*[@class='outerElement'])` to SCENARIO variable `numberOfOuterElements`
 When the condition `#{eval(${numberOfOuterElements} == 1)}` is true I do
 |step                                                                   |
 |When I click on element located by `xpath(//*[@class='innerElement'])` |
@@ -349,11 +349,11 @@ When the condition `#{eval(${numberOfOuterElements} == 1)}` is true I do
 .Click on the element if parent element is found and the element itself is presented on the page
 [source,gherkin]
 ----
-When I save number of elements located `By.xpath(//*[@class='outerElement'])` to SCENARIO variable `numberOfOuterElements`
+When I save number of elements located by `xpath(//*[@class='outerElement'])` to SCENARIO variable `numberOfOuterElements`
 When the condition `#{eval(${numberOfOuterElements} == 1)}` is true I do
 {headerSeparator=!, valueSeparator=!}
 !step                                                                                                                       !
-!When I save number of elements located `By.xpath(//*[@class='innerElement'])` to SCENARIO variable `numberOfInnerElements` !
+!When I save number of elements located by `xpath(//*[@class='innerElement'])` to SCENARIO variable `numberOfInnerElements` !
 !When the condition '#{eval(${numberOfInnerElements} == 1)}' is true I do                                                   !
 !|step                                                                                                                     |!
 !|When I click on element located by `xpath(//*[@class='innerElement'])`                                                   |!
