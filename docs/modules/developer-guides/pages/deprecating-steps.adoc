@@ -1,4 +1,4 @@
-= Steps deprecation procedure
+= Steps Deprecation
 
 VIVIDUS supports the special step deprecation mechanism that allows to log deprecated steps with replacement using current step context and automatically replace them using xref:commons:cli.adoc#_replace_deprecated_steps[`replaceDeprecatedSteps`] command.
 
@@ -7,7 +7,7 @@ VIVIDUS supports the special step deprecation mechanism that allows to log depre
 This mechanism cannot be applied if the new logic of deprecated step consists of several steps or the actual step has a table with different header/headers.
 ====
 
-== Deprecate code steps
+== Deprecate Code Steps
 
 For deprecation of Java code steps use annotation `@Replacement` with the following mandatory parameters:
 
@@ -17,16 +17,16 @@ For deprecation of Java code steps use annotation `@Replacement` with the follow
 ./src/main/java/com/mycompany/steps/MySteps.java
 [source,java]
 ----
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.6.0", replacementFormatPattern = "Given the step with parameters `%2$s` and `%1$s`")
-    @Given(value = "the step with parameters '$parameter1' and '$parameter2'", priority = 1)
-    public void givenStep(String parameter1, String parameter2)
-    {
-        // ... step logic
-    }
+@Deprecated(since = "0.6.0", forRemoval = true)
+@Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern = "Given the step with parameters `%2$s` and `%1$s`")
+@Given(value = "the step with parameters '$parameter1' and '$parameter2'", priority = 1)
+public void givenStep(String parameter1, String parameter2)
+{
+    // ... step logic
+}
 ----
 
-.Deprecated step in story
+.Deprecated step in story-file
 [source,gherkin]
 ----
 Given the step with parameters 'parameter1' and 'parameter2'
@@ -35,42 +35,46 @@ Given the step with parameters 'parameter1' and 'parameter2'
 .Output log
 [source]
 ----
-org.vividus.replacement.DeprecatedCodeStepsReporter - The step: "Given the step with parameters 'parameter1' and 'parameter2'" is deprecated and will be removed in VIVIDUS 0.6.0. Use step: "Given the step with parameters `parameter2` and `parameter1`"
+org.vividus.replacement.DeprecatedCodeStepsReporter - The step: "Given the step with parameters 'parameter1' and 'parameter2'" is deprecated and will be removed in VIVIDUS 0.7.0. Use step: "Given the step with parameters `parameter2` and `parameter1`"
 ----
 
-== Deprecate composite steps
+== Deprecate Composite Steps
 
 For deprecation of composite steps use the comment with the special pattern:
-`!--\s+DEPRECATED:\s+(.*),\s+(.*)$` where the first group is version to remove, the second one is formatter pattern for the actual step.
+[source,gherkin]
+----
+!--\s+DEPRECATED:\s+(.*),\s+(.*)$
+----
+where the first group is the version to remove step in, the second one is formatter pattern for the actual step.
 
-.Deprecated composite step in `composite.steps` file
+.Deprecated composite step in steps-file
 [source,gherkin]
 ----
 Composite: Given the step with parameters '$parameter1' and '$parameter2'
-!-- DEPRECATED: 0.6.0, Given the step with parameter `%2$s` and `%1$s`
-Given the step with parameters `<parameter2>` and `<parameter1>`
+!-- DEPRECATED: 0.7.0, Given the step with parameter `%2$s` and `%1$s`
+Given the step with parameters `<parameter1>` and `<parameter2>`
 ----
 
 .Output log
 [source]
 ----
-org.vividus.log.LoggingStoryReporter - The step: "Given the step with parameters 'parameter1' and 'parameter2'" is deprecated and will be removed in VIVIDUS 0.6.0. Use step: "Given the step with parameters `parameter2` and `parameter1`"
+org.vividus.log.LoggingStoryReporter - The step: "Given the step with parameters 'parameter1' and 'parameter2'" is deprecated and will be removed in VIVIDUS 0.7.0. Use step: "Given the step with parameters `parameter2` and `parameter1`"
 ----
 
 [NOTE]
 ====
 If composite step cannot be deprecated using formatter pattern it still must have the comment with the certain pattern for user notification in step replacer: `!--\s+DEPRECATED: The step .* is deprecated and will be removed in .*`.
 
-.Example:
+.Deprecated composite step without replacement in steps-file
 [source,gherkin]
 ----
 Composite: When I send HTTP $httpMethod to the relative URL '$relativeURL'
-!-- DEPRECATED: The step "When I send HTTP $httpMethod to the relative URL '$relativeURL'" is deprecated and will be removed in VIVIDUS 0.6.0
+!-- DEPRECATED: The step "When I send HTTP $httpMethod to the relative URL '$relativeURL'" is deprecated and will be removed in VIVIDUS 0.7.0
 When I execute HTTP <httpMethod> request for resource with relative URL `<relativeURL>`
 ----
 ====
 
-== Find deprecated steps
+== Find Deprecated Steps
 
 === In the log during/after tests execution
 
@@ -78,7 +82,7 @@ When I execute HTTP <httpMethod> request for resource with relative URL `<relati
 ----
 2023-06-12 11:18:31,719 [batch-1-thread-3] INFO  org.vividus.log.LoggingStoryReporter - The step: "When I find greater than `1` JSON elements by `$.store.book` and for each element do
 |step                                                       |
-|Then number of JSON elements by JSON path `$.author` is = 1|" is deprecated and will be removed in VIVIDUS 0.6.0. Use step: "When I find greater than `1` JSON elements from `${json-context}` by `$.store.book` and for each element do
+|Then number of JSON elements by JSON path `$.author` is = 1|" is deprecated and will be removed in VIVIDUS 0.7.0. Use step: "When I find greater than `1` JSON elements from `${json-context}` by `$.store.book` and for each element do
 |step                                                       |
 |Then number of JSON elements by JSON path `$.author` is = 1|"
 ----
@@ -112,7 +116,7 @@ COMPOSITE IN STEPS FILE  DEPRECATED  When I go to the relative URL '$relativeURL
 
 === In the documentation
 
-Deprecated steps and their replacements can be found in the documentation using search (https://docs.vividus.dev/vividus/latest/plugins/plugin-json.html#_save_json_element_value_from_context[example]).
+Deprecated steps and their replacements can be found in the documentation using search, for example, xref:plugins:plugin-web-app.adoc#_change_context[this step].
 
 == Remove deprecated steps from tests
 
@@ -120,7 +124,7 @@ Steps can only be removed from VIVIDUS in a release with breaking changes.
 Usually `MAJOR` version is incremented on breaking changes releases according to the https://semver.org/spec/v2.0.0.html[Semantic Versioning].
 But if project in initial development phase (has `0.y.z` version) incremented only `MINOR` version.
 
-image::semantic-versions.png[Semantic Versioning]
+image::semantic-versions.png[Semantic Versioning,width=50%]
 
 Also, breaking changes releases usually have the `Removed` section with changes in the https://github.com/vividus-framework/vividus/releases[release history].
 
