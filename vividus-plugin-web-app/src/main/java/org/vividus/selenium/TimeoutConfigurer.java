@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.vividus.selenium;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import org.openqa.selenium.WebDriver.Timeouts;
@@ -29,15 +28,13 @@ public class TimeoutConfigurer
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeoutConfigurer.class);
 
-    private int pageLoadTimeout;
-    private TimeUnit pageLoadTimeoutTimeUnit;
-    private int asyncScriptTimeout;
-    private TimeUnit asyncScriptTimeoutTimeUnit;
+    private Duration pageLoadTimeout;
+    private Duration asyncScriptTimeout;
 
     public void configure(Timeouts timeouts)
     {
-        setTimeout(timeouts, t -> t.pageLoadTimeout(pageLoadTimeout, pageLoadTimeoutTimeUnit));
-        setTimeout(timeouts, t -> t.setScriptTimeout(asyncScriptTimeout, asyncScriptTimeoutTimeUnit));
+        setTimeout(timeouts, t -> t.pageLoadTimeout(pageLoadTimeout));
+        setTimeout(timeouts, t -> t.scriptTimeout(asyncScriptTimeout));
     }
 
     public void configurePageLoadTimeout(Duration duration, Timeouts timeouts)
@@ -57,23 +54,13 @@ public class TimeoutConfigurer
         }
     }
 
-    public void setPageLoadTimeout(int pageLoadTimeout)
+    public void setPageLoadTimeout(Duration pageLoadTimeout)
     {
         this.pageLoadTimeout = pageLoadTimeout;
     }
 
-    public void setPageLoadTimeoutTimeUnit(TimeUnit pageLoadTimeoutTimeUnit)
-    {
-        this.pageLoadTimeoutTimeUnit = pageLoadTimeoutTimeUnit;
-    }
-
-    public void setAsyncScriptTimeout(int asyncScriptTimeout)
+    public void setAsyncScriptTimeout(Duration asyncScriptTimeout)
     {
         this.asyncScriptTimeout = asyncScriptTimeout;
-    }
-
-    public void setAsyncScriptTimeoutTimeUnit(TimeUnit asyncScriptTimeoutTimeUnit)
-    {
-        this.asyncScriptTimeoutTimeUnit = asyncScriptTimeoutTimeUnit;
     }
 }

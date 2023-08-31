@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,13 +29,8 @@ import org.openqa.selenium.WebDriver.Timeouts;
 
 class TimeoutConfigurerTests
 {
-    private static final int PAGE_LOAD_TIMEOUT = 1;
-    private static final TimeUnit PAGE_LOAD_TIMEOUT_TIMEUNIT = TimeUnit.MINUTES;
-
-    private static final int ASYNC_SCRIPT_TIMEOUT = 30;
-    private static final TimeUnit ASYNC_SCRIPT_TIMEOUT_TIMEUNIT = TimeUnit.SECONDS;
-
-    private static final Duration DURATION_PAGE_LOAD_TIMEOUT = Duration.ofSeconds(30L);
+    private static final Duration PAGE_LOAD_TIMEOUT = Duration.ofMinutes(1);
+    private static final Duration ASYNC_SCRIPT_TIMEOUT = Duration.ofSeconds(30);
 
     private TimeoutConfigurer timeoutConfigurer;
 
@@ -45,9 +39,7 @@ class TimeoutConfigurerTests
     {
         timeoutConfigurer = new TimeoutConfigurer();
         timeoutConfigurer.setPageLoadTimeout(PAGE_LOAD_TIMEOUT);
-        timeoutConfigurer.setPageLoadTimeoutTimeUnit(PAGE_LOAD_TIMEOUT_TIMEUNIT);
         timeoutConfigurer.setAsyncScriptTimeout(ASYNC_SCRIPT_TIMEOUT);
-        timeoutConfigurer.setAsyncScriptTimeoutTimeUnit(ASYNC_SCRIPT_TIMEOUT_TIMEUNIT);
     }
 
     @Test
@@ -55,16 +47,17 @@ class TimeoutConfigurerTests
     {
         Timeouts timeouts = mock(Timeouts.class);
         timeoutConfigurer.configure(timeouts);
-        verify(timeouts).pageLoadTimeout(PAGE_LOAD_TIMEOUT, PAGE_LOAD_TIMEOUT_TIMEUNIT);
-        verify(timeouts).setScriptTimeout(ASYNC_SCRIPT_TIMEOUT, ASYNC_SCRIPT_TIMEOUT_TIMEUNIT);
+        verify(timeouts).pageLoadTimeout(PAGE_LOAD_TIMEOUT);
+        verify(timeouts).scriptTimeout(ASYNC_SCRIPT_TIMEOUT);
     }
 
     @Test
     void testSetPageLoadTimeout()
     {
+        Duration customPageLoadTimeout = Duration.ofSeconds(30L);
         Timeouts timeouts = mock(Timeouts.class);
-        timeoutConfigurer.configurePageLoadTimeout(DURATION_PAGE_LOAD_TIMEOUT, timeouts);
-        verify(timeouts).pageLoadTimeout(DURATION_PAGE_LOAD_TIMEOUT);
+        timeoutConfigurer.configurePageLoadTimeout(customPageLoadTimeout, timeouts);
+        verify(timeouts).pageLoadTimeout(customPageLoadTimeout);
     }
 
     @Test
@@ -72,9 +65,9 @@ class TimeoutConfigurerTests
     {
         Timeouts timeouts = mock(Timeouts.class);
         UnsupportedCommandException exception = new UnsupportedCommandException("pagetimeout");
-        when(timeouts.pageLoadTimeout(PAGE_LOAD_TIMEOUT, PAGE_LOAD_TIMEOUT_TIMEUNIT)).thenThrow(exception);
+        when(timeouts.pageLoadTimeout(PAGE_LOAD_TIMEOUT)).thenThrow(exception);
         timeoutConfigurer.configure(timeouts);
-        verify(timeouts).setScriptTimeout(ASYNC_SCRIPT_TIMEOUT, ASYNC_SCRIPT_TIMEOUT_TIMEUNIT);
+        verify(timeouts).scriptTimeout(ASYNC_SCRIPT_TIMEOUT);
     }
 
     @Test
@@ -82,8 +75,8 @@ class TimeoutConfigurerTests
     {
         Timeouts timeouts = mock(Timeouts.class);
         UnsupportedCommandException exception = new UnsupportedCommandException("asynctimeout");
-        when(timeouts.setScriptTimeout(ASYNC_SCRIPT_TIMEOUT, ASYNC_SCRIPT_TIMEOUT_TIMEUNIT)).thenThrow(exception);
+        when(timeouts.scriptTimeout(ASYNC_SCRIPT_TIMEOUT)).thenThrow(exception);
         timeoutConfigurer.configure(timeouts);
-        verify(timeouts).pageLoadTimeout(PAGE_LOAD_TIMEOUT, PAGE_LOAD_TIMEOUT_TIMEUNIT);
+        verify(timeouts).pageLoadTimeout(PAGE_LOAD_TIMEOUT);
     }
 }
