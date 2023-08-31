@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,7 +66,7 @@ public final class JsonPathUtils
     public static <T> List<T> getData(String json, Collection<String> jsonPaths)
     {
         DocumentContext jsonPathContext = JsonPath.parse(json);
-        return jsonPaths.stream().map(jsonPathContext::<T>read).collect(Collectors.toList());
+        return jsonPaths.stream().map(jsonPathContext::<T>read).toList();
     }
 
     public static void setJacksonConfiguration()

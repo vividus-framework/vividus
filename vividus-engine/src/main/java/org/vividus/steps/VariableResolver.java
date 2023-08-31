@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,30 +77,28 @@ public class VariableResolver implements DryRunAwareExecutor
 
         for (int i = scanStartPosition; i < value.length(); i++)
         {
-            switch (value.charAt(i))
+            char currentChar = value.charAt(i);
+            if (currentChar == '$')
             {
-                case '$':
-                    if (i + 1 < value.length() && value.charAt(i + 1) == '{')
+                if (i + 1 < value.length() && value.charAt(i + 1) == '{')
+                {
+                    if (start == -1)
                     {
-                        if (start == -1)
-                        {
-                            start = i;
-                        }
-                        level++;
+                        start = i;
                     }
-                    break;
-                case '}':
-                    if (start != -1)
-                    {
-                        end = i;
-                    }
-                    if (level > 0)
-                    {
-                        level--;
-                    }
-                    break;
-                default:
-                    break;
+                    level++;
+                }
+            }
+            else if (currentChar == '}')
+            {
+                if (start != -1)
+                {
+                    end = i;
+                }
+                if (level > 0)
+                {
+                    level--;
+                }
             }
             if (level == 0 && end != -1)
             {

@@ -126,7 +126,7 @@ public class GoogleAnalyticsFacade
                              .entrySet()
                              .stream()
                              .map(e -> pairOf(e.getKey(), e.getValue()))
-                             .collect(Collectors.toList());
+                             .toList();
     }
 
     private BasicNameValuePair pairOf(String key, String value)

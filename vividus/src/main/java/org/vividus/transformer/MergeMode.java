@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public enum MergeMode
                 String merged = COLUMNS.merge(keywords, parameterConverters, List.of(table, supplementingTable),
                         tableProperties, Optional.empty(), true);
                 return new ExamplesTable(merged);
-            }).collect(Collectors.toList());
+            }).toList();
         }
 
         @Override
@@ -113,7 +113,7 @@ public enum MergeMode
                 String merged = ROWS.merge(keywords, parameterConverters, List.of(table, supplementingTable),
                         tableProperties, Optional.empty(), true);
                 return new ExamplesTable(merged);
-            }).collect(Collectors.toList());
+            }).toList();
         }
 
         @Override
@@ -126,8 +126,8 @@ public enum MergeMode
                          .flatMap(Set::stream)
                          .sorted(Entry.comparingByKey())
                          .map(Entry::getValue)
-                         .collect(Collectors.toList())
-            ).collect(Collectors.toList());
+                         .toList()
+            ).toList();
         }
     };
 
@@ -168,7 +168,7 @@ public enum MergeMode
                 .flatMap(List::stream)
                 .distinct()
                 .sorted()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static ExamplesTable buildSupplementingTable(TableProperties properties, String fillerValue,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 
 package org.vividus.ssh;
-
-import static java.util.stream.Collectors.toList;
 
 import java.util.List;
 import java.util.function.Function;
@@ -42,6 +40,6 @@ public class Commands
     {
         return Stream.of(StringUtils.split(joinedCommands, ';'))
                 .map(rawCommand -> new SingleCommand<>(rawCommand, commandFactory))
-                .collect(toList());
+                .toList();
     }
 }

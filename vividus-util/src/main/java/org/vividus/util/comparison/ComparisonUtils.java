@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class ComparisonUtils
@@ -39,7 +38,7 @@ public final class ComparisonUtils
                 .distinct()
                 .map(k -> new EntryComparisonResult(k, convertForConsistency(var1Map.get(k)),
                         convertForConsistency(var2Map.get(k))))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public static List<EntryComparisonResult> checkMapContainsSubMap(Map<?, ?> map, Map<?, ?> subMap)
@@ -47,7 +46,7 @@ public final class ComparisonUtils
         return subMap.keySet().stream()
                 .map(k -> new EntryComparisonResult(k, convertForConsistency(subMap.get(k)),
                         convertForConsistency(map.get(k))))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @SuppressWarnings("unchecked")
@@ -103,10 +102,8 @@ public final class ComparisonUtils
 
         private boolean isEqual(Object left, Object right)
         {
-            if (left instanceof BigDecimal && right instanceof BigDecimal)
+            if (left instanceof BigDecimal leftAsBigDecimal && right instanceof BigDecimal rightAsBigDecimal)
             {
-                BigDecimal leftAsBigDecimal = (BigDecimal) left;
-                BigDecimal rightAsBigDecimal = (BigDecimal) right;
                 int leftScale = leftAsBigDecimal.scale();
                 int rightScale = rightAsBigDecimal.scale();
                 if (leftScale < rightScale)

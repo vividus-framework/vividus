@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,17 +36,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CartesianProductTableTransformerTests
 {
-    private static final ExamplesTable FIRST_TABLE = new ExamplesTable(
-            "|name   |planet  |\n"
-          + "|Junit  |Jupiter |\n"
-          + "|Freddie|Mercury |\n"
+    private static final ExamplesTable FIRST_TABLE = new ExamplesTable("""
+            |name   |planet  |
+            |Junit  |Jupiter |
+            |Freddie|Mercury |
+            """
     );
 
-    private static final ExamplesTable SECOND_TABLE = new ExamplesTable(
-            "|col1 |col2 |\n"
-                    + "|row11|row12|\n"
-                    + "|row21|row22|\n"
-                    + "|row31|row32|"
+    private static final ExamplesTable SECOND_TABLE = new ExamplesTable("""
+            |col1 |col2 |
+            |row11|row12|
+            |row21|row22|
+            |row31|row32|"""
     );
 
     @Mock private TableProperties properties;
@@ -64,13 +65,15 @@ class CartesianProductTableTransformerTests
                 properties);
 
         String tableAsString = transformer.transform(StringUtils.EMPTY, null, properties);
-        String expectedTable = "|name|planet|col1|col2|number|\n"
-                             + "|Junit|Jupiter|row11|row12|911|\n"
-                             + "|Junit|Jupiter|row21|row22|911|\n"
-                             + "|Junit|Jupiter|row31|row32|911|\n"
-                             + "|Freddie|Mercury|row11|row12|911|\n"
-                             + "|Freddie|Mercury|row21|row22|911|\n"
-                             + "|Freddie|Mercury|row31|row32|911|\n";
+        String expectedTable = """
+                |name|planet|col1|col2|number|
+                |Junit|Jupiter|row11|row12|911|
+                |Junit|Jupiter|row21|row22|911|
+                |Junit|Jupiter|row31|row32|911|
+                |Freddie|Mercury|row11|row12|911|
+                |Freddie|Mercury|row21|row22|911|
+                |Freddie|Mercury|row31|row32|911|
+                """;
         assertEquals(expectedTable, tableAsString);
     }
 

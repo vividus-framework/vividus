@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -271,7 +270,7 @@ public class BlobStorageSteps
                                                     .stream()
                                                     .map(BlobItem::getName)
                                                     .filter(nameMatcher::matches)
-                                                    .collect(Collectors.toList());
+                                                    .toList();
         variableContext.putVariable(scopes, variableName, blobNames);
     }
 
@@ -339,7 +338,7 @@ public class BlobStorageSteps
         List<String> result = filter.getResultsLimit()
                 .map(filteredBlobNames::limit)
                 .orElse(filteredBlobNames)
-                .collect(Collectors.toList());
+                .toList();
 
         variableContext.putVariable(scopes, variableName, result);
     }

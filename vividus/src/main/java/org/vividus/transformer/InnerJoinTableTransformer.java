@@ -75,7 +75,7 @@ public class InnerJoinTableTransformer extends AbstractTableLoadingTransformer
                                     jointRow.putAll(leftRow);
                                     jointRow.putAll(rightRow);
                                     return jointRow;
-                                }))).collect(Collectors.toList());
+                                }))).toList();
         return ExamplesTable.empty().withRows(examplesTableRows);
     }
 

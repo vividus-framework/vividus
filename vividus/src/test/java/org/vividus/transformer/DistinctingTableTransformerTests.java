@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,23 +32,23 @@ class DistinctingTableTransformerTests
         var parameterConverters = new ParameterConverters();
         var tableParsers = new TableParsers(parameterConverters);
         var tableProperties = new TableProperties("byColumnNames=key1;key3", new Keywords(), parameterConverters);
-        var inputTable =
-                  "|key1|key2|key3|\n"
-                + "|a   |x   |a   |\n"
-                + "|a   |y   |a   |\n"
-                + "|b   |x   |a   |\n"
-                + "|b   |y   |a   |\n"
-                + "|b   |x   |b   |\n"
-                + "|b   |y   |b   |\n"
-                + "|a   |x   |b   |\n"
-                + "|a   |y   |b   |";
+        var inputTable = """
+                |key1|key2|key3|
+                |a   |x   |a   |
+                |a   |y   |a   |
+                |b   |x   |a   |
+                |b   |y   |a   |
+                |b   |x   |b   |
+                |b   |y   |b   |
+                |a   |x   |b   |
+                |a   |y   |b   |""";
         String result = new DistinctingTableTransformer().transform(inputTable, tableParsers, tableProperties);
-        var distinctTable =
-                  "|key1|key3|\n"
-                + "|a|a|\n"
-                + "|b|a|\n"
-                + "|b|b|\n"
-                + "|a|b|";
+        var distinctTable = """
+                |key1|key3|
+                |a|a|
+                |b|a|
+                |b|b|
+                |a|b|""";
         assertEquals(distinctTable, result);
     }
 }

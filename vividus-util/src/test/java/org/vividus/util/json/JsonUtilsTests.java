@@ -222,11 +222,10 @@ class JsonUtilsTests
             {
                 return false;
             }
-            if (!(obj instanceof TestClass))
+            if (!(obj instanceof TestClass other))
             {
                 return false;
             }
-            TestClass other = (TestClass) obj;
             return Objects.equals(id, other.id) && Objects.equals(firstName, other.firstName);
         }
     }

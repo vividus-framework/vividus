@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -110,7 +109,7 @@ public class StepsCounter
                 .flatMap(story -> story.getScenarios().stream())
                 .flatMap(scenario -> scenario.getSteps().stream())
                 .filter(step -> !step.startsWith(keywords.ignorable()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private BatchConfiguration createBatchConfiguration(String storyLocation)

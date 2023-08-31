@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.function.FailableBiFunction;
@@ -101,9 +100,7 @@ public class XrayExporter
         String testSetKey = xrayExporterOptions.getTestSetKey();
         if (testSetKey != null)
         {
-            List<String> testCaseIds = testCases.stream()
-                                                .map(Entry::getKey)
-                                                .collect(Collectors.toList());
+            List<String> testCaseIds = testCases.stream().map(Entry::getKey).toList();
 
             executeSafely(() -> xrayFacade.updateTestSet(testSetKey, testCaseIds), "test set", testSetKey);
         }

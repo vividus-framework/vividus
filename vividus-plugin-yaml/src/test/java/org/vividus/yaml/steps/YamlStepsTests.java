@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,47 +42,55 @@ class YamlStepsTests
     private static final String VARIABLE_NAME = "var";
     private static final Set<VariableScope> VARIABLE_SCOPES = Set.of(VariableScope.SCENARIO);
 
-    private static final String YAML = "---\n"
-            + "a: 1                       # an integer\n"
-            + "b: \"12\"                   # a string, disambiguated by quotes\n"
-            + "c: 123.0                   # a float\n"
-            + "d: !!float 1234            # also a float via explicit data type prefixed by (!!)\n"
-            + "e: !!str 12345             # a string, disambiguated by explicit type\n"
-            + "f: !!str Yes               # a string via explicit type\n"
-            + "g: Yes                     # a boolean True (yaml1.1), string \"Yes\" (yaml1.2)\n"
-            + "h: Yes we have No bananas  # a string, \"Yes\" and \"No\" disambiguated by context."
-            + "receipt:     Oz-Ware Purchase Invoice\n"
-            + "date:        2012-08-06\n"
-            + "customer:\n"
-            + "    first_name:   Dorothy\n"
-            + "    family_name:  Gale\n\n"
-            + "items:\n"
-            + "    - part_no:   A4786\n"
-            + "      descrip:   Water Bucket (Filled)\n"
-            + "      price:     1.47\n"
-            + "      quantity:  4\n\n"
-            + "    - part_no:   E1628\n"
-            + "      descrip:   High Heeled \"Ruby\" Slippers\n"
-            + "      size:      8\n"
-            + "      price:     133.7\n"
-            + "      quantity:  1\n\n"
-            + "bill-to:  &id001\n"
-            + "    street: |\n"
-            + "            123 Tornado Alley\n"
-            + "            Suite 16\n"
-            + "    city:   East Centerville\n"
-            + "    state:  KS\n\n"
-            + "ship-to:  *id001\n\n"
-            + "specialDelivery:  >\n"
-            + "    Follow the Yellow Brick\n"
-            + "    Road to the Emerald City.\n"
-            + "    Pay no attention to the\n"
-            + "    man behind the curtain.\n\n"
-            + "comments:    [\"A\", \"B\"]\n\n"
-            + "extraAdditions:\n"
-            + "    - cat\n"
-            + "    - dog\n"
-            + "...";
+    private static final String YAML = """
+            ---
+            a: 1                       # an integer
+            b: "12"                   # a string, disambiguated by quotes
+            c: 123.0                   # a float
+            d: !!float 1234            # also a float via explicit data type prefixed by (!!)
+            e: !!str 12345             # a string, disambiguated by explicit type
+            f: !!str Yes               # a string via explicit type
+            g: Yes                     # a boolean True (yaml1.1), string "Yes" (yaml1.2)
+            h: Yes we have No bananas  # a string, "Yes" and "No" disambiguated by context.receipt:\
+                 Oz-Ware Purchase Invoice
+            date:        2012-08-06
+            customer:
+                first_name:   Dorothy
+                family_name:  Gale
+
+            items:
+                - part_no:   A4786
+                  descrip:   Water Bucket (Filled)
+                  price:     1.47
+                  quantity:  4
+
+                - part_no:   E1628
+                  descrip:   High Heeled "Ruby" Slippers
+                  size:      8
+                  price:     133.7
+                  quantity:  1
+
+            bill-to:  &id001
+                street: |
+                        123 Tornado Alley
+                        Suite 16
+                city:   East Centerville
+                state:  KS
+
+            ship-to:  *id001
+
+            specialDelivery:  >
+                Follow the Yellow Brick
+                Road to the Emerald City.
+                Pay no attention to the
+                man behind the curtain.
+
+            comments:    ["A", "B"]
+
+            extraAdditions:
+                - cat
+                - dog
+            ...""";
 
     @Mock private VariableContext variableContext;
     @Mock private ISoftAssert softAssert;

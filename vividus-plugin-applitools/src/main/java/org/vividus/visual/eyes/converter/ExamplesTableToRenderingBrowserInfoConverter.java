@@ -20,7 +20,6 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.applitools.eyes.RectangleSize;
 import com.applitools.eyes.selenium.BrowserType;
@@ -66,7 +65,7 @@ public class ExamplesTableToRenderingBrowserInfoConverter
                 .filter(e -> !supportedOptions.contains(e.getKey()) && StringUtils.isNoneBlank(e.getValue())
                         && !PROFILE.equals(e.getKey()))
                 .map(Entry::getKey)
-                .collect(Collectors.toList());
+                .toList();
 
         Validate.isTrue(unsupportedOptions.isEmpty(), "The %s profile supports only %s options, but got %s",
                 profile, supportedOptions, unsupportedOptions);

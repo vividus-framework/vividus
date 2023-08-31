@@ -280,13 +280,10 @@ public final class ConfigurationResolver
         for (Entry<Object, Object> entry : properties.entrySet())
         {
             Object value = entry.getValue();
-            if (value instanceof String)
+            if (value instanceof String strValue && propertyPlaceholders.stream().flatMap(Set::stream).noneMatch(
+                    strValue::contains))
             {
-                String strValue = (String) value;
-                if (propertyPlaceholders.stream().flatMap(Set::stream).noneMatch(strValue::contains))
-                {
-                    entry.setValue(SPEL_RESOLVER.resolve(strValue));
-                }
+                entry.setValue(SPEL_RESOLVER.resolve(strValue));
             }
         }
     }

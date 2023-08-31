@@ -18,7 +18,6 @@ package org.vividus.steps.ui.web;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.jbehave.core.annotations.Alias;
@@ -91,7 +90,7 @@ public class NestedSteps
                 .assertIfNumberOfElementsFound("Elements to iterate with steps", locator, number, comparisonRule);
         if (!elements.isEmpty())
         {
-            List<String> cssSelectors = cssSelectorFactory.getCssSelectors(elements).collect(Collectors.toList());
+            List<String> cssSelectors = cssSelectorFactory.getCssSelectors(elements).toList();
             runStepsWithContextReset(() ->
             {
                 uiContext.putSearchContext(elements.get(0), () -> { });

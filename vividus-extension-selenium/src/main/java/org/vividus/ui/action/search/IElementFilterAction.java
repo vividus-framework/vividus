@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.vividus.ui.action.search;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebElement;
@@ -28,7 +27,7 @@ public interface IElementFilterAction extends IElementAction
     {
         if (StringUtils.isNotEmpty(value))
         {
-            return elements.stream().filter(element -> matches(element, value)).collect(Collectors.toList());
+            return elements.stream().filter(element -> matches(element, value)).toList();
         }
         return elements;
     }

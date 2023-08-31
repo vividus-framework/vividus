@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.vividus.steps.ui;
 
-import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
@@ -147,7 +146,7 @@ public class GenericElementSteps
             {
                 softAssert.assertEquals(
                         String.format("The elements are sorted in %s order", sortingOrder.name().toLowerCase()),
-                        texts.stream().sorted(sortingOrder.getSortingType()).collect(toList()), texts);
+                        texts.stream().sorted(sortingOrder.getSortingType()).toList(), texts);
             }
             else
             {

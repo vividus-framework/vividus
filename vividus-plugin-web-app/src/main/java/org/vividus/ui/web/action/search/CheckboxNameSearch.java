@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ public class CheckboxNameSearch extends AbstractWebElementSearchAction implement
         {
             checkboxLabels = findElements(searchContext, getXPathLocator(CHECKBOX_LABEL_DEEP), parameters).stream()
                     .filter(e -> getWebElementActions().getElementText(e).contains(checkBoxName))
-                    .collect(Collectors.toList());
+                    .toList();
             return searchCheckboxByLabels(searchContext, nonDisplayedParameters, checkboxLabels);
         }
         return matchedCheckboxLabels;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import static org.vividus.ui.web.action.CssSelectorFactory.CSS_SELECTOR_FACTORY_
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,8 +80,7 @@ class CssSelectorFactoryTests
         WebElement webElement2 = mock(WebElement.class);
         doReturn(CSS_SELECTORS).when(javascriptActions).executeScript(CSS_SELECTOR_CALCULATION,
             Arrays.asList(webElement1, webElement2));
-        assertEquals(Arrays.asList(CSS_SELECTOR1, SHARP_TWO), cssSelectorFactory
-                .getCssSelectors(Arrays.asList(webElement1, webElement2))
-                .collect(Collectors.toList()));
+        assertEquals(Arrays.asList(CSS_SELECTOR1, SHARP_TWO),
+                cssSelectorFactory.getCssSelectors(Arrays.asList(webElement1, webElement2)).toList());
     }
 }

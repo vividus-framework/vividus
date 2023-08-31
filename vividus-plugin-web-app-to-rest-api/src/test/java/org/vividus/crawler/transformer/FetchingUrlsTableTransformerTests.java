@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,11 +45,12 @@ class FetchingUrlsTableTransformerTests
     {
         var tableProperties = new TableProperties("", keywords, parameterConverters);
         tableProperties.getProperties().setProperty(COLUMN, URLS);
-        var expected = "|urls|\n"
-                + "|/first|\n"
-                + "|/second|\n"
-                + "|/fourth%25|\n"
-                + "|/third|";
+        var expected = """
+                |urls|
+                |/first|
+                |/second|
+                |/fourth%25|
+                |/third|""";
         assertEquals(expected, transformer.transform("", null, tableProperties));
     }
 

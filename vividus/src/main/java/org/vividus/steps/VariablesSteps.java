@@ -158,14 +158,10 @@ public class VariablesSteps
 
         for (Entry<?, Object> entry : map.entrySet())
         {
-            if (entry.getValue() instanceof List)
+            if (entry.getValue() instanceof List<?> valueAsList && valueAsList.size() == 1)
             {
-                List<?> valueAsList = (List<?>) entry.getValue();
-                if (valueAsList.size() == 1)
-                {
-                    expandedMap.put(entry.getKey(), valueAsList.get(0));
-                    continue;
-                }
+                expandedMap.put(entry.getKey(), valueAsList.get(0));
+                continue;
             }
             return map;
         }

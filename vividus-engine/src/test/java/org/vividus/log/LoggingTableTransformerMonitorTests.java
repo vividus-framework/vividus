@@ -52,8 +52,10 @@ class LoggingTableTransformerMonitorTests
                                                       + "Properties: {{}}" + LINE_SEPARATOR
                                                       + "Output (transformed) table:" + LINE_SEPARATOR
                                                       + "{}";
-    private static final String EXAMPLE_TABLE = "|Earth|Moon  |\n"
-                                              + "!Mars !Deimos!\n";
+    private static final String EXAMPLE_TABLE = """
+            |Earth|Moon  |
+            !Mars !Deimos!
+            """;
     private static final String LOGGED_EXAMPLE_TABLE = "|Earth|Moon  |\n"
                                                      + "!Mars !Deimos!";
     private static final String LOGGED_PROPERTIES = "transformer=TEST_TRANSFORMER, valueSeparator=!";

@@ -36,17 +36,11 @@ public class AccessibilityCheckResult
         this.url = new URIBuilder(URI.create(url)).addParameter("accessibility", "true").toString();
         this.status = status.getStatus();
 
-        switch (status.getVersion())
+        this.guideline = String.format(GUIDELINE_FORMAT, switch (status.getVersion())
         {
-            case WCAG_2_0:
-                this.guideline = String.format(GUIDELINE_FORMAT, "WCAG 2.0", status.getLevel());
-                break;
-            case WCAG_2_1:
-                this.guideline = String.format(GUIDELINE_FORMAT, "WCAG 2.1", status.getLevel());
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported accessibility standard: " + status.getVersion());
-        }
+            case WCAG_2_0 -> "WCAG 2.0";
+            case WCAG_2_1 -> "WCAG 2.1";
+        }, status.getLevel());
     }
 
     public String getUrl()

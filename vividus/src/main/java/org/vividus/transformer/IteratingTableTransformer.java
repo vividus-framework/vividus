@@ -17,7 +17,6 @@
 package org.vividus.transformer;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.Validate;
@@ -44,7 +43,7 @@ public class IteratingTableTransformer implements ExtendedTableTransformer
 
         List<String> column = IntStream.rangeClosed(startInclusive, endInclusive)
                 .mapToObj(String::valueOf)
-                .collect(Collectors.toList());
+                .toList();
         return ExamplesTableProcessor.buildExamplesTableFromColumns(ITERATOR, List.of(column), properties);
     }
 }

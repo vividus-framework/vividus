@@ -17,7 +17,6 @@
 package org.vividus.ui.web.action.search;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -58,7 +57,7 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
             return findElements(searchContext, newLocator, parameters)
                     .stream()
                     .filter(element -> matchesToText(element, text))
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return elements;
     }
@@ -92,17 +91,13 @@ public abstract class AbstractWebElementSearchAction extends AbstractElementActi
         {
             return true;
         }
-        switch (textTransform)
+        return switch (textTransform)
         {
-            case "uppercase":
-                return StringUtils.isAllUpperCase(word);
-            case "lowercase":
-                return StringUtils.isAllLowerCase(word);
-            case "capitalize":
-                return Character.isUpperCase(word.charAt(0));
-            default:
-                return false;
-        }
+            case "uppercase" -> StringUtils.isAllUpperCase(word);
+            case "lowercase" -> StringUtils.isAllLowerCase(word);
+            case "capitalize" -> Character.isUpperCase(word.charAt(0));
+            default -> false;
+        };
     }
 
     protected IWebElementActions getWebElementActions()

@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -51,8 +50,7 @@ class BatchStorageTests
 {
     private static final List<String> BATCH_NUMBERS = List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11");
     private static final String BATCH = "batch-";
-    private static final List<String> BATCH_KEYS = BATCH_NUMBERS.stream().map(n -> BATCH + n).collect(
-            Collectors.toList());
+    private static final List<String> BATCH_KEYS = BATCH_NUMBERS.stream().map(n -> BATCH + n).toList();
 
     private static final Duration EXPECTED_DURATION = Duration.ofSeconds(300);
     private static final String DEFAULT_RESOURCE_LOCATION = "";

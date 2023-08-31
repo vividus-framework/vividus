@@ -18,7 +18,6 @@ package org.vividus.ui.web.action.search;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.codeborne.selenide.selector.ByShadow;
@@ -158,7 +157,7 @@ public enum WebLocatorType implements LocatorType
         {
             List<String> searchValues = Stream.of(StringUtils.split(searchValue, ';'))
                     .map(String::strip)
-                    .collect(Collectors.toList());
+                    .toList();
             String targetValue = searchValues.get(searchValues.size() - 1);
             String upperShadowHost = searchValues.get(0);
             String[] innerShadowHosts = searchValues.stream().skip(1)

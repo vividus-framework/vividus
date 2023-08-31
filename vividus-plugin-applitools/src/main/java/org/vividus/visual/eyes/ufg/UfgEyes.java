@@ -17,7 +17,6 @@
 package org.vividus.visual.eyes.ufg;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.applitools.eyes.EyesRunner;
@@ -39,6 +38,6 @@ public class UfgEyes extends Eyes
     {
         return Stream.of(eyesRunner.getAllTestResults(false).getAllResults())
                      .map(ApplitoolsTestResults::new)
-                     .collect(Collectors.toList());
+                     .toList();
     }
 }

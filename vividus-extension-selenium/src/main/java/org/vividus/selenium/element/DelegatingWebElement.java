@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,12 +168,11 @@ public class DelegatingWebElement implements WebElement, WrapsElement, Locatable
     @Override
     public boolean equals(Object obj)
     {
-        if (!(obj instanceof WebElement))
+        if (!(obj instanceof WebElement that))
         {
             return false;
         }
 
-        WebElement that = (WebElement) obj;
         if (that instanceof WrapsElement)
         {
             that = ((WrapsElement) that).getWrappedElement();

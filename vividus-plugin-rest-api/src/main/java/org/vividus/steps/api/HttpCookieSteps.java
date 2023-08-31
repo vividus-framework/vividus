@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.greaterThan;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.hc.client5.http.cookie.Cookie;
 import org.apache.hc.client5.http.cookie.SetCookie;
@@ -79,7 +78,7 @@ public class HttpCookieSteps
                 LOGGER.info("Filtering cookies by path attribute '{}'", rootPath);
                 cookies = cookies.stream()
                         .filter(cookie -> rootPath.equals(cookie.getPath()))
-                        .collect(Collectors.toList());
+                        .toList();
                 if (softAssert.assertEquals(String.format("Number of cookies with name '%s' and path attribute '%s'",
                         cookieName, rootPath), 1, cookies.size()))
                 {
@@ -126,6 +125,6 @@ public class HttpCookieSteps
     {
         return cookieStoreProvider.getCookieStore().getCookies().stream()
                 .filter(cookie -> cookie.getName().equals(cookieName))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

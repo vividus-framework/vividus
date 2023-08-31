@@ -258,17 +258,13 @@ public class HttpRequestSteps
 
     private static Object castType(String typeName, String value)
     {
-        switch (typeName)
+        return switch (typeName)
         {
-            case "boolean":
-                return Boolean.parseBoolean(value);
-            case "int":
-                return Integer.parseInt(value);
-            case "org.apache.hc.core5.util.Timeout":
-                return Timeout.ofMilliseconds(Integer.parseInt(value));
-            default:
-                return value;
-        }
+            case "boolean" -> Boolean.parseBoolean(value);
+            case "int" -> Integer.parseInt(value);
+            case "org.apache.hc.core5.util.Timeout" -> Timeout.ofMilliseconds(Integer.parseInt(value));
+            default -> value;
+        };
     }
 
     public void setApiEndpoint(String apiEndpoint)

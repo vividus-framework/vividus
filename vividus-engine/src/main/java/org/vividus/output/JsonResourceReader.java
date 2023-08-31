@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
@@ -51,7 +50,7 @@ public final class JsonResourceReader
         List<FileEntry> fileEntries = new ArrayList<>();
         try (Stream<Path> paths = Files.walk(sourceDirectory))
         {
-            for (Path path : paths.filter(Files::isRegularFile).collect(Collectors.toList()))
+            for (Path path : paths.filter(Files::isRegularFile).toList())
             {
                 File file = path.toFile();
                 if (namesOfFilesToIgnore.contains(file.getName()))

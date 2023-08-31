@@ -50,14 +50,14 @@ class JsonTableTransformerTests
                 + "column_codeSystem=$.superCodes..codeSystem;"
                 + "column_type=$.superCodes..type");
         var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
-        var expectedTable =
-                "|column_code|column_codeSystem|column_type|\n"
-                        + "|107214|VIVIDUS|A|\n"
-                        + "|107224|VIVIDUS|B|\n"
-                        + "|107314|VIVIDUS|C|\n"
-                        + "|107324|VIVIDUS|D|\n"
-                        + "|107XX4|VIVIDUS|E|\n"
-                        + "|1|true|F|";
+        var expectedTable = """
+                |column_code|column_codeSystem|column_type|
+                |107214|VIVIDUS|A|
+                |107224|VIVIDUS|B|
+                |107314|VIVIDUS|C|
+                |107324|VIVIDUS|D|
+                |107XX4|VIVIDUS|E|
+                |1|true|F|""";
         assertEquals(expectedTable, table);
     }
 

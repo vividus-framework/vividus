@@ -22,10 +22,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -142,8 +140,7 @@ class PropertiesLoader
                 throw new IllegalStateException(
                         "No files with properties were found at location with pattern: " + resourceLocation);
             }
-            propertyResources.addAll(Stream.of(resources).filter(Resource::exists)
-                .filter(resourceFilter).collect(Collectors.toList()));
+            propertyResources.addAll(Stream.of(resources).filter(Resource::exists).filter(resourceFilter).toList());
         }
         return propertyResources;
     }
@@ -161,13 +158,12 @@ class PropertiesLoader
     private Properties validate(Properties properties, Resource propertyResources)
     {
         List<String> configurationProperties =
-            properties.entrySet()
+            properties.keySet()
                       .stream()
-                      .map(Entry::getKey)
                       .map(String.class::cast)
                       .filter(k -> k.startsWith(ConfigurationResolver.CONFIGURATION_PROPERTY_FAMILY)
                                 || k.startsWith(ConfigurationResolver.CONFIGURATION_SET_PROPERTY_FAMILY))
-                      .collect(Collectors.toList());
+                      .toList();
         if (configurationProperties.isEmpty())
         {
             return properties;

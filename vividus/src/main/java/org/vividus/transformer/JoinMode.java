@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public enum JoinMode
                     .collect(groupingBy(Entry::getKey, LinkedHashMap::new,
                             mapping(Entry::getValue, Collectors.joining(DELIMITER)))
                     );
-            List<List<String>> tableData = tableMap.values().stream().map(List::of).collect(Collectors.toList());
+            List<List<String>> tableData = tableMap.values().stream().map(List::of).toList();
 
             return ExamplesTableProcessor.buildExamplesTableFromColumns(tableMap.keySet(), tableData, properties);
         }
@@ -101,7 +101,7 @@ public enum JoinMode
     private static List<String> buildColumn(List<Map<String, String>> rows,
             Function<Map<String, String>, String> cellBuilder)
     {
-        return rows.stream().map(cellBuilder).collect(Collectors.toList());
+        return rows.stream().map(cellBuilder).toList();
     }
 
     protected abstract String join(ExamplesTable table, TableProperties properties);

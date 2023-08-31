@@ -22,7 +22,6 @@ import static org.apache.commons.lang3.Validate.isTrue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -54,7 +53,7 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
                 .map(t -> t.replace("\\;", ";").trim())
                 .distinct()
                 .filter(not(String::isBlank))
-                .collect(Collectors.toList());
+                .toList();
 
         ExamplesTableFactory factory = configuration.examplesTableFactory();
 
@@ -74,7 +73,7 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
         List<DescriptiveTable> pathTables = IntStream.range(0, tables.size())
                  .mapToObj(index -> new DescriptiveTable(String.format("table at index %d", index + 1),
                         factory.createExamplesTable(tables.get(index))))
-                 .collect(Collectors.toList());
+                 .toList();
 
         descriptiveTables.addAll(0, pathTables);
 
@@ -83,9 +82,7 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
             checkEmptyTables(descriptiveTables);
         }
 
-        return descriptiveTables.stream()
-                                .map(DescriptiveTable::getTable)
-                                .collect(Collectors.toList());
+        return descriptiveTables.stream().map(DescriptiveTable::getTable).toList();
     }
 
     private String getSeparatorsAsString(TableProperties tableProperties)
@@ -109,7 +106,7 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
         List<String> emptyTables = tables.stream()
                                          .filter(w -> w.getTable().getRowCount() == 0)
                                          .map(DescriptiveTable::getDescription)
-                                         .collect(Collectors.toList());
+                                         .toList();
 
         isTrue(emptyTables.isEmpty(), "Empty ExamplesTable-s are not allowed, but %s is/are empty", emptyTables);
     }

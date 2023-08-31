@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.hc.core5.http.ContentType;
@@ -345,7 +344,7 @@ public class HttpResponseValidationSteps
 
     private static List<String> extractHeaderElementsNames(Header header)
     {
-        return Stream.of(MessageSupport.parse(header)).map(HeaderElement::getName).collect(Collectors.toList());
+        return Stream.of(MessageSupport.parse(header)).map(HeaderElement::getName).toList();
     }
 
     private boolean isResponseCodeIsEqualToExpected(HttpResponse response, int expectedResponseCode)

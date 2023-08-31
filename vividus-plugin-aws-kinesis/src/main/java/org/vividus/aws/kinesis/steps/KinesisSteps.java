@@ -21,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.amazonaws.services.kinesis.AmazonKinesis;
 import com.amazonaws.services.kinesis.AmazonKinesisClientBuilder;
@@ -126,7 +125,7 @@ public class KinesisSteps
                 )
                 .map(amazonKinesisClient::getShardIterator)
                 .map(GetShardIteratorResult::getShardIterator)
-                .collect(Collectors.toList());
+                .toList();
 
         LOGGER.info("Shard iterators are created: {}", shardIterators);
         testContext.put(KEY, shardIterators);

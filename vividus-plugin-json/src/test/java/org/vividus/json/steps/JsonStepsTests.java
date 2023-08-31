@@ -379,11 +379,14 @@ class JsonStepsTests
         steps.assertElementByJsonPath(json, "$", expected, EnumSet.of(Option.IGNORING_ARRAY_ORDER));
         verify(softAssert).recordFailedAssertion("Different value found when comparing expected array element [0] to"
                 + " actual element [0].");
-        verify(softAssert).recordFailedAssertion("Different keys found in node \"[0]\", missing: \"[0].missing_value\""
-                + ", extra: \"[0].extra_value\",\"[0].line_terminator\", expected: <{\"different_value\":\"nf83u\""
-                + ",\"missing_value\":\"2k3nf\",\"numbers_array\":[0, 1, 2]}> but was: <{\"different_value\":\"2ince\""
-                + ",\"extra_value\":\"4ujeu\",\"line_terminator\":\"jfnse4\n4mn2j\nm38uff\n\",\"numbers_array\":"
-                + "[0, -1]}>");
+        verify(softAssert).recordFailedAssertion("""
+                Different keys found in node "[0]", missing: "[0].missing_value", \
+                extra: "[0].extra_value","[0].line_terminator", \
+                expected: <{"different_value":"nf83u","missing_value":"2k3nf","numbers_array":[0, 1, 2]}> \
+                but was: <{"different_value":"2ince","extra_value":"4ujeu","line_terminator":"jfnse4
+                4mn2j
+                m38uff
+                ","numbers_array":[0, -1]}>""");
         verify(softAssert).recordFailedAssertion("Different value found in node \"[0].different_value\", expected:"
                 + " <\"nf83u\"> but was: <\"2ince\">.");
         verify(softAssert).recordFailedAssertion("Array \"[0].numbers_array\" has different length, expected: <3>"

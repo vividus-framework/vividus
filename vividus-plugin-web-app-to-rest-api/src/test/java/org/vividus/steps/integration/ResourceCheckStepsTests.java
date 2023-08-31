@@ -118,31 +118,32 @@ class ResourceCheckStepsTests
     private static final String INVALID_URL_ERROR =
             "java.net.URISyntaxException: Illegal character in query at index 62: " + INVALID_URL;
 
-    private static final String FIRST_PAGE =
-          "<!DOCTYPE html>\n"
-        + "<html>\n"
-        + "<head>\n"
-        +   "<meta charset=\"UTF-8\">\n"
-        +   "<script src='https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js' />"
-        + "<title>Title of the document</title>\n"
-        + "</head>\n"
-        + "<body>\n"
-        + "  <a id='root' href='/'>Root</a>\n"
-        + "  <a id='https' href='https://vividus.org'>Eeny, meeny, miny, moe</a>\n"
-        + "  <a id='relative' href='/faq'>Catch a tiger by the toe.</a>\n"
-        + "  <a id='js' href='javascript:void(0)'>If he hollers, let him go,</a>\n"
-        + "  <a id='sharp' href='#'>Eeny, meeny, miny, moe.</a>\n"
-        + "  <a id='mailto' href='mailto:by.kalinin@gmail.com'>Say hi</a>\n"
-        + "  <a id='http' href='http://www.thucydides.info'>Just ignore it</a>\n"
-        + "  <a id='ftp' href='ftp://all-the-date.here'>Not supported scheme</a>\n"
-        + "  <a id='query-params-one' href='/products?name=pelmeshki'>Dumplings</a>\n"
-        + "  <a id='query-params-two' href='/products?name=smetanka'>Sour cream</a>\n"
-        + "  <img id='image' src='https://avatars0.githubusercontent.com/u/48793437?s=200&v=4'/>\n"
-        + "  <img class='image (gif)' src='https://github.githubassets.com/images/spinners/octocat-spinner-32.gif'/>\n"
-        + "  <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUAAsTAAALEwEAmpwYAAAAAM4HdnM8AAAAABJRU5ErkJggg=='/>\n"
-        + "  <iframe src='https://selenide.org'/>"
-        + "  <img id='shortcut-scheme' src='//images.ctfassets.net/us_cool_mint_pocketpaks_breath_strips.png'/>\n"
-        + "</body>\n</html>";
+    private static final String FIRST_PAGE = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+            <meta charset="UTF-8">
+            <script src='https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js' />\
+            <title>Title of the document</title>
+            </head>
+            <body>
+              <a id='root' href='/'>Root</a>
+              <a id='https' href='https://vividus.org'>Eeny, meeny, miny, moe</a>
+              <a id='relative' href='/faq'>Catch a tiger by the toe.</a>
+              <a id='js' href='javascript:void(0)'>If he hollers, let him go,</a>
+              <a id='sharp' href='#'>Eeny, meeny, miny, moe.</a>
+              <a id='mailto' href='mailto:by.kalinin@gmail.com'>Say hi</a>
+              <a id='http' href='http://www.thucydides.info'>Just ignore it</a>
+              <a id='ftp' href='ftp://all-the-date.here'>Not supported scheme</a>
+              <a id='query-params-one' href='/products?name=pelmeshki'>Dumplings</a>
+              <a id='query-params-two' href='/products?name=smetanka'>Sour cream</a>
+              <img id='image' src='https://avatars0.githubusercontent.com/u/48793437?s=200&v=4'/>
+              <img class='image (gif)' src='https://github.githubassets.com/images/spinners/octocat-spinner-32.gif'/>
+              <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUAAsTAAALEwEAmpwYAAAAAM4HdnM8AAAAABJRU5ErkJggg=='/>
+              <iframe src='https://selenide.org'/>  \
+              <img id='shortcut-scheme' src='//images.ctfassets.net/us_cool_mint_pocketpaks_breath_strips.png'/>
+            </body>
+            </html>""";
 
     private static final String SECOND_PAGE =
             "<!DOCTYPE html>"
