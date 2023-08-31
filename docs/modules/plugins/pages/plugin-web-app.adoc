@@ -41,6 +41,16 @@ include::partial$proxy-properties.adoc[]
 |`<empty>`
 |Provides possibility to attach screenshot for failed proxy steps
 
+|`web.timeouts.page-load`
+|{durations-format-link}
+|`PT1M`
+|Sets the amount of time to wait for a page load to complete before throwing an error.
+
+|`web.timeouts.async-script`
+|{durations-format-link}
+|`PT1M`
+|Sets the amount of time to wait for an asynchronous script to finish execution before throwing an error.
+
 |`web.driver.<browser-name>.command-line-arguments`
 |string with arguments
 |`<empty>`

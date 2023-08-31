@@ -12,10 +12,8 @@
     <context:component-scan base-package="org.vividus.converter.ui.web" />
 
     <bean id="timeoutConfigurer" class="org.vividus.selenium.TimeoutConfigurer">
-        <property name="pageLoadTimeout" value="${selenium.timeout.page-load-timeout}" />
-        <property name="pageLoadTimeoutTimeUnit" value="${selenium.timeout.page-load-timeout-unit}" />
-        <property name="asyncScriptTimeout" value="${selenium.timeout.async-script-timeout}" />
-        <property name="asyncScriptTimeoutTimeUnit" value="${selenium.timeout.async-script-timeout-unit}" />
+        <property name="pageLoadTimeout" value="${web.timeouts.page-load}" />
+        <property name="asyncScriptTimeout" value="${web.timeouts.async-script}" />
     </bean>
 
     <bean id="webDriverFactory" class="org.vividus.selenium.WebDriverFactory" parent="parentWebDriverFactory">
