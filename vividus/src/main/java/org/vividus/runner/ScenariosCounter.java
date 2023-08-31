@@ -31,12 +31,14 @@ import org.junit.runners.model.InitializationError;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
-// Fix once deprecated child class is removed
-@SuppressWarnings({ "checkstyle:HideUtilityClassConstructor", "PMD.UseUtilityClass" })
-public class ScenariosCounter
+public final class ScenariosCounter
 {
     private static final String DEFAULT_STORY_LOCATION = "story";
     private static final String FORMATTER = "%5d | %s";
+
+    private ScenariosCounter()
+    {
+    }
 
     public static void main(String[] args) throws ParseException, InitializationError, ReflectiveOperationException
     {
