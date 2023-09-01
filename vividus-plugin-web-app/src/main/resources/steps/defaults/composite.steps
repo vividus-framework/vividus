@@ -157,3 +157,7 @@ When I close current tab
 Composite: When I attempt to close current window with possibility to handle alert
 !-- DEPRECATED: 0.7.0, When I attempt to close current tab with possibility to handle alert
 When I attempt to close current tab with possibility to handle alert
+
+Composite: When I switch back to the page
+!-- DEPRECATED: 0.7.0, When I switch back to page
+When I switch back to page

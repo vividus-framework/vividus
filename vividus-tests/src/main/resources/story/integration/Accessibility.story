@@ -14,7 +14,7 @@ When I perform accessibility scan:
 
 
 Scenario: Validate against Section 508
-When I switch back to the page
+When I switch back to page
 When I perform accessibility scan:
 |standard   |level  |elementsToCheck  |violationsToIgnore       |
 |Section_508|WARNING|xpath(//img)     |Section508.A.Img.Ignored |

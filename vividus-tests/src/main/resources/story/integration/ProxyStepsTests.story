@@ -68,13 +68,13 @@ Scenario: Verify step "When I mock HTTP responses with request URL which $compar
 Meta:
     @requirementId 1104
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
-When I switch to frame located `<frameId>`
+When I switch to frame located by `<frameId>`
 Then number of elements found by `<elementId>` is = `0`
 When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `200`, content `#{loadBinaryResource(page.html)}` and headers:
 |name        |value    |
 |Content-Type|text/html|
 When I refresh page
-When I switch to frame located `<frameId>`
+When I switch to frame located by `<frameId>`
 Then number of elements found by `<elementId>` is = `1`
 Examples:
 |frameId       |elementId|
@@ -93,13 +93,13 @@ Scenario: Verify step When I mock HTTP responses with request URL which $compari
 Meta:
     @requirementId 1104
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
-When I switch to frame located `<frameId>`
+When I switch to frame located by `<frameId>`
 Then number of elements found by `<elementSelector>` is = `1`
 When I mock HTTP responses with request URL which CONTAINS `example.com` using response code `404` and headers:
 |name          |value|
 |Content-Length|0    |
 When I refresh page
-When I switch to frame located `<frameId>`
+When I switch to frame located by `<frameId>`
 Then number of elements found by `<elementSelector>` is = `0`
 Examples:
 |frameId       |elementSelector|
