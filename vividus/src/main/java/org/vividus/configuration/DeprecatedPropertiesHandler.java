@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -96,6 +97,12 @@ public class DeprecatedPropertiesHandler
     private boolean isDeprecated(String key)
     {
         return null != getDeprecatedProperty(key);
+    }
+
+    public Optional<String> getReplacingPropertyKey(String oldKey)
+    {
+        DeprecatedProperty deprecatedProperty = getDeprecatedProperty(oldKey);
+        return null != deprecatedProperty ? Optional.of(deprecatedProperty.getNewKey(oldKey)) : Optional.empty();
     }
 
     private DeprecatedProperty getDeprecatedProperty(String key)

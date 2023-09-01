@@ -324,3 +324,39 @@ gradlew replaceDeprecatedSteps
 The step "When I check all checkboxes located by `xpath(.//input)`" from "CheckboxStepsTests.story - Scenario: Validation of step 'When I $checkboxState all checkboxes located by `$checkboxesLocator`'" is deprecated but cannot be replaced automatically, please replace it manually.
 The step "When I check all checkboxes located by `xpath(.//input)`" from "composite.steps - Composite: When I run composite step with table:$table" is deprecated but cannot be replaced automatically, please replace it manually.
 ----
+
+== Replace deprecated properties
+
+The task replaces deprecated properties with actual ones in all properties files along the path `<project-name>/src/main/resources/properties`.
+
+.macOS / Linux:
+[source,shell]
+----
+./gradlew replaceDeprecatedProperties
+----
+
+.Windows:
+[source,shell]
+----
+gradlew replaceDeprecatedProperties
+----
+
+The examples below demonstrate property file with deprecated properties before and after applying the `replaceDeprecatedProperties` task.
+
+.Property file with deprecated entries before running the task `replaceDeprecatedProperties`
+[source]
+----
+ui.visual.applitools.server-uri=https://eyes.applitools.com/
+ui.visual.applitools.app-name=name
+web.driver.CHROME.experimental-options={"prefs": {"profile": {"cookie_controls_mode": 0}}}
+batch-6.story-execution-timeout=PT15M
+----
+
+.Property file with replaced entries after running the task `replaceDeprecatedProperties`
+[source]
+----
+applitools.server-uri=https://eyes.applitools.com/
+applitools.app-name=name
+web.driver.chrome.experimental-options={"prefs": {"profile": {"cookie_controls_mode": 0}}}
+batch-6.story.execution-timeout=PT15M
+----

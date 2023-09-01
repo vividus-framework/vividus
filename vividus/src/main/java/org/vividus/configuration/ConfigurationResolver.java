@@ -37,6 +37,9 @@ import org.vividus.spring.SpelExpressionResolver;
 
 public final class ConfigurationResolver
 {
+    public static final String PLACEHOLDER_PREFIX = "${";
+    public static final String PLACEHOLDER_SUFFIX = "}";
+
     static final String CONFIGURATION_PROPERTY_FAMILY = "configuration.";
     static final String CONFIGURATION_SET_PROPERTY_FAMILY = "configuration-set.";
 
@@ -46,8 +49,6 @@ public final class ConfigurationResolver
     private static final String PROFILES = "profiles";
     private static final String ENVIRONMENTS = "environments";
     private static final String SUITES = "suites";
-    private static final String PLACEHOLDER_PREFIX = "${";
-    private static final String PLACEHOLDER_SUFFIX = "}";
     private static final String PLACEHOLDER_VALUE_SEPARATOR = "=";
 
     private static final String[] DEFAULTS_PATHS = {
