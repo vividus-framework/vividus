@@ -116,8 +116,35 @@ a tunnel via proxy used by tests.
 ----
 configuration.profiles=saucelabs/web,web/desktop/chrome
 
-selenium.grid.host=ondemand.us-west-1.saucelabs.com
-selenium.grid.username=secretsauce
-selenium.grid.password=87380d3afd8fd8aed55a
-saucelabs.data-center=US_WEST
+include::partial$sauce-labs-common-confguration.adoc[]
+----
+
+.Configuration snippet to run mobile app tests using iOS Sumulator on Sauce Labs US West data center
+[source,properties]
+----
+configuration.profiles=saucelabs/mobile_app,mobile_app/ios
+
+include::partial$sauce-labs-common-confguration.adoc[]
+
+selenium.grid.device-name=iPhone Simulator
+selenium.grid.appium-version=2.0.0
+selenium.grid.platform-version=16.2
+
+# https://docs.saucelabs.com/mobile-apps/app-storage/
+selenium.grid.capabilities.app=myapp.app
+----
+
+.Configuration snippet to run mobile app tests using Android Emulator on Sauce Labs US West data center
+[source,properties]
+----
+configuration.profiles=saucelabs/mobile_app,mobile_app/android
+
+include::partial$sauce-labs-common-confguration.adoc[]
+
+selenium.grid.device-name=Android GoogleAPI Emulator
+selenium.grid.appium-version=2.0.0
+selenium.grid.platform-version=13.0
+
+# https://docs.saucelabs.com/mobile-apps/app-storage/
+selenium.grid.capabilities.app=myapp.apk
 ----
