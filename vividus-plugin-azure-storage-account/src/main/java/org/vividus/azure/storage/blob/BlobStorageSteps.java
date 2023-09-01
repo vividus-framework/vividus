@@ -319,9 +319,9 @@ public class BlobStorageSteps
                 blobServiceClientFactory.createBlobContainerClient(containerName, storageAccountKey);
 
         ListBlobsOptions options = new ListBlobsOptions();
-        filter.getBlobNamePrefix().ifPresent(options::setPrefix);
+        filter.blobNamePrefix().ifPresent(options::setPrefix);
         options.setMaxResultsPerPage(
-                filter.getResultsLimit()
+                filter.resultsLimit()
                         .map(limit -> Math.min(limit, DEFAULT_MAX_RESULTS_PER_PAGE))
                         .orElse(DEFAULT_MAX_RESULTS_PER_PAGE)
         );
@@ -331,11 +331,11 @@ public class BlobStorageSteps
                 .map(PagedResponse::getValue)
                 .flatMap(List::stream)
                 .map(BlobItem::getName);
-        Stream<String> filteredBlobNames = filter.getBlobNameMatcher()
+        Stream<String> filteredBlobNames = filter.blobNameMatcher()
                 .map(matcher -> blobNames.filter(matcher::matches))
                 .orElse(blobNames);
 
-        List<String> result = filter.getResultsLimit()
+        List<String> result = filter.resultsLimit()
                 .map(filteredBlobNames::limit)
                 .orElse(filteredBlobNames)
                 .toList();

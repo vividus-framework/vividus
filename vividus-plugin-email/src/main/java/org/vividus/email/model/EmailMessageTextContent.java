@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,6 @@
 
 package org.vividus.email.model;
 
-public class EmailMessageTextContent
+public record EmailMessageTextContent(String contentType, String content)
 {
-    private final String contentType;
-    private final String content;
-
-    public EmailMessageTextContent(String contentType, String content)
-    {
-        this.contentType = contentType;
-        this.content = content;
-    }
-
-    public String getContentType()
-    {
-        return contentType;
-    }
-
-    public String getContent()
-    {
-        return content;
-    }
 }

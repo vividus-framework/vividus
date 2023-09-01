@@ -104,7 +104,7 @@ class MouseActionsTests
             ordered.verify(waitActions).waitForPageLoad();
             ordered.verify(alertActions).waitForAlert(webDriver);
             ordered.verify(eventBus)
-                    .post(ArgumentMatchers.<PageLoadEndEvent>argThat(arg -> arg.isNewPageLoaded() == newPageLoaded));
+                    .post(ArgumentMatchers.<PageLoadEndEvent>argThat(arg -> arg.newPageLoaded() == newPageLoaded));
         }
         ordered.verifyNoMoreInteractions();
     }

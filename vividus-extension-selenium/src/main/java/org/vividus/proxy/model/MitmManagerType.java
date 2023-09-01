@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,14 +35,14 @@ public enum MitmManagerType
         @Override
         public MitmManager buildMitmManager(MitmManagerOptions options, KeyStoreOptions keyStoreOptions)
         {
-            File keyStore = ResourceUtils.loadFile(getClass(), keyStoreOptions.getPath());
+            File keyStore = ResourceUtils.loadFile(getClass(), keyStoreOptions.path());
             KeyStoreFileCertificateSource certificateSource = new KeyStoreFileCertificateSource(
-                    keyStoreOptions.getType(), keyStore, options.getAlias(), keyStoreOptions.getPassword());
+                    keyStoreOptions.type(), keyStore, options.alias(), keyStoreOptions.password());
 
             return ImpersonatingMitmManager
                     .builder()
                     .rootCertificateSource(certificateSource)
-                    .trustAllServers(options.isTrustAllServers())
+                    .trustAllServers(options.trustAllServers())
                     .build();
         }
     },
@@ -52,11 +52,11 @@ public enum MitmManagerType
         public MitmManager buildMitmManager(MitmManagerOptions options, KeyStoreOptions keyStoreOptions)
         {
             SelfSignedSslEngineSource sslEngineSource = new SelfSignedSslEngineSource(
-                    keyStoreOptions.getPath(),
-                    options.isTrustAllServers(),
+                    keyStoreOptions.path(),
+                    options.trustAllServers(),
                     true,
-                    options.getAlias(),
-                    keyStoreOptions.getPassword());
+                    options.alias(),
+                    keyStoreOptions.password());
 
             return new SelfSignedMitmManager(sslEngineSource);
         }

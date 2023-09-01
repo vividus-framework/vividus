@@ -114,7 +114,7 @@ class ParametersToAxeCheckOptionsConverterTests
             () -> assertEquals("tag", axeRun.getType()),
             () -> assertEquals(List.of("wcag2a"), axeRun.getValues()),
             () -> assertTrue(options.getRootElement().isEmpty()),
-            () -> assertFalse(rules.get(COLOR_CONTRAST_RULE).isEnabled()),
+            () -> assertFalse(rules.get(COLOR_CONTRAST_RULE).enabled()),
             () -> assertEquals(REPORTER, options.getReporter()),
             () -> assertEquals(List.of(elementToCheck), options.getElementsToCheck()),
             () -> assertEquals(List.of(elementToIgnore), options.getHideElements())
@@ -140,7 +140,7 @@ class ParametersToAxeCheckOptionsConverterTests
             () -> assertEquals(RULE, axeRun.getType()),
             () -> assertEquals(List.of("aria-required-parent"), axeRun.getValues()),
             () -> assertTrue(options.getRootElement().isEmpty()),
-            () -> assertFalse(rules.get(COLOR_CONTRAST_RULE).isEnabled()),
+            () -> assertFalse(rules.get(COLOR_CONTRAST_RULE).enabled()),
             () -> assertEquals(REPORTER, options.getReporter()),
             () -> assertEquals(List.of(elementToCheck), options.getElementsToCheck()),
             () -> assertEquals(List.of(elementToIgnore), options.getHideElements())

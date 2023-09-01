@@ -229,17 +229,8 @@ public class WebSocketSteps
         }
     }
 
-    private static final class WebSocket
+    private record WebSocket(WebSocketSession session, WebSocketTextMessageCollector collector)
     {
-        private final WebSocketSession session;
-        private final WebSocketTextMessageCollector collector;
-
-        private WebSocket(WebSocketSession session, WebSocketTextMessageCollector collector)
-        {
-            this.session = session;
-            this.collector = collector;
-        }
-
         private void close() throws IOException
         {
             session.close();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,15 +35,15 @@ public class IssueLinkSerializer extends JsonSerializer<IssueLink>
         generator.writeStartObject();
 
         generator.writeObjectFieldStart("type");
-        generator.writeStringField("name", issueLink.getType());
+        generator.writeStringField("name", issueLink.type());
         generator.writeEndObject();
 
         generator.writeObjectFieldStart("inwardIssue");
-        generator.writeStringField(KEY, issueLink.getInwardIssueKey());
+        generator.writeStringField(KEY, issueLink.inwardIssueKey());
         generator.writeEndObject();
 
         generator.writeObjectFieldStart("outwardIssue");
-        generator.writeStringField(KEY, issueLink.getOutwardIssueKey());
+        generator.writeStringField(KEY, issueLink.outwardIssueKey());
         generator.writeEndObject();
 
         generator.writeEndObject();

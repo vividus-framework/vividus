@@ -58,9 +58,9 @@ public class WebElementHighlighter implements IWebElementHighlighter
     private void changeState(Consumer<WebElement> stateUpdater)
     {
         SearchContext searchContext = uiContext.getSearchContext();
-        if (searchContext instanceof WebElement)
+        if (searchContext instanceof WebElement webElement)
         {
-            stateUpdater.accept((WebElement) searchContext);
+            stateUpdater.accept(webElement);
         }
         uiContext.getAssertingWebElements().forEach(stateUpdater);
     }

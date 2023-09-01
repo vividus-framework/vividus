@@ -340,8 +340,8 @@ public class PageSteps
                 ContextBuilder contextBuilder = ContextBuilder.create();
                 if (userInfo != null)
                 {
-                    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(userInfo.getUser(),
-                            userInfo.getPassword().toCharArray());
+                    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(userInfo.user(),
+                            userInfo.password().toCharArray());
                     HttpHost host = HttpHost.create(pageUriToCheck);
                     contextBuilder = contextBuilder.preemptiveBasicAuth(host, credentials);
                     pageUriToCheck = UriUtils.removeUserInfo(pageUriToCheck);

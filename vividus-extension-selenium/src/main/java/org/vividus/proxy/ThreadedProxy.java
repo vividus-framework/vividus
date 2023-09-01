@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class ThreadedProxy implements IProxy
     {
         this.proxyFactory = proxyFactory;
         this.testContext = testContext;
-        Set<Integer> proxyPortsRange = proxyPorts.getRange();
+        Set<Integer> proxyPortsRange = proxyPorts.range();
         if (proxyPortsRange.contains(0))
         {
             Validate.isTrue(proxyPortsRange.size() == 1,

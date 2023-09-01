@@ -114,9 +114,9 @@ class JiraFacadeTests
         List<IssueLink> issueLinks = issue.getIssueLinks();
         assertThat(issueLinks, hasSize(1));
         IssueLink issueLink = issueLinks.get(0);
-        assertNull(issueLink.getInwardIssueKey());
-        assertEquals(TESTS_LINK, issueLink.getType());
-        assertEquals("VVDS-2", issueLink.getOutwardIssueKey());
+        assertNull(issueLink.inwardIssueKey());
+        assertEquals(TESTS_LINK, issueLink.type());
+        assertEquals("VVDS-2", issueLink.outwardIssueKey());
     }
 
     @Test

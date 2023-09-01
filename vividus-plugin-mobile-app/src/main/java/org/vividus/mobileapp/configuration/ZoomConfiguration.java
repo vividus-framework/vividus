@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,9 @@ package org.vividus.mobileapp.configuration;
 
 import org.apache.commons.lang3.Validate;
 
-public class ZoomConfiguration
+public record ZoomConfiguration(int topIndent, int bottomIndent, int rightIndent, int leftIndent)
 {
-    private final int topIndent;
-    private final int bottomIndent;
-    private final int rightIndent;
-    private final int leftIndent;
-
-    public ZoomConfiguration(int topIndent, int bottomIndent, int rightIndent, int leftIndent)
+    public ZoomConfiguration
     {
         validateIndent("top", topIndent);
         validateIndent("bottom", bottomIndent);
@@ -33,30 +28,6 @@ public class ZoomConfiguration
         validateIndent("left", leftIndent);
         validateIndent("total vertical", topIndent + bottomIndent);
         validateIndent("total horizontal", rightIndent + leftIndent);
-        this.topIndent = topIndent;
-        this.bottomIndent = bottomIndent;
-        this.rightIndent = rightIndent;
-        this.leftIndent = leftIndent;
-    }
-
-    public int getTopIndent()
-    {
-        return topIndent;
-    }
-
-    public int getBottomIndent()
-    {
-        return bottomIndent;
-    }
-
-    public int getRightIndent()
-    {
-        return rightIndent;
-    }
-
-    public int getLeftIndent()
-    {
-        return leftIndent;
     }
 
     @SuppressWarnings("MagicNumber")

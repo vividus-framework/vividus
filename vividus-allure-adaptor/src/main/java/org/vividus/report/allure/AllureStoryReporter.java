@@ -486,7 +486,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     @AllowConcurrentEvents
     public void onAttachmentPublish(AttachmentPublishEvent event)
     {
-        Attachment attachment = event.getAttachment();
+        Attachment attachment = event.attachment();
         lifecycle.addAttachment(attachment.getTitle(), attachment.getContentType(), null, attachment.getContent());
     }
 
@@ -495,8 +495,8 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     {
         lifecycle.updateTestCase(getRootStepId(), result ->
         {
-            String name = event.getName();
-            String url = event.getUrl();
+            String name = event.name();
+            String url = event.url();
 
             boolean notExists = result.getLinks().stream()
                     .noneMatch(l -> Objects.equals(l.getUrl(), url) && Objects.equals(l.getName(), name));

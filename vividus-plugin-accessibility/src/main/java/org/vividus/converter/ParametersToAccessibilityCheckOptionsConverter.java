@@ -63,9 +63,9 @@ public class ParametersToAccessibilityCheckOptionsConverter
               .forEach(ignore::add);
         HtmlCsCheckOptions options = new HtmlCsCheckOptions(standardParameter);
         SearchContext context = uiContext.getSearchContext();
-        if (context instanceof WebElement)
+        if (context instanceof WebElement webElement)
         {
-            options.setRootElement(Optional.of((WebElement) context));
+            options.setRootElement(Optional.of(webElement));
         }
         options.setIgnore(ignore);
         options.setInclude(getViolationsToCheck(row));

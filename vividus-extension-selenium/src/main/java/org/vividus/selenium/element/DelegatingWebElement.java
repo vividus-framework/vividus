@@ -173,9 +173,9 @@ public class DelegatingWebElement implements WebElement, WrapsElement, Locatable
             return false;
         }
 
-        if (that instanceof WrapsElement)
+        if (that instanceof WrapsElement wrappingElement)
         {
-            that = ((WrapsElement) that).getWrappedElement();
+            that = wrappingElement.getWrappedElement();
         }
 
         return wrappedElement.equals(that);

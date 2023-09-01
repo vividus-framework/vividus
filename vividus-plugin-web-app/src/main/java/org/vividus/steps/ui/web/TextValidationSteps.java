@@ -68,9 +68,9 @@ public class TextValidationSteps
         uiContext.getOptionalSearchContext().ifPresent(searchContext ->
         {
             String actualText = "";
-            if (searchContext instanceof WebElement)
+            if (searchContext instanceof WebElement webElement)
             {
-                actualText = webElementActions.getElementText((WebElement) searchContext);
+                actualText = webElementActions.getElementText(webElement);
             }
             else if (searchContext instanceof WebDriver)
             {
@@ -84,9 +84,9 @@ public class TextValidationSteps
     private boolean verifyText(Pattern regex, String actualText, SearchContext searchContext)
     {
         boolean assertCondition = regex.matcher(actualText).find();
-        if (!assertCondition && searchContext instanceof WebElement)
+        if (!assertCondition && searchContext instanceof WebElement webElement)
         {
-            String pseudoElementContent = webElementActions.getPseudoElementContent((WebElement) searchContext);
+            String pseudoElementContent = webElementActions.getPseudoElementContent(webElement);
             return !pseudoElementContent.isEmpty() && regex.matcher(pseudoElementContent).find();
         }
         return assertCondition;
@@ -101,9 +101,9 @@ public class TextValidationSteps
     {
         uiContext.getOptionalSearchContext().ifPresent(searchContext ->
         {
-            if (searchContext instanceof WebElement)
+            if (searchContext instanceof WebElement webElement)
             {
-                elementValidations.assertIfElementContainsText((WebElement) searchContext, text, true);
+                elementValidations.assertIfElementContainsText(webElement, text, true);
             }
             else
             {
@@ -160,9 +160,9 @@ public class TextValidationSteps
     {
         return uiContext.getOptionalSearchContext().map(searchContext ->
         {
-            if (searchContext instanceof WebElement)
+            if (searchContext instanceof WebElement webElement)
             {
-                return elementValidations.assertIfElementContainsText((WebElement) searchContext, text, false);
+                return elementValidations.assertIfElementContainsText(webElement, text, false);
             }
             return baseValidations.assertIfElementDoesNotExist(String.format("An element with text '%s'", text),
                     new Locator(WebLocatorType.CASE_SENSITIVE_TEXT, text));
@@ -178,9 +178,9 @@ public class TextValidationSteps
     {
         uiContext.getOptionalSearchContext().ifPresent(searchContext ->
         {
-            if (searchContext instanceof WebElement)
+            if (searchContext instanceof WebElement webElement)
             {
-                elementValidations.assertIfElementContainsText((WebElement) searchContext, text, false);
+                elementValidations.assertIfElementContainsText(webElement, text, false);
             }
             else
             {

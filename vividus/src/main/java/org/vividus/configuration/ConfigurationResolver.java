@@ -121,9 +121,9 @@ public final class ConfigurationResolver
         {
             Object value = entry.getValue();
             deprecatedPropertiesHandler.warnIfDeprecated((String) entry.getKey(), value);
-            if (value instanceof String)
+            if (value instanceof String valueAsString)
             {
-                entry.setValue(propertyPlaceholderHelper.replacePlaceholders((String) value, properties::getProperty));
+                entry.setValue(propertyPlaceholderHelper.replacePlaceholders(valueAsString, properties::getProperty));
             }
         }
         deprecatedPropertiesHandler.removeDeprecated(properties);

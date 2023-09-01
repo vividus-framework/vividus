@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
 
         URI mainApplicationPage = getMainApplicationPageUri();
         Set<String> urls = siteMaps.stream().filter(
-            s -> s.getMainAppPage().equals(mainApplicationPage) && s.getSiteMapRelativeUrl().equals(siteMapRelativeUrl))
+            s -> s.mainAppPage().equals(mainApplicationPage) && s.siteMapRelativeUrl().equals(siteMapRelativeUrl))
             .findFirst().orElseGet(() ->
             {
                 Set<String> siteMapRelativeUrls;
@@ -72,7 +72,7 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
                 SiteMap siteMap = new SiteMap(mainApplicationPage, siteMapRelativeUrl, siteMapRelativeUrls);
                 siteMaps.add(siteMap);
                 return siteMap;
-            }).getUrls();
+            }).urls();
         if (urls.isEmpty() && throwException)
         {
             throw new SiteMapTableGenerationException("No URLs found in sitemap, or all URLs were filtered");

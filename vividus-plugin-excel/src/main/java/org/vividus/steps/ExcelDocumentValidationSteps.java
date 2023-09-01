@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ public class ExcelDocumentValidationSteps
         {
             CellValue cellValue = e.getKey();
             Matcher<String> matcher = e.getValue().map(Matchers::matchesPattern).orElseGet(IsNull<String>::new);
-            softAssert.assertThat(format("Cell at address '%s'", cellValue.getAddress()), cellValue.getValue(),
+            softAssert.assertThat(format("Cell at address '%s'", cellValue.address()), cellValue.value(),
                     matcher);
         });
     }
@@ -155,11 +155,11 @@ public class ExcelDocumentValidationSteps
         {
             Optional<Pattern> pattern = e.getValue();
             CellValue cellValue = e.getKey();
-            if (pattern.isPresent() && cellValue.getValue() != null)
+            if (pattern.isPresent() && cellValue.value() != null)
             {
-                return !pattern.get().asMatchPredicate().test(cellValue.getValue());
+                return !pattern.get().asMatchPredicate().test(cellValue.value());
             }
-            return pattern.isPresent() || cellValue.getValue() != null;
+            return pattern.isPresent() || cellValue.value() != null;
         };
     }
 }

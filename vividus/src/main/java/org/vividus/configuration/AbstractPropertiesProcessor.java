@@ -38,9 +38,9 @@ public abstract class AbstractPropertiesProcessor implements PropertiesProcessor
         for (Map.Entry<Object, Object> entry : properties.entrySet())
         {
             Object propertyValue = entry.getValue();
-            if (propertyValue instanceof String)
+            if (propertyValue instanceof String propertyValueAsString)
             {
-                String newValue = processProperty((String) entry.getKey(), (String) propertyValue);
+                String newValue = processProperty((String) entry.getKey(), propertyValueAsString);
                 entry.setValue(newValue);
             }
         }

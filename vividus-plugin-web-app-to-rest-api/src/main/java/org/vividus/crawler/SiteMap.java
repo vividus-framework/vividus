@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,31 +19,6 @@ package org.vividus.crawler;
 import java.net.URI;
 import java.util.Set;
 
-public class SiteMap
+public record SiteMap(URI mainAppPage, String siteMapRelativeUrl, Set<String> urls)
 {
-    private final URI mainAppPage;
-    private final String siteMapRelativeUrl;
-    private final Set<String> urls;
-
-    public SiteMap(URI mainAppPage, String siteMapRelativeUrl, Set<String> urls)
-    {
-        this.mainAppPage = mainAppPage;
-        this.siteMapRelativeUrl = siteMapRelativeUrl;
-        this.urls = urls;
-    }
-
-    public URI getMainAppPage()
-    {
-        return mainAppPage;
-    }
-
-    public String getSiteMapRelativeUrl()
-    {
-        return siteMapRelativeUrl;
-    }
-
-    public Set<String> getUrls()
-    {
-        return urls;
-    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,6 @@ package org.vividus.analytics.model;
 
 import java.util.List;
 
-public class AnalyticsEventBatch
+public record AnalyticsEventBatch(List<AnalyticsEvent> events)
 {
-    private final List<AnalyticsEvent> events;
-
-    public AnalyticsEventBatch(List<AnalyticsEvent> events)
-    {
-        this.events = events;
-    }
-
-    public List<AnalyticsEvent> getEvents()
-    {
-        return events;
-    }
 }

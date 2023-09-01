@@ -53,12 +53,12 @@ public class PlaceholderResolver
         }
         if (type == String.class || adaptedValue instanceof String)
         {
-            if (adaptedValue instanceof byte[])
+            if (adaptedValue instanceof byte[] adaptedValueAsBytes)
             {
-                adaptedValue = new String((byte[]) adaptedValue, StandardCharsets.UTF_8);
+                adaptedValue = new String(adaptedValueAsBytes, StandardCharsets.UTF_8);
             }
             adaptedValue = processExpressions(String.valueOf(adaptedValue));
-            if (!value.equals(adaptedValue) && adaptedValue instanceof String)
+            if (!value.equals(adaptedValue) && adaptedValue instanceof String adaptedValueAsString)
             {
                 if (iteration == MAX_DEPTH)
                 {
@@ -66,7 +66,7 @@ public class PlaceholderResolver
                     // nested levels, we need to fallback to one cycle of variable resolution and exit early
                     return variableResolver.resolve(originalValue);
                 }
-                return resolvePlaceholders(originalValue, (String) adaptedValue, type, iteration + 1);
+                return resolvePlaceholders(originalValue, adaptedValueAsString, type, iteration + 1);
             }
         }
         return adaptedValue;

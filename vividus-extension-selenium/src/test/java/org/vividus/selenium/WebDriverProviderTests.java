@@ -117,7 +117,7 @@ class WebDriverProviderTests
         ordered.verify(mockedEventBus).post(beforeWebDriverQuitEventArgumentCaptor.capture());
         ordered.verify(mockedEventBus).post(afterWebDriverQuitEventArgumentCaptor.capture());
         ordered.verifyNoMoreInteractions();
-        assertEquals(SESSION_ID, beforeWebDriverQuitEventArgumentCaptor.getValue().getSessionId());
-        assertEquals(SESSION_ID, afterWebDriverQuitEventArgumentCaptor.getValue().getSessionId());
+        assertEquals(SESSION_ID, beforeWebDriverQuitEventArgumentCaptor.getValue().sessionId());
+        assertEquals(SESSION_ID, afterWebDriverQuitEventArgumentCaptor.getValue().sessionId());
     }
 }

@@ -45,7 +45,7 @@ public class AbstractActionsSequenceSteps
         T actionBuilder = actionsBuilderConstructor.apply(webDriverProvider.get());
         for (AtomicAction<T> action : actions)
         {
-            Object argument = action.getArgument();
+            Object argument = action.argument();
             if (argument != null && argument.getClass().equals(Locator.class))
             {
                 Optional<WebElement> webElement = baseValidations.assertElementExists("Element for interaction",
@@ -56,7 +56,7 @@ public class AbstractActionsSequenceSteps
                 }
                 argument = webElement.get();
             }
-            action.getActionFactory().addAction(actionBuilder, argument);
+            action.actionFactory().addAction(actionBuilder, argument);
         }
         actionBuilder.perform();
     }

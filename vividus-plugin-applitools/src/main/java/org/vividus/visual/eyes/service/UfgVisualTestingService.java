@@ -58,7 +58,7 @@ public class UfgVisualTestingService implements VisualTestingService<UfgApplitoo
     public UfgApplitoolsVisualCheckResult run(ApplitoolsVisualCheck applitoolsVisualCheck)
     {
         UfgEyes eyes = eyesFactory.createEyes(applitoolsVisualCheck);
-        List<ApplitoolsTestResults> testResults = List.of();
+        List<ApplitoolsTestResults> testResults;
 
         eyes.open(webDriverProvider.getUnwrapped(RemoteWebDriver.class),
                 applitoolsVisualCheck.getConfiguration().getAppName(), applitoolsVisualCheck.getBaselineName());
@@ -66,8 +66,8 @@ public class UfgVisualTestingService implements VisualTestingService<UfgApplitoo
         try
         {
             SearchContext searchContext = applitoolsVisualCheck.getSearchContext();
-            SeleniumCheckSettings target = searchContext instanceof WebElement
-                    ? Target.region(asRemote((WebElement) searchContext))
+            SeleniumCheckSettings target = searchContext instanceof WebElement webElement
+                    ? Target.region(asRemote(webElement))
                     : Target.window();
             target = computeIgnores(target, applitoolsVisualCheck.getElementsToIgnore(), new Padding());
             target = computeIgnores(target, applitoolsVisualCheck.getAreasToIgnore(),

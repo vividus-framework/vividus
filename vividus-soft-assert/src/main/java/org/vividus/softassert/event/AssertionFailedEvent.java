@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,6 @@ package org.vividus.softassert.event;
 
 import org.vividus.softassert.model.SoftAssertionError;
 
-public class AssertionFailedEvent
+public record AssertionFailedEvent(SoftAssertionError softAssertionError)
 {
-    private final SoftAssertionError softAssertionError;
-
-    public AssertionFailedEvent(SoftAssertionError softAssertionError)
-    {
-        this.softAssertionError = softAssertionError;
-    }
-
-    public SoftAssertionError getSoftAssertionError()
-    {
-        return softAssertionError;
-    }
 }

@@ -71,7 +71,7 @@ class ScreenshotTakingStepsTests
         verify(screenshotTaker).takeScreenshot(screenshotName);
         verify(eventBus).post(eventCaptor.capture());
         AttachmentPublishEvent attachmentPublishEvent = eventCaptor.getValue();
-        Attachment attachment = attachmentPublishEvent.getAttachment();
+        Attachment attachment = attachmentPublishEvent.attachment();
         assertEquals(screenshotName, attachment.getTitle());
         assertArrayEquals(screenshotData, attachment.getContent());
         assertEquals("image/png", attachment.getContentType());

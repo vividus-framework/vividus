@@ -82,7 +82,7 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
             checkEmptyTables(descriptiveTables);
         }
 
-        return descriptiveTables.stream().map(DescriptiveTable::getTable).toList();
+        return descriptiveTables.stream().map(DescriptiveTable::table).toList();
     }
 
     private String getSeparatorsAsString(TableProperties tableProperties)
@@ -104,8 +104,8 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
     private void checkEmptyTables(List<DescriptiveTable> tables)
     {
         List<String> emptyTables = tables.stream()
-                                         .filter(w -> w.getTable().getRowCount() == 0)
-                                         .map(DescriptiveTable::getDescription)
+                                         .filter(w -> w.table().getRowCount() == 0)
+                                         .map(DescriptiveTable::description)
                                          .toList();
 
         isTrue(emptyTables.isEmpty(), "Empty ExamplesTable-s are not allowed, but %s is/are empty", emptyTables);
@@ -116,25 +116,7 @@ public abstract class AbstractTableLoadingTransformer implements ExtendedTableTr
         return configuration;
     }
 
-    private static final class DescriptiveTable
+    private record DescriptiveTable(String description, ExamplesTable table)
     {
-        private final String description;
-        private final ExamplesTable table;
-
-        DescriptiveTable(String description, ExamplesTable table)
-        {
-            this.description = description;
-            this.table = table;
-        }
-
-        String getDescription()
-        {
-            return description;
-        }
-
-        ExamplesTable getTable()
-        {
-            return table;
-        }
     }
 }

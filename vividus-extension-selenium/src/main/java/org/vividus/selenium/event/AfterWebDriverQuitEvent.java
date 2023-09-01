@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,6 @@
 
 package org.vividus.selenium.event;
 
-public class AfterWebDriverQuitEvent
+public record AfterWebDriverQuitEvent(String sessionId)
 {
-    private final String sessionId;
-
-    public AfterWebDriverQuitEvent(String sessionId)
-    {
-        this.sessionId = sessionId;
-    }
-
-    public String getSessionId()
-    {
-        return sessionId;
-    }
 }

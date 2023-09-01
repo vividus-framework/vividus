@@ -53,11 +53,10 @@ public class SubStepsConverter extends AbstractParameterConverter<String, SubSte
     {
         StoryReporter storyReporter = configuration.storyReporter(
                 runContext.getRootRunningStory().getStory().getPath());
-        if (storyReporter instanceof DelegatingStoryReporter)
+        if (storyReporter instanceof DelegatingStoryReporter delegatingStoryReporter)
         {
             // Need to exclude JUnitScenarioReporter from reporting of sub steps
-            storyReporter = ((DelegatingStoryReporter) storyReporter).getDelegates()
-                    .stream()
+            storyReporter = delegatingStoryReporter.getDelegates().stream()
                     .filter(e -> !(e instanceof ConcurrentStoryReporter))
                     .collect(collectingAndThen(Collectors.toList(), DelegatingStoryReporter::new));
         }

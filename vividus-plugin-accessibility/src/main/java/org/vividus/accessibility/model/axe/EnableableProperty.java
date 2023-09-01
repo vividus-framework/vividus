@@ -16,17 +16,6 @@
 
 package org.vividus.accessibility.model.axe;
 
-public class EnableableProperty
+public record EnableableProperty(boolean enabled)
 {
-    private final boolean enabled;
-
-    public EnableableProperty(boolean enabled)
-    {
-        this.enabled = enabled;
-    }
-
-    public boolean isEnabled()
-    {
-        return enabled;
-    }
 }

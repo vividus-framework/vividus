@@ -44,7 +44,7 @@ public enum Status
 
     public static Status from(AssertionFailedEvent event)
     {
-        return event.getSoftAssertionError().isNotFixedKnownIssue() ? KNOWN_ISSUES_ONLY : FAILED;
+        return event.softAssertionError().isNotFixedKnownIssue() ? KNOWN_ISSUES_ONLY : FAILED;
     }
 
     public static Status from(Throwable throwable)
@@ -59,8 +59,7 @@ public enum Status
 
     private static boolean isNotFixedKnownIssuesOnly(AssertionError assertionError)
     {
-        return assertionError instanceof VerificationError && ((VerificationError) assertionError)
-                .getErrors()
+        return assertionError instanceof VerificationError verificationError && verificationError.getErrors()
                 .stream()
                 .allMatch(SoftAssertionError::isNotFixedKnownIssue);
     }

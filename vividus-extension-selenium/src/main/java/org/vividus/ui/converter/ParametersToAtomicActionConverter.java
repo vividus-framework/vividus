@@ -56,7 +56,7 @@ public class ParametersToAtomicActionConverter<T extends Actions>
     @Override
     public boolean canConvertTo(Type targetType)
     {
-        return targetType instanceof ParameterizedType && ((ParameterizedType) targetType).getRawType().equals(
+        return targetType instanceof ParameterizedType parameterizedType && parameterizedType.getRawType().equals(
                 AtomicAction.class);
     }
 

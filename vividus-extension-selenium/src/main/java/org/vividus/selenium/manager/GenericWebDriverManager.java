@@ -158,9 +158,9 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
         return checkCapabilities(capabilities, () ->
         {
             Object platformNameFromCaps = capabilities.getCapability(CapabilityType.PLATFORM_NAME);
-            if (platformNameFromCaps instanceof String)
+            if (platformNameFromCaps instanceof String platformNameAsString)
             {
-                return ((String) platformNameFromCaps).equalsIgnoreCase(platformName);
+                return platformNameAsString.equalsIgnoreCase(platformName);
             }
             // https://github.com/SeleniumHQ/selenium/issues/9127
             if (platformNameFromCaps instanceof Platform && !MobilePlatform.TVOS.equals(platformName))

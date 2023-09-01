@@ -89,8 +89,8 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                 e -> (DebuggingViewportPastingDecorator) new AdjustingScrollableElementAwareViewportPastingDecorator(
                         toDecorate, e, javascriptActions, webCutOptions)
                 ).orElseGet(
-                () -> new DebuggingViewportPastingDecorator(toDecorate, webCutOptions.getWebHeaderToCut(),
-                        webCutOptions.getWebFooterToCut())
+                () -> new DebuggingViewportPastingDecorator(toDecorate, webCutOptions.webHeaderToCut(),
+                        webCutOptions.webFooterToCut())
         );
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,6 @@
 
 package org.vividus.mobileapp.model;
 
-public class ZoomCoordinates
+public record ZoomCoordinates(MoveCoordinates finger1MoveCoordinates, MoveCoordinates finger2MoveCoordinates)
 {
-    private final MoveCoordinates finger1MoveCoordinates;
-    private final MoveCoordinates finger2MoveCoordinates;
-
-    public ZoomCoordinates(MoveCoordinates finger1MoveCoordinates, MoveCoordinates finger2MoveCoordinates)
-    {
-        this.finger1MoveCoordinates = finger1MoveCoordinates;
-        this.finger2MoveCoordinates = finger2MoveCoordinates;
-    }
-
-    public MoveCoordinates getFinger1MoveCoordinates()
-    {
-        return finger1MoveCoordinates;
-    }
-
-    public MoveCoordinates getFinger2MoveCoordinates()
-    {
-        return finger2MoveCoordinates;
-    }
 }

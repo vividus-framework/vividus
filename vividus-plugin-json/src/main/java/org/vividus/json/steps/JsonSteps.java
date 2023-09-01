@@ -390,16 +390,16 @@ public class JsonSteps
                 };
                 assertThat(jsonPath, jsonValue, matcher);
             }
-            else if (jsonValue instanceof Boolean)
+            else if (jsonValue instanceof Boolean jsonValueAsBoolean)
             {
                 Validate.isTrue(IS_EQUAL_TO.equals(normalizedComparisonRule), INVALID_COMPARISON_RULE_MESSAGE,
                         jsonValue, expectedData, comparisonRule);
-                assertThat(jsonPath, (Boolean) jsonValue, equalTo(Boolean.valueOf(String.valueOf(expectedData))));
+                assertThat(jsonPath, jsonValueAsBoolean, equalTo(Boolean.valueOf(String.valueOf(expectedData))));
             }
-            else if (jsonValue instanceof String)
+            else if (jsonValue instanceof String jsonValueAsString)
             {
                 StringComparisonRule rule = convertToEnum(normalizedComparisonRule, StringComparisonRule.class);
-                assertThat(jsonPath, (String) jsonValue, rule.createMatcher(String.valueOf(expectedData)));
+                assertThat(jsonPath, jsonValueAsString, rule.createMatcher(String.valueOf(expectedData)));
             }
             else if (jsonValue instanceof Number)
             {

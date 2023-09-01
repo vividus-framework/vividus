@@ -212,7 +212,7 @@ public class XrayFacade
         String linkType = "Tests";
         JiraEntity issue = jiraFacade.getIssue(testCaseId);
         boolean linkExists = issue.getIssueLinks().stream()
-                .anyMatch(link -> linkType.equals(link.getType()) && requirementId.equals(link.getOutwardIssueKey()));
+                .anyMatch(link -> linkType.equals(link.type()) && requirementId.equals(link.outwardIssueKey()));
 
         if (linkExists)
         {

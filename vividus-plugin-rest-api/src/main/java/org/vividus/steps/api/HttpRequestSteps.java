@@ -75,9 +75,9 @@ public class HttpRequestSteps
     @Given("request body: $content")
     public void request(DataWrapper content)
     {
-        Object data = content.getData();
-        HttpEntity requestEntity = data instanceof String ? new StringEntity((String) data, StandardCharsets.UTF_8)
-                : new ByteArrayEntity((byte[]) data, null);
+        Object data = content.data();
+        HttpEntity requestEntity = data instanceof String dataAsString ? new StringEntity(dataAsString,
+                StandardCharsets.UTF_8) : new ByteArrayEntity((byte[]) data, null);
         httpTestContext.putRequestEntity(requestEntity);
     }
 

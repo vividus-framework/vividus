@@ -271,15 +271,7 @@ public class WebJavascriptActions extends JavascriptActions implements WebApplic
         this.stickyHeaderSizePercentage = stickyHeaderSizePercentage;
     }
 
-    private static final class BrowserConfig
+    private record BrowserConfig(String userAgent, double devicePixelRatio)
     {
-        private final String userAgent;
-        private final double devicePixelRatio;
-
-        private BrowserConfig(String userAgent, double devicePixelRatio)
-        {
-            this.userAgent = userAgent;
-            this.devicePixelRatio = devicePixelRatio;
-        }
     }
 }

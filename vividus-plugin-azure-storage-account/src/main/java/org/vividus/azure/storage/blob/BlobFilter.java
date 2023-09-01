@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,32 +20,7 @@ import java.util.Optional;
 
 import org.hamcrest.Matcher;
 
-public class BlobFilter
+public record BlobFilter(Optional<String> blobNamePrefix, Optional<Matcher<String>> blobNameMatcher,
+                         Optional<Integer> resultsLimit)
 {
-    private final Optional<String> blobNamePrefix;
-    private final Optional<Matcher<String>> blobNameMatcher;
-    private final Optional<Integer> resultsLimit;
-
-    public BlobFilter(Optional<String> blobNamePrefix, Optional<Matcher<String>> blobNameMatcher,
-            Optional<Integer> resultsLimit)
-    {
-        this.blobNamePrefix = blobNamePrefix;
-        this.blobNameMatcher = blobNameMatcher;
-        this.resultsLimit = resultsLimit;
-    }
-
-    public Optional<String> getBlobNamePrefix()
-    {
-        return blobNamePrefix;
-    }
-
-    public Optional<Matcher<String>> getBlobNameMatcher()
-    {
-        return blobNameMatcher;
-    }
-
-    public Optional<Integer> getResultsLimit()
-    {
-        return resultsLimit;
-    }
 }

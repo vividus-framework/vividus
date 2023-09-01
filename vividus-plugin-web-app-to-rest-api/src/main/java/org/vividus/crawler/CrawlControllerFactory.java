@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class CrawlControllerFactory implements ICrawlControllerFactory
         UserInfo userInfo = UriUtils.getUserInfo(mainApplicationPage);
         if (userInfo != null)
         {
-            BasicAuthInfo authInfo = new BasicAuthInfo(userInfo.getUser(), userInfo.getPassword(),
+            BasicAuthInfo authInfo = new BasicAuthInfo(userInfo.user(), userInfo.password(),
                     UriUtils.removeUserInfo(mainApplicationPage).toString());
             crawlConfig.addAuthInfo(authInfo);
         }

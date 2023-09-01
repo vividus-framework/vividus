@@ -138,7 +138,7 @@ class BarcodeStepsTests
         ordered.verify(eventBus).post(eventCaptor.capture());
         Object event = eventCaptor.getValue();
         assertThat(event, instanceOf(AttachmentPublishEvent.class));
-        Attachment attachment = ((AttachmentPublishEvent) event).getAttachment();
+        Attachment attachment = ((AttachmentPublishEvent) event).attachment();
         assertEquals("Screenshot", attachment.getTitle());
         assertEquals("image/png", attachment.getContentType());
         assertArrayEquals(ImageTool.toByteArray(QR_CODE_IMAGE), attachment.getContent());

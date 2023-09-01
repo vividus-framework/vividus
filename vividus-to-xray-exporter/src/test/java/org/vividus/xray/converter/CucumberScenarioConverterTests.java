@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,12 +48,12 @@ class CucumberScenarioConverterTests
         scenario.setSteps(steps);
 
         CucumberScenario outcome = CucumberScenarioConverter.convert(scenario);
-        assertEquals("Scenario", outcome.getType());
+        assertEquals("Scenario", outcome.type());
         String scenarioAsString = STEP_VALUE + 1 + lineSeparator()
             + STEP_VALUE + 2 + lineSeparator()
             + "# " + STEP_VALUE + 3 + lineSeparator()
             + STEP_VALUE + 4;
-        assertEquals(scenarioAsString, outcome.getScenario());
+        assertEquals(scenarioAsString, outcome.scenario());
     }
 
     @Test
@@ -79,7 +79,7 @@ class CucumberScenarioConverterTests
         examples.setExamples(List.of(example));
 
         CucumberScenario outcome = CucumberScenarioConverter.convert(scenario);
-        assertEquals("Scenario Outline", outcome.getType());
+        assertEquals("Scenario Outline", outcome.type());
         String scenarioAsString = STEP_VALUE + 1 + lineSeparator()
             + STEP_VALUE + 2 + lineSeparator()
             + STEP_VALUE + 3 + lineSeparator()
@@ -87,7 +87,7 @@ class CucumberScenarioConverterTests
             + "|key 1|key 2|" + lineSeparator()
             + "|value 11|value 12|" + lineSeparator()
             + "|value 21|value 22|" + lineSeparator();
-        assertEquals(scenarioAsString, outcome.getScenario());
+        assertEquals(scenarioAsString, outcome.scenario());
     }
 
     private Step createStep(String value)

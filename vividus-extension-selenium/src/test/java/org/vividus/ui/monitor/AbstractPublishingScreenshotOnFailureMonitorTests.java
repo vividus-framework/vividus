@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,7 +191,7 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
         doReturn(Optional.of(screenshot)).when(spy).takeScreenshot(ASSERTION_FAILURE);
         spy.onAssertionFailure(mock(AssertionFailedEvent.class));
         verify(eventBus).post(argThat((ArgumentMatcher<AttachmentPublishEvent>) event -> {
-            Attachment attachment = event.getAttachment();
+            Attachment attachment = event.attachment();
             return Arrays.equals(screenshot.getData(), attachment.getContent()) && title.equals(attachment.getTitle());
         }));
         assertThat(logger.getLoggingEvents(), empty());

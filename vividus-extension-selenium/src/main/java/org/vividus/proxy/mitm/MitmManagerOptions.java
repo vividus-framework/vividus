@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,39 +19,7 @@ package org.vividus.proxy.mitm;
 import org.vividus.http.keystore.KeyStoreOptions;
 import org.vividus.proxy.model.MitmManagerType;
 
-public class MitmManagerOptions
+public record MitmManagerOptions(MitmManagerType mitmManagerType, String alias, boolean trustAllServers,
+                                 KeyStoreOptions keyStoreOptions)
 {
-    private final MitmManagerType mitmManagerType;
-    private final String alias;
-    private final boolean trustAllServers;
-    private final KeyStoreOptions keyStoreOptions;
-
-    public MitmManagerOptions(MitmManagerType mitmManagerType, String alias, boolean trustAllServers,
-            KeyStoreOptions keyStoreOptions)
-    {
-        this.mitmManagerType = mitmManagerType;
-        this.alias = alias;
-        this.trustAllServers = trustAllServers;
-        this.keyStoreOptions = keyStoreOptions;
-    }
-
-    public MitmManagerType getMitmManagerType()
-    {
-        return mitmManagerType;
-    }
-
-    public String getAlias()
-    {
-        return alias;
-    }
-
-    public boolean isTrustAllServers()
-    {
-        return trustAllServers;
-    }
-
-    public KeyStoreOptions getKeyStoreOptions()
-    {
-        return keyStoreOptions;
-    }
 }

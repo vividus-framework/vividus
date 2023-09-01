@@ -81,7 +81,7 @@ class AbstractCloudTestLinkPublisherTests
     @Test
     void shouldNotPublishSessionLinkAfterScenarioIfWebDriverWasClosed()
     {
-        when(webDriverQuitEvent.getSessionId()).thenReturn(SESSION_ID);
+        when(webDriverQuitEvent.sessionId()).thenReturn(SESSION_ID);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(false);
 
         linkPublisher.resetState();
@@ -95,7 +95,7 @@ class AbstractCloudTestLinkPublisherTests
     @Test
     void shouldPublishSessionLinkAfterScenarioIfMultipleWebDriverSessionReCreationOccurred()
     {
-        when(webDriverQuitEvent.getSessionId()).thenReturn(SESSION_ID);
+        when(webDriverQuitEvent.sessionId()).thenReturn(SESSION_ID);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         mockDriverSession();
 
@@ -141,7 +141,7 @@ class AbstractCloudTestLinkPublisherTests
         verify(eventBus, times(times)).post(argThat(arg ->
         {
             var event = (LinkPublishEvent) arg;
-            return URL.equals(event.getUrl()) && "Test Test URL".equals(event.getName());
+            return URL.equals(event.url()) && "Test Test URL".equals(event.name());
         }));
     }
 

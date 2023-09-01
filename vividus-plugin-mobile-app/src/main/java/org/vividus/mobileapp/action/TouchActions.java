@@ -200,9 +200,9 @@ public class TouchActions
         uiContext.getOptionalSearchContext()
                  .map(this::createScreenShooter)
                  .ifPresent(screenShooter -> {
-                     SwipeConfiguration swipeConfiguration = mobileApplicationConfiguration.getSwipeConfiguration();
-                     Duration stabilizationDuration = swipeConfiguration.getSwipeStabilizationDuration();
-                     int swipeLimit = swipeConfiguration.getSwipeLimit();
+                     SwipeConfiguration swipeConfiguration = mobileApplicationConfiguration.swipeConfiguration();
+                     Duration stabilizationDuration = swipeConfiguration.swipeStabilizationDuration();
+                     int swipeLimit = swipeConfiguration.swipeLimit();
                      BufferedImage previousFrame = null;
 
                      Rectangle adjustedSwipeArea = adjustSwipeArea(swipeArea);
@@ -287,7 +287,7 @@ public class TouchActions
             Duration swipeDuration)
     {
         MoveCoordinates coordinates = direction.createCoordinates(startCoordinate, endCoordinate,
-                mobileApplicationConfiguration.getSwipeConfiguration(), swipeArea);
+                mobileApplicationConfiguration.swipeConfiguration(), swipeArea);
         swipe(coordinates, swipeDuration);
     }
 
@@ -301,22 +301,22 @@ public class TouchActions
     {
         Rectangle zoomArea = calculateZoomArea(contextArea);
         ZoomCoordinates zoomCoordinates = zoomType.calculateCoordinates(zoomArea);
-        Sequence moveFinger1Sequence = getFingerMoveSequence("finger1", zoomCoordinates.getFinger1MoveCoordinates());
-        Sequence moveFinger2Sequence = getFingerMoveSequence("finger2", zoomCoordinates.getFinger2MoveCoordinates());
+        Sequence moveFinger1Sequence = getFingerMoveSequence("finger1", zoomCoordinates.finger1MoveCoordinates());
+        Sequence moveFinger2Sequence = getFingerMoveSequence("finger2", zoomCoordinates.finger2MoveCoordinates());
         webDriverProvider.getUnwrapped(Interactive.class).perform(List.of(moveFinger1Sequence, moveFinger2Sequence));
     }
 
     @SuppressWarnings("MagicNumber")
     private Rectangle calculateZoomArea(Rectangle contextArea)
     {
-        ZoomConfiguration zoomConfiguration = mobileApplicationConfiguration.getZoomConfiguration();
-        int leftIndent = zoomConfiguration.getLeftIndent();
-        int topIndent = zoomConfiguration.getTopIndent();
+        ZoomConfiguration zoomConfiguration = mobileApplicationConfiguration.zoomConfiguration();
+        int leftIndent = zoomConfiguration.leftIndent();
+        int topIndent = zoomConfiguration.topIndent();
 
-        int widthInPercentage = 100 - (leftIndent + zoomConfiguration.getRightIndent());
+        int widthInPercentage = 100 - (leftIndent + zoomConfiguration.rightIndent());
         int zoomAreaWidth = contextArea.getWidth() * widthInPercentage / 100;
 
-        int heightInPercentage = 100 - (topIndent + zoomConfiguration.getBottomIndent());
+        int heightInPercentage = 100 - (topIndent + zoomConfiguration.bottomIndent());
         int zoomAreaHeight = contextArea.getHeight() * heightInPercentage / 100;
 
         int leftIndentPx = contextArea.getWidth() * leftIndent / 100;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@ public class MitmManagerFactory implements IMitmManagerFactory
     @Override
     public MitmManager createMitmManager(MitmManagerOptions options)
     {
-        KeyStoreOptions keyStoreOptions = options.getKeyStoreOptions();
-        checkNotNull(keyStoreOptions.getPath(), "key store path");
-        checkNotNull(keyStoreOptions.getType(), "key store type");
-        checkNotNull(keyStoreOptions.getPassword(), "key store password");
-        checkNotNull(options.getAlias(), "alias");
+        KeyStoreOptions keyStoreOptions = options.keyStoreOptions();
+        checkNotNull(keyStoreOptions.path(), "key store path");
+        checkNotNull(keyStoreOptions.type(), "key store type");
+        checkNotNull(keyStoreOptions.password(), "key store password");
+        checkNotNull(options.alias(), "alias");
 
-        return options.getMitmManagerType().buildMitmManager(options, keyStoreOptions);
+        return options.mitmManagerType().buildMitmManager(options, keyStoreOptions);
     }
 
     private void checkNotNull(Object value, String parameter)

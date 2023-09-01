@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class PublishingWebScreenshotOnFailureMonitor extends AbstractPublishingS
     protected Optional<Screenshot> takeScreenshot(String screenshotName)
     {
         SearchContext searchContext = uiContext.getSearchContext();
-        List<WebElement> webElements = searchContext instanceof WebElement ? List.of((WebElement) searchContext)
+        List<WebElement> webElements = searchContext instanceof WebElement webElement ? List.of(webElement)
                 : uiContext.getAssertingWebElements();
         return webScreenshotTaker.takeScreenshot(screenshotName, webElements);
     }

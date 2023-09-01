@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ class NetworkStepsTests
     {
         when(genericWebDriverManager.isAndroid()).thenReturn(false);
         when(genericWebDriverManager.isIOS()).thenReturn(true);
-        when(mobileEnvironment.isRealDevice()).thenReturn(true);
+        when(mobileEnvironment.realDevice()).thenReturn(true);
         var exception = assertThrows(IllegalArgumentException.class,
                 () -> networkSteps.changeNetworkConnection(NetworkToggle.OFF, mode));
         assertEquals(String.format("%s is not supported for iOS", mode), exception.getMessage());
@@ -58,7 +58,7 @@ class NetworkStepsTests
     void shouldFailForIOSSimulator()
     {
         when(genericWebDriverManager.isIOS()).thenReturn(true);
-        when(mobileEnvironment.isRealDevice()).thenReturn(false);
+        when(mobileEnvironment.realDevice()).thenReturn(false);
         testUnsupportedPlatform();
     }
 
@@ -84,7 +84,7 @@ class NetworkStepsTests
     {
         when(genericWebDriverManager.isAndroid()).thenReturn(false);
         when(genericWebDriverManager.isIOS()).thenReturn(true);
-        when(mobileEnvironment.isRealDevice()).thenReturn(true);
+        when(mobileEnvironment.realDevice()).thenReturn(true);
         networkSteps.changeNetworkConnection(NetworkToggle.ON, mode);
         verify(networkActions).changeNetworkConnectionState(NetworkToggle.ON, mode);
     }

@@ -98,7 +98,7 @@ public class GoogleAnalyticsFacade
 
     public void postEvent(AnalyticsEventBatch analyticsEvent)
     {
-        analyticsEvent.getEvents().stream()
+        analyticsEvent.events().stream()
                                   .map(this::asParams)
                                   .map(params -> WWWFormCodec.format(params, UTF_8))
                                   .collect(Collectors.collectingAndThen(toList(), this::prepareHttpEntites))

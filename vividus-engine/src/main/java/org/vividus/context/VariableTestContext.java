@@ -58,10 +58,10 @@ public class VariableTestContext implements VariableContext
     @Override
     public void putVariable(VariableScope variableScope, String variableKey, Object variableValue)
     {
-        if (variableValue instanceof byte[])
+        if (variableValue instanceof byte[] bytes)
         {
             LOGGER.atInfo()
-                    .addArgument(() -> ((byte[]) variableValue).length / THOUSAND)
+                    .addArgument(() -> bytes.length / THOUSAND)
                     .addArgument(() -> EnumUtils.toHumanReadableForm(variableScope))
                     .addArgument(variableKey)
                     .log("Saving {} kB of binary data into the {} variable '{}'");
