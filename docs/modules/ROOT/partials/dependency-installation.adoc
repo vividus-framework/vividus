@@ -2,6 +2,9 @@
 
 . Copy the below line to `dependencies` section of the project `build.gradle` file
 +
+[IMPORTANT]
+Please make sure to use the same version for all VIVIDUS dependencies.
++
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
