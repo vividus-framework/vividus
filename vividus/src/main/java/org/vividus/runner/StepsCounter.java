@@ -22,12 +22,13 @@ import static org.apache.commons.lang3.StringUtils.rightPad;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -49,23 +50,17 @@ import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 import org.vividus.resource.StoryLoader;
 
-public class StepsCounter
+public final class StepsCounter
 {
     private static final String DEFAULT_STORY_LOCATION = "story";
     private static final String SPACE = " ";
     private static final String OCCURRENCES = "occurrence(s)";
-    private final Set<StepCandidate> stepCandidates = new HashSet<>();
-    private final Map<String, Integer> stepsWithStats = new HashMap<>();
-    private final List<String> missedSteps = new ArrayList<>();
-    private int maxStepLength;
 
-    public static void main(String[] args) throws IOException, ParseException
+    private StepsCounter()
     {
-        StepsCounter stepsCounter = new StepsCounter();
-        stepsCounter.countSteps(args);
     }
 
-    public void countSteps(String[] args) throws ParseException, IOException
+    public static void main(String[] args) throws IOException, ParseException
     {
         Vividus.init();
         CommandLine commandLine;
@@ -84,13 +79,13 @@ public class StepsCounter
         Configuration configuration = BeanFactory.getBean(Configuration.class);
 
         List<String> steps = collectSteps(configuration, storyLoader, pathFinder, storyLocation);
-        fillStepCandidates();
-        fillStepsWithStats(configuration, steps);
-        printResults(commandLine, topOption, System.out);
+        Set<StepCandidate> stepCandidates = collectStepCandidates();
+        StepsUsageDetails stepsUsageDetails = fillStepsWithStats(configuration, stepCandidates, steps);
+        printResults(commandLine, topOption, System.out, stepsUsageDetails);
     }
 
-    private List<String> collectSteps(Configuration configuration, StoryLoader storyLoader, IPathFinder pathFinder,
-            String storyLocation) throws IOException
+    private static List<String> collectSteps(Configuration configuration, StoryLoader storyLoader,
+            IPathFinder pathFinder, String storyLocation) throws IOException
     {
         Keywords keywords = configuration.keywords();
         RegexStoryParser storyParser = new RegexStoryParser(new ExamplesTableFactory(keywords, null, null)
@@ -112,7 +107,7 @@ public class StepsCounter
                 .toList();
     }
 
-    private BatchConfiguration createBatchConfiguration(String storyLocation)
+    private static BatchConfiguration createBatchConfiguration(String storyLocation)
     {
         BatchConfiguration batchConfiguration = new BatchConfiguration();
         batchConfiguration.setResourceLocation(storyLocation);
@@ -121,17 +116,19 @@ public class StepsCounter
         return batchConfiguration;
     }
 
-    private void fillStepCandidates()
+    private static Set<StepCandidate> collectStepCandidates()
     {
         InjectableStepsFactory stepFactory = BeanFactory.getBean(InjectableStepsFactory.class);
-        for (CandidateSteps candidateSteps : stepFactory.createCandidateSteps())
-        {
-            stepCandidates.addAll(candidateSteps.listCandidates());
-        }
+        return stepFactory.createCandidateSteps().stream()
+                .map(CandidateSteps::listCandidates)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 
-    private void fillStepsWithStats(Configuration configuration, List<String> steps)
+    private static StepsUsageDetails fillStepsWithStats(Configuration configuration, Set<StepCandidate> stepCandidates,
+            List<String> steps)
     {
+        StepsUsageDetails stepsUsageDetails = new StepsUsageDetails();
         Keywords keywords = configuration.keywords();
         String previousNonAndStep = null;
         for (String stepValue : steps)
@@ -145,60 +142,66 @@ public class StepsCounter
             {
                 previousNonAndStep = stepValue;
             }
-            boolean isStepPresent = false;
+            boolean stepPresent = false;
             for (StepCandidate stepCandidate : stepCandidates)
             {
                 if (stepCandidate.matches(stepValue, currentNonAndStep))
                 {
-                    isStepPresent = true;
+                    stepPresent = true;
                     String stepString = stepCandidate.getStartingWord() + SPACE + stepCandidate.getPatternAsString();
-                    maxStepLength = Math.max(maxStepLength, stepString.length());
-                    Integer count = stepsWithStats.get(stepString);
-                    if (count != null)
-                    {
-                        stepsWithStats.put(stepString, ++count);
-                    }
-                    else
-                    {
-                        stepsWithStats.put(stepString, 1);
-                    }
+                    stepsUsageDetails.incrementStepUsage(stepString);
                     break;
                 }
             }
-            if (!isStepPresent)
+            if (!stepPresent)
             {
-                missedSteps.add(stepValue);
+                stepsUsageDetails.missedSteps.add(stepValue);
             }
         }
+        return stepsUsageDetails;
     }
 
-    private void printResults(CommandLine commandLine, Option topOption, PrintStream printStream)
+    private static void printResults(CommandLine commandLine, Option topOption, PrintStream printStream,
+            StepsUsageDetails stepsUsageDetails)
     {
-        if (!stepsWithStats.isEmpty())
+        if (!stepsUsageDetails.stepsWithStats.isEmpty())
         {
-            printStream.println(center("Top of the most used steps:", maxStepLength) + SPACE + OCCURRENCES);
-            long limit = stepsWithStats.size();
+            printStream.println(
+                    center("Top of the most used steps:", stepsUsageDetails.maxStepLength) + SPACE + OCCURRENCES);
+            long limit = stepsUsageDetails.stepsWithStats.size();
             if (commandLine.hasOption(topOption.getOpt()))
             {
                 limit = Long.parseLong(commandLine.getOptionValue(topOption.getOpt()));
             }
-            final int finalMaxStepLength = maxStepLength;
-            stepsWithStats
+            stepsUsageDetails.stepsWithStats
                     .entrySet()
                     .stream()
                     .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
                     .limit(limit)
-                    .forEach(k -> printStream.println(rightPad(k.getKey(), finalMaxStepLength)
+                    .forEach(k -> printStream.println(rightPad(k.getKey(), stepsUsageDetails.maxStepLength)
                                     + center(String.format(" %s", k.getValue()), OCCURRENCES.length())));
         }
         else
         {
             printStream.println("Matched steps haven't been found");
         }
-        if (!missedSteps.isEmpty())
+        if (!stepsUsageDetails.missedSteps.isEmpty())
         {
             printStream.println("\nUnable to find StepCandidate(s) for following step(s):");
-            missedSteps.forEach(printStream::println);
+            stepsUsageDetails.missedSteps.forEach(printStream::println);
+        }
+    }
+
+    private static final class StepsUsageDetails
+    {
+        private final Map<String, Integer> stepsWithStats = new HashMap<>();
+        private final List<String> missedSteps = new ArrayList<>();
+        private int maxStepLength;
+
+        private void incrementStepUsage(String step)
+        {
+            stepsWithStats.compute(step, (k, count) -> count == null ? 1 : count + 1);
+            maxStepLength = Math.max(maxStepLength, step.length());
         }
     }
 }

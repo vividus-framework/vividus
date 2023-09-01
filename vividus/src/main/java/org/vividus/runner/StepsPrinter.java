@@ -44,14 +44,16 @@ import org.jbehave.core.steps.StepCandidate;
 import org.vividus.configuration.BeanFactory;
 import org.vividus.configuration.Vividus;
 
-// Fix once deprecated child class is removed
-@SuppressWarnings({ "checkstyle:HideUtilityClassConstructor", "PMD.UseUtilityClass" })
-public class StepsPrinter
+public final class StepsPrinter
 {
     private static final String DEPRECATED = "DEPRECATED";
     private static final String COMPOSITE = "COMPOSITE IN STEPS FILE";
     private static final String EMPTY = "";
     private static final Pattern DEPRECATION_COMMENT_PATTERN = Pattern.compile("^!--\\h+DEPRECATED:\\h+.*");
+
+    private StepsPrinter()
+    {
+    }
 
     public static void main(String[] args) throws ParseException, IOException
     {
