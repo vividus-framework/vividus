@@ -1,6 +1,7 @@
 plugins {
     id 'com.bmuschko.docker-remote-api' version '9.3.2'
 }
+apply from: "${buildSystemPath}/vividus-test-subproject.gradle"
 
 project.description = 'VIVIDUS Docker bundler'
 
@@ -70,16 +71,12 @@ dependencies {
     implementation(group: 'net.snowflake', name: 'snowflake-jdbc', version: '3.14.1')
 }
 
-task copyRuntimeLibs(type: Copy) {
+tasks.register('copyRuntimeLibs', Copy) {
     into "$buildDir/docker/libs"
     from configurations.runtimeClasspath
 }
 
-import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
-import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
-import com.bmuschko.gradle.docker.tasks.image.Dockerfile
-
-task createDockerfile(type: Dockerfile) {
+tasks.register('createDockerfile', com.bmuschko.gradle.docker.tasks.image.Dockerfile) {
     dependsOn copyRuntimeLibs
 
     from('eclipse-temurin:17-jre-alpine')
@@ -90,12 +87,12 @@ task createDockerfile(type: Dockerfile) {
     entryPoint('java', '-cp', '/vividus/resources:/vividus/libs/*', 'org.vividus.runner.StoriesRunner')
 }
 
-task buildImage(type: DockerBuildImage) {
+tasks.register('buildImage', com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
     dependsOn createDockerfile
     images.add("vividus/vividus:${project.version}")
 }
 
-task pushImage(type: DockerPushImage) {
+tasks.register('pushImage', com.bmuschko.gradle.docker.tasks.image.DockerPushImage) {
     dependsOn buildImage
     images = buildImage.images
 }

@@ -1,3 +1,4 @@
+apply from: "${buildSystemPath}/vividus-test-subproject.gradle"
 project.description = 'VIVIDUS tests'
 
 tasks.publish.enabled = false
