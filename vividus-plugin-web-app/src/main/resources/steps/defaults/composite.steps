@@ -161,3 +161,11 @@ When I attempt to close current tab with possibility to handle alert
 Composite: When I switch back to the page
 !-- DEPRECATED: 0.7.0, When I switch back to page
 When I switch back to page
+
+Composite: Then each element located `$locator` has same `$dimension`
+!-- DEPRECATED: 0.7.0, Then each element located by `%1$s` has same `%2$s`
+Then each element located by `<locator>` has same `<dimension>`
+
+Composite: Then the context has a width of '$widthInPerc'%
+!-- DEPRECATED: 0.7.0, Then context has width of %1$s%
+Then context element has width of <widthInPerc>%
