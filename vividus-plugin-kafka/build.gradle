@@ -11,7 +11,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation platform(group: 'org.springframework.kafka', name: 'spring-kafka-bom', version: '3.0.10')
+    implementation platform(group: 'org.springframework.kafka', name: 'spring-kafka-bom', version: '3.0.11')
     implementation(group: 'org.springframework.kafka', name: 'spring-kafka')
     implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
 
