@@ -779,13 +779,13 @@ Does not support multi-selection
 
 [source,gherkin]
 ----
-When I select `$option` in dropdown located by `$locator``
+When I select `$option` in dropdown located by `$locator`
 ----
 
 _Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
 [source,gherkin]
 ----
-When I select `$option` in dropdown located `$locator``
+When I select `$option` in dropdown located `$locator`
 ----
 * `$option` - option to select
 * `$locator` - The <<_locator,locator>> used to find a dropdown.
