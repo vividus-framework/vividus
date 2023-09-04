@@ -139,6 +139,15 @@ class WebLocatorTypeTests
                 WebLocatorType.SHADOW_CSS_SELECTOR.buildBy("div1; div2; h1"));
     }
 
+    @Test
+    void shouldBuildByRadioButton()
+    {
+        var value = "label";
+        assertEquals(By.xpath(".//input[normalize-space(@type)='radio' and ((@* | text())=\"label\" "
+                        + "or @id=(//label[text()[normalize-space()=\"label\"]]/@for))]"),
+                WebLocatorType.RADIO_BUTTON.buildBy(value));
+    }
+
     static Stream<Arguments> dataSet()
     {
         return Stream.of(

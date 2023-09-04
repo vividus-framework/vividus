@@ -22,6 +22,7 @@ import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.WebElement;
+import org.vividus.annotation.Replacement;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.State;
 import org.vividus.ui.action.search.Locator;
@@ -32,6 +33,7 @@ import org.vividus.ui.web.action.search.WebLocatorType;
 
 import jakarta.inject.Inject;
 
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @TakeScreenshotOnFailure
 public class RadioButtonSteps
 {
@@ -64,7 +66,11 @@ public class RadioButtonSteps
      *          <label for="radioButtonId">}<b>'radioOption'</b>{@code </label>
      *      </div>
      * </div>}</pre>
+     * @deprecated Use step: "Then number of elements found by `radioButton($radioOption)` is equal to `1`"
      */
+    @Deprecated(since = "0.6.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern =
+            "Then number of elements found by `radioButton(%1$s)` is equal to `1`")
     @Then("a radio button with the name '$radioOption' exists")
     public WebElement assertIfRadioOptionExists(String radioOption)
     {
@@ -114,7 +120,11 @@ public class RadioButtonSteps
      *      </div>
      * </div>}</pre>
      * @see <a href="https://www.w3schools.com/tags/default.asp"><i>HTML Element Reference</i></a>
+     * @deprecated Use step: "When I click on element located by `radioButton($radioOption)`"
      */
+    @Deprecated(since = "0.6.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern =
+            "When I click on element located by `radioButton(%1$s)`")
     @When("I select a radio button with the name '$radioOption'")
     public void checkRadioOption(String radioOption)
     {
@@ -147,7 +157,11 @@ public class RadioButtonSteps
      *          <label for="radioButtonId">}<b>'radioOption'</b>{@code </label>
      *      </div>
      * </div>}</pre>
+     * @deprecated Use step: "Then number of $state elements found by `radioButton($radioOption)` is equal to `1`"
      */
+    @Deprecated(since = "0.6.0", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern =
+            "Then number of %1$s elements found by `radioButton(%2$s)` is equal to `1`")
     @Then("a [$state] radio button with the name '$radioOption' exists")
     public void assertIfRadioOptionExists(State state, String radioOption)
     {
@@ -183,7 +197,10 @@ public class RadioButtonSteps
      *      &lt;/div&gt;
      * &lt;/div&gt;
      * </pre>
+     * @deprecated Use multiple steps "Then number of elements found by `radioButton($radioOption)` is equal to `1`"
+     * Or step "Then number of elements found by `radioButton($radioOption)` is equal to `1`" with an ExamplesTable
      */
+    @Deprecated(since = "0.6.0", forRemoval = true)
     @Then("an element contains the radio buttons:$radioOptions")
     public void doesElementContainRadioOptions(ExamplesTable radioOptions)
     {

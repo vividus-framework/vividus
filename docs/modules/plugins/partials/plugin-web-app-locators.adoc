@@ -70,6 +70,10 @@ and moves handling of spaces up to user
 |input or textarea with text or any attribute value
 |fieldName(editor)
 
+|`radoButton`
+|input element with @type="radio" and label text value
+|radioButton(One)
+
 |`checkboxName`
 |input element with @type="checkbox" and text value
 |checkboxName(allow)
