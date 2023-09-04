@@ -14,6 +14,9 @@
     h3, p {
         font-weight: bold;
     }
+    img {
+        background: url('data:image/gif;base64,R0lGODlhCgAKAIAAAOXl5f///yH5BAAAAAAALAAAAAAKAAoAAAIRhB2ZhxoM3GMSykqd1VltzxQAOw==');
+    }
     <@custom_css />
     </style>
     <div class="container-fluid">
