@@ -58,9 +58,9 @@ public class PublishingAttachmentInterceptor implements HttpRequestInterceptor, 
     {
         byte[] body = null;
         String mimeType = null;
-        if (request instanceof HttpEntityContainer)
+        if (request instanceof HttpEntityContainer httpEntityContainer)
         {
-            HttpEntity entity = ((HttpEntityContainer) request).getEntity();
+            HttpEntity entity = httpEntityContainer.getEntity();
             if (entity != null)
             {
                 mimeType = getMimeType(request.getHeaders())

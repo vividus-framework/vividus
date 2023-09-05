@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,7 +141,7 @@ public class PropertyMapper implements IPropertyMapper
     private <T> Class<T> getType(JsonDeserializer<? extends T> deserializer)
     {
         Type type = ((ParameterizedType) deserializer.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        return (Class<T>) (type instanceof ParameterizedType ? ((ParameterizedType) type).getRawType() : type);
+        return (Class<T>) (type instanceof ParameterizedType parameterizedType ? parameterizedType.getRawType() : type);
     }
 
     private Set<String> getKeys(Set<String> propertyNames, String propertyPrefix)

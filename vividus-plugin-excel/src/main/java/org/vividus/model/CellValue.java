@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,6 @@
 
 package org.vividus.model;
 
-public class CellValue
+public record CellValue(String value, String address)
 {
-    private final String value;
-    private final String address;
-
-    public CellValue(String value, String address)
-    {
-        this.value = value;
-        this.address = address;
-    }
-
-    public String getValue()
-    {
-        return value;
-    }
-
-    public String getAddress()
-    {
-        return address;
-    }
 }

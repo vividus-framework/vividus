@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,9 +78,9 @@ public class DeprecatedPropertiesHandler
             warnDeprecated(DEPRECATED_WARN_MSG, key, getDeprecatedProperty(key).getNewKey(key));
         }
 
-        if (value instanceof String)
+        if (value instanceof String valueAsString)
         {
-            Matcher placeholderMatcher = placeholderPattern.matcher((String) value);
+            Matcher placeholderMatcher = placeholderPattern.matcher(valueAsString);
             while (placeholderMatcher.find())
             {
                 String placeholderKey = placeholderMatcher.group(1);

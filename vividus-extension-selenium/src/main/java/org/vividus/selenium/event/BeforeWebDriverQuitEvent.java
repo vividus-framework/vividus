@@ -16,17 +16,6 @@
 
 package org.vividus.selenium.event;
 
-public class BeforeWebDriverQuitEvent
+public record BeforeWebDriverQuitEvent(String sessionId)
 {
-    private final String sessionId;
-
-    public BeforeWebDriverQuitEvent(String sessionId)
-    {
-        this.sessionId = sessionId;
-    }
-
-    public String getSessionId()
-    {
-        return sessionId;
-    }
 }

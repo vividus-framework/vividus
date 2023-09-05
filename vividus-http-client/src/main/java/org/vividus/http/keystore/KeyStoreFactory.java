@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,16 +38,16 @@ public class KeyStoreFactory implements IKeyStoreFactory
         {
             try
             {
-                String keyStorePath = keyStoreOptions.getPath();
+                String keyStorePath = keyStoreOptions.path();
                 if (StringUtils.isNotBlank(keyStorePath))
                 {
-                    String keyStorePassword = keyStoreOptions.getPassword();
+                    String keyStorePassword = keyStoreOptions.password();
                     if (keyStorePassword == null)
                     {
                         throw new IllegalStateException(String.format("Key store password for %s %s must not be null",
-                                keyStoreOptions.getType(), keyStorePath));
+                                keyStoreOptions.type(), keyStorePath));
                     }
-                    KeyStore keyStore = KeyStore.getInstance(keyStoreOptions.getType());
+                    KeyStore keyStore = KeyStore.getInstance(keyStoreOptions.type());
                     try (InputStream inputStream = ResourceUtils.findResource(getClass(), keyStorePath).openStream())
                     {
                         keyStore.load(inputStream, keyStorePassword.toCharArray());

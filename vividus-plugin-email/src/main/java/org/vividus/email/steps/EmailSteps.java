@@ -164,11 +164,11 @@ public class EmailSteps
             {
                 EmailMessageTextContent content = contents.get(index);
                 LOGGER.atInfo()
-                      .addArgument(content.getContentType())
+                      .addArgument(content.contentType())
                       .addArgument(index)
                       .log("Content {} by index '{}'");
                 String key = String.format("%s[%d]", variableName, index);
-                variableContext.putVariable(scopes, key, content.getContent());
+                variableContext.putVariable(scopes, key, content.content());
             });
         }
     }

@@ -72,8 +72,8 @@ public abstract class AbstractScreenshotTaker<T extends ScreenshotParameters>
 
     private pazone.ashot.Screenshot takeScreenshot(SearchContext searchContext, AShot aShot)
     {
-        pazone.ashot.Screenshot screenshot = searchContext instanceof WebDriver
-                ? aShot.takeScreenshot((WebDriver) searchContext)
+        pazone.ashot.Screenshot screenshot = searchContext instanceof WebDriver webDriver
+                ? aShot.takeScreenshot(webDriver)
                 : aShot.takeScreenshot(getWebDriverProvider().get(), (WebElement) searchContext);
 
         screenshotDebugger.debug(this.getClass(), "After_AShot", screenshot.getImage());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,8 +165,8 @@ public final class UriUtils
         }
 
         UserInfo info = parseUserInfo(userInfo);
-        String username = decodeData(info.getUser());
-        String password = decodeData(info.getPassword());
+        String username = decodeData(info.user());
+        String password = decodeData(info.password());
         return encodeData(username) + USER_PASSWORD_SEPARATOR + encodeData(password);
     }
 
@@ -335,25 +335,7 @@ public final class UriUtils
         return buildNewUrl(baseUri, pathToGo);
     }
 
-    public static final class UserInfo
+    public record UserInfo(String user, String password)
     {
-        private final String user;
-        private final String password;
-
-        public UserInfo(String user, String password)
-        {
-            this.user = user;
-            this.password = password;
-        }
-
-        public String getUser()
-        {
-            return user;
-        }
-
-        public String getPassword()
-        {
-            return password;
-        }
     }
 }

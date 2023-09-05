@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,25 +76,7 @@ public final class CucumberScenarioConverter
                 Collectors.joining(CUCUMBER_SEPARATOR, CUCUMBER_SEPARATOR, CUCUMBER_SEPARATOR + lineSeparator()));
     }
 
-    public static class CucumberScenario
+    public record CucumberScenario(String type, String scenario)
     {
-        private final String type;
-        private final String scenario;
-
-        public CucumberScenario(String type, String scenario)
-        {
-            this.type = type;
-            this.scenario = scenario;
-        }
-
-        public String getType()
-        {
-            return type;
-        }
-
-        public String getScenario()
-        {
-            return scenario;
-        }
     }
 }

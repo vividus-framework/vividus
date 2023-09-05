@@ -129,8 +129,8 @@ class EmailMessageFactoryTests
         assertMessage(output, messageMock);
         assertThat(output.getContents(), hasSize(1));
         EmailMessageTextContent content = output.getContents().get(0);
-        assertEquals(TEXT, content.getContent());
-        assertEquals(TEXT_TYPE, content.getContentType());
+        assertEquals(TEXT, content.content());
+        assertEquals(TEXT_TYPE, content.contentType());
     }
 
     private void mockContent(Part part, String contentType, Object content) throws IOException, MessagingException

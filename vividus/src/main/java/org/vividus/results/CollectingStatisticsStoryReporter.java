@@ -129,7 +129,7 @@ public class CollectingStatisticsStoryReporter extends AbstractReportControlStor
     @Subscribe
     public void onAssertionFailure(AssertionFailedEvent event)
     {
-        addFailure(() -> event.getSoftAssertionError().getError().getMessage());
+        addFailure(() -> event.softAssertionError().getError().getMessage());
         updateStepStatus(Status.from(event));
     }
 

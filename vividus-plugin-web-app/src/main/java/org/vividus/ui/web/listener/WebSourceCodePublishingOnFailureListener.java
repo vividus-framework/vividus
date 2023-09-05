@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,9 +57,9 @@ public class WebSourceCodePublishingOnFailureListener extends AbstractSourceCode
         {
             sourceCode = getElementSource(searchContext);
         }
-        else if (searchContext instanceof WebDriver)
+        else if (searchContext instanceof WebDriver webDriver)
         {
-            sourceCode = ((WebDriver) searchContext).getPageSource();
+            sourceCode = webDriver.getPageSource();
         }
         Map<String, String> sources = new LinkedHashMap<>();
         if (sourceCode != null)

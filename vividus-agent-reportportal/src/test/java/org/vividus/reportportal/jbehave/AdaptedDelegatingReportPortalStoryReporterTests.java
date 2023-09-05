@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ class AdaptedDelegatingReportPortalStoryReporterTests
     {
         var event = mock(AssertionFailedEvent.class);
         var softAssertionError = mock(SoftAssertionError.class);
-        when(event.getSoftAssertionError()).thenReturn(softAssertionError);
+        when(event.softAssertionError()).thenReturn(softAssertionError);
         when(softAssertionError.getError()).thenReturn(new AssertionError());
         var failedStep = mock(TestItemLeaf.class);
         when(reporter.getLastStep()).thenReturn(Optional.of(failedStep));

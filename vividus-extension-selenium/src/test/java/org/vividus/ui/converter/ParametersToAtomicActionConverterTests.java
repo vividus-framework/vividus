@@ -152,7 +152,7 @@ class ParametersToAtomicActionConverterTests
     private static void verifySequenceAction(AtomicAction<Actions> action,
             AtomicActionFactory<Actions, ?> expectedFactory, Object expectedArgument)
     {
-        assertEquals(expectedFactory, action.getActionFactory());
-        assertEquals(expectedArgument, action.getArgument());
+        assertEquals(expectedFactory, action.actionFactory());
+        assertEquals(expectedArgument, action.argument());
     }
 }

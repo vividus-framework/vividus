@@ -88,8 +88,8 @@ public class GenericWebDriverFactory implements IGenericWebDriverFactory
         return propertyParser.getPropertyValuesTreeByPrefix(prefix)
                              .entrySet()
                              .stream()
-                             .map(e -> e.getValue() instanceof String
-                                 ? Map.entry(e.getKey(), adjustType((String) e.getValue()))
+                             .map(e -> e.getValue() instanceof String valueAsString
+                                 ? Map.entry(e.getKey(), adjustType(valueAsString))
                                  : e)
                              .collect(Collectors.collectingAndThen(toMap(Entry::getKey, Entry::getValue),
                                  DesiredCapabilities::new));

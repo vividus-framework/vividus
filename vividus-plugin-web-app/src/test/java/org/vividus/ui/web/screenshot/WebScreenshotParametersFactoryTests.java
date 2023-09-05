@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,8 +84,8 @@ class WebScreenshotParametersFactoryTests
         assertEquals(Optional.of(SIMPLE), parameters.getShootingStrategy());
         assertEquals(11, parameters.getNativeHeaderToCut());
         assertEquals(12, parameters.getNativeFooterToCut());
-        assertEquals(13, parameters.getWebCutOptions().getWebHeaderToCut());
-        assertEquals(14, parameters.getWebCutOptions().getWebFooterToCut());
+        assertEquals(13, parameters.getWebCutOptions().webHeaderToCut());
+        assertEquals(14, parameters.getWebCutOptions().webFooterToCut());
         assertEquals(Optional.of(scrollableElement), parameters.getScrollableElement());
         assertEquals(CoordsProviderType.WEB_DRIVER, parameters.getCoordsProvider());
         assertEquals(Duration.ofSeconds(1), parameters.getScrollTimeout());

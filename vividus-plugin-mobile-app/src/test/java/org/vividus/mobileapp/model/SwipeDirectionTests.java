@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ class SwipeDirectionTests
         Point point = new Point(pointX, pointY);
         Rectangle swipeArea = new Rectangle(point, dimension);
         SwipeConfiguration configuration = mock(SwipeConfiguration.class);
-        when(configuration.getSwipeVerticalXPosition()).thenReturn(xPercentage);
+        when(configuration.swipeVerticalXPosition()).thenReturn(xPercentage);
         MoveCoordinates coordinates = direction.calculateCoordinates(swipeArea, configuration);
 
         assertPoint(coordinates.getStart(), x, fromY);
@@ -68,7 +68,7 @@ class SwipeDirectionTests
         Point point = new Point(pointX, pointY);
         Rectangle swipeArea = new Rectangle(point, dimension);
         SwipeConfiguration configuration = mock(SwipeConfiguration.class);
-        when(configuration.getSwipeHorizontalYPosition()).thenReturn(yPercentage);
+        when(configuration.swipeHorizontalYPosition()).thenReturn(yPercentage);
         MoveCoordinates coordinates = direction.calculateCoordinates(swipeArea, configuration);
 
         assertPoint(coordinates.getStart(), fromX, y);

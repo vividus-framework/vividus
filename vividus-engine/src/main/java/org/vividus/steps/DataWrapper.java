@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,30 +18,18 @@ package org.vividus.steps;
 
 import java.nio.charset.StandardCharsets;
 
-public class DataWrapper
+public record DataWrapper(Object data)
 {
-    private final Object data;
-
-    public DataWrapper(Object data)
-    {
-        this.data = data;
-    }
-
     public byte[] getBytes()
     {
-        if (data instanceof String)
+        if (data instanceof String string)
         {
-            return ((String) data).getBytes(StandardCharsets.UTF_8);
+            return string.getBytes(StandardCharsets.UTF_8);
         }
-        else if (data instanceof byte[])
+        else if (data instanceof byte[] bytes)
         {
-            return (byte[]) data;
+            return bytes;
         }
         throw new IllegalArgumentException("Unsupported content type: " + data.getClass());
-    }
-
-    public Object getData()
-    {
-        return data;
     }
 }

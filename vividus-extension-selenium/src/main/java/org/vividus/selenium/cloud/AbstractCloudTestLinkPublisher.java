@@ -78,7 +78,7 @@ public abstract class AbstractCloudTestLinkPublisher
     {
         if (!getPublishState().isPublishedAfterScenario())
         {
-            publishCloudTestLink(event.getSessionId());
+            publishCloudTestLink(event.sessionId());
         }
     }
 

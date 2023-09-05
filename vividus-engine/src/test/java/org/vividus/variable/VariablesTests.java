@@ -188,14 +188,7 @@ class VariablesTests
         assertEquals(Map.of(KEY1, SCENARIO, KEY2, STORY, KEY3, STEP), variables.getVariables());
     }
 
-    private static final class Pojo
+    private record Pojo(String name)
     {
-        @SuppressWarnings("unused")
-        private final String name;
-
-        private Pojo(String name)
-        {
-            this.name = name;
-        }
     }
 }

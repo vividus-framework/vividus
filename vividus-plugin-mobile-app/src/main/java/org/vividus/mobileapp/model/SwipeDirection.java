@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@ import org.vividus.mobileapp.configuration.SwipeConfiguration;
 public enum SwipeDirection
 {
     UP(true, true, SwipeDirection.VERTICAL_INDENT_COEFFICIENT, Rectangle::getHeight, Rectangle::getWidth,
-            SwipeConfiguration::getSwipeVerticalXPosition),
+            SwipeConfiguration::swipeVerticalXPosition),
     DOWN(false, true, SwipeDirection.VERTICAL_INDENT_COEFFICIENT, Rectangle::getHeight, Rectangle::getWidth,
-            SwipeConfiguration::getSwipeVerticalXPosition),
+            SwipeConfiguration::swipeVerticalXPosition),
     LEFT(true, false, SwipeDirection.HORIZONTAL_INDENT_COEFFICIENT, Rectangle::getWidth, Rectangle::getHeight,
-            SwipeConfiguration::getSwipeHorizontalYPosition),
+            SwipeConfiguration::swipeHorizontalYPosition),
     RIGHT(false, false, SwipeDirection.HORIZONTAL_INDENT_COEFFICIENT, Rectangle::getWidth, Rectangle::getHeight,
-            SwipeConfiguration::getSwipeHorizontalYPosition);
+            SwipeConfiguration::swipeHorizontalYPosition);
 
     private static final float VERTICAL_INDENT_COEFFICIENT = 0.2f;
     private static final float HORIZONTAL_INDENT_COEFFICIENT = 0.125f;

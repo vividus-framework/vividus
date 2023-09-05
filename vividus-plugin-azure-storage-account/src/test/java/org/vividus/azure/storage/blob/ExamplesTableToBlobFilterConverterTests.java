@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,9 +59,9 @@ class ExamplesTableToBlobFilterConverterTests
                 RESULTS_LIMIT, "28"
         )));
         var blobFilter = converter.convertValue(examplesTable, null);
-        assertEquals(Optional.of(blobNamePrefix), blobFilter.getBlobNamePrefix());
-        assertEquals(Optional.of(28), blobFilter.getResultsLimit());
-        var blobNameMatcherOptional = blobFilter.getBlobNameMatcher();
+        assertEquals(Optional.of(blobNamePrefix), blobFilter.blobNamePrefix());
+        assertEquals(Optional.of(28), blobFilter.resultsLimit());
+        var blobNameMatcherOptional = blobFilter.blobNameMatcher();
         assertTrue(blobNameMatcherOptional.isPresent());
         Matcher<String> blobNameMatcher = blobNameMatcherOptional.get();
         assertThat(blobNameMatcher, instanceOf(StringRegularExpression.class));
@@ -77,9 +77,9 @@ class ExamplesTableToBlobFilterConverterTests
                 BLOB_NAME_FILTER_VALUE, filterValue
         )));
         var blobFilter = converter.convertValue(examplesTable, null);
-        assertEquals(Optional.empty(), blobFilter.getBlobNamePrefix());
-        assertEquals(Optional.empty(), blobFilter.getResultsLimit());
-        var blobNameMatcherOptional = blobFilter.getBlobNameMatcher();
+        assertEquals(Optional.empty(), blobFilter.blobNamePrefix());
+        assertEquals(Optional.empty(), blobFilter.resultsLimit());
+        var blobNameMatcherOptional = blobFilter.blobNameMatcher();
         assertTrue(blobNameMatcherOptional.isPresent());
         Matcher<String> blobNameMatcher = blobNameMatcherOptional.get();
         assertThat(blobNameMatcher, instanceOf(IsEqual.class));
@@ -92,8 +92,8 @@ class ExamplesTableToBlobFilterConverterTests
         var examplesTable = ExamplesTable.empty().withRows(List.of(Map.of(RESULTS_LIMIT, "5"
         )));
         var blobFilter = converter.convertValue(examplesTable, null);
-        assertEquals(Optional.of(5), blobFilter.getResultsLimit());
-        assertEquals(Optional.empty(), blobFilter.getBlobNameMatcher());
+        assertEquals(Optional.of(5), blobFilter.resultsLimit());
+        assertEquals(Optional.empty(), blobFilter.blobNameMatcher());
     }
 
     @ParameterizedTest

@@ -101,9 +101,9 @@ public class HttpCookieSteps
         if (assertCookiesPresent(cookieName, cookies.size()))
         {
             cookies.forEach(cookie -> {
-                if (cookie instanceof SetCookie)
+                if (cookie instanceof SetCookie setCookie)
                 {
-                    ((SetCookie) cookie).setValue(newCookieValue);
+                    setCookie.setValue(newCookieValue);
                 }
                 else
                 {

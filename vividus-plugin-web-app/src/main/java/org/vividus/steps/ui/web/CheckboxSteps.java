@@ -50,7 +50,7 @@ public class CheckboxSteps
         WebElement checkboxElement = baseValidations.assertIfElementExists(CHECKBOX, checkboxLocator);
         if (checkboxElement != null)
         {
-            Checkbox checkbox = checkboxElement instanceof Checkbox ? (Checkbox) checkboxElement : new Checkbox(
+            Checkbox checkbox = checkboxElement instanceof Checkbox asCheckbox ? asCheckbox : new Checkbox(
                     checkboxElement);
             if (checkbox.getWrappedElement() != null && checkbox.isSelected() != checkBoxAction.isSelected())
             {

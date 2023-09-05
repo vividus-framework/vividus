@@ -548,7 +548,7 @@ class CollectingStatisticsStoryReporterTests
     {
         var event = mock(AssertionFailedEvent.class);
         var error = mock(SoftAssertionError.class);
-        when(event.getSoftAssertionError()).thenReturn(error);
+        when(event.softAssertionError()).thenReturn(error);
         when(error.isNotFixedKnownIssue()).thenReturn(false);
         return event;
     }
@@ -557,7 +557,7 @@ class CollectingStatisticsStoryReporterTests
     {
         var event = mock(AssertionFailedEvent.class);
         var error = mock(SoftAssertionError.class);
-        when(event.getSoftAssertionError()).thenReturn(error);
+        when(event.softAssertionError()).thenReturn(error);
         when(error.isNotFixedKnownIssue()).thenReturn(true);
         return event;
     }
@@ -783,7 +783,7 @@ class CollectingStatisticsStoryReporterTests
 
         var event = mock(AssertionFailedEvent.class);
         var assertion = mock(SoftAssertionError.class);
-        when(event.getSoftAssertionError()).thenReturn(assertion);
+        when(event.softAssertionError()).thenReturn(assertion);
         var error = mock(AssertionError.class);
         var argumentExceptionCauseMessage = "You're illegal";
         when(assertion.getError()).thenReturn(error);

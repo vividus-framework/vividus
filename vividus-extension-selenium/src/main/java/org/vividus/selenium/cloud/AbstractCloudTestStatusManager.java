@@ -49,7 +49,7 @@ public abstract class AbstractCloudTestStatusManager
     {
         if (webDriverProvider.isWebDriverInitialized() && !getCloudTestStatus().isFailed())
         {
-            SoftAssertionError error = event.getSoftAssertionError();
+            SoftAssertionError error = event.softAssertionError();
             if (!error.isKnownIssue() || error.getKnownIssue().isFixed())
             {
                 getCloudTestStatus().fail();
@@ -61,10 +61,10 @@ public abstract class AbstractCloudTestStatusManager
     @Subscribe
     public final void updateCloudTestStatus(BeforeWebDriverQuitEvent event)
     {
-        String status = getCloudTestStatus().isFailed() ? testStatusMapping.getFailed() : testStatusMapping.getPassed();
+        String status = getCloudTestStatus().isFailed() ? testStatusMapping.failed() : testStatusMapping.passed();
         try
         {
-            updateCloudTestStatus(event.getSessionId(), status);
+            updateCloudTestStatus(event.sessionId(), status);
         }
         catch (Exception e)
         {

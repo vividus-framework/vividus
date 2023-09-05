@@ -400,15 +400,14 @@ class XrayFacadeTests
         return testCase;
     }
 
-    @SuppressWarnings("unchecked")
     private <T extends AbstractTestCase> T createTestCase(TestCaseType type, Supplier<T> factory)
     {
-        AbstractTestCase testCase = factory.get();
+        T testCase = factory.get();
         testCase.setType(type.getValue());
         testCase.setSummary("scenarioTitle");
         testCase.setLabels(new LinkedHashSet<>(List.of("label")));
         testCase.setComponents(new LinkedHashSet<>(List.of("component")));
-        return (T) testCase;
+        return testCase;
     }
 
     private void initializeFacade(List<String> editableStatuses)

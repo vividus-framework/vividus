@@ -38,7 +38,7 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator extends Deb
             WebElement scrollableElement, WebJavascriptActions javascriptActions,
             WebCutOptions webCutOptions)
     {
-        super(strategy, "arguments[1]", webCutOptions.getWebHeaderToCut(), webCutOptions.getWebFooterToCut());
+        super(strategy, "arguments[1]", webCutOptions.webHeaderToCut(), webCutOptions.webFooterToCut());
         this.javascriptActions = javascriptActions;
         this.scrollableElement = scrollableElement;
         this.webCutOptions = webCutOptions;
@@ -55,7 +55,7 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator extends Deb
               + "document.documentElement.scrollHeight,"
               + "document.documentElement.offsetHeight,"
               + "arguments[0].scrollHeight);", scrollableElement)).intValue()
-              + webCutOptions.getWebHeaderToCut() + webCutOptions.getWebFooterToCut();
+                         + webCutOptions.webHeaderToCut() + webCutOptions.webFooterToCut();
         return new PageDimensions(fullHeight, pageDimension.getViewportWidth(),
                 pageDimension.getViewportHeight());
     }
@@ -68,7 +68,7 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator extends Deb
                 scrollableElement)).intValue();
         if (currentChunkIndex > 0)
         {
-            scrollY += webCutOptions.getWebHeaderToCut();
+            scrollY += webCutOptions.webHeaderToCut();
         }
         return scrollY;
     }

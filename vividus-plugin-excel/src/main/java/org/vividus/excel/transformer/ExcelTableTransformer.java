@@ -102,7 +102,7 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
 
     private List<String> extractValues(IExcelSheetParser sheetParser, String range)
     {
-        return sheetParser.getDataFromRange(range).stream().map(CellValue::getValue).toList();
+        return sheetParser.getDataFromRange(range).stream().map(CellValue::value).toList();
     }
 
     private List<String> extractDataFromAddresses(IExcelSheetParser sheetParser, String addresses)

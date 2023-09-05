@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,27 +19,8 @@ package org.vividus.util.wait;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-public class WaitMode
+public record WaitMode(Duration duration, int retryTimes)
 {
-    private final Duration duration;
-    private final int retryTimes;
-
-    public WaitMode(Duration duration, int retryTimes)
-    {
-        this.duration = duration;
-        this.retryTimes = retryTimes;
-    }
-
-    public Duration getDuration()
-    {
-        return duration;
-    }
-
-    public int getRetryTimes()
-    {
-        return retryTimes;
-    }
-
     public long calculatePollingTimeout(TimeUnit timeUnit)
     {
         return timeUnit.convert(duration) / retryTimes;

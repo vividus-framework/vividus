@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public final class DurationBasedWaiter extends Waiter
     public DurationBasedWaiter(WaitMode waitMode)
     {
         super(waitMode.calculatePollingTimeout(TimeUnit.MILLISECONDS));
-        durationInMillis = waitMode.getDuration().toMillis();
+        durationInMillis = waitMode.duration().toMillis();
     }
 
     public DurationBasedWaiter(Duration timeout, Duration pollingTimeout)

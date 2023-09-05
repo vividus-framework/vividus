@@ -194,8 +194,8 @@ public class XrayExporter
         CucumberTestCaseParameters parameters = new CucumberTestCaseParameters();
         fillTestCaseParameters(parameters, TestCaseType.CUCUMBER, scenario);
         CucumberScenario cucumberScenario = CucumberScenarioConverter.convert(scenario);
-        parameters.setScenarioType(cucumberScenario.getType());
-        parameters.setScenario(cucumberScenario.getScenario());
+        parameters.setScenarioType(cucumberScenario.type());
+        parameters.setScenario(cucumberScenario.scenario());
         return parameters;
     }
 

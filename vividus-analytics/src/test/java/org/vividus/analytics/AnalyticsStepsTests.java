@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,8 +94,8 @@ class AnalyticsStepsTests
         reporter.postBeforeStoriesAnalytics();
         verify(eventBus).post(analyticsEventBatchCaptor.capture());
         AnalyticsEventBatch batch = analyticsEventBatchCaptor.getValue();
-        assertThat(batch.getEvents(), hasSize(1));
-        AnalyticsEvent event = batch.getEvents().get(0);
+        assertThat(batch.events(), hasSize(1));
+        AnalyticsEvent event = batch.events().get(0);
         Map<String, String> payload = event.getPayload();
         assertAll(
             () -> assertEquals(START, payload.get(SESSION_CONTROL)),
@@ -135,7 +135,7 @@ class AnalyticsStepsTests
         assertThat(batches, hasSize(2));
 
         AnalyticsEventBatch beforeBatch = batches.get(0);
-        List<AnalyticsEvent> events = beforeBatch.getEvents();
+        List<AnalyticsEvent> events = beforeBatch.events();
         assertThat(events, hasSize(2));
         AnalyticsEvent analyticsEvent = getAndRemove(events, CUSTOM_DIMENSION2);
         Map<String, String> payload = analyticsEvent.getPayload();
@@ -156,7 +156,7 @@ class AnalyticsStepsTests
             () -> assertEquals("use", payload1.get(EVENT_ACTION)));
 
         AnalyticsEventBatch afterBatch = batches.get(1);
-        Map<String, String> payload2 = afterBatch.getEvents().get(0).getPayload();
+        Map<String, String> payload2 = afterBatch.events().get(0).getPayload();
         assertAll(
             () -> assertEquals("9", payload2.get("cm1")),
             () -> assertEquals("40", payload2.get("cm2")),

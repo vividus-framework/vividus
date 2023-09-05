@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,6 @@
 
 package org.vividus.jira.model;
 
-public class IssueLink
+public record IssueLink(String type, String inwardIssueKey, String outwardIssueKey)
 {
-    private final String type;
-    private final String inwardIssueKey;
-    private final String outwardIssueKey;
-
-    public IssueLink(String type, String inwardIssueKey, String outwardIssueKey)
-    {
-        this.type = type;
-        this.inwardIssueKey = inwardIssueKey;
-        this.outwardIssueKey = outwardIssueKey;
-    }
-
-    public String getType()
-    {
-        return type;
-    }
-
-    public String getInwardIssueKey()
-    {
-        return inwardIssueKey;
-    }
-
-    public String getOutwardIssueKey()
-    {
-        return outwardIssueKey;
-    }
 }

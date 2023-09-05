@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,9 +139,9 @@ public class DelegatingWebDriver implements WebDriver, JavascriptExecutor, Takes
     @Override
     public <X> X getScreenshotAs(OutputType<X> target) throws WebDriverException
     {
-        if (wrappedDriver instanceof TakesScreenshot)
+        if (wrappedDriver instanceof TakesScreenshot takingScreenshotDriver)
         {
-            return ((TakesScreenshot) wrappedDriver).getScreenshotAs(target);
+            return takingScreenshotDriver.getScreenshotAs(target);
         }
         throw new UnsupportedOperationException(SCREENSHOTS_NOT_SUPPORTED);
     }
@@ -149,9 +149,9 @@ public class DelegatingWebDriver implements WebDriver, JavascriptExecutor, Takes
     @Override
     public Object executeScript(String script, Object... args)
     {
-        if (wrappedDriver instanceof JavascriptExecutor)
+        if (wrappedDriver instanceof JavascriptExecutor javascriptExecutor)
         {
-            return ((JavascriptExecutor) wrappedDriver).executeScript(script, args);
+            return javascriptExecutor.executeScript(script, args);
         }
         throw new UnsupportedOperationException(JAVASCRIPT_NOT_SUPPORTED);
     }
@@ -159,9 +159,9 @@ public class DelegatingWebDriver implements WebDriver, JavascriptExecutor, Takes
     @Override
     public Object executeAsyncScript(String script, Object... args)
     {
-        if (wrappedDriver instanceof JavascriptExecutor)
+        if (wrappedDriver instanceof JavascriptExecutor javascriptExecutor)
         {
-            return ((JavascriptExecutor) wrappedDriver).executeAsyncScript(script, args);
+            return javascriptExecutor.executeAsyncScript(script, args);
         }
         throw new UnsupportedOperationException(JAVASCRIPT_NOT_SUPPORTED);
     }
@@ -169,9 +169,9 @@ public class DelegatingWebDriver implements WebDriver, JavascriptExecutor, Takes
     @Override
     public Capabilities getCapabilities()
     {
-        if (wrappedDriver instanceof HasCapabilities)
+        if (wrappedDriver instanceof HasCapabilities havingCapabilitiesDriver)
         {
-            return ((HasCapabilities) wrappedDriver).getCapabilities();
+            return havingCapabilitiesDriver.getCapabilities();
         }
         throw new IllegalStateException(DRIVER_NOT_IMPLEMENT_HAS_CAPABILITIES);
     }
@@ -179,9 +179,9 @@ public class DelegatingWebDriver implements WebDriver, JavascriptExecutor, Takes
     @Override
     public void perform(Collection<Sequence> actions)
     {
-        if (wrappedDriver instanceof Interactive)
+        if (wrappedDriver instanceof Interactive interactiveDriver)
         {
-            ((Interactive) wrappedDriver).perform(actions);
+            interactiveDriver.perform(actions);
             return;
         }
         throw new UnsupportedOperationException(ADVANCED_INTERACTION_NOT_SUPPORTED);
@@ -190,9 +190,9 @@ public class DelegatingWebDriver implements WebDriver, JavascriptExecutor, Takes
     @Override
     public void resetInputState()
     {
-        if (wrappedDriver instanceof Interactive)
+        if (wrappedDriver instanceof Interactive interactiveDriver)
         {
-            ((Interactive) wrappedDriver).resetInputState();
+            interactiveDriver.resetInputState();
             return;
         }
         throw new UnsupportedOperationException(ADVANCED_INTERACTION_NOT_SUPPORTED);

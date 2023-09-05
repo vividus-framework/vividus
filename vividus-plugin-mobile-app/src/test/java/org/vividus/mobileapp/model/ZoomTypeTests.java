@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,10 +42,10 @@ class ZoomTypeTests
         Rectangle zoomArea = new Rectangle(new Point(pointX, pointY), dimension);
         ZoomCoordinates coordinates = zoomType.calculateCoordinates(zoomArea);
 
-        assertPoint(coordinates.getFinger1MoveCoordinates().getStart(), pointer1StartX, pointer1StartY);
-        assertPoint(coordinates.getFinger1MoveCoordinates().getEnd(), pointer1EndX, pointer1EndY);
-        assertPoint(coordinates.getFinger2MoveCoordinates().getStart(), pointer2StartX, pointer2StartY);
-        assertPoint(coordinates.getFinger2MoveCoordinates().getEnd(), pointer2EndX, pointer2EndY);
+        assertPoint(coordinates.finger1MoveCoordinates().getStart(), pointer1StartX, pointer1StartY);
+        assertPoint(coordinates.finger1MoveCoordinates().getEnd(), pointer1EndX, pointer1EndY);
+        assertPoint(coordinates.finger2MoveCoordinates().getStart(), pointer2StartX, pointer2StartY);
+        assertPoint(coordinates.finger2MoveCoordinates().getEnd(), pointer2EndX, pointer2EndY);
     }
 
     private static void assertPoint(Point point, int x, int y)

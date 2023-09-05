@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,6 @@ package org.vividus.reporter.event;
 
 import org.vividus.reporter.model.Attachment;
 
-public class AttachmentPublishEvent
+public record AttachmentPublishEvent(Attachment attachment)
 {
-    private final Attachment attachment;
-
-    public AttachmentPublishEvent(Attachment attachment)
-    {
-        this.attachment = attachment;
-    }
-
-    public Attachment getAttachment()
-    {
-        return attachment;
-    }
 }

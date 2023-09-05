@@ -18,24 +18,6 @@ package org.vividus.ui.action;
 
 import org.openqa.selenium.interactions.Actions;
 
-public class AtomicAction<T extends Actions>
+public record AtomicAction<T extends Actions>(AtomicActionFactory<T, ?> actionFactory, Object argument)
 {
-    private final AtomicActionFactory<T, ?> actionFactory;
-    private final Object argument;
-
-    public AtomicAction(AtomicActionFactory<T, ?> actionFactory, Object argument)
-    {
-        this.actionFactory = actionFactory;
-        this.argument = argument;
-    }
-
-    public AtomicActionFactory<T, ?> getActionFactory()
-    {
-        return actionFactory;
-    }
-
-    public Object getArgument()
-    {
-        return argument;
-    }
 }

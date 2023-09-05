@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,6 @@
 
 package org.vividus.mobileapp.configuration;
 
-public class MobileApplicationConfiguration
+public record MobileApplicationConfiguration(SwipeConfiguration swipeConfiguration, ZoomConfiguration zoomConfiguration)
 {
-    private final SwipeConfiguration swipeConfiguration;
-    private final ZoomConfiguration zoomConfiguration;
-
-    public MobileApplicationConfiguration(SwipeConfiguration swipeConfiguration, ZoomConfiguration zoomConfiguration)
-    {
-        this.swipeConfiguration = swipeConfiguration;
-        this.zoomConfiguration = zoomConfiguration;
-    }
-
-    public SwipeConfiguration getSwipeConfiguration()
-    {
-        return swipeConfiguration;
-    }
-
-    public ZoomConfiguration getZoomConfiguration()
-    {
-        return zoomConfiguration;
-    }
 }

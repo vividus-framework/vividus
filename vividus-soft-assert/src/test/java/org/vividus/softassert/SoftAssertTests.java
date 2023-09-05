@@ -360,7 +360,7 @@ class SoftAssertTests
         verify(eventBus).post(argThat(event -> {
             if (event instanceof AssertionFailedEvent failedEvent)
             {
-                SoftAssertionError softAssertionError = failedEvent.getSoftAssertionError();
+                SoftAssertionError softAssertionError = failedEvent.softAssertionError();
                 return softAssertionError != null && knownIssue == softAssertionError.isKnownIssue()
                         && softAssertionError.getError() != null;
             }

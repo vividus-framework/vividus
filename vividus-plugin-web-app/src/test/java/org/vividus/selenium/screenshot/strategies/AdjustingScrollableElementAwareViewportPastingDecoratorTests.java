@@ -65,8 +65,8 @@ class AdjustingScrollableElementAwareViewportPastingDecoratorTests
     @BeforeEach
     void beforeEach()
     {
-        when(webCutOptions.getWebHeaderToCut()).thenReturn(THE_ANSWER);
-        when(webCutOptions.getWebFooterToCut()).thenReturn(THE_ANSWER);
+        when(webCutOptions.webHeaderToCut()).thenReturn(THE_ANSWER);
+        when(webCutOptions.webFooterToCut()).thenReturn(THE_ANSWER);
         strategy = new TestAdjustingScrollableElementAwareViewportPastingDecorator(shootingStrategy, scrollableElement,
                 javascriptActions, webCutOptions);
     }

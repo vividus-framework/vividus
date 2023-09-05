@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,48 +20,19 @@ import java.time.Duration;
 
 import org.apache.commons.lang3.Validate;
 
-public class SwipeConfiguration
+public record SwipeConfiguration(Duration swipeStabilizationDuration, int swipeLimit, int swipeVerticalXPosition,
+                                 int swipeHorizontalYPosition)
 {
-    private final Duration swipeStabilizationDuration;
-    private final int swipeLimit;
-    private final int swipeVerticalXPosition;
-    private final int swipeHorizontalYPosition;
-
-    public SwipeConfiguration(Duration swipeStabilizationDuration, int swipeLimit, int swipeVerticalXPosition,
-            int swipeHorizontalYPosition)
+    public SwipeConfiguration
     {
         validatePosition("x", swipeVerticalXPosition);
         validatePosition("y", swipeHorizontalYPosition);
-        this.swipeStabilizationDuration = swipeStabilizationDuration;
-        this.swipeLimit = swipeLimit;
-        this.swipeVerticalXPosition = swipeVerticalXPosition;
-        this.swipeHorizontalYPosition = swipeHorizontalYPosition;
-    }
-
-    public Duration getSwipeStabilizationDuration()
-    {
-        return swipeStabilizationDuration;
-    }
-
-    public int getSwipeLimit()
-    {
-        return swipeLimit;
-    }
-
-    public int getSwipeVerticalXPosition()
-    {
-        return swipeVerticalXPosition;
-    }
-
-    public int getSwipeHorizontalYPosition()
-    {
-        return swipeHorizontalYPosition;
     }
 
     @SuppressWarnings("MagicNumber")
     private void validatePosition(String name, int value)
     {
-        Validate.isTrue(value >= 0 && value <= 100,
-                "The %s percentage value must be between 0 and 100, but got: %d", name, value);
+        Validate.isTrue(value >= 0 && value <= 100, "The %s percentage value must be between 0 and 100, but got: %d",
+                name, value);
     }
 }

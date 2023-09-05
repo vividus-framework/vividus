@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class AttachmentListener
     @AllowConcurrentEvents
     public void onAttachmentPublish(AttachmentPublishEvent event)
     {
-        Attachment attachment = event.getAttachment();
+        Attachment attachment = event.attachment();
         LOGGER.atInfo().addArgument(() -> Base64.getEncoder().encodeToString(attachment.getContent()))
                        .addArgument(attachment::getTitle)
                        .log("RP_MESSAGE#BASE64#{}#{}");
