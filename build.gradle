@@ -32,13 +32,16 @@ subprojects {
     }
 }
 
-configure([project(':vividus-tests'), project(':vividus-docker-bundler')]) {
-    apply from: "${buildSystemPath}/vividus-test-subproject.gradle"
+def publishedSubprojects = subprojects.findAll {
+    it.name != 'vividus-tests' && it.name != 'vividus-docker-bundler'
+}
+def libraries = publishedSubprojects.findAll { it.name != 'vividus-bom' }
+configure(libraries) {
+    apply from: "${buildSystemPath}/vividus-library-subproject.gradle"
 }
 
-def nonTestSubprojects = subprojects.findAll { !it.name.equals('vividus-tests') && !it.name.equals('vividus-docker-bundler') }
-configure(nonTestSubprojects) {
-    apply from: "${buildSystemPath}/vividus-library-subproject.gradle"
+configure(publishedSubprojects) {
+    apply plugin: 'maven-publish'
 
     publishing {
         repositories {
@@ -54,13 +57,13 @@ configure(nonTestSubprojects) {
     }
 }
 
-task jacocoAggregatedReport(type: JacocoReport) {
-    nonTestSubprojects.each {
-      executionData it.tasks.withType(Test)
+tasks.register('jacocoAggregatedReport', JacocoReport) {
+    libraries.each {
+        executionData it.tasks.withType(Test)
     }
-    dependsOn nonTestSubprojects.collect { it.tasks.withType(Test) }
-    sourceDirectories.from(subprojects.sourceSets.main.java.sourceDirectories)
-    classDirectories.from(subprojects.sourceSets.main.output)
+    dependsOn libraries.collect { it.tasks.withType(Test) }
+    sourceDirectories.from(libraries.sourceSets.main.java.sourceDirectories)
+    classDirectories.from(libraries.sourceSets.main.output)
 }
 
 project.description = 'Vividus'

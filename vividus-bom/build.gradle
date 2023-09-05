@@ -1,0 +1,28 @@
+plugins {
+    id 'java-platform'
+}
+
+description = 'VIVIDUS BOM (Bill of Materials)'
+
+dependencies {
+    constraints {
+        rootProject.subprojects.forEach {
+            if (it.name != 'vividus-docker-bundler' && it.name != 'vividus-tests' && !it.name.contains('exporter')) {
+                api(it)
+            }
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'org.vividus'
+            description = 'This Bill of Materials POM can be used to ease dependency management when referencing' +
+                    ' multiple VIVIDUS artifacts using Gradle or Maven.'
+            afterEvaluate {
+                from components.javaPlatform
+            }
+        }
+    }
+}
