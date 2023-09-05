@@ -32,6 +32,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junitpioneer.jupiter.SetEnvironmentVariable;
+import org.junitpioneer.jupiter.SetSystemProperty;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,11 +45,6 @@ class EncryptedPropertiesProcessorTests
     private static final String ENCRYPTED_VALUE = "KixcztydWWB6e3EYz4tzZg==";
     private static final String ENCRYPTED_VALUE_PLACEHOLDER = "ENC(" + ENCRYPTED_VALUE + ")";
     private static final String DECRYPTED_VALUE = "hello";
-
-    private StandardPBEStringEncryptor createEncryptor()
-    {
-        return createEncryptor(PASSWORD);
-    }
 
     private StandardPBEStringEncryptor createEncryptor(String password)
     {
@@ -63,11 +60,13 @@ class EncryptedPropertiesProcessorTests
             "username=open password=" + ENCRYPTED_VALUE_PLACEHOLDER + " secret-key=" + ENCRYPTED_VALUE_PLACEHOLDER
                     + ", username=open password=" + DECRYPTED_VALUE + " secret-key=" + DECRYPTED_VALUE
     })
+    @SetEnvironmentVariable(key = "VIVIDUS_ENCRYPTOR_PASSWORD", value = PASSWORD)
+    @SetSystemProperty(key = "vividus.encryptor.password", value = "invalid_pass")
     void shouldDecryptProperties(String encryptedValue, String decryptedValue)
     {
         var properties = new Properties();
         properties.setProperty(PROPERTY_KEY, encryptedValue);
-        var propertiesDecrypted = new EncryptedPropertiesProcessor(createEncryptor()).processProperties(properties);
+        var propertiesDecrypted = new EncryptedPropertiesProcessor(properties).processProperties(properties);
         assertEquals(decryptedValue, propertiesDecrypted.getProperty(PROPERTY_KEY));
     }
 

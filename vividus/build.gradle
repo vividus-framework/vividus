@@ -33,6 +33,14 @@ tasks.register('systemTest', Test) {
     mustRunAfter test
 }
 
+// https://junit-pioneer.org/docs/environment-variables/#warnings-for-reflective-access
+test {
+    jvmArgs = [
+            '--add-opens=java.base/java.util=ALL-UNNAMED',
+            '--add-opens=java.base/java.lang=ALL-UNNAMED'
+    ]
+}
+
 // https://github.com/spotbugs/spotbugs-gradle-plugin/issues/115
 spotbugsIntegrationTest.auxClassPaths += integrationTest.classpath
 spotbugsSystemTest.auxClassPaths += integrationTest.classpath

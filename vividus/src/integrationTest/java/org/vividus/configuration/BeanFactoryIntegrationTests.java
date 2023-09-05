@@ -32,6 +32,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
+import org.junitpioneer.jupiter.SetSystemProperty;
 import org.springframework.beans.factory.BeanIsAbstractException;
 
 class BeanFactoryIntegrationTests
@@ -222,13 +223,12 @@ class BeanFactoryIntegrationTests
     }
 
     @Test
-    @SetEnvironmentVariable(key = VIVIDUS_ENCRYPTOR_PASSWORD_ENV_VARIABLE, value = "swordfish")
+    @SetSystemProperty(key = VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY, value = "12345")
     void testConfigurationResolverEncryptedPropertySystemPassword() throws IOException
     {
         System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);
         System.setProperty(CONFIGURATION_PROFILES, BASIC_PROFILE);
         System.setProperty(CONFIGURATION_ENVIRONMENTS, INTEGRATION_TEST);
-        System.setProperty(VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY, "12345");
         BeanFactory.open();
         Properties properties = ConfigurationResolver.getInstance().getProperties();
         assertEquals(HELLO, properties.getProperty(ENCRYPTED_PROPERTY));
@@ -236,6 +236,7 @@ class BeanFactoryIntegrationTests
 
     @Test
     @SetEnvironmentVariable(key = VIVIDUS_ENCRYPTOR_PASSWORD_ENV_VARIABLE, value = "12345")
+    @SetSystemProperty(key = VIVIDUS_ENCRYPTOR_PASSWORD_PROPERTY, value = "swordfish")
     void testConfigurationResolverEncryptedPropertyEnvironmentVariable() throws IOException
     {
         System.setProperty(CONFIGURATION_SUITES, BASIC_SUITE);

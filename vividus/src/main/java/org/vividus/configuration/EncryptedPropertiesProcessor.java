@@ -56,15 +56,13 @@ public class EncryptedPropertiesProcessor extends AbstractPropertiesProcessor
         }
     }
 
-    @SuppressWarnings("checkstyle:TodoComment")
     private StringEncryptor getStringEncryptor()
     {
         if (stringEncryptor == null)
         {
-            // TODO: change the precedence in 0.6.0: env var should have the highest priority, then system properties
-            String password = Optional.ofNullable(System.getProperty("vividus.encryptor.password"))
+            String password = Optional.ofNullable(System.getenv("VIVIDUS_ENCRYPTOR_PASSWORD"))
+                    .or(() -> Optional.ofNullable(System.getProperty("vividus.encryptor.password")))
                     .or(() -> Optional.ofNullable(properties.getProperty("system.vividus.encryptor.password")))
-                    .or(() -> Optional.ofNullable(System.getenv("VIVIDUS_ENCRYPTOR_PASSWORD")))
                     .orElseThrow(() -> new IllegalStateException("Encryption password is not provided"));
 
             StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
