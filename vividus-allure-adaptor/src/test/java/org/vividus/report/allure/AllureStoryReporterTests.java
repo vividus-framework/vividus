@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,20 +69,19 @@ import org.jbehave.core.steps.StepCollector.Stage;
 import org.jbehave.core.steps.StepCreator.PendingStep;
 import org.jbehave.core.steps.StepCreator.StepExecutionType;
 import org.jbehave.core.steps.Timing;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junitpioneer.jupiter.SetSystemProperty;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.batch.BatchConfiguration;
@@ -144,6 +143,7 @@ class AllureStoryReporterTests
     private static final String ISSUE_LINK_PREFIX = "https://issue/";
     private static final String TMS_LINK_PREFIX = "https://tms/";
     private static final String ISSUE_LINK_DEV_PREFIX = "https://vividus.dev/";
+    private static final String PLACEHOLDER = "{}";
 
     private static final String LIFECYCLE_BEFORE_STORY = "Lifecycle: Before story";
     private static final String LIFECYCLE_AFTER_STORY = "Lifecycle: After story";
@@ -155,7 +155,7 @@ class AllureStoryReporterTests
     @Captor private ArgumentCaptor<TestResult> testResultCaptor;
     @Mock private IAllureReportGenerator allureReportGenerator;
     @Mock private BatchStorage batchStorage;
-    @Spy private TestContext testContext = new SimpleTestContext();
+    @Spy private final TestContext testContext = new SimpleTestContext();
     @Mock private IAllureRunContext allureRunContext;
     @Mock private IVerificationErrorAdapter verificationErrorAdapter;
     @Mock private StoryReporter next;
@@ -167,23 +167,6 @@ class AllureStoryReporterTests
     private RunTestContext runTestContext;
 
     private AllureStoryReporter allureStoryReporter;
-
-    @BeforeAll
-    static void beforeAll()
-    {
-        String placeholder = "{}";
-        System.setProperty(ALLURE_LINK_ISSUE_PROPERTY, ISSUE_LINK_PREFIX + placeholder);
-        System.setProperty(ALLURE_LINK_TMS_PROPERTY, TMS_LINK_PREFIX + placeholder);
-        System.setProperty(ALLURE_LINK_ISSUE_DEV_PROPERTY, ISSUE_LINK_DEV_PREFIX + placeholder);
-    }
-
-    @AfterAll
-    static void afterAll()
-    {
-        System.clearProperty(ALLURE_LINK_ISSUE_PROPERTY);
-        System.clearProperty(ALLURE_LINK_TMS_PROPERTY);
-        System.clearProperty(ALLURE_LINK_ISSUE_DEV_PROPERTY);
-    }
 
     @BeforeEach
     void beforeEach() throws IllegalAccessException
@@ -500,19 +483,22 @@ class AllureStoryReporterTests
                 captured.getHistoryId());
     }
 
-    @Test
-    void afterBeforeStoryStepsShouldStopLifecycleBeforeStorySteps()
+    @ParameterizedTest
+    @CsvSource({
+            "BEFORE, LIFECYCLE_BEFORE_STORY_STEPS, lifecycle-before-story-step, " + LIFECYCLE_BEFORE_STORY,
+            "AFTER,  LIFECYCLE_AFTER_STORY_STEPS,  lifecycle-after-story-step, " + LIFECYCLE_AFTER_STORY
+    })
+    void shouldStopTestCaseWithLifecycleStoryStepsInAfterStorySteps(Stage stage,
+            StoryExecutionStage storyExecutionStage, String currentStepId, String currentScenarioId)
     {
-        when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.LIFECYCLE_BEFORE_STORY_STEPS);
+        when(allureRunContext.getStoryExecutionStage()).thenReturn(storyExecutionStage);
         when(allureRunContext.isStepInProgress()).thenReturn(true);
-        String currentStepId = "lifecycle-before-story-step";
-        String currentScenarioId = LIFECYCLE_BEFORE_STORY;
         testContext.put(CURRENT_STEP_KEY, new LinkedQueueItem<>(currentScenarioId).attachItem(currentStepId));
 
-        allureStoryReporter.afterStorySteps(Stage.BEFORE, ExecutionType.USER);
+        allureStoryReporter.afterStorySteps(stage, ExecutionType.USER);
 
         InOrder ordered = inOrder(allureLifecycle, allureRunContext, next);
-        ordered.verify(next).afterStorySteps(Stage.BEFORE, ExecutionType.USER);
+        ordered.verify(next).afterStorySteps(stage, ExecutionType.USER);
         ordered.verify(allureLifecycle).updateStep(eq(currentStepId), anyStepResultConsumer());
         ordered.verify(allureLifecycle).stopStep(currentStepId);
         ordered.verify(allureLifecycle).updateTestCase(eq(currentScenarioId), anyTestResultConsumer());
@@ -522,23 +508,15 @@ class AllureStoryReporterTests
         assertNull(testContext.get(CURRENT_STEP_KEY, LinkedQueueItem.class));
     }
 
-    @Test
-    void afterEmptyBeforeStorySteps()
+    @EnumSource(Stage.class)
+    @ParameterizedTest
+    void afterEmptyLifecycleStorySteps(Stage stage)
     {
         when(allureRunContext.getStoryExecutionStage()).thenReturn(null);
-        allureStoryReporter.afterStorySteps(Stage.BEFORE, ExecutionType.USER);
+        allureStoryReporter.afterStorySteps(stage, ExecutionType.USER);
         InOrder ordered = inOrder(allureLifecycle, allureRunContext, next);
-        ordered.verify(next).afterStorySteps(Stage.BEFORE, ExecutionType.USER);
+        ordered.verify(next).afterStorySteps(stage, ExecutionType.USER);
         ordered.verify(allureRunContext).getStoryExecutionStage();
-        ordered.verifyNoMoreInteractions();
-    }
-
-    @Test
-    void afterAfterStorySteps()
-    {
-        allureStoryReporter.afterStorySteps(Stage.AFTER, ExecutionType.USER);
-        InOrder ordered = inOrder(allureLifecycle, allureRunContext, next);
-        ordered.verify(next).afterStorySteps(Stage.AFTER, ExecutionType.USER);
         ordered.verifyNoMoreInteractions();
     }
 
@@ -683,32 +661,6 @@ class AllureStoryReporterTests
         ordered.verify(next).afterStory(givenStory);
         ordered.verify(allureLifecycle).stopStep(SCENARIO_UID);
         ordered.verify(allureRunContext).resetCurrentStoryLabels(givenStory);
-    }
-
-    @Test
-    void afterStoryShouldStopLifecycleAfterStorySteps()
-    {
-        when(allureRunContext.getStoryExecutionStage()).thenReturn(StoryExecutionStage.LIFECYCLE_AFTER_STORY_STEPS);
-        when(allureRunContext.isStepInProgress()).thenReturn(true);
-        String currentStepId = "lifecycle-after-story-step";
-        String currentScenarioId = LIFECYCLE_AFTER_STORY;
-        testContext.put(CURRENT_STEP_KEY, new LinkedQueueItem<>(currentScenarioId).attachItem(currentStepId));
-
-        boolean givenStory = false;
-        RunningStory runningStory = new RunningStory();
-        runningStory.setNotExcluded(true);
-        runTestContext.putRunningStory(runningStory, givenStory);
-        allureStoryReporter.afterStory(givenStory);
-        InOrder ordered = inOrder(next, allureRunContext, allureLifecycle);
-        ordered.verify(next).afterStory(givenStory);
-        ordered.verify(allureLifecycle).updateStep(eq(currentStepId), anyStepResultConsumer());
-        ordered.verify(allureLifecycle).stopStep(currentStepId);
-        ordered.verify(allureLifecycle).updateTestCase(eq(currentScenarioId), anyTestResultConsumer());
-        ordered.verify(allureLifecycle).stopTestCase(currentScenarioId);
-        ordered.verify(allureLifecycle).writeTestCase(currentScenarioId);
-        ordered.verify(allureRunContext).resetCurrentStoryLabels(givenStory);
-        verifyNoMoreInteractions(next, allureLifecycle);
-        assertNull(testContext.get(CURRENT_STEP_KEY));
     }
 
     @Test
@@ -868,7 +820,7 @@ class AllureStoryReporterTests
             TestResult testResult = new TestResult();
             c.accept(testResult);
             return testResult.getStatus().equals(Status.BROKEN)
-                    && testResult.getStatusDetails().getMessage().equals(STORY_TIMEOUT_MESSAGE);
+                    && STORY_TIMEOUT_MESSAGE.equals(testResult.getStatusDetails().getMessage());
         });
     }
 
@@ -975,7 +927,7 @@ class AllureStoryReporterTests
 
         allureStoryReporter.failed(GIVEN_STEP, throwable);
 
-        var ordered = Mockito.inOrder(next, allureLifecycle, allureRunContext);
+        var ordered = inOrder(next, allureLifecycle, allureRunContext);
         ordered.verify(next).failed(GIVEN_STEP, throwable);
         ordered.verify(allureLifecycle).scheduleTestCase(
             argThat(tr -> "System After Story step: Given step".equals(tr.getName())));
@@ -1032,6 +984,9 @@ class AllureStoryReporterTests
     }
 
     @Test
+    @SetSystemProperty(key = ALLURE_LINK_ISSUE_PROPERTY, value = ISSUE_LINK_PREFIX + PLACEHOLDER)
+    @SetSystemProperty(key = ALLURE_LINK_TMS_PROPERTY, value = TMS_LINK_PREFIX + PLACEHOLDER)
+    @SetSystemProperty(key = ALLURE_LINK_ISSUE_DEV_PROPERTY, value = ISSUE_LINK_DEV_PREFIX + PLACEHOLDER)
     void testAddTestCaseInfo()
     {
         putEmptyRunningScenario(runTestContext);
@@ -1157,7 +1112,7 @@ class AllureStoryReporterTests
     void shouldDetectSystemAfterStorySteps(Stage stage, Lifecycle.ExecutionType type, int stageSet)
     {
         allureStoryReporter.beforeStorySteps(stage, type);
-        var ordered = Mockito.inOrder(next, allureRunContext);
+        var ordered = inOrder(next, allureRunContext);
         ordered.verify(allureRunContext, times(stageSet))
             .setStoryExecutionStage(StoryExecutionStage.SYSTEM_AFTER_STORY_STEPS);
         ordered.verify(next).beforeStorySteps(stage, type);
