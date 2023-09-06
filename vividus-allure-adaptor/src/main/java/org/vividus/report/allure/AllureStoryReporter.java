@@ -216,7 +216,9 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     {
         super.afterStorySteps(stage, type);
         if (stage == Stage.BEFORE
-                && allureRunContext.getStoryExecutionStage() == StoryExecutionStage.LIFECYCLE_BEFORE_STORY_STEPS)
+            && allureRunContext.getStoryExecutionStage() == StoryExecutionStage.LIFECYCLE_BEFORE_STORY_STEPS
+            || stage == Stage.AFTER
+               && allureRunContext.getStoryExecutionStage() == StoryExecutionStage.LIFECYCLE_AFTER_STORY_STEPS)
         {
             stopTestCase();
         }
@@ -392,10 +394,6 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
         RunningStory runningStory = getRunContext().getRunningStory();
         if (runningStory.isNotExcluded())
         {
-            if (allureRunContext.getStoryExecutionStage() == StoryExecutionStage.LIFECYCLE_AFTER_STORY_STEPS)
-            {
-                stopTestCase();
-            }
             if (getLinkedStep() != null)
             {
                 updateStepStatus(Status.PASSED);
