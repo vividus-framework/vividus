@@ -39,13 +39,11 @@ import org.slf4j.LoggerFactory;
 import org.vividus.annotation.Replacement;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.web.action.INavigateActions;
-import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
@@ -66,11 +64,9 @@ public class PageSteps
     @Inject private SetContextSteps setContextSteps;
     @Inject private INavigateActions navigateActions;
     @Inject private WebApplicationConfiguration webApplicationConfiguration;
-    @Inject private IWebWaitActions waitActions;
     @Inject private WebJavascriptActions javascriptActions;
     @Inject private IWebDriverProvider webDriverProvider;
     @Inject private IDescriptiveSoftAssert descriptiveSoftAssert;
-    @Inject private IWebDriverManager webDriverManager;
     private final List<WebApplicationListener> webApplicationListeners;
     private IHttpClient httpClient;
 
@@ -91,7 +87,7 @@ public class PageSteps
     public void openMainApplicationPage()
     {
         URI finalUri = updateUrlWithUserInfoForRedirects(webApplicationConfiguration.getMainApplicationPageUrl());
-        navigateTo(finalUri);
+        navigateActions.navigateTo(finalUri);
         boolean refreshPageNeeded = webApplicationListeners.stream()
                 .map(WebApplicationListener::onLoad)
                 .reduce(false, (a, b) -> a || b);
@@ -289,7 +285,7 @@ public class PageSteps
         URI newURI = UriUtils.buildNewRelativeUrl(currentURI, relativeURL);
         // Workaround: window content is not loaded if basic authentification is used
         newURI = UriUtils.removeUserInfo(newURI);
-        navigateTo(newURI);
+        navigateActions.navigateTo(newURI);
     }
 
     /**
@@ -367,21 +363,6 @@ public class PageSteps
             }
         }
         return pageUrl;
-    }
-
-    /**
-     * Navigates to the specified URL and waits for page load if current platform is iOS
-     * @param uri URI to open
-     * @deprecated Wait for iOS should be removed, it looks outdated and redundant
-     */
-    @Deprecated(since = "0.5.4", forRemoval = true)
-    private void navigateTo(URI uri)
-    {
-        navigateActions.navigateTo(uri);
-        if (webDriverManager.isIOS())
-        {
-            waitActions.waitForPageLoad();
-        }
     }
 
     private WebDriver getWebDriver()

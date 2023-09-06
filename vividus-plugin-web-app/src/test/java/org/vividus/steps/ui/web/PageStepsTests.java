@@ -28,7 +28,6 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -64,12 +63,10 @@ import org.openqa.selenium.WebDriver;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.INavigateActions;
-import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
@@ -94,9 +91,7 @@ class PageStepsTests
     @Mock private IUiContext uiContext;
     @Mock private WebApplicationConfiguration webApplicationConfiguration;
     @Mock private SetContextSteps setContextSteps;
-    @Mock private IWebWaitActions waitActions;
     @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private IWebDriverManager webDriverManager;
     @Mock private IHttpClient httpClient;
     private final List<WebApplicationListener> webApplicationListeners = new ArrayList<>();
     @InjectMocks private PageSteps pageSteps = new PageSteps(webApplicationListeners);
@@ -203,26 +198,6 @@ class PageStepsTests
     }
 
     @Test
-    void testOpenRelativeUrlIOS()
-    {
-        when(webDriverProvider.get()).thenReturn(driver);
-        when(driver.getCurrentUrl()).thenReturn(URL);
-        when(webDriverManager.isIOS()).thenReturn(true);
-        pageSteps.openRelativeUrl(RELATIVE_URL);
-        verify(waitActions).waitForPageLoad();
-    }
-
-    @Test
-    void testOpenRelativeUrlNotIOS()
-    {
-        when(webDriverProvider.get()).thenReturn(driver);
-        when(driver.getCurrentUrl()).thenReturn(URL);
-        when(webDriverManager.isIOS()).thenReturn(false);
-        pageSteps.openRelativeUrl(RELATIVE_URL);
-        verifyNoInteractions(waitActions);
-    }
-
-    @Test
     void testOpenPage()
     {
         String pageURL = "pageURL";
@@ -281,14 +256,6 @@ class PageStepsTests
         pageSteps.openMainApplicationPage();
         verify(navigateActions).navigateTo(mainPage);
         verify(navigateActions).refresh();
-    }
-
-    @Test
-    void testOpenMainApplicationPageIOS()
-    {
-        when(webDriverManager.isIOS()).thenReturn(true);
-        shouldOpenMainApplicationPage(true, true);
-        verify(waitActions).waitForPageLoad();
     }
 
     @Test
