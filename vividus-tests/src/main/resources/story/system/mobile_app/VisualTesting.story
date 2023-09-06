@@ -42,13 +42,13 @@ When I <action> baseline with name `${target-platform}-full-page`
 
 
 Scenario: Verify cut for full-page for FULL_SCREEN shooting strategy
-When I <action> baseline with name `${target-platform}-cuts-full-page` using screenshot configuration:
+When I <action> baseline with name `${target-platform}-cuts-full-screen` using screenshot configuration:
 |shootingStrategy|cutTop                             |cutBottom|cutLeft|cutRight|
 |FULL_SCREEN     |#{eval(400 + ${status-bar-height})}|300      |200    |100     |
 
 
 Scenario: Verify cuts for full-page
-When I <action> baseline with name `${target-platform}-cuts-full-page` using screenshot configuration:
+When I <action> baseline with name `${target-platform}-cuts-viewport` using screenshot configuration:
 |shootingStrategy|cutTop|cutBottom|cutLeft|cutRight|
 |VIEWPORT        |400   |300      |200    |100     |
 
