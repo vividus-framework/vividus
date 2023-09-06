@@ -573,8 +573,8 @@ When I execute javascript `sauce:inject-image` with arguments:
 [source,gherkin]
 ----
 When I execute javascript `sauce:throttleCPU` with arguments:
-|value                                                                                       |type  |
-|{"rate" : 4}|object|
+| value        | type   |
+| {"rate" : 4} | object |
 ----
 
 ==== Execute JavaScript and save result.
