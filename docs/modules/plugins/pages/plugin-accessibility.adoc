@@ -40,7 +40,7 @@ Accessibility test options:
 ** [subs=+quotes]`*standard*` - The tag of accessibility standard to check a page against, the list of available tags can be found https://www.deque.com/axe/core-documentation/api-documentation/#axe-core-tags[here]. Aside from tags provided by Axe Code, VIVIDUS provides own standards:
 *** `WCAG2xA` - includes `wcag2a`, `wcag21a`.
 *** `WCAG2xAA` - includes tags from `WCAG2xA` and `wcag2aa`, `wcag21aa`, `wcag22aa`.
-*** `WCAG2xAAA` - includes tags from `WCAG2xAAA` and `wcag2aaa`.
+*** `WCAG2xAAA` - includes tags from `WCAG2xAA` and `wcag2aaa`.
 ** `elementsToCheck` - The comma-separated list of xref:vividus:plugins:plugin-web-app.adoc#_locator[locators] of elements to verify.
 ** `elementsToIgnore` - The comma-separated list of xref:vividus:plugins:plugin-web-app.adoc#_locator[locators] of elements to ignore.
 ** `violationsToIgnore` - The comma-separated list of https://dequeuniversity.com/rules/axe/{axe-version}/[violations] to ignore.
