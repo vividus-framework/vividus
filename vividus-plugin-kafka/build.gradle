@@ -13,7 +13,8 @@ dependencies {
 
     implementation platform(group: 'org.springframework.kafka', name: 'spring-kafka-bom', version: '3.0.11')
     implementation(group: 'org.springframework.kafka', name: 'spring-kafka')
-    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.9')
+    implementation(group: 'org.slf4j', name: 'slf4j-api')
 
     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
