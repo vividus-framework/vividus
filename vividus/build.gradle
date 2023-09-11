@@ -103,7 +103,7 @@ dependencies {
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.5.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
-    testImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.0.1')
+    testImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.1.0')
     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
     testImplementation(group: 'org.springframework', name: 'spring-test')
 
@@ -125,7 +125,7 @@ dependencies {
     integrationTestImplementation project(':vividus-plugin-yaml')
     integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.0')
     integrationTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
-    integrationTestImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.0.1')
+    integrationTestImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.1.0')
 
     systemTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.0')
     systemTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
