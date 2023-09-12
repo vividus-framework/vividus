@@ -9,7 +9,8 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.9')
+    implementation(group: 'org.slf4j', name: 'slf4j-api')
     implementation(group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.4')
     implementation(group: 'de.hs-heilbronn.mi', name: 'crawler4j-with-sleepycat', version: '5.0.2') {
         exclude module: 'log4j-slf4j-impl'

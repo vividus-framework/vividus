@@ -13,7 +13,8 @@ dependencies {
     implementation(group: 'com.epam.reportportal', name: 'agent-java-jbehave', version: '5.2.2') {
         exclude module: 'jbehave-core'
     }
-    implementation(group: 'org.slf4j', name: 'slf4j-api', version: versions.slf4j)
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.9')
+    implementation(group: 'org.slf4j', name: 'slf4j-api')
     implementation(group: 'org.vividus', name: 'jbehave-core', version: versions.jbehave)
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.0')
