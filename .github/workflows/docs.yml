@@ -21,7 +21,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
     - name: Checkout (including submodules and tags)
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
         fetch-depth: 0
