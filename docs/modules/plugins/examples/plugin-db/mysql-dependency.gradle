@@ -1,0 +1,1 @@
+implementation(group: 'com.mysql', name: 'mysql-connector-j', version: '8.1.0')
