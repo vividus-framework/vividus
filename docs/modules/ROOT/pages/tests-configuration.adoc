@@ -323,14 +323,14 @@ Meta:
 Scenario: Open Epam main page
 !-- Scenario level
 Meta:
-  @severity 1
+  @priority 1
   @layout desktop
 Given I am on page with URL `https://www.epam.com/`
 Then page title is equal to `EPAM | Enterprise Software Development, Design & Consulting`
 
 Scenario: Open Google main page
 Meta:
-  @severity 2
+  @priority 2
   @layout desktop
   @skip
 Given I am on page with URL `https://www.google.com/`
@@ -396,11 +396,6 @@ bdd.all-meta-filters=groovy: !this['test-stand']
 |Allowed values
 |Description
 |Example
-
-|@severity
-|Numeric values (range 1-5)
-|Used to mark importance of the test where, most usually, the smallest number is the most important Test, the highest number is the least important.
-|`@severity 1`
 
 |@layout
 |`desktop`, `phone`, `chrome_phone`, `chrome_responsive`, `chrome_tablet`, `tablet`

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,57 +16,44 @@
 
 package org.vividus.report.allure;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static java.util.Map.entry;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.jbehave.core.model.Meta;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.EnumSource.Mode;
+import org.junitpioneer.jupiter.SetSystemProperty;
 
-import io.qameta.allure.model.Label;
 import io.qameta.allure.model.Link;
 
+@ExtendWith(TestLoggerFactoryExtension.class)
 class VividusLabelTests
 {
-    private static final String ISSUE = "issue";
-
     private static final String ISSUE_ID = "issueId";
 
-    private static final String HTTPS = "https://";
-
-    private static final Map<String, String> LINK_TYPES = Stream.of("tms", ISSUE, "requirement")
-            .collect(Collectors.toMap(type -> "allure.link." + type + ".pattern", type -> HTTPS + type + "/{}"));
-
-    private static final String SEVERITY = "severity";
-
-    @BeforeAll
-    static void beforeAll()
-    {
-        LINK_TYPES.forEach(System::setProperty);
-    }
-
-    @AfterAll
-    static void afterAll()
-    {
-        LINK_TYPES.keySet().forEach(System::clearProperty);
-    }
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(VividusLabel.class);
 
     private Meta createMeta(String metaKey, String metaValue)
     {
@@ -75,7 +62,7 @@ class VividusLabelTests
 
     private Meta createMeta(Map<String, String> map)
     {
-        Properties properties = new Properties();
+        var properties = new Properties();
         properties.putAll(map);
         return new Meta(properties);
     }
@@ -83,20 +70,20 @@ class VividusLabelTests
     @Test
     void shouldExtractMetaValues()
     {
-        Meta storyMeta = createMeta(ISSUE_ID, "VVD-1;VVD-2");
-        Meta scenarioMeta = createMeta(ISSUE_ID, "VVD-3; VVD-4");
-        Set<Entry<String, String>> metaValues = VividusLabel.ISSUE_ID.extractMetaValues(storyMeta, scenarioMeta);
+        var storyMeta = createMeta(ISSUE_ID, "VVD-1;VVD-2");
+        var scenarioMeta = createMeta(ISSUE_ID, "VVD-3; VVD-4");
+        var metaValues = VividusLabel.ISSUE_ID.extractMetaValues(storyMeta, scenarioMeta);
         assertThat(metaValues, contains(issue("VVD-1"), issue("VVD-2"), issue("VVD-3"), issue("VVD-4")));
     }
 
     @Test
     void shouldExtractMetaValuesWithDifferentSuffixes()
     {
-        String issueIdDev = "issueId.dev";
-        Meta storyMeta = createMeta(issueIdDev, "VVD-6;VVD-7");
-        String issueIdProd = "issueId.prod";
-        Meta scenarioMeta = createMeta(issueIdProd, "VVD-8; VVD-9");
-        Set<Entry<String, String>> metaValues = VividusLabel.ISSUE_ID.extractMetaValues(storyMeta, scenarioMeta);
+        var issueIdDev = "issueId.dev";
+        var storyMeta = createMeta(issueIdDev, "VVD-6;VVD-7");
+        var issueIdProd = "issueId.prod";
+        var scenarioMeta = createMeta(issueIdProd, "VVD-8; VVD-9");
+        var metaValues = VividusLabel.ISSUE_ID.extractMetaValues(storyMeta, scenarioMeta);
         assertThat(metaValues, contains(entry(issueIdDev, "VVD-6"), entry(issueIdDev, "VVD-7"),
                 entry(issueIdProd, "VVD-8"), entry(issueIdProd, "VVD-9")));
     }
@@ -109,11 +96,25 @@ class VividusLabelTests
     @Test
     void shouldExtractSeverity()
     {
-        String metaKey = SEVERITY;
-        Meta storyMeta = createMeta(metaKey, "1");
-        Meta scenarioMeta = createMeta(metaKey, "2");
-        Set<Entry<String, String>> metaValues = VividusLabel.SEVERITY.extractMetaValues(storyMeta, scenarioMeta);
+        var metaKey = "severity";
+        var storyMeta = createMeta(metaKey, "1");
+        var scenarioMeta = createMeta(metaKey, "2");
+        var metaValues = VividusLabel.SEVERITY.extractMetaValues(storyMeta, scenarioMeta);
         assertEquals(metaValues, Set.of(entry(metaKey, "critical")));
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+                warn("Meta @severity is deprecated and will be removed in VIVIDUS 0.7.0. Please use @priority meta "
+                     + "instead"))));
+    }
+
+    @Test
+    void shouldExtractPriority()
+    {
+        var metaKey = "priority";
+        var storyMeta = createMeta(metaKey, "3");
+        var scenarioMeta = createMeta(metaKey, "4");
+        var metaValues = VividusLabel.PRIORITY.extractMetaValues(storyMeta, scenarioMeta);
+        assertEquals(metaValues, Set.of(entry(metaKey, "minor")));
+        assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
     @ParameterizedTest
@@ -122,13 +123,14 @@ class VividusLabelTests
             "ISSUE_ID,       issueId",
             "REQUIREMENT_ID, requirementId",
             "SEVERITY,       severity",
+            "PRIORITY,       severity",
             "EPIC,           epic",
             "FEATURE,        feature"
     })
     void shouldCreateLabel(VividusLabel vividusLabel, String expectedName)
     {
-        String value = "value";
-        Label label = vividusLabel.createLabel(entry(expectedName, value));
+        var value = "value";
+        var label = vividusLabel.createLabel(entry(expectedName, value));
         assertAll(
             () -> assertEquals(expectedName, label.getName()),
             () -> assertEquals(value, label.getValue())
@@ -141,38 +143,29 @@ class VividusLabelTests
             "ISSUE_ID,       issue",
             "REQUIREMENT_ID, requirement"
     })
+    @SetSystemProperty(key = "allure.link.tms.pattern", value = "https://tms/{}")
+    @SetSystemProperty(key = "allure.link.issue.pattern", value = "https://issue/{}")
+    @SetSystemProperty(key = "allure.link.requirement.pattern", value = "https://requirement/{}")
     void shouldCreateLink(VividusLabel vividusLabel, String type)
     {
-        String identifier = "VVD-5";
-        Optional<Link> optionalLink = vividusLabel.createLink(entry(type, identifier));
-        assertTrue(optionalLink.isPresent());
-        Link link = optionalLink.get();
-        assertAll(
-            () -> assertEquals(identifier, link.getName()),
-            () -> assertEquals(type, link.getType()),
-            () -> assertEquals(HTTPS + type + "/" + identifier, link.getUrl())
-        );
+        var identifier = "VVD-5";
+        var actualLink = vividusLabel.createLink(entry(type, identifier));
+        var expectedLink = new Link().setName(identifier).setType(type).setUrl("https://" + type + "/" + identifier);
+        assertEquals(Optional.of(expectedLink), actualLink);
     }
 
     @Test
+    @SetSystemProperty(key = "allure.link.issue.test.pattern", value = "https://vividus.dev/{}")
     void shouldCreateLinkUsingSuffix()
     {
-        String identifier = "VVD-0";
-        String key = "allure.link.issue.test.pattern";
-        System.setProperty(key, "https://vividus.dev/{}");
-        Optional<Link> optionalLink = VividusLabel.ISSUE_ID.createLink(entry("issueId.test", identifier));
-        System.clearProperty(key);
-        assertTrue(optionalLink.isPresent());
-        Link link = optionalLink.get();
-        assertAll(
-            () -> assertEquals(identifier, link.getName()),
-            () -> assertEquals(ISSUE, link.getType()),
-            () -> assertEquals("https://vividus.dev/VVD-0", link.getUrl())
-        );
+        var identifier = "VVD-0";
+        var actualLink = VividusLabel.ISSUE_ID.createLink(entry("issueId.test", identifier));
+        var expectedLink = new Link().setName(identifier).setType("issue").setUrl("https://vividus.dev/" + identifier);
+        assertEquals(Optional.of(expectedLink), actualLink);
     }
 
     @ParameterizedTest
-    @EnumSource(names = {"SEVERITY", "EPIC", "FEATURE"}, mode = Mode.INCLUDE)
+    @EnumSource(names = {"SEVERITY", "PRIORITY", "EPIC", "FEATURE"}, mode = Mode.INCLUDE)
     void shouldNotCreateLink(VividusLabel vividusLabel)
     {
         assertEquals(Optional.empty(), vividusLabel.createLink(entry("type", "any")));
