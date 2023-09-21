@@ -82,6 +82,35 @@ Then `1` is = `1`
 
 image::multiple-links.png[Multiple external systems]
 
+== Viewing distribution of tests by priorities
+
+. Put meta at story or/and scenario level.
++
+[cols="2a,1,3,1", options="header"]
+|===
+|Meta tag name
+|Allowed values
+|Description
+|Example
+
+|`@severity` +
+
+WARNING: This meta tag is deprecated and will be removed in VIVIDUS 0.7.0. Please use `@priority` meta tag instead.
+
+|Numeric values (range 1-5)
+|Used to mark importance of the test where, most usually, the smallest number is the most important test, the highest number is the least important one.
+|`@severity 1`
+
+|`@priority`
+|Numeric values (range 1-5)
+|Used to mark importance of the test where, most usually, the smallest number is the most important test, the highest number is the least important one.
+|`@priority 1`
+
+|===
+
+. Run tests.
+. Open the report and find the distribution of tests by priorities at Graphs tab.
+
 == Notifications
 
 VIVIDUS can send notifications with test execution summary upon test completion.

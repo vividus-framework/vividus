@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.Meta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.model.MetaWrapper;
 
 import io.qameta.allure.SeverityLevel;
@@ -41,24 +43,36 @@ public enum VividusLabel
     TEST_CASE_ID("testCaseId", Optional.of(ResultsUtils.TMS_LINK_TYPE)),
     ISSUE_ID("issueId", Optional.of(ResultsUtils.ISSUE_LINK_TYPE)),
     REQUIREMENT_ID("requirementId", Optional.of("requirement")),
+    @Deprecated(since = "0.6.0", forRemoval = true)
     SEVERITY(LabelName.SEVERITY.value(), Optional.empty())
     {
         @Override
         public Set<Entry<String, String>> extractMetaValues(Meta storyMeta, Meta scenarioMeta)
         {
-            return scenarioMeta.getOptionalProperty(getMetaName())
-                    .map(Integer::parseInt)
-                    .map(severity -> SeverityLevel.values()[severity - 1])
-                    .map(SeverityLevel::value)
-                    .map(s -> entry(getMetaName(), s))
-                    .map(Set::of)
-                    .orElseGet(Set::of);
+            return extractSeverityMetaValues(getMetaName(), scenarioMeta);
+        }
+    },
+    PRIORITY("priority", Optional.empty())
+    {
+        @Override
+        public Set<Entry<String, String>> extractMetaValues(Meta storyMeta, Meta scenarioMeta)
+        {
+            return extractSeverityMetaValues(getMetaName(), scenarioMeta);
+        }
+
+        @Override
+        public Label createLabel(Entry<String, String> identifier)
+        {
+            return ResultsUtils.createSeverityLabel(identifier.getValue());
         }
     },
     EPIC(LabelName.EPIC.value(), Optional.empty()),
     FEATURE(LabelName.FEATURE.value(), Optional.empty());
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(VividusLabel.class);
+
     private static final String DOT = ".";
+
     private final String metaName;
     private final Optional<String> linkType;
 
@@ -81,6 +95,25 @@ public enum VividusLabel
                 .flatMap(Collection::stream)
                 .flatMap(e -> MetaWrapper.parsePropertyValues(e.getValue()).stream().map(m -> entry(e.getKey(), m)))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private static Set<Entry<String, String>> extractSeverityMetaValues(String metaName, Meta scenarioMeta)
+    {
+        return scenarioMeta.getOptionalProperty(metaName)
+                .map(metaValue -> {
+                    if (LabelName.SEVERITY.value().equals(metaName))
+                    {
+                        LOGGER.warn(
+                                "Meta @severity is deprecated and will be removed in VIVIDUS 0.7.0. Please use "
+                                + "@priority meta instead");
+                    }
+                    return Integer.parseInt(metaValue);
+                })
+                .map(severity -> SeverityLevel.values()[severity - 1])
+                .map(SeverityLevel::value)
+                .map(s -> entry(metaName, s))
+                .map(Set::of)
+                .orElseGet(Set::of);
     }
 
     public Optional<Link> createLink(Entry<String, String> identifier)
