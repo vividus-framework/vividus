@@ -14,3 +14,7 @@ When I perform Lighthouse desktop scan of `${vividus-test-site-url}` page:
 |Performance Score       |GREATER_THAN|90       |
 |PWA Score               |GREATER_THAN|20       |
 |SEO Score               |GREATER_THAN|85       |
+
+
+Scenario: Step verification: Then Lighthouse $scanType audit scores for `$checkpointPage` page are not less than for `$baselinePage` page
+Then Lighthouse desktop audit scores for `${vividus-test-site-url}` page are not less than for `${vividus-test-site-url}` page

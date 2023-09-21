@@ -1,5 +1,7 @@
 project.description = 'VIVIDUS plugin for Lighthouse'
 
+nohttp.source.excludes += '**/vividus-lighthouse-viewer-adaptation/**'
+
 dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-soft-assert')
