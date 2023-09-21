@@ -19,6 +19,7 @@ package org.vividus.datetime.expression;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import org.jbehave.core.expressions.MultiArgExpressionProcessor;
 import org.vividus.util.DateUtils;
@@ -34,11 +35,11 @@ public class FormatDateExpressionProcessor extends MultiArgExpressionProcessor<S
 
     private static final DateTimeFormatter ISO_STANDARD_FORMAT = DateTimeFormatter.ISO_DATE_TIME;
 
-    public FormatDateExpressionProcessor(DateUtils dateUtils)
+    public FormatDateExpressionProcessor(Locale locale, DateUtils dateUtils)
     {
         super("formatDate", MIN_ARG_NUMBER, MAX_ARG_NUMBER, args -> {
             ZonedDateTime inputDate = dateUtils.parseDateTime(args.get(INPUT_DATE_ARG_INDEX), ISO_STANDARD_FORMAT);
-            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(args.get(OUTPUT_FORMAT_ARG_INDEX));
+            DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern(args.get(OUTPUT_FORMAT_ARG_INDEX), locale);
             if (args.size() == MAX_ARG_NUMBER)
             {
                 ZoneId outputZone = ZoneId.of(args.get(OUTPUT_TIMEZONE_ARG_INDEX));

@@ -25,8 +25,11 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.time.zone.ZoneRulesException;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.LocaleUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,8 +47,8 @@ class FormatDateExpressionProcessorTests
 
     private static final String INPUT_DATE_NOT_ZERO_TIMEZONE = "2017-01-10T08:04:20.677-05:00";
 
-    private final FormatDateExpressionProcessor processor = new FormatDateExpressionProcessor(
-            new DateUtils(ZoneId.of("Etc/GMT-0")));
+    private final DateUtils dateUtils = new DateUtils(ZoneId.of("Etc/GMT-0"));
+    private FormatDateExpressionProcessor processor = new FormatDateExpressionProcessor(Locale.ENGLISH, dateUtils);
 
     // @formatter:off
     static Stream<Arguments> executeWithoutTZDDataProvider()
@@ -125,5 +128,13 @@ class FormatDateExpressionProcessorTests
         var exception = assertThrows(DateTimeParseException.class,
             () -> processor.execute("formatDate(1994:11:05T08:15:30Z, yyyy-MM-dd)"));
         assertThat(exception.getMessage(), containsString("Text '1994:11:05T08:15:30Z' could not be parsed"));
+    }
+
+    @Test
+    void testExecuteWithNonDefaultLocale()
+    {
+        processor = new FormatDateExpressionProcessor(LocaleUtils.toLocale("be_BY"), dateUtils);
+        var actual = processor.execute("formatDate(2023-09-21T14:36:23Z, d MMMM EEEE)");
+        assertEquals(Optional.of("21 верасня чацвер"), actual);
     }
 }
