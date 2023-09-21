@@ -11,7 +11,9 @@
     </bean>
     <bean class="org.vividus.datetime.expression.DiffDateExpressionProcessor" />
     <bean class="org.vividus.datetime.expression.EpochExpressionProcessors" />
-    <bean class="org.vividus.datetime.expression.FormatDateExpressionProcessor" />
+    <bean class="org.vividus.datetime.expression.FormatDateExpressionProcessor">
+        <constructor-arg index="0" value="${expression.format-date.locale}" />
+    </bean>
     <bean class="org.vividus.datetime.expression.FormatDateToExpressionProcessor" />
     <bean class="org.vividus.datetime.expression.ShiftDateExpressionProcessor" />
 
