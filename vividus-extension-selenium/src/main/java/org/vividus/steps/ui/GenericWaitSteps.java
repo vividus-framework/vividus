@@ -19,6 +19,7 @@ package org.vividus.steps.ui;
 import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -35,6 +36,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.State;
+import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
 import org.vividus.ui.action.ISearchActions;
@@ -56,10 +58,11 @@ public class GenericWaitSteps
     private final ISearchActions searchActions;
     private final ISoftAssert softAssert;
     private final IBaseValidations baseValidations;
+    private final ElementActions elementActions;
 
     public GenericWaitSteps(IWaitActions waitActions, IUiContext uiContext,
             IExpectedConditions<Locator> expectedSearchActionsConditions, ISearchActions searchActions,
-            ISoftAssert softAssert, IBaseValidations baseValidations)
+            ISoftAssert softAssert, IBaseValidations baseValidations, ElementActions elementActions)
     {
         this.waitActions = waitActions;
         this.uiContext = uiContext;
@@ -67,6 +70,7 @@ public class GenericWaitSteps
         this.searchActions = searchActions;
         this.softAssert = softAssert;
         this.baseValidations = baseValidations;
+        this.elementActions = elementActions;
     }
 
     /**
@@ -267,6 +271,36 @@ public class GenericWaitSteps
                 softAssert.assertTrue(assertionMessage, !result.isWaitPassed());
             }
         });
+    }
+
+    /**
+     * Waits until an element with the specified locator has text that matches the provided regular expression.
+     *
+     * @param locator The locator of the element which text to check
+     * @param regex   The regular expression used to validate the text of the element
+     */
+    @When("I wait until element located by `$locator` has text matching `$regex`")
+    public void waitUntilElementHasTextMatchingRegex(Locator locator, Pattern regex)
+    {
+        uiContext.getOptionalSearchContext()
+                .ifPresent(context -> waitActions.wait(context, new IExpectedSearchContextCondition<>()
+                {
+                    @Override
+                    public Boolean apply(SearchContext searchContext)
+                    {
+                        return searchActions.findElement(locator).map(elementActions::getElementText)
+                                                                 .map(regex::matcher)
+                                                                 .map(java.util.regex.Matcher::find)
+                                                                 .orElse(false);
+                    }
+
+                    @Override
+                    public String toString()
+                    {
+                        return String.format("text matching regex ('%s') to be present in element located by %s", regex,
+                                locator);
+                    }
+                }));
     }
 
     private String formatDuration(Duration duration)
