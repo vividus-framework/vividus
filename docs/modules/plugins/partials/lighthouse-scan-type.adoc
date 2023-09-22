@@ -1,0 +1,4 @@
+* `$scanType` - The scan type to use:
+** `full` - The scan is performed on both `desktop` and `mobile` devices.
+** `desktop` - The scan is performed on `desktop` device.
+** `mobile` - The scan is performed on `mobile` device.

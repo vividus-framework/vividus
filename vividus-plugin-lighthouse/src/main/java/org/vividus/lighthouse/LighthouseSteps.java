@@ -23,7 +23,9 @@ import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -35,6 +37,7 @@ import com.google.api.services.pagespeedonline.v5.model.Categories;
 import com.google.api.services.pagespeedonline.v5.model.LighthouseCategoryV5;
 import com.google.api.services.pagespeedonline.v5.model.LighthouseResultV5;
 
+import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.lighthouse.model.MetricRule;
 import org.vividus.lighthouse.model.ScanType;
@@ -57,12 +60,14 @@ public class LighthouseSteps
     private final IAttachmentPublisher attachmentPublisher;
     private final ISoftAssert softAssert;
     private final PagespeedInsights pagespeedInsights;
+    private final JsonFactory jsonFactory;
 
     private final String apiKey;
     private final List<String> categories;
+    private final int acceptableScorePercentageDelta;
 
     public LighthouseSteps(String applicationName, String apiKey, List<String> categories,
-            IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
+            int acceptableScorePercentageDelta, IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
             throws GeneralSecurityException, IOException
     {
         this.attachmentPublisher = attachmentPublisher;
@@ -79,8 +84,10 @@ public class LighthouseSteps
             )
             .setApplicationName(applicationName)
             .build();
+        this.jsonFactory = pagespeedInsights.getJsonFactory();
         this.apiKey = apiKey;
         this.categories = categories;
+        this.acceptableScorePercentageDelta = acceptableScorePercentageDelta;
     }
 
     /**
@@ -95,8 +102,6 @@ public class LighthouseSteps
     public void performLighthouseScan(ScanType scanType, String webPageUrl,
             List<MetricRule> metricsValidations) throws IOException
     {
-        JsonFactory jsonFactory = pagespeedInsights.getJsonFactory();
-
         for (String strategy : scanType.getStrategies())
         {
             LighthouseResultV5 result = executePagespeed(webPageUrl, strategy, true);
@@ -130,6 +135,76 @@ public class LighthouseSteps
         }
     }
 
+    /**
+     * Performs a Lighthouse scan on both the baseline and checkpoint pages validating that the audit scores of the
+     * checkpoint page have not worsened compared to the audit scores of the baseline page.
+     *
+     * @param scanType       The scan type to use, either <b>full</b> or <b>desktop</b> or <b>mobile</b>.
+     * @param checkpointPage The checkpoint page.
+     * @param baselinePage   The baseline page.
+     * @throws IOException if an I/O exception of some sort has occurred
+     */
+    @SuppressWarnings("MagicNumber")
+    @Then("Lighthouse $scanType audit scores for `$checkpointPage` page are not less than for `$baselinePage` page")
+    public void performLighthouseScanWithComparison(ScanType scanType, String checkpointPage, String baselinePage)
+            throws IOException
+    {
+        for (String strategy : scanType.getStrategies())
+        {
+            LighthouseResultV5 baseline = executePagespeed(baselinePage, strategy, true);
+            LighthouseResultV5 checkpoint = executePagespeed(checkpointPage, strategy, true);
+
+            Map<String, Integer> checkpointScores = getCategoryScores(checkpoint);
+
+            softAssert.runIgnoringTestFailFast(() -> getCategoryScores(baseline).forEach((categoryKey, baselineScore) ->
+            {
+                Integer checkpointScore = checkpointScores.get(categoryKey);
+
+                if (checkpointScore >= baselineScore)
+                {
+                    softAssert.recordPassedAssertion(String.format(
+                            "[%s] The %s audit is passed as checkpoint score (%s) is not less than baseline score (%s)",
+                            strategy, categoryKey, checkpointScore, baselineScore));
+                    return;
+                }
+
+                int scoreDecrease = (int) Math
+                        .abs(((checkpointScore.doubleValue() - baselineScore) / baselineScore) * 100);
+
+                if (scoreDecrease <= acceptableScorePercentageDelta)
+                {
+                    softAssert.recordPassedAssertion(String.format(
+                            "[%s] The %s audit is passed as checkpoint score (%s) fits acceptable delta in %s percents"
+                            + " from baseline score (%s)",
+                            strategy, categoryKey, checkpointScore, acceptableScorePercentageDelta, baselineScore));
+                    return;
+                }
+
+                softAssert.recordFailedAssertion(String.format("[%s] The %s audit score is degraded on %d percents",
+                        strategy, categoryKey, scoreDecrease));
+            }));
+
+            // Its expected to use .ftl file format for attachments, but for the sake of viewer's build process
+            // simplification in this place we use .html file
+            attachmentPublisher.publishAttachment(
+                    "/allure-customization/webjars/vividus-lighthouse-viewer-adaptation/index.html",
+                    Map.of("baseline", jsonFactory.toString(baseline), "checkpoint", jsonFactory.toString(checkpoint)),
+                    String.format("[%s] Lighthouse reports comparison", strategy));
+        }
+    }
+
+    private Map<String, Integer> getCategoryScores(LighthouseResultV5 result)
+    {
+        return result.getCategories().entrySet().stream().collect(
+                Collectors.toMap(Entry::getKey, e -> getScore((LighthouseCategoryV5) e.getValue()).intValue()));
+    }
+
+    private BigDecimal getScore(LighthouseCategoryV5 category)
+    {
+        BigDecimal score = (BigDecimal) category.getScore();
+        return score.movePointRight(2);
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, BigDecimal> getMetrics(LighthouseResultV5 result)
     {
@@ -143,8 +218,7 @@ public class LighthouseSteps
             LighthouseCategoryV5 categoryValue = f.apply(scanCategories);
             if (categoryValue != null)
             {
-                BigDecimal score = (BigDecimal) categoryValue.getScore();
-                metrics.put(m, score.movePointRight(2));
+                metrics.put(m, getScore(categoryValue));
             }
         });
 

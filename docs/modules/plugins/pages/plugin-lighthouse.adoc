@@ -41,10 +41,7 @@ Performs Lighthouse scan of the specified web page and validates performance met
 When I perform Lighthouse $scanType scan of `$webPageUrl` page:$metricsValidations
 ----
 
-* `$scanType` - The scan type to use:
-** `full` - The scan is performed on both `desktop` and `mobile` devices.
-** `desktop` - The scan is performed on `desktop` device.
-** `mobile` - The scan is performed on `mobile` device.
+include::partial$lighthouse-scan-type.adoc[]
 * `$webPageUrl` - The page URL to perform scan on.
 * `$metricsValidations` - The metric validations:
 ** `$metric` - The Lighthouse metric name.
@@ -78,4 +75,38 @@ When I perform Lighthouse full scan of `https://dequeuniversity.com/demo/mars` p
 |Performance Score       |GREATER_THAN|95       |
 |PWA Score               |GREATER_THAN|20       |
 |SEO Score               |GREATER_THAN|85       |
+----
+
+=== Compare Lighthouse audit scores of two pages
+
+Performs a Lighthouse scan on both the baseline and checkpoint pages validating that the audit scores of the checkpoint page have not worsened compared to the audit scores of the baseline page.
+
+.Properties
+[cols="2,1,2,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`lighthouse.acceptable-score-percentage-delta`
+|number
+|5
+|Lighthouse scan results may https://developers.google.com/web/tools/lighthouse/variability[vary] from one scan to another, to alleviate this variety the property enables acceptable percentage delta between checkpoint and baseline audit scores.
+
+|===
+
+[source,gherkin]
+----
+Then Lighthouse $scanType audit scores for `$checkpointPage` page are not less than for `$baselinePage` page
+----
+
+include::partial$lighthouse-scan-type.adoc[]
+* `$checkpointPage` - The checkpoint page.
+* `$baselinePage` - The baseline page.
+
+.Compare Lighthouse results of two pages
+[source]
+----
+Then Lighthouse desktop audit scores for `https://www.vividus-reactjs.com/` page are not less than for `https://www.vividus-vuejs.com/` page
 ----

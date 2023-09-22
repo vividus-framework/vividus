@@ -117,7 +117,7 @@ class LighthouseStepsTests
                 Pagespeedapi pagespeedapi = mockPagespeedapiCall(key, metrics);
                 when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
 
-                LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, attachmentPublisher,
+                LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, 0, attachmentPublisher,
                         softAssert);
 
                 MetricRule speedIndex = createSpeedIndexRule();
@@ -163,7 +163,8 @@ class LighthouseStepsTests
 
             when(pagespeedInsights.pagespeedapi()).thenReturn(desktopPagespeedapi).thenReturn(mobilePagespeedapi);
 
-            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, attachmentPublisher, softAssert);
+            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, 0, attachmentPublisher,
+                    softAssert);
 
             MetricRule speedIndex = createSpeedIndexRule();
             steps.performLighthouseScan(ScanType.FULL, URL, List.of(speedIndex));
@@ -192,10 +193,11 @@ class LighthouseStepsTests
         {
             Pagespeedapi pagespeedapi = mock();
             when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
-            Runpagespeed runpagespeed = mockConfiguration(pagespeedapi, DESKTOP_STRATEGY);
+            Runpagespeed runpagespeed = mockConfiguration(pagespeedapi, URL, DESKTOP_STRATEGY);
             doThrow(thrown).when(runpagespeed).execute();
 
-            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, attachmentPublisher, softAssert);
+            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, 0, attachmentPublisher,
+                    softAssert);
 
             GoogleJsonResponseException actual = assertThrows(GoogleJsonResponseException.class,
                     () -> steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of()));
@@ -212,13 +214,14 @@ class LighthouseStepsTests
             mockRun();
             ArrayMap<String, BigDecimal> metrics = createMetrics();
             Pagespeedapi pagespeedapi = mock();
-            Runpagespeed runpagespeed = mockConfiguration(pagespeedapi, DESKTOP_STRATEGY);
+            Runpagespeed runpagespeed = mockConfiguration(pagespeedapi, URL, DESKTOP_STRATEGY);
             GoogleJsonResponseException thrown = createResponseError(500, UNKNOWN_ERROR_MESSAGE);
             PagespeedApiPagespeedResponseV5 response = mockResponse(metrics);
             doThrow(thrown).doReturn(response).when(runpagespeed).execute();
             when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
 
-            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, attachmentPublisher, softAssert);
+            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, 0, attachmentPublisher,
+                    softAssert);
 
             MetricRule speedIndex = createSpeedIndexRule();
             steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of(speedIndex));
@@ -226,6 +229,74 @@ class LighthouseStepsTests
             verifyAttachments(DESKTOP_STRATEGY);
             validateMetric(DESKTOP_STRATEGY, speedIndex, metrics.get(SI_METRIC));
         });
+    }
+
+    @Test
+    void shouldCompareAuditScoresBetweenTwoSites() throws Exception
+    {
+        performTest(() ->
+        {
+            mockRun();
+
+            String baselineUrl = "https://baseline.com/my-page";
+            PagespeedApiPagespeedResponseV5 baselineResponse = mock();
+            Pagespeedapi baselineApi = mockPagespeedapiCall(baselineUrl, DESKTOP_STRATEGY, baselineResponse);
+            LighthouseResultV5 baselineResult = createLighthouseResult(0.90, 0.90, 0.90, 0.90);
+            when(baselineResponse.getLighthouseResult()).thenReturn(baselineResult);
+
+            String checkpointUrl = "https://checkpoint.com/my-page";
+            PagespeedApiPagespeedResponseV5 checkpointResponse = mock();
+            Pagespeedapi checkpointApi = mockPagespeedapiCall(checkpointUrl, DESKTOP_STRATEGY, checkpointResponse);
+            LighthouseResultV5 checkpointResult = createLighthouseResult(0.90, 0.951, 0.20, 0.89);
+            when(checkpointResponse.getLighthouseResult()).thenReturn(checkpointResult);
+
+            when(pagespeedInsights.pagespeedapi()).thenReturn(baselineApi).thenReturn(checkpointApi);
+
+            when(jsonFactory.toString(baselineResult)).thenReturn(RESULT_AS_STRING);
+            when(jsonFactory.toString(checkpointResult)).thenReturn(RESULT_AS_STRING);
+
+            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, 5, attachmentPublisher,
+                    softAssert);
+
+            steps.performLighthouseScanWithComparison(ScanType.DESKTOP, checkpointUrl, baselineUrl);
+
+            verify(softAssert).recordPassedAssertion("[desktop] The performance audit is passed as checkpoint score"
+                    + " (90) is not less than baseline score (90)");
+            verify(softAssert).recordPassedAssertion("[desktop] The seo audit is passed as checkpoint score (95) "
+                    + "is not less than baseline score (90)");
+            verify(softAssert).recordPassedAssertion("[desktop] The best-practices audit is passed as checkpoint score "
+                    + "(89) fits acceptable delta in 5 percents from baseline score (90)");
+            verify(softAssert)
+                    .recordFailedAssertion("[desktop] The accessibility audit score is degraded on 77 percents");
+            verifyNoMoreInteractions(softAssert);
+
+            verify(attachmentPublisher).publishAttachment(
+                    "/allure-customization/webjars/vividus-lighthouse-viewer-adaptation/index.html",
+                    Map.of("baseline", RESULT_AS_STRING, "checkpoint", RESULT_AS_STRING),
+                    "[desktop] Lighthouse reports comparison");
+        });
+    }
+
+    private LighthouseResultV5 createLighthouseResult(double performance, double seo, double accessibility,
+            double bestPractices)
+    {
+        LighthouseResultV5 results = mock();
+        Categories categories = new Categories();
+        when(results.getCategories()).thenReturn(categories);
+
+        categories.setPerformance(createCategory(performance));
+        categories.setSeo(createCategory(seo));
+        categories.setAccessibility(createCategory(accessibility));
+        categories.setBestPractices(createCategory(bestPractices));
+
+        return results;
+    }
+
+    private static LighthouseCategoryV5 createCategory(double score)
+    {
+        LighthouseCategoryV5 category = new LighthouseCategoryV5();
+        category.setScore(new BigDecimal(score));
+        return category;
     }
 
     private static GoogleJsonResponseException createResponseError(int code, String message)
@@ -276,10 +347,16 @@ class LighthouseStepsTests
 
     private Pagespeedapi mockPagespeedapiCall(String strategy, ArrayMap<String, BigDecimal> metrics) throws IOException
     {
-        Pagespeedapi pagespeedapi = mock();
-        Runpagespeed runpagespeed = mockConfiguration(pagespeedapi, strategy);
         PagespeedApiPagespeedResponseV5 pagespeedApiPagespeedResponseV5 = mockResponse(metrics);
-        when(runpagespeed.execute()).thenReturn(pagespeedApiPagespeedResponseV5);
+        return mockPagespeedapiCall(URL, strategy, pagespeedApiPagespeedResponseV5);
+    }
+
+    private Pagespeedapi mockPagespeedapiCall(String url, String strategy, PagespeedApiPagespeedResponseV5 response)
+            throws IOException
+    {
+        Pagespeedapi pagespeedapi = mock();
+        Runpagespeed runpagespeed = mockConfiguration(pagespeedapi, url, strategy);
+        when(runpagespeed.execute()).thenReturn(response);
         return pagespeedapi;
     }
 
@@ -306,10 +383,10 @@ class LighthouseStepsTests
         return pagespeedApiPagespeedResponseV5;
     }
 
-    private Runpagespeed mockConfiguration(Pagespeedapi pagespeedapi, String strategy) throws IOException
+    private Runpagespeed mockConfiguration(Pagespeedapi pagespeedapi, String url, String strategy) throws IOException
     {
         Runpagespeed runpagespeed = mock();
-        when(pagespeedapi.runpagespeed(URL)).thenReturn(runpagespeed);
+        when(pagespeedapi.runpagespeed(url)).thenReturn(runpagespeed);
         when(runpagespeed.setKey(API_KEY)).thenReturn(runpagespeed);
         when(runpagespeed.setStrategy(strategy)).thenReturn(runpagespeed);
         when(runpagespeed.setCategory(CATEGORIES)).thenReturn(runpagespeed);
