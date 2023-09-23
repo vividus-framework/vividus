@@ -1,0 +1,57 @@
+= Properties deprecation procedure
+
+VIVIDUS supports the special properties deprecation mechanism that allows to log deprecated properties with replacement, use them as actual ones and automatically replace using xref:commons:cli.adoc#_replace_deprecated_properties[`replaceDeprecatedProperties`] command.
+All deprecated properties for a particular module should be located in the properties file along the path `<module-name>/src/main/resources/properties/deprecated/deprecated.properties` and defined in the following way: `<deprecated property>=<actual property>`.
+
+== Deprecate static properties
+
+Deprecated properties without any dynamic components (with the syntax which strictly regulated and shouldn't be configured by users) defined by a simple key-value pair.
+
+.vividus-plugin-web-app/src/main/resources/properties/deprecated/deprecated.properties
+[source,properties]
+----
+web.driver.edge_chromium.driver-executable-path=web.driver.edge.driver-executable-path
+----
+
+== Deprecate dynamic properties
+
+Deprecation of properties with dynamic components (i.e. user-defined components) performed in the same way as deprecation of static properties, but https://en.wikipedia.org/wiki/Regular_expression[regular expression] groups used to define and replace dynamic parts.
+
+[NOTE]
+====
+https://www.regular-expressions.info/characters.html#special[Regex special characters] should be escaped by double slash.
+====
+
+.vividus-plugin-web-app/src/main/resources/properties/deprecated/deprecated.properties
+[source,gherkin]
+----
+web\\.driver\\.CHROME\\.(.+)=web.driver.chrome.$1
+----
+
+== Find deprecated properties
+
+All deprecated properties for the current xref:ROOT:tests-configuration.adoc#_profiles[profiles] and xref:ROOT:tests-configuration.adoc#_environments[environments] can be found in the execution log.
+
+[source]
+----
+2023-09-04 14:28:35,905 [main] WARN  org.vividus.configuration.DeprecatedPropertiesHandler - Deprecated property found: 'batch-6.story-execution-timeout'. Use 'batch-6.story.execution-timeout' instead
+2023-09-04 14:28:35,907 [main] WARN  org.vividus.configuration.DeprecatedPropertiesHandler - Deprecated property found: 'web.driver.CHROME.experimental-options'. Use 'web.driver.chrome.experimental-options' instead
+2023-09-04 14:28:35,908 [main] WARN  org.vividus.configuration.DeprecatedPropertiesHandler - Deprecated property found: 'ui.visual.applitools.server-uri'. Use 'applitools.server-uri' instead
+2023-09-04 14:28:35,908 [main] WARN  org.vividus.configuration.DeprecatedPropertiesHandler - Deprecated property found: 'ui.visual.applitools.execute-api-key'. Use 'applitools.execute-api-key' instead
+2023-09-04 14:28:35,918 [main] WARN  org.vividus.configuration.DeprecatedPropertiesHandler - Deprecated property found: 'ui.visual.applitools.app-name'. Use 'applitools.app-name' instead
+2023-09-04 14:28:35,919 [main] WARN  org.vividus.configuration.DeprecatedPropertiesHandler - Deprecated property found: 'web.driver.edge_chromium.driver-executable-path'. Use 'web.driver.edge.driver-executable-path' instead
+----
+
+== Remove deprecated properties from tests
+
+Properties can only be removed from VIVIDUS in a release with breaking changes.
+Usually `MAJOR` version is incremented on breaking changes releases according to the https://semver.org/spec/v2.0.0.html[Semantic Versioning].
+But if project in initial development phase (has `0.y.z` version) incremented only `MINOR` version.
+
+image::semantic-versions.png[Semantic Versioning]
+
+Also, breaking changes releases usually have the `Removed` section with changes in the https://github.com/vividus-framework/vividus/releases[release history].
+
+image::removed-section-properties.png[Removed section]
+
+In case of update to version with breaking changes it is necessary to check presence of all removed properties in test project and replace them manually or xref:commons:cli.adoc#_replace_deprecated_properties[automatically].

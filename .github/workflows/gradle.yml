@@ -721,6 +721,15 @@ jobs:
         cmp -c "$actualStory" "$expectedStory"
         cmp -c "$actualComposites" "$expectedComposites"
 
+    - name: Replace and validate deprecated properties
+      if: matrix.platform == 'macos-latest'
+      shell: bash
+      run: |
+        ./gradlew :vividus-tests:replaceDeprecatedProperties
+        actualProperties="vividus-tests/src/main/resources/properties/environment/system/properties_replacer/actual_properties.properties"
+        expectedProperties="vividus-tests/src/main/resources/properties/environment/system/properties_replacer/expected_properties.properties"
+        cmp -c "$actualProperties" "$expectedProperties"
+
     - name: Publish artifacts to GitHub packages
       if: (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/release-')) && matrix.platform == 'ubuntu-latest'
       run: ./gradlew publish
