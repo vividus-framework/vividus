@@ -222,7 +222,7 @@ jobs:
           declare -a profiles=( iexplore chrome firefox edge safari )
           for profile in "${profiles[@]}"; do
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/lambdatest \
-                                                  -Pvividus.configuration.suites=grid \
+                                                  -Pvividus.configuration.suites=health_check \
                                                   -Pvividus.configuration.profiles=lambdatest/web,web/desktop/${profile} \
                                                   -Pvividus.selenium.grid.username=${LAMBDATEST_USER} \
                                                   -Pvividus.selenium.grid.password=${LAMBDATEST_KEY}
@@ -242,7 +242,7 @@ jobs:
           declare -a profiles=( iexplore chrome firefox edge safari )
           for profile in "${profiles[@]}"; do
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs \
-                                                  -Pvividus.configuration.suites=grid \
+                                                  -Pvividus.configuration.suites=health_check \
                                                   -Pvividus.configuration.profiles=saucelabs/web,web/desktop/${profile} \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
@@ -302,7 +302,7 @@ jobs:
           declare -a profiles=( iphone android)
           for profile in "${profiles[@]}"; do
             ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/saucelabs \
-                                                  -Pvividus.configuration.suites=grid/saucelabs/${profile} \
+                                                  -Pvividus.configuration.suites=health_check/saucelabs/${profile} \
                                                   -Pvividus.configuration.profiles=saucelabs/web/phone/${profile},web/phone/${profile} \
                                                   -Pvividus.selenium.grid.username=${SAUCELABS_USER} \
                                                   -Pvividus.selenium.grid.password=${SAUCELABS_KEY}
@@ -321,7 +321,7 @@ jobs:
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
           declare -a profiles=( iphone android )
           for profile in "${profiles[@]}"; do
-            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=grid/browserstack/${profile} \
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check/browserstack/${profile} \
                                                   -Pvividus.configuration.profiles=browserstack/web/phone,web/phone/${profile} \
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY}
@@ -340,7 +340,7 @@ jobs:
         if [[ -n $MOBITRU_USER && -n $MOBITRU_KEY ]]; then
           declare -a profiles=( iphone android )
           for profile in "${profiles[@]}"; do
-            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=grid \
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
                                                   -Pvividus.configuration.profiles=mobitru/web,web/phone/${profile} \
                                                   -Pvividus.selenium.grid.username=${MOBITRU_USER} \
                                                   -Pvividus.selenium.grid.password=${MOBITRU_KEY}
@@ -509,7 +509,7 @@ jobs:
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
           declare -a profiles=( iexplore chrome firefox edge safari )
           for profile in "${profiles[@]}"; do
-            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=grid \
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
                                                   -Pvividus.configuration.profiles=browserstack/web,web/desktop/${profile} \
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
