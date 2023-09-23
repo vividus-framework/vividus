@@ -145,6 +145,16 @@ web.driver.chrome.mobile-emulation.width=1440
 web.driver.chrome.mobile-emulation.height=900
 ----
 
+=== Headless
+
+https://en.wikipedia.org/wiki/Headless_browser[Headless mode] is a functionality that allows the execution of a full
+version of the browser while controlling it programmatically. It can be used without dedicated graphics or display,
+meaning that it runs without its “head”, the Graphical User Interface (GUI). The following profiles running browsers in
+headless mode are available:
+
+- `web/headless/chrome`
+- `web/headless/firefox`
+
 === Docker
 The profile can be enabled by adding `web/docker` to `configuration.profiles` property. The profile should be used together with the browser profile.
 
@@ -156,9 +166,6 @@ WARNING: Default selenium grid URL is set to `selenium.grid.url=http://localhost
 configuraiton.profiles=web/docker,web/desktop/chrome
 ----
 
-=== Headless
-
-https://en.wikipedia.org/wiki/Headless_browser[Headless mode] is a functionality that allows the execution of a full version of the browser while controlling it programmatically. It can be used without dedicated graphics or display, meaning that it runs without its “head”, the Graphical User Interface (GUI). Update properties in this directory to adjust your headless automation.
 
 === Phone
 
