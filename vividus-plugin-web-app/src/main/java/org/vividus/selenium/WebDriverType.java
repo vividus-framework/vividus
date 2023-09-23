@@ -26,6 +26,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.chromium.ChromiumOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeDriverService;
 import org.openqa.selenium.edge.EdgeOptions;
@@ -113,9 +114,7 @@ public enum WebDriverType
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
             ChromeOptions options = new ChromeOptions().merge(desiredCapabilities);
-            configuration.getBinaryPath().ifPresent(options::setBinary);
-            options.addArguments(configuration.getCommandLineArguments());
-            configuration.getExperimentalOptions().forEach(options::setExperimentalOption);
+            fillOptions(options, configuration);
             return new ChromeDriver(options);
         }
     },
@@ -133,19 +132,17 @@ public enum WebDriverType
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
             ChromeOptions options = new ChromeOptions().merge(desiredCapabilities);
-            configuration.getBinaryPath().ifPresent(options::setBinary);
-            options.addArguments(configuration.getCommandLineArguments());
-            configuration.getExperimentalOptions().forEach(options::setExperimentalOption);
+            fillOptions(options, configuration);
             return new ChromeDriver(options);
         }
     },
-    EDGE(true, false, Browser.EDGE, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY, WebDriverManager::edgedriver)
+    EDGE(true, true, Browser.EDGE, EdgeDriverService.EDGE_DRIVER_EXE_PROPERTY, WebDriverManager::edgedriver)
     {
         @Override
         public WebDriver getWebDriver(DesiredCapabilities desiredCapabilities, WebDriverConfiguration configuration)
         {
             EdgeOptions options = new EdgeOptions().merge(desiredCapabilities);
-            configuration.getBinaryPath().ifPresent(options::setBinary);
+            fillOptions(options, configuration);
             return new EdgeDriver(options);
         }
     };
@@ -182,6 +179,14 @@ public enum WebDriverType
             path -> System.setProperty(driverExePropertyName, path),
             () -> webDriverManagerSupplier.get().setup()
         );
+    }
+
+    private static <T extends ChromiumOptions<T>> void fillOptions(ChromiumOptions<T> options,
+            WebDriverConfiguration configuration)
+    {
+        configuration.getBinaryPath().ifPresent(options::setBinary);
+        options.addArguments(configuration.getCommandLineArguments());
+        configuration.getExperimentalOptions().forEach(options::setExperimentalOption);
     }
 
     public boolean isBinaryPathSupported()
