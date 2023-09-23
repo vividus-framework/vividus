@@ -32,6 +32,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,7 @@ import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.testdouble.TestLocatorType;
 import org.vividus.ui.State;
+import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
 import org.vividus.ui.action.ISearchActions;
@@ -66,6 +68,7 @@ import org.vividus.ui.context.IUiContext;
 class GenericWaitStepsTests
 {
     private static final String VALUE = "value";
+    private static final Pattern ALL_LETTERS_PATTERN = Pattern.compile("[a-z]+");
     private static final Locator LOCATOR = new Locator(TestLocatorType.SEARCH, VALUE);
     private static final String ELEMENT_TO_VALIDATE_EXISTENCE = "The element to validate existence";
     private static final String ELEMENT_TO_VALIDATE_STOP_MOVEMENT = "The element to validate stop of its movement";
@@ -76,6 +79,7 @@ class GenericWaitStepsTests
     @Mock private ISearchActions searchActions;
     @Mock private ISoftAssert softAssert;
     @Mock private IBaseValidations baseValidations;
+    @Mock private ElementActions elementActions;
     @InjectMocks private GenericWaitSteps waitSteps;
 
     @AfterEach
@@ -311,6 +315,64 @@ class GenericWaitStepsTests
         var capturedCondition = conditionCaptor.getValue();
         assertFalse((boolean) capturedCondition.apply(searchContext));
         assertThrows(StaleElementReferenceException.class, () -> capturedCondition.apply(searchContext));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldWaitUntilElementHasTextMatchingRegex()
+    {
+        SearchContext context = mockSearchContext();
+        var element = mock(WebElement.class);
+
+        when(searchActions.findElement(LOCATOR)).thenReturn(Optional.of(element));
+        when(elementActions.getElementText(element)).thenReturn(VALUE);
+
+        waitSteps.waitUntilElementHasTextMatchingRegex(LOCATOR, ALL_LETTERS_PATTERN);
+
+        ArgumentCaptor<IExpectedSearchContextCondition<Boolean>> captor = ArgumentCaptor
+                .forClass(IExpectedSearchContextCondition.class);
+        verify(waitActions).wait(eq(context), captor.capture());
+        IExpectedSearchContextCondition<Boolean> condition = captor.getValue();
+        assertTrue(condition.apply(context));
+        assertEquals("text matching regex ('[a-z]+') to be present in element located by  Search: 'value';"
+                + " Visibility: VISIBLE;", condition.toString());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldWaitUntilElementHasTextMatchingRegexNoElement()
+    {
+        SearchContext context = mockSearchContext();
+        when(searchActions.findElement(LOCATOR)).thenReturn(Optional.empty());
+
+        waitSteps.waitUntilElementHasTextMatchingRegex(LOCATOR, ALL_LETTERS_PATTERN);
+
+        ArgumentCaptor<IExpectedSearchContextCondition<Boolean>> captor = ArgumentCaptor
+                .forClass(IExpectedSearchContextCondition.class);
+        verify(waitActions).wait(eq(context), captor.capture());
+        IExpectedSearchContextCondition<Boolean> condition = captor.getValue();
+        assertFalse(condition.apply(context));
+        verifyNoInteractions(elementActions);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void shouldWaitUntilElementHasTextMatchingRegexNoRegexMatch()
+    {
+        SearchContext context = mockSearchContext();
+        var element = mock(WebElement.class);
+
+        when(searchActions.findElement(LOCATOR)).thenReturn(Optional.of(element));
+        when(elementActions.getElementText(element)).thenReturn("123");
+
+        waitSteps.waitUntilElementHasTextMatchingRegex(LOCATOR, ALL_LETTERS_PATTERN);
+
+        ArgumentCaptor<IExpectedSearchContextCondition<Boolean>> captor = ArgumentCaptor
+                .forClass(IExpectedSearchContextCondition.class);
+        verify(waitActions).wait(eq(context), captor.capture());
+        IExpectedSearchContextCondition<Boolean> condition = captor.getValue();
+        assertFalse(condition.apply(context));
+        verifyNoMoreInteractions(elementActions);
     }
 
     private SearchContext mockSearchContext()
