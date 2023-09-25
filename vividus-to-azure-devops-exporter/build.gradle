@@ -2,7 +2,7 @@ project.description = 'VIVIDUS to Azure DevOps exporter'
 
 buildscript {
     ext {
-        springBootVersion = '3.1.3'
+        springBootVersion = '3.1.4'
     }
 
     repositories {
