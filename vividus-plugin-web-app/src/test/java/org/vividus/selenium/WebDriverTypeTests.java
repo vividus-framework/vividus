@@ -282,7 +282,7 @@ class WebDriverTypeTests
         "IEXPLORE,      true",
         "CHROME,        true",
         "SAFARI,        false",
-        "EDGE,          false",
+        "EDGE,          true",
         "OPERA,         true"
     })
     void testIsCommandLineArgumentsSupported(WebDriverType type, boolean commandLineArgumentsSupported)
