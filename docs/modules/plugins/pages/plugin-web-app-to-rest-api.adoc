@@ -272,3 +272,39 @@ Then I validate HTTP redirects:
 |startUrl                    |endUrl                          |redirectsNumber |
 |http://example.com/redirect |http://example.com/get-response |1               |
 ----
+
+=== Validate SSL rating
+
+:grade: https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide[grade]
+
+Performs SSL scanning using https://www.ssllabs.com/index.html[SSL Labs] and compares received {grade} value with expected one.
+
+[source,gherkin]
+----
+Then SSL rating for URL `$url` is $comparisonRule `$gradeName`
+----
+
+* `$url` - The URL for SSL scanning and grading.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$gradeName` - The name of {grade}. The possible values: `A+`, `A`, `A-`, `B`, `C`, `D`, `E`, `F`, `T`, `M`.
+
+.Properties
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`ssl-labs.api-endpoint`
+|`URL`
+|`https://api.ssllabs.com`
+|SSL Labs endpoint.
+
+|===
+
+.Validate SSL rating for `https://www.google.com`
+[source,gherkin]
+----
+Then SSL rating for URL `https://www.google.com` is equal to `B`
+----
