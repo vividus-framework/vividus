@@ -211,6 +211,17 @@ jobs:
         name: System Tests - Allure report
         path: vividus-tests/output/reports/allure
 
+    - name: Headless - Web - System tests
+      if: matrix.platform == 'ubuntu-latest'
+      shell: bash
+      run: |
+        declare -a profiles=( chrome firefox )
+        for profile in "${profiles[@]}"; do
+          ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments= \
+                                                -Pvividus.configuration.suites=health_check \
+                                                -Pvividus.configuration.profiles=web/headless/${profile}
+        done
+
     - name: LambdaTest - Desktop - Web - System tests
       if: matrix.platform == 'macos-latest'
       env:
@@ -742,7 +753,7 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    
+
     - name: Build and push Docker image to Docker Hub
       if: (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/release-')) && matrix.platform == 'ubuntu-latest'
       run: ./gradlew :vividus-docker-bundler:pushImage
