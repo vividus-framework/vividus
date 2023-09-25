@@ -90,6 +90,7 @@ class WebDriverTypeTests
                 (mock, context) -> {
                     assertEquals(1, context.getCount());
                     expected.addPreference("startup.homepage_welcome_url.additional", "about:blank");
+                    expected.addArguments();
                     assertEquals(List.of(expected), context.arguments());
                 }))
         {
