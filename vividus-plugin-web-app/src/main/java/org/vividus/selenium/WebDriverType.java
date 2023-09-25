@@ -62,11 +62,7 @@ public enum WebDriverType
             prepareCapabilities(desiredCapabilities);
             FirefoxOptions options = new FirefoxOptions(desiredCapabilities);
             configuration.getBinaryPath().ifPresent(options::setBinary);
-            String[] commandLineArguments = configuration.getCommandLineArguments();
-            if (commandLineArguments.length > 0)
-            {
-                options.addArguments(commandLineArguments);
-            }
+            options.addArguments(configuration.getCommandLineArguments());
             return new FirefoxDriver(options);
         }
     },
