@@ -18,11 +18,16 @@ package org.vividus.accessibility.model.axe;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import org.vividus.accessibility.deserializer.TargetDeserializer;
+
 public class Node
 {
     private String impact;
     private String html;
-    private List<String> target;
+    @JsonDeserialize(using = TargetDeserializer.class)
+    private Target target;
     private List<CheckResult> any;
     private List<CheckResult> all;
     private List<CheckResult> none;
@@ -47,12 +52,12 @@ public class Node
         this.html = html;
     }
 
-    public List<String> getTarget()
+    public Target getTarget()
     {
         return target;
     }
 
-    public void setTarget(List<String> target)
+    public void setTarget(Target target)
     {
         this.target = target;
     }
