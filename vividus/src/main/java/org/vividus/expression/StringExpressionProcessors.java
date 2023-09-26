@@ -18,6 +18,7 @@ package org.vividus.expression;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
@@ -25,7 +26,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.text.WordUtils;
@@ -79,7 +79,7 @@ public class StringExpressionProcessors extends DelegatingExpressionProcessor
     private static String anyOf(List<String> arguments)
     {
         int length = arguments.size();
-        return length == 0 ? "" : arguments.get(RandomUtils.nextInt(0, length));
+        return length == 0 ? "" : arguments.get(ThreadLocalRandom.current().nextInt(0, length));
     }
 
     private static UnaryOperator<String> generateLocalized()
