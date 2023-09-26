@@ -20,6 +20,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -40,6 +42,7 @@ import org.vividus.accessibility.model.axe.CheckResult;
 import org.vividus.accessibility.model.axe.Node;
 import org.vividus.accessibility.model.axe.Result;
 import org.vividus.accessibility.model.axe.ResultType;
+import org.vividus.accessibility.model.axe.Target;
 import org.vividus.accessibility.model.htmlcs.AccessibilityStandard;
 import org.vividus.accessibility.model.htmlcs.AccessibilityViolation;
 import org.vividus.accessibility.model.htmlcs.HtmlCsCheckOptions;
@@ -111,10 +114,10 @@ class AccessibilityTestExecutorTests
             null, List.of(elementToCheck), List.of(elementToIgnore))).thenReturn(output);
 
         List<AxeReportEntry> entries = executor.execute(engine, options, AxeReportEntry.class);
-        assertThat(entries, hasSize(1));
-        AxeReportEntry entry = entries.get(0);
-        assertEquals(ResultType.FAILED, entry.getType());
-        List<Result> results = entry.getResults();
+        assertThat(entries, hasSize(2));
+        AxeReportEntry failedEntry = entries.get(0);
+        assertEquals(ResultType.FAILED, failedEntry.getType());
+        List<Result> results = failedEntry.getResults();
         assertThat(results, hasSize(1));
         Result result = results.get(0);
         assertEquals("button-name", result.getId());
@@ -129,7 +132,9 @@ class AccessibilityTestExecutorTests
         Node node = nodes.get(0);
         assertEquals(impact, node.getImpact());
         assertEquals("<button class=\"ui-datepicker-trigger\" type=\"button\">...</button>", node.getHtml());
-        assertEquals(List.of(".departure-date > .ui-datepicker-trigger:nth-child(4)"), node.getTarget());
+        Target target = node.getTarget();
+        assertFalse(target.isInsideShadowDom());
+        assertEquals(List.of(".departure-date > .ui-datepicker-trigger:nth-child(4)"), target.getSelectorsChain());
         assertThat(node.getAll(), empty());
         assertThat(node.getNone(), empty());
         List<CheckResult> anys = node.getAny();
@@ -139,5 +144,17 @@ class AccessibilityTestExecutorTests
         assertEquals("minor", any.getImpact());
         assertEquals("Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
                 any.getMessage());
+
+        AxeReportEntry passedEntry = entries.get(1);
+        assertEquals(ResultType.PASSED, passedEntry.getType());
+        List<Result> passedResults = passedEntry.getResults();
+        assertThat(passedResults, hasSize(1));
+        Result passedResult = passedResults.get(0);
+        List<Node> passedNodes = passedResult.getNodes();
+        Node passedNode = passedNodes.get(0);
+        Target passedTarget = passedNode.getTarget();
+        assertTrue(passedTarget.isInsideShadowDom());
+        assertEquals(List.of("access-widget-ui[data-acsb=\"skipLinks\"]", ".skip-links"),
+                passedTarget.getSelectorsChain());
     }
 }

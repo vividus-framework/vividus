@@ -252,9 +252,22 @@ Report source: https://lpelypenko.github.io/axe-html-reporter/
                                                                     <td>${node?index}</td>
                                                                     <td>
                                                                         <p><strong>Element location</strong></p>
-                                                                        <#list node.getTarget() as target>
-                                                                            <pre><code class="css text-wrap">${target}</code></pre>
-                                                                        </#list>
+
+                                                                        <#assign insideShadowDom = node.getTarget().isInsideShadowDom() >
+                                                                        <#assign selectors = node.getTarget().getSelectorsChain() >
+
+                                                                        <#if !insideShadowDom && selectors?size == 1>
+                                                                            <pre><code class="css text-wrap">${selectors[0]}</code></pre>
+                                                                        <#else>
+                                                                            <#list selectors as selector>
+                                                                                <#if selector?index != selectors?size - 1>
+                                                                                    <p><i>${insideShadowDom?then('Shadow host', 'Frame')} #${selector?index + 1}:</i></p>
+                                                                                <#else>
+                                                                                    <p><i>Element:</i></p>
+                                                                                </#if>
+                                                                                <pre><code class="css text-wrap">${selector}</code></pre>
+                                                                            </#list>
+                                                                        </#if>
                                                                         <p><strong>Element source</strong></p>
                                                                         <pre><code class="html text-wrap"><#outputformat 'HTML'>${node.getHtml()}</#outputformat></code></pre>
                                                                     </td>
