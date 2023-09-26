@@ -89,6 +89,15 @@ public enum WebLocatorType implements LocatorType
                     + "local-name()='body') and ((@* | text())=%1$s or @id=(//label[text() = '%1$s']/@for))]", value);
         }
     },
+    RADIO_BUTTON("Radio button", ByLocatorSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            return XpathLocatorUtils.getXPathLocator(".//input[@type='radio' and "
+                    + "((@* | text())=%1$s or @id=(//label[text() = '%1$s']/@for))]", value);
+        }
+    },
     TEXT_PART("Text part", GenericTextFilter.class),
     PLACEHOLDER("Placeholder", PlaceholderFilter.class),
     STATE("State", StateFilter.class),

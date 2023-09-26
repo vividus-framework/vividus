@@ -158,6 +158,9 @@
     <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
         <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).UNNORMALIZED_XPATH}" />
     </bean>
+    <bean class="org.vividus.ui.action.search.ByLocatorSearch" parent="abstractElementAction" >
+        <constructor-arg value="#{T(org.vividus.ui.web.action.search.WebLocatorType).RADIO_BUTTON}" />
+    </bean>
 
     <bean class="org.vividus.ui.web.action.search.ElementNameSearch" parent="abstractWebElementSearchAction" >
         <constructor-arg index="0" value="#{T(org.vividus.ui.web.action.search.WebLocatorType).NAME}" />
