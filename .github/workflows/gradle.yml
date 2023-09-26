@@ -215,7 +215,7 @@ jobs:
       if: matrix.platform == 'ubuntu-latest'
       shell: bash
       run: |
-        declare -a profiles=( chrome firefox )
+        declare -a profiles=( chrome firefox edge )
         for profile in "${profiles[@]}"; do
           ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments= \
                                                 -Pvividus.configuration.suites=health_check \

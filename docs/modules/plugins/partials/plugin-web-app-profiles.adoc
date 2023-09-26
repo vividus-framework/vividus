@@ -154,6 +154,7 @@ headless mode are available:
 
 - `web/headless/chrome`
 - `web/headless/firefox`
+- `web/headless/edge`
 
 === Docker
 The profile can be enabled by adding `web/docker` to `configuration.profiles` property. The profile should be used together with the browser profile.
