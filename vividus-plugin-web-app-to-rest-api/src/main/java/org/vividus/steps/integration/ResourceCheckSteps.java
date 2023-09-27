@@ -135,9 +135,7 @@ public class ResourceCheckSteps
 
     private WebPageResourceValidation validate(WebPageResourceValidation r)
     {
-        return CheckStatus.BROKEN == r.getCheckStatus() || CheckStatus.FILTERED == r.getCheckStatus()
-                ? r
-                : resourceValidator.perform(r);
+        return r.getCheckStatus() != null ? r : resourceValidator.perform(r);
     }
 
     private Stream<WebPageResourceValidation> createResourceValidations(Collection<Element> elements,
@@ -150,7 +148,7 @@ public class ResourceCheckSteps
                 .peek(rv ->
                 {
                     resourceValidator.accept(rv);
-                    if (rv.getCheckStatus() != CheckStatus.BROKEN && !isSchemaAllowed(rv.getUriOrError().getLeft())
+                    if (rv.getCheckStatus() == null && !isSchemaAllowed(rv.getUriOrError().getLeft())
                             || excludeHrefsPattern.matcher(rv.toString()).matches())
                     {
                         rv.setCheckStatus(CheckStatus.FILTERED);
@@ -177,7 +175,22 @@ public class ResourceCheckSteps
         try
         {
             Pair<URI, String> elementUri = Pair.of(resolveUri(elementUriAsString), null);
-            return Optional.of(new WebPageResourceValidation(elementUri, elementCssSelector));
+            WebPageResourceValidation validation = new WebPageResourceValidation(elementUri, elementCssSelector);
+
+            if (isJumpLink(elementUriAsString))
+            {
+                String fragment = elementUri.getLeft().getFragment();
+                Element target = element.root().getElementById(fragment);
+                if (target == null)
+                {
+                    return Optional.of(ResourceValidationError.MISSING_JUMPLINK_TARGET
+                            .onAssertion(softAssert::recordFailedAssertion, elementCssSelector, fragment)
+                            .createValidation(null, elementCssSelector, fragment));
+                }
+                validation.setCheckStatus(CheckStatus.PASSED);
+            }
+
+            return Optional.of(validation);
         }
         catch (URISyntaxException e)
         {
@@ -186,6 +199,11 @@ public class ResourceCheckSteps
                             elementUriAsString)
                     .createValidation(null, elementCssSelector, elementUriAsString));
         }
+    }
+
+    private static boolean isJumpLink(String url)
+    {
+        return url.startsWith(URL_FRAGMENT) && url.length() > 1;
     }
 
     private static boolean isSchemaAllowed(URI uri)
@@ -198,7 +216,7 @@ public class ResourceCheckSteps
         String href = element.attr(HREF_ATTR);
         if (!href.isEmpty())
         {
-            if (URL_FRAGMENT.equals(href))
+            if (URL_FRAGMENT.equals(href) || isJumpLink(href))
             {
                 return href;
             }
