@@ -119,7 +119,7 @@ class BatchStorageTests
         var batchConfiguration = batchStorage.getBatchConfiguration(BATCH_KEYS.get(0));
         assertAll(
             () -> assertEquals(DEFAULT_RESOURCE_LOCATION, batchConfiguration.getResourceLocation()),
-            () -> assertEquals(List.of(), batchConfiguration.getResourceIncludePatterns()),
+            () -> assertEquals(List.of("**/*.story"), batchConfiguration.getResourceIncludePatterns()),
             () -> assertEquals(List.of(), batchConfiguration.getResourceExcludePatterns())
         );
     }

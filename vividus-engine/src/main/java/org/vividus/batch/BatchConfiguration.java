@@ -27,7 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 public class BatchConfiguration
 {
     private String resourceLocation;
-    private List<String> resourceIncludePatterns = List.of();
+    private List<String> resourceIncludePatterns = List.of("**/*.story");
     private List<String> resourceExcludePatterns = List.of();
     private String name;
     private Integer threads;
