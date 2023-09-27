@@ -96,7 +96,8 @@ public final class StepsCounter
                 return ExamplesTable.EMPTY;
             }
         });
-        BatchConfiguration batchConfiguration = createBatchConfiguration(storyLocation);
+        BatchConfiguration batchConfiguration = new BatchConfiguration();
+        batchConfiguration.setResourceLocation(storyLocation);
         return pathFinder.findPaths(batchConfiguration)
                 .stream()
                 .map(storyLoader::loadResourceAsText)
@@ -105,15 +106,6 @@ public final class StepsCounter
                 .flatMap(scenario -> scenario.getSteps().stream())
                 .filter(step -> !step.startsWith(keywords.ignorable()))
                 .toList();
-    }
-
-    private static BatchConfiguration createBatchConfiguration(String storyLocation)
-    {
-        BatchConfiguration batchConfiguration = new BatchConfiguration();
-        batchConfiguration.setResourceLocation(storyLocation);
-        batchConfiguration.setResourceIncludePatterns("**/*.story");
-        batchConfiguration.setResourceExcludePatterns("");
-        return batchConfiguration;
     }
 
     private static Set<StepCandidate> collectStepCandidates()
