@@ -90,5 +90,12 @@
     "scenarioPattern": "Known issue should should not stop the rest of the story if it's not marked as fail test suite fast",
     "storyPattern": "Next known issues",
     "stepPattern": "Then `vividus` matches.*"
+  },
+  "VVD-14": {
+    "type": "Internal",
+    "assertionPattern": "Jump link by selector .* points to missing element with notFound id",
+    "scenarioPattern": "Verification of Then all resources by selector.*",
+    "storyPattern": "ResourceCheckSteps",
+    "stepPattern": "Then all resources by selector.*"
   }
 }

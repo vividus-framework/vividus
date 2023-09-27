@@ -29,7 +29,9 @@ public enum ResourceValidationError
     EMPTY_HREF_SRC("Element doesn't contain href/src attributes",
         "Element by selector %s doesn't contain href/src attributes"),
     INVALID_HREF_SRC("Element has href/src attribute with invalid URL: %s",
-        "Element by selector %s has href/src attribute with invalid URL: %s");
+        "Element by selector %s has href/src attribute with invalid URL: %s"),
+    MISSING_JUMPLINK_TARGET("Jump link points to missing element with %s id",
+            "Jump link by selector %s points to missing element with %s id");
 
     private final String errorFormat;
     private final String assertionFormat;
