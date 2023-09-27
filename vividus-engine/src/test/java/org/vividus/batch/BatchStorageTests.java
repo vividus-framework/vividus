@@ -229,6 +229,6 @@ class BatchStorageTests
         var propertyMapper = new PropertyMapper(DOT, PropertyNamingStrategies.KEBAB_CASE, propertyParser, Set.of());
         batchStorage = new BatchStorage(propertyMapper, null, null, DEFAULT_META_FILTERS, false);
         var config = batchStorage.getBatchConfiguration("batch-997");
-        assertEquals(Duration.ofHours(3), config.getStoryExecutionTimeout());
+        assertEquals(Duration.ofHours(2), config.getStoryExecutionTimeout());
     }
 }

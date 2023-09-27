@@ -37,7 +37,7 @@ public class BatchStorage
     private static final String DEPRECATION_MESSAGE =
             "Property `bdd.story-execution-timeout` is deprecated and will be removed in"
                     + " VIVIDUS 0.7.0. Please use `story.execution-timeout` instead.";
-    private static final Duration DEFAULT_STORY_TIMEOUT = Duration.ofHours(3);
+    private static final Duration DEFAULT_STORY_TIMEOUT = Duration.ofHours(2);
 
     private final Map<String, BatchConfiguration> batchConfigurations;
     private final Duration defaultStoryExecutionTimeout;
