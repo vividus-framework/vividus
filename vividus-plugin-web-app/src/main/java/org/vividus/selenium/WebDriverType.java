@@ -72,12 +72,12 @@ public enum WebDriverType
         @Override
         public void prepareCapabilities(MutableCapabilities desiredCapabilities)
         {
-            Object options = desiredCapabilities.getCapability(WebDriverType.IE_OPTIONS);
+            Object options = desiredCapabilities.getCapability(InternetExplorerOptions.IE_OPTIONS);
             Map<String, Object> ieOptions;
             if (options == null)
             {
                 ieOptions = new HashMap<>();
-                desiredCapabilities.setCapability(WebDriverType.IE_OPTIONS, ieOptions);
+                desiredCapabilities.setCapability(InternetExplorerOptions.IE_OPTIONS, ieOptions);
             }
             else
             {
@@ -142,8 +142,6 @@ public enum WebDriverType
             return new EdgeDriver(options);
         }
     };
-
-    public static final String IE_OPTIONS = "se:ieOptions";
 
     private final boolean binaryPathSupported;
     private final boolean commandLineArgumentsSupported;

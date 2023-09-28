@@ -21,10 +21,11 @@ import java.util.Map;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.ie.InternetExplorerOptions;
 import org.openqa.selenium.remote.Browser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.selenium.WebDriverType;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
@@ -179,8 +180,8 @@ public class FieldSteps
     {
         // Workaround for IExplore: https://github.com/seleniumhq/selenium/issues/805
         if (webDriverManager.isBrowserAnyOf(Browser.IE) && Boolean.TRUE.equals(
-                ((Map<String, Object>) webDriverManager.getCapabilities().getCapability(WebDriverType.IE_OPTIONS))
-                        .get("requireWindowFocus")))
+                ((Map<String, Object>) webDriverManager.getCapabilities().getCapability(
+                        InternetExplorerOptions.IE_OPTIONS)).get(InternetExplorerDriver.REQUIRE_WINDOW_FOCUS)))
         {
             int iterationsCounter = TEXT_TYPING_ATTEMPTS_LIMIT;
             while (iterationsCounter > 0 && isValueNotEqualTo(element, normalizedText))
