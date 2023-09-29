@@ -21,7 +21,6 @@ import java.util.function.Function;
 
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.support.ui.Wait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,22 +94,17 @@ public class WaitActions implements IWaitActions
             {
                 if (recordAssertionIfTimeout)
                 {
-                    recordFailedAssertion(wait, timeoutException);
+                    softAssert.recordFailedAssertion(timeoutException);
                 }
                 return result;
             }
             catch (NoSuchElementException noSuchElementException)
             {
-                recordFailedAssertion(wait, noSuchElementException);
+                softAssert.recordFailedAssertion(wait + ". Error: " + noSuchElementException.getMessage());
                 return result;
             }
         }
         result.setWaitPassed(softAssert.assertNotNull("The input value to pass to the wait condition", input));
         return result;
-    }
-
-    private boolean recordFailedAssertion(Wait<?> wait, WebDriverException e)
-    {
-        return softAssert.recordFailedAssertion(wait + ". Error: " + e.getMessage());
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,28 +49,17 @@ import org.vividus.ui.action.search.SearchParameters;
 @ExtendWith(MockitoExtension.class)
 class ExpectedSearchActionsConditionsTests
 {
-    private static final String WITH_LOCATOR = "with search attributes:";
     private static final String TEXT = "text";
-    private static final String LOCATOR_PLUS_TEXT = WITH_LOCATOR + TEXT;
-    private static final String NO_SUCH_ELEMENT = "No such element with search attributes:text";
+    private static final String LOCATED_BY_TEXT = "located by " + TEXT;
+    private static final String ELEMENT_LOCATED_BY_TEXT = "element " + LOCATED_BY_TEXT;
+    private static final String NO_SUCH_ELEMENT = "No such element " + LOCATED_BY_TEXT;
 
-    @Mock
-    private ISearchActions searchActions;
-
-    @Mock
-    private WebElement webElement;
-
-    @Mock
-    private Locator locator;
-
-    @Mock
-    private SearchParameters searchParameters;
-
-    @Mock
-    private SearchContext searchContext;
-
-    @InjectMocks
-    private ExpectedSearchActionsConditions expectedSearchActionsConditions;
+    @Mock private ISearchActions searchActions;
+    @Mock private WebElement webElement;
+    @Mock private Locator locator;
+    @Mock private SearchParameters searchParameters;
+    @Mock private SearchContext searchContext;
+    @InjectMocks private ExpectedSearchActionsConditions expectedSearchActionsConditions;
 
     @BeforeEach
     void beforeEach()
@@ -81,12 +70,10 @@ class ExpectedSearchActionsConditionsTests
     @Test
     void testTextToBePresentInElementLocatedNoElements()
     {
-        when(locator.toString()).thenReturn(TEXT);
+        when(locator.toHumanReadableString()).thenReturn(TEXT);
         mockFindElements();
-        IExpectedSearchContextCondition<Boolean> condition = expectedSearchActionsConditions
-                .textToBePresentInElementLocated(locator, TEXT);
-        NoSuchElementException exception = assertThrows(NoSuchElementException.class,
-            () -> condition.apply(searchContext));
+        var condition = expectedSearchActionsConditions.textToBePresentInElementLocated(locator, TEXT);
+        var exception = assertThrows(NoSuchElementException.class, () -> condition.apply(searchContext));
         assertThat(exception.getMessage(), containsString(NO_SUCH_ELEMENT));
         validateSearchParameters();
     }
@@ -94,13 +81,12 @@ class ExpectedSearchActionsConditionsTests
     @Test
     void testTextToBePresentInElementLocated()
     {
-        when(locator.toString()).thenReturn(TEXT);
+        when(locator.toHumanReadableString()).thenReturn(TEXT);
         mockFindElements(webElement);
         when(webElement.getText()).thenReturn(TEXT);
-        IExpectedSearchContextCondition<Boolean> condition = expectedSearchActionsConditions
-                .textToBePresentInElementLocated(locator, TEXT);
-        assertToString("text ('text') to be present in element " + LOCATOR_PLUS_TEXT, condition);
-        assertTrue(condition.apply(searchContext).booleanValue());
+        var condition = expectedSearchActionsConditions.textToBePresentInElementLocated(locator, TEXT);
+        assertToString("text ('text') to be present in element " + LOCATED_BY_TEXT, condition);
+        assertTrue(condition.apply(searchContext));
         validateSearchParameters();
     }
 
@@ -109,8 +95,7 @@ class ExpectedSearchActionsConditionsTests
     {
         mockFindElements(webElement);
         when(webElement.getText()).thenThrow(new StaleElementReferenceException(TEXT));
-        IExpectedSearchContextCondition<Boolean> condition = expectedSearchActionsConditions
-                .textToBePresentInElementLocated(locator, TEXT);
+        var condition = expectedSearchActionsConditions.textToBePresentInElementLocated(locator, TEXT);
         assertNull(condition.apply(searchContext));
         validateSearchParameters();
     }
@@ -118,12 +103,11 @@ class ExpectedSearchActionsConditionsTests
     @Test
     void testVisibilityOfAllElementsIsDisplayedInvisible()
     {
-        when(locator.toString()).thenReturn(TEXT);
+        when(locator.toHumanReadableString()).thenReturn(TEXT);
         mockFindElements(webElement);
         when(webElement.isDisplayed()).thenReturn(false);
-        IExpectedSearchContextCondition<List<WebElement>> condition = expectedSearchActionsConditions
-                .visibilityOfAllElementsLocatedBy(locator);
-        assertToString("visibility of all elements " + LOCATOR_PLUS_TEXT, condition);
+        var condition = expectedSearchActionsConditions.visibilityOfAllElementsLocatedBy(locator);
+        assertToString("visibility of all elements " + LOCATED_BY_TEXT, condition);
         assertNull(condition.apply(searchContext));
         validateSearchParameters();
     }
@@ -132,8 +116,7 @@ class ExpectedSearchActionsConditionsTests
     void testVisibilityOfAllElementsNoElements()
     {
         mockFindElements();
-        IExpectedSearchContextCondition<List<WebElement>> condition = expectedSearchActionsConditions
-                .visibilityOfAllElementsLocatedBy(locator);
+        var condition = expectedSearchActionsConditions.visibilityOfAllElementsLocatedBy(locator);
         assertNull(condition.apply(searchContext));
         validateSearchParameters();
     }
@@ -145,8 +128,7 @@ class ExpectedSearchActionsConditionsTests
         elements.add(webElement);
         when(searchActions.findElements(searchContext, locator)).thenReturn(elements);
         when(webElement.isDisplayed()).thenThrow(new StaleElementReferenceException(TEXT));
-        IExpectedSearchContextCondition<List<WebElement>> condition = expectedSearchActionsConditions
-                .visibilityOfAllElementsLocatedBy(locator);
+        var condition = expectedSearchActionsConditions.visibilityOfAllElementsLocatedBy(locator);
         assertNull(condition.apply(searchContext));
         validateSearchParameters();
     }
@@ -156,8 +138,8 @@ class ExpectedSearchActionsConditionsTests
     {
         mockFindElements(webElement);
         when(webElement.isDisplayed()).thenReturn(true);
-        assertEquals(List.of(webElement), expectedSearchActionsConditions
-                .visibilityOfAllElementsLocatedBy(locator).apply(searchContext));
+        var condition = expectedSearchActionsConditions.visibilityOfAllElementsLocatedBy(locator);
+        assertEquals(List.of(webElement), condition.apply(searchContext));
         validateSearchParameters();
     }
 
@@ -182,12 +164,11 @@ class ExpectedSearchActionsConditionsTests
     @Test
     void testVisibilityOfElement()
     {
-        when(locator.toString()).thenReturn(TEXT);
+        when(locator.toHumanReadableString()).thenReturn(TEXT);
         mockFindElements(webElement);
         when(webElement.isDisplayed()).thenReturn(true);
-        IExpectedSearchContextCondition<WebElement> condition = expectedSearchActionsConditions
-                .visibilityOfElement(locator);
-        assertToString("visibility of element " + LOCATOR_PLUS_TEXT, condition);
+        var condition = expectedSearchActionsConditions.visibilityOfElement(locator);
+        assertToString("visibility of element " + LOCATED_BY_TEXT, condition);
         assertEquals(webElement, condition.apply(searchContext));
         validateSearchParameters();
     }
@@ -229,12 +210,11 @@ class ExpectedSearchActionsConditionsTests
     @Test
     void testElementToBeClickable()
     {
-        when(locator.toString()).thenReturn(TEXT);
+        when(locator.toHumanReadableString()).thenReturn(TEXT);
         mockIsDisplayed(true);
         when(webElement.isEnabled()).thenReturn(true);
-        IExpectedSearchContextCondition<WebElement> condition = expectedSearchActionsConditions
-                .elementToBeClickable(locator);
-        assertToString("element to be clickable: " + LOCATOR_PLUS_TEXT, condition);
+        var condition = expectedSearchActionsConditions.elementToBeClickable(locator);
+        assertToString(ELEMENT_LOCATED_BY_TEXT + " to be clickable", condition);
         assertEquals(webElement, condition.apply(searchContext));
         validateSearchParameters();
     }
@@ -268,26 +248,24 @@ class ExpectedSearchActionsConditionsTests
     @Test
     void testElementSelectionStateToBeTrueSelected()
     {
-        when(locator.toString()).thenReturn(TEXT);
+        when(locator.toHumanReadableString()).thenReturn(TEXT);
         mockFindElements(webElement);
         when(webElement.isSelected()).thenReturn(true);
-        IExpectedSearchContextCondition<Boolean> condition = expectedSearchActionsConditions
-                .elementSelectionStateToBe(locator, true);
-        assertToString(String.format("element %s to be selected", LOCATOR_PLUS_TEXT), condition);
-        assertTrue(condition.apply(searchContext).booleanValue());
+        var condition = expectedSearchActionsConditions.elementSelectionStateToBe(locator, true);
+        assertToString(String.format("element %s to be selected", LOCATED_BY_TEXT), condition);
+        assertTrue(condition.apply(searchContext));
         validateSearchParameters();
     }
 
     @Test
     void testElementSelectionStateToBeNotSelected()
     {
-        when(locator.toString()).thenReturn(TEXT);
+        when(locator.toHumanReadableString()).thenReturn(TEXT);
         mockFindElements(webElement);
         when(webElement.isSelected()).thenReturn(false);
-        IExpectedSearchContextCondition<Boolean> condition = expectedSearchActionsConditions
-                .elementSelectionStateToBe(locator, false);
-        assertToString(String.format("element %s to not be selected", LOCATOR_PLUS_TEXT), condition);
-        assertTrue(condition.apply(searchContext).booleanValue());
+        var condition = expectedSearchActionsConditions.elementSelectionStateToBe(locator, false);
+        assertToString(String.format("element %s to not be selected", LOCATED_BY_TEXT), condition);
+        assertTrue(condition.apply(searchContext));
         validateSearchParameters();
     }
 
@@ -296,20 +274,17 @@ class ExpectedSearchActionsConditionsTests
     {
         mockFindElements(webElement);
         when(webElement.isSelected()).thenReturn(true);
-        assertFalse(expectedSearchActionsConditions.elementSelectionStateToBe(locator, false)
-                .apply(searchContext).booleanValue());
+        assertFalse(expectedSearchActionsConditions.elementSelectionStateToBe(locator, false).apply(searchContext));
         validateSearchParameters();
     }
 
     @Test
     void testElementSelectionStateToBeNoElement()
     {
-        when(locator.toString()).thenReturn(TEXT);
+        when(locator.toHumanReadableString()).thenReturn(TEXT);
         mockFindElements();
-        IExpectedSearchContextCondition<Boolean> condition = expectedSearchActionsConditions
-                .elementSelectionStateToBe(locator, false);
-        NoSuchElementException exception = assertThrows(NoSuchElementException.class,
-            () -> condition.apply(searchContext));
+        var condition = expectedSearchActionsConditions.elementSelectionStateToBe(locator, false);
+        var exception = assertThrows(NoSuchElementException.class, () -> condition.apply(searchContext));
         assertThat(exception.getMessage(), containsString(NO_SUCH_ELEMENT));
         validateSearchParameters();
     }
@@ -319,21 +294,20 @@ class ExpectedSearchActionsConditionsTests
     {
         mockFindElements(webElement);
         when(webElement.isSelected()).thenThrow(new StaleElementReferenceException(TEXT));
-        assertNull(expectedSearchActionsConditions.elementSelectionStateToBe(locator, false)
-                .apply(searchContext));
+        var condition = expectedSearchActionsConditions.elementSelectionStateToBe(locator, false);
+        assertNull(condition.apply(searchContext));
         validateSearchParameters();
     }
 
     @Test
     void testInvisibilityOfElementInvisible()
     {
-        when(locator.toString()).thenReturn(TEXT);
+        when(locator.toHumanReadableString()).thenReturn(TEXT);
         mockFindElements(webElement);
         when(webElement.isDisplayed()).thenReturn(false);
-        IExpectedSearchContextCondition<Boolean> condition = expectedSearchActionsConditions
-                .invisibilityOfElement(locator);
-        assertToString("element to no longer be visible: " + LOCATOR_PLUS_TEXT, condition);
-        assertTrue(condition.apply(searchContext).booleanValue());
+        var condition = expectedSearchActionsConditions.invisibilityOfElement(locator);
+        assertToString(ELEMENT_LOCATED_BY_TEXT + " to be no longer visible", condition);
+        assertTrue(condition.apply(searchContext));
         validateSearchParameters();
     }
 
@@ -342,18 +316,16 @@ class ExpectedSearchActionsConditionsTests
     {
         mockFindElements(webElement);
         when(webElement.isDisplayed()).thenReturn(true);
-        assertFalse(expectedSearchActionsConditions.invisibilityOfElement(locator).apply(searchContext)
-                .booleanValue());
+        assertFalse(expectedSearchActionsConditions.invisibilityOfElement(locator).apply(searchContext));
         validateSearchParameters();
     }
 
     @Test
     void testInvisibilityOfElementNoElement()
     {
-        when(locator.toString()).thenReturn(TEXT);
+        when(locator.toHumanReadableString()).thenReturn(TEXT);
         mockFindElements();
-        assertTrue(expectedSearchActionsConditions.invisibilityOfElement(locator).apply(searchContext)
-                .booleanValue());
+        assertTrue(expectedSearchActionsConditions.invisibilityOfElement(locator).apply(searchContext));
         validateSearchParameters();
     }
 
@@ -362,8 +334,7 @@ class ExpectedSearchActionsConditionsTests
     {
         mockFindElements(webElement);
         when(webElement.isDisplayed()).thenThrow(new StaleElementReferenceException(TEXT));
-        assertTrue(expectedSearchActionsConditions.invisibilityOfElement(locator).apply(searchContext)
-                .booleanValue());
+        assertTrue(expectedSearchActionsConditions.invisibilityOfElement(locator).apply(searchContext));
         validateSearchParameters();
     }
 
@@ -376,7 +347,7 @@ class ExpectedSearchActionsConditionsTests
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private void verifyNot(Object expectedCondition, Object mockedCondition)
     {
-        IExpectedSearchContextCondition condition = mock(IExpectedSearchContextCondition.class);
+        var condition = mock(IExpectedSearchContextCondition.class);
         when(condition.apply(searchContext)).thenReturn(mockedCondition);
         IExpectedSearchContextCondition notCondition = expectedSearchActionsConditions.not(condition);
         assertThat(notCondition.toString(), containsString("condition to not be valid: "));
