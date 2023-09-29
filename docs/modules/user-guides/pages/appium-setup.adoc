@@ -79,7 +79,7 @@ Desired Capabilities are just a set of keys and values that get sent to the Appi
 - *app*: the path to the app you want to automate (but use the browserName capability instead in the case of automating a web browser)
 - *automationName*: the name of the driver you wish to use
 
-There are lots of other capabilities. To find out more please see http://appium.io/docs/en/writing-running-appium/caps/index.html[Appium Capabilities Doc].
+There are lots of other capabilities. To find out more please see https://appium.io/docs/en/2.1/guides/caps/[Appium Capabilities Documentation].
 
 === Setting capabilities in VIVIDUS
 
