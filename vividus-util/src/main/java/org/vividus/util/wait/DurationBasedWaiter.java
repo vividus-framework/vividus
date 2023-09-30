@@ -49,6 +49,10 @@ public final class DurationBasedWaiter extends Waiter
         {
             long iterationStartTime = System.currentTimeMillis();
             value = valueProvider.get();
+            if (stopCondition.test(value))
+            {
+                break;
+            }
             long iterationEndTime = System.currentTimeMillis();
 
             long iterationPollingTimeout = getPollingTimeoutMillis() - (iterationEndTime - iterationStartTime);
@@ -57,7 +61,7 @@ public final class DurationBasedWaiter extends Waiter
                 Sleeper.sleep(iterationPollingTimeout, TimeUnit.MILLISECONDS);
             }
         }
-        while (!stopCondition.test(value) && System.currentTimeMillis() <= endTime);
+        while (System.currentTimeMillis() <= endTime);
         return value;
     }
 }

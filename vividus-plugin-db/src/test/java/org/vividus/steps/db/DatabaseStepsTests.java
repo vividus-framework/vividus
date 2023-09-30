@@ -18,7 +18,11 @@ package org.vividus.steps.db;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -556,7 +560,8 @@ class DatabaseStepsTests
         databaseSteps.waitForDataAppearance(Duration.ofSeconds(4), 2, QUERY, DB_KEY, DataSetComparisonRule.IS_EQUAL_TO,
                 TABLE);
         String logMessage = "SQL result data is not equal to expected data in {} records";
-        assertThat(LOGGER.getLoggingEvents(), equalTo(List.of(info(logMessage, 1), info(logMessage, 1))));
+        assertThat(LOGGER.getLoggingEvents(), hasItem(info(logMessage, 1)));
+        assertThat(LOGGER.getLoggingEvents().size(), allOf(greaterThanOrEqualTo(2), lessThanOrEqualTo(3)));
         verify(attachmentPublisher).publishAttachment(eq(DATA_SOURCES_STATISTICS_FTL),
                 any(Map.class), eq(DATA_SOURCES_STATISTICS_TITLE));
         verify(softAssert).assertTrue(eq(QUERY_RESULTS_ARE_EQUAL), eq(false), any());
