@@ -5,7 +5,7 @@ dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-soft-assert')
 
-    api(group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.3')
+    api(group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.4')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.13.0')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.0')
