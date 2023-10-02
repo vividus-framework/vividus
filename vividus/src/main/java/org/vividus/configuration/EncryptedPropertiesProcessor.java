@@ -63,7 +63,8 @@ public class EncryptedPropertiesProcessor extends AbstractPropertiesProcessor
             String password = Optional.ofNullable(System.getenv("VIVIDUS_ENCRYPTOR_PASSWORD"))
                     .or(() -> Optional.ofNullable(System.getProperty("vividus.encryptor.password")))
                     .or(() -> Optional.ofNullable(properties.getProperty("system.vividus.encryptor.password")))
-                    .orElseThrow(() -> new IllegalStateException("Encryption password is not provided"));
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Encrypted properties are found, but no password for decryption is provided"));
 
             StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
             encryptor.setAlgorithm("PBEWithMD5AndDES");

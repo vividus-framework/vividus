@@ -117,6 +117,7 @@ class EncryptedPropertiesProcessorTests
         properties.setProperty(PROPERTY_KEY, ENCRYPTED_VALUE_PLACEHOLDER);
         var processor = new EncryptedPropertiesProcessor(properties);
         var exception = assertThrows(IllegalStateException.class, () -> processor.processProperties(properties));
-        assertEquals("Encryption password is not provided", exception.getMessage());
+        assertEquals("Encrypted properties are found, but no password for decryption is provided",
+                exception.getMessage());
     }
 }
