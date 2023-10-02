@@ -259,7 +259,6 @@
             <set>
                 <bean class="org.vividus.spring.StringToLocatorConverter" />
                 <bean class="org.vividus.spring.StringToLocatorSetConverter" />
-                <bean class="org.vividus.spring.StringToDateTimeFormatterConverter" />
                 <bean class="org.vividus.spring.StringToLocaleConverter"/>
                 <bean class="org.vividus.spring.StringToFormatConverter" />
             </set>
