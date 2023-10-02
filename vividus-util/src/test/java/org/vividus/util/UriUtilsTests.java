@@ -171,7 +171,8 @@ class UriUtilsTests
         "http://somehost:8080/path?key=a%26b,                         http://somehost:8080/path?key=a%26b",
         "http://somehost:8080/path?key=a&key2=b,                      http://somehost:8080/path?key=a&key2=b",
         "http://somehost:8080/path-with-&-ampersand,                  http://somehost:8080/path-with-&-ampersand",
-        "http://somehost:8080/path-with-%26-ampersand,                http://somehost:8080/path-with-&-ampersand"
+        "http://somehost:8080/path-with-%26-ampersand,                http://somehost:8080/path-with-&-ampersand",
+        "http://somehost:8080/SÖKVÄG || sätt,                         http://somehost:8080/S%C3%96KV%C3%84G%20%7C%7C%20s%C3%A4tt"
         // CHECKSTYLE:ON
     })
     void testCreateUri(String input, URI expected)
@@ -196,6 +197,8 @@ class UriUtilsTests
         "http://somehost:8080/path,        /newPath?name1=value1&name2=value2#fragement, http://somehost:8080/newPath?name1=value1&name2=value2#fragement",
         "https://www.somehost.by//cookies, //path/extra-path/extra-extra-path,           https://www.somehost.by//path/extra-path/extra-extra-path",
         "https://www.somehost.by/,         /////crazy-url-path,                          https://www.somehost.by/////crazy-url-path",
+        "https://www.somehost.by/,         //путь-джедая,                                https://www.somehost.by//%D0%BF%D1%83%D1%82%D1%8C-%D0%B4%D0%B6%D0%B5%D0%B4%D0%B0%D1%8F",
+        "https://www.somehost.by,          '',                                           https://www.somehost.by",
         "tel:1234567,                      '',                                           tel:1234567"
         // CHECKSTYLE:ON
     })
@@ -226,7 +229,8 @@ class UriUtilsTests
         String newPath = "newPath";
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> UriUtils.buildNewUrl(BASE_URI_STR, newPath));
-        assertEquals("Relative path in absolute URI: " + SERVER_URI_STR + newPath, exception.getMessage());
+        assertEquals(String.format("Relative path '%s' for '%s' should start with forward slash ('/')", newPath,
+                BASE_URI_STR), exception.getMessage());
     }
 
     @Test
