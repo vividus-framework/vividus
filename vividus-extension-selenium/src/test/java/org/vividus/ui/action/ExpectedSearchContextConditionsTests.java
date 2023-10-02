@@ -217,7 +217,7 @@ class ExpectedSearchContextConditionsTests
     @Test
     void testElementToBeClickableToString()
     {
-        assertEquals("element to be clickable: located by By.xpath: //xpath",
+        assertEquals("element located by By.xpath: //xpath to be clickable",
                 expectedConditions.elementToBeClickable(XPATH_LOCATOR).toString());
     }
 
@@ -353,7 +353,7 @@ class ExpectedSearchContextConditionsTests
     @Test
     void testInvisibilityOfElementLocatedToString()
     {
-        assertEquals("element to no longer be visible: located by " + XPATH_LOCATOR,
+        assertEquals("element located by " + XPATH_LOCATOR + " to be no longer visible",
                 expectedConditions.invisibilityOfElement(XPATH_LOCATOR).toString());
     }
 

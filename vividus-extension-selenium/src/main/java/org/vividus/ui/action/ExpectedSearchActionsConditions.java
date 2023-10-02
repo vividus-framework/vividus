@@ -50,6 +50,6 @@ public final class ExpectedSearchActionsConditions extends AbstractExpectedCondi
     @Override
     protected String toStringParameters(Locator locator)
     {
-        return "with search attributes:" + locator;
+        return "located by " + locator.toHumanReadableString();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package org.vividus.ui.action;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -46,23 +46,12 @@ class WaitActionsTests
     private static final String EXCEPTION_TIMEOUT_MESSAGE = "mocked timeout exception message";
     private static final String MOCKED_WAIT_DESCRIPTION = "mocked wait description";
 
-    @Mock
-    private ISoftAssert softAssert;
-
-    @Mock
-    private IWaitFactory waitFactory;
-
-    @Mock
-    private Wait<SearchContext> wait;
-
-    @Mock
-    private Function<SearchContext, ?> isTrue;
-
-    @Mock
-    private SearchContext searchContext;
-
-    @InjectMocks
-    private WaitActions waitActions;
+    @Mock private ISoftAssert softAssert;
+    @Mock private IWaitFactory waitFactory;
+    @Mock private Wait<SearchContext> wait;
+    @Mock private Function<SearchContext, ?> isTrue;
+    @Mock private SearchContext searchContext;
+    @InjectMocks private WaitActions waitActions;
 
     @Test
     void testWaitWith4Parameters()
@@ -103,11 +92,12 @@ class WaitActionsTests
     @Test
     void testWaitWith4ParametersFailWithTimeoutException()
     {
-        when(wait.toString()).thenReturn(MOCKED_WAIT_DESCRIPTION);
         when(waitFactory.createWait(searchContext, TIMEOUT_SECONDS)).thenReturn(wait);
-        mockException(TimeoutException.class);
+        TimeoutException exception = new TimeoutException(EXCEPTION_TIMEOUT_MESSAGE);
+        when(wait.until(isTrue)).thenThrow(exception);
         waitActions.wait(searchContext, TIMEOUT_SECONDS, isTrue);
-        verifyFailureRecording();
+        verify(softAssert).recordFailedAssertion(exception);
+        verifyNoMoreInteractions(softAssert);
     }
 
     @Test
@@ -135,7 +125,8 @@ class WaitActionsTests
         when(waitFactory.createWait(searchContext, TIMEOUT_SECONDS)).thenReturn(wait);
         mockException(NoSuchElementException.class);
         waitActions.wait(searchContext, TIMEOUT_SECONDS, isTrue);
-        verifyFailureRecording();
+        verify(softAssert).recordFailedAssertion(MOCKED_WAIT_DESCRIPTION + ". Error: " + EXCEPTION_TIMEOUT_MESSAGE);
+        verifyNoMoreInteractions(softAssert);
     }
 
     private void mockException(Class<? extends Exception> clazz)
@@ -143,12 +134,6 @@ class WaitActionsTests
         Exception exception = mock(clazz);
         Mockito.lenient().when(exception.getMessage()).thenReturn(EXCEPTION_TIMEOUT_MESSAGE);
         when(wait.until(isTrue)).thenThrow(exception);
-    }
-
-    private void verifyFailureRecording()
-    {
-        verify(softAssert, never()).recordPassedAssertion(MOCKED_WAIT_DESCRIPTION);
-        verify(softAssert).recordFailedAssertion(MOCKED_WAIT_DESCRIPTION + ". Error: " + EXCEPTION_TIMEOUT_MESSAGE);
     }
 
     private void verifySuccess()
