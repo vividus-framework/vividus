@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,12 @@
 
 package org.vividus.selenium;
 
-import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.openqa.selenium.By;
 
 public final class LocatorFactory
 {
@@ -35,41 +32,12 @@ public final class LocatorFactory
     {
     }
 
-    public static By convertStringToLocator(String source)
-    {
-        Locator locator = parseLocator(source);
-        if (locator == null)
-        {
-            return null;
-        }
-        try
-        {
-            Method method = By.class.getMethod(locator.getType(), String.class);
-            return (By) method.invoke(null, locator.getValue());
-        }
-        catch (ReflectiveOperationException | SecurityException e)
-        {
-            throw new IllegalArgumentException(e);
-        }
-    }
-
-    public static Set<By> convertStringToLocatorSet(String source)
-    {
-        return convertToLocators(source, LocatorFactory::convertStringToLocator);
-    }
-
     public static Set<Locator> convertStringToLocators(String source)
     {
-        return convertToLocators(source, LocatorFactory::parseLocator);
-    }
-
-    private static <T> Set<T> convertToLocators(String source, Function<String, T> elementConverter)
-    {
-        String[] locators = StringUtils.splitByWholeSeparator(source, DELIMITER);
-        return Stream.of(locators)
-            .map(String::trim)
-            .map(elementConverter)
-            .collect(Collectors.toSet());
+        return Stream.of(StringUtils.splitByWholeSeparator(source, DELIMITER))
+                .map(String::trim)
+                .map(LocatorFactory::parseLocator)
+                .collect(Collectors.toSet());
     }
 
     private static Locator parseLocator(String source)
