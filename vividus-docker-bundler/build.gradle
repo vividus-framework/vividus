@@ -1,5 +1,5 @@
 plugins {
-    id 'com.bmuschko.docker-remote-api' version '9.3.3'
+    id 'com.bmuschko.docker-remote-api' version '9.3.4'
 }
 apply from: "${buildSystemPath}/vividus-test-subproject.gradle"
 
