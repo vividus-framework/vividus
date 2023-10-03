@@ -72,7 +72,7 @@ dependencies {
 }
 
 tasks.register('copyRuntimeLibs', Copy) {
-    into "$buildDir/docker/libs"
+    into layout.buildDirectory.dir('docker/libs')
     from configurations.runtimeClasspath
 }
 
