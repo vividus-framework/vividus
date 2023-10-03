@@ -6,7 +6,7 @@ import static org.apache.tools.ant.taskdefs.condition.Os.isFamily
 if (isFamily(FAMILY_WINDOWS)) {
     test {
         systemProperties = [
-            'hadoop.home.dir': "${project.buildDir}/resources/test"
+            'hadoop.home.dir': layout.buildDirectory.dir('resources/test').get().asFile.path
         ]
     }
 }
