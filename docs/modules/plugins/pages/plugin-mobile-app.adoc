@@ -1,5 +1,5 @@
 :grid-default-hostname: empty
-:keys: https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton[iOS keys] or https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android keys]
+:keys: https://appium.github.io/appium-xcuitest-driver/5.6/execute-methods/#mobile-pressbutton[iOS keys] or https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html[Android keys]
 :given-step: Given I start mobile application
 
 = Mobile Application Plugin
@@ -69,7 +69,7 @@ a|`tagName(android.widget.TextView)->filter.attribute(text=Hi)` - `android.widge
 
 |`iosNsPredicate`
 |`iOS`
-|See https://github.com/appium/appium-xcuitest-driver/blob/master/docs/ios/ios-predicate.md[iOS Predicate Syntax] for more details
+|See https://appium.github.io/appium-xcuitest-driver/5.6/locator-strategies/[iOS Predicate Syntax] for more details
 |+iosNsPredicate(name BEGINSWITH 'A')+ or +By.iosNsPredicate(name BEGINSWITH 'B')+
 
 
@@ -112,10 +112,10 @@ a|Defines automation engine to use
 !Recommended engine
 
 !`Android`
-!http://appium.io/docs/en/drivers/android-uiautomator2/[UIAutomator2]
+!https://github.com/appium/appium-uiautomator2-driver#readme[UIAutomator2]
 
 !`iOS`
-!http://appium.io/docs/en/drivers/ios-xcuitest/[XCUITest]
+!https://appium.github.io/appium-xcuitest-driver/[XCUITest]
 !===
 
 |`mobile-environment.real-device`
@@ -227,7 +227,7 @@ configuration.profiles=mobile_app/local,mobile_app/ios
 
 ==== `mobile_app/local2`
 
-The profile simplifies configuration of tests execution against the local Appium https://appium.github.io/appium/docs/en/2.0/guides/migrating-1-to-2/#breaking-changes[*2.x*] server.
+The profile simplifies configuration of tests execution against the local Appium https://appium.github.io/appium/docs/en/2.1/guides/migrating-1-to-2/#breaking-changes[*2.x*] server.
 
 .Configure local execution of the tests for Android native application
 [source,properties]
@@ -253,7 +253,7 @@ Gets the text of the system clipboard of simulator or real device
 
 |`mobile-environment.wda-bundle-id`
 |`empty`
-|The property is for iOS real devices only and it specifies the WebDriverAgent bundle ID used to http://appium.io/docs/en/commands/device/clipboard/get-clipboard/#description[get clipboard text]. The property value may vary depending on test cloud providers and can be found in the XCode logs.
+|The property is for iOS real devices only and it specifies the WebDriverAgent bundle ID used to https://appium.github.io/appium-xcuitest-driver/5.6/clipboard/#get-clipboard[get clipboard text]. The property value may vary depending on test cloud providers and can be found in the XCode logs.
 
 |===
 
@@ -412,7 +412,7 @@ Changes the behavior of the Appium session.
 When I change Appium session settings:$settings
 ----
 
-* `$settings` - https://appium.io/docs/en/advanced-concepts/settings/#settings[The settings] to set.
+* `$settings` - The https://appium.github.io/appium-xcuitest-driver/5.6/settings/[iOS] or https://github.com/appium/appium-uiautomator2-driver#settings-api[Android] settings to set.
 
 .Configure to show invisible elements
 [source,gherkin]
@@ -527,7 +527,7 @@ When I download file `/sdcard/file.json` from device and save its content to sce
 
 === Switch to Web view by name
 
-Switches context to a web view with name that matches the rule {web-view-info}. Also, Appium capabilities for https://github.com/appium/appium-xcuitest-driver#web-context[iOS] and https://github.com/appium/appium-uiautomator2-driver#web-context[Android] are available for the fine-tuning configuration.
+Switches context to a web view with name that matches the rule {web-view-info}. Also, Appium capabilities for https://appium.github.io/appium-xcuitest-driver/5.6/capabilities/#web-context[iOS] and https://github.com/appium/appium-uiautomator2-driver#web-context[Android] are available for the fine-tuning configuration.
 
 [source,gherkin]
 ----
@@ -1020,7 +1020,7 @@ When I select $direction value with `$offset` offset in picker wheel located `$l
 ----
 
 * `$direction` - The direction to search the value: `NEXT` or `PREVIOUS`.
-* `$offset` - The ofset to pick from a middle of the wheel, see https://appium.io/docs/en/writing-running-appium/ios/ios-xctest-mobile-gestures/index.html#mobile-selectpickerwheelvalue[Select Picker Wheel Value guide].
+* `$offset` - The ofset to pick from a middle of the wheel, see https://appium.github.io/appium-xcuitest-driver/5.6/execute-methods/#mobile-selectpickerwheelvalue[Select Picker Wheel Value guide].
 * `$locator` - The locator to find `XCUIElementTypePickerWheel` element.
 
 .Select next item in the picker wheel

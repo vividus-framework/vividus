@@ -147,7 +147,9 @@ public class KeyboardSteps
     /**
      * Presses the key
      * <br>
-     * See <a href="https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton">iOS keys</a> and
+     * See
+     * <a href="https://appium.github.io/appium-xcuitest-driver/5.6/execute-methods/#mobile-pressbutton">iOS keys</a>
+     * and
      * <a href="https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html">
      * Android keys</a> for available values
      * <br>
@@ -168,7 +170,9 @@ public class KeyboardSteps
     /**
      * Performs long press of the key
      * <br>
-     * See <a href="https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton">iOS keys</a> and
+     * See
+     * <a href="https://appium.github.io/appium-xcuitest-driver/5.6/execute-methods/#mobile-pressbutton">iOS keys</a>
+     * and
      * <a href="https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html">
      * Android keys</a> for available values
      * <br>
@@ -196,7 +200,9 @@ public class KeyboardSteps
     /**
      * Presses the keys
      * <br>
-     * See <a href="https://github.com/appium/appium-xcuitest-driver#mobile-pressbutton">iOS keys</a> and
+     * See
+     * <a href="https://appium.github.io/appium-xcuitest-driver/5.6/execute-methods/#mobile-pressbutton">iOS keys</a>
+     * and
      * <a href="https://appium.github.io/java-client/io/appium/java_client/android/nativekey/AndroidKey.html">
      * Android keys</a> for available values
      * <br>

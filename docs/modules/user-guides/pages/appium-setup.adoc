@@ -2,8 +2,8 @@
 
 == Intro
 
-Appium is an open-source test automation framework for use with native, hybrid, and mobile web apps.
-It drives iOS, Android, and Windows apps using the WebDriver protocol. http://appium.io/docs/en/about-appium/intro/[Learn more].
+https://appium.io/docs/en/2.1/[Appium] is an open-source test automation framework for use with native, hybrid, and mobile web apps.
+It drives iOS, Android, and Windows apps using the WebDriver protocol.
 
 You can run VIVIDUS automated scenarios on mobile devices using Appium tool.
 
@@ -51,7 +51,7 @@ And the following environment variables are set:
 
 TIP: You can open "Edit configuration" to set the variables in Appium Desktop.
 
-Read more details for basic http://appium.io/docs/en/drivers/android-uiautomator2/[Android] and http://appium.io/docs/en/drivers/ios-xcuitest/[iOS] setup in Appium Guide.
+Read more details for basic https://appium.io/docs/en/2.1/quickstart/uiauto2-driver/[Android] and https://appium.github.io/appium-xcuitest-driver/[iOS] setup in Appium Guide.
 
 == Appium-Doctor (Optional)
 
@@ -258,7 +258,7 @@ XCUITest driver installs a helper application called WebDriverAgent-Runner onto 
 There are two approaches for WebDriverAgent configuration:
 
 . *Automatic WDA configuration*.
-Proper work of the WDA requires signing it with a valid Apple Developer account. If you have a paid Apple Developer account, please see the following instructions on http://appium.io/docs/en/drivers/ios-xcuitest-real-devices/#basic-automatic-configuration[Appium Doc];
+Proper work of the WDA requires signing it with a valid Apple Developer account. If you have a paid Apple Developer account, please see the following instructions on https://appium.github.io/appium-xcuitest-driver/5.6/real-device-config/#basic-automatic-configuration[Appium Doc];
 +
 . *Manual WDA configuration*.
 Using a "Free" developer account often leads to issues with the impossibility of creating a wildcard provisioning profile for the default application bundle.
@@ -267,7 +267,7 @@ Follow the instructions below to handle this issue.
 
 ==== Manual WDA configuration
 
-NOTE: The next steps are based on https://appium.io/docs/en/drivers/ios-xcuitest-real-devices/#basic-manual-configuration[Appium manual configuration doc].
+NOTE: The next steps are based on https://appium.github.io/appium-xcuitest-driver/5.6/real-device-config/#basic-manual-configuration[Appium manual configuration doc].
 
 . Add a new Apple Development Certificate for your Apple ID;
 +
