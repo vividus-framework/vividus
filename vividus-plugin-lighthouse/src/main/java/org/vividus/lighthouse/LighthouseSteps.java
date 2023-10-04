@@ -34,6 +34,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.ArrayMap;
 import com.google.api.services.pagespeedonline.v5.PagespeedInsights;
 import com.google.api.services.pagespeedonline.v5.model.Categories;
+import com.google.api.services.pagespeedonline.v5.model.LighthouseAuditResultV5;
 import com.google.api.services.pagespeedonline.v5.model.LighthouseCategoryV5;
 import com.google.api.services.pagespeedonline.v5.model.LighthouseResultV5;
 
@@ -208,9 +209,15 @@ public class LighthouseSteps
     @SuppressWarnings("unchecked")
     private Map<String, BigDecimal> getMetrics(LighthouseResultV5 result)
     {
-        List<ArrayMap<String, BigDecimal>> items = (List<ArrayMap<String, BigDecimal>>) result.getAudits()
-                .get("metrics").getDetails().get("items");
-        Map<String, BigDecimal> metrics = new HashMap<>(items.get(0));
+        Map<String, BigDecimal> metrics = new HashMap<>();
+
+        LighthouseAuditResultV5 performanceMetrics = result.getAudits().get("metrics");
+        if (performanceMetrics != null)
+        {
+            List<ArrayMap<String, BigDecimal>> items = (List<ArrayMap<String, BigDecimal>>) performanceMetrics
+                    .getDetails().get("items");
+            metrics.putAll(items.get(0));
+        }
 
         Categories scanCategories = result.getCategories();
         CUSTOM_METRIC_FATORIES.forEach((m, f) ->
