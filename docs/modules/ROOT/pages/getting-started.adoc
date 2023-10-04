@@ -179,3 +179,18 @@ cd /dir/to/where/the/results-are-published/.out/vividus-demo/reports/allure
 +
 WARNING: Make sure this browser will be used to view test reports only, it's not safe to surf the Internet with relaxed security rules.
 . Go to the test report directory and open `index.html` in the configured browser.
+
+### Option 3 (VSCode Live Server)
+
+. Open Visual Studio Code
+. Install https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer[Live Server] extension (to get help on how to install extensions in VSCode please see https://code.visualstudio.com/docs/editor/extension-marketplace#_install-an-extension[Install an extension] guide)
+. Click `File -> Open Folder...` in VSCode menu and choose the following folder:
++
+[source]
+----
+/dir/to/where/the/results-are-published/.out/vividus-demo/reports/allure
+----
+. Open `index.html` file
+. Click `Go Live` icon residing on right side of the bottom bar and wait until report is opened
+
+TIP: The https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer[Live Server] extension supports hot reload so you can run the tests and then just refresh report page in the browser to see actual results, however the VSCode session should remain active.
