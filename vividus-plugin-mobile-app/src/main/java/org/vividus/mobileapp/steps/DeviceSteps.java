@@ -84,7 +84,7 @@ public class DeviceSteps
      * @param filePath the path to an existing remote file on the device. This variable can be predefined with bundle
      * id to delete file inside an application bundle.
      * <p>See details for
-     * <a href="https://appium.github.io/appium-xcuitest-driver/4.19/execute-methods/#mobile-deletefile">iOS</a>,
+     * <a href="https://appium.github.io/appium-xcuitest-driver/5.6/execute-methods/#mobile-deletefile">iOS</a>,
      * <a href="https://github.com/appium/appium-uiautomator2-driver#mobile-deletefile">Android</a>
      */
     @When("I delete file `$filePath` from device")
@@ -105,7 +105,7 @@ public class DeviceSteps
      * @param filePath The path to an existing remote file on the device. This parameter can be predefined
      * with bundle id, then the file will be pulled from the root of the corresponding application container.
      * See details for
-     * <a href="https://appium.github.io/appium-xcuitest-driver/4.19/execute-methods/#mobile-pullfile">iOS</a>,
+     * <a href="https://appium.github.io/appium-xcuitest-driver/5.6/execute-methods/#mobile-pullfile">iOS</a>,
      * <a href="https://github.com/appium/appium-uiautomator2-driver#mobile-pullfile">Android</a>
      * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable scopes.<br>
      * <i>Available scopes:</i>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,13 +136,16 @@ public class ApplicationSteps
 
     /**
      * Change the behavior of the Appium session
-     * @param settings Appium session settings
-     * <br><a href="https://appium.io/docs/en/advanced-concepts/settings/#settings">Settings</a> example:
-     * <code>
-     * <br>|name                  |value|
-     * <br>|ignoreUnimportantViews|true |
-     * <br>|snapshotMaxDepth      |100  |
-     * </code>
+     *
+     * @param settings The <a href="https://appium.github.io/appium-xcuitest-driver/5.6/settings/">iOS</a>
+     *                 or <a href="https://github.com/appium/appium-uiautomator2-driver#settings-api">Android</a>
+     *                 settings to set.
+     *                 Example:
+     *                 <code>
+     *                 <br>|name                  |value|
+     *                 <br>|ignoreUnimportantViews|true |
+     *                 <br>|snapshotMaxDepth      |100  |
+     *                 </code>
      */
     @When("I change Appium session settings:$settings")
     public void changeAppiumSettings(List<NamedEntry> settings)

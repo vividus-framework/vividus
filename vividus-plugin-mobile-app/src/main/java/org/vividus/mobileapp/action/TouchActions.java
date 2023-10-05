@@ -126,7 +126,7 @@ public class TouchActions
     /**
      * Performs double tap on the <b>element</b>
      * See details for
-     * <a href="https://github.com/appium/appium-xcuitest-driver#mobile-doubletap">iOS</a>,
+     * <a href="https://appium.github.io/appium-xcuitest-driver/5.6/execute-methods/#mobile-doubletap">iOS</a>,
      * <a href="https://github.com/appium/appium-uiautomator2-driver/blob/master/docs/android-mobile-gestures.md#mobile-doubleclickgesture">Android</a>
      * @param element element to double tap, must not be {@code null}
      */
@@ -191,11 +191,11 @@ public class TouchActions
          * - scroll to an element works only if the element resides in UP scroll direction
          * - if the element in DOWN scroll direction, the command still tries to find the element in UP scroll direction
          * - payload is {"element" : "hash", "toVisible" : true}
-         * - see https://appium.io/docs/en/commands/mobile-command/#ios
+         * - see https://appium.github.io/appium-xcuitest-driver/5.6/execute-methods/#mobile-scroll
          * Android
          * - supports only accessibility id, uiautomator strategies
          * - payload is {"strategy": "accessibility id", "selector": "selector"}
-         * - see https://appium.io/docs/en/commands/mobile-command/#android-uiautomator2-only
+         * - see https://github.com/appium/appium-uiautomator2-driver#mobile-scroll
          * */
         uiContext.getOptionalSearchContext()
                  .map(this::createScreenShooter)

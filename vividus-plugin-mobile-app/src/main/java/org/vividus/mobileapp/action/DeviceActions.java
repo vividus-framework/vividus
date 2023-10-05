@@ -55,7 +55,7 @@ public class DeviceActions
      * Deletes a file by <b>deviceFilePath</b> from the device
      * @param deviceFilePath the path to an existing remote file on the device. This variable can be predefined
      * with bundle id to delete file inside an application bundle. See details for
-     * <a href="https://appium.github.io/appium-xcuitest-driver/4.19/execute-methods/#mobile-deletefile">iOS</a>,
+     * <a href="https://appium.github.io/appium-xcuitest-driver/5.6/execute-methods/#mobile-deletefile">iOS</a>,
      * <a href="https://github.com/appium/appium-uiautomator2-driver#mobile-deletefile">Android</a>
      */
     public void deleteFile(String deviceFilePath)
@@ -85,7 +85,7 @@ public class DeviceActions
      * @param deviceFilePath The path to an existing remote file on the device. This parameter can be predefined
      * with bundle id, then the file will be pulled from the root of the corresponding application container.
      * See details for
-     * <a href="https://appium.github.io/appium-xcuitest-driver/4.19/execute-methods/#mobile-pullfile">iOS</a>,
+     * <a href="https://appium.github.io/appium-xcuitest-driver/5.6/execute-methods/#mobile-pullfile">iOS</a>,
      * <a href="https://github.com/appium/appium-uiautomator2-driver#mobile-pullfile">Android</a>
      *
      * @return The content of the downloaded file.
