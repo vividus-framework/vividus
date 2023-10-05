@@ -13,7 +13,7 @@ The plugin defines profiles with a set of the preconfigured properties.
 |===
 
 |`saucelabs/web`
-|Use in conjunction with xref:plugins:plugin-web-app.adoc#_desktop[web application profiles].
+|Use in conjunction with xref:plugins:plugin-web-app.adoc#_list_of_desktop_profiles[web application profiles].
 
 |`saucelabs/web/phone/iphone`
 a|Use in conjunction with xref:plugins:plugin-web-app.adoc#_phone[web application phone profiles].
