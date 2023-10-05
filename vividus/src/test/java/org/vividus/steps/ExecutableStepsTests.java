@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ class ExecutableStepsTests
     {
         when(variableContext.getVariable(KEY)).thenReturn(null).thenReturn(ONE).thenReturn(2).thenReturn(THREE);
         executableSteps.executeStepsWithPollingInterval(Duration.ZERO, 10, KEY, ComparisonRule.LESS_THAN, 3, subSteps);
-        verify(subSteps, times(3)).execute(Optional.empty());
+        verify(subSteps, times(4)).execute(Optional.empty());
     }
 
     @Test
@@ -143,7 +143,7 @@ class ExecutableStepsTests
         when(variableContext.getVariable(KEY)).thenReturn(List.of(expectedValue)).thenReturn(List.of());
         executableSteps.executeStepsWithPollingInterval(Duration.ZERO, 3, KEY, ComparisonRule.EQUAL_TO,
                 List.of(expectedValue), subSteps);
-        verify(subSteps, times(1)).execute(Optional.empty());
+        verify(subSteps, times(2)).execute(Optional.empty());
     }
 
     @Test

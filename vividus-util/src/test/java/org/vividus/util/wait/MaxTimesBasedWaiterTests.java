@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
 
 package org.vividus.util.wait;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.junit.jupiter.api.Test;
@@ -35,12 +35,23 @@ import org.junit.jupiter.api.Test;
 @SuppressWarnings("unchecked")
 class MaxTimesBasedWaiterTests
 {
+    private static final String VALUE = "value";
+
     @Test
-    void shouldNotAllowToWaitForValue()
+    void shouldStopAfterSupplierValueTestIsPassed() throws IOException
     {
-        FailableSupplier<Boolean, IOException> valueProvider = mock(FailableSupplier.class);
-        MaxTimesBasedWaiter waiter = new MaxTimesBasedWaiter(Duration.ofMillis(500), 2);
-        assertThrows(NotImplementedException.class, () -> waiter.wait(valueProvider, Boolean::booleanValue));
+        FailableSupplier<String, IOException> failableSupplier = () -> VALUE;
+        String result = new MaxTimesBasedWaiter(Duration.ofMillis(200), 3).wait(failableSupplier, VALUE::equals);
+        assertEquals(VALUE, result);
+    }
+
+    @Test
+    void shouldReturnNullIfSupplierValueTestIsFailedOnAllIterations() throws IOException
+    {
+        FailableSupplier<String, IOException> failableSupplier = () -> VALUE;
+        String result = new MaxTimesBasedWaiter(Duration.ofMillis(200), 3).wait(failableSupplier,
+                Predicate.not(VALUE::equals));
+        assertNull(result);
     }
 
     @Test
@@ -58,7 +69,7 @@ class MaxTimesBasedWaiterTests
         BooleanSupplier stopCondition = mock(BooleanSupplier.class);
         when(stopCondition.getAsBoolean()).thenReturn(false).thenReturn(false).thenReturn(true);
         new MaxTimesBasedWaiter(Duration.ofMillis(200), 3).wait(failableRunnable, stopCondition);
-        verify(failableRunnable, times(2)).run();
+        verify(failableRunnable, times(3)).run();
     }
 
     @Test
@@ -66,6 +77,6 @@ class MaxTimesBasedWaiterTests
     {
         FailableRunnable<IOException> failableRunnable = mock(FailableRunnable.class);
         new MaxTimesBasedWaiter(Duration.ofMillis(100), 1).wait(failableRunnable, Boolean.TRUE::booleanValue);
-        verifyNoInteractions(failableRunnable);
+        verify(failableRunnable).run();
     }
 }
