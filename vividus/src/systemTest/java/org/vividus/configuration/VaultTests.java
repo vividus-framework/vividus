@@ -47,9 +47,9 @@ class VaultTests
     @Container
     private final VaultContainer<?> vaultContainer = new VaultContainer<>("hashicorp/vault:1.13")
             .withVaultToken(VAULT_TOKEN)
-            .withSecretInVault("secret/vividus/test",
-                    "top_secret=" + NEVER_SHOW_IT,
-                    "one_more_secret=" + NEVER_NEVER_SHOW_IT
+            .withInitCommand("kv put secret/vividus/test"
+                    + " top_secret=" + NEVER_SHOW_IT
+                    + " one_more_secret=" + NEVER_NEVER_SHOW_IT
             );
 
     @BeforeEach
