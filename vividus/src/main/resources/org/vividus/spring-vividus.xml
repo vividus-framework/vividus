@@ -61,27 +61,12 @@
         <constructor-arg index="0" value="${statistics.print-failures}" />
         <constructor-arg index="1" value="${statistics.folder}" />
         <property name="next">
-            <bean class="org.jbehave.core.reporters.DelegatingStoryReporter">
-                <constructor-arg>
-                    <bean class="org.vividus.spring.ListMergerFactoryBean">
-                        <property name="lists">
-                            <list>
-                                <ref bean="storyReporters" />
-                                <list>
-                                    <bean class="org.vividus.log.LoggingStoryReporter" />
-                                </list>
-                            </list>
-                        </property>
-                    </bean>
-                </constructor-arg>
-            </bean>
+            <bean class="org.vividus.log.LoggingStoryReporter" />
         </property>
     </bean>
 
 
     <bean class="org.vividus.groovy.VariableContextAwareGroovyScriptEvaluator" />
-
-    <util:list id="storyReporters" />
 
 
     <bean id="running-scenario" class="org.vividus.variable.RunningScenarioNameDynamicVariable"/>
