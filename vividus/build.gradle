@@ -65,8 +65,9 @@ dependencies {
     // Logging SLF4J + Log4j2
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.9')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
-    implementation(group: 'org.slf4j', name: 'jcl-over-slf4j') // Replace commons-logging with slf4j
-    implementation(group: 'org.slf4j', name: 'jul-to-slf4j') // JUL to slf4j bridge
+    implementation(group: 'org.slf4j', name: 'jcl-over-slf4j') // Replace commons-logging with SLF4J
+    implementation(group: 'org.slf4j', name: 'jul-to-slf4j') // JUL to SLF4J bridge
+    implementation(group: 'org.slf4j', name: 'log4j-over-slf4j') // Log4J 1.x and Reload4J to SLF4J bridge
 
     implementation platform(group: 'org.apache.logging.log4j', name: 'log4j-bom', version: '2.20.0')
     implementation(group: 'org.apache.logging.log4j', name: 'log4j-api')
