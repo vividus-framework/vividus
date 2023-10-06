@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,8 @@ package org.vividus.util.wait;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
-import org.apache.commons.lang3.NotImplementedException;
-import org.apache.commons.lang3.function.FailableRunnable;
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.vividus.util.Sleeper;
 
@@ -39,18 +36,17 @@ public final class MaxTimesBasedWaiter extends Waiter
     @Override
     public <T, E extends Exception> T wait(FailableSupplier<T, E> valueProvider, Predicate<T> stopCondition) throws E
     {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public <E extends Exception> void wait(FailableRunnable<E> runnable, BooleanSupplier stopCondition) throws E
-    {
         int counter = 0;
-        while (counter < maxIterations && !stopCondition.getAsBoolean())
+        while (counter < maxIterations)
         {
-            runnable.run();
+            T value = valueProvider.get();
+            if (stopCondition.test(value))
+            {
+                return value;
+            }
             Sleeper.sleep(getPollingTimeoutMillis(), TimeUnit.MILLISECONDS);
             counter++;
         }
+        return null;
     }
 }

@@ -16,12 +16,15 @@
 
 package org.vividus.lighthouse;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -30,6 +33,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -39,9 +43,15 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpHeaders;
@@ -59,24 +69,27 @@ import com.google.api.services.pagespeedonline.v5.model.LighthouseCategoryV5;
 import com.google.api.services.pagespeedonline.v5.model.LighthouseResultV5;
 import com.google.api.services.pagespeedonline.v5.model.PagespeedApiPagespeedResponseV5;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.lighthouse.model.MetricRule;
+import org.vividus.lighthouse.model.PerformanceValidationStrategy;
 import org.vividus.lighthouse.model.ScanType;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.FailableRunnable;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class LighthouseStepsTests
 {
     private static final String APP_NAME = "app-name";
@@ -94,17 +107,18 @@ class LighthouseStepsTests
             SEO);
     private static final String DESKTOP_STRATEGY = ScanType.DESKTOP.getStrategies()[0];
     private static final String UNKNOWN_ERROR_MESSAGE = "Lighthouse returned error: Something went wrong.";
+    private static final String PERFORMANCE_SCORE_LOG = "The performance score of the measurement #{} is {}";
+    private static final String GREATER_VALUE_FORMAT = "a value greater than <%s>";
+    private static final String CATEGORIES_ERROR_FORMAT = "Categories for validation doesn't contain 'performance',"
+            + " but performance validation strategy was set to %s. Either add 'performance' to validated "
+            + "categories, or set the strategy to 'NONE'";
 
     @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private ISoftAssert softAssert;
     @Mock private PagespeedInsights pagespeedInsights;
     @Mock private JsonFactory jsonFactory;
 
-    @BeforeEach
-    void init() throws IOException
-    {
-        when(pagespeedInsights.getJsonFactory()).thenReturn(jsonFactory);
-    }
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(LighthouseSteps.class);
 
     @ParameterizedTest
     @EnumSource(value = ScanType.class, names = "FULL", mode = EnumSource.Mode.EXCLUDE)
@@ -120,8 +134,7 @@ class LighthouseStepsTests
                 Pagespeedapi pagespeedapi = mockPagespeedapiCall(key, metrics);
                 when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
 
-                LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, 0, attachmentPublisher,
-                        softAssert);
+                LighthouseSteps steps = createSteps(CATEGORIES, 0, PerformanceValidationStrategy.NONE);
 
                 MetricRule speedIndex = createSpeedIndexRule();
                 MetricRule firstContentfulPaint = createRule(FCP_METRIC, 1500);
@@ -133,7 +146,7 @@ class LighthouseStepsTests
                 verifyAttachments(key);
                 validateMetric(key, speedIndex, metrics.get(SI_METRIC));
                 validateMetric(key, firstContentfulPaint, metrics.get(FCP_METRIC));
-                validateMetric(key, performanceScore, SCORE_METRIC_VAL.movePointRight(2));
+                validateMetric(key, performanceScore, alignScore(SCORE_METRIC_VAL));
                 ArgumentCaptor<String> failMesageCaptor = ArgumentCaptor.forClass(String.class);
                 verify(softAssert).recordFailedAssertion(failMesageCaptor.capture());
                 String message = failMesageCaptor.getValue();
@@ -148,7 +161,50 @@ class LighthouseStepsTests
     }
 
     @Test
-    void shouldPerformLighthouseScanWithoutPerformanceCategory() throws Exception
+    void shouldWrapIOExceptionIntoCompletionException() throws Exception
+    {
+        performTest(() ->
+        {
+            Pagespeedapi pagespeedapi = mock();
+            IOException thrown = mock(IOException.class);
+            doThrow(thrown).when(pagespeedapi).runpagespeed(any());
+            when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
+
+            LighthouseSteps steps = createSteps(CATEGORIES, 5, PerformanceValidationStrategy.NONE);
+
+            CompletionException completionThrown = assertThrows(CompletionException.class,
+                    () -> steps.performLighthouseScanWithComparison(ScanType.DESKTOP, URL, URL));
+            assertEquals(thrown, completionThrown.getCause());
+        });
+    }
+
+    @Test
+    void shouldFailIfCantGetUncachedResultParticularNumberOfTimes() throws Exception
+    {
+        performTest(() ->
+        {
+            PagespeedApiPagespeedResponseV5 response = mock();
+            Pagespeedapi api = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, response);
+            LighthouseResultV5 result = createLighthouseResult(0.50, 0.50, 0.50, 0.50);
+            when(response.getLighthouseResult()).thenReturn(result);
+
+            when(pagespeedInsights.pagespeedapi()).thenReturn(api);
+
+            LighthouseSteps steps = createSteps(CATEGORIES, 0, PerformanceValidationStrategy.HIGHEST);
+
+            List<MetricRule> metricsValidations = List.of();
+            IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                    () -> steps.performLighthouseScan(ScanType.DESKTOP, URL, metricsValidations));
+            assertEquals("Unable to get non-cached result after 5 measurement retries", thrown.getMessage());
+        });
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "NONE",
+        "null"
+    }, nullValues = "null")
+    void shouldPerformLighthouseScanWithoutPerformanceCategory(PerformanceValidationStrategy strategy) throws Exception
     {
         performTest(() ->
         {
@@ -168,8 +224,7 @@ class LighthouseStepsTests
 
             when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
 
-            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, categories, 0, attachmentPublisher,
-                    softAssert);
+            LighthouseSteps steps = createSteps(categories, 0, strategy);
 
             MetricRule seoRule = createRule(SEO_SCORE_METRIC, 100);
             steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of(seoRule));
@@ -198,8 +253,7 @@ class LighthouseStepsTests
 
             when(pagespeedInsights.pagespeedapi()).thenReturn(desktopPagespeedapi).thenReturn(mobilePagespeedapi);
 
-            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, 0, attachmentPublisher,
-                    softAssert);
+            LighthouseSteps steps = createSteps(CATEGORIES, 0, PerformanceValidationStrategy.NONE);
 
             MetricRule speedIndex = createSpeedIndexRule();
             steps.performLighthouseScan(ScanType.FULL, URL, List.of(speedIndex));
@@ -209,6 +263,126 @@ class LighthouseStepsTests
             validateMetric(desktopKey, speedIndex, desktopMetrics.get(SI_METRIC));
             validateMetric(mobileKey, speedIndex, mobileMetrics.get(SI_METRIC));
         });
+    }
+
+    @SuppressWarnings("VariableDeclarationUsageDistance")
+    @ParameterizedTest
+    @CsvSource({
+        "HIGHEST, 0.9",
+        "LOWEST, 0.1"
+    })
+    void shouldPerformLighthouseScanWithRetry(PerformanceValidationStrategy strategy, double score) throws Exception
+    {
+        performTest(() ->
+        {
+            mockRun();
+
+            PagespeedApiPagespeedResponseV5 firstResponse = mock();
+            Pagespeedapi firstApi = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, firstResponse);
+            LighthouseResultV5 firstResult = createLighthouseResult(0.50, 0.50, 0.50, 0.50);
+            when(firstResponse.getLighthouseResult()).thenReturn(firstResult);
+
+            PagespeedApiPagespeedResponseV5 firstResponseCached = mock();
+            Pagespeedapi firstApiCached = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, firstResponseCached);
+            LighthouseResultV5 firstResultCached = createLighthouseResult(0.50, 0.50, 0.50, 0.50);
+            when(firstResponseCached.getLighthouseResult()).thenReturn(firstResultCached);
+
+            PagespeedApiPagespeedResponseV5 secondResponse = mock();
+            Pagespeedapi secondApi = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, secondResponse);
+            LighthouseResultV5 secondResult = createLighthouseResult(score, score, score, score);
+            when(secondResponse.getLighthouseResult()).thenReturn(secondResult);
+            mockMetricItems(secondResult, new ArrayMap<>());
+            when(jsonFactory.toString(secondResult)).thenReturn(RESULT_AS_STRING);
+            when(jsonFactory.toPrettyString(any())).thenReturn(RESULT_AS_STRING);
+
+            PagespeedApiPagespeedResponseV5 thirdResponse = mock();
+            Pagespeedapi thirdApi = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, thirdResponse);
+            LighthouseResultV5 thirdResult = createLighthouseResult(0.70, 0.70, 0.70, 0.70);
+            when(thirdResponse.getLighthouseResult()).thenReturn(thirdResult);
+
+            when(pagespeedInsights.pagespeedapi()).thenReturn(firstApi).thenReturn(firstApiCached).thenReturn(secondApi)
+                    .thenReturn(thirdApi);
+
+            LighthouseSteps steps = createSteps(CATEGORIES, 0, strategy);
+
+            MetricRule perfScoreRule = createRule(PERF_SCORE_METRIC, 85, ComparisonRule.GREATER_THAN);
+            steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of(perfScoreRule));
+
+            BigDecimal performanceScore = (BigDecimal) secondResult.getCategories().getPerformance().getScore();
+            validateMetric(DESKTOP_STRATEGY, perfScoreRule, alignScore(performanceScore), GREATER_VALUE_FORMAT);
+            verifyNoMoreInteractions(pagespeedInsights);
+
+            assertThat(logger.getLoggingEvents(), is(List.of(
+                info(PERFORMANCE_SCORE_LOG, 1, getPerformanceScore(firstResult).intValue()),
+                info(PERFORMANCE_SCORE_LOG, 2, getPerformanceScore(secondResult).intValue()),
+                info(PERFORMANCE_SCORE_LOG, 3, getPerformanceScore(thirdResult).intValue())
+            )));
+        });
+    }
+
+    @Test
+    void shouldPerformLighthouseScanWithOneRetryIfScoreIsOneHundred() throws Exception
+    {
+        performTest(() ->
+        {
+            mockRun();
+
+            PagespeedApiPagespeedResponseV5 response = mock();
+            Pagespeedapi api = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, response);
+            LighthouseResultV5 result = createLighthouseResult(1, 1, 1, 1);
+            when(response.getLighthouseResult()).thenReturn(result);
+
+            mockMetricItems(result, new ArrayMap<>());
+            when(jsonFactory.toString(result)).thenReturn(RESULT_AS_STRING);
+            when(jsonFactory.toPrettyString(any())).thenReturn(RESULT_AS_STRING);
+
+            when(pagespeedInsights.pagespeedapi()).thenReturn(api);
+
+            LighthouseSteps steps = createSteps(CATEGORIES, 0, PerformanceValidationStrategy.HIGHEST);
+
+            MetricRule perfScoreRule = createRule(PERF_SCORE_METRIC, 85, ComparisonRule.GREATER_THAN);
+            steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of(perfScoreRule));
+
+            validateMetric(DESKTOP_STRATEGY, perfScoreRule, getPerformanceScore(result), GREATER_VALUE_FORMAT);
+            verifyNoMoreInteractions(pagespeedInsights);
+
+            assertThat(logger.getLoggingEvents(),
+                    is(List.of(info(PERFORMANCE_SCORE_LOG, 1, getPerformanceScore(result).intValue()))));
+        });
+    }
+
+    private BigDecimal getPerformanceScore(LighthouseResultV5 result)
+    {
+        return alignScore((BigDecimal) result.getCategories().getPerformance().getScore());
+    }
+
+    private BigDecimal alignScore(BigDecimal score)
+    {
+        return score.movePointRight(2);
+    }
+
+    static Stream<Arguments> inputs()
+    {
+        return Stream.of(
+                arguments(PerformanceValidationStrategy.HIGHEST, List.of(SEO),
+                        String.format(CATEGORIES_ERROR_FORMAT, PerformanceValidationStrategy.HIGHEST)),
+                arguments(PerformanceValidationStrategy.LOWEST, List.of(SEO),
+                        String.format(CATEGORIES_ERROR_FORMAT, PerformanceValidationStrategy.LOWEST)),
+                arguments(null, CATEGORIES,
+                        "Categories for validation contains 'performance', but performance validation strategy was not"
+                        + " set. Either remove 'performance' from validation categories, or set the strategy to 'NONE',"
+                        + " 'HIGHEST' or 'LOWEST'")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("inputs")
+    void shouldFailIfPerformanceValidationStrategyIsNotValid(PerformanceValidationStrategy strategy,
+            List<String> categories, String message)
+    {
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> createSteps(categories, 0, strategy));
+        assertEquals(message, thrown.getMessage());
     }
 
     static Stream<GoogleJsonResponseException> errors()
@@ -231,8 +405,7 @@ class LighthouseStepsTests
             Runpagespeed runpagespeed = mockConfiguration(pagespeedapi, URL, DESKTOP_STRATEGY, CATEGORIES);
             doThrow(thrown).when(runpagespeed).execute();
 
-            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, 0, attachmentPublisher,
-                    softAssert);
+            LighthouseSteps steps = createSteps(CATEGORIES, 0, PerformanceValidationStrategy.NONE);
 
             GoogleJsonResponseException actual = assertThrows(GoogleJsonResponseException.class,
                     () -> steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of()));
@@ -255,8 +428,7 @@ class LighthouseStepsTests
             doThrow(thrown).doReturn(response).when(runpagespeed).execute();
             when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
 
-            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, 0, attachmentPublisher,
-                    softAssert);
+            LighthouseSteps steps = createSteps(CATEGORIES, 0, PerformanceValidationStrategy.NONE);
 
             MetricRule speedIndex = createSpeedIndexRule();
             steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of(speedIndex));
@@ -266,6 +438,7 @@ class LighthouseStepsTests
         });
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     void shouldCompareAuditScoresBetweenTwoSites() throws Exception
     {
@@ -273,44 +446,66 @@ class LighthouseStepsTests
         {
             mockRun();
 
-            String baselineUrl = "https://baseline.com/my-page";
-            PagespeedApiPagespeedResponseV5 baselineResponse = mock();
-            Pagespeedapi baselineApi = mockPagespeedapiCall(baselineUrl, DESKTOP_STRATEGY, CATEGORIES,
-                    baselineResponse);
-            LighthouseResultV5 baselineResult = createLighthouseResult(0.90, 0.90, 0.90, 0.90);
-            when(baselineResponse.getLighthouseResult()).thenReturn(baselineResult);
+            try (MockedStatic<CompletableFuture> cfs = mockStatic(CompletableFuture.class))
+            {
+                CompletableFuture<LighthouseResultV5> baselineFuture = mock();
+                CompletableFuture<LighthouseResultV5> checkpointFuture = mock();
 
-            String checkpointUrl = "https://checkpoint.com/my-page";
-            PagespeedApiPagespeedResponseV5 checkpointResponse = mock();
-            Pagespeedapi checkpointApi = mockPagespeedapiCall(checkpointUrl, DESKTOP_STRATEGY, CATEGORIES,
-                    checkpointResponse);
-            LighthouseResultV5 checkpointResult = createLighthouseResult(0.90, 0.951, 0.20, 0.89);
-            when(checkpointResponse.getLighthouseResult()).thenReturn(checkpointResult);
+                ArgumentCaptor<Supplier<LighthouseResultV5>> captor = ArgumentCaptor.forClass(Supplier.class);
+                cfs.when(() -> CompletableFuture.supplyAsync(captor.capture())).thenReturn(baselineFuture)
+                        .thenReturn(checkpointFuture);
 
-            when(pagespeedInsights.pagespeedapi()).thenReturn(baselineApi).thenReturn(checkpointApi);
+                CompletableFuture<Void> end = mock();
+                cfs.when(() -> CompletableFuture.allOf(baselineFuture, checkpointFuture)).thenReturn(end);
 
-            when(jsonFactory.toString(baselineResult)).thenReturn(RESULT_AS_STRING);
-            when(jsonFactory.toString(checkpointResult)).thenReturn(RESULT_AS_STRING);
+                doAnswer(a ->
+                {
+                    Supplier<LighthouseResultV5> supplier = captor.getAllValues().get(0);
+                    return supplier.get();
+                }).when(baselineFuture).get();
 
-            LighthouseSteps steps = new LighthouseSteps(APP_NAME, API_KEY, CATEGORIES, 5, attachmentPublisher,
-                    softAssert);
+                doAnswer(a ->
+                {
+                    Supplier<LighthouseResultV5> supplier = captor.getAllValues().get(1);
+                    return supplier.get();
+                }).when(checkpointFuture).get();
 
-            steps.performLighthouseScanWithComparison(ScanType.DESKTOP, checkpointUrl, baselineUrl);
+                String baselineUrl = "https://baseline.com/my-page";
+                PagespeedApiPagespeedResponseV5 baselineResponse = mock();
+                Pagespeedapi baselineApi = mockPagespeedapiCall(baselineUrl, DESKTOP_STRATEGY, baselineResponse);
+                LighthouseResultV5 baselineResult = createLighthouseResult(0.90, 0.90, 0.90, 0.90);
+                when(baselineResponse.getLighthouseResult()).thenReturn(baselineResult);
 
-            verify(softAssert).recordPassedAssertion("[desktop] The performance audit is passed as checkpoint score"
-                    + " (90) is not less than baseline score (90)");
-            verify(softAssert).recordPassedAssertion("[desktop] The seo audit is passed as checkpoint score (95) "
-                    + "is not less than baseline score (90)");
-            verify(softAssert).recordPassedAssertion("[desktop] The best-practices audit is passed as checkpoint score "
-                    + "(89) fits acceptable delta in 5 percents from baseline score (90)");
-            verify(softAssert)
-                    .recordFailedAssertion("[desktop] The accessibility audit score is degraded on 77 percents");
-            verifyNoMoreInteractions(softAssert);
+                String checkpointUrl = "https://checkpoint.com/my-page";
+                PagespeedApiPagespeedResponseV5 checkpointResponse = mock();
+                Pagespeedapi checkpointApi = mockPagespeedapiCall(checkpointUrl, DESKTOP_STRATEGY, checkpointResponse);
+                LighthouseResultV5 checkpointResult = createLighthouseResult(0.90, 0.951, 0.20, 0.89);
+                when(checkpointResponse.getLighthouseResult()).thenReturn(checkpointResult);
 
-            verify(attachmentPublisher).publishAttachment(
-                    "/allure-customization/webjars/vividus-lighthouse-viewer-adaptation/index.html",
-                    Map.of("baseline", RESULT_AS_STRING, "checkpoint", RESULT_AS_STRING),
-                    "[desktop] Lighthouse reports comparison");
+                when(pagespeedInsights.pagespeedapi()).thenReturn(baselineApi).thenReturn(checkpointApi);
+
+                when(jsonFactory.toString(baselineResult)).thenReturn(RESULT_AS_STRING);
+                when(jsonFactory.toString(checkpointResult)).thenReturn(RESULT_AS_STRING);
+
+                LighthouseSteps steps = createSteps(CATEGORIES, 5, PerformanceValidationStrategy.NONE);
+
+                steps.performLighthouseScanWithComparison(ScanType.DESKTOP, checkpointUrl, baselineUrl);
+
+                verify(softAssert).recordPassedAssertion("[desktop] The performance audit is passed as checkpoint "
+                        + "score (90) is not less than baseline score (90)");
+                verify(softAssert).recordPassedAssertion("[desktop] The seo audit is passed as checkpoint score (95)"
+                        + " is not less than baseline score (90)");
+                verify(softAssert).recordPassedAssertion("[desktop] The best-practices audit is passed as checkpoint"
+                        + " score (89) fits acceptable delta in 5 percents from baseline score (90)");
+                verify(softAssert)
+                        .recordFailedAssertion("[desktop] The accessibility audit score is degraded on 77 percents");
+                verifyNoMoreInteractions(softAssert);
+
+                verify(attachmentPublisher).publishAttachment(
+                        "/allure-customization/webjars/vividus-lighthouse-viewer-adaptation/index.html",
+                        Map.of("baseline", RESULT_AS_STRING, "checkpoint", RESULT_AS_STRING),
+                        "[desktop] Lighthouse reports comparison");
+            }
         });
     }
 
@@ -356,6 +551,7 @@ class LighthouseStepsTests
 
     private void performTest(FailableRunnable<Exception> testRunner) throws Exception
     {
+        when(pagespeedInsights.getJsonFactory()).thenReturn(jsonFactory);
         HttpRequest httpRequest = mock();
         try (MockedConstruction<PagespeedInsights.Builder> mockedConstruction = mockConstruction(
                 PagespeedInsights.Builder.class, (mock, context) ->
@@ -382,10 +578,22 @@ class LighthouseStepsTests
                 key + "-metrics.json");
     }
 
+    private LighthouseSteps createSteps(List<String> categories, int delta, PerformanceValidationStrategy strategy)
+            throws Exception
+    {
+        return new LighthouseSteps(APP_NAME, API_KEY, categories, delta, strategy, attachmentPublisher, softAssert);
+    }
+
     private Pagespeedapi mockPagespeedapiCall(String strategy, ArrayMap<String, BigDecimal> metrics) throws IOException
     {
         PagespeedApiPagespeedResponseV5 pagespeedApiPagespeedResponseV5 = mockResponse(metrics);
         return mockPagespeedapiCall(URL, strategy, CATEGORIES, pagespeedApiPagespeedResponseV5);
+    }
+
+    private Pagespeedapi mockPagespeedapiCall(String url, String strategy, PagespeedApiPagespeedResponseV5 response)
+            throws IOException
+    {
+        return mockPagespeedapiCall(url, strategy, CATEGORIES, response);
     }
 
     private Pagespeedapi mockPagespeedapiCall(String url, String strategy, List<String> categories,
@@ -403,15 +611,14 @@ class LighthouseStepsTests
         LighthouseResultV5 lighthouseResultV5 = mock();
         when(pagespeedApiPagespeedResponseV5.getLighthouseResult()).thenReturn(lighthouseResultV5);
         when(jsonFactory.toString(lighthouseResultV5)).thenReturn(RESULT_AS_STRING);
-        LighthouseAuditResultV5 lighthouseAuditResultV5 = mock();
-        when(lighthouseResultV5.getAudits()).thenReturn(Map.of("metrics", lighthouseAuditResultV5));
-        List<ArrayMap<String, BigDecimal>> items = List.of(metrics);
-        when(lighthouseAuditResultV5.getDetails()).thenReturn(Map.of("items", items));
+        mockMetricItems(lighthouseResultV5, metrics);
+        Categories categories = mock();
+        when(lighthouseResultV5.getCategories()).thenReturn(categories);
         mockCategory(lighthouseResultV5, (c, cts) -> when(c.getPerformance()).thenReturn(cts), SCORE_METRIC_VAL);
 
         ArrayMap<String, BigDecimal> actualMetrics = ArrayMap.create();
         actualMetrics.putAll(metrics);
-        actualMetrics.put(PERF_SCORE_METRIC, SCORE_METRIC_VAL.movePointRight(2));
+        actualMetrics.put(PERF_SCORE_METRIC, alignScore(SCORE_METRIC_VAL));
         when(jsonFactory.toPrettyString(actualMetrics)).thenReturn(RESULT_AS_STRING);
         return pagespeedApiPagespeedResponseV5;
     }
@@ -424,6 +631,15 @@ class LighthouseStepsTests
         LighthouseCategoryV5 category = mock();
         categoryMocker.accept(categories, category);
         when(category.getScore()).thenReturn(SCORE_METRIC_VAL);
+    }
+
+    private void mockMetricItems(LighthouseResultV5 lighthouseResultV5, ArrayMap<String, BigDecimal> metrics)
+            throws IOException
+    {
+        LighthouseAuditResultV5 lighthouseAuditResultV5 = mock();
+        when(lighthouseResultV5.getAudits()).thenReturn(Map.of("metrics", lighthouseAuditResultV5));
+        List<ArrayMap<String, BigDecimal>> items = List.of(metrics);
+        when(lighthouseAuditResultV5.getDetails()).thenReturn(Map.of("items", items));
     }
 
     private Runpagespeed mockConfiguration(Pagespeedapi pagespeedapi, String url, String strategy,
@@ -448,8 +664,13 @@ class LighthouseStepsTests
 
     private void validateMetric(String key, MetricRule rule, BigDecimal actual)
     {
-        verify(softAssert).assertThat(eq(String.format("[%s] %s", key, rule.getMetric())), eq(actual), argThat(
-                arg -> String.format("a value less than <%s>", rule.getThreshold().intValue()).equals(arg.toString())));
+        validateMetric(key, rule, actual, "a value less than <%s>");
+    }
+
+    private void validateMetric(String key, MetricRule rule, BigDecimal actual, String matcherFormat)
+    {
+        verify(softAssert).assertThat(eq(String.format("[%s] %s", key, rule.getMetric())), eq(actual),
+                argThat(arg -> String.format(matcherFormat, rule.getThreshold().intValue()).equals(arg.toString())));
     }
 
     private MetricRule createSpeedIndexRule()
@@ -459,9 +680,14 @@ class LighthouseStepsTests
 
     private MetricRule createRule(String name, int value)
     {
+        return createRule(name, value, ComparisonRule.LESS_THAN);
+    }
+
+    private MetricRule createRule(String name, int value, ComparisonRule comparisonRule)
+    {
         MetricRule rule = new MetricRule();
         rule.setMetric(name);
-        rule.setRule(ComparisonRule.LESS_THAN);
+        rule.setRule(comparisonRule);
         rule.setThreshold(new BigDecimal(value));
         return rule;
     }

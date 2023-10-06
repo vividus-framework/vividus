@@ -6,6 +6,7 @@ The plugin provides the ability to generate https://developer.chrome.com/docs/li
 include::partial$plugin-installation.adoc[]
 
 == Properties
+
 [cols="2,1,2,3", options="header"]
 |===
 |Property Name
@@ -26,7 +27,18 @@ include::partial$plugin-installation.adoc[]
 |`lighthouse.categories`
 |comma-separated list of categories (`performance`, `pwa`, `best-practices`, `accessibility`, `seo`)
 |`performance,pwa,best-practices,accessibility,seo`
-|The audit catigories to run, by default the scan includes all 5 categories, but you can select particular ones depending on which aspects of your website you wish to analyze.
+|The audit categories to run, by default the scan includes all 5 categories, but you can select particular ones depending on which aspects of your website you wish to analyze.
+
+|`lighthouse.performance-validation-strategy`
+|`NONE`, `HIGHEST`, `LOWEST`
+|`NONE`
+a|Lighthouse performance scores are changed due to inherent https://developers.google.com/web/tools/lighthouse/variability[variability] in web and network technologies, even if there hasn't been a code change, to alleviate these effects this property allows to run several Lighthouse measurements and perform metrics validation on a measurement selected by user.
+
+Available options:
+
+* `HIGHEST` - validation is performed against Lighthouse measurement with the highest `performance score`, can be used only if `performance` category is specified in `lighthouse.categories` property.
+* `LOWEST` - validation is performed against Lighthouse measurement with the lowest `performance score`, can be used only if `performance` category is specified in `lighthouse.categories` property.
+* `NONE` - Lighthouse measurement is performed only once.
 
 |===
 
