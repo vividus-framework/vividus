@@ -113,10 +113,19 @@ class JsonStepsTests
     private static final String NON_EXISTING_PATH = "$['non-existing-element']";
     private static final String ANY_ELEMENT_PATH = "$.test.*";
 
+    private static final String DISTINCT_PATH = "$.array_of_objects.distinct()";
+    private static final String DISTINCT_PATH_RESULT =
+            "[{\"a\":[{\"a\":\"a-val\"},{\"b\":\"b-val\"}]},{\"b\":[{\"b\":\"b-val\"}]}]";
+
     private static final String JSON = "{\"test\":{\"name\":\"value\","
             + "\"number\":42,\"number-float\":42.1,\"number-float-e\":4.22E+1,\"number-float-e2\":400.0,"
             + "\"number-float-e3\":4E+2,\"bool\":true,\"array\":[1,2],"
             + "\"nested-json\":\"{\\\"nested-name\\\":\\\"nested-value\\\"}\",\"null\":null}}";
+
+    private static final String OBJECT_SERIES = "{\"array_of_objects\":["
+            + "{\"a\":[{\"a\":\"a-val\"},{\"b\":\"b-val\"}]},"
+            + "{\"b\":[{\"b\":\"b-val\"}]},"
+            + "{\"a\":[{\"a\":\"a-val\"},{\"b\":\"b-val\"}]}]}";
 
     private static final String VARIABLE_NAME = "name";
     private static final Set<VariableScope> SCOPES = Set.of(VariableScope.SCENARIO);
@@ -449,6 +458,13 @@ class JsonStepsTests
     }
 
     @Test
+    void shouldAssertArrayByJsonPathWithDuplicatesAndIgnoringDuplicatesFunction()
+    {
+        steps.assertElementByJsonPath(OBJECT_SERIES, DISTINCT_PATH, DISTINCT_PATH_RESULT, Set.of());
+        verifyJsonEqualityAssertion(DISTINCT_PATH, DISTINCT_PATH_RESULT, DISTINCT_PATH_RESULT);
+    }
+
+    @Test
     void shouldAssertCollectionByJsonPathIsEqualToSingleUnwrappedItem()
     {
         var expectedJson = NUMBER_PATH_RESULT;
@@ -457,10 +473,10 @@ class JsonStepsTests
         verifyJsonEqualityAssertion(jsonPath, expectedJson, expectedJson);
     }
 
-    private void verifyJsonEqualityAssertion(String jsonPath, String expectedData, String ectualData)
+    private void verifyJsonEqualityAssertion(String jsonPath, String expectedData, String actualData)
     {
         verify(softAssert).assertThat(
-                eq("Data by JSON path: " + jsonPath + " is equal to '" + expectedData + "'"), eq(ectualData),
+                eq("Data by JSON path: " + jsonPath + " is equal to '" + expectedData + "'"), eq(actualData),
                 argThat(matcher -> matcher.matches(expectedData)));
     }
 

@@ -18,7 +18,9 @@ package org.vividus.util.json;
 
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -28,16 +30,21 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.internal.function.PathFunction;
+import com.jayway.jsonpath.internal.function.PathFunctionFactory;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
+
+import org.vividus.util.FieldUtils;
 
 public final class JsonPathUtils
 {
     static
     {
         setJacksonConfiguration();
+        setDistinctPathFunction();
     }
 
     private JsonPathUtils()
@@ -72,6 +79,22 @@ public final class JsonPathUtils
     public static void setJacksonConfiguration()
     {
         Configuration.setDefaults(new JacksonConfiguration());
+    }
+
+    public static void setDistinctPathFunction()
+    {
+        Map<String, Class<? extends PathFunction>> modifiableMap = new HashMap<>();
+        PathFunctionFactory.FUNCTIONS.forEach(modifiableMap::put);
+        modifiableMap.put("distinct", Distinct.class);
+
+        try
+        {
+            FieldUtils.setFinalStatic(PathFunctionFactory.class.getDeclaredField("FUNCTIONS"), modifiableMap);
+        }
+        catch (NoSuchFieldException e)
+        {
+            throw new RuntimeException("The 'FUNCTIONS' field cannot be modified", e);
+        }
     }
 
     private static final class JacksonConfiguration implements Configuration.Defaults
