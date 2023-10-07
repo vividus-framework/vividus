@@ -12,6 +12,7 @@
         <constructor-arg index="2" value="${lighthouse.categories}" />
         <constructor-arg index="3" value="${lighthouse.acceptable-score-percentage-delta}" />
         <constructor-arg index="4" value="${lighthouse.performance-validation-strategy}" />
+        <constructor-arg index="5" value="${lighthouse.performance.measurements-number}" />
     </bean>
 
     <util:list id="stepBeanNames-Lighthouse" value-type="java.lang.String">

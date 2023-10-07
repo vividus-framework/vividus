@@ -77,7 +77,6 @@ public class LighthouseSteps
     private static final int MAX_SCORE = 100;
 
     private static final int MAX_CACHED_MEASUREMENT_NUMBER = 5;
-    private static final int MEASUREMENT_NUMBER = 3;
     private static final Duration MEASUREMENT_WAIT_DURATION = Duration.ofSeconds(25);
     private static final MaxTimesBasedWaiter MEASUREMENT_WAITER = new MaxTimesBasedWaiter(MEASUREMENT_WAIT_DURATION,
             MAX_CACHED_MEASUREMENT_NUMBER);
@@ -91,22 +90,29 @@ public class LighthouseSteps
     private final List<String> categories;
     private final int acceptableScorePercentageDelta;
     private final PerformanceValidationStrategy performanceValidationStrategy;
+    private final int performanceMeasurementsNumber;
 
     public LighthouseSteps(String applicationName, String apiKey, List<String> categories,
             int acceptableScorePercentageDelta, PerformanceValidationStrategy performanceValidationStrategy,
-            IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
+            int performanceMeasurementsNumber, IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
             throws GeneralSecurityException, IOException
     {
         boolean hasPerformance = categories.contains("performance");
+        if (hasPerformance)
+        {
+            isTrue(performanceValidationStrategy != null,
+                    "Categories for validation contains 'performance', but performance validation strategy was not set."
+                            + " Either remove 'performance' from validation categories, or set the strategy to 'NONE', "
+                            + "'HIGHEST' or 'LOWEST'");
+            isTrue(performanceMeasurementsNumber > 0, "Categories for validation contains 'performance', so the number"
+                    + " of performance measurements should be greater than 0");
+        }
 
-        isTrue(!(performanceValidationStrategy == null && hasPerformance),
-                "Categories for validation contains 'performance', but performance validation strategy was not set."
-                        + " Either remove 'performance' from validation categories, or set the strategy to 'NONE', "
-                        + "'HIGHEST' or 'LOWEST'");
         isTrue(!(performanceValidationStrategy != null && performanceValidationStrategy != NONE && !hasPerformance),
                 "Categories for validation doesn't contain 'performance', but performance validation strategy was set "
                         + "to %s. Either add 'performance' to validated categories, or set the strategy to 'NONE'",
                 performanceValidationStrategy);
+
         this.attachmentPublisher = attachmentPublisher;
         this.softAssert = softAssert;
         this.pagespeedInsights = new PagespeedInsights.Builder(
@@ -126,6 +132,7 @@ public class LighthouseSteps
         this.categories = categories;
         this.acceptableScorePercentageDelta = acceptableScorePercentageDelta;
         this.performanceValidationStrategy = performanceValidationStrategy;
+        this.performanceMeasurementsNumber = performanceMeasurementsNumber;
     }
 
     /**
@@ -301,7 +308,7 @@ public class LighthouseSteps
 
         Deque<LighthouseResultV5> results = new LinkedList<>();
 
-        for (int index = 0; index < MEASUREMENT_NUMBER; index++)
+        for (int index = 0; index < performanceMeasurementsNumber; index++)
         {
             LighthouseResultV5 result = MEASUREMENT_WAITER.wait(() -> executePagespeed(url, strategy, true), current ->
             {
