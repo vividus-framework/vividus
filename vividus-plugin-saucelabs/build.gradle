@@ -24,7 +24,7 @@ dependencies {
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testRuntimeOnly(group: 'org.junit.vintage', name: 'junit-vintage-engine')
     testCompileOnly(group: 'junit', name: 'junit', version: '4.13.2')
-    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.5.0')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.6.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
     testImplementation(group: 'com.github.powermock.powermock', name: 'powermock-api-mockito2', version: versions.powermock)
     testImplementation(group: 'com.github.powermock.powermock', name: 'powermock-module-junit4', version: versions.powermock)
