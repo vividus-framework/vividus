@@ -89,6 +89,7 @@ import org.vividus.softassert.FailableRunnable;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 
+@SuppressWarnings("MethodCount")
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class LighthouseStepsTests
 {
@@ -112,6 +113,7 @@ class LighthouseStepsTests
     private static final String CATEGORIES_ERROR_FORMAT = "Categories for validation doesn't contain 'performance',"
             + " but performance validation strategy was set to %s. Either add 'performance' to validated "
             + "categories, or set the strategy to 'NONE'";
+    private static final int DEFAULT_MEASUREMENTS_NUMBER = 3;
 
     @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private ISoftAssert softAssert;
@@ -364,24 +366,27 @@ class LighthouseStepsTests
     static Stream<Arguments> inputs()
     {
         return Stream.of(
-                arguments(PerformanceValidationStrategy.HIGHEST, List.of(SEO),
+                arguments(PerformanceValidationStrategy.HIGHEST, List.of(SEO), DEFAULT_MEASUREMENTS_NUMBER,
                         String.format(CATEGORIES_ERROR_FORMAT, PerformanceValidationStrategy.HIGHEST)),
-                arguments(PerformanceValidationStrategy.LOWEST, List.of(SEO),
+                arguments(PerformanceValidationStrategy.LOWEST, List.of(SEO), DEFAULT_MEASUREMENTS_NUMBER,
                         String.format(CATEGORIES_ERROR_FORMAT, PerformanceValidationStrategy.LOWEST)),
-                arguments(null, CATEGORIES,
+                arguments(null, CATEGORIES, DEFAULT_MEASUREMENTS_NUMBER,
                         "Categories for validation contains 'performance', but performance validation strategy was not"
                         + " set. Either remove 'performance' from validation categories, or set the strategy to 'NONE',"
-                        + " 'HIGHEST' or 'LOWEST'")
+                        + " 'HIGHEST' or 'LOWEST'"),
+                arguments(PerformanceValidationStrategy.LOWEST, CATEGORIES, 0,
+                        "Categories for validation contains 'performance', so the number of performance measurements "
+                        + "should be greater than 0")
         );
     }
 
     @ParameterizedTest
     @MethodSource("inputs")
     void shouldFailIfPerformanceValidationStrategyIsNotValid(PerformanceValidationStrategy strategy,
-            List<String> categories, String message)
+            List<String> categories, int performanceMeasurementsNumber, String message)
     {
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-                () -> createSteps(categories, 0, strategy));
+                () -> createSteps(categories, 0, strategy, performanceMeasurementsNumber));
         assertEquals(message, thrown.getMessage());
     }
 
@@ -581,7 +586,15 @@ class LighthouseStepsTests
     private LighthouseSteps createSteps(List<String> categories, int delta, PerformanceValidationStrategy strategy)
             throws Exception
     {
-        return new LighthouseSteps(APP_NAME, API_KEY, categories, delta, strategy, attachmentPublisher, softAssert);
+        return new LighthouseSteps(APP_NAME, API_KEY, categories, delta, strategy, DEFAULT_MEASUREMENTS_NUMBER,
+                attachmentPublisher, softAssert);
+    }
+
+    private LighthouseSteps createSteps(List<String> categories, int delta, PerformanceValidationStrategy strategy,
+            int performanceMeasurementsNumber) throws Exception
+    {
+        return new LighthouseSteps(APP_NAME, API_KEY, categories, delta, strategy, performanceMeasurementsNumber,
+                attachmentPublisher, softAssert);
     }
 
     private Pagespeedapi mockPagespeedapiCall(String strategy, ArrayMap<String, BigDecimal> metrics) throws IOException

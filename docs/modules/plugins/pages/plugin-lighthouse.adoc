@@ -40,6 +40,11 @@ Available options:
 * `LOWEST` - validation is performed against Lighthouse measurement with the lowest `performance score`, can be used only if `performance` category is specified in `lighthouse.categories` property.
 * `NONE` - Lighthouse measurement is performed only once.
 
+|`lighthouse.performance.measurements-number`
+|positive number
+|3
+|Specifies the number of Lighouse measurements performed before validation, the property takes its effect only if `lighthouse.performance-validation-strategy` is set to either `HIGHEST` or `LOWEST`.
+
 |===
 
 == Steps
