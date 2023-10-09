@@ -20,6 +20,12 @@
 
     <bean id="redirectValidationSteps" class="org.vividus.steps.integration.RedirectValidationSteps" />
 
+    <bean id="sslLabsClient" class="org.vividus.ssllabs.SslLabsClient">
+        <constructor-arg index="2" value="${ssl-labs.api-endpoint}"/>
+    </bean>
+
+    <bean id="sslLabsSteps" class="org.vividus.ssllabs.SslLabsSteps" />
+
     <bean id="httpRedirectsProvider" class="org.vividus.http.HttpRedirectsProvider">
         <property name="httpClient">
             <bean class="org.vividus.http.client.HttpClient"
@@ -89,5 +95,6 @@
         <idref bean="httpRequestSteps" />
         <idref bean="resourceCheckSteps" />
         <idref bean="redirectValidationSteps" />
+        <idref bean="sslLabsSteps" />
     </util:list>
  </beans>
