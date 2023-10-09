@@ -31,6 +31,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +47,7 @@ public final class UriUtils
     private static final String ENCODED_AMPERSAND = "%26";
     private static final String DOUBLE_ENCODED_AMPERSAND = "%2526";
     private static final String SCHEME_AUTHORITY_SEPARATOR = "://";
+    private static final int LAST_ASCII_CODE_POSITION = 127;
 
     private UriUtils()
     {
@@ -233,7 +235,8 @@ public final class UriUtils
 
     /**
      * Partially transforms RFC 2396 compliant URI to RFC 3986 compliant one: percent-encode square brackets found in
-     * URL query and URL fragment. For the complete list of required changes to make URI compliant with RFC 3986 see:
+     * URL query and URL fragment, percent-encode non-ASCII characters in URL path.
+     * For the complete list of required changes to make URI compliant with RFC 3986 see:
      * <a href="https://cr.openjdk.java.net/~dfuchs/writeups/updating-uri/">
      *     Updating URI support for RFC 3986 and RFC 3987 in the JDK
      * </a>
@@ -245,7 +248,25 @@ public final class UriUtils
         StringBuilder normalizedUri = new StringBuilder(uri.toString());
         recodeSpecialCharacters(normalizedUri, uri.getRawQuery(), true);
         recodeSpecialCharacters(normalizedUri, uri.getRawFragment(), false);
+        encodePath(normalizedUri, uri.getRawPath());
         return URI.create(normalizedUri.toString());
+    }
+
+    private static void encodePath(StringBuilder normalizedUri, String path)
+    {
+        if (!path.isEmpty())
+        {
+            String encodedPath = encodeNonAsciiChars(path);
+            int startIndexOfPath = normalizedUri.indexOf(path);
+            normalizedUri.replace(startIndexOfPath, startIndexOfPath + path.length(), encodedPath);
+        }
+    }
+
+    private static String encodeNonAsciiChars(String input)
+    {
+        return input.chars().mapToObj(
+                c -> c > LAST_ASCII_CODE_POSITION ? encodeData(String.valueOf((char) c)) : String.valueOf((char) c))
+                .collect(Collectors.joining(""));
     }
 
     private static String removeFragment(String url, String fragment)
@@ -295,14 +316,36 @@ public final class UriUtils
                 return new URI(url.getScheme(), url.getSchemeSpecificPart(), parsedRelativeUrl.getFragment());
             }
 
-            String path = StringUtils.repeat(SLASH, indexOfFirstNonSlashChar - 1) + parsedRelativeUrl.getPath();
-            return new URI(url.getScheme(), url.getAuthority(), path, parsedRelativeUrl.getQuery(),
-                    parsedRelativeUrl.getFragment());
+            String path = StringUtils.repeat(SLASH, indexOfFirstNonSlashChar - 1) + parsedRelativeUrl.getRawPath();
+            if (!path.isEmpty() && path.charAt(0) != '/')
+            {
+                throw new IllegalArgumentException(String
+                        .format("Relative path '%s' for '%s' should start with forward slash ('/')", path, url));
+            }
+            String uriAsString = createUriAsString(url.getScheme(), url.getAuthority(), encodeNonAsciiChars(path),
+                    parsedRelativeUrl.getQuery(), parsedRelativeUrl.getFragment());
+            return new URI(uriAsString);
         }
         catch (URISyntaxException e)
         {
             throw new IllegalArgumentException(e.getMessage(), e);
         }
+    }
+
+    private static String createUriAsString(String scheme, String authority, String path, String query, String fragment)
+    {
+        StringBuilder stringBuilderUri = new StringBuilder(scheme);
+        stringBuilderUri.append(SCHEME_AUTHORITY_SEPARATOR).append(authority);
+        stringBuilderUri.append(path);
+        if (query != null)
+        {
+            stringBuilderUri.append(QUERY_SEPARATOR).append(query);
+        }
+        if (fragment != null)
+        {
+            stringBuilderUri.append(FRAGMENT_SEPARATOR).append(fragment);
+        }
+        return stringBuilderUri.toString();
     }
 
     /**
