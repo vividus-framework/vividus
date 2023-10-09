@@ -77,6 +77,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
@@ -321,8 +322,12 @@ class LighthouseStepsTests
         });
     }
 
-    @Test
-    void shouldPerformLighthouseScanWithOneRetryIfScoreIsOneHundred() throws Exception
+    @ParameterizedTest
+    @ValueSource(doubles = {
+        1,
+        9.9
+    })
+    void shouldPerformLighthouseScanWithOneRetryIfScoreIsOneHundredOrNinetyNine(double value) throws Exception
     {
         performTest(() ->
         {
@@ -330,7 +335,7 @@ class LighthouseStepsTests
 
             PagespeedApiPagespeedResponseV5 response = mock();
             Pagespeedapi api = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, response);
-            LighthouseResultV5 result = createLighthouseResult(1, 1, 1, 1);
+            LighthouseResultV5 result = createLighthouseResult(value, value, value, value);
             when(response.getLighthouseResult()).thenReturn(result);
 
             mockMetricItems(result, new ArrayMap<>());
