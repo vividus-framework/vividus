@@ -43,6 +43,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.function.BiConsumer;
@@ -81,8 +82,8 @@ import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.lighthouse.LighthouseSteps.PerformanceValidationConfiguration;
 import org.vividus.lighthouse.model.MetricRule;
-import org.vividus.lighthouse.model.PerformanceValidationStrategy;
 import org.vividus.lighthouse.model.ScanType;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.FailableRunnable;
@@ -110,10 +111,10 @@ class LighthouseStepsTests
     private static final String UNKNOWN_ERROR_MESSAGE = "Lighthouse returned error: Something went wrong.";
     private static final String PERFORMANCE_SCORE_LOG = "The performance score of the measurement #{} is {}";
     private static final String GREATER_VALUE_FORMAT = "a value greater than <%s>";
-    private static final String CATEGORIES_ERROR_FORMAT = "Categories for validation doesn't contain 'performance',"
-            + " but performance validation strategy was set to %s. Either add 'performance' to validated "
-            + "categories, or set the strategy to 'NONE'";
+    private static final String PERCENTILE_RANGE_ERROR = "The percentile value should be in range between 0 and 100"
+            + " exclusively.";
     private static final int DEFAULT_MEASUREMENTS_NUMBER = 3;
+    private static final int DEFAULT_PERCENTILE = 90;
 
     @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private ISoftAssert softAssert;
@@ -136,7 +137,7 @@ class LighthouseStepsTests
                 Pagespeedapi pagespeedapi = mockPagespeedapiCall(key, metrics);
                 when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
 
-                LighthouseSteps steps = createSteps(CATEGORIES, 0, PerformanceValidationStrategy.NONE);
+                LighthouseSteps steps = createSteps(CATEGORIES, 0, Optional.empty());
 
                 MetricRule speedIndex = createSpeedIndexRule();
                 MetricRule firstContentfulPaint = createRule(FCP_METRIC, 1500);
@@ -172,7 +173,7 @@ class LighthouseStepsTests
             doThrow(thrown).when(pagespeedapi).runpagespeed(any());
             when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
 
-            LighthouseSteps steps = createSteps(CATEGORIES, 5, PerformanceValidationStrategy.NONE);
+            LighthouseSteps steps = createSteps(CATEGORIES, 5, Optional.empty());
 
             CompletionException completionThrown = assertThrows(CompletionException.class,
                     () -> steps.performLighthouseScanWithComparison(ScanType.DESKTOP, URL, URL));
@@ -192,7 +193,8 @@ class LighthouseStepsTests
 
             when(pagespeedInsights.pagespeedapi()).thenReturn(api);
 
-            LighthouseSteps steps = createSteps(CATEGORIES, 0, PerformanceValidationStrategy.HIGHEST);
+            LighthouseSteps steps = createSteps(CATEGORIES, 0,
+                    createConfiguration(DEFAULT_MEASUREMENTS_NUMBER, DEFAULT_PERCENTILE));
 
             List<MetricRule> metricsValidations = List.of();
             IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
@@ -201,12 +203,8 @@ class LighthouseStepsTests
         });
     }
 
-    @ParameterizedTest
-    @CsvSource(value = {
-        "NONE",
-        "null"
-    }, nullValues = "null")
-    void shouldPerformLighthouseScanWithoutPerformanceCategory(PerformanceValidationStrategy strategy) throws Exception
+    @Test
+    void shouldPerformLighthouseScanWithoutPerformanceCategory() throws Exception
     {
         performTest(() ->
         {
@@ -226,7 +224,7 @@ class LighthouseStepsTests
 
             when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
 
-            LighthouseSteps steps = createSteps(categories, 0, strategy);
+            LighthouseSteps steps = createSteps(categories, 0, Optional.empty());
 
             MetricRule seoRule = createRule(SEO_SCORE_METRIC, 100);
             steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of(seoRule));
@@ -255,7 +253,7 @@ class LighthouseStepsTests
 
             when(pagespeedInsights.pagespeedapi()).thenReturn(desktopPagespeedapi).thenReturn(mobilePagespeedapi);
 
-            LighthouseSteps steps = createSteps(CATEGORIES, 0, PerformanceValidationStrategy.NONE);
+            LighthouseSteps steps = createSteps(CATEGORIES, 0, Optional.empty());
 
             MetricRule speedIndex = createSpeedIndexRule();
             steps.performLighthouseScan(ScanType.FULL, URL, List.of(speedIndex));
@@ -270,10 +268,10 @@ class LighthouseStepsTests
     @SuppressWarnings("VariableDeclarationUsageDistance")
     @ParameterizedTest
     @CsvSource({
-        "HIGHEST, 0.9",
-        "LOWEST, 0.1"
+        "99, 0.9",
+        "1, 0.1"
     })
-    void shouldPerformLighthouseScanWithRetry(PerformanceValidationStrategy strategy, double score) throws Exception
+    void shouldPerformLighthouseScanWithRetry(int percentile, double score) throws Exception
     {
         performTest(() ->
         {
@@ -305,7 +303,8 @@ class LighthouseStepsTests
             when(pagespeedInsights.pagespeedapi()).thenReturn(firstApi).thenReturn(firstApiCached).thenReturn(secondApi)
                     .thenReturn(thirdApi);
 
-            LighthouseSteps steps = createSteps(CATEGORIES, 0, strategy);
+            LighthouseSteps steps = createSteps(CATEGORIES, 0,
+                    createConfiguration(DEFAULT_MEASUREMENTS_NUMBER, percentile));
 
             MetricRule perfScoreRule = createRule(PERF_SCORE_METRIC, 85, ComparisonRule.GREATER_THAN);
             steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of(perfScoreRule));
@@ -340,7 +339,8 @@ class LighthouseStepsTests
 
             when(pagespeedInsights.pagespeedapi()).thenReturn(api);
 
-            LighthouseSteps steps = createSteps(CATEGORIES, 0, PerformanceValidationStrategy.HIGHEST);
+            LighthouseSteps steps = createSteps(CATEGORIES, 0,
+                    createConfiguration(DEFAULT_MEASUREMENTS_NUMBER, DEFAULT_PERCENTILE));
 
             MetricRule perfScoreRule = createRule(PERF_SCORE_METRIC, 85, ComparisonRule.GREATER_THAN);
             steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of(perfScoreRule));
@@ -366,27 +366,28 @@ class LighthouseStepsTests
     static Stream<Arguments> inputs()
     {
         return Stream.of(
-                arguments(PerformanceValidationStrategy.HIGHEST, List.of(SEO), DEFAULT_MEASUREMENTS_NUMBER,
-                        String.format(CATEGORIES_ERROR_FORMAT, PerformanceValidationStrategy.HIGHEST)),
-                arguments(PerformanceValidationStrategy.LOWEST, List.of(SEO), DEFAULT_MEASUREMENTS_NUMBER,
-                        String.format(CATEGORIES_ERROR_FORMAT, PerformanceValidationStrategy.LOWEST)),
-                arguments(null, CATEGORIES, DEFAULT_MEASUREMENTS_NUMBER,
-                        "Categories for validation contains 'performance', but performance validation strategy was not"
-                        + " set. Either remove 'performance' from validation categories, or set the strategy to 'NONE',"
-                        + " 'HIGHEST' or 'LOWEST'"),
-                arguments(PerformanceValidationStrategy.LOWEST, CATEGORIES, 0,
-                        "Categories for validation contains 'performance', so the number of performance measurements "
-                        + "should be greater than 0")
+                arguments(CATEGORIES, createConfiguration(null, DEFAULT_PERCENTILE),
+                        "The measurements number value of performance validation configuration should be set."),
+                arguments(CATEGORIES, createConfiguration(-1, DEFAULT_PERCENTILE),
+                        "The measurements number value should be greater than 0."),
+                arguments(CATEGORIES, createConfiguration(DEFAULT_MEASUREMENTS_NUMBER, null),
+                        "The percentile value of performance validation configuration should be set."),
+                arguments(CATEGORIES, createConfiguration(DEFAULT_MEASUREMENTS_NUMBER, -1), PERCENTILE_RANGE_ERROR),
+                arguments(CATEGORIES, createConfiguration(DEFAULT_MEASUREMENTS_NUMBER, 101), PERCENTILE_RANGE_ERROR),
+                arguments(List.of(SEO), createConfiguration(DEFAULT_MEASUREMENTS_NUMBER, 1),
+                        "Categories for validation doesn't contain 'performance', but performance validation "
+                                + "configuration was set. Either add 'performance' to validated categories, or remove"
+                                + " performance validation configuration.")
         );
     }
 
     @ParameterizedTest
     @MethodSource("inputs")
-    void shouldFailIfPerformanceValidationStrategyIsNotValid(PerformanceValidationStrategy strategy,
-            List<String> categories, int performanceMeasurementsNumber, String message)
+    void shouldFailIfPerformanceValidationStrategyIsNotValid(List<String> categories,
+            Optional<PerformanceValidationConfiguration> config, String message)
     {
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-                () -> createSteps(categories, 0, strategy, performanceMeasurementsNumber));
+                () -> createSteps(categories, 0, config));
         assertEquals(message, thrown.getMessage());
     }
 
@@ -410,7 +411,7 @@ class LighthouseStepsTests
             Runpagespeed runpagespeed = mockConfiguration(pagespeedapi, URL, DESKTOP_STRATEGY, CATEGORIES);
             doThrow(thrown).when(runpagespeed).execute();
 
-            LighthouseSteps steps = createSteps(CATEGORIES, 0, PerformanceValidationStrategy.NONE);
+            LighthouseSteps steps = createSteps(CATEGORIES, 0, Optional.empty());
 
             GoogleJsonResponseException actual = assertThrows(GoogleJsonResponseException.class,
                     () -> steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of()));
@@ -433,7 +434,7 @@ class LighthouseStepsTests
             doThrow(thrown).doReturn(response).when(runpagespeed).execute();
             when(pagespeedInsights.pagespeedapi()).thenReturn(pagespeedapi);
 
-            LighthouseSteps steps = createSteps(CATEGORIES, 0, PerformanceValidationStrategy.NONE);
+            LighthouseSteps steps = createSteps(CATEGORIES, 0, Optional.empty());
 
             MetricRule speedIndex = createSpeedIndexRule();
             steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of(speedIndex));
@@ -492,7 +493,7 @@ class LighthouseStepsTests
                 when(jsonFactory.toString(baselineResult)).thenReturn(RESULT_AS_STRING);
                 when(jsonFactory.toString(checkpointResult)).thenReturn(RESULT_AS_STRING);
 
-                LighthouseSteps steps = createSteps(CATEGORIES, 5, PerformanceValidationStrategy.NONE);
+                LighthouseSteps steps = createSteps(CATEGORIES, 5, Optional.empty());
 
                 steps.performLighthouseScanWithComparison(ScanType.DESKTOP, checkpointUrl, baselineUrl);
 
@@ -583,18 +584,20 @@ class LighthouseStepsTests
                 key + "-metrics.json");
     }
 
-    private LighthouseSteps createSteps(List<String> categories, int delta, PerformanceValidationStrategy strategy)
-            throws Exception
+    private static Optional<PerformanceValidationConfiguration> createConfiguration(Integer measurementsNumber,
+            Integer percentile)
     {
-        return new LighthouseSteps(APP_NAME, API_KEY, categories, delta, strategy, DEFAULT_MEASUREMENTS_NUMBER,
-                attachmentPublisher, softAssert);
+        PerformanceValidationConfiguration configuration = new PerformanceValidationConfiguration();
+        configuration.setMeasurementsNumber(measurementsNumber);
+        configuration.setPercentile(percentile);
+        return Optional.of(configuration);
     }
 
-    private LighthouseSteps createSteps(List<String> categories, int delta, PerformanceValidationStrategy strategy,
-            int performanceMeasurementsNumber) throws Exception
+    private LighthouseSteps createSteps(List<String> categories, int delta,
+            Optional<PerformanceValidationConfiguration> configuration) throws Exception
     {
-        return new LighthouseSteps(APP_NAME, API_KEY, categories, delta, strategy, performanceMeasurementsNumber,
-                attachmentPublisher, softAssert);
+        return new LighthouseSteps(APP_NAME, API_KEY, categories, delta, configuration, attachmentPublisher,
+                softAssert);
     }
 
     private Pagespeedapi mockPagespeedapiCall(String strategy, ArrayMap<String, BigDecimal> metrics) throws IOException

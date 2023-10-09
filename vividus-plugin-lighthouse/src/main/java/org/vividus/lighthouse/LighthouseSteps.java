@@ -17,24 +17,23 @@
 package org.vividus.lighthouse;
 
 import static org.apache.commons.lang3.Validate.isTrue;
-import static org.vividus.lighthouse.model.PerformanceValidationStrategy.HIGHEST;
-import static org.vividus.lighthouse.model.PerformanceValidationStrategy.NONE;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -54,7 +53,6 @@ import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.lighthouse.model.MetricRule;
-import org.vividus.lighthouse.model.PerformanceValidationStrategy;
 import org.vividus.lighthouse.model.ScanType;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
@@ -75,6 +73,7 @@ public class LighthouseSteps
     private static final int DEFAULT_TIMEOUT = 0;
     private static final int INTERNAL_SERVER_ERROR = 500;
     private static final int MAX_SCORE = 100;
+    private static final int UPPER_PERCENTILE_LIMIT = 100;
 
     private static final int MAX_CACHED_MEASUREMENT_NUMBER = 5;
     private static final Duration MEASUREMENT_WAIT_DURATION = Duration.ofSeconds(25);
@@ -89,29 +88,20 @@ public class LighthouseSteps
     private final String apiKey;
     private final List<String> categories;
     private final int acceptableScorePercentageDelta;
-    private final PerformanceValidationStrategy performanceValidationStrategy;
-    private final int performanceMeasurementsNumber;
+    private final Optional<PerformanceValidationConfiguration> configuration;
 
     public LighthouseSteps(String applicationName, String apiKey, List<String> categories,
-            int acceptableScorePercentageDelta, PerformanceValidationStrategy performanceValidationStrategy,
-            int performanceMeasurementsNumber, IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
+            int acceptableScorePercentageDelta, Optional<PerformanceValidationConfiguration> configuration,
+            IAttachmentPublisher attachmentPublisher, ISoftAssert softAssert)
             throws GeneralSecurityException, IOException
     {
         boolean hasPerformance = categories.contains("performance");
-        if (hasPerformance)
-        {
-            isTrue(performanceValidationStrategy != null,
-                    "Categories for validation contains 'performance', but performance validation strategy was not set."
-                            + " Either remove 'performance' from validation categories, or set the strategy to 'NONE', "
-                            + "'HIGHEST' or 'LOWEST'");
-            isTrue(performanceMeasurementsNumber > 0, "Categories for validation contains 'performance', so the number"
-                    + " of performance measurements should be greater than 0");
-        }
+        configuration.filter(c -> hasPerformance).ifPresent(PerformanceValidationConfiguration::validate);
 
-        isTrue(!(performanceValidationStrategy != null && performanceValidationStrategy != NONE && !hasPerformance),
-                "Categories for validation doesn't contain 'performance', but performance validation strategy was set "
-                        + "to %s. Either add 'performance' to validated categories, or set the strategy to 'NONE'",
-                performanceValidationStrategy);
+        isTrue(configuration.isEmpty() || hasPerformance,
+                "Categories for validation doesn't contain 'performance', but performance validation configuration was"
+                        + " set. Either add 'performance' to validated categories, or remove performance validation "
+                        + "configuration.");
 
         this.attachmentPublisher = attachmentPublisher;
         this.softAssert = softAssert;
@@ -131,8 +121,7 @@ public class LighthouseSteps
         this.apiKey = apiKey;
         this.categories = categories;
         this.acceptableScorePercentageDelta = acceptableScorePercentageDelta;
-        this.performanceValidationStrategy = performanceValidationStrategy;
-        this.performanceMeasurementsNumber = performanceMeasurementsNumber;
+        this.configuration = configuration;
     }
 
     /**
@@ -301,14 +290,16 @@ public class LighthouseSteps
     private LighthouseResultV5 executePagespeedTest(String url, String strategy)
             throws IOException
     {
-        if (performanceValidationStrategy == null || performanceValidationStrategy == NONE)
+        if (configuration.isEmpty())
         {
             return executePagespeed(url, strategy, true);
         }
 
+        PerformanceValidationConfiguration unwrapped = configuration.get();
+
         Deque<LighthouseResultV5> results = new LinkedList<>();
 
-        for (int index = 0; index < performanceMeasurementsNumber; index++)
+        for (int index = 0; index < unwrapped.getMeasurementsNumber(); index++)
         {
             LighthouseResultV5 result = MEASUREMENT_WAITER.wait(() -> executePagespeed(url, strategy, true), current ->
             {
@@ -331,15 +322,21 @@ public class LighthouseSteps
             // request will be cached with long expiration time
             if (performanceScore == MAX_SCORE)
             {
-                return result;
+                break;
             }
         }
 
-        BiPredicate<LighthouseResultV5, LighthouseResultV5> resultPredicate = performanceValidationStrategy == HIGHEST
-                ? (l, r) -> getPerformanceScore(l) > getPerformanceScore(r)
-                : (l, r) -> getPerformanceScore(l) < getPerformanceScore(r);
+        return results.stream()
+                      .sorted(Comparator.comparing(this::getPerformanceScore))
+                      .collect(Collectors.collectingAndThen(Collectors.toList(),
+                              r -> percentile(r, unwrapped.getPercentile())));
+    }
 
-        return results.stream().reduce((l, r) -> resultPredicate.test(l, r) ? l : r).get();
+    @SuppressWarnings("MagicNumber")
+    private static LighthouseResultV5 percentile(List<LighthouseResultV5> results, double percentile)
+    {
+        int index = (int) Math.ceil(percentile / 100 * results.size());
+        return results.get(index - 1);
     }
 
     private LighthouseCategoryV5 getPerformance(LighthouseResultV5 result)
@@ -374,6 +371,46 @@ public class LighthouseSteps
             }
 
             throw thrown;
+        }
+    }
+
+    public static class PerformanceValidationConfiguration
+    {
+        private Integer measurementsNumber;
+        private Integer percentile;
+
+        public Integer getMeasurementsNumber()
+        {
+            return measurementsNumber;
+        }
+
+        public void setMeasurementsNumber(Integer measurementsNumber)
+        {
+            this.measurementsNumber = measurementsNumber;
+        }
+
+        public Integer getPercentile()
+        {
+            return percentile;
+        }
+
+        public void setPercentile(Integer percentile)
+        {
+            this.percentile = percentile;
+        }
+
+        private void validate()
+        {
+            validateValueIsSet(measurementsNumber, "measurements number");
+            isTrue(measurementsNumber > 0, "The measurements number value should be greater than 0.");
+            validateValueIsSet(percentile, "percentile");
+            isTrue(percentile > 0 && percentile < UPPER_PERCENTILE_LIMIT,
+                    "The percentile value should be in range between 0 and 100 exclusively.");
+        }
+
+        private static void validateValueIsSet(Integer value, String name)
+        {
+            isTrue(value != null, "The %s value of performance validation configuration should be set.", name);
         }
     }
 }
