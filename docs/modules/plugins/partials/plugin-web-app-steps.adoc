@@ -222,11 +222,13 @@ Then page is scrolled to element located by `xpath(//a[text()="Contact"])`
 
 === Text validation steps
 
+:context-description: The context can be set by the <<_change_context,corresponding steps>>. If no context is set, the text will be searched on the whole page.
+
 ==== Validate the text exists
 
 Validates that the text is presented in the current context. Expected text is *case sensitive*.
 
-The context can be set by the <<_change_context,corresponding steps>>. If no context is set, the text will be searched on the whole page.
+{context-description}
 
 [source,gherkin]
 ----
@@ -245,7 +247,7 @@ Then text `Contract Us` exists
 
 Validates that the text is not presented in the current context.
 
-The context can be set by the <<_change_context,corresponding steps>>. If no context is set, the text will be searched on the whole page.
+{context-description}
 
 [source,gherkin]
 ----
@@ -260,6 +262,30 @@ When I change context to element located by `id(code)`
 Then text `Deprecated` does not exist
 ----
 
+==== Validate the text matches regex
+
+Validates that the text from current context matches the specified regular expression.
+
+{context-description}
+
+[source,gherkin]
+----
+Then text matches `$regex`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+Then the text matches '$regex'
+----
+* `$regex` - The https://www.regular-expressions.info[regular expression] used to validate the text of the context.
+
+.Check the text with pattern 'User ".*" successfully logged in' is presented in the current context
+[source,gherkin]
+----
+When I change context to element located by `id(code)`
+Then text matches `User ".*" successfully logged in`
+----
 
 === Tab steps
 ==== Open a new tab
