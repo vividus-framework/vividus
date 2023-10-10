@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,16 +32,16 @@ public class StartContextListener implements ApplicationListener<ContextStartedE
     @Override
     public void onApplicationEvent(ContextStartedEvent event)
     {
-        cleanableDirectories.stream().flatMap(List::stream).forEach(this::deleteDirectory);
+        cleanableDirectories.stream().flatMap(List::stream).forEach(this::cleanDirectory);
     }
 
-    private void deleteDirectory(File directory)
+    private void cleanDirectory(File directory)
     {
         if (directory.exists())
         {
             try
             {
-                FileUtils.deleteDirectory(directory);
+                FileUtils.cleanDirectory(directory);
             }
             catch (IOException e)
             {

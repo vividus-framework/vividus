@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.vividus.spring;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -41,14 +40,14 @@ class StartContextListenerTests
     private final StartContextListener startContextListener = new StartContextListener();
 
     @Test
-    void shouldDeleteCleanableDirectories(@TempDir Path tempDir) throws IOException
+    void shouldCleanCleanableDirectories(@TempDir Path tempDir) throws IOException
     {
-        Path dir = tempDir.resolve("to-be-cleaned-up");
-        Files.createDirectories(dir);
-        startContextListener.setCleanableDirectories(Optional.of(List.of(dir.toFile())));
+        Files.createDirectories(tempDir.resolve("directory-to-remove"));
+        Files.createFile(tempDir.resolve("file-to-remove"));
+        startContextListener.setCleanableDirectories(Optional.of(List.of(tempDir.toFile())));
         startContextListener.onApplicationEvent(mock(ContextStartedEvent.class));
         assertTrue(Files.exists(tempDir));
-        assertFalse(Files.exists(dir));
+        assertEquals(0, Files.list(tempDir).count());
     }
 
     @Test
@@ -68,7 +67,7 @@ class StartContextListenerTests
         try (MockedStatic<FileUtils> fileUtils = mockStatic(FileUtils.class))
         {
             IOException ioException = new IOException();
-            fileUtils.when(() -> FileUtils.deleteDirectory(cleanableDirectory)).thenThrow(ioException);
+            fileUtils.when(() -> FileUtils.cleanDirectory(cleanableDirectory)).thenThrow(ioException);
             startContextListener.setCleanableDirectories(Optional.of(List.of(cleanableDirectory)));
             IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
                     () -> startContextListener.onApplicationEvent(mock(ContextStartedEvent.class)));
