@@ -144,8 +144,8 @@ class UriUtilsTests
     }
 
     @ParameterizedTest
+    // CHECKSTYLE:OFF
     @CsvSource({
-        // CHECKSTYLE:OFF
         "http://somehost:8080/path,                                   http://somehost:8080/path",
         "http://somehost:8080/path?name=goodvalue&a=b#fragment,       http://somehost:8080/path?name=goodvalue&a=b#fragment",
         "http://somehost:8080/pa | th?name=bad|value&a=b#fra| gme nt, http://somehost:8080/pa%20%7C%20th?name=bad%7Cvalue&a=b#fra%7C%20gme%20nt",
@@ -172,9 +172,13 @@ class UriUtilsTests
         "http://somehost:8080/path?key=a&key2=b,                      http://somehost:8080/path?key=a&key2=b",
         "http://somehost:8080/path-with-&-ampersand,                  http://somehost:8080/path-with-&-ampersand",
         "http://somehost:8080/path-with-%26-ampersand,                http://somehost:8080/path-with-&-ampersand",
-        "http://somehost:8080/SÖKVÄG || sätt,                         http://somehost:8080/S%C3%96KV%C3%84G%20%7C%7C%20s%C3%A4tt"
-        // CHECKSTYLE:ON
+        "http://somehost:8080/SÖKVÄG || sätt,                         http://somehost:8080/S%C3%96KV%C3%84G%20%7C%7C%20s%C3%A4tt",
+        "http://somehost:8080/sessions/TH?firstName=นฤมล&lastName=THว่องชยาภรณ์&phone=660967931096,"
+                + "http://somehost:8080/sessions/TH?firstName=%E0%B8%99%E0%B8%A4%E0%B8%A1%E0%B8%A5&lastName=TH%E0%B8%A7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B8%8A%E0%B8%A2%E0%B8%B2%E0%B8%A0%E0%B8%A3%E0%B8%93%E0%B9%8C&phone=660967931096",
+        "http://somehost:8080/sessions/TH?firstName=%E0%B8%99%E0%B8%A4%E0%B8%A1%E0%B8%A5&lastName=TH%E0%B8%A7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B8%8A%E0%B8%A2%E0%B8%B2%E0%B8%A0%E0%B8%A3%E0%B8%93%E0%B9%8C&phone=660967931096,"
+                + "http://somehost:8080/sessions/TH?firstName=%E0%B8%99%E0%B8%A4%E0%B8%A1%E0%B8%A5&lastName=TH%E0%B8%A7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B8%8A%E0%B8%A2%E0%B8%B2%E0%B8%A0%E0%B8%A3%E0%B8%93%E0%B9%8C&phone=660967931096"
     })
+    // CHECKSTYLE:ON
     void testCreateUri(String input, URI expected)
     {
         URI actual = UriUtils.createUri(input);
