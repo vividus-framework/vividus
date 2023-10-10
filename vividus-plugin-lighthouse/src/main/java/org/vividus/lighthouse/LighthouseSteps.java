@@ -72,8 +72,8 @@ public class LighthouseSteps
 
     private static final int DEFAULT_TIMEOUT = 0;
     private static final int INTERNAL_SERVER_ERROR = 500;
-    private static final int MAX_SCORE = 100;
     private static final int UPPER_PERCENTILE_LIMIT = 100;
+    private static final int MAX_CACHEABLE_SCORE = 99;
 
     private static final int MAX_CACHED_MEASUREMENT_NUMBER = 5;
     private static final Duration MEASUREMENT_WAIT_DURATION = Duration.ofSeconds(25);
@@ -318,9 +318,11 @@ public class LighthouseSteps
                            .addArgument(performanceScore)
                            .log("The performance score of the measurement #{} is {}");
 
-            // There is no point to continue measurements if we hit 100 performance because all the subsequent
-            // request will be cached with long expiration time
-            if (performanceScore == MAX_SCORE)
+            /**
+             * Experiments have shown that there is no point to continue measuring if we hit 99 or 100 performance
+             * scores because all the subsequent request will be cached with long expiration time.
+             */
+            if (performanceScore >= MAX_CACHEABLE_SCORE)
             {
                 break;
             }
