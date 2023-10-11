@@ -62,7 +62,7 @@ public class TextValidationSteps
      * Checks if the text in context matches <b>regex</b>
      * @param regex Expected regular expression
      */
-    @Then("the text matches '$regex'")
+    @Then("text matches `$regex`")
     public void ifTextMatchesRegex(Pattern regex)
     {
         uiContext.getOptionalSearchContext().ifPresent(searchContext ->

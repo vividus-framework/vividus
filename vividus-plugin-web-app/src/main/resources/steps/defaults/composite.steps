@@ -117,6 +117,10 @@ Composite: Then the text '$text' exists
 !-- DEPRECATED: 0.7.0, Then text `%1$s` exists
 Then text `<text>` exists
 
+Composite: Then the text matches '$regex'
+!-- DEPRECATED: 0.7.0, Then text matches `%1$s`
+Then text matches `<regex>`
+
 Composite: When I set focus to the context element
 !-- DEPRECATED: 0.7.0, When I set focus on context element
 When I set focus on context element
