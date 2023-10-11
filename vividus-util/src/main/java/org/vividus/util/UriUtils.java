@@ -292,6 +292,7 @@ public final class UriUtils
             {
                 encodedUriPart = encodedUriPart.replace(DOUBLE_ENCODED_AMPERSAND, ENCODED_AMPERSAND);
             }
+            encodedUriPart = encodeNonAsciiChars(encodedUriPart);
             int indexOfUriPart = normalizedUri.indexOf(uriPart);
             normalizedUri.replace(indexOfUriPart, indexOfUriPart + uriPart.length(), encodedUriPart);
         }
