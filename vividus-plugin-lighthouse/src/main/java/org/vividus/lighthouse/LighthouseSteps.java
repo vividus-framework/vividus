@@ -204,7 +204,8 @@ public class LighthouseSteps
                 if (checkpointScore >= baselineScore)
                 {
                     softAssert.recordPassedAssertion(String.format(
-                            "[%s] The %s audit passed because the checkpoint score (%s) was higher than the baseline score (%s)",
+                            "[%s] The %s audit passed because the checkpoint score (%s) was higher than or equal to the"
+                                    + " baseline score (%s)",
                             strategy, categoryKey, checkpointScore, baselineScore));
                     return;
                 }
@@ -215,8 +216,8 @@ public class LighthouseSteps
                 if (scoreDecrease <= acceptableScorePercentageDelta)
                 {
                     softAssert.recordPassedAssertion(String.format(
-                            "[%s] The %s audit passed because the checkpoint score (%s) is within the acceptable delta of %s percent"
-                            + " from baseline score (%s)",
+                            "[%s] The %s audit passed because the checkpoint score (%s) is within the acceptable delta "
+                                    + "of %s percent from baseline score (%s)",
                             strategy, categoryKey, checkpointScore, acceptableScorePercentageDelta, baselineScore));
                     return;
                 }
