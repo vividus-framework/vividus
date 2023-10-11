@@ -502,14 +502,14 @@ class LighthouseStepsTests
 
                 steps.performLighthouseScanWithComparison(ScanType.DESKTOP, checkpointUrl, baselineUrl);
 
-                verify(softAssert).recordPassedAssertion("[desktop] The performance audit is passed as checkpoint "
-                        + "score (90) is not less than baseline score (90)");
-                verify(softAssert).recordPassedAssertion("[desktop] The seo audit is passed as checkpoint score (95)"
-                        + " is not less than baseline score (90)");
-                verify(softAssert).recordPassedAssertion("[desktop] The best-practices audit is passed as checkpoint"
-                        + " score (89) fits acceptable delta in 5 percents from baseline score (90)");
-                verify(softAssert)
-                        .recordFailedAssertion("[desktop] The accessibility audit score is degraded on 77 percents");
+                verify(softAssert).recordPassedAssertion("[desktop] The performance audit passed because the checkpoint"
+                        + " score (90) was higher than or equal to the baseline score (90)");
+                verify(softAssert).recordPassedAssertion("[desktop] The seo audit passed because the checkpoint score "
+                        + "(95) was higher than or equal to the baseline score (90)");
+                verify(softAssert).recordPassedAssertion("[desktop] The best-practices audit passed because the "
+                        + "checkpoint score (89) is within the acceptable delta of 5 percent from baseline score (90)");
+                verify(softAssert).recordFailedAssertion("[desktop] The accessibility audit score has decreased by 77 "
+                        + "percent");
                 verifyNoMoreInteractions(softAssert);
 
                 verify(attachmentPublisher).publishAttachment(
