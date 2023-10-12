@@ -34,6 +34,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -46,6 +47,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -90,6 +92,7 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.FailableRunnable;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
+import org.vividus.util.Sleeper;
 
 @SuppressWarnings("MethodCount")
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -185,7 +188,7 @@ class LighthouseStepsTests
     @Test
     void shouldFailIfCantGetUncachedResultParticularNumberOfTimes() throws Exception
     {
-        performTest(() ->
+        performTest(() -> runWithMockedSleeper(() ->
         {
             PagespeedApiPagespeedResponseV5 response = mock();
             Pagespeedapi api = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, response);
@@ -201,7 +204,7 @@ class LighthouseStepsTests
             IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
                     () -> steps.performLighthouseScan(ScanType.DESKTOP, URL, metricsValidations));
             assertEquals("Unable to get non-cached result after 5 measurement retries", thrown.getMessage());
-        });
+        }, 5));
     }
 
     @Test
@@ -278,47 +281,50 @@ class LighthouseStepsTests
         {
             mockRun();
 
-            PagespeedApiPagespeedResponseV5 firstResponse = mock();
-            Pagespeedapi firstApi = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, firstResponse);
-            LighthouseResultV5 firstResult = createLighthouseResult(0.50, 0.50, 0.50, 0.50);
-            when(firstResponse.getLighthouseResult()).thenReturn(firstResult);
+            runWithMockedSleeper(() ->
+            {
+                PagespeedApiPagespeedResponseV5 firstResponse = mock();
+                Pagespeedapi firstApi = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, firstResponse);
+                LighthouseResultV5 firstResult = createLighthouseResult(0.50, 0.50, 0.50, 0.50);
+                when(firstResponse.getLighthouseResult()).thenReturn(firstResult);
 
-            PagespeedApiPagespeedResponseV5 firstResponseCached = mock();
-            Pagespeedapi firstApiCached = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, firstResponseCached);
-            LighthouseResultV5 firstResultCached = createLighthouseResult(0.50, 0.50, 0.50, 0.50);
-            when(firstResponseCached.getLighthouseResult()).thenReturn(firstResultCached);
+                PagespeedApiPagespeedResponseV5 firstResponseCached = mock();
+                Pagespeedapi firstApiCached = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, firstResponseCached);
+                LighthouseResultV5 firstResultCached = createLighthouseResult(0.50, 0.50, 0.50, 0.50);
+                when(firstResponseCached.getLighthouseResult()).thenReturn(firstResultCached);
 
-            PagespeedApiPagespeedResponseV5 secondResponse = mock();
-            Pagespeedapi secondApi = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, secondResponse);
-            LighthouseResultV5 secondResult = createLighthouseResult(score, score, score, score);
-            when(secondResponse.getLighthouseResult()).thenReturn(secondResult);
-            mockMetricItems(secondResult, new ArrayMap<>());
-            when(jsonFactory.toString(secondResult)).thenReturn(RESULT_AS_STRING);
-            when(jsonFactory.toPrettyString(any())).thenReturn(RESULT_AS_STRING);
+                PagespeedApiPagespeedResponseV5 secondResponse = mock();
+                Pagespeedapi secondApi = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, secondResponse);
+                LighthouseResultV5 secondResult = createLighthouseResult(score, score, score, score);
+                when(secondResponse.getLighthouseResult()).thenReturn(secondResult);
+                mockMetricItems(secondResult, new ArrayMap<>());
+                when(jsonFactory.toString(secondResult)).thenReturn(RESULT_AS_STRING);
+                when(jsonFactory.toPrettyString(any())).thenReturn(RESULT_AS_STRING);
 
-            PagespeedApiPagespeedResponseV5 thirdResponse = mock();
-            Pagespeedapi thirdApi = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, thirdResponse);
-            LighthouseResultV5 thirdResult = createLighthouseResult(0.70, 0.70, 0.70, 0.70);
-            when(thirdResponse.getLighthouseResult()).thenReturn(thirdResult);
+                PagespeedApiPagespeedResponseV5 thirdResponse = mock();
+                Pagespeedapi thirdApi = mockPagespeedapiCall(URL, DESKTOP_STRATEGY, thirdResponse);
+                LighthouseResultV5 thirdResult = createLighthouseResult(0.70, 0.70, 0.70, 0.70);
+                when(thirdResponse.getLighthouseResult()).thenReturn(thirdResult);
 
-            when(pagespeedInsights.pagespeedapi()).thenReturn(firstApi).thenReturn(firstApiCached).thenReturn(secondApi)
-                    .thenReturn(thirdApi);
+                when(pagespeedInsights.pagespeedapi()).thenReturn(firstApi).thenReturn(firstApiCached)
+                        .thenReturn(secondApi).thenReturn(thirdApi);
 
-            LighthouseSteps steps = createSteps(CATEGORIES, 0,
-                    createConfiguration(DEFAULT_MEASUREMENTS_NUMBER, percentile));
+                LighthouseSteps steps = createSteps(CATEGORIES, 0,
+                        createConfiguration(DEFAULT_MEASUREMENTS_NUMBER, percentile));
 
-            MetricRule perfScoreRule = createRule(PERF_SCORE_METRIC, 85, ComparisonRule.GREATER_THAN);
-            steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of(perfScoreRule));
+                MetricRule perfScoreRule = createRule(PERF_SCORE_METRIC, 85, ComparisonRule.GREATER_THAN);
+                steps.performLighthouseScan(ScanType.DESKTOP, URL, List.of(perfScoreRule));
 
-            BigDecimal performanceScore = (BigDecimal) secondResult.getCategories().getPerformance().getScore();
-            validateMetric(DESKTOP_STRATEGY, perfScoreRule, alignScore(performanceScore), GREATER_VALUE_FORMAT);
-            verifyNoMoreInteractions(pagespeedInsights);
+                BigDecimal performanceScore = (BigDecimal) secondResult.getCategories().getPerformance().getScore();
+                validateMetric(DESKTOP_STRATEGY, perfScoreRule, alignScore(performanceScore), GREATER_VALUE_FORMAT);
+                verifyNoMoreInteractions(pagespeedInsights);
 
-            assertThat(logger.getLoggingEvents(), is(List.of(
-                info(PERFORMANCE_SCORE_LOG, 1, getPerformanceScore(firstResult).intValue()),
-                info(PERFORMANCE_SCORE_LOG, 2, getPerformanceScore(secondResult).intValue()),
-                info(PERFORMANCE_SCORE_LOG, 3, getPerformanceScore(thirdResult).intValue())
-            )));
+                assertThat(logger.getLoggingEvents(), is(List.of(
+                    info(PERFORMANCE_SCORE_LOG, 1, getPerformanceScore(firstResult).intValue()),
+                    info(PERFORMANCE_SCORE_LOG, 2, getPerformanceScore(secondResult).intValue()),
+                    info(PERFORMANCE_SCORE_LOG, 3, getPerformanceScore(thirdResult).intValue())
+                )));
+            }, 1);
         });
     }
 
@@ -533,6 +539,16 @@ class LighthouseStepsTests
         categories.setBestPractices(createCategory(bestPractices));
 
         return results;
+    }
+
+    private static void runWithMockedSleeper(FailableRunnable<Exception> runnable, int times) throws Exception
+    {
+        try (MockedStatic<Sleeper> sleeper = mockStatic(Sleeper.class))
+        {
+            runnable.run();
+
+            sleeper.verify(() -> Sleeper.sleep(25000L, TimeUnit.MILLISECONDS), times(times));
+        }
     }
 
     private static LighthouseCategoryV5 createCategory(double score)
