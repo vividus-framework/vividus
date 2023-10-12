@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.util.property.IPropertyMapper;
 
-public class BatchStorage
+public final class BatchStorage
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchStorage.class);
 

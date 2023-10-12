@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
@@ -394,7 +395,7 @@ class CollectingStatisticsStoryReporterTests
 
     private String readStatistics(Path tempDirectory) throws IOException
     {
-        return Files.readString(tempDirectory.resolve("statistics.json")).replaceAll("\\r", "");
+        return Files.readString(tempDirectory.resolve("statistics.json"), StandardCharsets.UTF_8).replaceAll("\\r", "");
     }
 
     @SuppressWarnings({ "MethodLength", "PMD.ExcessiveMethodLength", "PMD.NcssCount" })

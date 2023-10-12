@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.vividus.testcontext.TestContext;
 import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.util.property.PropertyMapper;
 
-public class DynamicConfigurationManager<T>
+public final class DynamicConfigurationManager<T>
 {
     private final String configurationDefinition;
     private final PropertyMappedCollection<T> staticConfigurations;

@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.vividus.model.IntegerRange;
 import org.vividus.testcontext.TestContext;
 
-public class ThreadedProxy implements IProxy
+public final class ThreadedProxy implements IProxy
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadedProxy.class);
 

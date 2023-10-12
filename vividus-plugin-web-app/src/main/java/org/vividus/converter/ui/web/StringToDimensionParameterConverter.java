@@ -19,6 +19,7 @@ package org.vividus.converter.ui.web;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 import org.openqa.selenium.Dimension;
 
@@ -37,13 +38,10 @@ public class StringToDimensionParameterConverter extends FunctionalParameterConv
     public static Dimension convert(String dimensionAsString)
     {
         Matcher matcher = DIMENSION_PATTERN.matcher(dimensionAsString);
-        if (matcher.matches())
-        {
-            int width = Integer.parseInt(matcher.group(1));
-            int height = Integer.parseInt(matcher.group(2));
-            return new Dimension(width, height);
-        }
-        throw new IllegalArgumentException(
-                "Provided size = " + dimensionAsString + " has wrong format. Example of correct format: 800x600");
+        Validate.isTrue(matcher.matches(), "Provided size = %s has wrong format. Example of correct format: 800x600",
+                dimensionAsString);
+        int width = Integer.parseInt(matcher.group(1));
+        int height = Integer.parseInt(matcher.group(2));
+        return new Dimension(width, height);
     }
 }

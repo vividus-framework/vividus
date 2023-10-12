@@ -54,7 +54,7 @@ import jakarta.mail.event.MessageCountEvent;
 import jakarta.mail.event.MessageCountListener;
 import jakarta.mail.search.SearchTerm;
 
-public class ImapFetchService implements EmailFetchService
+public final class ImapFetchService implements EmailFetchService
 {
     private static final String PROTOCOL = "imaps";
 

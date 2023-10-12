@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -163,7 +164,8 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
     private void createJsonFileInResultsDirectory(String fileName, Object content) throws IOException
     {
-        try (BufferedWriter writer = Files.newBufferedWriter(resultsDirectory.toPath().resolve(fileName)))
+        Path filePath = resultsDirectory.toPath().resolve(fileName);
+        try (BufferedWriter writer = Files.newBufferedWriter(filePath, StandardCharsets.UTF_8))
         {
             objectMapper.writeValue(writer, content);
         }

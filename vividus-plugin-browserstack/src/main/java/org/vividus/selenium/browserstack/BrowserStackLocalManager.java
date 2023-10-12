@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ public class BrowserStackLocalManager implements TunnelManager<TunnelOptions>
         testContext.put(KEY, connection);
     }
 
-    private class BrowserStackLocalConnection
+    private final class BrowserStackLocalConnection
     {
         private static final String PAC_FORMAT = "function FindProxyForURL(url, host) "
                 + "{ if (shExpMatch(host, \"*.browserstack.com\")) { return \"DIRECT\"; }return \"PROXY %s\"; }";
