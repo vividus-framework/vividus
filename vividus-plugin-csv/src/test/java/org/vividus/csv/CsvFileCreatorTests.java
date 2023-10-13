@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.vividus.csv;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -99,6 +100,6 @@ class CsvFileCreatorTests
     private void verifyCsvFile(Path outputDirectory, String subDirectory, List<String> expectedLines) throws IOException
     {
         Path csvFile = outputDirectory.resolve(subDirectory).resolve(FILE_NAME);
-        assertEquals(expectedLines, Files.readAllLines(csvFile));
+        assertEquals(expectedLines, Files.readAllLines(csvFile, StandardCharsets.UTF_8));
     }
 }

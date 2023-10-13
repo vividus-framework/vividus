@@ -23,7 +23,7 @@ import com.applitools.eyes.SessionAccessibilityStatus;
 
 import org.apache.hc.core5.net.URIBuilder;
 
-public class AccessibilityCheckResult
+public final class AccessibilityCheckResult
 {
     private static final String GUIDELINE_FORMAT = "%s - %s";
 

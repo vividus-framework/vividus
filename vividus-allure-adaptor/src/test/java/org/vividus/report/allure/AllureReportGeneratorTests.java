@@ -287,7 +287,8 @@ class AllureReportGeneratorTests
 
     private void assertIndexHtml(Path reportDirectory) throws IOException
     {
-        assertThat(Files.readString(reportDirectory.resolve(INDEX_HTML)), not(containsString("googletagmanager")));
+        assertThat(Files.readString(reportDirectory.resolve(INDEX_HTML), StandardCharsets.UTF_8),
+                not(containsString("googletagmanager")));
     }
 
     private void assertSummaryJson(Path reportDirectory) throws IOException
@@ -366,7 +367,7 @@ class AllureReportGeneratorTests
 
     private static void assertFile(Path directory, String fileName, String expected) throws IOException
     {
-        assertEquals(expected, Files.readString(directory.resolve(fileName)).replace("\r", ""));
+        assertEquals(expected, Files.readString(directory.resolve(fileName), StandardCharsets.UTF_8).replace("\r", ""));
     }
 
     private Resource mockResource(String asString) throws IOException

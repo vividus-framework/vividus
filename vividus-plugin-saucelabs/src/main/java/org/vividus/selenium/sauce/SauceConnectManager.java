@@ -132,7 +132,7 @@ public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
         testContext.put(KEY, sauceConnectDescriptor);
     }
 
-    class SauceConnectDescriptor
+    static final class SauceConnectDescriptor
     {
         private final String tunnelName;
         private final int port;

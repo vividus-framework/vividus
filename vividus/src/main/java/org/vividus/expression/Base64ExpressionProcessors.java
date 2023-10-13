@@ -29,7 +29,7 @@ import org.jbehave.core.expressions.DelegatingExpressionProcessor;
 import org.jbehave.core.expressions.SingleArgExpressionProcessor;
 import org.vividus.util.ResourceUtils;
 
-public class Base64ExpressionProcessors extends DelegatingExpressionProcessor
+public final class Base64ExpressionProcessors extends DelegatingExpressionProcessor
 {
     public Base64ExpressionProcessors()
     {

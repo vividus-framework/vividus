@@ -28,7 +28,7 @@ import org.jbehave.core.expressions.RelaxedMultiArgExpressionProcessor;
 import org.jbehave.core.steps.ParameterConverters.FluentEnumConverter;
 import org.vividus.util.ResourceUtils;
 
-public class HashExpressionProcessors extends DelegatingExpressionProcessor
+public final class HashExpressionProcessors extends DelegatingExpressionProcessor
 {
     public HashExpressionProcessors(FluentEnumConverter fluentEnumConverter)
     {

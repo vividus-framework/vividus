@@ -58,7 +58,7 @@ import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.wait.MaxTimesBasedWaiter;
 
-public class LighthouseSteps
+public final class LighthouseSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(LighthouseSteps.class);
 
