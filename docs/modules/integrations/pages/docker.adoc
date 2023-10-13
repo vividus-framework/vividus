@@ -46,3 +46,64 @@ VIVIDUS Docker image includes:
     * `snowflake-jdbc` (Snowflake)
 
 IMPORTANT: VIVIDUS Docker image doesn't contain any browsers.
+
+== How to build an image with tests and publish it to Docker registry
+
+The image is built using the https://hub.docker.com/r/vividus/vividus[VIVIDUS docker image] as its base, and its version aligns with the version of VIVIDUS used in the project. The final image name is derived from the project name, and the image tag reflects the version of the tests.
+
+WARNING: It's advisible to use release versions of VIVIDUS in your project when building images with tests as the previously pulled snapshot version of VIVIDUS docker image used as a base image may differ from the latest snapshot version of VIVIDUS docker image available on Docker Hub.
+
+The building and publishing process is configured using environment variables or https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties[project properties], please note the configuration defined using environment variables takes precedence over the configuration defined using project properties.
+
+[cols="2,1,3", options="header"]
+|===
+
+|Environment variable
+|Project property
+|Required
+|Description
+
+|`DOCKER_REGISTRY_URL`
+|`docker.registry-url`
+|`false`
+|The URL of Docker registry to publish image to
+
+|`DOCKER_REPOSITORY_PATH`
+|`docker.repository-path`
+|`true`
+a| For https://hub.docker.com/[Docker Hub] the repository path is the Docker Hub username
+For private docker registries the repository path should follow `<registry host>/<repository name>` pattern e.g. `myapps.jfrog.io/tests-docker-release`
+
+|`DOCKER_REGISTRY_USERNAME`
+|
+|`false`
+|The docker registry username, if it's set, the password must be specified as well
+
+|`DOCKER_REGISTRY_PASSWORD`
+|
+|`false`
+|The docker registry password, if it's set, the username must be specified as well
+
+|===
+
+. Assuming there is a project containing VIVIDUS-based tests (e.g. https://github.com/vividus-framework/vividus-starter[VIVIDUS Starter])
+. Go to the project root directory
++
+[source,bash]
+----
+cd vividus-starter
+----
+
+. Build and publish docker image with tests to docker registry
++
+[source,bash]
+----
+./gradlew pushTestsImage
+----
+
+. Optionally run the tests from the docker image
++
+[source,bash]
+----
+docker run --rm --mount source="<directory to store test results>",target=/vividus/output,type=bind <image name>
+----
