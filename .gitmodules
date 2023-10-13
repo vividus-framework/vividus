@@ -1,7 +1,8 @@
-[submodule "vividus-build-system"]
-	path = vividus-build-system
-	url = https://github.com/vividus-framework/vividus-build-system.git
 [submodule "vividus-plugin-lighthouse/src/main/resources/allure-customization/webjars/vividus-lighthouse-viewer-adaptation"]
 	path = vividus-plugin-lighthouse/src/main/resources/allure-customization/webjars/vividus-lighthouse-viewer-adaptation
 	url = https://github.com/vividus-framework/vividus-lighthouse-viewer-adaptation
 	branch = viewer-332888a0bba5614283e456cc289f03a0fdc5257c
+[submodule "vividus-build-system"]
+	path = vividus-build-system
+	url = https://github.com/PavelSakharchuk/contribut_vividus-build-system.git
+	branch = add_add-opens_for_reflection
