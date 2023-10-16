@@ -148,3 +148,59 @@ selenium.grid.platform-version=13.0
 # https://docs.saucelabs.com/mobile-apps/app-storage/
 selenium.grid.capabilities.app=myapp.apk
 ----
+
+== Sauce Orchestrate
+
+The https://docs.saucelabs.com/orchestrate/[Sauce Orchestrate] is a new and unique approach to web and mobile application testing that increases test execution speed and enables end-to-end test orchestration.
+
+Prerequisites to install:
+
+* https://docs.saucelabs.com/dev/cli/saucectl/[saucectl]
+* https://www.docker.com/get-started/[Docker]
+
+How to run VIVIDUS steps using Sauce Orchestrate:
+
+. Go to the project root directory.
+. Build a docker image with tests and push it to a docker registry as described in this xref:integrations:docker.adoc#_how_to_build_an_image_with_tests_and_publish_it_to_docker_registry[article].
+. Create a `.sauce/config.yml` file in the project root with the following content:
++
+[source,yml]
+----
+apiVersion: v1alpha
+kind: imagerunner
+sauce:
+  region: us-west-1
+suites:
+  - name: VIVIDUS test suite
+    workload: webdriver
+    resourceProfile: c2m2
+    # replace the image value with the actual one
+    image: vividus.jfrog.io/tests-docker-release/vividus-sample-tests:0.1.0-SNAPSHOT
+    imagePullAuth:
+      user: $DOCKER_REGISTRY_USERNAME
+      token: $DOCKER_REGISTRY_PASSWORD
+    artifacts:
+      - '/vividus/output/reports/*'
+
+artifacts:
+  cleanup: true
+  download:
+    when: always
+    match:
+      - "*"
+    directory: ./report
+----
++
+[TIP]
+====
+* Please see https://docs.saucelabs.com/orchestrate/saucectl-configuration/[saucectl configuration] for more details.
+* Make sure `region` configuration value corresponds to the region specified by the `saucelabs.data-center` property, please see https://docs.saucelabs.com/orchestrate/saucectl-configuration/#region[region] docs for mapping.
+* The `DOCKER_REGISTRY_USERNAME` and `DOCKER_REGISTRY_PASSWORD` are expected to be set during the 2nd step of the guide.
+====
+. Start tests by using `saucectl`:
++
+[source,bash]
+----
+saucectl run
+----
+. Wait until the tests run is finished and see `report` folder in the project root for reports.
