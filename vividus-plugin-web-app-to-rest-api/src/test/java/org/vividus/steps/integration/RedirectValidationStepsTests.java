@@ -28,6 +28,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
@@ -88,7 +89,7 @@ class RedirectValidationStepsTests
     }
 
     @Test
-    void shouldSuccessValidateRedirects()
+    void shouldSuccessValidateRedirects() throws IOException
     {
         when(redirectsProvider.getRedirects(any(URI.class))).thenReturn(Collections.singletonList(REDIRECT_URL));
         redirectValidationSteps.validateRedirects(initParameters(REDIRECT_URL, REDIRECTS_NUMBER));
@@ -104,7 +105,7 @@ class RedirectValidationStepsTests
     }
 
     @Test
-    void shouldSuccessValidateRedirectsWithoutRedirectsNumber()
+    void shouldSuccessValidateRedirectsWithoutRedirectsNumber() throws IOException
     {
         when(redirectsProvider.getRedirects(any(URI.class))).thenReturn(Collections.singletonList(REDIRECT_URL));
         redirectValidationSteps.validateRedirects(initParameters(REDIRECT_URL, null));
@@ -120,7 +121,7 @@ class RedirectValidationStepsTests
     }
 
     @Test
-    void shouldValidateRedirectsWithWrongRedirectUrl()
+    void shouldValidateRedirectsWithWrongRedirectUrl() throws IOException
     {
         when(redirectsProvider.getRedirects(any(URI.class)))
                 .thenReturn(Collections.singletonList(URL_WITH_REDIRECT_RESPONSE));
@@ -150,13 +151,13 @@ class RedirectValidationStepsTests
     }
 
     @Test
-    void shouldValidateRedirectsWithCircularRedirectException()
+    void shouldValidateRedirectsWithCircularRedirectException() throws IOException
     {
         String circularExceptionMsg = "Circular exception appears";
-        var illegalStateException = new IllegalStateException(circularExceptionMsg);
-        when(redirectsProvider.getRedirects(any(URI.class))).thenThrow(illegalStateException);
+        var ioException = new IOException(circularExceptionMsg);
+        when(redirectsProvider.getRedirects(any(URI.class))).thenThrow(ioException);
         redirectValidationSteps.validateRedirects(initParameters(REDIRECT_URL, REDIRECTS_NUMBER));
-        verify(softAssert).recordFailedAssertion(ArgumentMatchers.isA(IllegalStateException.class));
+        verify(softAssert).recordFailedAssertion(ArgumentMatchers.isA(IOException.class));
         RedirectValidationState result = verifyAttachmentAndCaptureResult().get(0);
         verifyStartEndActualUrlSet(result, REDIRECT_URL, null);
         assertFalse(result.isPassed());
@@ -164,7 +165,7 @@ class RedirectValidationStepsTests
     }
 
     @Test
-    void shouldValidateRedirectsWithWrongRedirectNumber()
+    void shouldValidateRedirectsWithWrongRedirectNumber() throws IOException
     {
         int wrongRedirectsNumber = 2;
         int actualRedirectsNumber = 1;
@@ -186,7 +187,7 @@ class RedirectValidationStepsTests
     }
 
     @Test
-    void shouldValidateRedirectsWithWrongRedirectUrlAndRedirectsNumber()
+    void shouldValidateRedirectsWithWrongRedirectUrlAndRedirectsNumber() throws IOException
     {
         int wrongRedirectsNumber = 2;
         when(redirectsProvider.getRedirects(any(URI.class)))
@@ -203,7 +204,7 @@ class RedirectValidationStepsTests
     }
 
     @Test
-    void shouldValidateRedirectsWithNoRedirect()
+    void shouldValidateRedirectsWithNoRedirect() throws IOException
     {
         int redirectsNumber = 0;
         when(redirectsProvider.getRedirects(any(URI.class))).thenReturn(List.of());

@@ -21,9 +21,11 @@ import java.net.URI;
 import java.util.List;
 
 import org.apache.hc.client5.http.CircularRedirectException;
+import org.apache.hc.client5.http.HttpResponseException;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.HttpStatus;
 import org.vividus.http.client.ExternalServiceException;
+import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 
 public class HttpRedirectsProvider
@@ -32,20 +34,20 @@ public class HttpRedirectsProvider
 
     /**
      * Executes HEAD request to get redirects.
-     * Throws IllegalStateException in case of status code outside of "200-207"
+     * Throws HttpResponseException in case of status code outside of "200-207"
      * @param from URI to issue HEAD request
      * @return List of redirects. Empty list if there are no redirects.
      */
-    public List<URI> getRedirects(URI from)
+    @SuppressWarnings("AvoidHidingCauseException")
+    public List<URI> getRedirects(URI from) throws IOException
     {
+        HttpClientContext httpContext = HttpClientContext.create();
+        HttpResponse response;
         try
         {
-            HttpClientContext httpContext = HttpClientContext.create();
-            httpClient.doHttpHead(from, httpContext).verifyStatusCodeInRange(HttpStatus.SC_OK,
-                    HttpStatus.SC_MULTI_STATUS);
-            return httpContext.getRedirectLocations().getAll();
+            response = httpClient.doHttpHead(from, httpContext);
         }
-        catch (IOException | ExternalServiceException e)
+        catch (IOException e)
         {
             String exceptionMsg;
             if (e.getCause() instanceof CircularRedirectException)
@@ -58,8 +60,17 @@ public class HttpRedirectsProvider
             {
                 exceptionMsg = e.getMessage();
             }
-            throw new IllegalStateException(exceptionMsg, e);
+            throw new IOException(exceptionMsg, e);
         }
+        try
+        {
+            response.verifyStatusCodeInRange(HttpStatus.SC_OK, HttpStatus.SC_MULTI_STATUS);
+        }
+        catch (ExternalServiceException e)
+        {
+            throw new HttpResponseException(response.getStatusCode(), e.getMessage());
+        }
+        return httpContext.getRedirectLocations().getAll();
     }
 
     public void setHttpClient(IHttpClient httpClient)

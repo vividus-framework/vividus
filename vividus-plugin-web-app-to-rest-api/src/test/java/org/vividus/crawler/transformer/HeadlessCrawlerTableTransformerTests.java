@@ -44,6 +44,8 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.apache.hc.client5.http.HttpResponseException;
+import org.apache.hc.core5.http.HttpStatus;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.steps.ParameterConverters;
@@ -140,11 +142,11 @@ class HeadlessCrawlerTableTransformerTests
         transformer.setFilterRedirects(true);
         transformer.setSeedRelativeUrls(toSet(PATH2, PATH3));
         URI outgoingURI = URI.create(OUTGOING_ABSOLUT_URL);
-        IllegalStateException illegalStateException = new IllegalStateException();
-        when(redirectsProvider.getRedirects(outgoingURI)).thenThrow(illegalStateException);
+        var httpResponseException = new HttpResponseException(HttpStatus.SC_NOT_FOUND, "");
+        when(redirectsProvider.getRedirects(outgoingURI)).thenThrow(httpResponseException);
         Set<String> urls = testFetchUrls(ROOT, List.of(PATH2, SLASH_PATH3));
         assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
-        assertThat(logger.getLoggingEvents(), is(List.of(warn(illegalStateException,
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(httpResponseException,
                 "Exception during redirects receiving"))));
     }
 
