@@ -16,6 +16,7 @@
 
 package org.vividus.crawler.transformer;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +86,7 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
                 return Optional.of(redirects.get(redirects.size() - 1));
             }
         }
-        catch (IllegalStateException e)
+        catch (IOException e)
         {
             logger.warn("Exception during redirects receiving", e);
         }

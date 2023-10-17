@@ -34,6 +34,8 @@ import java.util.Set;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 
+import org.apache.hc.client5.http.HttpResponseException;
+import org.apache.hc.core5.http.HttpStatus;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.steps.ParameterConverters;
@@ -169,20 +171,21 @@ class SiteMapTableTransformerTests
     }
 
     @Test
-    void testThrowIllegalStateException() throws SiteMapParseException
+    void testThrowHttpResponseException() throws SiteMapParseException, IOException
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(SITEMAP_URLS);
         siteMapTableTransformer.setFilterRedirects(true);
-        var exception = new IllegalStateException();
-        when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUT_URL))).thenThrow(exception);
+        var httpResponseException = new HttpResponseException(HttpStatus.SC_NOT_FOUND, "");
+        when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUT_URL))).thenThrow(httpResponseException);
         var actual = siteMapTableTransformer.fetchUrls(createTableProperties());
         assertEquals(Set.of(OUTGOING_ABSOLUT_URL), actual);
-        assertThat(logger.getLoggingEvents(), is(List.of(warn(exception, "Exception during redirects receiving"))));
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(warn(httpResponseException, "Exception during redirects receiving"))));
     }
 
     @Test
-    void testNoRedirects() throws SiteMapParseException
+    void testNoRedirects() throws SiteMapParseException, IOException
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(SITEMAP_URLS);

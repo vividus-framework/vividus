@@ -16,6 +16,7 @@
 
 package org.vividus.steps.integration;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -140,7 +141,7 @@ public class RedirectValidationSteps
                 }
             }
         }
-        catch (IllegalStateException e)
+        catch (IOException e)
         {
             validationState.fail(e.getMessage());
             softAssert.recordFailedAssertion(e);

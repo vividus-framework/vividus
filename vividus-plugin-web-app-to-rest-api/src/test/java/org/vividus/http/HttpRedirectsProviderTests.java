@@ -28,9 +28,11 @@ import java.util.List;
 
 import org.apache.hc.client5.http.CircularRedirectException;
 import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.HttpResponseException;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.protocol.RedirectLocations;
 import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.ProtocolException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -58,15 +60,15 @@ class HttpRedirectsProviderTests
             HttpResponse httpResponse = new HttpResponse();
             httpResponse.setStatusCode(HttpStatus.SC_BAD_GATEWAY);
             when(httpClient.doHttpHead(URI_EXAMPLES, httpClientContext)).thenReturn(httpResponse);
-            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
+            var httpResponseException = assertThrows(HttpResponseException.class,
                     () -> redirectsProvider.getRedirects(URI_EXAMPLES));
-            assertEquals("Service returned response with unexpected status code: [502]. Expected code from range "
-                    + "[200 - 207]", illegalStateException.getMessage());
+            assertEquals("status code: 502, reason phrase: Service returned response with unexpected status code: "
+                    + "[502]. Expected code from range [200 - 207]", httpResponseException.getMessage());
         }
     }
 
     @Test
-    void shouldUpdateErrorMessageAndRethrowAsIllegalStateExceptionInCaseOfCircularRedirectException() throws IOException
+    void shouldUpdateErrorMessageAndRethrowAsIoExceptionInCaseOfCircularRedirectException() throws IOException
     {
         try (MockedStatic<HttpClientContext> httpClientContextMock = mockStatic(HttpClientContext.class))
         {
@@ -74,11 +76,26 @@ class HttpRedirectsProviderTests
             ClientProtocolException clientProtocolException = new ClientProtocolException(
                     new CircularRedirectException("Circular reference"));
             when(httpClient.doHttpHead(URI_EXAMPLES, httpClientContext)).thenThrow(clientProtocolException);
-            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
-                    () -> redirectsProvider.getRedirects(URI_EXAMPLES));
+            var ioException = assertThrows(IOException.class, () -> redirectsProvider.getRedirects(URI_EXAMPLES));
             assertEquals("Circular reference Circular redirects are forbidden by default. To allow them, please set "
                             + "property 'http.redirects-provider.circular-redirects-allowed=true'",
-                    illegalStateException.getMessage());
+                    ioException.getMessage());
+        }
+    }
+
+    @Test
+    void shouldUpdateErrorMessageAndRethrowAsIoExceptionInCaseOfNotCircularRedirectException() throws IOException
+    {
+        try (MockedStatic<HttpClientContext> httpClientContextMock = mockStatic(HttpClientContext.class))
+        {
+            String protocolExceptionMessage = "Redirect URI does not specify a valid host name";
+            httpClientContextMock.when(HttpClientContext::create).thenReturn(httpClientContext);
+            var protocolException = new ProtocolException(protocolExceptionMessage);
+            var clientProtocolException = new ClientProtocolException(protocolException.getMessage(),
+                    protocolException);
+            when(httpClient.doHttpHead(URI_EXAMPLES, httpClientContext)).thenThrow(clientProtocolException);
+            var ioException = assertThrows(IOException.class, () -> redirectsProvider.getRedirects(URI_EXAMPLES));
+            assertEquals(protocolExceptionMessage, ioException.getMessage());
         }
     }
 
