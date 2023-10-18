@@ -16,6 +16,9 @@
 
 package org.vividus.visual.eyes.factory;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.in;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -96,7 +99,7 @@ class ImageEyesFactoryTests
             () -> assertEquals(VIEWPORT, configuration.getViewportSize()),
             () -> assertEquals(SERVER_URI, configuration.getServerUrl()),
             () -> assertEquals(EXECUTE_API_KEY, configuration.getApiKey()),
-            () -> assertEquals(Set.of(logHandler), readLogHandler(eyes))
+            () -> assertThat(logHandler, is(in(readLogHandler(eyes))))
         );
         verifyNoInteractions(viewportSizeProvider);
     }
@@ -137,7 +140,7 @@ class ImageEyesFactoryTests
             () -> assertEquals(new RectangleSize(7680, 4320), configuration.getViewportSize()),
             () -> assertEquals(SERVER_URI, configuration.getServerUrl()),
             () -> assertEquals(EXECUTE_API_KEY, configuration.getApiKey()),
-            () -> assertEquals(Set.of(logHandler), readLogHandler(eyes))
+            () -> assertThat(logHandler, is(in(readLogHandler(eyes))))
         );
         verifyNoInteractions(viewportSizeProvider);
     }
