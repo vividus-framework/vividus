@@ -24,21 +24,23 @@ import org.apache.hc.client5.http.CircularRedirectException;
 import org.apache.hc.client5.http.HttpResponseException;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.HttpStatus;
-import org.vividus.http.client.ExternalServiceException;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 
 public class HttpRedirectsProvider
 {
+    private static final int STATUS_CODE_LEFT_BOUNDARY = HttpStatus.SC_OK;
+    private static final int STATUS_CODE_RIGHT_BOUNDARY = HttpStatus.SC_MULTI_STATUS;
+
     private IHttpClient httpClient;
 
     /**
      * Executes HEAD request to get redirects.
-     * Throws HttpResponseException in case of status code outside of "200-207"
+     * Throws HttpResponseException in case of status code outside "200-207" range
+     *
      * @param from URI to issue HEAD request
      * @return List of redirects. Empty list if there are no redirects.
      */
-    @SuppressWarnings("AvoidHidingCauseException")
     public List<URI> getRedirects(URI from) throws IOException
     {
         HttpClientContext httpContext = HttpClientContext.create();
@@ -62,13 +64,13 @@ public class HttpRedirectsProvider
             }
             throw new IOException(exceptionMsg, e);
         }
-        try
+
+        int statusCode = response.getStatusCode();
+        if (statusCode < STATUS_CODE_LEFT_BOUNDARY || statusCode > STATUS_CODE_RIGHT_BOUNDARY)
         {
-            response.verifyStatusCodeInRange(HttpStatus.SC_OK, HttpStatus.SC_MULTI_STATUS);
-        }
-        catch (ExternalServiceException e)
-        {
-            throw new HttpResponseException(response.getStatusCode(), e.getMessage());
+            String message = "HTTP response status code is expected to be in range [%d - %d], but was %d".formatted(
+                    STATUS_CODE_LEFT_BOUNDARY, STATUS_CODE_RIGHT_BOUNDARY, statusCode);
+            throw new HttpResponseException(statusCode, message);
         }
         return httpContext.getRedirectLocations().getAll();
     }

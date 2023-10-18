@@ -108,44 +108,9 @@ public class HttpResponse
         this.from = from;
     }
 
-    public HttpResponse verifyStatusCode(int... codes)
-    {
-        if (!ArrayUtils.contains(codes, statusCode))
-        {
-            StringBuilder builder = new StringBuilder("Service returned response with unexpected status code: [")
-                    .append(statusCode).append("]. Expected code is one of: ");
-            throw new ExternalServiceException(appendWithSeparators(builder, codes, ", ").toString());
-        }
-        return this;
-    }
-
-    public HttpResponse verifyStatusCodeInRange(int fromCodeInclusive, int toCodeInclusive)
-    {
-        if (statusCode < fromCodeInclusive || statusCode > toCodeInclusive)
-        {
-            String msg = String.format("Service returned response with unexpected status code: [%d]. Expected code "
-                    + "from range [%d - %d]", statusCode, fromCodeInclusive, toCodeInclusive);
-            throw new ExternalServiceException(msg);
-        }
-        return this;
-    }
-
     @Override
     public String toString()
     {
         return statusCode + " : " + getResponseBodyAsString();
-    }
-
-    private StringBuilder appendWithSeparators(StringBuilder builder, int[] codes, String separator)
-    {
-        if (codes != null && codes.length > 0)
-        {
-            builder.append(codes[0]);
-            for (int i = 1; i < codes.length; i++)
-            {
-                builder.append(separator).append(codes[i]);
-            }
-        }
-        return builder;
     }
 }
