@@ -15,8 +15,16 @@ dependencies {
     implementation project(':vividus')
     implementation project(':vividus-plugin-accessibility')
 
-    // https://github.com/applitools/eyes.sdk.java3/issues/591
-    // implementation project(':vividus-plugin-applitools')
+    /*
+    Gradle does not support Maven profiles used to fetch dependencies from pom.xml file based on OS, so to avoid
+    downlading of eyes-universal-core-binaries (127mb) which is default active profile, we exlude this dependency
+    and specify eyes-universal-core-alpine one to be used inside of docker image.
+    Please see https://github.com/gradle/gradle/issues/19225
+    */
+    implementation (project(':vividus-plugin-applitools')) {
+        exclude group: 'com.applitools', module: 'eyes-universal-core-binaries'
+    }
+    implementation(group: 'com.applitools', name: 'eyes-universal-core-alpine', version: versions.eyesUniversal)
 
     implementation project(':vividus-plugin-avro')
     implementation project(':vividus-plugin-aws-dynamodb')
