@@ -40,6 +40,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.PointerInput;
+import org.openqa.selenium.interactions.PointerInput.MouseButton;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.vividus.mobileapp.configuration.MobileApplicationConfiguration;
@@ -65,7 +66,10 @@ import pazone.ashot.util.ImageTool;
 public class TouchActions
 {
     private static final int HEIGHT_DIVIDER = 3;
-    private static final int MOVE_FINGER_DURATION_MS = 200;
+    private static final Duration MOVE_FINGER_DURATION = Duration.ofMillis(200);
+
+    private static final String FINGER_1 = "finger1";
+    private static final String FINGER_2 = "finger2";
 
     private final IWebDriverProvider webDriverProvider;
     private final GenericWebDriverManager genericWebDriverManager;
@@ -153,7 +157,7 @@ public class TouchActions
     private TouchAction<?> buildTapAction(WebElement element, BiConsumer<TouchAction<?>, ElementOption> tapByElement,
             BiConsumer<TouchAction<?>, PointOption<?>> tapByCoordinates)
     {
-        TouchAction<?> touchActions = newTouchActions();
+        TouchAction<?> touchActions = new TouchAction<>(webDriverProvider.getUnwrapped(PerformsTouchActions.class));
         // Workaround for known Appium/iOS/XCUITest issue:
         // https://github.com/appium/appium/issues/4131#issuecomment-64504187
         // https://discuss.appium.io/t/ios-visible-false-event-elements-are-visible-on-screen/27630/6
@@ -301,8 +305,10 @@ public class TouchActions
     {
         Rectangle zoomArea = calculateZoomArea(contextArea);
         ZoomCoordinates zoomCoordinates = zoomType.calculateCoordinates(zoomArea);
-        Sequence moveFinger1Sequence = getFingerMoveSequence("finger1", zoomCoordinates.finger1MoveCoordinates());
-        Sequence moveFinger2Sequence = getFingerMoveSequence("finger2", zoomCoordinates.finger2MoveCoordinates());
+        Sequence moveFinger1Sequence = getFingerMoveSequence(FINGER_1, zoomCoordinates.finger1MoveCoordinates(),
+                MOVE_FINGER_DURATION);
+        Sequence moveFinger2Sequence = getFingerMoveSequence(FINGER_2, zoomCoordinates.finger2MoveCoordinates(),
+                MOVE_FINGER_DURATION);
         webDriverProvider.getUnwrapped(Interactive.class).perform(List.of(moveFinger1Sequence, moveFinger2Sequence));
     }
 
@@ -327,27 +333,23 @@ public class TouchActions
         return new Rectangle(zoomAreaX, zoomAreaY, zoomAreaHeight, zoomAreaWidth);
     }
 
-    private Sequence getFingerMoveSequence(String pointerName, MoveCoordinates moveCoordinates)
+    private Sequence getFingerMoveSequence(String pointerName, MoveCoordinates moveCoordinates, Duration moveDuration)
     {
         PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, pointerName);
         Sequence fingerMove = new Sequence(finger, 0);
-        fingerMove.addAction(finger.createPointerMove(Duration.ofSeconds(0), PointerInput.Origin.viewport(),
+        fingerMove.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(),
                 moveCoordinates.getStart()));
-        fingerMove.addAction(finger.createPointerDown(0));
-        fingerMove.addAction(finger.createPointerMove(Duration.ofMillis(MOVE_FINGER_DURATION_MS),
-                PointerInput.Origin.viewport(), moveCoordinates.getEnd()));
-        fingerMove.addAction(finger.createPointerUp(0));
+        fingerMove.addAction(finger.createPointerDown(MouseButton.LEFT.asArg()));
+        fingerMove.addAction(finger.createPointerMove(moveDuration, PointerInput.Origin.viewport(),
+                moveCoordinates.getEnd()));
+        fingerMove.addAction(finger.createPointerUp(MouseButton.LEFT.asArg()));
         return fingerMove;
     }
 
     private void swipe(MoveCoordinates coordinates, Duration swipeDuration)
     {
-        newTouchActions()
-                .press(point(coordinates.getStart()))
-                .waitAction(waitOptions(swipeDuration))
-                .moveTo(point(coordinates.getEnd()))
-                .release()
-                .perform();
+        Sequence swipe = getFingerMoveSequence(FINGER_1, coordinates, swipeDuration);
+        webDriverProvider.getUnwrapped(Interactive.class).perform(List.of(swipe));
     }
 
     private static Point getCenter(WebElement element)
@@ -366,10 +368,5 @@ public class TouchActions
     private static boolean isValueInInterval(int value, int rightEnd)
     {
         return 0 <= value && value < rightEnd;
-    }
-
-    private TouchAction<?> newTouchActions()
-    {
-        return new TouchAction<>(webDriverProvider.getUnwrapped(PerformsTouchActions.class));
     }
 }

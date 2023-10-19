@@ -41,6 +41,7 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.function.FailableRunnable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -84,17 +85,13 @@ class TouchActionsTests
     private static final String RELEASE = "{action=release, options={}}";
 
     private static final Duration DURATION = Duration.ofSeconds(1);
-    private static final String SCROLL_UP = ACTIONS_OPEN
-            + "{action=press, options={x=300, y=640}}, "
-            + WAIT
-            + "{action=moveTo, options={x=300, y=160}}, "
-            + RELEASE
-            + ACTIONS_CLOSE;
     private static final String BLACK_IMAGE = "black.png";
     private static final String WHITE_IMAGE = "white.png";
     private static final String ELEMENT_ID = "elementId";
     private static final Dimension DIMENSION = new Dimension(600, 800);
     private static final Rectangle ACTION_AREA = new Rectangle(new Point(0, 0), DIMENSION);
+    private static final String FINGER_1 = "finger1";
+    private static final String FINGER_2 = "finger2";
 
     private final SwipeConfiguration swipeConfiguration =
             new SwipeConfiguration(Duration.ZERO, 5, 50, 0);
@@ -198,45 +195,40 @@ class TouchActionsTests
     @Test
     void shouldSwipeUntilConditionIsTrue() throws IOException
     {
-        mockPerformsTouchActions();
-        var context = mock(AppiumDriver.class);
-        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
-        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
-        when(stopCondition.getAsBoolean()).thenReturn(false)
-                                          .thenReturn(false)
-                                          .thenReturn(true);
-        when(screenshotTaker.takeViewportScreenshot()).thenReturn(getImage(BLACK_IMAGE))
-                                                      .thenReturn(getImage(WHITE_IMAGE));
+        validateSwipe(() -> {
+            var context = mock(AppiumDriver.class);
+            when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
+            when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
+            when(stopCondition.getAsBoolean()).thenReturn(false, false, true);
+            when(screenshotTaker.takeViewportScreenshot()).thenReturn(getImage(BLACK_IMAGE)).thenReturn(
+                    getImage(WHITE_IMAGE));
 
-        var swipeArea = new Rectangle(new Point(-5, -5), new Dimension(700, 900));
-        touchActions.swipeUntil(SwipeDirection.UP, DURATION, swipeArea, stopCondition);
-
-        verifySwipe(3);
+            var swipeArea = new Rectangle(new Point(-5, -5), new Dimension(700, 900));
+            touchActions.swipeUntil(SwipeDirection.UP, DURATION, swipeArea, stopCondition);
+        }, 3);
     }
 
     @Test
-    void shouldNotCropElementContextScreenshot()
+    void shouldNotCropElementContextScreenshot() throws IOException
     {
-        mockPerformsTouchActions();
-        var context = mock(WebElement.class);
-        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
-        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
-        when(stopCondition.getAsBoolean()).thenReturn(false)
-                .thenReturn(false)
-                .thenReturn(true);
-        var blackImage = spy(getImage(BLACK_IMAGE));
-        var whiteImage = spy(getImage(WHITE_IMAGE));
-        var blackScreenshot = new Screenshot(blackImage);
-        var whiteScreenshot = new Screenshot(whiteImage);
+        validateSwipe(() -> {
+            var context = mock(WebElement.class);
+            when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
+            when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
+            when(stopCondition.getAsBoolean()).thenReturn(false).thenReturn(false).thenReturn(true);
+            var blackImage = spy(getImage(BLACK_IMAGE));
+            var whiteImage = spy(getImage(WHITE_IMAGE));
+            var blackScreenshot = new Screenshot(blackImage);
+            var whiteScreenshot = new Screenshot(whiteImage);
 
-        when(screenshotTaker.takeAshotScreenshot(context, Optional.empty())).thenReturn(blackScreenshot)
-            .thenReturn(whiteScreenshot);
+            when(screenshotTaker.takeAshotScreenshot(context, Optional.empty())).thenReturn(blackScreenshot).thenReturn(
+                    whiteScreenshot);
 
-        touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition);
+            touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition);
 
-        verifySwipe(3);
-        verify(blackImage, never()).getSubimage(anyInt(), anyInt(), anyInt(), anyInt());
-        verify(whiteImage, never()).getSubimage(anyInt(), anyInt(), anyInt(), anyInt());
+            verify(blackImage, never()).getSubimage(anyInt(), anyInt(), anyInt(), anyInt());
+            verify(whiteImage, never()).getSubimage(anyInt(), anyInt(), anyInt(), anyInt());
+        }, 3);
     }
 
     @Test
@@ -250,67 +242,59 @@ class TouchActionsTests
     @Test
     void shouldWrapIOException() throws IOException
     {
-        mockPerformsTouchActions();
-        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mock(AppiumDriver.class)));
-        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
-        var exception = mock(IOException.class);
+        validateSwipe(() -> {
+            when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mock(AppiumDriver.class)));
+            when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
+            var exception = mock(IOException.class);
 
-        when(stopCondition.getAsBoolean()).thenReturn(false);
-        doThrow(exception).when(screenshotTaker).takeViewportScreenshot();
+            when(stopCondition.getAsBoolean()).thenReturn(false);
+            doThrow(exception).when(screenshotTaker).takeViewportScreenshot();
 
-        var wrapper = assertThrows(UncheckedIOException.class,
-                () -> touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition));
+            var wrapper = assertThrows(UncheckedIOException.class,
+                    () -> touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition));
 
-        assertEquals(exception, wrapper.getCause());
-        verifySwipe(1);
+            assertEquals(exception, wrapper.getCause());
+        }, 1);
     }
 
     @Test
     void shouldNotExceedSwipeLimit() throws IOException
     {
-        mockPerformsTouchActions();
-        var context = mock(AppiumDriver.class);
-        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
-        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
-        when(stopCondition.getAsBoolean()).thenReturn(false);
-        when(screenshotTaker.takeViewportScreenshot()).thenReturn(getImage(BLACK_IMAGE))
-                                                      .thenReturn(getImage(WHITE_IMAGE))
-                                                      .thenReturn(getImage(BLACK_IMAGE))
-                                                      .thenReturn(getImage(WHITE_IMAGE))
-                                                      .thenReturn(getImage(BLACK_IMAGE))
-                                                      .thenReturn(getImage(WHITE_IMAGE));
+        validateSwipe(() -> {
+            var context = mock(AppiumDriver.class);
+            when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
+            when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
+            when(stopCondition.getAsBoolean()).thenReturn(false);
+            when(screenshotTaker.takeViewportScreenshot()).thenReturn(getImage(BLACK_IMAGE)).thenReturn(
+                            getImage(WHITE_IMAGE)).thenReturn(getImage(BLACK_IMAGE)).thenReturn(getImage(WHITE_IMAGE))
+                    .thenReturn(getImage(BLACK_IMAGE)).thenReturn(getImage(WHITE_IMAGE));
 
-        var exception = assertThrows(IllegalStateException.class,
-            () -> touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition));
+            var exception = assertThrows(IllegalStateException.class,
+                    () -> touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition));
 
-        assertEquals("Swiping is stopped due to exceeded swipe limit '5'", exception.getMessage());
-        verifySwipe(6);
+            assertEquals("Swiping is stopped due to exceeded swipe limit '5'", exception.getMessage());
+        }, 6);
     }
 
     @Test
     void shouldStopSwipeOnceEndOfPageIsReached() throws IOException
     {
-        mockPerformsTouchActions();
-        var context = mock(AppiumDriver.class);
-        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
-        when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
-        when(stopCondition.getAsBoolean()).thenReturn(false);
-        when(screenshotTaker.takeViewportScreenshot()).thenReturn(getImage(BLACK_IMAGE))
-                                                      .thenReturn(getImage(WHITE_IMAGE))
-                                                      .thenReturn(getImage(BLACK_IMAGE))
-                                                      .thenReturn(getImage(BLACK_IMAGE));
+        validateSwipe(() -> {
+            var context = mock(AppiumDriver.class);
+            when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
+            when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
+            when(stopCondition.getAsBoolean()).thenReturn(false);
+            when(screenshotTaker.takeViewportScreenshot()).thenReturn(getImage(BLACK_IMAGE)).thenReturn(
+                    getImage(WHITE_IMAGE)).thenReturn(getImage(BLACK_IMAGE)).thenReturn(getImage(BLACK_IMAGE));
 
-        touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition);
-
-        verifySwipe(4);
+            touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition);
+        }, 4);
     }
 
     @Test
-    void shouldPerformVerticalSwipe()
+    void shouldPerformVerticalSwipe() throws IOException
     {
-        mockPerformsTouchActions();
-        touchActions.performSwipe(SwipeDirection.UP, 640, 160, ACTION_AREA, DURATION);
-        verifySwipe(1);
+        validateSwipe(() -> touchActions.performSwipe(SwipeDirection.UP, 640, 160, ACTION_AREA, DURATION), 1);
     }
 
     @Test
@@ -361,37 +345,44 @@ class TouchActionsTests
     {
         var webDriver = mock(Interactive.class);
         when(webDriverProvider.getUnwrapped(Interactive.class)).thenReturn(webDriver);
-        var pointerMoveTemplate = "{duration=%d, x=%%s, y=%%s, type=pointerMove, origin=viewport}";
-        var swipeSequenceTemplate = "{id=%s, type=pointer, parameters={pointerType=touch}, actions=["
-                + format(pointerMoveTemplate, 0) + ", " + "{button=0, type=pointerDown}, "
-                + format(pointerMoveTemplate, 200) + ", {button=0, type=pointerUp}]}";
-        var zoomSequence = format(swipeSequenceTemplate, "finger1", point1StartX, point1StartY, point1EndX, point1EndY)
-                + format(swipeSequenceTemplate, "finger2", point2StartX, point2StartY, point2EndX, point2EndY);
-        var actionsCaptor = ArgumentCaptor.forClass(Collection.class);
+        var zoomSequence = buildSwipeSequence(FINGER_1, 200, point1StartX, point1StartY, point1EndX, point1EndY)
+                + buildSwipeSequence(FINGER_2, 200, point2StartX, point2StartY, point2EndX, point2EndY);
         touchActions.performZoom(zoomType, ACTION_AREA);
+        ArgumentCaptor<Collection<Sequence>> actionsCaptor = ArgumentCaptor.forClass(Collection.class);
         verify(webDriver).perform(actionsCaptor.capture());
         assertEquals(zoomSequence, asString(actionsCaptor.getValue()));
     }
 
-    private void verifySwipe(int times)
+    private static String buildSwipeSequence(String pointerName, int swipeDurationMs, int point1StartX,
+            int point1StartY, int point1EndX, int point1EndY)
     {
-        verify(performsTouchActions, times(times))
-                .performTouchAction(argThat(arg -> SCROLL_UP.equals(arg.getParameters().toString())));
-        verifyNoMoreInteractions(stopCondition, performsTouchActions, screenshotTaker, genericWebDriverManager,
-                webDriverProvider);
+        var pointerMoveTemplate = "{duration=%d, x=%%s, y=%%s, type=pointerMove, origin=viewport}";
+        var swipeSequenceTemplate = "{id=%s, type=pointer, parameters={pointerType=touch}, actions=["
+                + format(pointerMoveTemplate, 0) + ", " + "{button=0, type=pointerDown}, "
+                + format(pointerMoveTemplate, swipeDurationMs) + ", {button=0, type=pointerUp}]}";
+        return format(swipeSequenceTemplate, pointerName, point1StartX, point1StartY, point1EndX, point1EndY);
     }
 
-    private BufferedImage getImage(String image)
+    @SuppressWarnings("unchecked")
+    private void validateSwipe(FailableRunnable<IOException> actionRunner, int times) throws IOException
     {
-        try
-        {
-            var bytes = ResourceUtils.loadResourceAsByteArray(getClass(), image);
-            return ImageTool.toBufferedImage(bytes);
-        }
-        catch (IOException e)
-        {
-            throw new UncheckedIOException(e);
-        }
+        Interactive webDriver = mock();
+        when(webDriverProvider.getUnwrapped(Interactive.class)).thenReturn(webDriver);
+
+        actionRunner.run();
+
+        ArgumentCaptor<Collection<Sequence>> actionsCaptor = ArgumentCaptor.forClass(Collection.class);
+        verify(webDriver, times(times)).perform(actionsCaptor.capture());
+        var swipeSequence = buildSwipeSequence(FINGER_1, 1000, 300, 640, 300, 160);
+        assertEquals(swipeSequence, asString(actionsCaptor.getValue()));
+
+        verifyNoMoreInteractions(stopCondition, screenshotTaker, genericWebDriverManager, webDriverProvider);
+    }
+
+    private BufferedImage getImage(String image) throws IOException
+    {
+        var bytes = ResourceUtils.loadResourceAsByteArray(getClass(), image);
+        return ImageTool.toBufferedImage(bytes);
     }
 
     private static String asString(Collection<Sequence> sequences)
