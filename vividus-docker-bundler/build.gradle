@@ -1,6 +1,13 @@
-plugins {
-    id 'com.bmuschko.docker-remote-api' version '9.3.4'
+buildscript {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'com.bmuschko:gradle-docker-plugin:9.3.4'
+    }
 }
+
 apply from: "${buildSystemPath}/vividus-test-subproject.gradle"
 
 project.description = 'VIVIDUS Docker bundler'
