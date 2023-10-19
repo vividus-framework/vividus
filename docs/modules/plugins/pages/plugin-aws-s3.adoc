@@ -27,6 +27,7 @@ When I upload data `$data` with key `$objectKey` and content type `$contentType`
 [source,gherkin]
 ----
 When I upload data `{"my":"json"}` with key `folder/name.json` and content type `application/json` to S3 bucket `testBucket`
+When I upload data `#{loadResource(data/report.csv)}` with key `folder/report.csv` and content type `text/csv` to S3 bucket `testBucket`
 ----
 
 === Download S3 object
