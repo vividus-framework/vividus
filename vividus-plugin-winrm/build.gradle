@@ -24,7 +24,7 @@ dependencies {
 
     implementation(group: 'javax.xml.ws', name: 'jaxws-api', version: '2.3.1')
     implementation(group: 'javax.jws', name: 'javax.jws-api', version: '1.1')
-    implementation(group: 'com.sun.xml.messaging.saaj', name: 'saaj-impl', version: '1.5.3')
+    implementation(group: 'com.sun.xml.messaging.saaj', name: 'saaj-impl', version: '3.0.3')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.0')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
