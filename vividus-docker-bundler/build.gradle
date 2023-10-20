@@ -8,14 +8,16 @@ buildscript {
     }
 }
 
-apply from: "${buildSystemPath}/vividus-test-subproject.gradle"
+apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
+
+apply from: "${buildSystemPath}/vividus-library-subproject.gradle"
 
 project.description = 'VIVIDUS Docker bundler'
 
 tasks {
     publish.enabled = false
-    testVividusInitialization.enabled = false
-    validateKnownIssues.enabled = false
+    javadocJar.enabled = false
+    sourcesJar.enabled = false
 }
 
 dependencies {
