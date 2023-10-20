@@ -62,6 +62,7 @@ import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.aws.s3.steps.S3BucketSteps.S3ObjectFilter;
 import org.vividus.aws.s3.steps.S3BucketSteps.S3ObjectFilterType;
 import org.vividus.context.VariableContext;
+import org.vividus.steps.DataWrapper;
 import org.vividus.util.DateUtils;
 import org.vividus.util.ResourceUtils;
 import org.vividus.variable.VariableScope;
@@ -83,11 +84,24 @@ class S3BucketStepsTests
     @Mock private VariableContext variableContext;
 
     @Test
-    void shouldUploadData() throws IOException
+    void shouldUploadDataBytes() throws IOException
     {
-        String csv = ResourceUtils.loadResource(CSV_FILE_PATH);
-        testSteps(steps -> steps.uploadData(csv, S3_OBJECT_KEY, CONTENT_TYPE, S3_BUCKET_NAME));
-        verifyContentUploaded(csv.getBytes(StandardCharsets.UTF_8), CONTENT_TYPE);
+        byte[] csvAsBytes = ResourceUtils.loadResourceAsByteArray(CSV_FILE_PATH);
+        DataWrapper data = mock(DataWrapper.class);
+        when(data.getBytes()).thenReturn(csvAsBytes);
+        testSteps(steps -> steps.uploadData(data, S3_OBJECT_KEY, CONTENT_TYPE, S3_BUCKET_NAME));
+        verifyContentUploaded(csvAsBytes, CONTENT_TYPE);
+    }
+
+    @Test
+    void shouldUploadDataString() throws IOException
+    {
+        String text = "abc";
+        byte[] stringAsBytes = text.getBytes(StandardCharsets.UTF_8);
+        DataWrapper data = mock(DataWrapper.class);
+        when(data.getBytes()).thenReturn(stringAsBytes);
+        testSteps(steps -> steps.uploadData(data, S3_OBJECT_KEY, CONTENT_TYPE, S3_BUCKET_NAME));
+        verifyContentUploaded(stringAsBytes, CONTENT_TYPE);
     }
 
     @Test

@@ -49,9 +49,11 @@ import org.jbehave.core.annotations.AsParameters;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.annotation.Replacement;
 import org.vividus.aws.auth.AwsServiceClientsContext;
 import org.vividus.context.VariableContext;
 import org.vividus.csv.CsvReader;
+import org.vividus.steps.DataWrapper;
 import org.vividus.util.DateUtils;
 import org.vividus.util.ResourceUtils;
 import org.vividus.variable.VariableScope;
@@ -92,9 +94,9 @@ public class S3BucketSteps
      * @param bucketName S3 bucket to upload
      */
     @When("I upload data `$data` with key `$objectKey` and content type `$contentType` to S3 bucket `$bucketName`")
-    public void uploadData(String data, String objectKey, String contentType, String bucketName)
+    public void uploadData(DataWrapper data, String objectKey, String contentType, String bucketName)
     {
-        uploadContent(bucketName, objectKey, data.getBytes(StandardCharsets.UTF_8), contentType);
+        uploadContent(bucketName, objectKey, data.getBytes(), contentType);
     }
 
     /**
@@ -107,7 +109,12 @@ public class S3BucketSteps
      * @param objectKey Key on which the content is added to S3 bucket
      * @param contentType Mime type of object for upload (see <a href="https://en.wikipedia.org/wiki/MIME">MIME</a>)
      * @param bucketName S3 bucket to upload
+     * @deprecated Use step: When I upload data `#{loadResource($resourcePath)}`
+     *  with key `$objectKey` and content type `$contentType` to S3 bucket `$bucketName`
      */
+    @Deprecated(since = "0.6.1", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern = "When I upload data `#{loadResource(%1$s)}`"
+            + " with key `%2$s` and content type `%3$s` to S3 bucket `%4$s`")
     @When("I upload resource `$resourcePath` with key `$objectKey` and content type `$contentType`"
             + " to S3 bucket `$bucketName`")
     public void uploadResource(String resourcePath, String objectKey, String contentType, String bucketName)
