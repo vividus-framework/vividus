@@ -23,6 +23,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
@@ -129,7 +130,18 @@ public class MouseActions implements IMouseActions
     {
         if (element != null)
         {
-            new Actions(getWebDriver()).scrollToElement(element).perform();
+            try
+            {
+                new Actions(getWebDriver()).scrollToElement(element).perform();
+            }
+            catch (MoveTargetOutOfBoundsException e)
+            {
+                // This is workaround for some Chrome/Chromium driver/browser bug:
+                // https://github.com/w3c/webdriver/issues/1635#issuecomment-1196434722
+                // https://stackoverflow.com/q/69975806/2067574
+                javascriptActions.scrollElementIntoViewportCenter(element);
+            }
+
             new Actions(getWebDriver()).moveToElement(element).perform();
         }
     }

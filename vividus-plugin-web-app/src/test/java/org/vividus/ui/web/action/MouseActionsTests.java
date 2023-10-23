@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -40,6 +41,7 @@ import com.google.common.eventbus.EventBus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InOrder;
@@ -52,6 +54,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Interactive;
+import org.openqa.selenium.interactions.MoveTargetOutOfBoundsException;
 import org.openqa.selenium.interactions.Sequence;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
@@ -288,21 +291,60 @@ class MouseActionsTests
         verify((Interactive) webDriver, times(2)).perform(sequencesCaptor.capture());
         List<Collection<Sequence>> sequences = sequencesCaptor.getAllValues();
         assertEquals(2, sequences.size());
-        assertEquals(Map.of(
-                ID, "default wheel",
-                TYPE, "wheel",
-                ACTIONS, List.of(
-                        Map.of(
-                                DURATION, 250L,
-                                X, 0,
-                                Y, 0,
-                                "deltaX", 0,
-                                "deltaY", 0,
-                                TYPE, "scroll",
-                                ORIGIN, webElement
-                        )
-                )), sequences.get(0).iterator().next().toJson());
+        assertEquals(createScrollToElementAction(), sequences.get(0).iterator().next().toJson());
         assertEquals(mouseSequence(List.of(pointerMoveAction())), sequences.get(1).iterator().next().toJson());
+        verifyNoInteractions(javascriptActions);
+    }
+
+    @Test
+    void shouldUseWorkaroundForFailureAtScrollToElementWhileMovingToElement()
+    {
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        doThrow(new MoveTargetOutOfBoundsException("move target out of bounds")).doNothing().when(
+                (Interactive) webDriver).perform(argThat(new ArgumentMatcher<>()
+                {
+                    private int invocationNumber;
+
+                    @Override
+                    public boolean matches(Collection<Sequence> sequences)
+                    {
+                        if (invocationNumber == 0)
+                        {
+                            invocationNumber++;
+                            return sequences.size() == 1 && createScrollToElementAction().equals(
+                                    sequences.iterator().next().toJson());
+                        }
+                        return true;
+                    }
+                }
+            )
+        );
+        mouseActions.moveToElement(webElement);
+        var ordered = inOrder(webDriver, javascriptActions);
+        ordered.verify((Interactive) webDriver).perform(
+                argThat(sequences -> sequences.size() == 1 && createScrollToElementAction().equals(
+                        sequences.iterator().next().toJson())));
+        ordered.verify(javascriptActions).scrollElementIntoViewportCenter(webElement);
+        ordered.verify((Interactive) webDriver).perform(argThat(sequences -> sequences.size() == 1 && mouseSequence(
+                List.of(pointerMoveAction())).equals(sequences.iterator().next().toJson())));
+    }
+
+    private Map<String, Object> createScrollToElementAction()
+    {
+        return Map.of(
+            ID, "default wheel",
+            TYPE, "wheel",
+            ACTIONS, List.of(
+                    Map.of(
+                            DURATION, 250L,
+                            X, 0,
+                            Y, 0,
+                            "deltaX", 0,
+                            "deltaY", 0,
+                            TYPE, "scroll",
+                            ORIGIN, webElement
+                    )
+            ));
     }
 
     private static Map<String, Object> mouseSequence(List<Map<String, ?>> mouseActions)
