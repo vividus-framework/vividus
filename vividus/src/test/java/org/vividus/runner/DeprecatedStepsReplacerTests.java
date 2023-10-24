@@ -16,9 +16,8 @@
 
 package org.vividus.runner;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.jbehave.core.configuration.Keywords.GIVEN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -38,10 +37,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-
-import com.github.valfirst.slf4jtest.TestLogger;
-import com.github.valfirst.slf4jtest.TestLoggerFactory;
-import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
@@ -66,6 +61,8 @@ import org.jbehave.core.steps.StepType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junitpioneer.jupiter.StdErr;
+import org.junitpioneer.jupiter.StdIo;
 import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.IPathFinder;
@@ -76,13 +73,9 @@ import org.vividus.resource.StoryLoader;
 import org.vividus.spring.ExtendedConfiguration;
 import org.vividus.util.UriUtils;
 
-@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
+@ExtendWith(MockitoExtension.class)
 class DeprecatedStepsReplacerTests
 {
-    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(DeprecatedStepsReplacer.class);
-
-    private static final String UNRESOLVED_DEPRECATION_LOG = "The step \"{}\" from \"{} - {}\" "
-            + "is deprecated but cannot be replaced automatically, please replace it manually.";
     private static final String NEW_LINE = "\n";
     private static final String RESOURCE_LOCATION_ARG = "--resourceLocation";
     private static final String RESOURCE_LOCATION = "root/vividus/vividus-tests/src/main/resources";
@@ -114,8 +107,9 @@ class DeprecatedStepsReplacerTests
     }
 
     @Test
+    @StdIo
     @SuppressWarnings({ "PMD.MultipleStringLiteralsExtended", "PMD.MultipleStringLiterals" })
-    void shouldReplaceDeprecatedJavaSteps() throws IOException, ParseException, NoSuchMethodException
+    void shouldReplaceDeprecatedJavaSteps(StdErr stdErr) throws IOException, ParseException, NoSuchMethodException
     {
         String lifecycleBlock = """
                 Lifecycle:
@@ -176,11 +170,17 @@ class DeprecatedStepsReplacerTests
         }
         verify(ignoredCandidate, never()).matches(codeStep);
         verify(conditionalStepCandidate).getMethod();
-        assertThat(LOGGER.getLoggingEvents(), is(List.of(
-                warn(UNRESOLVED_DEPRECATION_LOG, CODE_STEP_UNRESOLVED, "TheHero.story", "lifecycle (before steps)"),
-                warn(UNRESOLVED_DEPRECATION_LOG, CODE_STEP_UNRESOLVED_ALIAS, "TheHero.story",
-                        "lifecycle (after steps)"),
-                warn(UNRESOLVED_DEPRECATION_LOG, CODE_STEP_UNRESOLVED, "TheHero.story", "Scenario: scenario name"))));
+        assertThat(stdErr.capturedLines(), arrayContaining(
+                "The step \"Given deprecated step without automatic replacement\" from \"TheHero.story - lifecycle "
+                        + "(before steps)\" is deprecated but cannot be replaced automatically, please replace it "
+                        + "manually.",
+                "The step \"Given deprecated step without automatic replacement (alias)\" from \"TheHero.story - "
+                        + "lifecycle (after steps)\" is deprecated but cannot be replaced automatically, please "
+                        + "replace it manually.",
+                "The step \"Given deprecated step without automatic replacement\" from \"TheHero.story - Scenario: "
+                        + "scenario name\" is deprecated but cannot be replaced automatically, please replace it "
+                        + "manually."
+        ));
     }
 
     @Test
@@ -199,7 +199,8 @@ class DeprecatedStepsReplacerTests
     }
 
     @Test
-    void shouldReplaceDeprecatedCompositeSteps() throws IOException, ParseException
+    @StdIo
+    void shouldReplaceDeprecatedCompositeSteps(StdErr stdErr) throws IOException, ParseException
     {
         String notDeprecatedStep = "Given some actual step";
         String compositeStepHeader = "Composite: step wording\n";
@@ -231,9 +232,10 @@ class DeprecatedStepsReplacerTests
                     stepsContentDeprecated, stepsContentActual,
                     List.of(compositeCandidate, compositeCandidateWithoutReplace, notDeprecatedCandidate));
         }
-        assertThat(LOGGER.getLoggingEvents(), is(List.of(
-                warn(UNRESOLVED_DEPRECATION_LOG, CODE_STEP_UNRESOLVED, stepsFileName,
-                        "Composite: Given deprecated step without automatic replacement"))));
+        assertThat(stdErr.capturedLines(), arrayContaining(
+                "The step \"Given deprecated step without automatic replacement\" from \"" + stepsFileName
+                        + " - Composite: Given deprecated step without automatic replacement\" "
+                        + "is deprecated but cannot be replaced automatically, please replace it manually."));
     }
 
     private void mockAndTestStepsReplacer(String path, String resourceContentDeprecated, String resourceContentActual,
