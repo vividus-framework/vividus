@@ -55,8 +55,6 @@ import org.jbehave.core.steps.ConditionalStepCandidate;
 import org.jbehave.core.steps.InjectableStepsFactory;
 import org.jbehave.core.steps.StepCandidate;
 import org.jbehave.core.steps.StepFinder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vividus.IPathFinder;
 import org.vividus.annotation.Replacement;
 import org.vividus.batch.BatchConfiguration;
@@ -69,8 +67,6 @@ import org.vividus.util.UriUtils;
 @SuppressWarnings("PMD.ExcessiveImports")
 public final class DeprecatedStepsReplacer
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DeprecatedStepsReplacer.class);
-
     private static final String MANDATORY_STEP_COLUMN_NAME = "step";
     private static final String END_OF_STEP_LOOKAHEAD = "(?=\\h*(\\v|$))";
     private static final Pattern NESTED_STEPS_TABLE_PATTERN = Pattern.compile("(\\v|^).\\h*step\\h*.\\v");
@@ -213,9 +209,8 @@ public final class DeprecatedStepsReplacer
                     }
                     else if (isDeprecatedStepWithoutReplacement(stepCandidate))
                     {
-                        LOGGER.atWarn().addArgument(step).addArgument(resourceName).addArgument(resourceSection)
-                                .log("The step \"{}\" from \"{} - {}\" "
-                                   + "is deprecated but cannot be replaced automatically, please replace it manually.");
+                        System.err.println("The step \"" + step + "\" from \"" + resourceName + " - " + resourceSection
+                                + "\" is deprecated but cannot be replaced automatically, please replace it manually.");
                     }
                     break;
                 }

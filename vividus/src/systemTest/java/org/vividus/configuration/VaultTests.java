@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.condition.OS;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.vault.VaultContainer;
+import org.vividus.log.LoggerConfigurer;
 
 @EnabledIfEnvironmentVariable(named = "CI", matches = "true")
 @EnabledOnOs(OS.LINUX)
@@ -51,6 +53,12 @@ class VaultTests
                     + " top_secret=" + NEVER_SHOW_IT
                     + " one_more_secret=" + NEVER_NEVER_SHOW_IT
             );
+
+    @BeforeAll
+    static void beforeAll()
+    {
+        LoggerConfigurer.configureLoggers();
+    }
 
     @BeforeEach
     void beforeEach()

@@ -26,6 +26,7 @@ import java.util.Properties;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,6 +35,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
 import org.junitpioneer.jupiter.SetSystemProperty;
 import org.springframework.beans.factory.BeanIsAbstractException;
+import org.vividus.log.LoggerConfigurer;
 
 class BeanFactoryIntegrationTests
 {
@@ -57,6 +59,12 @@ class BeanFactoryIntegrationTests
 
     private static final String DEEPER_SUITE_LEVEL_OVERRIDABLE_PROPERTY = "deeper-suite-level-overridable-property";
     private static final String PROFILE_SUITE_OVERRIDABLE_PROPERTY = "profile-suite-overridable-property";
+
+    @BeforeAll
+    static void beforeAll()
+    {
+        LoggerConfigurer.configureLoggers();
+    }
 
     @BeforeEach
     void beforeEach()
