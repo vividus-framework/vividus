@@ -40,6 +40,8 @@ NOTE: The expression parameters marked with *bold* are mandatory.
 
 === `removeWrappingDoubleQuotes`
 
+WARNING: The expression is deprecated and will be removed in VIVIDUS 0.7.0. Please use JSON steps validating and saving JSON element values instead
+
 When REST API providing the data in JSON format is used it may be required to extract some values from JSON messages.
 String values are usually wrapped into double quotes, but sometimes only the value without quotes is needed.
 This expression allows to remove wrapping double quotes and use the value as is.
