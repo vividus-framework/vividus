@@ -173,3 +173,23 @@ Then each element located by `<locator>` has same `<dimension>`
 Composite: Then the context has a width of '$widthInPerc'%
 !-- DEPRECATED: 0.7.0, Then context has width of %1$s%
 Then context element has width of <widthInPerc>%
+
+Composite: When I wait until an alert appears
+!-- DEPRECATED: 0.7.0, When I wait until alert appears
+When I wait until alert appears
+
+Composite: When I wait until a frame with the name '$frameName' appears
+!-- DEPRECATED: 0.7.0, When I wait until element located by `xpath(//*[(local-name()='frame' or local-name()='iframe') and @*='%1$s'])` appears
+When I wait until element located by `xpath(//*[(local-name()='frame' or local-name()='iframe') and @*='<frameName>'])` appears
+
+Composite: When I wait until a frame with the name '$frameName' appears and I switch to it
+!-- DEPRECATED: 0.7.0, When I wait until frame with name `%1$s` appears and I switch to it
+When I wait until frame with name `$frameName` appears and I switch to it
+
+Composite: When I wait until the page has the title '$title'
+!-- DEPRECATED: 0.7.0, When I wait until page title is equal to `%1$s`
+When I wait until page title is equal to `<title>`
+
+Composite: When I wait until the page title contains the text '$text'
+!-- DEPRECATED: 0.7.0, When I wait until page title contains `%1$s`
+When I wait until page title contains `<text>`
