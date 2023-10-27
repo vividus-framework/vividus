@@ -87,7 +87,7 @@ dependencies {
     implementation(group: 'org.springframework.vault', name: 'spring-vault-core', version: '3.0.4')
 
     implementation(group: 'jakarta.inject', name: 'jakarta.inject-api', version: '2.0.1')
-    implementation(group: 'commons-cli', name: 'commons-cli', version: '1.5.0')
+    implementation(group: 'commons-cli', name: 'commons-cli', version: '1.6.0')
     // jasypt
     implementation(group: 'org.jasypt', name: 'jasypt-spring4', version: '1.9.3')
 
