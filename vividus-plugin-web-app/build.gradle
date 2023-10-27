@@ -10,7 +10,7 @@ dependencies {
 
     api project(':vividus-extension-selenium')
 
-    implementation(group: 'com.codeborne', name: 'selenide', version: '6.19.1')
+    implementation(group: 'com.codeborne', name: 'selenide', version: '7.0.1')
 
     // https://github.com/selenide/selenide/commit/86aa7a5b1eeedf495e9a0e15032c8d2bc480bdf5
     // https://github.com/bonigarcia/webdrivermanager/pull/1133
