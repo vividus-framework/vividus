@@ -23,7 +23,7 @@ dependencies {
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-ie-driver')
     implementation(group: 'org.seleniumhq.selenium', name: 'selenium-safari-driver')
     implementation(group: 'junit', name: 'junit', version: '4.13.2')
-    implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '5.5.3') {
+    implementation(group: 'io.github.bonigarcia', name: 'webdrivermanager', version: '5.6.0') {
         exclude group: 'com.github.docker-java'
     }
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.0.13')
