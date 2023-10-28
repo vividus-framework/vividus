@@ -3,7 +3,7 @@ project.description = 'VIVIDUS plugin for Azure Event Hub'
 dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-extension-azure')
-    implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-eventhubs', version: '2.31.0')
+    implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-eventhubs', version: '2.32.0')
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.9')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
 
