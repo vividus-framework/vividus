@@ -18,11 +18,11 @@ configurations {
      implementation project(':vividus-util')
      implementation project(':vividus-soft-assert')
 
-     api platform(group: 'org.seleniumhq.selenium', name: 'selenium-bom', version: '4.13.0')
+     api platform(group: 'org.seleniumhq.selenium', name: 'selenium-bom', version: '4.14.1')
      api(group: 'org.seleniumhq.selenium', name: 'selenium-api')
      api(group: 'org.seleniumhq.selenium', name: 'selenium-support')
      api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver')
-     api(group: 'io.appium', name: 'java-client', version: '8.6.0')
+     api(group: 'io.appium', name: 'java-client', version: '9.0.0')
 
      api(group: 'com.github.pazone', name: 'ashot', version: 'feb81d2288')
 
