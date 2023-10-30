@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.equalTo;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
+import org.vividus.annotation.Replacement;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
@@ -34,6 +35,10 @@ import jakarta.inject.Inject;
 @TakeScreenshotOnFailure
 public class SliderSteps
 {
+    private static final String SET_VALUE_JS = "arguments[0].value=arguments[1]";
+    private static final String VALUE_ATTRIBUTE = "value";
+    private static final String SLIDER_VALUE = "Slider value";
+
     @Inject private IBaseValidations baseValidations;
     @Inject private ISoftAssert softAssert;
     @Inject private WebJavascriptActions javascriptActions;
@@ -44,7 +49,11 @@ public class SliderSteps
      * @param value A value to set
      * @param xpath Xpath to slider
      * @see <a href="https://www.w3schools.com/jsref/dom_obj_range.asp"> <i>more about sliders</i></a>
+     * @deprecated Use step: "When I select value `$value` in slider located by `$locator`"
      */
+    @Deprecated(since = "0.6.2", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0",
+            replacementFormatPattern = "When I set value `%1$s` in slider located by `xpath(%2$s)`")
     @When("I select the value '$value' in a slider by the xpath '$xpath'")
     public void setSliderValue(String value, String xpath)
     {
@@ -52,8 +61,22 @@ public class SliderSteps
                 new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(xpath)));
         if (null != slider)
         {
-            javascriptActions.executeScript("arguments[0].value=arguments[1]", slider, value);
+            javascriptActions.executeScript(SET_VALUE_JS, slider, value);
         }
+    }
+
+    /**
+     * Step sets value of slider (input element with type = "range")
+     * using javascript script.
+     * @param value A value to set
+     * @param locator Locator to slider
+     * @see <a href="https://www.w3schools.com/jsref/dom_obj_range.asp"> <i>more about sliders</i></a>
+     */
+    @When("I set value `$value` in slider located by `$locator`")
+    public void setSliderValue(String value, Locator locator)
+    {
+        baseValidations.assertElementExists("The slider to set the value", locator).ifPresent(
+                s -> javascriptActions.executeScript(SET_VALUE_JS, s, value));
     }
 
     /**
@@ -61,7 +84,11 @@ public class SliderSteps
      * @param value A value to check
      * @param xpath Xpath to slider
      * @see <a href="https://www.w3schools.com/jsref/dom_obj_range.asp"> <i>more about sliders</i></a>
+     * @deprecated Use step: "Then value `$value` is selected in slider located by `$locator`"
      */
+    @Deprecated(since = "0.6.2", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0",
+            replacementFormatPattern = "Then value `%1$s` is selected in slider located by `%2$s`")
     @Then("the value '$value' is selected in a slider by the xpath '$xpath'")
     public void verifySliderValue(String value, String xpath)
     {
@@ -69,7 +96,20 @@ public class SliderSteps
                 new Locator(WebLocatorType.XPATH, XpathLocatorUtils.getXPath(xpath)));
         if (null != slider)
         {
-            softAssert.assertThat("Slider value", slider.getAttribute("value"), equalTo(value));
+            softAssert.assertThat(SLIDER_VALUE, slider.getAttribute(VALUE_ATTRIBUTE), equalTo(value));
         }
+    }
+
+    /**
+     * Step checks value of slider (input element with type = "range")
+     * @param value A value to check
+     * @param locator Locator to slider
+     * @see <a href="https://www.w3schools.com/jsref/dom_obj_range.asp"> <i>more about sliders</i></a>
+     */
+    @Then("value `$value` is selected in slider located by `$locator`")
+    public void verifySliderValue(String value, Locator locator)
+    {
+        baseValidations.assertElementExists("The slider to validate the value", locator).ifPresent(
+                s -> softAssert.assertThat(SLIDER_VALUE, s.getAttribute(VALUE_ATTRIBUTE), equalTo(value)));
     }
 }
