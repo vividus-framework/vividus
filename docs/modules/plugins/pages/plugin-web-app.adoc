@@ -1078,8 +1078,15 @@ Starts video playback.
 
 [source,gherkin]
 ----
+When I play video in video player located by `$locator`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I play video in video player located `$locator`
 ----
+
 * `$locator` - The <<_locator,locator>> used to find a video player.
 
 ==== Pause Video
@@ -1088,8 +1095,15 @@ Pauses video playback.
 
 [source,gherkin]
 ----
+When I pause video in video player located by `$locator`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I pause video in video player located `$locator`
 ----
+
 * `$locator` - The <<_locator,locator>> used to find a video player.
 
 ==== Rewind Video
@@ -1098,8 +1112,15 @@ Rewinds video to the desired mark in seconds.
 
 [source,gherkin]
 ----
+When I rewind time to `$number` seconds in video player located by `$locator`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I rewind time to `$number` seconds in video player located `$locator`
 ----
+
 * `$number` - time mark in seconds
 * `$locator` - The <<_locator,locator>> used to find a video player.
 
@@ -1107,6 +1128,12 @@ When I rewind time to `$number` seconds in video player located `$locator`
 Saves video player info: *duration*, *currentTime*, *src*, *networkState*.
 For more information about the properties see https://www.w3schools.com/tags/ref_av_dom.asp[HTML Audio/Video Properties]
 
+[source,gherkin]
+----
+When I save info from video player located by `$locator` to $scopes variable `$variableName`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
 [source,gherkin]
 ----
 When I save info from video player located `$locator` to $scopes variable `$variableName`

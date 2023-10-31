@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class VideoPlayerSteps
      * @param seconds time in seconds
      * @param locator Locator to locate element
      */
-    @When("I rewind time to `$number` seconds in video player located `$locator`")
+    @When("I rewind time to `$number` seconds in video player located by `$locator`")
     public void rewindTimeInVideoPlayer(Integer seconds, Locator locator)
     {
         findVideoPlayerAndExecuteAction(locator, e -> videoPlayerActions.rewind(e, seconds));
@@ -59,7 +59,7 @@ public class VideoPlayerSteps
      * This step plays the video in the video player. The target element must be &lt;video&gt; tag.
      * @param locator Locator to locate element
      */
-    @When("I play video in video player located `$locator`")
+    @When("I play video in video player located by `$locator`")
     public void playVideoInVideoPlayer(Locator locator)
     {
         findVideoPlayerAndExecuteAction(locator, videoPlayerActions::play);
@@ -69,7 +69,7 @@ public class VideoPlayerSteps
      * This step pauses the video in the video player. The target element must be &lt;video&gt; tag.
      * @param locator Locator to locate element
      */
-    @When("I pause video in video player located `$locator`")
+    @When("I pause video in video player located by `$locator`")
     public void pauseVideoInVideoPlayer(Locator locator)
     {
         findVideoPlayerAndExecuteAction(locator, videoPlayerActions::pause);
@@ -100,7 +100,7 @@ public class VideoPlayerSteps
      *                         <a href="https://www.w3schools.com/tags/av_prop_networkstate.asp">Network State</a></li>
      *                     </ul>
      */
-    @When("I save info from video player located `$locator` to $scopes variable `$variableName`")
+    @When("I save info from video player located by `$locator` to $scopes variable `$variableName`")
     public void saveVideoInfo(Locator locator, Set<VariableScope> scopes, String variableName)
     {
         findVideoPlayerAndExecuteAction(locator, v -> variableContext.putVariable(scopes, variableName,

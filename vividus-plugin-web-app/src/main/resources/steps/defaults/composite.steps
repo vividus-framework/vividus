@@ -173,3 +173,19 @@ Then each element located by `<locator>` has same `<dimension>`
 Composite: Then the context has a width of '$widthInPerc'%
 !-- DEPRECATED: 0.7.0, Then context has width of %1$s%
 Then context element has width of <widthInPerc>%
+
+Composite: When I rewind time to `$number` seconds in video player located `$locator`
+!-- DEPRECATED: 0.7.0, When I rewind time to `%1$s` seconds in video player located by `%2$s`
+When I rewind time to `<number>` seconds in video player located by `<locator>`
+
+Composite: When I play video in video player located `$locator`
+!-- DEPRECATED: 0.7.0, When I play video in video player located by `%1$s`
+When I play video in video player located by `<locator>`
+
+Composite: When I pause video in video player located `$locator`
+!-- DEPRECATED: 0.7.0, When I pause video in video player located by `%1$s`
+When I pause video in video player located by `<locator>`
+
+Composite: When I save info from video player located `$locator` to $scopes variable `$variableName`
+!-- DEPRECATED: 0.7.0, When I save info from video player located by `%1$s` to %2$s variable `%3$s`
+When I save info from video player located by `<locator>` to <scopes> variable `<variableName>`
