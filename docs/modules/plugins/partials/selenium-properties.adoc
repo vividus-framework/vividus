@@ -20,6 +20,11 @@ a|`true` +
 a|Whether to rety session creation at https://www.selenium.dev/documentation/grid/[Selenium Grid] in case of HTTP
 connect timeout. This flag may be useful when tests are executed via intermittent network connection.
 
+|`selenium.grid.http.read-timeout`
+|{durations-format-link} format
+|`{selenium-grid-default-http-read-timeout}`
+a|The maximum amount of time to wait for HTTP response from https://www.selenium.dev/documentation/grid/[Selenium Grid].
+
 |`{session-scope-property-base}.session-scope`
 a|`story`
 
