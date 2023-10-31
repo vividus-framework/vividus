@@ -16,6 +16,7 @@ NOTE: The properties marked with *bold* are mandatory.
 
 :application-under-test: browser
 :session-scope-property-base: web-application
+:selenium-grid-default-http-read-timeout: PT3M
 [cols="6,3,2,6", options="header"]
 |===
 |Property Name
