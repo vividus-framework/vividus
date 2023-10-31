@@ -20,21 +20,24 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.alertIsPresent;
 import static org.openqa.selenium.support.ui.ExpectedConditions.frameToBeAvailableAndSwitchToIt;
 import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.titleContains;
-import static org.openqa.selenium.support.ui.ExpectedConditions.titleIs;
 
 import java.time.Duration;
 
+import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.vividus.annotation.Replacement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.TimeoutConfigurer;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.State;
 import org.vividus.ui.action.IExpectedConditions;
@@ -43,11 +46,11 @@ import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
-import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
 import jakarta.inject.Inject;
 
+@SuppressWarnings("PMD.ExcessiveImports")
 @TakeScreenshotOnFailure
 public class WaitSteps
 {
@@ -70,7 +73,7 @@ public class WaitSteps
      * a potentially damaging operation.
      * </p>
      */
-    @When("I wait until an alert appears")
+    @When("I wait until alert appears")
     public void waitTillAlertAppears()
     {
         waitActions.wait(getWebDriver(), alertIsPresent());
@@ -82,11 +85,49 @@ public class WaitSteps
      * An <b>alert</b> is a small box that appears on the display screen to give you an information or to warn you about
      * a potentially damaging operation.
      * </p>
+     * @deprecated Use step: When I wait until alert disappears
      */
+    @Deprecated(since = "0.6.2", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern = "When I wait until alert disappears")
     @When("I wait until an alert disappears")
-    public void waitTillAlertDisappears()
+    public void waitTillAlertDisappearsDeprecated()
     {
         waitActions.wait(getWebDriver(), not(alertIsPresent()));
+    }
+
+    /**
+     * Waits for <b><i>an alert</i></b> disappearance from the page
+     * <p>
+     * An <b>alert</b> is a small box that appears on the display screen to give you an information or to warn you about
+     * a potentially damaging operation.
+     * </p>
+     */
+    @When("I wait until alert disappears")
+    public void waitTillAlertDisappears()
+    {
+        waitActions.wait(getWebDriver(), new ExpectedCondition<>()
+        {
+            @Override
+            public Boolean apply(WebDriver driver)
+            {
+                boolean alertNotPresent = false;
+                try
+                {
+                    getWebDriver().switchTo().alert();
+                }
+                catch (NoAlertPresentException e)
+                {
+                    alertNotPresent = true;
+                }
+                return alertNotPresent;
+            }
+
+            @Override
+            public String toString()
+            {
+                return "alert to be not present";
+            }
+        });
     }
 
     /**
@@ -124,7 +165,7 @@ public class WaitSteps
      * </ul>
      * @param frameName Any attribute value or text value of the frame tag
      */
-    @When("I wait until a frame with the name '$frameName' appears and I switch to it")
+    @When("I wait until frame with name `$frameName` appears and I switch to it")
     public void waitTillFrameAppearsAndSwitchToIt(String frameName)
     {
         waitActions.wait(getWebDriver(), frameToBeAvailableAndSwitchToIt(frameName));
@@ -177,55 +218,33 @@ public class WaitSteps
     }
 
     /**
-     * Waits for the specified <b><i>page title</i></b> contains the certain <b>text</b>
-     * <p>
-     * <b>The page title</b> is a value of a <i>&lt;title&gt;</i> tag
-     * </p>
-     * @param text Desired text to be present in the element
+     * Waits until the current page title matches the certain title using specified comparison rule.
+     * @param comparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches"
+     * @param pattern The expected title pattern of the current page
      */
-    @When("I wait until the page title contains the text '$text'")
-    public void waitTillPageContainsTitle(String text)
+    @When("I wait until page title $comparisonRule `$pattern`")
+    public void waitUntilPageTitleIs(StringComparisonRule comparisonRule, String pattern)
     {
-        waitActions.wait(getWebDriver(), titleContains(text));
-    }
+        WebDriver driver = getWebDriver();
+        waitActions.wait(driver, new ExpectedCondition<>()
+        {
+            private String actualTitle = "";
 
-    /**
-     * Waits for <b><i>the page</i></b> contains the certain <b>title</b>
-     * <p>
-     * <b>The page title</b> is a value of a <i>&lt;title&gt;</i> tag
-     * </p>
-     * @param title Expected title of the page
-     */
-    @When("I wait until the page has the title '$title'")
-    public void waitTillPageHasTitle(String title)
-    {
-        waitActions.wait(getWebDriver(), titleIs(title));
-    }
+            @Override
+            public Boolean apply(WebDriver driver)
+            {
+                Matcher<String> expectedTitleMatcher = comparisonRule.createMatcher(pattern);
+                actualTitle = driver.getTitle();
+                return expectedTitleMatcher.matches(actualTitle);
+            }
 
-    /**
-     * Waits for <b><i>a frame</i></b> with specified <b>name</b> becomes appearance on the page
-     * <p>
-     * <b>Frame</b> is a block (part) of the page concluded in the tag <i>&lt;iframe&gt;</i>
-     * </p>
-     * <p>
-     * Actions performed at this step:
-     * </p>
-     * <ul>
-     * <li><i>Finds</i> a frame with the <b>specified name</b> on the page
-     * <li><i>Waits</i> until this frame becomes visible
-     * </ul>
-     * @param frameName Any attribute value or text value of the frame tag
-     */
-    @When("I wait until a frame with the name '$frameName' appears")
-    public void waitTillFrameAppears(String frameName)
-    {
-        uiContext.getSearchContext(WebDriver.class).ifPresent(
-                searchContext -> {
-                    By locator = XpathLocatorUtils.getXPathLocator(
-                            "*[(local-name()='frame' or local-name()='iframe') and @*='%s']", frameName);
-                    waitForElementAppearance(searchContext, locator);
-                }
-        );
+            @Override
+            public String toString()
+            {
+                return String.format("current title %s \"%s\". Current title: \"%s\"", comparisonRule, pattern,
+                        actualTitle);
+            }
+        });
     }
 
     /**
@@ -258,12 +277,6 @@ public class WaitSteps
     {
         return waitActions.wait(getSearchContext(), timeout,
                 expectedSearchActionsConditions.invisibilityOfElement(locator)).isWaitPassed();
-    }
-
-    private boolean waitForElementAppearance(SearchContext searchContext, By by)
-    {
-        return waitActions.wait(searchContext,
-                expectedSearchContextConditions.visibilityOfAllElementsLocatedBy(by)).isWaitPassed();
     }
 
     /**

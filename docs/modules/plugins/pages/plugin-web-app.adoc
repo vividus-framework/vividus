@@ -1346,6 +1346,42 @@ When I type text `$text` in alert and accept it
 When I type text `VIVIDUS` in alert and accept it
 ----
 
+==== Wait for alert appearance
+
+Waits for an {alert} appearance on the current page.
+
+[source,gherkin]
+----
+When I wait until alert appears
+----
+
+.Wait untill an alert appear after click on the button
+[source,gherkin]
+----
+When I click on element located by `buttonName(Survey)`
+When I wait until alert appears
+Then an alert is present
+----
+
+==== Wait for alert disappearance
+
+Waits for an {alert} disappearance from the current page.
+
+[source,gherkin]
+----
+When I wait until alert disappears
+----
+
+.Wait untill an alert disappear after it is accepted
+[source,gherkin]
+----
+When I click on element located by `buttonName(Survey)`
+Then an alert is present
+When I accept alert with message which matches `.*`
+When I wait until alert disappears
+Then an alert is not present
+----
+
 ==== Verify that an alert is present
 
 Checks that there is {alert} on the page.
@@ -1376,6 +1412,43 @@ Then an alert is not present
 ----
 Given I am on page with URL `http://example.com`
 Then an alert is not present
+----
+
+=== Wait for a frame with the specified name and switch to it
+
+Waits for a frame with the specified name to appear and then switches to it.
+
+[source,gherkin]
+----
+When I wait until frame with name `$frameName` appears and I switch to it
+----
+
+* `$frameName` - The name or ID of the expected frame.
+
+.Wait for a frame with `cookieFrame` name and switch to it
+[source,gherkin]
+----
+Given I am on page with URL `http://example.com`
+When I wait until frame with name `cookieFrame` appears and I switch to it
+----
+
+=== Wait for specific title of the current page
+
+Waits until the current page https://developer.mozilla.org/en-US/docs/Web/HTML/Element/title[title] matches the certain title using specified comparison rule.
+
+[source,gherkin]
+----
+When I wait until page title $comparisonRule `$pattern`
+----
+
+* `$comparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule].
+* `$pattern` - The expected title pattern of the current page.
+
+.Check that current title ends with "Domain"
+[source,gherkin]
+----
+Given I am on page with URL `http://example.com`
+When I wait until page title matches `.*Domain`
 ----
 
 == Tips & Tricks

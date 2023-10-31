@@ -16,6 +16,9 @@
 
 package org.vividus.steps.ui.web;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -23,24 +26,26 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
+import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.TimeoutConfigurer;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.State;
 import org.vividus.ui.action.IExpectedConditions;
@@ -48,7 +53,6 @@ import org.vividus.ui.action.IExpectedSearchContextCondition;
 import org.vividus.ui.action.WaitResult;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
@@ -61,6 +65,7 @@ class WaitStepsTests
     private static final String TEXT = "text";
     private static final Duration TIMEOUT = Duration.ofSeconds(1L);
     private static final String ALERT_TO_BE_PRESENT = "alert to be present";
+    private static final String ALERT_TO_BE_NOT_PRESENT = "alert to be not present";
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IWebWaitActions waitActions;
@@ -68,7 +73,6 @@ class WaitStepsTests
     @Mock private WebElement webElement;
     @Mock private WebDriver webDriver;
     @Mock private ISoftAssert softAssert;
-    @Mock private IExpectedConditions<By> expectedSearchContextConditions;
     @Mock private IExpectedConditions<Locator> expectedSearchActionsConditions;
     @Mock private IBaseValidations baseValidations;
     @Mock private WebJavascriptActions javascriptActions;
@@ -97,10 +101,40 @@ class WaitStepsTests
     }
 
     @Test
-    void testWaitTillAlertDisappears()
+    void testWaitTillAlertDisappearsSuccess()
+    {
+        var targetLocation = mock(TargetLocator.class);
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        when(webDriver.switchTo()).thenReturn(targetLocation);
+        when(targetLocation.alert()).thenThrow(new NoAlertPresentException());
+        var capture = ArgumentCaptor.forClass(ExpectedCondition.class);
+        waitSteps.waitTillAlertDisappears();
+        verify(waitActions).wait(eq(webDriver), capture.capture());
+        ExpectedCondition expectedCondition = capture.getValue();
+        assertTrue((boolean) expectedCondition.apply(webDriver));
+        assertEquals(ALERT_TO_BE_NOT_PRESENT, expectedCondition.toString());
+    }
+
+    @Test
+    void testWaitTillAlertDisappearsFail()
+    {
+        var targetLocation = mock(TargetLocator.class);
+        when(webDriverProvider.get()).thenReturn(webDriver);
+        when(webDriver.switchTo()).thenReturn(targetLocation);
+        when(targetLocation.alert()).thenReturn(mock(Alert.class));
+        var capture = ArgumentCaptor.forClass(ExpectedCondition.class);
+        waitSteps.waitTillAlertDisappears();
+        verify(waitActions).wait(eq(webDriver), capture.capture());
+        ExpectedCondition expectedCondition = capture.getValue();
+        assertFalse((boolean) expectedCondition.apply(webDriver));
+        assertEquals(ALERT_TO_BE_NOT_PRESENT, expectedCondition.toString());
+    }
+
+    @Test
+    void testWaitTillAlertDisappearsDeprecated()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
-        waitSteps.waitTillAlertDisappears();
+        waitSteps.waitTillAlertDisappearsDeprecated();
         verify(waitActions).wait(eq(webDriver),
                 argThat(e -> "condition to not be valid: alert to be present".equals(e.toString())));
     }
@@ -140,35 +174,18 @@ class WaitStepsTests
     }
 
     @Test
-    void testWaitTillFrameAppears()
+    void testWaitUntilPageTitleIs()
     {
-        when(uiContext.getSearchContext(WebDriver.class)).thenReturn(Optional.of(webDriver));
-        WaitResult<List<WebElement>> waitResult = mock(WaitResult.class);
-        IExpectedSearchContextCondition<List<WebElement>> condition = mock(IExpectedSearchContextCondition.class);
-        By locator = XpathLocatorUtils
-                .getXPathLocator("*[(local-name()='frame' or local-name()='iframe') and @*=\"name\"]");
-        when(expectedSearchContextConditions.visibilityOfAllElementsLocatedBy(locator)).thenReturn(condition);
-        when(waitActions.wait(webDriver, condition)).thenReturn(waitResult);
-        waitSteps.waitTillFrameAppears(NAME);
-        verify(waitResult).isWaitPassed();
-    }
-
-    @Test
-    void testWaitTillPageContainsTitle()
-    {
+        String exampleTitle = "Example Title";
         when(webDriverProvider.get()).thenReturn(webDriver);
-        waitSteps.waitTillPageContainsTitle(TEXT);
-        verify(waitActions).wait(eq(webDriver),
-                argThat(e -> "title to contain \"text\". Current title: \"\"".equals(e.toString())));
-    }
-
-    @Test
-    void testWaitTillPageHasTitle()
-    {
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        waitSteps.waitTillPageHasTitle(TEXT);
-        verify(waitActions).wait(eq(webDriver),
-                argThat(e -> "title to be \"text\". Current title: \"\"".equals(e.toString())));
+        when(webDriver.getTitle()).thenReturn(exampleTitle);
+        var capture = ArgumentCaptor.forClass(ExpectedCondition.class);
+        waitSteps.waitUntilPageTitleIs(StringComparisonRule.IS_EQUAL_TO, exampleTitle);
+        verify(waitActions).wait(eq(webDriver), capture.capture());
+        ExpectedCondition expectedCondition = capture.getValue();
+        assertTrue((boolean) expectedCondition.apply(webDriver));
+        assertEquals("current title is equal to \"Example Title\". Current title: \"Example Title\"",
+                expectedCondition.toString());
     }
 
     @Test

@@ -64,3 +64,18 @@ When I change context to element located by `cssSelector(.external)`
 When I wait until element located by `cssSelector(.internal)` stops moving
 When I COMPARE_AGAINST baseline with name `moving-element-after-stopping`
 When I reset context
+
+Scenario: Verify steps: "When I wait until alert appears" and "When I wait until alert disappears"
+Given I am on page with URL `${vividus-test-site-url}/alertprompt.html`
+When I click on element located by `buttonName(Survey)`
+When I wait until alert appears
+When I type text `` in alert and accept it
+When I wait until alert disappears
+
+Scenario: Verify step: 'When I wait until page title $comparisonRule `$pattern`'
+When I wait until page title contains `Alert`
+
+Scenario: Verify step: 'When I wait until frame with name `$frameName` appears and I switch to it'
+Given I am on page with URL `${vividus-test-site-url}/frames.html`
+When I wait until frame with name `exampleCom` appears and I switch to it
+Then text `Example Domain` exists
