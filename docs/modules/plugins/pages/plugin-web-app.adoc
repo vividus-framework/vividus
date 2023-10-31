@@ -1078,8 +1078,15 @@ Starts video playback.
 
 [source,gherkin]
 ----
+When I play video in video player located by `$locator`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I play video in video player located `$locator`
 ----
+
 * `$locator` - The <<_locator,locator>> used to find a video player.
 
 ==== Pause Video
@@ -1088,8 +1095,15 @@ Pauses video playback.
 
 [source,gherkin]
 ----
+When I pause video in video player located by `$locator`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I pause video in video player located `$locator`
 ----
+
 * `$locator` - The <<_locator,locator>> used to find a video player.
 
 ==== Rewind Video
@@ -1098,8 +1112,15 @@ Rewinds video to the desired mark in seconds.
 
 [source,gherkin]
 ----
+When I rewind time to `$number` seconds in video player located by `$locator`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 When I rewind time to `$number` seconds in video player located `$locator`
 ----
+
 * `$number` - time mark in seconds
 * `$locator` - The <<_locator,locator>> used to find a video player.
 
@@ -1107,6 +1128,12 @@ When I rewind time to `$number` seconds in video player located `$locator`
 Saves video player info: *duration*, *currentTime*, *src*, *networkState*.
 For more information about the properties see https://www.w3schools.com/tags/ref_av_dom.asp[HTML Audio/Video Properties]
 
+[source,gherkin]
+----
+When I save info from video player located by `$locator` to $scopes variable `$variableName`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
 [source,gherkin]
 ----
 When I save info from video player located `$locator` to $scopes variable `$variableName`
@@ -1138,21 +1165,23 @@ Then `${info.src}` matches `.+youtube.+`
 ==== Set the browser command line arguments
 
 Allows to set command line arguments for browsers.
-This step works similar to the property
+This step works similar to the property:
 ```properties
 web.driver.<browser-name>.command-line-arguments
 ```
-In case both property and step are used - arguments from property will be ignored.
-Step will take effect for all new browser sessions created in the current story. It will not affect the current sessions.
+In case both the property and the step are used - arguments from the property will be ignored.
+The step will take effect for all new browser sessions created in the current story. It will not affect the current sessions.
 
-List of supported command line arguments for popular browsers:
-. https://peter.sh/experiments/chromium-command-line-switches/[Chrome]
-. https://www-archive.mozilla.org/docs/command-line-args[Firefox]
-. https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)[Internet Explorer]
+Popular browsers supporting command line arguments configuration:
+
+* https://peter.sh/experiments/chromium-command-line-switches/[Chrome],
+* https://textslashplain.com/2022/01/05/edge-command-line-arguments/[Edge],
+* https://www-archive.mozilla.org/docs/command-line-args/[Firefox],
+* https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)[Internet Explorer].
 
 Not supported browsers:
-. Safari
-. Edge
+
+* Safari
 
 [source,gherkin]
 ----

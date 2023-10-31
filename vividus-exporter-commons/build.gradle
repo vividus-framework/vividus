@@ -4,6 +4,10 @@ ext {
     springBootVersion = '3.1.5'
 }
 
+configurations.all {
+    exclude module: 'spring-boot-starter-logging'
+}
+
 dependencies {
     implementation project(':vividus-util')
     implementation(group: 'org.springframework.boot', name: 'spring-boot-starter', version: "${springBootVersion}")

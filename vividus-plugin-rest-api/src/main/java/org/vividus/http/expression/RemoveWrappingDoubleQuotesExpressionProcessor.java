@@ -17,9 +17,13 @@
 package org.vividus.http.expression;
 
 import org.jbehave.core.expressions.SingleArgExpressionProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RemoveWrappingDoubleQuotesExpressionProcessor extends SingleArgExpressionProcessor<String>
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemoveWrappingDoubleQuotesExpressionProcessor.class);
+
     private static final char DOUBLE_QUOTE = '"';
 
     public RemoveWrappingDoubleQuotesExpressionProcessor()
@@ -34,6 +38,9 @@ public class RemoveWrappingDoubleQuotesExpressionProcessor extends SingleArgExpr
      */
     private static String removeWrappingQuotes(String inputData)
     {
+        LOGGER.warn(
+                "#{removeWrappingDoubleQuotes(..)} expression is deprecated and will be removed in VIVIDUS 0.7.0. "
+                        + "Please use JSON steps validating and saving JSON element values instead");
         if (inputData.length() > 1 && inputData.charAt(0) == DOUBLE_QUOTE
                 && inputData.charAt(inputData.length() - 1) == DOUBLE_QUOTE)
         {

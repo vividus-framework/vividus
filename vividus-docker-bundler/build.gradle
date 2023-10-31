@@ -4,7 +4,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        classpath 'com.bmuschko:gradle-docker-plugin:9.3.4'
+        classpath 'com.bmuschko:gradle-docker-plugin:9.3.6'
     }
 }
 
@@ -78,8 +78,8 @@ dependencies {
 
     implementation project(':vividus-agent-reportportal')
 
-    implementation(group: 'com.mysql', name: 'mysql-connector-j', version: '8.1.0')
-    implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.4.1.jre11')
+    implementation(group: 'com.mysql', name: 'mysql-connector-j', version: '8.2.0')
+    implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.4.2.jre11')
     implementation(group: 'org.postgresql', name: 'postgresql', version: '42.6.0')
     implementation(group: 'com.oracle.database.jdbc', name: 'ojdbc10', version: '19.20.0.0')
     implementation(group: 'com.ibm.db2.jcc', name: 'db2jcc', version: 'db2jcc4')
