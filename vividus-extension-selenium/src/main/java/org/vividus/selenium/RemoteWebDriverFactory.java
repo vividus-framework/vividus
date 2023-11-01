@@ -17,12 +17,12 @@
 package org.vividus.selenium;
 
 import java.net.URL;
-import java.net.http.HttpConnectTimeoutException;
+import java.time.Duration;
 
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.SessionNotCreatedException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.http.ClientConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.manager.GenericWebDriverManager;
@@ -33,24 +33,31 @@ import io.appium.java_client.ios.IOSDriver;
 public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoteWebDriverFactory.class);
+    private static final String DEFAULT_HTTP_VERSION = "HTTP_1_1";
 
     private final boolean retrySessionCreationOnHttpConnectTimeout;
+    private final Duration readTimeout;
 
     private final RemoteWebDriverUrlProvider remoteWebDriverUrlProvider;
 
-    public RemoteWebDriverFactory(boolean retrySessionCreationOnHttpConnectTimeout,
+    public RemoteWebDriverFactory(boolean retrySessionCreationOnHttpConnectTimeout, Duration readTimeout,
             RemoteWebDriverUrlProvider remoteWebDriverUrlProvider)
     {
         this.retrySessionCreationOnHttpConnectTimeout = retrySessionCreationOnHttpConnectTimeout;
+        this.readTimeout = readTimeout;
         this.remoteWebDriverUrlProvider = remoteWebDriverUrlProvider;
     }
 
     @Override
     public RemoteWebDriver getRemoteWebDriver(Capabilities capabilities)
     {
+        URL remoteDriverUrl = remoteWebDriverUrlProvider.getRemoteDriverUrl();
+        ClientConfig clientConfig = ClientConfig.defaultConfig()
+                .baseUrl(remoteDriverUrl)
+                .readTimeout(readTimeout);
         try
         {
-            return createRemoteWebDriver(capabilities);
+            return createRemoteWebDriver(capabilities, clientConfig);
         }
         catch (SessionNotCreatedException e)
         {
@@ -58,7 +65,7 @@ public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
             {
                 LOGGER.warn("Failed to create a new session due to HTTP connect timout", e);
                 LOGGER.warn("Retrying to create a new session");
-                return createRemoteWebDriver(capabilities);
+                return createRemoteWebDriver(capabilities, clientConfig);
             }
             throw e;
         }
@@ -66,21 +73,24 @@ public class RemoteWebDriverFactory implements IRemoteWebDriverFactory
 
     private static boolean isHttpConnectTimeout(SessionNotCreatedException e)
     {
-        Throwable cause = e.getCause();
-        return cause instanceof TimeoutException && cause.getCause() instanceof HttpConnectTimeoutException;
+        return e.getMessage().contains("Message: java.net.http.HttpConnectTimeoutException: HTTP connect timed out");
     }
 
-    private RemoteWebDriver createRemoteWebDriver(Capabilities capabilities)
+    private RemoteWebDriver createRemoteWebDriver(Capabilities capabilities, ClientConfig clientConfig)
     {
-        URL remoteDriverUrl = remoteWebDriverUrlProvider.getRemoteDriverUrl();
         if (GenericWebDriverManager.isIOS(capabilities) || GenericWebDriverManager.isTvOS(capabilities))
         {
-            return new IOSDriver(remoteDriverUrl, capabilities);
+            // https://github.com/SeleniumHQ/selenium/issues/12918
+            return new IOSDriver(clientConfig.version(DEFAULT_HTTP_VERSION), capabilities);
         }
         else if (GenericWebDriverManager.isAndroid(capabilities))
         {
-            return new AndroidDriver(remoteDriverUrl, capabilities);
+            // https://github.com/SeleniumHQ/selenium/issues/12918
+            return new AndroidDriver(clientConfig.version(DEFAULT_HTTP_VERSION), capabilities);
         }
-        return new RemoteWebDriver(remoteDriverUrl, capabilities);
+        return (RemoteWebDriver) RemoteWebDriver.builder()
+                .config(clientConfig)
+                .oneOf(capabilities)
+                .build();
     }
 }
