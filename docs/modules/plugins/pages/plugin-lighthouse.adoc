@@ -39,7 +39,7 @@ This property requires `lighthouse.performance.measurements-number` to be set.
 |`lighthouse.performance.measurements-number`
 |positive number
 |empty
-a|Specifies the number of Lighouse measurements performed before validation.
+a|Specifies the number of Lighthouse measurements performed before validation.
 
 This property requires `lighthouse.performance.percentile` to be set.
 
