@@ -32,7 +32,7 @@ Scenario: Verify request data and response data HTTP message parts in step "When
 Meta:
     @requirementId 1772
 Given I am on page with URL `http://httpbingo.org/forms/post`
-When I check checkbox located by `By.xpath(//input[@value='cheese'])`
+When I check checkbox located by `xpath(//input[@value='cheese'])`
 When I click on element located by `xpath(//button)`
 When I capture HTTP POST request with URL pattern `http://httpbingo\.org/post` and save request data to SCENARIO variable `requestData`
 Then `${requestData.query}` is equal to `{}`

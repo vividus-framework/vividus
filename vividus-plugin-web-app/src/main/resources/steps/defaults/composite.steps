@@ -1,8 +1,8 @@
 Composite: Then a link with the URL '$URL' exists
-Then number of elements found by `By.linkUrl(<URL>)` is equal to `1`
+Then number of elements found by `linkUrl(<URL>)` is equal to `1`
 
 Composite: Then a link with the URL containing '$URLpart' exists
-Then number of elements found by `By.linkUrlPart(<URLpart>)` is equal to `1`
+Then number of elements found by `linkUrlPart(<URLpart>)` is equal to `1`
 
 Composite: Then the page title is '$pageTitle'
 Priority: 1
@@ -20,36 +20,36 @@ When I execute sequence of actions:
 
 Composite: Then an element with the name '$elementName' containing text '$text' exists
 Priority: 1
-Then number of elements found by `By.elementName(<elementName>)->filter.textPart(<text>)` is equal to `1`
+Then number of elements found by `elementName(<elementName>)->filter.textPart(<text>)` is equal to `1`
 
 Composite: Then an element with the name '$elementName' and text '$text' exists
-Then number of elements found by `By.elementName(<elementName>)->filter.caseSensitiveText(<text>)` is equal to `1`
+Then number of elements found by `elementName(<elementName>)->filter.caseSensitiveText(<text>)` is equal to `1`
 
 Composite: Then a [$state] element with the name '$elementName' and text '$text' exists
 Priority: 1
-!-- DEPRECATED: 0.7.0, Then number of elements found by `By.elementName(%2$s)->filter.caseSensitiveText(%3$s).state(%1$s)` is equal to `1`
-Then number of elements found by `By.elementName(<elementName>)->filter.caseSensitiveText(<text>).state(<state>)` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `elementName(%2$s)->filter.caseSensitiveText(%3$s).state(%1$s)` is equal to `1`
+Then number of elements found by `elementName(<elementName>)->filter.caseSensitiveText(<text>).state(<state>)` is equal to `1`
 
 Composite: Then an element with the name '$elementName' exists
-Then number of elements found by `By.elementName(<elementName>)` is equal to `1`
+Then number of elements found by `elementName(<elementName>)` is equal to `1`
 
 Composite: Then an element with the name '$elementName' does not exist
-Then number of elements found by `By.elementName(<elementName>)` is equal to `0`
+Then number of elements found by `elementName(<elementName>)` is equal to `0`
 
 Composite: Then a [$state] element with the name '$elementName' exists
-!-- DEPRECATED: 0.7.0, Then number of elements found by `By.elementName(%2$s)->filter.state(%1$s)` is equal to `1`
-Then number of elements found by `By.elementName(<elementName>)->filter.state(<state>)` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `elementName(%2$s)->filter.state(%1$s)` is equal to `1`
+Then number of elements found by `elementName(<elementName>)->filter.state(<state>)` is equal to `1`
 
 Composite: Then an element with the tag '$elementTag' and text '$text' exists
-Then number of elements found by `By.tagName(<elementTag>)->filter.caseSensitiveText(<text>)` is equal to `1`
+Then number of elements found by `tagName(<elementTag>)->filter.caseSensitiveText(<text>)` is equal to `1`
 
 Composite: Then a [$state] element with the tag '$elementTag' does not exist
-!-- DEPRECATED: 0.7.0, Then number of elements found by `By.tagName(%2$s)->filter.state(%1$s)` is equal to `0`
-Then number of elements found by `By.tagName(<elementTag>)->filter.state(<state>)` is equal to `0`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `tagName(%2$s)->filter.state(%1$s)` is equal to `0`
+Then number of elements found by `tagName(<elementTag>)->filter.state(<state>)` is equal to `0`
 
 Composite: Then a [$state] element with the tag '$elementTag' exists
-!-- DEPRECATED: 0.7.0, Then number of elements found by `By.tagName(%2$s)->filter.state(%1$s)` is equal to `1`
-Then number of elements found by `By.tagName(<elementTag>)->filter.state(<state>)` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `tagName(%2$s)->filter.state(%1$s)` is equal to `1`
+Then number of elements found by `tagName(<elementTag>)->filter.state(<state>)` is equal to `1`
 
 Composite: When I click on an element with the attribute '$attributeType'='$attributeValue'
 When I click on element located by `xpath(.//*[@<attributeType>='<attributeValue>'])`
@@ -58,23 +58,23 @@ Composite: When I click on an element with the text '$text'
 When I click on element located by `caseSensitiveText(<text>)`
 
 Composite: Then an element with the attribute '$attributeType'='$attributeValue' exists
-Then number of elements found by `By.xpath(.//*[@<attributeType>='<attributeValue>'])` is equal to `1`
+Then number of elements found by `xpath(.//*[@<attributeType>='<attributeValue>'])` is equal to `1`
 
 Composite: Then a [$state] element with the attribute '$attributeType'='$attributeValue' exists
-!-- DEPRECATED: 0.7.0, Then number of elements found by `By.xpath(.//*[@%2$s='%3$s'])->filter.state(%1$s)` is equal to `1`
-Then number of elements found by `By.xpath(.//*[@<attributeType>='<attributeValue>'])->filter.state(<state>)` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `xpath(.//*[@%2$s='%3$s'])->filter.state(%1$s)` is equal to `1`
+Then number of elements found by `xpath(.//*[@<attributeType>='<attributeValue>'])->filter.state(<state>)` is equal to `1`
 
 Composite: Then an element with the tag '$elementTag' and attribute '$attributeType'='$attributeValue' exists
-Then number of elements found by `By.xpath(.//<elementTag>[@<attributeType>='<attributeValue>'])` is equal to `1`
+Then number of elements found by `xpath(.//<elementTag>[@<attributeType>='<attributeValue>'])` is equal to `1`
 
 Composite: Then an element with the attribute '$attributeType' containing '$attributeValue' exists
-Then number of elements found by `By.xpath(.//*[contains(@<attributeType>, '<attributeValue>')])` is equal to `1`
+Then number of elements found by `xpath(.//*[contains(@<attributeType>, '<attributeValue>')])` is equal to `1`
 
 Composite: Then at least one element with the attribute '$attributeType'='$attributeValue' exists
-Then number of elements found by `By.xpath(.//*[@<attributeType>='<attributeValue>'])` is greater than or equal to `1`
+Then number of elements found by `xpath(.//*[@<attributeType>='<attributeValue>'])` is greater than or equal to `1`
 
 Composite: Then an element by the cssSelector '$cssSelector' exists
-Then number of elements found by `By.cssSelector(<cssSelector>)` is equal to `1`
+Then number of elements found by `cssSelector(<cssSelector>)` is equal to `1`
 
 Composite: When I hover a mouse over a button with the name '$buttonName'
 When I hover mouse over element located `By.buttonName(<buttonName>)`
@@ -86,20 +86,20 @@ Composite: When I click on a button with the image src '$imageSrc'
 When I click on element located by `xpath(.//button[./img[@src='<imageSrc>']])`
 
 Composite: Then a [$state] button with the name '$buttonName' exists
-!-- DEPRECATED: 0.7.0, Then number of elements found by `By.buttonName(%2$s)->filter.state(%1$s)` is equal to `1`
-Then number of elements found by `By.buttonName(<buttonName>)->filter.state(<state>)` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `buttonName(%2$s)->filter.state(%1$s)` is equal to `1`
+Then number of elements found by `buttonName(<buttonName>)->filter.state(<state>)` is equal to `1`
 
 Composite: Then a button with the name '$buttonName' exists
-Then number of elements found by `By.buttonName(<buttonName>)` is equal to `1`
+Then number of elements found by `buttonName(<buttonName>)` is equal to `1`
 
 Composite: Then a button with the name '$buttonName' does not exist
-Then number of elements found by `By.buttonName(<buttonName>)` is equal to `0`
+Then number of elements found by `buttonName(<buttonName>)` is equal to `0`
 
 Composite: Then a button with image with the src '$imageSrc' exists
-Then number of elements found by `By.xpath(.//button[./img[@src='<imageSrc>']])` is equal to `1`
+Then number of elements found by `xpath(.//button[./img[@src='<imageSrc>']])` is equal to `1`
 
 Composite: Then a button with the tooltip '$tooltip' and image with the src '$imageSrc' exists
-Then number of elements found by `By.xpath(.//button[./img[@src='<imageSrc>'] and @title='<tooltip>'])` is equal to `1`
+Then number of elements found by `xpath(.//button[./img[@src='<imageSrc>'] and @title='<tooltip>'])` is equal to `1`
 
 Composite: Given I am on the main application page
 !-- DEPRECATED: 0.7.0, Given I am on main application page
