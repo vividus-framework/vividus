@@ -658,7 +658,7 @@ When I find $comparisonRule '$number' elements by $locator and for each element 
 .Script type check
 [source,gherkin]
 ----
-When I find = `5` elements by `By.xpath(//script):a` and for each element do
+When I find = `5` elements by `xpath(//script):a` and for each element do
 |step                                                                                      |
 |When I set 'type' attribute value of the context element to the 'scenario' variable 'type'|
 |Then `${type}` is equal to `text/javascript`                                              |

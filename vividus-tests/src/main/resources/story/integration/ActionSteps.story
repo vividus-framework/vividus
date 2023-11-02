@@ -5,7 +5,7 @@ Meta:
 
 Scenario: Action verification MOVE_BY_OFFSET
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
-Then number of elements found by `By.xpath(//*[@id='moveCount' and text()='0'])` is equal to `1`
+Then number of elements found by `xpath(//*[@id='moveCount' and text()='0'])` is equal to `1`
 When I execute sequence of actions:
 |type          |argument                                   |
 |MOVE_TO       |By.xpath(//div[contains(., 'Mouse move!')])|
@@ -13,15 +13,15 @@ When I execute sequence of actions:
 |MOVE_BY_OFFSET|(0, -10)                                   |
 |MOVE_BY_OFFSET|(0, 10)                                    |
 |MOVE_BY_OFFSET|(0, -10)                                   |
-Then number of elements found by `By.xpath(//*[@id='moveCount' and text()='5'])` is equal to `1`
+Then number of elements found by `xpath(//*[@id='moveCount' and text()='5'])` is equal to `1`
 
 Scenario: Action verification MOVE_TO
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
-Then number of elements found by `By.xpath(//*[@id='enterCount' and text()='0'])` is equal to `1`
+Then number of elements found by `xpath(//*[@id='enterCount' and text()='0'])` is equal to `1`
 When I execute sequence of actions:
 |type   |argument                                    |
 |MOVE_TO|By.xpath(//div[contains(., 'Mouse enter!')])|
-Then number of elements found by `By.xpath(//*[@id='enterCount' and text()='1'])` is equal to `1`
+Then number of elements found by `xpath(//*[@id='enterCount' and text()='1'])` is equal to `1`
 
 Scenario: Action verification CLICK
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
@@ -122,7 +122,7 @@ When I find = `1` elements `By.xpath(//div[@id='output' and text()!='mark'])` an
 |{headerSeparator=!, valueSeparator=!}                           |
 |!type      !argument   !                                        |
 |!PRESS_KEYS!BACK_SPACE !                                        |
-Then number of elements found by `By.xpath(//div[@id='output' and text()='mark'])` is equal to `1`
+Then number of elements found by `xpath(//div[@id='output' and text()='mark'])` is equal to `1`
 
 Scenario: Action verification KEY_DOWN and KEY_UP combination
 Meta:
