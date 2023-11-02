@@ -22,80 +22,16 @@ NOTE: The tasks are available only through the `gradlew` command.
 The task runs test stories based on current xref:ROOT:tests-configuration.adoc[tests configuration] and tests state
 on the file system.
 
-.macOS / Linux:
-[source,shell]
-----
-./gradlew runStories
-----
-
-.Windows:
-[source,shell]
-----
-gradlew runStories
-----
-
-=== Treat known issues only as a positive result
-
-Known issues occurred during stories run fail the overall test execution with the corresponding xref:ROOT:tests-configuration.adoc#_exit_codes[exit code] by default. Use the following property in order to not treat known issues as failures:
-
-.Enable treating of known issues as positive result for current stories run
-[source,shell]
-----
-./gradlew runStories -PtreatKnownIssuesOnlyAsPassed=true
-----
-
-The treating of known issues as passed can be enabled globally for project by adding the following line into the
-`build.gradle` file of the tests project:
-
-.Enable treating of known issues as positive result for stories runs at project level
-[source,gradle]
-----
-runStories.treatKnownIssuesOnlyAsPassed = true
-----
-
 :task-name: runStories
 
-include::partial$exit-code.adoc[]
+include::partial$stories-exec.adoc[]
 
 == Debug stories
 
 The task runs test stories omitting VIVIDUS initialization check based on current xref:ROOT:tests-configuration.adoc[tests configuration]
 and tests state on the file system.
 
-.macOS / Linux:
-[source,shell]
-----
-./gradlew debugStories
-----
-
-.Windows:
-[source,shell]
-----
-gradlew debugStories
-----
-
-=== Treat known issues only as a positive result
-
-Known issues occurred during stories run fail the overall test execution with the corresponding xref:ROOT:tests-configuration.adoc#_exit_codes[exit code] by default. Use the following property in order to not treat known issues as failures:
-
-.Enable treating of known issues as positive result for current debug run
-[source,shell]
-----
-./gradlew debugStories -PtreatKnownIssuesOnlyAsPassed=true
-----
-
-The treating of known issues as passed can be enabled globally for project by adding the following line into the
-`build.gradle` file of the tests project:
-
-.Enable treating of known issues as positive result for debug runs at project level
-[source,gradle]
-----
-debugStories.treatKnownIssuesOnlyAsPassed = true
-----
-
-:task-name: debugStories
-
-include::partial$exit-code.adoc[]
+include::partial$stories-exec.adoc[task-name=debugStories]
 
 == Print available steps
 
