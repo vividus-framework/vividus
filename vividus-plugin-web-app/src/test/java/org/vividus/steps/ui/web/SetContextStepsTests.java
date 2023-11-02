@@ -16,6 +16,9 @@
 
 package org.vividus.steps.ui.web;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,8 +32,14 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +48,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.TargetLocator;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
@@ -54,7 +64,7 @@ import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.action.IWindowsActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SetContextStepsTests
 {
     private static final String EQUALS_MATCHER = "\"new title\"";
@@ -71,9 +81,10 @@ class SetContextStepsTests
     private static final String OTHER_WINDOW_HANDLE = "{248427e8-e67d-47ba-923f-4051f349f813}";
     private static final String NEW_WINDOW_IS_FOUND = "New window is found";
     private static final String NEW_WINDOW = "New window '";
-    private static final String NEW_TAB_IS_FOUND = "New tab is found";
     private static final String A_FRAME = "A frame";
     private static final String FRAME_TO_SWITCH = "The frame to switch context";
+
+    private static final String TOTAL_NUMBER_OF_OPENED_TABS_MESSAGE = "Total number of opened tabs is {}";
 
     @Mock private IBaseValidations baseValidations;
     @Mock private IUiContext uiContext;
@@ -85,6 +96,8 @@ class SetContextStepsTests
     @Mock private IWindowsActions windowsActions;
     @Mock private IWebWaitActions waitActions;
     @InjectMocks private SetContextSteps setContextSteps;
+
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(SetContextSteps.class);
 
     @Test
     void shouldSwitchingToDefault()
@@ -126,14 +139,21 @@ class SetContextStepsTests
     }
 
     @Test
-    void testSwitchToTab()
+    void shouldSwitchToNewTab()
     {
         when(webDriverProvider.get()).thenReturn(mockedWebDiver);
         when(mockedWebDiver.getWindowHandle()).thenReturn(CURRENT_WINDOW_HANDLE);
-        when(windowsActions.switchToNewTab(CURRENT_WINDOW_HANDLE)).thenReturn(OTHER_WINDOW_HANDLE);
-        when(softAssert.recordAssertion(true, NEW_TAB_IS_FOUND)).thenReturn(true);
+        when(mockedWebDiver.getWindowHandles()).thenReturn(Set.of(CURRENT_WINDOW_HANDLE, OTHER_WINDOW_HANDLE));
+        TargetLocator targetLocator = mock();
+        when(mockedWebDiver.switchTo()).thenReturn(targetLocator);
         setContextSteps.switchToTab();
-        verify(uiContext).reset();
+        var ordered = inOrder(targetLocator, uiContext);
+        ordered.verify(targetLocator).window(OTHER_WINDOW_HANDLE);
+        ordered.verify(uiContext).reset();
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info(TOTAL_NUMBER_OF_OPENED_TABS_MESSAGE, 2),
+                info("Switching to a new tab")
+        )));
     }
 
     @Test
@@ -141,10 +161,13 @@ class SetContextStepsTests
     {
         when(webDriverProvider.get()).thenReturn(mockedWebDiver);
         when(mockedWebDiver.getWindowHandle()).thenReturn(CURRENT_WINDOW_HANDLE);
-        when(windowsActions.switchToNewTab(CURRENT_WINDOW_HANDLE)).thenReturn(CURRENT_WINDOW_HANDLE);
-        when(softAssert.recordAssertion(false, NEW_TAB_IS_FOUND)).thenReturn(false);
+        when(mockedWebDiver.getWindowHandles()).thenReturn(Set.of(CURRENT_WINDOW_HANDLE));
         setContextSteps.switchToTab();
+        verify(softAssert).recordFailedAssertion("Tab to switch is not found");
         verifyNoInteractions(uiContext);
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                info(TOTAL_NUMBER_OF_OPENED_TABS_MESSAGE, 1)
+        )));
     }
 
     @Test

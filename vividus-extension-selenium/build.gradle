@@ -18,7 +18,7 @@ configurations {
      implementation project(':vividus-util')
      implementation project(':vividus-soft-assert')
 
-     api platform(group: 'org.seleniumhq.selenium', name: 'selenium-bom', version: '4.14.1')
+     api platform(group: 'org.seleniumhq.selenium', name: 'selenium-bom', version: '4.15.0')
      api(group: 'org.seleniumhq.selenium', name: 'selenium-api')
      api(group: 'org.seleniumhq.selenium', name: 'selenium-support')
      api(group: 'org.seleniumhq.selenium', name: 'selenium-remote-driver')
@@ -48,5 +48,5 @@ configurations {
      testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.6.0')
      testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
      testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
-     testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.15.2')
+     testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.15.3')
  }

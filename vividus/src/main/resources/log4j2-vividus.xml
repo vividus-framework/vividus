@@ -7,7 +7,7 @@
         <RollingFile name="file" fileName="output/logs/log4j.log" filePattern="output/logs/log4j.%i.log">
             <PatternLayout pattern="%d [%t] %-5p %c - %m%n" />
             <Policies>
-                <SizeBasedTriggeringPolicy size="1 MB" />
+                <SizeBasedTriggeringPolicy size="10 MB" />
             </Policies>
         </RollingFile>
         <AllureLogAppender name="AllureLogAppender">

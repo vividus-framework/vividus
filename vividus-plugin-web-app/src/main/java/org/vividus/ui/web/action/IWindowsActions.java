@@ -30,7 +30,9 @@ public interface IWindowsActions
      * If there is no new tabs stays on current.
      * @param currentTab identifier
      * @return window identifier
+     * @deprecated No replacement is available, plain WebDriver API should be used instead
      */
+    @Deprecated(since = "0.6.2", forRemoval = true)
     String switchToNewTab(String currentTab);
 
     /**

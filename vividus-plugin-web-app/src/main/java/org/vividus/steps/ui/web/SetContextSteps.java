@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 
 import java.time.Duration;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 import org.hamcrest.Matcher;
@@ -28,6 +29,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.annotation.Replacement;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.StringComparisonRule;
@@ -44,6 +47,8 @@ import org.vividus.ui.web.action.IWindowsActions;
 @TakeScreenshotOnFailure
 public class SetContextSteps
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SetContextSteps.class);
+
     private static final String NEW_WINDOW_OR_BROWSER_TAB_NAME_IS = "New window or browser tab name is ";
 
     private final IUiContext uiContext;
@@ -170,7 +175,7 @@ public class SetContextSteps
     @Replacement(versionToRemoveStep = "0.7.0", replacementFormatPattern = "When I switch to new tab")
     public void switchingToWindow()
     {
-        String currentWindow = getWebDriver().getWindowHandle();
+        String currentWindow = webDriverProvider.get().getWindowHandle();
         String newWindow = windowsActions.switchToNewTab(currentWindow);
         if (descriptiveSoftAssert.assertThat(String.format("New window '%s' is found", newWindow),
                 "New window is found", newWindow, not(equalTo(currentWindow))))
@@ -192,12 +197,21 @@ public class SetContextSteps
     @When("I switch to new tab")
     public void switchToTab()
     {
-        String currentTab = getWebDriver().getWindowHandle();
-        String newTab = windowsActions.switchToNewTab(currentTab);
-        if (descriptiveSoftAssert.recordAssertion(!newTab.equals(currentTab), "New tab is found"))
-        {
-            resetContext();
-        }
+        WebDriver driver = webDriverProvider.get();
+        String currentTab = driver.getWindowHandle();
+        Set<String> allTabs = driver.getWindowHandles();
+        LOGGER.atInfo().addArgument(allTabs::size).log("Total number of opened tabs is {}");
+        allTabs.stream()
+            .filter(windowHandle -> !windowHandle.equals(currentTab))
+            .findFirst()
+            .ifPresentOrElse(
+                    newTab -> {
+                        LOGGER.info("Switching to a new tab");
+                        driver.switchTo().window(newTab);
+                        resetContext();
+                    },
+                    () -> descriptiveSoftAssert.recordFailedAssertion("Tab to switch is not found")
+            );
     }
 
     /**
@@ -307,11 +321,6 @@ public class SetContextSteps
         {
             resetContext();
         }
-    }
-
-    private WebDriver getWebDriver()
-    {
-        return webDriverProvider.get();
     }
 
     private void resetContext()
