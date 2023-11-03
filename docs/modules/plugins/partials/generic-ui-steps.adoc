@@ -338,9 +338,9 @@ When I change context to element located `$locator` in scope of current context
 .Change context
 [source,gherkin]
 ----
-Then number of elements found by `By.xpath(html)` is equal to `1`
+Then number of elements found by `xpath(html)` is equal to `1`
 When I change context to element located by `xpath(//body)` in scope of current context
-Then number of elements found by `By.xpath(html)` is equal to `0`
+Then number of elements found by `xpath(html)` is equal to `0`
 ----
 
 === Reset and change context
@@ -363,9 +363,9 @@ When I change context to element located `$locator`
 .Change context
 [source,gherkin]
 ----
-Then number of elements found by `By.xpath(html)` is equal to `1`
+Then number of elements found by `xpath(html)` is equal to `1`
 When I change context to element located by `xpath(//body)`
-Then number of elements found by `By.xpath(html)` is equal to `0`
+Then number of elements found by `xpath(html)` is equal to `0`
 ----
 
 
@@ -381,11 +381,11 @@ When I reset context
 .Reset context
 [source,gherkin]
 ----
-Then number of elements found by `By.xpath(html)` is equal to `1`
+Then number of elements found by `xpath(html)` is equal to `1`
 When I change context to element located by `xpath(//body)`
-Then number of elements found by `By.xpath(html)` is equal to `0`
+Then number of elements found by `xpath(html)` is equal to `0`
 When I reset context
-Then number of elements found by `By.xpath(html)` is equal to `1`
+Then number of elements found by `xpath(html)` is equal to `1`
 ----
 
 

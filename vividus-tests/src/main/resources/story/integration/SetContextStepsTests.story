@@ -62,9 +62,9 @@ Then number of elements found by `tagName(h1)` is equal to `0`
 
 Scenario: Verify steps: "When I reset context" AND "When I change context to element located by `$locator`"
 When I change context to element located by `xpath(//body)`
-Then number of elements found by `By.xpath(html)` is equal to `0`
+Then number of elements found by `xpath(html)` is equal to `0`
 When I reset context
-Then number of elements found by `By.xpath(html)` is equal to `1`
+Then number of elements found by `xpath(html)` is equal to `1`
 
 
 Scenario: Verify step: "When I change context to element located by `$locator` in scope of current context"
@@ -77,9 +77,9 @@ Then `${name}` is = `vividus-logo`
 
 Scenario: Verify step: "When I reset context"
 When I change context to element located by `xpath(//body)`
-Then number of elements found by `By.xpath(html)` is equal to `0`
+Then number of elements found by `xpath(html)` is equal to `0`
 When I reset context
-Then number of elements found by `By.xpath(html)` is equal to `1`
+Then number of elements found by `xpath(html)` is equal to `1`
 
 
 Scenario: Should switch to first visible parent frame or main document if the current frame is closed
@@ -114,7 +114,7 @@ When I attempt to close current window with possibility to handle alert
 Then an alert is present
 When I accept alert with message which matches `.*`
 When I switch to tab with title that is equal to `Vividus Test Site`
-Then number of elements found by `By.xpath(//img[@name='vividus-logo'])` is equal to `1`
+Then number of elements found by `xpath(//img[@name='vividus-logo'])` is equal to `1`
 
 Scenario: Verify step: "When I attempt to close current tab with possibility to handle alert" with alert
 Meta:
@@ -131,7 +131,7 @@ When I attempt to close current tab with possibility to handle alert
 Then an alert is present
 When I accept alert with message which matches `.*`
 When I switch to tab with title that is equal to `Vividus Test Site`
-Then number of elements found by `By.xpath(//img[@name='vividus-logo'])` is equal to `1`
+Then number of elements found by `xpath(//img[@name='vividus-logo'])` is equal to `1`
 
 Scenario: Verify step: "When I attempt to close current tab with possibility to handle alert" without alert
 Meta:
@@ -140,7 +140,7 @@ Given I am on page with URL `${vividus-test-site-url}`
 When I open URL `${vividus-test-site-url}/onbeforeunloadAlert.html` in new tab
 Then an alert is not present
 When I attempt to close current tab with possibility to handle alert
-Then number of elements found by `By.xpath(//img[@name='vividus-logo'])` is equal to `1`
+Then number of elements found by `xpath(//img[@name='vividus-logo'])` is equal to `1`
 
 Scenario: Verify step: "When I open new tab" (new tab doesn't inherit the state of the previous tab and can't handle alert)
 When I open new tab
@@ -150,4 +150,4 @@ When I click on element located by `xpath(//a[text() = 'here'])`
 !-- No alert should be shown and tab should be kept open, but focus should be switched to another tab
 When I attempt to close current tab with possibility to handle alert
 Then page title is equal to `Vividus Test Site`
-Then number of elements found by `By.xpath(//img[@name='vividus-logo'])` is equal to `1`
+Then number of elements found by `xpath(//img[@name='vividus-logo'])` is equal to `1`
