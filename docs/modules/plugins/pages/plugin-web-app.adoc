@@ -1452,6 +1452,44 @@ Given I am on page with URL `http://example.com`
 When I wait until page title matches `.*Domain`
 ----
 
+=== Slider steps
+
+Steps allow to interact with https://www.w3schools.com/jsref/dom_obj_range.asp[slider] (input element with type = "range").
+
+==== Set value in the slider
+
+Set the specified value in the slider.
+
+[source,gherkin]
+----
+When I set value `$value` in slider located by `$locator`
+----
+* `$value` - The value to set in the slider. In most cases, it is a numeric value in the range of [0, 100].
+* `$locator` - The <<_locator,locator>> used to find a slider.
+
+.Set the value into the middle of the slider
+[source,gherkin]
+----
+When I set value `50` in slider located by `id(test_slider)`
+----
+
+==== Check value of the slider
+
+Check that the actual value in the slider equals to the value provided in the step.
+
+[source,gherkin]
+----
+Then value `$value` is selected in slider located by `$locator`
+----
+* `$value` - The expected value in the slider. In most cases, it is a numeric value in the range of [0, 100].
+* `$locator` - The <<_locator,locator>> used to find a slider.
+
+.Check that the value is set in the middle of the slider
+[source,gherkin]
+----
+Then value `50` is selected in slider located by `id(test_slider)`
+----
+
 == Tips & Tricks
 
 === Validate URL host of the opened page
