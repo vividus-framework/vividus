@@ -1069,6 +1069,25 @@ Given I am on page with URL `https://example.com/`
 When I change window size to `640x320`
 ----
 
+==== Select state in the checkbox
+
+A checkbox is a graphical user interface element. Performs the action with the flag found by the locator.
+Actions that can be performed (CHECK or UNCHECK)
+
+[source,gherkin]
+----
+When I $checkBoxAction checkbox located by `$checkboxLocator`
+----
+
+* $checkBoxAction - The action to select a state of the checkbox, either CHECK or UNCHECK.
+* $checkboxLocator - The <<_locator,locator>> used to identify the checkbox.
+
+.Check 'Terms & Conditions' checkbox
+[source,gherkin]
+----
+When I check checkbox located by `checkboxName(terms-and-conditions)`
+----
+
 === Video steps
 
 Steps allow to interact with https://www.w3schools.com/html/html5_video.asp[video] elements.
