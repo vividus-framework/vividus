@@ -22,19 +22,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.EntityDetails;
 import org.apache.hc.core5.http.Header;
-import org.apache.hc.core5.http.HeaderElement;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpEntityContainer;
-import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpRequestInterceptor;
-import org.apache.hc.core5.http.message.MessageSupport;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +58,7 @@ public class PublishingAttachmentInterceptor implements HttpRequestInterceptor, 
             HttpEntity entity = httpEntityContainer.getEntity();
             if (entity != null)
             {
-                mimeType = getMimeType(request.getHeaders())
+                mimeType = MimeTypeUtils.getMimeTypeFromHeaders(request.getHeaders())
                         .orElseGet(() ->
                                 Optional.ofNullable(ContentType.parseLenient(entity.getContentType()))
                                         .orElse(ContentType.DEFAULT_TEXT).getMimeType()
@@ -88,7 +83,7 @@ public class PublishingAttachmentInterceptor implements HttpRequestInterceptor, 
     {
         Header[] headers = response.getResponseHeaders();
         String attachmentTitle = String.format("Response: %s %s", response.getMethod(), response.getFrom());
-        String mimeType = getMimeType(headers).orElseGet(ContentType.DEFAULT_TEXT::getMimeType);
+        String mimeType = MimeTypeUtils.getMimeTypeFromHeadersWithDefault(headers);
         attachApiMessage(attachmentTitle, headers, response.getResponseBody(), mimeType, response.getStatusCode());
     }
 
@@ -101,16 +96,5 @@ public class PublishingAttachmentInterceptor implements HttpRequestInterceptor, 
         dataMap.put("statusCode", statusCode);
 
         attachmentPublisher.publishAttachment("/org/vividus/http/attachment/api-message.ftl", dataMap, title);
-    }
-
-    private Optional<String> getMimeType(Header... headers)
-    {
-        return Stream.of(headers)
-                .filter(h -> HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(h.getName())
-                        && StringUtils.isNotBlank(h.getValue()))
-                .findFirst()
-                .map(MessageSupport::parse)
-                .map(elements -> elements[0])
-                .map(HeaderElement::getName);
     }
 }

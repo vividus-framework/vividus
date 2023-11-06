@@ -30,6 +30,12 @@ include::partial$plugin-installation.adoc[]
 |`<empty>`
 |The property family to set HTTP headers for all outgoing requests, e.g. rest-api.http.header.my-sample-header=my-sample-value
 
+|`rest-api.http.extended-logging`
+a|`true`
+`false`
+|`false`
+|Enable logging of HTTP request/response headers and bodies (applied to the following content types only: `text/*`, `application/json`, `application/xml`)
+
 |===
 
 See xref:ROOT:tests-configuration.adoc#_http_configuration[HTTP configuration] for more fine-grained control over the HTTP interactions.

@@ -58,6 +58,7 @@
                 <constructor-arg value="rest-api.http.header." />
             </bean>
         </property>
+        <property name="firstRequestInterceptor" ref="extendedHttpLoggingInterceptor"/>
         <property name="lastRequestInterceptor" ref="publishingAttachmentInterceptor" />
         <property name="lastResponseInterceptor">
             <bean class="org.vividus.http.SavingConnectionDetailsHttpResponseInterceptor">
@@ -69,6 +70,7 @@
         </property>
         <property name="httpResponseHandlers">
             <list>
+                <ref bean="extendedHttpLoggingInterceptor" />
                 <ref bean="publishingAttachmentInterceptor" />
             </list>
         </property>
@@ -78,6 +80,10 @@
         <constructor-arg ref="httpClient-RestApi" />
         <constructor-arg ref="httpTestContext" />
         <constructor-arg ref="softAssert" />
+    </bean>
+
+    <bean id="extendedHttpLoggingInterceptor" class="org.vividus.http.ExtendedHttpLoggingInterceptor">
+        <constructor-arg value="${rest-api.http.extended-logging}" />
     </bean>
 
     <bean id="publishingAttachmentInterceptor" class="org.vividus.http.PublishingAttachmentInterceptor" />
