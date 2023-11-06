@@ -1,5 +1,26 @@
 = Reporting Configuration
 
+== Configure report layout
+
+[cols="3,1,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`report.show-parameters-section`
+a|`true` +
+`false`
+|`true`
+|Within the report section menu:Suites[Overview > Parameters] houses input data from both the scenario-level and
+story-level xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] if any of them is available. When the test data
+contains numerous records, the Parameters section can become lengthy, thus increasing the difficulty of navigating to
+the actual Execution body. The property can be used to hide the Parameters section, making navigation easier.
+
+|===
+
+
 == Add external links to report
 
 User has possibility to link stories/scenarios to external systems like test-management or bug-tracking systems.
