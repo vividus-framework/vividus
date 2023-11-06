@@ -174,16 +174,23 @@ class AllureStoryReporterTests
         RunTestContext context = new RunTestContext();
         context.setTestContext(testContext);
         runTestContext = spy(context);
-        allureStoryReporter = new AllureStoryReporter(reportControlContext, runTestContext, allureReportGenerator,
-                batchStorage, testContext, allureRunContext, verificationErrorAdapter);
-        FieldUtils.writeField(allureStoryReporter, "lifecycle", allureLifecycle, true);
+        initStoryReporter(true);
         linkedQueueItem = new LinkedQueueItem<>(SCENARIO_UID);
+    }
+
+    private void initStoryReporter(boolean showParametersSection) throws IllegalAccessException
+    {
+        allureStoryReporter = new AllureStoryReporter(showParametersSection, reportControlContext, runTestContext,
+                allureReportGenerator, batchStorage, testContext, allureRunContext, verificationErrorAdapter);
+        FieldUtils.writeField(allureStoryReporter, "lifecycle", allureLifecycle, true);
         allureStoryReporter.setNext(next);
     }
 
-    @Test
-    void testNonFirstExampleEventHandling()
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void testNonFirstExampleEventHandling(boolean showParametersSection) throws IllegalAccessException
     {
+        initStoryReporter(showParametersSection);
         lenient().when(testContext.get(CURRENT_STEP_KEY))
                 .thenReturn(null)
                 .thenReturn(linkedQueueItem)
@@ -192,7 +199,7 @@ class AllureStoryReporterTests
                 .thenReturn(null);
         when(allureRunContext.getCurrentStoryLabels()).thenReturn(new ArrayList<>());
         Entry<String, String> tableRow = testExampleHandling(1);
-        verify(allureLifecycle).updateStep(eq(null), argThat(updater -> {
+        verify(allureLifecycle, times(showParametersSection ? 1 : 0)).updateStep(eq(null), argThat(updater -> {
             StepResult stepResult = new StepResult();
             updater.accept(stepResult);
             assertParameters(tableRow, stepResult.getParameters());
@@ -200,21 +207,24 @@ class AllureStoryReporterTests
         }));
     }
 
-    @Test
-    void testFirstExampleEventHandling()
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void testFirstExampleEventHandling(boolean showParametersSection) throws IllegalAccessException
     {
+        initStoryReporter(showParametersSection);
         lenient().when(testContext.get(CURRENT_STEP_KEY))
                 .thenReturn(null)
                 .thenReturn(null)
                 .thenReturn(null)
                 .thenReturn(linkedQueueItem);
         Entry<String, String> tableRow = testExampleHandling(0);
-        verify(allureLifecycle).updateTestCase(eq(linkedQueueItem.getValue()), argThat(updater -> {
-            TestResult testResult = new TestResult();
-            updater.accept(testResult);
-            assertParameters(tableRow, testResult.getParameters());
-            return true;
-        }));
+        verify(allureLifecycle, times(showParametersSection ? 1 : 0)).updateTestCase(eq(linkedQueueItem.getValue()),
+                argThat(updater -> {
+                    TestResult testResult = new TestResult();
+                    updater.accept(testResult);
+                    assertParameters(tableRow, testResult.getParameters());
+                    return true;
+                }));
     }
 
     @ParameterizedTest
