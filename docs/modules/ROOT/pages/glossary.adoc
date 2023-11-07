@@ -330,8 +330,8 @@ in the example below).
 {transformer=ONE_MORE_MY_TRANSFORMER, tables=/$\{locale\}/table1.table;/$\{locale\}/table2.table}
 ----
 
-== Lifecycle
-*Synonyms*: Lifecycle Steps, Lifecycle Hooks.
+== Lifecycle Steps
+*Synonyms*: hooks, fixtures.
 
 VIVIDUS provides a set of lifecycle steps to control the lifecycle of a story/steps of a test.
 They are executed in the following order and follow syntax:
