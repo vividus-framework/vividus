@@ -352,7 +352,7 @@ Scope: STORY
 
 * Before and After each scenario
 
-.example showing syntax for Before and After each scenario
+.Syntax for Before and After each scenario
 [source,gherkin]
 ----
 Lifecycle:
