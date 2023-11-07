@@ -366,7 +366,7 @@ Scope: SCENARIO
 
 * Before and After each step
 
-.example showing syntax for Before and After each step
+.Syntax for Before and After each step
 [source,gherkin]
 ----
 Lifecycle:
