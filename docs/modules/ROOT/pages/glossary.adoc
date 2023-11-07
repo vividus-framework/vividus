@@ -380,7 +380,7 @@ Scope: STEP
 
 * Additionally, scope can also be mixed and matched
 
-.example showing syntax combining scopes in a Lifecycle
+.Syntax combining scopes in a Lifecycle
 [source,gherkin]
 ----
 Lifecycle:
