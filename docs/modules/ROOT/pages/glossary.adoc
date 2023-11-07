@@ -338,7 +338,7 @@ They are executed in the following order and follow syntax:
 
 * Before and After each story
 
-.example showing syntax for Before and After each story
+.Syntax for Before and After each story
 [source,gherkin]
 ----
 Lifecycle:
