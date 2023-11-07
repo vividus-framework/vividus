@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,9 +70,9 @@ import org.vividus.util.DateUtils;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class AzureDevOpsFacadeTests
 {
-    private static final ZoneOffset OFFSET = ZoneId.systemDefault().getRules().getOffset(Instant.now());
-    private static final OffsetDateTime START = OffsetDateTime.of(1977, 5, 25, 0, 0, 0, 0, OFFSET);
-    private static final OffsetDateTime END = OffsetDateTime.of(1993, 4, 16, 0, 0, 0, 0, OFFSET);
+    private static final ZoneId ZONE_ID = ZoneId.systemDefault();
+    private static final ZonedDateTime START = ZonedDateTime.of(LocalDateTime.of(1977, 5, 25, 0, 0, 0, 0), ZONE_ID);
+    private static final ZonedDateTime END = ZonedDateTime.of(LocalDateTime.of(1993, 4, 16, 0, 0, 0, 0), ZONE_ID);
 
     private static final String MANUAL_STEP_PREFIX = "Step: ";
     private static final String MANUAL_RESULT_PREFIX = "Result: ";
@@ -114,7 +113,7 @@ class AzureDevOpsFacadeTests
         this.options = new AzureDevOpsExporterOptions();
         options.setProject(PROJECT);
         options.setArea(AREA);
-        this.facade = new AzureDevOpsFacade(client, options, new DateUtils(ZoneId.systemDefault()));
+        this.facade = new AzureDevOpsFacade(client, options, new DateUtils(ZONE_ID));
     }
 
     @Test
@@ -335,8 +334,8 @@ class AzureDevOpsFacadeTests
         assertEquals(resultOutcome, testResult.getOutcome());
         assertEquals("40", testResult.getTestPoint().getId());
         assertEquals(25, testResult.getRevision());
-        assertEquals(START, testResult.getStartedDate());
-        assertEquals(END, testResult.getCompletedDate());
+        assertEquals(START.toOffsetDateTime(), testResult.getStartedDate());
+        assertEquals(END.toOffsetDateTime(), testResult.getCompletedDate());
 
         assertThat(logger.getLoggingEvents(), is(List.of(
             info("Creating Test Run"),
