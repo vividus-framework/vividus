@@ -50,6 +50,7 @@
     </bean>
 
     <bean id="allureStoryReporter" class="org.vividus.report.allure.AllureStoryReporter" lazy-init="false">
+        <constructor-arg index="0" value="${report.show-parameters-section}" />
         <property name="next">
             <bean class="org.vividus.variable.VariableStoryReporter">
                 <property name="next" ref="collectingStatisticsStoryReporter" />

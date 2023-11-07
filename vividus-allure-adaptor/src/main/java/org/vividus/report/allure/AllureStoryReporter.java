@@ -92,9 +92,12 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
     private final IAllureRunContext allureRunContext;
     private final IVerificationErrorAdapter verificationErrorAdapter;
 
-    public AllureStoryReporter(ReportControlContext reportControlContext, RunContext runContext,
-            IAllureReportGenerator allureReportGenerator, BatchStorage batchStorage, TestContext testContext,
-            IAllureRunContext allureRunContext, IVerificationErrorAdapter verificationErrorAdapter)
+    private final boolean showParametersSection;
+
+    public AllureStoryReporter(boolean showParametersSection, ReportControlContext reportControlContext,
+            RunContext runContext, IAllureReportGenerator allureReportGenerator, BatchStorage batchStorage,
+            TestContext testContext, IAllureRunContext allureRunContext,
+            IVerificationErrorAdapter verificationErrorAdapter)
     {
         super(reportControlContext, runContext);
         this.lifecycle = Allure.getLifecycle();
@@ -103,6 +106,7 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
         this.testContext = testContext;
         this.allureRunContext = allureRunContext;
         this.verificationErrorAdapter = verificationErrorAdapter;
+        this.showParametersSection = showParametersSection;
     }
 
     @Override
@@ -250,21 +254,24 @@ public class AllureStoryReporter extends AbstractReportControlStoryReporter
         LinkedQueueItem<String> step = getLinkedStep();
         startTestCase(runningScenario, StoryExecutionStage.BEFORE_SCENARIO);
 
-        Meta storyMeta = runningStory.getStory().getMeta();
-        Meta scenarioMeta = runningScenario.getScenario().getMeta();
-        List<Parameter> parameters = tableRow.entrySet().stream()
-                .filter(e -> !storyMeta.hasProperty(e.getKey()) && !scenarioMeta.hasProperty(e.getKey()))
-                .map(e -> new Parameter().setName(e.getKey()).setValue(e.getValue()))
-                .collect(Collectors.toList());
+        if (showParametersSection)
+        {
+            Meta storyMeta = runningStory.getStory().getMeta();
+            Meta scenarioMeta = runningScenario.getScenario().getMeta();
+            List<Parameter> parameters = tableRow.entrySet().stream()
+                    .filter(e -> !storyMeta.hasProperty(e.getKey()) && !scenarioMeta.hasProperty(e.getKey()))
+                    .map(e -> new Parameter().setName(e.getKey()).setValue(e.getValue()))
+                    .collect(Collectors.toList());
 
-        String id = getCurrentStepId();
-        if (step == null)
-        {
-            lifecycle.updateTestCase(id, result -> result.setParameters(parameters));
-        }
-        else
-        {
-            lifecycle.updateStep(id, result -> result.setParameters(parameters));
+            String id = getCurrentStepId();
+            if (step == null)
+            {
+                lifecycle.updateTestCase(id, result -> result.setParameters(parameters));
+            }
+            else
+            {
+                lifecycle.updateStep(id, result -> result.setParameters(parameters));
+            }
         }
 
         super.example(tableRow, exampleIndex);
