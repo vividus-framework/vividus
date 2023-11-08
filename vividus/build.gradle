@@ -41,10 +41,6 @@ test {
     ]
 }
 
-// https://github.com/spotbugs/spotbugs-gradle-plugin/issues/115
-spotbugsIntegrationTest.auxClassPaths += integrationTest.classpath
-spotbugsSystemTest.auxClassPaths += integrationTest.classpath
-
 check.dependsOn integrationTest
 check.dependsOn systemTest
 
