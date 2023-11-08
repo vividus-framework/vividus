@@ -329,3 +329,73 @@ in the example below).
 ----
 {transformer=ONE_MORE_MY_TRANSFORMER, tables=/$\{locale\}/table1.table;/$\{locale\}/table2.table}
 ----
+
+== Lifecycle Steps
+*Synonyms*: hooks, fixtures.
+
+VIVIDUS provides a set of lifecycle steps to control the lifecycle of a story/steps of a test.
+They are executed in the following order and follow syntax:
+
+* Before and After each story
+
+.Syntax for Before and After each story
+[source,gherkin]
+----
+Lifecycle:
+Before:
+Scope: STORY
+[steps to be executed before each story]
+After:
+Scope: STORY
+[steps to be executed after each story]
+----
+
+* Before and After each scenario
+
+.Syntax for Before and After each scenario
+[source,gherkin]
+----
+Lifecycle:
+Before:
+Scope: SCENARIO
+[steps to be executed before each scenario]
+After:
+Scope: SCENARIO
+[steps to be executed after each scenario]
+----
+
+* Before and After each step
+
+.Syntax for Before and After each step
+[source,gherkin]
+----
+Lifecycle:
+Before:
+Scope: STEP
+[steps to be executed before each step]
+After:
+Scope: STEP
+[steps to be executed after each step]
+----
+
+* Additionally, scope can also be mixed and matched
+
+.Syntax combining scopes in a Lifecycle
+[source,gherkin]
+----
+Lifecycle:
+Before:
+Scope: STORY
+[steps to be executed before each story]
+Scope: SCENARIO
+[steps to be executed before each scenario]
+Scope: STEP
+[steps to be executed before each step]
+After:
+Scope: STORY
+[steps to be executed after each story]
+Scope: SCENARIO
+[steps to be executed after each scenario]
+Scope: STEP
+[steps to be executed after each step]
+----
