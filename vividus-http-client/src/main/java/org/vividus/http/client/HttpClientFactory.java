@@ -16,6 +16,8 @@
 
 package org.vividus.http.client;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.net.URI;
@@ -47,8 +49,6 @@ import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.hc.core5.util.Timeout;
 import org.vividus.http.keystore.IKeyStoreFactory;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class HttpClientFactory implements IHttpClientFactory
 {
@@ -142,21 +142,20 @@ public class HttpClientFactory implements IHttpClientFactory
         return Optional.empty();
     }
 
-    @SuppressFBWarnings("NP_NULL_ON_SOME_PATH")
     private void configureAuth(HttpClientConfig config, HttpClientBuilder builder)
     {
         AuthConfig authConfig = config.getAuthConfig();
         String username = authConfig.getUsername();
         String password = authConfig.getPassword();
 
-        if (username == null && password == null)
+        if (isEmpty(username) && isEmpty(password))
         {
             isTrue(!authConfig.isPreemptiveAuthEnabled(),
                     "Preemptive authentication requires username and password to be set");
             return;
         }
 
-        isTrue(username != null && password != null, "The %s is missing", username == null ? "username" : "password");
+        isTrue(isNoneEmpty(username, password), "The %s is missing", isEmpty(username) ? "username" : "password");
 
         Credentials credentials = new UsernamePasswordCredentials(username, password.toCharArray());
         if (authConfig.isPreemptiveAuthEnabled())
