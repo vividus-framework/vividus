@@ -24,7 +24,7 @@ When I change context to element located by `<firstP>`
 When I <action> baseline `ufg-context` in batch `<batchName>` with Applitools UFG using matrix:
 |profile                |browser|viewportSize|deviceName|
 |desktop                |chrome |1920x1080   |          |
-|ios                    |       |            |iPhone X  |
+|ios                    |       |            |iPhone 14 |
 |chrome_mobile_emulation|       |            |Galaxy S10|
 
 
@@ -36,7 +36,7 @@ When I run visual test with Applitools UFG using:
  and matrix:
 |profile                |browser|viewportSize|deviceName|screenOrientation|version|
 |desktop                |firefox|1920x1080   |          |                 |       |
-|ios                    |       |            |iPhone X  |portrait         |latest |
+|ios                    |       |            |iPhone 14 |portrait         |latest |
 |chrome_mobile_emulation|       |            |Galaxy S10|landscape        |       |
 
 
@@ -47,7 +47,7 @@ When I run visual test with Applitools UFG using:
  and matrix:
 |profile                |browser|viewportSize|deviceName|screenOrientation|version|
 |desktop                |firefox|1920x1080   |          |                 |       |
-|ios                    |       |            |iPhone X  |landscape        |latest |
+|ios                    |       |            |iPhone 14 |landscape        |latest |
 |chrome_mobile_emulation|       |            |Galaxy S10|portrait         |       |
 
 
@@ -59,5 +59,5 @@ When I run visual test with Applitools UFG using:
  and matrix:
 |profile                |browser|viewportSize|deviceName|
 |desktop                |firefox|1920x1080   |          |
-|ios                    |       |            |iPhone X  |
+|ios                    |       |            |iPhone 14 |
 |chrome_mobile_emulation|       |            |Galaxy S10|
