@@ -23,10 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -48,9 +47,9 @@ import org.vividus.xray.model.TestExecutionItemStatus;
 @ExtendWith(MockitoExtension.class)
 class TestExecutionFactoryTests
 {
-    private static final ZoneOffset OFFSET = ZoneId.systemDefault().getRules().getOffset(Instant.now());
-    private static final OffsetDateTime START = OffsetDateTime.of(1977, 5, 25, 0, 0, 0, 0, OFFSET);
-    private static final OffsetDateTime FINISH = OffsetDateTime.of(1993, 4, 16, 0, 0, 0, 0, OFFSET);
+    private static final ZoneId ZONE_ID = ZoneId.systemDefault();
+    private static final ZonedDateTime START = ZonedDateTime.of(LocalDateTime.of(1977, 5, 25, 0, 0, 0, 0), ZONE_ID);
+    private static final ZonedDateTime FINISH = ZonedDateTime.of(LocalDateTime.of(1993, 4, 16, 0, 0, 0, 0), ZONE_ID);
 
     private static final String SUCCESS = "successful";
     private static final String FAILED = "failed";
@@ -127,7 +126,7 @@ class TestExecutionFactoryTests
 
     private static void assertExecutedItem(TestExecutionItem item, TestExecutionItemStatus status)
     {
-        assertItem(item, status, START.toString(), FINISH.toString());
+        assertItem(item, status, START.toOffsetDateTime().toString(), FINISH.toOffsetDateTime().toString());
     }
 
     private static void assertItem(TestExecutionItem item, TestExecutionItemStatus status, String start, String finish)
