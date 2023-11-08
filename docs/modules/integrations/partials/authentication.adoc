@@ -9,9 +9,18 @@ jira.<jira instance key placeholder>.http.auth.password=5401a7d27b291c5d
 jira.<jira instance key placeholder>.http.auth.preemptive-auth-enabled=true
 ----
 
-* In case of two-factor authentication or any other complex authentication process it's possible to set session cookies into request headers like the following example shows (`jira.<jira instance key placeholder>.http.auth.username` and `jira.<jira instance key placeholder>.http.auth.password` properties must be empty in this case).
+* In case of two-factor authentication, token authentication or any other complex authentication process it's possible to use request headers like the following example shows:
 +
+.Authenticate using Bearer token
+[source,properties]
+----
+jira.<jira instance key placeholder>.http.headers.Authorization=Bearer D5YY0qJDxFDOZjCEpINMTdcQQxNtATrMw/IAsyWI+CzE
+----
++
+.Authenticate using session cookies
 [source,properties]
 ----
 jira.<jira instance key placeholder>.http.headers.Cookie=SESSIONID=298zf09hf012fh2
 ----
++
+IMPORTANT: Both `jira.<jira instance key placeholder>.http.auth.username` and `jira.<jira instance key placeholder>.http.auth.password` properties must be empty in this case.
