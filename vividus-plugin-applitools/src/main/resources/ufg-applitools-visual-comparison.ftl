@@ -54,7 +54,7 @@
                                     <#assign accessibilityStatus = accessibilityResult.isPassed()?then('success', 'failed')>
                                     <tr class="${accessibilityStatus}">
                                         <td class="inner-cell">
-                                            ${accessibilityResult.getGuideline()} accessibility check is ${accessibilityResult.getStatus()}, see <a href="${accessibilityResult.getUrl()}" role="button">Applitools report</a> for details.
+                                            ${accessibilityResult.getGuideline()} accessibility check is ${accessibilityResult.getStatus()}, see <a href="${accessibilityResult.getUrl()}" role="button" target="_blank">Applitools report</a> for details.
                                         </td>
                                     </tr>
                                 </#if>
