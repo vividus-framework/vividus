@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,19 +31,25 @@ public class WebUiContextListener extends AbstractWebDriverEventListener
     private IUiContext uiContext;
 
     @Override
-    public void afterNavigateBack(WebDriver driver)
+    public void beforeNavigateBack(WebDriver driver)
     {
         uiContext.reset();
     }
 
     @Override
-    public void afterNavigateForward(WebDriver driver)
+    public void beforeNavigateForward(WebDriver driver)
     {
         uiContext.reset();
     }
 
     @Override
-    public void afterNavigateTo(String url, WebDriver driver)
+    public void beforeNavigateTo(String url, WebDriver driver)
+    {
+        uiContext.reset();
+    }
+
+    @Override
+    public void beforeNavigateRefresh(WebDriver driver)
     {
         uiContext.reset();
     }

@@ -41,7 +41,6 @@ import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
-import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
@@ -60,7 +59,6 @@ public class PageSteps
     private static final String FORWARD_SLASH = "/";
     private static final String PAGE_TITLE = "Page title";
 
-    @Inject private IUiContext uiContext;
     @Inject private SetContextSteps setContextSteps;
     @Inject private INavigateActions navigateActions;
     @Inject private WebApplicationConfiguration webApplicationConfiguration;
@@ -107,7 +105,6 @@ public class PageSteps
     @Given("I am on page with URL `$pageURL`")
     public void openPage(String pageURL)
     {
-        uiContext.reset();
         navigateActions.navigateTo(pageURL);
     }
 
@@ -177,7 +174,6 @@ public class PageSteps
     @When("I refresh page")
     public void refreshPage()
     {
-        uiContext.reset();
         navigateActions.refresh();
     }
 

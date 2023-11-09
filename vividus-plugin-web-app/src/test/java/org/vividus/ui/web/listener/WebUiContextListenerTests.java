@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.ui.web.listener;
 
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -24,14 +25,20 @@ import static org.mockito.Mockito.when;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
+import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.ui.context.IUiContext;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,30 +47,25 @@ class WebUiContextListenerTests
     private static final String WINDOW_NAME1 = "windowName1";
     private static final String WINDOW_NAME2 = "windowName2";
 
-    @Mock
-    private IUiContext uiContext;
+    @Mock private IUiContext uiContext;
+    @InjectMocks private WebUiContextListener webUiContextListener;
 
-    @InjectMocks
-    private WebUiContextListener webUiContextListener;
-
-    @Test
-    void testAfterNavigateBack()
+    static Stream<Arguments> navigateActions()
     {
-        webUiContextListener.afterNavigateBack(mock(WebDriver.class));
-        verify(uiContext).reset();
+        return Stream.of(
+            arguments((BiConsumer<WebUiContextListener, WebDriver>) WebDriverEventListener::beforeNavigateBack),
+            arguments((BiConsumer<WebUiContextListener, WebDriver>) WebDriverEventListener::beforeNavigateForward),
+            arguments((BiConsumer<WebUiContextListener, WebDriver>) (listener, webDriver) -> listener.beforeNavigateTo(
+                    "url", webDriver)),
+            arguments((BiConsumer<WebUiContextListener, WebDriver>) WebDriverEventListener::beforeNavigateRefresh)
+        );
     }
 
-    @Test
-    void testAfterNavigateForward()
+    @ParameterizedTest
+    @MethodSource("navigateActions")
+    void shouldResetContextBeforeAnyNavigationAction(BiConsumer<WebUiContextListener, WebDriver> test)
     {
-        webUiContextListener.afterNavigateForward(mock(WebDriver.class));
-        verify(uiContext).reset();
-    }
-
-    @Test
-    void testAfterNavigateTo()
-    {
-        webUiContextListener.afterNavigateTo("url", mock(WebDriver.class));
+        test.accept(webUiContextListener, mock(WebDriver.class));
         verify(uiContext).reset();
     }
 
