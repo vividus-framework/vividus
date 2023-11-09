@@ -46,7 +46,7 @@
                             <table class="table table-hover">
                                 <tr class="${visualStatus}">
                                     <td class="inner-cell">
-                                        Visual check is ${testResult.getStatus()}, see <a href="${testResult.getUrl()}" role="button">Applitools report</a> for details.
+                                        Visual check is ${testResult.getStatus()}, see <a href="${testResult.getUrl()}" role="button" target="_blank">Applitools report</a> for details.
                                     </td>
                                 </tr>
                                 <#if testResult.getAccessibilityCheckResult()??>
@@ -54,7 +54,7 @@
                                     <#assign accessibilityStatus = accessibilityResult.isPassed()?then('success', 'failed')>
                                     <tr class="${accessibilityStatus}">
                                         <td class="inner-cell">
-                                            ${accessibilityResult.getGuideline()} accessibility check is ${accessibilityResult.getStatus()}, see <a href="${accessibilityResult.getUrl()}" role="button">Applitools report</a> for details.
+                                            ${accessibilityResult.getGuideline()} accessibility check is ${accessibilityResult.getStatus()}, see <a href="${accessibilityResult.getUrl()}" role="button" target="_blank">Applitools report</a> for details.
                                         </td>
                                     </tr>
                                 </#if>
