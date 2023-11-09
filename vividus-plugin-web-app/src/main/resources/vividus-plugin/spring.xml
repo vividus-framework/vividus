@@ -82,9 +82,6 @@
     <bean id="webApplicationConfiguration" class="org.vividus.ui.web.configuration.WebApplicationConfiguration">
         <constructor-arg value="${web-application.main-page-url}" />
         <constructor-arg value="${web-application.authentication-mode}" />
-        <property name="mobileScreenResolutionWidthThreshold" value="${web-application.phone-resolution-width-threshold}" />
-        <property name="tabletScreenResolutionWidthThreshold" value="${web-application.tablet-resolution-width-threshold}" />
-        <property name="applicationEnvironmentType" value="${web-application.environment-type}" />
     </bean>
 
     <bean id="cssSelectorFactory" class="org.vividus.ui.web.action.CssSelectorFactory" />
