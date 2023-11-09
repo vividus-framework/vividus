@@ -18,7 +18,6 @@ package org.vividus.ui.web.action;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -54,13 +53,6 @@ class WebJavascriptActionsTests
             + "{ map[attributes[i].name] = attributes[i].value; } return map;";
     private static final String SCRIPT_SET_TOP_POSITION = "var originTop = arguments[0].getBoundingClientRect().top;"
             + " arguments[0].style.top = \"%dpx\"; return Math.round(originTop);";
-
-    private static final String GET_BROWSER_CONFIG_JS = "return {userAgent: navigator.userAgent,"
-            + "devicePixelRatio: window.devicePixelRatio}";
-    private static final String USER_AGENT_VALUE = "Mozilla";
-    private static final Double DEVICE_PIXEL_RATIO_VALUE = 1.5;
-    private static final Map<String, ?> BROWSER_CONFIG = Map.of("userAgent", USER_AGENT_VALUE, "devicePixelRatio",
-            DEVICE_PIXEL_RATIO_VALUE);
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IWebDriverManager webDriverManager;
@@ -227,21 +219,15 @@ class WebJavascriptActionsTests
     }
 
     @Test
-    void testOnLoadBrowserConfig()
+    void shouldReturnDevicePixelRatio()
     {
-        mockScriptExecution(GET_BROWSER_CONFIG_JS, BROWSER_CONFIG);
-        javascriptActions.onLoad();
-        assertEquals(USER_AGENT_VALUE, javascriptActions.getUserAgent());
-        assertEquals(DEVICE_PIXEL_RATIO_VALUE, javascriptActions.getDevicePixelRatio());
-    }
-
-    @Test
-    void testOnLoadMultipleTimes()
-    {
-        mockScriptExecution(GET_BROWSER_CONFIG_JS, BROWSER_CONFIG);
-        javascriptActions.onLoad();
-        javascriptActions.onLoad();
-        verify((JavascriptExecutor) webDriver, times(1)).executeScript(GET_BROWSER_CONFIG_JS);
+        String getDprJs = "return window.devicePixelRatio;";
+        double dpr = 1.5;
+        Number devicePixelRatioValue = dpr;
+        mockScriptExecution(getDprJs, devicePixelRatioValue);
+        assertEquals(dpr, javascriptActions.getDevicePixelRatio());
+        assertEquals(dpr, javascriptActions.getDevicePixelRatio());
+        verify((JavascriptExecutor) webDriver).executeScript(getDprJs);
     }
 
     @Test

@@ -26,10 +26,9 @@ import org.vividus.selenium.TextUtils;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.ViewportSizeProvider;
 import org.vividus.ui.action.JavascriptActions;
-import org.vividus.ui.web.listener.WebApplicationListener;
 import org.vividus.util.ResourceUtils;
 
-public class WebJavascriptActions extends JavascriptActions implements WebApplicationListener, ViewportSizeProvider
+public class WebJavascriptActions extends JavascriptActions implements ViewportSizeProvider
 {
     private static final String TRIGGER_EVENT_FORMAT = "if(document.createEvent){var evObj = document"
             + ".createEvent('MouseEvents');evObj.initEvent('%1$s', true, false); arguments[0].dispatchEvent(evObj);} "
@@ -44,17 +43,9 @@ public class WebJavascriptActions extends JavascriptActions implements WebApplic
 
     private final IWebDriverManager webDriverManager;
 
-    private final ThreadLocal<BrowserConfig> browserConfig = ThreadLocal.withInitial(() -> {
-        String userAgentKey = "userAgent";
-        String devicePixelRatioKey = "devicePixelRatio";
-        Map<String, ?> browserConfig = executeScript("return {"
-                + userAgentKey + ": navigator.userAgent,"
-                + devicePixelRatioKey + ": window.devicePixelRatio"
-                + "}");
-        String userAgent = (String) browserConfig.get(userAgentKey);
-        double devicePixelRatio = ((Number) browserConfig.get(devicePixelRatioKey)).doubleValue();
-        return new BrowserConfig(userAgent, devicePixelRatio);
-    });
+    private final ThreadLocal<Double> devicePixelRatio = ThreadLocal.withInitial(
+            () -> ((Number) executeScript("return window.devicePixelRatio;")).doubleValue()
+    );
 
     private int stickyHeaderSizePercentage;
 
@@ -201,21 +192,9 @@ public class WebJavascriptActions extends JavascriptActions implements WebApplic
         return executeScript("return arguments[0].value", webElement);
     }
 
-    @Override
-    public boolean onLoad()
-    {
-        browserConfig.get();
-        return false;
-    }
-
-    public String getUserAgent()
-    {
-        return browserConfig.get().userAgent;
-    }
-
     public double getDevicePixelRatio()
     {
-        return browserConfig.get().devicePixelRatio;
+        return devicePixelRatio.get();
     }
 
     public Map<String, String> getElementAttributes(WebElement webElement)
@@ -269,9 +248,5 @@ public class WebJavascriptActions extends JavascriptActions implements WebApplic
     public void setStickyHeaderSizePercentage(int stickyHeaderSizePercentage)
     {
         this.stickyHeaderSizePercentage = stickyHeaderSizePercentage;
-    }
-
-    private record BrowserConfig(String userAgent, double devicePixelRatio)
-    {
     }
 }
