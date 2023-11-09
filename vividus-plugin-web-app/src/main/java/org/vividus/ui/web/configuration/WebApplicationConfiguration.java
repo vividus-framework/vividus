@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,153 +19,50 @@ package org.vividus.ui.web.configuration;
 import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.net.URI;
-import java.util.function.Supplier;
 
-import com.google.common.base.Suppliers;
-
-import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.util.UriUtils;
 
 public class WebApplicationConfiguration
 {
-    private static final String TEST_ENVIRONMENT = "test";
+    private URI mainApplicationPageUri;
+    private String basicAuthUser;
+    private final AuthenticationMode authenticationMode;
 
-    private int mobileScreenResolutionWidthThreshold;
-    private int tabletScreenResolutionWidthThreshold;
-    private String applicationEnvironmentType;
-    private final ThreadLocal<ConfigurationStorage> configurationStorage;
-
-    public WebApplicationConfiguration(String mainApplicationPageUrlString, AuthenticationMode authenticationMode)
+    public WebApplicationConfiguration(String mainApplicationPageUrl, AuthenticationMode authenticationMode)
     {
-        configurationStorage = ThreadLocal.withInitial(() ->
-            new ConfigurationStorage(mainApplicationPageUrlString, authenticationMode));
-    }
-
-    public boolean isTestEnvironment()
-    {
-        return TEST_ENVIRONMENT.equals(applicationEnvironmentType);
+        this.authenticationMode = authenticationMode;
+        if (null != mainApplicationPageUrl)
+        {
+            URI uri = UriUtils.createUri(mainApplicationPageUrl);
+            this.basicAuthUser = uri.getUserInfo();
+            this.mainApplicationPageUri = this.authenticationMode != null
+                    ? this.authenticationMode.getUrl(mainApplicationPageUrl, basicAuthUser)
+                    : uri;
+        }
     }
 
     public URI getMainApplicationPageUrl()
     {
-        return configurationStorage.get().getMainApplicationPageUri();
+        isTrue(mainApplicationPageUri != null, "URL of the main application page should be non-blank");
+        return mainApplicationPageUri;
     }
 
     /**
      * @return the main application page URL or null if it's not set
      */
+    @SuppressWarnings("SimpleAccessorNameNotation")
     public URI getMainApplicationPageUrlUnsafely()
     {
-        return configurationStorage.get().getMainApplicationPageUriUnsafely();
+        return mainApplicationPageUri;
     }
 
     public AuthenticationMode getAuthenticationMode()
     {
-        return configurationStorage.get().authenticationMode;
-    }
-
-    public void changeAuthenticationMode(AuthenticationMode authenticationMode)
-    {
-        configurationStorage.get().setAuthenticationMode(authenticationMode);
+        return authenticationMode;
     }
 
     public String getBasicAuthUser()
     {
-        return configurationStorage.get().basicAuthUser;
-    }
-
-    public int getMobileScreenResolutionWidthThreshold()
-    {
-        return mobileScreenResolutionWidthThreshold;
-    }
-
-    public void setMobileScreenResolutionWidthThreshold(int mobileScreenResolutionWidthThreshold)
-    {
-        this.mobileScreenResolutionWidthThreshold = mobileScreenResolutionWidthThreshold;
-    }
-
-    public int getTabletScreenResolutionWidthThreshold()
-    {
-        return tabletScreenResolutionWidthThreshold;
-    }
-
-    public void setTabletScreenResolutionWidthThreshold(int tabletScreenResolutionWidthThreshold)
-    {
-        this.tabletScreenResolutionWidthThreshold = tabletScreenResolutionWidthThreshold;
-    }
-
-    public String getHost()
-    {
-        return configurationStorage.get().mainApplicationPageUri == null
-                ? null
-                : configurationStorage.get().mainApplicationPageUri.getHost();
-    }
-
-    public boolean isMobileViewport(WebJavascriptActions javascritActions)
-    {
-        return getViewportWidth(javascritActions) <= mobileScreenResolutionWidthThreshold;
-    }
-
-    public boolean isTabletViewport(WebJavascriptActions javascritActions)
-    {
-        return getViewportWidth(javascritActions) <= tabletScreenResolutionWidthThreshold;
-    }
-
-    private int getViewportWidth(WebJavascriptActions javascritActions)
-    {
-        return javascritActions.getViewportSize().getWidth();
-    }
-
-    public void setApplicationEnvironmentType(String applicationEnvironmentType)
-    {
-        this.applicationEnvironmentType = applicationEnvironmentType;
-    }
-
-    private static final class ConfigurationStorage
-    {
-        private URI mainApplicationPageUri;
-        private AuthenticationMode authenticationMode;
-        private String mainApplicationPageUrl;
-        private String basicAuthUser;
-        private final Supplier<URI> mainApplicationPageUriSupplier = Suppliers.memoize(() ->
-        {
-            isTrue(mainApplicationPageUri != null, "URL of the main application page should be non-blank");
-            return mainApplicationPageUri;
-        });
-
-        ConfigurationStorage(String mainApplicationPageUrl, AuthenticationMode authenticationMode)
-        {
-            if (null != mainApplicationPageUrl)
-            {
-                basicAuthUser = UriUtils.createUri(mainApplicationPageUrl).getUserInfo();
-                this.mainApplicationPageUrl = mainApplicationPageUrl;
-                this.authenticationMode = authenticationMode;
-                updateUri();
-            }
-        }
-
-        @SuppressWarnings("SimpleAccessorNameNotation")
-        private URI getMainApplicationPageUriUnsafely()
-        {
-            return mainApplicationPageUri;
-        }
-
-        private URI getMainApplicationPageUri()
-        {
-            return mainApplicationPageUriSupplier.get();
-        }
-
-        private void setAuthenticationMode(AuthenticationMode authenticationMode)
-        {
-            this.authenticationMode = authenticationMode;
-            updateUri();
-        }
-
-        private void updateUri()
-        {
-            this.mainApplicationPageUri = null != authenticationMode
-                    ? authenticationMode.getUrl(mainApplicationPageUrl, basicAuthUser)
-                    : UriUtils.createUri(mainApplicationPageUrl);
-        }
+        return basicAuthUser;
     }
 }
