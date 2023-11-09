@@ -154,10 +154,13 @@ public class FieldSteps
         {
             element.clear();
             LOGGER.info("Entering text \"{}\" in element", text);
-            if (webDriverManager.isBrowserAnyOf(Browser.SAFARI) && fieldActions.isElementContenteditable(element))
+            if (fieldActions.isElementContenteditable(element))
             {
-                javascriptActions.executeScript("var element = arguments[0];element.innerHTML = arguments[1];", element,
-                        text);
+                // Workaround for CKEditor 5 (JavaScript WYSIWYG editor):
+                // https://github.com/ckeditor/ckeditor5/issues/6554
+                javascriptActions.executeScript(
+                        "arguments[0].ckeditorInstance ? arguments[0].ckeditorInstance.setData(arguments[1])"
+                                + " : arguments[0].innerHTML = arguments[1]", element, text);
                 return;
             }
 

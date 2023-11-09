@@ -68,10 +68,9 @@ class FieldStepsTests
     @Mock private WebElement webElement;
 
     @Test
-    void shouldEnterTextInFieldForNotSafariBrowser()
+    void shouldEnterTextInFieldForNotContenteditableElement()
     {
         var locator = mock(Locator.class);
-        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(false);
         when(baseValidations.assertElementExists(FIELD_TO_ENTER_TEXT, locator)).thenReturn(Optional.of(webElement));
         fieldSteps.enterTextInField(TEXT, locator);
         verify(webElement).clear();
@@ -156,36 +155,23 @@ class FieldStepsTests
     }
 
     @Test
-    void testEnterTextInFieldSafariContentEditableFrame()
+    void testEnterTextInContentEditableElement()
     {
         var locator = mock(Locator.class);
         when(fieldActions.isElementContenteditable(webElement)).thenReturn(true);
-        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(true);
         when(baseValidations.assertElementExists(FIELD_TO_ENTER_TEXT, locator)).thenReturn(Optional.of(webElement));
         fieldSteps.enterTextInField(TEXT, locator);
         verify(webElement).clear();
-        verify(javascriptActions).executeScript("var element = arguments[0];element.innerHTML = arguments[1];",
-                webElement, TEXT);
+        verify(javascriptActions).executeScript("arguments[0].ckeditorInstance ?"
+                        + " arguments[0].ckeditorInstance.setData(arguments[1])"
+                        + " : arguments[0].innerHTML = arguments[1]", webElement, TEXT);
         verify(webElement, never()).sendKeys(TEXT);
-    }
-
-    @Test
-    void testEnterTextInFieldSafariSimpleFrame()
-    {
-        var locator = mock(Locator.class);
-        when(fieldActions.isElementContenteditable(webElement)).thenReturn(false);
-        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(true);
-        when(baseValidations.assertElementExists(FIELD_TO_ENTER_TEXT, locator)).thenReturn(Optional.of(webElement));
-        fieldSteps.enterTextInField(TEXT, locator);
-        verify(webElement).clear();
-        verify(fieldActions).typeText(webElement, TEXT);
     }
 
     @Test
     void shouldEnterTextInFieldWhichBecameStaleOnce()
     {
         var locator = mock(Locator.class);
-        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(false);
         when(baseValidations.assertElementExists(FIELD_TO_ENTER_TEXT, locator)).thenReturn(Optional.of(webElement));
         doThrow(StaleElementReferenceException.class).doNothing().when(fieldActions).typeText(webElement, TEXT);
         fieldSteps.enterTextInField(TEXT, locator);
@@ -197,7 +183,6 @@ class FieldStepsTests
     void shouldFailToEnterTextInFieldWhichIsAlwaysStale()
     {
         var locator = mock(Locator.class);
-        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(false);
         when(baseValidations.assertElementExists(FIELD_TO_ENTER_TEXT, locator)).thenReturn(Optional.of(webElement));
         var exception1 = new StaleElementReferenceException("one");
         var exception2 = new StaleElementReferenceException("two");
