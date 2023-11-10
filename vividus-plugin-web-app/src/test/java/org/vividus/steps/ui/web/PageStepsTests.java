@@ -65,7 +65,6 @@ import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
-import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.configuration.AuthenticationMode;
@@ -88,7 +87,6 @@ class PageStepsTests
     @Mock private IDescriptiveSoftAssert softAssert;
     @Mock private INavigateActions navigateActions;
     @Mock private WebJavascriptActions javascriptActions;
-    @Mock private IUiContext uiContext;
     @Mock private WebApplicationConfiguration webApplicationConfiguration;
     @Mock private SetContextSteps setContextSteps;
     @Mock private IWebDriverProvider webDriverProvider;
@@ -210,17 +208,15 @@ class PageStepsTests
     {
         pageSteps.refreshPage();
         verify(navigateActions).refresh();
-        verify(uiContext).reset();
     }
 
     @Test
     void testOpenPageUrlInNewWindow()
     {
-        InOrder ordered = Mockito.inOrder(setContextSteps, navigateActions, javascriptActions, uiContext);
+        InOrder ordered = Mockito.inOrder(setContextSteps, navigateActions, javascriptActions);
         pageSteps.openPageUrlInNewWindow(URL);
         ordered.verify(javascriptActions).openNewTab();
         ordered.verify(setContextSteps).switchingToWindow();
-        ordered.verify(uiContext).reset();
         ordered.verify(navigateActions).navigateTo(URL);
         ordered.verifyNoMoreInteractions();
     }
@@ -228,11 +224,10 @@ class PageStepsTests
     @Test
     void testOpenPageUrlInNewTab()
     {
-        InOrder ordered = Mockito.inOrder(setContextSteps, navigateActions, javascriptActions, uiContext);
+        InOrder ordered = Mockito.inOrder(setContextSteps, navigateActions, javascriptActions);
         pageSteps.openPageUrlInNewTab(URL);
         ordered.verify(javascriptActions).openNewTab();
         ordered.verify(setContextSteps).switchToTab();
-        ordered.verify(uiContext).reset();
         ordered.verify(navigateActions).navigateTo(URL);
         ordered.verifyNoMoreInteractions();
     }
