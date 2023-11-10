@@ -17,12 +17,16 @@
 package org.vividus.ui.web.action;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.ie.InternetExplorerOptions;
 import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
@@ -35,6 +39,7 @@ import org.vividus.ui.web.util.FormatUtils;
 public class FieldActions implements IFieldActions
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(FieldActions.class);
+    private static final int TEXT_TYPING_ATTEMPTS_LIMIT = 5;
 
     private final IWebDriverManager webDriverManager;
     private final WebJavascriptActions javascriptActions;
@@ -122,29 +127,111 @@ public class FieldActions implements IFieldActions
             String normalizedText = FormatUtils.normalizeLineEndings(text);
             LOGGER.info("Adding text \"{}\" into the element", normalizedText);
 
-            // workaround for Safari and IE 11
-            // Safari issue: https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/4467
-            // IE 11 issue: https://github.com/SeleniumHQ/selenium/issues/3353
-            boolean workaroundNeeded = webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)
-                    && !element.findElements(By.xpath("//preceding-sibling::head"
-                    + "[descendant::title[contains(text(),'Rich Text')]]")).isEmpty()
-                    && isElementContenteditable(element);
+            // workarounds for contenteditable elements
+            if (isElementContenteditable(element))
+            {
+                // workaround for CKEditor 5 (JavaScript WYSIWYG editor):
+                // https://github.com/ckeditor/ckeditor5/issues/6554
+                boolean ckeWorkaroundNeeded = javascriptActions.executeScript(
+                        "return arguments[0].ckeditorInstance !== undefined", element);
+                if (ckeWorkaroundNeeded)
+                {
+                    javascriptActions.executeScript(
+                            "const editor = arguments[0].ckeditorInstance;"
+                                    + "const originalText = editor.getData();"
+                                    + "const lastPCloseTagIndex = originalText.lastIndexOf('</p>');"
+                                    + "if (lastPCloseTagIndex !== -1) {"
+                                    + "editor.setData( originalText.substring(0, lastPCloseTagIndex)"
+                                    + " + arguments[1] + originalText.substring(lastPCloseTagIndex) );"
+                                    + "} else {"
+                                    + "editor.setData(originalText + arguments[1])"
+                                    + "}", element, text);
+                    return;
+                }
 
-            if (workaroundNeeded)
-            {
-                javascriptActions.executeScript(
-                        "var text=arguments[0].innerHTML;arguments[0].innerHTML = text+arguments[1];", element,
-                        text);
+                // workaround for Safari and IE 11
+                // Safari issue: https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/4467
+                // IE 11 issue: https://github.com/SeleniumHQ/selenium/issues/3353
+                boolean richTextWorkaroundNeeded = webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)
+                        && !element.findElements(By.xpath("//preceding-sibling::head"
+                        + "[descendant::title[contains(text(),'Rich Text')]]")).isEmpty();
+                if (richTextWorkaroundNeeded)
+                {
+                    javascriptActions.executeScript(
+                            "var text=arguments[0].innerHTML;arguments[0].innerHTML = text+arguments[1];", element,
+                            text);
+                    return;
+                }
             }
-            else
-            {
-                typeText(element, normalizedText);
-            }
+            sendKeysToElement(element, normalizedText);
         }
     }
 
     @Override
     public void typeText(WebElement element, String text)
+    {
+        enterTextInFieldWithRetry(text, element, false);
+    }
+
+    private void enterTextInFieldWithRetry(String text, WebElement element, boolean retry)
+    {
+        enterTextInField(element, text, retry, () -> enterTextInFieldWithRetry(text, element, true));
+    }
+
+    private void enterTextInField(WebElement element, String text, boolean retry, Runnable retryRunnable)
+    {
+        try
+        {
+            element.clear();
+            LOGGER.info("Entering text \"{}\" in element", text);
+            if (isElementContenteditable(element))
+            {
+                // Workaround for CKEditor 5 (JavaScript WYSIWYG editor):
+                // https://github.com/ckeditor/ckeditor5/issues/6554
+                javascriptActions.executeScript(
+                        "arguments[0].ckeditorInstance ? arguments[0].ckeditorInstance.setData(arguments[1])"
+                                + " : arguments[0].innerHTML = arguments[1]", element, text);
+                return;
+            }
+            sendKeysToElement(element, text);
+            applyWorkaroundIfIE(element, text);
+        }
+        catch (StaleElementReferenceException e)
+        {
+            if (retry)
+            {
+                throw e;
+            }
+            LOGGER.info("An element is stale. One more attempt to type text into it");
+            retryRunnable.run();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void applyWorkaroundIfIE(WebElement element, String normalizedText)
+    {
+        // Workaround for IExplore: https://github.com/seleniumhq/selenium/issues/805
+        if (webDriverManager.isBrowserAnyOf(Browser.IE) && Boolean.TRUE.equals(
+                ((Map<String, Object>) webDriverManager.getCapabilities().getCapability(
+                        InternetExplorerOptions.IE_OPTIONS)).get(InternetExplorerDriver.REQUIRE_WINDOW_FOCUS)))
+        {
+            int iterationsCounter = TEXT_TYPING_ATTEMPTS_LIMIT;
+            while (iterationsCounter > 0 && isValueNotEqualTo(element, normalizedText))
+            {
+                element.clear();
+                LOGGER.info("Re-typing text \"{}\" to element", normalizedText);
+                sendKeysToElement(element, normalizedText);
+                iterationsCounter--;
+            }
+            if (iterationsCounter == 0 && isValueNotEqualTo(element, normalizedText))
+            {
+                softAssert.recordFailedAssertion(String.format("The element is not filled correctly"
+                        + " after %d typing attempt(s)", TEXT_TYPING_ATTEMPTS_LIMIT + 1));
+            }
+        }
+    }
+
+    private void sendKeysToElement(WebElement element, String text)
     {
         try
         {
@@ -156,8 +243,12 @@ public class FieldActions implements IFieldActions
         }
     }
 
-    @Override
-    public boolean isElementContenteditable(WebElement element)
+    private boolean isValueNotEqualTo(WebElement element, String expectedValue)
+    {
+        return !expectedValue.equals(javascriptActions.executeScript("return arguments[0].value;", element));
+    }
+
+    private boolean isElementContenteditable(WebElement element)
     {
         return Boolean.parseBoolean(element.getAttribute("contenteditable"));
     }

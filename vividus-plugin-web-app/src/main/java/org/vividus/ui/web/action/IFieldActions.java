@@ -38,11 +38,4 @@ public interface IFieldActions
      * @param text The text to type
      */
     void typeText(WebElement element, String text);
-
-    /**
-     * Checks that the content of the element is editable
-     * @param element element to check
-     * @return true - if the element's content is editable or false - if it's not
-     */
-    boolean isElementContenteditable(WebElement element);
 }
