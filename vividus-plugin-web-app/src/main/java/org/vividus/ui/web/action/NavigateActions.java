@@ -16,10 +16,8 @@
 
 package org.vividus.ui.web.action;
 
-import java.net.URI;
-
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.Navigation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
@@ -42,7 +40,7 @@ public class NavigateActions implements INavigateActions
         LOGGER.info("Loading: {}", url);
         try
         {
-            getWebDriver().navigate().to(url);
+            getNavigator().to(url);
         }
         catch (TimeoutException ex)
         {
@@ -51,24 +49,12 @@ public class NavigateActions implements INavigateActions
     }
 
     @Override
-    public void navigateTo(URI url)
-    {
-        navigateTo(url.toString());
-    }
-
-    @Override
     public void refresh()
-    {
-        refresh(getWebDriver());
-    }
-
-    @Override
-    public void refresh(WebDriver webDriver)
     {
         LOGGER.info("Refreshing the current page");
         try
         {
-            webDriver.navigate().refresh();
+            getNavigator().refresh();
         }
         catch (TimeoutException ex)
         {
@@ -77,24 +63,6 @@ public class NavigateActions implements INavigateActions
         // Chrome browser doesn't wait for page load to the end (like Firefox) and stops waiting when the web site is
         // still loading. In this case Vividus additional wait.
         waitActions.waitForPageLoad();
-    }
-
-    @Override
-    public void back()
-    {
-        LOGGER.info("Navigating back to the previous page");
-        getWebDriver().navigate().back();
-        waitActions.waitForPageLoad();
-    }
-
-    @Override
-    public void back(String previousPageUrl)
-    {
-        String currentUrl = getWebDriver().getCurrentUrl();
-        if (!previousPageUrl.equals(currentUrl))
-        {
-            navigateTo(previousPageUrl);
-        }
     }
 
     @SuppressWarnings("checkstyle:IllegalCatchExtended")
@@ -111,8 +79,8 @@ public class NavigateActions implements INavigateActions
         }
     }
 
-    private WebDriver getWebDriver()
+    private Navigation getNavigator()
     {
-        return webDriverProvider.get();
+        return webDriverProvider.get().navigate();
     }
 }
