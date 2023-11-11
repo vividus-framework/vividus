@@ -313,7 +313,7 @@ Then `${qrCodeLink}` is equal to `https://www.example.com`
 
 === Upload file
 
-Uploads the {xref:ROOT:glossary.adoc#_resource}[resource] or file via web interface.
+Uploads the xref:ROOT:glossary.adoc#_resource[resource] or file via web interface.
 
 [source,gherkin]
 ----
