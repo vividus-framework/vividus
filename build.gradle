@@ -30,6 +30,13 @@ subprojects {
     }
 }
 
+allprojects {
+    tasks.withType(Test){
+        print("BUILD: $name $project.name")
+        jvmArgs += ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
+    }
+}
+
 def publishedSubprojects = subprojects.findAll {
     it.name != 'vividus-tests' && it.name != 'vividus-docker-bundler'
 }
