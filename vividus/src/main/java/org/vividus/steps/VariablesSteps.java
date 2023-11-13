@@ -36,7 +36,6 @@ import org.vividus.context.VariableContext;
 import org.vividus.publishing.DiffAttachmentPublisher;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.util.EnumUtils;
 import org.vividus.util.comparison.ComparisonUtils;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
 import org.vividus.variable.VariableScope;
@@ -61,8 +60,7 @@ public class VariablesSteps
             @Override
             protected <T extends Comparable<T>> boolean compareValues(T value1, ComparisonRule condition, T value2)
             {
-                String readableCondition = EnumUtils.toHumanReadableForm(condition);
-                String description = "Checking if \"" + value1 + "\" is " + readableCondition + " \"" + value2 + "\"";
+                String description = "Checking if \"%s\" is %s \"%s\"".formatted(value1, condition, value2);
 
                 Consumer<Boolean> resultConsumer = passed ->
                 {
