@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,27 +16,9 @@
 
 package org.vividus.ui.web.action;
 
-import java.net.URI;
-
-import org.openqa.selenium.WebDriver;
-
 public interface INavigateActions
 {
     void navigateTo(String url);
 
-    void navigateTo(URI url);
-
     void refresh();
-
-    void refresh(WebDriver webDriver);
-
-    void back();
-
-    /**
-     * Checks if the previous and current page URLs are different. Performs standard navigation back and checks if the
-     * URL value has changed. If not, navigating to default URL is performed, but the failed assertion is recorded.
-     * Applicable if navigation back function do not work on site.
-     * @param previousPageUrl The string which defines the previous page URL
-     */
-    void back(String previousPageUrl);
 }

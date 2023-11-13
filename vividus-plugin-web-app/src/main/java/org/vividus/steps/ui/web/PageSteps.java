@@ -85,7 +85,7 @@ public class PageSteps
     public void openMainApplicationPage()
     {
         URI finalUri = updateUrlWithUserInfoForRedirects(webApplicationConfiguration.getMainApplicationPageUrl());
-        navigateActions.navigateTo(finalUri);
+        navigateActions.navigateTo(finalUri.toString());
         boolean refreshPageNeeded = webApplicationListeners.stream()
                 .map(WebApplicationListener::onLoad)
                 .reduce(false, (a, b) -> a || b);
@@ -281,7 +281,7 @@ public class PageSteps
         URI newURI = UriUtils.buildNewRelativeUrl(currentURI, relativeURL);
         // Workaround: window content is not loaded if basic authentification is used
         newURI = UriUtils.removeUserInfo(newURI);
-        navigateActions.navigateTo(newURI);
+        navigateActions.navigateTo(newURI.toString());
     }
 
     /**

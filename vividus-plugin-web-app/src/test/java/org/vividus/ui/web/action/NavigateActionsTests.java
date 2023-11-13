@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.net.URI;
 import java.util.List;
 
 import com.github.valfirst.slf4jtest.TestLogger;
@@ -49,48 +47,25 @@ import org.vividus.softassert.ISoftAssert;
 class NavigateActionsTests
 {
     private static final String SCRIPT_WINDOW_STOP = "window.stop()";
-    private static final String URL_STR = "http://somewhere.com/page";
-    private static final URI URL = URI.create(URL_STR);
+    private static final String URL = "https://somewhere.com/page";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(NavigateActions.class);
 
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private WebDriver webDriver;
-
-    @Mock
-    private Navigation navigation;
-
-    @Mock
-    private IWebWaitActions waitActions;
-
-    @Mock
-    private ISoftAssert softAssert;
-
-    @Mock
-    private WebJavascriptActions javascriptActions;
-
-    @InjectMocks
-    private NavigateActions navigateActions;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private WebDriver webDriver;
+    @Mock private Navigation navigation;
+    @Mock private IWebWaitActions waitActions;
+    @Mock private ISoftAssert softAssert;
+    @Mock private WebJavascriptActions javascriptActions;
+    @InjectMocks private NavigateActions navigateActions;
 
     @Test
     void testNavigateTo()
     {
         when(webDriver.navigate()).thenReturn(navigation);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        navigateActions.navigateTo(URL_STR);
-        verify(navigation).to(URL_STR);
-    }
-
-    @Test
-    void testNavigateToByUri()
-    {
-        when(webDriver.navigate()).thenReturn(navigation);
-        when(webDriverProvider.get()).thenReturn(webDriver);
         navigateActions.navigateTo(URL);
-        verify(navigation).to(URL_STR);
+        verify(navigation).to(URL);
     }
 
     @Test
@@ -98,9 +73,9 @@ class NavigateActionsTests
     {
         when(webDriver.navigate()).thenReturn(navigation);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        TimeoutException exception = mock(TimeoutException.class);
-        doThrow(exception).when(navigation).to(URL_STR);
-        navigateActions.navigateTo(URL_STR);
+        TimeoutException exception = mock();
+        doThrow(exception).when(navigation).to(URL);
+        navigateActions.navigateTo(URL);
         verify(softAssert).recordFailedAssertion(exception);
         verify(javascriptActions).executeScript(SCRIPT_WINDOW_STOP);
     }
@@ -110,14 +85,14 @@ class NavigateActionsTests
     {
         when(webDriver.navigate()).thenReturn(navigation);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        TimeoutException exception = mock(TimeoutException.class);
-        doThrow(exception).when(navigation).to(URL_STR);
-        WebDriverException webDriverException = new WebDriverException();
+        TimeoutException exception = mock();
+        doThrow(exception).when(navigation).to(URL);
+        var webDriverException = new WebDriverException();
         when(javascriptActions.executeScript(SCRIPT_WINDOW_STOP)).thenThrow(webDriverException);
-        navigateActions.navigateTo(URL_STR);
+        navigateActions.navigateTo(URL);
         verify(softAssert).recordFailedAssertion(exception);
         assertThat(logger.getLoggingEvents(), equalTo(List.of(
-                info("Loading: {}", URL_STR),
+                info("Loading: {}", URL),
                 error(webDriverException, "Unable to stop resource loading"))));
     }
 
@@ -136,50 +111,10 @@ class NavigateActionsTests
     {
         when(webDriver.navigate()).thenReturn(navigation);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        TimeoutException exception = mock(TimeoutException.class);
+        TimeoutException exception = mock();
         doThrow(exception).when(navigation).refresh();
         navigateActions.refresh();
         verify(softAssert).recordFailedAssertion(exception);
         verify(javascriptActions).executeScript(SCRIPT_WINDOW_STOP);
-    }
-
-    @Test
-    void testRefreshWithWebDriver()
-    {
-        when(webDriver.navigate()).thenReturn(navigation);
-        navigateActions.refresh(webDriver);
-        verify(webDriverProvider, never()).get();
-        verify(navigation).refresh();
-        verify(waitActions).waitForPageLoad();
-    }
-
-    @Test
-    void testBack()
-    {
-        when(webDriver.navigate()).thenReturn(navigation);
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        navigateActions.back();
-        verify(navigation).back();
-        verify(waitActions).waitForPageLoad();
-    }
-
-    @Test
-    void testBackWithPreviousUrl()
-    {
-        when(webDriver.navigate()).thenReturn(navigation);
-        String defaultUrl = URL_STR + "/previous";
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(webDriver.getCurrentUrl()).thenReturn(URL_STR).thenReturn(URL_STR);
-        navigateActions.back(defaultUrl);
-        verify(navigation).to(defaultUrl);
-    }
-
-    @Test
-    void testBackWithPreviousUrlEqualToCurrent()
-    {
-        when(webDriverProvider.get()).thenReturn(webDriver);
-        when(webDriver.getCurrentUrl()).thenReturn(URL_STR);
-        navigateActions.back(URL_STR);
-        verify(navigation, never()).to(URL_STR);
     }
 }

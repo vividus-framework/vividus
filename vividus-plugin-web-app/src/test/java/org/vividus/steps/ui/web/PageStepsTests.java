@@ -52,10 +52,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.JavascriptException;
@@ -92,7 +90,7 @@ class PageStepsTests
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IHttpClient httpClient;
     private final List<WebApplicationListener> webApplicationListeners = new ArrayList<>();
-    @InjectMocks private PageSteps pageSteps = new PageSteps(webApplicationListeners);
+    @InjectMocks private final PageSteps pageSteps = new PageSteps(webApplicationListeners);
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(PageSteps.class);
 
@@ -102,55 +100,54 @@ class PageStepsTests
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getCurrentUrl()).thenReturn(URL);
         pageSteps.checkPageRelativeURL(RELATIVE_URL);
-        URI uri = UriUtils.createUri(URL);
+        var uri = UriUtils.createUri(URL);
         verify(softAssert).assertEquals(PAGE_HAS_CORRECT_RELATIVE_URL, uri, uri);
     }
 
     @Test
     void testCheckPageRelativeURLEmptyString()
     {
-        String relativeURL = "";
+        var relativeURL = "";
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getCurrentUrl()).thenReturn(URL);
         pageSteps.checkPageRelativeURL(relativeURL);
-        URI uri = UriUtils.createUri(URL);
+        var uri = UriUtils.createUri(URL);
         verify(softAssert).assertEquals(PAGE_HAS_CORRECT_RELATIVE_URL, uri, uri);
     }
 
     @Test
     void testCheckPageRelativeURLNonLatinRelativeUrl()
     {
-        String relativeURL = "/search/site/可伶可俐";
-        String url = "http://stage-en.vividus.org/"
-                + "search/site/%E5%8F%AF%E4%BC%B6%E5%8F%AF%E4%BF%90";
+        var relativeURL = "/search/site/可伶可俐";
+        var url = "http://stage-en.vividus.org/search/site/%E5%8F%AF%E4%BC%B6%E5%8F%AF%E4%BF%90";
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getCurrentUrl()).thenReturn(url);
         pageSteps.checkPageRelativeURL(relativeURL);
-        URI uri = UriUtils.createUri(url);
+        var uri = UriUtils.createUri(url);
         verify(softAssert).assertEquals(PAGE_HAS_CORRECT_RELATIVE_URL, uri, uri);
     }
 
     @Test
     void testCheckPageRelativeURLEncodedActualDecodedExpected()
     {
-        String relativeURL = "/relative-&-encoded";
-        String url = "http://www.example.com/relative-%26-encoded";
+        var relativeURL = "/relative-&-encoded";
+        var url = "http://www.example.com/relative-%26-encoded";
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getCurrentUrl()).thenReturn(url);
         pageSteps.checkPageRelativeURL(relativeURL);
-        URI uri = UriUtils.createUri(url);
+        var uri = UriUtils.createUri(url);
         verify(softAssert).assertEquals(PAGE_HAS_CORRECT_RELATIVE_URL, uri, uri);
     }
 
     @Test
     void testCheckPageRelativeURLFalseEncoded()
     {
-        String relativeURL = "/relative-%2526-encoded";
-        String url = "http://www.example.com/relative-%2526-encoded";
+        var relativeURL = "/relative-%2526-encoded";
+        var url = "http://www.example.com/relative-%2526-encoded";
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getCurrentUrl()).thenReturn(url);
         pageSteps.checkPageRelativeURL(relativeURL);
-        URI uri = UriUtils.createUri(url);
+        var uri = UriUtils.createUri(url);
         verify(softAssert).assertEquals(PAGE_HAS_CORRECT_RELATIVE_URL, uri, uri);
     }
 
@@ -159,7 +156,7 @@ class PageStepsTests
     void testPageWithURLpartIsLoaded()
     {
         when(webDriverProvider.get()).thenReturn(driver);
-        String urlValue = "http://example.com/";
+        var urlValue = "http://example.com/";
         when(driver.getCurrentUrl()).thenReturn(urlValue);
         pageSteps.checkUrlPartIsLoaded(urlValue);
         verify(softAssert).assertThat(eq("Page with the URLpart '" + urlValue + "' is loaded"),
@@ -192,13 +189,13 @@ class PageStepsTests
         when(driver.getCurrentUrl()).thenReturn(baseUrl);
         pageSteps.openRelativeUrl(toGo);
         verify(setContextSteps).switchingToDefault();
-        verify(navigateActions).navigateTo(URI.create(expected));
+        verify(navigateActions).navigateTo(expected);
     }
 
     @Test
     void testOpenPage()
     {
-        String pageURL = "pageURL";
+        var pageURL = "pageURL";
         pageSteps.openPage(pageURL);
         verify(navigateActions).navigateTo(pageURL);
     }
@@ -213,7 +210,7 @@ class PageStepsTests
     @Test
     void testOpenPageUrlInNewWindow()
     {
-        InOrder ordered = Mockito.inOrder(setContextSteps, navigateActions, javascriptActions);
+        var ordered = Mockito.inOrder(setContextSteps, navigateActions, javascriptActions);
         pageSteps.openPageUrlInNewWindow(URL);
         ordered.verify(javascriptActions).openNewTab();
         ordered.verify(setContextSteps).switchingToWindow();
@@ -224,7 +221,7 @@ class PageStepsTests
     @Test
     void testOpenPageUrlInNewTab()
     {
-        InOrder ordered = Mockito.inOrder(setContextSteps, navigateActions, javascriptActions);
+        var ordered = Mockito.inOrder(setContextSteps, navigateActions, javascriptActions);
         pageSteps.openPageUrlInNewTab(URL);
         ordered.verify(javascriptActions).openNewTab();
         ordered.verify(setContextSteps).switchToTab();
@@ -246,10 +243,9 @@ class PageStepsTests
         when(webApplicationListener2.onLoad()).thenReturn(result2);
         webApplicationListeners.add(webApplicationListener2);
         pageSteps.setKeepUserInfoForProtocolRedirects(false);
-        URI mainPage = URI.create(URL);
-        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
+        when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(URI.create(URL));
         pageSteps.openMainApplicationPage();
-        verify(navigateActions).navigateTo(mainPage);
+        verify(navigateActions).navigateTo(URL);
         verify(navigateActions).refresh();
     }
 
@@ -258,14 +254,14 @@ class PageStepsTests
     {
         mockPageRedirect(URL, URL, HTTP_EXAMPLE_COM);
         pageSteps.openMainApplicationPage();
-        verify(navigateActions).navigateTo(URI.create(URL));
+        verify(navigateActions).navigateTo(URL);
         verifyNoMoreInteractions(navigateActions);
     }
 
     @Test
     void testOpenMainApplicationPageRedirectSameHost() throws IOException, URISyntaxException
     {
-        String httpExampleComWithUserInfo = "http://user:password@example.com";
+        var httpExampleComWithUserInfo = "http://user:password@example.com";
         WebApplicationListener webApplicationListener1 = mock();
         when(webApplicationListener1.onLoad()).thenReturn(false);
         webApplicationListeners.add(webApplicationListener1);
@@ -274,20 +270,20 @@ class PageStepsTests
         webApplicationListeners.add(webApplicationListener2);
         mockPageRedirect(httpExampleComWithUserInfo, HTTP_EXAMPLE_COM, "https://example.com");
         when(webApplicationConfiguration.getBasicAuthUser()).thenReturn("user:password");
-        HttpHost expectedHost = HttpHost.create(HTTP_EXAMPLE_COM);
-        var contextBuilder = mock(ContextBuilder.class);
+        var expectedHost = HttpHost.create(HTTP_EXAMPLE_COM);
+        ContextBuilder contextBuilder = mock();
 
-        try (MockedStatic<ContextBuilder> contextBuilderStatic = Mockito.mockStatic(ContextBuilder.class))
+        try (var contextBuilderStatic = Mockito.mockStatic(ContextBuilder.class))
         {
             contextBuilderStatic.when(ContextBuilder::create).thenReturn(contextBuilder);
             when(contextBuilder.preemptiveBasicAuth(argThat(expectedHost::equals),
-                    argThat(credentials -> credentials.getUserPrincipal().getName().equals("user")
+                    argThat(credentials -> "user".equals(credentials.getUserPrincipal().getName())
                             && Arrays.equals(credentials.getPassword(), "password".toCharArray()))))
                                     .thenReturn(contextBuilder);
             when(contextBuilder.build()).thenReturn(new HttpClientContext());
             pageSteps.openMainApplicationPage();
         }
-        verify(navigateActions).navigateTo(URI.create("https://user:password@example.com"));
+        verify(navigateActions).navigateTo("https://user:password@example.com");
         verifyNoMoreInteractions(navigateActions);
     }
 
@@ -295,12 +291,12 @@ class PageStepsTests
     {
         pageSteps.setKeepUserInfoForProtocolRedirects(true);
         when(webApplicationConfiguration.getAuthenticationMode()).thenReturn(AuthenticationMode.URL);
-        URI mainPage = URI.create(mainPageUrl);
-        URI requestUrl = URI.create(expectedHeadUrl);
-        URI redirectPage = URI.create(redirectPageUrl);
+        var mainPage = URI.create(mainPageUrl);
+        var requestUrl = URI.create(expectedHeadUrl);
+        var redirectPage = URI.create(redirectPageUrl);
         when(httpClient.doHttpHead(eq(requestUrl), argThat(context ->
         {
-            RedirectLocations redirectLocations = new RedirectLocations();
+            var redirectLocations = new RedirectLocations();
             redirectLocations.add(redirectPage);
             context.setAttribute(HttpClientContext.REDIRECT_LOCATIONS, redirectLocations);
             return true;
@@ -313,7 +309,7 @@ class PageStepsTests
     {
         pageSteps.setKeepUserInfoForProtocolRedirects(true);
         when(webApplicationConfiguration.getAuthenticationMode()).thenReturn(AuthenticationMode.URL);
-        URI mainPage = URI.create(HTTP_EXAMPLE_COM);
+        var mainPage = URI.create(HTTP_EXAMPLE_COM);
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
         when(httpClient.doHttpHead(eq(mainPage), argThat(context ->
         {
@@ -321,19 +317,19 @@ class PageStepsTests
             return true;
         }))).thenReturn(new HttpResponse());
         pageSteps.openMainApplicationPage();
-        verify(navigateActions).navigateTo(mainPage);
+        verify(navigateActions).navigateTo(HTTP_EXAMPLE_COM);
         verifyNoMoreInteractions(navigateActions);
     }
 
     @Test
     void testOpenMainApplicationPageIOExeption() throws IOException
     {
-        String exceptionMessage = "message";
+        var exceptionMessage = "message";
         pageSteps.setKeepUserInfoForProtocolRedirects(true);
-        URI mainPage = URI.create("http://xxx");
+        var mainPage = URI.create("http://xxx");
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
         when(webApplicationConfiguration.getAuthenticationMode()).thenReturn(AuthenticationMode.URL);
-        IOException exception = new IOException(exceptionMessage);
+        var exception = new IOException(exceptionMessage);
         doThrow(exception).when(httpClient).doHttpHead(eq(mainPage), any(HttpClientContext.class));
         pageSteps.openMainApplicationPage();
         assertThat(logger.getLoggingEvents(),
@@ -343,7 +339,7 @@ class PageStepsTests
     @Test
     void testCheckPageRelativeURLNull()
     {
-        String url = "data:,";
+        var url = "data:,";
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getCurrentUrl()).thenReturn(url);
         pageSteps.checkPageRelativeURL(RELATIVE_URL);
@@ -353,7 +349,7 @@ class PageStepsTests
     @Test
     void testCheckUriIsLoaded()
     {
-        String url = HTTP_EXAMPLE_COM;
+        var url = HTTP_EXAMPLE_COM;
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getCurrentUrl()).thenReturn(url);
         pageSteps.checkUriIsLoaded(url);
@@ -366,16 +362,16 @@ class PageStepsTests
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getCurrentUrl()).thenReturn(URL);
         pageSteps.checkPageHost(HOST);
-        URI uri = UriUtils.createUri(URL);
-        String uriHost = uri.getHost();
+        var uri = UriUtils.createUri(URL);
+        var uriHost = uri.getHost();
         verify(softAssert).assertEquals(PAGE_HAS_CORRECT_HOST, uriHost, uriHost);
     }
 
     @Test
     void testPageTitleContainsText()
     {
-        String text = "text";
-        WebDriver driver = mock(WebDriver.class);
+        var text = "text";
+        WebDriver driver = mock();
         when(webDriverProvider.get()).thenReturn(driver);
         when(driver.getTitle()).thenReturn(text);
         pageSteps.assertPageTitle(StringComparisonRule.CONTAINS, text);
@@ -386,9 +382,9 @@ class PageStepsTests
     @Test
     void shouldStopThePageAndLogStatuses()
     {
-        String interactive = "interactive";
-        String complete = "complete";
-        Map<String, String> result = Map.of("before", interactive, "after", complete);
+        var interactive = "interactive";
+        var complete = "complete";
+        var result = Map.of("before", interactive, "after", complete);
         when(javascriptActions.stopPageLoading()).thenReturn(result);
         pageSteps.stopPageLoading();
         assertThat(logger.getLoggingEvents(),
@@ -399,7 +395,7 @@ class PageStepsTests
     @Test
     void shouldRecordFailedAssertionInCaseOfJavascriptExceptionDuringPageStoppage()
     {
-        JavascriptException javascriptException = new JavascriptException("I can't take this any moooore");
+        var javascriptException = new JavascriptException("I can't take this any moooore");
         when(javascriptActions.stopPageLoading()).thenThrow(javascriptException);
         pageSteps.stopPageLoading();
         softAssert.recordFailedAssertion("Unable to stop page loading", javascriptException);
