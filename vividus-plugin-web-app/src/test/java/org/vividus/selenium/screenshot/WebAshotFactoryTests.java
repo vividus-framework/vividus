@@ -94,8 +94,10 @@ class WebAshotFactoryTests
         var aShot = factory.create(Optional.of(screenshotParameters));
         validateCoordsProvider(aShot);
         var baseStrategy = (ShootingStrategy) FieldUtils.readField(aShot, SHOOTING_STRATEGY, true);
-        assertThat(baseStrategy, instanceOf(ScrollbarHidingDecorator.class));
-        assertThat(FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true),
+        var shootingStrategy = (ShootingStrategy) FieldUtils.readField(baseStrategy, SHOOTING_STRATEGY, true);
+        assertThat(baseStrategy, instanceOf(ElementCroppingDecorator.class));
+        assertThat(shootingStrategy, instanceOf(ScrollbarHidingDecorator.class));
+        assertThat(FieldUtils.readField(shootingStrategy, SHOOTING_STRATEGY, true),
                 instanceOf(DebuggingViewportPastingDecorator.class));
     }
 
