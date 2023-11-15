@@ -16,46 +16,25 @@
 
 package org.vividus.steps.ui.web;
 
-import java.util.Map;
-
 import org.jbehave.core.annotations.When;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.ie.InternetExplorerOptions;
-import org.openqa.selenium.remote.Browser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.web.action.IFieldActions;
-import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.util.FormatUtils;
 
 @TakeScreenshotOnFailure
 public class FieldSteps
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FieldSteps.class);
-
     private static final String FIELD_TO_CLEAR = "The field to clear";
-    private static final int TEXT_TYPING_ATTEMPTS_LIMIT = 5;
 
-    private final IWebDriverManager webDriverManager;
     private final IFieldActions fieldActions;
-    private final WebJavascriptActions javascriptActions;
-    private final ISoftAssert softAssert;
     private final IBaseValidations baseValidations;
 
-    public FieldSteps(IWebDriverManager webDriverManager, IFieldActions fieldActions,
-            WebJavascriptActions javascriptActions, ISoftAssert softAssert, IBaseValidations baseValidations)
+    public FieldSteps(IFieldActions fieldActions, IBaseValidations baseValidations)
     {
-        this.webDriverManager = webDriverManager;
         this.fieldActions = fieldActions;
-        this.javascriptActions = javascriptActions;
-        this.softAssert = softAssert;
         this.baseValidations = baseValidations;
     }
 
@@ -139,68 +118,7 @@ public class FieldSteps
     public void enterTextInField(String text, Locator locator)
     {
         String normalizedText = FormatUtils.normalizeLineEndings(text);
-        enterTextInField(normalizedText, locator, false);
-    }
-
-    private void enterTextInField(String text, Locator locator, boolean retry)
-    {
         baseValidations.assertElementExists("The field to enter text", locator).ifPresent(
-                element -> enterTextInField(element, text, retry, () -> enterTextInField(text, locator, true)));
-    }
-
-    private void enterTextInField(WebElement element, String text, boolean retry, Runnable retryRunnable)
-    {
-        try
-        {
-            element.clear();
-            LOGGER.info("Entering text \"{}\" in element", text);
-            if (webDriverManager.isBrowserAnyOf(Browser.SAFARI) && fieldActions.isElementContenteditable(element))
-            {
-                javascriptActions.executeScript("var element = arguments[0];element.innerHTML = arguments[1];", element,
-                        text);
-                return;
-            }
-
-            fieldActions.typeText(element, text);
-            applyWorkaroundIfIE(element, text);
-        }
-        catch (StaleElementReferenceException e)
-        {
-            if (retry)
-            {
-                throw e;
-            }
-            LOGGER.info("An element is stale. One more attempt to type text into it");
-            retryRunnable.run();
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void applyWorkaroundIfIE(WebElement element, String normalizedText)
-    {
-        // Workaround for IExplore: https://github.com/seleniumhq/selenium/issues/805
-        if (webDriverManager.isBrowserAnyOf(Browser.IE) && Boolean.TRUE.equals(
-                ((Map<String, Object>) webDriverManager.getCapabilities().getCapability(
-                        InternetExplorerOptions.IE_OPTIONS)).get(InternetExplorerDriver.REQUIRE_WINDOW_FOCUS)))
-        {
-            int iterationsCounter = TEXT_TYPING_ATTEMPTS_LIMIT;
-            while (iterationsCounter > 0 && isValueNotEqualTo(element, normalizedText))
-            {
-                element.clear();
-                LOGGER.info("Re-typing text \"{}\" to element", normalizedText);
-                fieldActions.typeText(element, normalizedText);
-                iterationsCounter--;
-            }
-            if (iterationsCounter == 0 && isValueNotEqualTo(element, normalizedText))
-            {
-                softAssert.recordFailedAssertion(String.format("The element is not filled correctly"
-                        + " after %d typing attempt(s)", TEXT_TYPING_ATTEMPTS_LIMIT + 1));
-            }
-        }
-    }
-
-    private boolean isValueNotEqualTo(WebElement element, String expectedValue)
-    {
-        return !expectedValue.equals(javascriptActions.executeScript("return arguments[0].value;", element));
+                element -> fieldActions.typeText(element, normalizedText));
     }
 }

@@ -21,34 +21,39 @@ import static java.util.Map.entry;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.support.ui.Select;
@@ -72,6 +77,8 @@ class FieldActionsTests
             .xpath("//preceding-sibling::head[descendant::title[contains(text(),'Rich Text')]]");
     private static final String TRUE = "true";
     private static final String CONTENTEDITABLE = "contenteditable";
+    private static final String CHECK_IF_CKE_JS = "return arguments[0].ckeditorInstance !== undefined";
+    private static final String GET_ELEMENT_VALUE_JS = "return arguments[0].value;";
 
     @Mock private IWebDriverManager webDriverManager;
     @Mock private KeysManager keysManager;
@@ -205,41 +212,54 @@ class FieldActionsTests
     @Test
     void testAddTextSafariOrIExploreContenteditableRichText()
     {
-        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)).thenReturn(true);
         when(webElement.getAttribute(CONTENTEDITABLE)).thenReturn(TRUE);
-        when(webElement.findElements(RICH_TEXT_EDITOR_LOCATOR)).thenReturn(List.of(webElement));
-        fieldActions.addText(webElement, TEXT);
-        verifyRichTextNotEditable();
-    }
-
-    @Test
-    void testAddTextSafariOrIExploreNotContextEditableNotRichText()
-    {
-        when(webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)).thenReturn(true);
-        fieldActions.addText(webElement, TEXT);
-        var inOrder = verifyWebElementInOrderInvocation();
-        inOrder.verify(webElement).sendKeys(TEXT);
-        verifyNoInteractions(javascriptActions);
-    }
-
-    @Test
-    void testAddTextSafariOrIExploreRichTextNotEditable()
-    {
         when(webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)).thenReturn(true);
         when(webElement.findElements(RICH_TEXT_EDITOR_LOCATOR)).thenReturn(List.of(webElement));
+        when(javascriptActions.executeScript(CHECK_IF_CKE_JS, webElement)).thenReturn(false);
         fieldActions.addText(webElement, TEXT);
-        var inOrder = verifyWebElementInOrderInvocation();
-        inOrder.verify(webElement).sendKeys(TEXT);
-        verifyNoInteractions(javascriptActions);
+        verify(javascriptActions).executeScript(
+                "var text=arguments[0].innerHTML;arguments[0].innerHTML = text+arguments[1];", webElement, TEXT);
+        verifyWebElementInOrderInvocation();
+        verifyNoMoreInteractions(webElement);
     }
 
     @Test
-    void testAddTextNotSafari()
+    void testNotContextEditable()
     {
-        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(false);
         fieldActions.addText(webElement, TEXT);
-        verifyNoInteractions(javascriptActions);
         verify(webElement).sendKeys(TEXT);
+        verifyNoInteractions(javascriptActions);
+    }
+
+    @Test
+    void testAddTextContenteditableNotSafariNotCKE()
+    {
+        when(webElement.getAttribute(CONTENTEDITABLE)).thenReturn(TRUE);
+        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(false);
+        when(javascriptActions.executeScript(CHECK_IF_CKE_JS, webElement)).thenReturn(false);
+        fieldActions.addText(webElement, TEXT);
+        verify(webElement).sendKeys(TEXT);
+        verifyNoMoreInteractions(webElement);
+    }
+
+    @Test
+    void testAddTextContenteditableCKE()
+    {
+        when(webElement.getAttribute(CONTENTEDITABLE)).thenReturn(TRUE);
+        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.SAFARI)).thenReturn(false);
+        when(javascriptActions.executeScript(CHECK_IF_CKE_JS, webElement))
+                .thenReturn(true);
+        fieldActions.addText(webElement, TEXT);
+        verify(javascriptActions).executeScript(
+                "const editor = arguments[0].ckeditorInstance;"
+                        + "const originalText = editor.getData();"
+                        + "const lastPCloseTagIndex = originalText.lastIndexOf('</p>');"
+                        + "if (lastPCloseTagIndex !== -1) {"
+                        + "editor.setData( originalText.substring(0, lastPCloseTagIndex)"
+                        + " + arguments[1] + originalText.substring(lastPCloseTagIndex) );"
+                        + "} else {"
+                        + "editor.setData(originalText + arguments[1])"
+                        + "}", webElement, TEXT);
         verifyNoMoreInteractions(webElement);
     }
 
@@ -249,14 +269,6 @@ class FieldActionsTests
         var normalizedText = FormatUtils.normalizeLineEndings(TEXT);
         fieldActions.addText(null, TEXT);
         verify(webElement, never()).sendKeys(normalizedText);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { TRUE, "false" })
-    void testIsElementContenteditable(String result)
-    {
-        when(webElement.getAttribute(CONTENTEDITABLE)).thenReturn(result);
-        assertEquals(Boolean.valueOf(result), fieldActions.isElementContenteditable(webElement));
     }
 
     @Test
@@ -291,19 +303,111 @@ class FieldActionsTests
         when(webElementActions.getElementText(webElement)).thenReturn(selectText);
     }
 
-    private void verifyRichTextNotEditable()
-    {
-        verify(javascriptActions).executeScript(
-                "var text=arguments[0].innerHTML;arguments[0].innerHTML = text+arguments[1];", webElement, TEXT);
-        var ordered = verifyWebElementInOrderInvocation();
-        ordered.verify(webElement).getAttribute(CONTENTEDITABLE);
-        verifyNoMoreInteractions(webElement);
-    }
-
     private InOrder verifyWebElementInOrderInvocation()
     {
         var ordered = inOrder(webElement);
         ordered.verify(webElement).findElements(RICH_TEXT_EDITOR_LOCATOR);
         return ordered;
+    }
+
+    @Test
+    void testEnterTextInFieldIExploreRequireWindowFocusFalse()
+    {
+        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.IE)).thenReturn(true);
+        mockRequireWindowFocusOption(false);
+        fieldActions.typeText(webElement, TEXT);
+        var inOrder = inOrder(webElement);
+        inOrder.verify(webElement).clear();
+        inOrder.verify(webElement).sendKeys(TEXT);
+    }
+
+    @Test
+    void testEnterTextInFieldIExploreRequireWindowFocusTrueWithoutReentering()
+    {
+        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.IE)).thenReturn(true);
+        mockRequireWindowFocusOption(true);
+        when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(TEXT);
+        fieldActions.typeText(webElement, TEXT);
+        var inOrder = inOrder(webElement);
+        inOrder.verify(webElement).clear();
+        inOrder.verify(webElement).sendKeys(TEXT);
+    }
+
+    @Test
+    void testEnterTextInFieldIExploreRequireWindowFocusTrueWithReentering()
+    {
+        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.IE)).thenReturn(true);
+        mockRequireWindowFocusOption(true);
+        when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(StringUtils.EMPTY, TEXT);
+        fieldActions.typeText(webElement, TEXT);
+        verify(webElement, times(2)).clear();
+        verify(webElement, times(2)).sendKeys(TEXT);
+    }
+
+    @Test
+    void testEnterTextInFieldIExploreRequireWindowFocusTrueFieldNotFilledCorrectly()
+    {
+        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.IE)).thenReturn(true);
+        mockRequireWindowFocusOption(true);
+        when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(StringUtils.EMPTY);
+        fieldActions.typeText(webElement, TEXT);
+        verify(webElement, times(6)).clear();
+        verify(webElement, times(6)).sendKeys(TEXT);
+        verify(softAssert).recordFailedAssertion("The element is not filled correctly after 6 typing attempt(s)");
+    }
+
+    @Test
+    void testEnterTextInFieldIExploreRequireWindowFocusTrueFieldIsFilledCorrectlyAfter5Attempts()
+    {
+        Mockito.lenient().when(webDriverManager.isBrowserAnyOf(Browser.IE)).thenReturn(true);
+        mockRequireWindowFocusOption(true);
+        when(javascriptActions.executeScript(GET_ELEMENT_VALUE_JS, webElement)).thenReturn(StringUtils.EMPTY,
+                StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, TEXT);
+        fieldActions.typeText(webElement, TEXT);
+        verify(webElement, times(6)).clear();
+        verify(webElement, times(6)).sendKeys(TEXT);
+        verifyNoInteractions(softAssert);
+    }
+
+    @Test
+    void testEnterTextInContentEditableElement()
+    {
+        when(webElement.getAttribute(CONTENTEDITABLE)).thenReturn(TRUE);
+        fieldActions.typeText(webElement, TEXT);
+        verify(webElement).clear();
+        verify(javascriptActions).executeScript("arguments[0].ckeditorInstance ?"
+                + " arguments[0].ckeditorInstance.setData(arguments[1])"
+                + " : arguments[0].innerHTML = arguments[1]", webElement, TEXT);
+        verify(webElement, never()).sendKeys(TEXT);
+    }
+
+    @Test
+    void shouldEnterTextInFieldWhichBecameStaleOnce()
+    {
+        doThrow(StaleElementReferenceException.class).doNothing().when(webElement).sendKeys(TEXT);
+        fieldActions.typeText(webElement, TEXT);
+        verify(webElement, times(2)).clear();
+        verify(webElement, times(2)).sendKeys(TEXT);
+    }
+
+    @Test
+    void shouldFailToEnterTextInFieldWhichIsAlwaysStale()
+    {
+        var exception1 = new StaleElementReferenceException("one");
+        var exception2 = new StaleElementReferenceException("two");
+        doThrow(exception1, exception2).when(webElement).sendKeys(TEXT);
+        var actual = assertThrows(StaleElementReferenceException.class,
+                () -> fieldActions.typeText(webElement, TEXT));
+        assertEquals(exception2, actual);
+        verify(webElement, times(2)).clear();
+        verify(webElement, times(2)).sendKeys(TEXT);
+    }
+
+    private void mockRequireWindowFocusOption(boolean requireWindowFocus)
+    {
+        Map<String, Object> options = Map.of("requireWindowFocus", requireWindowFocus);
+        var capabilities = mock(Capabilities.class);
+        when(capabilities.getCapability("se:ieOptions")).thenReturn(options);
+        when(webDriverManager.getCapabilities()).thenReturn(capabilities);
     }
 }
