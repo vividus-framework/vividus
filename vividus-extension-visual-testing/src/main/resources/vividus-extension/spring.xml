@@ -6,7 +6,7 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        default-lazy-init="true">
 
-    <beans profile="web,mobile_app">
+    <beans profile="web_selenium,mobile_app">
         <bean id="scenario" class="org.vividus.visual.screenshot.ScenarioBasedIndexer" />
 
         <bean class="org.vividus.visual.screenshot.BaselineIndexer" >

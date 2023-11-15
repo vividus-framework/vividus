@@ -403,6 +403,15 @@ When I send mobile application to background for `PT5S` period
 Then number of elements found by `accessibilityId(login-button)` is equal to `1`
 ----
 
+=== Navigate back
+
+Navigates back to the previous view.
+
+[source,gherkin]
+----
+When I navigate back
+----
+
 
 === Change session settings
 

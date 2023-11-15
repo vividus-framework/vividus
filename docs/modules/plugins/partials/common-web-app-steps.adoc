@@ -1,0 +1,118 @@
+=== Navigation
+
+==== Open application
+
+Navigates to the page which was configured as the main application page in the property with name
+`web-application.main-page-url`.
+
+[source,gherkin]
+----
+Given I am on main application page
+----
+
+==== Open the page by URL
+
+Navigates to the page with the given absolute URL, e.g. `https://docs.vividus.dev/`.
+
+[source,gherkin]
+----
+Given I am on page with URL `$pageUrl`
+----
+
+.Open the page with URL `https://docs.vividus.dev/`
+[source,gherkin]
+----
+Given I am on page with URL `https://docs.vividus.dev/`
+----
+
+==== Navigate to the page by relative URL
+
+Navigates to the page with the given relative URL.
+
+[source,gherkin]
+----
+When I go to relative URL `$relativeUrl`
+----
+
+* `relativeUrl` - A relative URL pointing to a resource within a website (e.g. `about.html` or `/products`). If the
+relative URL starts with '/' char, the navigation will be performed from the root. Otherwise the navigation will be
+performed from the current URL path.
++
+.Examples
+|===
+|Current page URL |Relative URL parameter|Resulting page URL
+
+|https://mysite.com
+|about.html
+|https://mysite.com/about.html
+
+|https://mysite.com
+|/products/new
+|https://mysite.com/products/new
+
+|https://mysite.com/path/foo
+|stats
+|https://mysite.com/path/foo/stats
+
+|https://mysite.com/path/foo
+|./docs/info.html
+|https://mysite.com/path/foo/docs/info.html
+
+|https://mysite.com/path/foo
+|/documents
+|https://mysite.com/documents
+|===
+
+.Open main application page and then navigate to '/products/new' page
+[source,gherkin]
+----
+Given I am on main application page
+When I go to relative URL `/products/new`
+----
+
+==== Refresh the page
+
+Reloads the current page: does the same as the reload button in the browser.
+
+[source,gherkin]
+----
+When I refresh page
+----
+
+==== Navigate back
+
+Navigates back to the previous page: does the same as the back button in the browser.
+
+[source,gherkin]
+----
+When I navigate back
+----
+
+=== Validate the page title
+
+Checks the page title matches the text according to the provided validation rule.
+
+[source,gherkin]
+----
+Then page title $comparisonRule `$text`
+----
+
+* `$comparisonRule` - The page title validation rule. One of the following options:
++
+** `is equal to` - validate the page title is equal to `$text` parameter,
+** `contains` - validate the page title title contains the string from `$text` parameter,
+** `does not contain` - validate the page title title does not contain the value from `$text` parameter.
+
+* `$text` - The text to match according to the rule.
+
+.Validate 'https://docs.vividus.dev/' page title
+[source,gherkin]
+----
+Then page title is equal to `What is VIVIDUS :: VIVIDUS`
+----
+
+.Validate the part of 'https://docs.vividus.dev/' page title
+[source,gherkin]
+----
+Then page title contains `VIVIDUS`
+----

@@ -31,7 +31,7 @@ public class WebApplicationConfiguration
     public WebApplicationConfiguration(String mainApplicationPageUrl, AuthenticationMode authenticationMode)
     {
         this.authenticationMode = authenticationMode;
-        if (null != mainApplicationPageUrl)
+        if (mainApplicationPageUrl != null)
         {
             URI uri = UriUtils.createUri(mainApplicationPageUrl);
             this.basicAuthUser = uri.getUserInfo();

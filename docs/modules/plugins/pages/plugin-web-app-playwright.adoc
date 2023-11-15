@@ -1,0 +1,44 @@
+= Web Application Plugin: Playwright Engine
+
+The plugin provides functionality to interact with Web applications with help of https://playwright.dev/java/[Playwright] engine.
+
+:plugin-short-name: web-app-playwright
+include::partial$plugin-installation.adoc[]
+
+== Properties
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="3,2,2,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+include::partial$common-web-app-properties.adoc[]
+
+|`playwright.tracing.output-directory`
+|A relative or absolute path of the directory on the file system
+|`${output.report-directory}/playwright-traces`
+|When any tracing option is enabled, the traces are recorded and saved to the specified directory. Every session
+is stored in the own file, the full path to the file is printed in the logs.
+
+|`playwright.tracing.screenshots-enabled`
+a|`true` +
+`false`
+|`false`
+|When tracing with the https://playwright.dev/java/docs/trace-viewer#screenshots[screenshots option] turned on,
+each trace records a screencast and renders it as a film strip.
+
+|`playwright.tracing.snapshots-enabled`
+a|`true` +
+`false`
+|`false`
+|When tracing with the https://playwright.dev/java/docs/trace-viewer#snapshots[snapshots option] turned on,
+Playwright captures a set of complete DOM snapshots for each action.
+
+|===
+
+== Steps
+include::plugins:partial$common-web-app-steps.adoc[]

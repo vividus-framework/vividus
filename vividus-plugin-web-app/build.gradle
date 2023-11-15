@@ -9,6 +9,7 @@ dependencies {
     implementation project(':vividus-util')
 
     api project(':vividus-extension-selenium')
+    api project(':vividus-extension-web-app')
 
     implementation(group: 'com.codeborne', name: 'selenide', version: '7.0.2')
 

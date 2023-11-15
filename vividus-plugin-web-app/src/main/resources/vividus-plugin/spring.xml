@@ -7,7 +7,7 @@
         http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
-        default-lazy-init="true" profile="web">
+        default-lazy-init="true" profile="web_selenium">
 
     <context:component-scan base-package="org.vividus.converter.ui.web" />
 
@@ -78,11 +78,6 @@
     </bean>
 
     <bean id="cookieManager" class="org.vividus.ui.web.action.CookieManager" />
-
-    <bean id="webApplicationConfiguration" class="org.vividus.ui.web.configuration.WebApplicationConfiguration">
-        <constructor-arg value="${web-application.main-page-url}" />
-        <constructor-arg value="${web-application.authentication-mode}" />
-    </bean>
 
     <bean id="cssSelectorFactory" class="org.vividus.ui.web.action.CssSelectorFactory" />
 

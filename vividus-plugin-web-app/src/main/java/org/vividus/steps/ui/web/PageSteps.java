@@ -76,10 +76,8 @@ public class PageSteps
     }
 
     /**
-     * Loading the page which was set as a main application page.
-     * <br>
-     * One can set an URL for the main page in the properties file
-     * by the <b>web-application.main-page-url</b> property
+     * Navigates to the page which was configured as the main application page in the property with name
+     * <code>web-application.main-page-url</code>.
      */
     @Given("I am on main application page")
     public void openMainApplicationPage()
@@ -96,16 +94,14 @@ public class PageSteps
     }
 
     /**
-     * Loads a <b>page</b> with the given <b>URL</b>
-     * <p>
-     * Requires an <b>absolute</b> URL (like https://example.com/).
-     * </p>
-     * @param pageURL An <b>absolute</b> URL of the page
+     * Navigates to the page with the given absolute URL, e.g. {@code https://docs.vividus.dev/}
+     *
+     * @param pageUrl An absolute URL of the page to navigate to.
      */
-    @Given("I am on page with URL `$pageURL`")
-    public void openPage(String pageURL)
+    @Given("I am on page with URL `$pageUrl`")
+    public void openPage(String pageUrl)
     {
-        navigateActions.navigateTo(pageURL);
+        navigateActions.navigateTo(pageUrl);
     }
 
     /**
@@ -118,21 +114,21 @@ public class PageSteps
      * <li>Compares it with the specified relative URL.
      * </ul>
      *
-     * @param relativeURL A string value of the relative URL
+     * @param relativeUrl A string value of the relative URL
      * @deprecated Use combination of step and expression:
      * "Then `#{extractPathFromUrl(${current-page-url})}` is equal to `$variable2`"
      */
     @Deprecated(since = "0.5.9", forRemoval = true)
     @Replacement(versionToRemoveStep = "0.7.0",
                  replacementFormatPattern = "Then `#{extractPathFromUrl(${current-page-url})}` is equal to `%1$s`")
-    @Then("the page has the relative URL '$relativeURL'")
-    public void checkPageRelativeURL(String relativeURL)
+    @Then("the page has the relative URL '$relativeUrl'")
+    public void checkPageRelativeURL(String relativeUrl)
     {
         URI url = UriUtils.createUri(getWebDriver().getCurrentUrl());
         // If web application under test is unavailable (no page is opened), an empty URL will be returned
         if (url.getPath() != null)
         {
-            String expectedRelativeUrl = relativeURL.isEmpty() ? FORWARD_SLASH : relativeURL;
+            String expectedRelativeUrl = relativeUrl.isEmpty() ? FORWARD_SLASH : relativeUrl;
             descriptiveSoftAssert.assertEquals("Page has correct relative URL",
                     UriUtils.buildNewUrl(getWebDriver().getCurrentUrl(), expectedRelativeUrl), url);
             return;
@@ -164,12 +160,7 @@ public class PageSteps
     }
 
     /**
-     * Refreshes the page
-     * <p>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Browser reloads current page which is the same action as one caused by pressing F5 on the keyboard.
-     * </ul>
+     * Reloads the current page: does the same as the reload button in the browser.
      */
     @When("I refresh page")
     public void refreshPage()
@@ -193,11 +184,12 @@ public class PageSteps
     }
 
     /**
-     * Opens page with the given <b>pageUrl</b> in a new tab
-     * @param pageUrl An absolute URL of the page
+     * Opens new tab and navigates to the page with the given URL.
+     *
+     * @param pageUrl An absolute URL of the page to open in new tab.
      */
     @When("I open URL `$pageUrl` in new tab")
-    public void openPageUrlInNewTab(String pageUrl)
+    public void openPageInNewTab(String pageUrl)
     {
         javascriptActions.openNewTab();
         setContextSteps.switchToTab();
@@ -247,49 +239,59 @@ public class PageSteps
     }
 
     /**
-     * Navigates the browser to the specific path in the current host
-     * defined in the <i>relative URL</i> step variable
-     * <br>
-     * A <b>relative URL</b> - points to a file within a web site
-     * (like <i>'about.html'</i> or <i>'/products'</i>)<br>
-     * <br>
-     * <table border="1">
-     * <caption>Examples:</caption>
-     * <tr>
-     * <td>Current page</td><td>Relative URL parameter</td><td>Opened page</td>
-     * </tr>
-     * <tr>
-     * <td>https://mysite.com/path/foo</td><td>stats</td><td>https://mysite.com/path/stats</td>
-     * </tr>
-     * <tr>
-     * <td>https://mysite.com/path/foo</td><td>/documents</td><td>https://mysite.com/documents</td>
-     * </tr>
-     * </table>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Builds the absolute URL by concatenating the base URL and the relative URL;
-     * <li>Loads the page with the absolute URL;
-     * </ul>
+     * Navigates to the page with the given relative URL.
      *
-     * @param relativeURL A string value of the relative URL
+     * @param relativeUrl A relative URL pointing to a resource within a website (e.g. <i>'about.html'</i> or
+     *                    <i>'/products'</i>). If the relative URL starts with '/' char, the navigation will be
+     *                    performed from the root.
+     *                    Otherwise, the navigation will be performed from the current URL path.
+     *                    <table border="1">
+     *                    <caption>Examples:</caption>
+     *                    <tr>
+     *                    <td>Current page</td><td>Relative URL parameter</td><td>Resulting page URL</td>
+     *                    </tr>
+     *                    <tr>
+     *                    <td>https://mysite.com</td><td>about.html</td><td>https://mysite.com/about.html</td>
+     *                    </tr>
+     *                    <tr>
+     *                    <td>https://mysite.com</td><td>/products/new</td><td>https://mysite.com/products/new</td>
+     *                    </tr>
+     *                    <tr>
+     *                    <td>https://mysite.com/path/foo</td><td>stats</td><td>https://mysite.com/path/foo/stats</td>
+     *                    </tr>
+     *                    <tr>
+     *                    <td>https://mysite.com/path/foo</td><td>./docs/info.html</td><td>https://mysite
+     *                    .com/path/foo/docs/info.html</td>
+     *                    </tr>
+     *                    <tr>
+     *                    <td>https://mysite.com/path/foo</td><td>/documents</td><td>https://mysite.com/documents</td>
+     *                    </tr>
+     *                    </table>
      */
-    @When("I go to relative URL `$relativeURL`")
-    public void openRelativeUrl(String relativeURL)
+    @When("I go to relative URL `$relativeUrl`")
+    public void openRelativeUrl(String relativeUrl)
     {
         setContextSteps.switchingToDefault();
         URI currentURI = UriUtils.createUri(getWebDriver().getCurrentUrl());
-        URI newURI = UriUtils.buildNewRelativeUrl(currentURI, relativeURL);
-        // Workaround: window content is not loaded if basic authentification is used
+        URI newURI = UriUtils.buildNewRelativeUrl(currentURI, relativeUrl);
+        // Workaround: window content is not loaded if basic authentication is used
         newURI = UriUtils.removeUserInfo(newURI);
         navigateActions.navigateTo(newURI.toString());
     }
 
     /**
-     * Checks that the page's <b>title</b> matches to <b>text</b> according to the provided string validation rule
-     * <p>
-     * A <b>title</b> is a text within a {@literal <title>} tag.
-     * @param comparisonRule String validation rule: "is equal to", "contains", "does not contain"
-     * @param text The text of the title to compare (ex. {@code <title>}<b>'text'</b>{@code </title>})
+     * Checks the page title matches the text according to the provided validation rule.
+     *
+     * @param comparisonRule The page title validation rule. One of the following options:
+     *                       <ul>
+     *                       <li><code>is equal to</code> - validate the page title is equal to <code>$text</code>
+     *                       parameter,</li>
+     *                       <li><code>contains</code> - validate the page title title contains the string from
+     *                       <code>$text</code> parameter,</li>
+     *                       <li><code>does not contain</code> - validate the page title title does not contain the
+     *                       value from <code>$text</code> parameter.</li>
+     *                       </ul>
+     * @param text           The text to match according to the rule.
      */
     @Then("page title $comparisonRule `$text`")
     public void assertPageTitle(StringComparisonRule comparisonRule, String text)
