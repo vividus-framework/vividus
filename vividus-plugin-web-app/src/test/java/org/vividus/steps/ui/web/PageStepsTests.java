@@ -219,10 +219,10 @@ class PageStepsTests
     }
 
     @Test
-    void testOpenPageUrlInNewTab()
+    void testOpenPageInNewTab()
     {
         var ordered = Mockito.inOrder(setContextSteps, navigateActions, javascriptActions);
-        pageSteps.openPageUrlInNewTab(URL);
+        pageSteps.openPageInNewTab(URL);
         ordered.verify(javascriptActions).openNewTab();
         ordered.verify(setContextSteps).switchToTab();
         ordered.verify(navigateActions).navigateTo(URL);

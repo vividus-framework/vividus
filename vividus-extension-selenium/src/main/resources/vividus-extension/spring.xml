@@ -7,7 +7,7 @@
         http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
-        default-lazy-init="true" profile="web,mobile_app">
+        default-lazy-init="true" profile="web_selenium,mobile_app">
 
     <context:component-scan base-package="org.vividus.jackson.databind.ui"/>
     <context:component-scan base-package="org.vividus.converter.ui" >

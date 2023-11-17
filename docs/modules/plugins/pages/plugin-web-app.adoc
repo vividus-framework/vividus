@@ -1,5 +1,4 @@
 = Web Application Plugin
-:given-step: Given I am on page with URL `https://www.google.com/search?q=vividus`
 
 The plugin provides functionality to interact with Web applications.
 
@@ -63,6 +62,8 @@ a|The command line (CLI) arguments to use when starting browser.
 * https://textslashplain.com/2022/01/05/edge-command-line-arguments/[`edge`],
 * https://www-archive.mozilla.org/docs/command-line-args/[`firefox`],
 * https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/general-info/hh826025(v=vs.85)?redirectedfrom=MSDN/[`iexplore`].
+
+include::partial$common-web-app-properties.adoc[]
 
 |`web-application.sticky-header-size-percentage`
 |header size as a viewport size percent
@@ -1044,7 +1045,7 @@ Then $storageType storage item with key `$key` does not exist
 Then local storage item with key `token` does not exist
 ----
 
-
+:given-step: Given I am on page with URL `https://www.google.com/search?q=vividus`
 include::partial$proxy-steps.adoc[]
 
 === Window Steps

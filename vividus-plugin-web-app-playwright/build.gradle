@@ -1,0 +1,32 @@
+project.description = 'VIVIDUS plugin for testing web applications using Playwirght engine'
+
+// give test dependencies access to compileOnly dependencies to emulate providedCompile
+// https://discuss.gradle.org/t/compileonly-dependencies-are-not-available-in-tests/15366/7
+configurations {
+    testImplementation.extendsFrom compileOnly
+}
+
+dependencies {
+    implementation project(':vividus-engine')
+    implementation project(':vividus-reporter')
+    implementation project(':vividus-soft-assert')
+    implementation project(':vividus-test-context')
+    implementation project(':vividus-util')
+
+    api project(':vividus-extension-web-app')
+
+    compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
+
+    implementation(group: 'com.microsoft.playwright', name: 'playwright', version: '1.39.0')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.9')
+    implementation(group: 'org.slf4j', name: 'slf4j-api')
+
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.1')
+    testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
+    testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
+    testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.7.0')
+    testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+    testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
+    testImplementation(group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '3.15.3')
+    testImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.1.0')
+}

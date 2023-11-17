@@ -433,24 +433,6 @@ When I wait until element located by `$locator` has text matching `$regex`
 When I wait until element located by `id(indicator)` has text matching `\d+`
 ----
 
-=== Navigate back
-
-Navigates back to the previous view.
-
-[source,gherkin]
-----
-When I navigate back
-----
-
-.Navigate back
-[source,gherkin]
-----
-Then number of elements found by `xpath(//*[@*='Welcome'])` is equal to `1`
-When I navigate back
-Then number of elements found by `xpath(//*[@*='Welcome'])` is equal to `0`
-----
-
-
 === Verify elements order
 
 Gets a collection of elements by locator and checks that they are sorted by
