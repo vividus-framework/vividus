@@ -335,6 +335,48 @@ When I select element located `$locator` and upload file `$filePath`
 When I select element located by `id(uploadfile)` and upload file `/folder/file_for_upload.png`
 ----
 
+=== Drag and drop steps
+
+This set of steps facilitates the dragging and dropping of elements on a web page.
+
+==== Drag and drop using mouse
+
+Performs drag-and-drop operation for the specified elements.
+
+[source,gherkin]
+----
+When I drag element located by `$draggable` and drop it at $location of element located by `$target`
+----
+
+* `$draggable` - The <<_locator,locator>> to identify the element to be dragged.
+* `$location` - The target position relative to the target element (TOP, BOTTOM, LEFT, RIGHT, CENTER, LEFT_TOP, RIGHT_TOP, LEFT_BOTTOM, RIGHT_BOTTOM).
+* `$target` - The <<_locator,locator>> to identify the target element.
+
+.Dragging the image on the page
+[source,gherkin]
+----
+When I drag element located by `id(item-number)` and drop it at right bottom of element located by `id(item-number)`
+----
+
+==== Drag and drop simulation
+
+Simulates a drag-and-drop operation for the specified elements,
+replicating the behavior without actual mouse actions performed.
+
+[source,gherkin]
+----
+When I simulate drag of element located by `$draggable` and drop at element located by `$target`
+----
+
+* `$draggable` - The <<_locator,locator>> to identify the element to be dragged.
+* `$target` - The <<_locator,locator>> to identify the target element.
+
+.Simulation of dragging an image onto the page
+[source,gherkin]
+----
+When I simulate drag of element located by `id(item-number)` and drop at element located by `id(item-number)`
+----
+
 === Check each element has a specific number of children elements
 
 Checks that each element specified by the locator contains an exact number of visible child elements specified by another locator
