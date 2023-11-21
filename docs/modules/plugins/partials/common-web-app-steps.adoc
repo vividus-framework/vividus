@@ -90,7 +90,7 @@ When I navigate back
 
 === Validate the page title
 
-Checks the page title matches the text according to the provided validation rule.
+Checks the page title matches the text according to the given validation rule.
 
 [source,gherkin]
 ----

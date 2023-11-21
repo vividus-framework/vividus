@@ -19,20 +19,23 @@ package org.vividus.ui.web.playwright;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.testcontext.SimpleTestContext;
+import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 
+@SuppressWarnings("PMD.CloseResource")
 @ExtendWith(MockitoExtension.class)
 class UiContextTests
 {
     private final UiContext uiContext = new UiContext(new SimpleTestContext());
 
-    @SuppressWarnings("PMD.CloseResource")
     @Test
     void shouldSetAndGetPage()
     {
@@ -50,5 +53,17 @@ class UiContextTests
         var currentPage = uiContext.getCurrentPage();
 
         assertNull(currentPage);
+    }
+
+    @Test
+    void shouldLocateElementOnPage()
+    {
+        Page page = mock();
+        uiContext.setCurrentPage(page);
+        PlaywrightLocator playwrightLocator = new PlaywrightLocator("xpath", "//div");
+        Locator locator = mock();
+        when(page.locator("xpath=//div")).thenReturn(locator);
+        Locator actual = uiContext.locateElement(playwrightLocator);
+        assertSame(locator, actual);
     }
 }

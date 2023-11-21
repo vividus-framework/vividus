@@ -42,7 +42,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.action.search.Locator;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 
 @SuppressWarnings("MethodCount")

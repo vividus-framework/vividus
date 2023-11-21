@@ -26,10 +26,12 @@
 
     <bean class="org.vividus.ui.web.playwright.UiContext" />
 
-    <bean id="pageSteps" class="org.vividus.steps.ui.web.playwright.PageSteps" />
-    <bean id="playwrightSetupSteps" class="org.vividus.steps.ui.web.playwright.PlaywrightSetupSteps" />
+    <bean id="mouseSteps" class="org.vividus.ui.web.playwright.steps.MouseSteps" />
+    <bean id="pageSteps" class="org.vividus.ui.web.playwright.steps.PageSteps" />
+    <bean id="playwrightSetupSteps" class="org.vividus.ui.web.playwright.steps.PlaywrightSetupSteps" />
 
     <util:list id="stepBeanNames-WebPlaywrightUi" value-type="java.lang.String">
+        <idref bean="mouseSteps" />
         <idref bean="pageSteps" />
         <idref bean="playwrightSetupSteps" />
     </util:list>
@@ -41,5 +43,8 @@
             </bean>
         </entry>
     </util:map>
+
+    <bean class="org.vividus.ui.web.playwright.converter.StringToPlaywrightLocatorConverter" />
+    <bean class="org.vividus.ui.web.playwright.converter.StringToPlaywrightLocatorSetConverter" />
 
  </beans>

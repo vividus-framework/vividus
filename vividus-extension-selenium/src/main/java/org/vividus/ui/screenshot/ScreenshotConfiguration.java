@@ -19,7 +19,7 @@ package org.vividus.ui.screenshot;
 import java.util.Optional;
 import java.util.Set;
 
-import org.vividus.ui.action.search.Locator;
+import org.vividus.selenium.locator.Locator;
 
 public class ScreenshotConfiguration
 {

@@ -35,7 +35,7 @@ import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.jbehave.core.model.ExamplesTable;
 import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.openqa.selenium.Dimension;
-import org.vividus.ui.action.search.Locator;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;
 import org.vividus.visual.eyes.factory.ApplitoolsVisualCheckFactory;

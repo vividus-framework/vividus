@@ -24,9 +24,9 @@ import java.util.function.Supplier;
 
 import org.jbehave.core.annotations.When;
 import org.vividus.reporter.event.IAttachmentPublisher;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParameters;

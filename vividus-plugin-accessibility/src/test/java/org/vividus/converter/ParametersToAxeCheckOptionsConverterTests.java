@@ -53,8 +53,8 @@ import org.openqa.selenium.WebElement;
 import org.vividus.accessibility.model.axe.AxeCheckOptions;
 import org.vividus.accessibility.model.axe.AxeOptions;
 import org.vividus.accessibility.model.axe.EnableableProperty;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.ui.action.ISearchActions;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.web.action.search.WebLocatorType;
 

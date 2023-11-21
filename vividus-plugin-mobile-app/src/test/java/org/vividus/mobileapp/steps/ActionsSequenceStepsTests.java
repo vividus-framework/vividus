@@ -44,9 +44,9 @@ import org.openqa.selenium.interactions.Interactive;
 import org.openqa.selenium.interactions.Sequence;
 import org.vividus.mobileapp.action.MobileAtomicActionFactories;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.AtomicAction;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.mobile.action.search.AppiumLocatorType;
 
 @ExtendWith(MockitoExtension.class)

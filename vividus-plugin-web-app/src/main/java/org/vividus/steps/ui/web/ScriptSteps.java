@@ -18,8 +18,8 @@ package org.vividus.steps.ui.web;
 
 import org.jbehave.core.annotations.Then;
 import org.openqa.selenium.WebElement;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.util.XpathLocatorUtils;

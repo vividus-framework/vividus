@@ -55,7 +55,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Dimension;
 import org.vividus.converter.FluentTrimmedEnumConverter;
 import org.vividus.converter.ui.web.StringToDimensionParameterConverter;
-import org.vividus.ui.action.search.Locator;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.ui.screenshot.ScreenshotParametersFactory;

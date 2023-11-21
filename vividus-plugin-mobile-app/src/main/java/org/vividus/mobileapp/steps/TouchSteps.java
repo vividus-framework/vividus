@@ -31,11 +31,11 @@ import org.openqa.selenium.WebElement;
 import org.vividus.mobileapp.action.TouchActions;
 import org.vividus.mobileapp.model.SwipeDirection;
 import org.vividus.mobileapp.model.ZoomType;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.ISearchActions;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 

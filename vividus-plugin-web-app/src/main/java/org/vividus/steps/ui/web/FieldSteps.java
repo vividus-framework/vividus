@@ -18,8 +18,8 @@ package org.vividus.steps.ui.web;
 
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.web.action.IFieldActions;
 import org.vividus.ui.web.util.FormatUtils;

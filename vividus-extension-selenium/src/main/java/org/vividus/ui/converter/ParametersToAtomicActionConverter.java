@@ -32,7 +32,7 @@ import org.jbehave.core.steps.ParameterConverters.AbstractParameterConverter;
 import org.jbehave.core.steps.Parameters;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-import org.vividus.converter.ui.StringToLocatorConverter;
+import org.vividus.selenium.converter.StringToLocatorConverter;
 import org.vividus.ui.action.AtomicAction;
 import org.vividus.ui.action.AtomicActionFactory;
 

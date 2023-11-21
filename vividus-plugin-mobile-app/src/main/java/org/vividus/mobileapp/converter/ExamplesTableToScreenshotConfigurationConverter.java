@@ -16,7 +16,7 @@
 
 package org.vividus.mobileapp.converter;
 
-import org.vividus.converter.ui.AbstractExamplesTableToScreenshotConfigurationConverter;
+import org.vividus.ui.converter.AbstractExamplesTableToScreenshotConfigurationConverter;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 
 public class ExamplesTableToScreenshotConfigurationConverter

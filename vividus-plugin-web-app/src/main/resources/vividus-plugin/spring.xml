@@ -180,6 +180,7 @@
     <bean id="fieldSteps" class="org.vividus.steps.ui.web.FieldSteps" />
     <bean id="focusSteps" class="org.vividus.steps.ui.web.FocusSteps" />
     <bean id="dragAndDropSteps" class="org.vividus.steps.ui.web.DragAndDropSteps" />
+    <bean id="mouseSteps" class="org.vividus.steps.ui.web.MouseSteps" />
 
     <bean id="jsValidationSteps" class="org.vividus.steps.ui.web.JsValidationSteps">
         <property name="includeBrowserExtensionLogEntries" value="${web.steps.js.include-browser-extension-log-entries}" />
@@ -296,6 +297,7 @@
         <idref bean="webUiVividusSetupSteps" />
         <idref bean="webStorageSteps" />
         <idref bean="dragAndDropSteps" />
+        <idref bean="mouseSteps" />
         <idref bean="scrollSteps" />
         <idref bean="performanceSteps" />
         <idref bean="windowSteps" />

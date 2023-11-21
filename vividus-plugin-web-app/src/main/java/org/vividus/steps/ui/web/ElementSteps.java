@@ -27,7 +27,6 @@ import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -37,19 +36,17 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
 import org.vividus.annotation.Replacement;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.manager.WebDriverManager;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.steps.ui.web.validation.IElementValidations;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.util.XpathLocatorUtils;
-import org.vividus.ui.web.action.ClickResult;
-import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
@@ -57,15 +54,11 @@ import org.vividus.ui.web.action.search.WebLocatorType;
 @TakeScreenshotOnFailure
 public class ElementSteps implements ResourceLoaderAware
 {
-    private static final String AN_ELEMENT_TO_CLICK = "An element to click";
     private static final String THE_NUMBER_OF_FOUND_ELEMENTS = "The number of found elements";
     private static final String FILE_EXISTS_MESSAGE_FORMAT = "File %s exists";
-    private static final String PAGE_NOT_REFRESHED_AFTER_CLICKING_ON_ELEMENT_LOCATED = "Page has not been refreshed"
-            + " after clicking on the element located by";
     private static final String ELEMENT_CSS_CONTAINING_VALUE = "Element has CSS property '%s' containing value '%s'";
     private static final String PARENT_ELEMENT_XPATH = "./..";
 
-    private final IMouseActions mouseActions;
     private final IWebElementActions webElementActions;
     private final IWebDriverProvider webDriverProvider;
     private final WebDriverManager webDriverManager;
@@ -75,12 +68,10 @@ public class ElementSteps implements ResourceLoaderAware
     private final IElementValidations elementValidations;
     private ResourceLoader resourceLoader;
 
-    public ElementSteps(IMouseActions mouseActions, IWebElementActions webElementActions,
-            IWebDriverProvider webDriverProvider, WebDriverManager webDriverManager, IUiContext uiContext,
-            IDescriptiveSoftAssert descriptiveSoftAssert, IBaseValidations baseValidations,
-            IElementValidations elementValidations)
+    public ElementSteps(IWebElementActions webElementActions, IWebDriverProvider webDriverProvider,
+            WebDriverManager webDriverManager, IUiContext uiContext, IDescriptiveSoftAssert descriptiveSoftAssert,
+            IBaseValidations baseValidations, IElementValidations elementValidations)
     {
-        this.mouseActions = mouseActions;
         this.webElementActions = webElementActions;
         this.webDriverProvider = webDriverProvider;
         this.webDriverManager = webDriverManager;
@@ -171,115 +162,6 @@ public class ElementSteps implements ResourceLoaderAware
         FileUtils.copyInputStreamToFile(resource.getInputStream(), uploadedFile);
         uploadedFile.deleteOnExit();
         return uploadedFile;
-    }
-
-    /**
-     * Clicks on the element with the provided search attributes and verify that page has not been reloaded
-     * <p>Actions performed at this step:</p>
-     * <ul>
-     * <li>Assert that element with specified search attributes is found on the page;</li>
-     * <li>Clicks on the element;</li>
-     * <li>Assert that page has not been refreshed after click</li>
-     * </ul>
-     * @param locator The locator for element to click
-     * @deprecated Use step: "When I click on element located by `$locator` then page does not refresh" instead
-     */
-    @Deprecated(since = "0.6.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.7.0",
-            replacementFormatPattern = "When I click on element located by `%1$s` then page does not refresh")
-    @When("I click on an element '$locator' then the page does not refresh")
-    public void clickElementPageNotRefresh(Locator locator)
-    {
-        WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, locator);
-        ClickResult clickResult = mouseActions.click(element);
-        descriptiveSoftAssert.assertTrue(
-                PAGE_NOT_REFRESHED_AFTER_CLICKING_ON_ELEMENT_LOCATED + locator, !clickResult.isNewPageLoaded());
-    }
-
-    /**
-     * Clicks on the element with the provided search attributes and verify that page has not been reloaded
-     * <p>Actions performed at this step:</p>
-     * <ul>
-     * <li>Assert that element with specified search attributes is found on the page;</li>
-     * <li>Clicks on the element;</li>
-     * <li>Assert that page has not been refreshed after click</li>
-     * </ul>
-     * @param locator The locator for the element to click
-     */
-    @When("I click on element located by `$locator` then page does not refresh")
-    public void clickElementAndPageNotRefresh(Locator locator)
-    {
-        baseValidations.assertElementExists(AN_ELEMENT_TO_CLICK, locator).ifPresent(element ->
-            {
-                ClickResult clickResult = mouseActions.click(element);
-                descriptiveSoftAssert.assertTrue(PAGE_NOT_REFRESHED_AFTER_CLICKING_ON_ELEMENT_LOCATED + locator,
-                    !clickResult.isNewPageLoaded());
-            }
-        );
-    }
-
-    /**
-     * Performs right click on an element by locator
-     * <p>Actions performed at this step:</p>
-     * <ul>
-     * <li>Finds the element by the given locator;</li>
-     * <li>Performs context click on the element.</li>
-     * </ul>
-     * @param locator The locator for the element to click
-     * @deprecated Use step: "When I perform right click on element located by `$locator`" instead
-     */
-    @Deprecated(since = "0.6.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.7.0",
-            replacementFormatPattern = "When I perform right-click on element located by `%1$s`")
-    @When("I perform right click on element located `$locator`")
-    public void contextClickElementByLocator(Locator locator)
-    {
-        WebElement element = baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, locator);
-        mouseActions.contextClick(element);
-    }
-
-    /**
-     * Performs right-click on an element by locator
-     * <p>Actions performed at this step:</p>
-     * <ul>
-     * <li>Finds the element by the given locator;</li>
-     * <li>Performs context click on the element.</li>
-     * </ul>
-     * @param locator The locator for the element to click
-     */
-    @When("I perform right-click on element located by `$locator`")
-    public void rightClickElementByLocator(Locator locator)
-    {
-        baseValidations.assertElementExists(AN_ELEMENT_TO_CLICK, locator)
-                .ifPresent(mouseActions::contextClick);
-    }
-
-    /**
-     * Sets a cursor on the <b>element</b> specified by locator
-     * @param locator to locate the element
-     * @deprecated Use step: "When I hover mouse over element located by `$locator`" instead
-     */
-    @Deprecated(since = "0.6.0", forRemoval = true)
-    @Replacement(versionToRemoveStep = "0.7.0",
-            replacementFormatPattern = "When I hover mouse over element located by `%1$s`")
-    @When("I hover mouse over element located `$locator`")
-    public void hoverMouseOverElement(Locator locator)
-    {
-        WebElement element = baseValidations.assertIfElementExists(
-                String.format("An element with attributes%1$s", locator), locator);
-        mouseActions.moveToElement(element);
-    }
-
-    /**
-     * Sets a cursor on the <b>element</b> specified by locator
-     * @param locator The locator for the element to hover
-     */
-    @When("I hover mouse over element located by `$locator`")
-    public void hoverMouseOverElementByLocator(Locator locator)
-    {
-        baseValidations.assertElementExists(
-                String.format("An element to hover mouse over%s", locator), locator)
-                .ifPresent(mouseActions::moveToElement);
     }
 
     /**
@@ -446,36 +328,6 @@ public class ElementSteps implements ResourceLoaderAware
                     .ifPresent(elementParent -> elementValidations
                             .assertIfElementHasWidthInPerc(elementParent, elementChild, width));
         });
-    }
-
-    /**
-     * Clicks on the element found by the specified locator.
-     * <p>The atomic actions performed are:</p>
-     * <ul>
-     * <li>find the element by the locator;</li>
-     * <li>click on the element if it is found, otherwise the whole step is failed and its execution stops;</li>
-     * <li>the first two actions are retried once if the field becomes stale during actions execution in other words if
-     * <a href="https://www.selenium.dev/exceptions/#stale_element_reference">StaleElementReferenceException</a>
-     * is occurred at any atomic action.</li>
-     * </ul>
-     * @param locator The locator used to find element.
-     */
-    @When("I click on element located by `$locator`")
-    public void clickOnElement(Locator locator)
-    {
-        try
-        {
-            findAndClick(locator);
-        }
-        catch (StaleElementReferenceException thrown)
-        {
-            findAndClick(locator);
-        }
-    }
-
-    private void findAndClick(Locator locator)
-    {
-        baseValidations.assertElementExists("Element to click", locator).ifPresent(mouseActions::click);
     }
 
     @Override

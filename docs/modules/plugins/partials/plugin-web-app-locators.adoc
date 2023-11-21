@@ -7,21 +7,20 @@
 |Description
 |Example
 
-
 |`id`
-|id attribute of an element
-|id(submitForm)
+|Locates elements whose `id` attribute matches the search value
+|id(submitBtn)
 
 |`cssSelector`
-|CSS selector to an element
+|Locates elements matching a https://www.selenium.dev/documentation/webdriver/elements/locators/#css-selector[CSS selector]
 |cssSelector(.menu-item)
 
 |`xPath`
-|https://developer.mozilla.org/en-US/docs/Web/XPath[xPath to locate an element]
+|Locates elements matching an https://www.selenium.dev/documentation/webdriver/elements/locators/#xpath[xPath expression]
 |xpath(//a)
 
 |`unnormalizedXPath`
-|https://developer.mozilla.org/en-US/docs/Web/XPath[xPath to locate an element].
+|Locates elements matching an https://www.selenium.dev/documentation/webdriver/elements/locators/#xpath[xPath] expression.
 Unlike `xPath` locator this one doesn't add https://developer.mozilla.org/en-US/docs/Web/XPath/Functions/normalize-space[space normalization]
 and moves handling of spaces up to user
 |unnormalizedXPath(//li[text()='ID:{nbsp}{nbsp}{nbsp}{nbsp}testId'])

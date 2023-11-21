@@ -24,13 +24,13 @@ import java.util.List;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.openqa.selenium.WebElement;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.ui.model.StringSortingOrder;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.State;
 import org.vividus.ui.action.ElementActions;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 

@@ -33,10 +33,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.screenshot.CoordsProviderType;
 import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.ui.action.ISearchActions;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.screenshot.ScreenshotPrecondtionMismatchException;
 import org.vividus.util.property.PropertyMappedCollection;
 

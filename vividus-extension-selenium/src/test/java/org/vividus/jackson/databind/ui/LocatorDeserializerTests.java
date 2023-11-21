@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.util.LocatorConversionUtils;
+import org.vividus.selenium.locator.Locator;
+import org.vividus.selenium.locator.LocatorConverter;
 
 @ExtendWith(MockitoExtension.class)
 class LocatorDeserializerTests
 {
     @Mock private Locator locator;
     @Mock private JsonParser jsonParser;
-    @Mock private LocatorConversionUtils locatorConversionUtils;
+    @Mock private LocatorConverter locatorConverter;
     @InjectMocks private LocatorDeserializer deserializer;
 
     @Test
@@ -44,7 +44,7 @@ class LocatorDeserializerTests
     {
         String input = "input-locator";
         when(jsonParser.getText()).thenReturn(input);
-        when(locatorConversionUtils.convertToLocator(input)).thenReturn(locator);
+        when(locatorConverter.convertToLocator(input)).thenReturn(locator);
         assertEquals(locator, deserializer.deserialize(jsonParser, null));
     }
 }

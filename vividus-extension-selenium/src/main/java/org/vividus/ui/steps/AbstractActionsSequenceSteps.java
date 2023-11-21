@@ -24,9 +24,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.AtomicAction;
-import org.vividus.ui.action.search.Locator;
 
 public class AbstractActionsSequenceSteps
 {

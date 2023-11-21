@@ -5,10 +5,6 @@ The plugin provides functionality to interact with Web applications.
 :plugin-short-name: web-app
 include::partial$plugin-installation.adoc[]
 
-include::partial$locator-header.adoc[]
-
-include::plugins:partial$plugin-web-app-locators.adoc[]
-
 == Properties
 
 NOTE: The properties marked with *bold* are mandatory.
@@ -175,6 +171,9 @@ include::partial$dynamic-variables-ui.adoc[]
 
 include::plugins:partial$plugin-web-app-profiles.adoc[]
 
+include::partial$locator-header.adoc[]
+include::plugins:partial$plugin-web-app-locators.adoc[]
+
 == Steps
 
 include::plugins:partial$plugin-web-app-steps.adoc[]
@@ -334,75 +333,6 @@ When I select element located `$locator` and upload file `$filePath`
 [source,gherkin]
 ----
 When I select element located by `id(uploadfile)` and upload file `/folder/file_for_upload.png`
-----
-
-=== Verify page is not refreshed after click on element
-
-Clicks on the element and checks that the page has not been refreshed after the click.
-
-[source,gherkin]
-----
-When I click on element located by `$locator` then page does not refresh
-----
-
-_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
-[source,gherkin]
-----
-When I click on an element '$locator' then the page does not refresh
-----
-
-* `$locator` - The <<_locator,locator>> to find an element to click.
-
-.Step example
-[source,gherkin]
-----
-When I click on element located by `id(send)` then page does not refresh
-----
-
-=== Right-click on the element
-
-Performs right-click on the element.
-
-[source,gherkin]
-----
-When I perform right-click on element located by `$locator`
-----
-
-_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
-[source,gherkin]
-----
-When I perform right click on element located `$locator`
-----
-
-* `$locator` - The <<_locator,locator>> to find an element to click.
-
-.Step example
-[source,gherkin]
-----
-When I perform right-click on element located by `id(clickme)`
-----
-
-=== Hover mouse over the element
-
-Moves a mouse cursor on the element.
-
-[source,gherkin]
-----
-When I hover mouse over element located by `$locator`
-----
-
-_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
-[source,gherkin]
-----
-When I hover mouse over element located `$locator`
-----
-
-* `$locator` - The <<_locator,locator>> to an element to hover.
-
-.Step example
-[source,gherkin]
-----
-When I hover mouse over element located by `id(hoverme)`
 ----
 
 === Check each element has a specific number of children elements
