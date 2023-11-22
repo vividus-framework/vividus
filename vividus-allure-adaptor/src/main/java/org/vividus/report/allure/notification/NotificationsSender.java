@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.vividus.util.property.IPropertyMapper;
 import guru.qa.allure.notifications.clients.Notification;
 import guru.qa.allure.notifications.config.Config;
 import guru.qa.allure.notifications.config.enums.Language;
+import guru.qa.allure.notifications.exceptions.MessageBuildException;
 
 public class NotificationsSender
 {
@@ -45,7 +46,14 @@ public class NotificationsSender
             config.getBase().setAllureFolder(reportDirectory.getAbsolutePath());
             config.getBase().setLanguage(Language.en);
             config.getBase().setEnableChart(true);
-            Notification.send(config);
+            try
+            {
+                Notification.send(config);
+            }
+            catch (IOException | MessageBuildException e)
+            {
+                LOGGER.error("Unable to send notifications", e);
+            }
         });
     }
 

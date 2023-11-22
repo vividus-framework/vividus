@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -38,6 +39,8 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -48,6 +51,7 @@ import guru.qa.allure.notifications.clients.Notification;
 import guru.qa.allure.notifications.config.Config;
 import guru.qa.allure.notifications.config.base.Base;
 import guru.qa.allure.notifications.config.enums.Language;
+import guru.qa.allure.notifications.exceptions.MessageBuildException;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class NotificationsSenderTests
@@ -79,6 +83,26 @@ class NotificationsSenderTests
             notificationsSender.sendNotifications(reportDirectory);
             notification.verify(() -> Notification.send(config));
             assertThat(logger.getLoggingEvents(), is(List.of()));
+        });
+    }
+
+    static Stream<Exception> errors()
+    {
+        return Stream.of(
+                new IOException(),
+                new MessageBuildException("message build error", new IOException())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("errors")
+    void shouldLogErrorOnNotificationSendException(Exception exception) throws IOException
+    {
+        testNotificationSending((config, notification) ->
+        {
+            notification.when(() -> Notification.send(config)).thenThrow(exception);
+            notificationsSender.sendNotifications(reportDirectory);
+            assertThat(logger.getLoggingEvents(), is(List.of(error(exception, "Unable to send notifications"))));
         });
     }
 
