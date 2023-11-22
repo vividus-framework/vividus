@@ -44,11 +44,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.interactions.Actions;
-import org.vividus.converter.ui.StringToLocatorConverter;
+import org.vividus.selenium.converter.StringToLocatorConverter;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.testdouble.TestAtomicActionFactories;
 import org.vividus.ui.action.AtomicAction;
 import org.vividus.ui.action.AtomicActionFactory;
-import org.vividus.ui.action.search.Locator;
 
 @ExtendWith(MockitoExtension.class)
 class ParametersToAtomicActionConverterTests

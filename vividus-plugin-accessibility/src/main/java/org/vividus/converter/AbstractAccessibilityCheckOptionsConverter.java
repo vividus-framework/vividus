@@ -26,8 +26,8 @@ import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.accessibility.model.AbstractAccessibilityCheckOptions;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.ui.action.ISearchActions;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.Visibility;
 
 public abstract class AbstractAccessibilityCheckOptionsConverter<T extends AbstractAccessibilityCheckOptions>

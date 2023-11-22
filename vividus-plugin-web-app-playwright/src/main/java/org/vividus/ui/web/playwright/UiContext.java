@@ -16,9 +16,11 @@
 
 package org.vividus.ui.web.playwright;
 
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 
 import org.vividus.testcontext.TestContext;
+import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 
 public class UiContext
 {
@@ -37,5 +39,10 @@ public class UiContext
     public Page getCurrentPage()
     {
         return testContext.get(Page.class, Page.class);
+    }
+
+    public Locator locateElement(PlaywrightLocator locator)
+    {
+        return getCurrentPage().locator(locator.getLocator());
     }
 }

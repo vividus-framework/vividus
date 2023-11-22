@@ -22,9 +22,9 @@ import java.util.Optional;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.ui.IState;
-import org.vividus.ui.action.search.Locator;
 
 public interface IBaseValidations
 {

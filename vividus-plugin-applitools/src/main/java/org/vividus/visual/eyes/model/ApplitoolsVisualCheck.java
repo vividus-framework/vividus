@@ -20,7 +20,7 @@ import java.util.Set;
 
 import com.applitools.eyes.config.Configuration;
 
-import org.vividus.ui.action.search.Locator;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.visual.model.AbstractVisualCheck;
 import org.vividus.visual.model.VisualActionType;
 

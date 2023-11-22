@@ -10,9 +10,6 @@
         default-lazy-init="true" profile="web_selenium,mobile_app">
 
     <context:component-scan base-package="org.vividus.jackson.databind.ui"/>
-    <context:component-scan base-package="org.vividus.converter.ui" >
-         <context:exclude-filter type="regex" expression="org\.vividus\.converter\.ui\..*\..*"/>
-    </context:component-scan>
 
     <bean id="parentWebDriverFactory" class="org.vividus.selenium.GenericWebDriverFactory" abstract="true" />
 
@@ -126,7 +123,7 @@
 
     <bean class="org.vividus.ui.action.search.ElementActionService" init-method="init"/>
 
-    <bean class="org.vividus.ui.util.LocatorConversionUtils">
+    <bean class="org.vividus.selenium.locator.LocatorConverter">
         <property name="dynamicLocators">
             <bean factory-bean="propertyMapper" factory-method="readValuesCaseInsensitively">
                 <constructor-arg value="ui.locator." />
@@ -217,6 +214,9 @@
             </set>
         </property>
     </bean>
+
+    <bean class="org.vividus.selenium.converter.StringToLocatorConverter" />
+    <bean class="org.vividus.selenium.converter.StringToLocatorSetConverter" />
 
     <bean id="context-height" class="org.vividus.ui.variable.SearchContextHeightDynamicVariable"/>
     <bean id="context-width" class="org.vividus.ui.variable.SearchContextWidthDynamicVariable"/>

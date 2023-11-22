@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,14 @@
 package org.vividus.spring;
 
 import org.springframework.core.convert.converter.Converter;
-import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.util.LocatorConversionUtils;
+import org.vividus.selenium.locator.Locator;
+import org.vividus.selenium.locator.LocatorConverter;
 
 public class StringToLocatorConverter implements Converter<String, Locator>
 {
-    private final LocatorConversionUtils conversionUtils;
+    private final LocatorConverter conversionUtils;
 
-    public StringToLocatorConverter(LocatorConversionUtils conversionUtils)
+    public StringToLocatorConverter(LocatorConverter conversionUtils)
     {
         this.conversionUtils = conversionUtils;
     }

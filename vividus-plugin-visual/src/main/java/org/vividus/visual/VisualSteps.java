@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,9 @@ import org.jbehave.core.steps.ConvertedParameters;
 import org.jbehave.core.steps.Parameters;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.resource.ResourceLoadException;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.screenshot.IgnoreStrategy;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 import org.vividus.ui.screenshot.ScreenshotParameters;

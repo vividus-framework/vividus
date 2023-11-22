@@ -1,0 +1,46 @@
+==== Right-click on the element
+
+Finds the element by the given locator and performs a right-click in the center of the element if it's found
+(at first moves mouse to the location of the element).
+
+[source,gherkin]
+----
+When I perform right-click on element located by `$locator`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+When I perform right click on element located `$locator`
+----
+
+* `$locator` - The <<_locator,locator>> used to find the element to right-click.
+
+.Right-click on the element with `id` attribute having value `clickme`
+[source,gherkin]
+----
+When I perform right-click on element located by `id(clickme)`
+----
+
+==== Hover mouse over the element
+
+Finds the element by the given locator and moves a mouse cursor over the center of the element, if it's found.
+
+[source,gherkin]
+----
+When I hover mouse over element located by `$locator`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+When I hover mouse over element located `$locator`
+----
+
+* `$locator` - The <<_locator,locator>> used to find the element to hover mouse over.
+
+.Hover mouse over element with `id` attribute having value `tooltip`
+[source,gherkin]
+----
+When I hover mouse over element located by `id(tooltip)`
+----

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,12 +46,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.testdouble.TestElementFilter;
 import org.vividus.testdouble.TestElementSearch;
 import org.vividus.testdouble.TestLocatorType;
 import org.vividus.ui.action.search.ElementActionService;
 import org.vividus.ui.action.search.IElementFilterAction;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.context.IUiContext;
 

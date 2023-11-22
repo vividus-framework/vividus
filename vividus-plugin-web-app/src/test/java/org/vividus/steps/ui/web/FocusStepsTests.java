@@ -29,9 +29,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.steps.ui.validation.BaseValidations;
 import org.vividus.steps.ui.web.validation.FocusValidations;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.UiContext;
 import org.vividus.ui.web.action.WebJavascriptActions;
 

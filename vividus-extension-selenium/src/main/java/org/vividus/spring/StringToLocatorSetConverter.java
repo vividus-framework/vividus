@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ package org.vividus.spring;
 import java.util.Set;
 
 import org.springframework.core.convert.converter.Converter;
-import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.util.LocatorConversionUtils;
+import org.vividus.selenium.locator.Locator;
+import org.vividus.selenium.locator.LocatorConverter;
 
 public class StringToLocatorSetConverter implements Converter<String, Set<Locator>>
 {
-    private LocatorConversionUtils conversionUtils;
+    private LocatorConverter conversionUtils;
 
     @Override
     public Set<Locator> convert(String source)
@@ -32,7 +32,7 @@ public class StringToLocatorSetConverter implements Converter<String, Set<Locato
         return conversionUtils.convertToLocatorSet(source);
     }
 
-    public void setConversionUtils(LocatorConversionUtils conversionUtils)
+    public void setConversionUtils(LocatorConverter conversionUtils)
     {
         this.conversionUtils = conversionUtils;
     }

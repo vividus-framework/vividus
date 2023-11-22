@@ -37,11 +37,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebElement;
 import org.vividus.context.VariableContext;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.ElementActions;
 import org.vividus.ui.action.ISearchActions;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.variable.VariableScope;
 

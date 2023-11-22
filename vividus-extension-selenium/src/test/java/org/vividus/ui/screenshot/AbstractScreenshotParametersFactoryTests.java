@@ -38,8 +38,8 @@ import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.screenshot.IgnoreStrategy;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.util.property.PropertyMappedCollection;
 
 @ExtendWith(TestLoggerFactoryExtension.class)

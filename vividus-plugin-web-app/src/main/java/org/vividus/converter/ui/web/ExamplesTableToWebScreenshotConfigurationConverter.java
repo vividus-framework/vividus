@@ -16,7 +16,7 @@
 
 package org.vividus.converter.ui.web;
 
-import org.vividus.converter.ui.AbstractExamplesTableToScreenshotConfigurationConverter;
+import org.vividus.ui.converter.AbstractExamplesTableToScreenshotConfigurationConverter;
 import org.vividus.ui.web.screenshot.WebScreenshotConfiguration;
 
 import jakarta.inject.Named;

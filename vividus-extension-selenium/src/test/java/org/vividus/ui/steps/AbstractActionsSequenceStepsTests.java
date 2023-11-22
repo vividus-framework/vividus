@@ -37,11 +37,11 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.interactions.Interactive;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.testdouble.TestAtomicActionFactories;
 import org.vividus.testdouble.TestLocatorType;
 import org.vividus.ui.action.AtomicAction;
-import org.vividus.ui.action.search.Locator;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractActionsSequenceStepsTests

@@ -40,5 +40,51 @@ Playwright captures a set of complete DOM snapshots for each action.
 
 |===
 
+== Locator
+
+=== Locator Types
+
+[cols="1,3,2", options="header"]
+|===
+
+|Type
+|Description
+|Example
+
+|`id`
+|Locates elements whose `id` attribute matches the search value
+|id(submitBtn)
+
+|`css`
+|Locates elements matching a https://playwright.dev/java/docs/locators#locate-by-css-or-xpath[CSS selector]
+|css(.menu-item)
+
+|`xPath`
+|Locates elements matching an https://playwright.dev/java/docs/locators#locate-by-css-or-xpath[xPath expression]
+|xpath(//a)
+
+|===
+
 == Steps
 include::plugins:partial$common-web-app-steps.adoc[]
+
+=== Mouse Actions
+==== Click on the element
+
+Finds the element by the given locator and performs a click in the center of the element if it's found
+(at first moves mouse to the location of the element).
+
+[source,gherkin]
+----
+When I click on element located by `$locator`
+----
+
+* `$locator` - The <<_locator,locator>> used to find the element to click.
+
+.Click on element with name `Submit`
+[source,gherkin]
+----
+When I click on element located by `name(Submit)`
+----
+
+include::plugins:partial$common-web-app-mouse-steps.adoc[]

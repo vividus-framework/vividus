@@ -19,7 +19,6 @@ package org.vividus.steps.ui.web;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
@@ -28,7 +27,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.vividus.ui.web.action.search.WebLocatorType.CASE_SENSITIVE_TEXT;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -45,7 +43,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -53,17 +50,16 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.manager.WebDriverManager;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.steps.ui.validation.IDescriptiveSoftAssert;
 import org.vividus.steps.ui.web.validation.IElementValidations;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.util.XpathLocatorUtils;
-import org.vividus.ui.web.action.ClickResult;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.WebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
@@ -73,7 +69,6 @@ import org.vividus.ui.web.action.search.WebLocatorType;
 class ElementStepsTests
 {
     private static final String PARENT_ELEMENT_HAS_CHILD = "Parent element has number of child elements which";
-    private static final String AN_ELEMENT_TO_CLICK = "An element to click";
     private static final String AN_ELEMENT = "An element";
     private static final String FILE_FILE_PATH_EXISTS = "File filePath exists";
     private static final String ELEMENT_HAS_CORRECT_CSS_PROPERTY_VALUE = "Element has correct css property value";
@@ -83,7 +78,6 @@ class ElementStepsTests
     private static final String CSS_NAME = "cssName";
     private static final String ELEMENT_HAS_CSS_PROPERTY_CONTAINING_VALUE =
             "Element has CSS property '" + CSS_NAME + "' containing value '" + CSS_PART_VALUE + "'";
-    private static final String ELEMENT_NAME = "elementName";
     private static final String XPATH = ".//xpath";
     private static final String TEXT = "text";
     private static final String FILE_PATH = "filePath";
@@ -95,11 +89,7 @@ class ElementStepsTests
     private static final String ELEMENT_XPATH = "elementXpath";
     private static final String CHILD_XPATH = "childXpath";
     private static final String THE_NUMBER_OF_PARENT_ELEMENTS = "The number of parent elements";
-    private static final String ELEMENT_TO_CLICK = "Element to click";
     private static final String PARENT_ELEMENT_XPATH = "./..";
-    private static final String PAGE_NOT_REFRESH_AFTER_CLICK_DESCRIPTION = "Page has not been refreshed after "
-            + "clicking on the element located by "
-            + "Case sensitive text: 'text'; Visibility: VISIBLE;";
     private static final String JAR_ARCHIVE_FILE_TXT = "jar:file:/D:/archive.jar!/file.txt";
     private static final String FILE_INPUT_ELEMENT = "A file input element";
 
@@ -113,49 +103,6 @@ class ElementStepsTests
     @Mock private WebElement webElement;
     @Mock private IDescriptiveSoftAssert softAssert;
     @InjectMocks private ElementSteps elementSteps;
-
-    @Test
-    void testContextClickElementByLocator()
-    {
-        var locator = new Locator(WebLocatorType.XPATH, XPATH);
-        when(baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, locator)).thenReturn(webElement);
-        elementSteps.contextClickElementByLocator(locator);
-        verify(mouseActions).contextClick(webElement);
-    }
-
-    @Test
-    void testRightClickElementByLocator()
-    {
-        var locator = new Locator(WebLocatorType.XPATH, XPATH);
-        when(baseValidations.assertElementExists(AN_ELEMENT_TO_CLICK, locator)).thenReturn(Optional.of(webElement));
-        elementSteps.rightClickElementByLocator(locator);
-        verify(mouseActions).contextClick(webElement);
-    }
-
-    @Test
-    void shouldClickOnElement()
-    {
-        var locator = mock(Locator.class);
-        when(baseValidations.assertElementExists(ELEMENT_TO_CLICK, locator)).thenReturn(Optional.of(webElement));
-
-        elementSteps.clickOnElement(locator);
-
-        verify(mouseActions).click(webElement);
-    }
-
-    @Test
-    void shouldRetryClickOnElementIfStaleElementReferenceExceptionIsThrown()
-    {
-        var exception = mock(StaleElementReferenceException.class);
-        var locator = mock(Locator.class);
-        when(baseValidations.assertElementExists(ELEMENT_TO_CLICK, locator)).thenReturn(Optional.of(webElement));
-        doThrow(exception).doReturn(new ClickResult()).when(mouseActions).click(webElement);
-
-        elementSteps.clickOnElement(locator);
-
-        verify(mouseActions, times(2)).click(webElement);
-        verify(baseValidations, times(2)).assertElementExists(ELEMENT_TO_CLICK, locator);
-    }
 
     @Test
     void testIsElementHasRightWidth()
@@ -263,52 +210,6 @@ class ElementStepsTests
                 .thenReturn(elements);
         elementSteps.doesEachElementByLocatorHaveSameDimension(locator, dimension);
         verify(elementValidations).assertAllWebElementsHaveEqualDimension(elements, dimension);
-    }
-
-    @Test
-    void testHoverMouseOverAnElementByLocator()
-    {
-        var locator = new Locator(WebLocatorType.ELEMENT_NAME, ELEMENT_NAME);
-        when(baseValidations.assertIfElementExists(
-                "An element with attributes Element name: 'elementName'; Visibility: VISIBLE;", locator))
-                .thenReturn(webElement);
-        elementSteps.hoverMouseOverElement(locator);
-        verify(mouseActions).moveToElement(webElement);
-    }
-
-    @Test
-    void testHoverMouseOverElementByLocator()
-    {
-        var locator = new Locator(WebLocatorType.ELEMENT_NAME, ELEMENT_NAME);
-        when(baseValidations.assertElementExists("An element to hover mouse over "
-                + "Element name: 'elementName'; Visibility: VISIBLE;", locator))
-                .thenReturn(Optional.of(webElement));
-        elementSteps.hoverMouseOverElementByLocator(locator);
-        verify(mouseActions).moveToElement(webElement);
-    }
-
-    @Test
-    void testClickElementWithTextPageNotRefresh()
-    {
-        var clickResult = new ClickResult();
-        clickResult.setNewPageLoaded(false);
-        var locator = new Locator(CASE_SENSITIVE_TEXT, TEXT);
-        when(baseValidations.assertIfElementExists(AN_ELEMENT_TO_CLICK, locator)).thenReturn(webElement);
-        when(mouseActions.click(webElement)).thenReturn(clickResult);
-        elementSteps.clickElementPageNotRefresh(locator);
-        verify(softAssert).assertTrue(PAGE_NOT_REFRESH_AFTER_CLICK_DESCRIPTION, !clickResult.isNewPageLoaded());
-    }
-
-    @Test
-    void testClickElementWithTextAndPageNotRefresh()
-    {
-        var clickResult = new ClickResult();
-        clickResult.setNewPageLoaded(false);
-        var locator = new Locator(CASE_SENSITIVE_TEXT, TEXT);
-        when(baseValidations.assertElementExists(AN_ELEMENT_TO_CLICK, locator)).thenReturn(Optional.of(webElement));
-        when(mouseActions.click(webElement)).thenReturn(clickResult);
-        elementSteps.clickElementAndPageNotRefresh(locator);
-        verify(softAssert).assertTrue(PAGE_NOT_REFRESH_AFTER_CLICK_DESCRIPTION, !clickResult.isNewPageLoaded());
     }
 
     @Test

@@ -22,8 +22,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
-import org.vividus.ui.action.search.Locator;
-import org.vividus.ui.util.LocatorConversionUtils;
+import org.vividus.selenium.locator.Locator;
+import org.vividus.selenium.locator.LocatorConverter;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -31,11 +31,11 @@ import jakarta.inject.Named;
 @Named
 public class LocatorDeserializer extends JsonDeserializer<Locator>
 {
-    @Inject private LocatorConversionUtils conversionUtils;
+    @Inject private LocatorConverter locatorConverter;
 
     @Override
     public Locator deserialize(JsonParser p, DeserializationContext ctxt) throws IOException
     {
-        return conversionUtils.convertToLocator(p.getText());
+        return locatorConverter.convertToLocator(p.getText());
     }
 }

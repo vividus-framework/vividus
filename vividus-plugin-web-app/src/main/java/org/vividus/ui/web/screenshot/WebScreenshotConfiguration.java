@@ -19,8 +19,8 @@ package org.vividus.ui.web.screenshot;
 import java.time.Duration;
 import java.util.Optional;
 
+import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.screenshot.CoordsProviderType;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.screenshot.ScreenshotConfiguration;
 
 public class WebScreenshotConfiguration extends ScreenshotConfiguration

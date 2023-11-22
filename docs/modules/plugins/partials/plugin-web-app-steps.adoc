@@ -4,13 +4,14 @@
 
 include::plugins:partial$common-web-app-steps.adoc[]
 
-=== Click on element
+=== Mouse Actions
+==== Click on the element
 
-Clicks on the element found by the specified locator.
+Clicks on the element found by the given locator.
 
 The atomic actions performed are:
 
-* find the element by the locator;
+* find the element by the given locator;
 * click on the element if it is found, otherwise the whole step is failed and its execution stops;
 * the first two actions are retried once if the field becomes stale during actions execution in other
 words if https://www.selenium.dev/exceptions/#stale_element_reference[StaleElementReferenceException]
@@ -18,13 +19,15 @@ is occurred at any atomic action.
 
 [NOTE]
 ====
-If element by the specified locator is not clickable (overlapped by another element, problems with page/context loading or the element is disabled) the step will fail with corresponding error:
+If the element by the given locator is not clickable (overlapped by another element, page or current context
+is not loaded properly or the element is disabled) the step will fail with corresponding error:
 [source]
 ----
 Could not click on the element: org.openqa.selenium.ElementClickInterceptedException: element click intercepted:
 Element <a href="#where-to-buy" data-tab-name="..." role="button">Where to Buy</a> is not clickable at point (1619, 275).
 Other element would receive the click: <div class="content">...</div>
 ----
+In this case extra steps might be needed to ensure element actionability, like, scrolling to the element, adding waits, etc.
 ====
 
 [source,gherkin]
@@ -32,13 +35,38 @@ Other element would receive the click: <div class="content">...</div>
 When I click on element located by `$locator`
 ----
 
-* `$locator` - The <<_locator,locator>> used to find element.
+* `$locator` - The <<_locator,locator>> used to find the element to click.
 
-.Click on element
+.Click on element with name `Submit`
 [source,gherkin]
 ----
 When I click on element located by `name(Submit)`
 ----
+
+==== Validate page is not refreshed after click on element
+
+Clicks on the element and checks that the page has not been refreshed after the click.
+
+[source,gherkin]
+----
+When I click on element located by `$locator` then page does not refresh
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+When I click on an element '$locator' then the page does not refresh
+----
+
+* `$locator` - The <<_locator,locator>> used to find the element to click.
+
+.Click on the element with `id` attribute having value `send` and validate page is not refreshed after the action
+[source,gherkin]
+----
+When I click on element located by `id(send)` then page does not refresh
+----
+
+include::plugins:partial$common-web-app-mouse-steps.adoc[]
 
 === Scrolling steps
 ==== Scroll context

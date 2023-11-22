@@ -33,10 +33,10 @@ import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.vividus.mobileapp.action.KeyboardActions;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.manager.GenericWebDriverManager;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.JavascriptActions;
-import org.vividus.ui.action.search.Locator;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 
 import io.appium.java_client.android.nativekey.AndroidKey;

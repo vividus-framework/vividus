@@ -21,7 +21,7 @@ import java.util.List;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.vividus.ui.action.search.Locator;
+import org.vividus.selenium.locator.Locator;
 
 import jakarta.inject.Inject;
 
