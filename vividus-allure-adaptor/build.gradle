@@ -25,7 +25,7 @@ dependencies {
     implementation(group: 'org.slf4j', name: 'slf4j-api')
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.13.0')
-    implementation(group: 'com.github.valfirst', name: 'allure-notifications', version: '1564ef23d7')
+    implementation(group: 'com.github.valfirst', name: 'allure-notifications', version: 'e91fdab70b')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.1')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
