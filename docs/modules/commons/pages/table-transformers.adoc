@@ -274,6 +274,12 @@ will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTabl
 
 |`byRowIndexes`
 |the zero-based indexes of the rows to keep, allowing individual indexes and ranges of indexes separated by semicolons. The range of indexes is specified using the hyphen (-) symbol between two indexes (e.g., 0-5).
+
+|`column.<column name>=<regex>`
+a|select rows where the value in the specified column matches the given regex.
+
+IMPORTANT: filtering by regex is not allowed to be used alongside with the following properties: `byMaxColumns`, `byColumnNames`, `byMaxRows`, `byRowIndexes`, `byRandomRows`.
+
 |===
 
 [IMPORTANT]
@@ -324,6 +330,27 @@ will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTabl
 |value1|value2|value3|
 |value4|value5|value6|
 |value7|value8|value9|
+----
+
+.Usage of FILTERING transformer with filtering by column value matching regex
+[source,gherkin]
+----
+{transformer=FILTERING, column.sequence=^((?!bbb).)*$}
+|sequence |
+|aaabbbccc|
+|qqqwwwlll|
+|bbbfffttt|
+|iiioooddd|
+|uuuhhhbbb|
+----
+
+in the exampe above we select only those rows that do not contain `bbb` string in the `sequence` column, as a result we get the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
+
+[source,gherkin]
+----
+|sequence |
+|qqqwwwlll|
+|iiioooddd|
 ----
 
 == DISTINCTING
