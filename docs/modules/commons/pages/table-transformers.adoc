@@ -278,7 +278,7 @@ will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTabl
 |`column.<column name>=<regex>`
 a|select rows where the value in the specified column matches the given regex.
 
-IMPORTANT: filtering by regex is not allowed to be used together with the following properties: `byMaxColumns`, `byColumnNames`, `byMaxRows`, `byRowIndexes`, `byRandomRows`.
+IMPORTANT: filtering by regex is not allowed to be used alongside with the following properties: `byMaxColumns`, `byColumnNames`, `byMaxRows`, `byRowIndexes`, `byRandomRows`.
 
 |===
 
