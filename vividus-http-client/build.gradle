@@ -6,7 +6,7 @@ configurations {
     testImplementation.extendsFrom compileOnly
 }
 
-ext.httpClientVersion = '5.2.1'
+ext.httpClientVersion = '5.2.2'
 
 dependencies {
     api(group: 'org.apache.httpcomponents.client5', name: 'httpclient5', version: "${httpClientVersion}")
