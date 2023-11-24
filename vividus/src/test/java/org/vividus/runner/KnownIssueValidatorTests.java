@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ package org.vividus.runner;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.hasItemInArray;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -61,7 +63,7 @@ class KnownIssueValidatorTests
     {
         when(knownIssueProvider.getKnownIssueIdentifiers()).thenReturn(new HashMap<>());
         testValidator();
-        assertThat(stdOut.capturedLines(), arrayContaining(""));
+        assertThat(stdOut.capturedLines(), is(emptyArray()));
     }
 
     @Test
