@@ -30,7 +30,7 @@ import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 @TakeScreenshotOnFailure
 public class GenericSetContextSteps
 {
-    public static final String ELEMENT_TO_SET_CONTEXT = "Element to set context";
+    private static final String ELEMENT_TO_SET_CONTEXT = "Element to set context";
     private final IUiContext uiContext;
     private final IBaseValidations baseValidations;
 
@@ -41,18 +41,18 @@ public class GenericSetContextSteps
     }
 
     /**
-     * Resets the context
+     * Resets the context if it was set previously.
      */
     @When("I reset context")
     public void resetContext()
     {
-        getUiContext().reset();
+        uiContext.reset();
     }
 
     /**
-     * Resets currently set context and
-     * sets the context for further localization of elements to an <b>element</b> located by <b>locator</b>
-     * @param locator locator to find an element
+     * Resets the context, finds the element by the given locator and sets the context to this element if it's found.
+     *
+     * @param locator The locator used to find the element to change context to.
      * @deprecated Use step: "When I change context to element located by `$locator`"
      */
     @Deprecated(since = "0.5.4", forRemoval = true)
@@ -62,47 +62,37 @@ public class GenericSetContextSteps
     public void resetAndChangeContextToElement(Locator locator)
     {
         resetContext();
-        changeContext(() -> getBaseValidations().assertIfElementExists(ELEMENT_TO_SET_CONTEXT, locator),
+        changeContext(() -> baseValidations.assertIfElementExists(ELEMENT_TO_SET_CONTEXT, locator),
             () -> resetAndChangeContextToElement(locator));
     }
 
     /**
-     * Resets currently set context and
-     * sets the context for further localization of elements to an <b>element</b> located by <b>locator</b>
-     * @param locator locator to find an element
+     * Resets the context, finds the element by the given locator and sets the context to this element if it's found.
+     *
+     * @param locator The locator used to find the element to change context to.
      */
     @When("I change context to element located by `$locator`")
-    public void resetAndSetContextToElement(Locator locator)
+    public void changeContext(Locator locator)
     {
         resetContext();
-        changeContext(() -> getBaseValidations().assertElementExists(ELEMENT_TO_SET_CONTEXT, locator).orElse(null),
-            () -> resetAndSetContextToElement(locator));
+        changeContext(() -> baseValidations.assertElementExists(ELEMENT_TO_SET_CONTEXT, locator).orElse(null),
+            () -> changeContext(locator));
     }
 
     /**
-     * Sets the context for further localization of elements to an <b>element</b> located by <b>locator</b>
-     * in scope of the current context.
-     * @param locator locator to find an element
+     * Finds the element by the given locator in the current context and sets the context to this element if it's found.
+     *
+     * @param locator The locator used to find the element to change context to.
      */
     @When("I change context to element located by `$locator` in scope of current context")
-    public void changeContextToElement(Locator locator)
+    public void changeContextInScopeOfCurrentContext(Locator locator)
     {
-        changeContext(() -> getBaseValidations().assertElementExists(ELEMENT_TO_SET_CONTEXT, locator).orElse(null),
-            () -> changeContextToElement(locator));
+        changeContext(() -> baseValidations.assertElementExists(ELEMENT_TO_SET_CONTEXT, locator).orElse(null),
+            () -> changeContextInScopeOfCurrentContext(locator));
     }
 
     private void changeContext(Supplier<WebElement> locator, SearchContextSetter setter)
     {
-        getUiContext().putSearchContext(locator.get(), setter);
-    }
-
-    protected IUiContext getUiContext()
-    {
-        return uiContext;
-    }
-
-    protected IBaseValidations getBaseValidations()
-    {
-        return baseValidations;
+        uiContext.putSearchContext(locator.get(), setter);
     }
 }

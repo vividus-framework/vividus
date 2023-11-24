@@ -67,6 +67,7 @@ Playwright captures a set of complete DOM snapshots for each action.
 
 == Steps
 include::plugins:partial$common-web-app-steps.adoc[]
+include::plugins:partial$ui-context-management-steps.adoc[]
 
 === Mouse Actions
 ==== Click on the element

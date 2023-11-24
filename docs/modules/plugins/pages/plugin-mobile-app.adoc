@@ -273,7 +273,9 @@ include::partial$dynamic-variables-ui.adoc[]
 
 == Steps
 
-=== Start mobile application
+=== Application management
+
+==== Start mobile application
 
 Starts mobile application with capabilities from user's `*.properties` files and profiles set by a user.
 
@@ -282,7 +284,8 @@ Starts mobile application with capabilities from user's `*.properties` files and
 Given I start mobile application
 ----
 
-=== Start mobile application with capabilities
+
+==== Start mobile application with capabilities
 
 Starts mobile application with capabilities from user's `*.properties` files and profiles set by a user.
 Additionally the step takes a list of capabilities as an argument that overrides globally-defined capabilities.
@@ -305,7 +308,7 @@ Given I start mobile application with capabilities:
 ----
 
 
-=== Activate mobile application
+==== Activate mobile application
 
 Activates the existing application on the device/emulator/simulator and moves
 it to the foreground. The application should be already running in order to
@@ -325,7 +328,7 @@ When I activate application with bundle identifier `com.apple.mobilesafari`
 ----
 
 
-=== Reinstall mobile application
+==== Reinstall mobile application
 
 Removes the mobile application from device/emulator/simulator and installs it again.
 
@@ -357,7 +360,7 @@ When I reinstall mobile application with bundle identifier `vividus-mobile.app`
 ----
 
 
-=== Terminate mobile application
+==== Terminate mobile application
 
 Terminates the running application on the device/emulator/simulator and
 navigates to the home device screen. The remote session will not be closed.
@@ -376,7 +379,7 @@ When I terminate application with bundle identifier `com.apple.mobilesafari`
 ----
 
 
-=== Close mobile application
+==== Close mobile application
 
 Closes the mobile application and quits the remote session.
 
@@ -385,7 +388,7 @@ Closes the mobile application and quits the remote session.
 When I close mobile application
 ----
 
-=== Run mobile application in background
+==== Run mobile application in background
 
 Runs mobile application in the background for specific period of time and either activates the app after a certain amount of time, or leave the app deactivated (when PT-1S is used). See https://appium.io/docs/en/commands/device/app/background-app/[Appium docs] for more details.
 
@@ -401,15 +404,6 @@ When I send mobile application to background for `$period` period
 ----
 When I send mobile application to background for `PT5S` period
 Then number of elements found by `accessibilityId(login-button)` is equal to `1`
-----
-
-=== Navigate back
-
-Navigates back to the previous view.
-
-[source,gherkin]
-----
-When I navigate back
 ----
 
 
@@ -432,8 +426,9 @@ When I change Appium session settings:
 |allowInvisibleElements|true |
 ----
 
+=== Device file management
 
-=== Upload a file to the device
+==== Upload a file to the device
 
 Uploads a file to the device/emulator/simulator.
 
@@ -454,7 +449,7 @@ Then the avatar icon is displayed with the uploaded image
 ----
 
 
-=== Upload the file with data to the device
+==== Upload the file with data to the device
 
 Upload the file with data to the device/emulator/simulator.
 
@@ -483,7 +478,7 @@ Then message file is displayed in file explorer
 ----
 
 
-=== Delete a file from the device
+==== Delete a file from the device
 
 Deletes a file from the device/emulator/simulator.
 
@@ -513,7 +508,7 @@ accomplish it by deleting following files: */Media/PhotoData/Photos.sqlite*, */M
 :web-view-info: (see http://appium.io/docs/en/writing-running-appium/web/hybrid/[Automating hybrid apps] for more information)
 
 
-=== Download the file from the device
+==== Download the file from the device
 
 Downloads the file from the device/emulator/simulator and saves its content to a variable.
 
@@ -532,6 +527,18 @@ include::partial$mobile-remote-file-path.adoc[]
 [source,gherkin]
 ----
 When I download file `/sdcard/file.json` from device and save its content to scenario variable `json-file`
+----
+
+include::partial$ui-context-management-steps.adoc[]
+
+
+=== Navigate back
+
+Navigates back to the previous view.
+
+[source,gherkin]
+----
+When I navigate back
 ----
 
 

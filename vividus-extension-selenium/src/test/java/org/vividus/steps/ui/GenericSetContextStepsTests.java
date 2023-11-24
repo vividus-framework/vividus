@@ -97,11 +97,11 @@ class GenericSetContextStepsTests
         when(baseValidations.assertElementExists(ELEMENT_TO_SET_CONTEXT, locator)).thenReturn(webElementOpt);
         doNothing().when(uiContext).putSearchContext(eq(webElement), setterCaptor.capture());
 
-        spy.resetAndSetContextToElement(locator);
+        spy.changeContext(locator);
 
         SearchContextSetter setter = setterCaptor.getValue();
         setter.setSearchContext();
-        verify(spy, times(2)).resetAndSetContextToElement(locator);
+        verify(spy, times(2)).changeContext(locator);
         verify(uiContext, times(2)).reset();
         verify(uiContext, times(2)).putSearchContext(eq(webElement), any(SearchContextSetter.class));
         verify(baseValidations, times(2)).assertElementExists(ELEMENT_TO_SET_CONTEXT, locator);
@@ -117,11 +117,11 @@ class GenericSetContextStepsTests
         ArgumentCaptor<SearchContextSetter> setterCaptor = ArgumentCaptor.forClass(SearchContextSetter.class);
         doNothing().when(uiContext).putSearchContext(eq(webElement), setterCaptor.capture());
 
-        spy.changeContextToElement(locator);
+        spy.changeContextInScopeOfCurrentContext(locator);
 
         SearchContextSetter setter = setterCaptor.getValue();
         setter.setSearchContext();
-        verify(spy, times(2)).changeContextToElement(locator);
+        verify(spy, times(2)).changeContextInScopeOfCurrentContext(locator);
         verify(uiContext, never()).reset();
         verify(uiContext, times(2)).putSearchContext(eq(webElement), any(SearchContextSetter.class));
     }
@@ -132,7 +132,7 @@ class GenericSetContextStepsTests
         Locator locator = mock(Locator.class);
         when(baseValidations.assertElementExists(ELEMENT_TO_SET_CONTEXT, locator)).thenReturn(Optional.empty());
 
-        genericSetContextSteps.changeContextToElement(locator);
+        genericSetContextSteps.changeContextInScopeOfCurrentContext(locator);
 
         verify(uiContext, never()).reset();
         verify(uiContext).putSearchContext(eq(null), any(SearchContextSetter.class));

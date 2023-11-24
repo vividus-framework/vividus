@@ -16,6 +16,8 @@
 
 package org.vividus.ui.web.playwright;
 
+import java.util.Optional;
+
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 
@@ -33,16 +35,41 @@ public class UiContext
 
     public void setCurrentPage(Page page)
     {
-        testContext.put(Page.class, page);
+        getPlaywrightContext().page = page;
     }
 
     public Page getCurrentPage()
     {
-        return testContext.get(Page.class, Page.class);
+        return getPlaywrightContext().page;
     }
 
-    public Locator locateElement(PlaywrightLocator locator)
+    public void setContext(Locator context)
     {
-        return getCurrentPage().locator(locator.getLocator());
+        getPlaywrightContext().context = context;
+    }
+
+    public void reset()
+    {
+        getPlaywrightContext().context = null;
+    }
+
+    public Locator locateElement(PlaywrightLocator playwrightLocator)
+    {
+        PlaywrightContext playwrightContext = getPlaywrightContext();
+        String locator = playwrightLocator.getLocator();
+        return Optional.ofNullable(playwrightContext.context)
+                .map(context -> context.locator(locator))
+                .orElseGet(() -> playwrightContext.page.locator(locator));
+    }
+
+    private PlaywrightContext getPlaywrightContext()
+    {
+        return testContext.get(PlaywrightContext.class, PlaywrightContext::new);
+    }
+
+    private static final class PlaywrightContext
+    {
+        private Page page;
+        private Locator context;
     }
 }
