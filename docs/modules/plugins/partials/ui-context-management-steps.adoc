@@ -1,0 +1,78 @@
+=== Context management
+
+The term "context" or "search context" refers to the area within which the element lookup is performed. By changing
+the context during the process of locating elements, it is possible to significantly streamline the creation and
+maintenance of tests. This helps to build more efficient and effective test cases, reducing the time spent interacting
+with unnecessary elements or searching the entire screen for the desired element.
+
+==== Change context
+
+Resets the context, finds the element by the given locator and sets the context to this element if it's found.
+
+[source,gherkin]
+----
+When I change context to element located by `$locator`
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+When I change context to element located `$locator`
+----
+
+* `$locator` - The <<_locator,locator>> used to find the element to change context to.
+
+.Change context
+[source,gherkin]
+----
+Then number of elements found by `id(header)` is equal to `1`
+When I change context to element located by `id(table)`
+Then number of elements found by `id(header)` is equal to `0`
+----
+
+==== Change context within current context
+
+Finds the element by the given locator in the current context and sets the context to this element if it's found.
+
+[source,gherkin]
+----
+When I change context to element located by `$locator` in scope of current context
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
+When I change context to element located `$locator` in scope of current context
+----
+
+* `$locator` - The <<_locator,locator>> used to find the element to change context to.
+
+.Change context in scope of the current context
+[source,gherkin]
+----
+Then number of elements found by `id(header)` is equal to `1`
+When I change context to element located by `id(table)`
+Then number of elements found by `id(header)` is equal to `0`
+When I change context to element located `id(first-row)` in scope of current context
+Then number of elements found by `id(table)` is equal to `0`
+----
+
+
+==== Reset context
+
+Resets the context if it was set previously.
+
+[source,gherkin]
+----
+When I reset context
+----
+
+.Reset context behaviour
+[source,gherkin]
+----
+Then number of elements found by `id(header)` is equal to `1`
+When I change context to element located by `id(table)`
+Then number of elements found by `id(header)` is equal to `0`
+When I reset context
+Then number of elements found by `id(header)` is equal to `1`
+----

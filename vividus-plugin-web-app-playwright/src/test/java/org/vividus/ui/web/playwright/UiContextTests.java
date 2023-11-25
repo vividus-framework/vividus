@@ -19,6 +19,7 @@ package org.vividus.ui.web.playwright;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.microsoft.playwright.Locator;
@@ -34,6 +35,7 @@ import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 @ExtendWith(MockitoExtension.class)
 class UiContextTests
 {
+    private static final PlaywrightLocator PLAYWRIGHT_LOCATOR = new PlaywrightLocator("xpath", "//div");
     private final UiContext uiContext = new UiContext(new SimpleTestContext());
 
     @Test
@@ -60,10 +62,37 @@ class UiContextTests
     {
         Page page = mock();
         uiContext.setCurrentPage(page);
-        PlaywrightLocator playwrightLocator = new PlaywrightLocator("xpath", "//div");
         Locator locator = mock();
-        when(page.locator("xpath=//div")).thenReturn(locator);
-        Locator actual = uiContext.locateElement(playwrightLocator);
+        when(page.locator(PLAYWRIGHT_LOCATOR.getLocator())).thenReturn(locator);
+        Locator actual = uiContext.locateElement(PLAYWRIGHT_LOCATOR);
         assertSame(locator, actual);
+    }
+
+    @Test
+    void shouldLocateElementWithinContext()
+    {
+        Page page = mock();
+        uiContext.setCurrentPage(page);
+        Locator context = mock();
+        uiContext.setContext(context);
+        Locator locator = mock();
+        when(context.locator(PLAYWRIGHT_LOCATOR.getLocator())).thenReturn(locator);
+        Locator actual = uiContext.locateElement(PLAYWRIGHT_LOCATOR);
+        assertSame(locator, actual);
+    }
+
+    @Test
+    void shouldLocateElementOnPageAfterContextReset()
+    {
+        Page page = mock();
+        uiContext.setCurrentPage(page);
+        Locator context = mock();
+        uiContext.setContext(context);
+        uiContext.reset();
+        Locator locator = mock();
+        when(page.locator(PLAYWRIGHT_LOCATOR.getLocator())).thenReturn(locator);
+        Locator actual = uiContext.locateElement(PLAYWRIGHT_LOCATOR);
+        assertSame(locator, actual);
+        verifyNoInteractions(context);
     }
 }

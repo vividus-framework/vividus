@@ -3,6 +3,7 @@
 :close-spec: https://w3c.github.io/webdriver/webdriver-spec.html#close-window[close]
 
 include::plugins:partial$common-web-app-steps.adoc[]
+include::plugins:partial$ui-context-management-steps.adoc[]
 
 === Mouse Actions
 ==== Click on the element
