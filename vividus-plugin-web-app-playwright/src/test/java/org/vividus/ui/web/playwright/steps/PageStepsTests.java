@@ -60,7 +60,9 @@ class PageStepsTests
 
         pageSteps.openMainApplicationPage();
 
-        verify(page).navigate(PAGE_URL);
+        var ordered = inOrder(uiContext, page);
+        ordered.verify(uiContext).reset();
+        ordered.verify(page).navigate(PAGE_URL);
     }
 
     @Test
@@ -71,7 +73,9 @@ class PageStepsTests
 
         pageSteps.openPage(PAGE_URL);
 
-        verify(page).navigate(PAGE_URL);
+        var ordered = inOrder(uiContext, page);
+        ordered.verify(uiContext).reset();
+        ordered.verify(page).navigate(PAGE_URL);
     }
 
     @Test
@@ -86,6 +90,7 @@ class PageStepsTests
         pageSteps.openPage(PAGE_URL);
 
         var ordered = inOrder(uiContext, page);
+        ordered.verify(uiContext).reset();
         ordered.verify(uiContext).setCurrentPage(page);
         ordered.verify(page).navigate(PAGE_URL);
     }
@@ -98,7 +103,9 @@ class PageStepsTests
 
         pageSteps.refreshPage();
 
-        verify(page).reload();
+        var ordered = inOrder(uiContext, page);
+        ordered.verify(uiContext).reset();
+        ordered.verify(page).reload();
     }
 
     @Test
@@ -109,7 +116,9 @@ class PageStepsTests
 
         pageSteps.navigateBack();
 
-        verify(page).goBack();
+        var ordered = inOrder(uiContext, page);
+        ordered.verify(uiContext).reset();
+        ordered.verify(page).goBack();
     }
 
     @Test
@@ -121,7 +130,9 @@ class PageStepsTests
 
         pageSteps.openRelativeUrl("stats");
 
-        verify(uiContext.getCurrentPage()).navigate("https://example.com/path/stats");
+        var ordered = inOrder(uiContext, page);
+        ordered.verify(uiContext).reset();
+        ordered.verify(uiContext.getCurrentPage()).navigate("https://example.com/path/stats");
     }
 
     @Test

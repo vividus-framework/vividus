@@ -65,6 +65,7 @@ public class PageSteps
     @Given("I am on page with URL `$pageUrl`")
     public void openPage(String pageUrl)
     {
+        uiContext.reset();
         Optional.ofNullable(uiContext.getCurrentPage()).orElseGet(this::openNewTab).navigate(pageUrl);
     }
 
@@ -74,6 +75,7 @@ public class PageSteps
     @When("I refresh page")
     public void refreshPage()
     {
+        uiContext.reset();
         uiContext.getCurrentPage().reload();
     }
 
@@ -83,6 +85,7 @@ public class PageSteps
     @When("I navigate back")
     public void navigateBack()
     {
+        uiContext.reset();
         uiContext.getCurrentPage().goBack();
     }
 
