@@ -16,29 +16,22 @@
 
 package org.vividus.configuration;
 
-import java.util.Optional;
 import java.util.Properties;
 
-import org.jasypt.encryption.StringEncryptor;
-import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
+import org.vividus.encryption.DecryptionFailedException;
+import org.vividus.encryption.Decryptor;
+import org.vividus.encryption.NoDecryptionPasswordException;
 
 public class EncryptedPropertiesProcessor extends AbstractPropertiesProcessor
 {
     private static final String ENC = "ENC";
-    private Properties properties;
-    private StringEncryptor stringEncryptor;
-
-    EncryptedPropertiesProcessor(StringEncryptor stringEncryptor)
-    {
-        super(ENC);
-        this.stringEncryptor = stringEncryptor;
-    }
+    private final Decryptor decryptor;
 
     EncryptedPropertiesProcessor(Properties properties)
     {
         super(ENC);
-        this.properties = properties;
+        this.decryptor = new Decryptor(properties);
     }
 
     @Override
@@ -46,7 +39,12 @@ public class EncryptedPropertiesProcessor extends AbstractPropertiesProcessor
     {
         try
         {
-            return getStringEncryptor().decrypt(partOfPropertyValueToProcess);
+            return decryptor.decrypt(partOfPropertyValueToProcess);
+        }
+        catch (NoDecryptionPasswordException e)
+        {
+            throw new DecryptionFailedException(
+                    "Encrypted properties are found, but no password for decryption is provided", e);
         }
         catch (EncryptionOperationNotPossibleException e)
         {
@@ -54,24 +52,5 @@ public class EncryptedPropertiesProcessor extends AbstractPropertiesProcessor
                     partOfPropertyValueToProcess, propertyName);
             throw new DecryptionFailedException(errorMessage, e);
         }
-    }
-
-    private StringEncryptor getStringEncryptor()
-    {
-        if (stringEncryptor == null)
-        {
-            String password = Optional.ofNullable(System.getenv("VIVIDUS_ENCRYPTOR_PASSWORD"))
-                    .or(() -> Optional.ofNullable(System.getProperty("vividus.encryptor.password")))
-                    .or(() -> Optional.ofNullable(properties.getProperty("system.vividus.encryptor.password")))
-                    .orElseThrow(() -> new IllegalStateException(
-                            "Encrypted properties are found, but no password for decryption is provided"));
-
-            StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
-            encryptor.setAlgorithm("PBEWithMD5AndDES");
-            encryptor.setPassword(password);
-
-            stringEncryptor = encryptor;
-        }
-        return stringEncryptor;
     }
 }

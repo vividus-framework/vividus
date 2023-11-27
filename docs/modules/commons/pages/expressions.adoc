@@ -975,6 +975,31 @@ Calculates the {resource-info}[resource] or file hash using the specified hashin
 |`0a05ba6064ae7e5d6ee9818f85b666ad`
 |===
 
+
+== Decryption
+
+=== `decrypt`
+
+Decrypts an input string using the same algrotihm and password employed for
+the xref:ROOT:secrets-management.adoc#_how_to_use_an_encrypted_string[decryption] of properties.
+
+[source, subs="+quotes"]
+----
+#{decrypt(*$encryptedInput*)}
+----
+
+* *`$encryptedInput`* - any string to be decrypted.
+
+.Examples of the expression doing decryption with encryption password equal to `12345`
+[cols="2a,1a"]
+|===
+|Expression |Result
+
+|`#{decrypt(7K9wRym/gaD8mFSqZ6KALLnrE6vPhsBaxKIcN9g4d9w=)}`
+|`The Show Must Go On`
+|===
+
+
 == Resources
 :resource-name-argument: pass:quotes[*`$resourceName`* - the name of the xref:ROOT:glossary.adoc#_resource[resource] to load]
 
