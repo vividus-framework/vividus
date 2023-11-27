@@ -109,62 +109,55 @@ public class FieldActions implements IFieldActions
     @Override
     public void clearFieldUsingKeyboard(WebElement field)
     {
-        if (field != null)
-        {
-            Entry<Keys, String> controllingKey = keysManager.getOsIndependentControlKey();
-            LOGGER.atInfo()
-                    .addArgument(controllingKey::getValue)
-                    .log("Attempting to clear field with [{} + A, Backspace] keys sequence");
-            field.sendKeys(Keys.chord(controllingKey.getKey(), "a") + Keys.BACK_SPACE);
-        }
+        Entry<Keys, String> controllingKey = keysManager.getOsIndependentControlKey();
+        LOGGER.atInfo().addArgument(controllingKey::getValue).log(
+                "Attempting to clear field with [{} + A, Backspace] keys sequence");
+        field.sendKeys(Keys.chord(controllingKey.getKey(), "a") + Keys.BACK_SPACE);
     }
 
     @Override
     public void addText(WebElement element, String text)
     {
-        if (element != null)
+        String normalizedText = FormatUtils.normalizeLineEndings(text);
+        LOGGER.info("Adding text \"{}\" into the element", normalizedText);
+
+        // workarounds for contenteditable elements
+        if (isElementContenteditable(element))
         {
-            String normalizedText = FormatUtils.normalizeLineEndings(text);
-            LOGGER.info("Adding text \"{}\" into the element", normalizedText);
-
-            // workarounds for contenteditable elements
-            if (isElementContenteditable(element))
+            // workaround for CKEditor 5 (JavaScript WYSIWYG editor):
+            // https://github.com/ckeditor/ckeditor5/issues/6554
+            boolean ckeWorkaroundNeeded = javascriptActions.executeScript(
+                    "return arguments[0].ckeditorInstance !== undefined", element);
+            if (ckeWorkaroundNeeded)
             {
-                // workaround for CKEditor 5 (JavaScript WYSIWYG editor):
-                // https://github.com/ckeditor/ckeditor5/issues/6554
-                boolean ckeWorkaroundNeeded = javascriptActions.executeScript(
-                        "return arguments[0].ckeditorInstance !== undefined", element);
-                if (ckeWorkaroundNeeded)
-                {
-                    javascriptActions.executeScript(
-                            "const editor = arguments[0].ckeditorInstance;"
-                                    + "const originalText = editor.getData();"
-                                    + "const lastPCloseTagIndex = originalText.lastIndexOf('</p>');"
-                                    + "if (lastPCloseTagIndex !== -1) {"
-                                    + "editor.setData( originalText.substring(0, lastPCloseTagIndex)"
-                                    + " + arguments[1] + originalText.substring(lastPCloseTagIndex) );"
-                                    + "} else {"
-                                    + "editor.setData(originalText + arguments[1])"
-                                    + "}", element, text);
-                    return;
-                }
-
-                // workaround for Safari and IE 11
-                // Safari issue: https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/4467
-                // IE 11 issue: https://github.com/SeleniumHQ/selenium/issues/3353
-                boolean richTextWorkaroundNeeded = webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)
-                        && !element.findElements(By.xpath("//preceding-sibling::head"
-                        + "[descendant::title[contains(text(),'Rich Text')]]")).isEmpty();
-                if (richTextWorkaroundNeeded)
-                {
-                    javascriptActions.executeScript(
-                            "var text=arguments[0].innerHTML;arguments[0].innerHTML = text+arguments[1];", element,
-                            text);
-                    return;
-                }
+                javascriptActions.executeScript(
+                        "const editor = arguments[0].ckeditorInstance;"
+                                + "const originalText = editor.getData();"
+                                + "const lastPCloseTagIndex = originalText.lastIndexOf('</p>');"
+                                + "if (lastPCloseTagIndex !== -1) {"
+                                + "editor.setData( originalText.substring(0, lastPCloseTagIndex)"
+                                + " + arguments[1] + originalText.substring(lastPCloseTagIndex) );"
+                                + "} else {"
+                                + "editor.setData(originalText + arguments[1])"
+                                + "}", element, text);
+                return;
             }
-            sendKeysToElement(element, normalizedText);
+
+            // workaround for Safari and IE 11
+            // Safari issue: https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/4467
+            // IE 11 issue: https://github.com/SeleniumHQ/selenium/issues/3353
+            boolean richTextWorkaroundNeeded = webDriverManager.isBrowserAnyOf(Browser.SAFARI, Browser.IE)
+                    && !element.findElements(By.xpath("//preceding-sibling::head"
+                    + "[descendant::title[contains(text(),'Rich Text')]]")).isEmpty();
+            if (richTextWorkaroundNeeded)
+            {
+                javascriptActions.executeScript(
+                        "var text=arguments[0].innerHTML;arguments[0].innerHTML = text+arguments[1];", element,
+                        text);
+                return;
+            }
         }
+        sendKeysToElement(element, normalizedText);
     }
 
     @Override

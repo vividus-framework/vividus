@@ -14,28 +14,21 @@
  * limitations under the License.
  */
 
-package org.vividus.steps.ui.web;
+package org.vividus.ui.web.playwright.steps;
+
+import com.microsoft.playwright.Locator;
 
 import org.jbehave.core.annotations.When;
-import org.openqa.selenium.WebElement;
-import org.vividus.selenium.locator.Locator;
-import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.ui.monitor.TakeScreenshotOnFailure;
-import org.vividus.ui.web.action.IFieldActions;
-import org.vividus.ui.web.util.FormatUtils;
+import org.vividus.ui.web.playwright.UiContext;
+import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 
-@TakeScreenshotOnFailure
 public class FieldSteps
 {
-    private static final String FIELD_TO_CLEAR = "The field to clear";
+    private final UiContext uiContext;
 
-    private final IFieldActions fieldActions;
-    private final IBaseValidations baseValidations;
-
-    public FieldSteps(IFieldActions fieldActions, IBaseValidations baseValidations)
+    public FieldSteps(UiContext uiContext)
     {
-        this.fieldActions = fieldActions;
-        this.baseValidations = baseValidations;
+        this.uiContext = uiContext;
     }
 
     /**
@@ -49,20 +42,15 @@ public class FieldSteps
      * <li>find the field by the locator;</li>
      * <li>clear the field if it is found, otherwise the whole step is failed and its execution stops;</li>
      * <li>type the text in the field.</li>
-     * <li>the first three actions are retried once if the field becomes stale during actions execution in other words
-     * <a href="https://www.selenium.dev/exceptions/#stale_element_reference">StaleElementReferenceException</a>
-     * is thrown at any action.</li>
      * </ul>
      *
      * @param text    The text to enter in the field.
      * @param locator The locator used to find the field to enter the text.
      */
     @When("I enter `$text` in field located by `$locator`")
-    public void enterTextInField(String text, Locator locator)
+    public void enterTextInField(String text, PlaywrightLocator locator)
     {
-        String normalizedText = FormatUtils.normalizeLineEndings(text);
-        baseValidations.assertElementExists("The field to enter text", locator).ifPresent(
-                element -> fieldActions.typeText(element, normalizedText));
+        uiContext.locateElement(locator).fill(text);
     }
 
     /**
@@ -76,10 +64,10 @@ public class FieldSteps
      * @param locator The locator used to find the field to add the text.
      */
     @When("I add `$text` to field located by `$locator`")
-    public void addTextToField(String text, Locator locator)
+    public void addTextToField(String text, PlaywrightLocator locator)
     {
-        baseValidations.assertElementExists("The field to add text", locator).ifPresent(
-                field -> fieldActions.addText(field, text));
+        Locator field = uiContext.locateElement(locator);
+        field.fill(field.inputValue() + text);
     }
 
     /**
@@ -88,32 +76,12 @@ public class FieldSteps
      * It works for elements declared using <code>&lt;input&gt;</code> or <code>&lt;textarea&gt;</code> tags and for
      * <code>[contenteditable]</code> elements (e.g. CKE editors, they are usually located via <code>&lt;body&gt;
      * </code> tag, that is placed in a frame as a separate HTML document).
-     * <p>
-     * The step does not trigger any keyboard or mouse events on the field.
      *
      * @param locator The locator used to find the field to clear.
      */
     @When("I clear field located by `$locator`")
-    public void clearField(Locator locator)
+    public void clearField(PlaywrightLocator locator)
     {
-        baseValidations.assertElementExists(FIELD_TO_CLEAR, locator).ifPresent(WebElement::clear);
-    }
-
-    /**
-     * Finds the field by the given locator and clears it using keyboard if the field is found.
-     * <p>
-     * It works for elements declared using <code>&lt;input&gt;</code> or <code>&lt;textarea&gt;</code> tags and for
-     * <code>[contenteditable]</code> elements (e.g. CKE editors, they are usually located via <code>&lt;body&gt;
-     * </code> tag, that is placed in a frame as a separate HTML document).
-     * <p>
-     * The step simulates user action by pressing buttons Ctrl/Cmd+A and then Backspace, that allows to trigger keyboard
-     * events on the field.
-     *
-     * @param locator The locator used to find the field to clear.
-     */
-    @When("I clear field located by `$locator` using keyboard")
-    public void clearFieldUsingKeyboard(Locator locator)
-    {
-        baseValidations.assertElementExists(FIELD_TO_CLEAR, locator).ifPresent(fieldActions::clearFieldUsingKeyboard);
+        uiContext.locateElement(locator).clear();
     }
 }

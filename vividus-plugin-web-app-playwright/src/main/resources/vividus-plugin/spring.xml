@@ -26,12 +26,14 @@
 
     <bean class="org.vividus.ui.web.playwright.UiContext" />
 
+    <bean id="fieldSteps" class="org.vividus.ui.web.playwright.steps.FieldSteps" />
     <bean id="mouseSteps" class="org.vividus.ui.web.playwright.steps.MouseSteps" />
     <bean id="pageSteps" class="org.vividus.ui.web.playwright.steps.PageSteps" />
     <bean id="playwrightSetupSteps" class="org.vividus.ui.web.playwright.steps.PlaywrightSetupSteps" />
     <bean id="setContextSteps" class="org.vividus.ui.web.playwright.steps.SetContextSteps" />
 
     <util:list id="stepBeanNames-WebPlaywrightUi" value-type="java.lang.String">
+        <idref bean="fieldSteps" />
         <idref bean="mouseSteps" />
         <idref bean="pageSteps" />
         <idref bean="playwrightSetupSteps" />
