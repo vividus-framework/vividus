@@ -51,10 +51,11 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
     @Override
     public AShot create(Optional<WebScreenshotParameters> screenshotParameters)
     {
-        return screenshotParameters.map(ashotParameters -> ashotParameters.getShootingStrategy()
-                                                                   .map(this::createAShot)
-                                                                   .orElseGet(() -> createAShot(ashotParameters)))
-                      .orElseGet(() -> createAShot(getScreenshotShootingStrategy()));
+        return screenshotParameters
+                .map(ashotParameters -> ashotParameters.getShootingStrategy()
+                        .map(strategy -> createAShot(strategy, ashotParameters))
+                        .orElseGet(() -> createAShot(ashotParameters)))
+                .orElseGet(() -> createAShot(getScreenshotShootingStrategy(), null));
     }
 
     private AShot createAShot(WebScreenshotParameters screenshotParameters)
@@ -100,7 +101,7 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
         return new ScrollbarHidingDecorator(strategy, scrollableElement, scrollbarHandler);
     }
 
-    private AShot createAShot(String strategyName)
+    private AShot createAShot(String strategyName, WebScreenshotParameters screenshotParameters)
     {
         ShootingStrategy baseShootingStrategy = getBaseShootingStrategy();
         ShootingStrategy shootingStrategy;
@@ -122,6 +123,10 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                     String.format("Unknown shooting strategy with the name: %s", strategyName));
         };
         shootingStrategy = decorateWithScrollbarHiding(shootingStrategy, Optional.empty());
+        shootingStrategy = screenshotParameters == null
+                ? shootingStrategy
+                : decorateWithCropping(shootingStrategy, screenshotParameters);
+
         return new AShot().shootingStrategy(shootingStrategy)
                 .coordsProvider(new ScrollBarHidingCoordsProviderDecorator(coordsProvider, scrollbarHandler));
     }

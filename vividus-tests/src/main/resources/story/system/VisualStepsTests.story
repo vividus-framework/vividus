@@ -119,3 +119,19 @@ When I change context to element located by `xpath(//a[@href="#home"])`
 When I <action> baseline with name `context-element-with-acceptable-diff-percentage` ignoring:
 |ACCEPTABLE_DIFF_PERCENTAGE|
 |5                         |
+
+
+Scenario: Validation shootingStrategy visual testing on a page with scrollable element with ignores
+Given I am on page with URL `${vividus-test-site-url}/visualTestIntegration.html`
+When I <action> baseline with name `visual-simple-shootingStrategy-with-ignores` using storage `filesystem` and ignoring:
+|ELEMENT      |
+|xpath(//a[1])|
+and screenshot configuration:
+|shootingStrategy|
+|SIMPLE          |
+When I <action> baseline with name `visual-viewportPasting-shootingStrategy-with-ignores` using storage `filesystem` and ignoring:
+|ELEMENT      |
+|xpath(//a[1])|
+and screenshot configuration:
+|shootingStrategy|
+|VIEWPORT_PASTING|
