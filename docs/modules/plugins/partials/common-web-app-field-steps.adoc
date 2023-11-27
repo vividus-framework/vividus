@@ -1,0 +1,47 @@
+=== Input Fields Interactions
+
+Fields are elements where users can enter data. The most typical fields are:
+
+* https://www.w3schools.com/tags/tag_input.asp[`<input>`] elements,
+* https://www.w3schools.com/tags/tag_textarea.asp[`<textarea>`] elements,
+* `[contenteditable]` elements (e.g CKE editors, they are usually located via `<body>` tag, that is placed in a frame as a separate HTML document).
+
+==== Enter text in field
+
+Enter the text in the field found by the given locator.
+
+The atomic actions performed are:
+
+* find the field by the locator;
+* clear the field if it is found, otherwise the whole step is failed and its execution stops;
+* type the text in the field.
+
+[source,gherkin]
+----
+When I enter `$text` in field located by `$locator`
+----
+* `$text` - The text to enter in the field.
+* `$locator` - The <<_locator,locator>> used to find the field to enter the text.
+
+.Type text `pa$$w0rd` in the field with attribute `id` having value `password`
+[source,gherkin]
+----
+When I enter `pa$$w0rd` in field located by `id(password)`
+----
+
+==== Add text to field
+
+Enters the text in the field, found by the given locator, without clearing the previous content.
+
+[source,gherkin]
+----
+When I add `$text` to field located by `$locator`
+----
+* `$text` - The text to add to the field.
+* `$locator` - The <<_locator,locator>> used to find the field to add the text.
+
+.Add text `name` to the field with attribute `id` having value `username`
+[source,gherkin]
+----
+When I add `name` to field located by `id(username)`
+----

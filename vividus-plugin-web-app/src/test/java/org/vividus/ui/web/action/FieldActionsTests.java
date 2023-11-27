@@ -60,7 +60,6 @@ import org.openqa.selenium.support.ui.Select;
 import org.vividus.selenium.KeysManager;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.util.FormatUtils;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class FieldActionsTests
@@ -204,12 +203,6 @@ class FieldActionsTests
     }
 
     @Test
-    void testClearFieldUsingKeyboardNull()
-    {
-        fieldActions.clearFieldUsingKeyboard(null);
-    }
-
-    @Test
     void testAddTextSafariOrIExploreContenteditableRichText()
     {
         when(webElement.getAttribute(CONTENTEDITABLE)).thenReturn(TRUE);
@@ -261,14 +254,6 @@ class FieldActionsTests
                         + "editor.setData(originalText + arguments[1])"
                         + "}", webElement, TEXT);
         verifyNoMoreInteractions(webElement);
-    }
-
-    @Test
-    void testAddTextElementIsNull()
-    {
-        var normalizedText = FormatUtils.normalizeLineEndings(TEXT);
-        fieldActions.addText(null, TEXT);
-        verify(webElement, never()).sendKeys(normalizedText);
     }
 
     @Test

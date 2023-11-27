@@ -69,6 +69,43 @@ When I click on element located by `id(send)` then page does not refresh
 
 include::plugins:partial$common-web-app-mouse-steps.adoc[]
 
+include::plugins:partial$common-web-app-field-steps.adoc[]
+==== Clear field
+
+Finds the field by the given locator and clears it if it's found. The step does not trigger any keyboard or mouse
+events on the field.
+
+[source,gherkin]
+----
+When I clear field located by `$locator`
+----
+* `$locator` - The <<_locator,locator>> used to find the field to clear.
+
+.Clear the field with attribute `id` having value `email`
+[source,gherkin]
+----
+When I clear field located by `id(email)`
+----
+
+==== Clear field using keyboard
+
+Finds the field by the given locator and clears it using keyboard if the field is found. The step simulates user action
+by pressing buttons kbd:[Ctrl+A] or kbd:[Cmd+A] and then kbd:[Backspace] that allows to trigger keyboard events on
+the field.
+
+[source,gherkin]
+----
+When I clear field located by `$locator` using keyboard
+----
+* `$locator` - The <<_locator,locator>> used to find a field.
+
+.Clear the field with attribute `id` having value `email` using keyboard
+[source,gherkin]
+----
+When I clear field located by `id(email)` using keyboard
+----
+
+
 === Scrolling steps
 ==== Scroll context
 

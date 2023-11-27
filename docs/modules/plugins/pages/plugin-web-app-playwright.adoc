@@ -89,3 +89,20 @@ When I click on element located by `name(Submit)`
 ----
 
 include::plugins:partial$common-web-app-mouse-steps.adoc[]
+
+include::plugins:partial$common-web-app-field-steps.adoc[]
+==== Clear field
+
+Finds the field by the given locator and clears it if it's found.
+
+[source,gherkin]
+----
+When I clear field located by `$locator`
+----
+* `$locator` - The <<_locator,locator>> used to find the field to clear.
+
+.Clear the field with attribute `id` having value `email`
+[source,gherkin]
+----
+When I clear field located by `id(email)`
+----
