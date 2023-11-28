@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.steps.ui.web;
 
 import org.jbehave.core.annotations.Then;
 import org.openqa.selenium.WebElement;
+import org.vividus.annotation.Replacement;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.SearchParameters;
@@ -46,8 +47,14 @@ public class ScriptSteps
      *
      * @param jsFileName Value of the <i>src</i> attribute
      * @return webElement found js script
+     * @deprecated Use step:
+     * "Then number of elements found by `xpath(.//script[contains(@src()='$jsFileName']):a` is equal to `1`" instead
      */
+    @Deprecated(since = "0.6.6", forRemoval = true)
     @Then("a javascript file with the name '$jsFileName' is included in the source code")
+    @Replacement(versionToRemoveStep = "0.7.0",
+            replacementFormatPattern = "Then number of elements found by `xpath(.//script[contains(@src()='%1$s']):a` "
+                    + "is equal to `1`")
     public WebElement thenJavascriptFileWithNameIsIncludedInTheSourceCode(String jsFileName)
     {
         return baseValidations.assertIfElementExists(String.format("Script with the name '%s'", jsFileName),
@@ -71,8 +78,14 @@ public class ScriptSteps
      *
      * @param jsText Content of the <i>{@literal <script>}</i> tag.
      * @return webElement found js script
+     * @deprecated Use step:
+     * "Then number of elements found by `xpath(.//script[text()='$jsText']):a` is equal to `1`" instead
      */
+    @Deprecated(since = "0.6.6", forRemoval = true)
     @Then("a javascript with the text '$jsText' is included in the source code")
+    @Replacement(versionToRemoveStep = "0.7.0",
+            replacementFormatPattern = "Then number of elements found by `xpath(.//script[text()='%1$s']):a` "
+                    + "is equal to `1`")
     public WebElement thenJavascriptFileWithTextIsIncludedInTheSourceCode(String jsText)
     {
         return baseValidations.assertIfElementExists(String.format("Script with text '%s'", jsText),
@@ -96,8 +109,14 @@ public class ScriptSteps
      *
      * @param jsTextPart String which should be contained in the <i>{@literal <script>}</i> tag.
      * @return webElement found js script
+     * @deprecated Use step:
+     * "Then number of elements found by `xpath(.//script[contains(text(),'$jsTextPart')]):a` is equal to `1`" instead
      */
+    @Deprecated(since = "0.6.6", forRemoval = true)
     @Then("a javascript with the textpart '$jsTextPart' is included in the source code")
+    @Replacement(versionToRemoveStep = "0.7.0",
+            replacementFormatPattern = "Then number of elements found by `xpath(.//script[contains(text(),'%1$s')]):a` "
+                    + "is equal to `1`")
     public WebElement thenJavascriptWithTextPartIsIncludedInTheSourceCode(String jsTextPart)
     {
         return baseValidations.assertIfElementExists(String.format("Script with the text part '%s'", jsTextPart),
