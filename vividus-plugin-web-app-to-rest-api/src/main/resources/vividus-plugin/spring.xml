@@ -91,6 +91,8 @@
         <property name="excludeExtensionsRegex" value="${transformer.from-headless-crawling.exclude-extensions-regex}" />
     </bean>
 
+    <bean class="org.vividus.databind.BasicHeadersDeserializer" />
+
     <util:list id="stepBeanNames-WebAppToRestApi" value-type="java.lang.String">
         <idref bean="httpRequestSteps" />
         <idref bean="resourceCheckSteps" />

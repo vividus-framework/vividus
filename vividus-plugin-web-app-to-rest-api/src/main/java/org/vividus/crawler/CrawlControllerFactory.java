@@ -19,11 +19,15 @@ package org.vividus.crawler;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hc.core5.http.Header;
 import org.vividus.util.UriUtils;
 import org.vividus.util.UriUtils.UserInfo;
 import org.vividus.util.property.IPropertyMapper;
@@ -97,7 +101,23 @@ public class CrawlControllerFactory implements ICrawlControllerFactory
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonAutoDetect(fieldVisibility = Visibility.NONE)
+    @SuppressWarnings("unused")
     private static final class MappedCrawlConfig extends CrawlConfig
     {
+        private Http http;
+
+        private void setHttp(Http http)
+        {
+            this.http = http;
+        }
+
+        public final class Http
+        {
+            private void setHeaders(Collection<? extends Header> headers)
+            {
+                setDefaultHeaders(headers);
+            }
+        }
     }
 }

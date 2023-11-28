@@ -182,6 +182,16 @@ a|`true`
 |`true`
 |Whether to crawl https pages.
 
+|`transformer.from-headless-crawling.http.headers.<header name>=<header value>`
+|
+|
+a|Set of headers to set for every crawling request being sent.
+
+[source,properties]
+----
+transformer.from-headless-crawling.http.headers.x-vercel-protection-bypass=1fac2b25014d35e5103b
+----
+
 4+^.^|_Proxy_
 
 |`transformer.from-headless-crawling.proxy-host`
