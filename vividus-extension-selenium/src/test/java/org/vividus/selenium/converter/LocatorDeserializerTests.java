@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.jackson.databind.ui;
+package org.vividus.selenium.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
