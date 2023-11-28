@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.jackson.databind.ui;
+package org.vividus.selenium.converter;
 
 import java.io.IOException;
 
@@ -25,13 +25,14 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.locator.LocatorConverter;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-
-@Named
 public class LocatorDeserializer extends JsonDeserializer<Locator>
 {
-    @Inject private LocatorConverter locatorConverter;
+    private final LocatorConverter locatorConverter;
+
+    public LocatorDeserializer(LocatorConverter locatorConverter)
+    {
+        this.locatorConverter = locatorConverter;
+    }
 
     @Override
     public Locator deserialize(JsonParser p, DeserializationContext ctxt) throws IOException
