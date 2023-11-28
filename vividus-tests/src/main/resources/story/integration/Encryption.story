@@ -14,3 +14,8 @@ Then `${partial-encrypted-variable}` is equal to `required username="my-username
 
 Scenario: Verify decrypted value is loaded from system variables
 Then `${system-property}` is equal to `Encrypted message`
+
+Scenario: Verify `decrypt` expression
+Meta:
+    @requirementId 4596
+Then `#{decrypt(7K9wRym/gaD8mFSqZ6KALLnrE6vPhsBaxKIcN9g4d9w=)}` is equal to `The Show Must Go On`

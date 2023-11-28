@@ -43,4 +43,8 @@
         <property name="eventBus" ref="eventBus" />
     </bean>
 
+    <bean class="org.vividus.encryption.Decryptor">
+        <constructor-arg index="0" ref="properties" />
+    </bean>
+
 </beans>

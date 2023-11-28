@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.vividus.configuration;
+package org.vividus.encryption;
 
-public class DecryptionFailedException extends RuntimeException
+public class NoDecryptionPasswordException extends RuntimeException
 {
-    private static final long serialVersionUID = -3712209243074523884L;
+    private static final long serialVersionUID = 8336981206596501721L;
 
-    public DecryptionFailedException(String message, Throwable cause)
+    public NoDecryptionPasswordException(String message)
     {
-        super(message, cause);
+        super(message);
     }
 }
