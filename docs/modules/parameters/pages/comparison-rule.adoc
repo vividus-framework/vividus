@@ -25,7 +25,7 @@ Shows how parameters should be compared.
 +++
 
 |GREATER_THAN
-|grater than
+|greater than
 |>
 
 |GREATER_THAN_OR_EQUAL_TO
