@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import org.apache.hc.core5.net.URIBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.vividus.databind.BasicHeadersDeserializer;
 import org.vividus.util.property.IPropertyMapper;
 import org.vividus.util.property.PropertyMapper;
 
@@ -45,7 +46,7 @@ class CrawlControllerFactoryTests
     private static final String URL = "https://example.com";
 
     private final IPropertyMapper propertyMapper = new PropertyMapper(".", PropertyNamingStrategies.KEBAB_CASE, null,
-            Set.of());
+            Set.of(new BasicHeadersDeserializer()));
 
     @Test
     void shouldCreateCrawlController(@TempDir Path baseDirectory) throws URISyntaxException
@@ -55,9 +56,11 @@ class CrawlControllerFactoryTests
             var crawlStorage = baseDirectory.resolve(CRAWL_STORAGE_FOLDER_KEY);
             Integer socketTimeout = 10_000;
 
+            String value = "714d9dac8b334a3e0577";
             var config = Map.of(
                 "socket-timeout", socketTimeout.toString(),
-                CRAWL_STORAGE_FOLDER_KEY, crawlStorage.toString()
+                CRAWL_STORAGE_FOLDER_KEY, crawlStorage.toString(),
+                "http.headers.credit-card-pin", value
             );
 
             var factory = new CrawlControllerFactory(config, propertyMapper);
@@ -79,6 +82,11 @@ class CrawlControllerFactoryTests
             var authInfo = authInfos.get(0);
             assertEquals(username, authInfo.getUsername());
             assertEquals(password, authInfo.getPassword());
+            var headers = crawlConfig.getDefaultHeaders();
+            assertThat(headers, hasSize(1));
+            var header = headers.iterator().next();
+            assertEquals("credit-card-pin", header.getName());
+            assertEquals(value, header.getValue());
         }
     }
 
