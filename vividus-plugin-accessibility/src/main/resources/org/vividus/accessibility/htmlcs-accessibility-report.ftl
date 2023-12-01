@@ -23,7 +23,7 @@
 	                        </div>
 	                        <div id="${violationId}" class="collapse">
 	                            <div class="card-header ${(violations[0].type)!}">
-	                                <button class="btn btn-link" target="_blank" style="padding: 0;" href="https://squizlabs.github.io/HTML_CodeSniffer/Standards/${violationCode?starts_with("WCAG2")?then('WCAG2/">WCAG 2.0','Section508/">Section 508')} Standard</button>
+	                                <a target="_blank" style="padding: 0;" href="https://squizlabs.github.io/HTML_CodeSniffer/Standards/${violationCode?starts_with("WCAG2")?then('WCAG2/">WCAG 2.1','Section508/">Section 508')} Standard</a>
 	                                <h4 class="card-title">Message Name: ${(violations[0].message)!?html}</h4>
 	                            </div>
 	                            <table class="table">
