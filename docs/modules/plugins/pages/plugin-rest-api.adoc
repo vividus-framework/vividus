@@ -306,6 +306,12 @@ WARNING: No HTTP request header is set in the case of binary content.
 Given request body: $content
 ----
 
+.Alias syntax
+[source,gherkin]
+----
+Given request body:`$content`
+----
+
 * `$content` - HTTP request body.
 
 .Set textual HTTP request body
@@ -322,6 +328,12 @@ When I set request headers:
 |name        |value    |
 |Content-Type|image/png|
 When I execute HTTP POST request for resource with relative URL `/upload/png`
+----
+
+.Set an ampty string as HTTP request body
+[source,gherkin]
+----
+Given request body:``
 ----
 
 === Prepare multipart HTTP request
