@@ -430,3 +430,30 @@ Then `${sortingTable}` is equal to table:
 |a1  |2.3 |
 |a1  |10  |
 |a2  |10.2|
+
+Scenario: Verify FROM_HTML transformer with attribute
+When I initialize scenario variable `documentTable` with values:
+{transformer=FROM_HTML, column=col, pageUrl=$\{vividus-test-site-url\}/links.html, xpathSelector=//a/@href}
+Then `${documentTable}` is equal to table:
+|col       |
+|#ElementId|
+|#notFound |
+|#         |
+
+Scenario: Verify FROM_HTML transformer with text
+When I initialize scenario variable `documentTable` with values:
+{transformer=FROM_HTML, column=col, pageUrl=$\{vividus-test-site-url\}/links.html, xpathSelector=//a/text()}
+Then `${documentTable}` is equal to table:
+|col                       |
+|Link to an element        |
+|Link to unexistent element|
+|Link with tooltip         |
+
+Scenario: Verify FROM_HTML transformer with HTML
+When I initialize scenario variable `documentTable` with values:
+{transformer=FROM_HTML, column=col, pageUrl=$\{vividus-test-site-url\}/links.html, xpathSelector=//a}
+Then `${documentTable}` is equal to table:
+|col                                                                              |
+|<a href="#ElementId">Link to an element</a>                                      |
+|<a href="#notFound">Link to unexistent element</a>                               |
+|<a href="#" title="Link title" onclick="onLinkClick(event)">Link with tooltip</a>|
