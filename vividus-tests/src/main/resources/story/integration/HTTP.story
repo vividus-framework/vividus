@@ -118,6 +118,13 @@ Then `${responseCode}` is equal to `200`
 When I save JSON element value from `${json-context}` by JSON path `$.data` to scenario variable `data`
 Then `${data}` matches `data:application/octet-stream;base64.*`
 
+Scenario: Verify step "Given request body:`$content`" (HTTP request body is an empty string)
+Given request body:``
+When I execute HTTP POST request for resource with relative URL `/post`
+Then `${responseCode}` is equal to `200`
+When I save JSON element value from `${json-context}` by JSON path `$.data` to scenario variable `data`
+Then `${data}` is equal to ``
+
 Scenario: Verify step "Given form data request:$parameters"
 Given form data request:
 |name     |value      |

@@ -40,6 +40,7 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.hc.core5.util.Timeout;
+import org.jbehave.core.annotations.Alias;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
@@ -73,6 +74,7 @@ public class HttpRequestSteps
      * @param content HTTP request body
      */
     @Given("request body: $content")
+    @Alias("request body:`$content`")
     public void request(DataWrapper content)
     {
         Object data = content.data();
