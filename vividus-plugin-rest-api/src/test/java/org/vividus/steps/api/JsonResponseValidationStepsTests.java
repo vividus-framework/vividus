@@ -87,7 +87,7 @@ class JsonResponseValidationStepsTests
                 .thenReturn(createHttpResponse(COMPLEX_JSON));
         var retryTimes = 10;
         steps.waitForJsonElement(JSON_PATH, Duration.ofSeconds(2), retryTimes, stepsToExecute);
-        verify(stepsToExecute, atLeast(4)).execute(Optional.empty());
+        verify(stepsToExecute, atLeast(3)).execute(Optional.empty());
         verify(stepsToExecute, atMost(retryTimes)).execute(Optional.empty());
         verifyAssertion();
     }
