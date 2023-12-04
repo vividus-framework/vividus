@@ -45,6 +45,8 @@ import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.client.HttpResponse;
@@ -56,7 +58,6 @@ class SslLabsClientTests
 {
     private static final String SSL_LABS_HOST = "https://api.ssllabs.com";
     private static final String ANALYZED_HOST = "www.example.com";
-    private static final int TOO_MANY_REQUESTS = 429;
     private static final int SERVICE_IS_OVERLOADED = 529;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(SslLabsClient.class);
@@ -102,28 +103,29 @@ class SslLabsClientTests
         }
     }
 
-    @Test
-    void shouldPerformSslScanWhenTooManyRequests() throws IOException
+    @ParameterizedTest
+    @ValueSource(ints = {
+            HttpStatus.SC_TOO_MANY_REQUESTS,
+            SERVICE_IS_OVERLOADED,
+            HttpStatus.SC_SERVICE_UNAVAILABLE,
+            HttpStatus.SC_BAD_GATEWAY,
+            HttpStatus.SC_BAD_REQUEST
+    })
+    void testPerformSslScanWithUnexpectedStatus(int statusCode) throws IOException
     {
-        testPerformSslScanWithUnexpectedStatus(TOO_MANY_REQUESTS);
-    }
-
-    @Test
-    void shouldPerformSslScanWhenServiceIsOverloaded() throws IOException
-    {
-        testPerformSslScanWithUnexpectedStatus(SERVICE_IS_OVERLOADED);
-    }
-
-    @Test
-    void shouldPerformSslScanWhenWhenServiceUnavailable() throws IOException
-    {
-        testPerformSslScanWithUnexpectedStatus(HttpStatus.SC_SERVICE_UNAVAILABLE);
-    }
-
-    @Test
-    void shouldPerformSslScanWithUnsupportedStatusCode() throws IOException
-    {
-        testPerformSslScanWithUnexpectedStatus(HttpStatus.SC_BAD_REQUEST);
+        try (var grade = mockStatic(Grade.class))
+        {
+            String response = "{\"status\":\"ERROR\"}";
+            HttpResponse httpResponse = new HttpResponse();
+            httpResponse.setStatusCode(statusCode);
+            httpResponse.setResponseBody(response.getBytes(StandardCharsets.UTF_8));
+            when(httpClient.doHttpGet(any(URI.class))).thenReturn(httpResponse);
+            assertEquals(Optional.empty(), client.performSslScan(ANALYZED_HOST));
+            grade.verify(() -> Grade.fromString(anyString()), never());
+            assertThat(logger.getLoggingEvents(), hasItems(
+                    warn("Unexpected status code received: {}\nResponse body: {}", statusCode, response),
+                    errorLogEntry));
+        }
     }
 
     @Test
@@ -165,23 +167,6 @@ class SslLabsClientTests
             assertEquals(Optional.empty(), client.performSslScan(ANALYZED_HOST));
             grade.verify(() -> Grade.fromString(anyString()), never());
             assertThat(logger.getLoggingEvents(), is(List.of()));
-        }
-    }
-
-    private void testPerformSslScanWithUnexpectedStatus(int statusCode) throws IOException
-    {
-        try (var grade = mockStatic(Grade.class))
-        {
-            String response = "{\"status\":\"ERROR\"}";
-            HttpResponse httpResponse = new HttpResponse();
-            httpResponse.setStatusCode(statusCode);
-            httpResponse.setResponseBody(response.getBytes(StandardCharsets.UTF_8));
-            when(httpClient.doHttpGet(any(URI.class))).thenReturn(httpResponse);
-            assertEquals(Optional.empty(), client.performSslScan(ANALYZED_HOST));
-            grade.verify(() -> Grade.fromString(anyString()), never());
-            assertThat(logger.getLoggingEvents(), hasItems(
-                    warn("Unexpected status code received: {}\nResponse body: {}", statusCode, response),
-                    errorLogEntry));
         }
     }
 
