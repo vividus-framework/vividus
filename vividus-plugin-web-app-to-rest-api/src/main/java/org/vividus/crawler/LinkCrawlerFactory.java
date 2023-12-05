@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,17 @@ public class LinkCrawlerFactory implements WebCrawlerFactory<LinkCrawler>
 {
     private final LinkCrawlerData linkCrawlerData;
 
-    private final String excludeExtensionsRegex;
+    private final String excludeUrlsRegex;
 
-    public LinkCrawlerFactory(LinkCrawlerData linkCrawlerData, String excludeExtensionsRegex)
+    public LinkCrawlerFactory(LinkCrawlerData linkCrawlerData, String excludeUrlsRegex)
     {
         this.linkCrawlerData = linkCrawlerData;
-        this.excludeExtensionsRegex = excludeExtensionsRegex;
+        this.excludeUrlsRegex = excludeUrlsRegex;
     }
 
     @Override
     public LinkCrawler newInstance()
     {
-        return new LinkCrawler(linkCrawlerData, excludeExtensionsRegex);
+        return new LinkCrawler(linkCrawlerData, excludeUrlsRegex);
     }
 }
