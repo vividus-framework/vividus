@@ -39,7 +39,6 @@ public class SslLabsClient
     private static final String ERROR_MESSAGE = "Status message '{}' received for host {}";
     private static final String API_VERSION = "/api/v3";
     private static final String ANALYZE_CALL = "/analyze?host=%s&fromCache=on&maxAge=1";
-    private static final int TOO_MANY_REQUESTS = 429;
     private static final int SERVICE_IS_OVERLOADED = 529;
     private static final DurationBasedWaiter WAITER = new DurationBasedWaiter(Duration.ofMinutes(10),
             Duration.ofSeconds(30));
@@ -112,8 +111,8 @@ public class SslLabsClient
             }
             LOGGER.atWarn().addArgument(statusCode).addArgument(httpResponse.getResponseBodyAsString()).log(
                     "Unexpected status code received: {}\nResponse body: {}");
-            if (statusCode == TOO_MANY_REQUESTS || statusCode == SERVICE_IS_OVERLOADED
-                    || statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE)
+            if (statusCode == HttpStatus.SC_TOO_MANY_REQUESTS || statusCode == SERVICE_IS_OVERLOADED
+                    || statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE || statusCode == HttpStatus.SC_BAD_GATEWAY)
             {
                 return false;
             }
