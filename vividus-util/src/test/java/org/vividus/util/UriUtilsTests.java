@@ -203,7 +203,8 @@ class UriUtilsTests
         "https://www.somehost.by/,         /////crazy-url-path,                          https://www.somehost.by/////crazy-url-path",
         "https://www.somehost.by/,         //путь-джедая,                                https://www.somehost.by//%D0%BF%D1%83%D1%82%D1%8C-%D0%B4%D0%B6%D0%B5%D0%B4%D0%B0%D1%8F",
         "https://www.somehost.by,          '',                                           https://www.somehost.by",
-        "tel:1234567,                      '',                                           tel:1234567"
+        "tel:1234567,                      '',                                           tel:1234567",
+        "https://test:pas%40dsad@host.com, '',                                           https://test:pas%40dsad@host.com"
         // CHECKSTYLE:ON
     })
     void testBuildNewUri(String baseUrl, String relativeUrl, String expectedUrl)

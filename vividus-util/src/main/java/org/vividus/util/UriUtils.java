@@ -323,7 +323,7 @@ public final class UriUtils
                 throw new IllegalArgumentException(String
                         .format("Relative path '%s' for '%s' should start with forward slash ('/')", path, url));
             }
-            String uriAsString = createUriAsString(url.getScheme(), url.getAuthority(), encodeNonAsciiChars(path),
+            String uriAsString = createUriAsString(url.getScheme(), url.getRawAuthority(), encodeNonAsciiChars(path),
                     parsedRelativeUrl.getQuery(), parsedRelativeUrl.getFragment());
             return new URI(uriAsString);
         }
