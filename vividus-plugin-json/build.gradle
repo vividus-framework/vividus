@@ -1,15 +1,13 @@
 project.description = 'VIVIDUS plugin for JSON testing'
 
-ext.jsonPathVersion = '2.8.0'
-
 dependencies {
     implementation project(':vividus-engine')
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
     api(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '3.2.2')
-    implementation(group: 'com.jayway.jsonpath', name: 'json-path', version: "${jsonPathVersion}")
-    implementation(group: 'com.jayway.jsonpath', name: 'json-path-assert', version: "${jsonPathVersion}")
+    implementation(group: 'com.github.vividus-framework.JsonPath', name: 'json-path', version: versions.jsonPath)
+    implementation(group: 'com.github.vividus-framework.JsonPath', name: 'json-path-assert', version: versions.jsonPath)
     implementation(group: 'com.flipkart.zjsonpatch', name: 'zjsonpatch', version: '0.4.14')
     implementation platform(group: 'io.qameta.allure', name: 'allure-bom', version: '2.25.0')
     implementation(group: 'io.qameta.allure', name: 'allure-jsonunit') {

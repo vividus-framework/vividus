@@ -1,7 +1,5 @@
 project.description = 'VIVIDUS plugin for REST API testing'
 
-ext.jsonPathVersion = '2.8.0'
-
 dependencies {
     api project(':vividus-engine')
     api project(':vividus-plugin-json')
@@ -14,8 +12,8 @@ dependencies {
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.1.1')
     implementation(group: 'org.springframework', name: 'spring-web')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0')
-    implementation(group: 'com.jayway.jsonpath', name: 'json-path', version: "${jsonPathVersion}")
-    implementation(group: 'com.jayway.jsonpath', name: 'json-path-assert', version: "${jsonPathVersion}")
+    implementation(group: 'com.github.vividus-framework.JsonPath', name: 'json-path', version: versions.jsonPath)
+    implementation(group: 'com.github.vividus-framework.JsonPath', name: 'json-path-assert', version: versions.jsonPath)
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
     implementation(group: 'org.apache.tika', name: 'tika-core', version: '2.9.1')
     implementation(group: 'jakarta.inject', name: 'jakarta.inject-api', version: '2.0.1')

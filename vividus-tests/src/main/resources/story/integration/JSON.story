@@ -217,3 +217,24 @@ Then JSON element from `${json}` by JSON path `$.store` is equal to `
   }
 }
 `
+
+Scenario: Validate `distinct()` function of JsonPath
+Then JSON element from `
+{
+  "type": [
+    "b",
+    "b",
+    "a",
+    "c",
+    "a"
+  ],
+  "name": [
+    "abc"
+  ],
+  "date": "2023-11-16"
+}
+` by JSON path `$.type.distinct()` is equal to `[
+   "a",
+   "b",
+   "c"
+]` IGNORING_ARRAY_ORDER
