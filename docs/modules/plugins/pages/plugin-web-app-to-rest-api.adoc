@@ -1,3 +1,5 @@
+:main-page-url: xref:plugin-web-app.adoc#_properties[web-application.main-page-url]
+
 = Web Application & REST API Integration Plugin
 
 The plugin provides the integration between web application testing functionality and REST API features.
@@ -218,7 +220,7 @@ transformer.from-headless-crawling.http.headers.x-vercel-protection-bypass=1fac2
 
 ==== Required properties
 
-* `web-application.main-page-url` - defines main application page URL
+* `{main-page-url}` - defines main application page URL
 
 .Usage example
 ----
@@ -302,21 +304,13 @@ Examples:
 
 == Steps
 
-=== Validate resources
+=== Resources validations
 
-Validates resources on web pages
+:css-selector: https://www.w3schools.com/cssref/css_selectors.asp[CSS selector]
 
-Resource validation logic:
+Steps to check resource availability using HTTP requests.
 
-. If the `pages` row contains relative URL then it gets resolved against URL in `web-application.main-page-url` property, i.e. if the main page URL is `https://elderscrolls.bethesda.net/` and relative URL is `/skyrim10` the resulting URL will be `https://elderscrolls.bethesda.net/skyrim10`
-. Collect elements by the CSS selector from each page
-. Get either `href` or `src` attribute value from each element, if neither of the attributes exists the validation fails
-. For each received value execute https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/HEAD[HEAD] request
-.. If the status code is https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200[200 OK] then the resource validation is considered as passed
-.. If the status code is one of https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404[404 Not Found], https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/405[405 Method Not Allowed], https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/501[501 Not Implemented], https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503[503 Service Unavailable] then GET request will be executed
-.. If the https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET[GET] status code is https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200[200 OK] then the resource validation is considered as passed, otherwise failed
-
-Resource validation statuses:
+==== Resource validation statuses
 
 [cols="1,4", options="header"]
 |===
@@ -331,7 +325,7 @@ a|Reasons:
 
 * an HTTP request to the page under test returns an empty HTTP response body;
 * an HTTP request to the page under test results in unexpected error;
-* the relative page URL can not be resolved because the `web-application.main-page-url` property is not set;
+* the relative page URL can not be resolved because the `{main-page-url}` property is not set;
 * the resource has invalid URL format;
 * the resource is missing `href` or `src` attributes;
 * the resource has `href` or `src` attribute but its value is not a valid URL;
@@ -352,13 +346,24 @@ a|Reasons:
 
 |===
 
+==== Validate resources on web pages
+
+Validates resources on web pages.
+
+Resource validation logic:
+
+. If the `pages` row contains relative URL then it gets resolved against URL in `{main-page-url}` property, i.e. if the main page URL is `https://elderscrolls.bethesda.net/` and relative URL is `/skyrim10` the resulting URL will be `https://elderscrolls.bethesda.net/skyrim10`
+. Collect elements by the CSS selector from each page
+. Get either `href` or `src` attribute value from each element, if neither of the attributes exists the validation fails
+include::partial$resource-check-statuses.adoc[]
+
 [source,gherkin]
 ----
 Then all resources by selector `$cssSelector` are valid on:$pages
 ----
 
-. `$cssSelector` - The https://www.w3schools.com/cssref/css_selectors.asp[CSS selector]
-. `$pages` - The pages to validate resources on
+. `$cssSelector` - The {css-selector}.
+. `$pages` - The pages to validate resources on.
 
 .Validate resources
 [source,gherkin]
@@ -367,6 +372,30 @@ Then all resources by selector `a` are valid on:
 |pages                        |
 |https://vividus.org/         |
 |/test-automation-made-awesome|
+----
+
+==== Validate resources from HTML
+
+Validates resources from HTML document.
+
+Resource validation logic:
+
+. Collects elements by the CSS selector from the specified HTML document
+. Get either `href` or `src` attribute value from each element, if neither of the attributes exists the validation fails. If the element value contains relative URL then it gets resolved against URL in `{main-page-url}` property
+include::partial$resource-check-statuses.adoc[]
+
+[source,gherkin]
+----
+Then all resources by selector `$cssSelector` from $html are valid
+----
+
+. `$cssSelector` - {css-selector}.
+. `$html` - HTML document to validate.
+
+.Validate resources from the current page
+[source,gherkin]
+----
+Then all resources by selector `a,img` from ${source-code} are valid
 ----
 
 === Validate redirects

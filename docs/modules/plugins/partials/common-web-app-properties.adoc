@@ -1,4 +1,4 @@
 |`web-application.main-page-url`
 |An absolute URL
 |`<empty>`
-|The URL of the strating page of the web application under test
+|The URL of the starting page of the web application under test
