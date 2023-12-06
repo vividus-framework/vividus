@@ -145,9 +145,8 @@ Also the number of https://github.com/json-path/JsonPath#operators[operators] an
 
 ===== `distinct()`
 
-Vividus provides ability to use additional function for filtering repeated values.
 
-* `distinct()` - Provides an array containing only unique items from the input array.
+* `distinct()` - removes duplicated items from the input array.
 
 .distinct() function of JSON Path example
 |===
