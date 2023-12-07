@@ -16,6 +16,7 @@
 
 package org.vividus.context;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.testcontext.TestContext;
 import org.vividus.util.EnumUtils;
+import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.IVariablesFactory;
 import org.vividus.variable.VariableScope;
 import org.vividus.variable.Variables;
@@ -35,11 +37,13 @@ public class VariableTestContext implements VariableContext
 
     private final TestContext testContext;
     private final IVariablesFactory variablesFactory;
+    private final JsonUtils jsonUtils;
 
-    public VariableTestContext(TestContext testContext, IVariablesFactory variablesFactory)
+    public VariableTestContext(TestContext testContext, IVariablesFactory variablesFactory, JsonUtils jsonUtils)
     {
         this.testContext = testContext;
         this.variablesFactory = variablesFactory;
+        this.jsonUtils = jsonUtils;
     }
 
     @Override
@@ -69,7 +73,9 @@ public class VariableTestContext implements VariableContext
         else
         {
             LOGGER.atInfo()
-                  .addArgument(variableValue)
+                  .addArgument(() -> variableValue instanceof Map || variableValue instanceof Collection
+                          ? jsonUtils.toPrettyJson(variableValue)
+                          : variableValue)
                   .addArgument(() -> EnumUtils.toHumanReadableForm(variableScope))
                   .addArgument(variableKey)
                   .log("Saving a value '{}' into the {} variable '{}'");
