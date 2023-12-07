@@ -89,6 +89,7 @@ class HeadlessCrawlerTableTransformerTests
     private static final String OUTGOING_ABSOLUT_URL = "http://some.url/path";
 
     private static final String EXCLUDE_EXTENSIONS_REGEX = "js|css";
+    private static final String EXCLUDE_URLS_REGEX = ".*broken-link*";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(HeadlessCrawlerTableTransformer.class);
 
@@ -119,10 +120,22 @@ class HeadlessCrawlerTableTransformerTests
                                   List<String> expectedSeedRelativeUrls) throws IOException, InterruptedException
     {
         transformer.setSeedRelativeUrls(seedRelativeUrlsProperty);
-        transformer.setExcludeExtensionsRegex(EXCLUDE_EXTENSIONS_REGEX);
+        transformer.setExcludeUrlsRegex(EXCLUDE_URLS_REGEX);
         Set<String> urls = testFetchUrls(mainAppPageRelativeUrl, expectedSeedRelativeUrls);
         assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
         verifyNoInteractions(redirectsProvider);
+        assertThat(logger.getLoggingEvents(), is(List.of()));
+    }
+
+    @Test
+    void testFetchUrlsWithDeprecatedExcludeExtensionsRegexProperty() throws IOException, InterruptedException
+    {
+        transformer.setExcludeExtensionsRegex(EXCLUDE_EXTENSIONS_REGEX);
+        testFetchUrls(MAIN_APP_PAGE, List.of());
+        assertThat(logger.getLoggingEvents(), is(List.of(warn(
+                "Property `transformer.from-headless-crawling.exclude-extensions-regex` is deprecated and will "
+                        + "be removed in VIVIDUS 0.7.0. "
+                        + "Please use `transformer.from-headless-crawling.exclude-urls-regex` instead."))));
     }
 
     @Test

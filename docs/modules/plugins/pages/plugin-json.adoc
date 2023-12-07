@@ -121,6 +121,105 @@ The steps syntax uses two internal (VIVIDUS-only) terms:
 
 TIP: Use https://jsonpath-c48u.onrender.com/[JsonPath online validator] to test your JsonPath.
 
+=== JSON Path
+
+JSON path expressions always refer to a JSON structure in the same way as XPath expression are used in combination with an XML document. The "root member object" in JsonPath is always referred to as `$` regardless if it is an object or array.
+
+JSON path expressions can use the dot–notation
+
+[source]
+----
+$.store.book[0].title
+----
+
+or the bracket–notation
+
+[source]
+----
+$['store']['book'][0]['title']
+----
+
+Also the number of https://github.com/json-path/JsonPath#operators[operators] and https://github.com/json-path/JsonPath#functions[functions] are available for use in JSON paths out of the box. At the same time there are additional functions listed below.
+
+==== JSON Path Functions
+
+===== `distinct()`
+
+
+* `distinct()` - removes duplicated items from the input array.
+
+.distinct() function of JSON Path example
+|===
+|JSON |JSON Path |Result
+
+|[source,JSON]
+----
+{
+    "type": [
+      "b",
+      "b",
+      "a",
+      "c",
+      "a"
+    ],
+    "name": [
+      "abc"
+    ]
+}
+----
+|`$.type.distinct()`
+|[source,JSON]
+----
+[
+    "b",
+    "a",
+    "c"
+]
+----
+
+|[source,JSON]
+----
+{
+    "data": [
+        {
+            "type": "a",
+            "val": "0"
+        },
+        {
+            "type": "b",
+            "val": "0"
+        },
+        {
+            "type": "c",
+            "val": "1"
+        },
+        {
+            "type": "b",
+            "val": "0"
+        }
+    ]
+}
+----
+|`$.data.distinct()`
+|[source,JSON]
+----
+[
+    {
+        "type": "a",
+        "val": "0"
+    },
+    {
+        "type": "b",
+        "val": "0"
+    },
+    {
+        "type": "c",
+        "val": "1"
+    }
+]
+----
+|===
+
 === Save JSON element value
 
 Saves a value of JSON element found in the given JSON into the variable with

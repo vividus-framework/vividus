@@ -88,6 +88,7 @@
         </property>
         <property name="filterRedirects" value="${transformer.from-headless-crawling.filter-redirects}" />
         <property name="seedRelativeUrls" value="${transformer.from-headless-crawling.seed-relative-urls}" />
+        <property name="excludeUrlsRegex" value="${transformer.from-headless-crawling.exclude-urls-regex}" />
         <property name="excludeExtensionsRegex" value="${transformer.from-headless-crawling.exclude-extensions-regex}" />
     </bean>
 

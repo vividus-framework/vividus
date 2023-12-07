@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ class LinkCrawlerTests
 
     private static final String RESOURCE_URL_WITH_EXTENSION = "https://some.url/resources/manual.PDF?param=value";
 
-    private static final String EXCLUDE_EXTENSIONS_REGEX = "(js|css|png|pdf)";
+    private static final String EXCLUDE_URLS_REGEX = ".*(js|css|png|pdf)$|.*broken-link.*";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(LinkCrawler.class);
 
@@ -83,7 +83,7 @@ class LinkCrawlerTests
     void testShouldVisit(String pageUrl, String url, boolean shouldVisit)
     {
         LinkCrawlerData linkCrawlerData = new LinkCrawlerData();
-        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_EXTENSIONS_REGEX);
+        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_URLS_REGEX);
         assertEquals(shouldVisit, crawler.shouldVisit(new Page(createWebUrl(pageUrl)), createWebUrl(url)));
     }
 
@@ -101,7 +101,7 @@ class LinkCrawlerTests
     void testOnRedirectedStatusCode()
     {
         LinkCrawlerData linkCrawlerData = new LinkCrawlerData();
-        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_EXTENSIONS_REGEX);
+        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_URLS_REGEX);
         crawler.onRedirectedStatusCode(createPageWithRedirect(PAGE_URL, ABSOLUTE_RESOURCE_URL));
         assertThat(logger.getLoggingEvents(), is(List.of()));
     }
@@ -110,11 +110,11 @@ class LinkCrawlerTests
     void testOnRedirectedStatusCodeShouldLogMessage()
     {
         LinkCrawlerData linkCrawlerData = new LinkCrawlerData();
-        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_EXTENSIONS_REGEX);
+        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_URLS_REGEX);
         Page page = createPageWithRedirect(PAGE_URL, RESOURCE_URL_WITH_EXTENSION);
         crawler.onRedirectedStatusCode(page);
         assertThat(logger.getLoggingEvents(), is(List.of(info(
-                "URL {} redirects to the URL with a forbidden extension ({}) and will be excluded from the result.",
+                "URL {} redirects to the URL matching ignore regex ({}) and will be excluded from the result.",
                 page.getWebURL().getURL(), RESOURCE_URL_WITH_EXTENSION))));
     }
 
@@ -129,7 +129,7 @@ class LinkCrawlerTests
         linkCrawlerData.getAbsoluteUrls().add(urlWithRedirectTwo);
         Page pageOne = createPageWithRedirect(urlWithRedirectOne, RESOURCE_URL_WITH_EXTENSION);
         Page pageTwo = createPageWithRedirect(urlWithRedirectTwo, RESOURCE_URL_WITH_EXTENSION);
-        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_EXTENSIONS_REGEX);
+        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_URLS_REGEX);
 
         crawler.onRedirectedStatusCode(pageOne);
         crawler.onRedirectedStatusCode(pageTwo);
@@ -141,7 +141,7 @@ class LinkCrawlerTests
     void testShouldVisitWhenTimeoutIsNotReached()
     {
         LinkCrawlerData linkCrawlerData = new LinkCrawlerData();
-        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_EXTENSIONS_REGEX);
+        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_URLS_REGEX);
         assertTrue(crawler.shouldVisit(new Page(createWebUrl(PAGE_URL)), createWebUrl(PAGE_URL)));
     }
 
@@ -149,7 +149,7 @@ class LinkCrawlerTests
     void testVisitHtmlPage()
     {
         LinkCrawlerData linkCrawlerData = new LinkCrawlerData();
-        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_EXTENSIONS_REGEX);
+        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_URLS_REGEX);
         Page page = new Page(createWebUrl(PAGE_URL));
         HtmlParseData htmlParseData = new HtmlParseData();
         htmlParseData.setOutgoingUrls(Set.of(createWebUrl(ABSOLUTE_RESOURCE_URL), createWebUrl(PAGE_URL + "/%2A"),
@@ -161,22 +161,24 @@ class LinkCrawlerTests
         assertThat(logger.getLoggingEvents(), is(List.of(info(CRAWLED_LOG_MESSAGE, PAGE_URL))));
     }
 
-    @Test
-    void testVisitPageWithNotAllowedExtension()
+    @ParameterizedTest
+    @CsvSource({ RESOURCE_URL_WITH_EXTENSION,
+                 "https://some.url/broken-link" })
+    void testNotVisitPageWithNotAllowedRegex(String url)
     {
         LinkCrawlerData linkCrawlerData = new LinkCrawlerData();
-        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_EXTENSIONS_REGEX);
-        assertFalse(crawler.shouldVisit(new Page(createWebUrl(RESOURCE_URL_WITH_EXTENSION)),
-                createWebUrl(RESOURCE_URL_WITH_EXTENSION)));
+        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_URLS_REGEX);
+        assertFalse(crawler.shouldVisit(new Page(createWebUrl(url)),
+                createWebUrl(url)));
         assertThat(logger.getLoggingEvents(),
-                is(List.of(info("Skip crawling for URL {}", RESOURCE_URL_WITH_EXTENSION))));
+                is(List.of(info("Skip crawling for URL {}", url))));
     }
 
     @Test
     void testVisitTextPage()
     {
         LinkCrawlerData linkCrawlerData = new LinkCrawlerData();
-        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_EXTENSIONS_REGEX);
+        LinkCrawler crawler = new LinkCrawler(linkCrawlerData, EXCLUDE_URLS_REGEX);
         Page page = new Page(createWebUrl(PAGE_URL));
         page.setParseData(new TextParseData());
         crawler.visit(page);
