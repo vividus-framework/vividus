@@ -86,13 +86,24 @@ Examples:
 |
 |List of relative URLs, a seed URL is a URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
 
-|`transformer.from-headless-crawling.exclude-extensions-regex`
+|`transformer.from-headless-crawling.exclude-urls-regex`
 |Regular expression
-a |`(css\|gif\|gz\|ico\|jpeg\|jpg\|js\|mp3\|mp4\|pdf\|png\|svg\|zip\|woff2
-\|woff\|ttf\|doc\|docx\|xml\|json\|webmanifest)`
+a |`.*(css\|gif\|gz\|ico\|jpeg\|jpg\|js\|mp3\|mp4\|pdf\|png\|svg\|zip\|woff2
+\|woff\|ttf\|doc\|docx\|xml\|json\|webmanifest)$`
+|The regular expression to match URLs.
+The crawler will not crawl all URLs that matching the given regular expression and they will not be added to the resulting table.
+https://en.wikipedia.org/wiki/URI_fragment[URI fragments] and https://en.wikipedia.org/wiki/Query_string[URL query] are ignored at filtering.
+
+a|`transformer.from-headless-crawling.exclude-extensions-regex`
+[WARNING]
+====
+The property is deprecated in favor of `transformer.from-headless-crawling.exclude-urls-regex` and will be removed in VIVIDUS 0.7.0.
+====
+
+|Regular expression
+|no default value
 |The regular expression to match extensions in URLs.
 The crawler will ignore all URLs referring to files with extensions matching the given regular expression.
-URLs without extensions will always be crawled.
 
 |`transformer.from-headless-crawling.filter-redirects`
 a|`true`
