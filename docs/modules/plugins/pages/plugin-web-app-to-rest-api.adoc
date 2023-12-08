@@ -250,7 +250,18 @@ Examples:
 |Description
 
 |`pageUrl`
-|The URL of the page to build the table upon.
+a|The URL of the page to build the table upon.
+
+WARNING: The `pageUrl` parameter is deprecated and will be removed in VIVIDUS 0.7.0, please use `variableName` instead.
+
+IMPORTANT: The `pageUrl` parameter can not be used together with the `variableName` parameter.
+
+|`variableName`
+a|The name of the variable containing source HTML, only variables of scopes `global` and `next_batches` are allowed.
+Exceptions are cases when the transformer using in xref:commons:vividus-steps.adoc#_initialize_variable_with_a_table[step]
+which initializes a variable with a table.
+
+IMPORTANT: The `variableName` parameter can not be used together with the `pageUrl` parameter.
 
 |`column`
 |The column name in the generated table.

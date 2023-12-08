@@ -449,9 +449,20 @@ Then `${documentTable}` is equal to table:
 |Link to unexistent element|
 |Link with tooltip         |
 
-Scenario: Verify FROM_HTML transformer with HTML
+Scenario: [Deprecated] Verify FROM_HTML transformer with page HTML
 When I initialize scenario variable `documentTable` with values:
 {transformer=FROM_HTML, column=col, pageUrl=$\{vividus-test-site-url\}/links.html, xpathSelector=//a}
+Then `${documentTable}` is equal to table:
+|col                                                                              |
+|<a href="#ElementId">Link to an element</a>                                      |
+|<a href="#notFound">Link to unexistent element</a>                               |
+|<a href="#" title="Link title" onclick="onLinkClick(event)">Link with tooltip</a>|
+
+Scenario: Verify FROM_HTML transformer with variable HTML
+When I execute HTTP GET request for resource with URL `${vividus-test-site-url}/links.html`
+Given I initialize story variable `pageSource` with value `${response}`
+When I initialize scenario variable `documentTable` with values:
+{transformer=FROM_HTML, column=col, variableName=pageSource, xpathSelector=//a}
 Then `${documentTable}` is equal to table:
 |col                                                                              |
 |<a href="#ElementId">Link to an element</a>                                      |

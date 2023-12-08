@@ -26,8 +26,11 @@ import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
+import org.apache.commons.lang3.Validate;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.jbehave.core.model.TableTransformers.TableTransformer;
@@ -35,23 +38,48 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.vividus.context.VariableContext;
 import org.vividus.util.ExamplesTableProcessor;
 
 public class HtmlDocumentTableTransformer implements TableTransformer
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HtmlDocumentTableTransformer.class);
+
     private static final String SLASH = "/";
 
     private final Optional<HttpConfiguration> httpConfiguration;
+    private final VariableContext variableContext;
 
-    public HtmlDocumentTableTransformer(Optional<HttpConfiguration> httpConfiguration)
+    public HtmlDocumentTableTransformer(Optional<HttpConfiguration> httpConfiguration, VariableContext variableContext)
     {
         this.httpConfiguration = httpConfiguration;
+        this.variableContext = variableContext;
     }
 
     @Override
     public String transform(String table, TableParsers parsers, TableProperties tableProperties)
     {
-        String pageUrl = tableProperties.getMandatoryNonBlankProperty("pageUrl", String.class);
+        Properties propertes = tableProperties.getProperties();
+        String pageUrl = propertes.getProperty("pageUrl");
+        String variableName = propertes.getProperty("variableName");
+
+        Validate.isTrue(pageUrl != null && variableName == null || pageUrl == null && variableName != null,
+                "Either 'pageUrl' or 'variableName' should be specified.");
+
+        Supplier<Document> documentSuppler;
+        if (pageUrl == null)
+        {
+            documentSuppler = () -> Jsoup.parse((String) variableContext.getVariable(variableName));
+        }
+        else
+        {
+            LOGGER.atWarn().log("The 'pageUrl' transformer parameter is deprecated and will be removed VIVIDUS 0.7.0, "
+                    + "please use 'variableName' parameter instead.");
+            documentSuppler = () -> createDocument(pageUrl);
+        }
+
         String column = tableProperties.getMandatoryNonBlankProperty("column", String.class);
 
         String xpathSelector = tableProperties.getMandatoryNonBlankProperty("xpathSelector", String.class);
@@ -74,12 +102,12 @@ public class HtmlDocumentTableTransformer implements TableTransformer
             getter = Element::outerHtml;
         }
 
-        return createDocument(pageUrl).selectXpath(xpathSelector)
-                                      .stream()
-                                      .map(getter)
-                                      .collect(collectingAndThen(toList(), attrs -> ExamplesTableProcessor
-                                              .buildExamplesTableFromColumns(List.of(column), List.of(attrs),
-                                                      tableProperties)));
+        return documentSuppler.get().selectXpath(xpathSelector)
+                                    .stream()
+                                    .map(getter)
+                                    .collect(collectingAndThen(toList(), attrs -> ExamplesTableProcessor
+                                            .buildExamplesTableFromColumns(List.of(column), List.of(attrs),
+                                                    tableProperties)));
     }
 
     private Document createDocument(String pageUrl)
