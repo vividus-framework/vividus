@@ -71,7 +71,13 @@ public class MouseActions implements IMouseActions
             WebElement page, WebDriverException webDriverException)
     {
         String message = webDriverException.getMessage();
-        if (message.contains("is not clickable at point") && message.contains("Other element would receive the click"))
+        /*
+         - Element is overlapped with another one: Other element would receive the click
+         - Page has dynamically loaded content which results in invalid (sometimes negative) coordinates for click, e.g:
+             Element is not clickable at point (498, -377)
+             Element is not clickable at point (550, -11228)
+        */
+        if (message.contains("is not clickable at point"))
         {
             try
             {
