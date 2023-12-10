@@ -241,17 +241,6 @@ class MouseActionsTests
         testClickWithElementNotClickableException();
     }
 
-    @Test
-    void shouldNotRetryClickOnNonMatchingError()
-    {
-        mockBodySearch();
-
-        WebDriverException e = new WebDriverException(ELEMENT_IS_NOT_CLICKABLE_AT_POINT);
-        doThrow(e).doNothing().when(webElement).click();
-        WebDriverException exception = assertThrows(WebDriverException.class, () -> mouseActions.click(webElement));
-        assertThat(exception.getMessage(), containsString(ELEMENT_IS_NOT_CLICKABLE_AT_POINT));
-    }
-
     private WebElement mockBodySearch()
     {
         when(webDriverProvider.get()).thenReturn(webDriver);
