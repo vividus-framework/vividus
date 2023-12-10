@@ -7,6 +7,6 @@ Meta:
     @requirementId 2054
 
 Given I am on page with URL `${vividus-test-site-url}/elementState.html`
-When I find > `0` elements `id(element-to-hide)` and while they exist do up to 20 iteration of
+When I find > `0` elements `id(element-to-hide)` and while they exist do up to 40 iteration of
 |step                                                |
 |When I click on element located by `id(button-hide)`|
