@@ -220,6 +220,8 @@
         <property name="windowsStrategy" value="${selenium.windows-strategy}" />
     </bean>
 
+    <bean id="mobileEmulationSteps" class="org.vividus.steps.ui.web.devtools.MobileEmulationSteps" />
+
     <bean class="org.vividus.ui.web.monitor.PublishingWebScreenshotOnFailureMonitor"
           parent="abstractPublishingScreenshotOnFailureMonitor"/>
 
@@ -302,6 +304,7 @@
         <idref bean="performanceSteps" />
         <idref bean="windowSteps" />
         <idref bean="browserSteps" />
+        <idref bean="mobileEmulationSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebUi" key-type="java.lang.Class">
