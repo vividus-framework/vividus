@@ -16,12 +16,14 @@
 
 package org.vividus.crawler;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -33,12 +35,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.hc.client5.http.ContextBuilder;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.protocol.RedirectLocations;
+import org.apache.hc.core5.http.HttpHost;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
@@ -98,11 +107,29 @@ class SiteMapParserTests
     @Test
     void testParseSiteMapWithUserInfoInUrl() throws IOException, SiteMapParseException
     {
-        URI siteMapUrl = UriUtils.addUserInfo(SITE_MAP_URL, "user:pass");
-        mockSiteMapParsing(SITEMAP_XML, siteMapUrl);
-        siteMapParser.setFollowRedirects(false);
-        Collection<SiteMapURL> siteMapUrls = siteMapParser.parse(true, siteMapUrl);
-        assertSiteMapUrls(SITEMAP_URL_NUMBER, SITEMAP_ENTRY_URL, siteMapUrls);
+        try (MockedStatic<ContextBuilder> contextBuilderCreation = mockStatic(ContextBuilder.class))
+        {
+            ContextBuilder contextBuilder = mock();
+            contextBuilderCreation.when(ContextBuilder::create).thenReturn(contextBuilder);
+            ArgumentCaptor<BasicCredentialsProvider> credentialsCaptor =
+                    ArgumentCaptor.forClass(BasicCredentialsProvider.class);
+            when(contextBuilder.useCredentialsProvider(credentialsCaptor.capture()))
+                    .thenReturn(contextBuilder);
+            HttpClientContext mockedContext = mock();
+            when(contextBuilder.build()).thenReturn(mockedContext);
+
+            mockSiteMapParsing(SITEMAP_XML, SITE_MAP_URL);
+            siteMapParser.setBaseUrl(Optional.empty());
+
+            URI siteMapUrl = UriUtils.addUserInfo(SITE_MAP_URL, "user:p%40ss");
+            Collection<SiteMapURL> siteMapUrls = siteMapParser.parse(true, siteMapUrl);
+
+            assertSiteMapUrls(SITEMAP_URL_NUMBER, SITEMAP_ENTRY_URL, siteMapUrls);
+            UsernamePasswordCredentials actualCredentials = (UsernamePasswordCredentials) credentialsCaptor.getValue()
+                    .getCredentials(new AuthScope(HttpHost.create(SITE_MAP_URL)), mockedContext);
+            assertEquals("user", actualCredentials.getUserName());
+            assertArrayEquals("p@ss".toCharArray(), actualCredentials.getPassword());
+        }
     }
 
     @Test

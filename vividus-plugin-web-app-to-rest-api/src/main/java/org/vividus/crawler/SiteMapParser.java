@@ -27,7 +27,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.hc.client5.http.ContextBuilder;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpHost;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.util.UriUtils;
@@ -58,9 +63,26 @@ public class SiteMapParser implements ISiteMapParser
     {
         try
         {
-            HttpClientContext context = new HttpClientContext();
-            HttpResponse response = httpClient.doHttpGet(siteMapUrl, context);
-            URI cleanSiteMapUrl = UriUtils.removeUserInfo(getBaseUri(context, siteMapUrl));
+            ContextBuilder contextBuilder = ContextBuilder.create();
+            UriUtils.UserInfo userInfo = UriUtils.getUserInfo(siteMapUrl);
+            URI targetSiteMapUrl;
+            if (userInfo != null)
+            {
+                targetSiteMapUrl = UriUtils.removeUserInfo(siteMapUrl);
+                BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                AuthScope authScope = new AuthScope(HttpHost.create(targetSiteMapUrl));
+                credentialsProvider.setCredentials(authScope,
+                        new UsernamePasswordCredentials(userInfo.user(), userInfo.password().toCharArray()));
+                contextBuilder.useCredentialsProvider(credentialsProvider);
+            }
+            else
+            {
+                targetSiteMapUrl = siteMapUrl;
+            }
+            HttpClientContext context = contextBuilder.build();
+
+            HttpResponse response = httpClient.doHttpGet(targetSiteMapUrl, context);
+            URI cleanSiteMapUrl = UriUtils.removeUserInfo(getBaseUri(context, targetSiteMapUrl));
             AbstractSiteMap siteMap = siteMapParser.parseSiteMap(response.getResponseBody(), cleanSiteMapUrl.toURL());
             if (siteMap.getType() == SitemapType.INDEX)
             {
