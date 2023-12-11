@@ -8,7 +8,7 @@ dependencies {
     api(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '3.2.2')
     implementation(group: 'com.github.vividus-framework.JsonPath', name: 'json-path', version: versions.jsonPath)
     implementation(group: 'com.github.vividus-framework.JsonPath', name: 'json-path-assert', version: versions.jsonPath)
-    implementation(group: 'com.flipkart.zjsonpatch', name: 'zjsonpatch', version: '0.4.14')
+    implementation(group: 'com.flipkart.zjsonpatch', name: 'zjsonpatch', version: '0.4.16')
     implementation platform(group: 'io.qameta.allure', name: 'allure-bom', version: '2.25.0')
     implementation(group: 'io.qameta.allure', name: 'allure-jsonunit') {
         exclude (group: 'io.qameta.allure')
