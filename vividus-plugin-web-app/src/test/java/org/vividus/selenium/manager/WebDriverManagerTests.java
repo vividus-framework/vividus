@@ -17,6 +17,7 @@
 package org.vividus.selenium.manager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -147,6 +148,15 @@ class WebDriverManagerTests
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
         var result = webDriverManager.getScreenResolution();
         assertEquals(Optional.empty(), result);
+    }
+
+    @Test
+    void shouldReturnTrueForChromeHeadlessShell()
+    {
+        var capabilities = mock(Capabilities.class);
+        when(capabilities.getBrowserName()).thenReturn("chrome-headless-shell");
+
+        assertTrue(WebDriverManager.isBrowser(capabilities, Browser.CHROME));
     }
 
     @ParameterizedTest
