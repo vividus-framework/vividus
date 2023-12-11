@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,19 @@ import org.vividus.ui.web.action.WebJavascriptActions;
 @ExtendWith(MockitoExtension.class)
 class DragAndDropStepsTests
 {
+    private static final String DRAGGABLE_ELEMENT = "Draggable element";
+    private static final String TARGET_ELEMENT = "Target element";
+    private static final String SIMULATE_DRAG_AND_DROP_JS = "simulate-drag-and-drop.js";
+    private static final String DRAG_AND_DROP_ACTIONS = "{id=default mouse, "
+            + "type=pointer, parameters={pointerType=mouse}, "
+            + "actions=["
+            + "{duration=100, x=0, y=0, type=pointerMove, origin=Mock for WebElement, hashCode: %s}, "
+            + "{button=0, type=pointerDown}, "
+            + "{duration=200, x=10, y=0, type=pointerMove, origin=pointer}, "
+            + "{duration=200, x=-10, y=0, type=pointerMove, origin=pointer}, "
+            + "{duration=200, x=100, y=50, type=pointerMove, origin=pointer}, "
+            + "{button=0, type=pointerUp}, "
+            + "{duration=1000, type=pause}]}";
     @Mock
     private IWebDriverProvider webDriverProvider;
 
@@ -60,23 +74,15 @@ class DragAndDropStepsTests
     private DragAndDropSteps dragAndDropSteps;
 
     @Test
-    void shouldDragAndDropToTargetAtLocation()
+    void shouldDragAndDropToTargetAtLocationDeprecated()
     {
         WebElement draggable = mockWebElementWithRect(100, 100, 50, 50);
         WebElement target = mockWebElementWithRect(200, 200, 50, 50);
         WebDriver driver = mock(WebDriver.class, withSettings().extraInterfaces(Interactive.class));
         when(webDriverProvider.get()).thenReturn(driver);
-        testDragAndDropToTargetAtLocation(draggable, Location.TOP, target);
+        testDragAndDropToTargetAtLocationDeprecated(draggable, Location.TOP, target);
         String actionsSequence = String.format(
-                "{id=default mouse, type=pointer, parameters={pointerType=mouse}, "
-                + "actions=["
-                + "{duration=100, x=0, y=0, type=pointerMove, origin=Mock for WebElement, hashCode: %s}, "
-                + "{button=0, type=pointerDown}, "
-                + "{duration=200, x=10, y=0, type=pointerMove, origin=pointer}, "
-                + "{duration=200, x=-10, y=0, type=pointerMove, origin=pointer}, "
-                + "{duration=200, x=100, y=50, type=pointerMove, origin=pointer}, "
-                + "{button=0, type=pointerUp}, "
-                + "{duration=1000, type=pause}]}", draggable.hashCode());
+                DRAG_AND_DROP_ACTIONS, draggable.hashCode());
         verify((Interactive) driver).perform(
                 argThat(arg -> arg.iterator().next().encode().toString().equals(actionsSequence)));
     }
@@ -97,6 +103,35 @@ class DragAndDropStepsTests
         );
     }
 
+    @Test
+    void shouldDragAndDropToTargetAtLocation()
+    {
+        WebElement draggable = mockWebElementWithRect(100, 100, 50, 50);
+        WebElement target = mockWebElementWithRect(200, 200, 50, 50);
+        WebDriver driver = mock(WebDriver.class, withSettings().extraInterfaces(Interactive.class));
+        when(webDriverProvider.get()).thenReturn(driver);
+        testDragAndDropToTargetAtLocation(draggable, Location.TOP, target);
+        String actionsSequence = String.format(
+                DRAG_AND_DROP_ACTIONS, draggable.hashCode());
+        verify((Interactive) driver).perform(
+                argThat(arg -> arg.iterator().next().encode().toString().equals(actionsSequence)));
+    }
+
+    @MethodSource("getElements")
+    @ParameterizedTest
+    void shouldNotDragAndDropWhenAnyElementIsNotFoundDeprecated(WebElement draggable, WebElement target)
+    {
+        testDragAndDropToTargetAtLocationDeprecated(draggable, Location.TOP, target);
+        verifyNoInteractions(webDriverProvider);
+    }
+
+    private void testDragAndDropToTargetAtLocationDeprecated(WebElement draggable, Location location, WebElement target)
+    {
+        Locator draggableLocator = mockDraggableElementSearchDeprecated(draggable);
+        Locator targetLocator = mockTargetElementSearchDeprecated(target);
+        dragAndDropSteps.dragAndDropToTargetAtLocationDeprecated(draggableLocator, location, targetLocator);
+    }
+
     @MethodSource("getElements")
     @ParameterizedTest
     void shouldNotDragAndDropWhenAnyElementIsNotFound(WebElement draggable, WebElement target)
@@ -113,32 +148,62 @@ class DragAndDropStepsTests
     }
 
     @Test
+    void shouldSimulateDragAndDropDeprecated()
+    {
+        WebElement draggable = mock();
+        WebElement target = mock();
+        Locator draggableLocator = mockDraggableElementSearchDeprecated(draggable);
+        Locator targetLocator = mockTargetElementSearchDeprecated(target);
+        dragAndDropSteps.simulateDragAndDropDeprecated(draggableLocator, targetLocator);
+        verify(javascriptActions)
+                .executeScriptFromResource(DragAndDropSteps.class, SIMULATE_DRAG_AND_DROP_JS, draggable, target);
+    }
+
+    @Test
     void shouldSimulateDragAndDrop()
     {
-        WebElement draggable = mock(WebElement.class);
-        WebElement target = mock(WebElement.class);
+        WebElement draggable = mock();
+        WebElement target = mock();
         Locator draggableLocator = mockDraggableElementSearch(draggable);
         Locator targetLocator = mockTargetElementSearch(target);
         dragAndDropSteps.simulateDragAndDrop(draggableLocator, targetLocator);
-        verify(javascriptActions).executeScriptFromResource(DragAndDropSteps.class, "simulate-drag-and-drop.js",
+        verify(javascriptActions).executeScriptFromResource(DragAndDropSteps.class, SIMULATE_DRAG_AND_DROP_JS,
                 draggable, target);
+    }
+
+    private Locator mockDraggableElementSearchDeprecated(WebElement draggable)
+    {
+        return mockElementSearchDeprecated(draggable, DRAGGABLE_ELEMENT);
+    }
+
+    private Locator mockTargetElementSearchDeprecated(WebElement target)
+    {
+        return mockElementSearchDeprecated(target, TARGET_ELEMENT);
     }
 
     private Locator mockDraggableElementSearch(WebElement draggable)
     {
-        return mockElementSearch(draggable, "Draggable element");
+        return mockElementSearch(draggable, DRAGGABLE_ELEMENT);
     }
 
     private Locator mockTargetElementSearch(WebElement target)
     {
-        return mockElementSearch(target, "Target element");
+        return mockElementSearch(target, TARGET_ELEMENT);
+    }
+
+    private Locator mockElementSearchDeprecated(WebElement element, String assertionDescription)
+    {
+        Locator locator = mock(Locator.class);
+        lenient().when(baseValidations.assertIfElementExists(assertionDescription, locator)).thenReturn(
+                element);
+        return locator;
     }
 
     private Locator mockElementSearch(WebElement element, String assertionDescription)
     {
         Locator locator = mock(Locator.class);
-        lenient().when(baseValidations.assertIfElementExists(assertionDescription, locator)).thenReturn(
-                element);
+        lenient().when(baseValidations.assertElementExists(assertionDescription, locator))
+                .thenReturn(Optional.ofNullable(element));
         return locator;
     }
 }
