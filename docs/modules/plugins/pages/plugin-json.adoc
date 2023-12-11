@@ -5,6 +5,115 @@ The plugin provides a set of actions for transformation and validation of JSON d
 :plugin-short-name: json
 include::partial$plugin-installation.adoc[]
 
+== JSON Path
+
+JSON path expressions always refer to a JSON structure in the same way as XPath expression are used in combination with
+an XML document. The "root member object" in JSON path is always referred to as `$` regardless if it is an object or array.
+
+JSON path expressions can use the dot–notation
+
+[source]
+----
+$.store.book[0].title
+----
+
+or the bracket–notation
+
+[source]
+----
+$['store']['book'][0]['title']
+----
+
+The official JSON path guide conatins https://github.com/json-path/JsonPath#path-examples[examples of JSON paths].
+Also the number of https://github.com/json-path/JsonPath#operators[operators] and
+https://github.com/json-path/JsonPath#functions[functions] are available for use in JSON paths out of the box. At the
+same time additional functions provided by this plugin are listed below.
+
+TIP: Use https://jsonpath-c48u.onrender.com/[JSON path online validator] to test your JSON path.
+
+=== JSON Path Functions
+
+==== `distinct()`
+
+
+* `distinct()` - removes duplicated items from the input array.
+
+.Examples of `distinct()` JSON path function
+|===
+|JSON |JSON Path |Result
+
+a|
+[source,JSON]
+----
+{
+    "type": [
+      "b",
+      "b",
+      "a",
+      "c",
+      "a"
+    ],
+    "name": [
+      "abc"
+    ]
+}
+----
+|`$.type.distinct()`
+a|
+[source,JSON]
+----
+[
+    "b",
+    "a",
+    "c"
+]
+----
+
+a|
+[source,JSON]
+----
+{
+    "data": [
+        {
+            "type": "a",
+            "val": "0"
+        },
+        {
+            "type": "b",
+            "val": "0"
+        },
+        {
+            "type": "c",
+            "val": "1"
+        },
+        {
+            "type": "b",
+            "val": "0"
+        }
+    ]
+}
+----
+|`$.data.distinct()`
+a|
+[source,JSON]
+----
+[
+    {
+        "type": "a",
+        "val": "0"
+    },
+    {
+        "type": "b",
+        "val": "0"
+    },
+    {
+        "type": "c",
+        "val": "1"
+    }
+]
+----
+|===
+
 == xref:commons:variables.adoc[Dynamic variables]
 
 === JSON context
@@ -27,7 +136,7 @@ Then number of JSON elements from `${json-context}` by JSON path `$.product` is 
 
 === FROM_JSON
 
-:json-paths: https://github.com/json-path/JsonPath#path-examples[JSON Paths]
+:json-paths: <<JSON Path, JSON Paths>>
 
 `FROM_JSON` transformer constructs a table by mapping table columns to values found by {json-paths} in the source JSON.
 
@@ -107,7 +216,7 @@ Then `${jsonDataTable[0].host}` is not equal to `[httpbingo.org]`
 
 == Steps
 
-:json-path: https://github.com/json-path/JsonPath#path-examples[JSON Path]
+:json-path: <<JSON Path, JSON path>>
 :json-schema: https://json-schema.org/understanding-json-schema/[JSON Schema]
 
 The steps syntax uses two internal (VIVIDUS-only) terms:
@@ -118,107 +227,6 @@ The steps syntax uses two internal (VIVIDUS-only) terms:
  * "JSON element value" or "value of JSON element" - scalar values like
    `string` _not wrapped_ into double quotes, `number`, `boolean`
    (`true` or `false`) and `null`.
-
-TIP: Use https://jsonpath-c48u.onrender.com/[JsonPath online validator] to test your JsonPath.
-
-=== JSON Path
-
-JSON path expressions always refer to a JSON structure in the same way as XPath expression are used in combination with an XML document. The "root member object" in JsonPath is always referred to as `$` regardless if it is an object or array.
-
-JSON path expressions can use the dot–notation
-
-[source]
-----
-$.store.book[0].title
-----
-
-or the bracket–notation
-
-[source]
-----
-$['store']['book'][0]['title']
-----
-
-Also the number of https://github.com/json-path/JsonPath#operators[operators] and https://github.com/json-path/JsonPath#functions[functions] are available for use in JSON paths out of the box. At the same time there are additional functions listed below.
-
-==== JSON Path Functions
-
-===== `distinct()`
-
-
-* `distinct()` - removes duplicated items from the input array.
-
-.distinct() function of JSON Path example
-|===
-|JSON |JSON Path |Result
-
-|[source,JSON]
-----
-{
-    "type": [
-      "b",
-      "b",
-      "a",
-      "c",
-      "a"
-    ],
-    "name": [
-      "abc"
-    ]
-}
-----
-|`$.type.distinct()`
-|[source,JSON]
-----
-[
-    "b",
-    "a",
-    "c"
-]
-----
-
-|[source,JSON]
-----
-{
-    "data": [
-        {
-            "type": "a",
-            "val": "0"
-        },
-        {
-            "type": "b",
-            "val": "0"
-        },
-        {
-            "type": "c",
-            "val": "1"
-        },
-        {
-            "type": "b",
-            "val": "0"
-        }
-    ]
-}
-----
-|`$.data.distinct()`
-|[source,JSON]
-----
-[
-    {
-        "type": "a",
-        "val": "0"
-    },
-    {
-        "type": "b",
-        "val": "0"
-    },
-    {
-        "type": "c",
-        "val": "1"
-    }
-]
-----
-|===
 
 === Save JSON element value
 
