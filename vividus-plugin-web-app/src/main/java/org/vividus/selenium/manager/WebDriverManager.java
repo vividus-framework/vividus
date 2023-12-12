@@ -60,7 +60,9 @@ public class WebDriverManager extends GenericWebDriverManager implements IWebDri
 
     public static boolean isBrowser(Capabilities capabilities, Browser browser)
     {
-        return browser.browserName().equalsIgnoreCase(capabilities.getBrowserName());
+        // Workaround for https://github.com/SeleniumHQ/selenium/issues/13112
+        return Browser.CHROME.equals(browser) && "chrome-headless-shell".equals(capabilities.getBrowserName())
+                || browser.browserName().equalsIgnoreCase(capabilities.getBrowserName());
     }
 
     @Override
