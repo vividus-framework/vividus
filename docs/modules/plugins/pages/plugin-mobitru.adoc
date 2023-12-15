@@ -110,6 +110,11 @@ NOTE: The properties marked with *bold* are mandatory.
 |`<empty>`
 |The file name of the application under test uploaded to Mobitru. The application should be uploaded either via https://app.mobitru.com/static/mstfdocs/public/Mobitru_User_Guide.pdf[UI] or https://app.mobitru.com/wiki/api/#api-InstallApp-UpdateArtifact[REST API].
 
+|[subs=+quotes]`*mobitru.app-no-resign*`
+|`true` to avoid resign and `false` if not`.
+|`false`
+|(iOS only) Query parameter to avoid the resign ipa with Mobitru profile or not.
+
 |[subs=+quotes]`*mobile-application.bundle-id*`
 |The valid application package name or bundle id.
 |`<empty>`

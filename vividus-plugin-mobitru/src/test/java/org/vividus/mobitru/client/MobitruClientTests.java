@@ -54,6 +54,8 @@ class MobitruClientTests
     private static final String DEVICE_ENDPOINT = "/billing/unit/vividus/automation/api/device/deviceid";
     private static final String DEVICE_ID = "deviceid";
     private static final String TAKE_DEVICE_ENDPOINT = "/billing/unit/vividus/automation/api/device";
+    private static final String EXPECTED_INSTALL_RELATIVE_URL =
+            "/billing/unit/vividus/automation/api/storage/install/udid/fileid?noResign=false";
 
     @Mock private IHttpClient httpClient;
     @Mock private HttpResponse httpResponse;
@@ -179,13 +181,12 @@ class MobitruClientTests
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.GET)).thenReturn(builder);
-            when(builder.withRelativeUrl("/billing/unit/vividus/automation/api/storage/install/udid/fileid"))
-                    .thenReturn(builder);
+            when(builder.withRelativeUrl(EXPECTED_INSTALL_RELATIVE_URL)).thenReturn(builder);
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
             when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_CREATED);
-            mobitruClient.installApp("udid", "fileid");
+            mobitruClient.installApp("udid", "fileid", false);
             verify(httpClient).execute(httpRequest);
         }
     }
