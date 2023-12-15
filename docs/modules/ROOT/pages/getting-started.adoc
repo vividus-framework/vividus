@@ -81,7 +81,7 @@ Please choose any of the listed below IDEs.
 === Eclipse
 
 ==== Prerequisites
-. Install https://www.eclipse.org/downloads/packages/release/2023-06/r/eclipse-ide-java-developers[Eclipse IDE 2023-06]
+. Install https://www.eclipse.org/downloads/packages/release/2023-09/r/eclipse-ide-java-developers[Eclipse IDE 2023-09]
 . Add https://jbehave.org/eclipse-integration.html[JBehave plugin]
 
 ==== Import the project
@@ -101,7 +101,7 @@ Please choose any of the listed below IDEs.
 gradlew eclipse
 ----
 
-. https://help.eclipse.org/2023-06/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-importproject.htm[Import the project to Eclipse]
+. https://help.eclipse.org/2023-09/index.jsp?topic=%2Forg.eclipse.platform.doc.user%2Ftasks%2Ftasks-importproject.htm[Import the project to Eclipse]
 . Start creating your tests
 
 === Visual Studio Code
