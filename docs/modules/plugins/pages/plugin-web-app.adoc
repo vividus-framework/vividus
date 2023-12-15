@@ -1104,7 +1104,7 @@ NOTE: If the element doesn't exist on the page/context, the step will immediatel
 Then element located by `$locator` disappears in `$timeout`
 ----
 
-* `$locator` - The <<_locator,locator>> used to element.
+* `$locator` - The <<_locator,locator>> used to find element.
 * `$timeout` - The maximum time to wait for the element disappearance in {durations-format-link} format.
 
 .Click on the button and waiting for disappearance of the element for 3 seconds
@@ -1112,6 +1112,100 @@ Then element located by `$locator` disappears in `$timeout`
 ----
 When I click on a button with the name 'Toggle element visibility with delay'
 Then element located by 'xpath(//div[@id='delayed'])' disappears in 'PT3S'
+----
+
+==== Wait for element state
+
+Waits for an element, located by the specified locator in the given search context, to change to the specified state.
+
+Actions performed at this step:
+
+* finds an element with the specified locator within search context,
+* waits until this element changes to the specified state or timeout is reached.
+
+[source,gherkin]
+----
+When I wait until state of element located by `$locator` is $state
+----
+
+* `$locator` - The <<_locator,locator>> used to find element.
+* `$state` - The expected element xref:parameters:state.adoc[state].
+
+.Click on the button and wait until the element becomes invisible
+[source,gherkin]
+----
+When I click on element located by `buttonName(hide)`
+When I wait until state of element located by `xpath(//*[text()='Element to hide']):a` is NOT VISIBLE
+----
+
+==== Wait until element becomes stale
+
+Waits for an element, located by the specified locator in the given search context, to become stale.
+
+When an element becomes stale:
+
+* the element has been disposed,
+* the element is no longer attached to the DOM.
+
+Actions performed at this step:
+
+* finds an element with the specified locator within search context,
+* waits until this element becomes stale or timeout is reached.
+
+[source,gherkin]
+----
+When I wait until element located by `$locator` is stale
+----
+
+* `$locator` - The <<_locator,locator>> used to find element.
+
+.Delete element using button and wait until the element disappears from the page
+[source,gherkin]
+----
+When I click on element located by `buttonName(Delete from order)`
+When I wait until element located by `xpath(//*[text()='Pizza pepperoni']):a` is stale
+----
+
+==== Wait until element contains text
+
+Waits for an element, located by the specified locator in the given search context, to contain the certain text.
+
+Actions performed at this step:
+
+* finds an element with the specified locator within search context,
+* waits until the text in this element becomes visible or timeout is reached.
+
+[source,gherkin]
+----
+When I wait until element located by `$locator` contains text `$text`
+----
+
+* `$locator` - The <<_locator,locator>> used to find element.
+* `$text` - The desired text to be present in the element.
+
+.Click on the button and wait until the text in specified element becomes visible
+[source,gherkin]
+----
+When I click on element located by `buttonName(show text)`
+When I wait until element located by `id(element-with-text)` contains text `Text to show`
+----
+
+==== Wait until scroll is finished
+
+Waits for the scroll finish. Useful for the cases when page have very slow scroll and need to synchronize the tests with the scroll.
+
+[source,gherkin]
+----
+When I wait until scroll is finished
+----
+
+.Scroll the page and check that the element in the visible area
+[source,gherkin]
+----
+Given I am on page with URL `http://example.com/pageWithSlowScroll.html`
+When I click on element located by `id(scrollIt)`
+When I wait until scroll is finished
+Then page is scrolled to element located by `id(footerElement)`
 ----
 
 === Set Variable Steps
@@ -1276,6 +1370,24 @@ Then an alert is not present
 ----
 Given I am on page with URL `http://example.com`
 Then an alert is not present
+----
+
+==== Verify that no alert displayed during timeout
+
+Checks that no {popup-alert}[popup alerts] displayed during the timeout.
+
+[source,gherkin]
+----
+Then alert does not appear in `$timeout`
+----
+
+* `$timeout` - Total duration to wait in the {iso-date-format-link} format.
+
+.Check that an alert doesn't appear within 7 seconds after page loaded
+[source,gherkin]
+----
+Given I am on page with URL `http://example.com`
+Then alert does not appear in `PT7S`
 ----
 
 === Wait for a frame with the specified name and switch to it
