@@ -54,6 +54,9 @@ import org.vividus.xray.model.AbstractTestCase;
 import org.vividus.xray.model.TestCaseType;
 import org.vividus.xray.model.TestExecution;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
 @Component
 public class XrayExporter
 {

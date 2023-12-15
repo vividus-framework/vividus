@@ -32,7 +32,9 @@ import org.vividus.crawler.LinkCrawlerFactory;
 import org.vividus.util.UriUtils;
 
 import edu.uci.ics.crawler4j.crawler.CrawlController;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+@SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
 public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTransformer
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(HeadlessCrawlerTableTransformer.class);

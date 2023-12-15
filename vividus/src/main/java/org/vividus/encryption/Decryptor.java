@@ -25,10 +25,13 @@ import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class Decryptor
 {
     private final LazyInitializer<StringEncryptor> encryptorProvider;
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public Decryptor(Properties properties)
     {
         this.encryptorProvider = LazyInitializer.<StringEncryptor>builder().setInitializer(() -> {

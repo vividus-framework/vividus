@@ -32,6 +32,8 @@ import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class Locator
 {
     private static final char QUOTE = '\'';
@@ -40,6 +42,7 @@ public class Locator
     private final SearchParameters searchParameters;
     private final Map<LocatorType, List<String>> filterAttributes = new LinkedHashMap<>();
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public Locator(LocatorType locatorType, SearchParameters searchParameters)
     {
         checkIfApplicable(locatorType, IElementSearchAction.class, "Search");
@@ -47,6 +50,7 @@ public class Locator
         this.searchParameters = searchParameters;
     }
 
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public Locator(LocatorType locatorType, String searchValue)
     {
         this(locatorType, new SearchParameters(searchValue));
