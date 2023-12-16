@@ -79,9 +79,9 @@ public class MobitruFacadeImpl implements MobitruFacade
     }
 
     @Override
-    public void installApp(String deviceId, String appRealName) throws MobitruOperationException
+    public void installApp(String deviceId, String appRealName, boolean resign) throws MobitruOperationException
     {
-        mobitruClient.installApp(deviceId, findApp(appRealName));
+        mobitruClient.installApp(deviceId, findApp(appRealName), resign);
     }
 
     @Override

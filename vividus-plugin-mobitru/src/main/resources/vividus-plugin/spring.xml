@@ -9,6 +9,7 @@
 
     <bean class="org.vividus.mobitru.selenium.MobitruCapabilitiesAdjuster" >
         <property name="appFileName" value="${mobitru.app-file-name}" />
+        <property name="resignIosApp" value="${mobitru.resign-ios-app}" />
     </bean>
 
     <bean class="org.vividus.mobitru.mobileapp.MobitruApplicationActivator" >

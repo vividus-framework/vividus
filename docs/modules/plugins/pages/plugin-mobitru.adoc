@@ -86,7 +86,7 @@ selenium.grid.capabilities.mobitru-device-search\:manufacturer=SAMSUNG
 
 NOTE: The properties marked with *bold* are mandatory.
 
-[cols="6,2,3,5", options="header"]
+[cols="5,3,3,5", options="header"]
 
 |===
 
@@ -114,6 +114,12 @@ NOTE: The properties marked with *bold* are mandatory.
 |The valid application package name or bundle id.
 |`<empty>`
 |`Package name` for Android or `Bundle identifier` from `Plist.info` for iOS. It is used to activate the application under tests after Appium session start.
+
+|`mobitru.resign-ios-app`
+a|`true` +
+`false`
+|`true`
+|(iOS only) Resign the application (*.ipa) with Mobitru profile or not.
 
 |`mobitru.device-wait-timeout`
 |The duration in {durations-format-link} format.

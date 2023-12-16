@@ -72,9 +72,10 @@ public class MobitruClient
         executeRequest(DEVICE_PATH + "/" + deviceId, HttpMethod.DELETE, UnaryOperator.identity(), HttpStatus.SC_OK);
     }
 
-    public void installApp(String deviceId, String appId) throws MobitruOperationException
+    public void installApp(String deviceId, String appId, boolean resign) throws MobitruOperationException
     {
-        executeGet(String.format("/storage/install/%s/%s", deviceId, appId), HttpStatus.SC_CREATED);
+        String url = String.format("/storage/install/%s/%s?noResign=%s", deviceId, appId, !resign);
+        executeGet(url, HttpStatus.SC_CREATED);
     }
 
     private byte[] executeGet(String relativeUrl, int expectedResponseCode) throws MobitruOperationException

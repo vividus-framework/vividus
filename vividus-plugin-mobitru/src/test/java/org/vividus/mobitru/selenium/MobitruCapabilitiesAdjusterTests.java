@@ -45,13 +45,29 @@ class MobitruCapabilitiesAdjusterTests
     private static final String UDID = "Z3CV103D2DO";
     private static final String STEAM_APK = "steam.apk";
     private static final String APPIUM_UDID = "appium:udid";
+    private static final boolean DEFAULT_RESIGN_IOS_APP_VALUE = true;
 
     @Mock private MobitruFacade mobitruFacade;
 
     @InjectMocks private MobitruCapabilitiesAdjuster mobitruCapabilitiesConfigurer;
 
     @Test
-    void shouldTakeDeviceInstallAnAppAndSetUdidToTheCapabilities() throws MobitruOperationException
+    void shouldTakeDeviceInstallAnAppIfResignIsDisabled() throws MobitruOperationException
+    {
+        mobitruCapabilitiesConfigurer.setAppFileName(STEAM_APK);
+        boolean resignIosApp = false;
+        mobitruCapabilitiesConfigurer.setResignIosApp(resignIosApp);
+        var capabilities = mock(DesiredCapabilities.class);
+        when(mobitruFacade.takeDevice(capabilities)).thenReturn(UDID);
+        var ordered = Mockito.inOrder(mobitruFacade);
+        assertEquals(Map.of(APPIUM_UDID, UDID), mobitruCapabilitiesConfigurer.getExtraCapabilities(capabilities));
+        ordered.verify(mobitruFacade).takeDevice(capabilities);
+        ordered.verify(mobitruFacade).installApp(UDID, STEAM_APK, resignIosApp);
+        verify(mobitruFacade, never()).returnDevice(UDID);
+    }
+
+    @Test
+    void shouldTakeDeviceInstallAnAppIfNoResignIsNotSpecified() throws MobitruOperationException
     {
         mobitruCapabilitiesConfigurer.setAppFileName(STEAM_APK);
         var capabilities = mock(DesiredCapabilities.class);
@@ -59,7 +75,21 @@ class MobitruCapabilitiesAdjusterTests
         var ordered = Mockito.inOrder(mobitruFacade);
         assertEquals(Map.of(APPIUM_UDID, UDID), mobitruCapabilitiesConfigurer.getExtraCapabilities(capabilities));
         ordered.verify(mobitruFacade).takeDevice(capabilities);
-        ordered.verify(mobitruFacade).installApp(UDID, STEAM_APK);
+        ordered.verify(mobitruFacade).installApp(UDID, STEAM_APK, DEFAULT_RESIGN_IOS_APP_VALUE);
+        verify(mobitruFacade, never()).returnDevice(UDID);
+    }
+
+    @Test
+    void shouldTakeDeviceInstallAnAppAndSetUdidToTheCapabilities() throws MobitruOperationException
+    {
+        mobitruCapabilitiesConfigurer.setAppFileName(STEAM_APK);
+        mobitruCapabilitiesConfigurer.setResignIosApp(DEFAULT_RESIGN_IOS_APP_VALUE);
+        var capabilities = mock(DesiredCapabilities.class);
+        when(mobitruFacade.takeDevice(capabilities)).thenReturn(UDID);
+        var ordered = Mockito.inOrder(mobitruFacade);
+        assertEquals(Map.of(APPIUM_UDID, UDID), mobitruCapabilitiesConfigurer.getExtraCapabilities(capabilities));
+        ordered.verify(mobitruFacade).takeDevice(capabilities);
+        ordered.verify(mobitruFacade).installApp(UDID, STEAM_APK, DEFAULT_RESIGN_IOS_APP_VALUE);
         verify(mobitruFacade, never()).returnDevice(UDID);
     }
 
@@ -69,12 +99,13 @@ class MobitruCapabilitiesAdjusterTests
         throws MobitruOperationException
     {
         mobitruCapabilitiesConfigurer.setAppFileName(STEAM_APK);
+        mobitruCapabilitiesConfigurer.setResignIosApp(DEFAULT_RESIGN_IOS_APP_VALUE);
         var capabilities = new DesiredCapabilities(Map.of(udidCapabilityName, UDID));
         when(mobitruFacade.takeDevice(capabilities)).thenReturn(UDID);
         var ordered = Mockito.inOrder(mobitruFacade);
         assertEquals(Map.of(), mobitruCapabilitiesConfigurer.getExtraCapabilities(capabilities));
         ordered.verify(mobitruFacade).takeDevice(capabilities);
-        ordered.verify(mobitruFacade).installApp(UDID, STEAM_APK);
+        ordered.verify(mobitruFacade).installApp(UDID, STEAM_APK, DEFAULT_RESIGN_IOS_APP_VALUE);
         verify(mobitruFacade, never()).returnDevice(UDID);
     }
 
@@ -82,10 +113,11 @@ class MobitruCapabilitiesAdjusterTests
     void shouldWrapExceptionAndStopDeviceUsage() throws MobitruOperationException
     {
         mobitruCapabilitiesConfigurer.setAppFileName(STEAM_APK);
+        mobitruCapabilitiesConfigurer.setResignIosApp(DEFAULT_RESIGN_IOS_APP_VALUE);
         var capabilities = new DesiredCapabilities();
         var exception = new MobitruOperationException(UDID);
         when(mobitruFacade.takeDevice(capabilities)).thenReturn(UDID);
-        doThrow(exception).when(mobitruFacade).installApp(UDID, STEAM_APK);
+        doThrow(exception).when(mobitruFacade).installApp(UDID, STEAM_APK, DEFAULT_RESIGN_IOS_APP_VALUE);
         var iae = assertThrows(IllegalStateException.class, () -> mobitruCapabilitiesConfigurer.adjust(capabilities));
         verify(mobitruFacade).returnDevice(UDID);
         assertEquals(exception, iae.getCause());
@@ -107,10 +139,11 @@ class MobitruCapabilitiesAdjusterTests
     void shouldRethrowAnExceptionIfItsHappensDuringStoppage() throws MobitruOperationException
     {
         mobitruCapabilitiesConfigurer.setAppFileName(STEAM_APK);
+        mobitruCapabilitiesConfigurer.setResignIosApp(DEFAULT_RESIGN_IOS_APP_VALUE);
         var capabilities = new DesiredCapabilities();
         var exception = new MobitruOperationException(UDID);
         when(mobitruFacade.takeDevice(capabilities)).thenReturn(UDID);
-        doThrow(exception).when(mobitruFacade).installApp(UDID, STEAM_APK);
+        doThrow(exception).when(mobitruFacade).installApp(UDID, STEAM_APK, DEFAULT_RESIGN_IOS_APP_VALUE);
         var secondException = new MobitruOperationException(UDID);
         doThrow(secondException).when(mobitruFacade).returnDevice(UDID);
         var uie = assertThrows(IllegalStateException.class,
