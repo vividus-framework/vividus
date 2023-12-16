@@ -169,8 +169,12 @@ class MobitruClientTests
         }
     }
 
-    @Test
-    void shouldInstallApp() throws IOException, MobitruOperationException
+    @ParameterizedTest
+    @CsvSource({
+            "true,  noResign=false",
+            "false, noResign=true"
+    })
+    void shouldInstallApp(boolean resign, String urlQuery) throws IOException, MobitruOperationException
     {
         var builder = mock(HttpRequestBuilder.class);
         ClassicHttpRequest httpRequest = mock();
@@ -180,13 +184,13 @@ class MobitruClientTests
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.GET)).thenReturn(builder);
             when(builder.withRelativeUrl(
-                    "/billing/unit/vividus/automation/api/storage/install/udid/fileid?noResign=false")).thenReturn(
+                    "/billing/unit/vividus/automation/api/storage/install/udid/fileid?" + urlQuery)).thenReturn(
                     builder);
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
             when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_CREATED);
-            mobitruClient.installApp("udid", "fileid", true);
+            mobitruClient.installApp("udid", "fileid", resign);
             verify(httpClient).execute(httpRequest);
         }
     }
