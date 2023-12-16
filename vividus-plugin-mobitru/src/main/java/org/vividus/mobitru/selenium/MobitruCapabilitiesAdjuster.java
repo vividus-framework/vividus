@@ -29,7 +29,7 @@ public class MobitruCapabilitiesAdjuster extends DesiredCapabilitiesAdjuster
     private final MobitruFacade mobitruFacade;
 
     private String appFileName;
-    private boolean isNoResign;
+    private boolean resignIosApp = true;
 
     public MobitruCapabilitiesAdjuster(MobitruFacade mobitruFacade)
     {
@@ -43,7 +43,7 @@ public class MobitruCapabilitiesAdjuster extends DesiredCapabilitiesAdjuster
         try
         {
             deviceId = mobitruFacade.takeDevice(desiredCapabilities);
-            mobitruFacade.installApp(deviceId, appFileName, isNoResign);
+            mobitruFacade.installApp(deviceId, appFileName, resignIosApp);
             Map<String, Object> capabilities = desiredCapabilities.asMap();
             if (capabilities.containsKey(APPIUM_UDID) || capabilities.containsKey("udid"))
             {
@@ -73,8 +73,8 @@ public class MobitruCapabilitiesAdjuster extends DesiredCapabilitiesAdjuster
         this.appFileName = appFileName;
     }
 
-    public void setIsNoResign(boolean noResign)
+    public void setResignIosApp(boolean resignIosApp)
     {
-        this.isNoResign = noResign;
+        this.resignIosApp = resignIosApp;
     }
 }

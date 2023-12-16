@@ -69,7 +69,7 @@ class MobitruFacadeImplTests
     private static final String CAPABILITIES_JSON = CAPABILITIES_JSON_PREFIX
             + "\"platformVersion\":\"12\",\"deviceName\":\"SAMSUNG SM-G998B\",\"udid\":\"Z3CT103D2DZ\"}}";
     private static final Map<String, String> DEVICE_SEARCH_PARAMETERS = Map.of("type", PHONE);
-    private static final boolean DEFAULT_NO_RESIGN_VALUE = false;
+    private static final boolean DEFAULT_RESIGN_VALUE = true;
 
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(MobitruFacadeImpl.class);
 
@@ -182,8 +182,8 @@ class MobitruFacadeImplTests
         when(mobitruClient.getArtifacts()).thenReturn(
                 "[{\"realName\" : \"test.apk\", \"id\" : \"1\"}, {\"realName\" : \"app.apk\", \"id\" : \"2\"}]"
             .getBytes(StandardCharsets.UTF_8));
-        mobitruFacadeImpl.installApp(UDID, "app.apk", DEFAULT_NO_RESIGN_VALUE);
-        verify(mobitruClient).installApp(UDID, "2", DEFAULT_NO_RESIGN_VALUE);
+        mobitruFacadeImpl.installApp(UDID, "app.apk", DEFAULT_RESIGN_VALUE);
+        verify(mobitruClient).installApp(UDID, "2", DEFAULT_RESIGN_VALUE);
     }
 
     @Test
@@ -194,7 +194,7 @@ class MobitruFacadeImplTests
                         + " \"uploadedAt\" : \"33189300000\"}]")
                         .getBytes(StandardCharsets.UTF_8));
         var exception = assertThrows(MobitruOperationException.class,
-            () -> mobitruFacadeImpl.installApp(UDID, "starfield.apk", DEFAULT_NO_RESIGN_VALUE));
+            () -> mobitruFacadeImpl.installApp(UDID, "starfield.apk", DEFAULT_RESIGN_VALUE));
         assertEquals("Unable to find application with the name `starfield.apk`. The available applications are: "
             + "[Application{id='1', realName='123.apk', uploadedBy='Mithrandir', uploadedAt=33189300000}]",
                 exception.getMessage());
@@ -214,7 +214,7 @@ class MobitruFacadeImplTests
     {
         when(mobitruClient.getArtifacts()).thenReturn("[{".getBytes(StandardCharsets.UTF_8));
         var exception = assertThrows(MobitruOperationException.class,
-            () -> mobitruFacadeImpl.installApp(UDID, null, DEFAULT_NO_RESIGN_VALUE));
+            () -> mobitruFacadeImpl.installApp(UDID, null, DEFAULT_RESIGN_VALUE));
         assertInstanceOf(IOException.class, exception.getCause());
         verify(mobitruClient, never()).installApp(any(), any(), anyBoolean());
     }

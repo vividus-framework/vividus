@@ -36,10 +36,10 @@ public interface MobitruFacade
      *
      * @param deviceId    The UDID of the device
      * @param appRealName The application to install filename.
-     * @param isNoResign The query parameter to avoid the resign ipa with Mobitru profile or not.
+     * @param resign      (iOS only) Resign the application (*.ipa) with Mobitru profile or not.
      * @throws MobitruOperationException In case of any issues during application installation.
      */
-    void installApp(String deviceId, String appRealName, boolean isNoResign) throws MobitruOperationException;
+    void installApp(String deviceId, String appRealName, boolean resign) throws MobitruOperationException;
 
     /**
      * Returns the device with specified UDID to the devices pool.
