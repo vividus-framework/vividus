@@ -170,72 +170,9 @@ Then page is scrolled to element located by `$locator`
 Then page is scrolled to element located by `xpath(//a[text()="Contact"])`
 ----
 
-=== Text validation steps
+include::plugins:partial$ui-selenium-text-content-steps.adoc[]
+include::plugins:partial$common-web-app-text-steps.adoc[]
 
-:context-description: The context can be set by the <<_change_context,corresponding steps>>. If no context is set, the text will be searched on the whole page.
-
-==== Validate the text exists
-
-Validates that the text is presented in the current context. Expected text is *case sensitive*.
-
-{context-description}
-
-[source,gherkin]
-----
-Then text `$text` exists
-----
-* `$text` - Expected text.
-
-.Check the text 'Contract Us' is presented on the page
-[source,gherkin]
-----
-Given I am on page with URL `https://docs.vividus.dev/`
-Then text `Contract Us` exists
-----
-
-==== Validate the text does not exists
-
-Validates that the text is not presented in the current context.
-
-{context-description}
-
-[source,gherkin]
-----
-Then text `$text` does not exist
-----
-* `$text` - Text that should not exist.
-
-.Check the text 'Deprecated' is not presented in the element
-[source,gherkin]
-----
-When I change context to element located by `id(code)`
-Then text `Deprecated` does not exist
-----
-
-==== Validate the text matches regex
-
-Validates that the text from current context matches the specified regular expression.
-
-{context-description}
-
-[source,gherkin]
-----
-Then text matches `$regex`
-----
-
-_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
-[source,gherkin]
-----
-Then the text matches '$regex'
-----
-* `$regex` - The https://www.regular-expressions.info[regular expression] used to validate the text of the context.
-
-.Check the text with pattern 'User ".*" successfully logged in' is presented in the current context
-[source,gherkin]
-----
-When I change context to element located by `id(code)`
-Then text matches `User ".*" successfully logged in`
-----
 
 === Tab steps
 ==== Open a new tab

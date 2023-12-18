@@ -56,21 +56,18 @@ public class GenericSetVariableSteps
     }
 
     /**
-     * Extracts the <b>text</b> of element found in the context and saves it to the <b>variable</b> with the specified
-     * <b>variableName</b>
-     * Actions performed at this step:
-     * <ul>
-     * <li>Saves the text of element into the <i>variable name</i>
-     * </ul>
-     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     * <i>Available scopes:</i>
-     * <ul>
-     * <li><b>STEP</b> - the variable will be available only within the step
-     * <li><b>SCENARIO</b> - the variable will be available only within the scenario
-     * <li><b>STORY</b> - the variable will be available within the whole story
-     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     * </ul>
-     * @param variableName A name under which the value should be saved
+     * Saves the text of the context element into a variable.
+     *
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable scopes.
+     *                     <br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The name of the variable to save the text content.
      */
     @When("I save text of context element to $scopes variable `$variableName`")
     public void saveContextElementTextToVariable(Set<VariableScope> scopes, String variableName)
@@ -79,18 +76,19 @@ public class GenericSetVariableSteps
     }
 
     /**
-     * Saves text of an element into a variable.
+     * Finds the element by the given locator and saves its text into a variable.
      *
-     * @param locator        The locator to find an element
-     * @param scopes         The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
-     *                       <i>Available scopes:</i>
-     *                       <ul>
-     *                       <li><b>STEP</b> - the variable will be available only within the step,
-     *                       <li><b>SCENARIO</b> - the variable will be available only within the scenario,
-     *                       <li><b>STORY</b> - the variable will be available within the whole story,
-     *                       <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
-     *                       </ul>
-     * @param variableName   the variable name to store the text.
+     * @param locator      The locator used to find the element whose text content will be saved.
+     * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable scopes.
+     *                     <br>
+     *                     <i>Available scopes:</i>
+     *                     <ul>
+     *                     <li><b>STEP</b> - the variable will be available only within the step,
+     *                     <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                     <li><b>STORY</b> - the variable will be available within the whole story,
+     *                     <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                     </ul>
+     * @param variableName The name of the variable to save the text content.
      */
     @When("I save text of element located by `$locator` to $scopes variable `$variableName`")
     public void saveTextOfElement(Locator locator, Set<VariableScope> scopes, String variableName)

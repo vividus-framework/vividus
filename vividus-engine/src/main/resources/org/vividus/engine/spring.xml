@@ -60,7 +60,7 @@
         <property name="storyLoader" ref="storyLoader" />
         <property name="storyReporterBuilder" ref="storyReporterBuilder" />
         <property name="placeholderResolver" ref="placeholderResolver" />
-        <property name="compositePaths" value="${engine.composite-paths},steps/defaults/*.steps"/>
+        <property name="compositePaths" value="${internal.engine.composite-paths}"/>
         <property name="aliasPaths" value="${engine.alias-paths}"/>
         <property name="storyControls" ref="springStoryControls" />
         <property name="parallelStoryExamplesEnabled" value="${bdd.configuration.parallel-story-examples-enabled}"/>

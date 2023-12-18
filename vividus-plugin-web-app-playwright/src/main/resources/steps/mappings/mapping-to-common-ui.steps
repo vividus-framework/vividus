@@ -1,0 +1,2 @@
+Composite: When I save text of context element to $scopes variable `$variableName`
+When I save text of context to <scopes> variable `<variableName>`

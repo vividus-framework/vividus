@@ -17,6 +17,7 @@
 package org.vividus.ui.web.playwright;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
@@ -55,11 +56,21 @@ public class UiContext
 
     public Locator locateElement(PlaywrightLocator playwrightLocator)
     {
-        PlaywrightContext playwrightContext = getPlaywrightContext();
         String locator = playwrightLocator.getLocator();
+        return getInCurrentContext(context -> context.locator(locator), page -> page.locator(locator));
+    }
+
+    public Locator getCurrentContexOrPageRoot()
+    {
+        return getInCurrentContext(context -> context, page -> page.locator("//html/body"));
+    }
+
+    private <R> R getInCurrentContext(Function<Locator, R> elementContextAction, Function<Page, R> pageContextAction)
+    {
+        PlaywrightContext playwrightContext = getPlaywrightContext();
         return Optional.ofNullable(playwrightContext.context)
-                .map(context -> context.locator(locator))
-                .orElseGet(() -> playwrightContext.page.locator(locator));
+                .map(elementContextAction)
+                .orElseGet(() -> pageContextAction.apply(playwrightContext.page));
     }
 
     private PlaywrightContext getPlaywrightContext()

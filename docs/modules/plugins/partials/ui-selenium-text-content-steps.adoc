@@ -1,0 +1,23 @@
+include::plugins:partial$ui-text-content-steps.adoc[]
+
+==== Save the text of the context
+
+Saves the text of the context element into a variable.
+
+[NOTE]
+An error is thrown if the context is not set to the element.
+
+[source,gherkin]
+----
+When I save text of context element to $scopes variable `$variableName`
+----
+
+* `$scopes` - The comma-separated set of the xref:commons:variables.adoc#_scopes[variables scopes].
+* `$variableName` - The name of the variable to save the text content.
+
+.Save the text of the context element
+[source,gherkin]
+----
+When I change context to element located by `id(username)`
+When I save text of context element to scneario variable `username`
+----

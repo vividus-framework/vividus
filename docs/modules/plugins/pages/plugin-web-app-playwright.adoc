@@ -106,3 +106,26 @@ When I clear field located by `$locator`
 ----
 When I clear field located by `id(email)`
 ----
+
+include::plugins:partial$ui-text-content-steps.adoc[]
+
+==== Save the text of the context
+
+Saves the text of the context into a variable.
+
+[source,gherkin]
+----
+When I save text of context to $scopes variable `$variableName`
+----
+
+* `$scopes` - The comma-separated set of the xref:commons:variables.adoc#_scopes[variables scopes].
+* `$variableName` - The name of the variable to save the text content.
+
+.Save the text of the context
+[source,gherkin]
+----
+When I change context to element located by `id(username)`
+When I save text of context element to scneario variable `username`
+----
+
+include::plugins:partial$common-web-app-text-steps.adoc[]

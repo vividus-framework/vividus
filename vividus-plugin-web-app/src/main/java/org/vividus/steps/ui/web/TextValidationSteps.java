@@ -59,11 +59,12 @@ public class TextValidationSteps
     }
 
     /**
-     * Checks if the text in context matches <b>regex</b>
-     * @param regex Expected regular expression
+     * Validates the text from current context matches the specified regular expression.
+     *
+     * @param regex The regular expression used to validate the context text.
      */
     @Then("text matches `$regex`")
-    public void ifTextMatchesRegex(Pattern regex)
+    public void assertTextMatchesRegex(Pattern regex)
     {
         uiContext.getOptionalSearchContext().ifPresent(searchContext ->
         {
@@ -93,11 +94,12 @@ public class TextValidationSteps
     }
 
     /**
-     * Checks if the <b>text</b> exists in context
-     * @param text Expected text
+     * Validates the text is present in the current context. The expected text is case-sensitive.
+     *
+     * @param text The expected text to be found in the context text.
      */
     @Then("text `$text` exists")
-    public void ifTextExists(String text)
+    public void assertTextExists(String text)
     {
         uiContext.getOptionalSearchContext().ifPresent(searchContext ->
         {
@@ -148,8 +150,9 @@ public class TextValidationSteps
     }
 
     /**
-     * Checks if the <b>text</b> does not exist in context
-     * @param text Text value
+     * Validates the text from the context does not contain the given value.
+     *
+     * @param text The text to be not found in the context text.
      * @return <code>true</code> if text does not exist, otherwise <code>false</code>
      * @deprecated Use step: "Then text `$text` does not exist"
      */
@@ -170,8 +173,9 @@ public class TextValidationSteps
     }
 
     /**
-     * Checks if the <b>text</b> does not exist in context
-     * @param text Text value
+     * Validates the text is not present in the current context.
+     *
+     * @param text The text that should not be present in the context.
      */
     @Then("text `$text` does not exist")
     public void assertTextDoesNotExist(String text)
