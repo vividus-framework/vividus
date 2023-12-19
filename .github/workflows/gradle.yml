@@ -215,12 +215,16 @@ jobs:
       if: matrix.platform == 'ubuntu-latest'
       shell: bash
       run: |
-        declare -a profiles=( chrome firefox edge )
+        declare -a profiles=( firefox edge )
         for profile in "${profiles[@]}"; do
-          ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments= \
-                                                -Pvividus.configuration.suites=health_check \
+          ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
                                                 -Pvividus.configuration.profiles=web/headless/${profile}
         done
+        # New headless Chrome is used in CI, it will be made default in VIVIDUS 0.7.0 if testing passes (see more: https://developer.chrome.com/docs/chromium/new-headless)
+        ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
+                                              -Pvividus.configuration.profiles=web/headless/chrome \
+                                              -Pvividus.web.driver.chrome.command-line-arguments="--headless=new --hide-scrollbars"
+
 
     - name: LambdaTest - Desktop - Web - System tests
       if: matrix.platform == 'macos-latest'
