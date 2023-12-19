@@ -1,0 +1,20 @@
+=== Text content manupulations
+
+==== Save the text of an element
+
+Finds the element by the given locator and saves its text into a variable.
+
+[source,gherkin]
+----
+When I save text of element located by `$locator` to $scopes variable `$variableName`
+----
+
+* `$locator` - The <<_locator,locator>> used to find the element whose text content will be saved.
+* `$scopes` - The comma-separated set of the xref:commons:variables.adoc#_scopes[variables scopes].
+* `$variableName` - The name of the variable to save the text content.
+
+.Save the text of the header element
+[source,gherkin]
+----
+When I save text of element located by `id(header)` to scenario variable `heading-text`
+----

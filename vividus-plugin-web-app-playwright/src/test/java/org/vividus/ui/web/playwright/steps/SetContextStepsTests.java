@@ -18,9 +18,10 @@ package org.vividus.ui.web.playwright.steps;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -37,90 +38,45 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.assertions.LocatorAssertions;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 
-import org.apache.commons.lang3.function.TriConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.opentest4j.AssertionFailedError;
-import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.playwright.UiContext;
+import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SetContextStepsTests
 {
     @Mock private UiContext uiContext;
-    @Mock private ISoftAssert softAssert;
-    @InjectMocks private SetContextSteps setContextSteps;
+    @Mock private PlaywrightSoftAssert playwrightSoftAssert;
+    @InjectMocks private SetContextSteps steps;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(SetContextSteps.class);
 
     @Test
     void shouldResetContext()
     {
-        setContextSteps.resetContext();
+        steps.resetContext();
         verify(uiContext).reset();
     }
 
     @Test
-    void shouldChangeContextSuccessfully()
+    void shouldChangeContext()
     {
-        testSuccessfulContextChange(setContextSteps::changeContext, ordered -> ordered.verify(uiContext).reset());
+        testSuccessfulContextChange(steps::changeContext, ordered -> ordered.verify(uiContext).reset());
     }
 
     @Test
-    void shouldFailToChangeContext()
+    void shouldChangeContextInScopeOfCurrentContext()
     {
-        testFailureToContextChange(setContextSteps::changeContext, ordered -> ordered.verify(uiContext).reset());
-    }
-
-    @Test
-    void shouldChangeContextInScopeOfCurrentContextSuccessfully()
-    {
-        testSuccessfulContextChange(setContextSteps::changeContextInScopeOfCurrentContext, ordered -> { });
-    }
-
-    @Test
-    void shouldFailToChangeContextInScopeOfCurrentContext()
-    {
-        testFailureToContextChange(setContextSteps::changeContextInScopeOfCurrentContext, ordered -> { });
+        testSuccessfulContextChange(steps::changeContextInScopeOfCurrentContext, ordered -> { });
     }
 
     private void testSuccessfulContextChange(Consumer<PlaywrightLocator> test, Consumer<InOrder> orderedVerification)
-    {
-        testContextChange((locator, context, locatorAssertions) ->
-        {
-            test.accept(locator);
-            var ordered = inOrder(uiContext, locatorAssertions);
-            orderedVerification.accept(ordered);
-            ordered.verify(locatorAssertions).hasCount(1);
-            ordered.verify(uiContext).setContext(context);
-            ordered.verifyNoMoreInteractions();
-            assertThat(logger.getLoggingEvents(), is(List.of(info("The context is successfully changed"))));
-        });
-    }
-
-    private void testFailureToContextChange(Consumer<PlaywrightLocator> test, Consumer<InOrder> orderedVerification)
-    {
-        testContextChange((locator, context, locatorAssertions) ->
-        {
-            var error = new AssertionFailedError("Locator expected to have count: 1\nReceived: 8");
-            doThrow(error).when(locatorAssertions).hasCount(1);
-            test.accept(locator);
-            var ordered = inOrder(uiContext, locatorAssertions, softAssert);
-            orderedVerification.accept(ordered);
-            ordered.verify(locatorAssertions).hasCount(1);
-            ordered.verify(softAssert).recordFailedAssertion(
-                    "The element to set context is not found. " + error.getMessage(), error);
-            ordered.verifyNoMoreInteractions();
-            assertThat(logger.getLoggingEvents(), is(empty()));
-        });
-    }
-
-    private void testContextChange(TriConsumer<PlaywrightLocator, Locator, LocatorAssertions> test)
     {
         var locator = new PlaywrightLocator("xpath", "//a");
         Locator context = mock();
@@ -130,7 +86,18 @@ class SetContextStepsTests
             LocatorAssertions locatorAssertions = mock();
             playwrightAssertionsStaticMock.when(() -> PlaywrightAssertions.assertThat(context)).thenReturn(
                     locatorAssertions);
-            test.accept(locator, context, locatorAssertions);
+            doNothing().when(playwrightSoftAssert).runAssertion(eq("The element to set context is not found"),
+                    argThat(runnable -> {
+                        runnable.run();
+                        return true;
+                    }));
+            test.accept(locator);
+            var ordered = inOrder(uiContext, locatorAssertions);
+            orderedVerification.accept(ordered);
+            ordered.verify(locatorAssertions).hasCount(1);
+            ordered.verify(uiContext).setContext(context);
+            ordered.verifyNoMoreInteractions();
+            assertThat(logger.getLoggingEvents(), is(List.of(info("The context is successfully changed"))));
         }
     }
 }

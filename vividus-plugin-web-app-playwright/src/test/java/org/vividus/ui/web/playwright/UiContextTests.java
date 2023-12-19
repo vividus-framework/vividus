@@ -95,4 +95,27 @@ class UiContextTests
         assertSame(locator, actual);
         verifyNoInteractions(context);
     }
+
+    @Test
+    void shouldReturnCurrentContext()
+    {
+        Page page = mock();
+        uiContext.setCurrentPage(page);
+        Locator context = mock();
+        uiContext.setContext(context);
+        Locator actual = uiContext.getCurrentContexOrPageRoot();
+        assertSame(context, actual);
+        verifyNoInteractions(page);
+    }
+
+    @Test
+    void shouldReturnPageRootWhenNoContextIsSet()
+    {
+        Page page = mock();
+        uiContext.setCurrentPage(page);
+        Locator root = mock();
+        when(page.locator("//html/body")).thenReturn(root);
+        Locator actual = uiContext.getCurrentContexOrPageRoot();
+        assertSame(root, actual);
+    }
 }

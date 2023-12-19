@@ -1,0 +1,57 @@
+=== Text content validation
+
+The context can be set by the <<_change_context,corresponding steps>>. If no context is set, the text will be searched across the whole page.
+
+
+==== Validate the text exists
+
+Validates the text is present in the current context. The expected text is *case-sensitive*.
+
+[source,gherkin]
+----
+Then text `$text` exists
+----
+* `$text` - The expected text to be found in the context text.
+
+.Check the text 'Contract Us' is present on the page
+[source,gherkin]
+----
+Given I am on page with URL `https://docs.vividus.dev/`
+Then text `Contact Us` exists
+----
+
+
+==== Validate the text does not exists
+
+Validates the text is not present in the current context.
+
+[source,gherkin]
+----
+Then text `$text` does not exist
+----
+* `$text` - The text that should not be present in the context.
+
+.Check the text 'Deprecated' is not present in the element
+[source,gherkin]
+----
+When I change context to element located by `id(code)`
+Then text `Deprecated` does not exist
+----
+
+
+==== Validate the text matches regular expression
+
+Validates the text from current context matches the specified regular expression.
+
+[source,gherkin]
+----
+Then text matches `$regex`
+----
+* `$regex` - The https://www.regular-expressions.info[regular expression] used to validate the context text.
+
+.Check the text with pattern 'User ".*" successfully logged in' is present in the current context
+[source,gherkin]
+----
+When I change context to element located by `id(message)`
+Then text matches `User ".*" successfully logged in`
+----

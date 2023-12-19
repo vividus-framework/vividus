@@ -20,11 +20,10 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 
 import org.jbehave.core.annotations.When;
-import org.opentest4j.AssertionFailedError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.playwright.UiContext;
+import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 
 public class SetContextSteps
@@ -32,12 +31,12 @@ public class SetContextSteps
     private static final Logger LOGGER = LoggerFactory.getLogger(SetContextSteps.class);
 
     private final UiContext uiContext;
-    private final ISoftAssert softAssert;
+    private final PlaywrightSoftAssert playwrightSoftAssert;
 
-    public SetContextSteps(UiContext uiContext, ISoftAssert softAssert)
+    public SetContextSteps(UiContext uiContext, PlaywrightSoftAssert playwrightSoftAssert)
     {
         this.uiContext = uiContext;
-        this.softAssert = softAssert;
+        this.playwrightSoftAssert = playwrightSoftAssert;
     }
 
     /**
@@ -70,15 +69,10 @@ public class SetContextSteps
     public void changeContextInScopeOfCurrentContext(PlaywrightLocator locator)
     {
         Locator context = uiContext.locateElement(locator);
-        try
-        {
+        playwrightSoftAssert.runAssertion("The element to set context is not found", () -> {
             PlaywrightAssertions.assertThat(context).hasCount(1);
             uiContext.setContext(context);
             LOGGER.info("The context is successfully changed");
-        }
-        catch (AssertionFailedError e)
-        {
-            softAssert.recordFailedAssertion("The element to set context is not found. " + e.getMessage(), e);
-        }
+        });
     }
 }
