@@ -51,7 +51,7 @@ class DeprecatedCompositeStepsReporterTests
             "The step: \"%s\" is deprecated and will be removed in VIVIDUS %s. Use step: \"%s\"",
             DEPRECATED_STEP_STRING, REMOVE_VERSION, ACTUAL_STEP_STRING);
 
-    @Spy private TestContext testContext = new SimpleTestContext();
+    @Spy private final TestContext testContext = new SimpleTestContext();
     @Mock private LoggingStoryReporter nextReporter;
     @Mock private DeprecatedStepNotificationFactory deprecatedStepNotificationFactory;
     @InjectMocks private DeprecatedCompositeStepsReporter deprecatedCompositeStepsReporter;
@@ -68,7 +68,7 @@ class DeprecatedCompositeStepsReporterTests
         runBeforeStep();
         assertEquals(DEPRECATION_INFO_RESOLVED, testContext.get(DEPRECATED_STEP_NOTIFICATION_KEY));
         verify(nextReporter).beforeStep(argThat(s -> s.getExecutionType() == StepExecutionType.COMMENT
-                && s.getStepAsString().equals(DEPRECATION_INFO_RESOLVED)));
+                && DEPRECATION_INFO_RESOLVED.equals(s.getStepAsString())));
     }
 
     @ParameterizedTest

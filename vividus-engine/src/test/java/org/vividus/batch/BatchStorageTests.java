@@ -70,7 +70,7 @@ class BatchStorageTests
 
     private BatchStorage batchStorage;
 
-    void initializeBatchStorage() throws IOException
+    private void initializeBatchStorage() throws IOException
     {
         var batchConfigurations = new HashMap<String, String>();
         addBatchConfiguration(batchConfigurations, 1);
