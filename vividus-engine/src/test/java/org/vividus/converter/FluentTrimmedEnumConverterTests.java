@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -33,7 +32,7 @@ class FluentTrimmedEnumConverterTests
     @ParameterizedTest
     void testConversion(String valueToConvert)
     {
-        Assertions.assertEquals(ComparisonRule.EQUAL_TO,
+        assertEquals(ComparisonRule.EQUAL_TO,
                 fluentTrimmedEnumConverter.convertValue(valueToConvert, ComparisonRule.class));
     }
 

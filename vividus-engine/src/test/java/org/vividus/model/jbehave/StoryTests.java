@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -73,7 +74,7 @@ class StoryTests
             SCENARIO_TITLE, new org.jbehave.core.model.Meta(List.of(META_KEY + StringUtils.SPACE + META_VALUE)));
 
     @Test
-    void shouldDeserializeStoryWithoutExamples() throws Exception
+    void shouldDeserializeStoryWithoutExamples() throws IOException
     {
         performTest((reporter, out) ->
         {
@@ -102,7 +103,7 @@ class StoryTests
     }
 
     @Test
-    void shouldDeserializeStoryExamples() throws Exception
+    void shouldDeserializeStoryExamples() throws IOException
     {
         performTest((reporter, out) ->
         {
@@ -233,8 +234,9 @@ class StoryTests
         assertEquals(List.of(List.of(TABLE_VALUE + 1), List.of(TABLE_VALUE + 2)), parameters.getValues());
     }
 
-    private static void performTest(FailableBiConsumer<StoryReporter, ByteArrayOutputStream, Exception> testables)
-            throws Exception
+    private static void performTest(
+            FailableBiConsumer<StoryReporter, ByteArrayOutputStream, JsonProcessingException> testables)
+            throws IOException
     {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream();
                 PrintStream stream = new PrintStream(out, false, StandardCharsets.UTF_8))

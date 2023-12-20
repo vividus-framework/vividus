@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ class ExtendedStoryReporterBuilderTests
     {
         List<Format> formats = List.of(Format.XML);
         builder.setFormats(formats);
-        assertEquals(List.of(org.jbehave.core.reporters.Format.XML), builder.formats());
+        assertEquals(List.of(Format.XML), builder.formats());
     }
 
     @Test

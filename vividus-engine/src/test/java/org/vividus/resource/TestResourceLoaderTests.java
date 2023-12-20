@@ -120,7 +120,7 @@ class TestResourceLoaderTests
         var propertyParser = mock(IPropertyParser.class);
         testResourceLoader = new TestResourceLoader(propertyParser, resourcePatternResolver, false);
         var resource = mock(Resource.class);
-        Resource[] expectedResources = new Resource[] { resource };
+        Resource[] expectedResources = { resource };
         when(resourcePatternResolver.getResources(TABLE_PATH + TABLE_NAME)).thenReturn(expectedResources);
 
         var actualResources = testResourceLoader.getResources(TABLE_PATH, TABLE_NAME);
