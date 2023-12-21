@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,8 +46,8 @@ public class DeprecatedStepNotificationFactory
     protected String createDeprecatedStepNotification(String versionToRemove, String replacementFormatPattern)
     {
         String runningDeprecatedStep = runTestContext.getRunningStory().getRunningSteps().getFirst();
-        Matcher stepMatcher = getStepMatcher(runningDeprecatedStep);
-        String[] stepParams = getParametersFromStep(stepMatcher);
+        Optional<Matcher> stepMatcher = getStepMatcher(runningDeprecatedStep);
+        String[] stepParams = stepMatcher.map(this::getParametersFromStep).orElseGet(() -> new String[0]);
 
         String notification;
         try (Formatter newStep = new Formatter())
@@ -59,7 +60,7 @@ public class DeprecatedStepNotificationFactory
         return notification;
     }
 
-    private Matcher getStepMatcher(String rawDeprecatedStep)
+    private Optional<Matcher> getStepMatcher(String rawDeprecatedStep)
     {
         List<Matcher> matchers = new ArrayList<>();
         Keywords keywords = configuration.keywords();
@@ -73,7 +74,7 @@ public class DeprecatedStepNotificationFactory
                 matchers.add(matcher);
             }
         }
-        return matchers.stream().max(Comparator.comparing(Matcher::groupCount)).orElse(null);
+        return matchers.stream().max(Comparator.comparing(Matcher::groupCount));
     }
 
     private String[] getParametersFromStep(Matcher stepMatcher)

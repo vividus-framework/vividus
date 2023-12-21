@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 
 import org.jbehave.core.configuration.Configuration;
 import org.jbehave.core.configuration.Keywords;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -42,6 +43,9 @@ import org.vividus.model.RunningStory;
 @ExtendWith(MockitoExtension.class)
 class DeprecatedStepNotificationFactoryTests
 {
+    private static final String DEPRECATION_MSG_FORMAT =
+            "The step: \"%s\" is deprecated and will be removed in VIVIDUS %s. Use step: \"%s\"";
+
     private static final String REMOVE_VERSION = "0.7.0";
 
     private static final String NOT_PARAMETERIZED_STEP_VALUE = "step without parameters deprecated";
@@ -93,11 +97,24 @@ class DeprecatedStepNotificationFactoryTests
         when(collectingStepPatternsMonitor.getRegisteredStepPatterns()).thenReturn(stepPatternsCache);
 
         mockRunTestContext(deprecatedStep);
-        String expectedNotification = String.format(
-                "The step: \"%s\" is deprecated and will be removed in VIVIDUS %s. Use step: \"%s\"", deprecatedStep,
-                REMOVE_VERSION, expectedActualStep);
+        String expectedNotification = String.format(DEPRECATION_MSG_FORMAT, deprecatedStep, REMOVE_VERSION,
+                expectedActualStep);
         assertEquals(expectedNotification, deprecatedStepNotificationFactory
                 .createDeprecatedStepNotification(REMOVE_VERSION, formatPattern));
+    }
+
+    @Test
+    void shouldGetNotificationForRunningDeprecatedStepWithoutPattern()
+    {
+        Map<String, Pattern> stepPatternsCache = new ConcurrentHashMap<>();
+        when(configuration.keywords()).thenReturn(new Keywords());
+        when(collectingStepPatternsMonitor.getRegisteredStepPatterns()).thenReturn(stepPatternsCache);
+
+        mockRunTestContext(NOT_PARAMETERIZED_STEP_DEPR);
+        String expectedNotification = String.format(DEPRECATION_MSG_FORMAT, NOT_PARAMETERIZED_STEP_DEPR, REMOVE_VERSION,
+                NOT_PARAMETERIZED_STEP_ACTUAL);
+        assertEquals(expectedNotification, deprecatedStepNotificationFactory
+                .createDeprecatedStepNotification(REMOVE_VERSION, NOT_PARAMETERIZED_STEP_ACTUAL));
     }
 
     private void mockRunTestContext(String deprecatedStep)
