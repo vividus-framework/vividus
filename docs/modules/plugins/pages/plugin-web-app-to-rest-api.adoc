@@ -381,16 +381,23 @@ include::partial$resource-check-statuses.adoc[]
 
 [source,gherkin]
 ----
+Then all resources located by $locatorType `$locator` are valid on:$pages
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 Then all resources by selector `$cssSelector` are valid on:$pages
 ----
 
-. `$cssSelector` - The {css-selector}.
+. `$locatorType` - The `CSS selector` or `XPath`.
+. `$locator` - The locator to locate resources for validation.
 . `$pages` - The pages to validate resources on.
 
-.Validate resources
+.Validate resources located by XPath
 [source,gherkin]
 ----
-Then all resources by selector `a` are valid on:
+Then all resources located by xpath `//a` are valid on:
 |pages                        |
 |https://vividus.org/         |
 |/test-automation-made-awesome|
@@ -408,16 +415,23 @@ include::partial$resource-check-statuses.adoc[]
 
 [source,gherkin]
 ----
+Then all resources located by $locatorType `$locator` in $html are valid
+----
+
+_Deprecated syntax (will be removed in VIVIDUS 0.7.0)_:
+[source,gherkin]
+----
 Then all resources by selector `$cssSelector` from $html are valid
 ----
 
-. `$cssSelector` - {css-selector}.
+. `$locatorType` - The `CSS selector` or `XPath`.
+. `$locator` - The locator to locate resources for validation.
 . `$html` - HTML document to validate.
 
 .Validate resources from the current page
 [source,gherkin]
 ----
-Then all resources by selector `a,img` from ${source-code} are valid
+Then all resources located by css selector `a,img` in ${source-code} are valid
 ----
 
 === Validate redirects

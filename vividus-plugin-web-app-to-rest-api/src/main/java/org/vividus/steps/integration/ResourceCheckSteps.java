@@ -16,7 +16,7 @@
 
 package org.vividus.steps.integration;
 
-import static org.vividus.util.HtmlUtils.getElementsByCssSelector;
+import static org.vividus.util.HtmlUtils.getElements;
 import static org.vividus.util.UriUtils.buildNewUrl;
 
 import java.io.IOException;
@@ -39,6 +39,7 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Selector.SelectorParseException;
+import org.vividus.html.LocatorType;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
@@ -97,15 +98,16 @@ public class ResourceCheckSteps
      *         b. If status code not acceptable but one of (404, 405, 501, 503) then GET request will be sent;
      *         c. If GET status code acceptable than check considered as passed otherwise failed;
      *     3. If element doesn't contain href or src attribute fail assertion will be recorded
-     * @param cssSelector to locate resources
-     * @param html to validate
+     * @param locatorType The <b>CSS selector</b> or <b>XPath</b>
+     * @param locator     The locator to locate elements in HTML document
+     * @param html        The HTML containing elements to validate
      */
-    @Then("all resources by selector `$cssSelector` from $html are valid")
-    public void checkResources(String cssSelector, String html)
+    @Then("all resources located by $locatorType `$locator` in $html are valid")
+    public void checkResources(LocatorType locatorType, String locator, String html)
     {
         softAssert.runIgnoringTestFailFast(() -> execute(() ->
         {
-            Collection<Element> resourcesToValidate = getElementsByCssSelector(html, cssSelector);
+            Collection<Element> resourcesToValidate = getElements(html, locatorType, locator);
             Stream<WebPageResourceValidation> validations = createResourceValidations(resourcesToValidate,
                     resourceValidation -> {
                         URI uriToCheck = resourceValidation.getUriOrError().getLeft();
@@ -278,16 +280,17 @@ public class ResourceCheckSteps
      *         c. If GET status code acceptable than check considered as passed otherwise failed;
      * <b>Example:</b>
      * <pre>
-     * Then all resources by selector a are valid on:
+     * Then all resources located by css selector `a` are valid on:
      * |pages|
      * |https://vividus.org|
      * |/test-automation-made-awesome|
      * </pre>
-     * @param cssSelector to locate resources
-     * @param pages where resources will be validated
+     * @param locatorType The <b>CSS selector</b> or <b>XPath</b>
+     * @param locator     The locator to locate elements in HTML document
+     * @param pages       The URLs of pages containing resources to validate
      */
-    @Then("all resources by selector `$cssSelector` are valid on:$pages")
-    public void checkResources(String cssSelector, ExamplesTable pages)
+    @Then("all resources located by $locatorType `$locator` are valid on:$pages")
+    public void checkResources(LocatorType locatorType, String locator, ExamplesTable pages)
     {
         softAssert.runIgnoringTestFailFast(() -> execute(() -> {
             Stream<WebPageResourceValidation> resourcesToValidate = pages.getRows().stream().map(m -> m.get("pages"))
@@ -315,7 +318,7 @@ public class ResourceCheckSteps
                         {
                             httpRequestExecutor.executeHttpRequest(HttpMethod.GET, pageUrl, Optional.empty());
                             return Optional.ofNullable(httpTestContext.getResponse().getResponseBodyAsString())
-                                    .map(response -> getElementsByCssSelector(pageUrl, response, cssSelector))
+                                    .map(response -> getElements(pageUrl, response, locatorType, locator))
                                     .map(elements -> createResourceValidations(elements,
                                             rV -> rV.setPageURL(pageUrl)
                                     ))

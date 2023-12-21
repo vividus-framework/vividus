@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,26 +31,16 @@ public final class HtmlUtils
 
     public static Elements getElements(String html, LocatorType locatorType, String locator)
     {
+        return getElements("", html, locatorType, locator);
+    }
+
+    public static Elements getElements(String baseUri, String html, LocatorType locatorType, String locator)
+    {
         if (locatorType == LocatorType.CSS_SELECTOR)
         {
-            return getElementsByCssSelector(html, locator);
+            return getElements(baseUri, html, d -> d.select(locator));
         }
-        return getElementsByXpath(html, locator);
-    }
-
-    public static Elements getElementsByCssSelector(String html, String cssSelector)
-    {
-        return getElementsByCssSelector("", html, cssSelector);
-    }
-
-    public static Elements getElementsByCssSelector(String baseUri, String html, String cssSelector)
-    {
-        return getElements(baseUri, html, d -> d.select(cssSelector));
-    }
-
-    private static Elements getElementsByXpath(String html, String xpath)
-    {
-        return getElements("", html, d -> d.selectXpath(xpath));
+        return getElements(baseUri, html, d -> d.selectXpath(locator));
     }
 
     private static Elements getElements(String baseUri, String html, Function<Document, Elements> finder)

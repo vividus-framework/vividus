@@ -1,0 +1,8 @@
+Composite: Then all resources by selector `$cssSelector` from $html are valid
+!-- DEPRECATED: 0.7.0, Then all resources located by $locatorType `$locator` in $html are valid
+Then all resources located by css selector `<cssSelector>` in <html> are valid
+
+
+Composite: Then all resources by selector `$cssSelector` are valid on:$pages
+!-- DEPRECATED: 0.7.0, Then all resources located by $locatorType `$locator` are valid on:$pages
+Then all resources located by css selector `<cssSelector>` are valid on:<pages>

@@ -43,12 +43,6 @@ class HtmlUtilsTests
             </html>""";
 
     @Test
-    void shouldGetElementsBySelector()
-    {
-        assertEquals("Title of the document", HtmlUtils.getElementsByCssSelector(HTML, TITLE).get(0).text());
-    }
-
-    @Test
     void shouldGetElementsBySelectorHtmlWithBaseUrl()
     {
         try (MockedStatic<Jsoup> jsoup = mockStatic(Jsoup.class))
@@ -60,7 +54,7 @@ class HtmlUtilsTests
             jsoup.when(() -> Jsoup.parse(HTML, baseUri)).thenReturn(document);
             when(document.select(TITLE)).thenReturn(elements);
 
-            assertEquals(elements, HtmlUtils.getElementsByCssSelector(baseUri, HTML, TITLE));
+            assertEquals(elements, HtmlUtils.getElements(baseUri, HTML, LocatorType.CSS_SELECTOR, TITLE));
 
             jsoup.verify(() -> Jsoup.parse(HTML, baseUri));
             jsoup.verifyNoMoreInteractions();
