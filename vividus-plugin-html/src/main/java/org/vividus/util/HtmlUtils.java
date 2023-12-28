@@ -21,7 +21,7 @@ import java.util.function.Function;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import org.vividus.html.LocatorType;
+import org.vividus.html.HtmlLocatorType;
 
 public final class HtmlUtils
 {
@@ -29,14 +29,14 @@ public final class HtmlUtils
     {
     }
 
-    public static Elements getElements(String html, LocatorType locatorType, String locator)
+    public static Elements getElements(String html, HtmlLocatorType locatorType, String locator)
     {
         return getElements("", html, locatorType, locator);
     }
 
-    public static Elements getElements(String baseUri, String html, LocatorType locatorType, String locator)
+    public static Elements getElements(String baseUri, String html, HtmlLocatorType locatorType, String locator)
     {
-        if (locatorType == LocatorType.CSS_SELECTOR)
+        if (locatorType == HtmlLocatorType.CSS_SELECTOR)
         {
             return getElements(baseUri, html, d -> d.select(locator));
         }

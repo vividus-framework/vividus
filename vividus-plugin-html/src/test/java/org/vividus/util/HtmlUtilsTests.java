@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockedStatic;
-import org.vividus.html.LocatorType;
+import org.vividus.html.HtmlLocatorType;
 
 class HtmlUtilsTests
 {
@@ -54,7 +54,7 @@ class HtmlUtilsTests
             jsoup.when(() -> Jsoup.parse(HTML, baseUri)).thenReturn(document);
             when(document.select(TITLE)).thenReturn(elements);
 
-            assertEquals(elements, HtmlUtils.getElements(baseUri, HTML, LocatorType.CSS_SELECTOR, TITLE));
+            assertEquals(elements, HtmlUtils.getElements(baseUri, HTML, HtmlLocatorType.CSS_SELECTOR, TITLE));
 
             jsoup.verify(() -> Jsoup.parse(HTML, baseUri));
             jsoup.verifyNoMoreInteractions();
@@ -63,7 +63,7 @@ class HtmlUtilsTests
 
     @ParameterizedTest
     @CsvSource({"CSS_SELECTOR, body", "XPATH, //body"})
-    void shouldFindElement(LocatorType locatorType, String locator)
+    void shouldFindElement(HtmlLocatorType locatorType, String locator)
     {
         assertEquals(1, HtmlUtils.getElements(HTML, locatorType, locator).size());
     }

@@ -1,0 +1,2 @@
+- `$htmlLocatorType` - The HTML locator type, either https://jsoup.org/cookbook/extracting-data/selector-syntax[`CSS selector`] or https://developer.mozilla.org/en-US/docs/Web/XPath[`XPath`].
+- `$htmlLocator` - The actual locator.

@@ -1,17 +1,9 @@
-:locator-types: `CSS selector` or `XPath`
-
 = HTML Plugin
 
 The plugin provides the ability to work with HTML documents: data extraction and validation.
 
 :plugin-short-name: html
 include::partial$plugin-installation.adoc[]
-
-== Locators
-
-HTML locators should be used in order to interact with HTML document elements. The following locators are supported:
-- https://jsoup.org/cookbook/extracting-data/selector-syntax[`CSS selector`]
-- https://developer.mozilla.org/en-US/docs/Web/XPath[`XPath`]
 
 == Steps
 
@@ -21,11 +13,10 @@ Validates the number of elements found by the locator matches the specified rule
 
 [source,gherkin]
 ----
-Then number of elements found by $locatorType `$locator` in HTML `$html` is $comparisonRule `$number`
+Then number of elements found by $htmlLocatorType `$htmlLocator` in HTML `$html` is $comparisonRule `$number`
 ----
 
-- `$locatorType` - {locator-types}.
-- `$locator` - See <<_locators>>.
+include::partial$html-locator.adoc[]
 - `$html` - The HTML document to validate.
 - `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
 - `$quantity` -  The expected number of elements.
@@ -43,11 +34,10 @@ Validates whether the element found by the locator contains the expected text.
 
 [source,gherkin]
 ----
-Then element found by $locatorType `$locator` in HTML `$html` contains text `$expectedText`
+Then element found by $htmlLocatorType `$htmlLocator` in HTML `$html` contains text `$expectedText`
 ----
 
-- `$locatorType` - {locator-types}.
-- `$locator` - See <<_locators>>.
+include::partial$html-locator.adoc[]
 - `$html` - The HTML document to validate.
 - `$expectedText` - The expected element text.
 
@@ -64,12 +54,11 @@ Saves the attribute value into the variable.
 
 [source,gherkin]
 ----
-When I save `$attributeName` attribute value of element found by $locatorType `$locator` in HTML `$html` to $scopes variable `$variableName`
+When I save `$attributeName` attribute value of element found by $htmlLocatorType `$htmlLocator` in HTML `$html` to $scopes variable `$variableName`
 ----
 
 - `$attributeName` - The name of the attribute.
-- `$locatorType` - {locator-types}.
-- `$locator` - See <<_locators>>.
+include::partial$html-locator.adoc[]
 - `$html` - The HTML document to find element.
 - `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 - `$variableName` - The name of the variable to save the attribute value.
@@ -99,13 +88,12 @@ Then `${title}` is = `paragraph`
 Saves the data or the text of element. Where the *data* is characters between the start-tag and end-tag of the element and the *text* is the textual content of the element  without any inner element.
 [source,gherkin]
 ----
-When I save $dataType of element found by $locatorType `$locator` in HTML `$html` to $scopes variable `variableName`
+When I save $dataType of element found by $htmlLocatorType `$htmlLocator` in HTML `$html` to $scopes variable `variableName`
 ----
 
 - `$dataType` - Either `data` or `text`
 - `$html` - The HTML document to find element.
-- `$locatorType` - {locator-types}.
-- `$locator` - See <<_locators>>.
+include::partial$html-locator.adoc[]
 * `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
 * `$variableName` - The name of the variable to save the data or text.
 

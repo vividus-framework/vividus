@@ -96,6 +96,6 @@
     "assertionPattern": "Jump link by selector .* points to missing element with notFound id",
     "scenarioPattern": "Steps verification.*",
     "storyPattern": "ResourceCheckSteps",
-    "stepPattern": "Then all resources located by.*"
+    "stepPattern": "Then all resources found by.*"
   }
 }
