@@ -27,7 +27,6 @@ import org.vividus.context.VariableContext;
 import org.vividus.html.HtmlLocatorType;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
-import org.vividus.util.HtmlUtils;
 import org.vividus.variable.VariableScope;
 
 public class HtmlSteps
@@ -43,7 +42,7 @@ public class HtmlSteps
 
     private Optional<Element> assertElementByLocatorExists(String html, HtmlLocatorType locatorType, String locator)
     {
-        Elements elements = HtmlUtils.getElements(html, locatorType, locator);
+        Elements elements = locatorType.locate(html, locator);
         if (assertElements(locatorType, locator, ComparisonRule.EQUAL_TO, 1, elements))
         {
             return Optional.of(elements.first());
@@ -75,7 +74,7 @@ public class HtmlSteps
     public boolean doesElementByLocatorExist(HtmlLocatorType htmlLocatorType,
             String htmlLocator, String html, ComparisonRule comparisonRule, int number)
     {
-        Elements elements = HtmlUtils.getElements(html, htmlLocatorType, htmlLocator);
+        Elements elements = htmlLocatorType.locate(html, htmlLocator);
         return assertElements(htmlLocatorType, htmlLocator, comparisonRule, number, elements);
     }
 

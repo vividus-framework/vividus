@@ -429,7 +429,7 @@ include::partial$html-locator.adoc[]
 .Validate resources from the current page
 [source,gherkin]
 ----
-Then all resources found by css selector `a,img` in ${source-code} are valid
+Then all resources found by CSS selector `a,img` in ${source-code} are valid
 ----
 
 === Validate redirects

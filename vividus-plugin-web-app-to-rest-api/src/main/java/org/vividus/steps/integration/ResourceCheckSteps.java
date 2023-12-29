@@ -16,7 +16,6 @@
 
 package org.vividus.steps.integration;
 
-import static org.vividus.util.HtmlUtils.getElements;
 import static org.vividus.util.UriUtils.buildNewUrl;
 
 import java.io.IOException;
@@ -107,7 +106,7 @@ public class ResourceCheckSteps
     {
         softAssert.runIgnoringTestFailFast(() -> execute(() ->
         {
-            Collection<Element> resourcesToValidate = getElements(html, htmlLocatorType, htmlLocator);
+            Collection<Element> resourcesToValidate = htmlLocatorType.locate(html, htmlLocator);
             Stream<WebPageResourceValidation> validations = createResourceValidations(resourcesToValidate,
                     resourceValidation -> {
                         URI uriToCheck = resourceValidation.getUriOrError().getLeft();
@@ -280,7 +279,7 @@ public class ResourceCheckSteps
      *         c. If GET status code acceptable than check considered as passed otherwise failed;
      * <b>Example:</b>
      * <pre>
-     * Then all resources found by css selector `a` are valid on:
+     * Then all resources found by CSS selector `a` are valid on:
      * |pages|
      * |https://vividus.org|
      * |/test-automation-made-awesome|
@@ -318,7 +317,7 @@ public class ResourceCheckSteps
                         {
                             httpRequestExecutor.executeHttpRequest(HttpMethod.GET, pageUrl, Optional.empty());
                             return Optional.ofNullable(httpTestContext.getResponse().getResponseBodyAsString())
-                                    .map(response -> getElements(pageUrl, response, htmlLocatorType, htmlLocator))
+                                    .map(response -> htmlLocatorType.locate(pageUrl, response, htmlLocator))
                                     .map(elements -> createResourceValidations(elements,
                                             rV -> rV.setPageURL(pageUrl)
                                     ))

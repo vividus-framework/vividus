@@ -16,15 +16,40 @@
 
 package org.vividus.html;
 
+import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
+
 public enum HtmlLocatorType
 {
-    XPATH("XPath"), CSS_SELECTOR("CSS selector");
+    XPATH("XPath")
+    {
+        @Override
+        public Elements locate(String baseUri, String html, String locator)
+        {
+            return Jsoup.parse(html, baseUri).selectXpath(locator);
+        }
+    },
+    CSS_SELECTOR("CSS selector")
+    {
+        @Override
+        public Elements locate(String baseUri, String html, String locator)
+        {
+            return Jsoup.parse(html, baseUri).select(locator);
+        }
+    };
 
     private final String description;
 
     HtmlLocatorType(String description)
     {
         this.description = description;
+    }
+
+    public abstract Elements locate(String baseUri, String html, String locator);
+
+    public Elements locate(String html, String locator)
+    {
+        return locate("", html, locator);
     }
 
     public String getDescription()
