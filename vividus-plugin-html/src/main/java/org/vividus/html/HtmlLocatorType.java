@@ -16,40 +16,34 @@
 
 package org.vividus.html;
 
+import java.util.function.BiFunction;
+
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 public enum HtmlLocatorType
 {
-    XPATH("XPath")
-    {
-        @Override
-        public Elements findElements(String baseUri, String html, String locator)
-        {
-            return Jsoup.parse(html, baseUri).selectXpath(locator);
-        }
-    },
-    CSS_SELECTOR("CSS selector")
-    {
-        @Override
-        public Elements findElements(String baseUri, String html, String locator)
-        {
-            return Jsoup.parse(html, baseUri).select(locator);
-        }
-    };
+    XPATH("XPath", Document::selectXpath),
+    CSS_SELECTOR("CSS selector", Document::selectXpath);
 
     private final String description;
+    private final BiFunction<Document, String, Elements> finder;
 
-    HtmlLocatorType(String description)
+    HtmlLocatorType(String description, BiFunction<Document, String, Elements> finder)
     {
         this.description = description;
+        this.finder = finder;
     }
-
-    public abstract Elements findElements(String baseUri, String html, String locator);
 
     public Elements findElements(String html, String locator)
     {
         return findElements("", html, locator);
+    }
+
+    public Elements findElements(String baseUri, String html, String locator)
+    {
+        return finder.apply(Jsoup.parse(html, baseUri), locator);
     }
 
     public String getDescription()
