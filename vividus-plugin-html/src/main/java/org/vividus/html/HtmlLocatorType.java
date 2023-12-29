@@ -24,7 +24,7 @@ public enum HtmlLocatorType
     XPATH("XPath")
     {
         @Override
-        public Elements locate(String baseUri, String html, String locator)
+        public Elements findElements(String baseUri, String html, String locator)
         {
             return Jsoup.parse(html, baseUri).selectXpath(locator);
         }
@@ -32,7 +32,7 @@ public enum HtmlLocatorType
     CSS_SELECTOR("CSS selector")
     {
         @Override
-        public Elements locate(String baseUri, String html, String locator)
+        public Elements findElements(String baseUri, String html, String locator)
         {
             return Jsoup.parse(html, baseUri).select(locator);
         }
@@ -45,11 +45,11 @@ public enum HtmlLocatorType
         this.description = description;
     }
 
-    public abstract Elements locate(String baseUri, String html, String locator);
+    public abstract Elements findElements(String baseUri, String html, String locator);
 
-    public Elements locate(String html, String locator)
+    public Elements findElements(String html, String locator)
     {
-        return locate("", html, locator);
+        return findElements("", html, locator);
     }
 
     public String getDescription()

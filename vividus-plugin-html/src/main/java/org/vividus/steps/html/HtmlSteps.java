@@ -42,7 +42,7 @@ public class HtmlSteps
 
     private Optional<Element> assertElementByLocatorExists(String html, HtmlLocatorType locatorType, String locator)
     {
-        Elements elements = locatorType.locate(html, locator);
+        Elements elements = locatorType.findElements(html, locator);
         if (assertElements(locatorType, locator, ComparisonRule.EQUAL_TO, 1, elements))
         {
             return Optional.of(elements.first());
@@ -74,7 +74,7 @@ public class HtmlSteps
     public boolean doesElementByLocatorExist(HtmlLocatorType htmlLocatorType,
             String htmlLocator, String html, ComparisonRule comparisonRule, int number)
     {
-        Elements elements = htmlLocatorType.locate(html, htmlLocator);
+        Elements elements = htmlLocatorType.findElements(html, htmlLocator);
         return assertElements(htmlLocatorType, htmlLocator, comparisonRule, number, elements);
     }
 

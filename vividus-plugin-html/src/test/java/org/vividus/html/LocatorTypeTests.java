@@ -47,13 +47,13 @@ class LocatorTypeTests
         try (MockedStatic<Jsoup> jsoup = mockStatic(Jsoup.class))
         {
             String baseUri = "base-uri";
-            Document document = mock(Document.class);
-            Elements elements = mock(Elements.class);
+            Document document = mock();
+            Elements elements = mock();
 
             jsoup.when(() -> Jsoup.parse(HTML, baseUri)).thenReturn(document);
             when(document.select(TITLE)).thenReturn(elements);
 
-            assertEquals(elements, HtmlLocatorType.CSS_SELECTOR.locate(baseUri, HTML, TITLE));
+            assertEquals(elements, HtmlLocatorType.CSS_SELECTOR.findElements(baseUri, HTML, TITLE));
 
             jsoup.verify(() -> Jsoup.parse(HTML, baseUri));
             jsoup.verifyNoMoreInteractions();
@@ -64,7 +64,7 @@ class LocatorTypeTests
     @CsvSource({"CSS_SELECTOR, body", "XPATH, //body"})
     void shouldFindElement(HtmlLocatorType locatorType, String locator)
     {
-        assertEquals(1, locatorType.locate(HTML, locator).size());
+        assertEquals(1, locatorType.findElements(HTML, locator).size());
     }
 
     @ParameterizedTest

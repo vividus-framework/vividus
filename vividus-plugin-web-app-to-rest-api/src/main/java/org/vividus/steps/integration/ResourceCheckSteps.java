@@ -106,7 +106,7 @@ public class ResourceCheckSteps
     {
         softAssert.runIgnoringTestFailFast(() -> execute(() ->
         {
-            Collection<Element> resourcesToValidate = htmlLocatorType.locate(html, htmlLocator);
+            Collection<Element> resourcesToValidate = htmlLocatorType.findElements(html, htmlLocator);
             Stream<WebPageResourceValidation> validations = createResourceValidations(resourcesToValidate,
                     resourceValidation -> {
                         URI uriToCheck = resourceValidation.getUriOrError().getLeft();
@@ -317,7 +317,7 @@ public class ResourceCheckSteps
                         {
                             httpRequestExecutor.executeHttpRequest(HttpMethod.GET, pageUrl, Optional.empty());
                             return Optional.ofNullable(httpTestContext.getResponse().getResponseBodyAsString())
-                                    .map(response -> htmlLocatorType.locate(pageUrl, response, htmlLocator))
+                                    .map(response -> htmlLocatorType.findElements(pageUrl, response, htmlLocator))
                                     .map(elements -> createResourceValidations(elements,
                                             rV -> rV.setPageURL(pageUrl)
                                     ))
