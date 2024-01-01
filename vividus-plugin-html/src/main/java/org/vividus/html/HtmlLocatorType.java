@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.jsoup.select.Elements;
 public enum HtmlLocatorType
 {
     XPATH("XPath", Document::selectXpath),
-    CSS_SELECTOR("CSS selector", Document::selectXpath);
+    CSS_SELECTOR("CSS selector", Document::select);
 
     private final String description;
     private final BiFunction<Document, String, Elements> finder;
