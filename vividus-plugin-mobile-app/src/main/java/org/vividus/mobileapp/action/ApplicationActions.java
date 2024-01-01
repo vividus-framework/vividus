@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,23 @@ package org.vividus.mobileapp.action;
 import org.apache.commons.lang3.Validate;
 import org.openqa.selenium.HasCapabilities;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.softassert.ISoftAssert;
 
 import io.appium.java_client.InteractsWithApps;
 import io.appium.java_client.appmanagement.ApplicationState;
 
 public class ApplicationActions
 {
-    private final IWebDriverProvider webDriverProvider;
+    private static final String APP_NOT_INSTALLED = "Application with the bundle identifier '%s' is not installed on "
+            + "the device";
 
-    public ApplicationActions(IWebDriverProvider webDriverProvider)
+    private final IWebDriverProvider webDriverProvider;
+    private final ISoftAssert softAssert;
+
+    public ApplicationActions(IWebDriverProvider webDriverProvider, ISoftAssert softAssert)
     {
         this.webDriverProvider = webDriverProvider;
+        this.softAssert = softAssert;
     }
 
     /**
@@ -40,24 +46,30 @@ public class ApplicationActions
     public void activateApp(String bundleId)
     {
         InteractsWithApps interactor = webDriverProvider.getUnwrapped(InteractsWithApps.class);
-        Validate.isTrue(interactor.isAppInstalled(bundleId),
-                "Application with the bundle identifier '%s' is not installed on the device", bundleId);
+        Validate.isTrue(interactor.isAppInstalled(bundleId), APP_NOT_INSTALLED, bundleId);
         interactor.activateApp(bundleId);
     }
 
     /**
-     * Terminate the application if it's running.
+     * Terminates the running application. If the application is not running, new failed assertion is recorded.
+     *
      * @param bundleId bundle identifier of the application to terminate.
      */
     public void terminateApp(String bundleId)
     {
         InteractsWithApps interactor = webDriverProvider.getUnwrapped(InteractsWithApps.class);
         ApplicationState appState = interactor.queryAppState(bundleId);
-        Validate.isTrue(appState != ApplicationState.NOT_INSTALLED && appState != ApplicationState.NOT_RUNNING,
-                "Application with the bundle identifier '%s' is not installed or not running on the device",
-                bundleId);
-        Validate.isTrue(interactor.terminateApp(bundleId),
-                "Unable to terminate mobile application with the bundle identifier '%s'", bundleId);
+        if (appState == ApplicationState.NOT_RUNNING)
+        {
+            softAssert.recordFailedAssertion(
+                    "Application with the bundle identifier '%s' is not running on the device".formatted(bundleId));
+        }
+        else
+        {
+            Validate.isTrue(appState != ApplicationState.NOT_INSTALLED, APP_NOT_INSTALLED, bundleId);
+            Validate.isTrue(interactor.terminateApp(bundleId),
+                    "Unable to terminate mobile application with the bundle identifier '%s'", bundleId);
+        }
     }
 
     /**

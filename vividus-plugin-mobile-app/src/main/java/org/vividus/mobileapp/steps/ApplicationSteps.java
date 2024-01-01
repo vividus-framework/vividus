@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,8 +114,11 @@ public class ApplicationSteps
     }
 
     /**
-     * Terminates the application if it's running. The session will not be closed.
-     * @param bundleId bundle identifier of the application to terminate.
+     * Terminates the running application on the device/emulator/simulator and navigates to the home device screen
+     * (the remote session will not be closed). If the application is not running, new failed assertion is recorded.
+     *
+     * @param bundleId "Package name" for Android or "Bundle identifier" from "Plist.info" for iOS of the application
+     *                to terminate.
      */
     @When("I terminate application with bundle identifier `$bundleId`")
     public void terminateApp(String bundleId)

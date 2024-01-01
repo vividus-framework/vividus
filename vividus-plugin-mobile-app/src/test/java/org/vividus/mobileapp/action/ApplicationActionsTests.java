@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.MutableCapabilities;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.softassert.ISoftAssert;
 
 import io.appium.java_client.InteractsWithApps;
 import io.appium.java_client.appmanagement.ApplicationState;
@@ -44,10 +45,9 @@ class ApplicationActionsTests
     private static final String UNKNOWN_BUNDLE_ID = "unknown bundle id";
     private static final String APP = "app";
     private static final String APP_NAME = "vividus-mobile.app";
-    private static final String APPLICATION_IS_NOT_INSTALLED_OR_NOT_RUNNING = "Application with the bundle identifier"
-            + " '%s' is not installed or not running on the device";
 
     @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private ISoftAssert softAssert;
     @InjectMocks private ApplicationActions applicationActions;
 
     @Test
@@ -115,24 +115,21 @@ class ApplicationActionsTests
     void shouldNotTerminateNotInstalledApp()
     {
         InteractsWithApps driver = mockInteractingWithAppsDriver();
-        when(driver.queryAppState(UNKNOWN_BUNDLE_ID)).thenReturn(ApplicationState.NOT_INSTALLED);
-        Exception exception = assertThrows(IllegalArgumentException.class,
-                () -> applicationActions.terminateApp(UNKNOWN_BUNDLE_ID));
-        assertEquals(
-                String.format(APPLICATION_IS_NOT_INSTALLED_OR_NOT_RUNNING, UNKNOWN_BUNDLE_ID),
-                exception.getMessage());
+        when(driver.queryAppState(UNKNOWN_BUNDLE_ID)).thenReturn(ApplicationState.NOT_RUNNING);
+        applicationActions.terminateApp(UNKNOWN_BUNDLE_ID);
+        verify(softAssert).recordFailedAssertion(
+                "Application with the bundle identifier 'unknown bundle id' is not running on the device");
     }
 
     @Test
     void shouldNotTerminateNotRunningApp()
     {
         InteractsWithApps driver = mockInteractingWithAppsDriver();
-        when(driver.queryAppState(UNKNOWN_BUNDLE_ID)).thenReturn(ApplicationState.NOT_RUNNING);
+        when(driver.queryAppState(UNKNOWN_BUNDLE_ID)).thenReturn(ApplicationState.NOT_INSTALLED);
         Exception exception = assertThrows(IllegalArgumentException.class,
                 () -> applicationActions.terminateApp(UNKNOWN_BUNDLE_ID));
-        assertEquals(
-                String.format(APPLICATION_IS_NOT_INSTALLED_OR_NOT_RUNNING, UNKNOWN_BUNDLE_ID),
-                exception.getMessage());
+        assertEquals(String.format("Application with the bundle identifier" + " '%s' is not installed on the device",
+                UNKNOWN_BUNDLE_ID), exception.getMessage());
     }
 
     @Test
