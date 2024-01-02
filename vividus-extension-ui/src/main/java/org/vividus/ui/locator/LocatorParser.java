@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.ui.locator;
 
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -41,7 +42,7 @@ public final class LocatorParser
                 .map(String::trim)
                 .map(l -> LocatorParser.parseSingleLocator(l, locatorFactory))
                 .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public static <T> T parseSingleLocator(String locatorAsString, BiFunction<String, String, T> locatorFactory)
