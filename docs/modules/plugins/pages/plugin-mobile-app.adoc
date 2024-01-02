@@ -362,15 +362,15 @@ When I reinstall mobile application with bundle identifier `vividus-mobile.app`
 
 ==== Terminate mobile application
 
-Terminates the running application on the device/emulator/simulator and
-navigates to the home device screen. The remote session will not be closed.
+Terminates the running application on the device/emulator/simulator and navigates to the home device screen
+(the remote session will not be closed). If the application is not running, new failed assertion is recorded.
 
 [source,gherkin]
 ----
 When I terminate application with bundle identifier `$bundleId`
 ----
 
-* `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS
+* `$bundleId` - `Package name` for Android or `Bundle identifier` from `Plist.info` for iOS  of the application to terminate.
 
 .Terminates Safari browser application
 [source,gherkin]
