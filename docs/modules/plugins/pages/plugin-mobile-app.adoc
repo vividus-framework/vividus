@@ -531,6 +531,8 @@ When I download file `/sdcard/file.json` from device and save its content to sce
 
 include::partial$ui-context-management-steps.adoc[]
 
+include::plugins:partial$ui-elements-validation-steps.adoc[]
+
 include::plugins:partial$ui-selenium-text-content-steps.adoc[]
 
 === Navigate back

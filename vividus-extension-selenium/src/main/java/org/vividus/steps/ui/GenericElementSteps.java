@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,9 @@ public class GenericElementSteps
     }
 
     /**
-     * Checks whether the context contains exact number of elements by locator
+     * Validates the context contains the number of elements matching the specified comparison rule.
      *
-     * @param locator        Locator to locate element
+     * @param locator        The locator used to find elements.
      * @param comparisonRule The rule to match the number of elements. The supported rules:
      *                       <ul>
      *                       <li>less than (&lt;)</li>
@@ -61,8 +61,8 @@ public class GenericElementSteps
      *                       <li>equal to (=)</li>
      *                       <li>not equal to (!=)</li>
      *                       </ul>
-     * @param number         The expected number of elements
-     * @return list of Web elements
+     * @param number         The expected number of elements.
+     * @return list of found elements
      */
     @Then("number of elements found by `$locator` is $comparisonRule `$number`")
     public List<WebElement> assertElementsNumber(Locator locator, ComparisonRule comparisonRule, int number)

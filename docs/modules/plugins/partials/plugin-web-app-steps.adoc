@@ -170,6 +170,8 @@ Then page is scrolled to element located by `$locator`
 Then page is scrolled to element located by `xpath(//a[text()="Contact"])`
 ----
 
+include::plugins:partial$ui-elements-validation-steps.adoc[]
+
 include::plugins:partial$ui-selenium-text-content-steps.adoc[]
 include::plugins:partial$common-web-app-text-steps.adoc[]
 

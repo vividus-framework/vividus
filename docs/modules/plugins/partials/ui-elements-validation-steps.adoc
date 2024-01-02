@@ -1,0 +1,20 @@
+=== Elements validation
+
+==== Validate elements number
+
+Validates the context contains the number of elements matching the specified comparison rule.
+
+[source,gherkin]
+----
+Then number of elements found by `$locator` is $comparisonRule `$quantity`
+----
+
+* `$locator` - The <<_locator,locator>> used to find elements.
+* `$comparisonRule` - The xref:parameters:comparison-rule.adoc[comparison rule].
+* `$quantity` - The expected number of the elements.
+
+.Validate the number of elements
+[source,gherkin]
+----
+Then number of elements found by `xpath(./a)` is equal to `5`
+----

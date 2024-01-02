@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,18 @@ import java.util.Objects;
 
 public class PlaywrightLocator
 {
-    private final String locator;
+    private final String locatorType;
+    private final String locatorValue;
 
     public PlaywrightLocator(String locatorType, String locatorValue)
     {
-        this.locator = locatorType + "=" + locatorValue;
+        this.locatorType = locatorType;
+        this.locatorValue = locatorValue;
     }
 
     public String getLocator()
     {
-        return locator;
+        return locatorType + "=" + locatorValue;
     }
 
     @Override
@@ -44,12 +46,18 @@ public class PlaywrightLocator
             return false;
         }
         PlaywrightLocator that = (PlaywrightLocator) o;
-        return Objects.equals(locator, that.locator);
+        return Objects.equals(locatorType, that.locatorType) && Objects.equals(locatorValue, that.locatorValue);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(locator);
+        return Objects.hash(locatorType, locatorValue);
+    }
+
+    @Override
+    public String toString()
+    {
+        return locatorType + '(' + locatorValue + ')';
     }
 }
