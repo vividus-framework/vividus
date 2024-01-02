@@ -238,3 +238,71 @@ Then JSON element from `
    "b",
    "c"
 ]` IGNORING_ARRAY_ORDER
+
+Scenario: Validate JSON against OpenAPI schema
+Then JSON `
+{
+    "person": {
+        "name": "John",
+        "surname": "Doe",
+        "gender": "MALE"
+    },
+    "role": "GUEST"
+}` is valid against OpenAPI schema `
+{
+   "openapi":"3.0.0",
+   "paths":{
+
+   },
+   "info":{
+      "title":"User Info API",
+      "version":"v0.1.0"
+   },
+   "components":{
+      "schemas":{
+         "Data":{
+            "type":"object",
+            "required":[
+               "role",
+               "person"
+            ],
+            "properties":{
+               "role":{
+                  "type":"string",
+                  "enum":[
+                     "GUEST",
+                     "USER",
+                     "ADMIN"
+                  ]
+               },
+               "person":{
+                  "$ref":"#/components/schemas/Person"
+               }
+            }
+         },
+         "Person":{
+            "type":"object",
+            "required":[
+               "name",
+               "surname"
+            ],
+            "properties":{
+               "name":{
+                  "type":"string"
+               },
+               "surname":{
+                  "type":"string"
+               },
+               "gender":{
+                  "type":"string",
+                  "enum":[
+                     "MALE",
+                     "FEMALE",
+                     "OTHER"
+                  ]
+               }
+            }
+         }
+      }
+   }
+}`

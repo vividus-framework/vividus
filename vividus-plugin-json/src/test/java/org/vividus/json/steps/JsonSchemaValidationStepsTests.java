@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,10 @@ import org.vividus.util.json.JsonUtils;
 class JsonSchemaValidationStepsTests
 {
     private static final String SCHEMA_RESOURCE_NAME = "schema.json";
+    private static final String OPEN_API_SCHEMA_RESOURCE_NAME = "open-api-schema.json";
+
+    private static final String JSON_IS_VALID_AGAINST_SCHEMA = "JSON is valid against schema";
+    private static final String JSON_IS_NOT_VALID_AGAINST_SCHEMA = "JSON is not valid against schema:";
 
     @Mock private ISoftAssert softAssert;
     private JsonSchemaValidationSteps steps;
@@ -58,7 +62,7 @@ class JsonSchemaValidationStepsTests
     {
         var schema = loadResource(schemaResourceName);
         steps.validateJsonAgainstSchema(loadResource("valid-against-schema.json"), schema);
-        verify(softAssert).recordAssertion(true, "JSON is valid against schema");
+        verify(softAssert).recordAssertion(true, JSON_IS_VALID_AGAINST_SCHEMA);
         verifyNoMoreInteractions(softAssert);
     }
 
@@ -79,10 +83,42 @@ class JsonSchemaValidationStepsTests
         var schema = loadResource(SCHEMA_RESOURCE_NAME);
         steps.validateJsonAgainstSchema(loadResource("not-valid-against-schema.json"), schema);
         var lineSeparator = System.lineSeparator();
-        var errorMessage = "JSON is not valid against schema:" + lineSeparator
+        var errorMessage = JSON_IS_NOT_VALID_AGAINST_SCHEMA + lineSeparator
                 + "1) $.price: is missing but it is required," + lineSeparator
                 + "2) $.tags: integer found, array expected";
         verify(softAssert).recordAssertion(false, errorMessage);
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldValidateJsonAgainstOpenAPISchema()
+    {
+        var schema = loadResource(OPEN_API_SCHEMA_RESOURCE_NAME);
+        steps.validateJsonAgainstOpenApiSchema(loadResource("valid-against-open-api-schema.json"), schema);
+        verify(softAssert).recordAssertion(true, JSON_IS_VALID_AGAINST_SCHEMA);
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldFailValidationAgainstOpenAPISchema()
+    {
+        var schema = loadResource(OPEN_API_SCHEMA_RESOURCE_NAME);
+        steps.validateJsonAgainstOpenApiSchema(loadResource("not-valid-against-open-api-schema.json"), schema);
+        var lineSeparator = System.lineSeparator();
+        var errorMessage = JSON_IS_NOT_VALID_AGAINST_SCHEMA + lineSeparator
+                + "1) $.person.name: is missing but it is required," + lineSeparator
+                + "2) $.person.gender: does not have a value in the enumeration [MALE, FEMALE, OTHER]";
+        verify(softAssert).recordAssertion(false, errorMessage);
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldFailValidationAgainstOpenAPISchemaWithoutComponentNode()
+    {
+        var schema = loadResource("open-api-schema-without-components.json");
+        steps.validateJsonAgainstOpenApiSchema(any(), schema);
+        verify(softAssert).recordFailedAssertion(
+                argThat((ArgumentMatcher<String>) "Component node in OpenAPI schema could not be null"::equals));
         verifyNoMoreInteractions(softAssert);
     }
 

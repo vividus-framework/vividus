@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package org.vividus.json.steps;
 
+import static com.networknt.schema.SpecVersion.VersionFlag.V4;
+
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaException;
 import com.networknt.schema.JsonSchemaFactory;
@@ -33,6 +36,7 @@ import org.vividus.util.json.JsonUtils;
 public class JsonSchemaValidationSteps
 {
     private static final String LINE_SEPARATOR = System.lineSeparator();
+    private static final String COMPONENTS = "components";
 
     private final JsonUtils jsonUtils;
     private final ISoftAssert softAssert;
@@ -67,6 +71,35 @@ public class JsonSchemaValidationSteps
             return;
         }
         JsonSchema jsonSchema = JsonSchemaFactory.getInstance(version).getSchema(schemaNode);
+        JsonNode jsonNode = jsonUtils.readTree(json);
+        Set<ValidationMessage> validationMessages = jsonSchema.validate(jsonNode);
+        assertValidationMessages(validationMessages);
+    }
+
+    /**
+     * Validates json against OpenAPI schema.
+     * <a href="https://spec.openapis.org/oas/v3.0.0">OpenAPI 3.0</a> uses an extended subset of
+     * <a href="https://json-schema.org/specification-links#draft-4">JSON Schema Specification v4</a>
+     * to describe the data formats.
+     * @param json The JSON to validate.
+     * @param openApiSchema The OpenAPI schema.
+     */
+    @Then("JSON `$json` is valid against OpenAPI schema `$openApiSchema`")
+    public void validateJsonAgainstOpenApiSchema(String json, String openApiSchema)
+    {
+        JsonNode componentNode = jsonUtils.readTree(openApiSchema).get(COMPONENTS);
+        if (componentNode == null)
+        {
+            softAssert.recordFailedAssertion("Component node in OpenAPI schema could not be null");
+            return;
+        }
+        JsonNode schemaNode = componentNode.get("schemas").elements().next();
+
+        ObjectNode schemaForValidation = schemaNode.deepCopy();
+        schemaForValidation.set(COMPONENTS, componentNode);
+
+        JsonSchema jsonSchema = JsonSchemaFactory.getInstance(V4).getSchema(schemaForValidation);
+
         JsonNode jsonNode = jsonUtils.readTree(json);
         Set<ValidationMessage> validationMessages = jsonSchema.validate(jsonNode);
         assertValidationMessages(validationMessages);

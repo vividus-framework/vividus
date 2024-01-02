@@ -600,3 +600,92 @@ Then JSON `
 ----
 
 include::partial$plugin-json-matchers.adoc[]
+
+=== Validate JSON against OpenAPI schema
+
+Validates JSON against https://spec.openapis.org/oas/v3.0.0[OpenAPI schema version 3.0].
+
+[source,gherkin]
+----
+Then JSON `$json` is valid against OpenAPI schema `$openApiSchema`
+----
+
+* `$json` - The JSON to validate.
+* `$schema` - https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#schema-object[The OpenAPI schema].
+
+[IMPORTANT]
+====
+https://swagger.io/docs/specification/data-models/keywords/[OpenAPI 3.0] uses an extended subset of https://json-schema.org/specification-links#draft-4[JSON Schema Specification v4] to describe the data formats.
+====
+
+.Validate person information
+[source,gherkin]
+----
+Then JSON `
+{
+    "person": {
+        "name": "John",
+        "surname": "Doe",
+        "gender": "MALE"
+    },
+    "role": "GUEST"
+}` is valid against OpenAPI schema `
+{
+   "openapi":"3.0.0",
+   "paths":{
+
+   },
+   "info":{
+      "title":"User Info API",
+      "version":"v0.1.0"
+   },
+   "components":{
+      "schemas":{
+         "Data":{
+            "type":"object",
+            "required":[
+               "role",
+               "person"
+            ],
+            "properties":{
+               "role":{
+                  "type":"string",
+                  "enum":[
+                     "GUEST",
+                     "USER",
+                     "ADMIN"
+                  ]
+               },
+               "person":{
+                  "$ref":"#/components/schemas/Person"
+               }
+            }
+         },
+         "Person":{
+            "type":"object",
+            "required":[
+               "name",
+               "surname"
+            ],
+            "properties":{
+               "name":{
+                  "type":"string"
+               },
+               "surname":{
+                  "type":"string"
+               },
+               "gender":{
+                  "type":"string",
+                  "enum":[
+                     "MALE",
+                     "FEMALE",
+                     "OTHER"
+                  ]
+               }
+            }
+         }
+      }
+   }
+}`
+`
+----
