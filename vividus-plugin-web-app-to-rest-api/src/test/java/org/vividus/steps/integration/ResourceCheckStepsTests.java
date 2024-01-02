@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.html.HtmlLocatorType;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
@@ -216,7 +217,7 @@ class ResourceCheckStepsTests
         URI imageUri = URI.create("https://avatars0.githubusercontent.com/u/48793437?s=200&v=4");
         URI gifImageUri = URI.create("https://github.githubassets.com/images/spinners/octocat-spinner-32.gif");
         when(webApplicationConfiguration.getMainApplicationPageUrlUnsafely()).thenReturn(VIVIDUS_URI);
-        resourceCheckSteps.checkResources("a, img", FIRST_PAGE);
+        resourceCheckSteps.checkResources(HtmlLocatorType.CSS_SELECTOR, "a, img", FIRST_PAGE);
 
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
@@ -259,7 +260,7 @@ class ResourceCheckStepsTests
 
         String html = "<!DOCTYPE html><html><head></head><body><a id='about' href='/faq'>FAQ</a>"
                 + "<a id='broken-link' href='" + INVALID_URL + "'>Invalid link</a></body></html>";
-        resourceCheckSteps.checkResources(LINK_SELECTOR, html);
+        resourceCheckSteps.checkResources(HtmlLocatorType.CSS_SELECTOR, LINK_SELECTOR, html);
 
         String errorMessage = "Unable to resolve /faq resource since the main application page URL is not set";
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
@@ -298,7 +299,7 @@ class ResourceCheckStepsTests
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
         ExamplesTable examplesTable = new ExamplesTable("{valueSeparator=!}\n|pages|\n!" + pageUrl + "!");
-        resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
+        resourceCheckSteps.checkResources(HtmlLocatorType.CSS_SELECTOR, LINK_SELECTOR, examplesTable);
 
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
@@ -329,7 +330,7 @@ class ResourceCheckStepsTests
             Sleeper.sleep(5, TimeUnit.SECONDS);
             return null;
         }).when(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, SECOND_PAGE_URL, Optional.empty());
-        resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
+        resourceCheckSteps.checkResources(HtmlLocatorType.CSS_SELECTOR, LINK_SELECTOR, examplesTable);
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, SECOND_PAGE_URL, Optional.empty());
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, FIRST_PAGE_URL, Optional.empty());
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
@@ -370,7 +371,7 @@ class ResourceCheckStepsTests
         resourceCheckSteps.init();
         ExamplesTable examplesTable =
                 new ExamplesTable("|pages|\n|https://third.page|");
-        resourceCheckSteps.checkResources(LINK_SELECTOR + ", video", examplesTable);
+        resourceCheckSteps.checkResources(HtmlLocatorType.CSS_SELECTOR, LINK_SELECTOR + ", video", examplesTable);
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, THIRD_PAGE_URL, Optional.empty());
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
@@ -420,7 +421,7 @@ class ResourceCheckStepsTests
         String page = "https://any.page";
         ExamplesTable examplesTable =
                 new ExamplesTable(String.format("|pages|%n|%s|", page));
-        resourceCheckSteps.checkResources("img", examplesTable);
+        resourceCheckSteps.checkResources(HtmlLocatorType.XPATH, "//img", examplesTable);
         verify(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, page, Optional.empty());
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
@@ -444,7 +445,7 @@ class ResourceCheckStepsTests
         resourceCheckSteps.init();
         ExamplesTable examplesTable =
                 new ExamplesTable(FIRST_PAGE_TABLE);
-        resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
+        resourceCheckSteps.checkResources(HtmlLocatorType.CSS_SELECTOR, LINK_SELECTOR, examplesTable);
         String errorMessage = "Unable to get page with URL: https://first.page";
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
@@ -469,7 +470,7 @@ class ResourceCheckStepsTests
         resourceCheckSteps.init();
         ExamplesTable examplesTable =
                 new ExamplesTable("|pages|\n|https://second.page|");
-        resourceCheckSteps.checkResources(LINK_SELECTOR, examplesTable);
+        resourceCheckSteps.checkResources(HtmlLocatorType.CSS_SELECTOR, LINK_SELECTOR, examplesTable);
         String errorMessage = "Unable to get page with URL: https://second.page; Response is received without body;";
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
@@ -491,7 +492,7 @@ class ResourceCheckStepsTests
             v.uncaughtException(new Thread("Interrupted-0"), interruptedException);
             return true;
         }));
-        resourceCheckSteps.checkResources(LINK_SELECTOR, FIRST_PAGE_TABLE);
+        resourceCheckSteps.checkResources(HtmlLocatorType.CSS_SELECTOR, LINK_SELECTOR, FIRST_PAGE_TABLE);
         verify(softAssert).recordFailedAssertion("Exception occured in thread with name: Interrupted-0",
                 interruptedException);
         verifyNoInteractions(httpTestContext, attachmentPublisher, resourceValidator);
@@ -512,7 +513,7 @@ class ResourceCheckStepsTests
             throw exception;
         }).when(executor).execute(any(), any());
         var illegalStateException = assertThrows(IllegalStateException.class,
-                () -> resourceCheckSteps.checkResources(LINK_SELECTOR, FIRST_PAGE_TABLE));
+                () -> resourceCheckSteps.checkResources(HtmlLocatorType.CSS_SELECTOR, LINK_SELECTOR, FIRST_PAGE_TABLE));
         assertEquals(exception, illegalStateException.getCause());
     }
 
@@ -535,7 +536,7 @@ class ResourceCheckStepsTests
         resourceCheckSteps.setUriToIgnoreRegex(Optional.of("^((?!https).)*"));
         resourceCheckSteps.init();
         when(webApplicationConfiguration.getMainApplicationPageUrlUnsafely()).thenReturn(VIVIDUS_URI);
-        resourceCheckSteps.checkResources(LINK_SELECTOR, FIRST_PAGE);
+        resourceCheckSteps.checkResources(HtmlLocatorType.CSS_SELECTOR, LINK_SELECTOR, FIRST_PAGE);
         verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)

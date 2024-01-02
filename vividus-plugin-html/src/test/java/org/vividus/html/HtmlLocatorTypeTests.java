@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.util;
+package org.vividus.html;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -28,9 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockedStatic;
-import org.vividus.html.LocatorType;
 
-class HtmlUtilsTests
+class HtmlLocatorTypeTests
 {
     private static final String TITLE = "title";
     private static final String HTML = """
@@ -43,24 +42,18 @@ class HtmlUtilsTests
             </html>""";
 
     @Test
-    void shouldGetElementsBySelector()
-    {
-        assertEquals("Title of the document", HtmlUtils.getElementsByCssSelector(HTML, TITLE).get(0).text());
-    }
-
-    @Test
     void shouldGetElementsBySelectorHtmlWithBaseUrl()
     {
         try (MockedStatic<Jsoup> jsoup = mockStatic(Jsoup.class))
         {
             String baseUri = "base-uri";
-            Document document = mock(Document.class);
-            Elements elements = mock(Elements.class);
+            Document document = mock();
+            Elements elements = mock();
 
             jsoup.when(() -> Jsoup.parse(HTML, baseUri)).thenReturn(document);
             when(document.select(TITLE)).thenReturn(elements);
 
-            assertEquals(elements, HtmlUtils.getElementsByCssSelector(baseUri, HTML, TITLE));
+            assertEquals(elements, HtmlLocatorType.CSS_SELECTOR.findElements(baseUri, HTML, TITLE));
 
             jsoup.verify(() -> Jsoup.parse(HTML, baseUri));
             jsoup.verifyNoMoreInteractions();
@@ -69,8 +62,15 @@ class HtmlUtilsTests
 
     @ParameterizedTest
     @CsvSource({"CSS_SELECTOR, body", "XPATH, //body"})
-    void shouldFindElement(LocatorType locatorType, String locator)
+    void shouldFindElement(HtmlLocatorType locatorType, String locator)
     {
-        assertEquals(1, HtmlUtils.getElements(HTML, locatorType, locator).size());
+        assertEquals(1, locatorType.findElements(HTML, locator).size());
+    }
+
+    @ParameterizedTest
+    @CsvSource({"CSS_SELECTOR, CSS selector", "XPATH, XPath"})
+    void shouldProvideHumanReadableDescription(HtmlLocatorType locatorType, String expected)
+    {
+        assertEquals(expected, locatorType.getDescription());
     }
 }

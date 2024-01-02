@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,9 @@ import org.jbehave.core.annotations.When;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.vividus.context.VariableContext;
-import org.vividus.html.LocatorType;
+import org.vividus.html.HtmlLocatorType;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
-import org.vividus.util.HtmlUtils;
 import org.vividus.variable.VariableScope;
 
 public class HtmlSteps
@@ -41,9 +40,9 @@ public class HtmlSteps
         this.variableContext = variableContext;
     }
 
-    private Optional<Element> assertElementByLocatorExists(String html, LocatorType locatorType, String locator)
+    private Optional<Element> assertElementByLocatorExists(String html, HtmlLocatorType locatorType, String locator)
     {
-        Elements elements = HtmlUtils.getElements(html, locatorType, locator);
+        Elements elements = locatorType.findElements(html, locator);
         if (assertElements(locatorType, locator, ComparisonRule.EQUAL_TO, 1, elements))
         {
             return Optional.of(elements.first());
@@ -53,32 +52,33 @@ public class HtmlSteps
 
     /**
      * Checks if HTML contains elements according to rule by locator
-     * @param locatorType    <b>CSS selector</b> or <b>XPath</b>
-     * @param locator        Locator to locate elements in HTML document
-     * @param html           HTML to check
-     * @param comparisonRule The rule to match the quantity of elements. The supported rules:
-     *                       <ul>
-     *                       <li>less than (&lt;)</li>
-     *                       <li>less than or equal to (&lt;=)</li>
-     *                       <li>greater than (&gt;)</li>
-     *                       <li>greater than or equal to (&gt;=)</li>
-     *                       <li>equal to (=)</li>
-     *                       <li>not equal to (!=)</li>
-     *                       </ul>
-     * @param number         Number of elements
+     *
+     * @param htmlLocatorType The <b>CSS selector</b> or <b>XPath</b>
+     * @param htmlLocator     The locator to locate elements in HTML document
+     * @param html            The HTML document
+     * @param comparisonRule  The rule to match the quantity of elements. The supported rules:
+     *                        <ul>
+     *                        <li>less than (&lt;)</li>
+     *                        <li>less than or equal to (&lt;=)</li>
+     *                        <li>greater than (&gt;)</li>
+     *                        <li>greater than or equal to (&gt;=)</li>
+     *                        <li>equal to (=)</li>
+     *                        <li>not equal to (!=)</li>
+     *                        </ul>
+     * @param number          The expected number of elements
      * @see <a href="https://www.w3schools.com/cssref/css_selectors.asp"><i>CSS Selector Reference</i></a>
      * @see <a href="https://jsoup.org/apidocs/org/jsoup/select/Selector.html"><i>Jsoup Selector API</i></a>
      * @return true if elements quantity corresponds to rule, false otherwise
      */
-    @Then("number of elements found by $locatorType `$locator` in HTML `$html` is $comparisonRule `$number`")
-    public boolean doesElementByLocatorExist(LocatorType locatorType,
-            String locator, String html, ComparisonRule comparisonRule, int number)
+    @Then("number of elements found by $htmlLocatorType `$htmlLocator` in HTML `$html` is $comparisonRule `$number`")
+    public boolean doesElementByLocatorExist(HtmlLocatorType htmlLocatorType,
+            String htmlLocator, String html, ComparisonRule comparisonRule, int number)
     {
-        Elements elements = HtmlUtils.getElements(html, locatorType, locator);
-        return assertElements(locatorType, locator, comparisonRule, number, elements);
+        Elements elements = htmlLocatorType.findElements(html, htmlLocator);
+        return assertElements(htmlLocatorType, htmlLocator, comparisonRule, number, elements);
     }
 
-    private boolean assertElements(LocatorType locatorType, String cssSelector, ComparisonRule comparisonRule,
+    private boolean assertElements(HtmlLocatorType locatorType, String cssSelector, ComparisonRule comparisonRule,
             int number, Elements elements)
     {
         return softAssert.assertThat(String.format("Number of elements found by %s '%s'", locatorType.getDescription(),
@@ -87,58 +87,63 @@ public class HtmlSteps
 
     /**
      * Checks if HTML has expected data by given locator
-     * @param html         HTML to check
-     * @param expectedText expected value of element
-     * @param locatorType  <b>CSS selector</b> or <b>XPath</b>
-     * @param locator      Locator to locate element in HTML document
+     *
+     * @param htmlLocatorType The <b>CSS selector</b> or <b>XPath</b>
+     * @param htmlLocator     The locator to locate element in HTML document
+     * @param html            The HTML document
+     * @param expectedText    The expected text of element
      * @see <a href="https://www.w3schools.com/cssref/css_selectors.asp"><i>CSS Selector Reference</i></a>
      * @see <a href="https://jsoup.org/apidocs/org/jsoup/select/Selector.html"><i>Jsoup Selector API</i></a>
      */
-    @Then("element found by $locatorType `$locator` in HTML `$html` contains text `$expectedText`")
-    public void elementContainsDataByLocator(LocatorType locatorType, String locator, String html, String expectedText)
+    @Then("element found by $htmlLocatorType `$htmlLocator` in HTML `$html` contains text `$expectedText`")
+    public void elementContainsDataByLocator(HtmlLocatorType htmlLocatorType, String htmlLocator, String html,
+            String expectedText)
     {
-        assertElementByLocatorExists(html, locatorType, locator).ifPresent(e -> softAssert
-            .assertEquals(String.format("Element found by %s contains expected data", locatorType.getDescription()),
+        assertElementByLocatorExists(html, htmlLocatorType, htmlLocator).ifPresent(e -> softAssert
+            .assertEquals(String.format("Element found by %s contains expected data", htmlLocatorType.getDescription()),
                     expectedText, e.text()));
     }
 
     /**
      * Sets specified attribute value of the element found by the locator to the variable with name
-     * @param attributeName name of the element attribute
-     * @param html HTML to check
-     * @param locatorType  <b>CSS selector</b> or <b>XPath</b>
-     * @param locator CSS selector
+     *
+     * @param attributeName    The name of the element attribute
+     * @param html             The HTML document
+     * @param htmlLocatorType  The <b>CSS selector</b> or <b>XPath</b>
+     * @param htmlLocator      The locator to locate element in HTML document
      * @see <a href="https://www.w3schools.com/cssref/css_selectors.asp"><i>CSS Selector Reference</i></a>
      * @see <a href="https://jsoup.org/apidocs/org/jsoup/select/Selector.html"><i>Jsoup Selector API</i></a>
      * @param scopes scopes The set of variable scopes (comma separated list of scopes e.g.: STORY, NEXT_BATCHES)
      * @param variableName variable name
      */
-    @When(value = "I save `$attributeName` attribute value of element found by $locatorType `$locator` in HTML "
+    @When(value = "I save `$attributeName` attribute value of element found by $htmlLocatorType `$htmlLocator` in HTML "
         + "`$html` to $scopes variable `$variableName`", priority = 1)
-    public void saveAttributeValueOfElementByLocator(String attributeName, LocatorType locatorType, String locator,
-            String html, Set<VariableScope> scopes, String variableName)
+    public void saveAttributeValueOfElementByLocator(String attributeName, HtmlLocatorType htmlLocatorType,
+            String htmlLocator, String html, Set<VariableScope> scopes, String variableName)
     {
-        assertElementByLocatorExists(html, locatorType, locator)
+        assertElementByLocatorExists(html, htmlLocatorType, htmlLocator)
                 .ifPresent(e -> variableContext.putVariable(scopes, variableName, e.attr(attributeName)));
     }
 
     /**
      * Sets specified data type (text, data) of the element found by the locator to the variable with name
-     * @param dataType to save
-     * @param locatorType  <b>CSS selector</b> or <b>XPath</b>
-     * @param locator CSS selector
-     * @param html HTML to check
-     * @param scopes scopes The set of variable scopes (comma separated list of scopes e.g.: STORY, NEXT_BATCHES)
-     * @param variableName variable name
+     *
+     * @param dataType        The type of data, either <b>text</b> or <b>data</b> (contents of scripts, comments,
+     * CSS styles, etc.)
+     * @param htmlLocatorType The <b>CSS selector</b> or <b>XPath</b>
+     * @param htmlLocator     The locator to locate element in HTML document
+     * @param html            The HTML document
+     * @param scopes scopes   The set of variable scopes (comma separated list of scopes e.g.: STORY, NEXT_BATCHES)
+     * @param variableName    The variable name
      * @see <a href="https://www.w3schools.com/cssref/css_selectors.asp"><i>CSS Selector Reference</i></a>
      * @see <a href="https://jsoup.org/apidocs/org/jsoup/select/Selector.html"><i>Jsoup Selector API</i></a>
      */
-    @When("I save $dataType of element found by $locatorType `$locator` in HTML `$html` to $scopes variable"
+    @When("I save $dataType of element found by $htmlLocatorType `$htmlLocator` in HTML `$html` to $scopes variable"
             + " `$variableName`")
-    public void saveData(DataType dataType, LocatorType locatorType, String locator, String html,
+    public void saveData(DataType dataType, HtmlLocatorType htmlLocatorType, String htmlLocator, String html,
             Set<VariableScope> scopes, String variableName)
     {
-        assertElementByLocatorExists(html, locatorType, locator)
+        assertElementByLocatorExists(html, htmlLocatorType, htmlLocator)
             .ifPresent(e -> variableContext.putVariable(scopes, variableName, dataType.get(e)));
     }
 }

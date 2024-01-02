@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
-import org.vividus.html.LocatorType;
+import org.vividus.html.HtmlLocatorType;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.util.ResourceUtils;
@@ -50,14 +50,9 @@ class HtmlStepsTests
     private static final String HREF = "href";
     private static final String HTML_CONTENT = ResourceUtils.loadResource(HtmlStepsTests.class, "index.html");
 
-    @Mock
-    private ISoftAssert softAssert;
-
-    @Mock
-    private VariableContext variableContext;
-
-    @InjectMocks
-    private HtmlSteps htmlSteps;
+    @Mock private ISoftAssert softAssert;
+    @Mock private VariableContext variableContext;
+    @InjectMocks private HtmlSteps htmlSteps;
 
     @ParameterizedTest
     @CsvSource({
@@ -80,7 +75,7 @@ class HtmlStepsTests
     private void elementContainsDataByCssSelector(String selector, int size, boolean result)
     {
         mockFoundElements(selector, CSS_SELECTOR, size, result);
-        htmlSteps.elementContainsDataByLocator(LocatorType.CSS_SELECTOR, selector, HTML_CONTENT, TEXT);
+        htmlSteps.elementContainsDataByLocator(HtmlLocatorType.CSS_SELECTOR, selector, HTML_CONTENT, TEXT);
         verifyFoundElements(selector, CSS_SELECTOR, size);
     }
 
@@ -94,7 +89,7 @@ class HtmlStepsTests
         "'//h1[not(contains(text(), \"Header\"))]',    XPATH       , XPath,        1, true",
         "//body/p,                                     XPATH       , XPath,        0, true"
     })
-    void shouldValidateElementsExistenceByLocator(String locator, LocatorType type, String description, int size,
+    void shouldValidateElementsExistenceByLocator(String locator, HtmlLocatorType type, String description, int size,
         boolean result)
     {
         mockFoundElements(locator, description, size, result);
@@ -108,8 +103,8 @@ class HtmlStepsTests
         String selector = "body > div > p:nth-child(3) > a";
         mockFoundElements(selector, CSS_SELECTOR, 1, true);
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        htmlSteps.saveAttributeValueOfElementByLocator(HREF, LocatorType.CSS_SELECTOR, selector, HTML_CONTENT, scopes,
-            VARIABLE_NAME);
+        htmlSteps.saveAttributeValueOfElementByLocator(HREF, HtmlLocatorType.CSS_SELECTOR, selector, HTML_CONTENT,
+                scopes, VARIABLE_NAME);
         verifyFoundElements(selector, CSS_SELECTOR, 1);
         verify(variableContext).putVariable(scopes, VARIABLE_NAME, "http://www.iana.org/domains/example");
     }
@@ -119,7 +114,7 @@ class HtmlStepsTests
     {
         String selector = "body > div > p:nth-child(4)";
         mockFoundElements(selector, CSS_SELECTOR, 0, false);
-        htmlSteps.saveAttributeValueOfElementByLocator(HTML_CONTENT, LocatorType.CSS_SELECTOR, selector, HREF,
+        htmlSteps.saveAttributeValueOfElementByLocator(HTML_CONTENT, HtmlLocatorType.CSS_SELECTOR, selector, HREF,
                 Set.of(VariableScope.SCENARIO), VARIABLE_NAME);
         verifyFoundElements(selector, CSS_SELECTOR, 0);
         verifyNoInteractions(variableContext);
@@ -131,7 +126,7 @@ class HtmlStepsTests
         String selector = "h1";
         mockFoundElements(selector, CSS_SELECTOR, 1, true);
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
-        htmlSteps.saveData(DataType.TEXT, LocatorType.CSS_SELECTOR, selector, HTML_CONTENT, scopes, VARIABLE_NAME);
+        htmlSteps.saveData(DataType.TEXT, HtmlLocatorType.CSS_SELECTOR, selector, HTML_CONTENT, scopes, VARIABLE_NAME);
         verifyFoundElements(selector, CSS_SELECTOR, 1);
         verify(variableContext).putVariable(scopes, VARIABLE_NAME, TEXT);
     }
