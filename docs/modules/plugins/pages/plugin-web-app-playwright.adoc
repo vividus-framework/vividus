@@ -107,6 +107,8 @@ When I clear field located by `$locator`
 When I clear field located by `id(email)`
 ----
 
+include::plugins:partial$ui-elements-validation-steps.adoc[]
+
 include::plugins:partial$ui-text-content-steps.adoc[]
 
 ==== Save the text of the context

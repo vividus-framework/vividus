@@ -147,27 +147,6 @@ When I wait until element located by `$locator` stops moving
 When I wait until element located by `id(submitForm)` stops moving
 ----
 
-
-=== Verify elements number
-
-Verifies if the number of elements located by locator matches the desired number.
-
-[source,gherkin]
-----
-Then number of elements found by `$locator` is $comparisonRule `$quantity`
-----
-
-* `$locator` - <<_locator>>.
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `$quantity` - The expected number of the elements.
-
-.Verify the number of elements
-[source,gherkin]
-----
-Then number of elements found by `tagName(img)` is equal to `5`
-----
-
-
 === Verify elements state
 
 Verifies if the number of elements located by locator matches the number
@@ -178,7 +157,7 @@ If you describe number condition as equal to 5 in case if there are 10 elements 
 The first one about number condition violation. The second one about state check failure.
 
 [WARNING]
-In case when <<_visibility_types>> are used and checked state are equal (For an example ':i' and 'NOT_VISIBLE') exception will be thrown. In such cases please use step: <<_verify_elements_number>>.
+In case when <<_visibility_types>> are used and checked state are equal (For an example ':i' and 'NOT_VISIBLE') exception will be thrown. In such cases please use step: <<_validate_elements_number>>.
 Contradictory visibility parameters (locator - ':i' and checked state - 'VISIBLE') are also not allowed.
 
 [source,gherkin]
