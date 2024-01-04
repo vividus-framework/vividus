@@ -28,6 +28,7 @@
 
     <bean class="org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert" />
 
+    <bean id="elementSteps" class="org.vividus.ui.web.playwright.steps.ElementSteps" />
     <bean id="fieldSteps" class="org.vividus.ui.web.playwright.steps.FieldSteps" />
     <bean id="mouseSteps" class="org.vividus.ui.web.playwright.steps.MouseSteps" />
     <bean id="pageSteps" class="org.vividus.ui.web.playwright.steps.PageSteps" />
@@ -36,6 +37,7 @@
     <bean id="textContentSteps" class="org.vividus.ui.web.playwright.steps.TextContentSteps" />
 
     <util:list id="stepBeanNames-WebPlaywrightUi" value-type="java.lang.String">
+        <idref bean="elementSteps" />
         <idref bean="fieldSteps" />
         <idref bean="mouseSteps" />
         <idref bean="pageSteps" />
