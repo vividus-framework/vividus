@@ -11,7 +11,6 @@
     <context:component-scan base-package="org.vividus.converter" >
         <context:exclude-filter type="regex" expression="org\.vividus\.converter\..*\..*"/>
     </context:component-scan>
-    <context:component-scan base-package="org.vividus.expression"/>
 
     <import resource="classpath:/org/vividus/engine/spring.xml"/>
     <import resource="classpath:/org/vividus/reporter/spring.xml"/>
