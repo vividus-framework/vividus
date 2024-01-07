@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.ContextAware;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.Platform;
@@ -95,11 +94,11 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
         return function.apply(webDriverProvider.get());
     }
 
-    private void switchToContext(ContextAware contextAwareDriver, String contextName)
+    private void switchToContext(SupportsContextSwitching contextSwitchingDriver, String contextName)
     {
-        if (contextAwareDriver.getContextHandles().contains(contextName))
+        if (contextSwitchingDriver.getContextHandles().contains(contextName))
         {
-            contextAwareDriver.context(contextName);
+            contextSwitchingDriver.context(contextName);
         }
         else
         {

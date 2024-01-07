@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,14 @@ import java.util.function.Predicate;
 
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
-import org.openqa.selenium.ContextAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.StringComparisonRule;
+
+import io.appium.java_client.remote.SupportsContextSwitching;
 
 public class SetContextSteps
 {
@@ -50,7 +51,7 @@ public class SetContextSteps
     @When("I switch to native context")
     public void switchToNativeContext()
     {
-        getContextAware().context(IGenericWebDriverManager.NATIVE_APP_CONTEXT);
+        getContextSwitchingDriver().context(IGenericWebDriverManager.NATIVE_APP_CONTEXT);
     }
 
     /**
@@ -62,7 +63,7 @@ public class SetContextSteps
     @When("I switch to web view with name that $comparisonRule `$value`")
     public void switchToWebViewByName(StringComparisonRule rule, String value)
     {
-        List<String> webViews = getContextAware().getContextHandles()
+        List<String> webViews = getContextSwitchingDriver().getContextHandles()
                 .stream()
                 .filter(not(IGenericWebDriverManager.NATIVE_APP_CONTEXT::equals))
                 .toList();
@@ -89,12 +90,12 @@ public class SetContextSteps
         {
             String webView = matchedWebViews.get(0);
             LOGGER.atInfo().addArgument(webView).log("Switching to web view with the name '{}'");
-            getContextAware().context(webView);
+            getContextSwitchingDriver().context(webView);
         }
     }
 
-    private ContextAware getContextAware()
+    private SupportsContextSwitching getContextSwitchingDriver()
     {
-        return webDriverProvider.getUnwrapped(ContextAware.class);
+        return webDriverProvider.getUnwrapped(SupportsContextSwitching.class);
     }
 }

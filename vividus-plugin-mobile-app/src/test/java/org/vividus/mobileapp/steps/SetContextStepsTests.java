@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,11 +37,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.ContextAware;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.StringComparisonRule;
+
+import io.appium.java_client.remote.SupportsContextSwitching;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SetContextStepsTests
@@ -51,7 +52,7 @@ class SetContextStepsTests
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private ISoftAssert softAssert;
-    @Mock private ContextAware contextAware;
+    @Mock private SupportsContextSwitching contextSwitchingDriver;
     @InjectMocks private SetContextSteps setContextSteps;
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(SetContextSteps.class);
@@ -59,12 +60,12 @@ class SetContextStepsTests
     @Test
     void shouldSwitchToNativeContext()
     {
-        when(webDriverProvider.getUnwrapped(ContextAware.class)).thenReturn(contextAware);
+        when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(contextSwitchingDriver);
 
         setContextSteps.switchToNativeContext();
 
-        verify(contextAware).context(IGenericWebDriverManager.NATIVE_APP_CONTEXT);
-        verifyNoMoreInteractions(contextAware, webDriverProvider);
+        verify(contextSwitchingDriver).context(IGenericWebDriverManager.NATIVE_APP_CONTEXT);
+        verifyNoMoreInteractions(contextSwitchingDriver, webDriverProvider);
         verifyNoInteractions(softAssert);
         assertThat(logger.getLoggingEvents(), is(empty()));
     }
@@ -72,14 +73,14 @@ class SetContextStepsTests
     @Test
     void shouldSwitchToWebViewByName()
     {
-        when(webDriverProvider.getUnwrapped(ContextAware.class)).thenReturn(contextAware);
-        when(contextAware.getContextHandles())
+        when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(contextSwitchingDriver);
+        when(contextSwitchingDriver.getContextHandles())
                 .thenReturn(Set.of(IGenericWebDriverManager.NATIVE_APP_CONTEXT, WEB_VIEW_MAIN));
 
         setContextSteps.switchToWebViewByName(StringComparisonRule.IS_EQUAL_TO, WEB_VIEW_MAIN);
 
-        verify(contextAware).context(WEB_VIEW_MAIN);
-        verifyNoMoreInteractions(softAssert, contextAware, webDriverProvider);
+        verify(contextSwitchingDriver).context(WEB_VIEW_MAIN);
+        verifyNoMoreInteractions(softAssert, contextSwitchingDriver, webDriverProvider);
         assertThat(logger.getLoggingEvents(), is(List.of(
                 info(WEB_VIEWS_FOUND, Set.of(WEB_VIEW_MAIN).toString()),
                 info("Switching to web view with the name '{}'", WEB_VIEW_MAIN))));
@@ -88,28 +89,29 @@ class SetContextStepsTests
     @Test
     void shouldFailToSwitchToWebViewWhenNoWebViewIsAvailable()
     {
-        when(webDriverProvider.getUnwrapped(ContextAware.class)).thenReturn(contextAware);
-        when(contextAware.getContextHandles()).thenReturn(Set.of(IGenericWebDriverManager.NATIVE_APP_CONTEXT));
+        when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(contextSwitchingDriver);
+        when(contextSwitchingDriver.getContextHandles()).thenReturn(
+                Set.of(IGenericWebDriverManager.NATIVE_APP_CONTEXT));
 
         setContextSteps.switchToWebViewByName(StringComparisonRule.IS_EQUAL_TO, WEB_VIEW_MAIN);
 
         verify(softAssert).recordFailedAssertion("No web views found");
-        verifyNoMoreInteractions(softAssert, contextAware, webDriverProvider);
+        verifyNoMoreInteractions(softAssert, contextSwitchingDriver, webDriverProvider);
         assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
     @Test
     void shouldFailSwitchingToWebViewIfNoWebViewMatchesTheRule()
     {
-        when(webDriverProvider.getUnwrapped(ContextAware.class)).thenReturn(contextAware);
-        when(contextAware.getContextHandles())
+        when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(contextSwitchingDriver);
+        when(contextSwitchingDriver.getContextHandles())
                 .thenReturn(Set.of(IGenericWebDriverManager.NATIVE_APP_CONTEXT, WEB_VIEW_MAIN));
 
         setContextSteps.switchToWebViewByName(StringComparisonRule.DOES_NOT_CONTAIN, WEB_VIEW_MAIN);
 
         verify(softAssert).recordFailedAssertion("The number of web views with name that does not contain"
                 + " 'WEBVIEW_MAIN' is expected to be 1, but got 0");
-        verifyNoMoreInteractions(softAssert, contextAware, webDriverProvider);
+        verifyNoMoreInteractions(softAssert, contextSwitchingDriver, webDriverProvider);
         assertThat(logger.getLoggingEvents(), is(List.of(
                 info(WEB_VIEWS_FOUND, Set.of(WEB_VIEW_MAIN).toString()))));
     }
