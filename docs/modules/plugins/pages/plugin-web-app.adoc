@@ -1293,7 +1293,7 @@ Then number of elements found by `xpath(.//script[text()='<jsText>']):a` is equa
 ----
 ====
 
-Checks the page contains a script (an element with the '<script>' tag) whose content is equal to the specified text.
+Checks the page contains a script (an element with the `<script>` tag) whose content is equal to the specified text.
 
 [source,gherkin]
 ----
