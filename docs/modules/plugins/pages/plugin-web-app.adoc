@@ -1250,6 +1250,91 @@ When I wait until scroll is finished
 Then page is scrolled to element located by `id(footerElement)`
 ----
 
+=== Script Steps
+
+The Script Steps verify the presence of JavaScript files in the HTML source code of an active page.
+
+==== Check the presence of script resource
+
+[WARNING]
+====
+This step is deprecated and will be removed in VIVIDUS 0.7.0.
+Please see the replacement pattern below:
+[source,gherkin]
+----
+Then number of elements found by `xpath(.//script[contains(@src()='<jsFileName>']):a` is equal to `1`
+----
+====
+
+Checks script (an element with the `<script>` tag) with the specified path (`@src` attribute) is included on the page.
+
+[source,gherkin]
+----
+Then a javascript file with the name '$jsFileName' is included in the source code
+----
+
+* `$jsFileName` - The part of the script resource URL from the `@src` attribute.
+
+.Checks if the javascript with the 'script.js' filename exists in the page source code
+[source,gherkin]
+----
+Then a javascript file with the name 'script.js' is included in the source code.
+----
+
+==== Check the presence of script code
+
+[WARNING]
+====
+This step is deprecated and will be removed in VIVIDUS 0.7.0.
+Please see the replacement pattern below:
+[source,gherkin]
+----
+Then number of elements found by `xpath(.//script[text()='<jsText>']):a` is equal to `1`
+----
+====
+
+Checks the page contains a script (an element with the `<script>` tag) whose content is equal to the specified text.
+
+[source,gherkin]
+----
+Then a javascript with the text '$jsText' is included in the source code
+----
+
+* `$jsText` - The expected text to be equal to the text of a `<script>` tag.
+
+.Checks if the JavaScript code equals to the expected one
+[source,gherkin]
+----
+Then a javascript with the text 'document.getElementById("demo-for-script").innerHTML = "Hello JavaScript!";' is included in the source code
+----
+
+==== Check script contains code
+
+[WARNING]
+====
+This step is deprecated and will be removed in VIVIDUS 0.7.0.
+Please see the replacement pattern below:
+[source,gherkin]
+----
+Then number of elements found by `xpath(.//script[contains(text(),'<jsTextPart>')]):a` is equal to `1`
+----
+====
+
+Checks the page contains a script (an element with the `<script>` tag) whose content contains the specified text.
+
+[source,gherkin]
+----
+Then a javascript with the textpart '$jsTextPart' is included in the source code
+----
+
+* `$jsTextPart` - The expected text to be contained in the text of a `<script>` tag.
+
+.Checks if the JavaScript code contains 'Hello JavaScript'
+[source,gherkin]
+----
+Then a javascript with the textpart 'Hello JavaScript' is included in the source code
+----
+
 === Set Variable Steps
 
 ==== Save HTML table to the variable
