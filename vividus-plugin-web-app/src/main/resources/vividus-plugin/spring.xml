@@ -81,7 +81,7 @@
 
     <bean id="cssSelectorFactory" class="org.vividus.ui.web.action.CssSelectorFactory" />
 
-    <bean id="webStorageManager" class="org.vividus.ui.web.storage.WebStorageManager" />
+    <bean class="org.vividus.ui.web.storage.WebStorage" />
 
     <bean id="abstractWebElementSearchAction" class="org.vividus.ui.web.action.search.AbstractWebElementSearchAction"
           parent="abstractElementAction" abstract="true" />

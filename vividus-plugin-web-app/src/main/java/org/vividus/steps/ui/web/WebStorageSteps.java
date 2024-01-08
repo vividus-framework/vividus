@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,20 +29,20 @@ import org.slf4j.LoggerFactory;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.storage.StorageType;
-import org.vividus.ui.web.storage.WebStorageManager;
+import org.vividus.ui.web.storage.WebStorage;
 import org.vividus.variable.VariableScope;
 
 public class WebStorageSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebStorageSteps.class);
 
-    private final WebStorageManager webStorageManager;
+    private final WebStorage webStorage;
     private final VariableContext variableContext;
     private final ISoftAssert softAssert;
 
-    public WebStorageSteps(WebStorageManager webStorageManager, VariableContext variableContext, ISoftAssert softAssert)
+    public WebStorageSteps(WebStorage webStorage, VariableContext variableContext, ISoftAssert softAssert)
     {
-        this.webStorageManager = webStorageManager;
+        this.webStorage = webStorage;
         this.variableContext = variableContext;
         this.softAssert = softAssert;
     }
@@ -68,7 +68,7 @@ public class WebStorageSteps
     public void saveWebStorageItemToVariable(StorageType storageType, String key, Set<VariableScope> scopes,
             String variableName)
     {
-        variableContext.putVariable(scopes, variableName, webStorageManager.getStorage(storageType).getItem(key));
+        variableContext.putVariable(scopes, variableName, webStorage.getItem(storageType, key));
     }
 
     /**
@@ -84,7 +84,7 @@ public class WebStorageSteps
     public void setWebStorageItem(StorageType storageType, String key, String value)
     {
         LOGGER.info("Setting {} storage item with key '{}' and value '{}", storageType, key, value);
-        webStorageManager.getStorage(storageType).setItem(key, value);
+        webStorage.setItem(storageType, key, value);
     }
 
     /**
@@ -116,6 +116,6 @@ public class WebStorageSteps
     private void assertWebStorageItem(StorageType storageType, String key, Matcher<Object> matcher)
     {
         softAssert.assertThat(String.format("%s storage item with key '%s'", storageType, key),
-                webStorageManager.getStorage(storageType).getItem(key), matcher);
+                webStorage.getItem(storageType, key), matcher);
     }
 }

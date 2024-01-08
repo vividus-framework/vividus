@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,11 +37,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openqa.selenium.html5.Storage;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.web.storage.StorageType;
-import org.vividus.ui.web.storage.WebStorageManager;
+import org.vividus.ui.web.storage.WebStorage;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -52,7 +51,7 @@ class WebStorageStepsTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(WebStorageSteps.class);
 
-    @Mock private WebStorageManager webStorageManager;
+    @Mock private WebStorage webStorage;
     @Mock private VariableContext variableContext;
     @Mock private ISoftAssert softAssert;
     @InjectMocks private WebStorageSteps webStorageSteps;
@@ -61,9 +60,7 @@ class WebStorageStepsTests
     void shouldSaveWebStorageItemToVariable()
     {
         var storageType = mock(StorageType.class);
-        Storage storage = mock(Storage.class);
-        when(webStorageManager.getStorage(storageType)).thenReturn(storage);
-        when(storage.getItem(KEY)).thenReturn(VALUE);
+        when(webStorage.getItem(storageType, KEY)).thenReturn(VALUE);
         var scopes = Set.of(VariableScope.STEP);
 
         webStorageSteps.saveWebStorageItemToVariable(storageType, KEY, scopes, KEY);
@@ -75,11 +72,10 @@ class WebStorageStepsTests
     void shouldSetWebStorageItem()
     {
         var storageType = mock(StorageType.class);
-        Storage storage = mock(Storage.class);
-        when(webStorageManager.getStorage(storageType)).thenReturn(storage);
+
         webStorageSteps.setWebStorageItem(storageType, KEY, VALUE);
 
-        verify(storage).setItem(KEY, VALUE);
+        verify(webStorage).setItem(storageType, KEY, VALUE);
         assertThat(logger.getLoggingEvents(),
                 is(List.of(info("Setting {} storage item with key '{}' and value '{}", storageType, KEY, VALUE))));
     }
@@ -88,9 +84,7 @@ class WebStorageStepsTests
     void shouldAssertThatWebStorageItemExists()
     {
         var storageType = StorageType.LOCAL;
-        Storage storage = mock(Storage.class);
-        when(webStorageManager.getStorage(storageType)).thenReturn(storage);
-        when(storage.getItem(KEY)).thenReturn(VALUE);
+        when(webStorage.getItem(storageType, KEY)).thenReturn(VALUE);
 
         webStorageSteps.assertWebStorageItemExists(storageType, KEY);
 
@@ -102,9 +96,8 @@ class WebStorageStepsTests
     void shouldAssertThatWebStorageItemDoesNotExist()
     {
         var storageType = StorageType.SESSION;
-        Storage storage = mock(Storage.class);
-        when(webStorageManager.getStorage(storageType)).thenReturn(storage);
-        when(storage.getItem(KEY)).thenReturn(VALUE);
+
+        when(webStorage.getItem(storageType, KEY)).thenReturn(VALUE);
 
         webStorageSteps.assertWebStorageItemDoesNotExist(storageType, KEY);
 
