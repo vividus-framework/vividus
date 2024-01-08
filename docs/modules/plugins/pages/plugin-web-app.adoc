@@ -1320,7 +1320,7 @@ Then number of elements found by `xpath(.//script[contains(text(),'<jsTextPart>'
 ----
 ====
 
-Checks the page contains a script (an element with the '<script>' tag) whose content contains the specified text.
+Checks the page contains a script (an element with the `<script>` tag) whose content contains the specified text.
 
 [source,gherkin]
 ----
