@@ -1,0 +1,42 @@
+=== Save size and coordinates of element
+
+Saves the information about the size of an element and its coordinates relative to the viewport.
+
+[source,gherkin]
+----
+When I save coordinates and size of element located by `$locator` to $scopes variable `$variableName`
+----
+
+* `$locator` - <<_locator>>.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the coordinates and size of an element which can be accessed on the variable name using dot notation (please see examples section):
++
+[cols="1,3", options="header"]
+|===
+
+|Attribute
+|Description
+
+|`x`
+|the `x` coordinate
+
+|`y`
+|the `y` coordinate
+
+|`height`
+|the `height` of the element
+
+|`width`
+|the `width` of the element
+
+|===
+
+.Verify image size and coordinates
+[source,gherkin]
+----
+When I save coordinates and size of element located by `tagName(img)` to scenario variable `rect`
+Then `${rect.height}` is equal `400`
+Then `${rect.width}` is equal `400`
+Then `${rect.x}` is equal `200`
+Then `${rect.y}` is equal `8`
+----

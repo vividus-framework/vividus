@@ -253,6 +253,8 @@ When I save number of elements located by `tagName(a)` to scenario variable `num
 Then `${numberOfLinks}` is equal to `1`
 ----
 
+include::plugins:partial$ui-size-and-coordinates-steps.adoc[]
+
 === Element existence during the time period
 
 Validates the element located by the locator has existed for the period

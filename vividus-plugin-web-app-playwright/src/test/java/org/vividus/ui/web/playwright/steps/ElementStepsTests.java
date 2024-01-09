@@ -20,24 +20,34 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.microsoft.playwright.Locator;
+import java.util.Map;
+import java.util.Set;
 
+import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.options.BoundingBox;
+
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
+import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
 class ElementStepsTests
 {
+    private static final String XPATH = "xpath";
+
     @Mock private UiContext uiContext;
     @Mock private ISoftAssert softAssert;
+    @Mock private VariableContext variableContext;
     @InjectMocks private ElementSteps steps;
 
     @ParameterizedTest
@@ -50,7 +60,7 @@ class ElementStepsTests
     void shouldRecordAssertionOnValidationIfNumberOfElementIsEqualToExpected(String locatorValue, int actualNumber,
             int expectedNumber, String assertionMessage)
     {
-        var playwrightLocator = new PlaywrightLocator("xpath", locatorValue);
+        var playwrightLocator = new PlaywrightLocator(XPATH, locatorValue);
         Locator locator = mock();
         when(uiContext.locateElement(playwrightLocator)).thenReturn(locator);
         when(locator.count()).thenReturn(actualNumber);
@@ -72,5 +82,29 @@ class ElementStepsTests
         when(locator.count()).thenReturn(actualNumber);
         steps.assertElementsNumber(playwrightLocator, ComparisonRule.GREATER_THAN, expectedNumber);
         verify(softAssert).recordAssertion(passed, assertionMessage);
+    }
+
+    @Test
+    void shouldSaveElementCoordinatesAndSize()
+    {
+        var playwrightLocator = new PlaywrightLocator(XPATH, "div");
+        Locator locator = mock();
+        when(uiContext.locateElement(playwrightLocator)).thenReturn(locator);
+        BoundingBox box = new BoundingBox();
+        box.x = 1;
+        box.y = 2;
+        box.height = 3;
+        box.width = 4;
+        when(locator.boundingBox()).thenReturn(box);
+
+        String variableName = "variable name";
+        steps.saveElementCoordinatesAndSize(playwrightLocator, Set.of(VariableScope.STORY), variableName);
+
+        verify(variableContext).putVariable(Set.of(VariableScope.STORY), variableName, Map.of(
+            "x", box.x,
+            "y", box.y,
+            "height", box.height,
+            "width", box.width
+        ));
     }
 }

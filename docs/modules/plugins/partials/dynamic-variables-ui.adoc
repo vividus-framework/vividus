@@ -1,5 +1,7 @@
 === Context element rectangle
 
+IMPORTANT: Context element rectangle dynamic variables are deprecated and will be removed in VIVIDUS 0.7.0, please use <<_save_size_and_coordinates_of_element>> step.
+
 The set of dynamic variables provides ability to access context element
 coordinates, width and height.
 

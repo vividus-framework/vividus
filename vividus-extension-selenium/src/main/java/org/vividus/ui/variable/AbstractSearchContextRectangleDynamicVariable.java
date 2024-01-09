@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,27 @@ import java.util.function.ToIntFunction;
 
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.ui.context.UiContext;
 import org.vividus.variable.DynamicVariable;
 import org.vividus.variable.DynamicVariableCalculationResult;
 
+@Deprecated(forRemoval = true, since = "0.6.6")
 public abstract class AbstractSearchContextRectangleDynamicVariable implements DynamicVariable
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSearchContextRectangleDynamicVariable.class);
+
+    private final String expression;
+    private final String attribute;
     private final UiContext uiContext;
     private final ToIntFunction<Rectangle> valueProvider;
 
-    protected AbstractSearchContextRectangleDynamicVariable(UiContext uiContext, ToIntFunction<Rectangle> valueProvider)
+    protected AbstractSearchContextRectangleDynamicVariable(String expression, String attribute, UiContext uiContext,
+            ToIntFunction<Rectangle> valueProvider)
     {
+        this.expression = expression;
+        this.attribute = attribute;
         this.uiContext = uiContext;
         this.valueProvider = valueProvider;
     }
@@ -38,6 +48,13 @@ public abstract class AbstractSearchContextRectangleDynamicVariable implements D
     @Override
     public DynamicVariableCalculationResult calculateValue()
     {
+        LOGGER.atWarn().addArgument(expression)
+                       .addArgument("When I save coordinates and size of element located by `$locator` to $scopes "
+                               + "variable `$variableName`")
+                       .addArgument(attribute)
+                       .log("The '{}' dynamic variable is deprecated and will be removed in VIVIDUS 0.7.0, please use"
+                               + " '{}' step to save location adn coodinates, and then use '{}' property to get target "
+                               + "value.");
         return DynamicVariableCalculationResult.withValueOrError(
                 uiContext.getSearchContext(WebElement.class)
                         .map(WebElement::getRect)

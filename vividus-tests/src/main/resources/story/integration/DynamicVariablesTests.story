@@ -10,15 +10,22 @@ Scope: STORY
 Given I am on page with URL `${vividus-test-site-url}`
 
 
-Scenario: Verify context' rectangle dynamic variables
+Scenario: Verify: 'Contextual rectangle dynamic variables', 'When I save coordinates and size of element located by `$locator` to $scopes variable `$variableName'
 Meta:
     @requirementId 802
+!-- Deprecated
 When I change context to element located by `tagName(img)`
 Then `${context-height}`            is > `0`
 Then `${context-width}`             is > `0`
 Then `${context-x-coordinate}`      is > `0`
 Then `${context-y-coordinate}`      is > `0`
-
+When I reset context
+!-- Replacement, move to GenericSetVariableSteps.story once the expressions are removed
+When I save coordinates and size of element located by `tagName(img)` to scenario variable `rect`
+Then `${rect.height}`            is = `400`
+Then `${rect.width}`             is = `400`
+Then `${rect.x}`                 is = `200`
+Then `${rect.y}`                 is = `8`
 
 Scenario: Verify `source-code` dynamic variable
 Then `${source-code}` matches `.+Vividus Logo.+`

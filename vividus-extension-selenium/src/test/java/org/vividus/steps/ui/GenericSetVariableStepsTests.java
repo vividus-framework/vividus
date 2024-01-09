@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -35,6 +36,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
 import org.vividus.context.VariableContext;
 import org.vividus.selenium.locator.Locator;
@@ -170,5 +172,24 @@ class GenericSetVariableStepsTests
 
         verify(softAssert).recordFailedAssertion(String.format("The '%s' attribute does not exist", ATTRIBUTE_NAME));
         verifyNoInteractions(variableContext);
+    }
+
+    @Test
+    void shouldSaveElementCoordinatesAndSize()
+    {
+        Locator locator = mock(Locator.class);
+        WebElement webElement = mock(WebElement.class);
+        when(baseValidations.assertElementExists("The element to get size and coordinates", locator))
+                .thenReturn(Optional.of(webElement));
+        Rectangle rectangle = new Rectangle(1, 2, 3, 4);
+        when(webElement.getRect()).thenReturn(rectangle);
+
+        genericSetVariableSteps.saveElementCoordinatesAndSize(locator, VARIABLE_SCOPE, VARIABLE_NAME);
+
+        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, Map.of(
+                "x", rectangle.getX(),
+                "y", rectangle.getY(),
+                "height", rectangle.getHeight(),
+                "width", rectangle.getWidth()));
     }
 }
