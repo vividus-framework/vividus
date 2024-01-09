@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ package org.vividus.ui.variable;
 import org.openqa.selenium.Rectangle;
 import org.vividus.ui.context.UiContext;
 
+@Deprecated(forRemoval = true, since = "0.6.6")
 public class SearchContextXCoordinateDynamicVariable extends AbstractSearchContextRectangleDynamicVariable
 {
     public SearchContextXCoordinateDynamicVariable(UiContext uiContext)
     {
-        super(uiContext, Rectangle::getX);
+        super("context-x-coordinate", "x", uiContext, Rectangle::getX);
     }
 }

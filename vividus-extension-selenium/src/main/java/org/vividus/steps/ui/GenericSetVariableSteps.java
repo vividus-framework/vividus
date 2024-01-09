@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.steps.ui;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -229,5 +230,61 @@ public class GenericSetVariableSteps
             softAssert.assertNotNull(String.format("The '%s' attribute value was found", attributeName), value);
             return value;
         }).ifPresent(value -> variableContext.putVariable(scopes, variableName, value));
+    }
+
+    /**
+     * Saves the information about the size of an element and its coordinates relative to the viewport.
+     *
+     * @param locator        The locator to find an element
+     * @param scopes         The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                       <i>Available scopes:</i>
+     *                       <ul>
+     *                       <li><b>STEP</b> - the variable will be available only within the step,
+     *                       <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                       <li><b>STORY</b> - the variable will be available within the whole story,
+     *                       <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                       </ul>
+     * @param variableName   The name of the variable to save the coordinates and size of an element which can be
+     *                       accessed on the variable name using dot notation:
+     *                       <table>
+     *                       <caption>A table of size and coordinate properties</caption>
+     *                       <thead>
+     *                       <tr>
+     *                           <th><b>attribute</b></th>
+     *                           <th><b>description</b></th>
+     *                       </tr>
+     *                       </thead>
+     *                       <tbody>
+     *                       <tr>
+     *                           <td>x</td>
+     *                           <td>the x coordinate</td>
+     *                       </tr>
+     *                       <tr>
+     *                           <td>y</td>
+     *                           <td>the y coordinate</td>
+     *                       </tr>
+     *                       <tr>
+     *                           <td>height</td>
+     *                           <td>the height of the element</td>
+     *                       </tr>
+     *                       <tr>
+     *                           <td>width</td>
+     *                           <td>the width of the element</td>
+     *                       </tr>
+     *                       </tbody>
+     *                       </table>
+     */
+    @When("I save coordinates and size of element located by `$locator` to $scopes variable `$variableName`")
+    public void saveElementCoordinatesAndSize(Locator locator, Set<VariableScope> scopes, String variableName)
+    {
+        baseValidations.assertElementExists("The element to get size and coordinates", locator)
+                       .map(WebElement::getRect)
+                       .map(rect -> Map.of(
+                           "x", rect.getX(),
+                           "y", rect.getY(),
+                           "height", rect.getHeight(),
+                           "width", rect.getWidth())
+                       )
+                       .ifPresent(rect -> variableContext.putVariable(scopes, variableName, rect));
     }
 }

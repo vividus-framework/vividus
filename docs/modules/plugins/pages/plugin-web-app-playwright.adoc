@@ -130,4 +130,6 @@ When I change context to element located by `id(username)`
 When I save text of context element to scneario variable `username`
 ----
 
+include::plugins:partial$ui-size-and-coordinates-steps.adoc[]
+
 include::plugins:partial$common-web-app-text-steps.adoc[]
