@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.listener;
+package org.vividus.selenium;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -25,30 +25,26 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.reporter.event.IAttachmentPublisher;
-import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.ContextSourceCodeProvider;
 import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.listener.AbstractSourceCodePublishingOnFailureListener;
 import org.vividus.ui.web.action.CssSelectorFactory;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
-public class WebSourceCodePublishingOnFailureListener extends AbstractSourceCodePublishingOnFailureListener
+public class WebContextSourceCodeProvider implements ContextSourceCodeProvider
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebSourceCodePublishingOnFailureListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebContextSourceCodeProvider.class);
 
     private final IUiContext uiContext;
     private final WebJavascriptActions webJavascriptActions;
 
-    protected WebSourceCodePublishingOnFailureListener(IAttachmentPublisher attachmentPublisher, IWebDriverProvider
-             webDriverProvider, IUiContext uiContext, WebJavascriptActions webJavascriptActions)
+    protected WebContextSourceCodeProvider(IUiContext uiContext, WebJavascriptActions webJavascriptActions)
     {
-        super(attachmentPublisher, webDriverProvider, "HTML");
         this.uiContext = uiContext;
         this.webJavascriptActions = webJavascriptActions;
     }
 
     @Override
-    protected Map<String, String> getSourceCode()
+    public Map<String, String> getSourceCode()
     {
         SearchContext searchContext = uiContext.getSearchContext();
         String sourceCode = null;

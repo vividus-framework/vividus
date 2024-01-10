@@ -16,26 +16,27 @@
 
 package org.vividus.ui.variable;
 
-import org.openqa.selenium.WebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.vividus.selenium.IWebDriverProvider;
+import static org.vividus.ui.ContextSourceCodeProvider.APPLICATION_SOURCE_CODE;
+
+import org.vividus.ui.ContextSourceCodeProvider;
+import org.vividus.variable.DynamicVariable;
 import org.vividus.variable.DynamicVariableCalculationResult;
 
-public class SourceCodeDynamicVariable extends AbstractWebDriverDynamicVariable
+public class ContextSourceCodeDynamicVariable implements DynamicVariable
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SourceCodeDynamicVariable.class);
+    private final ContextSourceCodeProvider contextSourceCodeProvider;
 
-    public SourceCodeDynamicVariable(IWebDriverProvider webDriverProvider)
+    public ContextSourceCodeDynamicVariable(ContextSourceCodeProvider contextSourceCodeProvider)
     {
-        super(webDriverProvider, WebDriver::getPageSource);
+        this.contextSourceCodeProvider = contextSourceCodeProvider;
     }
 
     @Override
     public DynamicVariableCalculationResult calculateValue()
     {
-        LOGGER.warn("The \"${source-code}\" dynamic variable is deprecated and will be removed in VIVIDUS 0.7.0. "
-                + "Please use \"${context-source-code}\" dynamic variable instead.");
-        return super.calculateValue();
+        String contextSourceCode = contextSourceCodeProvider.getSourceCode().get(APPLICATION_SOURCE_CODE);
+        return contextSourceCode != null
+                ? DynamicVariableCalculationResult.withValue(contextSourceCode)
+                : DynamicVariableCalculationResult.withError("application is not started");
     }
 }

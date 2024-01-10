@@ -130,11 +130,6 @@
 
     <bean class="org.vividus.ui.listener.UiContextListener" lazy-init="false" />
 
-    <bean id="abstractSourceCodePublishngOnFailureListener" class="org.vividus.ui.listener.AbstractSourceCodePublishingOnFailureListener"
-          abstract="true">
-        <property name="publishSourceOnFailure" value="${ui.publish-source-on-failure}" />
-    </bean>
-
     <bean class="org.vividus.selenium.screenshot.ScreenshotFileNameGenerator" />
 
     <bean id="genericElementSteps" class="org.vividus.steps.ui.GenericElementSteps" />
@@ -221,6 +216,7 @@
     <bean id="context-x-coordinate" class="org.vividus.ui.variable.SearchContextXCoordinateDynamicVariable"/>
     <bean id="context-y-coordinate" class="org.vividus.ui.variable.SearchContextYCoordinateDynamicVariable"/>
     <bean id="source-code" class="org.vividus.ui.variable.SourceCodeDynamicVariable"/>
+    <bean id="context-source-code" class="org.vividus.ui.variable.ContextSourceCodeDynamicVariable"/>
 
     <bean class="org.vividus.report.ui.ImageCompressor" >
         <property name="imageCompressionQuality" value="${ui.report.image-compression-quality}" />

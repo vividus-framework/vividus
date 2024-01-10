@@ -27,8 +27,9 @@ When I reinstall mobile application with bundle identifier `${main-app}`
 When I wait until element located by `xpath(<textElementXpath>)->filter.text(Home)` appears
 
 
-Scenario: Validate coordinate/size dynamic variables, page source dynamic variable
+Scenario: Validate coordinate/size dynamic variables, page source dynamic variables
 Then `${source-code}` matches `.+Home.+`
+Then `${context-source-code}` matches `.+Home.+`
 When I change context to element located by `xpath(<textElementXpath>)->filter.text(Home)`
 Then `${context-height}`            is > `0`
 Then `${context-width}`             is > `0`

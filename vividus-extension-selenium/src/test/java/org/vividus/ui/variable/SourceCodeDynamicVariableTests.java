@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,16 @@
 
 package org.vividus.ui.variable;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,9 +36,11 @@ import org.openqa.selenium.WebDriver;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.variable.DynamicVariableCalculationResult;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class SourceCodeDynamicVariableTests
 {
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(SourceCodeDynamicVariable.class);
+
     @Mock private IWebDriverProvider webDriverProvider;
     @InjectMocks private SourceCodeDynamicVariable dynamicVariable;
 
@@ -45,6 +54,9 @@ class SourceCodeDynamicVariableTests
         when(driver.getPageSource()).thenReturn(sources);
 
         assertEquals(DynamicVariableCalculationResult.withValue(sources), dynamicVariable.calculateValue());
+        assertEquals(List.of(warn(
+                "The \"${source-code}\" dynamic variable is deprecated and will be removed in VIVIDUS 0.7.0. "
+                + "Please use \"${context-source-code}\" dynamic variable instead.")), logger.getLoggingEvents());
     }
 
     @Test

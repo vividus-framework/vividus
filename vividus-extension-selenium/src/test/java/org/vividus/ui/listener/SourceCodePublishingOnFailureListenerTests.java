@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.vividus.ui.ContextSourceCodeProvider.APPLICATION_SOURCE_CODE;
 
 import java.util.Map;
 
@@ -30,6 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.ContextSourceCodeProvider;
 
 @ExtendWith(MockitoExtension.class)
 class SourceCodePublishingOnFailureListenerTests
@@ -37,13 +39,11 @@ class SourceCodePublishingOnFailureListenerTests
     private static final String SOURCES = "<html/>";
     private static final String HTML = "HTML";
 
-    @Mock
-    private IAttachmentPublisher attachmentPublisher;
-    @Mock
-    private IWebDriverProvider webDriverProvider;
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private ContextSourceCodeProvider contextSourceCodeProvider;
+    @Mock private IAttachmentPublisher attachmentPublisher;
 
-    @InjectMocks
-    private TestSorceCodePublishingOnFailureListener listener;
+    @InjectMocks private SourceCodePublishingOnFailureListener listener;
 
     @Test
     void shouldNoPublishSourceCodeWhenPublishingDisabled()
@@ -67,55 +67,25 @@ class SourceCodePublishingOnFailureListenerTests
     void shouldPublishSourceCode()
     {
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
+        when(contextSourceCodeProvider.getSourceCode()).thenReturn(Map.of(APPLICATION_SOURCE_CODE, SOURCES));
+        listener.setFormat(HTML);
         listener.setPublishSourceOnFailure(true);
         listener.onAssertionFailure(null);
         verify(webDriverProvider).isWebDriverInitialized();
         verify(attachmentPublisher).publishAttachment("/templates/source-code.ftl",
                 Map.of("sourceCode", SOURCES, "format", HTML), "Application source code");
-        verifyNoMoreInteractions(webDriverProvider, attachmentPublisher);
+        verifyNoMoreInteractions(webDriverProvider, contextSourceCodeProvider, attachmentPublisher);
     }
 
     @Test
     void shouldNotPublishMissingSource()
     {
-        TestEmptySorceCodePublishingOnFailureListener listener = new TestEmptySorceCodePublishingOnFailureListener(
-                attachmentPublisher, webDriverProvider);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
+        when(contextSourceCodeProvider.getSourceCode()).thenReturn(Map.of());
         listener.setPublishSourceOnFailure(true);
         listener.onAssertionFailure(null);
         verify(webDriverProvider).isWebDriverInitialized();
         verifyNoInteractions(attachmentPublisher);
-        verifyNoMoreInteractions(webDriverProvider, attachmentPublisher);
-    }
-
-    private static class TestSorceCodePublishingOnFailureListener extends AbstractSourceCodePublishingOnFailureListener
-    {
-        protected TestSorceCodePublishingOnFailureListener(IAttachmentPublisher attachmentPublisher,
-                IWebDriverProvider webDriverProvider)
-        {
-            super(attachmentPublisher, webDriverProvider, HTML);
-        }
-
-        @Override
-        protected Map<String, String> getSourceCode()
-        {
-            return Map.of(APPLICATION_SOURCE_CODE, SOURCES);
-        }
-    }
-
-    private static final class TestEmptySorceCodePublishingOnFailureListener
-            extends TestSorceCodePublishingOnFailureListener
-    {
-        protected TestEmptySorceCodePublishingOnFailureListener(IAttachmentPublisher attachmentPublisher,
-                IWebDriverProvider webDriverProvider)
-        {
-            super(attachmentPublisher, webDriverProvider);
-        }
-
-        @Override
-        protected Map<String, String> getSourceCode()
-        {
-            return Map.of();
-        }
+        verifyNoMoreInteractions(webDriverProvider, contextSourceCodeProvider);
     }
 }

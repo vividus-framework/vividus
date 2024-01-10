@@ -223,7 +223,12 @@
     <bean class="org.vividus.ui.web.monitor.PublishingWebScreenshotOnFailureMonitor"
           parent="abstractPublishingScreenshotOnFailureMonitor"/>
 
-    <bean class="org.vividus.ui.web.listener.WebSourceCodePublishingOnFailureListener" parent="abstractSourceCodePublishngOnFailureListener" lazy-init="false" />
+    <bean class="org.vividus.selenium.WebContextSourceCodeProvider" />
+
+    <bean class="org.vividus.ui.listener.SourceCodePublishingOnFailureListener" lazy-init="false">
+        <property name="publishSourceOnFailure" value="${ui.publish-source-on-failure}" />
+        <property name="format" value="HTML" />
+    </bean>
 
     <bean class="org.vividus.selenium.BrowserWindowSizeListener" lazy-init="false">
          <property name="webDriverManager" ref="webDriverManager" />

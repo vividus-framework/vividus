@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package org.vividus.mobileapp.listener;
+package org.vividus.selenium.mobileapp;
 
 import java.util.Map;
 import java.util.Optional;
 
-import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.listener.AbstractSourceCodePublishingOnFailureListener;
+import org.vividus.ui.ContextSourceCodeProvider;
 
-public class MobileSourceCodePublishingOnFailureListener extends AbstractSourceCodePublishingOnFailureListener
+public class MobileContextSourceCodeProvider implements ContextSourceCodeProvider
 {
-    public MobileSourceCodePublishingOnFailureListener(IAttachmentPublisher attachmentPublisher,
-            IWebDriverProvider webDriverProvider)
+    private final IWebDriverProvider webDriverProvider;
+
+    public MobileContextSourceCodeProvider(IWebDriverProvider webDriverProvider)
     {
-        super(attachmentPublisher, webDriverProvider, "XML");
+        this.webDriverProvider = webDriverProvider;
     }
 
     @Override
-    protected Map<String, String> getSourceCode()
+    public Map<String, String> getSourceCode()
     {
-        return Optional.ofNullable(getWebDriverProvider().get().getPageSource())
+        return Optional.ofNullable(webDriverProvider.get().getPageSource())
                        .map(sc -> Map.of(APPLICATION_SOURCE_CODE, sc))
                        .orElseGet(Map::of);
     }
