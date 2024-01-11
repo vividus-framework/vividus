@@ -28,3 +28,5 @@ Given I am on page with URL `<pageToValidate>`
 Then all resources found by xpath `//a` in ${${source-code}} are valid
 !-- Deprecated
 Then all resources by selector `a` from ${source-code} are valid
+When I change context to element located by `linkText(Link to unexistent element)`
+Then all resources by selector `a` from ${context-source-code} are valid

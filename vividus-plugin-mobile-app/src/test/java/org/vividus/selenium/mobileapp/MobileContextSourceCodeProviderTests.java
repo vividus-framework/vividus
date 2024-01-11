@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.mobileapp.listener;
+package org.vividus.selenium.mobileapp;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -31,10 +31,10 @@ import org.openqa.selenium.WebDriver;
 import org.vividus.selenium.IWebDriverProvider;
 
 @ExtendWith(MockitoExtension.class)
-class MobileSourceCodePublishingOnFailureListenerTests
+class MobileContextSourceCodeProviderTests
 {
     @Mock private IWebDriverProvider webDriverProvider;
-    @InjectMocks private MobileSourceCodePublishingOnFailureListener listener;
+    @InjectMocks private MobileContextSourceCodeProvider sourceCodeProvider;
 
     @Test
     void shouldReturnSourceCode()
@@ -43,6 +43,6 @@ class MobileSourceCodePublishingOnFailureListenerTests
         String source = "</beans>";
         when(webDriver.getPageSource()).thenReturn(source);
         when(webDriverProvider.get()).thenReturn(webDriver);
-        assertEquals(Map.of("Application source code", source), listener.getSourceCode());
+        assertEquals(Map.of("Application source code", source), sourceCodeProvider.getSourceCode());
     }
 }

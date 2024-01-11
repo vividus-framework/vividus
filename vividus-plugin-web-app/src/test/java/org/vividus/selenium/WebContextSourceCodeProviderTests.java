@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.listener;
+package org.vividus.selenium;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.debug;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,7 +42,7 @@ import org.vividus.ui.web.action.CssSelectorFactory;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class})
-class WebSourceCodePublishingOnFailureListenerTests
+class WebContextSourceCodeProviderTests
 {
     private static final String OUTER_HTML_SCRIPT = "return arguments[0].outerHTML;";
     private static final String SHADOW_DOM_SCRIPT = CssSelectorFactory.CSS_SELECTOR_FACTORY_SCRIPT
@@ -64,9 +64,9 @@ class WebSourceCodePublishingOnFailureListenerTests
     @Mock private IUiContext uiContext;
     @Mock private WebJavascriptActions webJavascriptActions;
 
-    @InjectMocks private WebSourceCodePublishingOnFailureListener listener;
+    @InjectMocks private WebContextSourceCodeProvider sourceCodeProvider;
 
-    private final TestLogger logger = TestLoggerFactory.getTestLogger(WebSourceCodePublishingOnFailureListener.class);
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(WebContextSourceCodeProvider.class);
 
     @Test
     void shouldReturnWholePageForDriverContext()
@@ -79,7 +79,8 @@ class WebSourceCodePublishingOnFailureListenerTests
         when(webJavascriptActions.executeScript(
                 String.format(SHADOW_DOM_SCRIPT, "document.documentElement"))).thenReturn(
                 Map.of(sourceTitle, pageSource));
-        assertEquals(Map.of(APPLICATION_SOURCE_CODE, pageSource, sourceTitle, pageSource), listener.getSourceCode());
+        assertEquals(Map.of(APPLICATION_SOURCE_CODE, pageSource, sourceTitle, pageSource),
+                sourceCodeProvider.getSourceCode());
     }
 
     @Test
@@ -92,7 +93,7 @@ class WebSourceCodePublishingOnFailureListenerTests
         mockShadowDomSourcesRetrieval(webElement, Map.of(sourceTitle, elementSource));
         when(webJavascriptActions.executeScript(OUTER_HTML_SCRIPT, webElement)).thenReturn(elementSource);
         assertEquals(Map.of(APPLICATION_SOURCE_CODE, elementSource, sourceTitle, elementSource),
-                listener.getSourceCode());
+                sourceCodeProvider.getSourceCode());
     }
 
     @Test
@@ -103,7 +104,7 @@ class WebSourceCodePublishingOnFailureListenerTests
         when(webJavascriptActions.executeScript(OUTER_HTML_SCRIPT, webElement)).thenThrow(
                 StaleElementReferenceException.class);
         mockShadowDomSourcesRetrieval(webElement, Map.of());
-        assertEquals(Map.of(), listener.getSourceCode());
+        assertEquals(Map.of(), sourceCodeProvider.getSourceCode());
         assertEquals(logger.getLoggingEvents(), List.of(debug("Unable to get sources of the stale element")));
     }
 
@@ -112,7 +113,7 @@ class WebSourceCodePublishingOnFailureListenerTests
     {
         when(uiContext.getSearchContext()).thenReturn(null);
         when(webJavascriptActions.executeScript(any(String.class))).thenReturn(Map.of());
-        assertEquals(Map.of(), listener.getSourceCode());
+        assertEquals(Map.of(), sourceCodeProvider.getSourceCode());
     }
 
     private void mockShadowDomSourcesRetrieval(WebElement webElement, Map<String, String> sources)

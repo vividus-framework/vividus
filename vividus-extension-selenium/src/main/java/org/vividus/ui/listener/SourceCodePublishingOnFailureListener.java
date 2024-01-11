@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,23 +23,23 @@ import com.google.common.eventbus.Subscribe;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.event.AssertionFailedEvent;
+import org.vividus.ui.ContextSourceCodeProvider;
 
-public abstract class AbstractSourceCodePublishingOnFailureListener
+public class SourceCodePublishingOnFailureListener
 {
-    protected static final String APPLICATION_SOURCE_CODE = "Application source code";
-
-    private final IAttachmentPublisher attachmentPublisher;
     private final IWebDriverProvider webDriverProvider;
-    private final String format;
+    private final ContextSourceCodeProvider contextSourceCodeProvider;
+    private final IAttachmentPublisher attachmentPublisher;
 
     private boolean publishSourceOnFailure;
+    private String format;
 
-    protected AbstractSourceCodePublishingOnFailureListener(IAttachmentPublisher attachmentPublisher,
-            IWebDriverProvider webDriverProvider, String format)
+    public SourceCodePublishingOnFailureListener(IWebDriverProvider webDriverProvider,
+            ContextSourceCodeProvider contextSourceCodeProvider, IAttachmentPublisher attachmentPublisher)
     {
         this.webDriverProvider = webDriverProvider;
+        this.contextSourceCodeProvider = contextSourceCodeProvider;
         this.attachmentPublisher = attachmentPublisher;
-        this.format = format;
     }
 
     @Subscribe
@@ -47,7 +47,7 @@ public abstract class AbstractSourceCodePublishingOnFailureListener
     {
         if (publishSourceOnFailure && webDriverProvider.isWebDriverInitialized())
         {
-            getSourceCode().forEach(this::publishSource);
+            contextSourceCodeProvider.getSourceCode().forEach(this::publishSource);
         }
     }
 
@@ -57,15 +57,13 @@ public abstract class AbstractSourceCodePublishingOnFailureListener
             Map.of("sourceCode", source, "format", format), title);
     }
 
-    protected abstract Map<String, String> getSourceCode();
-
     public void setPublishSourceOnFailure(boolean publishSourceOnFailure)
     {
         this.publishSourceOnFailure = publishSourceOnFailure;
     }
 
-    protected IWebDriverProvider getWebDriverProvider()
+    public void setFormat(String format)
     {
-        return webDriverProvider;
+        this.format = format;
     }
 }
