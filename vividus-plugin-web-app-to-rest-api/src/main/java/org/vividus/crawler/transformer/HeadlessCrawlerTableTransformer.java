@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@ package org.vividus.crawler.transformer;
 
 import java.net.URI;
 import java.util.Set;
-import java.util.function.Supplier;
 
-import com.google.common.base.Suppliers;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
@@ -52,23 +53,22 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
     private String excludeUrlsRegex;
     private String excludeExtensionsRegex;
 
-    private final Supplier<Set<String>> urlsProvider = Suppliers.memoize(() ->
-    {
-        if (!StringUtils.isEmpty(excludeExtensionsRegex))
-        {
-            LOGGER.warn(DEPRECATION_MESSAGE);
-        }
+    private final LoadingCache<URI, Set<String>> crawledUrlsCache = CacheBuilder.newBuilder()
+            .build(new CacheLoader<>()
+            {
+                @Override
+                public Set<String> load(URI mainApplicationPage)
+                {
+                    CrawlController controller = crawlControllerFactory.createCrawlController(mainApplicationPage);
 
-        URI mainApplicationPage = getMainApplicationPageUri();
-        CrawlController controller = crawlControllerFactory.createCrawlController(mainApplicationPage);
+                    addSeeds(mainApplicationPage, controller);
 
-        addSeeds(mainApplicationPage, controller);
-
-        LinkCrawlerData linkCrawlerData = new LinkCrawlerData();
-        controller.start(new LinkCrawlerFactory(linkCrawlerData, excludeUrlsRegex), NUMBER_OF_CRAWLERS);
-        Set<String> absoluteUrls = linkCrawlerData.getAbsoluteUrls();
-        return filterResults(absoluteUrls.stream());
-    });
+                    LinkCrawlerData linkCrawlerData = new LinkCrawlerData();
+                    controller.start(new LinkCrawlerFactory(linkCrawlerData, excludeUrlsRegex), NUMBER_OF_CRAWLERS);
+                    Set<String> absoluteUrls = linkCrawlerData.getAbsoluteUrls();
+                    return filterResults(absoluteUrls.stream());
+                }
+            });
 
     private void addSeeds(URI mainApplicationPage, CrawlController controller)
     {
@@ -102,7 +102,13 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
     @Override
     protected Set<String> fetchUrls(TableProperties properties)
     {
-        return urlsProvider.get();
+        if (!StringUtils.isEmpty(excludeExtensionsRegex))
+        {
+            LOGGER.warn(DEPRECATION_MESSAGE);
+        }
+
+        URI mainApplicationPage = getMainApplicationPageUri(properties);
+        return crawledUrlsCache.getUnchecked(mainApplicationPage);
     }
 
     public void setCrawlControllerFactory(ICrawlControllerFactory crawlControllerFactory)

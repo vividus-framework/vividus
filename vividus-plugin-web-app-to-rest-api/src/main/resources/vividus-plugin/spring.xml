@@ -73,6 +73,8 @@
         <property name="siteMapParser" ref="siteMapParser" />
         <property name="ignoreErrors" value="${transformer.from-sitemap.ignore-errors}" />
         <property name="filterRedirects" value="${transformer.from-sitemap.filter-redirects}" />
+        <property name="mainPageUrl" value="${transformer.from-sitemap.main-page-url}" />
+        <property name="mainPageUrlProperty" value="transformer.from-sitemap.main-page-url" />
     </bean>
 
     <bean name="FROM_HEADLESS_CRAWLING" class="org.vividus.crawler.transformer.HeadlessCrawlerTableTransformer"
@@ -90,6 +92,8 @@
         <property name="seedRelativeUrls" value="${transformer.from-headless-crawling.seed-relative-urls}" />
         <property name="excludeUrlsRegex" value="${transformer.from-headless-crawling.exclude-urls-regex}" />
         <property name="excludeExtensionsRegex" value="${transformer.from-headless-crawling.exclude-extensions-regex}" />
+        <property name="mainPageUrl" value="${transformer.from-headless-crawling.main-page-url}" />
+        <property name="mainPageUrlProperty" value="transformer.from-headless-crawling.main-page-url" />
     </bean>
 
     <bean id="FROM_HTML" class="org.vividus.crawler.transformer.HtmlDocumentTableTransformer">

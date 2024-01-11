@@ -276,6 +276,13 @@ Then `<relativeUrl>` matches `.*links.*`
 Examples:
 {transformer=FROM_HEADLESS_CRAWLING, column=relativeUrl}
 
+
+Scenario: Verify FROM_HEADLESS_CRAWLING transformer passing URL through transformer parameter
+Then `<relativeUrl>` matches `.*links.*`
+Examples:
+{transformer=FROM_HEADLESS_CRAWLING, column=relativeUrl, mainPageUrl=$\{vividus-test-site-url\}}
+
+
 Scenario: Verify FROM_SITEMAP transformer
 When I initialize scenario variable `sitemapTransformerTable` with values:
 {transformer=FROM_SITEMAP, siteMapRelativeUrl=/sitemap.xml, column=sitemapUrl}
