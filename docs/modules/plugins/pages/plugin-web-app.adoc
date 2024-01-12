@@ -1382,6 +1382,27 @@ When I save number of open tabs to $scopes variable `$variableName`
 When I save number of open tabs to SCENARIO variable `count`
 ----
 
+==== Save the CSS property value of the element
+
+Saves the CSS property value of the element located by locator into a variable.
+
+[source,gherkin]
+----
+When I save `$cssProperty` CSS property value of element located by `$locator` to $scopes variable `$variableName`
+----
+
+* `$cssProperty` - The name of an https://www.w3schools.com/cssref/index.php[CSS property].
+* `$locator` - The <<_locator,locator>> used to find the element to get the CSS property.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the CSS property value.
+
+.Save the CSS property value of the table
+[source,gherkin]
+----
+When I save `padding` CSS property value of element located by `xpath(//table)` to scenario variable `paddingValue`
+Then `${paddingValue}` is equal to `5px`
+----
+
 === Alert Steps
 
 :alert: https://www.w3schools.com/js/js_popup.asp[popup alert]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,6 +51,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
+import org.vividus.context.VariableContext;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.manager.WebDriverManager;
@@ -63,6 +66,7 @@ import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.WebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
+import org.vividus.variable.VariableScope;
 
 @SuppressWarnings("checkstyle:MethodCount")
 @ExtendWith(MockitoExtension.class)
@@ -92,6 +96,9 @@ class ElementStepsTests
     private static final String PARENT_ELEMENT_XPATH = "./..";
     private static final String JAR_ARCHIVE_FILE_TXT = "jar:file:/D:/archive.jar!/file.txt";
     private static final String FILE_INPUT_ELEMENT = "A file input element";
+    private static final String VARIABLE_NAME = "variableName";
+    private static final String ELEMENT_WITH_CSS_PROPERTY = "The element to get the CSS property value";
+    private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
 
     @Mock private IBaseValidations baseValidations;
     @Mock private IMouseActions mouseActions;
@@ -102,6 +109,7 @@ class ElementStepsTests
     @Mock private WebElementActions webElementActions;
     @Mock private WebElement webElement;
     @Mock private IDescriptiveSoftAssert softAssert;
+    @Mock private VariableContext variableContext;
     @InjectMocks private ElementSteps elementSteps;
 
     @Test
@@ -421,6 +429,44 @@ class ElementStepsTests
         when(baseValidations.assertIfElementExists(AN_ELEMENT, locator)).thenReturn(null);
         elementSteps.uploadFileDeprecated(locator, FILE_PATH);
         verify(webElement, never()).sendKeys(ABSOLUTE_PATH);
+    }
+
+    @Test
+    void shouldSaveCssPropertyValue()
+    {
+        var locator = mock(Locator.class);
+        var webElement = mock(WebElement.class);
+        when(baseValidations.assertElementExists(ELEMENT_WITH_CSS_PROPERTY, locator))
+                .thenReturn(Optional.of(webElement));
+        when(webElementActions.getCssValue(webElement, CSS_NAME)).thenReturn(CSS_VALUE);
+
+        elementSteps.saveCssPropertyValue(CSS_NAME, locator, VARIABLE_SCOPE, VARIABLE_NAME);
+        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, CSS_VALUE);
+        verifyNoInteractions(softAssert);
+    }
+
+    @Test
+    void shouldNotSaveCssPropertyValueIfTheValueIsNotFound()
+    {
+        var locator = mock(Locator.class);
+        var webElement = mock(WebElement.class);
+        when(baseValidations.assertElementExists(ELEMENT_WITH_CSS_PROPERTY, locator))
+                .thenReturn(Optional.of(webElement));
+        when(webElementActions.getCssValue(webElement, CSS_NAME)).thenReturn(StringUtils.EMPTY);
+
+        elementSteps.saveCssPropertyValue(CSS_NAME, locator, VARIABLE_SCOPE, VARIABLE_NAME);
+        verify(softAssert).recordFailedAssertion(String.format("The '%s' CSS property does not exist", CSS_NAME));
+        verifyNoInteractions(variableContext);
+    }
+
+    @Test
+    void shouldNotSaveCssPropertyValueIfTheElementIsNotFound()
+    {
+        var locator = mock(Locator.class);
+        when(baseValidations.assertElementExists(ELEMENT_WITH_CSS_PROPERTY, locator)).thenReturn(Optional.empty());
+
+        elementSteps.saveCssPropertyValue(CSS_NAME, locator, VARIABLE_SCOPE, VARIABLE_NAME);
+        verifyNoInteractions(softAssert, variableContext);
     }
 
     @Test

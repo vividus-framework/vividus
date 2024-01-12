@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.containsString;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
@@ -35,6 +36,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.ResourceUtils;
 import org.vividus.annotation.Replacement;
+import org.vividus.context.VariableContext;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.selenium.manager.WebDriverManager;
@@ -49,6 +51,7 @@ import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.action.IWebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
+import org.vividus.variable.VariableScope;
 
 @SuppressWarnings({"PMD.ExcessiveImports", "PMD.AvoidDuplicateLiterals"})
 @TakeScreenshotOnFailure
@@ -66,11 +69,12 @@ public class ElementSteps implements ResourceLoaderAware
     private final IDescriptiveSoftAssert descriptiveSoftAssert;
     private final IBaseValidations baseValidations;
     private final IElementValidations elementValidations;
+    private final VariableContext variableContext;
     private ResourceLoader resourceLoader;
 
     public ElementSteps(IWebElementActions webElementActions, IWebDriverProvider webDriverProvider,
             WebDriverManager webDriverManager, IUiContext uiContext, IDescriptiveSoftAssert descriptiveSoftAssert,
-            IBaseValidations baseValidations, IElementValidations elementValidations)
+            IBaseValidations baseValidations, IElementValidations elementValidations, VariableContext variableContext)
     {
         this.webElementActions = webElementActions;
         this.webDriverProvider = webDriverProvider;
@@ -79,6 +83,7 @@ public class ElementSteps implements ResourceLoaderAware
         this.descriptiveSoftAssert = descriptiveSoftAssert;
         this.baseValidations = baseValidations;
         this.elementValidations = elementValidations;
+        this.variableContext = variableContext;
     }
 
     /**
@@ -223,6 +228,48 @@ public class ElementSteps implements ResourceLoaderAware
             Matcher<String> matcher = comparisonRule.createMatcher(cssValue);
             String actualCssValue = webElementActions.getCssValue(element, cssName);
             descriptiveSoftAssert.assertThat("Element css property value is", actualCssValue, matcher);
+        });
+    }
+
+    /**
+     * Gets the value of <b>CSS property</b> from element located by <b>locator</b> and saves it to the <b>variable</b>
+     * with the specified <b>variableName</b>
+     * <p>
+     * Actions performed at this step:
+     * </p>
+     * <ul>
+     * <li>Finds element using <i>locator</i>
+     * <li>Extracts from the element value of the <i>cssProperty</i> and saves it to the <i>variableName</i>
+     * </ul>
+     * @param cssProperty    The name of the CSS property (for ex. 'color', 'flex')
+     * @param locator        The locator to find an element
+     * @param scopes         The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                       <i>Available scopes:</i>
+     *                       <ul>
+     *                       <li><b>STEP</b> - the variable will be available only within the step,
+     *                       <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                       <li><b>STORY</b> - the variable will be available within the whole story,
+     *                       <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                       </ul>
+     * @param variableName   The name of the variable to save the CSS property value
+     */
+    @When("I save `$cssProperty` CSS property value of element located by `$locator` to $scopes"
+            + " variable `$variableName`")
+    public void saveCssPropertyValue(String cssProperty, Locator locator, Set<VariableScope> scopes,
+                                     String variableName)
+    {
+        baseValidations.assertElementExists("The element to get the CSS property value", locator).ifPresent(e ->
+        {
+            String cssValue = webElementActions.getCssValue(e, cssProperty);
+            if (!cssValue.isEmpty())
+            {
+                variableContext.putVariable(scopes, variableName, cssValue);
+            }
+            else
+            {
+                descriptiveSoftAssert
+                        .recordFailedAssertion(String.format("The '%s' CSS property does not exist", cssProperty));
+            }
         });
     }
 
