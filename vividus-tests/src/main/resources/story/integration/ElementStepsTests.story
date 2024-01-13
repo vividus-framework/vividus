@@ -209,6 +209,10 @@ Scenario: Step verification 'Then number of $state elements found by `$locator` 
 Given I am on page with URL `${vividus-test-site-url}`
 Then number of VISIBLE elements found by `tagName(img):a` is = `1`
 
+Scenario: Verify step: "When I save `$cssProperty` CSS property value of element located by `$locator` to $scopes variable `$variableName`"
+When I save `background-image` CSS property value of element located by `xpath(//body)` to scenario variable `cssPropertyValue`
+Then `${cssPropertyValue}` is = `none`
+
 Scenario: Step verification Then elements located by `$locator` are sorted by text in $sortingOrder order
 Given I am on page with URL `${vividus-test-site-url}/sortedListOfElement.html`
 Then elements located by `tagName(h3)` are sorted by text in ASCENDING order
