@@ -146,7 +146,7 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
         this.mainPageUrl = mainPageUrl;
     }
 
-    @Deprecated(forRemoval = true, since = "0.6.5")
+    @Deprecated(forRemoval = true, since = "0.6.6")
     public void setMainPageUrlProperty(String mainPageUrlProperty)
     {
         this.mainPageUrlProperty = mainPageUrlProperty;
