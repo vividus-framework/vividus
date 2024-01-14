@@ -13,10 +13,19 @@ include::partial$plugin-installation.adoc[]
 
 `FROM_SITEMAP` transformer generates table based on the website sitemap.
 
+IMPORTANT: The use of `web-application.main-page-url` property for setting of main page for crawling is deprecated and will be removed in VIVIDUS 0.7.0, pelase see either `mainPageUrl` transformer parameter or `transformer.from-sitemap.main-page-url` property.
+
 [cols="1,3", options="header"]
+
 |===
+
 |Parameter
 |Description
+
+|`mainPageUrl`
+a|main application page URL, used as initial seed URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
+
+IMPORTANT: The main page url value defined by this parameter overrides the value defined by the `transformer.from-sitemap.main-page-url` property.
 
 |`siteMapRelativeUrl`
 |relative URL of `sitemap.xml`
@@ -26,14 +35,24 @@ include::partial$plugin-installation.adoc[]
 
 |`column`
 |the column name in the generated table
+
 |===
 
 [cols="3,1,1,3", options="header"]
+
 |===
+
 |Property Name
 |Acceptable values
 |Default
 |Description
+
+|`transformer.from-sitemap.main-page-url`
+|`URL`
+|
+a|main application page URL, used as initial seed URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
+
+IMPORTANT: The main page url value defined by this property gets overriden by the value defined in `mainPageUrl` transformer parameter.
 
 |`transformer.from-sitemap.ignore-errors`
 a|`true`
@@ -46,9 +65,8 @@ a|`true`
 `false`
 |`false`
 |defines whether urls that has redirect to the one that has already been included in the table are excluded from the table
+
 |===
-==== Required properties
-* `web-application.main-page-url` - defines main application page URL
 
 .Usage example
 ----
@@ -60,11 +78,18 @@ Examples:
 
 `FROM_HEADLESS_CRAWLING` transformer generates table based on the results of headless crawling.
 
+IMPORTANT: The use of `web-application.main-page-url` property for setting of main page for crawling is deprecated and will be removed in VIVIDUS 0.7.0, pelase see either `mainPageUrl` transformer parameter or `transformer.from-headless-crawling.main-page-url` property.
+
 [cols="1,3", options="header"]
 |===
 
 |Parameter Name
 |Description
+
+|`mainPageUrl`
+a|main application page URL, used as initial seed URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
+
+IMPORTANT: The main page url value defined by this parameter overrides the value defined by the `transformer.from-headless-crawling.main-page-url` property.
 
 |`column`
 |The column name in the generated table.
@@ -80,6 +105,13 @@ Examples:
 |Description
 
 4+^.^|_General_
+
+|`transformer.from-headless-crawling.main-page-url`
+|`URL`
+|
+a|main application page URL, used as initial seed URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
+
+IMPORTANT: The main page url value defined by this property gets overriden by the value defined in `mainPageUrl` transformer parameter.
 
 |`transformer.from-headless-crawling.seed-relative-urls`
 |Comma-separated list of values
@@ -228,10 +260,6 @@ transformer.from-headless-crawling.http.headers.x-vercel-protection-bypass=1fac2
 |Password to authenticate with proxy.
 
 |===
-
-==== Required properties
-
-* `{main-page-url}` - defines main application page URL
 
 .Usage example
 ----

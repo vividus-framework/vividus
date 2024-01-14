@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.vividus.http.HttpRedirectsProvider;
 import org.vividus.transformer.ExtendedTableTransformer;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.util.ExamplesTableProcessor;
+import org.vividus.util.UriUtils;
 
 public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTableTransformer
 {
@@ -43,6 +44,9 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
     private WebApplicationConfiguration webApplicationConfiguration;
     private HttpRedirectsProvider httpRedirectsProvider;
     private boolean filterRedirects;
+    private URI mainPageUrl;
+    @Deprecated(forRemoval = true, since = "0.6.6")
+    private String mainPageUrlProperty;
 
     @Override
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties properties)
@@ -101,6 +105,27 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
                 .buildExamplesTableFromColumns(List.of(columnName), List.of(urlsList), properties);
     }
 
+    protected URI getMainApplicationPageUri(TableProperties properties)
+    {
+        String mainPageParam = "mainPageUrl";
+        URI uri = Optional.ofNullable(properties.getProperties().getProperty(mainPageParam))
+                          .map(UriUtils::createUri)
+                          .orElse(mainPageUrl);
+
+        if (uri == null)
+        {
+            uri = webApplicationConfiguration.getMainApplicationPageUrl();
+            logger.atWarn().addArgument("web-application.main-page-url")
+                           .addArgument(mainPageParam)
+                           .addArgument(mainPageUrlProperty)
+                           .log("The use of {} property for setting of main page for crawling is deprecated and will "
+                                   + "be removed in VIVIDUS 0.7.0, pelase see use either {} transformer parameter or "
+                                   + "{} property.");
+        }
+
+        return uri;
+    }
+
     public void setWebApplicationConfiguration(WebApplicationConfiguration webApplicationConfiguration)
     {
         this.webApplicationConfiguration = webApplicationConfiguration;
@@ -111,13 +136,19 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
         this.httpRedirectsProvider = httpRedirectsProvider;
     }
 
-    protected URI getMainApplicationPageUri()
-    {
-        return webApplicationConfiguration.getMainApplicationPageUrl();
-    }
-
     public void setFilterRedirects(boolean filterRedirects)
     {
         this.filterRedirects = filterRedirects;
+    }
+
+    public void setMainPageUrl(URI mainPageUrl)
+    {
+        this.mainPageUrl = mainPageUrl;
+    }
+
+    @Deprecated(forRemoval = true, since = "0.6.6")
+    public void setMainPageUrlProperty(String mainPageUrlProperty)
+    {
+        this.mainPageUrlProperty = mainPageUrlProperty;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import java.util.Set;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.hc.client5.http.HttpResponseException;
 import org.apache.hc.core5.http.HttpStatus;
@@ -51,7 +52,7 @@ import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 
 import crawlercommons.sitemaps.SiteMapURL;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SiteMapTableTransformerTests
 {
     private static final String SOME_URL = "http://www.some.url";
@@ -175,13 +176,19 @@ class SiteMapTableTransformerTests
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(SITEMAP_URLS);
+        String prop = "transformer.from-sitemap.main-page-url";
+        siteMapTableTransformer.setMainPageUrlProperty(prop);
         siteMapTableTransformer.setFilterRedirects(true);
         var httpResponseException = new HttpResponseException(HttpStatus.SC_NOT_FOUND, "");
         when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUT_URL))).thenThrow(httpResponseException);
         var actual = siteMapTableTransformer.fetchUrls(createTableProperties());
         assertEquals(Set.of(OUTGOING_ABSOLUT_URL), actual);
         assertThat(logger.getLoggingEvents(),
-                is(List.of(warn(httpResponseException, "Exception during redirects receiving"))));
+                is(List.of(
+                        warn("The use of {} property for setting of main page for crawling is deprecated and will "
+                                + "be removed in VIVIDUS 0.7.0, pelase see use either {} transformer parameter or "
+                                + "{} property.", "web-application.main-page-url", "mainPageUrl", prop),
+                        warn(httpResponseException, "Exception during redirects receiving"))));
     }
 
     @Test
