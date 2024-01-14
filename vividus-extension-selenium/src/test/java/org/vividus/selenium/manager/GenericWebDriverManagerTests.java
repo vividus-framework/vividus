@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +17,15 @@
 package org.vividus.selenium.manager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -43,7 +37,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
@@ -57,6 +50,7 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.session.WebDriverSessionAttributes;
 import org.vividus.selenium.session.WebDriverSessionInfo;
 
+import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.remote.MobilePlatform;
 import io.appium.java_client.remote.SupportsContextSwitching;
@@ -71,79 +65,47 @@ class GenericWebDriverManagerTests
     @Mock private WebDriverSessionInfo webDriverSessionInfo;
     @InjectMocks private GenericWebDriverManager driverManager;
 
-    private WebDriver mockWebDriver(Object platform)
+    private <T extends WebDriver> T mockWebDriver(Class<T> classToMock, Object platform)
     {
-        var capabilities = mock(Capabilities.class);
+        Capabilities capabilities = mock();
         when(capabilities.getCapability(CapabilityType.PLATFORM_NAME)).thenReturn(platform);
 
-        var webDriver = mock(WebDriver.class, withSettings().extraInterfaces(HasCapabilities.class));
+        T webDriver = mock(classToMock, withSettings().extraInterfaces(HasCapabilities.class));
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(((HasCapabilities) webDriver).getCapabilities()).thenReturn(capabilities);
         return webDriver;
     }
 
-    private void mockMobileDriverContext(SupportsContextSwitching contextSwitchingDriver,
-            Set<String> returnContextHandles)
-    {
-        when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(contextSwitchingDriver);
-        when(contextSwitchingDriver.getContext()).thenReturn(WEBVIEW_CONTEXT);
-        when(contextSwitchingDriver.getContextHandles()).thenReturn(returnContextHandles);
-    }
-
-    private GenericWebDriverManager spyIsMobile(boolean returnValue)
-    {
-        var spy = Mockito.spy(driverManager);
-        doReturn(returnValue).when(spy).isMobile();
-        return spy;
-    }
-
     @Test
     void testPerformActionInNativeContextNotMobile()
     {
-        var webDriverConfigured = mock(WebDriver.class);
-        when(webDriverProvider.get()).thenReturn(webDriverConfigured);
-        GenericWebDriverManager spy = spyIsMobile(false);
-        spy.performActionInNativeContext(webDriver -> assertEquals(webDriverConfigured, webDriver));
-        verifyNoInteractions(webDriverConfigured);
+        WebDriver driver = mockWebDriver(WebDriver.class, Platform.LINUX);
+        when(webDriverProvider.get()).thenReturn(driver);
+        driverManager.performActionInNativeContext(wD -> assertEquals(driver, wD));
+        verify((HasCapabilities) driver).getCapabilities();
+        verifyNoMoreInteractions(driver);
     }
 
     @Test
     void testPerformActionInNativeContext()
     {
-        var contextSwitchingDriver = mock(SupportsContextSwitching.class,
-                withSettings().extraInterfaces(HasCapabilities.class));
-        Set<String> contexts = new HashSet<>();
-        contexts.add(WEBVIEW_CONTEXT);
-        contexts.add(NATIVE_APP_CONTEXT);
-        mockMobileDriverContext(contextSwitchingDriver, contexts);
-        var spy = spyIsMobile(true);
-        spy.performActionInNativeContext(webDriver -> assertEquals(contextSwitchingDriver, webDriver));
-        verify(contextSwitchingDriver).context(NATIVE_APP_CONTEXT);
-        verify(contextSwitchingDriver).context(WEBVIEW_CONTEXT);
-    }
-
-    @Test
-    void testPerformActionInNativeContextException()
-    {
-        var contextSwitchingDriver = mock(SupportsContextSwitching.class,
-                withSettings().extraInterfaces(HasCapabilities.class));
-        mockMobileDriverContext(contextSwitchingDriver, new HashSet<>());
-        var spy = spyIsMobile(true);
-        var exception = assertThrows(IllegalStateException.class,
-                () -> spy.performActionInNativeContext(webDriver -> assertEquals(contextSwitchingDriver, webDriver)));
-        assertEquals("MobileDriver doesn't have context: " + NATIVE_APP_CONTEXT, exception.getMessage());
+        IOSDriver driver = mockWebDriver(IOSDriver.class, MobilePlatform.IOS);
+        when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(driver);
+        when(driver.getContext()).thenReturn(WEBVIEW_CONTEXT);
+        driverManager.performActionInNativeContext(wD -> assertEquals(driver, wD));
+        verify(driver).context(NATIVE_APP_CONTEXT);
+        verify(driver).context(WEBVIEW_CONTEXT);
     }
 
     @Test
     void testPerformActionInNativeContextSwitchNotNeeded()
     {
-        var contextSwitchingDriver = mock(SupportsContextSwitching.class);
-        when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(contextSwitchingDriver);
-        when(contextSwitchingDriver.getContext()).thenReturn(NATIVE_APP_CONTEXT);
-        var spy = spyIsMobile(true);
-        spy.performActionInNativeContext(webDriver -> assertEquals(contextSwitchingDriver, webDriver));
-        verify(contextSwitchingDriver, never()).context(NATIVE_APP_CONTEXT);
-        verify(contextSwitchingDriver, never()).getContextHandles();
+        AndroidDriver driver = mockWebDriver(AndroidDriver.class, MobilePlatform.ANDROID);
+        when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(driver);
+        when(driver.getContext()).thenReturn(NATIVE_APP_CONTEXT);
+        driverManager.performActionInNativeContext(wD -> assertEquals(driver, wD));
+        verify(driver).getContext();
+        verifyNoMoreInteractions(driver);
     }
 
     static Stream<Arguments> platformsData()
@@ -182,15 +144,15 @@ class GenericWebDriverManagerTests
     @MethodSource("platformsData")
     void testIsPlatform(Predicate<GenericWebDriverManager> test, Object platform, boolean expected)
     {
-        mockWebDriver(platform);
+        mockWebDriver(WebDriver.class, platform);
         assertEquals(expected, test.test(driverManager));
     }
 
     @Test
     void testGetSize()
     {
-        WebDriver webDriver = mockWebDriver(Platform.WINDOWS);
-        var screenSize = mock(Dimension.class);
+        WebDriver webDriver = mockWebDriver(WebDriver.class, Platform.WINDOWS);
+        Dimension screenSize = mock();
         mockSizeRetrieval(webDriver, screenSize);
         assertEquals(screenSize, driverManager.getSize());
     }
@@ -200,10 +162,9 @@ class GenericWebDriverManagerTests
     void shouldGetScreenSizeForMobileApp()
     {
         var dimension = new Dimension(375, 667);
-        var iOSDriver = mock(IOSDriver.class);
-        lenient().when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(iOSDriver);
+        IOSDriver iOSDriver = mockWebDriver(IOSDriver.class, MobilePlatform.IOS);
+        when(webDriverProvider.getUnwrapped(SupportsContextSwitching.class)).thenReturn(iOSDriver);
         when(iOSDriver.getContext()).thenReturn(NATIVE_APP_CONTEXT);
-        mockWebDriver(MobilePlatform.IOS);
         mockSizeRetrieval(iOSDriver, dimension);
         when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.SCREEN_SIZE),
                 any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArguments()[1]).get());
@@ -212,9 +173,9 @@ class GenericWebDriverManagerTests
 
     private void mockSizeRetrieval(WebDriver webDriver, Dimension screenSize)
     {
-        var options = mock(Options.class);
+        Options options = mock();
         when(webDriver.manage()).thenReturn(options);
-        var window = mock(Window.class);
+        Window window = mock();
         when(options.window()).thenReturn(window);
         when(window.getSize()).thenReturn(screenSize);
     }
@@ -223,7 +184,7 @@ class GenericWebDriverManagerTests
     @Test
     void testGetNativeApplicationViewportCached()
     {
-        mockWebDriver(MobilePlatform.IOS);
+        mockWebDriver(IOSDriver.class, MobilePlatform.IOS);
         var dimension = new Dimension(375, 667);
         when(webDriverSessionInfo.get(eq(WebDriverSessionAttributes.SCREEN_SIZE),
                 any(Supplier.class))).thenReturn(dimension);
