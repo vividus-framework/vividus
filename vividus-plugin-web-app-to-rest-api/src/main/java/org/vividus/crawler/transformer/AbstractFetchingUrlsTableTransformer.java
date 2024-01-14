@@ -45,7 +45,7 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
     private HttpRedirectsProvider httpRedirectsProvider;
     private boolean filterRedirects;
     private URI mainPageUrl;
-    @Deprecated(forRemoval = true, since = "0.6.5")
+    @Deprecated(forRemoval = true, since = "0.6.6")
     private String mainPageUrlProperty;
 
     @Override
