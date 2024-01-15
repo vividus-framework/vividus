@@ -66,7 +66,7 @@ Variable provides source code of the UI of the application under test.
 
 [WARNING]
 ====
-The variable is deprecated and will be removed in VIVIDUS 0.7.0. Please use `${context-source-code}` dynamic variable instead.
+The variable is deprecated and will be removed in VIVIDUS 0.7.0. Please use `$\{context-source-code}` dynamic variable instead.
 ====
 
 ==== *Variable name*
