@@ -79,31 +79,19 @@ public class GenericWebDriverManager implements IGenericWebDriverManager
             String originalContext = contextSwitchingDriver.getContext();
             if (!NATIVE_APP_CONTEXT.equals(originalContext))
             {
-                switchToContext(contextSwitchingDriver, NATIVE_APP_CONTEXT);
+                contextSwitchingDriver.context(NATIVE_APP_CONTEXT);
                 try
                 {
                     return function.apply(contextSwitchingDriver);
                 }
                 finally
                 {
-                    switchToContext(contextSwitchingDriver, originalContext);
+                    contextSwitchingDriver.context(originalContext);
                 }
             }
             return function.apply(contextSwitchingDriver);
         }
         return function.apply(webDriverProvider.get());
-    }
-
-    private void switchToContext(SupportsContextSwitching contextSwitchingDriver, String contextName)
-    {
-        if (contextSwitchingDriver.getContextHandles().contains(contextName))
-        {
-            contextSwitchingDriver.context(contextName);
-        }
-        else
-        {
-            throw new IllegalStateException("MobileDriver doesn't have context: " + contextName);
-        }
     }
 
     @Override
