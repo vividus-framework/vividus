@@ -18,7 +18,7 @@ dependencies {
 
     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
-    implementation(group: 'com.microsoft.playwright', name: 'playwright', version: '1.40.0')
+    implementation(group: 'com.microsoft.playwright', name: 'playwright', version: '1.41.0')
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.11')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
 
