@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,6 @@ import io.qameta.allure.context.RandomUidContext;
 import io.qameta.allure.context.ReportInfoContext;
 import io.qameta.allure.core.AttachmentsPlugin;
 import io.qameta.allure.core.Configuration;
-import io.qameta.allure.core.LaunchResults;
 import io.qameta.allure.core.MarkdownDescriptionsPlugin;
 import io.qameta.allure.core.TestsResultsPlugin;
 import io.qameta.allure.duration.DurationPlugin;
@@ -81,7 +80,6 @@ import io.qameta.allure.retry.RetryTrendPlugin;
 import io.qameta.allure.severity.SeverityPlugin;
 import io.qameta.allure.status.StatusChartPlugin;
 import io.qameta.allure.suites.SuitesPlugin;
-import io.qameta.allure.summary.SummaryData;
 import io.qameta.allure.summary.SummaryPlugin;
 import io.qameta.allure.tags.TagsPlugin;
 import io.qameta.allure.timeline.TimelinePlugin;
@@ -263,15 +261,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
                 new MailPlugin(),
                 new InfluxDbExportPlugin(),
                 new PrometheusExportPlugin(),
-                new SummaryPlugin() {
-                    @Override
-                    protected SummaryData getData(List<LaunchResults> launches)
-                    {
-                        SummaryData data = super.getData(launches);
-                        data.setReportName("Test Report");
-                        return data;
-                    }
-                },
+                new SummaryPlugin(),
                 new ExecutorPlugin(),
                 new LaunchPlugin(),
                 new Allure1Plugin(),
@@ -279,6 +269,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
                 new Allure2Plugin()
         );
         Configuration configuration = new ConfigurationBuilder()
+                .withReportName("Test Report")
                 .fromExtensions(extensions)
                 .fromPlugins(allurePluginsProvider.getPlugins())
                 .build();
