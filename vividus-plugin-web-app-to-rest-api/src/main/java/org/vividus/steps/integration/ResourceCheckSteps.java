@@ -181,8 +181,10 @@ public class ResourceCheckSteps
             if (isJumpLink(elementUriAsString))
             {
                 String fragment = elementUri.getLeft().getFragment();
-                Element target = element.root().getElementById(fragment);
-                if (target == null)
+                Element root = element.root();
+                boolean targetNotPresent = root.getElementById(fragment) == null
+                                        && root.getElementsByAttributeValue("name", fragment).isEmpty();
+                if (targetNotPresent)
                 {
                     return Optional.of(ResourceValidationError.MISSING_JUMPLINK_TARGET
                             .onAssertion(softAssert::recordFailedAssertion, elementCssSelector, fragment)

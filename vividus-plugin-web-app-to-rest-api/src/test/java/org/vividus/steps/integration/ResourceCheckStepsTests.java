@@ -115,6 +115,8 @@ class ResourceCheckStepsTests
     private static final String EXTERNAL_SECTION_LINK_SELECTOR = "#external-section";
     private static final String SECTION_SELECTOR = "#section";
     private static final String JUMP_LINK_SELECTOR = "#jump-link";
+    private static final String NAMED_SECTION_SELECTOR = "#named-section";
+    private static final String JUMP_LINK_USING_NAME_SELECTOR = "#jump-link-using-name";
 
     private static final String INVALID_URL = "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|"
             + "Google+Sans:400,500,700|Google+Sans+Text:400&lang=en";
@@ -150,6 +152,8 @@ class ResourceCheckStepsTests
               <a id='external-section' href='https://external.page/other#section'>External jump link</a>
               <a id='jump-link' href='#section'>Jump link</a>
               <p id='section'>Section</p>
+              <a id='jump-link-using-name' href='#named-section'>Jump link using name</a>
+              <p name='named-section'>Named Section</a>
             </body>
             </html>""";
 
@@ -223,8 +227,10 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(15));
+            assertThat(validationsToReport, hasSize(16));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
+            validate(resourceValidations, URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
+                    CheckStatus.PASSED, N_A);
             validate(resourceValidations, URI.create(SECTION_SELECTOR), JUMP_LINK_SELECTOR, CheckStatus.PASSED, N_A);
             validate(resourceValidations, SERENITY_URI, HTTP_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, imageUri, "#image", CheckStatus.PASSED, N_A);
@@ -337,8 +343,10 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(13));
+            assertThat(validationsToReport, hasSize(14));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
+            validate(resourceValidations.next(), URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
+                    CheckStatus.PASSED);
             validate(resourceValidations.next(), URI.create(SECTION_SELECTOR), JUMP_LINK_SELECTOR, CheckStatus.PASSED);
             validate(resourceValidations.next(), SERENITY_URI, HTTP_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), EXTERNAL_SECTION_LINK, EXTERNAL_SECTION_LINK_SELECTOR,
@@ -382,7 +390,7 @@ class ResourceCheckStepsTests
             validateError(resourceValidations.next(), "Element doesn't contain href/src attributes", "#video-id",
                     THIRD_PAGE_URL);
             validateError(resourceValidations.next(), INVALID_HREF_ATTR_MESSAGE, "#link-id-2", THIRD_PAGE_URL);
-            validateError(resourceValidations.next(), "Jump link points to missing element with section id",
+            validateError(resourceValidations.next(), "Jump link points to missing element with section id or name",
                     JUMP_LINK_SELECTOR, THIRD_PAGE_URL);
             validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, "#link-id", CheckStatus.PASSED);
             return true;
@@ -541,7 +549,7 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(12));
+            assertThat(validationsToReport, hasSize(13));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations, EXTERNAL_SECTION_LINK, EXTERNAL_SECTION_LINK_SELECTOR, CheckStatus.PASSED,
                     N_A);
@@ -551,6 +559,8 @@ class ResourceCheckStepsTests
             validate(resourceValidations, VIVIDUS_QUERY_URI_1, SELECTOR_QUERY_1, CheckStatus.PASSED, N_A);
             validate(resourceValidations, VIVIDUS_QUERY_URI_2, SELECTOR_QUERY_2, CheckStatus.PASSED, N_A);
             validate(resourceValidations, SHARP_URI, SHARP_ID, CheckStatus.FILTERED, N_A);
+            validate(resourceValidations, URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
+                    CheckStatus.FILTERED, N_A);
             validate(resourceValidations, URI.create(SECTION_SELECTOR), JUMP_LINK_SELECTOR, CheckStatus.FILTERED, N_A);
             validate(resourceValidations, FTP_URI, FTP_ID, CheckStatus.FILTERED, N_A);
             validate(resourceValidations, SERENITY_URI, HTTP_ID, CheckStatus.FILTERED, N_A);
