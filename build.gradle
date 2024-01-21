@@ -73,6 +73,6 @@ ext {
         // eyes and eyesUniversal versions should be updated and tested together
         eyes:                   '5.64.7',
         eyesUniversal:          '5.63.13',
-        jsonPath:               'fd1bbfe6f9'
+        jsonPath:               '52ebb195bd'
     ]
 }
