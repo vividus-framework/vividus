@@ -93,7 +93,7 @@
   },
   "VVD-14": {
     "type": "Internal",
-    "assertionPattern": "Jump link by selector .* points to missing element with notFound id",
+    "assertionPattern": "Jump link by selector .* points to missing element with notFound id or name",
     "scenarioPattern": "Steps verification.*",
     "storyPattern": "ResourceCheckSteps",
     "stepPattern": "Then all resources found by.*"

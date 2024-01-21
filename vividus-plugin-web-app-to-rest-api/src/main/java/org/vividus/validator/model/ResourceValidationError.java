@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ public enum ResourceValidationError
         "Element by selector %s doesn't contain href/src attributes"),
     INVALID_HREF_SRC("Element has href/src attribute with invalid URL: %s",
         "Element by selector %s has href/src attribute with invalid URL: %s"),
-    MISSING_JUMPLINK_TARGET("Jump link points to missing element with %s id",
-            "Jump link by selector %s points to missing element with %s id");
+    MISSING_JUMPLINK_TARGET("Jump link points to missing element with %s id or name",
+            "Jump link by selector %s points to missing element with %s id or name");
 
     private final String errorFormat;
     private final String assertionFormat;
