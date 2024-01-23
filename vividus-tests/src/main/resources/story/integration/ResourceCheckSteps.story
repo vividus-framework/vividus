@@ -30,3 +30,8 @@ Then all resources found by xpath `//a[@href]` in ${${source-code}} are valid
 Then all resources by selector `a[href]` from ${source-code} are valid
 When I change context to element located by `linkText(Link to unexistent element)`
 Then all resources by selector `a[href]` from ${context-source-code} are valid
+
+Scenario: Verification of the URI exclusion mechanism via 'resource-checker.uri-to-ignore-regex' property
+Given I am on page with URL `${vividus-test-site-url}/visualTestIntegration.html`
+When I change context to element located by `linkText(Home)`
+Then all resources found by CSS selector `a` in ${context-source-code} are valid

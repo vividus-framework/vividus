@@ -146,15 +146,7 @@ public class ResourceCheckSteps
                 .map(this::parseElement)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .peek(rv ->
-                {
-                    resourceValidator.accept(rv);
-                    if (rv.getCheckStatus() == null && !isSchemaAllowed(rv.getUriOrError().getLeft())
-                            || excludeHrefsPattern.matcher(rv.toString()).matches())
-                    {
-                        rv.setCheckStatus(CheckStatus.FILTERED);
-                    }
-                })
+                .peek(resourceValidator)
                 .parallel();
     }
 
@@ -175,10 +167,18 @@ public class ResourceCheckSteps
         }
         try
         {
-            Pair<URI, String> elementUri = Pair.of(resolveUri(elementUriAsString), null);
+            URI uriToValidate = resolveUri(elementUriAsString);
+            Pair<URI, String> elementUri = Pair.of(uriToValidate, null);
             WebPageResourceValidation validation = new WebPageResourceValidation(elementUri, elementCssSelector);
+            boolean jumpLink = isJumpLink(elementUriAsString);
+            if (!jumpLink && !isSchemaAllowed(uriToValidate)
+                          || excludeHrefsPattern.matcher(uriToValidate.toString()).matches())
+            {
+                validation.setCheckStatus(CheckStatus.FILTERED);
+                return Optional.of(validation);
+            }
 
-            if (isJumpLink(elementUriAsString))
+            if (jumpLink)
             {
                 String fragment = elementUri.getLeft().getFragment();
                 Element root = element.root();

@@ -179,6 +179,7 @@ class ResourceCheckStepsTests
           + "  <video id='video-id'>Some video without attributes</a>\r\n"
           + "  <a id='link-id-2' href='" + INVALID_URL + "'>Fonts</a>\r\n"
           + "  <a id='jump-link' href='#section'>Jump link</a>\r\n"
+          + "  <a id='jump-link-using-name' href='#named-section'>Jump link using name</a>\r\n"
           + "</body>\r\n"
           + "</html>\r\n";
 
@@ -375,7 +376,7 @@ class ResourceCheckStepsTests
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
         when(httpResponse.getResponseBodyAsString()).thenReturn(THIRD_PAGE);
-        resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
+        resourceCheckSteps.setUriToIgnoreRegex(Optional.of(NAMED_SECTION_SELECTOR));
         resourceCheckSteps.init();
         ExamplesTable examplesTable =
                 new ExamplesTable("|pages|\n|https://third.page|");
@@ -385,7 +386,7 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(4));
+            assertThat(validationsToReport, hasSize(5));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validateError(resourceValidations.next(), "Element doesn't contain href/src attributes", "#video-id",
                     THIRD_PAGE_URL);
@@ -393,6 +394,8 @@ class ResourceCheckStepsTests
             validateError(resourceValidations.next(), "Jump link points to missing element with section id or name",
                     JUMP_LINK_SELECTOR, THIRD_PAGE_URL);
             validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, "#link-id", CheckStatus.PASSED);
+            validate(resourceValidations.next(), URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
+                    CheckStatus.FILTERED);
             return true;
         }), eq(REPORT_NAME));
         verify(softAssert).recordFailedAssertion("Element by selector #video-id doesn't contain href/src attributes");
@@ -541,7 +544,7 @@ class ResourceCheckStepsTests
     {
         mockResourceValidator();
         runExecutor();
-        resourceCheckSteps.setUriToIgnoreRegex(Optional.of("^((?!https).)*"));
+        resourceCheckSteps.setUriToIgnoreRegex(Optional.of("(?!https).*"));
         resourceCheckSteps.init();
         when(webApplicationConfiguration.getMainApplicationPageUrlUnsafely()).thenReturn(VIVIDUS_URI);
         resourceCheckSteps.checkResources(HtmlLocatorType.CSS_SELECTOR, LINK_SELECTOR, FIRST_PAGE);
