@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,11 @@ import org.vividus.util.ResourceUtils;
 @ExtendWith(MockitoExtension.class)
 class JiraFacadeTests
 {
-    private static final String ISSUE_ID = "issue id";
+    private static final String ISSUE_ID = "VVDS-1";
     private static final String ISSUE_BODY = "issue body";
     private static final String ISSUE_ENDPOINT = "/rest/api/latest/issue/";
     private static final String TESTS_LINK = "Tests";
+    private static final String ISSUE_JSON = "issue.json";
 
     @Mock private JiraClient jiraClient;
     @Mock private JiraClientProvider jiraClientProvider;
@@ -87,7 +88,7 @@ class JiraFacadeTests
     void shouldCreateIssueLink() throws IOException, JiraConfigurationException
     {
         String requirementKey = "requirement id";
-        String linkRequest = "{\"type\":{\"name\":\"Tests\"},\"inwardIssue\":{\"key\":\"issue id\"},"
+        String linkRequest = "{\"type\":{\"name\":\"Tests\"},\"inwardIssue\":{\"key\":\"VVDS-1\"},"
                 + "\"outwardIssue\":{\"key\":\"requirement id\"}}";
         when(jiraClientProvider.getByIssueKey(ISSUE_ID)).thenReturn(jiraClient);
         jiraFacade.createIssueLink(ISSUE_ID, requirementKey, TESTS_LINK);
@@ -95,28 +96,31 @@ class JiraFacadeTests
     }
 
     @Test
-    void shouldReturnIssueStatue() throws IOException, JiraConfigurationException
-    {
-        when(jiraClientProvider.getByIssueKey(ISSUE_ID)).thenReturn(jiraClient);
-        when(jiraClient.executeGet(ISSUE_ENDPOINT + ISSUE_ID))
-                .thenReturn("{\"fields\":{\"status\": {\"name\" : \"Open\"}}}");
-        assertEquals("Open", jiraFacade.getIssueStatus(ISSUE_ID));
-    }
-
-    @Test
     void shouldGetIssue() throws IOException, JiraConfigurationException
     {
         when(jiraClientProvider.getByIssueKey(ISSUE_ID)).thenReturn(jiraClient);
-        String responseBody = ResourceUtils.loadResource(getClass(), "issue.json");
+        String responseBody = ResourceUtils.loadResource(getClass(), ISSUE_JSON);
         when(jiraClient.executeGet(ISSUE_ENDPOINT + ISSUE_ID)).thenReturn(responseBody);
         JiraEntity issue = jiraFacade.getIssue(ISSUE_ID);
         assertEquals("31354", issue.getId());
+        assertEquals(ISSUE_ID, issue.getKey());
+        assertEquals("Open", issue.getStatus());
         List<IssueLink> issueLinks = issue.getIssueLinks();
         assertThat(issueLinks, hasSize(1));
         IssueLink issueLink = issueLinks.get(0);
         assertNull(issueLink.inwardIssueKey());
         assertEquals(TESTS_LINK, issueLink.type());
         assertEquals("VVDS-2", issueLink.outwardIssueKey());
+    }
+
+    @Test
+    void shouldGetIssueAsJson() throws IOException, JiraConfigurationException
+    {
+        when(jiraClientProvider.getByIssueKey(ISSUE_ID)).thenReturn(jiraClient);
+        String responseBody = ResourceUtils.loadResource(getClass(), ISSUE_JSON);
+        when(jiraClient.executeGet(ISSUE_ENDPOINT + ISSUE_ID)).thenReturn(responseBody);
+        String issue = jiraFacade.getIssueAsJson(ISSUE_ID);
+        assertEquals(responseBody, issue);
     }
 
     @Test

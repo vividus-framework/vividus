@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.vividus.jira.JiraClient;
 import org.vividus.jira.JiraClientProvider;
 import org.vividus.jira.JiraConfigurationException;
 import org.vividus.jira.JiraFacade;
+import org.vividus.jira.mapper.JiraEntityMapper;
 import org.vividus.jira.model.Attachment;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.util.json.JsonPathUtils;
@@ -50,6 +51,9 @@ import org.vividus.xray.model.ManualTestCase;
 import org.vividus.xray.model.TestExecution;
 import org.zeroturnaround.zip.ZipException;
 import org.zeroturnaround.zip.ZipUtil;
+
+import net.javacrumbs.jsonunit.JsonMatchers;
+import net.javacrumbs.jsonunit.core.Option;
 
 public class XrayFacade
 {
@@ -91,8 +95,24 @@ public class XrayFacade
     public <T extends AbstractTestCase> void updateTestCase(String testCaseKey, T testCase)
             throws IOException, NonEditableIssueStatusException, JiraConfigurationException
     {
-        checkIfIssueEditable(testCaseKey);
+        String jiraEntityJson = jiraFacade.getIssueAsJson(testCaseKey);
         String updateTestRequest = objectMapper.writeValueAsString(testCase);
+
+        boolean sameState = JsonMatchers.jsonEquals(updateTestRequest)
+                .withOptions(List.of(Option.IGNORING_EXTRA_FIELDS, Option.IGNORING_ARRAY_ORDER))
+                .whenIgnoringPaths("$.fields.assignee")
+                .matches(jiraEntityJson);
+
+        if (sameState)
+        {
+            LOGGER.atInfo().addArgument(testCase::getType)
+                           .addArgument(testCaseKey)
+                           .log("{} Test with key {} is already up to date");
+            return;
+        }
+
+        checkIfIssueEditable(JiraEntityMapper.readValue(jiraEntityJson, JiraEntity.class));
+
         LOGGER.atInfo().addArgument(testCase::getType)
                        .addArgument(testCaseKey)
                        .addArgument(updateTestRequest)
@@ -196,14 +216,12 @@ public class XrayFacade
                 requestBody);
     }
 
-    private void checkIfIssueEditable(String issueKey)
-            throws IOException, NonEditableIssueStatusException, JiraConfigurationException
+    private void checkIfIssueEditable(JiraEntity jiraEntity) throws NonEditableIssueStatusException
     {
-        String status = jiraFacade.getIssueStatus(issueKey);
-
+        String status = jiraEntity.getStatus();
         if (editableStatuses.stream().noneMatch(s -> StringUtils.equalsIgnoreCase(s, status)))
         {
-            throw new NonEditableIssueStatusException(issueKey, status);
+            throw new NonEditableIssueStatusException(jiraEntity.getKey(), status);
         }
     }
 
