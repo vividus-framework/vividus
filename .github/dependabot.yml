@@ -1,4 +1,11 @@
 version: 2
+registries:
+  maven-artifactory:
+    # Actually it's not needed to be accessed, but Dependabot strats search from this repo
+    type: maven-repository
+    url: https://maven.pkg.github.com/vividus-framework/vividus
+    username: token
+    password: ${{secrets.TOKEN_FOR_VIVIDUS_PACKAGE_REGISTRY}}
 updates:
 - package-ecosystem: gradle
   directory: "/"
