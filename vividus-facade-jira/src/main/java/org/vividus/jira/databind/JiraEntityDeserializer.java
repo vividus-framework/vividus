@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,17 @@ public class JiraEntityDeserializer extends JsonDeserializer<JiraEntity>
 
         JiraEntity entity = new JiraEntity();
         entity.setId(jsonNode.path("id").asText());
+        entity.setKey(jsonNode.path("key").asText());
 
-        List<IssueLink> issueLinks = jsonNode.path("fields")
-                                             .path("issuelinks")
-                                             .traverse(parser.getCodec())
-                                             .readValueAs(new TypeReference<List<IssueLink>>() { });
+        JsonNode fields = jsonNode.path("fields");
+
+        List<IssueLink> issueLinks = fields.path("issuelinks")
+                                           .traverse(parser.getCodec())
+                                           .readValueAs(new TypeReference<List<IssueLink>>() { });
         entity.setIssueLinks(issueLinks);
+
+        entity.setStatus(fields.path("status").path("name").asText());
+
         return entity;
     }
 }

@@ -1,5 +1,6 @@
 {
     "id": "31354",
+    "key": "VVDS-1",
     "fields": {
         "issuelinks": [
             {
@@ -16,10 +17,12 @@
                     "id": "22791",
                     "key": "VVDS-2",
                     "self": "https://jira.vividus.com/rest/api/2/issue/22791",
-                    "fields": {
-                    }
+                    "fields": {}
                 }
             }
-        ]
+        ],
+        "status": {
+            "name": "Open"
+        }
     }
 }

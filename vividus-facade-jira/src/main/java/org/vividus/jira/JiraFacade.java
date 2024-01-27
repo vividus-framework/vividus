@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,32 +20,18 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-
 import org.apache.commons.lang3.function.FailableSupplier;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.message.BasicHeader;
-import org.vividus.jira.databind.IssueLinkDeserializer;
-import org.vividus.jira.databind.IssueLinkSerializer;
-import org.vividus.jira.databind.JiraEntityDeserializer;
+import org.vividus.jira.mapper.JiraEntityMapper;
 import org.vividus.jira.model.Attachment;
 import org.vividus.jira.model.IssueLink;
 import org.vividus.jira.model.JiraEntity;
 import org.vividus.jira.model.Project;
-import org.vividus.util.json.JsonPathUtils;
 
 public class JiraFacade
 {
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .registerModule(new SimpleModule()
-                    .addSerializer(IssueLink.class, new IssueLinkSerializer())
-                    .addDeserializer(IssueLink.class, new IssueLinkDeserializer())
-                    .addDeserializer(JiraEntity.class, new JiraEntityDeserializer()))
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-
     private static final String REST_API_ENDPOINT = "/rest/api/latest/";
     private static final String ISSUE = "issue/";
     private static final String ISSUE_ENDPOINT = REST_API_ENDPOINT + ISSUE;
@@ -72,25 +58,24 @@ public class JiraFacade
             throws IOException, JiraConfigurationException
     {
         IssueLink issueLink = new IssueLink(type, inwardIssueKey, outwardIssueKey);
-        String createLinkRequest = OBJECT_MAPPER.writeValueAsString(issueLink);
+        String createLinkRequest = JiraEntityMapper.writeValueAsString(issueLink);
         jiraClientProvider.getByIssueKey(inwardIssueKey).executePost("/rest/api/latest/issueLink", createLinkRequest);
-    }
-
-    public String getIssueStatus(String issueKey) throws IOException, JiraConfigurationException
-    {
-        String issue = jiraClientProvider.getByIssueKey(issueKey).executeGet(ISSUE_ENDPOINT + issueKey);
-        return JsonPathUtils.getData(issue, "$.fields.status.name");
     }
 
     public Project getProject(String projectKey) throws IOException, JiraConfigurationException
     {
-        return getJiraEntity("project/", projectKey, () -> jiraClientProvider.getByProjectKey(projectKey),
-                Project.class);
+        String response = retrieveEntity("project/", projectKey, () -> jiraClientProvider.getByProjectKey(projectKey));
+        return JiraEntityMapper.readValue(response, Project.class);
     }
 
     public JiraEntity getIssue(String issueKey) throws IOException, JiraConfigurationException
     {
         return getJiraEntity(ISSUE, issueKey, JiraEntity.class);
+    }
+
+    public String getIssueAsJson(String issueKey) throws IOException, JiraConfigurationException
+    {
+        return retrieveEntity(ISSUE, issueKey, () -> jiraClientProvider.getByIssueKey(issueKey));
     }
 
     public void addAttachments(String issueKey, List<Attachment> attachments)
@@ -106,14 +91,14 @@ public class JiraFacade
     private <T> T getJiraEntity(String relativeUrl, String entityKey, Class<T> entityType)
             throws IOException, JiraConfigurationException
     {
-        return getJiraEntity(relativeUrl, entityKey, () -> jiraClientProvider.getByIssueKey(entityKey), entityType);
+        String response = retrieveEntity(relativeUrl, entityKey, () -> jiraClientProvider.getByIssueKey(entityKey));
+        return JiraEntityMapper.readValue(response, entityType);
     }
 
-    private <T> T getJiraEntity(String relativeUrl, String entityKey,
-            FailableSupplier<JiraClient, JiraConfigurationException> jiraClientSupplier, Class<T> entityType)
+    private String retrieveEntity(String relativeUrl, String entityKey,
+            FailableSupplier<JiraClient, JiraConfigurationException> jiraClientSupplier)
             throws IOException, JiraConfigurationException
     {
-        String responseBody = jiraClientSupplier.get().executeGet(REST_API_ENDPOINT + relativeUrl + entityKey);
-        return OBJECT_MAPPER.readValue(responseBody, entityType);
+        return jiraClientSupplier.get().executeGet(REST_API_ENDPOINT + relativeUrl + entityKey);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,9 +88,9 @@ class XrayFacadeTests
     private static final String UPDATE_TEST_EXECUTION_LOG = "Updating Test Execution with ID {}: {}";
     private static final String ISSUE_KEY = "TEST-0";
     private static final String LINK_TYPE = "Tests";
-    private static final String ISSUE_ID = "issue id";
+    private static final String ISSUE_ID = "VVDS-1";
     private static final String REQUIREMENT_ID = "requirement id";
-    private static final String BODY = "{}";
+    private static final String BODY = "{\"fields\":{\"summary\":\"VIVIDUS Test Case\"}}";
     private static final String OPEN_STATUS = "Open";
     private static final String MANUAL_TYPE = "Manual";
     private static final String CUCUMBER_TYPE = "Cucumber";
@@ -99,6 +99,17 @@ class XrayFacadeTests
     private static final String FILES_ATTACH_MESSAGE = "Successfully attached files and folders at {} to test "
             + "execution with key {}";
     private static final String TEST_EXECUTION_REQUEST = "{\"testExecutionKey\":\"TEST-0\",\"tests\":[]}";
+    private static final String OPEN_ISSUE_BODY = """
+            {
+                "key": "VVDS-1",
+                "fields": {
+                    "issuelinks": [],
+                    "status": {
+                        "name": "Open"
+                    }
+                }
+            }
+            """;
 
     @Mock private ManualTestCaseSerializer manualTestSerializer;
     @Mock private CucumberTestCaseSerializer cucumberTestSerializer;
@@ -155,7 +166,7 @@ class XrayFacadeTests
         ManualTestCase testCase = createManualTestCase();
         mockSerialization(manualTestSerializer, testCase);
 
-        when(jiraFacade.getIssueStatus(ISSUE_ID)).thenReturn(OPEN_STATUS);
+        when(jiraFacade.getIssueAsJson(ISSUE_ID)).thenReturn(OPEN_ISSUE_BODY);
 
         xrayFacade.updateTestCase(ISSUE_ID, testCase);
 
@@ -170,12 +181,30 @@ class XrayFacadeTests
         CucumberTestCase testCase = createCucumberTestCase();
         mockSerialization(cucumberTestSerializer, testCase);
 
-        when(jiraFacade.getIssueStatus(ISSUE_ID)).thenReturn(OPEN_STATUS);
+        when(jiraFacade.getIssueAsJson(ISSUE_ID)).thenReturn(OPEN_ISSUE_BODY);
 
         xrayFacade.updateTestCase(ISSUE_ID, testCase);
 
         verify(jiraFacade).updateIssue(ISSUE_ID, BODY);
         verifyUpdateLogs(CUCUMBER_TYPE);
+    }
+
+    @Test
+    void shouldNotUpdateTestCaseIfItsUpToDate()
+            throws IOException, NonEditableIssueStatusException, JiraConfigurationException
+    {
+        initializeFacade(List.of());
+        CucumberTestCase testCase = createCucumberTestCase();
+        mockSerialization(cucumberTestSerializer, testCase);
+
+        when(jiraFacade.getIssueAsJson(ISSUE_ID))
+                .thenReturn("{\"fields\": {\"summary\": \"VIVIDUS Test Case\", \"extra_field\": \"value\"}}");
+
+        xrayFacade.updateTestCase(ISSUE_ID, testCase);
+
+        verifyNoMoreInteractions(jiraFacade);
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(info("{} Test with key {} is already up to date", CUCUMBER_TYPE, ISSUE_ID))));
     }
 
     private void verifyUpdateLogs(String type)
@@ -189,12 +218,24 @@ class XrayFacadeTests
     void shouldUpdateTestCaseNotEditableStatus() throws IOException, JiraConfigurationException
     {
         initializeFacade(List.of(OPEN_STATUS));
-        String closedStatus = "Closed";
-        when(jiraFacade.getIssueStatus(ISSUE_ID)).thenReturn(closedStatus);
+
+        String body = """
+                {
+                    "key": "VVDS-1",
+                    "fields": {
+                        "issuelinks": [],
+                        "status": {
+                            "name": "Closed"
+                        }
+                    }
+                }
+                """;
+
+        when(jiraFacade.getIssueAsJson(ISSUE_ID)).thenReturn(body);
 
         NonEditableIssueStatusException exception = assertThrows(NonEditableIssueStatusException.class,
             () -> xrayFacade.updateTestCase(ISSUE_ID, createManualTestCase()));
-        assertEquals("Issue " + ISSUE_ID + " is in non-editable '" + closedStatus + "' status", exception.getMessage());
+        assertEquals("Issue " + ISSUE_ID + " is in non-editable 'Closed' status", exception.getMessage());
         assertThat(logger.getLoggingEvents(), is(List.of()));
     }
 
@@ -269,13 +310,14 @@ class XrayFacadeTests
         initializeFacade(List.of());
         TestExecution testExecution = new TestExecution();
         TestExecutionInfo info = new TestExecutionInfo();
-        info.setSummary("summary");
+        info.setSummary("test execution summary");
         testExecution.setInfo(info);
         testExecution.setTests(List.of(
             createTestExecutionItem("test-one", TestExecutionItemStatus.PASS, null)
         ));
         when(jiraClientProvider.getByJiraConfigurationKey(Optional.empty())).thenReturn(jiraClient);
-        String body = "{\"info\":{\"summary\":\"summary\"},\"tests\":[{\"testKey\":\"test-one\",\"status\":\"PASS\"}]}";
+        String body = "{\"info\":{\"summary\":\"test execution summary\"},\"tests\":[{\"testKey\":\"test-one\","
+                + "\"status\":\"PASS\"}]}";
         when(jiraClient.executePost(EXECUTION_IMPORT_ENDPOINT, body)).thenReturn("{\"testExecIssue\":{\"id\":\"01101\""
                 + ",\"key\":\"TEST-0\",\"self\":\"https://jira.com/rest/api/2/issue/01101\"}}");
 
@@ -357,7 +399,7 @@ class XrayFacadeTests
         when(jiraClientProvider.getByIssueKey(ISSUE_KEY)).thenReturn(jiraClient);
         xrayFacade.updateTestSet(ISSUE_KEY, List.of(ISSUE_ID, ISSUE_ID));
         verify(jiraClient).executePost("/rest/raven/1.0/api/testset/" + ISSUE_KEY + "/test",
-            "{\"add\":[\"issue id\",\"issue id\"]}");
+            "{\"add\":[\"VVDS-1\",\"VVDS-1\"]}");
         assertThat(logger.getLoggingEvents(), is(List.of(
             info("Add {} test cases to Test Set with ID {}", ISSUE_ID + ", " + ISSUE_ID, ISSUE_KEY)
         )));
@@ -423,6 +465,10 @@ class XrayFacadeTests
         {
             JsonGenerator generator = a.getArgument(1, JsonGenerator.class);
             generator.writeStartObject();
+            generator.writeFieldName("fields");
+            generator.writeStartObject();
+            generator.writeStringField("summary", "VIVIDUS Test Case");
+            generator.writeEndObject();
             generator.writeEndObject();
             return null;
         }).when(serializer).serialize(eq(testCase), any(JsonGenerator.class), any(SerializerProvider.class));
