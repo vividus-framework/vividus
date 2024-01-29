@@ -246,7 +246,7 @@ When I save JSON element value from `$json` by JSON path `$jsonPath` to $scopes 
 .Validate the title of the second book
 [source,gherkin]
 ----
-When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/json-path/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
+When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/vividus-framework/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
 When I save JSON element value from `${response}` by JSON path `$.store.book[1].title` to scenario variable `title-of-second-book`
 Then `${title-of-second-book}` is equal to `Sword of Honour`
 ----
@@ -269,7 +269,7 @@ When I save JSON element from `$json` by JSON path `$jsonPath` to $scopes variab
 .Validate the title of the second book
 [source,gherkin]
 ----
-When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/json-path/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
+When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/vividus-framework/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
 When I save JSON element from `${response}` by JSON path `$.store.book[1].title` to scenario variable `title-of-second-book`
 Then `${title-of-second-book}` is equal to `"Sword of Honour"`
 ----
@@ -442,7 +442,7 @@ When I find $comparisonRule '$elementsNumber' JSON elements in '$json' by '$json
 .Find the title from JSON
 [source,gherkin]
 ----
-When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/json-path/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
+When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/vividus-framework/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
 When I find > `1` JSON elements in `${response}` by `$.store.book` and until variable `title` matches `M.+` for each element I do:
 |step|
 |When I save JSON element value from `${json-context}` by JSON path `$.title` to scenario variable `title`|
@@ -472,7 +472,7 @@ Then JSON element value from `$json` by JSON path `$jsonPath` $comparisonRule `$
 .Validate the price of the fourth book is greater than 22.50
 [source,gherkin]
 ----
-When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/json-path/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
+When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/vividus-framework/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
 Then JSON element value from `${response}` by JSON path `$.store.book[3].price` is greater than `22.50`
 ----
 

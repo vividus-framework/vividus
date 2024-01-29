@@ -6,7 +6,7 @@ Meta:
 Lifecycle:
 Before:
 Scope: STORY
-When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/json-path/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
+When I execute HTTP GET request for resource with URL `https://raw.githubusercontent.com/vividus-framework/JsonPath/master/json-path-web-test/src/main/resources/webapp/json/goessner.json`
 Then `${responseCode}` matches `20\d`
 
 
