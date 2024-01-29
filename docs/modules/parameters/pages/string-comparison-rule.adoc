@@ -26,7 +26,7 @@ Defines how string values should be compared.
 |Verify that string value does not contain another string value
 
 |MATCHES
-|matchers
+|matches
 |Verify that string value matches regular expression
 
 |===
