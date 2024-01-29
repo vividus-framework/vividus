@@ -16,32 +16,22 @@
 
 package org.vividus.html;
 
-import java.util.function.BiFunction;
-
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 
-public enum HtmlLocatorType
+public final class JsoupUtils
 {
-    XPATH("XPath", Document::selectXpath),
-    CSS_SELECTOR("CSS selector", Document::select);
-
-    private final String description;
-    private final BiFunction<Document, String, Elements> finder;
-
-    HtmlLocatorType(String description, BiFunction<Document, String, Elements> finder)
+    private JsoupUtils()
     {
-        this.description = description;
-        this.finder = finder;
     }
 
-    public Elements findElements(Document document, String locator)
+    public static Document getDocument(String html, String baseUri)
     {
-        return finder.apply(document, locator);
+        return Jsoup.parse(html, baseUri);
     }
 
-    public String getDescription()
+    public static Document getDocument(String html)
     {
-        return description;
+        return getDocument(html, "");
     }
 }

@@ -36,9 +36,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hc.core5.net.URIBuilder;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Selector.SelectorParseException;
 import org.vividus.html.HtmlLocatorType;
+import org.vividus.html.JsoupUtils;
 import org.vividus.http.HttpMethod;
 import org.vividus.http.HttpRequestExecutor;
 import org.vividus.http.HttpTestContext;
@@ -56,6 +58,7 @@ public class ResourceCheckSteps
     private static final Set<String> ALLOWED_SCHEMES = Set.of("http", "https");
     private static final String URL_FRAGMENT = "#";
     private static final String HREF_ATTR = "href";
+    private static final String HTML_TITLE_TAG = "title";
 
     private final ResourceValidator<WebPageResourceValidation> resourceValidator;
     private final AttachmentPublisher attachmentPublisher;
@@ -106,7 +109,9 @@ public class ResourceCheckSteps
     {
         softAssert.runIgnoringTestFailFast(() -> execute(() ->
         {
-            Collection<Element> resourcesToValidate = htmlLocatorType.findElements(html, htmlLocator);
+            Document document = JsoupUtils.getDocument(html);
+            Collection<Element> resourcesToValidate = htmlLocatorType.findElements(document, htmlLocator);
+            boolean contextCheck = document.head().getElementsByTag(HTML_TITLE_TAG).isEmpty();
             Stream<WebPageResourceValidation> validations = createResourceValidations(resourcesToValidate,
                     resourceValidation -> {
                         URI uriToCheck = resourceValidation.getUriOrError().getLeft();
@@ -120,7 +125,7 @@ public class ResourceCheckSteps
                             resourceValidation.setError(message);
                             resourceValidation.setCheckStatus(CheckStatus.BROKEN);
                         }
-                    });
+                    }, contextCheck);
             validateResources(validations);
         }));
     }
@@ -140,17 +145,17 @@ public class ResourceCheckSteps
     }
 
     private Stream<WebPageResourceValidation> createResourceValidations(Collection<Element> elements,
-            Consumer<WebPageResourceValidation> resourceValidator)
+            Consumer<WebPageResourceValidation> resourceValidator, boolean contextCheck)
     {
         return elements.stream()
-                .map(this::parseElement)
+                .map(e -> parseElement(e, contextCheck))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .peek(resourceValidator)
                 .parallel();
     }
 
-    private Optional<WebPageResourceValidation> parseElement(Element element)
+    private Optional<WebPageResourceValidation> parseElement(Element element, boolean contextCheck)
     {
         String elementUriAsString = getElementUri(element).trim();
         if (elementUriAsString.startsWith("data:"))
@@ -186,6 +191,16 @@ public class ResourceCheckSteps
                                         && root.getElementsByAttributeValue("name", fragment).isEmpty();
                 if (targetNotPresent)
                 {
+                    if (contextCheck)
+                    {
+                        WebPageResourceValidation contextJumpLinkValidation = new WebPageResourceValidation(
+                                Pair.of(null, String.format(
+                                        "Validation of jump link (the target is \"%s\") is skipped as the current "
+                                                + "context is restricted to a portion of the document.",
+                                        elementUriAsString)), elementCssSelector);
+                        contextJumpLinkValidation.setCheckStatus(CheckStatus.FILTERED);
+                        return Optional.of(contextJumpLinkValidation);
+                    }
                     return Optional.of(ResourceValidationError.MISSING_JUMPLINK_TARGET
                             .onAssertion(softAssert::recordFailedAssertion, elementCssSelector, fragment)
                             .createValidation(null, elementCssSelector, fragment));
@@ -319,9 +334,10 @@ public class ResourceCheckSteps
                         {
                             httpRequestExecutor.executeHttpRequest(HttpMethod.GET, pageUrl, Optional.empty());
                             return Optional.ofNullable(httpTestContext.getResponse().getResponseBodyAsString())
-                                    .map(response -> htmlLocatorType.findElements(pageUrl, response, htmlLocator))
+                                    .map(response -> htmlLocatorType
+                                            .findElements(JsoupUtils.getDocument(response, pageUrl), htmlLocator))
                                     .map(elements -> createResourceValidations(elements,
-                                            rV -> rV.setPageURL(pageUrl)
+                                            rV -> rV.setPageURL(pageUrl), false
                                     ))
                                     .orElseGet(() -> Stream.of(createMissingPageBodyValidation(pageUrl)));
                         }

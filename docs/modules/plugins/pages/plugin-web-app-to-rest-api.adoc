@@ -389,7 +389,8 @@ a|Reasons:
 
 * the resource path matches the patterns specified by the `resource-checker.uri-to-ignore-regex` property;
 * the resource path is equal to `#` (anchor);
-* the resource is not a HTTP(S) resource.
+* the resource is not a HTTP(S) resource;
+* the resource is jump link which cannot be verified from the current context (if only part of the document is checked).
 
 |`SKIPPED`
 |A resource validation has already been performed, i.e. if the same resource might be present on several pages so we do not need to validate it twice.

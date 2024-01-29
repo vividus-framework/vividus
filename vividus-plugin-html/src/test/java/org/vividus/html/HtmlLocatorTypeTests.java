@@ -17,54 +17,25 @@
 package org.vividus.html;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.MockedStatic;
 
 class HtmlLocatorTypeTests
 {
-    private static final String TITLE = "title";
-    private static final String HTML = """
-            <!DOCTYPE html>
-            <html>
-            <head>
-            <title>Title of the document</title>
-            </head>
-            <body />
-            </html>""";
-
-    @Test
-    void shouldGetElementsBySelectorHtmlWithBaseUrl()
-    {
-        try (MockedStatic<Jsoup> jsoup = mockStatic(Jsoup.class))
-        {
-            String baseUri = "base-uri";
-            Document document = mock();
-            Elements elements = mock();
-
-            jsoup.when(() -> Jsoup.parse(HTML, baseUri)).thenReturn(document);
-            when(document.select(TITLE)).thenReturn(elements);
-
-            assertEquals(elements, HtmlLocatorType.CSS_SELECTOR.findElements(baseUri, HTML, TITLE));
-
-            jsoup.verify(() -> Jsoup.parse(HTML, baseUri));
-            jsoup.verifyNoMoreInteractions();
-        }
-    }
-
     @ParameterizedTest
     @CsvSource({"CSS_SELECTOR, body", "XPATH, //body"})
     void shouldFindElement(HtmlLocatorType locatorType, String locator)
     {
-        assertEquals(1, locatorType.findElements(HTML, locator).size());
+        String html = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                <title>Title of the document</title>
+                </head>
+                <body />
+                </html>""";
+        assertEquals(1, locatorType.findElements(JsoupUtils.getDocument(html), locator).size());
     }
 
     @ParameterizedTest

@@ -28,6 +28,10 @@ Given I am on page with URL `<pageToValidate>`
 Then all resources found by xpath `//a[@href]` in ${${source-code}} are valid
 !-- Deprecated
 Then all resources by selector `a[href]` from ${source-code} are valid
+When I change context to element located by `linkText(Link with tooltip)`
+Then all resources by selector `a[href]` from ${context-source-code} are valid
+
+Scenario: Verification of the jump link from context
 When I change context to element located by `linkText(Link to unexistent element)`
 Then all resources by selector `a[href]` from ${context-source-code} are valid
 
