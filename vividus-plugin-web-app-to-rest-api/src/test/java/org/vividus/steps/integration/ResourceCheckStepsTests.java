@@ -573,6 +573,37 @@ class ResourceCheckStepsTests
         }), eq(REPORT_NAME));
     }
 
+    @Test
+    void shouldFilterJumpLinkDuringContextValidation() throws InterruptedException, ExecutionException
+    {
+        String contextHtml = "<a id='jump-link' href='#section'>Jump link</a>";
+        mockResourceValidator();
+        runExecutor();
+        resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
+        resourceCheckSteps.init();
+        resourceCheckSteps.checkResources(HtmlLocatorType.CSS_SELECTOR, LINK_SELECTOR, contextHtml);
+
+        verify(attachmentPublisher).publishAttachment(eq(TEMPLATE_NAME), argThat(m -> {
+            @SuppressWarnings(UNCHECKED)
+            Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
+                    .get(RESULTS);
+            Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
+            WebPageResourceValidation validation = resourceValidations.next();
+            Pair<URI, String> uriOrError = validation.getUriOrError();
+
+            Assertions.assertAll(
+                    () -> assertNull(uriOrError.getLeft()),
+                    () -> assertEquals(
+                            "Validation of jump link (the target is \"#section\") is skipped as the current context "
+                                    + "is restricted to a portion of the document.",
+                            uriOrError.getRight()),
+                    () -> assertEquals(JUMP_LINK_SELECTOR, validation.getCssSelector()),
+                    () -> assertSame(CheckStatus.FILTERED, validation.getCheckStatus()),
+                    () -> assertEquals(N_A, validation.getPageURL()));
+            return true;
+        }), eq(REPORT_NAME));
+    }
+
     private void runExecutor() throws InterruptedException, ExecutionException
     {
         doNothing().when(executor).execute(argThat(r -> {
