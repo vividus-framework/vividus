@@ -19,7 +19,10 @@ package org.vividus.crawler.transformer;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,6 +41,7 @@ import org.vividus.util.UriUtils;
 public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTableTransformer
 {
     private static final String COLUMN_KEY = "column";
+    private static final String REDIRECT_JOINER = " -> ";
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -67,34 +71,56 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
         if (filterRedirects)
         {
             Set<String> uniqueUrls = urls.collect(Collectors.toSet());
-            results = uniqueUrls.stream().filter(url -> isNotExistingRedirect(url, uniqueUrls));
+
+            Set<String> result = new HashSet<>();
+            Map<String, List<String>> redirectChains = new HashMap<>();
+
+            for (String url : uniqueUrls)
+            {
+                List<String> redirects = getRedirects(url);
+                if (redirects.isEmpty())
+                {
+                    result.add(url);
+                    continue;
+                }
+
+                String targetLocation = redirects.get(redirects.size() - 1);
+                if (!uniqueUrls.contains(targetLocation))
+                {
+                    result.add(url);
+                }
+
+                redirectChains.put(url, redirects);
+            }
+
+            if (!redirectChains.isEmpty())
+            {
+                logger.atInfo().addArgument(System.lineSeparator())
+                               .addArgument(() -> redirectChains.entrySet().stream()
+                                   .map(e -> e.getKey() + REDIRECT_JOINER + String.join(REDIRECT_JOINER, e.getValue()))
+                                   .collect(Collectors.joining(System.lineSeparator())))
+                               .log("Filtered redirects chains:{}{}");
+            }
+
+            return result;
         }
+
         return results.collect(Collectors.toSet());
     }
 
-    private boolean isNotExistingRedirect(String urlToCheck, Set<String> allUrls)
-    {
-        return getLastRedirect(urlToCheck)
-                .map(URI::toString)
-                .map(lastRedirect -> !allUrls.contains(lastRedirect))
-                .orElse(true);
-    }
-
-    private Optional<URI> getLastRedirect(String urlAsString)
+    private List<String> getRedirects(String urlAsString)
     {
         try
         {
-            List<URI> redirects = httpRedirectsProvider.getRedirects(URI.create(urlAsString));
-            if (!redirects.isEmpty())
-            {
-                return Optional.of(redirects.get(redirects.size() - 1));
-            }
+            return httpRedirectsProvider.getRedirects(URI.create(urlAsString)).stream()
+                                                                              .map(URI::toString)
+                                                                              .toList();
         }
         catch (IOException e)
         {
             logger.warn("Exception during redirects receiving", e);
         }
-        return Optional.empty();
+        return List.of();
     }
 
     private String build(Set<String> urls, TableProperties properties)
