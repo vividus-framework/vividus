@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.azure.cosmos;
 
 import java.util.stream.Collectors;
 
+import com.azure.core.credential.TokenCredential;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.models.PartitionKey;
@@ -26,6 +27,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.azure.cosmos.model.CosmosDbAccount;
 import org.vividus.azure.cosmos.model.CosmosDbContainer;
 import org.vividus.azure.cosmos.model.CosmosDbDatabase;
@@ -34,6 +37,8 @@ import org.vividus.util.property.PropertyMappedCollection;
 
 public class CosmosDbService
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CosmosDbService.class);
+
     private final LoadingCache<CosmosDbContainer, CosmosContainer> containers = CacheBuilder.newBuilder()
             .build(
                 new CacheLoader<CosmosDbContainer, CosmosContainer>()
@@ -47,25 +52,38 @@ public class CosmosDbService
                         String accountKey = db.getAccountKey();
                         CosmosDbAccount account = accounts.get(accountKey,
                                 "Account configuration not found for the key: %s", accountKey);
-                        return new CosmosClientBuilder().endpoint(account.getEndpoint())
-                                                        .key(account.getKey())
-                                                        .connectionSharingAcrossClientsEnabled(true)
-                                                        .buildClient()
-                                                        .getDatabase(db.getId())
-                                                        .getContainer(cosmosDbContainer.getId());
+
+                        String key = account.getKey();
+                        CosmosClientBuilder builder = new CosmosClientBuilder().endpoint(account.getEndpoint())
+                                .connectionSharingAcrossClientsEnabled(true);
+                        if (key == null)
+                        {
+                            LOGGER.info("Accessing Cosmos DB '{}' using default credentials, "
+                                    + "as no key has been configured for it", accountKey);
+                            builder.credential(tokenCredential);
+                        }
+                        else
+                        {
+                            builder.key(key);
+                        }
+                        return builder.buildClient()
+                                .getDatabase(db.getId())
+                                .getContainer(cosmosDbContainer.getId());
                     }
                 });
 
     private final JsonUtils jsonUtils;
     private final PropertyMappedCollection<CosmosDbAccount> accounts;
     private final PropertyMappedCollection<CosmosDbDatabase> databases;
+    private final TokenCredential tokenCredential;
 
     public CosmosDbService(JsonUtils jsonUtils, PropertyMappedCollection<CosmosDbAccount> accounts,
-            PropertyMappedCollection<CosmosDbDatabase> databases)
+            PropertyMappedCollection<CosmosDbDatabase> databases, TokenCredential tokenCredential)
     {
         this.jsonUtils = jsonUtils;
         this.accounts = accounts;
         this.databases = databases;
+        this.tokenCredential = tokenCredential;
     }
 
     public String executeQuery(CosmosDbContainer cosmosDbContainer, String query)

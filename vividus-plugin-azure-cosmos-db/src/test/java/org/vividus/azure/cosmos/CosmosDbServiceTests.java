@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
+import com.azure.core.credential.TokenCredential;
 import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
@@ -60,6 +61,7 @@ class CosmosDbServiceTests
     private static final String QUERY = "SELECT * FROM ITEMS";
     private static final String DB = "db";
     private static final String KEY = "key";
+    private static final String ACCOUNT_MSG = "Account configuration not found for the key: %s";
 
     private final JsonUtils jsonUtils = new JsonUtils();
     private final JsonNode node = jsonUtils.readTree(JSON_STRING);
@@ -69,6 +71,7 @@ class CosmosDbServiceTests
     @Mock private CosmosDatabase database;
     @Mock private PropertyMappedCollection<CosmosDbAccount> accounts;
     @Mock private PropertyMappedCollection<CosmosDbDatabase> databases;
+    @Mock private TokenCredential tokenCredential;
 
     @BeforeEach
     void beforeEach()
@@ -80,14 +83,18 @@ class CosmosDbServiceTests
         CosmosDbAccount cosmosDbAccount = new CosmosDbAccount();
         cosmosDbAccount.setEndpoint(ENDPOINT);
         cosmosDbAccount.setKey(KEY);
-        when(accounts.get(ACCOUNT_KEY, "Account configuration not found for the key: %s", ACCOUNT_KEY))
+        when(accounts.get(ACCOUNT_KEY, ACCOUNT_MSG, ACCOUNT_KEY))
             .thenReturn(cosmosDbAccount);
-        cosmosDbService = new CosmosDbService(jsonUtils, accounts, databases);
+        cosmosDbService = new CosmosDbService(jsonUtils, accounts, databases, tokenCredential);
     }
 
     @Test
     void shouldQueryDatabase()
     {
+        CosmosDbAccount cosmosDbAccount = new CosmosDbAccount();
+        cosmosDbAccount.setEndpoint(ENDPOINT);
+        when(accounts.get(ACCOUNT_KEY, ACCOUNT_MSG, ACCOUNT_KEY))
+                .thenReturn(cosmosDbAccount);
         testWithContainer((cosmosDbContainer, container) -> {
             @SuppressWarnings(UNCHECKED)
             CosmosPagedIterable<JsonNode> result = mock(CosmosPagedIterable.class);

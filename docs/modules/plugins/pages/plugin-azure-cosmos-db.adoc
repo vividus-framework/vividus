@@ -47,6 +47,10 @@ Where:
 .. `key` - The key of the account
 .. `endpoint` - The endoint of the account
 
+In case if `account-key` was not provided in properties, will be used https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/identity/azure-identity#defaultazurecredential[DefaultAzureCredential mechanism] for authentication.
+
+include::partial$azure-authentication.adoc[leveloffset=+1]
+
 .Access configuration
 [source,properties]
 ----
