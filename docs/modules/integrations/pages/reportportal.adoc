@@ -9,56 +9,62 @@ include::ROOT:partial$dependency-installation.adoc[]
 
 NOTE: The properties marked with bold are mandatory.
 
-[cols="4,3,2,6", options="header"]
+[cols="5,3,2,6", options="header"]
 |===
 |Property Name
 |Acceptable values
 |Default
 |Description
 
-|*system.rp.enable*
-a|`true`
+|*`system.rp.enable`*
+a|`true` +
 `false`
 |`false`
 |Enables reporting to the ReportPortal
 
-|*system.rp.endpoint*
+|*`system.rp.endpoint`*
 |URL
 |none
 |URL to the ReportPortal instance
 
-|*system.rp.uuid*
+|*`system.rp.uuid`*
 |Access token from ReportPortal profile
 |none
 |Will be used to authenticate user
 
-|*system.rp.project*
+|*`system.rp.project`*
 |Any string
 |none
 |Name of the project that will be used for launch reporting
 
-|*system.rp.launch*
+|*`system.rp.launch`*
 |Any string
 |none
 |The name of the launch, e.g. `SMOKE`
 
-|system.rp.description
+|`system.rp.description`
 |Any string
 |none
 |Launch description
 
-|system.rp.test-entity
-|`SCENARIO`/`STEP`
+a|[WARNING]
+====
+The reporting of steps as ReportPortal test cases is https://github.com/reportportal/agent-java-jbehave/commit/469418bf13a66bb6b756b49168c764539b19604d[deprecated].
+As such, this property is deprecated and will be removed in VIVIDUS 0.8.0. The default behavior will be to report scenarios as test cases.
+====
+`system.rp.test-entity`
+a|`SCENARIO` +
+`STEP`
 |`SCENARIO`
 |Defines what will be reported as a test case `SCENARIO` or `STEP`
 
-|system.rp.attributes
+|`system.rp.attributes`
 |Semi-colon separated values, e.g. `key:value; value;`
 |none
 |Attributes could be used for additional tagging of the launches
 
-|system.rp.publish-attachments
-a|`true`
+|`system.rp.publish-attachments`
+a|`true` +
 `false`
 |`true`
 |Enables or disables on-failure attachments (screenshots, application source code) publishing
