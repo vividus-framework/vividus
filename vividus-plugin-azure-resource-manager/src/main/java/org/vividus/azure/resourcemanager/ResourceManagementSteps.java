@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.http.ContentType;
+import com.azure.core.http.HttpHeaderName;
 import com.azure.core.http.HttpMethod;
 import com.azure.core.http.HttpPipeline;
 import com.azure.core.http.HttpRequest;
@@ -239,7 +240,7 @@ public class ResourceManagementSteps
         HttpRequest httpRequest = new HttpRequest(method, azureResourceUrl);
         azureResourceBody.ifPresent(requestBody -> {
             httpRequest.setBody(requestBody);
-            httpRequest.setHeader("Content-Type", ContentType.APPLICATION_JSON);
+            httpRequest.setHeader(HttpHeaderName.CONTENT_TYPE, ContentType.APPLICATION_JSON);
         });
 
         try (HttpResponse httpResponse = httpPipeline.send(httpRequest).block())
