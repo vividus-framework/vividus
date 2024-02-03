@@ -1,1 +1,1 @@
-implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.5.0.jre11-preview')
+implementation(group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '12.6.0.jre11')
