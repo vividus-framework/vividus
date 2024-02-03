@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,13 @@ import com.google.common.eventbus.EventBus;
 import org.jbehave.core.reporters.FilePrintStreamFactory;
 import org.jbehave.core.reporters.StoryReporter;
 import org.jbehave.core.reporters.StoryReporterBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AdaptedReportPortalFormat extends ReportPortalFormat
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AdaptedReportPortalFormat.class);
+
     private final EventBus eventBus;
     private TestEntity testEntity;
 
@@ -46,6 +50,12 @@ public class AdaptedReportPortalFormat extends ReportPortalFormat
     @Override
     public StoryReporter createStoryReporter(FilePrintStreamFactory factory, StoryReporterBuilder storyReporterBuilder)
     {
+        if (testEntity == TestEntity.STEP)
+        {
+            LOGGER.info("The reporting of steps as ReportPortal test cases is deprecated. As such, the property "
+                    + "'system.rp.test-entity' is deprecated and will be removed in VIVIDUS 0.8.0. "
+                            + "The default behavior will be to report scenarios as test cases");
+        }
         return new AdaptedDelegatingReportPortalStoryReporter(eventBus, testEntity.buildReporter(launch, itemTree));
     }
 
@@ -63,6 +73,7 @@ public class AdaptedReportPortalFormat extends ReportPortalFormat
 
     public enum TestEntity
     {
+        @Deprecated(since = "0.6.7", forRemoval = true)
         STEP(ReportPortalStepStoryReporter::new),
         SCENARIO(ReportPortalScenarioStoryReporter::new);
 
