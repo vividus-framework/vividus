@@ -44,8 +44,9 @@ Where:
 
 . `account-key` - The key of the account configuration
 . `property-name` - The name of the container property. One of:
-.. `key` - The key of the account
-.. `endpoint` - The endoint of the account
+.. `endpoint` - The endoint of the account.
+.. `key` - Either a master or readonly key used to perform authentication for Cosmos database service.
+If `key` is not set, <<_authentication,default authentication mechanism described below>> will be used.
 
 .Access configuration
 [source,properties]
@@ -71,6 +72,8 @@ azure.cosmos-db.database.commecrial.account-key=vividus
 azure.cosmos-db.account.vividus.endpoint=https://vividus-cosmos.documents.azure.com:443/
 azure.cosmos-db.account.vividus.key=some key
 ----
+
+include::partial$azure-authentication.adoc[]
 
 == Steps
 
