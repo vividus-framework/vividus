@@ -16,6 +16,7 @@
 
 package org.vividus.crawler.transformer;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -94,6 +95,8 @@ class HeadlessCrawlerTableTransformerTests
     private static final String EXCLUDE_EXTENSIONS_REGEX = "js|css";
     private static final String EXCLUDE_URLS_REGEX = ".*broken-link*";
 
+    private static final String REDIRECT_FILTER_LOG = "Filtered redirects chains:{}{}";
+
     private final TestLogger logger = TestLoggerFactory.getTestLogger(HeadlessCrawlerTableTransformer.class);
 
     @Mock private ICrawlControllerFactory crawlControllerFactory;
@@ -149,10 +152,13 @@ class HeadlessCrawlerTableTransformerTests
     {
         transformer.setFilterRedirects(true);
         transformer.setSeedRelativeUrls(toSet(PATH2, PATH3));
+        transformer.setMainPageUrlProperty(MAIN_APP_PROP);
         URI outgoingURI = URI.create(OUTGOING_ABSOLUT_URL);
         when(redirectsProvider.getRedirects(outgoingURI)).thenReturn(List.of(outgoingURI));
         Set<String> urls = testFetchUrls(ROOT, asList(PATH2, SLASH_PATH3));
         assertThat(urls, equalTo(Set.of()));
+        assertThat(logger.getLoggingEvents(), is(List.of(getMainAppPageWarn(),
+                info(REDIRECT_FILTER_LOG, System.lineSeparator(), "http://some.url/path -> http://some.url/path"))));
     }
 
     @Test
@@ -175,10 +181,13 @@ class HeadlessCrawlerTableTransformerTests
     {
         transformer.setFilterRedirects(true);
         transformer.setSeedRelativeUrls(toSet(PATH2, PATH3));
+        transformer.setMainPageUrlProperty(MAIN_APP_PROP);
         URI outgoingURI = URI.create(OUTGOING_ABSOLUT_URL);
         when(redirectsProvider.getRedirects(outgoingURI)).thenReturn(List.of(URI.create("http://some.url/other")));
         Set<String> urls = testFetchUrls(ROOT, asList(PATH2, SLASH_PATH3));
         assertThat(urls, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
+        assertThat(logger.getLoggingEvents(), is(List.of(getMainAppPageWarn(),
+                info(REDIRECT_FILTER_LOG, System.lineSeparator(), "http://some.url/path -> http://some.url/other"))));
     }
 
     @Test
