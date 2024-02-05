@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,56 +18,52 @@ package org.vividus.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Sleeper.class, Thread.class})
 public class SleeperTests
 {
-    @Before
-    public void before()
-    {
-        PowerMockito.mockStatic(Thread.class);
-    }
-
     @Test
+    @PrepareForTest(Sleeper.class)
     public void testSleepDuration() throws Exception
     {
+        PowerMockito.mockStatic(Sleeper.class);
+        PowerMockito.doCallRealMethod().when(Sleeper.class, "sleep", Duration.ofMillis(1));
+
         Sleeper.sleep(Duration.ofMillis(1));
-        verifySleep(1);
+
+        PowerMockito.verifyStatic(Sleeper.class);
+        Sleeper.sleep(1, TimeUnit.MILLISECONDS);
     }
 
     @Test
-    public void testSleep() throws Exception
+    public void shouldSleepForGivenTimeout() throws InterruptedException
     {
-        Sleeper.sleep(1L, TimeUnit.MILLISECONDS);
-        verifySleep(1);
+        TimeUnit timeUnit = mock();
+        var timeout = 1L;
+        Sleeper.sleep(timeout, timeUnit);
+        verify(timeUnit).sleep(timeout);
     }
 
     @Test
-    public void testSleepException() throws Exception
+    public void shouldWrapInterruptedExceptionAtSleep() throws InterruptedException
     {
-        InterruptedException cause = new InterruptedException();
-        PowerMockito.doThrow(cause).when(Thread.class);
-        Thread.sleep(1L);
-        IllegalStateException exception = assertThrows(IllegalStateException.class,
-            () -> Sleeper.sleep(1L, TimeUnit.MILLISECONDS));
+        TimeUnit timeUnit = mock();
+        var timeout = 1L;
+        var cause = new InterruptedException();
+        doThrow(cause).when(timeUnit).sleep(timeout);
+        var exception = assertThrows(IllegalStateException.class, () -> Sleeper.sleep(timeout, timeUnit));
         assertEquals(cause, exception.getCause());
-    }
-
-    private static void verifySleep(int times) throws InterruptedException
-    {
-        PowerMockito.verifyStatic(Thread.class, Mockito.times(times));
-        Thread.sleep(1L);
     }
 }
