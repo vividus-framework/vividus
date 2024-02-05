@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,8 @@ public class JsonSchemaValidationSteps
         SpecVersion.VersionFlag version;
         try
         {
-            version = SpecVersionDetector.detectOptionalVersion(schemaNode).orElse(SpecVersion.VersionFlag.V202012);
+            version = SpecVersionDetector.detectOptionalVersion(schemaNode, true)
+                    .orElse(SpecVersion.VersionFlag.V202012);
         }
         catch (JsonSchemaException e)
         {
