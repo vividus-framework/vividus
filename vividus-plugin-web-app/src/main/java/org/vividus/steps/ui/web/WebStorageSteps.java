@@ -113,6 +113,32 @@ public class WebStorageSteps
         assertWebStorageItem(storageType, key, nullValue());
     }
 
+    /**
+     * Removes an item with the key from
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API">web storage</a>
+     *
+     * @param key         The key of the item to remove
+     * @param storageType One of the web storage mechanisms: either "local" or "session".
+     */
+    @When("I remove item with key `$key` from $storageType storage")
+    public void removeItemFromStorage(String key, StorageType storageType)
+    {
+        LOGGER.info("Removing item with key '{}' from {} storage", key, storageType);
+        webStorage.removeItem(storageType, key);
+    }
+
+    /**
+     * Removes all items from <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API">web storage</a>
+     *
+     * @param storageType One of the web storage mechanisms: either "local" or "session".
+     */
+    @When("I clear $storageType storage")
+    public void clearStorage(StorageType storageType)
+    {
+        LOGGER.info("Clearing {} storage", storageType);
+        webStorage.clear(storageType);
+    }
+
     private void assertWebStorageItem(StorageType storageType, String key, Matcher<Object> matcher)
     {
         softAssert.assertThat(String.format("%s storage item with key '%s'", storageType, key),

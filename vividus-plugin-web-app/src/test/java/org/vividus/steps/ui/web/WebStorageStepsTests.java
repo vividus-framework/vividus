@@ -104,4 +104,27 @@ class WebStorageStepsTests
         verify(softAssert).assertThat(eq("Session storage item with key 'key'"), eq(VALUE),
                 argThat(m -> "null".equals(m.toString())));
     }
+
+    @Test
+    void shouldRemoveItemFromStorage()
+    {
+        var storageType = StorageType.SESSION;
+
+        webStorageSteps.removeItemFromStorage(KEY, storageType);
+
+        verify(webStorage).removeItem(storageType, KEY);
+        assertThat(logger.getLoggingEvents(),
+                is(List.of(info("Removing item with key '{}' from {} storage", KEY, storageType))));
+    }
+
+    @Test
+    void shouldClearStorage()
+    {
+        var storageType = StorageType.SESSION;
+
+        webStorageSteps.clearStorage(storageType);
+
+        verify(webStorage).clear(storageType);
+        assertThat(logger.getLoggingEvents(), is(List.of(info("Clearing {} storage", storageType))));
+    }
 }
