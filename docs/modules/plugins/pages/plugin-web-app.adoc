@@ -930,6 +930,41 @@ Then $storageType storage item with key `$key` does not exist
 Then local storage item with key `token` does not exist
 ----
 
+==== Remove web storage item
+
+Removes an item with the key from web storage.
+
+[source,gherkin]
+----
+When I remove item with key `$key` from $storageType storage
+----
+
+* `$key` - The key of the item to remove.
+* `$storageType` - One of the web storage mechanisms: either `local` or `session`.
+
+.Remove item with 'token' key from web storage
+[source,gherkin]
+----
+When I remove item with key `token` from session storage
+----
+
+==== Clear web storage
+
+Removes all items from web storage.
+
+[source,gherkin]
+----
+When I clear $storageType storage
+----
+
+* `$storageType` - One of the web storage mechanisms: either `local` or `session`.
+
+.Clear session storage
+[source,gherkin]
+----
+When I clear session storage
+----
+
 :given-step: Given I am on page with URL `https://www.google.com/search?q=vividus`
 include::partial$proxy-steps.adoc[]
 
