@@ -58,7 +58,7 @@ where `<browser>` is one of the following values:
 
 ==== List of desktop profiles
 
-[cols="~a,~a", options="header"]
+[cols="1a,3a", options="header"]
 |===
 |Profile
 |Example of properties
@@ -72,7 +72,7 @@ selenium.grid.platform-version=10
 web.driver.chrome.command-line-arguments=--disable-auto-reload
 ----
 
-.^|`web/desktop/edge` +
+.^|`web/desktop/edge`
 |
 [source, properties]
 ----
@@ -153,6 +153,23 @@ meaning that it runs without its “head”, the Graphical User Interface (GUI).
 headless mode are available:
 
 - `web/headless/chrome`
++
+[cols="2,1,1,2", options="header"]
+|===
+|Profile-specific properties
+|Format
+|Default value
+|Description
+
+|`web.headless.chrome.window-size`
+|`width,height`
+|`800,600`
+a|Sets the initial window size.
+
+NOTE: This property is ignored when custom CLI arguments are set using `web.driver.chrome.command-line-arguments` property.
+
+|===
+
 - `web/headless/firefox`
 - `web/headless/edge`
 
@@ -172,12 +189,12 @@ configuraiton.profiles=web/docker,web/desktop/chrome
 
 Contains phone related properties, for android and iOS devices.
 
-[cols="~a,~a", options="header"]
+[cols="1a,2a", options="header"]
 |===
 |Profile
 |Example of properties
 
-.^|web/phone/android
+.^|`web/phone/android`
 |
 [source, properties]
 ----
@@ -187,7 +204,7 @@ selenium.grid.capabilities.deviceOrientation=portrait
 selenium.grid.capabilities.appiumVersion=2.0.0
 ----
 
-.^|web/phone/ios
+.^|`web/phone/ios`
 |
 [source, properties]
 ----
@@ -202,12 +219,12 @@ selenium.grid.capabilities.appiumVersion=2.0.0
 
 Similar to the xref:plugins:plugin-web-app.adoc#_phone[Phone] directory, but is designed for tablets properties.
 
-[cols="~a,~a", options="header"]
+[cols="1a,2a", options="header"]
 |===
 |Profile
 |Example of properties
 
-.^|web/tablet
+.^|`web/tablet`
 |
 [source, properties]
 ----
