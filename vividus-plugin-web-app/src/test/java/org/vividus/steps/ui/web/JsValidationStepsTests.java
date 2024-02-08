@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.vividus.steps.ui.web;
 
-import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -25,15 +24,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,7 +41,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
@@ -54,6 +53,7 @@ import org.vividus.context.VariableContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.logging.BrowserLogLevel;
+import org.vividus.selenium.logging.BrowserLogManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.WaitActions;
 import org.vividus.ui.action.WaitResult;
@@ -69,31 +69,28 @@ class JsValidationStepsTests
     private static final Pattern EXTENSION_PATTERN = Pattern.compile(EXTENSION);
     private static final String ERRORS_ASSERTION_DESCRIPTION = "Current page contains no JavaScript errors";
 
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-
-    @Mock
-    private IAttachmentPublisher attachmentPublisher;
-
-    @Mock
-    private ISoftAssert softAssert;
-
-    @Mock
-    private WaitActions waitActions;
-
-    @Mock
-    private VariableContext variableContext;
-
-    @InjectMocks
+    @Mock private IWebDriverProvider webDriverProvider;
+    @Mock private IAttachmentPublisher attachmentPublisher;
+    @Mock private ISoftAssert softAssert;
+    @Mock private WaitActions waitActions;
+    @Mock private VariableContext variableContext;
+    @InjectMocks private BrowserLogManager browserLogManager;
     private JsValidationSteps jsValidationSteps;
+
+    @BeforeEach
+    void beforeEach()
+    {
+        jsValidationSteps = new JsValidationSteps(webDriverProvider, browserLogManager, softAssert, attachmentPublisher,
+                waitActions, variableContext);
+    }
 
     @Test
     void testCheckThereAreLogEntriesOnOpenedPageFilteredByRegExp()
     {
-        Map<String, Collection<LogEntry>> expectedResults = testCheckJsErrors(ERROR_MESSAGE, () -> jsValidationSteps
-                .checkThereAreLogEntriesOnOpenedPageFilteredByRegExp(singletonList(BrowserLogLevel.ERRORS),
-                        ERROR_MESSAGE_PATTERN));
-        InOrder inOrder = inOrder(attachmentPublisher, softAssert);
+        var expectedResults = testCheckJsErrors(ERROR_MESSAGE,
+                () -> jsValidationSteps.checkThereAreLogEntriesOnOpenedPageFilteredByRegExp(
+                        Set.of(BrowserLogLevel.ERRORS), ERROR_MESSAGE_PATTERN));
+        var inOrder = inOrder(attachmentPublisher, softAssert);
         verifyAttachmentPublisher(expectedResults, inOrder);
         inOrder.verify(softAssert).assertFalse(String.format("Current page contains JavaScript %s by regex '%s'",
                 BrowserLogLevel.ERRORS.toString().toLowerCase(), ERROR_MESSAGE), false);
@@ -102,25 +99,27 @@ class JsValidationStepsTests
     @Test
     void testCheckJsErrorsOnPage()
     {
-        Map<String, Collection<LogEntry>> expectedResults = testCheckJsErrors(ERROR_MESSAGE,
-            () -> jsValidationSteps.checkJsLogEntriesOnOpenedPage(singletonList(BrowserLogLevel.ERRORS)));
+        var expectedResults = testCheckJsErrors(ERROR_MESSAGE,
+                () -> jsValidationSteps.checkJsLogEntriesOnOpenedPage(Set.of(BrowserLogLevel.ERRORS)));
         verifyTestActions(expectedResults, ERRORS_ASSERTION_DESCRIPTION);
     }
 
     @Test
     void testCheckJsErrorsOnPageByRegExpNoMatch()
     {
-        testCheckJsErrors(ERROR_MESSAGE, () -> jsValidationSteps
-                .checkJsLogEntriesOnOpenedPageFilteredByRegExp(singletonList(BrowserLogLevel.ERRORS),
-                    EXTENSION_PATTERN));
+        testCheckJsErrors(ERROR_MESSAGE,
+                () -> jsValidationSteps.checkJsLogEntriesOnOpenedPageFilteredByRegExp(Set.of(BrowserLogLevel.ERRORS),
+                        EXTENSION_PATTERN));
         verifyTestActions(Map.of(URL, Collections.emptySet()), ERRORS_ASSERTION_DESCRIPTION);
     }
 
     @Test
     void testCheckJsErrorsAndWarningsOnPage()
     {
-        List<BrowserLogLevel> logLevels = Arrays.asList(BrowserLogLevel.ERRORS, BrowserLogLevel.WARNINGS);
-        Map<String, Collection<LogEntry>> expectedResults = testCheckJsErrors(ERROR_MESSAGE,
+        var logLevels = new LinkedHashSet<BrowserLogLevel>();
+        logLevels.add(BrowserLogLevel.ERRORS);
+        logLevels.add(BrowserLogLevel.WARNINGS);
+        var expectedResults = testCheckJsErrors(ERROR_MESSAGE,
             () -> jsValidationSteps.checkJsLogEntriesOnOpenedPage(logLevels));
         verifyTestActions(expectedResults, "Current page contains no JavaScript errors, warnings");
     }
@@ -129,8 +128,8 @@ class JsValidationStepsTests
     void testCheckJsErrorsContainsBrowserExtensionErrors()
     {
         jsValidationSteps.setIncludeBrowserExtensionLogEntries(true);
-        Map<String, Collection<LogEntry>> expectedResults = testCheckJsErrors(EXTENSION + ERROR_MESSAGE,
-            () -> jsValidationSteps.checkJsLogEntriesOnOpenedPage(singletonList(BrowserLogLevel.ERRORS)));
+        var expectedResults = testCheckJsErrors(EXTENSION + ERROR_MESSAGE,
+            () -> jsValidationSteps.checkJsLogEntriesOnOpenedPage(Set.of(BrowserLogLevel.ERRORS)));
         verifyTestActions(expectedResults, ERRORS_ASSERTION_DESCRIPTION);
     }
 
@@ -139,7 +138,7 @@ class JsValidationStepsTests
     {
         jsValidationSteps.setIncludeBrowserExtensionLogEntries(false);
         testCheckJsErrors(EXTENSION + ERROR_MESSAGE,
-            () -> jsValidationSteps.checkJsLogEntriesOnOpenedPage(singletonList(BrowserLogLevel.ERRORS)));
+            () -> jsValidationSteps.checkJsLogEntriesOnOpenedPage(Set.of(BrowserLogLevel.ERRORS)));
         verifyTestActions(Map.of(URL, Collections.emptySet()), ERRORS_ASSERTION_DESCRIPTION);
     }
 
@@ -147,12 +146,12 @@ class JsValidationStepsTests
     @CsvSource({"true, 1", "false, 0"})
     void shouldWaitForMessagesAndSaveResultIntoScopedVariable(boolean waitPassed, int savesVariable)
     {
-        var webDriver = mock(WebDriver.class, withSettings().extraInterfaces(HasCapabilities.class));
+        WebDriver webDriver = mock(withSettings().extraInterfaces(HasCapabilities.class));
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriver.getCurrentUrl()).thenReturn(URL);
-        var options = mock(Options.class);
+        Options options = mock();
         when(webDriver.manage()).thenReturn(options);
-        var logs = mock(Logs.class);
+        Logs logs = mock();
         when(options.logs()).thenReturn(logs);
         var severeEntry = new LogEntry(Level.SEVERE, 1L, "severe");
         var infoEntry = new LogEntry(Level.INFO, 1L, "info");
@@ -160,46 +159,47 @@ class JsValidationStepsTests
             new LogEntries(List.of(infoEntry)));
         var result = new WaitResult<>();
         result.setWaitPassed(waitPassed);
-        when(waitActions.wait(eq(webDriver), argThat(f -> {
-            f.apply(webDriver);
-            f.apply(webDriver);
+        var logEntries = Set.of(BrowserLogLevel.INFOS);
+        when(waitActions.wait(eq(logEntries), argThat(f -> {
+            f.apply(logEntries);
+            f.apply(logEntries);
             return "appearance of JavaScript infos matching `.*info.*` regex".equals(f.toString());
         }))).thenReturn(result);
         var variableName = "variableName";
         var scopes = Set.of(VariableScope.SCENARIO);
-        jsValidationSteps.waitForMessageAndSave(List.of(BrowserLogLevel.INFOS), Pattern.compile(".*info.*"), scopes,
+        jsValidationSteps.waitForMessageAndSave(logEntries, Pattern.compile(".*info.*"), scopes,
             variableName);
-        var ordered = Mockito.inOrder(attachmentPublisher, variableContext);
+        var ordered = inOrder(attachmentPublisher, variableContext);
         ordered.verify(variableContext, times(savesVariable)).putVariable(scopes, variableName, List.of(infoEntry));
         verifyAttachmentPublisher(Map.of(URL, List.of(infoEntry)), ordered);
     }
 
     private Map<String, Collection<LogEntry>> testCheckJsErrors(String logErrorMessage, Runnable action)
     {
-        LogEntry entry = mockGetLogEntry(logErrorMessage);
+        var entry = mockGetLogEntry(logErrorMessage);
         action.run();
         return Map.of(URL, Collections.singleton(entry));
     }
 
     private LogEntry mockGetLogEntry(String logErrorMessage)
     {
-        WebDriver webDriver = mock(WebDriver.class, withSettings().extraInterfaces(HasCapabilities.class));
+        WebDriver webDriver = mock(withSettings().extraInterfaces(HasCapabilities.class));
         when(webDriverProvider.get()).thenReturn(webDriver);
         when(webDriver.getCurrentUrl()).thenReturn(URL);
-        Options options = mock(Options.class);
+        Options options = mock();
         when(webDriver.manage()).thenReturn(options);
-        Logs logs = mock(Logs.class);
+        Logs logs = mock();
         when(options.logs()).thenReturn(logs);
-        LogEntry severeEntry = new LogEntry(Level.SEVERE, 1L, logErrorMessage);
-        LogEntry infoEntry = new LogEntry(Level.INFO, 1L, logErrorMessage);
-        LogEntries logEntries = new LogEntries(Arrays.asList(severeEntry, infoEntry));
+        var severeEntry = new LogEntry(Level.SEVERE, 1L, logErrorMessage);
+        var infoEntry = new LogEntry(Level.INFO, 1L, logErrorMessage);
+        var logEntries = new LogEntries(List.of(severeEntry, infoEntry));
         when(logs.get(LogType.BROWSER)).thenReturn(logEntries);
         return severeEntry;
     }
 
     private void verifyTestActions(Map<String, Collection<LogEntry>> expectedResults, String assertionDescription)
     {
-        InOrder inOrder = inOrder(attachmentPublisher, softAssert);
+        var inOrder = inOrder(attachmentPublisher, softAssert);
         verifyAttachmentPublisher(expectedResults, inOrder);
         inOrder.verify(softAssert).assertEquals(assertionDescription, 0,
                 expectedResults.entrySet().iterator().next().getValue().size());

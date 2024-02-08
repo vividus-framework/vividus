@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.WrapsElement;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.RemoteWebElement;
+import org.openqa.selenium.support.events.EventFiringDecorator;
 import org.openqa.selenium.virtualauthenticator.HasVirtualAuthenticator;
 import org.vividus.selenium.driver.TextFormattingWebDriver;
 import org.vividus.selenium.element.DelegatingWebElement;
@@ -44,7 +45,8 @@ class WebDriverUtilsTests
     {
         var remoteWebDriver = mock(RemoteWebDriver.class);
         var wrappingDriver = new TextFormattingWebDriver(remoteWebDriver);
-        var actual = WebDriverUtils.unwrap(wrappingDriver, HasVirtualAuthenticator.class);
+        WebDriver decoratedDriver = new EventFiringDecorator<>().decorate(wrappingDriver);
+        var actual = WebDriverUtils.unwrap(decoratedDriver, HasVirtualAuthenticator.class);
         assertEquals(remoteWebDriver, actual);
     }
 
