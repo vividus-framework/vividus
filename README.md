@@ -6,12 +6,12 @@
 [![BrowserStack Status](https://automate.browserstack.com/badge.svg?badge_key=VjFGZEtSdWpWZ3QrNkNBeHphOUpLbWFsL2VLMW15eUxySGEwamovU1ArTT0tLVN3dlROQWpVbnlNWWdsOGFxdDYwRGc9PQ==--4afc60c487e3a7d23e327c7b430c81e34277a35e)](https://automate.browserstack.com/public-build/VjFGZEtSdWpWZ3QrNkNBeHphOUpLbWFsL2VLMW15eUxySGEwamovU1ArTT0tLVN3dlROQWpVbnlNWWdsOGFxdDYwRGc9PQ==--4afc60c487e3a7d23e327c7b430c81e34277a35e)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
 
-**This repository contains source code of VIVIDUS tool. If you are looking for the user guide, please, check out [Vividus Starter](https://github.com/vividus-framework/vividus-starter) and [the official documentation](https://docs.vividus.dev/).**
+**This repository contains source code of VIVIDUS tool. If you are looking for the user guide, please, check out [VIVIDUS Starter](https://github.com/vividus-framework/vividus-starter) and [the official documentation](https://docs.vividus.dev/).**
 
 ## How to build the project? (Only for VIVIDUS developers)
 Prerequisites: make sure [Java 17](https://adoptium.net/temurin/releases/?version=17) is used.
 
-1. Clone main [Vividus project](https://github.com/vividus-framework/vividus.git)
+1. Clone main [VIVIDUS project](https://github.com/vividus-framework/vividus.git)
     ```shell
     git clone --recursive https://github.com/vividus-framework/vividus.git
     ```
