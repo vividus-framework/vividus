@@ -13,7 +13,7 @@ asciidoc:
     example-caption: false
     iso-date-format-link: 'https://en.wikipedia.org/wiki/ISO_8601[ISO-8601]'
     durations-format-link: 'https://en.wikipedia.org/wiki/ISO_8601#Durations[ISO-8601 Durations]'
-    java-api-docs-base-url: 'https://docs.oracle.com/en/java/javase/17'
+    java-api-docs-base-url: 'https://docs.oracle.com/en/java/javase/21'
 nav:
 - modules/ROOT/nav.adoc
 - modules/commons/nav.adoc
