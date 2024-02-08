@@ -77,6 +77,7 @@
         <property name="waitForAlertTimeout" value="${web.alert.wait-for-alert-timeout}" />
     </bean>
 
+    <bean class="org.vividus.selenium.logging.BrowserLogManager"/>
     <bean id="cookieManager" class="org.vividus.ui.web.action.CookieManager" />
 
     <bean id="cssSelectorFactory" class="org.vividus.ui.web.action.CssSelectorFactory" />
@@ -276,7 +277,8 @@
     <bean class="org.vividus.ui.web.action.WebAtomicActionFactories$KeyDown" />
     <bean class="org.vividus.ui.web.action.WebAtomicActionFactories$KeyUp" />
 
-    <bean id="browserLogCleanningListener" class="org.vividus.steps.ui.web.listener.BrowserLogCleanningListener" />
+    <bean id="browserLogCleaningListenerFactory"
+          class="org.vividus.ui.web.listener.BrowserLogCleaningListener.Factory"/>
 
     <util:list id="stepBeanNames-WebUi" value-type="java.lang.String">
         <idref bean="webDriverSetupSteps" />

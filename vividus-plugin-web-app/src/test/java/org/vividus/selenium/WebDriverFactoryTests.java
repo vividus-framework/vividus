@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,10 +68,13 @@ import org.openqa.selenium.remote.Browser;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.decorators.Decorated;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.openqa.selenium.support.events.WebDriverEventListener;
+import org.openqa.selenium.support.events.WebDriverListener;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.driver.TextFormattingWebDriver;
+import org.vividus.ui.web.listener.WebDriverListenerFactory;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.IPropertyParser;
 
@@ -109,7 +112,7 @@ class WebDriverFactoryTests
             "false,"
     })
     void testGetWebDriverWithWebDriverType(boolean proxyStarted, Boolean acceptsInsecureCerts)
-            throws IllegalAccessException
+            throws ReflectiveOperationException
     {
         var key1 = "key1";
         var key2 = "key2";
@@ -129,7 +132,7 @@ class WebDriverFactoryTests
 
     @Test
     @ClearSystemProperty(key = ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY)
-    void testGetWebDriverWithCommandLineArgumentsConfigurationAndBinaryPath() throws IllegalAccessException
+    void testGetWebDriverWithCommandLineArgumentsConfigurationAndBinaryPath() throws ReflectiveOperationException
     {
         when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, COMMAND_LINE_ARGUMENTS)).thenReturn(
                 ARGS);
@@ -145,7 +148,7 @@ class WebDriverFactoryTests
 
     @Test
     @ClearSystemProperty(key = ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY)
-    void testGetWebDriverWithCommandLineArgumentsOverride() throws IllegalAccessException
+    void testGetWebDriverWithCommandLineArgumentsOverride() throws ReflectiveOperationException
     {
         when(webDriverStartContext.get(WebDriverStartParameters.COMMAND_LINE_ARGUMENTS)).thenReturn(ARGS);
         testGetChromeWebDriver(new DesiredCapabilities(), null, DRIVER_PATH, null,
@@ -155,7 +158,7 @@ class WebDriverFactoryTests
     @SuppressWarnings("unchecked")
     @Test
     @ClearSystemProperty(key = ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY)
-    void testGetWebDriverWithWebDriverTypeAndExperimentalOptionsConfiguration() throws IllegalAccessException
+    void testGetWebDriverWithWebDriverTypeAndExperimentalOptionsConfiguration() throws ReflectiveOperationException
     {
         testGetChromeWebDriver(new DesiredCapabilities(), null, DRIVER_PATH,
                 "{\"mobileEmulation\": {\"deviceName\": \"iPhone 8\"}}", args -> { },
@@ -169,11 +172,12 @@ class WebDriverFactoryTests
     @SuppressWarnings("unchecked")
     private void testGetChromeWebDriver(DesiredCapabilities desiredCapabilities, String binaryPath, String driverPath,
             String experimentalOptions, Consumer<List<String>> argsValidator,
-            Consumer<ChromeOptions> capabilitiesValidator) throws IllegalAccessException
+            Consumer<ChromeOptions> capabilitiesValidator) throws ReflectiveOperationException
     {
         var webDriverType = WebDriverType.CHROME;
+        WebDriverListenerFactory webDriverListenerFactory = mock();
         var webDriverFactory = new WebDriverFactory(false, remoteWebDriverFactory, propertyParser, new JsonUtils(),
-                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer);
+                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer, List.of(webDriverListenerFactory));
         webDriverFactory.setWebDriverType(webDriverType);
         lenient().when(propertyParser.getPropertyValue(PROPERTY_FORMAT, CHROME_BROWSER_NAME, BINARY_PATH)).thenReturn(
                 binaryPath);
@@ -203,7 +207,7 @@ class WebDriverFactoryTests
             });
         }))
         {
-            testWebDriverCreation(desiredCapabilities, webDriverFactory,
+            testWebDriverCreation(desiredCapabilities, webDriverFactory, webDriverListenerFactory,
                     () -> chromeDriverMockedConstruction.constructed().get(0));
             assertEquals(driverPath, System.getProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY));
             verify(timeoutConfigurer).configure(timeouts);
@@ -216,7 +220,7 @@ class WebDriverFactoryTests
     {
         var webDriverType = WebDriverType.SAFARI;
         var webDriverFactory = new WebDriverFactory(false, remoteWebDriverFactory, propertyParser, new JsonUtils(),
-                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer);
+                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer, List.of());
         webDriverFactory.setWebDriverType(webDriverType);
         when(propertyParser.getPropertyValue(PROPERTY_FORMAT, SAFARI_BROWSER_NAME, BINARY_PATH)).thenReturn(null);
         when(webDriverStartContext.get(WebDriverStartParameters.COMMAND_LINE_ARGUMENTS)).thenReturn(ARG_1);
@@ -231,7 +235,7 @@ class WebDriverFactoryTests
     {
         var webDriverType = WebDriverType.SAFARI;
         var webDriverFactory = new WebDriverFactory(false, remoteWebDriverFactory, propertyParser, new JsonUtils(),
-                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer);
+                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer, List.of());
         webDriverFactory.setWebDriverType(webDriverType);
         when(propertyParser.getPropertyValue(PROPERTY_FORMAT, SAFARI_BROWSER_NAME, BINARY_PATH)).thenReturn("testPath");
         DesiredCapabilities desiredCapabilities = mock();
@@ -245,7 +249,7 @@ class WebDriverFactoryTests
     {
         var webDriverType = WebDriverType.SAFARI;
         var webDriverFactory = new WebDriverFactory(false, remoteWebDriverFactory, propertyParser, new JsonUtils(),
-                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer);
+                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer, List.of());
         webDriverFactory.setWebDriverType(webDriverType);
         when(propertyParser.getPropertyValue(PROPERTY_FORMAT, SAFARI_BROWSER_NAME, BINARY_PATH)).thenReturn(null);
         when(propertyParser.getPropertyValue(PROPERTY_FORMAT, SAFARI_BROWSER_NAME, COMMAND_LINE_ARGUMENTS)).thenReturn(
@@ -257,7 +261,7 @@ class WebDriverFactoryTests
     }
 
     @Test
-    void testGetRemoteWebDriver() throws IllegalAccessException
+    void testGetRemoteWebDriver() throws ReflectiveOperationException
     {
         mockCapabilities(remoteWebDriver);
         var desiredCapabilities = new DesiredCapabilities();
@@ -273,7 +277,7 @@ class WebDriverFactoryTests
             "SAFARI,"
     })
     void shouldSetAcceptInsecureCertsForSupportingBrowsers(String type, Boolean acceptsInsecureCerts)
-            throws IllegalAccessException
+            throws ReflectiveOperationException
     {
         mockCapabilities(remoteWebDriver);
         var desiredCapabilities = new DesiredCapabilities();
@@ -290,7 +294,7 @@ class WebDriverFactoryTests
 
     @Test
     @SuppressWarnings("unchecked")
-    void testGetRemoteWebDriverFirefoxDriver() throws IllegalAccessException
+    void testGetRemoteWebDriverFirefoxDriver() throws ReflectiveOperationException
     {
         mockCapabilities(remoteWebDriver);
         var desiredCapabilities = new DesiredCapabilities(new FirefoxOptions());
@@ -310,7 +314,7 @@ class WebDriverFactoryTests
     }
 
     @Test
-    void testGetRemoteWebDriverMarionetteDriver() throws IllegalAccessException
+    void testGetRemoteWebDriverMarionetteDriver() throws ReflectiveOperationException
     {
         mockCapabilities(remoteWebDriver);
         var desiredCapabilities = new DesiredCapabilities();
@@ -321,7 +325,7 @@ class WebDriverFactoryTests
     }
 
     @Test
-    void testGetRemoteWebDriverIEDriver() throws IllegalAccessException
+    void testGetRemoteWebDriverIEDriver() throws ReflectiveOperationException
     {
         mockCapabilities(remoteWebDriver);
         var desiredCapabilities = new DesiredCapabilities();
@@ -333,7 +337,7 @@ class WebDriverFactoryTests
     }
 
     @Test
-    void testGetRemoteWebDriverIsChromeWithAdditionalOptions() throws IllegalAccessException
+    void testGetRemoteWebDriverIsChromeWithAdditionalOptions() throws ReflectiveOperationException
     {
         var args = "disable-blink-features=BlockCredentialedSubresources";
         var chromeOptions = new ChromeOptions();
@@ -347,12 +351,12 @@ class WebDriverFactoryTests
     }
 
     @Test
-    void testGetRemoteWebDriverIsChromeWithoutAdditionalOptions() throws IllegalAccessException
+    void testGetRemoteWebDriverIsChromeWithoutAdditionalOptions() throws ReflectiveOperationException
     {
         testGetRemoteWebDriverIsChrome(new ChromeOptions());
     }
 
-    private void testGetRemoteWebDriverIsChrome(ChromeOptions chromeOptions) throws IllegalAccessException
+    private void testGetRemoteWebDriverIsChrome(ChromeOptions chromeOptions) throws ReflectiveOperationException
     {
         mockCapabilities(remoteWebDriver);
         var desiredCapabilities = new DesiredCapabilities();
@@ -363,35 +367,45 @@ class WebDriverFactoryTests
         assertLogger();
     }
 
-    private void assertRemoteWebDriverCreation(DesiredCapabilities desiredCapabilities) throws IllegalAccessException
+    private void assertRemoteWebDriverCreation(DesiredCapabilities desiredCapabilities)
+            throws ReflectiveOperationException
     {
         Options options = mock();
         when(remoteWebDriver.manage()).thenReturn(options);
         Timeouts timeouts = mock();
         when(options.timeouts()).thenReturn(timeouts);
 
-
-        var webDriverFactory = new WebDriverFactory(true, remoteWebDriverFactory, propertyParser,
-                new JsonUtils(), proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer);
-        testWebDriverCreation(desiredCapabilities, webDriverFactory, () -> remoteWebDriver);
+        WebDriverListenerFactory webDriverListenerFactory = mock();
+        var webDriverFactory = new WebDriverFactory(true, remoteWebDriverFactory, propertyParser, new JsonUtils(),
+                proxy, webDriverStartContext, Optional.empty(), timeoutConfigurer, List.of(webDriverListenerFactory));
+        testWebDriverCreation(desiredCapabilities, webDriverFactory, webDriverListenerFactory, () -> remoteWebDriver);
         verify(timeoutConfigurer).configure(timeouts);
     }
 
     private static void testWebDriverCreation(DesiredCapabilities desiredCapabilities,
-            WebDriverFactory webDriverFactory, Supplier<WebDriver> expectedSupplier) throws IllegalAccessException
+            WebDriverFactory webDriverFactory, WebDriverListenerFactory webDriverListenerFactory,
+            Supplier<WebDriver> expectedSupplier) throws ReflectiveOperationException
     {
         WebDriverEventListener webDriverEventListener = mock();
         var eventListeners = List.of(webDriverEventListener);
         webDriverFactory.setWebDriverEventListeners(eventListeners);
 
-        var eventFiringDriver = webDriverFactory.createWebDriver(desiredCapabilities);
+        WebDriverListener webDriverListener = mock();
+        when(webDriverListenerFactory.createListener()).thenReturn(webDriverListener);
 
-        assertThat(eventFiringDriver, instanceOf(EventFiringWebDriver.class));
+        var decoratedDriver = webDriverFactory.createWebDriver(desiredCapabilities);
+
+        assertThat(decoratedDriver, instanceOf(Decorated.class));
+        EventFiringWebDriver eventFiringDriver = ((Decorated<EventFiringWebDriver>) decoratedDriver).getOriginal();
         var textFormattingDriver = ((WrapsDriver) eventFiringDriver).getWrappedDriver();
         assertThat(textFormattingDriver, instanceOf(TextFormattingWebDriver.class));
         assertEquals(expectedSupplier.get(), ((WrapsDriver) textFormattingDriver).getWrappedDriver());
 
         assertEquals(eventListeners, FieldUtils.readField(eventFiringDriver, "eventListeners", true));
+
+        decoratedDriver.getCurrentUrl();
+        verify(webDriverListener).beforeAnyWebDriverCall(eventFiringDriver, WebDriver.class.getMethod("getCurrentUrl"),
+                null);
     }
 
     private static void mockCapabilities(HasCapabilities hasCapabilities)

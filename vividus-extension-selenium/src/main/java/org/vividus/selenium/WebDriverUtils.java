@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.WrapsElement;
+import org.openqa.selenium.support.decorators.Decorated;
 
 public final class WebDriverUtils
 {
@@ -39,6 +40,7 @@ public final class WebDriverUtils
         return unwrap(webElement, WrapsElement.class, WrapsElement::getWrappedElement, clazz);
     }
 
+    @SuppressWarnings("unchecked")
     private static <T, W, R> R unwrap(T toUnwrap, Class<W> wrapperClazz, Function<W, T> unwrapper, Class<R> targetClazz)
     {
         T unwrapped = toUnwrap;
@@ -47,6 +49,10 @@ public final class WebDriverUtils
             if (wrapperClazz.isInstance(unwrapped))
             {
                 unwrapped = unwrapper.apply(wrapperClazz.cast(unwrapped));
+                if (unwrapped instanceof Decorated)
+                {
+                    unwrapped = ((Decorated<T>) unwrapped).getOriginal();
+                }
             }
             else
             {

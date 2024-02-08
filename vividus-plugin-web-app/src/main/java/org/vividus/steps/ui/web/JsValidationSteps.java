@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.logging.LogEntry;
 import org.vividus.context.VariableContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
@@ -43,16 +42,19 @@ import org.vividus.variable.VariableScope;
 public class JsValidationSteps
 {
     private final IWebDriverProvider webDriverProvider;
+    private final BrowserLogManager browserLogManager;
     private final ISoftAssert softAssert;
     private final IAttachmentPublisher attachmentPublisher;
     private final WaitActions waitActions;
     private final VariableContext variableContext;
     private boolean includeBrowserExtensionLogEntries;
 
-    public JsValidationSteps(IWebDriverProvider webDriverProvider, ISoftAssert softAssert,
-            IAttachmentPublisher attachmentPublisher, WaitActions waitActions, VariableContext variableContext)
+    public JsValidationSteps(IWebDriverProvider webDriverProvider, BrowserLogManager browserLogManager,
+            ISoftAssert softAssert, IAttachmentPublisher attachmentPublisher, WaitActions waitActions,
+            VariableContext variableContext)
     {
         this.webDriverProvider = webDriverProvider;
+        this.browserLogManager = browserLogManager;
         this.softAssert = softAssert;
         this.attachmentPublisher = attachmentPublisher;
         this.waitActions = waitActions;
@@ -71,7 +73,7 @@ public class JsValidationSteps
      * @param regex Regular expression to filter log entries
      */
     @Then("there are browser console $logEntries by regex `$regex`")
-    public void checkThereAreLogEntriesOnOpenedPageFilteredByRegExp(List<BrowserLogLevel> logEntries, Pattern regex)
+    public void checkThereAreLogEntriesOnOpenedPageFilteredByRegExp(Set<BrowserLogLevel> logEntries, Pattern regex)
     {
         Set<LogEntry> filteredLogEntries = getLogEntries(logEntries, regex);
         softAssert.assertFalse(String.format("Current page contains JavaScript %s by regex '%s'",
@@ -89,7 +91,7 @@ public class JsValidationSteps
      * @param logEntries Comma-separated list of entries to check. Possible values: "errors", "warnings", "infos".
      */
     @Then("there are no browser console $logEntries")
-    public void checkJsLogEntriesOnOpenedPage(List<BrowserLogLevel> logEntries)
+    public void checkJsLogEntriesOnOpenedPage(Set<BrowserLogLevel> logEntries)
     {
         checkLogMessagesAbsence(getLogEntries(logEntries,
             e -> includeBrowserExtensionLogEntries || !e.getMessage().contains("extension")), logEntries);
@@ -107,7 +109,7 @@ public class JsValidationSteps
      * @param regex Regular expression to filter log entries
      */
     @Then(value = "there are no browser console $logEntries by regex `$regex`", priority = 1)
-    public void checkJsLogEntriesOnOpenedPageFilteredByRegExp(List<BrowserLogLevel> logEntries, Pattern regex)
+    public void checkJsLogEntriesOnOpenedPageFilteredByRegExp(Set<BrowserLogLevel> logEntries, Pattern regex)
     {
         checkLogMessagesAbsence(getLogEntries(logEntries, regex), logEntries);
     }
@@ -131,17 +133,16 @@ public class JsValidationSteps
      */
     @When("I wait until browser console $logEntries by regex `$regex` appear and save all entries into $scopes "
             + "variable `$variableName`")
-    public void waitForMessageAndSave(List<BrowserLogLevel> logEntries, Pattern regex, Set<VariableScope> scopes,
+    public void waitForMessageAndSave(Set<BrowserLogLevel> logEntries, Pattern regex, Set<VariableScope> scopes,
             String variableName)
     {
-        WebDriver webDriver = webDriverProvider.get();
         List<LogEntry> messages = new ArrayList<>();
-        WaitResult<Boolean> waitResult = waitActions.wait(webDriver, new Function<>()
+        WaitResult<Boolean> waitResult = waitActions.wait(logEntries, new Function<>()
         {
             @Override
-            public Boolean apply(WebDriver driver)
+            public Boolean apply(Set<BrowserLogLevel> logEntries)
             {
-                Set<LogEntry> newMessages = getLogEntries(logEntries, driver);
+                Set<LogEntry> newMessages = browserLogManager.getFilteredLog(logEntries);
                 messages.addAll(newMessages);
                 return newMessages.stream().map(LogEntry::getMessage).anyMatch(regex.asMatchPredicate());
             }
@@ -157,44 +158,38 @@ public class JsValidationSteps
         {
             variableContext.putVariable(scopes, variableName, messages);
         }
-        publishAttachment(webDriver, messages);
+        publishAttachment(messages);
     }
 
-    private void checkLogMessagesAbsence(Set<LogEntry> logEntries, List<BrowserLogLevel> logLevels)
+    private void checkLogMessagesAbsence(Set<LogEntry> logEntries, Set<BrowserLogLevel> logLevels)
     {
         softAssert.assertEquals("Current page contains no JavaScript " + toString(logLevels), 0,
                 logEntries.size());
     }
 
-    private Set<LogEntry> getLogEntries(List<BrowserLogLevel> logEntries, Predicate<? super LogEntry> filter)
+    private Set<LogEntry> getLogEntries(Set<BrowserLogLevel> logEntries, Predicate<? super LogEntry> filter)
     {
-        WebDriver webDriver = webDriverProvider.get();
-        Set<LogEntry> filteredLogEntries = getLogEntries(logEntries, webDriver).stream()
+        Set<LogEntry> filteredLogEntries = browserLogManager.getFilteredLog(logEntries).stream()
                 .filter(filter::test)
                 .collect(Collectors.toSet());
 
-        publishAttachment(webDriver, filteredLogEntries);
+        publishAttachment(filteredLogEntries);
         return filteredLogEntries;
     }
 
-    private Set<LogEntry> getLogEntries(List<BrowserLogLevel> logEntries, WebDriver webDriver)
-    {
-        return BrowserLogManager.getFilteredLog(webDriver, logEntries);
-    }
-
-    private Set<LogEntry> getLogEntries(List<BrowserLogLevel> logEntries, Pattern regex)
+    private Set<LogEntry> getLogEntries(Set<BrowserLogLevel> logEntries, Pattern regex)
     {
         return getLogEntries(logEntries, message -> regex.matcher(message.getMessage()).matches());
     }
 
-    private void publishAttachment(WebDriver webDriver, Collection<LogEntry> filteredLogEntries)
+    private void publishAttachment(Collection<LogEntry> filteredLogEntries)
     {
         attachmentPublisher.publishAttachment("/org/vividus/steps/ui/web/js-console-validation-result-table.ftl",
-                Map.of("results", Map.of(webDriver.getCurrentUrl(), filteredLogEntries)),
+                Map.of("results", Map.of(webDriverProvider.get().getCurrentUrl(), filteredLogEntries)),
             "JavaScript console validation results");
     }
 
-    private static String toString(List<BrowserLogLevel> logLevels)
+    private static String toString(Set<BrowserLogLevel> logLevels)
     {
         return logLevels.stream()
                 .map(BrowserLogLevel::toString)
