@@ -49,7 +49,7 @@ public class WebDriverFactory extends GenericWebDriverFactory
     private final TimeoutConfigurer timeoutConfigurer;
     private WebDriverType webDriverType;
     private List<WebDriverEventListener> webDriverEventListeners;
-    private final List<WebDriverListenerFactory> webDriverListenerFactories;
+    private final List<WebDriverListenerFactory<WebDriverListener>> webDriverListenerFactories;
     private final boolean remoteExecution;
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
@@ -58,7 +58,8 @@ public class WebDriverFactory extends GenericWebDriverFactory
             IPropertyParser propertyParser, JsonUtils jsonUtils, IProxy proxy,
             WebDriverStartContext webDriverStartContext,
             Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters,
-            TimeoutConfigurer timeoutConfigurer, List<WebDriverListenerFactory> webDriverListenerFactories)
+            TimeoutConfigurer timeoutConfigurer,
+            List<WebDriverListenerFactory<WebDriverListener>> webDriverListenerFactories)
     {
         super(remoteWebDriverFactory, propertyParser, jsonUtils, desiredCapabilitiesAdjusters);
         this.remoteExecution = remoteExecution;
@@ -79,7 +80,7 @@ public class WebDriverFactory extends GenericWebDriverFactory
         webDriverEventListeners.forEach(eventFiringWebDriver::register);
 
         WebDriverListener[] webDriverListeners = webDriverListenerFactories.stream()
-                .map(WebDriverListenerFactory::createListener)
+                .map(factory -> factory.createListener(eventFiringWebDriver))
                 .toArray(WebDriverListener[]::new);
         return new EventFiringDecorator<>(webDriverListeners).decorate(eventFiringWebDriver);
     }

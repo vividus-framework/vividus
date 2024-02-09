@@ -30,13 +30,8 @@ import java.util.logging.Level;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
@@ -46,24 +41,15 @@ import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.Logs;
 import org.openqa.selenium.remote.Browser;
-import org.vividus.selenium.IWebDriverProvider;
 
-@ExtendWith(MockitoExtension.class)
 class BrowserLogManagerTests
 {
-    private static final String ERROR_MESSAGE = "error message";
-
-    @Mock
-    private IWebDriverProvider webDriverProvider;
-    @InjectMocks
-    private BrowserLogManager browserLogManager;
-
     @Test
     void shouldReturnFilteredLogContainingEntries()
     {
         var webDriver = mockBrowserName(Browser.CHROME.browserName());
         var logEntries = mockLogRetrieval(webDriver);
-        var filteredLog = browserLogManager.getFilteredLog(Set.of(BrowserLogLevel.ERRORS));
+        var filteredLog = BrowserLogManager.getFilteredLog(webDriver, Set.of(BrowserLogLevel.ERRORS));
         assertEquals(Set.of(logEntries.getAll().get(0)), filteredLog);
     }
 
@@ -72,39 +58,40 @@ class BrowserLogManagerTests
     {
         var webDriver = mockBrowserName(Browser.CHROME.browserName());
         mockLogRetrieval(webDriver);
-        var filteredLog = browserLogManager.getFilteredLog(Set.of(BrowserLogLevel.WARNINGS));
+        var filteredLog = BrowserLogManager.getFilteredLog(webDriver, Set.of(BrowserLogLevel.WARNINGS));
         assertEquals(Set.of(), filteredLog);
     }
 
-    static Stream<Arguments> notSupportedBrowsers()
+    static Stream<Browser> notSupportedBrowsers()
     {
-        return Stream.of(Arguments.of(Browser.IE), Arguments.of(Browser.SAFARI), Arguments.of(Browser.FIREFOX));
+        return Stream.of(Browser.IE, Browser.SAFARI, Browser.FIREFOX);
     }
 
     @ParameterizedTest
     @MethodSource("notSupportedBrowsers")
     void shouldFailWhenBrowserDoesntSupportsLogs(Browser browser)
     {
-        mockBrowserName(browser.browserName());
+        WebDriver webDriver = mockBrowserName(browser.browserName());
         var logLevelsToInclude = Set.of(BrowserLogLevel.ERRORS);
         var exception = assertThrows(IllegalStateException.class,
-                () -> browserLogManager.getFilteredLog(logLevelsToInclude));
+                () -> BrowserLogManager.getFilteredLog(webDriver, logLevelsToInclude));
         assertEquals("Browser does not support retrieval of browser logs", exception.getMessage());
     }
 
     @Test
-    void shouldIgnoreUnsupportedFirefoxIfFlagIsSet()
+    void shouldResetBuffer()
     {
-        var webDriver = mockBrowserName(Browser.FIREFOX.browserName());
-        browserLogManager.resetBuffer(true);
-        verify(webDriver, never()).manage();
+        var webDriver = mockBrowserName(Browser.CHROME.browserName());
+        Logs logs = mockLogsProvider(webDriver);
+        BrowserLogManager.resetBuffer(webDriver);
+        verify(logs).get(LogType.BROWSER);
     }
 
     @Test
-    void shouldIgnoreUnsupportedIExplorerIfFlagIsSet()
+    void shouldIgnoreUnsupportedFirefoxOnBufferReset()
     {
-        var webDriver = mockBrowserName(Browser.IE.browserName());
-        browserLogManager.resetBuffer(true);
+        var webDriver = mockBrowserName(Browser.FIREFOX.browserName());
+        BrowserLogManager.resetBuffer(webDriver);
         verify(webDriver, never()).manage();
     }
 
@@ -114,20 +101,25 @@ class BrowserLogManagerTests
         Capabilities capabilities = mock();
         when(((HasCapabilities) webDriver).getCapabilities()).thenReturn(capabilities);
         when(capabilities.getBrowserName()).thenReturn(browserName);
-        when(webDriverProvider.get()).thenReturn(webDriver);
         return webDriver;
     }
 
     private static LogEntries mockLogRetrieval(WebDriver webDriver)
     {
+        Logs logs = mockLogsProvider(webDriver);
+        var severeEntry = new LogEntry(Level.SEVERE, 1L, "error message");
+        var infoEntry = new LogEntry(Level.INFO, 1L, "info message");
+        var logEntries = new LogEntries(Arrays.asList(severeEntry, infoEntry));
+        when(logs.get(LogType.BROWSER)).thenReturn(logEntries);
+        return logEntries;
+    }
+
+    private static Logs mockLogsProvider(WebDriver webDriver)
+    {
         Options options = mock();
         when(webDriver.manage()).thenReturn(options);
         Logs logs = mock();
         when(options.logs()).thenReturn(logs);
-        var severeEntry = new LogEntry(Level.SEVERE, 1L, ERROR_MESSAGE);
-        var infoEntry = new LogEntry(Level.INFO, 1L, ERROR_MESSAGE);
-        var logEntries = new LogEntries(Arrays.asList(severeEntry, infoEntry));
-        when(logs.get(LogType.BROWSER)).thenReturn(logEntries);
-        return logEntries;
+        return logs;
     }
 }

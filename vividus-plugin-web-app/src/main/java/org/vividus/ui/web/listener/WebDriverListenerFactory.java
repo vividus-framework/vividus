@@ -16,9 +16,10 @@
 
 package org.vividus.ui.web.listener;
 
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.events.WebDriverListener;
 
-public interface WebDriverListenerFactory
+public interface WebDriverListenerFactory<T extends WebDriverListener>
 {
-    WebDriverListener createListener();
+    T createListener(WebDriver webDriver);
 }
