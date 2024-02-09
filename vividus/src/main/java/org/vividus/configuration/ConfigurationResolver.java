@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ import com.google.common.collect.Multimap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.vividus.spring.SpelExpressionResolver;
 
@@ -55,6 +57,15 @@ public final class ConfigurationResolver
         "org/vividus/http/client",
         "org/vividus/util"
     };
+
+    // This is the cheapest solution, it breaks low-coupling and other design principles. BUT the implementation of the
+    // solid solution requires much time and effort and the solution will become useless with removal of the deprecated
+    // profiles (in general deprecation of the profile is a very rare case). Summing up this is an acceptable trade-off.
+    private static final Set<String> DEPRECATED_PROFILES = Set.of(
+            "web/desktop/iexplore"
+    );
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationResolver.class);
 
     private static ConfigurationResolver instance;
 
@@ -167,7 +178,11 @@ public final class ConfigurationResolver
         suites = propertyPlaceholderHelper.replacePlaceholders(suites, mergedProperties::getProperty);
 
         Multimap<String, String> configuration = LinkedHashMultimap.create();
-        configuration.putAll("profile", asPaths(resolveSpel(profiles)));
+        List<String> parsedProfiles = asPaths(resolveSpel(profiles));
+        parsedProfiles.stream().filter(DEPRECATED_PROFILES::contains).forEach(profile ->
+                LOGGER.warn("`{}` profile is deprecated and will be removed in VIVIDUS 0.8.0", profile)
+        );
+        configuration.putAll("profile", parsedProfiles);
         configuration.putAll("environment", asPaths(resolveSpel(environments)));
         configuration.putAll("suite", asPaths(resolveSpel(suites)));
         return configuration;
