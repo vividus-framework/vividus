@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,22 @@
 
 package org.vividus.configuration;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
+import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.SystemUtils;
+import org.slf4j.LoggerFactory;
 import org.vividus.log.LoggerConfigurer;
 import org.vividus.log.TestInfoLogger;
+import org.vividus.util.Sleeper;
 import org.vividus.util.json.JsonPathUtils;
 
 public final class Vividus
 {
+    // +2 months after planned migration to Java 21 in order to do not slow down old projects
+    private static final LocalDateTime JAVA_MIGRATION_NOTIFICATION_DATE = LocalDateTime.of(2024, 8, 1, 0, 0);
+
     private Vividus()
     {
     }
@@ -30,6 +40,7 @@ public final class Vividus
     {
         LoggerConfigurer.configureLoggers();
         TestInfoLogger.drawBanner();
+        checkJavaVersion();
         BeanFactory.open();
 
         // Load JsonPathUtils to configure JsonPath SPI
@@ -41,5 +52,27 @@ public final class Vividus
         {
             throw new IllegalStateException(e);
         }
+    }
+
+    private static void checkJavaVersion()
+    {
+        if (SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_21))
+        {
+            return;
+        }
+
+        long daysAfterNotification = Duration.between(JAVA_MIGRATION_NOTIFICATION_DATE, LocalDateTime.now()).toDays();
+        long secondsToWait = daysAfterNotification > 0 ? daysAfterNotification : 0;
+        String lineSeparator = System.lineSeparator();
+        String separator = lineSeparator + "====================================================================";
+        String message = separator
+                + lineSeparator + "    Java of version {} is used."
+                + lineSeparator + "    VIVIDUS will require Java 21 starting from July 1, 2024,"
+                + lineSeparator + "    you won't be able to run tests using current Java version."
+                + lineSeparator + "    Please, upgrade to Java 21 at the earliest convenient time."
+                + lineSeparator + "    Execution will resume in {}s."
+                + separator;
+        LoggerFactory.getLogger(Vividus.class).warn(message, SystemUtils.JAVA_VERSION, secondsToWait);
+        Sleeper.sleep(Duration.ofSeconds(secondsToWait));
     }
 }
