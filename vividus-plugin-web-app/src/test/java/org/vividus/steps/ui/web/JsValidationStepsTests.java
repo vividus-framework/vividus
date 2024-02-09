@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -53,7 +52,6 @@ import org.vividus.context.VariableContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.logging.BrowserLogLevel;
-import org.vividus.selenium.logging.BrowserLogManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.WaitActions;
 import org.vividus.ui.action.WaitResult;
@@ -74,15 +72,7 @@ class JsValidationStepsTests
     @Mock private ISoftAssert softAssert;
     @Mock private WaitActions waitActions;
     @Mock private VariableContext variableContext;
-    @InjectMocks private BrowserLogManager browserLogManager;
-    private JsValidationSteps jsValidationSteps;
-
-    @BeforeEach
-    void beforeEach()
-    {
-        jsValidationSteps = new JsValidationSteps(webDriverProvider, browserLogManager, softAssert, attachmentPublisher,
-                waitActions, variableContext);
-    }
+    @InjectMocks private JsValidationSteps jsValidationSteps;
 
     @Test
     void testCheckThereAreLogEntriesOnOpenedPageFilteredByRegExp()
@@ -160,9 +150,9 @@ class JsValidationStepsTests
         var result = new WaitResult<>();
         result.setWaitPassed(waitPassed);
         var logEntries = Set.of(BrowserLogLevel.INFOS);
-        when(waitActions.wait(eq(logEntries), argThat(f -> {
-            f.apply(logEntries);
-            f.apply(logEntries);
+        when(waitActions.wait(eq(webDriver), argThat(f -> {
+            f.apply(webDriver);
+            f.apply(webDriver);
             return "appearance of JavaScript infos matching `.*info.*` regex".equals(f.toString());
         }))).thenReturn(result);
         var variableName = "variableName";

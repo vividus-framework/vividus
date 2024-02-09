@@ -18,38 +18,32 @@ package org.vividus.ui.web.listener;
 
 import java.lang.reflect.Method;
 
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
 import org.openqa.selenium.support.events.WebDriverListener;
 import org.vividus.selenium.logging.BrowserLogManager;
 
 public final class BrowserLogCleaningListener implements WebDriverListener
 {
-    private final BrowserLogManager browserLogManager;
+    private final WebDriver webDriver;
 
-    private BrowserLogCleaningListener(BrowserLogManager browserLogManager)
+    private BrowserLogCleaningListener(WebDriver webDriver)
     {
-        this.browserLogManager = browserLogManager;
+        this.webDriver = webDriver;
     }
 
     @Override
     public void beforeAnyNavigationCall(Navigation navigation, Method method, Object[] args)
     {
-        browserLogManager.resetBuffer(true);
+        BrowserLogManager.resetBuffer(webDriver);
     }
 
-    public static class Factory implements WebDriverListenerFactory
+    public static class Factory implements WebDriverListenerFactory<BrowserLogCleaningListener>
     {
-        private final BrowserLogManager browserLogManager;
-
-        public Factory(BrowserLogManager browserLogManager)
-        {
-            this.browserLogManager = browserLogManager;
-        }
-
         @Override
-        public WebDriverListener createListener()
+        public BrowserLogCleaningListener createListener(WebDriver webDriver)
         {
-            return new BrowserLogCleaningListener(browserLogManager);
+            return new BrowserLogCleaningListener(webDriver);
         }
     }
 }

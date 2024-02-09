@@ -17,28 +17,26 @@
 package org.vividus.ui.web.listener;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mockStatic;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
 import org.openqa.selenium.support.events.WebDriverListener;
 import org.vividus.selenium.logging.BrowserLogManager;
+import org.vividus.ui.web.listener.BrowserLogCleaningListener.Factory;
 
-@ExtendWith(MockitoExtension.class)
 class BrowserLogCleaningListenerTests
 {
-    @Mock private BrowserLogManager browserLogManager;
-    @InjectMocks private BrowserLogCleaningListener.Factory factory;
-
     @Test
     void shouldResetBrowserLogBeforeAnyNavigation()
     {
-        WebDriverListener listener = factory.createListener();
-        listener.beforeAnyNavigationCall(mock(Navigation.class), null, null);
-        verify(browserLogManager).resetBuffer(true);
+        try (var browserLogManagerStaticMock = mockStatic(BrowserLogManager.class))
+        {
+            WebDriver webDriver = mock();
+            WebDriverListener listener = new Factory().createListener(webDriver);
+            listener.beforeAnyNavigationCall(mock(Navigation.class), null, null);
+            browserLogManagerStaticMock.verify(() -> BrowserLogManager.resetBuffer(webDriver));
+        }
     }
 }

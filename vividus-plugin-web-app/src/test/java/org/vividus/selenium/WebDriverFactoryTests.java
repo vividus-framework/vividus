@@ -391,7 +391,7 @@ class WebDriverFactoryTests
         webDriverFactory.setWebDriverEventListeners(eventListeners);
 
         WebDriverListener webDriverListener = mock();
-        when(webDriverListenerFactory.createListener()).thenReturn(webDriverListener);
+        when(webDriverListenerFactory.createListener(any(WebDriver.class))).thenReturn(webDriverListener);
 
         var decoratedDriver = webDriverFactory.createWebDriver(desiredCapabilities);
 
@@ -402,6 +402,7 @@ class WebDriverFactoryTests
         assertEquals(expectedSupplier.get(), ((WrapsDriver) textFormattingDriver).getWrappedDriver());
 
         assertEquals(eventListeners, FieldUtils.readField(eventFiringDriver, "eventListeners", true));
+        verify(webDriverListenerFactory).createListener(eventFiringDriver);
 
         decoratedDriver.getCurrentUrl();
         verify(webDriverListener).beforeAnyWebDriverCall(eventFiringDriver, WebDriver.class.getMethod("getCurrentUrl"),

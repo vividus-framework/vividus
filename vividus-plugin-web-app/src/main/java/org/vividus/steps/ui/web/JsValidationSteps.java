@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.logging.LogEntry;
 import org.vividus.context.VariableContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
@@ -42,19 +43,16 @@ import org.vividus.variable.VariableScope;
 public class JsValidationSteps
 {
     private final IWebDriverProvider webDriverProvider;
-    private final BrowserLogManager browserLogManager;
     private final ISoftAssert softAssert;
     private final IAttachmentPublisher attachmentPublisher;
     private final WaitActions waitActions;
     private final VariableContext variableContext;
     private boolean includeBrowserExtensionLogEntries;
 
-    public JsValidationSteps(IWebDriverProvider webDriverProvider, BrowserLogManager browserLogManager,
-            ISoftAssert softAssert, IAttachmentPublisher attachmentPublisher, WaitActions waitActions,
-            VariableContext variableContext)
+    public JsValidationSteps(IWebDriverProvider webDriverProvider, ISoftAssert softAssert,
+            IAttachmentPublisher attachmentPublisher, WaitActions waitActions, VariableContext variableContext)
     {
         this.webDriverProvider = webDriverProvider;
-        this.browserLogManager = browserLogManager;
         this.softAssert = softAssert;
         this.attachmentPublisher = attachmentPublisher;
         this.waitActions = waitActions;
@@ -137,12 +135,12 @@ public class JsValidationSteps
             String variableName)
     {
         List<LogEntry> messages = new ArrayList<>();
-        WaitResult<Boolean> waitResult = waitActions.wait(logEntries, new Function<>()
+        WaitResult<Boolean> waitResult = waitActions.wait(webDriverProvider.get(), new Function<>()
         {
             @Override
-            public Boolean apply(Set<BrowserLogLevel> logEntries)
+            public Boolean apply(WebDriver webDriver)
             {
-                Set<LogEntry> newMessages = browserLogManager.getFilteredLog(logEntries);
+                Set<LogEntry> newMessages = BrowserLogManager.getFilteredLog(webDriver, logEntries);
                 messages.addAll(newMessages);
                 return newMessages.stream().map(LogEntry::getMessage).anyMatch(regex.asMatchPredicate());
             }
@@ -167,19 +165,20 @@ public class JsValidationSteps
                 logEntries.size());
     }
 
+    private Set<LogEntry> getLogEntries(Set<BrowserLogLevel> logEntries, Pattern regex)
+    {
+        return getLogEntries(logEntries, message -> regex.matcher(message.getMessage()).matches());
+    }
+
     private Set<LogEntry> getLogEntries(Set<BrowserLogLevel> logEntries, Predicate<? super LogEntry> filter)
     {
-        Set<LogEntry> filteredLogEntries = browserLogManager.getFilteredLog(logEntries).stream()
-                .filter(filter::test)
+        Set<LogEntry> filteredLogEntries = BrowserLogManager.getFilteredLog(webDriverProvider.get(), logEntries)
+                .stream()
+                .filter(filter)
                 .collect(Collectors.toSet());
 
         publishAttachment(filteredLogEntries);
         return filteredLogEntries;
-    }
-
-    private Set<LogEntry> getLogEntries(Set<BrowserLogLevel> logEntries, Pattern regex)
-    {
-        return getLogEntries(logEntries, message -> regex.matcher(message.getMessage()).matches());
     }
 
     private void publishAttachment(Collection<LogEntry> filteredLogEntries)
