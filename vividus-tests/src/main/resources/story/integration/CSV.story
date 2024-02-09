@@ -29,3 +29,12 @@ Then `${csv-records}` matching rows using `country` from `csv-data` is equal to 
 |country|capital|data                                                             |
 |Belarus|Minsk  |{"sheet": [{"cols": 1, "name": "A", "rows": 2}], "name": "tests"}|
 |Belarus|Minsk  |plain text                                                       |
+
+Scenario: Verify step: "When I save CSV `$csv` to $scopes variable `$variableName`"
+Given I initialize scenario variable `csv` with value `key1,key2,key3
+val1-1,val1-2,val1-3
+val2-1,val2-2,val2-3`
+When I save CSV `${csv}` to scenario variable `csv-from-variable`
+When I save CSV `#{loadResource(/data/simple-csv.csv)}` to scenario variable `csv-from-file`
+Then `${csv-from-file}` is equal to `${csv-from-variable}`
+Then `${csv-from-file[1].key2}` is equal to `val2-2`
