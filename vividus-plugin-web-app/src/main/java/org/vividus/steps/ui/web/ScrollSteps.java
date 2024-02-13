@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,17 +62,22 @@ public class ScrollSteps
     }
 
     /**
-     * Scroll the element into view by calling API:
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView">Scroll into view</a>
-     * @param locator to locate an element
+     * Finds an element and scrolls it into view with centred positioning.
+     * <br>
+     * Please note that if the element to scroll is located inside an
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/overflow">overflow</a> container then native JS
+     * <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView">scrollIntoView</a> method
+     * with top alignment is used.
+     *
+     * @param locator The locator of the element to scroll into view
      */
     @When("I scroll element located by `$locator` into view")
     public void scrollIntoView(Locator locator)
     {
-        List<WebElement> toScroll = baseValidations.assertIfElementsExist("Element to scroll into view", locator);
-        if (!toScroll.isEmpty())
+        List<WebElement> scrollTargets = baseValidations.assertIfElementsExist("Element to scroll into view", locator);
+        if (!scrollTargets.isEmpty())
         {
-            javascriptActions.scrollIntoView(toScroll.get(0), true);
+            javascriptActions.scrollElementIntoViewportCenter(scrollTargets.get(0));
         }
     }
 

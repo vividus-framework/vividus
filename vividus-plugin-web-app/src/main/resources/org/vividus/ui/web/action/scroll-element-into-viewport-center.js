@@ -5,6 +5,11 @@ let currentWindow = window;
 const stickyHeaderSize = arguments[1] / 100
 
 try {
+    if (isElementInsideOverflowContainer(elementToScroll)) {
+        elementToScroll.scrollIntoView(true);
+        exit(true);
+    }
+
     // Check, if we have an access to top level document
     window.top.document;
     while (currentWindow !== window.top) {
@@ -28,6 +33,18 @@ function wait() {
 function clearTimeoutAndWait(event) {
     currentWindow.clearTimeout(waitForScroll);
     wait();
+}
+
+function isElementInsideOverflowContainer(element) {
+    let container = element.parentElement;
+    while (container) {
+        const style = window.getComputedStyle(container);
+        if (style.overflow !== 'visible' && (style.overflowX !== 'visible' || style.overflowY !== 'visible')) {
+            return true;
+        }
+        container = container.parentElement;
+    }
+    return false;
 }
 
 wait();
