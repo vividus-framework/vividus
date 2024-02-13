@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,9 @@
 
 package io.appium.java_client;
 
-import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -39,6 +37,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.function.FailableRunnable;
@@ -77,12 +76,8 @@ import pazone.ashot.util.ImageTool;
 @ExtendWith(MockitoExtension.class)
 class TouchActionsTests
 {
-    private static final String ACTIONS_OPEN = "{actions=[";
-    private static final String ACTIONS_CLOSE = "]}";
-
-    private static final String PRESS = "{action=press, options={element=elementId}}, ";
-    private static final String WAIT = "{action=wait, options={ms=1000}}, ";
-    private static final String RELEASE = "{action=release, options={}}";
+    private static final String POINTER_MOVE_TEMPLATE = "{duration=%d, x=%d, y=%d, type=pointerMove, "
+            + "origin=viewport}";
 
     private static final Duration DURATION = Duration.ofSeconds(1);
     private static final String BLACK_IMAGE = "black.png";
@@ -99,104 +94,50 @@ class TouchActionsTests
     @Spy private final MobileApplicationConfiguration mobileApplicationConfiguration =
             new MobileApplicationConfiguration(swipeConfiguration, zoomConfiguration);
     @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private RemoteWebElement element;
-    @Mock private PerformsTouchActions performsTouchActions;
     @Mock private GenericWebDriverManager genericWebDriverManager;
     @Mock private IUiContext uiContext;
     @Mock private MobileAppScreenshotTaker screenshotTaker;
     @Mock private BooleanSupplier stopCondition;
     @InjectMocks private TouchActions touchActions;
 
-    private void mockPerformsTouchActions()
+    @Test
+    void shouldTapOnElement()
     {
-        when(webDriverProvider.getUnwrapped(PerformsTouchActions.class)).thenReturn(performsTouchActions);
+        testTapOnElement(200, touchActions::tap);
     }
 
     @Test
-    void shouldTapOnVisibleElement()
+    void shouldTapOnElementWithDuration()
     {
-        mockPerformsTouchActions();
-        when(element.isDisplayed()).thenReturn(true);
-        when(element.getId()).thenReturn(ELEMENT_ID);
-
-        touchActions.tap(element, Duration.ofSeconds(1));
-
-        var touchActionCaptor = ArgumentCaptor.forClass(TouchAction.class);
-        verify(performsTouchActions).performTouchAction(touchActionCaptor.capture());
-        var actions = ACTIONS_OPEN + PRESS
-                + WAIT
-                + RELEASE
-                + ACTIONS_CLOSE;
-        assertEquals(actions, touchActionCaptor.getValue().getParameters().toString());
+        int millis = 500;
+        testTapOnElement(millis, element -> touchActions.tap(element, Duration.ofMillis(millis)));
     }
 
-    @Test
-    void shouldTapOnInvisibleElement()
+    private void testTapOnElement(int durationInMillis, Consumer<WebElement> test)
     {
-        mockPerformsTouchActions();
-        when(element.isDisplayed()).thenReturn(false);
-        when(element.getLocation()).thenReturn(new Point(1, 3));
-        when(element.getSize()).thenReturn(new Dimension(2, 4));
-        when(genericWebDriverManager.getSize()).thenReturn(new Dimension(100, 200));
+        Interactive webDriver = mock();
+        when(webDriverProvider.getUnwrapped(Interactive.class)).thenReturn(webDriver);
+        WebElement element = mock();
+        when(element.getRect()).thenReturn(new Rectangle(300, 400, 500, 600));
 
-        touchActions.tap(element, Duration.ofSeconds(1));
+        test.accept(element);
 
-        var touchActionCaptor = ArgumentCaptor.forClass(TouchAction.class);
-        verify(performsTouchActions).performTouchAction(touchActionCaptor.capture());
-        var actions = ACTIONS_OPEN + "{action=press, options={x=2, y=5}}, "
-                + WAIT
-                + RELEASE
-                + ACTIONS_CLOSE;
-        assertEquals(actions, touchActionCaptor.getValue().getParameters().toString());
-    }
+        var actions = POINTER_MOVE_TEMPLATE.formatted(0, 600, 650)
+                + ", {button=0, type=pointerDown}"
+                + ", {duration=%d, type=pause}, ".formatted(durationInMillis)
+                + "{button=0, type=pointerUp}";
+        var sequence = buildSequence(FINGER_1, actions);
+        assertActionsSequence(webDriver, sequence);
 
-    @ParameterizedTest
-    @CsvSource({
-            "100, 200",
-            "1,   -3"
-    })
-    void shouldTapOnInvisibleElementOutsideViewport(int x, int y)
-    {
-        mockPerformsTouchActions();
-        when(element.isDisplayed()).thenReturn(false);
-        when(element.getLocation()).thenReturn(new Point(x, y));
-        when(element.getSize()).thenReturn(new Dimension(2, 4));
-        when(genericWebDriverManager.getSize()).thenReturn(new Dimension(100, 200));
-        when(element.getId()).thenReturn(ELEMENT_ID);
-
-        touchActions.tap(element, Duration.ofSeconds(1));
-
-        var touchActionCaptor = ArgumentCaptor.forClass(TouchAction.class);
-        verify(performsTouchActions).performTouchAction(touchActionCaptor.capture());
-        var actions = ACTIONS_OPEN + PRESS
-                + WAIT
-                + RELEASE
-                + ACTIONS_CLOSE;
-        assertEquals(actions, touchActionCaptor.getValue().getParameters().toString());
-    }
-
-    @Test
-    void shouldTapOnVisibleElementWithoutWaitIfDurationIsZero()
-    {
-        mockPerformsTouchActions();
-        when(element.getId()).thenReturn(ELEMENT_ID);
-        when(element.isDisplayed()).thenReturn(true);
-
-        touchActions.tap(element);
-
-        verify(performsTouchActions).performTouchAction(argThat(arg ->
-        {
-            var parameters = arg.getParameters().toString();
-            var actions = ACTIONS_OPEN + "{action=tap, options={element=elementId}}" + ACTIONS_CLOSE;
-            return actions.equals(parameters);
-        }));
+        verifyNoInteractions(stopCondition, screenshotTaker, genericWebDriverManager);
+        verifyNoMoreInteractions(webDriverProvider);
     }
 
     @Test
     void shouldSwipeUntilConditionIsTrue() throws IOException
     {
         validateSwipe(() -> {
-            var context = mock(AppiumDriver.class);
+            AppiumDriver context = mock();
             when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
             when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
             when(stopCondition.getAsBoolean()).thenReturn(false, false, true);
@@ -212,7 +153,7 @@ class TouchActionsTests
     void shouldNotCropElementContextScreenshot() throws IOException
     {
         validateSwipe(() -> {
-            var context = mock(WebElement.class);
+            WebElement context = mock();
             when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
             when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
             when(stopCondition.getAsBoolean()).thenReturn(false).thenReturn(false).thenReturn(true);
@@ -236,16 +177,17 @@ class TouchActionsTests
     {
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.empty());
         touchActions.swipeUntil(SwipeDirection.UP, DURATION, ACTION_AREA, stopCondition);
-        verifyNoInteractions(genericWebDriverManager, screenshotTaker, performsTouchActions);
+        verifyNoInteractions(genericWebDriverManager, screenshotTaker);
     }
 
     @Test
     void shouldWrapIOException() throws IOException
     {
         validateSwipe(() -> {
-            when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mock(AppiumDriver.class)));
+            AppiumDriver context = mock();
+            when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
             when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
-            var exception = mock(IOException.class);
+            IOException exception = mock();
 
             when(stopCondition.getAsBoolean()).thenReturn(false);
             doThrow(exception).when(screenshotTaker).takeViewportScreenshot();
@@ -261,7 +203,7 @@ class TouchActionsTests
     void shouldNotExceedSwipeLimit() throws IOException
     {
         validateSwipe(() -> {
-            var context = mock(AppiumDriver.class);
+            AppiumDriver context = mock();
             when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
             when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
             when(stopCondition.getAsBoolean()).thenReturn(false);
@@ -280,7 +222,7 @@ class TouchActionsTests
     void shouldStopSwipeOnceEndOfPageIsReached() throws IOException
     {
         validateSwipe(() -> {
-            var context = mock(AppiumDriver.class);
+            AppiumDriver context = mock();
             when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(context));
             when(genericWebDriverManager.getSize()).thenReturn(DIMENSION);
             when(stopCondition.getAsBoolean()).thenReturn(false);
@@ -300,9 +242,10 @@ class TouchActionsTests
     @Test
     void shouldPerformDoubleTapIos()
     {
-        var javascriptExecutor = mock(JavascriptExecutor.class);
+        JavascriptExecutor javascriptExecutor = mock();
         when(genericWebDriverManager.isAndroid()).thenReturn(false);
         when(genericWebDriverManager.isIOS()).thenReturn(true);
+        RemoteWebElement element = mock();
         when(element.getId()).thenReturn(ELEMENT_ID);
         when(webDriverProvider.getUnwrapped(JavascriptExecutor.class)).thenReturn(javascriptExecutor);
 
@@ -314,7 +257,8 @@ class TouchActionsTests
     @Test
     void shouldPerformDoubleTapAndroid()
     {
-        var javascriptExecutor = mock(JavascriptExecutor.class);
+        JavascriptExecutor javascriptExecutor = mock();
+        RemoteWebElement element = mock();
         when(element.getId()).thenReturn(ELEMENT_ID);
         when(genericWebDriverManager.isAndroid()).thenReturn(true);
         when(webDriverProvider.getUnwrapped(JavascriptExecutor.class)).thenReturn(javascriptExecutor);
@@ -329,12 +273,11 @@ class TouchActionsTests
     {
         when(genericWebDriverManager.isAndroid()).thenReturn(false);
         when(genericWebDriverManager.isIOS()).thenReturn(false);
-        var exception = assertThrows(IllegalArgumentException.class,
-                () -> touchActions.doubleTap(element));
+        WebElement element = mock();
+        var exception = assertThrows(IllegalArgumentException.class, () -> touchActions.doubleTap(element));
         assertEquals("Double tap action is available only for Android and iOS platforms", exception.getMessage());
     }
 
-    @SuppressWarnings("unchecked")
     @CsvSource({
             "OUT,  150, 640, 293, 416, 510, 80, 366, 303",
             "IN,   293, 416, 150, 640, 366, 303, 510, 80"
@@ -343,27 +286,30 @@ class TouchActionsTests
     void shouldPerformZoom(ZoomType zoomType, int point1StartX, int point1StartY, int point1EndX, int point1EndY,
             int point2StartX, int point2StartY, int point2EndX, int point2EndY)
     {
-        var webDriver = mock(Interactive.class);
+        Interactive webDriver = mock();
         when(webDriverProvider.getUnwrapped(Interactive.class)).thenReturn(webDriver);
         var zoomSequence = buildSwipeSequence(FINGER_1, 200, point1StartX, point1StartY, point1EndX, point1EndY)
                 + buildSwipeSequence(FINGER_2, 200, point2StartX, point2StartY, point2EndX, point2EndY);
         touchActions.performZoom(zoomType, ACTION_AREA);
-        ArgumentCaptor<Collection<Sequence>> actionsCaptor = ArgumentCaptor.forClass(Collection.class);
-        verify(webDriver).perform(actionsCaptor.capture());
-        assertEquals(zoomSequence, asString(actionsCaptor.getValue()));
+
+        assertActionsSequence(webDriver, zoomSequence);
     }
 
     private static String buildSwipeSequence(String pointerName, int swipeDurationMs, int point1StartX,
             int point1StartY, int point1EndX, int point1EndY)
     {
-        var pointerMoveTemplate = "{duration=%d, x=%%s, y=%%s, type=pointerMove, origin=viewport}";
-        var swipeSequenceTemplate = "{id=%s, type=pointer, parameters={pointerType=touch}, actions=["
-                + format(pointerMoveTemplate, 0) + ", " + "{button=0, type=pointerDown}, "
-                + format(pointerMoveTemplate, swipeDurationMs) + ", {button=0, type=pointerUp}]}";
-        return format(swipeSequenceTemplate, pointerName, point1StartX, point1StartY, point1EndX, point1EndY);
+        var actions = POINTER_MOVE_TEMPLATE.formatted(0, point1StartX, point1StartY)
+                + ", {button=0, type=pointerDown}, "
+                + POINTER_MOVE_TEMPLATE.formatted(swipeDurationMs, point1EndX, point1EndY)
+                + ", {button=0, type=pointerUp}";
+        return buildSequence(pointerName, actions);
     }
 
-    @SuppressWarnings("unchecked")
+    private static String buildSequence(String pointerName, String actions)
+    {
+        return "{id=%s, type=pointer, parameters={pointerType=touch}, actions=[%s]}".formatted(pointerName, actions);
+    }
+
     private void validateSwipe(FailableRunnable<IOException> actionRunner, int times) throws IOException
     {
         Interactive webDriver = mock();
@@ -371,10 +317,8 @@ class TouchActionsTests
 
         actionRunner.run();
 
-        ArgumentCaptor<Collection<Sequence>> actionsCaptor = ArgumentCaptor.forClass(Collection.class);
-        verify(webDriver, times(times)).perform(actionsCaptor.capture());
         var swipeSequence = buildSwipeSequence(FINGER_1, 1000, 300, 640, 300, 160);
-        assertEquals(swipeSequence, asString(actionsCaptor.getValue()));
+        assertActionsSequence(webDriver, swipeSequence, times);
 
         verifyNoMoreInteractions(stopCondition, screenshotTaker, genericWebDriverManager, webDriverProvider);
     }
@@ -383,6 +327,19 @@ class TouchActionsTests
     {
         var bytes = ResourceUtils.loadResourceAsByteArray(getClass(), image);
         return ImageTool.toBufferedImage(bytes);
+    }
+
+    private static void assertActionsSequence(Interactive interactiveWebDriver, String expected)
+    {
+        assertActionsSequence(interactiveWebDriver, expected, 1);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void assertActionsSequence(Interactive interactiveWebDriver, String expected, int times)
+    {
+        ArgumentCaptor<Collection<Sequence>> actionsCaptor = ArgumentCaptor.forClass(Collection.class);
+        verify(interactiveWebDriver, times(times)).perform(actionsCaptor.capture());
+        assertEquals(expected, asString(actionsCaptor.getValue()));
     }
 
     private static String asString(Collection<Sequence> sequences)
