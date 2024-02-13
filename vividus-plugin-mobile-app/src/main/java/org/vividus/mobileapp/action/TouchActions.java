@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@
 
 package org.vividus.mobileapp.action;
 
-import static io.appium.java_client.touch.WaitOptions.waitOptions;
-import static io.appium.java_client.touch.offset.ElementOption.element;
-import static io.appium.java_client.touch.offset.PointOption.point;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -27,7 +23,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
@@ -39,8 +34,8 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Interactive;
+import org.openqa.selenium.interactions.Pause;
 import org.openqa.selenium.interactions.PointerInput;
-import org.openqa.selenium.interactions.PointerInput.MouseButton;
 import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.vividus.mobileapp.configuration.MobileApplicationConfiguration;
@@ -57,16 +52,14 @@ import org.vividus.selenium.mobileapp.MobileAppScreenshotTaker;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.util.Sleeper;
 
-import io.appium.java_client.PerformsTouchActions;
-import io.appium.java_client.TouchAction;
-import io.appium.java_client.touch.offset.ElementOption;
-import io.appium.java_client.touch.offset.PointOption;
 import pazone.ashot.util.ImageTool;
 
 public class TouchActions
 {
     private static final int HEIGHT_DIVIDER = 3;
+
     private static final Duration MOVE_FINGER_DURATION = Duration.ofMillis(200);
+    private static final Duration DEFAULT_TAP_DURATION = Duration.ofMillis(200);
 
     private static final String FINGER_1 = "finger1";
     private static final String FINGER_2 = "finger2";
@@ -101,7 +94,7 @@ public class TouchActions
      */
     public void tap(WebElement element)
     {
-        buildTapAction(element, TouchAction::tap, TouchAction::tap).perform();
+        tapAtElementCenter(element, DEFAULT_TAP_DURATION);
     }
 
     /**
@@ -120,10 +113,7 @@ public class TouchActions
      */
     public void tap(WebElement element, Duration duration)
     {
-        buildTapAction(element, TouchAction::press, TouchAction::press)
-                .waitAction(waitOptions(duration))
-                .release()
-                .perform();
+        tapAtElementCenter(element, duration);
     }
 
     //CHECKSTYLE:OFF
@@ -152,26 +142,6 @@ public class TouchActions
         }
         Map<String, Object> args = Map.of("elementId", WebDriverUtils.unwrap(element, RemoteWebElement.class).getId());
         webDriverProvider.getUnwrapped(JavascriptExecutor.class).executeScript(script, args);
-    }
-
-    private TouchAction<?> buildTapAction(WebElement element, BiConsumer<TouchAction<?>, ElementOption> tapByElement,
-            BiConsumer<TouchAction<?>, PointOption<?>> tapByCoordinates)
-    {
-        TouchAction<?> touchActions = new TouchAction<>(webDriverProvider.getUnwrapped(PerformsTouchActions.class));
-        // Workaround for known Appium/iOS/XCUITest issue:
-        // https://github.com/appium/appium/issues/4131#issuecomment-64504187
-        // https://discuss.appium.io/t/ios-visible-false-event-elements-are-visible-on-screen/27630/6
-        if (!element.isDisplayed())
-        {
-            Point elementCenter = getCenter(element);
-            if (isInViewport(elementCenter))
-            {
-                tapByCoordinates.accept(touchActions, point(elementCenter));
-                return touchActions;
-            }
-        }
-        tapByElement.accept(touchActions, element(WebDriverUtils.unwrap(element, RemoteWebElement.class)));
-        return touchActions;
     }
 
     /**
@@ -309,7 +279,7 @@ public class TouchActions
                 MOVE_FINGER_DURATION);
         Sequence moveFinger2Sequence = getFingerMoveSequence(FINGER_2, zoomCoordinates.finger2MoveCoordinates(),
                 MOVE_FINGER_DURATION);
-        webDriverProvider.getUnwrapped(Interactive.class).perform(List.of(moveFinger1Sequence, moveFinger2Sequence));
+        performActions(List.of(moveFinger1Sequence, moveFinger2Sequence));
     }
 
     @SuppressWarnings("MagicNumber")
@@ -339,34 +309,47 @@ public class TouchActions
         Sequence fingerMove = new Sequence(finger, 0);
         fingerMove.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(),
                 moveCoordinates.getStart()));
-        fingerMove.addAction(finger.createPointerDown(MouseButton.LEFT.asArg()));
+        fingerMove.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
         fingerMove.addAction(finger.createPointerMove(moveDuration, PointerInput.Origin.viewport(),
                 moveCoordinates.getEnd()));
-        fingerMove.addAction(finger.createPointerUp(MouseButton.LEFT.asArg()));
+        fingerMove.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
         return fingerMove;
     }
 
     private void swipe(MoveCoordinates coordinates, Duration swipeDuration)
     {
         Sequence swipe = getFingerMoveSequence(FINGER_1, coordinates, swipeDuration);
-        webDriverProvider.getUnwrapped(Interactive.class).perform(List.of(swipe));
+        performActions(List.of(swipe));
+    }
+
+    private void tapAtElementCenter(WebElement webElement, Duration tapDuration)
+    {
+        Point elementCenter = getCenter(webElement);
+        tapAtPoint(elementCenter, tapDuration);
+    }
+
+    private void tapAtPoint(Point point, Duration tapDuration)
+    {
+        PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, FINGER_1);
+        Sequence tap = new Sequence(finger, 0);
+        tap.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), point));
+        tap.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+        tap.addAction(new Pause(finger, tapDuration));
+        tap.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+        performActions(List.of(tap));
     }
 
     private static Point getCenter(WebElement element)
     {
-        Point upperLeft = element.getLocation();
-        Dimension size = element.getSize();
-        return new Point(upperLeft.x + size.getWidth() / 2, upperLeft.y + size.getHeight() / 2);
+        Rectangle elementRect = element.getRect();
+        return new Point(
+                elementRect.x + elementRect.getWidth() / 2,
+                elementRect.y + elementRect.getHeight() / 2
+        );
     }
 
-    private boolean isInViewport(Point point)
+    private void performActions(List<Sequence> actions)
     {
-        Dimension viewport = genericWebDriverManager.getSize();
-        return isValueInInterval(point.x, viewport.getWidth()) && isValueInInterval(point.y, viewport.getHeight());
-    }
-
-    private static boolean isValueInInterval(int value, int rightEnd)
-    {
-        return 0 <= value && value < rightEnd;
+        webDriverProvider.getUnwrapped(Interactive.class).perform(actions);
     }
 }

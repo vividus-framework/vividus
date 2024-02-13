@@ -230,7 +230,7 @@ When I upload file `/data/mobile-upload-image.png` to device
 When I tap on element located by `iosNsPredicate(name == 'selectImage')`
 When I wait until element located by `accessibilityId(Photos)` appears
 When I tap on element located by `xpath((//XCUIElementTypeImage[contains(@name, "Photo")])[1])`
-Then number of elements found by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` is equal to `1`
+When I wait until element located by `xpath(//XCUIElementTypeStaticText[@value='228x228'])` appears
 
 
 Scenario: [Android] Verify step: 'I upload file with name `$fileName` and data `$data` to device'
