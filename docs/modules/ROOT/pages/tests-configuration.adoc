@@ -92,6 +92,48 @@ NOTE: The properties marked with *bold* are mandatory.
 |`PT2H`
 |The max duration of the single story in {durations-format-link} format. Could be overriden via corresponging batch setting.
 
+|`story.example-index-format`
+|`\u0020[0]`
+a|The format defining how to display indices of story-level xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] rows
+ when they are run in parallel.
+
+`\u0020` is a regular space represented as Unicode escape sequence, it is required to use this form, because the spaces
+before and after the equal sign are ignored in properties files.
+
+{java-api-docs-base-url}/docs/api/java.base/java/text/DecimalFormat.html#special_pattern_character[Special format chracters],
+e.g., `0`, `#`, specify the way indices are displayed.
+
+[cols="2,1,2", options="header"]
+!===
+!Pattern
+!Index
+!Result
+
+!`0`
+!`1`
+!`1`
+
+!`0`
+!`10`
+!`10`
+
+!`0`
+!`100`
+!`100`
+
+!`000`
+!`1`
+!`001`
+
+!`000`
+!`10`
+!`010`
+
+!`000`
+!`100`
+!`100`
+!===
+
 |`bdd.configuration.dry-run`
 |`false`
 |Enables dry-run execution mode (no actual steps will be executed, dynamic variables and xref:ROOT:glossary.adoc#_expression[expressions] won't be resolved). For example dry-run could be useful to debug what stroies will be executed with provided config.
