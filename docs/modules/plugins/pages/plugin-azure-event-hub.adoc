@@ -45,27 +45,26 @@ When I disable data capturing for event hub `sample_event_hub` in namespace `NS-
 When I enable data capturing for event hub `sample_event_hub` in namespace `NS-EH` from resource group `RG-EH`
 ----
 
-== Event Hub for Kafka
+== Azure Event Hub for Apache Kafka
 
-Azure Event Hubs provides an Apache Kafka endpoint on an event hub, which allows users to connect to the event hub using the Kafka protocol.
-During publishing or consuming events, your client is trying to access the Event Hubs resources. These resources can be accessed using an authorized entity.
-Azure Event Hubs provides 2 options for authorizing access to secure resources:
-* OAuth 2.0
-* Shared access signature (SAS)
+Azure Event Hubs provides an Apache Kafka endpoint on an event hub, which allows users to connect to the event hub using the Kafka protocol. To achieve this, the following steps should be performed.
 
-For configuration access to Azure Event Hubs with Kafka protocol needed:
-
-. Add the Event Hub and Kafka dependencies to the project `build.gradle`
+. Add the Event Hub and Kafka plugins to the project `build.gradle`
 +
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-azure-event-hub', version: '{current-version}')
-implementation(group: 'org.vividus', name: 'vividus-plugin-kafka', version: '{current-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-azure-event-hub')
+implementation(group: 'org.vividus', name: 'vividus-plugin-kafka')
 ----
 
-. Configure xref:plugin-kafka.adoc[Kafka Consumer and Producer] and mechanism of authentication
-
-.Setup for consumer or produces with OAuth 2.0
+. Configure authentication for xref:plugin-kafka.adoc[Kafka Consumer or/and Producer].
++
+During publishing or consuming the Kafka client is trying to access the Event Hubs resources. These resources can be accessed only using an authorized entity.
+Azure Event Hubs provides 2 options to authorize access to the secure resources:
++
+* OAuth 2.0
++
+.Configure consumer or producer to use OAuth 2.0
 [source,properties]
 ----
 kafka.<consumer/producer>.<consumer-or-producer-key>.security.protocol=SASL_SSL
@@ -78,8 +77,10 @@ kafka.<consumer/producer>.<consumer-or-producer-key>.sasl.jaas.config= \
     scope='https://<azure-event-hub-namespace>.servicebus.windows.net/.default' \
     clientSecret='<azure-client-secret>';
 ----
-
-.Setup for consumer or produces with SAS
++
+* Shared access signature (SAS)
++
+.Configure consumer or producer to use SAS
 [source,properties]
 ----
 kafka.<consumer/producer>.<consumer-or-producer-key>.security.protocol=SASL_SSL
