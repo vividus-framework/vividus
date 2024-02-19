@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,8 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -37,13 +36,13 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.locator.Locator;
@@ -51,8 +50,6 @@ import org.vividus.testdouble.TestElementFilter;
 import org.vividus.testdouble.TestElementSearch;
 import org.vividus.testdouble.TestLocatorType;
 import org.vividus.ui.action.search.ElementActionService;
-import org.vividus.ui.action.search.IElementFilterAction;
-import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.context.IUiContext;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
@@ -61,7 +58,6 @@ class SearchActionsTests
     private static final String VALUE = "value";
     private static final String FILTER_MESSAGE = "{} of {} elements were filtered out by {} filter with '{}' value";
 
-    @Mock private WebElement webElement;
     @Mock private SearchContext searchContext;
     @Mock private TestElementSearch testSearch;
     @Mock private TestElementFilter testFilter;
@@ -71,44 +67,46 @@ class SearchActionsTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(SearchActions.class);
 
-    @BeforeEach
-    void init()
-    {
-        lenient().when(elementActionService.find(TestLocatorType.SEARCH))
-            .thenReturn(testSearch);
-        lenient().when(elementActionService.find(TestLocatorType.FILTER))
-            .thenReturn(testFilter);
-    }
-
     @Test
-    void testFindElementsByLocatorSingleAttribute()
+    void shouldFindElements()
     {
-        when(testSearch.search(eq(searchContext), any(SearchParameters.class)))
-                .thenReturn(List.of(webElement));
-        Locator locator = new Locator(TestLocatorType.SEARCH, VALUE);
-        List<WebElement> foundElements = searchActions.findElements(searchContext, locator);
-        assertEquals(List.of(webElement), foundElements);
+        var locator = new Locator(TestLocatorType.SEARCH, VALUE);
+
+        var webElements = List.of(mock(WebElement.class));
+        when(elementActionService.find(TestLocatorType.SEARCH)).thenReturn(testSearch);
+        when(testSearch.search(searchContext, locator.getSearchParameters())).thenReturn(webElements);
+
+        var foundElements = searchActions.findElements(searchContext, locator);
+        assertEquals(webElements, foundElements);
         assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
     @Test
     void shouldFindElementsUsingLocatorAndUiContext()
     {
-        when(testSearch.search(eq(searchContext), any(SearchParameters.class)))
-                .thenReturn(List.of(webElement));
         when(uiContext.getSearchContext()).thenReturn(searchContext);
-        Locator locator = new Locator(TestLocatorType.SEARCH, VALUE);
-        List<WebElement> foundElements = searchActions.findElements(locator);
-        assertEquals(List.of(webElement), foundElements);
+
+        var locator = new Locator(TestLocatorType.SEARCH, VALUE);
+
+        var webElements = List.of(mock(WebElement.class));
+        when(elementActionService.find(TestLocatorType.SEARCH)).thenReturn(testSearch);
+        when(testSearch.search(searchContext, locator.getSearchParameters())).thenReturn(webElements);
+
+        var foundElements = searchActions.findElements(locator);
+        assertEquals(webElements, foundElements);
         assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
     @Test
     void shouldReturnEmptyOptionalIfNoElementFound()
     {
-        when(testSearch.search(eq(searchContext), any(SearchParameters.class))).thenReturn(List.of());
         when(uiContext.getSearchContext()).thenReturn(searchContext);
-        Locator locator = new Locator(TestLocatorType.SEARCH, VALUE);
+
+        var locator = new Locator(TestLocatorType.SEARCH, VALUE);
+
+        when(elementActionService.find(TestLocatorType.SEARCH)).thenReturn(testSearch);
+        when(testSearch.search(searchContext, locator.getSearchParameters())).thenReturn(List.of());
+
         assertEquals(Optional.empty(), searchActions.findElement(locator));
         assertThat(logger.getLoggingEvents(), is(empty()));
     }
@@ -116,12 +114,15 @@ class SearchActionsTests
     @Test
     void shouldReturnFirstElementIfFewFound()
     {
-        WebElement element1 = mock(WebElement.class);
-        WebElement element2 = mock(WebElement.class);
-        when(testSearch.search(eq(searchContext), any(SearchParameters.class)))
-            .thenReturn(List.of(element1, element2));
         when(uiContext.getSearchContext()).thenReturn(searchContext);
-        Locator locator = new Locator(TestLocatorType.SEARCH, VALUE);
+
+        var locator = new Locator(TestLocatorType.SEARCH, VALUE);
+
+        WebElement element1 = mock();
+        WebElement element2 = mock();
+        when(elementActionService.find(TestLocatorType.SEARCH)).thenReturn(testSearch);
+        when(testSearch.search(searchContext, locator.getSearchParameters())).thenReturn(List.of(element1, element2));
+
         assertEquals(Optional.of(element1), searchActions.findElement(locator));
         assertThat(logger.getLoggingEvents(), is(empty()));
     }
@@ -129,46 +130,116 @@ class SearchActionsTests
     @Test
     void shouldFindElementInSearchContext()
     {
-        WebDriver webDriver = mock(WebDriver.class);
-        WebElement element = mock(WebElement.class);
+        var locator = new Locator(TestLocatorType.SEARCH, VALUE);
 
-        when(testSearch.search(eq(webDriver), any(SearchParameters.class))).thenReturn(List.of(element));
+        WebDriver webDriver = mock();
+        WebElement webElement = mock();
 
-        Locator locator = new Locator(TestLocatorType.SEARCH, VALUE);
-        assertEquals(Optional.of(element), searchActions.findElement(webDriver, locator));
+        when(elementActionService.find(TestLocatorType.SEARCH)).thenReturn(testSearch);
+        when(testSearch.search(webDriver, locator.getSearchParameters())).thenReturn(List.of(webElement));
+
+        assertEquals(Optional.of(webElement), searchActions.findElement(webDriver, locator));
         verifyNoInteractions(uiContext, searchContext);
         assertThat(logger.getLoggingEvents(), is(empty()));
     }
 
     @Test
-    void testFindElementsByLocatorSeveralAttributes()
+    void shouldFindElementsAndFilter()
     {
-        List<WebElement> list = List.of(webElement);
-        when(testSearch.search(eq(searchContext), any(SearchParameters.class)))
-                .thenReturn(List.of(webElement));
-        when(((IElementFilterAction) testFilter).filter(List.of(webElement), VALUE)).thenReturn(list);
-        Locator locator = new Locator(TestLocatorType.SEARCH, VALUE)
-                .addFilter(TestLocatorType.FILTER, VALUE);
-        List<WebElement> foundElements = searchActions.findElements(searchContext, locator);
-        assertEquals(list, foundElements);
+        var locator = new Locator(TestLocatorType.SEARCH, VALUE).addFilter(TestLocatorType.FILTER, VALUE);
+
+        var webElements = List.of(mock(WebElement.class));
+        when(elementActionService.find(TestLocatorType.SEARCH)).thenReturn(testSearch);
+        when(testSearch.search(searchContext, locator.getSearchParameters())).thenReturn(webElements);
+
+        when(elementActionService.find(TestLocatorType.FILTER)).thenReturn(testFilter);
+        when(testFilter.filter(webElements, VALUE)).thenReturn(webElements);
+
+        var foundElements = searchActions.findElements(searchContext, locator);
+        assertEquals(webElements, foundElements);
         assertThat(logger.getLoggingEvents(),
                 equalTo(List.of(info(FILTER_MESSAGE, 0, 1, TestLocatorType.FILTER, VALUE))));
     }
 
     @Test
-    void shouldFindElementsAndFilter()
+    void shouldRetrySearchOnStaleElementReferenceExceptionAtFiltering()
     {
-        Locator locator = new Locator(TestLocatorType.SEARCH, VALUE);
-        String filterOne = "filter-one";
+        var locator = new Locator(TestLocatorType.SEARCH, VALUE).addFilter(TestLocatorType.FILTER, VALUE);
+
+        var webElements1 = List.of(mock(WebElement.class));
+        var webElements2 = List.of(mock(WebElement.class));
+        when(elementActionService.find(TestLocatorType.SEARCH)).thenReturn(testSearch);
+        when(testSearch.search(searchContext, locator.getSearchParameters())).thenReturn(webElements1).thenReturn(
+                webElements2);
+
+        when(elementActionService.find(TestLocatorType.FILTER)).thenReturn(testFilter);
+        var staleElementReferenceException = new StaleElementReferenceException("test");
+        when(testFilter.filter(webElements1, VALUE)).thenThrow(staleElementReferenceException);
+        when(testFilter.filter(webElements2, VALUE)).thenReturn(webElements2);
+
+        var foundElements = searchActions.findElements(searchContext, locator);
+
+        assertEquals(webElements2, foundElements);
+        assertThat(logger.getLoggingEvents(),
+                equalTo(List.of(info(FILTER_MESSAGE, 0, 1, TestLocatorType.FILTER, VALUE))));
+
+        var ordered = inOrder(elementActionService, testSearch, testFilter);
+        ordered.verify(elementActionService).find(TestLocatorType.SEARCH);
+        ordered.verify(testSearch).search(searchContext, locator.getSearchParameters());
+        ordered.verify(elementActionService).find(TestLocatorType.FILTER);
+        ordered.verify(testFilter).filter(webElements1, VALUE);
+        ordered.verify(testSearch).search(searchContext, locator.getSearchParameters());
+        ordered.verify(testFilter).filter(webElements2, VALUE);
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void shouldThrowErrorOnTwoSubsequentStaleElementReferenceExceptionsAtFiltering()
+    {
+        var locator = new Locator(TestLocatorType.SEARCH, VALUE).addFilter(TestLocatorType.FILTER, VALUE);
+
+        var webElements1 = List.of(mock(WebElement.class));
+        var webElements2 = List.of(mock(WebElement.class));
+        when(elementActionService.find(TestLocatorType.SEARCH)).thenReturn(testSearch);
+        when(testSearch.search(searchContext, locator.getSearchParameters())).thenReturn(webElements1).thenReturn(
+                webElements2);
+
+        when(elementActionService.find(TestLocatorType.FILTER)).thenReturn(testFilter);
+        var staleElementReferenceException1 = new StaleElementReferenceException("test1");
+        when(testFilter.filter(webElements1, VALUE)).thenThrow(staleElementReferenceException1);
+        var staleElementReferenceException2 = new StaleElementReferenceException("test2");
+        when(testFilter.filter(webElements2, VALUE)).thenThrow(staleElementReferenceException2);
+
+        var actual = assertThrows(StaleElementReferenceException.class,
+                () -> searchActions.findElements(searchContext, locator));
+
+        assertEquals(staleElementReferenceException2, actual);
+        assertThat(logger.getLoggingEvents(), is(empty()));
+
+        var ordered = inOrder(elementActionService, testSearch, testFilter);
+        ordered.verify(elementActionService).find(TestLocatorType.SEARCH);
+        ordered.verify(testSearch).search(searchContext, locator.getSearchParameters());
+        ordered.verify(elementActionService).find(TestLocatorType.FILTER);
+        ordered.verify(testFilter).filter(webElements1, VALUE);
+        ordered.verify(testSearch).search(searchContext, locator.getSearchParameters());
+        ordered.verify(testFilter).filter(webElements2, VALUE);
+        ordered.verifyNoMoreInteractions();
+    }
+
+    @Test
+    void shouldFindElementsAndApplySeveralFilters()
+    {
+        var filterOne = "filter-one";
+        var filterTwo = "filter-two";
+        var filterThree = "filter-three";
+        var locator = new Locator(TestLocatorType.SEARCH, VALUE);
         locator.addFilter(TestLocatorType.FILTER, filterOne);
-        String filterTwo = "filter-two";
         locator.addFilter(TestLocatorType.FILTER, filterTwo);
-        String filterThree = "filter-three";
         locator.addFilter(TestLocatorType.ADDITIONAL_FILTER, filterThree);
         locator.addFilter(TestLocatorType.ADDITIONAL_FILTER, "filter-four");
 
-        WebElement element = mock(WebElement.class);
-        TestElementFilter additionalFilter = mock(TestElementFilter.class);
+        WebElement element = mock();
+        TestElementFilter additionalFilter = mock();
 
         when(elementActionService.find(TestLocatorType.SEARCH)).thenReturn(testSearch);
         when(elementActionService.find(TestLocatorType.FILTER)).thenReturn(testFilter);
