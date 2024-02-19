@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,6 @@ import org.vividus.ui.action.search.ElementActionService;
 import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.LocatorType;
-import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.context.IUiContext;
 
 import jakarta.inject.Inject;
@@ -44,32 +44,8 @@ public class SearchActions implements ISearchActions
     @Override
     public List<WebElement> findElements(SearchContext searchContext, Locator locator)
     {
-        SearchParameters searchParameters = locator.getSearchParameters();
         IElementSearchAction searchAction = elementActionService.find(locator.getLocatorType());
-        List<WebElement> foundElements = searchAction.search(searchContext, searchParameters);
-        for (Entry<LocatorType, List<String>> entry : locator.getFilterAttributes().entrySet())
-        {
-            IElementFilterAction filterAction = elementActionService.find(entry.getKey());
-            for (String filterValue : entry.getValue())
-            {
-                int size = foundElements.size();
-                if (size == 0)
-                {
-                    break;
-                }
-
-                List<WebElement> filteredElements = filterAction.filter(foundElements, filterValue);
-
-                LOGGER.atInfo().addArgument(() -> size - filteredElements.size())
-                               .addArgument(size)
-                               .addArgument(entry::getKey)
-                               .addArgument(filterValue)
-                               .log("{} of {} elements were filtered out by {} filter with '{}' value");
-
-                foundElements = filteredElements;
-            }
-        }
-        return foundElements;
+        return findElements(searchContext, locator, searchAction, false);
     }
 
     @Override
@@ -85,9 +61,56 @@ public class SearchActions implements ISearchActions
     }
 
     @Override
-    public Optional<WebElement> findElement(SearchContext searchContext, Locator attributes)
+    public Optional<WebElement> findElement(SearchContext searchContext, Locator locator)
     {
-        List<WebElement> elements = findElements(searchContext, attributes);
+        List<WebElement> elements = findElements(searchContext, locator);
         return elements.isEmpty() ? Optional.empty() : Optional.of(elements.get(0));
+    }
+
+    private List<WebElement> findElements(SearchContext searchContext, Locator locator,
+            IElementSearchAction searchAction, boolean retry)
+    {
+        List<WebElement> foundElements = searchAction.search(searchContext, locator.getSearchParameters());
+        try
+        {
+            return filterElements(locator, foundElements);
+        }
+        catch (StaleElementReferenceException e)
+        {
+            if (!retry)
+            {
+                return findElements(searchContext, locator, searchAction, true);
+            }
+            throw e;
+        }
+    }
+
+    private List<WebElement> filterElements(Locator locator, List<WebElement> foundElements)
+    {
+        List<WebElement> result = foundElements;
+        for (Entry<LocatorType, List<String>> filterAttribute : locator.getFilterAttributes().entrySet())
+        {
+            LocatorType filterType = filterAttribute.getKey();
+            IElementFilterAction filterAction = elementActionService.find(filterType);
+            for (String filterValue : filterAttribute.getValue())
+            {
+                int size = result.size();
+                if (size == 0)
+                {
+                    break;
+                }
+
+                List<WebElement> filteredElements = filterAction.filter(result, filterValue);
+
+                LOGGER.atInfo().addArgument(() -> size - filteredElements.size())
+                               .addArgument(size)
+                               .addArgument(filterType)
+                               .addArgument(filterValue)
+                               .log("{} of {} elements were filtered out by {} filter with '{}' value");
+
+                result = filteredElements;
+            }
+        }
+        return result;
     }
 }
