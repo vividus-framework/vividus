@@ -80,8 +80,8 @@ class JsonSchemaValidationStepsTests
         steps.validateJsonAgainstSchema(loadResource("not-valid-against-schema.json"), schema);
         var lineSeparator = System.lineSeparator();
         var errorMessage = "JSON is not valid against schema:" + lineSeparator
-                + "1) $: required property 'price' not found," + lineSeparator
-                + "2) $.tags: integer found, array expected";
+                + "1) $.tags: integer found, array expected," + lineSeparator
+                + "2) $: required property 'price' not found";
         verify(softAssert).recordAssertion(false, errorMessage);
         verifyNoMoreInteractions(softAssert);
     }
