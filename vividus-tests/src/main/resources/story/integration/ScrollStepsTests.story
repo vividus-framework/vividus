@@ -51,3 +51,8 @@ Scenario: Scroll TOP for page Verify step: When I scroll context to $scrollDirec
 When I scroll context to TOP edge
 When I execute javascript `return document.documentElement.scrollTop` and save result to scenario variable `scroll`
 Then `${scroll}` is = `0`
+
+Scenario: Validate scrolling of element into view when window scroll is not in the initial position
+Given I am on page with URL `${vividus-test-site-url}/hugeStickyHeader.html`
+When I scroll element located by `id(target)` into view
+When I click on element located by `id(click-me)`

@@ -17,7 +17,7 @@ try {
         currentWindow = currentWindow.parent;
     }
     currentWindow.addEventListener('scroll', clearTimeoutAndWait, false);
-    currentWindow.scrollBy(0, elementToScroll.getBoundingClientRect().top - currentWindow.innerHeight * stickyHeaderSize);
+    currentWindow.scrollBy(0, elementToScroll.getBoundingClientRect().top - currentWindow.scrollY - currentWindow.innerHeight * stickyHeaderSize);
 }
 catch(e) {
     // swallow error quietly
