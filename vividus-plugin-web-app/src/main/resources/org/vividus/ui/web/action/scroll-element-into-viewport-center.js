@@ -16,7 +16,18 @@ try {
         elementToScroll = currentWindow.frameElement;
         currentWindow = currentWindow.parent;
     }
-    currentWindow.addEventListener('scroll', clearTimeoutAndWait, false);
+
+    const safariBrowser = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (safariBrowser)
+    {
+        currentWindow.addEventListener('scroll', clearTimeoutAndWait, false);
+    }
+    else
+    {
+        // https://developer.mozilla.org/en-US/docs/Web/API/Document/scrollend_event
+        currentWindow.addEventListener("scrollend", scrollEndEventListener);
+    }
+
     currentWindow.scrollBy(0, elementToScroll.getBoundingClientRect().top - currentWindow.scrollY - currentWindow.innerHeight * stickyHeaderSize);
 }
 catch(e) {
@@ -33,6 +44,11 @@ function wait() {
 function clearTimeoutAndWait(event) {
     currentWindow.clearTimeout(waitForScroll);
     wait();
+}
+
+function scrollEndEventListener(event) {
+    currentWindow.removeEventListener("scrollend", scrollEndEventListener);
+    exit(true);
 }
 
 function isElementInsideOverflowContainer(element) {
