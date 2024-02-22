@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.vividus.log;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -37,8 +37,8 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junitpioneer.jupiter.StdErr;
 import org.junitpioneer.jupiter.StdIo;
+import org.junitpioneer.jupiter.StdOut;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.report.allure.AllureStoryReporter;
@@ -54,14 +54,13 @@ class AllureLogAppenderTests
 
     @Test
     @StdIo
-    // Need to be sure static variable org.apache.logging.log4j.status.StatusLogger.STATUS_LOGGER was not initialized
-    // with default value of System.err
+    // Need to be sure static initializations are performed with default value of System.out
+    // in org.apache.logging.log4j.status.StatusLogger
     @Order(1)
-    void shouldNotCreateAppenderWithNullName(StdErr stdErr)
+    void shouldNotCreateAppenderWithNullName(StdOut stdOut)
     {
         var appender = AllureLogAppender.createAppender(null, filter, layout);
-        assertThat(stdErr.capturedLines(),
-                arrayContaining("ERROR StatusLogger No name provided for AllureLogAppender"));
+        assertThat(stdOut.capturedString(), containsString("ERROR No name provided for AllureLogAppender"));
         assertNull(appender);
     }
 
