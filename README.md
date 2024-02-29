@@ -57,7 +57,7 @@ Prerequisites: make sure [Java 21](https://adoptium.net/temurin/releases/?versio
 <td>
 <br />
 
-[![BrowserStack](https://www.browserstack.com/images/mail/browserstack-logo-footer.png)](https://www.browserstack.com)
+[<img src="https://browserstack.wpenginepowered.com/wp-content/themes/browserstack/img/browserstack_inverse_footer_logo.svg" width="180px" alt="BrowserStack">]([https://saucelabs.com](https://www.browserstack.com))
 
 [BrowserStack](https://www.browserstack.com/) has provided us with the tools and infrastructure necessary to build a high quality tool by testing our components on a range of browsers and platforms. Thank you.
 
