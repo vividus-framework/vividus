@@ -53,7 +53,7 @@ pipeline {
     stage('Run Tests Using Docker') {
         steps {
                 sh "docker ps -a"
-                withDockerContainer(image: 'eclipse-temurin:17', args: "--net ${vividusNetwork} --name ${vividusProxyHost}") {<1> <4>
+                withDockerContainer(image: 'eclipse-temurin:21', args: "--net ${vividusNetwork} --name ${vividusProxyHost}") {<1> <4>
                 dir(projectName) {<6>
                     sh """ <9>
                         echo -e "${overridings}" > overriding.properties

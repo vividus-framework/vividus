@@ -14,7 +14,7 @@ we highly recommend you read xref:ROOT:tests-configuration.adoc["How to cook VIV
 . https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup#_your_identity[Configure] your identity
 
 === Install Java
-. Download and install https://adoptium.net/temurin/releases/?version=17[Java 17].
+. Download and install https://adoptium.net/temurin/releases/?version=21[Java 21].
 . https://www.baeldung.com/java-home-on-windows-7-8-10-mac-os-x-linux[Configure `JAVA_HOME` environment variable] to point your directory with installed JDK.
 . Add new entry to `PATH` environment variable:
     * for Windows: `%JAVA_HOME%/bin`

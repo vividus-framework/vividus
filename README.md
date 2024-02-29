@@ -9,7 +9,7 @@
 **This repository contains source code of VIVIDUS tool. If you are looking for the user guide, please, check out [VIVIDUS Starter](https://github.com/vividus-framework/vividus-starter) and [the official documentation](https://docs.vividus.dev/).**
 
 ## How to build the project? (Only for VIVIDUS developers)
-Prerequisites: make sure [Java 17](https://adoptium.net/temurin/releases/?version=17) is used.
+Prerequisites: make sure [Java 21](https://adoptium.net/temurin/releases/?version=21) is used.
 
 1. Clone main [VIVIDUS project](https://github.com/vividus-framework/vividus.git)
     ```shell
