@@ -28,7 +28,7 @@ try {
         currentWindow.addEventListener("scrollend", scrollEndEventListener);
     }
 
-    currentWindow.scrollBy(0, elementToScroll.getBoundingClientRect().top - currentWindow.scrollY - currentWindow.innerHeight * stickyHeaderSize);
+    currentWindow.scrollBy(0, elementToScroll.getBoundingClientRect().top - currentWindow.innerHeight * stickyHeaderSize);
 }
 catch(e) {
     // swallow error quietly

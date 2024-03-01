@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package org.vividus.ui.web.action;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +42,7 @@ import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.util.ResourceUtils;
+import org.vividus.util.Sleeper;
 
 @ExtendWith(MockitoExtension.class)
 class WebJavascriptActionsTests
@@ -109,12 +112,16 @@ class WebJavascriptActionsTests
     void testScrollElementIntoViewportCenter()
     {
         var webElement = mock(WebElement.class);
-        var stickyHeaderSize = 111_122;
+        var stickyHeaderSize = 25;
         javascriptActions.setStickyHeaderSizePercentage(stickyHeaderSize);
-        javascriptActions.scrollElementIntoViewportCenter(webElement);
-        verify((JavascriptExecutor) webDriver).executeAsyncScript(
-                ResourceUtils.loadResource(WebJavascriptActionsTests.class, "scroll-element-into-viewport-center.js"),
-                webElement, stickyHeaderSize);
+        try (var sleeperStaticMock = mockStatic(Sleeper.class))
+        {
+            javascriptActions.scrollElementIntoViewportCenter(webElement);
+            var script = ResourceUtils.loadResource(WebJavascriptActionsTests.class,
+                    "scroll-element-into-viewport-center.js");
+            verify((JavascriptExecutor) webDriver).executeAsyncScript(script, webElement, stickyHeaderSize);
+            sleeperStaticMock.verify(() -> Sleeper.sleep(Duration.ofMillis(500)));
+        }
     }
 
     @Test
