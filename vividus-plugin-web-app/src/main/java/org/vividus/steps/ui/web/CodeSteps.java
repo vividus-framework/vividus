@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.context.VariableContext;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.softassert.ISoftAssert;
@@ -44,6 +46,7 @@ import org.vividus.variable.VariableScope;
 public class CodeSteps extends AbstractExecuteScriptSteps
 {
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final Logger LOGGER = LoggerFactory.getLogger(CodeSteps.class);
 
     private final IBaseValidations baseValidations;
     private final WebJavascriptActions javascriptActions;
@@ -122,6 +125,7 @@ public class CodeSteps extends AbstractExecuteScriptSteps
 
     /**
      * Checks that the <b>page code</b> contains a <b>node element</b> specified by <b>Locator</b>
+     *
      * @param locator        A locator for an expected element
      * @param comparisonRule The rule to match the quantity of elements. The supported rules:
      *                       <ul>
@@ -135,11 +139,19 @@ public class CodeSteps extends AbstractExecuteScriptSteps
      * @param quantity       The number to compare
      * @return <b>List&lt;WebElement&gt;</b> A collection of elements matching the locator,
      * <b> null</b> - if there are no desired elements
+     * @deprecated The step: "Then number of invisible elements `$locator` is $comparisonRule `$quantity`" is
+     * deprecated and will be removed in VIVIDUS 0.8.0. The replacement is the step "Then number of elements found by
+     * `$locator` is $comparisonRule `$quantity`", make sure to put the proper visibility type to the locator.
      */
+    @Deprecated(forRemoval = true, since = "0.6.9")
     @Then("number of invisible elements `$locator` is $comparisonRule `$quantity`")
     public List<WebElement> doesInvisibleQuantityOfElementsExists(Locator locator,
             ComparisonRule comparisonRule, int quantity)
     {
+        LOGGER.warn("The step: \"Then number of invisible elements `$locator` is $comparisonRule `$quantity`\" is "
+                + "deprecated and will be removed in VIVIDUS 0.8.0. The replacement is the step \"Then number of "
+                + "elements found by `$locator` is $comparisonRule `$quantity`\", make sure to put the proper "
+                + "visibility type to the locator.");
         locator.getSearchParameters().setVisibility(Visibility.ALL);
         return baseValidations.assertIfNumberOfElementsFound("The number of found invisible elements",
                     locator, quantity, comparisonRule);
