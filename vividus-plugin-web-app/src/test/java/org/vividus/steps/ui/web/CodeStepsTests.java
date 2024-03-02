@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package org.vividus.steps.ui.web;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,9 +29,13 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +55,7 @@ import org.vividus.ui.web.action.WebJavascriptActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.variable.VariableScope;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class CodeStepsTests
 {
     private static final String JS_RESULT_ASSERTION_MESSAGE = "Returned result is not null";
@@ -73,23 +80,14 @@ class CodeStepsTests
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
     private static final String VARIABLE_NAME = "variableName";
 
-    @Mock
-    private ISoftAssert softAssert;
+    @Mock private ISoftAssert softAssert;
+    @Mock private IBaseValidations mockedBaseValidations;
+    @Mock private WebElement mockedWebElement;
+    @Mock private WebJavascriptActions javascriptActions;
+    @Mock private VariableContext variableContext;
+    @InjectMocks private CodeSteps codeSteps;
 
-    @Mock
-    private IBaseValidations mockedBaseValidations;
-
-    @Mock
-    private WebElement mockedWebElement;
-
-    @Mock
-    private WebJavascriptActions javascriptActions;
-
-    @Mock
-    private VariableContext variableContext;
-
-    @InjectMocks
-    private CodeSteps codeSteps;
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(CodeSteps.class);
 
     @Test
     void testCheckJsonFieldValue() throws IOException
@@ -167,6 +165,11 @@ class CodeStepsTests
         codeSteps.doesInvisibleQuantityOfElementsExists(locator,  ComparisonRule.EQUAL_TO, 1);
         verify(mockedBaseValidations).assertIfNumberOfElementsFound("The number of found invisible elements", locator,
                 1, ComparisonRule.EQUAL_TO);
+        assertThat(logger.getLoggingEvents(), equalTo(List.of(
+                warn("The step: \"Then number of invisible elements `$locator` is $comparisonRule `$quantity`\" is "
+                        + "deprecated and will be removed in VIVIDUS 0.8.0. The replacement is the step \"Then number"
+                        + " of elements found by `$locator` is $comparisonRule `$quantity`\", make sure to put the "
+                        + "proper visibility type to the locator."))));
     }
 
     @Test
