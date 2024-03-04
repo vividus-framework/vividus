@@ -7,17 +7,15 @@ The plugin provides functionality to interact with https://learn.microsoft.com/e
 :plugin-short-name: azure-service-bus
 include::partial$plugin-installation.adoc[]
 
-== Service Bus management
+== Configuration
 
-=== Configuration
+include::partial$azure-authentication.adoc[]
 
-include::partial$azure-authentication.adoc[leveloffset=+1]
+include::partial$azure-profile-and-subscription.adoc[]
 
-include::partial$azure-profile-and-subscription.adoc[leveloffset=+1]
+== Steps
 
-=== Steps
-
-==== Send message to Service Bus
+=== Send message
 
 Send messages in Azure Service Bus https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview#concepts[Queue or Topic]
 under the specific namespace.
