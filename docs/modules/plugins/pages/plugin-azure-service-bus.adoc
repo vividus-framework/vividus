@@ -1,0 +1,37 @@
+:azure-service-name: service-bus
+
+= Azure Service Bus Plugin
+
+The plugin provides functionality to interact with https://learn.microsoft.com/en-us/azure/service-bus-messaging/[Service Bus].
+
+:plugin-short-name: azure-service-bus
+include::partial$plugin-installation.adoc[]
+
+== Configuration
+
+include::partial$azure-authentication.adoc[]
+
+include::partial$azure-profile-and-subscription.adoc[]
+
+== Steps
+
+=== Send message
+
+Send messages in Azure Service Bus https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview#concepts[Queue or Topic]
+under the specific namespace.
+
+[source,gherkin]
+----
+When I send message to service bus $type with name `$name` in namespace `$namespaceName` and payload:`$payload`
+----
+
+* `$type` - The type of service bus messaging components: either `QUEUE` or `TOPIC`.
+* `$name` - The queue or topic name.
+* `$namespaceName` - The name of the namespace the service bus belongs to.
+* `$payload` - Message to send to the service bus.
+
+.Send simple message to the Service Bus Queue
+[source,gherkin]
+----
+When I send message to service bus QUEUE with name `testQueue` in namespace `myProjectNamespace` and payload:`Hello World!`
+----

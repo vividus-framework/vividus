@@ -12,6 +12,7 @@
 *** xref:plugin-azure-event-grid.adoc[Event Grid]
 *** xref:plugin-azure-event-hub.adoc[Event Hub]
 *** xref:plugin-azure-functions.adoc[Functions]
+*** xref:plugin-azure-service-bus.adoc[Service Bus]
 *** xref:plugin-azure-storage-account.adoc[Storage Account]
 *** xref:plugin-azure-storage-queue.adoc[Storage Queue]
 * Data Formats
