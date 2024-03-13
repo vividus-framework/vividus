@@ -79,3 +79,6 @@ Scenario: Verify step: 'When I wait until frame with name `$frameName` appears a
 Given I am on page with URL `${vividus-test-site-url}/frames.html`
 When I wait until frame with name `exampleCom` appears and I switch to it
 Then text `Example Domain` exists
+
+Scenario: Verify step: 'Then element located by `$locator` appears in `$timeout`'
+Then element located by `id(non-existent-element)` appears in `PT4S`
