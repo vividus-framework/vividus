@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.vividus.steps.ui.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -52,6 +54,8 @@ import org.vividus.ui.State;
 import org.vividus.ui.action.IExpectedConditions;
 import org.vividus.ui.action.IExpectedSearchContextCondition;
 import org.vividus.ui.action.WaitResult;
+import org.vividus.ui.action.search.SearchParameters;
+import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.IWebWaitActions;
 import org.vividus.ui.web.action.WebJavascriptActions;
@@ -78,6 +82,28 @@ class WaitStepsTests
     @Mock private WebJavascriptActions javascriptActions;
     @Mock private TimeoutConfigurer timeoutConfigurer;
     @InjectMocks private WaitSteps waitSteps;
+
+    @Test
+    void shouldElementByNameAppearsWithTimeout()
+    {
+        when(uiContext.getSearchContext()).thenReturn(webElement);
+        Locator locator = new Locator(WebLocatorType.ELEMENT_NAME, NAME);
+        IExpectedSearchContextCondition<WebElement> condition = mock();
+        when(expectedSearchActionsConditions.visibilityOfElement(locator)).thenReturn(condition);
+        waitSteps.waitForElementAppearance(locator, TIMEOUT);
+        verify(waitActions).wait(webElement, TIMEOUT, condition);
+    }
+
+    @Test
+    void shouldThrowAnExceptionInCaseOfIncorrectVisibilityUsedForAppearanceWait()
+    {
+        Locator locator = new Locator(WebLocatorType.ELEMENT_NAME, new SearchParameters(NAME, Visibility.ALL));
+        var iae = assertThrows(IllegalArgumentException.class,
+                () -> waitSteps.waitForElementAppearance(locator, TIMEOUT));
+        assertEquals("The step supports locators with VISIBLE visibility settings only, but the locator is "
+                + "`element name 'name' (visible or invisible)`", iae.getMessage());
+        verifyNoInteractions(expectedSearchActionsConditions, waitActions);
+    }
 
     @Test
     void testElementByNameDisappearsWithTimeout()
