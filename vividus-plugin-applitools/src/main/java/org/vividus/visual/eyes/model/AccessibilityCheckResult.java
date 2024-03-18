@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public final class AccessibilityCheckResult
         {
             case WCAG_2_0 -> "WCAG 2.0";
             case WCAG_2_1 -> "WCAG 2.1";
-        }, status.getLevel());
+        }, status.getLevel().getName());
     }
 
     public String getUrl()
