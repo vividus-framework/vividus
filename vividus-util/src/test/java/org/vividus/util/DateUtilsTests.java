@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -81,5 +82,21 @@ class DateUtilsTests
         OffsetDateTime actual = new DateUtils(ZERO_TIMEZONE)
                 .asOffsetDateTime(offsetDateTime.toInstant().toEpochMilli());
         assertEquals(offsetDateTime, actual);
+    }
+
+    @Test
+    void shouldConvertEpochSecondToLocalDateTime()
+    {
+        LocalDateTime actual = new DateUtils(ZERO_TIMEZONE).fromEpochSecond(1_710_799_201);
+        LocalDateTime expected = LocalDateTime.of(2024, 3, 18, 22, 0, 1);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldConvertEpochMillToLocalDateTime()
+    {
+        LocalDateTime actual = new DateUtils(ZERO_TIMEZONE).fromEpochMilli(1_710_799_201_234L);
+        LocalDateTime expected = LocalDateTime.of(2024, 3, 18, 22, 0, 1, 234_000_000);
+        assertEquals(expected, actual);
     }
 }

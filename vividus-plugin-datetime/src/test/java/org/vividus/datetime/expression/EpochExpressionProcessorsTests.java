@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.vividus.datetime.expression;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.ZoneId;
@@ -28,18 +29,26 @@ import org.vividus.util.DateUtils;
 
 class EpochExpressionProcessorsTests
 {
-    private static final String ISO_DATE_TIME = "1993-04-16T00:00:00";
-
     private final EpochExpressionProcessors processor = new EpochExpressionProcessors(new DateUtils(ZoneId.of("UTC")));
+
+    private void assertExpressionResult(String expected, String expressionName, String input)
+    {
+        assertEquals(Optional.of(expected), processor.execute(String.format(expressionName + "(%s)", input)));
+    }
 
     @ParameterizedTest
     @CsvSource({
-            "1993-04-16T00:00:00,       734918400",
-            "2020-12-11T18:43:05+05:30, 1607692385"
+            "1993-04-16T00:00:00,           734918400,  734918400000",
+            "1993-04-16T00:00:00.123,       734918400,  734918400123",
+            "2020-12-11T18:43:05+05:30,     1607692385, 1607692385000",
+            "2020-12-11T18:43:05.987+05:30, 1607692385, 1607692385987"
     })
-    void testExecuteMatchingExpressionToEpoch(String date, String expectedEpoch)
+    void shouldExecuteMatchingExpressionToEpoch(String date, String expectedEpochSecond, String expectedEpochMilli)
     {
-        assertEquals(Optional.of(expectedEpoch), processor.execute(String.format("toEpochSecond(%s)", date)));
+        assertAll(
+                () -> assertExpressionResult(expectedEpochSecond, "toEpochSecond", date),
+                () -> assertExpressionResult(expectedEpochMilli, "toEpochMilli", date)
+        );
     }
 
     @ParameterizedTest
@@ -47,9 +56,19 @@ class EpochExpressionProcessorsTests
             "1.669640468E9, 2022-11-28T13:01:08",
             "734918400,     1993-04-16T00:00:00"
     })
-    void testExecuteMatchingExpressionFromEpoch(String epoch, String expectedDate)
+    void shouldExecuteMatchingExpressionFromEpochSecond(String epoch, String expectedDate)
     {
-        assertEquals(Optional.of(expectedDate), processor.execute(String.format("fromEpochSecond(%s)", epoch)));
+        assertExpressionResult(expectedDate, "fromEpochSecond", epoch);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "1.669640468123E12, 2022-11-28T13:01:08.123",
+            "734918400987,     1993-04-16T00:00:00.987"
+    })
+    void shouldExecuteMatchingExpressionFromEpochMilli(String epoch, String expectedDate)
+    {
+        assertExpressionResult(expectedDate, "fromEpochMilli", epoch);
     }
 
     @ParameterizedTest
@@ -57,6 +76,6 @@ class EpochExpressionProcessorsTests
     void testExecuteNonMatchingExpression(String invalidExpressionName)
     {
         assertEquals(Optional.empty(),
-                processor.execute(String.format("%s(%s)", invalidExpressionName, ISO_DATE_TIME)));
+                processor.execute(String.format("%s(%s)", invalidExpressionName, "1993-04-16T00:00:00")));
     }
 }

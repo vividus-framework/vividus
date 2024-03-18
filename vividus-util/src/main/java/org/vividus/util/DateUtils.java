@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,15 +82,26 @@ public class DateUtils
     }
 
     /**
-     * Obtains an instance of {@code LocalDateTime} using seconds from the
-     * epoch of 1970-01-01T00:00:00Z.
-     * @param seconds the number of seconds from the epoch of 1970-01-01T00:00:00Z
+     * Obtains an instance of {@code LocalDateTime} using seconds from the epoch of 1970-01-01T00:00:00Z.
+     *
+     * @param epochSecond the number of seconds from the epoch of 1970-01-01T00:00:00Z
      * @return {@code LocalDateTime} instance
      */
-    public LocalDateTime fromEpochSecond(long seconds)
+    public LocalDateTime fromEpochSecond(long epochSecond)
     {
         ZoneOffset zoneOffset = zoneId.getRules().getOffset(Instant.now());
-        return LocalDateTime.ofEpochSecond(seconds, 0, zoneOffset);
+        return LocalDateTime.ofEpochSecond(epochSecond, 0, zoneOffset);
+    }
+
+    /**
+     * Obtains an instance of {@code LocalDateTime} using milliseconds from the epoch of 1970-01-01T00:00:00Z.
+     *
+     * @param epochMilli the number of milliseconds from 1970-01-01T00:00:00Z
+     * @return {@code LocalDateTime} instance
+     */
+    public LocalDateTime fromEpochMilli(long epochMilli)
+    {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMilli), zoneId);
     }
 
     /**
