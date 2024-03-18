@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ class ExamplesTableToRenderingBrowserInfoConverterTests
         ExamplesTable examplesTable = createTable(table);
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
                 () -> converter.convertValue(examplesTable, null));
-        assertEquals("Unknown device name: Nokia 3310", thrown.getMessage());
+        assertEquals("Invalid name: Nokia 3310", thrown.getMessage());
     }
 
     private static ExamplesTable createTable(String table)
