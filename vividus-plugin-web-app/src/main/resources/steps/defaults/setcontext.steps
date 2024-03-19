@@ -1,10 +1,13 @@
 Composite: When I set the text found in search context to the '$scopes' variable '$variableName'
+!-- DEPRECATED: 0.8.0, When I save text of context element to %1$s variable `%2$s`
 When I save text of context element to <scopes> variable `<variableName>`
 
 
 Composite: When I set '$attributeName' attribute value of the context element to the '$scopes' variable '$variableName'
+!-- DEPRECATED: 0.8.0, When I save `%1$s` attribute value of context element to %2$s variable `%3$s`
 When I save `<attributeName>` attribute value of context element to <scopes> variable `<variableName>`
 
 
 Composite: When I set '$attributeName' attribute value of the element by $locator to the $scopes variable '$variableName'
+!-- DEPRECATED: 0.8.0, When I save `%1$s` attribute value of element located by `%2$s` to %3$s variable `%4$s`
 When I save `<attributeName>` attribute value of element located by `<locator>` to <scopes> variable `<variableName>`
