@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,14 +197,16 @@ class UriUtilsTests
     @ParameterizedTest
     @CsvSource({
         // CHECKSTYLE:OFF
-        "http://somehost:8080/path,        /newPath,                                     http://somehost:8080/newPath",
-        "http://somehost:8080/path,        /newPath?name1=value1&name2=value2#fragement, http://somehost:8080/newPath?name1=value1&name2=value2#fragement",
-        "https://www.somehost.by//cookies, //path/extra-path/extra-extra-path,           https://www.somehost.by//path/extra-path/extra-extra-path",
-        "https://www.somehost.by/,         /////crazy-url-path,                          https://www.somehost.by/////crazy-url-path",
-        "https://www.somehost.by/,         //путь-джедая,                                https://www.somehost.by//%D0%BF%D1%83%D1%82%D1%8C-%D0%B4%D0%B6%D0%B5%D0%B4%D0%B0%D1%8F",
-        "https://www.somehost.by,          '',                                           https://www.somehost.by",
-        "tel:1234567,                      '',                                           tel:1234567",
-        "https://test:pas%40dsad@host.com, '',                                           https://test:pas%40dsad@host.com"
+        "http://somehost:8080/path,        /newPath,                                                http://somehost:8080/newPath",
+        "http://somehost:8080/path,        /newPath?name1=value1&name2=value2#fragement,            http://somehost:8080/newPath?name1=value1&name2=value2#fragement",
+        "https://www.somehost.by//cookies, //path/extra-path/extra-extra-path,                      https://www.somehost.by//path/extra-path/extra-extra-path",
+        "https://www.somehost.by/,         /////crazy-url-path,                                     https://www.somehost.by/////crazy-url-path",
+        "https://www.somehost.by/,         //путь-джедая,                                           https://www.somehost.by//%D0%BF%D1%83%D1%82%D1%8C-%D0%B4%D0%B6%D0%B5%D0%B4%D0%B0%D1%8F",
+        "https://www.somehost.by,          '',                                                      https://www.somehost.by",
+        "tel:1234567,                      '',                                                      tel:1234567",
+        "https://test:pas%40dsad@host.com, '',                                                      https://test:pas%40dsad@host.com",
+        "http://localhost:4200,            /m/cool#%E7%94%A2%E5%93%81%E6%A6%82%E8%A6%BD%20overview, http://localhost:4200/m/cool#%E7%94%A2%E5%93%81%E6%A6%82%E8%A6%BD%20overview",
+        "http://localhost:4200,            /m/cool#產品概覽 overview,                                http://localhost:4200/m/cool#%E7%94%A2%E5%93%81%E6%A6%82%E8%A6%BD%20overview",
         // CHECKSTYLE:ON
     })
     void testBuildNewUri(String baseUrl, String relativeUrl, String expectedUrl)
