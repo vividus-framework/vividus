@@ -3,6 +3,8 @@ project.description = 'VIVIDUS plugin for Azure Service Bus'
 dependencies {
     api project(':vividus-engine')
     implementation project(':vividus-extension-azure')
+    implementation project(':vividus-soft-assert')
+    implementation project(':vividus-util')
     implementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.21')
     implementation(group: 'com.azure', name: 'azure-messaging-servicebus')
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.12')
