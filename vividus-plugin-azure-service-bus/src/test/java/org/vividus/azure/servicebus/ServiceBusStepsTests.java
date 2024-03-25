@@ -93,7 +93,7 @@ public class ServiceBusStepsTests
                 .thenReturn(new LinkedBlockingDeque<>())
                 .thenReturn(returnedMessages);
 
-        serviceBusSteps.waitForServiceBusMessages(Duration.ofSeconds(2), SERVICE_BUS_KEY, equalTo, expectedCount);
+        serviceBusSteps.waitForServiceBusMessages(Duration.ofMillis(1700), SERVICE_BUS_KEY, equalTo, expectedCount);
 
         verify(serviceBusService, times(2)).getMessagesForClient(SERVICE_BUS_KEY);
         verify(softAssert).assertThat("Total count of messages for Service Bus with key: "
