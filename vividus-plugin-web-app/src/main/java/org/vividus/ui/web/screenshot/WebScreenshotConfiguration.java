@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.vividus.ui.web.screenshot;
 
+import static org.vividus.selenium.screenshot.WebAshotFactory.DEFAULT_STICKY_FOOTER_HEIGHT;
+import static org.vividus.selenium.screenshot.WebAshotFactory.DEFAULT_STICKY_HEADER_HEIGHT;
+
 import java.time.Duration;
 import java.util.Optional;
 
@@ -27,8 +30,8 @@ public class WebScreenshotConfiguration extends ScreenshotConfiguration
 {
     private int nativeHeaderToCut;
     private int nativeFooterToCut;
-    private int webHeaderToCut;
-    private int webFooterToCut;
+    private int webHeaderToCut = DEFAULT_STICKY_HEADER_HEIGHT;
+    private int webFooterToCut = DEFAULT_STICKY_FOOTER_HEIGHT;
     private Optional<Locator> scrollableElement = Optional.empty();
     private CoordsProviderType coordsProvider = CoordsProviderType.CEILING;
     @SuppressWarnings("MagicNumber")

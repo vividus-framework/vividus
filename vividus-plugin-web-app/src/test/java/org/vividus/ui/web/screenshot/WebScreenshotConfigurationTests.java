@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.vividus.ui.web.screenshot;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.vividus.selenium.screenshot.WebAshotFactory.DEFAULT_STICKY_FOOTER_HEIGHT;
+import static org.vividus.selenium.screenshot.WebAshotFactory.DEFAULT_STICKY_HEADER_HEIGHT;
 
 import java.time.Duration;
 
@@ -31,6 +33,13 @@ class WebScreenshotConfigurationTests
     void shouldReturnWebDriverCoordsProviderAsDefaultOne()
     {
         assertEquals(CoordsProviderType.CEILING, CONFIGURATION.getCoordsProvider());
+    }
+
+    @Test
+    void shouldReturnDefaultWebHeaderAndFooterCutOptions()
+    {
+        assertEquals(DEFAULT_STICKY_HEADER_HEIGHT, CONFIGURATION.getWebHeaderToCut());
+        assertEquals(DEFAULT_STICKY_FOOTER_HEIGHT, CONFIGURATION.getWebFooterToCut());
     }
 
     @Test
