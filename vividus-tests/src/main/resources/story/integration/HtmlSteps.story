@@ -54,3 +54,12 @@ Examples:
 |locatorType |locator                            |
 |CSS selector|*:containsOwn(Page Title)          |
 |XPath       |//*[contains(text(), 'Page Title')]|
+
+
+Scenario: Verify step: 'When I save number of elements found by $htmlLocatorType `$htmlLocator` in HTML `$html` to $scopes variable `$variableName`'
+When I save number of elements found by <locatorType> `<locator>` in HTML `${html}` to scenario variable `count`
+Then `${count}` is equal to `1`
+Examples:
+|locatorType |locator|
+|CSS selector|body   |
+|XPath       |//body |
