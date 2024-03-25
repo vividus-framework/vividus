@@ -30,13 +30,16 @@ import org.vividus.util.DateUtils;
 
 public class EpochExpressionProcessors extends DelegatingExpressionProcessor
 {
+    private static final DateTimeFormatter ISO_DATE_TIME_WITH_MILLIS_PRECISION = DateTimeFormatter.ofPattern(
+            "yyyy-MM-dd'T'HH:mm:ss.SSS");
+
     public EpochExpressionProcessors(DateUtils dateUtils)
     {
         super(List.of(
                 toEpoch("toEpochSecond", dateUtils, ZonedDateTime::toEpochSecond),
                 toEpoch("toEpochMilli", dateUtils, zdt -> zdt.toInstant().toEpochMilli()),
-                fromEpoch("fromEpochSecond", dateUtils::fromEpochSecond),
-                fromEpoch("fromEpochMilli", dateUtils::fromEpochMilli)
+                fromEpoch("fromEpochSecond", DateTimeFormatter.ISO_DATE_TIME, dateUtils::fromEpochSecond),
+                fromEpoch("fromEpochMilli", ISO_DATE_TIME_WITH_MILLIS_PRECISION, dateUtils::fromEpochMilli)
         ));
     }
 
@@ -49,12 +52,12 @@ public class EpochExpressionProcessors extends DelegatingExpressionProcessor
         });
     }
 
-    private static SingleArgExpressionProcessor<String> fromEpoch(String funtionName,
+    private static SingleArgExpressionProcessor<String> fromEpoch(String funtionName, DateTimeFormatter formatter,
             LongFunction<LocalDateTime> converter)
     {
         return new SingleArgExpressionProcessor<>(funtionName, arg -> {
             LocalDateTime localDateTime = converter.apply(new BigDecimal(arg).longValueExact());
-            return DateTimeFormatter.ISO_DATE_TIME.format(localDateTime);
+            return formatter.format(localDateTime);
         });
     }
 }
