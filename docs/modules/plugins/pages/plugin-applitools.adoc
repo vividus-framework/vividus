@@ -74,6 +74,10 @@ NOTE: The properties marked with *bold* are mandatory.
 |`EXACT`
 |See https://applitools.com/docs/common/cmn-eyes-match-levels.html#Available[available match levels].
 
+|`ui.visual.applitools.disable-browser-fetching`
+|`false`
+|If `true`, page resources for rendering on the UFG will be fetched from outside of the browser.
+
 |===
 
 ==== Cross-environment properties

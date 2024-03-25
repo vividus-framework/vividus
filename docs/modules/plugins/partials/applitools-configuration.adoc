@@ -17,3 +17,4 @@
 ** `executeApiKey` - The key to access tests and test results.
 ** `serverUri` - The URI of the rest server.
 ** `accessibilityStandard` - The accessibility standard to check the page against. The required value format is `<standard> - <level>`, where standard is either `WCAG 2.0` or `WCAG 2.1` and level is either `AA` or `AAA`. This check uses {contrast-advisor} that helps in identifying potential contrast violations in both the text and images of your web and mobile applications, helping to ensure your technology is more accessible. Please *make sure* {contrast-advisor} feature is enabled in your Applitools account.
+** `disableBrowserFetching` - By default, is `false`.  If `true`, page resources for rendering on the UFG will be fetched from outside of the browser.

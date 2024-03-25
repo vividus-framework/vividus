@@ -8,7 +8,14 @@
 
     <bean id="serviceBusSteps" class="org.vividus.azure.servicebus.ServiceBusSteps" />
 
-    <bean class="org.vividus.azure.servicebus.service.ServiceBusService" />
+    <bean class="org.vividus.azure.servicebus.service.ServiceBusService">
+        <constructor-arg name="clientConfigs">
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="azure.service-bus." />
+                <constructor-arg value="org.vividus.azure.servicebus.model.ServiceBusConnectionParameters" />
+            </bean>
+        </constructor-arg>
+    </bean>
 
     <util:list id="stepBeanNames-Azure-ServiceBus" value-type="java.lang.String">
         <idref bean="serviceBusSteps" />

@@ -15,6 +15,7 @@
         <property name="hostOS" value="${ui.visual.applitools.host-os}" />
         <property name="viewportSize" value="${ui.visual.applitools.viewport-size}" />
         <property name="matchLevel" value="${ui.visual.applitools.match-level}" />
+        <property name="disableBrowserFetching" value="${ui.visual.applitools.disable-browser-fetching}" />
         <property name="serverUri" value="${applitools.server-uri}" />
         <property name="appName" value="${applitools.app-name}" />
         <property name="baselineEnvName" value="${ui.visual.applitools.baseline-env-name}" />

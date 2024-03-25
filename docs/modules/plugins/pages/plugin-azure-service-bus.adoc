@@ -13,25 +13,161 @@ include::partial$azure-authentication.adoc[]
 
 include::partial$azure-profile-and-subscription.adoc[]
 
+=== Azure Service Bus Configuration
+
+Azure Service Bus configurations are established via set of properties with the following format:
+
+[source,properties]
+----
+azure.service-bus.{service-bus-key}.{property-name}=property value
+----
+
+where:
+
+. `service-bus-key` - The key associated with the Azure Service Bus connection configuration, which will be used as a step parameter.
+. `property-name` - The name of Service Bus property. One of:
+.. `channel-type` - The type of Service Bus messaging channel: either
+https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview#concepts[QUEUE or TOPIC].
+.. `namespace` - The name of the namespace Service Bus belongs to.
+.. `name` - The queue or topic name.
+.. `subscription-name` - The name of the topic subscription. Only for `TOPIC` channel type.
+
 == Steps
 
 === Send message
 
-Send messages in Azure Service Bus https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview#concepts[Queue or Topic]
-under the specific namespace.
+Send message to the specified Azure Service Bus https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview#concepts[Queue or Topic].
 
 [source,gherkin]
 ----
-When I send message to service bus $type with name `$name` in namespace `$namespaceName` and payload:`$payload`
+When I send message to `$serviceBusKey` service bus with payload:`$payload`
 ----
 
-* `$type` - The type of service bus messaging components: either `QUEUE` or `TOPIC`.
-* `$name` - The queue or topic name.
-* `$namespaceName` - The name of the namespace the service bus belongs to.
+* `$serviceBusKey` - The key associated with the Azure Service Bus connection configuration, will be used to find required properties values.
 * `$payload` - Message to send to the service bus.
 
 .Send simple message to the Service Bus Queue
 [source,gherkin]
 ----
-When I send message to service bus QUEUE with name `testQueue` in namespace `myProjectNamespace` and payload:`Hello World!`
+When I send message to `myProjectQueue` service bus with payload:`Hello World!`
+----
+
+=== Start consuming messages
+
+Starts Azure Service Bus consumer with the provided configuration to listen the specified
+https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-overview#concepts[Queue or Topic].
+
+IMPORTANT: The consumer must be stopped when it's not used.
+
+[source,gherkin]
+----
+When I start consuming messages from `$serviceBusKey` service bus
+----
+
+* `$serviceBusKey` - The key associated with the Azure Service Bus connection configuration, will be used to find required properties values.
+
+.Start consuming messages from the topic configured by Service Bus key `myProjectTopic`
+[source,gherkin]
+----
+When I start consuming messages from `myProjectTopic` service bus
+----
+
+=== Stop consuming messages
+
+Stops Azure Service Bus consumer started by the <<_start_consuming_messages>> step before.
+
+All recorded messages are kept and can be drained into the variable using the step <<_save_messages_to_the_variable>>.
+
+[source,gherkin]
+----
+When I stop consuming messages from `$serviceBusKey` service bus
+----
+
+* `$serviceBusKey` - The key associated with the Azure Service Bus connection configuration, will be used to find required properties values.
+
+.Stop consuming messages from the topic configured by Service Bus key `myProjectTopic`
+[source,gherkin]
+----
+When I stop consuming messages from `myProjectTopic` service bus
+----
+
+=== Wait for the messages
+
+Waits until the count of the consumed messages (from the consumer start or after the last draining operation) matches to the rule or until the timeout is exceeded.
+
+[source,gherkin]
+----
+When I wait with `$timeout` timeout until count of consumed `$serviceBusKey` service bus messages is $comparisonRule `$expectedCount`
+----
+
+* `$timeout` - The maximum time to wait for the events in {durations-format-link} format.
+* `$serviceBusKey` - The key associated with Azure Service Bus connection configuration, will be used to find required properties values.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$expectedCount` - The expected count of the events to be matched by the rule.
+
+.Wait for at least 5 messages from the queue for 30 seconds
+[source,gherkin]
+----
+When I wait with `PT30S` timeout until count of consumed `myProjectQueue` service bus messages is >= `5`
+----
+
+=== Save messages to the variable
+
+Drains/Peeks the consumed messages to the specified variable. If the consumer is not stopped, the new events might arrive after the draining.
+If the consumer is stopped, all the events received from the consumer start or after the last draining operation are stored to the variable.
+
+[source,gherkin]
+----
+When I $operation consumed `$serviceBusKey` service bus messages to $scopes variable `$variableName`
+----
+
+* `$operation` - operation under the consumed messages, one of:
+** `DRAIN` - saves the messages consumed since the last drain or from the consumption start and moves the consumer cursor to the position after the last consumed message;
+** `PEEK` - saves the messages consumed since the last drain or from the consumption start and doesn't change the consumer cursor position.
+* `$serviceBusKey` - The key associated with Azure Service Bus connection configuration, will be used to find required properties values.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to store the messages. The messages are accessible via zero-based index, e.g. `${my-var[0]}` will return the first received message.
+
+.Peek and drain messages from the consumer, save them to variables, and compare each other
+[source,gherkin]
+----
+When I start consuming messages from `myProjectTopic` service bus
+When I DRAIN consumed `myProjectTopic` service bus messages to STORY variable `drained-messages`
+!-- Perform any actions triggering the publishing of events to Kafka
+When I PEEK consumed `myProjectTopic` service bus messages to STORY variable `peeked-messages`
+When I stop consuming messages from `myProjectTopic` service bus
+Then `${drained-messages[0]}` is not equal to `${peeked-messages[0]}`
+----
+
+== Examples
+.Consume messages from the Service Bus topic
+[source,gherkin]
+----
+When I start consuming messages from `myProjectTopic` service bus
+When I wait with `PT30S` timeout until count of consumed `myProjectTopic` service bus messages is >= `2`
+When I stop consuming messages from `myProjectTopic` service bus
+When I DRAIN consumed `myProjectTopic` service bus messages to STORY variable `drained-messages`
+Then `${drained-messages[0]}` is equal to `some-expected-event`
+----
+
+.Drain messages while the Service Bus consumer is running
+[source,gherkin]
+----
+When I send message to `myProjectTopic` service bus with payload:`First message`
+When I start consuming messages from `myProjectTopic` service bus
+When I DRAIN consumed `myProjectTopic` service bus messages to SCENARIO variable `first-drain-messages`
+When I send message to `myProjectTopic` service bus with payload:`Second message`
+When I DRAIN consumed `myProjectTopic` service bus messages to SCENARIO variable `second-drain-messages`
+When I stop consuming messages from `myProjectTopic` service bus
+Then `${first-drain-messages[0]}` is not equal to `${second-drain-messages[0]}`
+----
+
+.Peek messages while the Service Bus consumer is running
+[source,gherkin]
+----
+When I send message to `myProjectQueue` service bus with payload:`Hello World!`
+When I start consuming messages from `myProjectTopic` service bus
+When I PEEK consumed `myProjectQueue` service bus messages to SCENARIO variable `peeked-messages`
+When I stop consuming messages from `myProjectTopic` service bus
+Then `${peeked-messages[0]}` is equal to `Hello World!`
 ----
