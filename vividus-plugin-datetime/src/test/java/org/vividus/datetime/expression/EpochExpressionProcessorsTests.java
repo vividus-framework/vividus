@@ -64,7 +64,10 @@ class EpochExpressionProcessorsTests
     @ParameterizedTest
     @CsvSource({
             "1.669640468123E12, 2022-11-28T13:01:08.123",
-            "734918400987,     1993-04-16T00:00:00.987"
+            "734918400987,     1993-04-16T00:00:00.987",
+            "734918400980,     1993-04-16T00:00:00.980",
+            "734918400900,     1993-04-16T00:00:00.900",
+            "734918400000,     1993-04-16T00:00:00.000"
     })
     void shouldExecuteMatchingExpressionFromEpochMilli(String epoch, String expectedDate)
     {
