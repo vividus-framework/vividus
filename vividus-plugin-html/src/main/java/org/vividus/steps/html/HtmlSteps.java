@@ -147,4 +147,22 @@ public class HtmlSteps
         assertElementByLocatorExists(html, htmlLocatorType, htmlLocator)
             .ifPresent(e -> variableContext.putVariable(scopes, variableName, dataType.get(e)));
     }
+
+    /**
+     * Saves the number of elements found by locator to a variable.
+     *
+     * @param htmlLocatorType The <b>CSS selector</b> or <b>XPath</b>
+     * @param htmlLocator     The locator to locate element in HTML document
+     * @param html            The HTML document
+     * @param scopes          The set of variable scopes (comma separated list of scopes e.g.: STORY, NEXT_BATCHES)
+     * @param variableName    The variable name
+     */
+    @When("I save number of elements found by $htmlLocatorType `$htmlLocator` in HTML `$html` to $scopes variable"
+            + " `$variableName`")
+    public void saveNumberOfElements(HtmlLocatorType htmlLocatorType, String htmlLocator, String html,
+            Set<VariableScope> scopes, String variableName)
+    {
+        Elements elements = htmlLocatorType.findElements(JsoupUtils.getDocument(html), htmlLocator);
+        variableContext.putVariable(scopes, variableName, elements.size());
+    }
 }

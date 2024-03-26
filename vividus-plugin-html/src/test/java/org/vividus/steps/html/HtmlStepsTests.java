@@ -131,6 +131,14 @@ class HtmlStepsTests
         verify(variableContext).putVariable(scopes, VARIABLE_NAME, TEXT);
     }
 
+    @Test
+    void shouldSaveNumberOfElements()
+    {
+        Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
+        htmlSteps.saveNumberOfElements(HtmlLocatorType.CSS_SELECTOR, "div", HTML_CONTENT, scopes, VARIABLE_NAME);
+        verify(variableContext).putVariable(scopes, VARIABLE_NAME, 1);
+    }
+
     private void mockFoundElements(String selector, String locatorType, int size, boolean result)
     {
         lenient().when(softAssert.assertThat(eq(String.format(NUMBER_OF_ELEMENTS_FOUND_FORMAT, locatorType, selector)),

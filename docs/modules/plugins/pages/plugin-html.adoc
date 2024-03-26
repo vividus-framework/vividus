@@ -122,3 +122,33 @@ Examples:
 |CSS selector|script  |h1    |
 |XPath       |//script|//h1  |
 ----
+
+=== Save number of elements
+
+Saves the number of elements contained in HTML document.
+
+[source,gherkin]
+----
+When I save number of elements found by $htmlLocatorType `$htmlLocator` in HTML `$html` to $scopes variable `$variableName`
+----
+
+include::partial$html-locator.adoc[]
+- `$html` - The HTML document.
+- `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+- `$variableName` - The name of the variable to save the number of elements.
+
+.Validate number of Heading 1 elements
+[source,gherkin]
+----
+Given I initialize story variable `html` with value
+`
+<html>
+  <body>
+    <h1>This is a Heading</h1>
+    <p title="paragraph">This is a paragraph.</p>
+  </body>
+</html>
+`
+When I save number of elements found by XPath `//h1` in HTML `${html}` to scenario variable `heading1`
+Then `${heading1}` is equal to `1`
+----
