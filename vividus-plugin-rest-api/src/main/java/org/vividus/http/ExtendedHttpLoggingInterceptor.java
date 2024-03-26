@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ public class ExtendedHttpLoggingInterceptor implements HttpRequestInterceptor, H
 
             if (httpResponse.getResponseBody() != null)
             {
-                String mimeType = MimeTypeUtils.getMimeTypeFromHeadersWithDefault(headers);
+                String mimeType = ContentTypeHeaderParser.getMimeTypeFromHeadersWithDefault(headers);
                 if (mimeType.startsWith("text/") || LOGGED_CONTENT_TYPES.contains(mimeType))
                 {
                     loggingEventBuilder = loggingEventBuilder.addArgument(httpResponse::getResponseBodyAsString);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
@@ -49,6 +50,7 @@ import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
 import org.apache.hc.core5.http.message.BasicClassicHttpRequest;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.apache.hc.core5.http.protocol.HttpContext;
@@ -75,6 +77,7 @@ class PublishingAttachmentInterceptorTests
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String TEXT_PLAIN = "text/plain";
     private static final byte[] DATA = "data".getBytes(StandardCharsets.UTF_8);
+    private static final String SPACE = " ";
 
     @Mock private IAttachmentPublisher attachmentPublisher;
     @InjectMocks private PublishingAttachmentInterceptor interceptor;
@@ -104,7 +107,7 @@ class PublishingAttachmentInterceptorTests
     void testHttpRequestIsAttachedSuccessfullyWhenContentTypeIsSet(String contentTypeHeaderName) throws IOException
     {
         Header contentTypeHeader = new BasicHeader(contentTypeHeaderName, TEXT_PLAIN);
-        var httpEntity = mock(HttpEntity.class);
+        var httpEntity = mock(ByteArrayEntity.class);
         testHttpRequestIsAttachedSuccessfully(contentTypeHeader, httpEntity);
         verify(httpEntity).getContentLength();
         verify(httpEntity).writeTo(any(ByteArrayOutputStream.class));
@@ -135,7 +138,7 @@ class PublishingAttachmentInterceptorTests
     {
         HttpRequest httpRequest = mock();
         when(httpRequest.getHeaders()).thenReturn(new Header[] {});
-        when(httpRequest.toString()).thenReturn(METHOD + " " + ENDPOINT);
+        when(httpRequest.toString()).thenReturn(METHOD + SPACE + ENDPOINT);
         testNoHttpRequestBodyIsAttached(httpRequest, empty());
     }
 
@@ -175,6 +178,19 @@ class PublishingAttachmentInterceptorTests
         when(httpResponse.getResponseHeaders()).thenReturn(new Header[0]);
         interceptor.handle(httpResponse);
         verifyPublishAttachment(RESPONSE);
+    }
+
+    @Test
+    void testCurlBuildIsFailed() throws URISyntaxException
+    {
+        HttpRequest httpRequest = mock();
+        when(httpRequest.getHeaders()).thenReturn(new Header[] {});
+        when(httpRequest.toString()).thenReturn(METHOD + SPACE + ENDPOINT);
+        String empty = "";
+        var exception = new URISyntaxException(empty, empty);
+        when(httpRequest.getUri()).thenThrow(exception);
+        testNoHttpRequestBodyIsAttached(httpRequest,
+                equalTo(List.of(error(exception, "Error is occurred on building cURL command"))));
     }
 
     private void testHttpRequestIsAttachedSuccessfully(Header contentTypeHeader, HttpEntity httpEntity)
