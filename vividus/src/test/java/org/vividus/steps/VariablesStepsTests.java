@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ import org.vividus.softassert.ISoftAssert;
 import org.vividus.util.comparison.ComparisonUtils.EntryComparisonResult;
 import org.vividus.variable.VariableScope;
 
+@SuppressWarnings("PMD.UnnecessaryBooleanAssertion")
 @ExtendWith(MockitoExtension.class)
 class VariablesStepsTests
 {
@@ -162,7 +163,7 @@ class VariablesStepsTests
     {
         Map<String, Object> map1 = Map.of(KEY_1, 2);
         Map<String, Object> map2 = Map.of(KEY_1, 2L);
-        BigDecimal twoBD = new BigDecimal("2");
+        BigDecimal twoBD = new BigDecimal(2);
         assertFalse(variablesSteps.compareVariables(map1, ComparisonRule.EQUAL_TO, map2));
         verify(softAssert).assertTrue(TABLES_ARE_EQUAL, true);
 

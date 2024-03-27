@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public abstract class AbstractElementAction implements IElementAction
             return findElements(searchContext, locator, parameters.getVisibility(), parameters.isWaitForElement(),
                     false);
         }
-        LOGGER.error(IElementAction.NOT_SET_CONTEXT);
+        LOGGER.error(NOT_SET_CONTEXT);
         return List.of();
     }
 
@@ -125,7 +125,7 @@ public abstract class AbstractElementAction implements IElementAction
                 {
                     throw e;
                 }
-                LOGGER.warn(e.getMessage(), e);
+                LOGGER.atWarn().addArgument(e::getMessage).setCause(e).log("{}");
                 return false;
             }
         }).toList();

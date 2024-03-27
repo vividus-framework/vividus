@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ public class ImageCompressor
 
     private BufferedImage toRGB(byte[] imageBytes) throws IOException
     {
-        var image = ImageTool.toBufferedImage(imageBytes);
+        BufferedImage image = ImageTool.toBufferedImage(imageBytes);
         BufferedImage jpgImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
         jpgImage.createGraphics().drawImage(image, 0, 0, Color.BLACK, null);
         return jpgImage;

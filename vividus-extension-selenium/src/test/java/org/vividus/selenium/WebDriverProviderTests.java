@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ class WebDriverProviderTests
     private final TestContext testContext = new SimpleTestContext();
     @Mock private VividusWebDriverFactory vividusDriverFactory;
     @Mock private EventBus mockedEventBus;
-    @InjectMocks private WebDriverProvider webDriverProvider = new WebDriverProvider(testContext);
+    @InjectMocks private final WebDriverProvider webDriverProvider = new WebDriverProvider(testContext);
 
     @Mock(extraInterfaces = WrapsDriver.class)
     private RemoteWebDriver remoteWebDriver;

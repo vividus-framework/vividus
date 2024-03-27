@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -47,7 +48,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebDriver;
@@ -88,19 +88,16 @@ class BaseValidationsTests
     @Mock private IDescriptiveSoftAssert softAssert;
     @InjectMocks private BaseValidations baseValidations;
 
-    private List<WebElement> webElements;
-    private BaseValidations spy;
-
     @SuppressWarnings("unchecked")
     @Test
     void testAssertIfElementExistsWithLocator()
     {
-        webElements = List.of(mockedWebElement);
+        var elements = List.of(mockedWebElement);
         when(uiContext.getSearchContext()).thenReturn(mockedSearchContext);
         var attributes = mock(Locator.class);
-        when(searchActions.findElements(mockedSearchContext, attributes)).thenReturn(webElements);
+        when(searchActions.findElements(mockedSearchContext, attributes)).thenReturn(elements);
         when(attributes.toString()).thenReturn("attributes");
-        when(softAssert.assertThat(eq(SOME_ELEMENT), anyString(), eq(webElements),
+        when(softAssert.assertThat(eq(SOME_ELEMENT), anyString(), eq(elements),
                 any(Matcher.class))).thenReturn(true);
         var foundElement = baseValidations.assertIfElementExists(SOME_ELEMENT, attributes);
         assertEquals(mockedWebElement, foundElement);
@@ -158,7 +155,7 @@ class BaseValidationsTests
     @Test
     void testAssertIfElementDoesNotExistWithLocator()
     {
-        spy = Mockito.spy(baseValidations);
+        var spy = spy(baseValidations);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         var searchParameters = new SearchParameters();
         var attributes = new Locator(SEARCH, searchParameters);
@@ -170,7 +167,7 @@ class BaseValidationsTests
     @Test
     void testAssertElementDoesNotExistWithLocator()
     {
-        spy = Mockito.spy(baseValidations);
+        var spy = spy(baseValidations);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         var searchParameters = new SearchParameters();
         var attributes = new Locator(SEARCH, searchParameters);
@@ -185,7 +182,7 @@ class BaseValidationsTests
     @Test
     void testAssertIfElementDoesNotExistWhenNoFailedAssertionRecordingIsNeeded()
     {
-        spy = Mockito.spy(baseValidations);
+        var spy = spy(baseValidations);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         var searchParameters = new SearchParameters();
         var attributes = new Locator(SEARCH, searchParameters);
@@ -198,7 +195,7 @@ class BaseValidationsTests
     @Test
     void testAssertElementDoesNotExistWhenNoFailedAssertionRecordingIsNeeded()
     {
-        spy = Mockito.spy(baseValidations);
+        var spy = spy(baseValidations);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         var searchParameters = new SearchParameters();
         var attributes = new Locator(SEARCH, searchParameters);
@@ -237,7 +234,7 @@ class BaseValidationsTests
     @Test
     void testAssertElementStateResultNotBoolean()
     {
-        spy = Mockito.spy(baseValidations);
+        var spy = spy(baseValidations);
         when(mockedWebDriverProvider.get()).thenReturn(mockedWebDriver);
         var mockedExpectedConditionToString = mockedExpectedCondition.toString();
         var state = mock(IState.class);
@@ -250,7 +247,7 @@ class BaseValidationsTests
     @Test
     void testAssertIfElementsExist()
     {
-        webElements = List.of(mockedWebElement);
+        List<WebElement> webElements = List.of(mockedWebElement);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         var locator = new Locator(SEARCH, XPATH_INT);
         when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
@@ -382,10 +379,10 @@ class BaseValidationsTests
     @Test
     void testAssertElementExistsMoreThanOne()
     {
-        webElements = List.of(mockedWebElement, mockedWebElement);
+        var elements = List.of(mockedWebElement, mockedWebElement);
         when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(mockedSearchContext));
         var locator = new Locator(SEARCH, XPATH_INT);
-        when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(webElements);
+        when(searchActions.findElements(mockedSearchContext, locator)).thenReturn(elements);
         var element = baseValidations.assertElementExists(BUSINESS_DESCRIPTION, locator);
         assertTrue(element.isEmpty());
         verify(softAssert).recordFailedAssertion(
@@ -441,7 +438,7 @@ class BaseValidationsTests
     @Test
     void shouldAssertNumberOfElementsFound()
     {
-        spy = Mockito.spy(baseValidations);
+        var spy = spy(baseValidations);
         var locator = mock(Locator.class);
         var webElements = List.of(mockedWebElement);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.vividus.spring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.ExpressionException;
-import org.springframework.expression.ParseException;
 import org.springframework.expression.ParserContext;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
@@ -28,7 +27,7 @@ public class SpelExpressionResolver
     private static final Logger LOGGER = LoggerFactory.getLogger(SpelExpressionResolver.class);
     private static final SpelExpressionParser PARSER = new SpelExpressionParser();
 
-    public Object resolve(String expressionString) throws ParseException
+    public Object resolve(String expressionString)
     {
         try
         {

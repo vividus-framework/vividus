@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import freemarker.template.TemplateModelException;
 @ExtendWith(MockitoExtension.class)
 class ImageBytesToBase64MethodTests
 {
-    private static final byte[] IMAGE = new byte[] {1, 0, 1};
+    private static final byte[] IMAGE = {1, 0, 1};
 
     @Mock private ImageCompressor imageCompressor;
     @InjectMocks private ImageBytesToBase64Method method;

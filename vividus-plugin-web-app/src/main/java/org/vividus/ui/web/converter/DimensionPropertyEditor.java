@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.vividus.converter.ui.web.StringToDimensionParameterConverter;
 public class DimensionPropertyEditor extends PropertyEditorSupport
 {
     @Override
-    public void setAsText(String text) throws IllegalArgumentException
+    public void setAsText(String text)
     {
         setValue(text.isBlank() ? null : StringToDimensionParameterConverter.convert(text));
     }

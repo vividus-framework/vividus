@@ -296,9 +296,9 @@ class ConfigurationResolverTests
     void shouldThrowAnExceptionInCaseOfEmptyConfigurationSet()
     {
         try (var beanFactory = mockStatic(BeanFactory.class);
-                var newDeprecatedPropertiesHandler = mockConstruction(DeprecatedPropertiesHandler.class,
+                var ignored = mockConstruction(DeprecatedPropertiesHandler.class,
                         withSettings().useConstructor(new Properties(), PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX));
-                var newPropertiesLoaders = mockConstruction(PropertiesLoader.class,
+                var ignored2 = mockConstruction(PropertiesLoader.class,
                         withSettings().useConstructor(resourcePatternResolver), (mock, context) -> {
                             var emptyProperties = toProperties(Map.of());
                             when(mock.loadConfigurationProperties()).thenReturn(toProperties(
@@ -326,9 +326,9 @@ class ConfigurationResolverTests
     void shouldThrowAnExceptionIfConfigurationSetNotDefined()
     {
         try (var beanFactory = mockStatic(BeanFactory.class);
-                var newDeprecatedPropertiesHandler = mockConstruction(DeprecatedPropertiesHandler.class,
+                var ignored = mockConstruction(DeprecatedPropertiesHandler.class,
                         withSettings().useConstructor(new Properties(), PLACEHOLDER_PREFIX, PLACEHOLDER_SUFFIX));
-                var newPropertiesLoaders = mockConstruction(PropertiesLoader.class,
+                var ignored2 = mockConstruction(PropertiesLoader.class,
                         withSettings().useConstructor(resourcePatternResolver), (mock, context) -> {
                             var emptyProperties = toProperties(Map.of());
                             when(mock.loadConfigurationProperties()).thenReturn(toProperties(

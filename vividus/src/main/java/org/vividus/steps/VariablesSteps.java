@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,9 +159,11 @@ public class VariablesSteps
             if (entry.getValue() instanceof List<?> valueAsList && valueAsList.size() == 1)
             {
                 expandedMap.put(entry.getKey(), valueAsList.get(0));
-                continue;
             }
-            return map;
+            else
+            {
+                return map;
+            }
         }
         return expandedMap;
     }

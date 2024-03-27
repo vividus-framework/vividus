@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,9 +113,10 @@ class LocatorConverterTests
     }
 
     @ParameterizedTest
-    @CsvSource(value = {
+    @CsvSource({
             "By.searchFor(111122), Search for 111122",
-            "'By.searchFor(some, coma separated\\,value)', 'Search for some, coma separated\\,value'"})
+            "'By.searchFor(some, coma separated\\,value)', 'Search for some, coma separated\\,value'"
+    })
     void shouldCreateDynamicLocatorUsingBaseType(String locator, String actual)
     {
         lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,8 +58,8 @@ class ExpectedSearchContextConditionsTests
         SearchContext searchContext = mock(SearchContext.class);
         when(searchContext.findElement(XPATH_LOCATOR)).thenReturn(webElement);
         when(webElement.getText()).thenReturn(ELEMENT_TEXT);
-        assertTrue(expectedConditions.textToBePresentInElementLocated(XPATH_LOCATOR, TEXT_TO_FIND)
-                .apply(searchContext).booleanValue());
+        assertTrue(
+                expectedConditions.textToBePresentInElementLocated(XPATH_LOCATOR, TEXT_TO_FIND).apply(searchContext));
     }
 
     @Test
@@ -274,8 +274,7 @@ class ExpectedSearchContextConditionsTests
         SearchContext searchContext = mock(SearchContext.class);
         when(searchContext.findElement(XPATH_LOCATOR)).thenReturn(webElement);
         when(webElement.isSelected()).thenReturn(TRUE);
-        assertTrue(expectedConditions.elementSelectionStateToBe(XPATH_LOCATOR, TRUE).apply(searchContext)
-                .booleanValue());
+        assertTrue(expectedConditions.elementSelectionStateToBe(XPATH_LOCATOR, TRUE).apply(searchContext));
     }
 
     @Test
@@ -285,8 +284,7 @@ class ExpectedSearchContextConditionsTests
         SearchContext searchContext = mock(SearchContext.class);
         when(searchContext.findElement(XPATH_LOCATOR)).thenReturn(webElement);
         when(webElement.isSelected()).thenReturn(TRUE);
-        assertFalse(expectedConditions.elementSelectionStateToBe(XPATH_LOCATOR, FALSE).apply(searchContext)
-                .booleanValue());
+        assertFalse(expectedConditions.elementSelectionStateToBe(XPATH_LOCATOR, FALSE).apply(searchContext));
     }
 
     @Test
@@ -318,8 +316,7 @@ class ExpectedSearchContextConditionsTests
         SearchContext searchContext = mock(SearchContext.class);
         when(searchContext.findElement(XPATH_LOCATOR)).thenReturn(webElement);
         when(webElement.isDisplayed()).thenReturn(true);
-        assertFalse(expectedConditions.invisibilityOfElement(XPATH_LOCATOR).apply(searchContext)
-                .booleanValue());
+        assertFalse(expectedConditions.invisibilityOfElement(XPATH_LOCATOR).apply(searchContext));
     }
 
     @Test
@@ -329,8 +326,7 @@ class ExpectedSearchContextConditionsTests
         SearchContext searchContext = mock(SearchContext.class);
         when(searchContext.findElement(XPATH_LOCATOR)).thenReturn(webElement);
         when(webElement.isDisplayed()).thenReturn(false);
-        assertTrue(expectedConditions.invisibilityOfElement(XPATH_LOCATOR).apply(searchContext)
-                .booleanValue());
+        assertTrue(expectedConditions.invisibilityOfElement(XPATH_LOCATOR).apply(searchContext));
     }
 
     @Test
@@ -338,8 +334,7 @@ class ExpectedSearchContextConditionsTests
     {
         SearchContext searchContext = mock(SearchContext.class);
         when(searchContext.findElement(XPATH_LOCATOR)).thenThrow(NoSuchElementException.class);
-        assertTrue(expectedConditions.invisibilityOfElement(XPATH_LOCATOR).apply(searchContext)
-                .booleanValue());
+        assertTrue(expectedConditions.invisibilityOfElement(XPATH_LOCATOR).apply(searchContext));
     }
 
     @Test
@@ -347,7 +342,7 @@ class ExpectedSearchContextConditionsTests
     {
         SearchContext searchContext = mock(SearchContext.class);
         when(searchContext.findElement(XPATH_LOCATOR)).thenThrow(StaleElementReferenceException.class);
-        assertTrue(expectedConditions.invisibilityOfElement(XPATH_LOCATOR).apply(searchContext).booleanValue());
+        assertTrue(expectedConditions.invisibilityOfElement(XPATH_LOCATOR).apply(searchContext));
     }
 
     @Test
