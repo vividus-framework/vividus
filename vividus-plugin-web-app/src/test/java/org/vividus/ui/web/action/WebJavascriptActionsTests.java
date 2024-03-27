@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -238,17 +238,6 @@ class WebJavascriptActionsTests
         when(((JavascriptExecutor) webDriver).executeScript(SCRIPT_GET_ELEMENT_ATTRIBUTES, webElement))
                 .thenReturn(attributes);
         assertEquals(javascriptActions.getElementAttributes(webElement), attributes);
-    }
-
-    @Test
-    void testSetElementTopPosition()
-    {
-        var webElement = mock(WebElement.class);
-        Long top = 10L;
-        when(((JavascriptExecutor) webDriver).executeScript(String.format(SCRIPT_SET_TOP_POSITION, top), webElement))
-                .thenReturn(top);
-        var resultTop = javascriptActions.setElementTopPosition(webElement, top.intValue());
-        assertEquals(top.intValue(), resultTop);
     }
 
     @Test

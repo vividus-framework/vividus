@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -202,20 +202,6 @@ public class WebJavascriptActions extends JavascriptActions implements ViewportS
         return executeScript("var attributes = arguments[0].attributes; var map = new Object();"
                 + " for(i=0; i< attributes.length; i++){ map[attributes[i].name] = attributes[i].value; } return map;",
                 webElement);
-    }
-
-    /**
-     * Sets the top position of a positioned element.
-     * @param top specifies the top position of the element including padding, scrollbar, border and margin
-     *  for a given WebElement
-     * @param webElement WebElement to set top for
-     * @return origin top position of webElement
-     */
-    public int setElementTopPosition(WebElement webElement, int top)
-    {
-        Long originTop = executeScript(String.format("var originTop = arguments[0].getBoundingClientRect().top;"
-                + " arguments[0].style.top = \"%dpx\"; return Math.round(originTop);", top), webElement);
-        return originTop.intValue();
     }
 
     @Override
