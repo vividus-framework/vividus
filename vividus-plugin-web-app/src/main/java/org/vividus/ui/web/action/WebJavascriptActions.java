@@ -16,6 +16,7 @@
 
 package org.vividus.ui.web.action;
 
+import java.time.Duration;
 import java.util.Map;
 
 import org.openqa.selenium.Dimension;
@@ -27,6 +28,7 @@ import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.ViewportSizeProvider;
 import org.vividus.ui.action.JavascriptActions;
 import org.vividus.util.ResourceUtils;
+import org.vividus.util.Sleeper;
 
 public class WebJavascriptActions extends JavascriptActions implements ViewportSizeProvider
 {
@@ -40,6 +42,8 @@ public class WebJavascriptActions extends JavascriptActions implements ViewportS
     private static final String WAIT_FOR_SCROLL = loadScript("wait-for-scroll.js");
 
     private static final String SCROLL_TO_END_OF_PAGE = loadScript("scroll-to-end-of-page.js");
+
+    private static final Duration SCROLL_STABILIZATION_TIMEOUT = Duration.ofMillis(500);
 
     private final IWebDriverManager webDriverManager;
 
@@ -106,6 +110,7 @@ public class WebJavascriptActions extends JavascriptActions implements ViewportS
     public void scrollElementIntoViewportCenter(WebElement webElement)
     {
         executeAsyncScript(SCROLL_ELEMENT_INTO_VIEWPORT_CENTER, webElement, stickyHeaderSizePercentage);
+        Sleeper.sleep(SCROLL_STABILIZATION_TIMEOUT);
     }
 
     /**
