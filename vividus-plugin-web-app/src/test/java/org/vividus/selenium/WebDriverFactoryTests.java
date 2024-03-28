@@ -397,7 +397,7 @@ class WebDriverFactoryTests
 
         assertThat(decoratedDriver, instanceOf(Decorated.class));
         EventFiringWebDriver eventFiringDriver = ((Decorated<EventFiringWebDriver>) decoratedDriver).getOriginal();
-        var textFormattingDriver = ((WrapsDriver) eventFiringDriver).getWrappedDriver();
+        var textFormattingDriver = eventFiringDriver.getWrappedDriver();
         assertThat(textFormattingDriver, instanceOf(TextFormattingWebDriver.class));
         assertEquals(expectedSupplier.get(), ((WrapsDriver) textFormattingDriver).getWrappedDriver());
 

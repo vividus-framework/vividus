@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,7 +219,7 @@ class LighthouseStepsTests
             when(pagespeedApiPagespeedResponseV5.getLighthouseResult()).thenReturn(lighthouseResultV5);
             when(jsonFactory.toString(lighthouseResultV5)).thenReturn(RESULT_AS_STRING);
             when(lighthouseResultV5.getAudits()).thenReturn(Map.of());
-            mockCategory(lighthouseResultV5, (c, cts) -> when(c.getSeo()).thenReturn(cts), SCORE_METRIC_VAL);
+            mockCategory(lighthouseResultV5, (c, cts) -> when(c.getSeo()).thenReturn(cts));
             when(jsonFactory.toPrettyString(any())).thenReturn(RESULT_AS_STRING);
 
             List<String> categories = List.of(SEO);
@@ -651,7 +651,7 @@ class LighthouseStepsTests
         mockMetricItems(lighthouseResultV5, metrics);
         Categories categories = mock();
         when(lighthouseResultV5.getCategories()).thenReturn(categories);
-        mockCategory(lighthouseResultV5, (c, cts) -> when(c.getPerformance()).thenReturn(cts), SCORE_METRIC_VAL);
+        mockCategory(lighthouseResultV5, (c, cts) -> when(c.getPerformance()).thenReturn(cts));
 
         ArrayMap<String, BigDecimal> actualMetrics = ArrayMap.create();
         actualMetrics.putAll(metrics);
@@ -661,7 +661,7 @@ class LighthouseStepsTests
     }
 
     private void mockCategory(LighthouseResultV5 lighthouseResultV5,
-            BiConsumer<Categories, LighthouseCategoryV5> categoryMocker, BigDecimal value)
+            BiConsumer<Categories, LighthouseCategoryV5> categoryMocker)
     {
         Categories categories = mock();
         when(lighthouseResultV5.getCategories()).thenReturn(categories);

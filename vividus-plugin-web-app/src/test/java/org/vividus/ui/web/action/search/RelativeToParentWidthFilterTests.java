@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,6 @@ class RelativeToParentWidthFilterTests
     private static final String PARENT_WIDTH = "900";
     private static final String PARENT_PERCENTAGE_WIDTH = "32";
 
-    private List<WebElement> webElements;
-
     @Mock
     private WebElement webElementWithCorrectRelativeToParentWidth;
 
@@ -65,7 +63,7 @@ class RelativeToParentWidthFilterTests
     @Test
     void testRelativeToParentWidthFilter()
     {
-        webElements = List.of(webElementWithCorrectRelativeToParentWidth);
+        var webElements = List.of(webElementWithCorrectRelativeToParentWidth);
         mockParentElement(webElementWithCorrectRelativeToParentWidth, webElementParent);
         mockWebElementWidth(webElementWithCorrectRelativeToParentWidth, CORRECT_ELEMENT_WIDTH,
                 dimensionElementWithCorrectRelativeToParentWidth);
@@ -77,7 +75,6 @@ class RelativeToParentWidthFilterTests
     @Test
     void testRelativeToParentWidthFilterWithIncorrectWidth()
     {
-        webElements = List.of(webElementWithCorrectRelativeToParentWidth, webElementWithIncorrectRelativeToParentWidth);
         mockParentElement(webElementWithCorrectRelativeToParentWidth, webElementParent);
         mockParentElement(webElementWithIncorrectRelativeToParentWidth, webElementParent);
         mockWebElementWidth(webElementWithCorrectRelativeToParentWidth, CORRECT_ELEMENT_WIDTH,
@@ -85,6 +82,8 @@ class RelativeToParentWidthFilterTests
         mockWebElementWidth(webElementWithIncorrectRelativeToParentWidth, INCORRECT_ELEMENT_WIDTH,
                 dimensionElementWithIncorrectRelativeToParentWidth);
         mockWebElementWidth(webElementParent, PARENT_WIDTH, dimensionParentElement);
+        var webElements = List.of(webElementWithCorrectRelativeToParentWidth,
+                webElementWithIncorrectRelativeToParentWidth);
         List<WebElement> foundElements = filter.filter(webElements, PARENT_PERCENTAGE_WIDTH);
         assertEquals(1, foundElements.size());
     }
@@ -92,7 +91,7 @@ class RelativeToParentWidthFilterTests
     @Test
     void testRelativeToParentWidthFilterIncorrectRelativeToParentWidth()
     {
-        webElements = List.of(webElementWithIncorrectRelativeToParentWidth);
+        var webElements = List.of(webElementWithIncorrectRelativeToParentWidth);
         mockParentElement(webElementWithIncorrectRelativeToParentWidth, webElementParent);
         mockWebElementWidth(webElementParent, PARENT_WIDTH, dimensionParentElement);
         mockWebElementWidth(webElementWithIncorrectRelativeToParentWidth, INCORRECT_ELEMENT_WIDTH,
@@ -104,7 +103,7 @@ class RelativeToParentWidthFilterTests
     @Test
     void testRelativeToParentWidthFilterEmptyRelativeToParentWidth()
     {
-        webElements = List.of();
+        var webElements = List.<WebElement>of();
         List<WebElement> foundElements = filter.filter(webElements, "");
         assertEquals(List.of(), foundElements);
     }
@@ -112,7 +111,7 @@ class RelativeToParentWidthFilterTests
     @Test
     void testRelativeToParentWidthFilterNullRelativeToParentWidth()
     {
-        webElements = List.of();
+        var webElements = List.<WebElement>of();
         List<WebElement> foundElements = filter.filter(webElements, null);
         assertEquals(List.of(), foundElements);
     }

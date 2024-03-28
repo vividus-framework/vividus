@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ public enum WebDriverStartParameters implements WebDriverStartParameter
     DESIRED_CAPABILITIES(DesiredCapabilities::new),
     COMMAND_LINE_ARGUMENTS(null);
 
-    private transient Supplier<?> initialValueSupplier;
+    private final transient Supplier<?> initialValueSupplier;
 
     <T> WebDriverStartParameters(Supplier<T> initialValueSupplier)
     {

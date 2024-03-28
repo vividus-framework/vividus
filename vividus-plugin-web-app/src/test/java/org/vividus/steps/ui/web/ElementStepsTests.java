@@ -63,12 +63,11 @@ import org.vividus.ui.action.search.SearchParameters;
 import org.vividus.ui.action.search.Visibility;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.util.XpathLocatorUtils;
-import org.vividus.ui.web.action.IMouseActions;
 import org.vividus.ui.web.action.WebElementActions;
 import org.vividus.ui.web.action.search.WebLocatorType;
 import org.vividus.variable.VariableScope;
 
-@SuppressWarnings("checkstyle:MethodCount")
+@SuppressWarnings({ "checkstyle:MethodCount", "PMD.UnnecessaryBooleanAssertion" })
 @ExtendWith(MockitoExtension.class)
 class ElementStepsTests
 {
@@ -101,7 +100,6 @@ class ElementStepsTests
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
 
     @Mock private IBaseValidations baseValidations;
-    @Mock private IMouseActions mouseActions;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private WebDriverManager webDriverManager;
     @Mock private IElementValidations elementValidations;

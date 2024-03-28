@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -39,13 +37,7 @@ class LocatorTests
 {
     private static final String VALUE = "value";
 
-    private Locator locator;
-
-    @BeforeEach
-    void beforeEach()
-    {
-        locator = locator(Visibility.VISIBLE);
-    }
+    private final Locator locator = createLocator(Visibility.VISIBLE);
 
     @Test
     void testAddCompetingFilter()
@@ -107,7 +99,7 @@ class LocatorTests
     @Test
     void testGetSearchParameters()
     {
-        Assertions.assertEquals(new SearchParameters(VALUE), locator.getSearchParameters());
+        assertEquals(new SearchParameters(VALUE), locator.getSearchParameters());
     }
 
     @Test
@@ -119,13 +111,13 @@ class LocatorTests
     static Stream<Arguments> locators()
     {
         return Stream.of(
-            arguments(locator(Visibility.VISIBLE).addFilter(TestLocatorType.FILTER, VALUE),
+            arguments(createLocator(Visibility.VISIBLE).addFilter(TestLocatorType.FILTER, VALUE),
                     "search 'value' (visible) with filter 'value'"),
-            arguments(locator(Visibility.INVISIBLE).addFilter(TestLocatorType.FILTER, VALUE)
+            arguments(createLocator(Visibility.INVISIBLE).addFilter(TestLocatorType.FILTER, VALUE)
                                                    .addFilter(TestLocatorType.FILTER, VALUE)
                                                    .addFilter(TestLocatorType.ADDITIONAL_FILTER, VALUE),
                     "search 'value' (invisible) with filter 'value', 'value' and additional filter 'value'"),
-            arguments(locator(Visibility.ALL),
+            arguments(createLocator(Visibility.ALL),
                     "search 'value' (visible or invisible)")
         );
     }
@@ -137,7 +129,7 @@ class LocatorTests
         assertEquals(expectedMessage, locator.toHumanReadableString());
     }
 
-    private static Locator locator(Visibility visibility)
+    private static Locator createLocator(Visibility visibility)
     {
         Locator locator = new Locator(TestLocatorType.SEARCH, VALUE);
         locator.getSearchParameters().setVisibility(visibility);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,11 @@ import org.vividus.testdouble.TestLocatorType;
 @ExtendWith(MockitoExtension.class)
 class ElementActionServiceTests
 {
-    @Spy private Set<IElementAction> elementActions = new HashSet<>();
+    @Spy private final Set<IElementAction> elementActions = new HashSet<>();
     @InjectMocks private ElementActionService service;
 
     @BeforeEach
-    void init() throws IllegalArgumentException
+    void init()
     {
         elementActions.add(new TestElementFilter());
         elementActions.add(new TestElementSearch());

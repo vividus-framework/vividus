@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public enum IgnoreStrategy
         private int drawImagePart(Graphics2D g2, BufferedImage source, int nextInsertY, int sourceY1, int sourceY2)
         {
             int imageWidth = source.getWidth();
-            int destinationY2 = nextInsertY + (sourceY2 - sourceY1);
+            int destinationY2 = nextInsertY + sourceY2 - sourceY1;
             g2.drawImage(source, 0, nextInsertY, imageWidth, destinationY2, 0, sourceY1, imageWidth, sourceY2, null);
             return destinationY2;
         }

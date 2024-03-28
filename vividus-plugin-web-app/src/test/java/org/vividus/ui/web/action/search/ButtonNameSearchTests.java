@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,9 +74,6 @@ class ButtonNameSearchTests
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AbstractWebElementSearchAction.class);
 
-    private List<WebElement> webElements;
-    private SearchParameters buttonParameters;
-
     @Mock
     private WebElement webElement;
 
@@ -93,8 +90,8 @@ class ButtonNameSearchTests
     @Test
     void testSearchSuccess()
     {
-        webElements = List.of(webElement);
-        buttonParameters = new SearchParameters(VALUE, Visibility.ALL, false);
+        var webElements = List.of(webElement);
+        var buttonParameters = new SearchParameters(VALUE, Visibility.ALL, false);
         when(searchContext.findElements(BUTTON_LOCATOR)).thenReturn(webElements);
         List<WebElement> foundElements = buttonNameSearch.search(searchContext, buttonParameters);
         assertEquals(webElements, foundElements);
@@ -103,8 +100,8 @@ class ButtonNameSearchTests
     @Test
     void testSearchByUpperDivSuccess()
     {
-        webElements = List.of(webElement);
-        buttonParameters = new SearchParameters(VALUE, Visibility.ALL, false);
+        var webElements = List.of(webElement);
+        var buttonParameters = new SearchParameters(VALUE, Visibility.ALL, false);
         when(searchContext.findElements(BUTTON_LOCATOR)).thenReturn(webElements);
         List<WebElement> foundElements = buttonNameSearch.search(searchContext, buttonParameters);
         assertEquals(webElements, foundElements);
@@ -113,7 +110,7 @@ class ButtonNameSearchTests
     @Test
     void testSearchByUpperDivNotFound()
     {
-        buttonParameters = new SearchParameters(VALUE, Visibility.ALL, false);
+        var buttonParameters = new SearchParameters(VALUE, Visibility.ALL, false);
         when(searchContext.findElements(BUTTON_LOCATOR)).thenReturn(List.of());
         when(searchContext.findElements(BUTTON_LOCATOR_WITH_TEXT_TRANSFORM_CSS_PROPERTY)).thenReturn(List.of());
         List<WebElement> foundElements = buttonNameSearch.search(searchContext, buttonParameters);
@@ -123,7 +120,7 @@ class ButtonNameSearchTests
     @Test
     void testSearchEmptyContext()
     {
-        buttonParameters = new SearchParameters(VALUE);
+        var buttonParameters = new SearchParameters(VALUE);
         List<WebElement> foundElements = buttonNameSearch.search(null, buttonParameters);
         assertTrue(foundElements.isEmpty());
         assertThat(logger.getLoggingEvents(), equalTo(List.of()));
@@ -132,8 +129,8 @@ class ButtonNameSearchTests
     @Test
     void testSearchButtonsWithTextTransformCssProperty()
     {
-        webElements = List.of(webElement);
-        buttonParameters = new SearchParameters(VALUE, Visibility.ALL, false);
+        var webElements = List.of(webElement);
+        var buttonParameters = new SearchParameters(VALUE, Visibility.ALL, false);
         SearchParameters parametersWithCapitalLetter = new SearchParameters(VALUE_WITH_CAPITAL_LETTER, Visibility.ALL,
                 false);
         SearchParameters buttonParametersWithCapitalLetter = new SearchParameters(

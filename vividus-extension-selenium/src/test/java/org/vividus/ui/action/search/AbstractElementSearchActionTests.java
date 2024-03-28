@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,7 +201,7 @@ class AbstractElementSearchActionTests
         verify(element, Mockito.never()).getSize();
         verifyNoInteractions(waitActions);
         assertThat(logger.getLoggingEvents(), equalTo(List.of(
-                warn(exception, exception.getMessage()),
+                buildWarnMessage(exception),
                 info(NUMBER_OF_VISIBLE_ELEMENTS, LOGGED_LOCATOR, 1, Visibility.VISIBLE.getDescription(), 0)
         )));
     }
@@ -211,13 +211,18 @@ class AbstractElementSearchActionTests
         var exception = new StaleElementReferenceException(EXCEPTION);
         return Stream.of(
             arguments((Answer<Boolean>) invocation -> { throw exception; }, 0, List.of(
-                    warn(exception, exception.getMessage()),
+                    buildWarnMessage(exception),
                     info(NUMBER_OF_VISIBLE_ELEMENTS, LOGGED_LOCATOR, 1, Visibility.VISIBLE.getDescription(), 0)
             )),
             arguments((Answer<Boolean>) invocation -> true, 1, List.of(
                     info(NUMBER_OF_VISIBLE_ELEMENTS, LOGGED_LOCATOR, 1, Visibility.VISIBLE.getDescription(), 1)
             ))
         );
+    }
+
+    private static LoggingEvent buildWarnMessage(StaleElementReferenceException exception)
+    {
+        return warn(exception, "{}", exception.getMessage());
     }
 
     @ParameterizedTest

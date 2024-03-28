@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package org.vividus.selenium.screenshot;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
@@ -31,8 +30,8 @@ public class ScreenshotFileNameGenerator implements IScreenshotFileNameGenerator
 {
     private static final String DEFAULT_IMAGE_FORMAT = "png";
 
-    private static final ThreadLocal<DateFormat> DATE_FORMAT = ThreadLocal
-            .withInitial(() -> new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_SSS", Locale.getDefault()));
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss_SSS")
+            .withZone(ZoneId.systemDefault());
 
     @Inject private IGenericWebDriverManager webDriverManager;
 
@@ -41,7 +40,7 @@ public class ScreenshotFileNameGenerator implements IScreenshotFileNameGenerator
     {
         Dimension windowSize = webDriverManager.getSize();
         StringBuilder screenshotFileName = new StringBuilder()
-                .append(DATE_FORMAT.get().format(Calendar.getInstance().getTime()))
+                .append(DATE_FORMAT.format(Instant.now()))
                 .append('-')
                 .append(screenshotName);
         Capabilities capabilities = webDriverManager.getCapabilities();
