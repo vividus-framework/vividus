@@ -19,7 +19,6 @@
     <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
         <property name="converters">
             <set>
-                <bean class="org.vividus.spring.StringToLocaleConverter"/>
                 <bean class="org.vividus.spring.StringToFormatConverter" />
             </set>
         </property>
