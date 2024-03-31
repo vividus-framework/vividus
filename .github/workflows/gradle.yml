@@ -111,14 +111,14 @@ jobs:
 
     - name: Upload coverage to Codecov
       if: ${{ !github.event.pull_request.head.repo.fork || github.ref == 'refs/heads/master'}}
-      uses: codecov/codecov-action@v4.1.0
+      uses: codecov/codecov-action@v4.1.1
       with:
         fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}
 
     - name: Upload coverage to Codecov
       if: ${{ github.event.pull_request.head.repo.fork }}
-      uses: codecov/codecov-action@v4.1.0
+      uses: codecov/codecov-action@v4.1.1
 
     - name: VIVIDUS tasks validation
       run: |
