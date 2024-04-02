@@ -110,6 +110,21 @@ See https://applitools.com/docs/topics/general-concepts/working-withcross-enviro
 
 |===
 
+==== Properties-based screenshot configuration for web applications
+
+Properties-based screenshot configuration can be specified using `web.screenshot.strategy.<YOUR_STRATEGY_NAME>.<PROPERTY_NAME>=<PROPERTY_VALUE>` pattern,
+where:
+
+ - `YOUR_STRATEGY_NAME` - name of the custom strategy;
+ - `PROPERTY_NAME` - name of the property you want to specify;
+ - `PROPERTY_VALUE` - value of the property in the required format.
+
+Keep in mind that properties-based configuration can be overridden by <<_visual_check_with_custom_applitools_and_screenshot_configuration, the step>> with custom step configuration.
+
+include::partial$screenshot-properties-based-configuration.adoc[]
+
+NOTE: Modifiers to cut web header or web footer have the default value `100` px (cutting headers and footers up to 100 pixels high).
+
 === Common visual testing actions use cases
 
 include::partial$establish.adoc[leveloffset=+1]

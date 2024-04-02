@@ -1,0 +1,61 @@
+[cols="3,1,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Description
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.web-header-to-cut`
+|size in pixels
+|Web header to cut (could be useful if your site has sticky header)
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.web-footer-to-cut`
+|size in pixels
+|Web footer to cut (could be useful if your site has sticky footer)
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-header-to-cut`
+|size in pixels
+|Native header to cut
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.native-footer-to-cut`
+|size in pixels
+|Native footer to cut
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.coords-provider`
+|`WEB_DRIVER` `CEILING`
+|Adds margins to coordinates, default one
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.scroll-timeout`
+|The duration in {durations-format-link} format.
+|Timeout for scrolling during performing visual check
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.scrollable-element`
+|locator
+|Locator of element for performing scroll action during visual check, steps fails if an element by the locator does not exist
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.shooting-strategy`
+|`SIMPLE` `VIEWPORT_PASTING`
+|Screenshot shooting strategy name (`VIEWPORT_PASTING` by default)
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-top`
+|size in pixels
+|The size of top part of the final screenshot to cut.
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-bottom`
+|size in pixels
+|The size of bottom part of the final screenshot to cut.
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-left`
+|size in pixels
+|The size of left part of the final screenshot to cut.
+
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.cut-right`
+|size in pixels
+|The size of right part of the final screenshot to cut.
+
+|`web.screenshot.strategy=YOUR_STRATEGY_NAME`
+|string
+|After configuration necessary properties use this one to enable your custom strategy
+
+|===
+
+IMPORTANT: Mind that `cut-***` modifications applied to the final screenshot, for example final stitched screenshot will be cut for the viewport-pasting strategy.
