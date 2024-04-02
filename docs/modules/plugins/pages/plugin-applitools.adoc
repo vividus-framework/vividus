@@ -78,6 +78,10 @@ NOTE: The properties marked with *bold* are mandatory.
 |`false`
 |If `true`, page resources for rendering on the UFG will be fetched from outside of the browser.
 
+|`ui.visual.applitools.layout-breakpoints`
+|`true`
+|If `true` the viewport width and height are changed to the specified device's values prior to capturing the page source for rendering in UFG.
+
 |===
 
 ==== Cross-environment properties
