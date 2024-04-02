@@ -83,8 +83,8 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
         when(baselineIndexer.createIndexedBaseline(BASELINE)).thenReturn(BASELINE);
 
          // CHECKSTYLE:OFF
-        String table = "|executeApiKey  |readApiKey  |hostApp |hostOS |viewportSize|matchLevel|disableBrowserFetching|serverUri          |appName |batchName |baselineEnvName  |elementsToIgnore|areasToIgnore|baselineName |action   |accessibilityStandard|" + System.lineSeparator()
-                     + "|execute-api-key|read-api-key|host-app|host-os|1x1         |EXACT     |true                  |https://example.com|app-name|batch-name|baseline-env-name|elements        |areas        |baseline-name|ESTABLISH|WCAG 2.1 - AA        |";
+        String table = "|executeApiKey  |readApiKey  |hostApp |hostOS |viewportSize|matchLevel|disableBrowserFetching|layoutBreakpoints|serverUri          |appName |batchName |baselineEnvName  |elementsToIgnore|areasToIgnore|baselineName |action   |accessibilityStandard|" + System.lineSeparator()
+                     + "|execute-api-key|read-api-key|host-app|host-os|1x1         |EXACT     |true                  |true             |https://example.com|app-name|batch-name|baseline-env-name|elements        |areas        |baseline-name|ESTABLISH|WCAG 2.1 - AA        |";
         // CHECKSTYLE:ON
         ExamplesTable applitoolsCheckTable = createTable(table);
 
@@ -112,6 +112,7 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
             () -> assertTrue(configuration.getSaveFailedTests()),
             () -> assertTrue(configuration.getSaveNewTests()),
             () -> assertTrue(configuration.isDisableBrowserFetching()),
+            () -> assertTrue(configuration.isDefaultLayoutBreakpointsSet()),
             () -> assertEquals(BATCH, configuration.getBatch().getName()),
             () -> assertEquals(AccessibilityLevel.AA, settings.getLevel()),
             () -> assertEquals(AccessibilityGuidelinesVersion.WCAG_2_1, settings.getGuidelinesVersion())
@@ -156,6 +157,7 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
         String baselineEnvName = "default-baseline-env-name";
         converter.setBaselineEnvName(baselineEnvName);
         converter.setDisableBrowserFetching(false);
+        converter.setLayoutBreakpoints(false);
 
         List<ApplitoolsVisualCheck> checks = checksSupplier.get();
         assertThat(checks, hasSize(1));
@@ -180,6 +182,7 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
             () -> assertFalse(configuration.getSaveFailedTests()),
             () -> assertFalse(configuration.getSaveNewTests()),
             () -> assertFalse(configuration.isDisableBrowserFetching()),
+            () -> assertFalse(configuration.isDefaultLayoutBreakpointsSet()),
             () -> assertEquals(BATCH, configuration.getBatch().getName()),
             () -> assertNull(configuration.getAccessibilityValidation())
         );

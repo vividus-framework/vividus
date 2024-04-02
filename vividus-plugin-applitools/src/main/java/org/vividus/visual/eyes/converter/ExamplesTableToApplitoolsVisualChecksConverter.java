@@ -55,6 +55,7 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     private static final String VIEWPORT_SIZE_OPTION = "viewportSize";
     private static final String MATCH_LEVEL_OPTION = "matchLevel";
     private static final String DISABLE_BROWSER_FETCHING = "disableBrowserFetching";
+    private static final String LAYOUT_BREAKPOINTS = "layoutBreakpoints";
     private static final String SERVER_URI_OPTION = "serverUri";
     private static final String APP_NAME_OPTION = "appName";
     private static final String BATCH_NAME_OPTION = "batchName";
@@ -66,7 +67,8 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     private static final List<String> SUPPORTED_OPTIONS = List.of(BASELINE_NAME_OPTION, ACTION_OPTION,
             EXECUTE_API_KEY_OPTION, READ_API_KEY_OPTION, HOST_APP_OPTION, HOST_OS_OPTION, VIEWPORT_SIZE_OPTION,
             MATCH_LEVEL_OPTION, DISABLE_BROWSER_FETCHING, SERVER_URI_OPTION, APP_NAME_OPTION, BATCH_NAME_OPTION,
-            BASELINE_ENV_NAME_OPTION, ELEMENTS_TO_IGNORE_OPTION, AREAS_TO_IGNORE_OPTION, ACCESSIBILITY_STANDARD_OPTION);
+            BASELINE_ENV_NAME_OPTION, ELEMENTS_TO_IGNORE_OPTION, AREAS_TO_IGNORE_OPTION, ACCESSIBILITY_STANDARD_OPTION,
+            LAYOUT_BREAKPOINTS);
 
     private String executeApiKey;
     private String readApiKey;
@@ -75,6 +77,7 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     private Dimension viewportSize;
     private MatchLevel matchLevel;
     private Boolean disableBrowserFetching;
+    private Boolean layoutBreakpoints;
     private URI serverUri;
     private String appName = "Application";
     private String baselineEnvName;
@@ -118,6 +121,7 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
                 params.valueAs(VIEWPORT_SIZE_OPTION, Dimension.class, viewportSize),
                 params.valueAs(MATCH_LEVEL_OPTION, MatchLevel.class, matchLevel),
                 params.valueAs(DISABLE_BROWSER_FETCHING, Boolean.class, disableBrowserFetching),
+                params.valueAs(LAYOUT_BREAKPOINTS, Boolean.class, layoutBreakpoints),
                 params.valueAs(SERVER_URI_OPTION, URI.class, serverUri),
                 params.valueAs(APP_NAME_OPTION, String.class, appName),
                 params.valueAs(BASELINE_ENV_NAME_OPTION, String.class, baselineEnvName),
@@ -136,7 +140,7 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     {
         ApplitoolsVisualCheck check = createCheck(batchName, baselineName, action);
         configureEyes(check, executeApiKey, hostApp, hostOS, viewportSize, matchLevel, disableBrowserFetching,
-                serverUri, appName, baselineEnvName, readApiKey, Set.of(), Set.of(), null);
+                layoutBreakpoints, serverUri, appName, baselineEnvName, readApiKey, Set.of(), Set.of(), null);
         return check;
     }
 
@@ -147,9 +151,9 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
 
     @SuppressWarnings("paramNum")
     private void configureEyes(ApplitoolsVisualCheck check, String executeApiKey, String hostApp, String hostOS,
-            Dimension viewportSize, MatchLevel matchLevel, Boolean disableBrowserFetching, URI serverUri,
-            String appName, String baselineEnvName, String readApiKey, Set<Locator> elements, Set<Locator> areas,
-            AccessibilitySettings settings)
+            Dimension viewportSize, MatchLevel matchLevel, Boolean disableBrowserFetching, Boolean layoutBreakpoints,
+            URI serverUri, String appName, String baselineEnvName, String readApiKey, Set<Locator> elements,
+            Set<Locator> areas, AccessibilitySettings settings)
     {
         check.setScreenshotParameters(screenshotParametersFactory.create());
         check.setReadApiKey(readApiKey);
@@ -167,6 +171,7 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
                 .setViewportSize(viewport)
                 .setMatchLevel(matchLevel)
                 .setDisableBrowserFetching(disableBrowserFetching)
+                .setLayoutBreakpoints(layoutBreakpoints)
                 .setServerUrl(Optional.ofNullable(serverUri).map(URI::toString).orElse(null))
                 .setAppName(appName)
                 .setBaselineEnvName(baselineEnvName)
@@ -214,6 +219,11 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     public void setDisableBrowserFetching(Boolean disableBrowserFetching)
     {
         this.disableBrowserFetching = disableBrowserFetching;
+    }
+
+    public void setLayoutBreakpoints(Boolean layoutBreakpoints)
+    {
+        this.layoutBreakpoints = layoutBreakpoints;
     }
 
     public void setServerUri(URI serverUri)
