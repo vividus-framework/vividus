@@ -261,22 +261,25 @@ will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTabl
 |Description
 
 |`byMaxColumns`
-|the maximum number of columns to keep
+|The maximum number of columns to keep. If the number of columns in the original table is less than the value specified
+in this parameter, then all the original table columns are kept.
 
 |`byMaxRows`
-|the maximum number of rows to keep
+|The maximum number of rows to keep. If the number of rows in the original table is less than the value specified in
+this parameter, then all the original table rows are kept.
 
 |`byRandomRows`
-|the number of random rows to keep
+|The number of random rows to keep. If the number of rows in the original table is less than the value specified in this
+parameter, then all the original table rows are kept.
 
 |`byColumnNames`
-|the names of the columns to keep separated by semicolon
+|The names of the columns to keep separated by semicolon.
 
 |`byRowIndexes`
-|the zero-based indexes of the rows to keep, allowing individual indexes and ranges of indexes separated by semicolons. The range of indexes is specified using the hyphen (-) symbol between two indexes (e.g., 0-5).
+|The zero-based indexes of the rows to keep, allowing individual indexes and ranges of indexes separated by semicolons. The range of indexes is specified using the hyphen (-) symbol between two indexes (e.g., 0-5).
 
 |`column.<column name>=<regex>`
-a|select rows where the value in the specified column matches the given regex.
+a|Select rows where the value in the specified column matches the given regex.
 
 IMPORTANT: filtering by regex is not allowed to be used alongside with the following properties: `byMaxColumns`, `byColumnNames`, `byMaxRows`, `byRowIndexes`, `byRandomRows`.
 

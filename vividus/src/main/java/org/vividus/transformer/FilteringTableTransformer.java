@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,9 +116,10 @@ public class FilteringTableTransformer extends AbstractFilteringTableTransformer
         else if (byRandomRows != null)
         {
             int randomRowsCount = Integer.parseInt(byRandomRows);
-            isTrue(randomRowsCount <= numberOfRows,
-                    "'byRandomRows' is %d, but it must be less than or equal to %d (the number of table rows)",
-                    randomRowsCount, numberOfRows);
+            if (randomRowsCount >= numberOfRows)
+            {
+                return rows;
+            }
             return ThreadLocalRandom.current()
                     .ints(0, numberOfRows)
                     .distinct()
