@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.jbehave.core.configuration.Keywords;
@@ -39,6 +39,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
@@ -121,12 +122,10 @@ class FilteringTableTransformerTests
     void testTransformRandomRows()
     {
         var tableProperties = new TableProperties("byRandomRows=1", keywords, parameterConverters);
-        List<String> transformerRandomTables = new ArrayList<>();
+        List<String> transformerRandomTables = IntStream.range(0, 1000)
+                .mapToObj(i -> transformer.transform(TEN_ROWS_TABLE, tableParsers, tableProperties))
+                .toList();
         Map<String, Integer> randomTablesCount = new HashMap<>();
-        for (int i = 0; i < 1000; i++)
-        {
-            transformerRandomTables.add(transformer.transform(TEN_ROWS_TABLE, tableParsers, tableProperties));
-        }
         for (String tableStr : transformerRandomTables)
         {
             randomTablesCount.put(tableStr, Collections.frequency(transformerRandomTables, tableStr));
@@ -135,6 +134,17 @@ class FilteringTableTransformerTests
         Integer maxCountSameRows = Collections.max(randomTablesCount.values());
         int maxThreshold = 70;
         assertThat(maxCountSameRows - minCountSameRows, lessThanOrEqualTo(maxThreshold));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {
+            10, 11
+    })
+    void shouldResultInFullTableWhenNumberOfRandomRowsIsGreaterThanNumberOfTableRows(int numberOfRandomRows)
+    {
+        var tableProperties = new TableProperties("byRandomRows=" + numberOfRandomRows, keywords, parameterConverters);
+        String transformedTable = transformer.transform(TEN_ROWS_TABLE, tableParsers, tableProperties);
+        assertEquals(TEN_ROWS_TABLE, transformedTable);
     }
 
     @ParameterizedTest
@@ -147,7 +157,6 @@ class FilteringTableTransformerTests
             "'byRandomRows=1, byMaxRows=1',        Conflicting properties declaration found: 'byRandomRows' and 'byMaxRows'",
             "'byRandomRows=1, byRowIndexes=1;2',   Conflicting properties declaration found: 'byRandomRows' and 'byRowIndexes'",
             "'column.demo=.*, byMaxRows=2',        'Filtering by regex is not allowed to be used together with the following properties: ''byMaxColumns'', ''byColumnNames'', ''byMaxRows'', ''byRowIndexes'', ''byRandomRows'''",
-            "'byRandomRows=4',                     '''byRandomRows'' is 4, but it must be less than or equal to 3 (the number of table rows)'",
             "'byColumnNames=key11;key2;key13',     'byColumnNames' refers columns missing in ExamplesTable: key11; key13",
             "'byRowIndexes=5-4;12',                'byRowIndexes' has invalid range of indexes: 5-4. The start index must be less than or equal to the end index."
     })
