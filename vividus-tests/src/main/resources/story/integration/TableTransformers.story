@@ -201,13 +201,32 @@ Examples:
 }
 {transformer=FILTERING, column.col1=.+}
 
-Scenario: Verify DISTINCTING transformer
+Scenario: Validate DISTINCTING transformer
 Meta:
     @requirementId 992
 Then `<column1>` is equal to `a a b b`
 Then `<column3>` is equal to `a b a b`
 Examples:
 {transformer=DISTINCTING, byColumnNames=column1;column3}
+{transformer=JOINING, joinMode=rows}
+|column1|column2|column3|
+|a      |x      |a      |
+|a      |y      |a      |
+|a      |x      |b      |
+|a      |y      |b      |
+|b      |x      |a      |
+|b      |y      |a      |
+|b      |x      |b      |
+|b      |y      |b      |
+
+Scenario: Validate DISTINCTING transformer keeping all columns
+Meta:
+    @requirementId 992
+Then `<column1>` is equal to `a a b b`
+Then `<column2>` is equal to `x x x x`
+Then `<column3>` is equal to `a b a b`
+Examples:
+{transformer=DISTINCTING, byColumnNames=column1;column3, keepAllColumns=true}
 {transformer=JOINING, joinMode=rows}
 |column1|column2|column3|
 |a      |x      |a      |

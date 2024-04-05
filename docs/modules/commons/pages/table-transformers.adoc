@@ -360,16 +360,24 @@ in the exampe above we select only those rows that do not contain `bbb` string i
 
 `DISTINCTING` transformer generates xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] from the specified columns, deleting the rows with repeating values.
 
-[cols="1,3", options="header"]
+[cols="1,1,4", options="header"]
 |===
 |Parameter
+|Default value
 |Description
 
-|`byColumnNames`
-|the names of the columns to keep separated by semicolon
+|[subs=+quotes]`*byColumnNames*`
+|
+|The names of the columns to keep (separated by semicolon).
+
+|`keepAllColumns`
+|`false`
+|If `false`, only the columns specified in `byColumnNames` will appear in the resulting table. Otherwise, all columns
+ from the initial table will be included in the resulting table. If the initial table has rows with repeated values,
+the value from the first row will be retained in the resulting table.
 |===
 
-The following `DISTINCTING` transformer:
+This `DISTINCTING` transformer:
 
 [source,gherkin]
 ----
@@ -389,6 +397,28 @@ will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTabl
 |column1|column2|
 |A      |C      |
 |B      |D      |
+----
+
+This `DISTINCTING` transformer keeping all columns:
+
+[source,gherkin]
+----
+{transformer=DISTINCTING, byColumnNames=column1;column2, keepAllColumns=true}
+|column1|column2|column3|
+|A      |C      |0      |
+|B      |D      |1      |
+|A      |C      |1      |
+|A      |C      |0      |
+|B      |D      |0      |
+----
+
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
+
+[source,gherkin]
+----
+|column1|column2|column3|
+|A      |C      |0      |
+|B      |D      |1      |
 ----
 
 == MERGING

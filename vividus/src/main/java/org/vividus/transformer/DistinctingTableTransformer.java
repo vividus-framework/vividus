@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,13 @@
 
 package org.vividus.transformer;
 
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.ExamplesTable.TableRows;
@@ -31,14 +35,36 @@ public class DistinctingTableTransformer extends AbstractFilteringTableTransform
     public String transform(String tableAsString, TableParsers tableParsers, TableProperties tableProperties)
     {
         String byColumnNames = tableProperties.getMandatoryNonBlankProperty(BY_COLUMNS_NAMES_PROPERTY, String.class);
+        String keepAllColumns = tableProperties.getProperties().getProperty("keepAllColumns");
+
         TableRows tableRows = tableParsers.parseRows(tableAsString, tableProperties);
         List<String> allColumnNames = tableRows.getHeaders();
         List<String> filteredColumnNames = filterColumnNames(allColumnNames, byColumnNames);
         List<List<String>> rows = tableRows.getRows();
-        filterRowsByColumnNames(allColumnNames, rows, filteredColumnNames);
 
-        Set<List<String>> distinctRows = new LinkedHashSet<>(rows);
+        Collection<String> headers;
+        Collection<List<String>> distinctRows;
+        if (Boolean.parseBoolean(keepAllColumns))
+        {
+            int[] indexesToDistinct = IntStream.range(0, allColumnNames.size())
+                    .filter(i -> filteredColumnNames.contains(allColumnNames.get(i)))
+                    .sorted()
+                    .toArray();
 
-        return ExamplesTableProcessor.buildExamplesTable(filteredColumnNames, distinctRows, tableProperties);
+            distinctRows = rows.stream().collect(Collectors.toMap(
+                    r -> IntStream.of(indexesToDistinct).mapToObj(r::get).toList(),
+                    Function.identity(),
+                    (r1, r2) -> r1,
+                    LinkedHashMap::new
+            )).values();
+            headers = allColumnNames;
+        }
+        else
+        {
+            filterRowsByColumnNames(allColumnNames, rows, filteredColumnNames);
+            distinctRows = new LinkedHashSet<>(rows);
+            headers = filteredColumnNames;
+        }
+        return ExamplesTableProcessor.buildExamplesTable(headers, distinctRows, tableProperties);
     }
 }
