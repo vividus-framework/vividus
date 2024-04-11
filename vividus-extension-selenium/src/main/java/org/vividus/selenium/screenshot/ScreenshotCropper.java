@@ -63,7 +63,9 @@ public class ScreenshotCropper
                     .flatMap(Collection::stream)
                     .collect(Collectors.collectingAndThen(
                             Collectors.toList(),
-                            webElementsToIgnore -> coordsProvider.ofElements(webDriver, webElementsToIgnore)
+                            webElementsToIgnore -> coordsProvider.ofElements(webDriver, webElementsToIgnore).stream()
+                                    .filter(i -> contextCoords.map(c -> i.y >= c.y && i.x >= c.x).orElse(true))
+                                    .collect(Collectors.toSet())
                     ));
             if (!ignore.isEmpty())
             {
