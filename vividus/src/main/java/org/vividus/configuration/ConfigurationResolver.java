@@ -37,6 +37,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.PropertyPlaceholderHelper;
 import org.vividus.spring.SpelExpressionResolver;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public final class ConfigurationResolver
 {
     public static final String PLACEHOLDER_PREFIX = "${";
@@ -76,6 +78,7 @@ public final class ConfigurationResolver
         this.properties = properties;
     }
 
+    @SuppressFBWarnings("SING_SINGLETON_GETTER_NOT_SYNCHRONIZED")
     public static ConfigurationResolver getInstance() throws IOException
     {
         if (instance != null)
