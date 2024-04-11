@@ -135,3 +135,11 @@ When I <action> baseline with name `visual-viewportPasting-shootingStrategy-with
 and screenshot configuration:
 |shootingStrategy|
 |VIEWPORT_PASTING|
+
+
+Scenario: Validation of context visual testing with outer ignored areas which are specified using XPath descendant locators
+Given I am on page with URL `${vividus-test-site-url}/inputs.html`
+When I change context to element located by `id(story)`
+When I <action> baseline with name `context-check-with-outer-ignores` ignoring:
+|AREA                                                                       |
+|By.xpath(//h1[@title='Text area section']),By.xpath(//label[@for='story']) |
