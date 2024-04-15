@@ -56,7 +56,6 @@ import io.qameta.allure.context.FreemarkerContext;
 import io.qameta.allure.context.JacksonContext;
 import io.qameta.allure.context.MarkdownContext;
 import io.qameta.allure.context.RandomUidContext;
-import io.qameta.allure.context.ReportInfoContext;
 import io.qameta.allure.core.AttachmentsPlugin;
 import io.qameta.allure.core.Configuration;
 import io.qameta.allure.core.MarkdownDescriptionsPlugin;
@@ -198,7 +197,6 @@ public class AllureReportGenerator implements IAllureReportGenerator
     private void generateData()
     {
         List<Extension> extensions = List.of(
-                new ReportInfoContext("VIVIDUS"),
                 new JacksonContext(),
                 new MarkdownContext(),
                 new FreemarkerContext()
