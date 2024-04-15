@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -294,7 +294,7 @@ class AllureReportGeneratorTests
     private void assertSummaryJson(Path reportDirectory) throws IOException
     {
         assertFile(reportDirectory, "widgets/summary.json",
-                "{\"reportName\":\"Test Report\","
+                "{\"reportName\":\"VIVIDUS Report\","
                     + "\"testRuns\":[],"
                     + "\"statistic\":{\"failed\":0,\"broken\":0,\"skipped\":0,\"passed\":0,\"unknown\":0,\"total\":0},"
                     + "\"time\":{}"
