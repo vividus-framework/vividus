@@ -269,9 +269,10 @@ public class AllureReportGenerator implements IAllureReportGenerator
                 new Allure2Plugin()
         );
         Configuration configuration = new ConfigurationBuilder()
-                .withReportName("Test Report")
-                .fromExtensions(extensions)
-                .fromPlugins(allurePluginsProvider.getPlugins())
+                .withReportName("VIVIDUS Report")
+                .withReportLanguage("en")
+                .withExtensions(extensions)
+                .withPlugins(allurePluginsProvider.getPlugins())
                 .build();
         new ReportGenerator(configuration).generate(reportDirectory.toPath(), List.of(resultsDirectory.toPath()));
     }
