@@ -42,7 +42,7 @@
             renderNothingWhenEmpty: false,
             rawTemplates: { "generic-file-path": fileLine, "tag-file-changed": "<span/>"},
         };
-        let diff2htmlUi = new Diff2HtmlUI(targetElement, `${udiff?replace("${", "\\${")?replace("`", "\\`")?no_esc}`, configuration);
+        let diff2htmlUi = new Diff2HtmlUI(targetElement, `${udiff?replace("${", "\\${")?replace("`", "\\`")?replace("</script>", "<\\/script>")?no_esc}`, configuration);
         diff2htmlUi.draw();
         diff2htmlUi.highlightCode();
     });
