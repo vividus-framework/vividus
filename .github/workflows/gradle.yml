@@ -237,11 +237,12 @@ jobs:
         if [[ -n $LAMBDATEST_USER && -n $LAMBDATEST_KEY ]]; then
           declare -a profiles=( iexplore chrome firefox edge safari )
           for profile in "${profiles[@]}"; do
-            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/lambdatest \
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments= \
                                                   -Pvividus.configuration.suites=health_check \
                                                   -Pvividus.configuration.profiles=lambdatest/web,web/desktop/${profile} \
                                                   -Pvividus.selenium.grid.username=${LAMBDATEST_USER} \
-                                                  -Pvividus.selenium.grid.password=${LAMBDATEST_KEY}
+                                                  -Pvividus.selenium.grid.password=${LAMBDATEST_KEY} \
+                                                  -Pvividus.selenium.grid.capabilities.LT\:Options.build="VIVIDUS System Tests"
           done
         else
             echo No LAMBDATEST_USER and/or LAMBDATEST_KEY, LambdaTest integration tests will be skipped
@@ -550,11 +551,12 @@ jobs:
       shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
-            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/mobile_app/browserstack/ios \
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments= \
                                                   -Pvividus.configuration.suites=system/mobile_app/healthcheck/browserstack \
-                                                  -Pvividus.configuration.profiles=browserstack/mobile_app,mobile_app/ios \
+                                                  -Pvividus.configuration.profiles=browserstack/mobile_app/ios,mobile_app/ios \
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
+                                                  -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="VIVIDUS iOS System Tests" \
                                                   -Pvividus.allure.history-directory=output/history/bs-ios-system-tests \
                                                   -Pvividus.allure.report-directory=output/reports/bs-ios-allure \
                                                   -Pvividus.allure.executor.name="Github Actions (Vividus)" \
@@ -595,11 +597,12 @@ jobs:
       shell: bash
       run: |
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
-            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments=system/mobile_app/browserstack/android \
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.environments= \
                                                   -Pvividus.configuration.suites=system/mobile_app/healthcheck/browserstack \
-                                                  -Pvividus.configuration.profiles=browserstack/mobile_app,mobile_app/android \
+                                                  -Pvividus.configuration.profiles=browserstack/mobile_app/android,mobile_app/android \
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
+                                                  -Pvividus.selenium.grid.capabilities.bstack\:options.buildName="VIVIDUS Android System Tests" \
                                                   -Pvividus.allure.history-directory=output/history/bs-android-system-tests \
                                                   -Pvividus.allure.report-directory=output/reports/bs-android-allure \
                                                   -Pvividus.allure.executor.name="Github Actions (Vividus)" \
