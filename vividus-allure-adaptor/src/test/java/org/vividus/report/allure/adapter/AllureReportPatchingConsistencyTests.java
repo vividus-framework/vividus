@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,10 @@ class AllureReportPatchingConsistencyTests
         return Stream.of(
                 Arguments.of(APP_JS, "\"unknown\":\"Unknown\""),
                 Arguments.of(APP_JS, "\"failed\",\"broken\",\"passed\",\"skipped\",\"unknown\""),
+                Arguments.of(APP_JS,
+                        "var t=this.statistic,e=t.passed,n=void 0===e?0:e,r=t.failed,o=void 0===r?0:r,i=t.broken,a=void"
+                                + " 0===i?0:i,s=t.total;return(void 0===s?0:s)?n?\"\""
+                                + ".concat(this.formatNumber(n/(n+o+a)*100),\"%\"):\"0%\":\"???\""),
                 Arguments.of(STYLES_CSS, "#ffd050"),
                 Arguments.of(STYLES_CSS, "#d35ebe"),
                 Arguments.of(STYLES_CSS, "#fffae6"),
