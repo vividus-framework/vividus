@@ -18,14 +18,14 @@ When I save info from video player located `<videoLocator>` to SCENARIO variable
 Then `${details.currentTime}` is > `0`
 When I pause video in video player located `<videoLocator>`
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
-Given I initialize scenario variable `pausedTime` with value `${details.currentTime}`
+Given I initialize story variable `pausedTime` with value `${details.currentTime}`
 Then element located by `<videoLocator>` exists for `PT1S` duration
 Then `${details.currentTime}` is = `${pausedTime}`
 When I play video in video player located by `<videoLocator>`
 Then element located by `<videoLocator>` exists for `PT1S` duration
 When I pause video in video player located by `<videoLocator>`
 When I save info from video player located by `<videoLocator>` to SCENARIO variable `details`
-Given I initialize scenario variable `pausedTime` with value `${details.currentTime}`
+Given I initialize story variable `pausedTime` with value `${details.currentTime}`
 Then element located by `<videoLocator>` exists for `PT1S` duration
 When I save info from video player located by `<videoLocator>` to SCENARIO variable `details`
 Then `${details.currentTime}` is = `${pausedTime}`
