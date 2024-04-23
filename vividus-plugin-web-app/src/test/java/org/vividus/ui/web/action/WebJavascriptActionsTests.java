@@ -109,7 +109,7 @@ class WebJavascriptActionsTests
     void testScrollElementIntoViewportCenter()
     {
         var webElement = mock(WebElement.class);
-        var stickyHeaderSize = 111_122;
+        var stickyHeaderSize = 25;
         javascriptActions.setStickyHeaderSizePercentage(stickyHeaderSize);
         javascriptActions.scrollElementIntoViewportCenter(webElement);
         verify((JavascriptExecutor) webDriver).executeAsyncScript(
