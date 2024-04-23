@@ -305,13 +305,21 @@ public class AllureReportGenerator implements IAllureReportGenerator
         String cssString = FileUtils.readFileToString(cssFile, StandardCharsets.UTF_8);
 
         String brokenStatusColor = "#d35ebf";
+        String passRateCounterScript =
+                "var t=this.statistic,e=t.passed,n=void 0===e?0:e,r=t.failed,o=void 0===r?0:r,i=t.broken,a=void "
+                        + "0===i?0:i,s=t.total;return(void 0===s?0:s)?n?\"\""
+                        + ".concat(this.formatNumber(n/(n+o+a)*100),\"%\"):\"0%\":\"???\"";
         javascriptString = javascriptString
                 // Replacing of gray colors with #d35ebf in CSS does not affect the color used to draw
                 // <rect> HTML elements used to display trends
                 .replace("#aaa", brokenStatusColor)
                 .replace("\"unknown\":\"Unknown\"", "\"unknown\":\"Known\"")
                 .replace("\"failed\",\"broken\",\"passed\",\"skipped\",\"unknown\"",
-                        "\"failed\",\"unknown\",\"passed\",\"broken\",\"skipped\"");
+                        "\"failed\",\"unknown\",\"passed\",\"broken\",\"skipped\"")
+                .replace(passRateCounterScript,
+                        "var t=this.statistic,e=t.passed,n=void 0===e?0:e,r=t.failed,o=void 0===r?0:r,i=t.broken,a=void"
+                                + " 0===i?0:i,c=t.unknown,d=void 0===c?0:c,s=t.total;return(void 0===s?0:s)?n?\"\""
+                                + ".concat(this.formatNumber((n+d)/(n+d+a+o)*100),\"%\"):\"0%\":\"???\"");
         cssString = cssString
                 .replace("#ffd050", brokenStatusColor)
                 .replace("#d35ebe", "#ffd051")
