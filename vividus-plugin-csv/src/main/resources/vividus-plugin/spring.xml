@@ -14,9 +14,11 @@
         <constructor-arg type="java.lang.Character" value="${csv.escape-char:#{null}}" />
     </bean>
 
-    <bean factory-bean="csvFormatFactory" factory-method="getCsvFormat" />
+    <bean id="csvFormat" factory-bean="csvFormatFactory" factory-method="getCsvFormat" />
 
-    <bean class="org.vividus.csv.CsvReader" />
+    <bean class="org.vividus.csv.CsvReader">
+        <constructor-arg ref="csvFormat" />
+    </bean>
 
     <bean id="FROM_CSV" class="org.vividus.csv.transformer.CsvTableTransformer" />
 
