@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -185,7 +186,14 @@ class VariablesTests
         variables.putStoryVariable(KEY2, STORY);
         variables.putStoryVariable(KEY3, STORY);
         variables.putStoryVariable(KEY3, STEP);
-        assertEquals(Map.of(KEY1, SCENARIO, KEY2, STORY, KEY3, STEP), variables.getVariables());
+        var keyWithNullValue = "key-with-null-value";
+        variables.putStoryVariable(keyWithNullValue, null);
+        Map<String, String> expected = new HashMap<>();
+        expected.put(KEY1, SCENARIO);
+        expected.put(KEY2, STORY);
+        expected.put(KEY3, STEP);
+        expected.put(keyWithNullValue, null);
+        assertEquals(expected, variables.getVariables());
     }
 
     private record Pojo(String name)

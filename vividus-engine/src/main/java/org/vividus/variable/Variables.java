@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -72,9 +70,12 @@ public class Variables
 
     public Map<String, Object> getVariables()
     {
+        // Do not use Collectors#toMap, it results in NPE, it's OpenJDK bug:
+        // https://stackoverflow.com/questions/24630963/nullpointerexception-in-collectors-tomap-with-null-entry-values
+        // https://bugs.openjdk.java.net/browse/JDK-8148463
         return concatedVariables().map(Map::entrySet)
-                                  .flatMap(Set::stream)
-                                  .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (k1, k2) -> k2));
+                .flatMap(Set::stream)
+                .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), HashMap::putAll);
     }
 
     private Optional<Object> getVariable(Map<String, Object> variables, VariableKey variableKey)
