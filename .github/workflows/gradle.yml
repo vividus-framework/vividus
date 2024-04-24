@@ -760,8 +760,8 @@ jobs:
         expectedStory="vividus-tests/src/main/resources/story/replacement/ReplacedStepsExpected.story"
         actualComposites="vividus-tests/src/main/resources/steps/replacement/replaced_composites_actual.steps"
         expectedComposites="vividus-tests/src/main/resources/steps/replacement/replaced_composites_expected.steps"
-        cmp -c "$actualStory" "$expectedStory"
-        cmp -c "$actualComposites" "$expectedComposites"
+        cmp "$actualStory" "$expectedStory"
+        cmp "$actualComposites" "$expectedComposites"
 
     - name: Replace and validate deprecated properties
       if: matrix.platform == 'macos-latest'
@@ -770,7 +770,7 @@ jobs:
         ./gradlew :vividus-tests:replaceDeprecatedProperties
         actualProperties="vividus-tests/src/main/resources/properties/environment/system/properties_replacer/actual_properties.properties"
         expectedProperties="vividus-tests/src/main/resources/properties/environment/system/properties_replacer/expected_properties.properties"
-        cmp -c "$actualProperties" "$expectedProperties"
+        cmp "$actualProperties" "$expectedProperties"
 
     - name: Publish artifacts to GitHub packages
       if: (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/release-')) && matrix.platform == 'ubuntu-latest'
