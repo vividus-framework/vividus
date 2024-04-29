@@ -1119,7 +1119,7 @@ Then `#{extractPathFromUrl(https://docs.vividus.dev/vividus/latest?page=2)}` is 
 
 === `extractQueryFromUrl`
 
-Extracts tyhe decoded query component from the given URL.
+Extracts the decoded query component from the given URL.
 
 [source, subs="+quotes"]
 ----
