@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ public class UrlExpressionProcessors extends DelegatingExpressionProcessor
     public UrlExpressionProcessors()
     {
         super(List.of(
+                new SingleArgExpressionProcessor<>("extractSchemeFromUrl", url -> UriUtils.createUri(url).getScheme()),
                 new SingleArgExpressionProcessor<>("extractHostFromUrl", url -> UriUtils.createUri(url).getHost()),
                 new SingleArgExpressionProcessor<>("extractPathFromUrl", url -> UriUtils.createUri(url).getPath()),
                 new SingleArgExpressionProcessor<>("extractQueryFromUrl", url -> UriUtils.createUri(url).getQuery())

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 class UrlExpressionProcessorsTests
 {
     private static final String EXAMPLE_URL = "https://www.example.com/one/two?id=0&name=temp";
+    private static final String URL_SCHEME = "https";
     private static final String URL_HOST = "www.example.com";
     private static final String URL_PATH = "/one/two";
     private static final String URL_QUERY = "id=0&name=temp";
@@ -38,6 +39,8 @@ class UrlExpressionProcessorsTests
     {
         // CHECKSTYLE:OFF
         return Stream.of(
+                arguments("extractSchemeFromUrl(tel:37127123567)", "tel"),
+                arguments(String.format("extractSchemeFromUrl(%s)", EXAMPLE_URL),  URL_SCHEME),
                 arguments(String.format("extractHostFromUrl(%s)", EXAMPLE_URL),  URL_HOST),
                 arguments(String.format("extractPathFromUrl(%s)", EXAMPLE_URL),  URL_PATH),
                 arguments(String.format("extractQueryFromUrl(%s)", EXAMPLE_URL), URL_QUERY)

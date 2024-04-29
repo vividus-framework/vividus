@@ -232,6 +232,7 @@ Scenario: Validate expressions parsing URLs
 Then `#{<expression>}` is = `<expected>`
 Examples:
 |expression                                                                            |expected                  |
+|extractSchemeFromUrl(${vividus-test-site-url}/windows.html?query=test)                |https                     |
 |extractHostFromUrl(${vividus-test-site-url}/windows.html?query=test)                  |${vividus-test-site-host} |
 |extractPathFromUrl(${vividus-test-site-url}/windows.html?query=test)                  |/windows.html             |
 |extractPathFromUrl(${vividus-test-site-url}/encoded%E2%82%AC/windows.html?query=test) |/encoded€/windows.html    |
