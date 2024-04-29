@@ -1058,11 +1058,30 @@ Given I initialize scenario variable `my-data` with value `#{resourceToBase64(/d
 ----
 
 == URL parsing
-:url-argument: pass:quotes[*`$url`* - the URL to extract component from.]
+:url-argument: pass:quotes[*`$url`* - the URL to extract the component from.]
+
+=== `extractSchemeFromUrl`
+
+Extracts the scheme component from the given URL.
+
+[source, subs="+quotes"]
+----
+#{extractSchemeFromUrl(*$url*)}
+----
+
+[subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
+* {url-argument}
+
+.Validate URL protocol
+[source,gherkin]
+----
+Then `#{extractHostFromUrl(file://server/folder/data.xml?id=123)}` is equal to `file`
+Then `#{extractHostFromUrl(https://docs.vividus.dev/vividus/latest?page=2)}` is equal to `https`
+----
 
 === `extractHostFromUrl`
 
-Extracts host component from the given URL.
+Extracts the host component from the given URL.
 
 [source, subs="+quotes"]
 ----
@@ -1072,16 +1091,16 @@ Extracts host component from the given URL.
 [subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
 * {url-argument}
 
-.Validate host component from URL
+.Validate the host component from URL
 [source,gherkin]
 ----
-Then `#{extractHostFromUrl(file://server/folder/data.xml?id=123)}` is = `server`
-Then `#{extractHostFromUrl(https://docs.vividus.dev/vividus/latest?page=2)}` is = `docs.vividus.dev`
+Then `#{extractHostFromUrl(file://server/folder/data.xml?id=123)}` is equal to `server`
+Then `#{extractHostFromUrl(https://docs.vividus.dev/vividus/latest?page=2)}` is equal to `docs.vividus.dev`
 ----
 
 === `extractPathFromUrl`
 
-Extracts decoded path component from the given URL.
+Extracts the decoded path component from the given URL.
 
 [source, subs="+quotes"]
 ----
@@ -1091,16 +1110,16 @@ Extracts decoded path component from the given URL.
 [subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
 * {url-argument}
 
-.Validate path component from URL
+.Validate the path component from URL
 [source,gherkin]
 ----
-Then `#{extractPathFromUrl(file://server/folder/data.xml?id=123)}` is = `/folder/data.xml`
-Then `#{extractPathFromUrl(https://docs.vividus.dev/vividus/latest?page=2)}` is = `/vividus/latest`
+Then `#{extractPathFromUrl(file://server/folder/data.xml?id=123)}` is equal to `/folder/data.xml`
+Then `#{extractPathFromUrl(https://docs.vividus.dev/vividus/latest?page=2)}` is equal to `/vividus/latest`
 ----
 
 === `extractQueryFromUrl`
 
-Extracts decoded query component from the given URL.
+Extracts the decoded query component from the given URL.
 
 [source, subs="+quotes"]
 ----
@@ -1110,11 +1129,11 @@ Extracts decoded query component from the given URL.
 [subs="specialchars,attributes,quotes,replacements,macros,post_replacements"]
 * {url-argument}
 
-.Validate query component from URL
+.Validate the query component from URL
 [source,gherkin]
 ----
-Then `#{extractQueryFromUrl(file://server/folder/data.xml?id=123)}` is = `id=123`
-Then `#{extractQueryFromUrl(https://docs.vividus.dev/vividus/latest?page=2)}` is = `page=2`
+Then `#{extractQueryFromUrl(file://server/folder/data.xml?id=123)}` is equal to `id=123`
+Then `#{extractQueryFromUrl(https://docs.vividus.dev/vividus/latest?page=2)}` is equal to `page=2`
 ----
 
 == Script evaluation
