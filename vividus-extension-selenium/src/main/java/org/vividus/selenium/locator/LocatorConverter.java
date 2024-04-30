@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,8 +135,8 @@ public class LocatorConverter
                             parametersQuantity, parameters.length));
         }
         return "xpath".equalsIgnoreCase(locatorPattern.getLocatorType())
-            ? XpathLocatorUtils.getXPath(pattern, parameters)
-            : String.format(pattern, parameters);
+            ? XpathLocatorUtils.getXPath(pattern, (Object[]) parameters)
+            : String.format(pattern, (Object[]) parameters);
     }
 
     private static Optional<LocatorType> findLocatorType(Set<LocatorType> locatorTypes, String type)
