@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -39,11 +39,11 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ConnectionClosedException;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.apache.hc.core5.http.protocol.HttpContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
@@ -139,7 +139,7 @@ class HttpRequestExecutorTests
     @Test
     void testExecuteHttpRequestConnectionClosedException() throws IOException
     {
-        when(httpClient.execute(requestWithMatchingUrl(URL), nullable(HttpContext.class))).thenThrow(
+        when(httpClient.execute(requestWithMatchingUrl(URL), isA(HttpClientContext.class))).thenThrow(
                 new ConnectionClosedException());
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty());
         verify(softAssert).recordFailedAssertion(
@@ -151,7 +151,8 @@ class HttpRequestExecutorTests
     @Test
     void testExecuteHttpRequestIOException() throws IOException
     {
-        when(httpClient.execute(requestWithMatchingUrl(URL), nullable(HttpContext.class))).thenThrow(new IOException());
+        when(httpClient.execute(requestWithMatchingUrl(URL), isA(HttpClientContext.class))).thenThrow(
+                new IOException());
         assertThrows(IOException.class,
             () -> httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty()));
         verify(httpTestContext).releaseRequestData();
@@ -161,7 +162,7 @@ class HttpRequestExecutorTests
     {
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.setResponseTimeInMs(RESPONSE_TIME_IN_MS);
-        when(httpClient.execute(requestWithMatchingUrl(URL), nullable(HttpContext.class))).thenReturn(httpResponse);
+        when(httpClient.execute(requestWithMatchingUrl(URL), isA(HttpClientContext.class))).thenReturn(httpResponse);
         return httpResponse;
     }
 

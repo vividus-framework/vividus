@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -29,7 +28,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 
-import org.apache.hc.core5.http.protocol.HttpContext;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,7 +59,7 @@ class ResourceValidatorTests
     @Test
     void shouldValidateResource() throws IOException
     {
-        when(httpClient.doHttpHead(eq(FIRST), any(HttpContext.class))).thenReturn(httpResponse);
+        when(httpClient.doHttpHead(FIRST)).thenReturn(httpResponse);
         when(httpResponse.getStatusCode()).thenReturn(200);
         when(softAssert.assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER))).thenReturn(true);
         var resourceValidation = new ResourceValidation(FIRST);
@@ -72,7 +70,7 @@ class ResourceValidatorTests
     @Test
     void shouldValidateResourceAndReuseCachedResultForTheSameUrl() throws IOException
     {
-        when(httpClient.doHttpHead(eq(FIRST), any(HttpContext.class))).thenReturn(httpResponse);
+        when(httpClient.doHttpHead(FIRST)).thenReturn(httpResponse);
         when(httpResponse.getStatusCode()).thenReturn(200);
         when(softAssert.assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER))).thenReturn(true);
         var resourceValidation = new ResourceValidation(FIRST);
@@ -88,7 +86,7 @@ class ResourceValidatorTests
     @Test
     void shouldValidateResourceAndNotRetryWithGetIfStatusCodeNotInNotAllowedSet() throws IOException
     {
-        when(httpClient.doHttpHead(eq(FIRST), any(HttpContext.class))).thenReturn(httpResponse);
+        when(httpClient.doHttpHead(FIRST)).thenReturn(httpResponse);
         var forbidden = 403;
         when(httpResponse.getStatusCode()).thenReturn(forbidden);
         when(softAssert.assertThat(eq("Status code for https://vividus.org is 403. expected one of [200]"),
@@ -101,8 +99,8 @@ class ResourceValidatorTests
     @Test
     void shouldValidateResourceAndRetryWithGetWhenHeadStatusCodeInNotAllowedSet() throws IOException
     {
-        when(httpClient.doHttpHead(eq(FIRST), any(HttpContext.class))).thenReturn(httpResponse);
-        when(httpClient.doHttpGet(eq(FIRST), any(HttpContext.class))).thenReturn(httpResponse);
+        when(httpClient.doHttpHead(FIRST)).thenReturn(httpResponse);
+        when(httpClient.doHttpGet(FIRST)).thenReturn(httpResponse);
         when(softAssert.assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER))).thenReturn(true);
         var notFound = 404;
         when(httpResponse.getStatusCode()).thenReturn(notFound).thenReturn(OK);
@@ -115,7 +113,7 @@ class ResourceValidatorTests
     void shouldMarkValidationAsBrokenIfExceptionOccurs() throws IOException
     {
         var ioException = new IOException();
-        when(httpClient.doHttpHead(eq(FIRST), any(HttpContext.class))).thenThrow(ioException);
+        when(httpClient.doHttpHead(FIRST)).thenThrow(ioException);
         var resourceValidation = new ResourceValidation(FIRST);
         var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.BROKEN, result.getCheckStatus());

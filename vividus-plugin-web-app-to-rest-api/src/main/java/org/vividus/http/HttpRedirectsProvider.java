@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.List;
 
 import org.apache.hc.client5.http.CircularRedirectException;
 import org.apache.hc.client5.http.HttpResponseException;
-import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.HttpStatus;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
@@ -43,11 +42,10 @@ public class HttpRedirectsProvider
      */
     public List<URI> getRedirects(URI from) throws IOException
     {
-        HttpClientContext httpContext = HttpClientContext.create();
-        HttpResponse response;
+        HttpResponse httpResponse;
         try
         {
-            response = httpClient.doHttpHead(from, httpContext);
+            httpResponse = httpClient.doHttpHead(from);
         }
         catch (IOException e)
         {
@@ -65,14 +63,14 @@ public class HttpRedirectsProvider
             throw new IOException(exceptionMsg, e);
         }
 
-        int statusCode = response.getStatusCode();
+        int statusCode = httpResponse.getStatusCode();
         if (statusCode < STATUS_CODE_LEFT_BOUNDARY || statusCode > STATUS_CODE_RIGHT_BOUNDARY)
         {
             String message = "HTTP response status code is expected to be in range [%d - %d], but was %d".formatted(
                     STATUS_CODE_LEFT_BOUNDARY, STATUS_CODE_RIGHT_BOUNDARY, statusCode);
             throw new HttpResponseException(statusCode, message);
         }
-        return httpContext.getRedirectLocations().getAll();
+        return httpResponse.getRedirectLocations().getAll();
     }
 
     public void setHttpClient(IHttpClient httpClient)

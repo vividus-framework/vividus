@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.text.StringEscapeUtils;
-import org.apache.hc.client5.http.ContextBuilder;
-import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.core5.http.HttpHost;
 import org.hamcrest.Matchers;
 import org.jbehave.core.annotations.Given;
 import org.jbehave.core.annotations.Then;
@@ -37,6 +33,7 @@ import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.annotation.Replacement;
+import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.steps.StringComparisonRule;
@@ -48,7 +45,6 @@ import org.vividus.ui.web.configuration.AuthenticationMode;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.ui.web.listener.WebApplicationListener;
 import org.vividus.util.UriUtils;
-import org.vividus.util.UriUtils.UserInfo;
 
 import jakarta.inject.Inject;
 
@@ -329,20 +325,8 @@ public class PageSteps
         {
             try
             {
-                URI pageUriToCheck = pageUrl;
-                UserInfo userInfo = UriUtils.getUserInfo(pageUriToCheck);
-                ContextBuilder contextBuilder = ContextBuilder.create();
-                if (userInfo != null)
-                {
-                    UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(userInfo.user(),
-                            userInfo.password().toCharArray());
-                    HttpHost host = HttpHost.create(pageUriToCheck);
-                    contextBuilder = contextBuilder.preemptiveBasicAuth(host, credentials);
-                    pageUriToCheck = UriUtils.removeUserInfo(pageUriToCheck);
-                }
-                HttpClientContext context = contextBuilder.build();
-                httpClient.doHttpHead(pageUriToCheck, context);
-                List<URI> redirectLocations = context.getRedirectLocations().getAll();
+                HttpResponse httpResponse = httpClient.doHttpHead(pageUrl, true);
+                List<URI> redirectLocations = httpResponse.getRedirectLocations().getAll();
                 if (!redirectLocations.isEmpty())
                 {
                     URI uri = redirectLocations.get(redirectLocations.size() - 1);

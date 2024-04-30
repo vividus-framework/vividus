@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.hc.client5.http.protocol.RedirectLocations;
 import org.apache.hc.core5.http.Header;
 
 public class HttpResponse
@@ -32,6 +33,7 @@ public class HttpResponse
     private long responseTimeInMs;
     private byte[] responseBody;
     private Header[] responseHeaders;
+    private RedirectLocations redirectLocations;
 
     public Optional<Header> getHeaderByName(String headerName)
     {
@@ -106,6 +108,16 @@ public class HttpResponse
     public void setFrom(URI from)
     {
         this.from = from;
+    }
+
+    public void setRedirectLocations(RedirectLocations redirectLocations)
+    {
+        this.redirectLocations = redirectLocations;
+    }
+
+    public RedirectLocations getRedirectLocations()
+    {
+        return redirectLocations;
     }
 
     @Override
