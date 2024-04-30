@@ -152,7 +152,7 @@
 
     <bean id="abstractScreenshotParametersFactory" class="org.vividus.ui.screenshot.AbstractScreenshotParametersFactory" abstract="true">
         <property name="ignoreStrategies">
-             <util:map key-type="org.vividus.selenium.screenshot.IgnoreStrategy" value-type="java.util.LinkedHashSet" map-class="java.util.LinkedHashMap">
+             <util:map key-type="org.vividus.selenium.screenshot.IgnoreStrategy" value-type="java.util.Set" map-class="java.util.LinkedHashMap">
                  <entry key="ELEMENT" value="${ui.visual.ignored-elements}"/>
                  <entry key="AREA" value="${ui.visual.ignored-areas}"/>
              </util:map>

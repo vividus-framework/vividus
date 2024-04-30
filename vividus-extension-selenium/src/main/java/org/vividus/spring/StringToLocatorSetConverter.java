@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@ import org.vividus.selenium.locator.LocatorConverter;
 
 public class StringToLocatorSetConverter implements Converter<String, Set<Locator>>
 {
-    private LocatorConverter conversionUtils;
+    private final LocatorConverter conversionUtils;
+
+    public StringToLocatorSetConverter(LocatorConverter conversionUtils)
+    {
+        this.conversionUtils = conversionUtils;
+    }
 
     @Override
     public Set<Locator> convert(String source)
     {
         return conversionUtils.convertToLocatorSet(source);
-    }
-
-    public void setConversionUtils(LocatorConverter conversionUtils)
-    {
-        this.conversionUtils = conversionUtils;
     }
 }

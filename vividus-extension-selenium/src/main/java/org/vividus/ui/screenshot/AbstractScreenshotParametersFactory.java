@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.ui.screenshot;
 
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -130,7 +131,7 @@ public abstract class AbstractScreenshotParametersFactory<C extends ScreenshotCo
             Set<Locator> ignore = Stream.concat(
                     getLocatorsStream(globalIgnores.getValue()),
                     getLocatorsStream(stepIgnores.get(ignoreStrategy)))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
             allIgnores.put(ignoreStrategy, ignore);
         }
         parameters.setIgnoreStrategies(allIgnores);
