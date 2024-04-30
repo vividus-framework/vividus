@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -33,9 +32,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -43,10 +40,7 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.apache.hc.client5.http.ContextBuilder;
-import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.protocol.RedirectLocations;
-import org.apache.hc.core5.http.HttpHost;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -252,14 +246,14 @@ class PageStepsTests
     @Test
     void testOpenMainApplicationPageRedirect() throws IOException
     {
-        mockPageRedirect(URL, URL, HTTP_EXAMPLE_COM);
+        mockPageRedirect(URL, HTTP_EXAMPLE_COM);
         pageSteps.openMainApplicationPage();
         verify(navigateActions).navigateTo(URL);
         verifyNoMoreInteractions(navigateActions);
     }
 
     @Test
-    void testOpenMainApplicationPageRedirectSameHost() throws IOException, URISyntaxException
+    void testOpenMainApplicationPageRedirectSameHost() throws IOException
     {
         var httpExampleComWithUserInfo = "http://user:password@example.com";
         WebApplicationListener webApplicationListener1 = mock();
@@ -268,39 +262,26 @@ class PageStepsTests
         WebApplicationListener webApplicationListener2 = mock();
         when(webApplicationListener2.onLoad()).thenReturn(false);
         webApplicationListeners.add(webApplicationListener2);
-        mockPageRedirect(httpExampleComWithUserInfo, HTTP_EXAMPLE_COM, "https://example.com");
+        mockPageRedirect(httpExampleComWithUserInfo, "https://example.com");
         when(webApplicationConfiguration.getBasicAuthUser()).thenReturn("user:password");
-        var expectedHost = HttpHost.create(HTTP_EXAMPLE_COM);
-        ContextBuilder contextBuilder = mock();
 
-        try (var contextBuilderStatic = Mockito.mockStatic(ContextBuilder.class))
-        {
-            contextBuilderStatic.when(ContextBuilder::create).thenReturn(contextBuilder);
-            when(contextBuilder.preemptiveBasicAuth(argThat(expectedHost::equals),
-                    argThat(credentials -> "user".equals(credentials.getUserPrincipal().getName())
-                            && Arrays.equals(credentials.getPassword(), "password".toCharArray()))))
-                                    .thenReturn(contextBuilder);
-            when(contextBuilder.build()).thenReturn(new HttpClientContext());
-            pageSteps.openMainApplicationPage();
-        }
+        pageSteps.openMainApplicationPage();
+
         verify(navigateActions).navigateTo("https://user:password@example.com");
         verifyNoMoreInteractions(navigateActions);
     }
 
-    private void mockPageRedirect(String mainPageUrl, String expectedHeadUrl, String redirectPageUrl) throws IOException
+    private void mockPageRedirect(String mainPageUrl, String redirectPageUrl) throws IOException
     {
         pageSteps.setKeepUserInfoForProtocolRedirects(true);
         when(webApplicationConfiguration.getAuthenticationMode()).thenReturn(AuthenticationMode.URL);
         var mainPage = URI.create(mainPageUrl);
-        var requestUrl = URI.create(expectedHeadUrl);
         var redirectPage = URI.create(redirectPageUrl);
-        when(httpClient.doHttpHead(eq(requestUrl), argThat(context ->
-        {
-            var redirectLocations = new RedirectLocations();
-            redirectLocations.add(redirectPage);
-            context.setAttribute(HttpClientContext.REDIRECT_LOCATIONS, redirectLocations);
-            return true;
-        }))).thenReturn(new HttpResponse());
+        var redirectLocations = new RedirectLocations();
+        redirectLocations.add(redirectPage);
+        var httpResponse = new HttpResponse();
+        httpResponse.setRedirectLocations(redirectLocations);
+        when(httpClient.doHttpHead(mainPage, true)).thenReturn(httpResponse);
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
     }
 
@@ -311,18 +292,16 @@ class PageStepsTests
         when(webApplicationConfiguration.getAuthenticationMode()).thenReturn(AuthenticationMode.URL);
         var mainPage = URI.create(HTTP_EXAMPLE_COM);
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
-        when(httpClient.doHttpHead(eq(mainPage), argThat(context ->
-        {
-            context.setAttribute(HttpClientContext.REDIRECT_LOCATIONS, new RedirectLocations());
-            return true;
-        }))).thenReturn(new HttpResponse());
+        var httpResponse = new HttpResponse();
+        httpResponse.setRedirectLocations(new RedirectLocations());
+        when(httpClient.doHttpHead(mainPage, true)).thenReturn(httpResponse);
         pageSteps.openMainApplicationPage();
         verify(navigateActions).navigateTo(HTTP_EXAMPLE_COM);
         verifyNoMoreInteractions(navigateActions);
     }
 
     @Test
-    void testOpenMainApplicationPageIOExeption() throws IOException
+    void testOpenMainApplicationPageIOException() throws IOException
     {
         var exceptionMessage = "message";
         pageSteps.setKeepUserInfoForProtocolRedirects(true);
@@ -330,7 +309,7 @@ class PageStepsTests
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(mainPage);
         when(webApplicationConfiguration.getAuthenticationMode()).thenReturn(AuthenticationMode.URL);
         var exception = new IOException(exceptionMessage);
-        doThrow(exception).when(httpClient).doHttpHead(eq(mainPage), any(HttpClientContext.class));
+        doThrow(exception).when(httpClient).doHttpHead(mainPage, true);
         pageSteps.openMainApplicationPage();
         assertThat(logger.getLoggingEvents(),
                 is(List.of(error("HTTP request for '{}' failed with the exception: {}", mainPage, exceptionMessage))));

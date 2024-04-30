@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,18 @@
 package org.vividus.http.client;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,14 +37,19 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Base64;
 import java.util.List;
-import java.util.stream.Stream;
 
-import org.apache.commons.lang3.function.FailableSupplier;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.AuthenticationException;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.client5.http.protocol.RedirectLocations;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
@@ -53,10 +59,9 @@ import org.apache.hc.core5.http.HttpStatus;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -75,6 +80,14 @@ class HttpClientTests
 
     private static final String VIVIDUS_ORG = "https://www.vividus.org/";
     private static final URI URI_TO_GO = URI.create(VIVIDUS_ORG);
+
+    private static final String USER = "user";
+    private static final String PASSWORD = "pass";
+    private static final String BASIC_AUTH = USER + ":" + PASSWORD;
+    private static final String SCHEME = "https";
+    private static final String HOST = "www.vividus.org";
+    private static final HttpHost HTTP_HOST = new HttpHost(SCHEME, HOST, 443);
+    private static final URI URI_WITH_BASIC_AUTH = URI.create(SCHEME + "://" + BASIC_AUTH + "@" + HOST + "/");
 
     @Mock private HttpResponseHandler handler;
     @Mock private Header header;
@@ -95,34 +108,19 @@ class HttpClientTests
     }
 
     @Test
-    void testGetHttpHost() throws URISyntaxException
+    void testGetHttpHost()
     {
-        var httpHost = createHttpHost();
+        var httpHost = HTTP_HOST;
         httpClient.setHttpHost(httpHost);
         assertEquals(httpHost, httpClient.getHttpHost());
     }
 
-    @TestFactory
-    Stream<DynamicTest> httpGetTests()
+    @Test
+    void shouldDoHttpGetWithPreemptiveAuthEnabled() throws IOException, AuthenticationException
     {
-        return Stream.of(
-                dynamicTest("shouldDoHttpGetWithHttpContext", () -> {
-                    HttpContext context = mock();
-                    testDoHttpGet(context, () -> httpClient.doHttpGet(URI_TO_GO, context));
-                }),
-                dynamicTest("shouldDoHttpGetWithoutHttpContext", () -> {
-                    testDoHttpGet(null, () -> httpClient.doHttpGet(URI_TO_GO));
-                })
-        );
-    }
-
-    private void testDoHttpGet(HttpContext context, FailableSupplier<HttpResponse, IOException> test)
-            throws IOException, URISyntaxException
-    {
-        var httpHost = createHttpHost();
+        var httpHost = HTTP_HOST;
         httpClient.setHttpHost(httpHost);
-        @SuppressWarnings("PMD.CloseResource")
-        ClassicHttpResponse classicHttpResponse = mock();
+        @SuppressWarnings("PMD.CloseResource") ClassicHttpResponse classicHttpResponse = mock();
         HttpEntity httpEntity = mock();
         byte[] body = { 0, 1, 2 };
         var headers = new Header[] { header };
@@ -134,7 +132,8 @@ class HttpClientTests
         });
         when(classicHttpResponse.getHeaders()).thenReturn(headers);
         when(classicHttpResponse.getCode()).thenReturn(statusCode);
-        when(closeableHttpClient.execute(eq(httpHost), isA(HttpGet.class), eq(context),
+        var httpContextArgumentCaptor = ArgumentCaptor.forClass(HttpContext.class);
+        when(closeableHttpClient.execute(eq(httpHost), isA(HttpGet.class), httpContextArgumentCaptor.capture(),
                 argThat((ArgumentMatcher<HttpClientResponseHandler<HttpResponse>>) responseHandler -> {
                     try
                     {
@@ -151,110 +150,140 @@ class HttpClientTests
                         throw new IllegalStateException(e);
                     }
                 }))).thenReturn(new HttpResponse());
-        var httpResponse = test.get();
+        var httpResponse = httpClient.doHttpGet(URI_WITH_BASIC_AUTH, true);
         assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
         verify(handler).handle(httpResponse);
+        var httpContext = httpContextArgumentCaptor.getValue();
+        assertInstanceOf(HttpClientContext.class, httpContext);
+        var httpClientContext = (HttpClientContext) httpContext;
+        var authExchanges = httpClientContext.getAuthExchanges();
+        assertEquals(1, authExchanges.size());
+        var authExchange = authExchanges.get(HTTP_HOST);
+        var authScheme = authExchange.getAuthScheme();
+        var authResponse = authScheme.generateAuthResponse(null, null, null);
+        var expectedAuthResponse = "Basic " + Base64.getEncoder().encodeToString(
+                BASIC_AUTH.getBytes(StandardCharsets.UTF_8));
+        assertEquals(expectedAuthResponse, authResponse);
+        assertNull(httpClientContext.getCredentialsProvider());
     }
 
     @Test
-    void shouldDoHttpGetSkippingResponseBodySaving() throws URISyntaxException, IOException
+    void shouldDoHttpGetSkippingResponseBodySaving() throws IOException
     {
         httpClient.setSkipResponseEntity(true);
-        var httpHost = createHttpHost();
+        var httpHost = HTTP_HOST;
         httpClient.setHttpHost(httpHost);
-        @SuppressWarnings("PMD.CloseResource")
-        ClassicHttpResponse classicHttpResponse = mock();
-        HttpEntity httpEntity = mock();
-        var headers = new Header[] { header };
-        var statusCode = HttpStatus.SC_OK;
-        when(classicHttpResponse.getEntity()).thenAnswer((Answer<HttpEntity>) invocation -> {
-            Sleeper.sleep(Duration.ofMillis(THREAD_SLEEP_TIME));
-            return httpEntity;
-        });
-        when(classicHttpResponse.getHeaders()).thenReturn(headers);
-        when(classicHttpResponse.getCode()).thenReturn(statusCode);
-        when(closeableHttpClient.execute(eq(httpHost), isA(HttpGet.class), nullable(HttpContext.class),
-                argThat((ArgumentMatcher<HttpClientResponseHandler<HttpResponse>>) responseHandler -> {
-                    try
-                    {
-                        var httpResponse = responseHandler.handleResponse(classicHttpResponse);
-                        assertEquals(VIVIDUS_ORG, httpResponse.getFrom().toString());
-                        assertEquals(GET, httpResponse.getMethod());
-                        assertNull(httpResponse.getResponseBody());
-                        assertArrayEquals(headers, httpResponse.getResponseHeaders());
-                        assertEquals(statusCode, httpResponse.getStatusCode());
-                        return true;
-                    }
-                    catch (HttpException | IOException e)
-                    {
-                        throw new IllegalStateException(e);
-                    }
-                }))).thenReturn(new HttpResponse());
+        var responseHandlerMatcher = responseHandlerMatcher(GET, HttpStatus.SC_OK, mock());
+        when(closeableHttpClient.execute(eq(httpHost), isA(HttpGet.class), isA(HttpClientContext.class),
+                argThat(responseHandlerMatcher))).thenReturn(new HttpResponse());
         var httpResponse = httpClient.doHttpGet(URI_TO_GO);
         assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
         verify(handler).handle(httpResponse);
     }
 
-    @TestFactory
-    Stream<DynamicTest> httpHeadTests()
+    @Test
+    void shouldDoHttpHead() throws IOException
     {
-        return Stream.of(
-                dynamicTest("shouldDoHttpHeadWithHttpContext", () -> {
-                    HttpContext context = mock();
-                    testDoHttpHead(context, () -> httpClient.doHttpHead(URI_TO_GO, context));
-                }),
-                dynamicTest("shouldDoHttpHeadWithoutHttpContext", () -> {
-                    testDoHttpHead(null, () -> httpClient.doHttpHead(URI_TO_GO));
-                })
-        );
-    }
-
-    private void testDoHttpHead(HttpContext context, FailableSupplier<HttpResponse, IOException> test)
-            throws IOException
-    {
-        @SuppressWarnings("PMD.CloseResource")
-        ClassicHttpResponse classicHttpResponse = mock();
-        when(classicHttpResponse.getEntity()).thenAnswer((Answer<HttpEntity>) invocation -> {
-            Sleeper.sleep(Duration.ofMillis(THREAD_SLEEP_TIME));
-            return null;
-        });
-        var statusCode = HttpStatus.SC_MOVED_PERMANENTLY;
-        var headers = new Header[] { header };
-        when(classicHttpResponse.getHeaders()).thenReturn(headers);
-        when(classicHttpResponse.getCode()).thenReturn(statusCode);
-        when(closeableHttpClient.execute(isA(HttpHead.class), eq(context),
-                argThat((ArgumentMatcher<HttpClientResponseHandler<HttpResponse>>) responseHandler -> {
-                    try
-                    {
-                        var httpResponse = responseHandler.handleResponse(classicHttpResponse);
-                        assertEquals(HEAD, httpResponse.getMethod());
-                        assertEquals(URI_TO_GO, httpResponse.getFrom());
-                        assertEquals(statusCode, httpResponse.getStatusCode());
-                        assertArrayEquals(headers, httpResponse.getResponseHeaders());
-                        return true;
-                    }
-                    catch (HttpException | IOException e)
-                    {
-                        throw new IllegalStateException(e);
-                    }
-                }))).thenReturn(new HttpResponse());
-        var httpResponse = test.get();
+        var httpContextArgumentCaptor = ArgumentCaptor.forClass(HttpContext.class);
+        var responseHandlerMatcher = responseHandlerMatcher(HEAD, HttpStatus.SC_MOVED_PERMANENTLY, null);
+        when(closeableHttpClient.execute(isA(HttpHead.class), httpContextArgumentCaptor.capture(),
+                argThat(responseHandlerMatcher))).thenReturn(new HttpResponse());
+        var httpResponse = httpClient.doHttpHead(URI_WITH_BASIC_AUTH);
         assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
         verify(handler).handle(httpResponse);
+        var httpContext = httpContextArgumentCaptor.getValue();
+        assertInstanceOf(HttpClientContext.class, httpContext);
+        var httpClientContext = (HttpClientContext) httpContext;
+        var authExchanges = httpClientContext.getAuthExchanges();
+        assertThat(authExchanges.entrySet(), is(empty()));
+        var credentialsProvider = httpClientContext.getCredentialsProvider();
+        assertInstanceOf(BasicCredentialsProvider.class, credentialsProvider);
+        var credentials = credentialsProvider.getCredentials(new AuthScope(HTTP_HOST), null);
+        assertEquals(USER, credentials.getUserPrincipal().getName());
+        assertArrayEquals(PASSWORD.toCharArray(), credentials.getPassword());
     }
 
     @Test
     void testDoHttpGetThrowingIOExceptionAtExecution() throws IOException
     {
         var message = "execute HTTP GET exception message";
-        when(closeableHttpClient.execute(isA(HttpGet.class), nullable(HttpContext.class), any())).thenThrow(
+        var request = new HttpGet(URI_TO_GO);
+        when(closeableHttpClient.execute(eq(request), isA(HttpClientContext.class), any())).thenThrow(
                 new IOException(message));
-        var exception = assertThrows(IOException.class, () -> httpClient.doHttpGet(URI_TO_GO));
+        var exception = assertThrows(IOException.class, () -> httpClient.execute(request));
         assertEquals(message, exception.getMessage());
     }
 
-    private static HttpHost createHttpHost() throws URISyntaxException
+    @Test
+    void testDoHttpHeadThrowingIOExceptionAtGettingUri() throws IOException, URISyntaxException
     {
-        return HttpHost.create(VIVIDUS_ORG.substring(0, VIVIDUS_ORG.length() - 1));
+        var uriSyntaxException = new URISyntaxException("invalid uri", "Unable to parse URI");
+        var request = mock(HttpHead.class);
+        when(request.getUri()).thenThrow(uriSyntaxException);
+        when(closeableHttpClient.execute(eq(request), isA(HttpClientContext.class),
+                argThat((ArgumentMatcher<HttpClientResponseHandler<HttpResponse>>) responseHandler -> {
+                    try
+                    {
+                        ClassicHttpResponse classicHttpResponse = mock();
+                        responseHandler.handleResponse(classicHttpResponse);
+                        return false;
+                    }
+                    catch (HttpException | IOException e)
+                    {
+                        assertEquals(uriSyntaxException, e.getCause());
+                        return true;
+                    }
+                }))).thenReturn(new HttpResponse());
+        var httpResponse = httpClient.execute(request);
+        assertNull(httpResponse.getFrom());
+    }
+
+    @Test
+    void shouldDoHttpGetAndSaveRedirects() throws IOException
+    {
+        httpClient.setSkipResponseEntity(true);
+        var httpHost = HTTP_HOST;
+        httpClient.setHttpHost(httpHost);
+        var request = new HttpGet(URI_TO_GO);
+        var context = HttpClientContext.create();
+        RedirectLocations redirectLocations = mock();
+        context.setAttribute(HttpClientContext.REDIRECT_LOCATIONS, redirectLocations);
+        var responseHandlerMatcher = responseHandlerMatcher(GET, HttpStatus.SC_OK, mock());
+        when(closeableHttpClient.execute(eq(httpHost), eq(request), eq(context),
+                argThat(responseHandlerMatcher))).thenReturn(new HttpResponse());
+        var httpResponse = httpClient.execute(request, context);
+        assertThat(httpResponse.getResponseTimeInMs(), greaterThan(0L));
+        assertEquals(redirectLocations, httpResponse.getRedirectLocations());
+        verify(handler).handle(httpResponse);
+    }
+
+    private ArgumentMatcher<HttpClientResponseHandler<HttpResponse>> responseHandlerMatcher(String httpMethod,
+            int statusCode, HttpEntity httpEntity)
+    {
+        @SuppressWarnings("PMD.CloseResource")
+        ClassicHttpResponse classicHttpResponse = mock();
+        var headers = new Header[] { header };
+        when(classicHttpResponse.getEntity()).thenAnswer((Answer<HttpEntity>) invocation -> {
+            Sleeper.sleep(Duration.ofMillis(THREAD_SLEEP_TIME));
+            return httpEntity;
+        });
+        when(classicHttpResponse.getHeaders()).thenReturn(headers);
+        when(classicHttpResponse.getCode()).thenReturn(statusCode);
+        return responseHandler -> {
+            try
+            {
+                var httpResponse = responseHandler.handleResponse(classicHttpResponse);
+                assertEquals(URI_TO_GO, httpResponse.getFrom());
+                assertEquals(httpMethod, httpResponse.getMethod());
+                assertNull(httpResponse.getResponseBody());
+                assertEquals(statusCode, httpResponse.getStatusCode());
+                assertArrayEquals(headers, httpResponse.getResponseHeaders());
+                return true;
+            }
+            catch (HttpException | IOException e)
+            {
+                throw new IllegalStateException(e);
+            }
+        };
     }
 }

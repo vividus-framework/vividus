@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,26 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.hc.client5.http.ContextBuilder;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.protocol.HttpContext;
 import org.vividus.http.handler.HttpResponseHandler;
+import org.vividus.util.UriUtils;
+import org.vividus.util.UriUtils.UserInfo;
 
 public class HttpClient implements IHttpClient, AutoCloseable
 {
@@ -49,25 +57,53 @@ public class HttpClient implements IHttpClient, AutoCloseable
     @Override
     public HttpResponse doHttpGet(URI uri) throws IOException
     {
-        return execute(new HttpGet(uri));
+        return doHttpGet(uri, false);
+    }
+
+    @Override
+    public HttpResponse doHttpGet(URI uri, boolean usePreemptiveBasicAuthIfAvailable) throws IOException
+    {
+        return executeWithUserInfoHandling(uri, usePreemptiveBasicAuthIfAvailable, HttpGet::new);
     }
 
     @Override
     public HttpResponse doHttpHead(URI uri) throws IOException
     {
-        return execute(new HttpHead(uri));
+        return doHttpHead(uri, false);
     }
 
     @Override
-    public HttpResponse doHttpGet(URI uri, HttpContext context) throws IOException
+    public HttpResponse doHttpHead(URI uri, boolean usePreemptiveBasicAuthIfAvailable) throws IOException
     {
-        return execute(new HttpGet(uri), context);
+        return executeWithUserInfoHandling(uri, usePreemptiveBasicAuthIfAvailable, HttpHead::new);
     }
 
-    @Override
-    public HttpResponse doHttpHead(URI uri, HttpContext context) throws IOException
+    private HttpResponse executeWithUserInfoHandling(URI uri, boolean usePreemptiveBasicAuthIfAvailable,
+            Function<URI, ClassicHttpRequest> requestFactory) throws IOException
     {
-        return execute(new HttpHead(uri), context);
+        UserInfo userInfo = UriUtils.getUserInfo(uri);
+        if (userInfo != null)
+        {
+            ContextBuilder contextBuilder = ContextBuilder.create();
+
+            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(userInfo.user(),
+                    userInfo.password().toCharArray());
+            HttpHost host = HttpHost.create(uri);
+            if (usePreemptiveBasicAuthIfAvailable)
+            {
+                contextBuilder = contextBuilder.preemptiveBasicAuth(host, credentials);
+            }
+            else
+            {
+                BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                credentialsProvider.setCredentials(new AuthScope(host), credentials);
+                contextBuilder.useCredentialsProvider(credentialsProvider);
+            }
+            URI targetUri = UriUtils.removeUserInfo(uri);
+            HttpClientContext httpClientContext = contextBuilder.build();
+            return execute(requestFactory.apply(targetUri), httpClientContext);
+        }
+        return execute(requestFactory.apply(uri));
     }
 
     @Override
@@ -77,7 +113,7 @@ public class HttpClient implements IHttpClient, AutoCloseable
     }
 
     @Override
-    public HttpResponse execute(ClassicHttpRequest request, HttpContext context) throws IOException
+    public HttpResponse execute(ClassicHttpRequest request, HttpClientContext context) throws IOException
     {
         HttpClientResponseHandler<HttpResponse> responseHandler = response -> {
             HttpResponse httpResponse = new HttpResponse();
@@ -107,12 +143,15 @@ public class HttpClient implements IHttpClient, AutoCloseable
             return httpResponse;
         };
 
+        HttpClientContext internalContext = Optional.ofNullable(context).orElseGet(HttpClientContext::create);
+
         StopWatch watch = new StopWatch();
         watch.start();
-        HttpResponse httpResponse = httpHost == null ? closeableHttpClient.execute(request, context, responseHandler)
-                : closeableHttpClient.execute(httpHost, request, context, responseHandler);
+        HttpResponse httpResponse = httpHost == null ? closeableHttpClient.execute(request, internalContext,
+                responseHandler) : closeableHttpClient.execute(httpHost, request, internalContext, responseHandler);
         watch.stop();
         httpResponse.setResponseTimeInMs(watch.getTime());
+        httpResponse.setRedirectLocations(internalContext.getRedirectLocations());
 
         for (HttpResponseHandler handler : httpResponseHandlers)
         {

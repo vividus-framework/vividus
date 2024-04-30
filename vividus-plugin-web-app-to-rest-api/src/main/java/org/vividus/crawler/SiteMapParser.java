@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,12 +27,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.hc.client5.http.ContextBuilder;
-import org.apache.hc.client5.http.auth.AuthScope;
-import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
-import org.apache.hc.client5.http.protocol.HttpClientContext;
-import org.apache.hc.core5.http.HttpHost;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.util.UriUtils;
@@ -63,26 +57,8 @@ public class SiteMapParser implements ISiteMapParser
     {
         try
         {
-            ContextBuilder contextBuilder = ContextBuilder.create();
-            UriUtils.UserInfo userInfo = UriUtils.getUserInfo(siteMapUrl);
-            URI targetSiteMapUrl;
-            if (userInfo != null)
-            {
-                targetSiteMapUrl = UriUtils.removeUserInfo(siteMapUrl);
-                BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-                AuthScope authScope = new AuthScope(HttpHost.create(targetSiteMapUrl));
-                credentialsProvider.setCredentials(authScope,
-                        new UsernamePasswordCredentials(userInfo.user(), userInfo.password().toCharArray()));
-                contextBuilder.useCredentialsProvider(credentialsProvider);
-            }
-            else
-            {
-                targetSiteMapUrl = siteMapUrl;
-            }
-            HttpClientContext context = contextBuilder.build();
-
-            HttpResponse response = httpClient.doHttpGet(targetSiteMapUrl, context);
-            URI cleanSiteMapUrl = UriUtils.removeUserInfo(getBaseUri(context, targetSiteMapUrl));
+            HttpResponse response = httpClient.doHttpGet(siteMapUrl);
+            URI cleanSiteMapUrl = UriUtils.removeUserInfo(getBaseUri(response, siteMapUrl));
             AbstractSiteMap siteMap = siteMapParser.parseSiteMap(response.getResponseBody(), cleanSiteMapUrl.toURL());
             if (siteMap.getType() == SitemapType.INDEX)
             {
@@ -101,12 +77,12 @@ public class SiteMapParser implements ISiteMapParser
         }
     }
 
-    private URI getBaseUri(HttpClientContext context, URI siteMapUrl)
+    private URI getBaseUri(HttpResponse httpResponse, URI siteMapUrl)
     {
         return this.baseUrl.orElseGet(() -> {
             if (followRedirects)
             {
-                List<URI> redirectLocations = context.getRedirectLocations().getAll();
+                List<URI> redirectLocations = httpResponse.getRedirectLocations().getAll();
                 if (!redirectLocations.isEmpty())
                 {
                     return redirectLocations.get(redirectLocations.size() - 1);
