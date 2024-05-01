@@ -45,7 +45,6 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -69,8 +68,6 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.decorators.Decorated;
-import org.openqa.selenium.support.events.EventFiringWebDriver;
-import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.openqa.selenium.support.events.WebDriverListener;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.driver.TextFormattingWebDriver;
@@ -382,31 +379,23 @@ class WebDriverFactoryTests
         verify(timeoutConfigurer).configure(timeouts);
     }
 
+    @SuppressWarnings("unchecked")
     private static void testWebDriverCreation(DesiredCapabilities desiredCapabilities,
             WebDriverFactory webDriverFactory, WebDriverListenerFactory webDriverListenerFactory,
             Supplier<WebDriver> expectedSupplier) throws ReflectiveOperationException
     {
-        WebDriverEventListener webDriverEventListener = mock();
-        var eventListeners = List.of(webDriverEventListener);
-        webDriverFactory.setWebDriverEventListeners(eventListeners);
-
         WebDriverListener webDriverListener = mock();
         when(webDriverListenerFactory.createListener(any(WebDriver.class))).thenReturn(webDriverListener);
 
         var decoratedDriver = webDriverFactory.createWebDriver(desiredCapabilities);
 
         assertThat(decoratedDriver, instanceOf(Decorated.class));
-        EventFiringWebDriver eventFiringDriver = ((Decorated<EventFiringWebDriver>) decoratedDriver).getOriginal();
-        var textFormattingDriver = eventFiringDriver.getWrappedDriver();
-        assertThat(textFormattingDriver, instanceOf(TextFormattingWebDriver.class));
+        var textFormattingDriver = ((Decorated<TextFormattingWebDriver>) decoratedDriver).getOriginal();
         assertEquals(expectedSupplier.get(), ((WrapsDriver) textFormattingDriver).getWrappedDriver());
 
-        assertEquals(eventListeners, FieldUtils.readField(eventFiringDriver, "eventListeners", true));
-        verify(webDriverListenerFactory).createListener(eventFiringDriver);
-
         decoratedDriver.getCurrentUrl();
-        verify(webDriverListener).beforeAnyWebDriverCall(eventFiringDriver, WebDriver.class.getMethod("getCurrentUrl"),
-                null);
+        verify(webDriverListener).beforeAnyWebDriverCall(textFormattingDriver,
+                WebDriver.class.getMethod("getCurrentUrl"), null);
     }
 
     private static void mockCapabilities(HasCapabilities hasCapabilities)

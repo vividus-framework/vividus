@@ -86,7 +86,7 @@ public final class AlertHandlingListener implements WebDriverListener
         }
     }
 
-    public static class Factory implements WebDriverListenerFactory<AlertHandlingListener>
+    public static class Factory implements WebDriverListenerFactory
     {
         private final AlertHandlingOption alertHandlingOption;
         private final EventBus eventBus;

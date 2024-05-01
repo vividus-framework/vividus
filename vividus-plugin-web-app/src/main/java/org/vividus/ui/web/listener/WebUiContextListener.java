@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,68 +16,68 @@
 
 package org.vividus.ui.web.listener;
 
+import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
+import org.openqa.selenium.WebDriver.Navigation;
+import org.openqa.selenium.WebDriver.TargetLocator;
+import org.openqa.selenium.support.events.WebDriverListener;
 import org.vividus.ui.context.IUiContext;
 
-public class WebUiContextListener extends AbstractWebDriverEventListener
+public class WebUiContextListener implements WebDriverListener
 {
-    private final ThreadLocal<String> currentWindowIdentifier = ThreadLocal.withInitial(() -> StringUtils.EMPTY);
+    private final WebDriver webDriver;
+    private final IUiContext uiContext;
+    private String currentWindowIdentifier = StringUtils.EMPTY;
 
-    private IUiContext uiContext;
-
-    @Override
-    public void beforeNavigateBack(WebDriver driver)
+    public WebUiContextListener(WebDriver webDriver, IUiContext uiContext)
     {
-        uiContext.reset();
-    }
-
-    @Override
-    public void beforeNavigateForward(WebDriver driver)
-    {
-        uiContext.reset();
-    }
-
-    @Override
-    public void beforeNavigateTo(String url, WebDriver driver)
-    {
-        uiContext.reset();
-    }
-
-    @Override
-    public void beforeNavigateRefresh(WebDriver driver)
-    {
-        uiContext.reset();
-    }
-
-    @Override
-    public void beforeSwitchToWindow(String windowName, WebDriver driver)
-    {
-        String currentIdentifier = currentWindowIdentifier.get();
-        if (currentIdentifier.isEmpty())
-        {
-            return;
-        }
-        Set<String> windowHandles = driver.getWindowHandles();
-        if (!windowHandles.contains(currentIdentifier))
-        {
-            driver.switchTo().window(windowHandles.iterator().next());
-            uiContext.reset();
-        }
-    }
-
-    @Override
-    public void afterSwitchToWindow(String windowName, WebDriver driver)
-    {
-        currentWindowIdentifier.set(Optional.ofNullable(windowName).orElseGet(driver::getWindowHandle));
-    }
-
-    public void setUiContext(IUiContext uiContext)
-    {
+        this.webDriver = webDriver;
         this.uiContext = uiContext;
+    }
+
+    @Override
+    public void beforeAnyNavigationCall(Navigation navigation, Method method, Object[] args)
+    {
+        uiContext.reset();
+    }
+
+    @Override
+    public void beforeWindow(TargetLocator targetLocator, String nameOrHandle)
+    {
+        if (!currentWindowIdentifier.isEmpty())
+        {
+            Set<String> windowHandles = webDriver.getWindowHandles();
+            if (!windowHandles.contains(currentWindowIdentifier))
+            {
+                webDriver.switchTo().window(windowHandles.iterator().next());
+                uiContext.reset();
+            }
+        }
+    }
+
+    @Override
+    public void afterWindow(TargetLocator targetLocator, String nameOrHandle, WebDriver driver)
+    {
+        currentWindowIdentifier = Optional.ofNullable(nameOrHandle).orElseGet(driver::getWindowHandle);
+    }
+
+    public static class Factory implements WebDriverListenerFactory
+    {
+        private final IUiContext uiContext;
+
+        public Factory(IUiContext uiContext)
+        {
+            this.uiContext = uiContext;
+        }
+
+        @Override
+        public WebUiContextListener createListener(WebDriver webDriver)
+        {
+            return new WebUiContextListener(webDriver, uiContext);
+        }
     }
 }

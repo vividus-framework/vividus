@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,55 +14,57 @@
  * limitations under the License.
  */
 
-package org.vividus.steps.ui.web.listener;
+package org.vividus.ui.web.listener;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import com.google.common.eventbus.EventBus;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.testcontext.TestContext;
 import org.vividus.ui.web.event.PageLoadEndEvent;
-import org.vividus.ui.web.listener.PerformanceMetricsListener;
+import org.vividus.ui.web.listener.PerformanceMetricsListener.Factory;
 import org.vividus.ui.web.performance.PerformanceMetrics;
 
 @ExtendWith(MockitoExtension.class)
 class PerformanceMetricsListenerTests
 {
     @Mock private TestContext testContext;
-    @InjectMocks private PerformanceMetricsListener listener;
+    @Mock private EventBus eventBus;
 
-    @Test
-    void shouldResetMetricsAfterNavigateBack()
+    private PerformanceMetricsListener createListener()
     {
-        listener.afterNavigateBack(null);
-        verify(testContext).remove(PerformanceMetrics.class);
+        var listener = new Factory(testContext, eventBus).createListener(null);
+        verify(eventBus).register(listener);
+        return listener;
     }
 
     @Test
-    void shouldResetMetricsAfterNavigateForward()
+    void shouldUnregisterListenerBeforeWebDriverQuit()
     {
-        listener.afterNavigateForward(null);
-        verify(testContext).remove(PerformanceMetrics.class);
+        var listener = createListener();
+        listener.beforeQuit(null);
+        verify(eventBus).unregister(listener);
     }
 
     @Test
-    void shouldResetMetricsAfterNavigateTo()
+    void shouldResetPerformanceMetricsAfterAnyNavigation()
     {
-        listener.afterNavigateTo(null, null);
-        verify(testContext).remove(PerformanceMetrics.class);
+        createListener().afterAnyNavigationCall(null, null, null, null);
+        verify(testContext).remove(PerformanceMetrics.KEY);
     }
 
     @Test
-    void shouldResetMetricsAfterSwitchToWindow()
+    void shouldResetPerformanceMetricsAfterSwitchToWindow()
     {
-        listener.afterSwitchToWindow(null, null);
-        verify(testContext).remove(PerformanceMetrics.class);
+        createListener().afterWindow(null, null, null);
+        verify(testContext).remove(PerformanceMetrics.KEY);
     }
 
     @ParameterizedTest
@@ -70,10 +72,10 @@ class PerformanceMetricsListenerTests
         "true, 1",
         "false, 0"
     })
-    void shouldResetMetricsOnNewPage(boolean newPage, int times)
+    void shouldResetPerformanceMetricsOnNewPageLoad(boolean newPage, int times)
     {
         PageLoadEndEvent event = new PageLoadEndEvent(newPage, null);
-        listener.handle(event);
-        verify(testContext, times(times)).remove(PerformanceMetrics.class);
+        createListener().onPageLoadFinish(event);
+        verify(testContext, times(times)).remove(PerformanceMetrics.KEY);
     }
 }

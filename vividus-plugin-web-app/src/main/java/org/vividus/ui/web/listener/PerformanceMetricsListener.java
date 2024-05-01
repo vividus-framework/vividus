@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,49 +16,51 @@
 
 package org.vividus.ui.web.listener;
 
+import java.lang.reflect.Method;
+
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
+import org.openqa.selenium.WebDriver.Navigation;
+import org.openqa.selenium.WebDriver.TargetLocator;
+import org.openqa.selenium.support.events.WebDriverListener;
 import org.vividus.testcontext.TestContext;
 import org.vividus.ui.web.event.PageLoadEndEvent;
 import org.vividus.ui.web.performance.PerformanceMetrics;
 
-public class PerformanceMetricsListener extends AbstractWebDriverEventListener
+public class PerformanceMetricsListener implements WebDriverListener
 {
     private final TestContext testContext;
+    private final EventBus eventBus;
 
-    public PerformanceMetricsListener(TestContext testContext)
+    public PerformanceMetricsListener(TestContext testContext, EventBus eventBus)
     {
         this.testContext = testContext;
+        this.eventBus = eventBus;
+        eventBus.register(this);
     }
 
     @Override
-    public void afterNavigateBack(WebDriver driver)
+    public void beforeQuit(WebDriver driver)
+    {
+        eventBus.unregister(this);
+    }
+
+    @Override
+    public void afterAnyNavigationCall(Navigation navigation, Method method, Object[] args, Object result)
     {
         resetPerformanceMetrics();
     }
 
     @Override
-    public void afterNavigateForward(WebDriver driver)
-    {
-        resetPerformanceMetrics();
-    }
-
-    @Override
-    public void afterNavigateTo(String url, WebDriver driver)
-    {
-        resetPerformanceMetrics();
-    }
-
-    @Override
-    public void afterSwitchToWindow(String windowName, WebDriver driver)
+    public void afterWindow(TargetLocator targetLocator, String nameOrHandle, WebDriver driver)
     {
         resetPerformanceMetrics();
     }
 
     @Subscribe
-    public void handle(PageLoadEndEvent event)
+    public void onPageLoadFinish(PageLoadEndEvent event)
     {
         if (event.newPageLoaded())
         {
@@ -68,6 +70,25 @@ public class PerformanceMetricsListener extends AbstractWebDriverEventListener
 
     private void resetPerformanceMetrics()
     {
-        testContext.remove(PerformanceMetrics.class);
+        // Can't move this logic to PerformanceMetrics: the workaround to break circular dependency
+        testContext.remove(PerformanceMetrics.KEY);
+    }
+
+    public static class Factory implements WebDriverListenerFactory
+    {
+        private final TestContext testContext;
+        private final EventBus eventBus;
+
+        public Factory(TestContext testContext, EventBus eventBus)
+        {
+            this.testContext = testContext;
+            this.eventBus = eventBus;
+        }
+
+        @Override
+        public PerformanceMetricsListener createListener(WebDriver webDriver)
+        {
+            return new PerformanceMetricsListener(testContext, eventBus);
+        }
     }
 }

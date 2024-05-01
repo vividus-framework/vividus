@@ -16,7 +16,6 @@
 
 package org.vividus.selenium;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,8 +30,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.events.EventFiringDecorator;
-import org.openqa.selenium.support.events.EventFiringWebDriver;
-import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.openqa.selenium.support.events.WebDriverListener;
 import org.vividus.proxy.IProxy;
 import org.vividus.selenium.manager.WebDriverManager;
@@ -48,8 +45,7 @@ public class WebDriverFactory extends GenericWebDriverFactory
     private final WebDriverStartContext webDriverStartContext;
     private final TimeoutConfigurer timeoutConfigurer;
     private WebDriverType webDriverType;
-    private List<WebDriverEventListener> webDriverEventListeners;
-    private final List<WebDriverListenerFactory<WebDriverListener>> webDriverListenerFactories;
+    private final List<WebDriverListenerFactory> webDriverListenerFactories;
     private final boolean remoteExecution;
 
     private final Map<WebDriverType, WebDriverConfiguration> configurations = new ConcurrentHashMap<>();
@@ -59,7 +55,7 @@ public class WebDriverFactory extends GenericWebDriverFactory
             WebDriverStartContext webDriverStartContext,
             Optional<Set<DesiredCapabilitiesAdjuster>> desiredCapabilitiesAdjusters,
             TimeoutConfigurer timeoutConfigurer,
-            List<WebDriverListenerFactory<WebDriverListener>> webDriverListenerFactories)
+            List<WebDriverListenerFactory> webDriverListenerFactories)
     {
         super(remoteWebDriverFactory, propertyParser, jsonUtils, desiredCapabilitiesAdjusters);
         this.remoteExecution = remoteExecution;
@@ -76,13 +72,10 @@ public class WebDriverFactory extends GenericWebDriverFactory
                 desiredCapabilities);
         timeoutConfigurer.configure(webDriver.manage().timeouts());
 
-        EventFiringWebDriver eventFiringWebDriver = new EventFiringWebDriver(webDriver);
-        webDriverEventListeners.forEach(eventFiringWebDriver::register);
-
         WebDriverListener[] webDriverListeners = webDriverListenerFactories.stream()
-                .map(factory -> factory.createListener(eventFiringWebDriver))
+                .map(factory -> factory.createListener(webDriver))
                 .toArray(WebDriverListener[]::new);
-        return new EventFiringDecorator<>(webDriverListeners).decorate(eventFiringWebDriver);
+        return new EventFiringDecorator<>(webDriverListeners).decorate(webDriver);
     }
 
     private WebDriver createLocalWebDriver(DesiredCapabilities desiredCapabilities)
@@ -214,10 +207,5 @@ public class WebDriverFactory extends GenericWebDriverFactory
     public void setWebDriverType(WebDriverType webDriverType)
     {
         this.webDriverType = webDriverType;
-    }
-
-    public void setWebDriverEventListeners(List<WebDriverEventListener> webDriverEventListeners)
-    {
-        this.webDriverEventListeners = Collections.unmodifiableList(webDriverEventListeners);
     }
 }
