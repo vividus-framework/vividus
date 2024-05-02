@@ -215,27 +215,13 @@ class HttpClientTests
     }
 
     @Test
-    void testDoHttpHeadThrowingIOExceptionAtGettingUri() throws IOException, URISyntaxException
+    void testDoHttpHeadThrowingIOExceptionAtGettingUri() throws URISyntaxException
     {
         var uriSyntaxException = new URISyntaxException("invalid uri", "Unable to parse URI");
         var request = mock(HttpHead.class);
         when(request.getUri()).thenThrow(uriSyntaxException);
-        when(closeableHttpClient.execute(eq(request), isA(HttpClientContext.class),
-                argThat((ArgumentMatcher<HttpClientResponseHandler<HttpResponse>>) responseHandler -> {
-                    try
-                    {
-                        ClassicHttpResponse classicHttpResponse = mock();
-                        responseHandler.handleResponse(classicHttpResponse);
-                        return false;
-                    }
-                    catch (HttpException | IOException e)
-                    {
-                        assertEquals(uriSyntaxException, e.getCause());
-                        return true;
-                    }
-                }))).thenReturn(new HttpResponse());
-        var httpResponse = httpClient.execute(request);
-        assertNull(httpResponse.getFrom());
+        var ioException = assertThrows(IOException.class, () -> httpClient.execute(request));
+        assertEquals(uriSyntaxException, ioException.getCause());
     }
 
     @Test

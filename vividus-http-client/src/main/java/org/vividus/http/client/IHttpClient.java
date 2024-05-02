@@ -73,7 +73,24 @@ public interface IHttpClient
      */
     HttpResponse doHttpHead(URI uri, boolean usePreemptiveBasicAuthIfAvailable) throws IOException;
 
+    /**
+     * Executes HTTP request and handles URI user info in the fully-automated way: converts user info provided as a
+     * part of URI to non-preemptive basic authentication configuration.
+     *
+     * @param request Request to execute
+     * @return HTTP response
+     * @throws IOException in case of any I/O errors
+     */
     HttpResponse execute(ClassicHttpRequest request) throws IOException;
 
+    /**
+     * Executes HTTP request and handles URI user info in the fully-automated way: converts user info provided as a
+     * part of URI to non-preemptive basic authentication configuration.
+     *
+     * @param request Request to execute
+     * @param context HTTP client context
+     * @return HTTP response
+     * @throws IOException in case of any I/O errors
+     */
     HttpResponse execute(ClassicHttpRequest request, HttpClientContext context) throws IOException;
 }

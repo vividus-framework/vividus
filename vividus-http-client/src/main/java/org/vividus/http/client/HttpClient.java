@@ -19,30 +19,35 @@ package org.vividus.http.client;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.auth.BasicScheme;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.client5.http.routing.RoutingSupport;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.net.URIAuthority;
 import org.vividus.http.handler.HttpResponseHandler;
 import org.vividus.util.UriUtils;
 import org.vividus.util.UriUtils.UserInfo;
 
 public class HttpClient implements IHttpClient, AutoCloseable
 {
+    private static final boolean USE_PREEMPTIVE_BASIC_AUTH_IF_AVAILABLE = false;
+
     private CloseableHttpClient closeableHttpClient;
     private HttpHost httpHost;
     private boolean skipResponseEntity;
@@ -57,53 +62,25 @@ public class HttpClient implements IHttpClient, AutoCloseable
     @Override
     public HttpResponse doHttpGet(URI uri) throws IOException
     {
-        return doHttpGet(uri, false);
+        return doHttpGet(uri, USE_PREEMPTIVE_BASIC_AUTH_IF_AVAILABLE);
     }
 
     @Override
     public HttpResponse doHttpGet(URI uri, boolean usePreemptiveBasicAuthIfAvailable) throws IOException
     {
-        return executeWithUserInfoHandling(uri, usePreemptiveBasicAuthIfAvailable, HttpGet::new);
+        return execute(new HttpGet(uri), null, usePreemptiveBasicAuthIfAvailable);
     }
 
     @Override
     public HttpResponse doHttpHead(URI uri) throws IOException
     {
-        return doHttpHead(uri, false);
+        return doHttpHead(uri, USE_PREEMPTIVE_BASIC_AUTH_IF_AVAILABLE);
     }
 
     @Override
     public HttpResponse doHttpHead(URI uri, boolean usePreemptiveBasicAuthIfAvailable) throws IOException
     {
-        return executeWithUserInfoHandling(uri, usePreemptiveBasicAuthIfAvailable, HttpHead::new);
-    }
-
-    private HttpResponse executeWithUserInfoHandling(URI uri, boolean usePreemptiveBasicAuthIfAvailable,
-            Function<URI, ClassicHttpRequest> requestFactory) throws IOException
-    {
-        UserInfo userInfo = UriUtils.getUserInfo(uri);
-        if (userInfo != null)
-        {
-            ContextBuilder contextBuilder = ContextBuilder.create();
-
-            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(userInfo.user(),
-                    userInfo.password().toCharArray());
-            HttpHost host = HttpHost.create(uri);
-            if (usePreemptiveBasicAuthIfAvailable)
-            {
-                contextBuilder = contextBuilder.preemptiveBasicAuth(host, credentials);
-            }
-            else
-            {
-                BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-                credentialsProvider.setCredentials(new AuthScope(host), credentials);
-                contextBuilder.useCredentialsProvider(credentialsProvider);
-            }
-            URI targetUri = UriUtils.removeUserInfo(uri);
-            HttpClientContext httpClientContext = contextBuilder.build();
-            return execute(requestFactory.apply(targetUri), httpClientContext);
-        }
-        return execute(requestFactory.apply(uri));
+        return execute(new HttpHead(uri), null, usePreemptiveBasicAuthIfAvailable);
     }
 
     @Override
@@ -115,17 +92,28 @@ public class HttpClient implements IHttpClient, AutoCloseable
     @Override
     public HttpResponse execute(ClassicHttpRequest request, HttpClientContext context) throws IOException
     {
+        return execute(request, context, USE_PREEMPTIVE_BASIC_AUTH_IF_AVAILABLE);
+    }
+
+    private HttpResponse execute(ClassicHttpRequest request, HttpClientContext context,
+            boolean usePreemptiveBasicAuthIfAvailable) throws IOException
+    {
+        URI uri = getRequestUri(request);
+
+        HttpClientContext internalContext = Optional.ofNullable(context).orElseGet(HttpClientContext::create);
+
+        String userInfo = request.getAuthority().getUserInfo();
+        if (userInfo != null)
+        {
+            HttpHost host = RoutingSupport.normalize(HttpHost.create(uri), DefaultSchemePortResolver.INSTANCE);
+            configureBasicAuth(usePreemptiveBasicAuthIfAvailable, userInfo, host, internalContext);
+            request.setAuthority(new URIAuthority(host));
+        }
+
         HttpClientResponseHandler<HttpResponse> responseHandler = response -> {
             HttpResponse httpResponse = new HttpResponse();
             httpResponse.setMethod(request.getMethod());
-            try
-            {
-                httpResponse.setFrom(request.getUri());
-            }
-            catch (URISyntaxException e)
-            {
-                throw new IOException(e);
-            }
+            httpResponse.setFrom(uri);
             HttpEntity entity = response.getEntity();
             if (entity != null)
             {
@@ -143,8 +131,6 @@ public class HttpClient implements IHttpClient, AutoCloseable
             return httpResponse;
         };
 
-        HttpClientContext internalContext = Optional.ofNullable(context).orElseGet(HttpClientContext::create);
-
         StopWatch watch = new StopWatch();
         watch.start();
         HttpResponse httpResponse = httpHost == null ? closeableHttpClient.execute(request, internalContext,
@@ -159,6 +145,39 @@ public class HttpClient implements IHttpClient, AutoCloseable
         }
 
         return httpResponse;
+    }
+
+    private static URI getRequestUri(ClassicHttpRequest request) throws IOException
+    {
+        try
+        {
+            return request.getUri();
+        }
+        catch (URISyntaxException e)
+        {
+            throw new IOException(e);
+        }
+    }
+
+    private static void configureBasicAuth(boolean usePreemptiveBasicAuthIfAvailable, String plainUserInfo,
+            HttpHost host, HttpClientContext internalContext)
+    {
+        UserInfo userInfo = UriUtils.parseUserInfo(plainUserInfo);
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(userInfo.user(),
+                userInfo.password().toCharArray());
+        HttpHost normalizedHost = RoutingSupport.normalize(host, DefaultSchemePortResolver.INSTANCE);
+        if (usePreemptiveBasicAuthIfAvailable)
+        {
+            BasicScheme authScheme = new BasicScheme(StandardCharsets.UTF_8);
+            authScheme.initPreemptive(credentials);
+            internalContext.resetAuthExchange(normalizedHost, authScheme);
+        }
+        else
+        {
+            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(new AuthScope(normalizedHost), credentials);
+            internalContext.setCredentialsProvider(credentialsProvider);
+        }
     }
 
     public void setCloseableHttpClient(CloseableHttpClient closeableHttpClient)
