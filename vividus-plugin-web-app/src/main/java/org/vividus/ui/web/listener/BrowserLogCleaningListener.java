@@ -38,7 +38,7 @@ public final class BrowserLogCleaningListener implements WebDriverListener
         BrowserLogManager.resetBuffer(webDriver);
     }
 
-    public static class Factory implements WebDriverListenerFactory<BrowserLogCleaningListener>
+    public static class Factory implements WebDriverListenerFactory
     {
         @Override
         public BrowserLogCleaningListener createListener(WebDriver webDriver)

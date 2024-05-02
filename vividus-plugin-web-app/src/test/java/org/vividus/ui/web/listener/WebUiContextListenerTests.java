@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.vividus.ui.web.listener;
 
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -25,21 +24,15 @@ import static org.mockito.Mockito.when;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.TargetLocator;
-import org.openqa.selenium.support.events.WebDriverEventListener;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.web.listener.WebUiContextListener.Factory;
 
 @ExtendWith(MockitoExtension.class)
 class WebUiContextListenerTests
@@ -48,55 +41,46 @@ class WebUiContextListenerTests
     private static final String WINDOW_NAME2 = "windowName2";
 
     @Mock private IUiContext uiContext;
-    @InjectMocks private WebUiContextListener webUiContextListener;
 
-    static Stream<Arguments> navigateActions()
+    @Test
+    void shouldResetContextBeforeAnyNavigationAction()
     {
-        return Stream.of(
-            arguments((BiConsumer<WebUiContextListener, WebDriver>) WebDriverEventListener::beforeNavigateBack),
-            arguments((BiConsumer<WebUiContextListener, WebDriver>) WebDriverEventListener::beforeNavigateForward),
-            arguments((BiConsumer<WebUiContextListener, WebDriver>) (listener, webDriver) -> listener.beforeNavigateTo(
-                    "url", webDriver)),
-            arguments((BiConsumer<WebUiContextListener, WebDriver>) WebDriverEventListener::beforeNavigateRefresh)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("navigateActions")
-    void shouldResetContextBeforeAnyNavigationAction(BiConsumer<WebUiContextListener, WebDriver> test)
-    {
-        test.accept(webUiContextListener, mock(WebDriver.class));
+        var listener = new Factory(uiContext).createListener(null);
+        listener.beforeAnyNavigationCall(null, null, null);
         verify(uiContext).reset();
     }
 
     @Test
     void testBeforeWindow()
     {
-        WebDriver webDriver = mock(WebDriver.class);
-        webUiContextListener.beforeSwitchToWindow(WINDOW_NAME1, webDriver);
-        verifyNoInteractions(uiContext);
+        WebDriver webDriver = mock();
+        var listener = new Factory(uiContext).createListener(webDriver);
+        listener.beforeWindow(null, WINDOW_NAME1);
+        verifyNoInteractions(uiContext, webDriver);
     }
 
     @Test
     void testBeforeWindowWindowExists()
     {
-        WebDriver webDriver = mock(WebDriver.class);
-        webUiContextListener.afterSwitchToWindow(WINDOW_NAME1, webDriver);
+        WebDriver webDriver = mock();
+        var listener = new Factory(uiContext).createListener(webDriver);
+        listener.afterWindow(null, WINDOW_NAME1, webDriver);
         when(webDriver.getWindowHandles()).thenReturn(new LinkedHashSet<>(List.of(WINDOW_NAME1, WINDOW_NAME2)));
-        webUiContextListener.beforeSwitchToWindow(WINDOW_NAME2, webDriver);
+        listener.beforeWindow(null, WINDOW_NAME2);
         verifyNoInteractions(uiContext);
     }
 
     @Test
     void testBeforeWindowWindowNotExists()
     {
-        WebDriver webDriver = mock(WebDriver.class);
-        webUiContextListener.afterSwitchToWindow(WINDOW_NAME1, webDriver);
-        TargetLocator targetLocator = mock(TargetLocator.class);
+        WebDriver webDriver = mock();
+        var listener = new Factory(uiContext).createListener(webDriver);
+        listener.afterWindow(null, WINDOW_NAME1, webDriver);
+        TargetLocator targetLocator = mock();
         when(webDriver.switchTo()).thenReturn(targetLocator);
         when(webDriver.getWindowHandles()).thenReturn(Set.of(WINDOW_NAME2));
 
-        webUiContextListener.beforeSwitchToWindow(WINDOW_NAME2, webDriver);
+        listener.beforeWindow(null, WINDOW_NAME2);
 
         verify(uiContext).reset();
         verify(targetLocator).window(WINDOW_NAME2);
@@ -105,11 +89,12 @@ class WebUiContextListenerTests
     @Test
     void testSwitchToNewWindow()
     {
-        WebDriver webDriver = mock(WebDriver.class);
+        WebDriver webDriver = mock();
         when(webDriver.getWindowHandle()).thenReturn(WINDOW_NAME1);
-        webUiContextListener.afterSwitchToWindow(null, webDriver);
+        var listener = new Factory(uiContext).createListener(webDriver);
+        listener.afterWindow(null, null, webDriver);
         when(webDriver.getWindowHandles()).thenReturn(new LinkedHashSet<>(List.of(WINDOW_NAME1, WINDOW_NAME2)));
-        webUiContextListener.beforeSwitchToWindow(WINDOW_NAME2, webDriver);
+        listener.beforeWindow(null, WINDOW_NAME2);
         verifyNoInteractions(uiContext);
     }
 }
