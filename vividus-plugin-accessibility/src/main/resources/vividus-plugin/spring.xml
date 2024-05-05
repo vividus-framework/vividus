@@ -9,6 +9,7 @@
 
     <bean id="accessibilitySteps" class="org.vividus.accessibility.AccessibilitySteps">
         <property name="accessibilityEngine" value="${accessibility.engine}" />
+        <property name="reportViolationsAsAssertions" value="${accessibility.report-violations-as-assertions}" />
     </bean>
 
     <bean class="org.vividus.accessibility.executor.AccessibilityTestExecutor" />
