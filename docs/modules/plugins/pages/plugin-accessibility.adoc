@@ -5,6 +5,31 @@ The plugin provides functionality to perform accessibility validations using htt
 :plugin-short-name: accessibility
 include::partial$plugin-installation.adoc[]
 
+== Properties
+
+[cols="2,1,3", options="header"]
+
+|===
+
+|Property Name
+|Default
+|Description
+
+|`accessibility.engine`
+|`HTML_CS`
+|Engine to use, either `HTML_CS` or `AXE_CORE`.
+
+|`accessibility.report-violations-as-assertions`
+|`false`
+a|If `false` the step will report only the number of violations detected during accessibility check.
+
+If `true` the step will report each violation individually using the following format:
+
+* `[button-name] Ensures buttons have discernible text` - AxeCore
+* `[WCAG2AAA.Principle3.Guideline3_2.3_2_1.G107] Check that a change of context does not occur when this input field receives focus.` - HTML CS
+
+|===
+
 == Steps
 
 === Validate site accessibility

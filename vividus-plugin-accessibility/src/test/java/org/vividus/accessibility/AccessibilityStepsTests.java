@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.vividus.accessibility.model.htmlcs.AccessibilityStandard.WCAG2A;
 import static org.vividus.accessibility.model.htmlcs.ViolationLevel.ERROR;
@@ -135,7 +136,53 @@ class AccessibilityStepsTests
     @Test
     void shouldExecuteAxeCoreAccessibilityTest()
     {
+        AxeReportEntry failedEntry = createEntry(ResultType.FAILED);
+        AxeReportEntry passedEntry = createEntry(ResultType.PASSED);
+
+        AxeOptions axeRun = executeAxeTest(List.of(passedEntry, failedEntry), false);
+
+        verify(attachmentPublisher).publishAttachment(
+            "/org/vividus/accessibility/axe-accessibility-report.ftl",
+            Map.of("entries", List.of(passedEntry, failedEntry), "url", PAGE, "run", axeRun),
+            "[WCAG2A standard] Accessibility report for page: " + PAGE
+        );
+        verifyNumberOfViolations(1);
+    }
+
+    @Test
+    void shouldFailIfAxeCodeDidntReturnAnyResults()
+    {
+        AxeReportEntry failedEntry = createEntry(ResultType.FAILED);
+        failedEntry.setResults(List.of());
+        List<AxeReportEntry> entries = List.of(failedEntry);
+
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
+                () -> executeAxeTest(entries, false));
+        assertEquals("Axe scan has not returned any results for the provided WCAG2A standard, please make "
+                + "sure the configuration is valid", thrown.getMessage());
+
+        verifyNoInteractions(attachmentPublisher);
+    }
+
+    @Test
+    void shouldReportViolationsAsAssertions()
+    {
+        executeAxeTest(List.of(createEntry(ResultType.FAILED)), true);
+
+        verify(softAssert).recordFailedAssertion("[result-id-failed] result-description-failed");
+        verifyNoMoreInteractions(softAssert);
+    }
+
+    private void verifyNumberOfViolations(long number)
+    {
+        verify(softAssert).assertThat(eq("[WCAG2A standard] Number of accessibility violations at the page " + PAGE),
+                eq(number), argThat(m -> MATCHER.equals(m.toString())));
+    }
+
+    private AxeOptions executeAxeTest(List<AxeReportEntry> entries, boolean reportViolationsAsAssertions)
+    {
         accessibilitySteps.setAccessibilityEngine(AccessibilityEngine.AXE_CORE);
+        accessibilitySteps.setReportViolationsAsAssertions(reportViolationsAsAssertions);
         AxeOptions axeRun = AxeOptions.forStandard("WCAG2A");
         AxeCheckOptions options = mock(AxeCheckOptions.class);
         when(options.getRunOnly()).thenReturn(axeRun);
@@ -144,45 +191,12 @@ class AccessibilityStepsTests
         ExamplesTable checkOptions = mock(ExamplesTable.class);
         when(checkOptions.getRowsAsParameters(true)).thenReturn(List.of(params));
 
-        AxeReportEntry failedEntry = createEntry(ResultType.FAILED);
-        AxeReportEntry passedEntry = createEntry(ResultType.PASSED);
         when(accessibilityTestExecutor.execute(AccessibilityEngine.AXE_CORE, options, AxeReportEntry.class))
-                .thenReturn(List.of(passedEntry, failedEntry));
+                .thenReturn(entries);
 
         accessibilitySteps.performAccessibilityScan(checkOptions);
 
-        verify(attachmentPublisher).publishAttachment(
-            "/org/vividus/accessibility/axe-accessibility-report.ftl",
-            Map.of("entries", List.of(passedEntry, failedEntry), "url", PAGE, "run", axeRun),
-            "[WCAG2A standard] Accessibility report for page: " + PAGE
-        );
-        verify(softAssert).assertThat(eq("[WCAG2A standard] Number of accessibility violations at the page " + PAGE),
-                eq(1L), argThat(m -> MATCHER.equals(m.toString())));
-    }
-
-    @Test
-    void shouldFailIfAxeCodeDidntReturnAnyResults()
-    {
-        accessibilitySteps.setAccessibilityEngine(AccessibilityEngine.AXE_CORE);
-        AxeOptions axeRun = AxeOptions.forStandard("WCAG2AA");
-        AxeCheckOptions options = mock(AxeCheckOptions.class);
-        when(options.getRunOnly()).thenReturn(axeRun);
-        Parameters params = mock(Parameters.class);
-        when(params.as(AxeCheckOptions.class)).thenReturn(options);
-        ExamplesTable checkOptions = mock(ExamplesTable.class);
-        when(checkOptions.getRowsAsParameters(true)).thenReturn(List.of(params));
-
-        AxeReportEntry failedEntry = createEntry(ResultType.FAILED);
-        failedEntry.setResults(List.of());
-        when(accessibilityTestExecutor.execute(AccessibilityEngine.AXE_CORE, options, AxeReportEntry.class))
-                .thenReturn(List.of(failedEntry));
-
-        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-                () -> accessibilitySteps.performAccessibilityScan(checkOptions));
-        assertEquals("Axe scan has not returned any results for the provided WCAG2AA standard, please make "
-                + "sure the configuration is valid", thrown.getMessage());
-
-        verifyNoInteractions(attachmentPublisher);
+        return axeRun;
     }
 
     private AxeReportEntry createEntry(ResultType type)
@@ -190,6 +204,8 @@ class AccessibilityStepsTests
         AxeReportEntry entry = new AxeReportEntry();
         entry.setType(type);
         Result result = new Result();
+        result.setId("result-id-" + type.name().toLowerCase());
+        result.setDescription("result-description-" + type.name().toLowerCase());
         entry.setResults(List.of(result));
         return entry;
     }

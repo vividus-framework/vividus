@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,6 +35,7 @@ import org.vividus.accessibility.model.AbstractAccessibilityCheckOptions;
 import org.vividus.accessibility.model.axe.AxeCheckOptions;
 import org.vividus.accessibility.model.axe.AxeOptions;
 import org.vividus.accessibility.model.axe.AxeReportEntry;
+import org.vividus.accessibility.model.axe.Result;
 import org.vividus.accessibility.model.axe.ResultType;
 import org.vividus.accessibility.model.htmlcs.AccessibilityViolation;
 import org.vividus.accessibility.model.htmlcs.HtmlCsCheckOptions;
@@ -49,6 +51,7 @@ public class AccessibilitySteps
     private static final String AXE_CORE_MESSAGE = "[%s] Number of accessibility violations at the page %s";
 
     private AccessibilityEngine accessibilityEngine;
+    private boolean reportViolationsAsAssertions;
 
     private final AccessibilityTestExecutor accessibilityTestExecutor;
     private final IWebDriverProvider webDriverProvider;
@@ -105,8 +108,10 @@ public class AccessibilitySteps
                         .execute(accessibilityEngine, options, AccessibilityViolation.class);
                 ViolationLevel level = options.getLevel();
                 publishAttachment(options.getStandard(), currentUrl, convertResult(violations));
-                softAssert.assertThat(String.format(HTML_CS_MESSAGE, level, currentUrl),
-                    violations.stream().filter(v -> v.getTypeCode() <= level.getCode()).count(), equalTo(0L));
+                List<AccessibilityViolation> failures = violations.stream()
+                        .filter(v -> v.getTypeCode() <= level.getCode()).toList();
+                reportViolations(failures, AccessibilityViolation::getCode, AccessibilityViolation::getMessage,
+                        HTML_CS_MESSAGE, level, currentUrl);
             });
         }
         else
@@ -126,11 +131,25 @@ public class AccessibilitySteps
                 publishAttachment(axeOptionsAsString, currentUrl, Map.of("entries", reportEntries, "url", currentUrl,
                         "run", axeOptions));
 
-                long failures = reportEntries.stream().filter(e -> ResultType.FAILED == e.getType())
-                        .map(AxeReportEntry::getResults).map(List::size).findFirst().orElse(0);
-                softAssert.assertThat(String.format(AXE_CORE_MESSAGE, axeOptionsAsString, currentUrl), failures,
-                        equalTo(0L));
+                List<Result> failures = reportEntries.stream().filter(e -> ResultType.FAILED == e.getType())
+                        .map(AxeReportEntry::getResults).findFirst().orElse(List.of());
+                reportViolations(failures, Result::getId, Result::getDescription, AXE_CORE_MESSAGE, axeOptionsAsString,
+                        currentUrl);
             });
+        }
+    }
+
+    private <T> void reportViolations(List<T> violations, Function<T, String> idGetter,
+            Function<T, String> messageGetter, String format, Object... args)
+    {
+        if (reportViolationsAsAssertions)
+        {
+            violations.stream().map(v -> "[" + idGetter.apply(v) + "] " + messageGetter.apply(v))
+                    .forEach(softAssert::recordFailedAssertion);
+        }
+        else
+        {
+            softAssert.assertThat(String.format(format, args), (long) violations.size(), equalTo(0L));
         }
     }
 
@@ -169,5 +188,10 @@ public class AccessibilitySteps
     public void setAccessibilityEngine(AccessibilityEngine accessibilityEngine)
     {
         this.accessibilityEngine = accessibilityEngine;
+    }
+
+    public void setReportViolationsAsAssertions(boolean reportViolationsAsAssertions)
+    {
+        this.reportViolationsAsAssertions = reportViolationsAsAssertions;
     }
 }
