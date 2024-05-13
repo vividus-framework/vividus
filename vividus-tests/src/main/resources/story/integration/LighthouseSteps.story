@@ -12,7 +12,6 @@ When I perform Lighthouse desktop scan of `${vividus-test-site-url}` page:
 |Accessibility Score     |GREATER_THAN|85       |
 |Best Practices Score    |GREATER_THAN|90       |
 |Performance Score       |GREATER_THAN|90       |
-|PWA Score               |GREATER_THAN|20       |
 |SEO Score               |GREATER_THAN|85       |
 
 

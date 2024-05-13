@@ -109,8 +109,7 @@ class LighthouseStepsTests
     private static final BigDecimal SCORE_METRIC_VAL = new BigDecimal(0.99f);
     private static final String RESULT_AS_STRING = "{}";
     private static final String SEO = "seo";
-    private static final List<String> CATEGORIES = List.of("performance", "pwa", "best-practices", "accessibility",
-            SEO);
+    private static final List<String> CATEGORIES = List.of("performance", "best-practices", "accessibility", SEO);
     private static final String DESKTOP_STRATEGY = ScanType.DESKTOP.getStrategies()[0];
     private static final String UNKNOWN_ERROR_MESSAGE = "Lighthouse returned error: Something went wrong.";
     private static final String PERFORMANCE_SCORE_LOG = "The performance score of the measurement #{} is {}";
