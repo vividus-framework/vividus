@@ -25,8 +25,8 @@ include::partial$plugin-installation.adoc[]
 |The API key that identifies your project and provides you with API access, quota, and reports. Its recommended to specify the key if you plan to use the plugin in an automated way and make multiple queries per second.
 
 |`lighthouse.categories`
-|comma-separated list of categories (`performance`, `pwa`, `best-practices`, `accessibility`, `seo`)
-|`performance,pwa,best-practices,accessibility,seo`
+|comma-separated list of categories (`performance`, `best-practices`, `accessibility`, `seo`)
+|`performance,best-practices,accessibility,seo`
 |The audit categories to run, by default the scan includes all 5 categories, but you can select particular ones depending on which aspects of your website you wish to analyze.
 
 |`lighthouse.performance.percentile`
@@ -70,7 +70,6 @@ include::partial$lighthouse-scan-type.adoc[]
 **** `Accessibility Score`
 **** `Best Practices Score`
 **** `Performance Score`
-**** `PWA Score`
 **** `SEO Score`
 ** `$rule` - xref:parameters:comparison-rule.adoc[The comparison rule].
 ** `$threshold` - The expected integer or floating (e.g. `0.35`) number.
@@ -88,7 +87,6 @@ When I perform Lighthouse full scan of `https://dequeuniversity.com/demo/mars` p
 |Accessibility Score     |GREATER_THAN|90       |
 |Best Practices Score    |EQUAL_TO    |100      |
 |Performance Score       |GREATER_THAN|95       |
-|PWA Score               |GREATER_THAN|20       |
 |SEO Score               |GREATER_THAN|85       |
 ----
 

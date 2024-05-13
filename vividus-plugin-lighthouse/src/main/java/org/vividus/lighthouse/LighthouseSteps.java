@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,11 +62,10 @@ public final class LighthouseSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(LighthouseSteps.class);
 
-    private static final Map<String, Function<Categories, LighthouseCategoryV5>> CUSTOM_METRIC_FATORIES = Map.of(
+    private static final Map<String, Function<Categories, LighthouseCategoryV5>> CUSTOM_METRIC_FACTORIES = Map.of(
         "accessibilityScore", Categories::getAccessibility,
         "bestPracticesScore", Categories::getBestPractices,
         "performanceScore", Categories::getPerformance,
-        "pwaScore", Categories::getPwa,
         "seoScore", Categories::getSeo
     );
 
@@ -276,7 +275,7 @@ public final class LighthouseSteps
         }
 
         Categories scanCategories = result.getCategories();
-        CUSTOM_METRIC_FATORIES.forEach((m, f) ->
+        CUSTOM_METRIC_FACTORIES.forEach((m, f) ->
         {
             LighthouseCategoryV5 categoryValue = f.apply(scanCategories);
             if (categoryValue != null)
