@@ -36,6 +36,7 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
 {
     private ISiteMapParser siteMapParser;
     private boolean ignoreErrors;
+    private boolean strict;
 
     private final List<SiteMap> siteMaps = Collections.synchronizedList(new LinkedList<>());
 
@@ -47,6 +48,10 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
                 .map(Boolean::valueOf)
                 .orElse(ignoreErrors);
         String siteMapRelativeUrl = properties.getMandatoryNonBlankProperty("siteMapRelativeUrl", String.class);
+        boolean strictParameter = Optional.ofNullable(properties.getProperties().getProperty("strict"))
+                .map(Boolean::valueOf)
+                .orElse(strict);
+
 
         URI mainApplicationPage = getMainApplicationPageUri(properties);
         Set<String> urls = siteMaps.stream().filter(
@@ -56,7 +61,7 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
                 Set<String> siteMapRelativeUrls;
                 try
                 {
-                    siteMapRelativeUrls = filterResults(siteMapParser.parse(true, mainApplicationPage,
+                    siteMapRelativeUrls = filterResults(siteMapParser.parse(strictParameter, mainApplicationPage,
                             siteMapRelativeUrl).stream()
                             .map(SiteMapURL::getUrl)
                             .map(URL::toString));
@@ -88,5 +93,10 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
     public void setIgnoreErrors(boolean ignoreErrors)
     {
         this.ignoreErrors = ignoreErrors;
+    }
+
+    public void setStrict(boolean strict)
+    {
+        this.strict = strict;
     }
 }

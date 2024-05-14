@@ -9,69 +9,89 @@ include::partial$plugin-installation.adoc[]
 
 == xref:ROOT:glossary.adoc#_table_transformer[Table Transformers]
 
-=== FROM_SITEMAP
+=== `FROM_SITEMAP`
 
 `FROM_SITEMAP` transformer generates table based on the website sitemap.
 
 IMPORTANT: The use of `web-application.main-page-url` property for setting of main page for crawling is deprecated and will be removed in VIVIDUS 0.7.0, pelase see either `mainPageUrl` transformer parameter or `transformer.from-sitemap.main-page-url` property.
 
-[cols="1,3", options="header"]
-
-|===
-
-|Parameter
-|Description
-
-|`mainPageUrl`
-a|main application page URL, used as initial seed URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
-
-IMPORTANT: The main page url value defined by this parameter overrides the value defined by the `transformer.from-sitemap.main-page-url` property.
-
-|`siteMapRelativeUrl`
-|relative URL of `sitemap.xml`
-
-|`ignoreErrors`
-|ignore sitemap parsing errors (_true_ or _false_)
-
-|`column`
-|the column name in the generated table
-
-|===
+The properties outlined in the table below are applied to all FROM_SITEMAP transformers utilized in the tests, unless
+they override the values by specifiying the corresponding table parameters.
 
 [cols="3,1,1,3", options="header"]
-
 |===
-
 |Property Name
 |Acceptable values
 |Default
 |Description
 
 |`transformer.from-sitemap.main-page-url`
-|`URL`
+|URL
 |
-a|main application page URL, used as initial seed URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
-
-IMPORTANT: The main page url value defined by this property gets overriden by the value defined in `mainPageUrl` transformer parameter.
+|The main application page URL, used as initial seed URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
 
 |`transformer.from-sitemap.ignore-errors`
-a|`true`
+a|`true` +
 `false`
 |`false`
-|ignore sitemap parsing errors
+|Ignore sitemap parsing errors.
+
+|`transformer.from-sitemap.strict`
+a|`true` +
+`false`
+|`true`
+|Whether invalid URLs will be rejected silently (where "invalid" means that the URL is not under the base URL, see https://www.sitemaps.org/protocol.html#location[sitemap file location explanation] for more details)
 
 |`transformer.from-sitemap.filter-redirects`
-a|`true`
+a|`true` +
 `false`
 |`false`
 |defines whether urls that has redirect to the one that has already been included in the table are excluded from the table
 
 |===
 
+The parameters outlined in the table below are exclusively applicable to the transformer in which they are declared.
+
+[cols="1,1,1,2", options="header"]
+|===
+|Parameter
+|Acceptable values
+|Default
+|Description
+
+|`mainPageUrl`
+|URL
+|If not specified, the default value is taken from `transformer.from-sitemap.main-page-url` property.
+|The main application page URL, used as initial seed URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
+
+|`siteMapRelativeUrl`
+|Relative URL
+|
+|The relative URL of `sitemap.xml`.
+
+|`column`
+|
+|
+|The column name to store collected relative URLs in the generated table.
+
+|`ignoreErrors`
+a|`true` +
+`false`
+|If not specified, the default value is taken from `transformer.from-sitemap.ignore-errors` property.
+|Ignore sitemap parsing errors.
+
+|`strict`
+a|`true` +
+`false`
+|If not specified, the default value is taken from `transformer.from-sitemap.strict` property.
+|Whether invalid URLs will be rejected silently (where "invalid" means that the URL is not under the base URL, see https://www.sitemaps.org/protocol.html#location[sitemap file location explanation] for more details)
+|===
+
+
 .Usage example
 ----
 Examples:
-{transformer=FROM_SITEMAP, siteMapRelativeUrl=/sitemap.xml, ignoreErrors=true, column=page-url}
+{transformer=FROM_SITEMAP, siteMapRelativeUrl=/sitemap.xml, ignoreErrors=true, strict=false, column=page-url}
 ----
 
 === FROM_HEADLESS_CRAWLING
@@ -80,21 +100,6 @@ Examples:
 
 IMPORTANT: The use of `web-application.main-page-url` property for setting of main page for crawling is deprecated and will be removed in VIVIDUS 0.7.0, pelase see either `mainPageUrl` transformer parameter or `transformer.from-headless-crawling.main-page-url` property.
 
-[cols="1,3", options="header"]
-|===
-
-|Parameter Name
-|Description
-
-|`mainPageUrl`
-a|main application page URL, used as initial seed URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
-
-IMPORTANT: The main page url value defined by this parameter overrides the value defined by the `transformer.from-headless-crawling.main-page-url` property.
-
-|`column`
-|The column name in the generated table.
-
-|===
 
 [cols="3,1,1,3", options="header"]
 |===
@@ -258,6 +263,22 @@ transformer.from-headless-crawling.http.headers.x-vercel-protection-bypass=1fac2
 |`string`
 |`no default value`
 |Password to authenticate with proxy.
+
+|===
+
+[cols="1,3", options="header"]
+|===
+
+|Parameter Name
+|Description
+
+|`mainPageUrl`
+a|main application page URL, used as initial seed URL that is fetched by the crawler to extract new URLs in it and follow them for crawling.
+
+IMPORTANT: The main page url value defined by this parameter overrides the value defined by the `transformer.from-headless-crawling.main-page-url` property.
+
+|`column`
+|The column name in the generated table.
 
 |===
 

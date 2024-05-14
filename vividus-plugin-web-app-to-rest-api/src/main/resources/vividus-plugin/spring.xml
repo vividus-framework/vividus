@@ -72,6 +72,7 @@
           parent="abstractFetchingUrlsTableTransformer">
         <property name="siteMapParser" ref="siteMapParser" />
         <property name="ignoreErrors" value="${transformer.from-sitemap.ignore-errors}" />
+        <property name="strict" value="${transformer.from-sitemap.strict}" />
         <property name="filterRedirects" value="${transformer.from-sitemap.filter-redirects}" />
         <property name="mainPageUrl" value="${transformer.from-sitemap.main-page-url}" />
         <property name="mainPageUrlProperty" value="transformer.from-sitemap.main-page-url" />
