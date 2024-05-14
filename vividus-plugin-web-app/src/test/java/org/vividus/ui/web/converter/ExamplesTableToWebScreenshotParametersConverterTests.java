@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.vividus.converter.ui.web;
+package org.vividus.ui.web.converter;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Duration;
 import java.util.Optional;
 
 import org.jbehave.core.model.ExamplesTable;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.vividus.selenium.screenshot.CoordsProviderType;
 import org.vividus.ui.web.screenshot.WebScreenshotConfiguration;
@@ -35,16 +35,20 @@ class ExamplesTableToWebScreenshotParametersConverterTests
     @Test
     void shouldConvertExamplesTableToWebScreenshotConfiguration()
     {
-        ExamplesTable table = new ExamplesTable(
-                "|nativeHeaderToCut|nativeFooterToCut|webHeaderToCut|webFooterToCut|\n|1|2|3|4|");
-        WebScreenshotConfiguration parameters =
+        var table = new ExamplesTable("""
+                |nativeHeaderToCut|nativeFooterToCut|webHeaderToCut|webFooterToCut|
+                |1                |2                |3             |4             |
+                """);
+        var configuration =
                 (WebScreenshotConfiguration) tableConverter.convertValue(table, null);
-        Assertions.assertAll(() -> assertEquals(Duration.ofMillis(500), parameters.getScrollTimeout()),
-                             () -> assertEquals(CoordsProviderType.CEILING, parameters.getCoordsProvider()),
-                             () -> assertEquals(Optional.empty(), parameters.getScrollableElement()),
-                             () -> assertEquals(1, parameters.getNativeHeaderToCut()),
-                             () -> assertEquals(2, parameters.getNativeFooterToCut()),
-                             () -> assertEquals(3, parameters.getWebHeaderToCut()),
-                             () -> assertEquals(4, parameters.getWebFooterToCut()));
+        assertAll(
+                () -> assertEquals(Duration.ofMillis(500), configuration.getScrollTimeout()),
+                () -> assertEquals(CoordsProviderType.CEILING, configuration.getCoordsProvider()),
+                () -> assertEquals(Optional.empty(), configuration.getScrollableElement()),
+                () -> assertEquals(1, configuration.getNativeHeaderToCut()),
+                () -> assertEquals(2, configuration.getNativeFooterToCut()),
+                () -> assertEquals(3, configuration.getWebHeaderToCut()),
+                () -> assertEquals(4, configuration.getWebFooterToCut())
+        );
     }
 }

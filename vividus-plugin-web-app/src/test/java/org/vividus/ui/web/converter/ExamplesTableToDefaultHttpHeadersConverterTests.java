@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,33 +14,34 @@
  * limitations under the License.
  */
 
-package org.vividus.converter.ui.web;
+package org.vividus.ui.web.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 
-import io.netty.handler.codec.http.DefaultHttpHeaders;
-
 class ExamplesTableToDefaultHttpHeadersConverterTests
 {
-    private static final ExamplesTableToDefaultHttpHeadersConverter CONVERTER =
-        new ExamplesTableToDefaultHttpHeadersConverter();
+    private final ExamplesTableToDefaultHttpHeadersConverter converter =
+            new ExamplesTableToDefaultHttpHeadersConverter();
 
     @Test
-    void shouldConvertExaplesTableToADefaultHeaders()
+    void shouldConvertExamplesTableToADefaultHeaders()
     {
-        DefaultHttpHeaders headers = CONVERTER.convertValue(new ExamplesTable("|name|value|\n|key|value|"),
-                Object.class);
+        var examplesTable = new ExamplesTable("""
+                |name|value|
+                |key |value|
+                """);
+        var headers = converter.convertValue(examplesTable, Object.class);
         assertEquals(1, headers.size());
         assertEquals("value", headers.get("key"));
     }
 
     @Test
-    void shouldConvertExaplesTableToAnEmptyDefaultHeaders()
+    void shouldConvertExamplesTableToAnEmptyDefaultHeaders()
     {
-        DefaultHttpHeaders headers = CONVERTER.convertValue(ExamplesTable.empty(), Object.class);
+        var headers = converter.convertValue(ExamplesTable.empty(), Object.class);
         assertEquals(0, headers.size());
     }
 }
