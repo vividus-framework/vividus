@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context"
     xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
         default-lazy-init="true" profile="web_selenium">
-
-    <context:component-scan base-package="org.vividus.converter.ui.web" />
 
     <bean id="timeoutConfigurer" class="org.vividus.selenium.TimeoutConfigurer">
         <property name="pageLoadTimeout" value="${web.timeouts.page-load}" />
@@ -300,6 +296,10 @@
             <bean class="org.vividus.ui.web.converter.DimensionPropertyEditor" />
         </entry>
     </util:map>
+
+    <bean class="org.vividus.ui.web.converter.ExamplesTableToDefaultHttpHeadersConverter" />
+    <bean class="org.vividus.ui.web.converter.ExamplesTableToWebScreenshotConfigurationConverter" />
+    <bean class="org.vividus.ui.web.converter.StringToDimensionParameterConverter" />
 
     <bean id="current-page-url" class="org.vividus.ui.web.variable.CurrentPageUrlDynamicVariable"/>
     <bean id="browser-window-height" class="org.vividus.ui.web.variable.BrowserWindowHeightDynamicVariable"/>

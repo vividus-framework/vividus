@@ -18,8 +18,6 @@ package org.vividus.ui.web.converter;
 
 import java.beans.PropertyEditorSupport;
 
-import org.vividus.converter.ui.web.StringToDimensionParameterConverter;
-
 public class DimensionPropertyEditor extends PropertyEditorSupport
 {
     @Override
