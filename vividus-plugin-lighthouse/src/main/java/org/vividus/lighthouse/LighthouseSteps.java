@@ -318,9 +318,9 @@ public final class LighthouseSteps
                            .addArgument(performanceScore)
                            .log("The performance score of the measurement #{} is {}");
 
-            /**
-             * Experiments have shown that there is no point to continue measuring if we hit 99 or 100 performance
-             * scores because all the subsequent request will be cached with long expiration time.
+            /*
+              Experiments have shown that there is no point to continue measuring if we hit 99 or 100 performance
+              scores because all the subsequent request will be cached with long expiration time.
              */
             if (performanceScore >= MAX_CACHEABLE_SCORE)
             {
