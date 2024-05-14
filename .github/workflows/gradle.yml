@@ -356,8 +356,8 @@ jobs:
         if [[ -n $BROWSERSTACK_USER && -n $BROWSERSTACK_KEY ]]; then
           declare -a profiles=( iphone android )
           for profile in "${profiles[@]}"; do
-            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check/browserstack/${profile} \
-                                                  -Pvividus.configuration.profiles=browserstack/web/phone,web/phone/${profile} \
+            ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
+                                                  -Pvividus.configuration.profiles=browserstack/web/phone/${profile},web/phone/${profile} \
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY}
           done
