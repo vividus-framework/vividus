@@ -18,7 +18,6 @@ package org.vividus.crawler.transformer;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -64,8 +63,19 @@ class SiteMapTableTransformerTests
     private static final String STRICT_PARAMETER_NAME = "strict";
     private static final String SITEMAP_XML = "/org/vividus/sitemap/sitemap.xml";
     private static final URI MAIN_APP_PAGE = URI.create(SOME_URL);
-    private static final Set<SiteMapURL> SITEMAP_URLS = Set.of(new SiteMapURL(SOME_URL + "/product", true));
-    private static final String OUTGOING_ABSOLUT_URL = "http://www.some.url/product";
+
+    public static final SiteMapURL PRODUCT_URL = new SiteMapURL(SOME_URL + "/product", true);
+    private static final Set<SiteMapURL> SITEMAP_URLS = Set.of(
+            PRODUCT_URL,
+            /*
+            Some sitemaps may contain invalid URLs: not encoded, it's not allowed according to the standard:
+            https://www.sitemaps.org/protocol.html#escaping, but we are trying to handle such cases
+            */
+            new SiteMapURL(SOME_URL + "/Juridisk erklæring", false)
+    );
+    private static final String OUTGOING_ABSOLUTE_SIMPLE_URL = "http://www.some.url/product";
+    private static final String OUTGOING_ABSOLUTE_NOT_ENCODED_URL = "http://www.some.url/Juridisk erklæring";
+    private static final String OUTGOING_ABSOLUTE_ENCODED_URL = "http://www.some.url/Juridisk%20erkl%C3%A6ring";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(SiteMapTableTransformer.class);
 
@@ -86,7 +96,7 @@ class SiteMapTableTransformerTests
         siteMapTableTransformer.setStrict(strict);
         var properties = createTableProperties();
         var actual = siteMapTableTransformer.fetchUrls(properties);
-        assertEquals(Set.of(OUTGOING_ABSOLUT_URL), actual);
+        assertEquals(Set.of(OUTGOING_ABSOLUTE_SIMPLE_URL, OUTGOING_ABSOLUTE_NOT_ENCODED_URL), actual);
 
         var actualFromCache = siteMapTableTransformer.fetchUrls(properties);
         assertSame(actual, actualFromCache);
@@ -192,15 +202,15 @@ class SiteMapTableTransformerTests
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         boolean strict = true;
-        when(siteMapParser.parse(strict, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(SITEMAP_URLS);
+        when(siteMapParser.parse(strict, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(Set.of(PRODUCT_URL));
         siteMapTableTransformer.setStrict(strict);
         String prop = "transformer.from-sitemap.main-page-url";
         siteMapTableTransformer.setMainPageUrlProperty(prop);
         siteMapTableTransformer.setFilterRedirects(true);
         var httpResponseException = new HttpResponseException(HttpStatus.SC_NOT_FOUND, "");
-        when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUT_URL))).thenThrow(httpResponseException);
+        when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUTE_SIMPLE_URL))).thenThrow(httpResponseException);
         var actual = siteMapTableTransformer.fetchUrls(createTableProperties());
-        assertEquals(Set.of(OUTGOING_ABSOLUT_URL), actual);
+        assertEquals(Set.of(OUTGOING_ABSOLUTE_SIMPLE_URL), actual);
         assertThat(logger.getLoggingEvents(),
                 is(List.of(
                         warn("The use of {} property for setting of main page for crawling is deprecated and will "
@@ -217,9 +227,10 @@ class SiteMapTableTransformerTests
         when(siteMapParser.parse(strict, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(SITEMAP_URLS);
         siteMapTableTransformer.setStrict(strict);
         siteMapTableTransformer.setFilterRedirects(true);
-        when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUT_URL))).thenReturn(List.of());
+        when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUTE_SIMPLE_URL))).thenReturn(List.of());
+        when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUTE_ENCODED_URL))).thenReturn(List.of());
         var actual = siteMapTableTransformer.fetchUrls(createTableProperties());
-        assertThat(actual, equalTo(Set.of(OUTGOING_ABSOLUT_URL)));
+        assertEquals(Set.of(OUTGOING_ABSOLUTE_SIMPLE_URL, OUTGOING_ABSOLUTE_NOT_ENCODED_URL), actual);
     }
 
     private TableProperties createTableProperties()

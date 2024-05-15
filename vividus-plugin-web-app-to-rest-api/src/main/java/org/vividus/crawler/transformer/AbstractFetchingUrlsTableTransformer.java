@@ -57,13 +57,15 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
     {
         checkTableEmptiness(tableAsString);
         Set<String> urls = fetchUrls(properties).stream()
-                .map(URI::create)
+                .map(this::parseUri)
                 .map(URI::getRawPath)
                 .collect(Collectors.toSet());
         return build(urls, properties);
     }
 
     protected abstract Set<String> fetchUrls(TableProperties properties);
+
+    protected abstract URI parseUri(String uri);
 
     protected Set<String> filterResults(Stream<String> urls)
     {
@@ -112,9 +114,9 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
     {
         try
         {
-            return httpRedirectsProvider.getRedirects(URI.create(urlAsString)).stream()
-                                                                              .map(URI::toString)
-                                                                              .toList();
+            return httpRedirectsProvider.getRedirects(parseUri(urlAsString)).stream()
+                    .map(URI::toString)
+                    .toList();
         }
         catch (IOException e)
         {
