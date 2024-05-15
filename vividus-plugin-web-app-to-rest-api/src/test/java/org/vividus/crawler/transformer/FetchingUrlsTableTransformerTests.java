@@ -127,5 +127,11 @@ class FetchingUrlsTableTransformerTests
         {
             return new HashSet<>(List.of("http://someurl/first", "http://someurl.com/second", "/third", "/fourth%25"));
         }
+
+        @Override
+        protected URI parseUri(String uri)
+        {
+            return URI.create(uri);
+        }
     }
 }

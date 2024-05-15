@@ -29,6 +29,7 @@ import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.vividus.crawler.ISiteMapParser;
 import org.vividus.crawler.SiteMap;
 import org.vividus.crawler.SiteMapParseException;
+import org.vividus.util.UriUtils;
 
 import crawlercommons.sitemaps.SiteMapURL;
 
@@ -83,6 +84,12 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
             throw new SiteMapTableGenerationException("No URLs found in sitemap, or all URLs were filtered");
         }
         return urls;
+    }
+
+    @Override
+    protected URI parseUri(String uri)
+    {
+        return UriUtils.createUri(uri);
     }
 
     public void setSiteMapParser(ISiteMapParser siteMapParser)

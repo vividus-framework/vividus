@@ -111,6 +111,12 @@ public class HeadlessCrawlerTableTransformer extends AbstractFetchingUrlsTableTr
         return crawledUrlsCache.getUnchecked(mainApplicationPage);
     }
 
+    @Override
+    protected URI parseUri(String uri)
+    {
+        return URI.create(uri);
+    }
+
     public void setCrawlControllerFactory(ICrawlControllerFactory crawlControllerFactory)
     {
         this.crawlControllerFactory = crawlControllerFactory;
