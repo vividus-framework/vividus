@@ -10,6 +10,7 @@
     <bean class="org.vividus.mobitru.selenium.MobitruCapabilitiesAdjuster" >
         <property name="appFileName" value="${mobitru.app-file-name}" />
         <property name="resignIosApp" value="${mobitru.resign-ios-app}" />
+        <property name="doInjection" value="${mobitru.do-injection}" />
     </bean>
 
     <bean class="org.vividus.mobitru.mobileapp.MobitruApplicationActivator" >

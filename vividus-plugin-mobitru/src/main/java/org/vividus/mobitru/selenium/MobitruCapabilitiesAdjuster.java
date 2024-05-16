@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ public class MobitruCapabilitiesAdjuster extends DesiredCapabilitiesAdjuster
 
     private String appFileName;
     private boolean resignIosApp = true;
+    private boolean doInjection;
 
     public MobitruCapabilitiesAdjuster(MobitruFacade mobitruFacade)
     {
@@ -43,7 +44,7 @@ public class MobitruCapabilitiesAdjuster extends DesiredCapabilitiesAdjuster
         try
         {
             deviceId = mobitruFacade.takeDevice(desiredCapabilities);
-            mobitruFacade.installApp(deviceId, appFileName, resignIosApp);
+            mobitruFacade.installApp(deviceId, appFileName, resignIosApp, doInjection);
             Map<String, Object> capabilities = desiredCapabilities.asMap();
             if (capabilities.containsKey(APPIUM_UDID) || capabilities.containsKey("udid"))
             {
@@ -76,5 +77,10 @@ public class MobitruCapabilitiesAdjuster extends DesiredCapabilitiesAdjuster
     public void setResignIosApp(boolean resignIosApp)
     {
         this.resignIosApp = resignIosApp;
+    }
+
+    public void setDoInjection(boolean doInjection)
+    {
+        this.doInjection = doInjection;
     }
 }

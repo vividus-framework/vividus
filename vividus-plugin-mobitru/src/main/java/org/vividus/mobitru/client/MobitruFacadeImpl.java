@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,9 +79,10 @@ public class MobitruFacadeImpl implements MobitruFacade
     }
 
     @Override
-    public void installApp(String deviceId, String appRealName, boolean resign) throws MobitruOperationException
+    public void installApp(String deviceId, String appRealName, boolean resign, boolean injection)
+            throws MobitruOperationException
     {
-        mobitruClient.installApp(deviceId, findApp(appRealName), resign);
+        mobitruClient.installApp(deviceId, findApp(appRealName), resign, injection);
     }
 
     @Override

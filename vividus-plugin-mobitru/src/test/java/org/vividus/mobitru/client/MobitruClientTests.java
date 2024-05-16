@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,10 +171,13 @@ class MobitruClientTests
 
     @ParameterizedTest
     @CsvSource({
-            "true,  noResign=false",
-            "false, noResign=true"
+            "true, true, noResign=false&doInjection=true",
+            "true, false, noResign=false&doInjection=false",
+            "false, true, noResign=true&doInjection=true",
+            "false, false, noResign=true&doInjection=false"
     })
-    void shouldInstallApp(boolean resign, String urlQuery) throws IOException, MobitruOperationException
+    void shouldInstallApp(boolean resign, boolean injection, String urlQuery)
+            throws IOException, MobitruOperationException
     {
         var builder = mock(HttpRequestBuilder.class);
         ClassicHttpRequest httpRequest = mock();
@@ -190,7 +193,7 @@ class MobitruClientTests
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
             when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_CREATED);
-            mobitruClient.installApp("udid", "fileid", resign);
+            mobitruClient.installApp("udid", "fileid", resign, injection);
             verify(httpClient).execute(httpRequest);
         }
     }
