@@ -121,6 +121,12 @@ a|`true` +
 |`true`
 |(iOS only) Resign the application (*.ipa) with Mobitru profile or not.
 
+|`mobitru.do-injection`
+a|`true` +
+`false`
+|`false`
+|Inject special code into application to allow emulation of "touch id" action and QR code scan.
+
 |`mobitru.device-wait-timeout`
 |The duration in {durations-format-link} format.
 |`PT5M`

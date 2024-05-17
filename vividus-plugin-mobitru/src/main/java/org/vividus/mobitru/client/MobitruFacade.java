@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,11 @@ public interface MobitruFacade
      * @param deviceId    The UDID of the device
      * @param appRealName The application to install filename.
      * @param resign      (iOS only) Resign the application (*.ipa) with Mobitru profile or not.
+     * @param injection   inject special code into application to allow emulation of "touch id" action and QR code scan
      * @throws MobitruOperationException In case of any issues during application installation.
      */
-    void installApp(String deviceId, String appRealName, boolean resign) throws MobitruOperationException;
+    void installApp(String deviceId, String appRealName, boolean resign, boolean injection)
+            throws MobitruOperationException;
 
     /**
      * Returns the device with specified UDID to the devices pool.
