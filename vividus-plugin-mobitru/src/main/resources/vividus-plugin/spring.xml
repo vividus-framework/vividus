@@ -7,10 +7,14 @@
        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        profile="mobitru">
 
-    <bean class="org.vividus.mobitru.selenium.MobitruCapabilitiesAdjuster" >
+    <bean class="org.vividus.mobitru.selenium.MobitruCapabilitiesAdjuster">
+        <constructor-arg index="0">
+            <bean class="org.vividus.mobitru.client.InstallApplicationOptions">
+                <constructor-arg index="0" value="${mobitru.resign-ios-app}" />
+                <constructor-arg index="1" value="${mobitru.do-injection}" />
+            </bean>
+        </constructor-arg>
         <property name="appFileName" value="${mobitru.app-file-name}" />
-        <property name="resignIosApp" value="${mobitru.resign-ios-app}" />
-        <property name="doInjection" value="${mobitru.do-injection}" />
     </bean>
 
     <bean class="org.vividus.mobitru.mobileapp.MobitruApplicationActivator" >

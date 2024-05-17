@@ -72,11 +72,11 @@ public class MobitruClient
         executeRequest(DEVICE_PATH + "/" + deviceId, HttpMethod.DELETE, UnaryOperator.identity(), HttpStatus.SC_OK);
     }
 
-    public void installApp(String deviceId, String appId, boolean resign, boolean injection)
+    public void installApp(String deviceId, String appId, InstallApplicationOptions options)
             throws MobitruOperationException
     {
-        String url = String.format("/storage/install/%s/%s?noResign=%s&doInjection=%s",
-                deviceId, appId, !resign, injection);
+        String url = String.format("/storage/install/%s/%s?noResign=%s&doInjection=%s", deviceId, appId,
+                !options.resignIosApp(), options.injectionEnabled());
         executeGet(url, HttpStatus.SC_CREATED);
     }
 
