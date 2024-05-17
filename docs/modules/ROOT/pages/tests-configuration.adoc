@@ -556,7 +556,7 @@ Here one could find description of general HTTP properties applied across all th
 
 |`http.socket-timeout`
 |`integer`
-|`3000`
+|`300000`
 |The timeout in milliseconds used for waiting for data or, put differently, a maximum period inactivity between two consecutive data packets. A timeout value of zero is interpreted as an infinite timeout. A negative value is interpreted as undefined (system default if applicable)
 
 |`http.cookie-spec`
