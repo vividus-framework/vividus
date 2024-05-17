@@ -125,7 +125,7 @@ a|`true` +
 a|`true` +
 `false`
 |`false`
-|inject special code into application to allow emulation of "touch id" action and QR code scan.
+|Inject special code into application to allow emulation of "touch id" action and QR code scan.
 
 |`mobitru.device-wait-timeout`
 |The duration in {durations-format-link} format.
