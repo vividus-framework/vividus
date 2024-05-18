@@ -181,6 +181,7 @@ class MobitruClientTests
     {
         var builder = mock(HttpRequestBuilder.class);
         ClassicHttpRequest httpRequest = mock();
+        var installApplicationOptions = new InstallApplicationOptions(resign, injection);
         try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
         {
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
@@ -193,7 +194,7 @@ class MobitruClientTests
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
             when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_CREATED);
-            mobitruClient.installApp("udid", "fileid", resign, injection);
+            mobitruClient.installApp("udid", "fileid", installApplicationOptions);
             verify(httpClient).execute(httpRequest);
         }
     }

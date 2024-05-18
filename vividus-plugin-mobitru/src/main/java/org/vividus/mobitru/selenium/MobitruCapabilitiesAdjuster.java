@@ -19,6 +19,7 @@ package org.vividus.mobitru.selenium;
 import java.util.Map;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.vividus.mobitru.client.InstallApplicationOptions;
 import org.vividus.mobitru.client.MobitruFacade;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
 import org.vividus.selenium.DesiredCapabilitiesAdjuster;
@@ -28,12 +29,12 @@ public class MobitruCapabilitiesAdjuster extends DesiredCapabilitiesAdjuster
     private static final String APPIUM_UDID = "appium:udid";
     private final MobitruFacade mobitruFacade;
 
+    private final InstallApplicationOptions installApplicationOptions;
     private String appFileName;
-    private boolean resignIosApp = true;
-    private boolean doInjection;
 
-    public MobitruCapabilitiesAdjuster(MobitruFacade mobitruFacade)
+    public MobitruCapabilitiesAdjuster(InstallApplicationOptions installApplicationOptions, MobitruFacade mobitruFacade)
     {
+        this.installApplicationOptions = installApplicationOptions;
         this.mobitruFacade = mobitruFacade;
     }
 
@@ -44,7 +45,7 @@ public class MobitruCapabilitiesAdjuster extends DesiredCapabilitiesAdjuster
         try
         {
             deviceId = mobitruFacade.takeDevice(desiredCapabilities);
-            mobitruFacade.installApp(deviceId, appFileName, resignIosApp, doInjection);
+            mobitruFacade.installApp(deviceId, appFileName, installApplicationOptions);
             Map<String, Object> capabilities = desiredCapabilities.asMap();
             if (capabilities.containsKey(APPIUM_UDID) || capabilities.containsKey("udid"))
             {
@@ -72,15 +73,5 @@ public class MobitruCapabilitiesAdjuster extends DesiredCapabilitiesAdjuster
     public void setAppFileName(String appFileName)
     {
         this.appFileName = appFileName;
-    }
-
-    public void setResignIosApp(boolean resignIosApp)
-    {
-        this.resignIosApp = resignIosApp;
-    }
-
-    public void setDoInjection(boolean doInjection)
-    {
-        this.doInjection = doInjection;
     }
 }

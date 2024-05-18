@@ -36,11 +36,10 @@ public interface MobitruFacade
      *
      * @param deviceId    The UDID of the device
      * @param appRealName The application to install filename.
-     * @param resign      (iOS only) Resign the application (*.ipa) with Mobitru profile or not.
-     * @param injection   inject special code into application to allow emulation of "touch id" action and QR code scan
+     * @param options     Application installation options.
      * @throws MobitruOperationException In case of any issues during application installation.
      */
-    void installApp(String deviceId, String appRealName, boolean resign, boolean injection)
+    void installApp(String deviceId, String appRealName, InstallApplicationOptions options)
             throws MobitruOperationException;
 
     /**
