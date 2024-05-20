@@ -177,36 +177,15 @@ IMPORTANT: For device configuration, we need to perform the following steps: ins
 
 The profile can be enabled by adding `{ios-profile}` to `configuration.profiles` property
 
-Default profile configuration
-[source,properties]
-----
-selenium.grid.platform-name=iOS
-selenium.grid.automation-name=XCUITest
-----
-
 === tvOS
 :tvos-profile: mobile_app/tvos
 
 The profile can be enabled by adding `{tvos-profile}` to `configuration.profiles` property
 
-Default profile configuration
-[source,properties]
-----
-selenium.grid.platform-name=tvOS
-selenium.grid.automation-name=XCUITest
-----
-
 === Android
 :android-profile: mobile_app/android
 
 The profile can be enabled by adding `{android-profile}` to `configuration.profiles` property
-
-Default profile configuration
-[source,properties]
-----
-selenium.grid.platform-name=Android
-selenium.grid.automation-name=UIAutomator2
-----
 
 === Local
 
