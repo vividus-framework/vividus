@@ -84,6 +84,41 @@ The allowed values for the preference from the example are:
 * `1` - block third-party cookies;
 * `2` - block third-party cookies in Incognito mode only.
 
+=== Configuring of Basic authentication for Chromium browsers
+Vividus allows users to add predefined configurations for https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#basic_authentication_scheme[Basic authentication]. This setting is only available for desktop Chromium browsers (Chrome, Opera, Microsoft Edge) and allows to define multiple configurations for authorization on different sites.
+
+[cols="4,3,3", options="header"]
+|===
+|Property Name
+|Acceptable values
+|Description
+
+|`web-application.basic-authentication.<configuration-name>.url-regex`
+|Regular expression
+|Regular expression for site URI (regex validate URI without path, for example for page https://www.example.com/page regex will be `^https:\/\/www\.example\.com$`)
+
+|`web-application.basic-authentication.<configuration-name>.username`
+|Username
+|Username
+
+|`web-application.basic-authentication.<configuration-name>.password`
+|Password
+|Password
+
+|===
+
+.Setting up authorization for sites https://httpbingo.org and https://www.example.com
+[source,properties]
+----
+web-application.basic-authentication.httpbingo.url-regex=https:\/\/httpbingo\.org
+web-application.basic-authentication.httpbingo.username=user
+web-application.basic-authentication.httpbingo.password=passwd
+
+web-application.basic-authentication.example.url-regex=.*example\.org
+web-application.basic-authentication.example.username=admin
+web-application.basic-authentication.example.password=qwerty123
+----
+
 include::partial$proxy-meta-tags.adoc[]
 
 == xref:ROOT:glossary.adoc#_expression[Expressions]
