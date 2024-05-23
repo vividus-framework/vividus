@@ -10,9 +10,9 @@ Scenario: [iOS] Verify that dpr is not cached (dpr for iPhone 7 Simulator is 2.0
 Meta:
     @targetPlatform ios
 Given I start mobile application with capabilities:
-|name       |value             |
-|app        |${app-url}        |
-|deviceName |iPhone 7 Simulator|
+| name              | value              |
+| appium:app        | ${app-url}         |
+| appium:deviceName | iPhone 7 Simulator |
 When I ESTABLISH baseline with name `ios-low-dpr`
 When I close mobile application
 
@@ -21,17 +21,17 @@ Scenario: Verify step: 'Given I start mobile application with capabilities:$capa
 Meta:
     @targetPlatform ios
 Given I start mobile application with capabilities:
-|name|value     |
-|app |${app-url}|
+| name       | value      |
+| appium:app | ${app-url} |
 
 
 Scenario: Verify step: 'Given I start mobile application with capabilities:$capabilities'
 Meta:
     @targetPlatform android
 Given I start mobile application with capabilities:
-|name           |value     |
-|app            |${app-url}|
-|platformVersion|10.0      |
+| name                   | value      |
+| appium:app             | ${app-url} |
+| appium:platformVersion |10.0        |
 !-- Platform version 10 is using here as AndroidDriver getSystemBars() returns wrong values for Android 12.
 !-- https://github.com/appium/appium/issues/16390. It leads to failed visual check. Should be fixed in Appium 1.22.3,
 !-- which is not supported by SauceLab yet.
@@ -100,7 +100,6 @@ Examples:
 Scenario: Verify contextual check with ignored element
 When I tap on element located by `accessibilityId(menuToggler)`
 When I tap on element located by `xpath(<menuScrollViewXpath>)`
-When I wait until element located by `xpath(<scrollViewXpath>)` appears
 When I change context to element located by `xpath(<scrollViewXpath>)`
 When I <action> baseline with name `${target-platform}-context-with-ignore` ignoring:
 |ELEMENT                   |
