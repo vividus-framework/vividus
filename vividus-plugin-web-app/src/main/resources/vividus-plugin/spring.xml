@@ -14,6 +14,12 @@
 
     <bean id="webDriverFactory" class="org.vividus.selenium.WebDriverFactory" parent="parentWebDriverFactory">
         <constructor-arg index="0" value="${selenium.grid.enabled}"/>
+        <constructor-arg>
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="web-application.basic-authentication." />
+                <constructor-arg value="org.vividus.selenium.authentication.BasicAuthCredentials" />
+            </bean>
+        </constructor-arg>
         <property name="webDriverType" value="${selenium.browser}" />
     </bean>
 
