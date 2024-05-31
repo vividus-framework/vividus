@@ -317,15 +317,18 @@ public final class UriUtils
                 return new URI(url.getScheme(), url.getSchemeSpecificPart(), decodedFragment);
             }
 
-            URI parsedRelativeUrl = new URI(removeFragment(decodeUrl(normalizedRelativeUrl), decodedFragment));
-            String path = StringUtils.repeat(SLASH, indexOfFirstNonSlashChar - 1) + parsedRelativeUrl.getRawPath();
+            String parsedRelativeUrl = removeFragment(decodeUrl(normalizedRelativeUrl), decodedFragment);
+            String[] parts = StringUtils.split(parsedRelativeUrl, "?", 2);
+            String rawPath = parts.length > 0 ? parts[0] : "";
+            String query = parts.length > 1 ? parts[1] : null;
+            String path = StringUtils.repeat(SLASH, indexOfFirstNonSlashChar - 1) + rawPath;
             if (!path.isEmpty() && path.charAt(0) != '/')
             {
                 throw new IllegalArgumentException(String
                         .format("Relative path '%s' for '%s' should start with forward slash ('/')", path, url));
             }
-            String uriAsString = createUriAsString(url.getScheme(), url.getRawAuthority(), path,
-                    parsedRelativeUrl.getQuery(), decodedFragment);
+            String uriAsString = createUriAsString(url.getScheme(), url.getRawAuthority(), path, query,
+                    decodedFragment);
 
             return buildUrl(uriAsString, decodedFragment);
         }

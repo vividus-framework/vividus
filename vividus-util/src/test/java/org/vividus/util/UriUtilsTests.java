@@ -207,6 +207,7 @@ class UriUtilsTests
         "https://test:pas%40dsad@host.com, '',                                                      https://test:pas%40dsad@host.com",
         "http://localhost:4200,            /m/cool#%E7%94%A2%E5%93%81%E6%A6%82%E8%A6%BD%20overview, http://localhost:4200/m/cool#%E7%94%A2%E5%93%81%E6%A6%82%E8%A6%BD%20overview",
         "http://localhost:4200,            /m/cool#產品概覽 overview,                                http://localhost:4200/m/cool#%E7%94%A2%E5%93%81%E6%A6%82%E8%A6%BD%20overview",
+        "https://somehost.il/,             /%D7%92'%D7%95%D7%A0%D7%A1%D7%95%D7%A0%D7%A1-%D7%98%D7%99%D7%A4%D7%95%D7%AA-%D7%A9%D7%9C-%D7%91%D7%A8%D7%A7%20%D7%AA%D7%A8%D7%A1%D7%99%D7%A1-%D7%9E%D7%A8%D7%9B%D7%9A-%D7%A9%D7%99%D7%A2%D7%A8-%D7%9C%D7%99%D7%9C%D7%93%D7%99%D7%9D, https://somehost.il/%D7%92'%D7%95%D7%A0%D7%A1%D7%95%D7%A0%D7%A1-%D7%98%D7%99%D7%A4%D7%95%D7%AA-%D7%A9%D7%9C-%D7%91%D7%A8%D7%A7%20%D7%AA%D7%A8%D7%A1%D7%99%D7%A1-%D7%9E%D7%A8%D7%9B%D7%9A-%D7%A9%D7%99%D7%A2%D7%A8-%D7%9C%D7%99%D7%9C%D7%93%D7%99%D7%9D"
         // CHECKSTYLE:ON
     })
     void testBuildNewUri(String baseUrl, String relativeUrl, String expectedUrl)
