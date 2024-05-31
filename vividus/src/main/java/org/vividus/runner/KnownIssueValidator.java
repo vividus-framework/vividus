@@ -18,10 +18,11 @@ package org.vividus.runner;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
@@ -78,9 +79,7 @@ public final class KnownIssueValidator
             return;
         }
 
-        File file = new File(failuresListPath);
-
-        try (FileInputStream is = new FileInputStream(file);
+        try (InputStream is = Files.newInputStream(new File(failuresListPath).toPath());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)))
         {
             print("Known Issue", "Assertion Error");

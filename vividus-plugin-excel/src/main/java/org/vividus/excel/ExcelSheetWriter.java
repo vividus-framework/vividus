@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package org.vividus.excel;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +45,7 @@ public final class ExcelSheetWriter
     public static void createExcel(Path path, Optional<String> sheetName, ExamplesTable content) throws IOException
     {
         try (XSSFWorkbook workbook = new XSSFWorkbook();
-                FileOutputStream fileOut = new FileOutputStream(path.toFile()))
+                OutputStream fileOut = Files.newOutputStream(path))
         {
             XSSFSheet sheet = sheetName.map(workbook::createSheet).orElseGet(workbook::createSheet);
             fillData(content, sheet);
@@ -61,9 +61,9 @@ public final class ExcelSheetWriter
     */
     public static void addSheetToExcel(Path path, String sheetName, ExamplesTable content) throws IOException
     {
-        try (InputStream fileInput = new FileInputStream(path.toFile());
+        try (InputStream fileInput = Files.newInputStream(path);
                 XSSFWorkbook workbook = new XSSFWorkbook(fileInput);
-                FileOutputStream fileOut = new FileOutputStream(path.toFile()))
+                OutputStream fileOut = Files.newOutputStream(path))
         {
             fillData(content, workbook.createSheet(sheetName));
             workbook.write(fileOut);
