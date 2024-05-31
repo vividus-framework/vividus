@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.vividus.azure.cosmos.model;
 
+import com.azure.cosmos.ConnectionMode;
+
 public class CosmosDbAccount
 {
     private String key;
     private String endpoint;
+    private ConnectionMode connectionMode;
 
     public String getKey()
     {
@@ -39,5 +42,15 @@ public class CosmosDbAccount
     public void setEndpoint(String endpoint)
     {
         this.endpoint = endpoint;
+    }
+
+    public ConnectionMode getConnectionMode()
+    {
+        return connectionMode;
+    }
+
+    public void setConnectionMode(ConnectionMode connectionMode)
+    {
+        this.connectionMode = connectionMode;
     }
 }
