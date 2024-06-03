@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,10 @@ import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
@@ -229,8 +231,32 @@ public class ExcelSheetParser implements IExcelSheetParser
     @Override
     public Map<String, List<String>> getDataAsTable(String range)
     {
-        CellRangeAddress address = CellRangeAddress.valueOf(range);
+        List<String> rangeList = Stream.of(StringUtils.split(range, ';'))
+                .map(String::trim)
+                .toList();
+
+        Map<String, List<String>> data = parseRowsWithHeader(CellRangeAddress.valueOf(rangeList.get(0)));
+        int numOfHeaders = data.size();
+
+        rangeList.stream().skip(1).forEach(r ->
+        {
+            CellRangeAddress address = CellRangeAddress.valueOf(r);
+            int numOfColumnsInAddress = address.getLastColumn() - address.getFirstColumn() + 1;
+            if (numOfHeaders != numOfColumnsInAddress)
+            {
+                throw new IllegalArgumentException(String.format(
+                "The number of columns (%d) in the \"%s\" range must correspond to the number of table headers (%d)",
+                        numOfColumnsInAddress, r, numOfHeaders));
+            }
+            addAdditionalRows(data, address);
+        });
+        return data;
+    }
+
+    private Map<String, List<String>> parseRowsWithHeader(CellRangeAddress address)
+    {
         Map<String, List<String>> data = new LinkedHashMap<>();
+
         for (int colIndex = address.getFirstColumn(); colIndex <= address.getLastColumn(); colIndex++)
         {
             String columnName = sheet.getRow(address.getFirstRow()).getCell(colIndex).getStringCellValue();
@@ -243,6 +269,20 @@ public class ExcelSheetParser implements IExcelSheetParser
             data.put(columnName, columnsData);
         }
         return data;
+    }
+
+    @SuppressWarnings("checkstyle:MultipleVariableDeclarationsExtended")
+    private void addAdditionalRows(Map<String, List<String>> data, CellRangeAddress address)
+    {
+        for (int colIndex = address.getFirstColumn(), i = 0; colIndex <= address.getLastColumn(); colIndex++, i++)
+        {
+            List<String> colValues = data.get(new ArrayList<>(data.keySet()).get(i));
+            for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++)
+            {
+                Row row = sheet.getRow(rowIndex);
+                colValues.add(CellUtils.getCellValueAsString(row.getCell(colIndex)));
+            }
+        }
     }
 
     private static final class SheetDataLimits

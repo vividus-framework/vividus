@@ -31,11 +31,11 @@ include::partial$plugin-installation.adoc[]
 
 |`range`
 |
-|the range of cells from the specified excel sheet
+|the semicolon-separated collection of https://www.w3schools.com/excel/excel_ranges.php[Excel ranges] from the specified excel sheet. The table header is always taken from the first range and the number of columns in subsequent ranges must correspond to the header.
 
 |`addresses`
 |
-|the comma-separated collection of the cell addresses from the specified excel sheet
+|the semicolon-separated collection of the cell addresses from the specified excel sheet
 
 |`increment`
 |`1`
@@ -72,6 +72,12 @@ Examples:
 ----
 Examples:
 {transformer=FROM_EXCEL, path=/my-excel-file.xlsx, sheet=Data, range=A2:B4}
+----
+
+.Usage FROM_EXCEL with a header not from the first line
+----
+Examples:
+{transformer=FROM_EXCEL, path=/my-excel-file.xlsx, sheet=Data, range=A2:B2;A1:B1;A3:B4}
 ----
 
 == Steps
