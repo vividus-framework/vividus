@@ -44,6 +44,8 @@ import org.vividus.variable.VariableScope;
 class ElementStepsTests
 {
     private static final String XPATH = "xpath";
+    private static final String VARIABLE_NAME = "variableName";
+    private static final String LOCATOR_VALUE = "div";
 
     @Mock private UiContext uiContext;
     @Mock private ISoftAssert softAssert;
@@ -87,7 +89,7 @@ class ElementStepsTests
     @Test
     void shouldSaveElementCoordinatesAndSize()
     {
-        var playwrightLocator = new PlaywrightLocator(XPATH, "div");
+        var playwrightLocator = new PlaywrightLocator(XPATH, LOCATOR_VALUE);
         Locator locator = mock();
         when(uiContext.locateElement(playwrightLocator)).thenReturn(locator);
         BoundingBox box = new BoundingBox();
@@ -97,14 +99,25 @@ class ElementStepsTests
         box.width = 4;
         when(locator.boundingBox()).thenReturn(box);
 
-        String variableName = "variable name";
-        steps.saveElementCoordinatesAndSize(playwrightLocator, Set.of(VariableScope.STORY), variableName);
+        steps.saveElementCoordinatesAndSize(playwrightLocator, Set.of(VariableScope.STORY), VARIABLE_NAME);
 
-        verify(variableContext).putVariable(Set.of(VariableScope.STORY), variableName, Map.of(
+        verify(variableContext).putVariable(Set.of(VariableScope.STORY), VARIABLE_NAME, Map.of(
             "x", box.x,
             "y", box.y,
             "height", box.height,
             "width", box.width
         ));
+    }
+
+    @Test
+    void shouldSaveNumberOfElementsToVariable()
+    {
+        int elementCount = 5;
+        var playwrightLocator = new PlaywrightLocator(XPATH, LOCATOR_VALUE);
+        Locator locator = mock();
+        when(uiContext.locateElement(playwrightLocator)).thenReturn(locator);
+        when(locator.count()).thenReturn(elementCount);
+        steps.saveNumberOfElementsToVariable(playwrightLocator, Set.of(VariableScope.STORY), VARIABLE_NAME);
+        verify(variableContext).putVariable(Set.of(VariableScope.STORY), VARIABLE_NAME, elementCount);
     }
 }

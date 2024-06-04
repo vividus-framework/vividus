@@ -137,4 +137,31 @@ public class ElementSteps
             "width", box.width
         ));
     }
+
+    /**
+     * Extracts the <b>number</b> of elements found by <b>locator</b> and saves it to the <b>variable</b> with the
+     * specified <b>variableName</b>
+     * Actions performed at this step:
+     * <ul>
+     * <li>Finds the elements by <b>locator</b>
+     * <li>Saves the number of found elements into the <i>variable</i>
+     * </ul>
+     * @param locator The locator to find an element
+     * @param scopes The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     * <i>Available scopes:</i>
+     * <ul>
+     * <li><b>STEP</b> - the variable will be available only within the step,
+     * <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     * <li><b>STORY</b> - the variable will be available within the whole story,
+     * <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     * </ul>
+     * @param variableName A name under which the value should be saved
+     */
+    @When("I save number of elements located by `$locator` to $scopes variable `$variableName`")
+    public void saveNumberOfElementsToVariable(PlaywrightLocator locator, Set<VariableScope> scopes,
+            String variableName)
+    {
+        int elementCount = uiContext.locateElement(locator).count();
+        variableContext.putVariable(scopes, variableName, elementCount);
+    }
 }
