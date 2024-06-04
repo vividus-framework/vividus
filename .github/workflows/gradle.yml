@@ -198,7 +198,7 @@ jobs:
                                                   -Pvividus.selenium.grid.username=${BROWSERSTACK_USER} \
                                                   -Pvividus.selenium.grid.password=${BROWSERSTACK_KEY} \
                                                   -Pvividus.selenium.grid.platform-name=Windows \
-                                                  -Pvividus.selenium.grid.platform-version=10 \
+                                                  -Pvividus.selenium.grid.platform-version=11 \
                                                   -Pvividus.allure.history-directory=output/history/system-tests \
                                                   -Pvividus.allure.executor.name="Github Actions (Vividus)" \
                                                   -Pvividus.allure.executor.type=github \
