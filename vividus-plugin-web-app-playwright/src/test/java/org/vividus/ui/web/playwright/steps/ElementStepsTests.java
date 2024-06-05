@@ -18,6 +18,7 @@ package org.vividus.ui.web.playwright.steps;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -46,6 +47,9 @@ class ElementStepsTests
     private static final String XPATH = "xpath";
     private static final String VARIABLE_NAME = "variableName";
     private static final String LOCATOR_VALUE = "div";
+    private static final String ATTRIBUTE_NAME = "attributeName";
+    private static final String ATTRIBUTE_VALUE = "attributeValue";
+    private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.STORY);
 
     @Mock private UiContext uiContext;
     @Mock private ISoftAssert softAssert;
@@ -99,9 +103,9 @@ class ElementStepsTests
         box.width = 4;
         when(locator.boundingBox()).thenReturn(box);
 
-        steps.saveElementCoordinatesAndSize(playwrightLocator, Set.of(VariableScope.STORY), VARIABLE_NAME);
+        steps.saveElementCoordinatesAndSize(playwrightLocator, VARIABLE_SCOPE, VARIABLE_NAME);
 
-        verify(variableContext).putVariable(Set.of(VariableScope.STORY), VARIABLE_NAME, Map.of(
+        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, Map.of(
             "x", box.x,
             "y", box.y,
             "height", box.height,
@@ -117,7 +121,57 @@ class ElementStepsTests
         Locator locator = mock();
         when(uiContext.locateElement(playwrightLocator)).thenReturn(locator);
         when(locator.count()).thenReturn(elementCount);
-        steps.saveNumberOfElementsToVariable(playwrightLocator, Set.of(VariableScope.STORY), VARIABLE_NAME);
-        verify(variableContext).putVariable(Set.of(VariableScope.STORY), VARIABLE_NAME, elementCount);
+        steps.saveNumberOfElementsToVariable(playwrightLocator, VARIABLE_SCOPE, VARIABLE_NAME);
+        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, elementCount);
+    }
+
+    @Test
+    void shouldSaveContextElementAttributeValueToVariable()
+    {
+        Locator locator = mock();
+        when(uiContext.getCurrentContexOrPageRoot()).thenReturn(locator);
+        when(locator.getAttribute(ATTRIBUTE_NAME)).thenReturn(ATTRIBUTE_VALUE);
+        steps.saveContextElementAttributeValueToVariable(ATTRIBUTE_NAME, VARIABLE_SCOPE, VARIABLE_NAME);
+        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, ATTRIBUTE_VALUE);
+        verifyNoInteractions(softAssert);
+    }
+
+    @Test
+    void shouldSaveAttributeValueOfElement()
+    {
+        var playwrightLocator = new PlaywrightLocator(XPATH, LOCATOR_VALUE);
+        Locator locator = mock();
+        when(uiContext.locateElement(playwrightLocator)).thenReturn(locator);
+        when(locator.getAttribute(ATTRIBUTE_NAME)).thenReturn(ATTRIBUTE_VALUE);
+        steps.saveAttributeValueOfElement(ATTRIBUTE_NAME, playwrightLocator, VARIABLE_SCOPE, VARIABLE_NAME);
+        verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, ATTRIBUTE_VALUE);
+        verifyNoInteractions(softAssert);
+    }
+
+    @Test
+    void shouldNotSaveAttributeValueOfContextIfAttributeIsNotPresent()
+    {
+        Locator locator = mock();
+        when(uiContext.getCurrentContexOrPageRoot()).thenReturn(locator);
+        when(locator.getAttribute(ATTRIBUTE_NAME)).thenReturn(null);
+        steps.saveContextElementAttributeValueToVariable(ATTRIBUTE_NAME, VARIABLE_SCOPE, VARIABLE_NAME);
+        verifyIfAttributeIsNotPresent();
+    }
+
+    @Test
+    void shouldNotSaveAttributeValueOfElementIfAttributeIsNotPresent()
+    {
+        var playwrightLocator = new PlaywrightLocator(XPATH, LOCATOR_VALUE);
+        Locator locator = mock();
+        when(uiContext.locateElement(playwrightLocator)).thenReturn(locator);
+        when(locator.getAttribute(ATTRIBUTE_NAME)).thenReturn(null);
+        steps.saveAttributeValueOfElement(ATTRIBUTE_NAME, playwrightLocator, VARIABLE_SCOPE, VARIABLE_NAME);
+        verifyIfAttributeIsNotPresent();
+    }
+
+    private void verifyIfAttributeIsNotPresent()
+    {
+        verify(softAssert).recordFailedAssertion(String.format("The '%s' attribute does not exist", ATTRIBUTE_NAME));
+        verifyNoInteractions(variableContext);
     }
 }

@@ -130,6 +130,46 @@ When I change context to element located by `id(username)`
 When I save text of context element to scneario variable `username`
 ----
 
+=== Saves the attribute value of the context
+
+Saves the attribute value of the context element into a variable.
+
+[source,gherkin]
+----
+When I save `$attributeName` attribute value of context element to $scopes variable `$variableName`
+----
+
+* `$attributeName` - The name of an element attribute.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the attribute value.
+
+.Save the attribute value of the context element
+[source,gherkin]
+----
+When I change context to element located by `id(username)`
+When I save `innerText` attribute value of context element to SCENARIO variable `username`
+----
+
+=== Save the attribute value of the element
+
+Saves the attribute value of the element located by locator into a variable.
+
+[source,gherkin]
+----
+When I save `$attributeName` attribute value of element located by `$locator` to $scopes variable `$variableName`
+----
+
+* `$attributeName` - The name of an element attribute.
+* `$locator` - <<_locator>>.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The name of the variable to save the attribute value.
+
+Save the attribute value of the element
+[source,gherkin]
+----
+When I save `innerText` attribute value of element located by `id(username)` to SCENARIO variable `username`
+----
+
 include::plugins:partial$ui-elements-quantity-steps.adoc[]
 
 include::plugins:partial$ui-size-and-coordinates-steps.adoc[]
