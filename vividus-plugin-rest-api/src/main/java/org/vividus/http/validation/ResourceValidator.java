@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.hc.core5.http.HttpStatus;
+import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
 import org.vividus.http.validation.model.AbstractResourceValidation;
 import org.vividus.http.validation.model.CheckStatus;
@@ -46,6 +47,7 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
                                                                   HttpStatus.SC_NOT_IMPLEMENTED);
 
     private final Map<URI, T> cache = new ConcurrentHashMap<>();
+    private boolean publishResponseBody;
 
     public ResourceValidator(IHttpClient httpClient, ISoftAssert softAssert)
     {
@@ -72,15 +74,22 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
         try
         {
             int statusCode = httpClient.doHttpHead(uri).getStatusCode();
+            HttpResponse response = null;
             if (notAllowedHeadStatusCodes.contains(statusCode))
             {
-                statusCode = httpClient.doHttpGet(uri).getStatusCode();
+                response = httpClient.doHttpGet(uri);
+                statusCode = response.getStatusCode();
             }
             resourceValidation.setStatusCode(OptionalInt.of(statusCode));
 
             CheckStatus checkStatus = softAssert.assertThat(
                     String.format("Status code for %s is %d. expected one of %s", uri, statusCode, allowedStatusCodes),
                     statusCode, is(oneOf(allowedStatusCodes.toArray()))) ? CheckStatus.PASSED : CheckStatus.FAILED;
+
+            if (publishResponseBody && response != null && checkStatus == CheckStatus.FAILED)
+            {
+                resourceValidation.setResponseBody(response.getResponseBodyAsString());
+            }
             resourceValidation.setCheckStatus(checkStatus);
         }
         catch (IOException e)
@@ -88,5 +97,10 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
             softAssert.recordFailedAssertion("Exception occured during check of: " + uri, e);
             resourceValidation.setCheckStatus(CheckStatus.BROKEN);
         }
+    }
+
+    public void setPublishResponseBody(boolean publishResponseBody)
+    {
+        this.publishResponseBody = publishResponseBody;
     }
 }

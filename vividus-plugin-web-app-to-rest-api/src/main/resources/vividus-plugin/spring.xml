@@ -13,6 +13,7 @@
         <constructor-arg>
             <bean class="org.vividus.http.validation.ResourceValidator">
                 <constructor-arg ref="httpClient-ResourceValidator" />
+                <property name="publishResponseBody" value="${resource-checker.publish-response-body}" />
             </bean>
         </constructor-arg>
         <property name="uriToIgnoreRegex" value="${resource-checker.uri-to-ignore-regex}" />

@@ -49,7 +49,7 @@
                     Check Status
                 </th>
                 <th/>
-                    Status code
+                    Response
                 </th>
             </tr>
         </thead>
@@ -64,7 +64,8 @@
                         ${checkStatus}
                     </td>
                     <td>
-                        ${result.statusCode.getAsInt()}
+                        Status code: ${result.statusCode.getAsInt()}
+                        <#include "resources-response-body-fragment.ftl">
                     </td>
                 </tr>
                 </#list>
