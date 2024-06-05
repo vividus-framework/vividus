@@ -17,8 +17,10 @@
 package org.vividus.ui.web.playwright.steps;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.options.BoundingBox;
 
 import org.jbehave.core.annotations.Then;
@@ -163,5 +165,66 @@ public class ElementSteps
     {
         int elementCount = uiContext.locateElement(locator).count();
         variableContext.putVariable(scopes, variableName, elementCount);
+    }
+
+    /**
+     * Extracts the value of <b>attribute</b> of element found in the context and saves it to the <b>variable</b> with
+     * the specified <b>variableName</b>
+     * Actions performed at this step:
+     * <ul>
+     * <li>Saves the value of attribute with name <i>attributeName</i> to the <i>variableName</i>
+     * </ul>
+     * @param attributeName  The name of the attribute (for ex. 'name', 'id')
+     * @param scopes         The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                       <i>Available scopes:</i>
+     *                       <ul>
+     *                       <li><b>STEP</b> - the variable will be available only within the step,
+     *                       <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                       <li><b>STORY</b> - the variable will be available within the whole story,
+     *                       <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                       </ul>
+     * @param variableName   The name under which the attribute value should be saved
+     */
+    @When("I save `$attributeName` attribute value of context element to $scopes variable `$variableName`")
+    public void saveContextElementAttributeValueToVariable(String attributeName, Set<VariableScope> scopes,
+            String variableName)
+    {
+        saveAttributeValueOfElement(uiContext.getCurrentContexOrPageRoot(), attributeName, scopes, variableName);
+    }
+
+    /**
+     * Gets the value of <b>attribute</b> from element located by <b>locator</b> and saves it to the <b>variable</b>
+     * with the specified <b>variableName</b>
+     * Actions performed at this step:
+     * <ul>
+     * <li>Saves the value of attribute with name <i>attributeName</i> to the <i>variableName</i>
+     * </ul>
+     * @param attributeName  The name of the attribute (for ex. 'name', 'id')
+     * @param locator        The locator to find an element
+     * @param scopes         The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
+     *                       <i>Available scopes:</i>
+     *                       <ul>
+     *                       <li><b>STEP</b> - the variable will be available only within the step,
+     *                       <li><b>SCENARIO</b> - the variable will be available only within the scenario,
+     *                       <li><b>STORY</b> - the variable will be available within the whole story,
+     *                       <li><b>NEXT_BATCHES</b> - the variable will be available starting from next batch
+     *                       </ul>
+     * @param variableName   The name under which the attribute value should be saved
+     */
+    @When("I save `$attributeName` attribute value of element located by `$locator` to $scopes variable "
+          + "`$variableName`")
+    public void saveAttributeValueOfElement(String attributeName, PlaywrightLocator locator, Set<VariableScope> scopes,
+            String variableName)
+    {
+        saveAttributeValueOfElement(uiContext.locateElement(locator), attributeName, scopes, variableName);
+    }
+
+    private void saveAttributeValueOfElement(Locator element, String attributeName, Set<VariableScope> scopes,
+            String variableName)
+    {
+        Optional.ofNullable(element.getAttribute(attributeName))
+                .ifPresentOrElse(value -> variableContext.putVariable(scopes, variableName, value),
+                        () -> softAssert.recordFailedAssertion(
+                                String.format("The '%s' attribute does not exist", attributeName)));
     }
 }
