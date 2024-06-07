@@ -15,13 +15,17 @@
                 <property name="headless" value="${internal.browser.headless}" />
             </bean>
         </constructor-arg>
-        <constructor-arg index="2">
+    </bean>
+
+    <bean class="org.vividus.ui.web.playwright.BrowserContextConfiguration">
+        <constructor-arg index="0">
             <bean class="com.microsoft.playwright.Tracing.StartOptions">
                 <property name="screenshots" value="${playwright.tracing.screenshots-enabled}" />
                 <property name="snapshots" value="${playwright.tracing.snapshots-enabled}" />
             </bean>
         </constructor-arg>
-        <constructor-arg index="3" value="${playwright.tracing.output-directory}" />
+        <constructor-arg index="1" value="${ui.wait.timeout}" />
+        <constructor-arg index="2" value="${playwright.tracing.output-directory}" />
     </bean>
 
     <bean class="org.vividus.ui.web.playwright.UiContext" />
@@ -35,6 +39,7 @@
     <bean id="playwrightSetupSteps" class="org.vividus.ui.web.playwright.steps.PlaywrightSetupSteps" />
     <bean id="setContextSteps" class="org.vividus.ui.web.playwright.steps.SetContextSteps" />
     <bean id="textContentSteps" class="org.vividus.ui.web.playwright.steps.TextContentSteps" />
+    <bean id="waitSteps" class="org.vividus.ui.web.playwright.steps.WaitSteps" />
 
     <util:list id="stepBeanNames-WebPlaywrightUi" value-type="java.lang.String">
         <idref bean="elementSteps" />
@@ -44,6 +49,7 @@
         <idref bean="playwrightSetupSteps" />
         <idref bean="setContextSteps" />
         <idref bean="textContentSteps" />
+        <idref bean="waitSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebPlaywrightUi" key-type="java.lang.Class">

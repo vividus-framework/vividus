@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -43,13 +44,13 @@ import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.Tracing;
 import com.microsoft.playwright.Tracing.StartOptions;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -59,12 +60,24 @@ import org.vividus.testcontext.SimpleTestContext;
 @ExtendWith(MockitoExtension.class)
 class BrowserContextProviderTests
 {
+    private static final long TIMEOUT_MILLIS = 100;
+
     @Spy private final SimpleTestContext testContext = new SimpleTestContext();
     @Spy private final StartOptions tracingOptions = new StartOptions().setScreenshots(false).setSnapshots(false);
     @Mock private BrowserType browserType;
     @Mock private LaunchOptions launchOptions;
     @Mock private Path tracesOutputDirectory;
-    @InjectMocks private BrowserContextProvider browserContextProvider;
+    private BrowserContextProvider browserContextProvider;
+
+    @BeforeEach
+    void setUp()
+    {
+        Duration duration = Duration.ofMillis(TIMEOUT_MILLIS);
+        BrowserContextConfiguration browserContextConfiguration = new BrowserContextConfiguration(tracingOptions,
+                duration, tracesOutputDirectory);
+        browserContextProvider = new BrowserContextProvider(browserType, launchOptions, testContext,
+                browserContextConfiguration);
+    }
 
     @Test
     void shouldCreateBrowserContextAtFirstRetrievalOnly()
@@ -82,7 +95,8 @@ class BrowserContextProviderTests
             var actual = browserContextProvider.get();
 
             assertSame(browserContext, actual);
-            verifyNoInteractions(browserContext);
+            verify(browserContext).setDefaultTimeout(TIMEOUT_MILLIS);
+            verifyNoMoreInteractions(browserContext);
             playwrightStaticMock.reset();
             reset(playwright, browser);
 
@@ -90,7 +104,9 @@ class BrowserContextProviderTests
             var actual2 = browserContextProvider.get();
 
             assertSame(browserContext, actual2);
-            verifyNoInteractions(browserContext, playwright, browser);
+            verify(browserContext).setDefaultTimeout(TIMEOUT_MILLIS);
+            verifyNoMoreInteractions(browserContext);
+            verifyNoInteractions(playwright, browser);
             playwrightStaticMock.verifyNoInteractions();
 
             // Close context
@@ -132,6 +148,7 @@ class BrowserContextProviderTests
             var actual = browserContextProvider.get();
 
             assertSame(browserContext, actual);
+            verify(browserContext).setDefaultTimeout(TIMEOUT_MILLIS);
             verifyNoMoreInteractions(browserContext);
             verify(tracing).start(tracingOptions);
             playwrightStaticMock.reset();
@@ -168,6 +185,7 @@ class BrowserContextProviderTests
 
             assertSame(newBrowserContext, anotherActual);
             assertNotSame(actual, anotherActual);
+            verify(newBrowserContext).setDefaultTimeout(TIMEOUT_MILLIS);
             verifyNoMoreInteractions(newBrowserContext);
             verify(tracing).start(tracingOptions);
             verifyNoInteractions(playwright);
@@ -190,7 +208,8 @@ class BrowserContextProviderTests
             var actual = browserContextProvider.get();
 
             assertSame(browserContext, actual);
-            verifyNoInteractions(browserContext);
+            verify(browserContext).setDefaultTimeout(TIMEOUT_MILLIS);
+            verifyNoMoreInteractions(browserContext);
             playwrightStaticMock.reset();
             reset(playwright, browser);
 

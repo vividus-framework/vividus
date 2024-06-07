@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import com.microsoft.playwright.BrowserType.LaunchOptions;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.Tracing;
-import com.microsoft.playwright.Tracing.StartOptions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,30 +39,30 @@ public class BrowserContextProvider
 
     private final BrowserType browserType;
     private final LaunchOptions launchOptions;
-    private final Tracing.StartOptions tracingOptions;
-    private final Path tracesOutputDirectory;
     private final TestContext testContext;
+    private final BrowserContextConfiguration browserContextConfiguration;
 
     private PlaywrightContext playwrightContext;
 
-    public BrowserContextProvider(BrowserType browserType, LaunchOptions launchOptions, StartOptions tracingOptions,
-            Path tracesOutputDirectory, TestContext testContext)
+    public BrowserContextProvider(BrowserType browserType, LaunchOptions launchOptions, TestContext testContext,
+            BrowserContextConfiguration browserContextConfiguration)
     {
         this.browserType = browserType;
         this.launchOptions = launchOptions;
-        this.tracingOptions = tracingOptions;
-        this.tracesOutputDirectory = tracesOutputDirectory;
         this.testContext = testContext;
+        this.browserContextConfiguration = browserContextConfiguration;
     }
 
     public BrowserContext get()
     {
         return testContext.get(BROWSER_CONTEXT_KEY, () -> {
             BrowserContext browserContext = getPlaywrightContext().browser().newContext();
-            if (isTracingEnabled())
+            if (browserContextConfiguration.isTracingEnabled())
             {
-                browserContext.tracing().start(tracingOptions);
+                browserContext.tracing().start(browserContextConfiguration.getTracingOptions());
             }
+            long browserContextTimeout = browserContextConfiguration.getTimeout().toMillis();
+            browserContext.setDefaultTimeout(browserContextTimeout);
             return browserContext;
         });
     }
@@ -72,11 +71,12 @@ public class BrowserContextProvider
     {
         Optional.ofNullable(testContext.get(BROWSER_CONTEXT_KEY, BrowserContext.class)).ifPresent(
                 browserContext -> {
-                    if (isTracingEnabled())
+                    if (browserContextConfiguration.isTracingEnabled())
                     {
                         String tracesArchiveFileName = "traces-%s-%d.zip".formatted(Thread.currentThread().getName(),
                                 System.currentTimeMillis());
-                        Path tracesArchiveFilePath = tracesOutputDirectory.resolve(tracesArchiveFileName);
+                        Path tracesArchiveFilePath = browserContextConfiguration.getTracesOutputDirectory()
+                                .resolve(tracesArchiveFileName);
                         browserContext.tracing().stop(new Tracing.StopOptions().setPath(tracesArchiveFilePath));
                         LOGGER.info("The recorded Playwright traces are saved at {}", tracesArchiveFilePath);
                     }
@@ -119,11 +119,6 @@ public class BrowserContextProvider
             }
         }
         return pc;
-    }
-
-    private boolean isTracingEnabled()
-    {
-        return tracingOptions.screenshots || tracingOptions.snapshots;
     }
 
     private record PlaywrightContext(Playwright playwright, Browser browser)
