@@ -52,7 +52,7 @@
                     Check Status
                 </th>
                 <th/>
-                    Status code
+                    Response
                 </th>
                 <th/>
                     Checked on page
@@ -78,7 +78,8 @@
                         ${checkStatus}
                     </td>
                     <td>
-                        ${(result.statusCode.isPresent())?then(result.statusCode.getAsInt(),'N/A')}
+                        Status code: ${(result.statusCode.isPresent())?then(result.statusCode.getAsInt(),'N/A')}
+                        <#include "resources-response-body-fragment.ftl">
                     </td>
                     <td>
                         <#assign pageURL = result.pageURL>

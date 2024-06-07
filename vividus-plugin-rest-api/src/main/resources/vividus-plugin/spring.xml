@@ -12,7 +12,7 @@
           factory-method="buildHttpClient">
         <constructor-arg>
             <bean parent="restApiHttpClientConfig">
-                <property name="skipResponseEntity" value="true" />
+                <property name="skipResponseEntity" value="#{!${resource-checker.publish-response-body}}" />
                 <property name="lastRequestInterceptor"><null/></property>
                 <property name="lastResponseInterceptor"><null/></property>
                 <property name="httpResponseHandlers"><list/></property>
@@ -32,6 +32,7 @@
         <constructor-arg>
             <bean class="org.vividus.http.validation.ResourceValidator">
                 <constructor-arg ref="httpClient-ResourceValidator" />
+                <property name="publishResponseBody" value="${resource-checker.publish-response-body}" />
             </bean>
         </constructor-arg>
     </bean>

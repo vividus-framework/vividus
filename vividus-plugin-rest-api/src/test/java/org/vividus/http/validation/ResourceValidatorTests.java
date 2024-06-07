@@ -20,8 +20,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -107,6 +109,56 @@ class ResourceValidatorTests
         var resourceValidation = new ResourceValidation(FIRST);
         var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, result.getCheckStatus());
+    }
+
+    @Test
+    void shouldValidateResourceAndAttachResponseBodyIfUnexpectedStatusCode() throws IOException
+    {
+        resourceValidator.setPublishResponseBody(true);
+
+        String notFound = "Not found";
+        URI notFoundUrl = URI.create("https://vividus.org/not-found");
+        var response404 = mock(HttpResponse.class);
+        when(httpClient.doHttpHead(notFoundUrl)).thenReturn(response404);
+        when(httpClient.doHttpGet(notFoundUrl)).thenReturn(response404);
+        when(response404.getStatusCode()).thenReturn(404);
+        when(response404.getResponseBodyAsString()).thenReturn(notFound);
+
+        URI protectedUrl = URI.create("https://vividus.org/protected-page");
+        var response401 = mock(HttpResponse.class);
+        when(httpClient.doHttpHead(protectedUrl)).thenReturn(response401);
+        when(response401.getStatusCode()).thenReturn(401);
+
+        when(httpClient.doHttpHead(FIRST)).thenReturn(httpResponse);
+        when(httpResponse.getStatusCode()).thenReturn(200);
+        when(softAssert.assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER))).thenReturn(true);
+
+        URI notAllowedUrl = URI.create("https://vividus.org/not-allowed");
+        var response405 = mock(HttpResponse.class);
+        when(httpClient.doHttpHead(notAllowedUrl)).thenReturn(response405);
+        when(response405.getStatusCode()).thenReturn(405);
+        when(httpClient.doHttpGet(notAllowedUrl)).thenReturn(httpResponse);
+        when(softAssert.assertThat(eq("Status code for https://vividus.org/not-allowed is 200. expected one of [200]"),
+                eq(OK), argThat(MATCHER))).thenReturn(true);
+
+        var resourceValidationNotFoundUrl = new ResourceValidation(notFoundUrl);
+        var resourceValidationProtectedUrl = new ResourceValidation(protectedUrl);
+        var resourceValidationSuccessful = new ResourceValidation(FIRST);
+        var resourceValidationNotAllowedSuccessful = new ResourceValidation(notAllowedUrl);
+
+        var resultSuccessfulWithoutBody = resourceValidator.perform(resourceValidationSuccessful);
+        var resultSuccessfulNotAllowedWithoutBody = resourceValidator.perform(resourceValidationNotAllowedSuccessful);
+        var resultNotFound  = resourceValidator.perform(resourceValidationNotFoundUrl);
+        var resultProtected = resourceValidator.perform(resourceValidationProtectedUrl);
+
+        assertEquals(notFound, resultNotFound.getResponseBody());
+        assertNull(resultProtected.getResponseBody());
+        assertNull(resultSuccessfulWithoutBody.getResponseBody());
+        assertNull(resultSuccessfulNotAllowedWithoutBody.getResponseBody());
+
+        resourceValidator.setPublishResponseBody(false);
+        var resultNotFoundDisabledPublishing  = resourceValidator.perform(resourceValidationNotFoundUrl);
+        assertNull(resultNotFoundDisabledPublishing.getResponseBody());
     }
 
     @Test

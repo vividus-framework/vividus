@@ -418,6 +418,24 @@ a|Reasons:
 
 |===
 
+==== Properties
+
+[cols="3,1,1,3", options="header"]
+|===
+
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`resource-checker.publish-response-body`
+a|`true`
+`false`
+|`false`
+a|Whether to attach the HTTP response body for HTTP calls with non-successful status codes (may reduce performance).
+
+|===
+
 ==== Validate resources on web pages
 
 Validates resources on web pages.

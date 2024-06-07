@@ -835,6 +835,8 @@ Actions performed by step:
 * if the GET status code is `200` then check is considered as `passed`, otherwise `failed`
 * if the target URL has already been checked then the check is considered as `skipped`
 
+NOTE: To attach the HTTP response body for HTTP calls with non-successful status codes, use the `resource-checker.publish-response-body` property.
+
 [source,gherkin]
 ----
 Then HTTP resources are valid:$resources
