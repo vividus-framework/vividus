@@ -17,7 +17,6 @@
 package org.vividus.mobileapp.steps;
 
 import static io.appium.java_client.CommandExecutionHelper.execute;
-import static io.appium.java_client.MobileCommand.prepareArguments;
 import static java.util.Map.entry;
 import static org.vividus.selenium.type.CapabilitiesValueTypeAdjuster.adjustType;
 
@@ -25,6 +24,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jbehave.core.annotations.Given;
@@ -155,15 +155,13 @@ public class ApplicationSteps
     {
         ExecutesMethod executesMethod = webDriverProvider.getUnwrapped(ExecutesMethod.class);
 
-        String[] params = settings.stream()
-                                  .map(NamedEntry::getName)
-                                  .toArray(String[]::new);
-        Object[] values = settings.stream()
-                                  .map(NamedEntry::getValue)
-                                  .map(v -> NumberUtils.isDigits(v) ? Long.valueOf(v) : adjustType(v))
-                                  .toArray();
+        Map<String, Object> settingsMap = settings.stream().collect(
+                Collectors.toMap(NamedEntry::getName, namedEntry -> {
+                    String value = namedEntry.getValue();
+                    return NumberUtils.isDigits(value) ? Long.valueOf(value) : adjustType(value);
+                }));
 
-        execute(executesMethod, entry("setSettings", prepareArguments("settings", prepareArguments(params, values))));
+        execute(executesMethod, entry("setSettings", Map.of("settings", settingsMap)));
     }
 
     /**
