@@ -38,6 +38,11 @@ a|`true` +
 |When tracing with the https://playwright.dev/java/docs/trace-viewer#snapshots[snapshots option] turned on,
 Playwright captures a set of complete DOM snapshots for each action.
 
+|`ui.wait.timeout`
+|{durations-format-link} format
+|`PT1M`
+|Total duration to wait for UI condition
+
 |===
 
 == Locator
@@ -175,3 +180,59 @@ include::plugins:partial$ui-elements-quantity-steps.adoc[]
 include::plugins:partial$ui-size-and-coordinates-steps.adoc[]
 
 include::plugins:partial$common-web-app-text-steps.adoc[]
+
+=== Wait for element appearance
+
+Waits for appearance of the element by the locator.
+
+[source,gherkin]
+----
+When I wait until element located by `$locator` appears
+----
+
+* `$locator` - <<_locator>>.
+
+.Wait for appearance of the element with the specified id
+[source,gherkin]
+----
+When I wait until element located by `id(welcome-image)` appears
+----
+
+
+=== Wait for element disappearance
+
+Waits for disappearance of the element by the locator.
+
+NOTE: If the element doesn't exist on the page/context, the step will immediately complete successfully.
+
+[source,gherkin]
+----
+When I wait until element located by `$locator` disappears
+----
+
+* `$locator` - <<_locator>>.
+
+.Wait for disappearance of the element with the specified id
+[source,gherkin]
+----
+When I wait until element located by `id(welcome-image)` disappears
+----
+
+=== Wait for expected elements number
+
+Waits for the expected number of elements located by locator.
+
+[source,gherkin]
+----
+When I wait until number of elements located by `$locator` is $comparisonRule $number
+----
+
+* `$locator` - <<_locator>>.
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$number` - The expected number of the elements.
+
+.Wait for the visible elements
+[source,gherkin]
+----
+When I wait until number of elements located by `xpath(//a)` is equal to `5`
+----
