@@ -277,7 +277,7 @@ When I wait until element located by `id(indicator)` has text matching `\d+`
 === Verify elements order
 
 Gets a collection of elements by locator and checks that they are sorted by
-their text in the specified order. The collection should have more than 1
+their text in the specified order. The collection should have at least one
 element with not empty text, otherwise the step fails.
 
 [source,gherkin]
