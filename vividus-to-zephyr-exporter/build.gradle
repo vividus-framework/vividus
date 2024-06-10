@@ -14,6 +14,11 @@ buildscript {
 }
 apply plugin: org.springframework.boot.gradle.plugin.SpringBootPlugin
 
+tasks {
+    javadocJar.enabled = false
+    sourcesJar.enabled = false
+}
+
 dependencies {
     // https://github.com/spring-gradle-plugins/dependency-management-plugin/issues/257
     implementation platform(group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: "${springBootVersion}")
