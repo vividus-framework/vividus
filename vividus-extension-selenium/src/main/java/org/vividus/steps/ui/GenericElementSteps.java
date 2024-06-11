@@ -122,7 +122,7 @@ public class GenericElementSteps
     @Then("elements located by `$locator` are sorted by text in $sortingOrder order")
     public void areElementSorted(Locator locator, StringSortingOrder sortingOrder)
     {
-        ComparisonRule rule = ComparisonRule.GREATER_THAN;
+        ComparisonRule rule = ComparisonRule.GREATER_THAN_OR_EQUAL_TO;
         int requiredNumber = 1;
 
         List<WebElement> elements = baseValidations.assertNumberOfElementsFound("The elements to check the sorting",
