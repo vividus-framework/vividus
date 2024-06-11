@@ -381,9 +381,28 @@ When I find >= `0` elements `xpath(//*[@class='menu enabled'])` and while they e
 |When I click on element located by `id(disable)`|
 ----
 
+:javascript-executor-link: https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html[JavascriptExecutor]
+
+=== Execute JavaScript
+
+Executes passed JavaScript code on the opened page via {javascript-executor-link}.
+
+[source,gherkin]
+----
+When I execute javascript `$jsCode`
+----
+* `$jsCode` - The JavaScript code.
+
+.Click on the link using JavaScript
+[source,gherkin]
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com`
+When I execute javascript `document.querySelector('a').click()`
+----
+
 === Execute JavaScript with arguments
 
-Executes JavaScript via https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html[JavascriptExecutor]. Step executes the script either without any arguments or with `String` or `Object` argument types.
+Executes JavaScript via {javascript-executor-link}. Step executes the script either without any arguments or with `String` or `Object` argument types.
 
 [source,gherkin]
 ----
@@ -417,7 +436,7 @@ When I execute javascript `sauce:throttleCPU` with arguments:
 | {"rate" : 4} | object |
 ----
 
-==== Execute JavaScript and save result.
+=== Execute JavaScript and save result.
 
 https://www.selenium.dev/selenium/docs/api/java/org/openqa/selenium/JavascriptExecutor.html[Executes JavaScript] code and saves result into variable.
 

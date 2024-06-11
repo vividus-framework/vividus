@@ -16,3 +16,8 @@ Scenario: Step verification: "When I execute javascript `$jsCode` with arguments
 Then number of elements found by `xpath(//img)` is = `1`
 When I execute javascript `document.querySelector('[name="vividus-logo"]').remove()` with arguments:
 Then number of elements found by `xpath(//img)` is = `0`
+
+Scenario: Step verification: "When I execute javascript `$jsCode`"
+Then number of elements found by `xpath(//a)` is = `1`
+When I execute javascript `document.querySelector('a').remove()`
+Then number of elements found by `xpath(//a)` is = `0`

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,18 @@ public class ExecuteScriptSteps extends AbstractExecuteScriptSteps
 
     /**
      * Executes passed JavaScript code on the opened page
+     *
+     * @param jsCode       JavaScript code
+     *                     (e.g. "document.querySelector('[name="vividus-logo"]').remove()")
+     */
+    @When("I execute javascript `$jsCode`")
+    public void executeJavascript(String jsCode)
+    {
+        javascriptActions.executeScript(jsCode);
+    }
+
+    /**
+     * Executes passed JavaScript code on the opened page
      * and saves returned value into the <b>variable</b>
      *
      * @param scopes       The set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of variable's scope<br>
@@ -54,7 +66,7 @@ public class ExecuteScriptSteps extends AbstractExecuteScriptSteps
      * @param jsCode       Code in javascript that returns some value as result
      *                     (e.g. var a=1; return a;)
      */
-    @When("I execute javascript `$jsCode` and save result to $scopes variable `$variableName`")
+    @When(value = "I execute javascript `$jsCode` and save result to $scopes variable `$variableName`", priority = 1)
     public void saveValueFromJS(String jsCode, Set<VariableScope> scopes, String variableName)
     {
         assertAndSaveResult(() -> javascriptActions.executeScript(jsCode), scopes, variableName);

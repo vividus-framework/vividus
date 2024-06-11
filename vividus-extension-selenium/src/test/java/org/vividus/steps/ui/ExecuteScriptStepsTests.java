@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,14 @@ class ExecuteScriptStepsTests
 
     @InjectMocks
     private ExecuteScriptSteps executeScriptSteps;
+
+    @Test
+    void shouldExecuteJavascript()
+    {
+        String jsCode = "document.querySelector('[name=\"vividus-logo\"]').remove()";
+        executeScriptSteps.executeJavascript(jsCode);
+        verify(javascriptActions).executeScript(jsCode);
+    }
 
     static Stream<Arguments> executeJavascriptWithArguments()
     {
