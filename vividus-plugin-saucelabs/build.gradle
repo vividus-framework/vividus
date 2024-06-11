@@ -15,7 +15,7 @@ dependencies {
     implementation project(':vividus-extension-selenium')
 
     implementation(group: 'com.google.guava', name: 'guava', version: '33.2.1-jre')
-    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.179') {
+    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.181') {
         exclude module: 'slf4j-jdk14'
     }
 
