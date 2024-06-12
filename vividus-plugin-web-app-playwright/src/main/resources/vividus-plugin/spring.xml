@@ -30,6 +30,8 @@
 
     <bean class="org.vividus.ui.web.playwright.UiContext" />
 
+    <bean class="org.vividus.ui.web.playwright.action.PlaywrightJavascriptActions" />
+
     <bean class="org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert" />
 
     <bean id="elementSteps" class="org.vividus.ui.web.playwright.steps.ElementSteps" />
@@ -40,6 +42,7 @@
     <bean id="setContextSteps" class="org.vividus.ui.web.playwright.steps.SetContextSteps" />
     <bean id="textContentSteps" class="org.vividus.ui.web.playwright.steps.TextContentSteps" />
     <bean id="waitSteps" class="org.vividus.ui.web.playwright.steps.WaitSteps" />
+    <bean id="executeScriptSteps" class="org.vividus.ui.web.playwright.steps.ExecuteScriptSteps" />
 
     <util:list id="stepBeanNames-WebPlaywrightUi" value-type="java.lang.String">
         <idref bean="elementSteps" />
@@ -50,6 +53,7 @@
         <idref bean="setContextSteps" />
         <idref bean="textContentSteps" />
         <idref bean="waitSteps" />
+        <idref bean="executeScriptSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebPlaywrightUi" key-type="java.lang.Class">

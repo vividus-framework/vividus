@@ -236,3 +236,41 @@ When I wait until number of elements located by `$locator` is $comparisonRule $n
 ----
 When I wait until number of elements located by `xpath(//a)` is equal to `5`
 ----
+
+=== JavaScript steps
+==== Execute JavaScript
+
+Executes passed JavaScript code on the opened page.
+
+[source,gherkin]
+----
+When I execute javascript `$jsCode`
+----
+* `$jsCode` - The JavaScript code.
+
+.Click on the link using JavaScript
+[source,gherkin]
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com`
+When I execute javascript `document.querySelector('a').click()`
+----
+
+==== Execute JavaScript and save result
+
+Executes passed JavaScript code on the opened page and saves result into variable.
+
+[source,gherkin]
+----
+When I execute javascript `$jsCode` and save result to $scopes variable `$variableName`
+----
+* `$jsCode` - The JavaScript code with return value.
+* `$scopes` - xref:commons:variables.adoc#_scopes[The comma-separated set of the variables scopes].
+* `$variableName` - The variable name to script execution result.
+
+.Validate timings
+[source,gherkin]
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
+When I execute javascript `JSON.stringify(window.performance.timing)` and save result to scenario variable `timings`
+Then number of JSON elements from `${timings}` by JSON path `$.connectStart` is = 1
+----
