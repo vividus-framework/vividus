@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.vividus.selenium.sauce;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -74,9 +73,8 @@ public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
                 }
                 synchronized (sauceTunnelManager)
                 {
-                    sauceTunnelManager.openConnection(sauceLabsUsername, sauceLabsAccessKey, sauceLabsDataCenter,
-                            sauceConnectDescriptor.getPort(), null, sauceConnectDescriptor.getOptions(), null,
-                            Boolean.TRUE, null);
+                    sauceTunnelManager.openConnection(sauceLabsUsername, sauceLabsAccessKey, sauceLabsDataCenter, null,
+                            sauceConnectDescriptor.getOptions(), null, Boolean.TRUE, null);
                 }
             }
             catch (IOException e)
@@ -135,14 +133,12 @@ public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
     static final class SauceConnectDescriptor
     {
         private final String tunnelName;
-        private final int port;
         private final String options;
 
         SauceConnectDescriptor(SauceConnectOptions sauceConnectOptions) throws IOException
         {
             tunnelName = UUID.randomUUID().toString();
             options = sauceConnectOptions.build(tunnelName);
-            port = getFreePort();
         }
 
         String getTunnelName()
@@ -150,22 +146,9 @@ public class SauceConnectManager implements TunnelManager<SauceConnectOptions>
             return tunnelName;
         }
 
-        int getPort()
-        {
-            return port;
-        }
-
         String getOptions()
         {
             return options;
-        }
-
-        private int getFreePort() throws IOException
-        {
-            try (ServerSocket socket = new ServerSocket(0))
-            {
-                return socket.getLocalPort();
-            }
         }
     }
 }
