@@ -14,34 +14,14 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.action.search;
+package org.vividus.ui.web.playwright.locator;
 
-import org.vividus.ui.State;
+import org.vividus.ui.action.search.ElementVisibility;
 
 public enum Visibility implements ElementVisibility
 {
-    VISIBLE(State.VISIBLE, "visible"),
-    INVISIBLE(State.NOT_VISIBLE, "invisible"),
-    ALL(null, "visible or invisible");
-
-    private final State state;
-    private final String description;
-
-    Visibility(State state, String description)
-    {
-        this.state = state;
-        this.description = description;
-    }
-
-    public State getState()
-    {
-        return state;
-    }
-
-    public String getDescription()
-    {
-        return description;
-    }
+    VISIBLE,
+    ALL;
 
     public static Visibility getElementType(String input)
     {
