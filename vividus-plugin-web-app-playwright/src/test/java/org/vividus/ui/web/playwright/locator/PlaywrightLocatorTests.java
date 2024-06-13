@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,14 @@ class PlaywrightLocatorTests
     {
         var locator = new PlaywrightLocator("xpath", "//div").getLocator();
         assertEquals("xpath=//div", locator);
+    }
+
+    @Test
+    void testToString()
+    {
+        var locator = new PlaywrightLocator("css", "div");
+        locator.setVisibility(Visibility.VISIBLE);
+        assertEquals("css(div) with visibility: visible", locator.toString());
     }
 
     @Test

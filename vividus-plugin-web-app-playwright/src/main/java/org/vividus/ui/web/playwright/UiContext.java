@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.microsoft.playwright.Page;
 
 import org.vividus.testcontext.TestContext;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
+import org.vividus.ui.web.playwright.locator.Visibility;
 
 public class UiContext
 {
@@ -57,7 +58,10 @@ public class UiContext
     public Locator locateElement(PlaywrightLocator playwrightLocator)
     {
         String locator = playwrightLocator.getLocator();
-        return getInCurrentContext(context -> context.locator(locator), page -> page.locator(locator));
+        Locator locatorInContext = getInCurrentContext(context -> context.locator(locator),
+                page -> page.locator(locator));
+        return (playwrightLocator.getVisibility() == Visibility.VISIBLE)
+                ? locatorInContext.locator("visible=true") : locatorInContext;
     }
 
     public Locator getCurrentContexOrPageRoot()

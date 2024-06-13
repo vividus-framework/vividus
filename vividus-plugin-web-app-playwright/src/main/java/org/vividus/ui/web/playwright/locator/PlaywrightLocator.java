@@ -22,6 +22,7 @@ public class PlaywrightLocator
 {
     private final String locatorType;
     private final String locatorValue;
+    private Visibility visibility = Visibility.VISIBLE;
 
     public PlaywrightLocator(String locatorType, String locatorValue)
     {
@@ -32,6 +33,16 @@ public class PlaywrightLocator
     public String getLocator()
     {
         return locatorType + "=" + locatorValue;
+    }
+
+    public Visibility getVisibility()
+    {
+        return visibility;
+    }
+
+    public void setVisibility(Visibility visibility)
+    {
+        this.visibility = visibility;
     }
 
     @Override
@@ -46,18 +57,19 @@ public class PlaywrightLocator
             return false;
         }
         PlaywrightLocator that = (PlaywrightLocator) o;
-        return Objects.equals(locatorType, that.locatorType) && Objects.equals(locatorValue, that.locatorValue);
+        return Objects.equals(locatorType, that.locatorType) && Objects.equals(locatorValue,
+                that.locatorValue) && Objects.equals(visibility, that.visibility);
     }
 
     @Override
     public int hashCode()
     {
-        return Objects.hash(locatorType, locatorValue);
+        return Objects.hash(locatorType, locatorValue, visibility);
     }
 
     @Override
     public String toString()
     {
-        return locatorType + '(' + locatorValue + ')';
+        return locatorType + '(' + locatorValue + ')' + " with visibility: " + visibility.toString().toLowerCase();
     }
 }

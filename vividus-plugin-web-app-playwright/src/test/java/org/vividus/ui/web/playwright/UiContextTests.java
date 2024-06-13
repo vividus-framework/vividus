@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.testcontext.SimpleTestContext;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
+import org.vividus.ui.web.playwright.locator.Visibility;
 
 @SuppressWarnings("PMD.CloseResource")
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +38,11 @@ class UiContextTests
 {
     private static final PlaywrightLocator PLAYWRIGHT_LOCATOR = new PlaywrightLocator("xpath", "//div");
     private final UiContext uiContext = new UiContext(new SimpleTestContext());
+
+    static
+    {
+        PLAYWRIGHT_LOCATOR.setVisibility(Visibility.ALL);
+    }
 
     @Test
     void shouldSetAndGetPage()
@@ -117,5 +123,19 @@ class UiContextTests
         when(page.locator("//html/body")).thenReturn(root);
         Locator actual = uiContext.getCurrentContexOrPageRoot();
         assertSame(root, actual);
+    }
+
+    @Test
+    void shouldLocateVisibleElement()
+    {
+        var playwrightLocator = new PlaywrightLocator("css", "div");
+        Page page = mock();
+        uiContext.setCurrentPage(page);
+        Locator locator = mock();
+        Locator visibleLocator = mock();
+        when(page.locator(playwrightLocator.getLocator())).thenReturn(locator);
+        when(locator.locator("visible=true")).thenReturn(visibleLocator);
+        Locator actual = uiContext.locateElement(playwrightLocator);
+        assertSame(visibleLocator, actual);
     }
 }

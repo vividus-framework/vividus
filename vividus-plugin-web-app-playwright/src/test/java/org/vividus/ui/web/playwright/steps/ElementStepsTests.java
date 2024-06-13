@@ -57,12 +57,14 @@ class ElementStepsTests
     @InjectMocks private ElementSteps steps;
 
     @ParameterizedTest
+    // CHECKSTYLE:OFF
     @CsvSource(quoteCharacter = '`', value = {
-            ".//a,   3, 3, The number of elements found by 'xpath(.//a)' is 3",
-            ".//div, 4, 3, `The number of elements found by 'xpath(.//div)' is 4, but 3 were expected`",
-            "/h1,    3, 1, `The number of elements found by 'xpath(/h1)' is 3, but 1 was expected`",
-            "/h2,    1, 0, `The number of elements found by 'xpath(/h2)' is 1, but 0 were expected`"
+            ".//a,   3, 3, The number of elements found by 'xpath(.//a) with visibility: visible' is 3",
+            ".//div, 4, 3, `The number of elements found by 'xpath(.//div) with visibility: visible' is 4, but 3 were expected`",
+            "/h1,    3, 1, `The number of elements found by 'xpath(/h1) with visibility: visible' is 3, but 1 was expected`",
+            "/h2,    1, 0, `The number of elements found by 'xpath(/h2) with visibility: visible' is 1, but 0 were expected`"
     })
+    // CHECKSTYLE:ON
     void shouldRecordAssertionOnValidationIfNumberOfElementIsEqualToExpected(String locatorValue, int actualNumber,
             int expectedNumber, String assertionMessage)
     {
@@ -75,10 +77,12 @@ class ElementStepsTests
     }
 
     @ParameterizedTest
+    // CHECKSTYLE:OFF
     @CsvSource(quoteCharacter = '`', value = {
-            "a,   3, 2, true, `The number of elements found by 'css(a)' is 3, it is greater than 2`",
-            "div, 3, 4, false, `The number of elements found by 'css(div)' is 3, but it is not greater than 4`"
+            "a,   3, 2, true, `The number of elements found by 'css(a) with visibility: visible' is 3, it is greater than 2`",
+            "div, 3, 4, false, `The number of elements found by 'css(div) with visibility: visible' is 3, but it is not greater than 4`"
     })
+    // CHECKSTYLE:ON
     void shouldRecordAssertionOnValidationIfNumberOfElementMatchesToExpected(String locatorValue, int actualNumber,
             int expectedNumber, boolean passed, String assertionMessage)
     {

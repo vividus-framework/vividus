@@ -86,7 +86,8 @@ class WaitStepsTests
         BooleanSupplier condition = conditionCaptor.getValue();
         Assertions.assertTrue(condition.getAsBoolean());
         verify(softAssert).recordPassedAssertion(
-                "Passed wait condition: number of elements located by 'css(div)' to be equal to 5");
+                "Passed wait condition: number of elements located by 'css(div) with visibility: visible'"
+                + " to be equal to 5");
         verifyNoMoreInteractions(softAssert);
     }
 
@@ -112,8 +113,8 @@ class WaitStepsTests
         doThrow(timeoutError).when(context).waitForCondition(any(BooleanSupplier.class));
         waitSteps.waitForElementNumber(playwrightLocator, ComparisonRule.EQUAL_TO, 3);
         verify(softAssert).recordFailedAssertion(
-                "Failed wait condition: number of elements located by 'css(div)' to be equal to 3. "
-                + TIMEOUT_ERROR_MESSAGE, timeoutError);
+                "Failed wait condition: number of elements located by 'css(div) with visibility: visible'"
+                + " to be equal to 3. " + TIMEOUT_ERROR_MESSAGE, timeoutError);
         verifyNoMoreInteractions(softAssert);
     }
 
@@ -122,7 +123,8 @@ class WaitStepsTests
         when(uiContext.locateElement(playwrightLocator)).thenReturn(locator);
         step.accept(playwrightLocator);
         verify(locator).waitFor(argThat(arg -> arg.state == selectorState));
-        String assertionMessage = String.format("Passed wait condition: element located by 'css(div)' to be %s",
+        String assertionMessage = String.format(
+                "Passed wait condition: element located by 'css(div) with visibility: visible' to be %s",
                 selectorState.toString().toLowerCase());
         verify(softAssert).recordPassedAssertion(assertionMessage);
         verifyNoMoreInteractions(softAssert);
@@ -137,7 +139,8 @@ class WaitStepsTests
             throw timeoutError;
         }).when(locator).waitFor(argThat(arg -> arg.state == selectorState));
         step.accept(playwrightLocator);
-        String assertionMessage = String.format("Failed wait condition: element located by 'css(div)' to be %s. %s",
+        String assertionMessage = String.format(
+                "Failed wait condition: element located by 'css(div) with visibility: visible' to be %s. %s",
                 selectorState.toString().toLowerCase(), TIMEOUT_ERROR_MESSAGE);
         verify(softAssert).recordFailedAssertion(assertionMessage, timeoutError);
     }
