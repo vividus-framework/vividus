@@ -12,11 +12,16 @@ Given I am on page with URL `${vividus-test-site-url}/video.html`
 When I switch to frame located by `id(video)`
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
 Then `${details.currentTime}` is = `0`
+When I take screenshot
 When I click on element located by `xpath(//button[@aria-label='Play'])`
-Then element located by `<videoLocator>` exists for `PT10S` duration
+When I take screenshot
+Then element located by `<videoLocator>` exists for `PT20S` duration
+When I take screenshot
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
 Then `${details.currentTime}` is > `0`
+When I take screenshot
 When I pause video in video player located `<videoLocator>`
+When I take screenshot
 When I save info from video player located `<videoLocator>` to SCENARIO variable `details`
 Given I initialize story variable `pausedTime` with value `${details.currentTime}`
 Then element located by `<videoLocator>` exists for `PT1S` duration
