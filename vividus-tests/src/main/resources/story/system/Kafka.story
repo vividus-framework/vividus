@@ -11,6 +11,9 @@ Meta:
     @requirementId 2915
 Given I initialize scenario variable `event-value` with value `{"event-from-system-vividus-test": "#{generate(regexify '[a-z]{8}')}"}`
 When I start consuming events from `vividus` Kafka topics `${topic}`
+When I set Kafka event headers:
+|name       |value     |
+|test_header|test_value|
 When I execute steps:
 |step            |
 |<eventPublisher>|
