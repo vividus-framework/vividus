@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -162,6 +163,7 @@ class KafkaStepsIntegrationTests
     @Test
     void shouldProduceEventWithKey() throws InterruptedException, ExecutionException, TimeoutException
     {
+        String anyDataWithHeader = ANY_DATA + "-with-headers";
         kafkaSteps.startKafkaListener(CONSUMER, Set.of(TOPIC));
 
         kafkaSteps.sendEventWithKey(KEY + 1, ANY_DATA, PRODUCER, TOPIC);
@@ -169,7 +171,9 @@ class KafkaStepsIntegrationTests
         kafkaSteps.sendEvent(ANY_DATA, PRODUCER, TOPIC);
         kafkaSteps.sendEventWithKey(KEY + 2, ANY_DATA, PRODUCER, TOPIC);
         kafkaSteps.sendEventWithKey(KEY + 3, ANY_DATA, PRODUCER, TOPIC);
-        kafkaSteps.sendEvent(ANY_DATA, PRODUCER, TOPIC);
+        var headers = new ExamplesTable("|name|value|\n|headerName1|headerValue1|\n|headerName2|headerValue2|");
+        kafkaSteps.setEventHeaders(headers);
+        kafkaSteps.sendEvent(anyDataWithHeader, PRODUCER, TOPIC);
 
         kafkaSteps.waitForKafkaEvents(Duration.ofSeconds(10), CONSUMER, ComparisonRule.EQUAL_TO, 6);
         kafkaSteps.stopKafkaListener(CONSUMER);
@@ -181,14 +185,13 @@ class KafkaStepsIntegrationTests
         assertEquals(info(LISTENER_STOPPED), events.get(1));
         LoggingEvent keysLogEvent = events.get(2);
         assertEquals(Level.INFO, keysLogEvent.getLevel());
-        assertEquals("Saving events with the keys: {}", keysLogEvent.getMessage());
+        assertEquals("Saving events with the keys and headers: {}", keysLogEvent.getMessage());
         List<Object> arguments = keysLogEvent.getArguments();
         assertThat(arguments, hasSize(1));
-        List<String> keys = Stream.of(arguments.get(0).toString().split(",")).map(String::strip).sorted().toList();
-        String noKey = "<no key>";
-        assertEquals(List.of(noKey, noKey, noKey, KEY + 1, KEY + 2, KEY + 3), keys);
+        assertEquals("[key1, <no key>, <no key>, key2, key3, {<no key>; headerName1, headerName2}]",
+                arguments.get(0).toString());
 
         verify(variableContext).putVariable(SCOPES, VARIABLE_NAME,
-                List.of(ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA));
+                List.of(ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, anyDataWithHeader));
     }
 }
