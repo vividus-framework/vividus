@@ -441,7 +441,8 @@ expression with the given replacement string.
 [TIP]
 ====
 Online tools like https://www.regexplanet.com/advanced/java/index.html[RegexPlanet] or
-https://regex101.com/[Regex101] can be used to test and debug regular expressions
+https://regex101.com/[Regex101] can be used to test and debug regular expressions, 
+while https://extendsclass.com/regex-tester.html[Cyrilex] can be employed for visualizing them.
 ====
 
 [source, subs="+quotes"]
