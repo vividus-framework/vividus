@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import static org.apache.hc.core5.http.HttpHeaders.CONTENT_TYPE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -31,7 +33,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class MimeTypeUtilsTests
+class ContentTypeHeaderParserTests
 {
     private static final String TEXT_TYPE = "text/plain";
 
@@ -41,12 +43,20 @@ class MimeTypeUtilsTests
                          arguments(new BasicHeader("stubHeader", "stubHeaderValue")));
     }
 
+    static Stream<Arguments> headersWithContentType()
+    {
+        return Stream.of(arguments(new BasicHeader(CONTENT_TYPE, "application/x-www-form-urlencoded"),
+                        Optional.empty()),
+                arguments(new BasicHeader(CONTENT_TYPE, "multipart/form-data; charset=ISO-8859-1"),
+                        Optional.of(StandardCharsets.ISO_8859_1)));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = { CONTENT_TYPE, "content-type" })
     void shouldGetMimeTypeFromHeaders(String contentType)
     {
         Header contentTypeHeader = new BasicHeader(contentType, TEXT_TYPE);
-        String actualMimeType = MimeTypeUtils.getMimeTypeFromHeaders(contentTypeHeader).get();
+        String actualMimeType = ContentTypeHeaderParser.getMimeType(contentTypeHeader).get();
         assertEquals(TEXT_TYPE, actualMimeType);
     }
 
@@ -54,14 +64,28 @@ class MimeTypeUtilsTests
     @MethodSource("headersWithoutContentType")
     void shouldNotGetMimeTypeFromHeadersWithoutContentType(Header header)
     {
-        Optional<String> actualMimeType = MimeTypeUtils.getMimeTypeFromHeaders(header);
+        Optional<String> actualMimeType = ContentTypeHeaderParser.getMimeType(header);
         assertEquals(Optional.empty(), actualMimeType);
     }
 
     @Test
     void shouldGetMimeTypeFromHeadersWithDefault()
     {
-        String actualMimeType = MimeTypeUtils.getMimeTypeFromHeadersWithDefault();
+        String actualMimeType = ContentTypeHeaderParser.getMimeTypeFromHeadersWithDefault();
         assertEquals(TEXT_TYPE, actualMimeType);
+    }
+
+    @ParameterizedTest
+    @MethodSource("headersWithoutContentType")
+    void testGetDefaultCharsetForCaseWithoutContentTypeHeaderValue(Header header)
+    {
+        assertEquals(Optional.empty(), ContentTypeHeaderParser.getCharset(header));
+    }
+
+    @ParameterizedTest
+    @MethodSource("headersWithContentType")
+    void testGetCharsetForCaseWithContentTypeHeaderValue(Header header, Optional<Charset> charset)
+    {
+        assertEquals(charset, ContentTypeHeaderParser.getCharset(header));
     }
 }

@@ -31,7 +31,23 @@
         .panel-heading a.collapsed:after {
             content:"\F105";
         }
-        
+        .container {
+            position: relative;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0px;
+            right: 15px;
+        }
+        #copy-toast {
+            position: absolute;
+            display: none;
+            top: 35px;
+            right: 0px;
+            font-size: 13px;
+            background-color: #666362;
+            color: #fff;
+        }
     </style>
 
     <div class="panel-group" id="accordion">
@@ -94,6 +110,25 @@
                 </div>
             </div>
         </#if>
+
+        <#if curlCommand??>
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <h4 class="panel-title toggleable">
+                        <a data-toggle="collapse" data-target="#collapse-curl" href="#collapse-curl" class="collapsed">cURL command</a>
+                    </h4>
+                </div>
+                <div id="collapse-curl" class="panel-collapse collapse">
+                    <div class="container">
+                        <pre><code class="language-shell">${curlCommand}</code></pre>
+                        <button class="copy-button" title="Copy to clipboard" onclick="copyCurlCommand()">
+                        	<img src="../../webjars/bootstrap/3.4.1/fonts/clipboard.svg">
+                        </button>
+                        <span id="copy-toast">Copied!</span>
+                    </div>
+                </div>
+            </div>
+        </#if>
     </div>
 
     <script src="../../webjars/jquery/3.6.4/jquery.min.js"></script>
@@ -110,6 +145,15 @@
                 hljs.highlightElement(e);
             });
         });
+
+        function copyCurlCommand() {
+            var text = document.querySelector('#collapse-curl code').textContent;
+            navigator.clipboard.writeText(text);
+            document.getElementById("copy-toast").style.display = "inline";
+            setTimeout( function() {
+                document.getElementById("copy-toast").style.display = "none";
+            }, 1000);
+        }
     </script>
 </body>
 </html>
