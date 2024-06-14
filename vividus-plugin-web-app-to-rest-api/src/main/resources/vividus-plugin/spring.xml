@@ -17,6 +17,27 @@
             </bean>
         </constructor-arg>
         <property name="uriToIgnoreRegex" value="${resource-checker.uri-to-ignore-regex}" />
+        <constructor-arg name="httpRequestExecutor">
+            <bean class="org.vividus.http.HttpRequestExecutor">
+                <constructor-arg>
+                    <bean class="org.vividus.http.client.HttpClient"
+                          factory-bean="httpClientFactory"
+                          factory-method="buildHttpClient">
+                        <constructor-arg>
+                            <bean parent="restApiHttpClientConfig">
+                                <property name="firstRequestInterceptor">
+                                    <bean class="org.vividus.http.client.LoggingHttpRequestInterceptor">
+                                        <constructor-arg value="org.vividus.http.WebAppToRestApiHttpClient" />
+                                    </bean>
+                                </property>
+                            </bean>
+                        </constructor-arg>
+                    </bean>
+                </constructor-arg>
+                <constructor-arg ref="httpTestContext" />
+                <constructor-arg ref="softAssert" />
+            </bean>
+        </constructor-arg>
     </bean>
 
     <bean id="redirectValidationSteps" class="org.vividus.steps.integration.RedirectValidationSteps" />
@@ -35,6 +56,11 @@
                 <constructor-arg>
                     <bean parent="httpClientConfig">
                         <property name="circularRedirectsAllowed" value="${http.redirects-provider.circular-redirects-allowed}" />
+                        <property name="firstRequestInterceptor">
+                            <bean class="org.vividus.http.client.LoggingHttpRequestInterceptor">
+                                <constructor-arg value="org.vividus.http.WebAppToRestApiHttpClient" />
+                            </bean>
+                        </property>
                     </bean>
                 </constructor-arg>
             </bean>
