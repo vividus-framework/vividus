@@ -17,6 +17,7 @@
 package org.vividus.mobitru.selenium;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.mobitru.client.InstallApplicationOptions;
@@ -27,6 +28,7 @@ import org.vividus.selenium.DesiredCapabilitiesAdjuster;
 public class MobitruCapabilitiesAdjuster extends DesiredCapabilitiesAdjuster
 {
     private static final String APPIUM_UDID = "appium:udid";
+    private static final String UDID = "udid";
     private final MobitruFacade mobitruFacade;
 
     private final InstallApplicationOptions installApplicationOptions;
@@ -44,14 +46,26 @@ public class MobitruCapabilitiesAdjuster extends DesiredCapabilitiesAdjuster
         String deviceId = null;
         try
         {
-            deviceId = mobitruFacade.takeDevice(desiredCapabilities);
-            mobitruFacade.installApp(deviceId, appFileName, installApplicationOptions);
+            Map<String, Object> returnCaps;
             Map<String, Object> capabilities = desiredCapabilities.asMap();
-            if (capabilities.containsKey(APPIUM_UDID) || capabilities.containsKey("udid"))
+            if (capabilities.containsKey(APPIUM_UDID) || capabilities.containsKey(UDID))
             {
-                return Map.of();
+                Object deviceIdObj = capabilities.getOrDefault(APPIUM_UDID, capabilities.get(UDID));
+                deviceId = Optional.ofNullable(deviceIdObj).
+                        map(String::valueOf).
+                        orElseThrow();
+                //use different API in case if udid is provided in capabilities
+                //it's required in some cases like if the device is already taken
+                mobitruFacade.takeDevice(deviceId);
+                returnCaps = Map.of();
             }
-            return Map.of(APPIUM_UDID, deviceId);
+            else
+            {
+                deviceId = mobitruFacade.takeDevice(desiredCapabilities);
+                returnCaps = Map.of(APPIUM_UDID, deviceId);
+            }
+            mobitruFacade.installApp(deviceId, appFileName, installApplicationOptions);
+            return returnCaps;
         }
         catch (MobitruOperationException outerException)
         {

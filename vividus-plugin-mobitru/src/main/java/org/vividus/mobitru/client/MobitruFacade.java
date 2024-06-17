@@ -32,6 +32,15 @@ public interface MobitruFacade
     String takeDevice(DesiredCapabilities desiredCapabilities) throws MobitruOperationException;
 
     /**
+     * Takes the device in use depending on the provided capabilities set.
+     *
+     * @param udid The UDID of a Device, which should be taken
+     * @return The UDID of the taken device.
+     * @throws MobitruOperationException In case of any issues during device reservation.
+     */
+    String takeDevice(String udid) throws MobitruOperationException;
+
+    /**
      * Installs the desired application on the device with specified UDID
      *
      * @param deviceId    The UDID of the device

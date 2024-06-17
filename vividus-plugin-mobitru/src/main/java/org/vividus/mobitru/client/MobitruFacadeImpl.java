@@ -64,6 +64,13 @@ public class MobitruFacadeImpl implements MobitruFacade
     }
 
     @Override
+    public String takeDevice(String udid) throws MobitruOperationException
+    {
+        LOGGER.info("Trying to take device with udid {}", udid);
+        return takeDevice(mobitruClient::takeDeviceBySerial, udid, getDefaultDeviceWaiter());
+    }
+
+    @Override
     public String takeDevice(DesiredCapabilities desiredCapabilities) throws MobitruOperationException
     {
         if (isSearchForDevice(desiredCapabilities))
@@ -74,8 +81,12 @@ public class MobitruFacadeImpl implements MobitruFacade
         }
         Device device = new Device();
         device.setDesiredCapabilities(desiredCapabilities.asMap());
-        Waiter deviceWaiter = new DurationBasedWaiter(new WaitMode(waitForDeviceTimeout, RETRY_TIMES));
-        return takeDevice(device, deviceWaiter);
+        return takeDevice(device, getDefaultDeviceWaiter());
+    }
+
+    private Waiter getDefaultDeviceWaiter()
+    {
+        return new DurationBasedWaiter(new WaitMode(waitForDeviceTimeout, RETRY_TIMES));
     }
 
     @Override
@@ -95,10 +106,17 @@ public class MobitruFacadeImpl implements MobitruFacade
     {
         LOGGER.info("Trying to take device with configuration {}", device);
         String capabilities = performMapperOperation(mapper -> mapper.writeValueAsString(device));
+        return takeDevice(mobitruClient::takeDevice, capabilities, deviceWaiter);
+    }
+
+    private String takeDevice(FailableFunction<String, byte[], MobitruOperationException> takeDeviceActions,
+                              String configurationOrUdid,
+                              Waiter deviceWaiter) throws MobitruOperationException
+    {
         byte[] receivedDevice = deviceWaiter.wait(() -> {
             try
             {
-                return mobitruClient.takeDevice(capabilities);
+                return takeDeviceActions.apply(configurationOrUdid);
             }
             catch (MobitruDeviceTakeException e)
             {
@@ -108,7 +126,8 @@ public class MobitruFacadeImpl implements MobitruFacade
         }, Objects::nonNull);
         if (null == receivedDevice)
         {
-            throw new MobitruDeviceTakeException(String.format("Unable to take device with configuration %s", device));
+            throw new MobitruDeviceTakeException(
+                    String.format("Unable to take device with configuration or udid %s", configurationOrUdid));
         }
         Device takenDevice = performMapperOperation(mapper -> mapper.readValue(receivedDevice, Device.class));
         LOGGER.info("Device with configuration {} is taken", takenDevice);
