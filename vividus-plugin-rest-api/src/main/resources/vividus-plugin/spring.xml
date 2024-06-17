@@ -118,4 +118,5 @@
 
     <bean class="org.vividus.http.expression.UriEncodingExpressionProcessors" />
     <bean class="org.vividus.http.expression.RemoveWrappingDoubleQuotesExpressionProcessor" />
+    <bean class="org.vividus.http.expression.PkceExpressionProcessor" />
 </beans>

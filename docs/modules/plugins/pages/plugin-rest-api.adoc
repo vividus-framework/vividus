@@ -154,6 +154,26 @@ https://user@vividus.dev:vividus.dev/path/segment?a&b=c#fragment)}`
 
 |===
 
+=== `generateCodeChallenge`
+
+https://oauth.net/2/pkce/[Proof Key for Code Exchange (PKCE)] - an extension of the OAuth 2.0 protocol that helps
+prevent code interception attacks. In scope of PKCE a new flow with three new parameters: code verifier, code challenge,
+code challenge method and dependencies between them was introduced. This expression helps to generate code challenge
+using SHA-256 hashing and base64 URL encoding for provided code verifier value.
+
+[source, subs="+quotes"]
+----
+#{generateCodeChallenge(*$codeVerifier*)}
+----
+
+* *`$codeVerifier`* - any string to generate code challenge
+
+.Generate code challenge by provided code verifier value
+[source,gherkin]
+----
+Given I initialize scenario variable `codeChallenge` with value `#{generateCodeChallenge(${codeVerifier})}`
+----
+
 == xref:commons:variables.adoc[Dynamic variables]
 
 === HTTP response as text
