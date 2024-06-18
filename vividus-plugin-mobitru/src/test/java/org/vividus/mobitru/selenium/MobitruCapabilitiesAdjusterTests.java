@@ -71,10 +71,10 @@ class MobitruCapabilitiesAdjusterTests
     {
         mobitruCapabilitiesConfigurer.setAppFileName(STEAM_APK);
         var capabilities = new DesiredCapabilities(Map.of(udidCapabilityName, UDID));
-        when(mobitruFacade.takeDevice(UDID)).thenReturn(UDID);
+        when(mobitruFacade.takeDevice(capabilities)).thenReturn(UDID);
         var ordered = Mockito.inOrder(mobitruFacade);
         assertEquals(Map.of(), mobitruCapabilitiesConfigurer.getExtraCapabilities(capabilities));
-        ordered.verify(mobitruFacade).takeDevice(UDID);
+        ordered.verify(mobitruFacade).takeDevice(capabilities);
         ordered.verify(mobitruFacade).installApp(UDID, STEAM_APK, installApplicationOptions);
         verify(mobitruFacade, never()).returnDevice(UDID);
     }

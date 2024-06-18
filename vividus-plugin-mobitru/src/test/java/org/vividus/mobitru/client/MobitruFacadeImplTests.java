@@ -67,6 +67,7 @@ class MobitruFacadeImplTests
     private static final String DEVICE_TYPE_CAPABILITY_NAME = "mobitru-device-search:type";
     private static final String PHONE = "phone";
     private static final String PLATFORM_NAME = "platformName";
+    private static final String UDID_CAP = "udid";
     private static final String IOS = "ios";
     private static final String ANDROID = "android";
     private static final String NO_DEVICE = "no device";
@@ -119,14 +120,16 @@ class MobitruFacadeImplTests
                 LoggingEvent.info(DEVICE_TAKEN_MESSAGE, takenDevice)), LOGGER.getLoggingEvents());
     }
 
-    @Test
-    void shouldTakeDeviceByUdidAndProvideItsUdid() throws MobitruOperationException
+    @ParameterizedTest
+    @ValueSource(strings = { "appium:udid", UDID_CAP})
+    void shouldTakeDeviceByUdidAndProvideItsUdid(String capName) throws MobitruOperationException
     {
         mobitruFacadeImpl.setWaitForDeviceTimeout(Duration.ofSeconds(20));
         var deviceTakeException = new MobitruDeviceTakeException(NO_DEVICE);
+        var desiredCapabilities = new DesiredCapabilities(Map.of(capName, UDID));
         when(mobitruClient.takeDeviceBySerial(UDID)).thenThrow(deviceTakeException).
                 thenReturn(CAPABILITIES_WITH_UDID_JSON.getBytes(StandardCharsets.UTF_8));
-        assertEquals(UDID, mobitruFacadeImpl.takeDevice(UDID));
+        assertEquals(UDID, mobitruFacadeImpl.takeDevice(desiredCapabilities));
         var takenDevice = getTestDevice();
         assertEquals(List.of(
                 LoggingEvent.info(TRYING_TO_TAKE_DEVICE_UDID_MESSAGE, UDID),
@@ -153,7 +156,7 @@ class MobitruFacadeImplTests
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "appium:udid", "udid", "deviceName", "appium:deviceName" })
+    @ValueSource(strings = { "appium:udid", UDID_CAP, "deviceName", "appium:deviceName" })
     void shouldThrowExceptionIfConflictingCapabilities(String capabilityName)
     {
         mobitruFacadeImpl.setWaitForDeviceTimeout(Duration.ofSeconds(20));
@@ -194,9 +197,10 @@ class MobitruFacadeImplTests
     void shouldThrowExceptionIfNoDeviceWithUdid() throws MobitruOperationException
     {
         mobitruFacadeImpl.setWaitForDeviceTimeout(Duration.ofSeconds(1));
+        var desiredCapabilities = new DesiredCapabilities(Map.of(UDID_CAP, UDID));
         when(mobitruClient.takeDeviceBySerial(UDID)).thenThrow(new MobitruDeviceTakeException(NO_DEVICE));
         var exception = assertThrows(MobitruDeviceTakeException.class,
-                () -> mobitruFacadeImpl.takeDevice(UDID));
+                () -> mobitruFacadeImpl.takeDevice(desiredCapabilities));
         assertEquals(String.format(UNABLE_TO_TAKE_DEVICE_ERROR_FORMAT, UDID), exception.getMessage());
     }
 
@@ -268,7 +272,7 @@ class MobitruFacadeImplTests
         desiredCapabilities.put(PLATFORM_NAME, "Android");
         desiredCapabilities.put("platformVersion", platformVersion);
         desiredCapabilities.put("deviceName", deviceName);
-        desiredCapabilities.put("udid", udid);
+        desiredCapabilities.put(UDID_CAP, udid);
         Device device = new Device();
         device.setDesiredCapabilities(desiredCapabilities);
         return device;

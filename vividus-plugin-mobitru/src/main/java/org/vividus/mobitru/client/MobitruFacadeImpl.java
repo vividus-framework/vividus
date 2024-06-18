@@ -49,6 +49,7 @@ public class MobitruFacadeImpl implements MobitruFacade
     private static final Logger LOGGER = LoggerFactory.getLogger(MobitruFacadeImpl.class);
 
     private static final String UDID = "udid";
+    private static final String APPIUM_UDID = "appium:udid";
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -64,15 +65,22 @@ public class MobitruFacadeImpl implements MobitruFacade
     }
 
     @Override
-    public String takeDevice(String udid) throws MobitruOperationException
-    {
-        LOGGER.info("Trying to take device with udid {}", udid);
-        return takeDevice(mobitruClient::takeDeviceBySerial, udid, getDefaultDeviceWaiter());
-    }
-
-    @Override
     public String takeDevice(DesiredCapabilities desiredCapabilities) throws MobitruOperationException
     {
+        Map<String, Object> capabilities = desiredCapabilities.asMap();
+        //use different API in case if udid is provided in capabilities
+        //it's required in some cases like if the device is already taken
+        if (!isSearchForDevice(desiredCapabilities)
+                &&
+                (capabilities.containsKey(APPIUM_UDID) || capabilities.containsKey(UDID)))
+        {
+            Object deviceIdObj = capabilities.getOrDefault(APPIUM_UDID, capabilities.get(UDID));
+            String udid = Optional.ofNullable(deviceIdObj).
+                    map(String::valueOf).
+                    orElseThrow();
+            LOGGER.info("Trying to take device with udid {}", udid);
+            return takeDevice(mobitruClient::takeDeviceBySerial, udid, getDefaultDeviceWaiter());
+        }
         if (isSearchForDevice(desiredCapabilities))
         {
             DeviceSearchParameters deviceSearchParameters = new DeviceSearchParameters(desiredCapabilities);
@@ -214,7 +222,7 @@ public class MobitruFacadeImpl implements MobitruFacade
                 .anyMatch(key -> key.startsWith("mobitru-device-search:"));
         if (containsSearchCapabilities)
         {
-            Optional<String> conflictingCapability = Stream.of(UDID, "appium:udid", "deviceName", "appium:deviceName")
+            Optional<String> conflictingCapability = Stream.of(UDID, APPIUM_UDID, "deviceName", "appium:deviceName")
                     .filter(capabilities::containsKey).findFirst();
             Validate.isTrue(conflictingCapability.isEmpty(),
                     "Conflicting capabilities are found. `%s` capability can not be specified along with "
