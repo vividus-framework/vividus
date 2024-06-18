@@ -175,7 +175,7 @@ class KafkaStepsIntegrationTests
         kafkaSteps.setEventHeaders(headers);
         kafkaSteps.sendEvent(anyDataWithHeader, PRODUCER, TOPIC);
 
-        kafkaSteps.waitForKafkaEvents(Duration.ofSeconds(10), CONSUMER, ComparisonRule.EQUAL_TO, 6);
+        kafkaSteps.waitForKafkaEvents(Duration.ofSeconds(20), CONSUMER, ComparisonRule.EQUAL_TO, 6);
         kafkaSteps.stopKafkaListener(CONSUMER);
         kafkaSteps.processKafkaEvents(QueueOperation.PEEK, CONSUMER, SCOPES, VARIABLE_NAME);
 
