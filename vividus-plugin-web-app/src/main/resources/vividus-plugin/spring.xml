@@ -216,6 +216,10 @@
         <property name="windowsStrategy" value="${selenium.windows-strategy}" />
     </bean>
 
+    <bean id="chromeExperimentalSteps" class="org.vividus.steps.ui.web.ChromeExperimentalSteps">
+        <property name="fileDownloadTimeout" value="${ui.chrome.file-download-timeout}" />
+    </bean>
+
     <bean class="org.vividus.ui.web.monitor.PublishingWebScreenshotOnFailureMonitor"
           parent="abstractPublishingScreenshotOnFailureMonitor"/>
 
@@ -290,6 +294,7 @@
         <idref bean="windowSteps" />
         <idref bean="browserSteps" />
         <idref bean="mobileEmulationSteps" />
+        <idref bean="chromeExperimentalSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebUi" key-type="java.lang.Class">
