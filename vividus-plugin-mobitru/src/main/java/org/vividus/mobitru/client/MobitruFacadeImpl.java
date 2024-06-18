@@ -75,11 +75,9 @@ public class MobitruFacadeImpl implements MobitruFacade
                 (capabilities.containsKey(APPIUM_UDID) || capabilities.containsKey(UDID)))
         {
             Object deviceIdObj = capabilities.getOrDefault(APPIUM_UDID, capabilities.get(UDID));
-            String udid = Optional.ofNullable(deviceIdObj).
-                    map(String::valueOf).
-                    orElseThrow();
-            LOGGER.info("Trying to take device with udid {}", udid);
-            return takeDevice(mobitruClient::takeDeviceBySerial, udid, getDefaultDeviceWaiter());
+            LOGGER.info("Trying to take device with udid {}", deviceIdObj);
+            return takeDevice(mobitruClient::takeDeviceBySerial, String.valueOf(deviceIdObj),
+                    getDefaultDeviceWaiter());
         }
         if (isSearchForDevice(desiredCapabilities))
         {
