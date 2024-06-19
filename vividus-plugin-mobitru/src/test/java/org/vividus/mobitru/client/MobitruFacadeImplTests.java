@@ -32,6 +32,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -56,19 +59,29 @@ class MobitruFacadeImplTests
 {
     private static final String DEVICE_TAKEN_MESSAGE = "Device with configuration {} is taken";
     private static final String TRYING_TO_TAKE_DEVICE_MESSAGE = "Trying to take device with configuration {}";
+    private static final String TRYING_TO_TAKE_DEVICE_UDID_MESSAGE = "Trying to take device with udid {}";
     private static final String RETRY_TO_TAKE_DEVICE_MESSAGE = "Unable to take device, retrying attempt.";
-    private static final String UNABLE_TO_TAKE_DEVICE_ERROR_FORMAT = "Unable to take device with configuration %s";
+    private static final String UNABLE_TO_TAKE_DEVICE_WITH_CONFIGURATION_ERROR_FORMAT =
+            "Unable to take device with configuration %s";
+    private static final String UNABLE_TO_TAKE_DEVICE_WITH_UDID_ERROR_FORMAT = "Unable to take device with udid %s";
     private static final String UDID = "Z3CT103D2DZ";
     private static final String DEVICE_TYPE_CAPABILITY_NAME = "mobitru-device-search:type";
     private static final String PHONE = "phone";
     private static final String PLATFORM_NAME = "platformName";
+    private static final String UDID_CAP = "udid";
     private static final String IOS = "ios";
     private static final String ANDROID = "android";
     private static final String NO_DEVICE = "no device";
     private static final String CAPABILITIES_JSON_PREFIX = "{\"desiredCapabilities\":{\"platformName\":\"Android\",";
-    private static final String CAPABILITIES_JSON = CAPABILITIES_JSON_PREFIX
+    private static final String CAPABILITIES_IOS_PLATFORM = "{\"desiredCapabilities\":{\"platformName\":\"IOS\"}}";
+    private static final String CAPABILITIES_WITHOUT_UDID_JSON = CAPABILITIES_JSON_PREFIX
+            + "\"platformVersion\":\"12\",\"deviceName\":\"SAMSUNG SM-G998B\"}}";
+    private static final String CAPABILITIES_WITH_UDID_JSON = CAPABILITIES_JSON_PREFIX
             + "\"platformVersion\":\"12\",\"deviceName\":\"SAMSUNG SM-G998B\",\"udid\":\"Z3CT103D2DZ\"}}";
     private static final Map<String, String> DEVICE_SEARCH_PARAMETERS = Map.of("type", PHONE);
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(MobitruFacadeImpl.class);
 
@@ -77,7 +90,7 @@ class MobitruFacadeImplTests
     @InjectMocks private MobitruFacadeImpl mobitruFacadeImpl;
 
     @Test
-    void shouldFindDeviceThenTakeItAndProvideItsUdid() throws MobitruOperationException
+    void shouldFindDeviceThenTakeItAndProvideItsUdid() throws MobitruOperationException, JsonProcessingException
     {
         mobitruFacadeImpl.setWaitForDeviceTimeout(Duration.ofSeconds(20));
         var deviceSearchException = new MobitruDeviceSearchException(NO_DEVICE);
@@ -87,11 +100,11 @@ class MobitruFacadeImplTests
         var desiredCapabilities = new DesiredCapabilities(
                 Map.of(PLATFORM_NAME, ANDROID, DEVICE_TYPE_CAPABILITY_NAME, PHONE));
         when(mobitruClient.findDevices(ANDROID, DEVICE_SEARCH_PARAMETERS)).thenThrow(deviceSearchException)
-                .thenReturn(('[' + failedToTakeDeviceCapabilitiesJson + "," + CAPABILITIES_JSON + ']')
+                .thenReturn(('[' + failedToTakeDeviceCapabilitiesJson + "," + CAPABILITIES_WITH_UDID_JSON + ']')
                         .getBytes(StandardCharsets.UTF_8));
         when(mobitruClient.takeDevice(failedToTakeDeviceCapabilitiesJson)).thenThrow(deviceTakeException);
-        when(mobitruClient.takeDevice(CAPABILITIES_JSON))
-                .thenReturn(CAPABILITIES_JSON.getBytes(StandardCharsets.UTF_8));
+        when(mobitruClient.takeDevice(CAPABILITIES_WITH_UDID_JSON))
+                .thenReturn(CAPABILITIES_WITH_UDID_JSON.getBytes(StandardCharsets.UTF_8));
         assertEquals(UDID, mobitruFacadeImpl.takeDevice(desiredCapabilities));
         var failedTakeDevice = createDevice("13", "GOOGLE PIXEL 6", "777");
         var takenDevice = getTestDevice();
@@ -102,8 +115,26 @@ class MobitruFacadeImplTests
                         + System.lineSeparator() + "Device 2: " + takenDevice),
                 LoggingEvent.info(TRYING_TO_TAKE_DEVICE_MESSAGE, failedTakeDevice),
                 LoggingEvent.warn(deviceTakeException, RETRY_TO_TAKE_DEVICE_MESSAGE),
-                LoggingEvent.warn(String.format(UNABLE_TO_TAKE_DEVICE_ERROR_FORMAT, failedTakeDevice)),
+                LoggingEvent.warn(UNABLE_TO_TAKE_DEVICE_WITH_CONFIGURATION_ERROR_FORMAT.formatted(
+                        OBJECT_MAPPER.writeValueAsString(failedTakeDevice))),
                 LoggingEvent.info(TRYING_TO_TAKE_DEVICE_MESSAGE, takenDevice),
+                LoggingEvent.info(DEVICE_TAKEN_MESSAGE, takenDevice)), LOGGER.getLoggingEvents());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "appium:udid", UDID_CAP})
+    void shouldTakeDeviceByUdidAndProvideItsUdid(String capName) throws MobitruOperationException
+    {
+        mobitruFacadeImpl.setWaitForDeviceTimeout(Duration.ofSeconds(20));
+        var deviceTakeException = new MobitruDeviceTakeException(NO_DEVICE);
+        var desiredCapabilities = new DesiredCapabilities(Map.of(capName, UDID));
+        when(mobitruClient.takeDeviceBySerial(UDID)).thenThrow(deviceTakeException).
+                thenReturn(CAPABILITIES_WITH_UDID_JSON.getBytes(StandardCharsets.UTF_8));
+        assertEquals(UDID, mobitruFacadeImpl.takeDevice(desiredCapabilities));
+        var takenDevice = getTestDevice();
+        assertEquals(List.of(
+                LoggingEvent.info(TRYING_TO_TAKE_DEVICE_UDID_MESSAGE, UDID),
+                LoggingEvent.warn(deviceTakeException, RETRY_TO_TAKE_DEVICE_MESSAGE),
                 LoggingEvent.info(DEVICE_TAKEN_MESSAGE, takenDevice)), LOGGER.getLoggingEvents());
     }
 
@@ -117,7 +148,7 @@ class MobitruFacadeImplTests
         requestedDevice.setDesiredCapabilities(desiredCapabilities.asMap());
         when(mobitruClient.takeDevice("{\"desiredCapabilities\":{\"platformName\":\"ANDROID\"}}"))
                 .thenThrow(exception)
-                .thenReturn(CAPABILITIES_JSON.getBytes(StandardCharsets.UTF_8));
+                .thenReturn(CAPABILITIES_WITH_UDID_JSON.getBytes(StandardCharsets.UTF_8));
         assertEquals(UDID,
             mobitruFacadeImpl.takeDevice(desiredCapabilities));
         assertEquals(List.of(LoggingEvent.info(TRYING_TO_TAKE_DEVICE_MESSAGE, requestedDevice),
@@ -126,7 +157,7 @@ class MobitruFacadeImplTests
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "appium:udid", "udid", "deviceName", "appium:deviceName" })
+    @ValueSource(strings = { "appium:udid", UDID_CAP, "deviceName", "appium:deviceName" })
     void shouldThrowExceptionIfConflictingCapabilities(String capabilityName)
     {
         mobitruFacadeImpl.setWaitForDeviceTimeout(Duration.ofSeconds(20));
@@ -153,25 +184,37 @@ class MobitruFacadeImplTests
     {
         mobitruFacadeImpl.setWaitForDeviceTimeout(Duration.ofSeconds(1));
         when(mobitruClient.findDevices(ANDROID, DEVICE_SEARCH_PARAMETERS))
-                .thenReturn(('[' + CAPABILITIES_JSON + ']').getBytes(StandardCharsets.UTF_8));
-        when(mobitruClient.takeDevice(CAPABILITIES_JSON))
+                .thenReturn(('[' + CAPABILITIES_WITHOUT_UDID_JSON + ']').getBytes(StandardCharsets.UTF_8));
+        when(mobitruClient.takeDevice(CAPABILITIES_WITHOUT_UDID_JSON))
                 .thenThrow(new MobitruDeviceTakeException(NO_DEVICE));
         var capabilities = new DesiredCapabilities(Map.of(PLATFORM_NAME, ANDROID, DEVICE_TYPE_CAPABILITY_NAME, PHONE));
         var exception = assertThrows(MobitruDeviceTakeException.class,
                 () -> mobitruFacadeImpl.takeDevice(capabilities));
-        assertEquals(String.format(UNABLE_TO_TAKE_DEVICE_ERROR_FORMAT, getTestDevice()), exception.getMessage());
+        assertEquals(UNABLE_TO_TAKE_DEVICE_WITH_CONFIGURATION_ERROR_FORMAT.formatted(CAPABILITIES_WITHOUT_UDID_JSON),
+                exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionIfNoDeviceWithUdid() throws MobitruOperationException
+    {
+        mobitruFacadeImpl.setWaitForDeviceTimeout(Duration.ofSeconds(1));
+        var desiredCapabilities = new DesiredCapabilities(Map.of(UDID_CAP, UDID));
+        when(mobitruClient.takeDeviceBySerial(UDID)).thenThrow(new MobitruDeviceTakeException(NO_DEVICE));
+        var exception = assertThrows(MobitruDeviceTakeException.class,
+                () -> mobitruFacadeImpl.takeDevice(desiredCapabilities));
+        assertEquals(UNABLE_TO_TAKE_DEVICE_WITH_UDID_ERROR_FORMAT.formatted(UDID), exception.getMessage());
     }
 
     @Test
     void shouldThrowExceptionIfNoDeviceTaken() throws MobitruOperationException
     {
         mobitruFacadeImpl.setWaitForDeviceTimeout(Duration.ofSeconds(1));
-        when(mobitruClient.takeDevice("{\"desiredCapabilities\":{\"platformName\":\"IOS\"}}"))
+        when(mobitruClient.takeDevice(CAPABILITIES_IOS_PLATFORM))
                 .thenThrow(new MobitruDeviceTakeException(NO_DEVICE));
         var capabilities = new DesiredCapabilities(Map.of(PLATFORM_NAME, IOS));
         var exception = assertThrows(MobitruDeviceTakeException.class,
                 () -> mobitruFacadeImpl.takeDevice(capabilities));
-        assertEquals("Unable to take device with configuration {desiredCapabilities={platformName=IOS}}",
+        assertEquals(UNABLE_TO_TAKE_DEVICE_WITH_CONFIGURATION_ERROR_FORMAT.formatted(CAPABILITIES_IOS_PLATFORM),
                 exception.getMessage());
     }
 
@@ -227,7 +270,7 @@ class MobitruFacadeImplTests
         desiredCapabilities.put(PLATFORM_NAME, "Android");
         desiredCapabilities.put("platformVersion", platformVersion);
         desiredCapabilities.put("deviceName", deviceName);
-        desiredCapabilities.put("udid", udid);
+        desiredCapabilities.put(UDID_CAP, udid);
         Device device = new Device();
         device.setDesiredCapabilities(desiredCapabilities);
         return device;

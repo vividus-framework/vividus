@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.function.FailableFunction;
+import org.apache.commons.lang3.function.FailableSupplier;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +51,7 @@ public class MobitruFacadeImpl implements MobitruFacade
     private static final Logger LOGGER = LoggerFactory.getLogger(MobitruFacadeImpl.class);
 
     private static final String UDID = "udid";
+    private static final String APPIUM_UDID = "appium:udid";
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -72,10 +75,25 @@ public class MobitruFacadeImpl implements MobitruFacade
             List<Device> foundDevices = findDevices(deviceSearchParameters);
             return takeDevice(foundDevices);
         }
+
+        Map<String, Object> capabilities = desiredCapabilities.asMap();
+        Object deviceUdid = capabilities.getOrDefault(APPIUM_UDID, capabilities.get(UDID));
+        if (deviceUdid != null)
+        {
+            //use different API in case if udid is provided in capabilities
+            //it's required in some cases like if the device is already taken
+            LOGGER.info("Trying to take device with udid {}", deviceUdid);
+            return takeDevice(() -> mobitruClient.takeDeviceBySerial(String.valueOf(deviceUdid)),
+                    () -> "Unable to take device with udid " + deviceUdid, getDefaultDeviceWaiter());
+        }
         Device device = new Device();
         device.setDesiredCapabilities(desiredCapabilities.asMap());
-        Waiter deviceWaiter = new DurationBasedWaiter(new WaitMode(waitForDeviceTimeout, RETRY_TIMES));
-        return takeDevice(device, deviceWaiter);
+        return takeDevice(device, getDefaultDeviceWaiter());
+    }
+
+    private Waiter getDefaultDeviceWaiter()
+    {
+        return new DurationBasedWaiter(new WaitMode(waitForDeviceTimeout, RETRY_TIMES));
     }
 
     @Override
@@ -95,10 +113,17 @@ public class MobitruFacadeImpl implements MobitruFacade
     {
         LOGGER.info("Trying to take device with configuration {}", device);
         String capabilities = performMapperOperation(mapper -> mapper.writeValueAsString(device));
+        return takeDevice(() -> mobitruClient.takeDevice(capabilities),
+                () -> "Unable to take device with configuration " + capabilities, deviceWaiter);
+    }
+
+    private String takeDevice(FailableSupplier<byte[], MobitruOperationException> takeDeviceActions,
+            Supplier<String> unableToTakeDeviceErrorMessage, Waiter deviceWaiter) throws MobitruOperationException
+    {
         byte[] receivedDevice = deviceWaiter.wait(() -> {
             try
             {
-                return mobitruClient.takeDevice(capabilities);
+                return takeDeviceActions.get();
             }
             catch (MobitruDeviceTakeException e)
             {
@@ -108,7 +133,7 @@ public class MobitruFacadeImpl implements MobitruFacade
         }, Objects::nonNull);
         if (null == receivedDevice)
         {
-            throw new MobitruDeviceTakeException(String.format("Unable to take device with configuration %s", device));
+            throw new MobitruDeviceTakeException(unableToTakeDeviceErrorMessage.get());
         }
         Device takenDevice = performMapperOperation(mapper -> mapper.readValue(receivedDevice, Device.class));
         LOGGER.info("Device with configuration {} is taken", takenDevice);
@@ -195,7 +220,7 @@ public class MobitruFacadeImpl implements MobitruFacade
                 .anyMatch(key -> key.startsWith("mobitru-device-search:"));
         if (containsSearchCapabilities)
         {
-            Optional<String> conflictingCapability = Stream.of(UDID, "appium:udid", "deviceName", "appium:deviceName")
+            Optional<String> conflictingCapability = Stream.of(UDID, APPIUM_UDID, "deviceName", "appium:deviceName")
                     .filter(capabilities::containsKey).findFirst();
             Validate.isTrue(conflictingCapability.isEmpty(),
                     "Conflicting capabilities are found. `%s` capability can not be specified along with "

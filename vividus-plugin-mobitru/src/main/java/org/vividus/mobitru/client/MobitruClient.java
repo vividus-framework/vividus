@@ -57,6 +57,13 @@ public class MobitruClient
                 MobitruDeviceSearchException::new);
     }
 
+    public byte[] takeDeviceBySerial(String udid) throws MobitruOperationException
+    {
+        URIBuilder uriBuilder = new URIBuilder().setPath(DEVICE_PATH).appendPath(udid);
+        return executeRequest(uriBuilder.toString(), HttpMethod.POST, UnaryOperator.identity(),
+                HttpStatus.SC_OK, MobitruDeviceTakeException::new);
+    }
+
     public byte[] takeDevice(String requestedDevice) throws MobitruOperationException
     {
         return executePost(DEVICE_PATH, requestedDevice, HttpStatus.SC_OK);
