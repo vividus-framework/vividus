@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,11 @@ public class MouseSteps
     @When("I click on element located by `$locator`")
     public void clickOnElement(PlaywrightLocator locator)
     {
-        runMouseAction(locator, Locator::click, "click");
+        Consumer<Locator> clickAction = element -> {
+            element.click();
+            afterClick();
+        };
+        runMouseAction(locator, clickAction, "click");
     }
 
     /**
@@ -84,5 +88,11 @@ public class MouseSteps
         {
             softAssert.recordFailedAssertion("The element to " + actionDescription + " is not found", timeoutError);
         }
+    }
+
+    private void afterClick()
+    {
+        uiContext.getCurrentPage().waitForLoadState();
+        uiContext.resetToActiveFrame();
     }
 }

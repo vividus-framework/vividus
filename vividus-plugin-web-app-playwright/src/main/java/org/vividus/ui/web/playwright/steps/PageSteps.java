@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,6 @@ public class PageSteps
     @Given("I am on page with URL `$pageUrl`")
     public void openPage(String pageUrl)
     {
-        uiContext.reset();
         Optional.ofNullable(uiContext.getCurrentPage()).orElseGet(this::openNewTab).navigate(pageUrl);
     }
 
@@ -75,7 +74,6 @@ public class PageSteps
     @When("I refresh page")
     public void refreshPage()
     {
-        uiContext.reset();
         uiContext.getCurrentPage().reload();
     }
 
@@ -85,7 +83,6 @@ public class PageSteps
     @When("I navigate back")
     public void navigateBack()
     {
-        uiContext.reset();
         uiContext.getCurrentPage().goBack();
     }
 
@@ -149,8 +146,15 @@ public class PageSteps
 
     private Page openNewTab()
     {
+        uiContext.reset();
         Page page = browserContextProvider.get().newPage();
         uiContext.setCurrentPage(page);
+        page.onFrameNavigated(frame -> {
+            if (frame.parentFrame() == null)
+            {
+                uiContext.reset();
+            }
+        });
         return page;
     }
 }

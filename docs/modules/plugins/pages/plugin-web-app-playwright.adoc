@@ -306,3 +306,41 @@ Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
 When I execute javascript `JSON.stringify(window.performance.timing)` and save result to scenario variable `timings`
 Then number of JSON elements from `${timings}` by JSON path `$.connectStart` is = 1
 ----
+
+=== Context steps
+==== Switch to the default context of page
+
+Switches context to the root https://developer.mozilla.org/en-US/docs/Web/HTML/Element/html[<html>] element of the current page.
+
+[source,gherkin]
+----
+When I switch back to page
+----
+
+.Switch to user context and back to the default context of page
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/elementState.html`
+When I change context to element located by `id(button-hide)`
+Then text `Element to hide` does not exist
+When I switch back to page
+Then text `Element to hide` exists
+----
+
+==== Switch context to a frame
+
+Switches to https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe[<iframe>] or https://developer.mozilla.org/en-US/docs/Web/HTML/Element/frame[<frame>] element using one of the supported locators.
+
+[source,gherkin]
+----
+When I switch to frame located by `$locator`
+----
+
+* `$locator` - <<_locator>> of frame element.
+
+.Switch to frame
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/nestedFrames.html`
+Then text `Modal Frame Example` does not exist
+When I switch to frame located by `id(parent)`
+Then text `Modal Frame Example` exists
+----
