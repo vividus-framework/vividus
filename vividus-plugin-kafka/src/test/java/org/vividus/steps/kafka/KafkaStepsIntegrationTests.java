@@ -59,6 +59,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
@@ -69,6 +70,7 @@ import org.vividus.util.property.IPropertyParser;
 import org.vividus.variable.VariableScope;
 
 @EmbeddedKafka(topics = KafkaStepsIntegrationTests.TOPIC)
+@DirtiesContext
 @ExtendWith({ MockitoExtension.class, SpringExtension.class, TestLoggerFactoryExtension.class })
 class KafkaStepsIntegrationTests
 {
