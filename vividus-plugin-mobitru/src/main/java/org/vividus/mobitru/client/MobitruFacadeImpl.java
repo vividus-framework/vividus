@@ -68,22 +68,21 @@ public class MobitruFacadeImpl implements MobitruFacade
     public String takeDevice(DesiredCapabilities desiredCapabilities) throws MobitruOperationException
     {
         Map<String, Object> capabilities = desiredCapabilities.asMap();
-        //use different API in case if udid is provided in capabilities
-        //it's required in some cases like if the device is already taken
-        if (!isSearchForDevice(desiredCapabilities)
-                &&
-                (capabilities.containsKey(APPIUM_UDID) || capabilities.containsKey(UDID)))
-        {
-            Object deviceIdObj = capabilities.getOrDefault(APPIUM_UDID, capabilities.get(UDID));
-            LOGGER.info("Trying to take device with udid {}", deviceIdObj);
-            return takeDevice(mobitruClient::takeDeviceBySerial, String.valueOf(deviceIdObj),
-                    getDefaultDeviceWaiter());
-        }
+
         if (isSearchForDevice(desiredCapabilities))
         {
             DeviceSearchParameters deviceSearchParameters = new DeviceSearchParameters(desiredCapabilities);
             List<Device> foundDevices = findDevices(deviceSearchParameters);
             return takeDevice(foundDevices);
+        }
+        if (capabilities.containsKey(APPIUM_UDID) || capabilities.containsKey(UDID))
+        {
+            //use different API in case if udid is provided in capabilities
+            //it's required in some cases like if the device is already taken
+            Object deviceIdObj = capabilities.getOrDefault(APPIUM_UDID, capabilities.get(UDID));
+            LOGGER.info("Trying to take device with udid {}", deviceIdObj);
+            return takeDevice(mobitruClient::takeDeviceBySerial, String.valueOf(deviceIdObj),
+                    getDefaultDeviceWaiter());
         }
         Device device = new Device();
         device.setDesiredCapabilities(desiredCapabilities.asMap());
