@@ -16,9 +16,12 @@
 
 package org.vividus.ui.web.playwright;
 
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.Function;
 
+import com.microsoft.playwright.FrameLocator;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 
@@ -45,12 +48,37 @@ public class UiContext
         return getPlaywrightContext().page;
     }
 
+    public void setCurrentFrame(FrameLocator frame)
+    {
+        getPlaywrightContext().frames.add(frame);
+    }
+
+    public FrameLocator getCurrentFrame()
+    {
+        return getPlaywrightContext().frames.isEmpty() ? null : getPlaywrightContext().frames.getLast();
+    }
+
     public void setContext(Locator context)
     {
         getPlaywrightContext().context = context;
     }
 
     public void reset()
+    {
+        getPlaywrightContext().frames.clear();
+        resetContext();
+    }
+
+    public void resetToActiveFrame()
+    {
+        Deque<FrameLocator> frames = getPlaywrightContext().frames;
+        while (!frames.isEmpty() && !frames.getLast().owner().isVisible())
+        {
+            frames.removeLast();
+        }
+    }
+
+    public void resetContext()
     {
         getPlaywrightContext().context = null;
     }
@@ -59,22 +87,25 @@ public class UiContext
     {
         String locator = playwrightLocator.getLocator();
         Locator locatorInContext = getInCurrentContext(context -> context.locator(locator),
-                page -> page.locator(locator));
+                page -> page.locator(locator), frame -> frame.locator(locator));
         return (playwrightLocator.getVisibility() == Visibility.VISIBLE)
                 ? locatorInContext.locator("visible=true") : locatorInContext;
     }
 
     public Locator getCurrentContexOrPageRoot()
     {
-        return getInCurrentContext(context -> context, page -> page.locator("//html/body"));
+        return getInCurrentContext(context -> context, page -> page.locator("//html/body"), FrameLocator::owner);
     }
 
-    private <R> R getInCurrentContext(Function<Locator, R> elementContextAction, Function<Page, R> pageContextAction)
+    private <R> R getInCurrentContext(Function<Locator, R> elementContextAction, Function<Page, R> pageContextAction,
+            Function<FrameLocator, R> frameContextAction)
     {
         PlaywrightContext playwrightContext = getPlaywrightContext();
         return Optional.ofNullable(playwrightContext.context)
                 .map(elementContextAction)
-                .orElseGet(() -> pageContextAction.apply(playwrightContext.page));
+                .orElseGet(() -> Optional.ofNullable(getCurrentFrame())
+                        .map(frameContextAction)
+                        .orElseGet(() -> pageContextAction.apply(playwrightContext.page)));
     }
 
     private PlaywrightContext getPlaywrightContext()
@@ -86,5 +117,6 @@ public class UiContext
     {
         private Page page;
         private Locator context;
+        private final LinkedList<FrameLocator> frames = new LinkedList<>();
     }
 }

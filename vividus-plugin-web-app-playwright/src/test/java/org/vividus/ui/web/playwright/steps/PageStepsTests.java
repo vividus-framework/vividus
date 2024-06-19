@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,19 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.util.function.Consumer;
 
 import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.Frame;
 import com.microsoft.playwright.Page;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -60,9 +64,8 @@ class PageStepsTests
 
         pageSteps.openMainApplicationPage();
 
-        var ordered = inOrder(uiContext, page);
-        ordered.verify(uiContext).reset();
-        ordered.verify(page).navigate(PAGE_URL);
+        verify(page).navigate(PAGE_URL);
+        verifyNoMoreInteractions(page);
     }
 
     @Test
@@ -73,9 +76,8 @@ class PageStepsTests
 
         pageSteps.openPage(PAGE_URL);
 
-        var ordered = inOrder(uiContext, page);
-        ordered.verify(uiContext).reset();
-        ordered.verify(page).navigate(PAGE_URL);
+        verify(page).navigate(PAGE_URL);
+        verifyNoMoreInteractions(page);
     }
 
     @Test
@@ -88,11 +90,7 @@ class PageStepsTests
         when(browserContext.newPage()).thenReturn(page);
 
         pageSteps.openPage(PAGE_URL);
-
-        var ordered = inOrder(uiContext, page);
-        ordered.verify(uiContext).reset();
-        ordered.verify(uiContext).setCurrentPage(page);
-        ordered.verify(page).navigate(PAGE_URL);
+        verifyInteractionsForOpenPageInNewTap(page);
     }
 
     @Test
@@ -103,9 +101,8 @@ class PageStepsTests
 
         pageSteps.refreshPage();
 
-        var ordered = inOrder(uiContext, page);
-        ordered.verify(uiContext).reset();
-        ordered.verify(page).reload();
+        verify(page).reload();
+        verifyNoMoreInteractions(page);
     }
 
     @Test
@@ -116,9 +113,8 @@ class PageStepsTests
 
         pageSteps.navigateBack();
 
-        var ordered = inOrder(uiContext, page);
-        ordered.verify(uiContext).reset();
-        ordered.verify(page).goBack();
+        verify(page).goBack();
+        verifyNoMoreInteractions(page);
     }
 
     @Test
@@ -130,9 +126,7 @@ class PageStepsTests
 
         pageSteps.openRelativeUrl("stats");
 
-        var ordered = inOrder(uiContext, page);
-        ordered.verify(uiContext).reset();
-        ordered.verify(uiContext.getCurrentPage()).navigate("https://example.com/path/stats");
+        verify(uiContext.getCurrentPage()).navigate("https://example.com/path/stats");
     }
 
     @Test
@@ -147,5 +141,24 @@ class PageStepsTests
 
         verify(softAssert).assertThat(eq("Page title"), eq(pageTitle),
                 argThat(argument -> argument.matches(pageTitle)));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void verifyInteractionsForOpenPageInNewTap(Page page)
+    {
+        ArgumentCaptor<Consumer<Frame>> frameConsumerCaptor = ArgumentCaptor.forClass(Consumer.class);
+        var ordered = inOrder(uiContext, page);
+        ordered.verify(uiContext).reset();
+        ordered.verify(uiContext).setCurrentPage(page);
+        ordered.verify(page).onFrameNavigated(frameConsumerCaptor.capture());
+        ordered.verify(page).navigate(PAGE_URL);
+        ordered.verifyNoMoreInteractions();
+        Consumer<Frame> frameConsumer = frameConsumerCaptor.getValue();
+        Frame frame = mock();
+        when(frame.parentFrame()).thenReturn(null).thenReturn(mock(Frame.class));
+        frameConsumer.accept(frame);
+        ordered.verify(uiContext).reset();
+        frameConsumer.accept(frame);
+        ordered.verifyNoMoreInteractions();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,14 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
+import com.microsoft.playwright.FrameLocator;
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
 import com.microsoft.playwright.assertions.LocatorAssertions;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 
@@ -51,6 +54,8 @@ import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SetContextStepsTests
 {
+    private static final PlaywrightLocator LOCATOR = new PlaywrightLocator("xpath", "div");
+
     @Mock private UiContext uiContext;
     @Mock private PlaywrightSoftAssert playwrightSoftAssert;
     @InjectMocks private SetContextSteps steps;
@@ -61,13 +66,13 @@ class SetContextStepsTests
     void shouldResetContext()
     {
         steps.resetContext();
-        verify(uiContext).reset();
+        verify(uiContext).resetContext();
     }
 
     @Test
     void shouldChangeContext()
     {
-        testSuccessfulContextChange(steps::changeContext, ordered -> ordered.verify(uiContext).reset());
+        testSuccessfulContextChange(steps::changeContext, ordered -> ordered.verify(uiContext).resetContext());
     }
 
     @Test
@@ -78,9 +83,8 @@ class SetContextStepsTests
 
     private void testSuccessfulContextChange(Consumer<PlaywrightLocator> test, Consumer<InOrder> orderedVerification)
     {
-        var locator = new PlaywrightLocator("xpath", "//a");
         Locator context = mock();
-        when(uiContext.locateElement(locator)).thenReturn(context);
+        when(uiContext.locateElement(LOCATOR)).thenReturn(context);
         try (var playwrightAssertionsStaticMock = mockStatic(PlaywrightAssertions.class))
         {
             LocatorAssertions locatorAssertions = mock();
@@ -91,7 +95,7 @@ class SetContextStepsTests
                         runnable.run();
                         return true;
                     }));
-            test.accept(locator);
+            test.accept(LOCATOR);
             var ordered = inOrder(uiContext, locatorAssertions);
             orderedVerification.accept(ordered);
             ordered.verify(locatorAssertions).hasCount(1);
@@ -99,5 +103,55 @@ class SetContextStepsTests
             ordered.verifyNoMoreInteractions();
             assertThat(logger.getLoggingEvents(), is(List.of(info("The context is successfully changed"))));
         }
+    }
+
+    @Test
+    void shouldSwitchToFrameFromPage()
+    {
+        Page page = mock();
+        when(uiContext.getCurrentPage()).thenReturn(page);
+        when(uiContext.getCurrentFrame()).thenReturn(null);
+        testSwitchToFrame(page::frameLocator);
+    }
+
+    @Test
+    void shouldSwitchToFrameFromFrame()
+    {
+        FrameLocator currentFrame = mock();
+        when(uiContext.getCurrentFrame()).thenReturn(currentFrame);
+        testSwitchToFrame(currentFrame::frameLocator);
+    }
+
+    private void testSwitchToFrame(Function<String, FrameLocator> frameLocatorProvider)
+    {
+        FrameLocator frameLocator = mock();
+        Locator rootLocator = mock();
+        when(frameLocatorProvider.apply(LOCATOR.getLocator())).thenReturn(frameLocator);
+        when(frameLocator.locator(":root")).thenReturn(rootLocator);
+        try (var playwrightAssertionsStaticMock = mockStatic(PlaywrightAssertions.class))
+        {
+            LocatorAssertions locatorAssertions = mock();
+            playwrightAssertionsStaticMock.when(() -> PlaywrightAssertions.assertThat(rootLocator)).thenReturn(
+                    locatorAssertions);
+            doNothing().when(playwrightSoftAssert).runAssertion(eq("The frame to switch is not found"),
+                    argThat(runnable -> {
+                        runnable.run();
+                        return true;
+                    }));
+            steps.switchToFrame(LOCATOR);
+            var ordered = inOrder(uiContext, locatorAssertions);
+            ordered.verify(uiContext).resetContext();
+            ordered.verify(locatorAssertions).hasCount(1);
+            ordered.verify(uiContext).setCurrentFrame(frameLocator);
+            ordered.verifyNoMoreInteractions();
+            assertThat(logger.getLoggingEvents(), is(List.of(info("Successfully switched to frame"))));
+        }
+    }
+
+    @Test
+    void shouldSwitchBackToPage()
+    {
+        steps.switchingToDefault();
+        verify(uiContext).reset();
     }
 }
