@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.function.FailableFunction;
+import org.apache.commons.lang3.function.FailableSupplier;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,22 +69,22 @@ public class MobitruFacadeImpl implements MobitruFacade
     @Override
     public String takeDevice(DesiredCapabilities desiredCapabilities) throws MobitruOperationException
     {
-        Map<String, Object> capabilities = desiredCapabilities.asMap();
-
         if (isSearchForDevice(desiredCapabilities))
         {
             DeviceSearchParameters deviceSearchParameters = new DeviceSearchParameters(desiredCapabilities);
             List<Device> foundDevices = findDevices(deviceSearchParameters);
             return takeDevice(foundDevices);
         }
-        if (capabilities.containsKey(APPIUM_UDID) || capabilities.containsKey(UDID))
+
+        Map<String, Object> capabilities = desiredCapabilities.asMap();
+        Object deviceUdid = capabilities.getOrDefault(APPIUM_UDID, capabilities.get(UDID));
+        if (deviceUdid != null)
         {
             //use different API in case if udid is provided in capabilities
             //it's required in some cases like if the device is already taken
-            Object deviceIdObj = capabilities.getOrDefault(APPIUM_UDID, capabilities.get(UDID));
-            LOGGER.info("Trying to take device with udid {}", deviceIdObj);
-            return takeDevice(mobitruClient::takeDeviceBySerial, String.valueOf(deviceIdObj),
-                    getDefaultDeviceWaiter());
+            LOGGER.info("Trying to take device with udid {}", deviceUdid);
+            return takeDevice(() -> mobitruClient.takeDeviceBySerial(String.valueOf(deviceUdid)),
+                    () -> "Unable to take device with udid " + deviceUdid, getDefaultDeviceWaiter());
         }
         Device device = new Device();
         device.setDesiredCapabilities(desiredCapabilities.asMap());
@@ -111,17 +113,17 @@ public class MobitruFacadeImpl implements MobitruFacade
     {
         LOGGER.info("Trying to take device with configuration {}", device);
         String capabilities = performMapperOperation(mapper -> mapper.writeValueAsString(device));
-        return takeDevice(mobitruClient::takeDevice, capabilities, deviceWaiter);
+        return takeDevice(() -> mobitruClient.takeDevice(capabilities),
+                () -> "Unable to take device with configuration " + capabilities, deviceWaiter);
     }
 
-    private String takeDevice(FailableFunction<String, byte[], MobitruOperationException> takeDeviceActions,
-                              String configurationOrUdid,
-                              Waiter deviceWaiter) throws MobitruOperationException
+    private String takeDevice(FailableSupplier<byte[], MobitruOperationException> takeDeviceActions,
+            Supplier<String> unableToTakeDeviceErrorMessage, Waiter deviceWaiter) throws MobitruOperationException
     {
         byte[] receivedDevice = deviceWaiter.wait(() -> {
             try
             {
-                return takeDeviceActions.apply(configurationOrUdid);
+                return takeDeviceActions.get();
             }
             catch (MobitruDeviceTakeException e)
             {
@@ -131,8 +133,7 @@ public class MobitruFacadeImpl implements MobitruFacade
         }, Objects::nonNull);
         if (null == receivedDevice)
         {
-            throw new MobitruDeviceTakeException(
-                    String.format("Unable to take device with configuration or udid %s", configurationOrUdid));
+            throw new MobitruDeviceTakeException(unableToTakeDeviceErrorMessage.get());
         }
         Device takenDevice = performMapperOperation(mapper -> mapper.readValue(receivedDevice, Device.class));
         LOGGER.info("Device with configuration {} is taken", takenDevice);
