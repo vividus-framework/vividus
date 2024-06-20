@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,12 @@ public class ExcelDocumentValidationSteps
 {
     private final ISoftAssert softAssert;
 
-    public ExcelDocumentValidationSteps(ISoftAssert softAssert)
+    private final boolean preserveCellFormatting;
+
+    public ExcelDocumentValidationSteps(ISoftAssert softAssert, boolean preserveCellFormatting)
     {
         this.softAssert = softAssert;
+        this.preserveCellFormatting = preserveCellFormatting;
     }
 
     /**
@@ -106,7 +109,7 @@ public class ExcelDocumentValidationSteps
     {
         sheetMapper.apply(getExtractor(excelDoc)).ifPresentOrElse(s ->
         {
-            IExcelSheetParser parser = new ExcelSheetParser(s);
+            IExcelSheetParser parser = new ExcelSheetParser(s, preserveCellFormatting);
             records.stream()
                 .flatMap(r -> parser.getDataFromRange(r.getCellsRange())
                         .stream()

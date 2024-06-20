@@ -5,6 +5,25 @@ The plugin provides the ability to work with Excel documents.
 :plugin-short-name: excel
 include::partial$plugin-installation.adoc[]
 
+== Properties
+
+[cols="6,2,3,5", options="header"]
+
+|===
+
+|Property Name
+|Acceptable values
+|Default
+|Description
+
+|`excel.preserve-cell-formatting`
+a|`true`
+`false`
+|`false`
+|If `true` original cells format will be preserved. For example cell's date value `3/31/1994` will be represented in human-readable format `3/31/94`, not `34424.0` (number of days after 01/01/1900), number value `1` will be represented as `1`, not `1.0`.
+
+|===
+
 == xref:ROOT:glossary.adoc#_table_transformer[Table Transformers]
 
 === FROM_EXCEL

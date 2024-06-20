@@ -24,6 +24,13 @@ Then `${excel}` contains excel sheet with name `Mapping` and records:
 !B3        !Price                  !
 !C1:C5     !                       !
 
+Scenario: Verification cell formatting preserving
+Given I initialize scenario variable `excel` with value `${response-as-bytes}`
+Then `${excel}` contains excel sheet with name `AsString` and records:
+|cellsRange |valueRegex |
+|A1         |TRUE       |
+|B3         |3          |
+
 Scenario: Verification of step 'When I create temporary excel file with content:$content and put path to $scopes variable `$variableName`' and transformer FROM_EXCEL
 Meta:
     @requirementId 1028, 2953
