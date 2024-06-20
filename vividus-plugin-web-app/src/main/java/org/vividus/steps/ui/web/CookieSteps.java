@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -183,6 +183,32 @@ public class CookieSteps
     @When("I set all cookies for current domain:$parameters")
     public void setAllCookies(ExamplesTable parameters)
     {
+        setAllCookiesWithoutApply(parameters);
+        navigateActions.refresh();
+    }
+
+    /**
+     * Adds the cookies provided in the input ExamplesTable, but does not apply the changes in cookies. The current
+     * page must be refreshed or the navigation must be performed to apply the cookie changes. It's allowed to add
+     * the cookies for the current domain only: make sure the web browser is opened at the expected domain.
+     * <p>The cookie parameters to be defined in the ExamplesTable</p>
+     * <ul>
+     * <li><b>cookieName</b> - the name of the cookie to set</li>
+     * <li><b>cookieValue</b> - the value of the cookie to set</li>
+     * <li><b>path</b> - the path of the cookie to set</li>
+     * </ul>
+     * <p>Usage example:</p>
+     * <code>
+     * <br>When I set all cookies for current domain:
+     * <br>|cookieName   |cookieValue |path |
+     * <br>|cookieAgreed |2           |/    |
+     * </code>
+     *
+     * @param parameters The parameters of the cookies to set as ExamplesTable
+     */
+    @When("I set all cookies for current domain without applying changes:$parameters")
+    public void setAllCookiesWithoutApply(ExamplesTable parameters)
+    {
         String currentUrl = webDriverProvider.get().getCurrentUrl();
         Validate.isTrue(null != currentUrl,
                 "Unable to get current URL. Please make sure you've navigated to the right URL");
@@ -190,7 +216,6 @@ public class CookieSteps
         {
             cookieManager.addCookie(row.get("cookieName"), row.get("cookieValue"), row.get("path"), currentUrl);
         });
-        navigateActions.refresh();
     }
 
     /**
