@@ -179,7 +179,7 @@ public class KafkaSteps
     public void sendEventWithKey(String key, String value, String producerKey, String topic)
             throws InterruptedException, ExecutionException, TimeoutException
     {
-        ProducerRecord record = new ProducerRecord(topic, 0, 0L, key, value,
+        ProducerRecord<String, String> record = new ProducerRecord<>(topic, null, key, value,
                 testContext.remove(HEADERS_KEY));
         kafkaTemplates.get(producerKey).send(record).get(WAIT_TIMEOUT_IN_MINUTES, TimeUnit.MINUTES);
     }
