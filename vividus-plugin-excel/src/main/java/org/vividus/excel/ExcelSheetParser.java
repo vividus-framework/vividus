@@ -48,31 +48,24 @@ public class ExcelSheetParser implements IExcelSheetParser
 
     private final int columnsToParseCount;
 
-    private boolean trimCellValues;
+    private final boolean preserveCellFormatting;
 
     private DataFormatter dataFormatter;
 
     private FormulaEvaluator formulaEvaluator;
 
-    public ExcelSheetParser(Sheet sheet)
+    public ExcelSheetParser(Sheet sheet, boolean preserveCellFormatting)
     {
         this.sheet = sheet;
+        this.preserveCellFormatting = preserveCellFormatting;
         SheetDataLimits sheetDataLimits = getSheetDataLimits(sheet.getLastRowNum());
         rowsToParseCount = sheetDataLimits.getLastRowIndex() + 1;
         columnsToParseCount = sheetDataLimits.getLastColumnIndex() + 1;
-    }
-
-    public ExcelSheetParser(Sheet sheet, boolean trimCellValues)
-    {
-        this(sheet);
-        this.trimCellValues = trimCellValues;
-    }
-
-    public ExcelSheetParser(Sheet sheet, boolean trimCellValues, DataFormatter dataFormatter)
-    {
-        this(sheet, trimCellValues);
-        this.dataFormatter = dataFormatter;
-        formulaEvaluator = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+        if (preserveCellFormatting)
+        {
+            dataFormatter = new DataFormatter();
+            formulaEvaluator = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+        }
     }
 
     private SheetDataLimits getSheetDataLimits(int lastRowCandidate)
@@ -109,7 +102,7 @@ public class ExcelSheetParser implements IExcelSheetParser
     public List<String> getRow(int rowNumber)
     {
         return StreamSupport.stream(sheet.getRow(rowNumber).spliterator(), false)
-                .map(this::getCellValueAndTrimIfNeeded).toList();
+                .map(this::getCellValue).toList();
     }
 
     @Override
@@ -134,7 +127,7 @@ public class ExcelSheetParser implements IExcelSheetParser
                 .map(row -> IntStream.range(0, getCellsCount(row.getLastCellNum()))
                         .mapToObj(row::getCell)
                         .filter(Objects::nonNull)
-                        .map(this::getCellValueAndTrimIfNeeded)
+                        .map(this::getCellValue)
                         .collect(toLinkedList()))
                 .collect(toLinkedList());
     }
@@ -172,11 +165,11 @@ public class ExcelSheetParser implements IExcelSheetParser
                     Cell titleCell = titleRow.getCell(j);
                     if (null != titleCell)
                     {
-                        String key = getCellValueAndTrimIfNeeded(titleCell);
+                        String key = getCellValue(titleCell);
                         Cell dataCell = dataRow.getCell(j);
                         if (null != dataCell && !key.isEmpty())
                         {
-                            entryData.put(key, getCellValueAndTrimIfNeeded(dataCell));
+                            entryData.put(key, getCellValue(dataCell));
                         }
                     }
                 }
@@ -186,18 +179,10 @@ public class ExcelSheetParser implements IExcelSheetParser
         return resultData;
     }
 
-    private String getCellValueAndTrimIfNeeded(Cell cell)
+    private String getCellValue(Cell cell)
     {
-        String cellValue;
-        if (dataFormatter != null)
-        {
-            cellValue = dataFormatter.formatCellValue(cell, formulaEvaluator);
-        }
-        else
-        {
-            cellValue = CellUtils.getCellValueAsString(cell);
-        }
-        return trimCellValues ? cellValue.trim() : cellValue;
+        return preserveCellFormatting ? dataFormatter.formatCellValue(cell, formulaEvaluator)
+                                      : CellUtils.getCellValueAsString(cell);
     }
 
     @Override
@@ -224,7 +209,7 @@ public class ExcelSheetParser implements IExcelSheetParser
         {
             throw new IllegalArgumentException(String.format("Row at address '%s' doesn't exist", address));
         }
-        return Optional.ofNullable(row.getCell(cellReference.getCol())).map(CellUtils::getCellValueAsString)
+        return Optional.ofNullable(row.getCell(cellReference.getCol())).map(this::getCellValue)
                 .orElse(null);
     }
 
@@ -264,7 +249,7 @@ public class ExcelSheetParser implements IExcelSheetParser
             for (int rowIndex = address.getFirstRow() + 1; rowIndex <= address.getLastRow(); rowIndex++)
             {
                 Row row = sheet.getRow(rowIndex);
-                columnsData.add(CellUtils.getCellValueAsString(row.getCell(colIndex)));
+                columnsData.add(getCellValue(row.getCell(colIndex)));
             }
             data.put(columnName, columnsData);
         }
@@ -280,7 +265,7 @@ public class ExcelSheetParser implements IExcelSheetParser
             for (int rowIndex = address.getFirstRow(); rowIndex <= address.getLastRow(); rowIndex++)
             {
                 Row row = sheet.getRow(rowIndex);
-                colValues.add(CellUtils.getCellValueAsString(row.getCell(colIndex)));
+                colValues.add(getCellValue(row.getCell(colIndex)));
             }
         }
     }

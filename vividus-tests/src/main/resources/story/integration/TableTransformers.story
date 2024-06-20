@@ -158,7 +158,7 @@ Meta:
     @issueId 2908
 When I initialize scenario variable `expectedTable` with values:
 |StringValue|NumericValue|BooleanValue|FormulaValue|FormulaErrorValue|
-|City       |17.0        |false       |289.0       |                 |
+|City       |17          |FALSE       |289         |#VALUE!          |
 Then `${expectedTable}` is equal to table:
 {transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=DifferentTypes, range=A1:E2}
 
@@ -167,9 +167,9 @@ Meta:
     @issueId 5084
 When I initialize scenario variable `expectedTable` with values:
 |StringValue |NumericValue |BooleanValue |FormulaValue |
-|Timezone    |21.0         |false        |441.0        |
-|City        |17.0         |false        |289.0        |
-|Country     |19.0         |true         |361.0        |
+|Timezone    |21           |FALSE        |441          |
+|City        |17           |FALSE        |289          |
+|Country     |19           |TRUE         |361          |
 Then `${expectedTable}` is equal to table:
 {transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=DifferentTypes, range=A1:D1;A4:D4;A2:D3;}
 
@@ -178,8 +178,8 @@ Meta:
     @issueId 5084
 When I initialize scenario variable `expectedTable` with values:
 |NumericValue |BooleanValue |FormulaValue |
-|17.0         |false        |289.0        |
-|19.0         |true         |361.0        |
+|17           |FALSE        |289          |
+|19           |TRUE         |361          |
 Then `${expectedTable}` is equal to table:
 {transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=DifferentTypes, range=B1:D2;B3:D3}
 
