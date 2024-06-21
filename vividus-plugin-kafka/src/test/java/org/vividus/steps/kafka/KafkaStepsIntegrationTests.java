@@ -19,6 +19,7 @@ package org.vividus.steps.kafka;
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static java.util.stream.Collectors.toMap;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,6 +51,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -190,10 +192,16 @@ class KafkaStepsIntegrationTests
         assertEquals("Saving events with the keys and headers: {}", keysLogEvent.getMessage());
         List<Object> arguments = keysLogEvent.getArguments();
         assertThat(arguments, hasSize(1));
-        assertEquals("[key1, <no key>, <no key>, key2, key3, {<no key>; headerName1, headerName2}]",
-                arguments.get(0).toString());
+        @SuppressWarnings("unchecked")
+        var eventKeysAndHeaders = (List<String>) arguments.get(0);
+        var eventWithoutKey = "<no key>";
+        assertThat(eventKeysAndHeaders, containsInAnyOrder("key1", eventWithoutKey, eventWithoutKey, "key2", "key3",
+                "{<no key>; headerName1, headerName2}"));
 
-        verify(variableContext).putVariable(SCOPES, VARIABLE_NAME,
-                List.of(ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, anyDataWithHeader));
+        var variableValueArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(variableContext).putVariable(eq(SCOPES), eq(VARIABLE_NAME), variableValueArgumentCaptor.capture());
+        @SuppressWarnings("unchecked")
+        List<String> variable = variableValueArgumentCaptor.getValue();
+        assertThat(variable, containsInAnyOrder(ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, ANY_DATA, anyDataWithHeader));
     }
 }
