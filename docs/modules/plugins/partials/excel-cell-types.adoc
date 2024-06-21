@@ -1,0 +1,77 @@
+== Excel cell types
+
+[cols="1,3,3", options="header"]
+|===
+
+|Type
+|Usage example
+|Description
+
+|STRING
+|`String value`
+
+`#{withCellType(String, String value)}`
+|Default cells type. Used if the cell type is not specified explicitly
+
+|FORMULA
+|`\#{withCellType(Formula, DOLLAR(A2))}`
+
+`#{withCellType(Formula, A2+A3)}`
+|https://support.microsoft.com/en-us/office/data-types-in-data-models-e2388f62-6122-4e2b-bcad-053e3da9ba90[Excel formulas]
+
+|DATE
+|`\#{withCellType(Date, 03/31/2024)}` - date with default date input format `MM/dd/yyyy` and default cell format `m/d/yy`. Output `3/31/24`
+
+`#{withCellType(Date, 31-Mar-2024 input dd-MMM-yyyy)}` - date with custom date input format `dd-MMM-yyyy` and default cell format `m/d/yy`. Output `3/31/24`
+
+`\#{withCellType(Date, 03/31/2024 format m.d.yyyy h:mm)}` - date with default date input format `MM/dd/yyyy` and custom cell format `m.d.yyyy h:mm`. Output `3.31.2024 0:00`
+
+`#{withCellType(Date, 2024/03/31 13:04 input yyyy/MM/dd HH:mm format m.d.yy h:mm)}` - date with custom date input and cell formats. Output `3.31.24 13:04`
+
+|Excel date.
+
+Optional parameters:
+
+`input` - the input date format based on the https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns[date/time format]. Default value is `MM/dd/yyyy`
+
+`format` - the output https://support.microsoft.com/en-us/office/format-numbers-as-dates-or-times-418bd3fe-0577-47c8-8caa-b4d30c528309[cell date format] in Excel. Default value is `m/d/yy`
+
+|BOOLEAN
+|`#{withCellType(Boolean, false)}`
+|Boolean cell type
+
+|NUMERIC
+|`\#{withCellType(Numeric, 128)}` - output `128.0`
+
+`#{withCellType(Numeric, 32768 format \#,##0.00)}` - the number with `,` thousands separator and two decimal places. Output `32,768.00`
+|Number cell type
+
+Optional parameters:
+
+`format` - the current https://support.microsoft.com/en-us/office/number-format-codes-5026bbd6-04bc-48cd-bf33-80f18b4eae68[cell number format]. Default value is `#.0`
+
+|===
+
+=== Cells type for column
+
+Cells type can be specified for all values in column using the next column name format: `#{withColumnCellsType(<values-type>, <column-name>)`. The types specified in individual cells will have priority.
+
+.Create Excel file with typed column
+----
+When I create temporary excel file with content:
+|#{withColumnCellsType(date, multi-type column)}            |
+|31-Mar-2024 input dd-MMM-yyyy                              |
+|#{withCellType(Numeric, 100500 format #,##0.00)}           |
+|#{withCellType(Boolean, true)}                             |
+|2024/03/31 13:04 input yyyy/MM/dd HH:mm format m.d.yy h:mm |
+and put path to scenario variable `path`
+----
+
+Data from output Excel file:
+----
+|multi-type column |
+|3/31/24           |
+|100,500.00        |
+|TRUE              |
+|3.31.24 13:04     |
+----

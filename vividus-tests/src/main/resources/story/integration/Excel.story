@@ -47,6 +47,27 @@ When I initialize scenario variable `excel-data` with values:
 Then `${excel-data}` is equal to table:
 {transformer=FROM_EXCEL, path=$\{path\}, sheet=Sheet0, range=A1:B2}
 
+Scenario: Validate step 'When I create temporary excel file with content:$content and put path to $scopes variable `$variableName`' with different cells type and formatting
+Meta:
+    @requirementId 4553
+When I create temporary excel file with content:
+|numeric                                       |formula                              |date                                                                              |boolean                         |#{withColumnCellsType(date, multi-type col)} |
+|#{withCellType(Numeric, 100500 format #.000)} |#{withCellType(formula, left(A2,3))} |#{withCellType(DATE,  03/31/2024)}                                                |#{withCellType(BOOLEAN, true)}  |31-Mar-2024 input dd-MMM-yyyy                |
+|#{withCellType(Numeric, 99500)}               |#{withCellType(formula,A2+A3)}       |#{withCellType(DATE, 31-Mar-2024 input dd-MMM-yyyy)}                              |#{withCellType(BOOLEAN, false)} |#{withCellType(Numeric, 100500)}             |
+|                                              |                                     |#{withCellType(DATE, 03/31/2024 format m.d.yyyy h:mm)}                            |                                |#{withCellType(String, 105)}                 |
+|                                              |                                     |#{withCellType(DATE, 2024/03/31 13:04 input yyyy/MM/dd HH:mm format m.d.yy h:mm)} |                                |#{withCellType(String, Empty)}               |
+|                                              |                                     |#{withCellType(DATE, 2024,03,31 format m.d.yy h:mm input yyyy,MM,dd)}             |                                |#{withCellType(String, not allowed)}         |
+and put path to scenario variable `path`
+When I initialize scenario variable `excel-data` with values:
+|numeric    |formula |date            |boolean |multi-type col |
+|100500.000 |100     |3/31/24         |TRUE    |3/31/24        |
+|99500.0    |200000  |3/31/24         |FALSE   |100500.0       |
+|           |        |3.31.2024 0:00  |        |105            |
+|           |        |3.31.24 13:04   |        |Empty          |
+|           |        |3.31.24 0:00    |        |not allowed    |
+Then `${excel-data}` is equal to table:
+{transformer=FROM_EXCEL, path=$\{path\}, sheet=Sheet0, range=A1:E6}
+
 Scenario: Validate steps 'When I create temporary excel file containing sheet with name `$sheetName` and content:$content and put its path to $scopes variable `$variableName`' and 'When I add sheet with name `$sheetName` and content $content to excel file at path `$path`'
 Meta:
     @requirementId 2953
