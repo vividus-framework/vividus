@@ -324,9 +324,16 @@ class WebDriverFactoryTests
                     caps.getBrowserName());
         }))).thenReturn(remoteWebDriver);
         assertRemoteWebDriverCreation(desiredCapabilities);
-        var sessionCaps = "{%n  \"acceptInsecureCerts\" : true,%n" + "  \"browserName\" : \"firefox\",%n"
-                + "  \"moz:debuggerAddress\" : true,%n" + "  \"moz:firefoxOptions\" : {%n" + "    \"prefs\" : {%n"
-                + "      \"startup.homepage_welcome_url.additional\" : \"about:blank\"%n" + "    }%n  }%n}";
+        var sessionCaps = "{%n"
+                + "  \"acceptInsecureCerts\" : true,%n"
+                + "  \"browserName\" : \"firefox\",%n"
+                + "  \"moz:debuggerAddress\" : true,%n"
+                + "  \"moz:firefoxOptions\" : {%n"
+                + "    \"prefs\" : {%n"
+                + "      \"remote.active-protocols\" : 3,%n"
+                + "      \"startup.homepage_welcome_url.additional\" : \"about:blank\"%n"
+                + "    }%n"
+                + "  }%n}";
         assertThat(logger.getLoggingEvents(),
                 is(List.of(info("Requested capabilities:\n{}", String.format(sessionCaps)),
                         info(SESSION_CAPABILITIES, CAPS_AS_STRING))));
