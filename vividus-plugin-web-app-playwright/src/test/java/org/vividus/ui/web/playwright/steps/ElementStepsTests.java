@@ -16,6 +16,8 @@
 
 package org.vividus.ui.web.playwright.steps;
 
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -37,7 +39,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.playwright.UiContext;
+import org.vividus.ui.web.playwright.action.ElementActions;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 import org.vividus.variable.VariableScope;
 
@@ -49,11 +53,14 @@ class ElementStepsTests
     private static final String LOCATOR_VALUE = "div";
     private static final String ATTRIBUTE_NAME = "attributeName";
     private static final String ATTRIBUTE_VALUE = "attributeValue";
+    private static final String CSS_NAME = "cssName";
+    private static final String CSS_VALUE = "cssValue";
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.STORY);
 
     @Mock private UiContext uiContext;
     @Mock private ISoftAssert softAssert;
     @Mock private VariableContext variableContext;
+    @Mock private ElementActions elementActions;
     @InjectMocks private ElementSteps steps;
 
     @ParameterizedTest
@@ -171,6 +178,17 @@ class ElementStepsTests
         when(locator.getAttribute(ATTRIBUTE_NAME)).thenReturn(null);
         steps.saveAttributeValueOfElement(ATTRIBUTE_NAME, playwrightLocator, VARIABLE_SCOPE, VARIABLE_NAME);
         verifyIfAttributeIsNotPresent();
+    }
+
+    @Test
+    void shouldAssertElementCssProperty()
+    {
+        Locator locator = mock();
+        when(uiContext.getCurrentContexOrPageRoot()).thenReturn(locator);
+        when(elementActions.getCssValue(locator, CSS_NAME)).thenReturn(CSS_VALUE);
+        steps.assertElementCssProperty(CSS_NAME, StringComparisonRule.IS_EQUAL_TO, CSS_VALUE);
+        verify(softAssert).assertThat(eq("Element css property value is"), eq(CSS_VALUE),
+                argThat(matcher -> matcher.matches(CSS_VALUE)));
     }
 
     private void verifyIfAttributeIsNotPresent()

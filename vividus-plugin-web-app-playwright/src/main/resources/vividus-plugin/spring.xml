@@ -32,6 +32,8 @@
 
     <bean class="org.vividus.ui.web.playwright.action.PlaywrightJavascriptActions" />
 
+    <bean class="org.vividus.ui.web.playwright.action.ElementActions" />
+
     <bean class="org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert" />
 
     <bean id="elementSteps" class="org.vividus.ui.web.playwright.steps.ElementSteps" />
