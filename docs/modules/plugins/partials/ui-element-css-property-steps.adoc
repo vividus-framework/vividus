@@ -1,0 +1,21 @@
+=== Check an element CSS property
+
+Checks the context element has the expected CSS property.
+
+The context can be set by the <<_change_context,corresponding steps>>.
+
+[source,gherkin]
+----
+Then context element has CSS property `$cssName` with value that $comparisonRule `$cssValue`
+----
+
+* `$cssName` - A name of the CSS property.
+* `$comparisonRule` - CSS property xref:parameters:string-comparison-rule.adoc[comparison rule].
+* `$cssValue` - The expected value of the CSS property.
+
+.Change context to element and verify it color CSS property value
+[source,gherkin]
+----
+When I change context to element located by `id(rainbow)`
+Then context element has CSS property `color` with value that is equal to `rgba(0, 0, 0, 1)`
+----

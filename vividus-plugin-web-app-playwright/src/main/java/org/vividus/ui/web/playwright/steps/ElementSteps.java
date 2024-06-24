@@ -23,12 +23,15 @@ import java.util.Set;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.options.BoundingBox;
 
+import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.playwright.UiContext;
+import org.vividus.ui.web.playwright.action.ElementActions;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 import org.vividus.variable.VariableScope;
 
@@ -37,12 +40,15 @@ public class ElementSteps
     private final UiContext uiContext;
     private final ISoftAssert softAssert;
     private final VariableContext variableContext;
+    private final ElementActions elementActions;
 
-    public ElementSteps(UiContext uiContext, ISoftAssert softAssert, VariableContext variableContext)
+    public ElementSteps(UiContext uiContext, ISoftAssert softAssert, VariableContext variableContext,
+            ElementActions elementActions)
     {
         this.uiContext = uiContext;
         this.softAssert = softAssert;
         this.variableContext = variableContext;
+        this.elementActions = elementActions;
     }
 
     /**
@@ -217,6 +223,21 @@ public class ElementSteps
             String variableName)
     {
         saveAttributeValueOfElement(uiContext.locateElement(locator), attributeName, scopes, variableName);
+    }
+
+    /**
+     * Checks that the context <b>element</b> has an expected <b>CSS property</b>
+     * @param cssName A name of the <b>CSS property</b>
+     * @param comparisonRule is equal to, contains, does not contain
+     * @param cssValue An expected value of the <b>CSS property</b>
+     */
+    @Then("context element has CSS property `$cssName` with value that $comparisonRule `$cssValue`")
+    public void assertElementCssProperty(String cssName, StringComparisonRule comparisonRule, String cssValue)
+    {
+        String actualCssValue = elementActions.getCssValue(uiContext.getCurrentContexOrPageRoot(),
+                cssName);
+        Matcher<String> matcher = comparisonRule.createMatcher(cssValue);
+        softAssert.assertThat("Element css property value is", actualCssValue, matcher);
     }
 
     private void saveAttributeValueOfElement(Locator element, String attributeName, Set<VariableScope> scopes,

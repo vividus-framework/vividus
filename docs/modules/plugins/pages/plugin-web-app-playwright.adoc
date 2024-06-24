@@ -344,3 +344,5 @@ Then text `Modal Frame Example` does not exist
 When I switch to frame located by `id(parent)`
 Then text `Modal Frame Example` exists
 ----
+
+include::plugins:partial$ui-element-css-property-steps.adoc[]
