@@ -346,3 +346,7 @@ Then text `Modal Frame Example` exists
 ----
 
 include::plugins:partial$ui-element-css-property-steps.adoc[]
+
+include::plugins:partial$ui-elements-conditional-iteration-steps.adoc[]
+
+include::plugins:partial$ui-execution-on-each-element-steps.adoc[]

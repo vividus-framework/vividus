@@ -58,6 +58,11 @@ public class UiContext
         return getPlaywrightContext().frames.isEmpty() ? null : getPlaywrightContext().frames.getLast();
     }
 
+    public Locator getContext()
+    {
+        return getPlaywrightContext().context;
+    }
+
     public void setContext(Locator context)
     {
         getPlaywrightContext().context = context;
