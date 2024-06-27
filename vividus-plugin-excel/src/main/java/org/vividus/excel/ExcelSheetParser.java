@@ -249,7 +249,10 @@ public class ExcelSheetParser implements IExcelSheetParser
             for (int rowIndex = address.getFirstRow() + 1; rowIndex <= address.getLastRow(); rowIndex++)
             {
                 Row row = sheet.getRow(rowIndex);
-                columnsData.add(getCellValue(row.getCell(colIndex)));
+                String cellValue = Optional.ofNullable(row.getCell(colIndex))
+                                           .map(this::getCellValue)
+                                           .orElse(null);
+                columnsData.add(cellValue);
             }
             data.put(columnName, columnsData);
         }
