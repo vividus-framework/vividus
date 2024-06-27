@@ -61,6 +61,15 @@ class ExcelTableTransformerTests
     }
 
     @Test
+    void shouldNotReplaceLinebreaksForNullCells()
+    {
+        properties.getProperties().setProperty(SHEET, "DifferentTypes");
+        properties.getProperties().setProperty(RANGE, "E1:E3");
+        var actualResult = transformer.transform("", null, properties);
+        assertEquals("|Null|\n|null|\n|null|", actualResult);
+    }
+
+    @Test
     void testCheckConcurrentConditionsWithTwoPropertiesThrowException()
     {
         properties.getProperties().setProperty(COLUMN, DATA);

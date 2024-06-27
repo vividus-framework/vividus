@@ -131,7 +131,7 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
     private List<String> replaceLineBreaks(List<String> list, String lineBreakReplacement)
     {
         return list.stream()
-                     .map(e -> e.replace("\n", lineBreakReplacement))
+                     .map(e -> e == null ? e : e.replace("\n", lineBreakReplacement))
                      .toList();
     }
 }

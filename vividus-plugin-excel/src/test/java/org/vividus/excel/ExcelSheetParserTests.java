@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -248,9 +249,13 @@ class ExcelSheetParserTests
         expectedData.put("Number", List.of(ONE_AS_STRING, TWO_AS_STRING));
         expectedData.put("String", List.of("STRING", "string"));
         expectedData.put("Formula", List.of(THREE_AS_STRING, ""));
+        List<String> nulls = new ArrayList<>();
+        nulls.add(null);
+        nulls.add(null);
+        expectedData.put("Null", nulls);
 
         sheetParser = new ExcelSheetParser(extractor.getSheet("DifferentTypes").get(), false);
-        var data = sheetParser.getDataAsTable("A1:D3");
+        var data = sheetParser.getDataAsTable("A1:E3");
         assertEquals(expectedData, data);
     }
 

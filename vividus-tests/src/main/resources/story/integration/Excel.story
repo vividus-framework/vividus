@@ -109,8 +109,9 @@ Meta:
 When I initialize scenario variable `expectedTable` with values:
 |StringValue|NumericValue|BooleanValue|FormulaValue|FormulaErrorValue|
 |City       |17          |FALSE       |289         |#VALUE!          |
+|Country    |19          |TRUE        |361         |null             |
 Then `${expectedTable}` is equal to table:
-{transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=DifferentTypes, range=A1:E2}
+{transformer=FROM_EXCEL, path=/data/excel.xlsx, sheet=DifferentTypes, range=A1:E3}
 
 Scenario: Check FROM_EXCEL transformer with multiple ranges (separate ranges for header and data)
 Meta:
