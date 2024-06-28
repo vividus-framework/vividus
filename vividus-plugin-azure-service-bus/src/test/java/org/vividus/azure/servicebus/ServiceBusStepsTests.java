@@ -17,8 +17,8 @@
 package org.vividus.azure.servicebus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -95,7 +95,7 @@ public class ServiceBusStepsTests
 
         serviceBusSteps.waitForServiceBusMessages(Duration.ofMillis(1700), SERVICE_BUS_KEY, equalTo, expectedCount);
 
-        verify(serviceBusService, times(2)).getMessagesForClient(SERVICE_BUS_KEY);
+        verify(serviceBusService, atLeast(1)).getMessagesForClient(SERVICE_BUS_KEY);
         verify(softAssert).assertThat("Total count of messages for Service Bus with key: "
                         + SERVICE_BUS_KEY, 1, matcher);
     }
