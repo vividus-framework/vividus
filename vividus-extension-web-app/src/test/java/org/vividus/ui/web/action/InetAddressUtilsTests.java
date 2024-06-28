@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,21 @@
 
 package org.vividus.ui.web.action;
 
-import java.util.Set;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.apache.hc.client5.http.cookie.CookieStore;
-import org.openqa.selenium.Cookie;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-public interface ICookieManager
+class InetAddressUtilsTests
 {
-    void addCookie(String cookieName, String cookieValue, String path, String urlAsString);
-
-    void deleteAllCookies();
-
-    void deleteCookie(String cookieName);
-
-    Cookie getCookie(String cookieName);
-
-    Set<Cookie> getCookies();
-
-    CookieStore getCookiesAsHttpCookieStore();
+    @ParameterizedTest
+    @CsvSource({
+            "https://www.domain.com, .domain.com",
+            "http://127.0.0.1:8080, 127.0.0.1",
+            "http://localhost:8080,  localhost"
+    })
+    void shouldGetDomain(String urlAsString, String domain)
+    {
+        assertEquals(domain, InetAddressUtils.getDomain(urlAsString));
+    }
 }

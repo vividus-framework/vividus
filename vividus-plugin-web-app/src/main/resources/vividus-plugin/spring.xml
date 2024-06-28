@@ -78,7 +78,7 @@
         <property name="waitForAlertTimeout" value="${web.alert.wait-for-alert-timeout}" />
     </bean>
 
-    <bean id="cookieManager" class="org.vividus.ui.web.action.CookieManager" />
+    <bean id="cookieManager" class="org.vividus.ui.web.action.WebDriverCookieManager" />
 
     <bean id="cssSelectorFactory" class="org.vividus.ui.web.action.CssSelectorFactory" />
 

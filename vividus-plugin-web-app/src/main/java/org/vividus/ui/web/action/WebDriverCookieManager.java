@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,9 @@
 
 package org.vividus.ui.web.action;
 
-import java.net.URI;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
-
-import com.google.common.net.InetAddresses;
-import com.google.common.net.InternetDomainName;
 
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
@@ -35,33 +31,22 @@ import org.vividus.selenium.IWebDriverProvider;
 
 import jakarta.inject.Inject;
 
-public class CookieManager implements ICookieManager
+public class WebDriverCookieManager implements CookieManager<Cookie>
 {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CookieManager.class);
-
-    private static final String DOMAIN_PARTS_SEPARATOR = ".";
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebDriverCookieManager.class);
 
     @Inject private IWebDriverProvider webDriverProvider;
 
     @Override
     public void addCookie(String cookieName, String cookieValue, String path, String urlAsString)
     {
-        String host = URI.create(urlAsString).getHost();
-        String domain = host.contains(DOMAIN_PARTS_SEPARATOR) && !InetAddresses.isInetAddress(host)
-                ? DOMAIN_PARTS_SEPARATOR + getTopDomain(host)
-                : host;
-
+        String domain = InetAddressUtils.getDomain(urlAsString);
         Cookie cookie = new Cookie.Builder(cookieName, cookieValue)
                 .domain(domain)
                 .path(path)
                 .build();
         LOGGER.debug("Adding cookie: {}", cookie);
         getOptions().addCookie(cookie);
-    }
-
-    private static String getTopDomain(String host)
-    {
-        return InternetDomainName.from(host).topPrivateDomain().toString();
     }
 
     @Override
@@ -91,7 +76,7 @@ public class CookieManager implements ICookieManager
     @Override
     public CookieStore getCookiesAsHttpCookieStore()
     {
-        return getCookies().stream().map(CookieManager::createHttpClientCookie).collect(
+        return getCookies().stream().map(WebDriverCookieManager::createHttpClientCookie).collect(
                 new CookieStoreCollector());
     }
 

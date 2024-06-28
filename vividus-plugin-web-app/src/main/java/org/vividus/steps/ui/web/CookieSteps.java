@@ -30,7 +30,7 @@ import org.openqa.selenium.Cookie;
 import org.vividus.context.VariableContext;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.action.ICookieManager;
+import org.vividus.ui.web.action.CookieManager;
 import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
@@ -38,14 +38,14 @@ import org.vividus.variable.VariableScope;
 public class CookieSteps
 {
     private final ISoftAssert softAssert;
-    private final ICookieManager cookieManager;
+    private final CookieManager<Cookie> cookieManager;
     private final INavigateActions navigateActions;
     private final IWebDriverProvider webDriverProvider;
     private final VariableContext variableContext;
     private final JsonUtils jsonUtils;
 
-    public CookieSteps(ISoftAssert softAssert, ICookieManager cookieManager, INavigateActions navigateActions,
-            IWebDriverProvider webDriverProvider, VariableContext variableContext, JsonUtils jsonUtils)
+    public CookieSteps(ISoftAssert softAssert, CookieManager<Cookie> cookieManager, INavigateActions navigateActions,
+                       IWebDriverProvider webDriverProvider, VariableContext variableContext, JsonUtils jsonUtils)
     {
         this.softAssert = softAssert;
         this.cookieManager = cookieManager;
