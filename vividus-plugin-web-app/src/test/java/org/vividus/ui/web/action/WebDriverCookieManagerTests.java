@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ import org.openqa.selenium.WebDriver.Options;
 import org.vividus.selenium.IWebDriverProvider;
 
 @ExtendWith(MockitoExtension.class)
-class CookieManagerTests
+class WebDriverCookieManagerTests
 {
     private static final String PATH = "/";
     private static final String ZERO = "0";
@@ -61,7 +61,7 @@ class CookieManagerTests
     @Captor private ArgumentCaptor<Cookie> cookieCaptor;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private Options options;
-    @InjectMocks private CookieManager cookieManager;
+    @InjectMocks private WebDriverCookieManager cookieManager;
 
     @Test
     void shouldDeleteAllCookies()

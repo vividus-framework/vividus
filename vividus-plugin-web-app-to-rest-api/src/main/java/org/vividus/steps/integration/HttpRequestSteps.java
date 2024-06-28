@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,19 @@ import java.util.Map;
 
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.jbehave.core.annotations.When;
+import org.openqa.selenium.Cookie;
 import org.vividus.http.HttpTestContext;
 import org.vividus.reporter.event.AttachmentPublisher;
-import org.vividus.ui.web.action.ICookieManager;
+import org.vividus.ui.web.action.CookieManager;
 
 public class HttpRequestSteps
 {
-    private final ICookieManager cookieManager;
+    private final CookieManager<Cookie> cookieManager;
     private final HttpTestContext httpTestContext;
     private final AttachmentPublisher attachmentPublisher;
 
-    public HttpRequestSteps(ICookieManager cookieManager, HttpTestContext httpTestContext,
-            AttachmentPublisher attachmentPublisher)
+    public HttpRequestSteps(CookieManager<Cookie> cookieManager, HttpTestContext httpTestContext,
+                            AttachmentPublisher attachmentPublisher)
     {
         this.cookieManager = cookieManager;
         this.httpTestContext = httpTestContext;

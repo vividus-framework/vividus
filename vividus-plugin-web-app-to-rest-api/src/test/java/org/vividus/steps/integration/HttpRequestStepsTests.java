@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.HttpTestContext;
 import org.vividus.reporter.event.AttachmentPublisher;
-import org.vividus.ui.web.action.ICookieManager;
+import org.vividus.ui.web.action.CookieManager;
 
 @ExtendWith(MockitoExtension.class)
 class HttpRequestStepsTests
 {
     @Mock private HttpTestContext httpTestContext;
-    @Mock private ICookieManager cookieManager;
+    @Mock private CookieManager<Cookie> cookieManager;
     @Mock private AttachmentPublisher attachmentPublisher;
     @InjectMocks private HttpRequestSteps httpRequestSteps;
 

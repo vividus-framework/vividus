@@ -30,12 +30,15 @@
 
     <bean class="org.vividus.ui.web.playwright.UiContext" />
 
+    <bean class="org.vividus.ui.web.playwright.action.PlaywrightCookieManager" />
+
     <bean class="org.vividus.ui.web.playwright.action.PlaywrightJavascriptActions" />
 
     <bean class="org.vividus.ui.web.playwright.action.ElementActions" />
 
     <bean class="org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert" />
 
+    <bean id="cookieSteps" class="org.vividus.ui.web.playwright.steps.CookieSteps" />
     <bean id="elementSteps" class="org.vividus.ui.web.playwright.steps.ElementSteps" />
     <bean id="fieldSteps" class="org.vividus.ui.web.playwright.steps.FieldSteps" />
     <bean id="mouseSteps" class="org.vividus.ui.web.playwright.steps.MouseSteps" />
@@ -48,6 +51,7 @@
     <bean id="nestedSteps" class="org.vividus.ui.web.playwright.steps.NestedSteps" />
 
     <util:list id="stepBeanNames-WebPlaywrightUi" value-type="java.lang.String">
+        <idref bean="cookieSteps" />
         <idref bean="elementSteps" />
         <idref bean="fieldSteps" />
         <idref bean="mouseSteps" />

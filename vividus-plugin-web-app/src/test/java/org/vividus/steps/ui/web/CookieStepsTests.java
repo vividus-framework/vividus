@@ -42,8 +42,8 @@ import org.openqa.selenium.WebDriver;
 import org.vividus.context.VariableContext;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.ui.web.action.CookieManager;
 import org.vividus.ui.web.action.INavigateActions;
+import org.vividus.ui.web.action.WebDriverCookieManager;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
@@ -54,7 +54,7 @@ class CookieStepsTests
 
     @Mock private INavigateActions navigateActions;
     @Mock private ISoftAssert softAssert;
-    @Mock private CookieManager cookieManager;
+    @Mock private WebDriverCookieManager cookieManager;
     @Mock private Cookie cookie;
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private VariableContext variableContext;
