@@ -8,7 +8,7 @@ dependencies {
     api(group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.5')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
