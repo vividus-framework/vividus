@@ -1,0 +1,31 @@
+=== Perform steps while elements exist
+
+Executes the steps while the found elements exist.
+
+[IMPORTANT]
+To avoid infinite loops the iterationLimit parameter is used. If iteration's limit reached the step will fail.
+
+[source,gherkin]
+----
+When I find $comparisonRule `$number` elements `$locator` and while they exist do up to $iterationLimit iteration of$stepsToExecute
+----
+
+Alias:
+[source,gherkin]
+----
+When I find $comparisonRule '$number' elements $locator and while they exist do up to $iterationLimit iteration of$stepsToExecute
+----
+
+* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
+* `$number` - The number of elements to find.
+* `$locator` - <<_locator>>.
+* `$iterationLimit` - The maximum number of iterations to perform.
+* `$stepsToExecute` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with a single column containing the steps to execute.
+
+.Disable menus
+[source,gherkin]
+----
+When I find >= `0` elements `xpath(//*[@class='menu enabled'])` and while they exist do up to 10 iteration of
+|step                                            |
+|When I click on element located by `id(disable)`|
+----

@@ -75,6 +75,15 @@ class UiContextTests
     }
 
     @Test
+    void shouldSetAndGetContext()
+    {
+        Locator context = mock();
+        uiContext.setContext(context);
+        var currentContext = uiContext.getContext();
+        assertSame(context, currentContext);
+    }
+
+    @Test
     void shouldReturnNullWhenFrameNotSet()
     {
         var currentFrame = uiContext.getCurrentFrame();
