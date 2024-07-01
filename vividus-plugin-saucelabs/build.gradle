@@ -6,10 +6,7 @@ dependencies {
     implementation project(':vividus-extension-selenium')
 
     implementation(group: 'com.google.guava', name: 'guava', version: '33.2.1-jre')
-    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.181')
-    // Explicitly add the dependency to fix: https://github.com/saucelabs/saucerest-java/issues/527
-    // For now ci-sauce uses saucerest:2.5.0 which doesn't contain the fix
-    implementation(group: 'com.saucelabs', name: 'saucerest', version: '2.5.1')
+    implementation(group: 'com.saucelabs', name: 'ci-sauce', version: '1.183')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
