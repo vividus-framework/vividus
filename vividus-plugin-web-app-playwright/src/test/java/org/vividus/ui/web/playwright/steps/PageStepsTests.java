@@ -20,11 +20,14 @@ import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.util.List;
 import java.util.function.Consumer;
 
 import com.microsoft.playwright.BrowserContext;
@@ -48,6 +51,7 @@ import org.vividus.ui.web.playwright.UiContext;
 class PageStepsTests
 {
     private static final String PAGE_URL = "https://docs.vividus.dev";
+    private static final String TAB_CLOSED = "Current tab has been closed";
 
     @Mock private BrowserContextProvider browserContextProvider;
     @Mock private UiContext uiContext;
@@ -90,7 +94,55 @@ class PageStepsTests
         when(browserContext.newPage()).thenReturn(page);
 
         pageSteps.openPage(PAGE_URL);
-        verifyInteractionsForOpenPageInNewTap(page);
+        verifyInteractionsForNewPage(page, 1);
+    }
+
+    @Test
+    void shouldOpenNewTab()
+    {
+        BrowserContext browserContext = mock();
+        when(browserContextProvider.get()).thenReturn(browserContext);
+        Page newTab = mock();
+        when(browserContext.newPage()).thenReturn(newTab);
+
+        pageSteps.openNewTab();
+        verifyInteractionsForNewPage(newTab, 0);
+    }
+
+    @Test
+    void shouldCloseCurrentTab()
+    {
+        Page currentTab = mock();
+        when(uiContext.getCurrentPage()).thenReturn(currentTab);
+
+        Page page1 = mock();
+        Page page2 = mock();
+        List<Page> allTabs = List.of(page1, page2, currentTab);
+
+        BrowserContext browserContext = mock();
+        when(browserContextProvider.get()).thenReturn(browserContext);
+        when(browserContext.pages()).thenReturn(allTabs).thenReturn(allTabs.subList(0, allTabs.size() - 2));
+
+        pageSteps.closeCurrentTab();
+        verify(currentTab).close();
+        verify(uiContext).reset();
+        verify(uiContext).setCurrentPage(page2);
+        verify(softAssert).recordAssertion(true, TAB_CLOSED);
+    }
+
+    @Test
+    void shouldNotCloseCurrentTabIfOnlyOneTabPresent()
+    {
+        Page currentTab = mock();
+        when(uiContext.getCurrentPage()).thenReturn(currentTab);
+
+        BrowserContext browserContext = mock();
+        when(browserContextProvider.get()).thenReturn(browserContext);
+        when(browserContext.pages()).thenReturn(List.of(currentTab));
+
+        pageSteps.closeCurrentTab();
+        verifyNoInteractions(currentTab);
+        verify(softAssert).recordAssertion(false, TAB_CLOSED);
     }
 
     @Test
@@ -144,14 +196,14 @@ class PageStepsTests
     }
 
     @SuppressWarnings("unchecked")
-    private void verifyInteractionsForOpenPageInNewTap(Page page)
+    private void verifyInteractionsForNewPage(Page page, int navigateTimes)
     {
         ArgumentCaptor<Consumer<Frame>> frameConsumerCaptor = ArgumentCaptor.forClass(Consumer.class);
         var ordered = inOrder(uiContext, page);
         ordered.verify(uiContext).reset();
         ordered.verify(uiContext).setCurrentPage(page);
         ordered.verify(page).onFrameNavigated(frameConsumerCaptor.capture());
-        ordered.verify(page).navigate(PAGE_URL);
+        ordered.verify(page, times(navigateTimes)).navigate(PAGE_URL);
         ordered.verifyNoMoreInteractions();
         Consumer<Frame> frameConsumer = frameConsumerCaptor.getValue();
         Frame frame = mock();

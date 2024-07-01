@@ -106,6 +106,43 @@ By. prefix is optional.
 include::plugins:partial$common-web-app-steps.adoc[]
 include::plugins:partial$ui-context-management-steps.adoc[]
 
+=== Tab steps
+==== Open a new tab
+
+Opens a new browser tab and switches the focus for future commands to this tab.
+
+[source,gherkin]
+----
+When I open new tab
+----
+
+.Open page in a new tab
+[source,gherkin]
+----
+When I open new tab
+Given I am on page with URL `https://docs.vividus.dev`
+----
+
+==== Close current tab
+
+Closes the current tab and switches to the last browser tab.
+
+[source,gherkin]
+----
+When I close current tab
+----
+
+NOTE: This step can only be applied to a session with multiple tabs open.
+
+.Open URL in new tab, close it and switch to the previous page
+[source,gherkin]
+----
+Given I am on page with URL `https://example.com`
+When I open new tab
+Given I am on page with URL `https://example.com/contact-us`
+When I close current tab
+----
+
 === Mouse Actions
 ==== Click on the element
 
