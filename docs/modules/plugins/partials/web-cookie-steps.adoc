@@ -6,14 +6,15 @@ Validates whether the certain cookie is set.
 
 [source,gherkin]
 ----
-Then cookie with name `$cookieName` is set
+Then cookie with name that $stringComparisonRule `$cookieName` is set
 ----
-* $cookieName - The name of the cookie to check presence.
+* `$stringComparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule].
+* `$cookieName` - The name of the cookie to check presence.
 
 .Check the session cookie is present
 [source,gherkin]
 ----
-Then cookie with name `JSESSIONID` is set
+Then cookie with name that is equal to `JSESSIONID` is set
 ----
 
 ==== Validate cookie absence
@@ -22,14 +23,15 @@ Validates whether the certain cookie is not set.
 
 [source,gherkin]
 ----
-Then cookie with name `$cookieName` is not set
+Then cookie with name that $stringComparisonRule `$cookieName` is not set
 ----
-* $cookieName - The name of the cookie to check absence.
+* `$stringComparisonRule` - xref:parameters:string-comparison-rule.adoc[String comparison rule].
+* `$cookieName` - The name of the cookie to check absence.
 
-.Check the session cookie is not present
+.Check that Google Analytics cookies are not present
 [source,gherkin]
 ----
-Then cookie with name `JSESSIONID` is not set
+Then cookie with name that matches `_ga.*` is not set
 ----
 
 ==== Set cookies

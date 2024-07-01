@@ -18,8 +18,6 @@ package org.vividus.ui.web.playwright.steps;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -28,10 +26,12 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Set;
 
 import com.microsoft.playwright.options.Cookie;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,6 +40,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.ui.web.playwright.action.PlaywrightCookieManager;
 import org.vividus.util.json.JsonUtils;
@@ -49,7 +50,8 @@ import org.vividus.variable.VariableScope;
 class CookieStepsTests
 {
     private static final String NAME = "name";
-    private static final String COOKIE_WITH_NAME_TEXT = "Cookie with the name '";
+    private static final String COOKIE_WITH_NAME_TEXT = "Cookie with the name that is equal to '";
+    private static final String DYNAMIC_COOKIE_NAME = "SSESSf4342sds23e3t5fs";
     @Mock private Cookie cookie;
     @Mock private PlaywrightCookieManager cookieManager;
     @Mock private VariableContext variableContext;
@@ -59,20 +61,21 @@ class CookieStepsTests
     @InjectMocks private CookieSteps cookieSteps;
 
     @Test
-    void testThenCookieWithNameIsSet()
+    void shouldValidateThatCookieWithNameMatchingComparisonRuleIsSet()
     {
-        when(cookieManager.getCookie(NAME)).thenReturn(cookie);
-        cookieSteps.thenCookieWithNameIsSet(NAME);
-        verifyCookieAssertion(cookie);
+        Cookie pwCookie = new Cookie(DYNAMIC_COOKIE_NAME, StringUtils.EMPTY);
+        when(cookieManager.getCookies()).thenReturn(List.of(pwCookie));
+        cookieSteps.thenCookieWithMatchingNameIsSet(StringComparisonRule.MATCHES, "SSESS.*");
+        verify(softAssert).assertTrue("Cookie with the name that matches 'SSESS.*' is set", true);
     }
 
     @Test
-    void testThenCookieWithNameIsNotSet()
+    void shouldValidateThatCookieWithNameMatchingComparisonRuleIsNotSet()
     {
-        when(cookieManager.getCookie(NAME)).thenReturn(cookie);
-        cookieSteps.thenCookieWithNameIsNotSet(NAME);
-        verify(softAssert).assertThat(eq(COOKIE_WITH_NAME_TEXT + NAME + "' is not set"), eq(cookie),
-                argThat(m -> "null".equals(m.toString())));
+        Cookie pwCookie = new Cookie(DYNAMIC_COOKIE_NAME, StringUtils.EMPTY);
+        when(cookieManager.getCookies()).thenReturn(List.of(pwCookie));
+        cookieSteps.thenCookieWithMatchingNameIsNotSet(StringComparisonRule.CONTAINS, "_ga");
+        verify(softAssert).assertTrue("Cookie with the name that contains '_ga' is not set", true);
     }
 
     @Test
@@ -94,12 +97,12 @@ class CookieStepsTests
     {
         String value = "value";
         Cookie newCookie = new Cookie(NAME, value);
-        when(cookieManager.getCookie(NAME)).thenReturn(newCookie);
+        when(cookieManager.getCookies()).thenReturn(List.of(newCookie));
         Set<VariableScope> scopes = Set.of(VariableScope.SCENARIO);
 
         cookieSteps.saveCookieIntoVariable(NAME, scopes, NAME);
         verify(variableContext).putVariable(scopes, NAME, value);
-        verifyCookieAssertion(newCookie);
+        verifyCookieAssertion(true);
     }
 
     @Test
@@ -149,7 +152,7 @@ class CookieStepsTests
     {
         cookieSteps.saveCookieIntoVariable(NAME, Set.of(VariableScope.SCENARIO), NAME);
         verifyNoInteractions(variableContext);
-        verifyCookieAssertion(null);
+        verifyCookieAssertion(false);
     }
 
     @Test
@@ -159,9 +162,8 @@ class CookieStepsTests
         verifyNoInteractions(jsonUtils, variableContext);
     }
 
-    private void verifyCookieAssertion(Cookie cookie)
+    private void verifyCookieAssertion(boolean assertionPass)
     {
-        verify(softAssert).assertThat(eq(COOKIE_WITH_NAME_TEXT + NAME + "' is set"), eq(cookie),
-                argThat(m -> "not null".equals(m.toString())));
+        verify(softAssert).assertTrue(COOKIE_WITH_NAME_TEXT + NAME + "' is set", assertionPass);
     }
 }

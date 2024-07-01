@@ -16,20 +16,19 @@
 
 package org.vividus.ui.web.playwright.steps;
 
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-
 import java.util.Optional;
 import java.util.Set;
 
 import com.microsoft.playwright.options.Cookie;
 
 import org.apache.commons.lang3.Validate;
+import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.action.CookieManager;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
 import org.vividus.util.json.JsonUtils;
@@ -37,8 +36,6 @@ import org.vividus.variable.VariableScope;
 
 public class CookieSteps
 {
-    private static final String COOKIE_IS_SET = "Cookie with the name '%s' is set";
-
     private final WebApplicationConfiguration webApplicationConfiguration;
     private final VariableContext variableContext;
     private final ISoftAssert softAssert;
@@ -56,29 +53,36 @@ public class CookieSteps
     }
 
     /**
-     * Validates whether the certain cookie is set.
+     * Checks if cookie with name <code>cookieName</code> according the <b>string validation rule</b> is set.
      *
+     * @param stringComparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches".
      * @param cookieName The name of the cookie to check presence.
-     * @return The cookie if present
+     * @return The cookie if present.
      */
-    @Then("cookie with name `$cookieName` is set")
-    public Optional<Cookie> thenCookieWithNameIsSet(String cookieName)
+    @Then("cookie with name that $stringComparisonRule `$cookieName` is set")
+    public Optional<Cookie> thenCookieWithMatchingNameIsSet(StringComparisonRule stringComparisonRule,
+            String cookieName)
     {
-        Cookie cookie = cookieManager.getCookie(cookieName);
-        softAssert.assertThat(String.format(COOKIE_IS_SET, cookieName), cookie, notNullValue());
-        return Optional.ofNullable(cookie);
+        Optional<Cookie> cookie = getCookieMatchingRule(stringComparisonRule, cookieName);
+        softAssert.assertTrue(
+                String.format("Cookie with the name that %s '%s' is set", stringComparisonRule, cookieName),
+                cookie.isPresent());
+        return cookie;
     }
 
     /**
-     * Validates whether the certain cookie is not set.
+     * Checks if cookie with name <code>cookieName</code> according the <b>string validation rule</b> is not set.
      *
      * @param cookieName The name of the cookie to check absence.
+     * @param stringComparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches".
      */
-    @Then("cookie with name `$cookieName` is not set")
-    public void thenCookieWithNameIsNotSet(String cookieName)
+    @Then("cookie with name that $stringComparisonRule `$cookieName` is not set")
+    public void thenCookieWithMatchingNameIsNotSet(StringComparisonRule stringComparisonRule, String cookieName)
     {
-        Cookie cookie = cookieManager.getCookie(cookieName);
-        softAssert.assertThat(String.format("Cookie with the name '%s' is not set", cookieName), cookie, nullValue());
+        Optional<Cookie> cookie = getCookieMatchingRule(stringComparisonRule, cookieName);
+        softAssert.assertTrue(
+                String.format("Cookie with the name that %s '%s' is not set", stringComparisonRule, cookieName),
+                cookie.isEmpty());
     }
 
     /**
@@ -127,7 +131,7 @@ public class CookieSteps
     @When("I save value of cookie with name `$cookieName` to $scopes variable `$variableName`")
     public void saveCookieIntoVariable(String cookieName, Set<VariableScope> scopes, String variableName)
     {
-        thenCookieWithNameIsSet(cookieName)
+        thenCookieWithMatchingNameIsSet(StringComparisonRule.IS_EQUAL_TO, cookieName)
                 .ifPresent(cookie -> variableContext.putVariable(scopes, variableName, cookie.value));
     }
 
@@ -171,5 +175,11 @@ public class CookieSteps
     public void removeCookie(String cookieName)
     {
         cookieManager.deleteCookie(cookieName);
+    }
+
+    private Optional<Cookie> getCookieMatchingRule(StringComparisonRule validationRule, String cookieName)
+    {
+        Matcher<String> matcher = validationRule.createMatcher(cookieName);
+        return cookieManager.getCookies().stream().filter(cookie -> matcher.matches(cookie.name)).findFirst();
     }
 }
