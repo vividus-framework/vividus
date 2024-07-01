@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -67,14 +66,14 @@ class FreemarkerProcessorTests
     void testProcessIOException()
     {
         assertThrows(IOException.class, () ->
-            freemarkerProcessor.process("test2.ftl", Collections.singletonMap("key", "value"), StandardCharsets.UTF_8));
+            freemarkerProcessor.process("test2.ftl", Map.of("key", "value"), StandardCharsets.UTF_8));
     }
 
     @Test
     void testProcessTemplateException()
     {
         assertThrows(TemplateException.class, () ->
-            freemarkerProcessor.process(RELATIVE_PATH, Collections.emptyMap(), StandardCharsets.UTF_8));
+            freemarkerProcessor.process(RELATIVE_PATH, Map.of(), StandardCharsets.UTF_8));
     }
 
     @Test

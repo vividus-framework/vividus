@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import static org.mockito.Mockito.withSettings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.util.Collections;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -135,7 +134,7 @@ class MobileAppWebDriverManagerTests
     void shouldPerformJsRequestForStatBarHeightWhenSessionDetailsStatBarHeightIsNullForIos()
     {
         mockCapabilities(MobilePlatform.IOS);
-        mockGetSession(Collections.EMPTY_MAP);
+        mockGetSession(Map.of());
         when(javascriptActions.executeScript(MOBILE_DEVICE_SCREEN_INFO_JS)).thenReturn(STATUS_BAR_SIZE);
         assertEquals(44, driverManager.getStatusBarSize());
     }
@@ -149,7 +148,7 @@ class MobileAppWebDriverManagerTests
 
         when(webDriverProvider.getUnwrapped(ExecutesMethod.class)).thenReturn(executingMethodDriver);
         Response response = new Response();
-        response.setValue(Collections.EMPTY_MAP);
+        response.setValue(Map.of());
 
         when(executingMethodDriver.execute(GET_SESSION_COMMAND)).thenReturn(response);
         var exception = assertThrows(IllegalStateException.class, driverManager::getStatusBarSize);

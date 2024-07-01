@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -100,7 +99,7 @@ class JsValidationStepsTests
         testCheckJsErrors(ERROR_MESSAGE,
                 () -> jsValidationSteps.checkJsLogEntriesOnOpenedPageFilteredByRegExp(Set.of(BrowserLogLevel.ERRORS),
                         EXTENSION_PATTERN));
-        verifyTestActions(Map.of(URL, Collections.emptySet()), ERRORS_ASSERTION_DESCRIPTION);
+        verifyTestActions(Map.of(URL, Set.of()), ERRORS_ASSERTION_DESCRIPTION);
     }
 
     @Test
@@ -129,7 +128,7 @@ class JsValidationStepsTests
         jsValidationSteps.setIncludeBrowserExtensionLogEntries(false);
         testCheckJsErrors(EXTENSION + ERROR_MESSAGE,
             () -> jsValidationSteps.checkJsLogEntriesOnOpenedPage(Set.of(BrowserLogLevel.ERRORS)));
-        verifyTestActions(Map.of(URL, Collections.emptySet()), ERRORS_ASSERTION_DESCRIPTION);
+        verifyTestActions(Map.of(URL, Set.of()), ERRORS_ASSERTION_DESCRIPTION);
     }
 
     @ParameterizedTest
@@ -168,7 +167,7 @@ class JsValidationStepsTests
     {
         var entry = mockGetLogEntry(logErrorMessage);
         action.run();
-        return Map.of(URL, Collections.singleton(entry));
+        return Map.of(URL, Set.of(entry));
     }
 
     private LogEntry mockGetLogEntry(String logErrorMessage)

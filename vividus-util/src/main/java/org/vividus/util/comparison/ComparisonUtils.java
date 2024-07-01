@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.util.comparison;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,9 +58,9 @@ public final class ComparisonUtils
         compareTables(() -> isNotEmptyList(listOfMaps1) && isNotEmptyList(listOfMaps2), listOfMaps1, listOfMaps2,
                 results, removeFirstFunction, removeFirstFunction);
         compareTables(() -> isNotEmptyList(listOfMaps1), listOfMaps1, listOfMaps2, results, removeFirstFunction,
-            lom -> Collections.emptyMap());
-        compareTables(() -> isNotEmptyList(listOfMaps2), listOfMaps1, listOfMaps2, results,
-            lom -> Collections.emptyMap(), removeFirstFunction);
+                lom -> Map.of());
+        compareTables(() -> isNotEmptyList(listOfMaps2), listOfMaps1, listOfMaps2, results, lom -> Map.of(),
+                removeFirstFunction);
         return results;
     }
 
