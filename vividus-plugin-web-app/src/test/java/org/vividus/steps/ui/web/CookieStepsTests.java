@@ -42,15 +42,18 @@ import org.openqa.selenium.WebDriver;
 import org.vividus.context.VariableContext;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.ui.web.action.WebDriverCookieManager;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.variable.VariableScope;
 
+@SuppressWarnings("PMD.UnnecessaryBooleanAssertion")
 @ExtendWith(MockitoExtension.class)
 class CookieStepsTests
 {
     private static final String NAME = "name";
+    private static final String DYNAMIC_COOKIE_NAME = "SSESSf4342sds23e3t5fs";
 
     @Mock private INavigateActions navigateActions;
     @Mock private ISoftAssert softAssert;
@@ -128,12 +131,30 @@ class CookieStepsTests
     }
 
     @Test
+    void shouldValidateThatCookieWithNameMatchingComparisonRuleIsSet()
+    {
+        when(cookie.getName()).thenReturn(DYNAMIC_COOKIE_NAME);
+        when(cookieManager.getCookies()).thenReturn(Set.of(cookie));
+        cookieSteps.thenCookieWithMatchingNameIsSet(StringComparisonRule.MATCHES, "SSESS.*");
+        verify(softAssert).assertTrue("Cookie with the name that matches 'SSESS.*' is set", true);
+    }
+
+    @Test
     void testThenCookieWithNameIsNotSet()
     {
         when(cookieManager.getCookie(NAME)).thenReturn(cookie);
         cookieSteps.thenCookieWithNameIsNotSet(NAME);
         verify(softAssert).assertThat(eq("Cookie with the name '" + NAME + "' is not set"), eq(cookie),
                 argThat(matcher -> "null".equals(matcher.toString())));
+    }
+
+    @Test
+    void shouldValidateThatCookieWithNameMatchingComparisonRuleIsNotSet()
+    {
+        when(cookie.getName()).thenReturn(DYNAMIC_COOKIE_NAME);
+        when(cookieManager.getCookies()).thenReturn(Set.of(cookie));
+        cookieSteps.thenCookieWithMatchingNameIsNotSet(StringComparisonRule.CONTAINS, "_ga");
+        verify(softAssert).assertTrue("Cookie with the name that contains '_ga' is not set", true);
     }
 
     @Test

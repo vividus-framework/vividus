@@ -23,13 +23,16 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.Validate;
+import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
 import org.jbehave.core.model.ExamplesTable;
 import org.openqa.selenium.Cookie;
+import org.vividus.annotation.Replacement;
 import org.vividus.context.VariableContext;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.action.CookieManager;
 import org.vividus.ui.web.action.INavigateActions;
 import org.vividus.util.json.JsonUtils;
@@ -37,6 +40,8 @@ import org.vividus.variable.VariableScope;
 
 public class CookieSteps
 {
+    private static final String COOKIE_PRESENCE_PATTERN = "Cookie with the name '%s' is set";
+
     private final ISoftAssert softAssert;
     private final CookieManager<Cookie> cookieManager;
     private final INavigateActions navigateActions;
@@ -110,17 +115,34 @@ public class CookieSteps
     }
 
     /**
-     * Validates whether the certain cookie is set
+     * Checks if cookie with name <code>cookieName</code> according the <b>string validation rule</b> is set.
+     *
+     * @param stringComparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches".
+     * @param cookieName The name of the cookie to check presence.
+     */
+    @Then("cookie with name that $stringComparisonRule `$cookieName` is set")
+    public void thenCookieWithMatchingNameIsSet(StringComparisonRule stringComparisonRule, String cookieName)
+    {
+        Optional<Cookie> cookie = getCookieMatchingRule(stringComparisonRule, cookieName);
+        softAssert.assertTrue(
+                String.format("Cookie with the name that %s '%s' is set", stringComparisonRule, cookieName),
+                cookie.isPresent());
+    }
+
+    /**
+     * Validates whether the certain cookie is set.
      *
      * @param cookieName The name of the cookie to check presence.
-     * @return The cookie if present
+     * @deprecated Use step: Then cookie with name that is equal to `$cookieName` is set
      */
+    @Deprecated(since = "0.6.12", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.8.0",
+            replacementFormatPattern = "Then cookie with name that is equal to `%1$s` is set")
     @Then("cookie with name `$cookieName` is set")
-    public Optional<Cookie> thenCookieWithNameIsSet(String cookieName)
+    public void thenCookieWithNameIsSet(String cookieName)
     {
-        Cookie cookie = cookieManager.getCookie(cookieName);
-        softAssert.assertThat(String.format("Cookie with the name '%s' is set", cookieName), cookie, notNullValue());
-        return Optional.ofNullable(cookie);
+        softAssert.assertThat(String.format(COOKIE_PRESENCE_PATTERN, cookieName), cookieManager.getCookie(cookieName),
+                notNullValue());
     }
 
     /**
@@ -141,15 +163,38 @@ public class CookieSteps
     @When("I save value of cookie with name `$cookieName` to $scopes variable `$variableName`")
     public void saveCookieIntoVariable(String cookieName, Set<VariableScope> scopes, String variableName)
     {
-        thenCookieWithNameIsSet(cookieName).map(Cookie::getValue)
-                .ifPresent(v -> variableContext.putVariable(scopes, variableName, v));
+        Cookie cookie = cookieManager.getCookie(cookieName);
+        softAssert.assertThat(String.format(COOKIE_PRESENCE_PATTERN, cookieName), cookie, notNullValue());
+        if (cookie != null)
+        {
+            variableContext.putVariable(scopes, variableName, cookie.getValue());
+        }
     }
 
     /**
-     * Validates whether the certain cookie is not set
+     * Checks if cookie with name <code>cookieName</code> according the <b>string validation rule</b> is not set.
      *
-     * @param cookieName The name of the cookie to check absence
+     * @param cookieName The name of the cookie to check absence.
+     * @param stringComparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches".
      */
+    @Then("cookie with name that $stringComparisonRule `$cookieName` is not set")
+    public void thenCookieWithMatchingNameIsNotSet(StringComparisonRule stringComparisonRule, String cookieName)
+    {
+        Optional<Cookie> cookie = getCookieMatchingRule(stringComparisonRule, cookieName);
+        softAssert.assertTrue(
+                String.format("Cookie with the name that %s '%s' is not set", stringComparisonRule, cookieName),
+                cookie.isEmpty());
+    }
+
+    /**
+     * Validates whether the certain cookie is not set.
+     *
+     * @param cookieName The name of the cookie to check absence.
+     * @deprecated Use step: Then cookie with name that is equal to `$cookieName` is not set
+     */
+    @Deprecated(since = "0.6.12", forRemoval = true)
+    @Replacement(versionToRemoveStep = "0.8.0",
+            replacementFormatPattern = "Then cookie with name that is equal to `%1$s` is not set")
     @Then("cookie with name `$cookieName` is not set")
     public void thenCookieWithNameIsNotSet(String cookieName)
     {
@@ -239,5 +284,11 @@ public class CookieSteps
         Optional.ofNullable(cookieManager.getCookie(cookieName))
                 .map(Cookie::toJson)
                 .ifPresent(cam -> variableContext.putVariable(scopes, variableName, jsonUtils.toJson(cam)));
+    }
+
+    private Optional<Cookie> getCookieMatchingRule(StringComparisonRule validationRule, String cookieName)
+    {
+        Matcher<String> matcher = validationRule.createMatcher(cookieName);
+        return cookieManager.getCookies().stream().filter(cookie -> matcher.matches(cookie.getName())).findFirst();
     }
 }

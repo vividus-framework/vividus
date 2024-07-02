@@ -8,8 +8,10 @@ When I set all cookies for current domain without applying changes:
 |cookieName |cookieValue |path|
 |cookieName1|cookieValue1|/   |
 Then cookie with name `cookieName1` is set
+Then cookie with name that matches `.*Name1` is set
 When I remove cookie with name `cookieName1` from current domain
 Then cookie with name `cookieName1` is not set
+Then cookie with name that is equal to `cookieName1` is not set
 
 When I set all cookies for current domain:
 |cookieName |cookieValue |path|
