@@ -9,4 +9,6 @@
         <constructor-arg value="${web-application.main-page-url}" />
         <constructor-arg value="${web-application.authentication-mode}" />
     </bean>
+
+    <bean class="org.vividus.ui.web.action.SpringResourceFileLoader"/>
 </beans>

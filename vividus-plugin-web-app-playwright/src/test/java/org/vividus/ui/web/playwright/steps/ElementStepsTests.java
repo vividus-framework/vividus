@@ -18,15 +18,23 @@ package org.vividus.ui.web.playwright.steps;
 
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.assertions.LocatorAssertions;
+import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import com.microsoft.playwright.options.BoundingBox;
 
 import org.junit.jupiter.api.Test;
@@ -40,8 +48,10 @@ import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.ui.web.action.ResourceFileLoader;
 import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.action.ElementActions;
+import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 import org.vividus.variable.VariableScope;
 
@@ -55,12 +65,15 @@ class ElementStepsTests
     private static final String ATTRIBUTE_VALUE = "attributeValue";
     private static final String CSS_NAME = "cssName";
     private static final String CSS_VALUE = "cssValue";
+    private static final String FILE_PATH = "filePath";
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.STORY);
 
     @Mock private UiContext uiContext;
     @Mock private ISoftAssert softAssert;
     @Mock private VariableContext variableContext;
     @Mock private ElementActions elementActions;
+    @Mock private PlaywrightSoftAssert playwrightSoftAssert;
+    @Mock private ResourceFileLoader resourceFileLoader;
     @InjectMocks private ElementSteps steps;
 
     @ParameterizedTest
@@ -178,6 +191,34 @@ class ElementStepsTests
         when(locator.getAttribute(ATTRIBUTE_NAME)).thenReturn(null);
         steps.saveAttributeValueOfElement(ATTRIBUTE_NAME, playwrightLocator, VARIABLE_SCOPE, VARIABLE_NAME);
         verifyIfAttributeIsNotPresent();
+    }
+
+    @Test
+    void shouldUploadFile() throws IOException
+    {
+        File file = mock();
+        Path filePath = mock();
+        when(resourceFileLoader.loadFile(FILE_PATH)).thenReturn(file);
+        when(file.toPath()).thenReturn(filePath);
+        try (var playwrightAssertionsStaticMock = mockStatic(PlaywrightAssertions.class))
+        {
+            var playwrightLocator = new PlaywrightLocator(XPATH, LOCATOR_VALUE);
+            Locator fileInputLocator = mock();
+            when(uiContext.locateElement(playwrightLocator)).thenReturn(fileInputLocator);
+            LocatorAssertions locatorAssertions = mock();
+            playwrightAssertionsStaticMock.when(() -> PlaywrightAssertions.assertThat(fileInputLocator))
+                    .thenReturn(locatorAssertions);
+            doNothing().when(playwrightSoftAssert)
+                    .runAssertion(eq("A file input element is not found"), argThat(runnable -> {
+                        runnable.run();
+                        return true;
+                    }));
+            steps.uploadFile(playwrightLocator, FILE_PATH);
+            var ordered = inOrder(locatorAssertions, fileInputLocator);
+            ordered.verify(locatorAssertions).hasCount(1);
+            ordered.verify(fileInputLocator).setInputFiles(filePath);
+            ordered.verifyNoMoreInteractions();
+        }
     }
 
     @Test
