@@ -16,11 +16,14 @@
 
 package org.vividus.ui.web.playwright.steps;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import com.microsoft.playwright.options.BoundingBox;
 
 import org.hamcrest.Matcher;
@@ -30,8 +33,10 @@ import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.StringComparisonRule;
+import org.vividus.ui.web.action.ResourceFileLoader;
 import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.action.ElementActions;
+import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 import org.vividus.variable.VariableScope;
 
@@ -41,14 +46,19 @@ public class ElementSteps
     private final ISoftAssert softAssert;
     private final VariableContext variableContext;
     private final ElementActions elementActions;
+    private final PlaywrightSoftAssert playwrightSoftAssert;
+    private final ResourceFileLoader resourceFileLoader;
 
     public ElementSteps(UiContext uiContext, ISoftAssert softAssert, VariableContext variableContext,
-            ElementActions elementActions)
+            ElementActions elementActions, PlaywrightSoftAssert playwrightSoftAssert,
+            ResourceFileLoader resourceFileLoader)
     {
         this.uiContext = uiContext;
         this.softAssert = softAssert;
         this.variableContext = variableContext;
         this.elementActions = elementActions;
+        this.playwrightSoftAssert = playwrightSoftAssert;
+        this.resourceFileLoader = resourceFileLoader;
     }
 
     /**
@@ -238,6 +248,30 @@ public class ElementSteps
                 cssName);
         Matcher<String> matcher = comparisonRule.createMatcher(cssValue);
         softAssert.assertThat("Element css property value is", actualCssValue, matcher);
+    }
+
+    /**
+     * This step uploads a file with a given relative path to an element located by the provided locator.
+     * <p>
+     * A <b>relative path</b> is a path that starts from a given working directory, eliminating the need to provide the
+     * full absolute path(i.e. <i>'about.jpeg'</i> is in the root directory or <i>'/story/uploadfiles/about.png'</i>)
+     * </p>
+     *
+     * @param locator The locator for the upload element.
+     * @param filePath The relative path to the file to be uploaded.
+     * @see <a href="https://en.wikipedia.org/wiki/Path_(computing)#Absolute_and_relative_paths">Absolute and
+     * relative paths</a>
+     * @throws IOException If an I/O error occurs when loading the file.
+     */
+    @When("I select element located by `$locator` and upload `$resourceNameOrFilePath`")
+    public void uploadFile(PlaywrightLocator locator, String filePath) throws IOException
+    {
+        File fileForUpload = resourceFileLoader.loadFile(filePath);
+        Locator fileInputLocator = uiContext.locateElement(locator);
+        playwrightSoftAssert.runAssertion("A file input element is not found", () -> {
+            PlaywrightAssertions.assertThat(fileInputLocator).hasCount(1);
+            fileInputLocator.setInputFiles(fileForUpload.toPath());
+        });
     }
 
     private void saveAttributeValueOfElement(Locator element, String attributeName, Set<VariableScope> scopes,
