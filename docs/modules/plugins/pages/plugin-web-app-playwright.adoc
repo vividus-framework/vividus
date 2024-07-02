@@ -389,3 +389,5 @@ include::plugins:partial$ui-elements-conditional-iteration-steps.adoc[]
 include::plugins:partial$ui-execution-on-each-element-steps.adoc[]
 
 include::plugins:partial$web-cookie-steps.adoc[]
+
+include::plugins:partial$dropdown-steps.adoc[]

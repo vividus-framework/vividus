@@ -1,0 +1,22 @@
+=== Dropdown Steps
+
+==== Select the option
+
+Selects option in dropdown
+
+[IMPORTANT]
+Does not support multi-selection
+
+[source,gherkin]
+----
+When I select `$option` in dropdown located by `$locator`
+----
+
+* `$option` - option to select
+* `$locator` - The <<_locator,locator>> used to find a dropdown.
+
+.Dropdown.story
+[source,gherkin]
+----
+When I select `Red` in dropdown located by `id(colors)`
+----
