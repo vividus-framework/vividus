@@ -90,7 +90,7 @@ class PlaywrightCookieManagerTests
         cookieManager.addCookie(COOKIE_NAME, ZERO, PATH, urlAsString);
         verify(browserContext).addCookies(cookieCaptor.capture());
 
-        Cookie cookie = cookieCaptor.getValue().getFirst();
+        Cookie cookie = cookieCaptor.getValue().get(0);
         assertEquals(COOKIE_NAME, cookie.name);
         assertEquals(ZERO, cookie.value);
         assertEquals(PATH, cookie.path);
