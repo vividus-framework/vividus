@@ -1724,6 +1724,42 @@ Then value `$value` is selected in slider located by `$locator`
 Then value `50` is selected in slider located by `id(test_slider)`
 ----
 
+=== Download file from browser downloads page
+
+Downloads the file from the browser downloads page and saves its content to the specified variable.
+
+IMPORTANT: The step is only supported by Chrome browser.
+
+Actions performed at this step:
+
+1. Switch the browser to the download manager page.
+2. Search for the latest downloaded file with a name that matches the provided regex.
+3. Wait until the file download is complete.
+4. Store file content into a variable with the specific scope.
+5. Close the download manager page and return to the previously opened page.
+
+[source,gherkin]
+----
+When I download file with name matching `$regex` from browser downloads and save its content to $scopes variable `$variableName`
+----
+
+* `$regex` - regular expression to filter downloaded files by name
+* `$scopes` - the set (comma separated list of scopes e.g.: STORY, NEXT_BATCHES) of the variable scopes. Allowed values are STEP, SCENARIO, STORY and NEXT_BATCHES
+* `$variableName` - the variable name to save file content
+
+Timeout for file downloading is configurable via properties. The default timeout is 3 minutes.
+
+[source, properties]
+----
+ui.chrome.file-download-timeout=PT3M
+----
+
+.Save data of the previously downloaded file into property
+[source,gherkin]
+----
+When I download file with name matching `report` from browser downloads and save its content to SCENARIO variable `testReport`
+----
+
 === Mobile Emulation
 
 ==== Emulate mobile device
