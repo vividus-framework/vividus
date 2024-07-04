@@ -126,7 +126,7 @@ IMPORTANT: The main page url value defined by this property gets overriden by th
 |`transformer.from-headless-crawling.exclude-urls-regex`
 |Regular expression
 a |`.*(css\|gif\|gz\|ico\|jpeg\|jpg\|js\|mp3\|mp4\|pdf\|png\|svg\|zip\|woff2
-\|woff\|ttf\|doc\|docx\|xml\|json\|webmanifest)$`
+\|woff\|ttf\|doc\|docx\|xml\|json\|webmanifest\|webp)$`
 |The regular expression to match URLs.
 The crawler will not crawl all URLs that matching the given regular expression and they will not be added to the resulting table.
 https://en.wikipedia.org/wiki/URI_fragment[URI fragments] and https://en.wikipedia.org/wiki/Query_string[URL query] are ignored at filtering.
