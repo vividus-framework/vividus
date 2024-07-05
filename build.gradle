@@ -36,6 +36,7 @@ def publishedSubprojects = subprojects.findAll {
 def libraries = publishedSubprojects.findAll { it.name != 'vividus-bom' }
 configure(libraries) {
     apply from: "${buildSystemPath}/vividus-library-subproject.gradle"
+    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 configure(publishedSubprojects) {
