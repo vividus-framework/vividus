@@ -5,7 +5,7 @@ dependencies {
     implementation project(':vividus-extension-azure')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
-    implementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.24')
+    implementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.25')
     implementation(group: 'com.azure', name: 'azure-messaging-servicebus')
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.13')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
