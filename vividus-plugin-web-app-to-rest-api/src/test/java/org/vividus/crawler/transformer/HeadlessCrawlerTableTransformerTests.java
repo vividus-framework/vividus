@@ -71,8 +71,8 @@ import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.crawler.CrawlController.WebCrawlerFactory;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
+import edu.uci.ics.crawler4j.url.AbstractWebURL;
 import edu.uci.ics.crawler4j.url.WebURL;
-import edu.uci.ics.crawler4j.url.WebURLImpl;
 
 @ExtendWith({MockitoExtension.class, TestLoggerFactoryExtension.class})
 class HeadlessCrawlerTableTransformerTests
@@ -320,7 +320,7 @@ class HeadlessCrawlerTableTransformerTests
 
     private static WebURL createWebUrl(String url)
     {
-        WebURL webUrl = new WebURLImpl();
+        WebURL webUrl = new AbstractWebURL() { };
         webUrl.setURL(url);
         return webUrl;
     }
