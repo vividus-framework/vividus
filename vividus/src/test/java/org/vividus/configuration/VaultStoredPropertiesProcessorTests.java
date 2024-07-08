@@ -48,8 +48,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentMatcher;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MutablePropertySources;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -80,7 +78,7 @@ class VaultStoredPropertiesProcessorTests
     })
     void shouldRejectInvalidSecretPaths(String fullSecretPath) throws IOException
     {
-        try (var processor = new VaultStoredPropertiesProcessor(new Properties()))
+        try (var processor = new VaultStoredPropertiesProcessor())
         {
             var propertyName = "invalid-property";
             var exception = assertThrows(IllegalArgumentException.class,
@@ -99,17 +97,13 @@ class VaultStoredPropertiesProcessorTests
         var properties = new Properties();
         properties.put(vaultNamespaceProperty, vaultNamespaceValue);
 
-        MutablePropertySources propertySources = mock();
         var result = "pa$$w0rd";
 
-        try (var processor = new VaultStoredPropertiesProcessor(properties);
+        try (var processor = new VaultStoredPropertiesProcessor();
                 var annotationConfigApplicationContextConstruction = mockConstruction(
                         AnnotationConfigApplicationContext.class,
                         (mock, context) -> {
-                            ConfigurableEnvironment configurableEnvironment = mock();
-                            when(mock.getEnvironment()).thenReturn(configurableEnvironment);
-
-                            when(configurableEnvironment.getPropertySources()).thenReturn(propertySources);
+                            processor.processProperties(properties);
 
                             VaultTemplate vaultTemplate = mock();
                             when(mock.getBean(VaultTemplate.class)).thenReturn(vaultTemplate);
@@ -128,11 +122,7 @@ class VaultStoredPropertiesProcessorTests
             assertThat(annotationConfigApplicationContextConstruction.constructed(), hasSize(1));
             var context = annotationConfigApplicationContextConstruction.constructed().get(0);
 
-            var ordered = inOrder(context, propertySources);
-            ordered.verify(propertySources).addFirst(
-                    argThat(source -> vaultNamespaceValue.equals(source.getProperty(vaultNamespaceProperty)))
-            );
-
+            var ordered = inOrder(context);
             ordered.verify(context).registerBean(eq(RestTemplateCustomizer.class), argThat(
                     (ArgumentMatcher<Supplier<RestTemplateCustomizer>>) supplier -> {
                         RestTemplate restTemplate = mock();
@@ -176,7 +166,7 @@ class VaultStoredPropertiesProcessorTests
     })
     void shouldPrintLogAboutDeprecation(String propertyValue) throws IOException
     {
-        try (var processor = new VaultStoredPropertiesProcessor(new Properties()))
+        try (var processor = new VaultStoredPropertiesProcessor())
         {
             processor.processProperty("old-property-name", propertyValue);
         }

@@ -17,11 +17,13 @@
 package org.vividus.configuration;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -144,14 +146,11 @@ public final class ConfigurationResolver
         deprecatedPropertiesHandler.removeDeprecated(properties);
         resolveSpelExpressions(properties, false);
 
-        try (VaultStoredPropertiesProcessor vaultProcessor = new VaultStoredPropertiesProcessor(properties))
-        {
-            PropertiesProcessor propertiesProcessor = new DelegatingPropertiesProcessor(List.of(
-                    new EncryptedPropertiesProcessor(properties), vaultProcessor
-            ));
-            new SystemPropertiesInitializer(propertiesProcessor).setSystemProperties(properties);
-            properties = propertiesProcessor.processProperties(properties);
-        }
+        List<PropertiesProcessor> processors = new ArrayList<>();
+        ServiceLoader.load(PropertiesProcessor.class).forEach(processors::add);
+        PropertiesProcessor propertiesProcessor = new DelegatingPropertiesProcessor(processors);
+        new SystemPropertiesInitializer(propertiesProcessor).setSystemProperties(properties);
+        properties = propertiesProcessor.processProperties(properties);
 
         instance = new ConfigurationResolver(properties);
         return instance;
