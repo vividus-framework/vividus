@@ -14,8 +14,6 @@ dependencies {
     implementation(group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.4')
     implementation(group: 'de.hs-heilbronn.mi', name: 'crawler4j-with-sleepycat', version: '5.0.2') {
         exclude module: 'log4j-slf4j-impl'
-        exclude group: "org.bouncycastle", module: "bcpkix-jdk15on"
-        exclude group: "org.bouncycastle", module: "bcprov-jdk15on"
     }
 
     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
