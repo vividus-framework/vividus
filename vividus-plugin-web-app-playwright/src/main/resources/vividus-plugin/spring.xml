@@ -36,6 +36,10 @@
 
     <bean class="org.vividus.ui.web.playwright.action.ElementActions" />
 
+    <bean id="scrollActions" class="org.vividus.ui.web.playwright.action.ScrollActions">
+        <property name="stickyHeaderSizePercentage" value="${web-application.sticky-header-size-percentage}" />
+    </bean>
+
     <bean class="org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert" />
 
     <bean id="cookieSteps" class="org.vividus.ui.web.playwright.steps.CookieSteps" />
@@ -50,6 +54,7 @@
     <bean id="executeScriptSteps" class="org.vividus.ui.web.playwright.steps.ExecuteScriptSteps" />
     <bean id="nestedSteps" class="org.vividus.ui.web.playwright.steps.NestedSteps" />
     <bean id="dropdownSteps" class="org.vividus.ui.web.playwright.steps.DropdownSteps" />
+    <bean id="scrollSteps" class="org.vividus.ui.web.playwright.steps.ScrollSteps" />
 
     <util:list id="stepBeanNames-WebPlaywrightUi" value-type="java.lang.String">
         <idref bean="cookieSteps" />
@@ -64,6 +69,7 @@
         <idref bean="executeScriptSteps" />
         <idref bean="nestedSteps" />
         <idref bean="dropdownSteps" />
+        <idref bean="scrollSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebPlaywrightUi" key-type="java.lang.Class">

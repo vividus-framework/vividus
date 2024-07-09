@@ -425,3 +425,5 @@ When I select element located by `$locator` and upload `$resourceNameOrFilePath`
 ----
 When I select element located by `id(uploadfile)` and upload file `/folder/file_for_upload.png`
 ----
+
+include::plugins:partial$ui-scrolling-steps.adoc[]

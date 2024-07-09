@@ -14,37 +14,33 @@
  * limitations under the License.
  */
 
-package org.vividus.steps.ui.web;
+package org.vividus.ui.web.playwright.steps;
 
-import java.util.List;
+import com.microsoft.playwright.Locator;
 
 import org.jbehave.core.annotations.Then;
 import org.jbehave.core.annotations.When;
-import org.openqa.selenium.WebElement;
-import org.vividus.selenium.locator.Locator;
 import org.vividus.softassert.ISoftAssert;
-import org.vividus.steps.ui.validation.IBaseValidations;
-import org.vividus.ui.context.IUiContext;
-import org.vividus.ui.monitor.TakeScreenshotOnFailure;
+import org.vividus.steps.ui.web.ScrollDirection;
 import org.vividus.ui.web.action.DirectionScroller;
-import org.vividus.ui.web.action.WebJavascriptActions;
-import org.vividus.ui.web.action.WebUiContextScroller;
+import org.vividus.ui.web.playwright.UiContext;
+import org.vividus.ui.web.playwright.action.PlaywrightUiContextScroller;
+import org.vividus.ui.web.playwright.action.ScrollActions;
+import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
+import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 
-@TakeScreenshotOnFailure
 public class ScrollSteps
 {
-    private final IUiContext uiContext;
-    private final WebJavascriptActions javascriptActions;
     private final ISoftAssert softAssert;
-    private final IBaseValidations baseValidations;
+    private final UiContext uiContext;
+    private final ScrollActions scrollActions;
 
-    public ScrollSteps(IUiContext uiContext, WebJavascriptActions javascriptActions, ISoftAssert softAssert,
-            IBaseValidations baseValidations)
+    public ScrollSteps(ISoftAssert softAssert, UiContext uiContext, PlaywrightSoftAssert playwrightSoftAssert,
+            ScrollActions scrollActions)
     {
-        this.uiContext = uiContext;
-        this.javascriptActions = javascriptActions;
         this.softAssert = softAssert;
-        this.baseValidations = baseValidations;
+        this.uiContext = uiContext;
+        this.scrollActions = scrollActions;
     }
 
     /**
@@ -60,7 +56,7 @@ public class ScrollSteps
     @When("I scroll context to $scrollDirection edge")
     public void scrollContextIn(ScrollDirection scrollDirection)
     {
-        DirectionScroller scroller = new WebUiContextScroller(uiContext, javascriptActions);
+        DirectionScroller scroller = new PlaywrightUiContextScroller(uiContext, scrollActions);
         scrollDirection.scroll(scroller);
     }
 
@@ -75,23 +71,19 @@ public class ScrollSteps
      * @param locator The locator of the element to scroll into view
      */
     @When("I scroll element located by `$locator` into view")
-    public void scrollIntoView(Locator locator)
+    public void scrollIntoView(PlaywrightLocator locator)
     {
-        List<WebElement> scrollTargets = baseValidations.assertIfElementsExist("Element to scroll into view", locator);
-        if (!scrollTargets.isEmpty())
-        {
-            javascriptActions.scrollElementIntoViewportCenter(scrollTargets.get(0));
-        }
+        Locator element = uiContext.locateElement(locator);
+        scrollActions.scrollElementIntoViewportCenter(element);
     }
 
     /**
-     * Checks if the page is scrolled to the specific element located by locator
+     * Checks if the page is scrolled to the specific element located by locator.
      * <br>Example: &lt;a id="information_collection" name="information_collection_name"&gt; -
      * Then page is scrolled to element located by `id(information_collection)`
      * <p>
      * Actions performed at this step:
      * <ul>
-     * <li>Assert that element with specified locator exists
      * <li>Checks whether page is scrolled to the very bottom
      * <li>If yes --&gt; verify that element's Y coordinate is positive which means that element is visible if no --&gt;
      * get element's Y coordinate and verify that it's close to 0 which means that element is an the very top
@@ -99,18 +91,10 @@ public class ScrollSteps
      * @param locator A locator to locate element
      */
     @Then("page is scrolled to element located by `$locator`")
-    public void isPageScrolledToElement(Locator locator)
+    public void isPageScrolledToElement(PlaywrightLocator locator)
     {
-        WebElement element = baseValidations.assertIfElementExists("Element to verify position", locator);
-        if (element != null)
-        {
-            int elementYCoordinate = element.getLocation().getY();
-            boolean pageVisibleAreaScrolledToElement = javascriptActions.executeScript(String.format(
-                    "var windowScrollY = Math.floor(window.scrollY);"
-                    + "return windowScrollY <= %1$d && %1$d <= (windowScrollY + window.innerHeight)",
-                    elementYCoordinate));
-            softAssert.assertTrue(String.format("The page is scrolled to an element with located by %s", locator),
-                    pageVisibleAreaScrolledToElement);
-        }
+        Locator element = uiContext.locateElement(locator);
+        softAssert.assertTrue(String.format("The page is scrolled to an element with located by %s", locator),
+                scrollActions.isScrolledToElement(element));
     }
 }
