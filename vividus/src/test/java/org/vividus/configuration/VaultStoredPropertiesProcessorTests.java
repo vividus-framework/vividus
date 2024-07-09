@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.vividus.configuration;
 
+import static com.github.valfirst.slf4jtest.LoggingEvent.warn;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -36,7 +38,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import com.github.valfirst.slf4jtest.TestLogger;
+import com.github.valfirst.slf4jtest.TestLoggerFactory;
+import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentMatcher;
@@ -55,8 +62,11 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.web.client.RestTemplate;
 
+@ExtendWith(TestLoggerFactoryExtension.class)
 class VaultStoredPropertiesProcessorTests
 {
+    private final TestLogger logger = TestLoggerFactory.getTestLogger(VaultStoredPropertiesProcessor.class);
+
     @ParameterizedTest
     @ValueSource(strings = {
             "",
@@ -155,5 +165,39 @@ class VaultStoredPropertiesProcessorTests
             ordered.verify(context).refresh();
             ordered.verify(context).getBean(VaultTemplate.class);
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "beforeVAULT()after",
+            "VAULT()",
+            "beforeVAULT()",
+            "VAULT()after"
+    })
+    void shouldPrintLogAboutDeprecation(String propertyValue) throws IOException
+    {
+        try (var processor = new VaultStoredPropertiesProcessor(new Properties()))
+        {
+            processor.processProperty("old-property-name", propertyValue);
+        }
+        assertThat(logger.getLoggingEvents(), is(List.of(
+                warn("`VAULT(...)` placeholder is deprecated and will be removed in VIVIDUS 0.7.0, "
+                        + "please use `HASHI_CORP_VAULT(...)` placeholder instead."))));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "beforeHASHI_CORP_VAULT()after",
+            "HASHI_CORP_VAULT()",
+            "beforeHASHI_CORP_VAULT()",
+            "HASHI_CORP_VAULT()after"
+    })
+    void shouldNotPrintLogAboutDeprecation(String propertyValue) throws IOException
+    {
+        try (var processor = new VaultStoredPropertiesProcessor(new Properties()))
+        {
+            processor.processProperty("new-property-name", propertyValue);
+        }
+        assertEquals(0, logger.getLoggingEvents().size());
     }
 }
