@@ -382,6 +382,24 @@ When I switch to frame located by `id(parent)`
 Then text `Modal Frame Example` exists
 ----
 
+=== Select an option in dropdown
+
+Selects the first https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option[option] in dropdown whose https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#value[value attribute] is equal to the provided value (case-insensitive).
+
+[source,gherkin]
+----
+When I select `$option` in dropdown located by `$locator`
+----
+
+* `$option` - The option to select.
+* `$locator` - The <<_locator,locator>> used to find dropdown.
+
+.Select option with the value `Red` in dropdown
+[source,gherkin]
+----
+When I select `Red` in dropdown located by `id(colors)`
+----
+
 include::plugins:partial$ui-element-css-property-steps.adoc[]
 
 include::plugins:partial$ui-elements-conditional-iteration-steps.adoc[]
