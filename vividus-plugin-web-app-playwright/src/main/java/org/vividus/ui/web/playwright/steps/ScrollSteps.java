@@ -26,7 +26,6 @@ import org.vividus.ui.web.action.DirectionScroller;
 import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.action.PlaywrightUiContextScroller;
 import org.vividus.ui.web.playwright.action.ScrollActions;
-import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 
 public class ScrollSteps
@@ -35,8 +34,7 @@ public class ScrollSteps
     private final UiContext uiContext;
     private final ScrollActions scrollActions;
 
-    public ScrollSteps(ISoftAssert softAssert, UiContext uiContext, PlaywrightSoftAssert playwrightSoftAssert,
-            ScrollActions scrollActions)
+    public ScrollSteps(ISoftAssert softAssert, UiContext uiContext, ScrollActions scrollActions)
     {
         this.softAssert = softAssert;
         this.uiContext = uiContext;

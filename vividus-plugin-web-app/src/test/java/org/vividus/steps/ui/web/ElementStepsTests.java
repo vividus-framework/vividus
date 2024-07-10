@@ -257,13 +257,13 @@ class ElementStepsTests
                      assertEquals(List.of(FILE_PATH), context.arguments());
                      when(mock.exists()).thenReturn(true);
                      when(mock.getAbsolutePath()).thenReturn(ABSOLUTE_PATH);
-                 })
+                 });
+             InputStream inputStream = new ByteArrayInputStream(TEXT.getBytes(StandardCharsets.UTF_8))
         )
         {
             var resource = mock(Resource.class);
             when(resource.exists()).thenReturn(true);
             when(resource.getURL()).thenReturn(new URL(JAR_ARCHIVE_FILE_TXT));
-            InputStream inputStream = new ByteArrayInputStream(TEXT.getBytes(StandardCharsets.UTF_8));
             when(resource.getInputStream()).thenReturn(inputStream);
             mockResourceLoader(resource);
             when(softAssert.assertTrue(FILE_FILE_PATH_EXISTS, true)).thenReturn(true);

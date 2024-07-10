@@ -88,8 +88,7 @@ public class PlaywrightCookieManager implements CookieManager<Cookie>
                 new CookieStoreCollector());
     }
 
-    private static org.apache.hc.client5.http.cookie.Cookie createHttpClientCookie(
-            com.microsoft.playwright.options.Cookie cookie)
+    private static org.apache.hc.client5.http.cookie.Cookie createHttpClientCookie(Cookie cookie)
     {
         BasicClientCookie httpClientCookie = new BasicClientCookie(cookie.name, cookie.value);
         httpClientCookie.setDomain(cookie.domain);

@@ -129,7 +129,7 @@ class PlaywrightCookieManagerTests
     {
         Double expiryDate = (double) ZonedDateTime.now().plusDays(1).toInstant().getEpochSecond();
         when(browserContextProvider.get()).thenReturn(browserContext);
-        com.microsoft.playwright.options.Cookie cookie = createCookie().setExpires(expiryDate);
+        Cookie cookie = createCookie().setExpires(expiryDate);
         when(browserContext.cookies()).thenReturn(List.of(cookie));
 
         CookieStore cookieStore = cookieManager.getCookiesAsHttpCookieStore();

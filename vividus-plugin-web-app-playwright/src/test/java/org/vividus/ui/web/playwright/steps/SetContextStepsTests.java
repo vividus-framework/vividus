@@ -138,6 +138,7 @@ class SetContextStepsTests
         testSwitchToFrame(currentFrame::frameLocator);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void shouldWaitForTabAndSwitch()
     {
@@ -150,8 +151,11 @@ class SetContextStepsTests
         when(browserContext.pages()).thenReturn(List.of(page1, page2));
 
         doNothing().when(waitActions).runWithTimeoutAssertion(
-                (Supplier) argThat(
-                        s -> ((Supplier) s).get().equals("switch to the tab where title contains \"Title2\"")),
+                (Supplier<String>) argThat(
+                        s -> {
+                            String value = ((Supplier<String>) s).get();
+                            return "switch to the tab where title contains \"Title2\"".equals(value);
+                        }),
                 argThat(runnable ->
                 {
                     runnable.run();
@@ -174,6 +178,7 @@ class SetContextStepsTests
         verifyNoMoreInteractions(page1);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void shouldWaitForTabAndNotSwitchIfMatchedTitleNotFound()
     {
@@ -184,8 +189,11 @@ class SetContextStepsTests
         when(browserContext.pages()).thenReturn(List.of(page));
 
         doNothing().when(waitActions).runWithTimeoutAssertion(
-                (Supplier) argThat(s -> ((Supplier) s).get()
-                        .equals(String.format("switch to the tab where title contains \"%s\"", TITLE_2))),
+                (Supplier<String>) argThat(s -> {
+                    String value = ((Supplier<String>) s).get();
+                    return String.format("switch to the tab where title contains \"%s\"", TITLE_2)
+                            .equals(value);
+                }),
                 argThat(runnable ->
                 {
                     runnable.run();

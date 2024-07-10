@@ -93,6 +93,7 @@ class WaitStepsTests
         assertTrue(condition.getAsBoolean());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void shouldWaitUntilPageTitleIs()
     {
@@ -101,8 +102,11 @@ class WaitStepsTests
         when(uiContext.getCurrentPage()).thenReturn(page);
         when(page.title()).thenReturn(title);
         doNothing().when(waitActions)
-                .runWithTimeoutAssertion((Supplier) argThat(
-                        s -> ((Supplier) s).get().equals("current title contains \"Title\". Current title: \"Title\"")),
+                .runWithTimeoutAssertion((Supplier<String>) argThat(
+                        s -> {
+                            String value = ((Supplier<String>) s).get();
+                            return "current title contains \"Title\". Current title: \"Title\"".equals(value);
+                        }),
                         argThat(runnable ->
                         {
                             runnable.run();

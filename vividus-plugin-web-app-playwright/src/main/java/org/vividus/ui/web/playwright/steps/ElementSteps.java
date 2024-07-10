@@ -81,9 +81,8 @@ public class ElementSteps
     {
         int actualNumberOfElements = uiContext.locateElement(locator).count();
         boolean matches = comparisonRule.getComparisonRule(number).matches(actualNumberOfElements);
-        StringBuilder assertionMessage = new StringBuilder("The number of elements found by ")
-                .append('\'').append(locator).append('\'')
-                .append(" is ").append(actualNumberOfElements);
+        StringBuilder assertionMessage = new StringBuilder("The number of elements found by '")
+                .append(locator).append("' is ").append(actualNumberOfElements);
         if (comparisonRule == ComparisonRule.EQUAL_TO)
         {
             if (!matches)

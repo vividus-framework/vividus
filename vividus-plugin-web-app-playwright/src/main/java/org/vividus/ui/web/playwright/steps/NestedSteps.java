@@ -80,7 +80,7 @@ public class NestedSteps
      * @param iterationLimit Max iterations to perform
      * @param stepsToExecute Examples table with steps to execute for each found elements
      */
-    @When(value = "I find $comparisonRule `$number` elements `$locator` and while they exist do up "
+    @When("I find $comparisonRule `$number` elements `$locator` and while they exist do up "
                   + "to $iterationLimit iteration of$stepsToExecute")
     @Alias("I find $comparisonRule '$number' elements $locator and while they exist do up "
            + "to $iterationLimit iteration of$stepsToExecute")
@@ -133,7 +133,7 @@ public class NestedSteps
      * @param locator        Locator to locate element
      * @param stepsToExecute Examples table with steps to execute for each found elements
      */
-    @When(value = "I find $comparisonRule `$number` elements by `$locator` and for each element do$stepsToExecute")
+    @When("I find $comparisonRule `$number` elements by `$locator` and for each element do$stepsToExecute")
     @Alias("I find $comparisonRule '$number' elements by $locator and for each element do$stepsToExecute")
     public void executeStepsForAllLocatedElements(ComparisonRule comparisonRule, int number, PlaywrightLocator locator,
             SubSteps stepsToExecute)

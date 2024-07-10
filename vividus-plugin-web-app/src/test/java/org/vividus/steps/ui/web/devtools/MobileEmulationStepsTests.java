@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ class MobileEmulationStepsTests
 {
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IWebDriverManager webDriverManager;
-    @Mock private HasCdp hasCdp;
+    @Mock private HasCdp havingCdpDriver;
     private MobileEmulationSteps steps;
 
     @BeforeEach
@@ -52,7 +52,7 @@ class MobileEmulationStepsTests
     void shouldOverrideDeviceMetrics()
     {
         when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(true);
-        when(webDriverProvider.getUnwrapped(HasCdp.class)).thenReturn(hasCdp);
+        when(webDriverProvider.getUnwrapped(HasCdp.class)).thenReturn(havingCdpDriver);
 
         String metrics = """
             {
@@ -65,7 +65,7 @@ class MobileEmulationStepsTests
 
         steps.overrideDeviceMetrics(metrics);
 
-        verify(hasCdp).executeCdpCommand("Emulation.setDeviceMetricsOverride", Map.of(
+        verify(havingCdpDriver).executeCdpCommand("Emulation.setDeviceMetricsOverride", Map.of(
             "width", 430,
             "height", 932,
             "deviceScaleFactor", 3,
@@ -77,11 +77,11 @@ class MobileEmulationStepsTests
     void shouldClearDeviceMetrics()
     {
         when(webDriverManager.isBrowserAnyOf(Browser.CHROME)).thenReturn(true);
-        when(webDriverProvider.getUnwrapped(HasCdp.class)).thenReturn(hasCdp);
+        when(webDriverProvider.getUnwrapped(HasCdp.class)).thenReturn(havingCdpDriver);
 
         steps.clearDeviceMetrics();
 
-        verify(hasCdp).executeCdpCommand("Emulation.clearDeviceMetricsOverride", Map.of());
+        verify(havingCdpDriver).executeCdpCommand("Emulation.clearDeviceMetricsOverride", Map.of());
     }
 
     @Test

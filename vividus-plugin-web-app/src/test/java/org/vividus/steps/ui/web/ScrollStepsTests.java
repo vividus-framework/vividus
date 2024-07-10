@@ -16,8 +16,6 @@
 
 package org.vividus.steps.ui.web;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -28,7 +26,6 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -152,11 +149,5 @@ class ScrollStepsTests
         when(baseValidations.assertIfElementExists(ELEMENT_TO_VERIFY_POSITION, locator)).thenReturn(null);
         scrollSteps.isPageScrolledToElement(locator);
         verifyNoInteractions(softAssert);
-    }
-
-    private void verifyUnsupportedScroll(Executable toTest)
-    {
-        var exception = assertThrows(UnsupportedOperationException.class, toTest);
-        assertEquals("Horizontal scroll of the page not supported", exception.getMessage());
     }
 }

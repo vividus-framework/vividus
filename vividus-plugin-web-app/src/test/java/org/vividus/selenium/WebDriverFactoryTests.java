@@ -66,7 +66,6 @@ import org.openqa.selenium.UsernameAndPassword;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Timeouts;
-import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -510,7 +509,7 @@ class WebDriverFactoryTests
 
         assertThat(decoratedDriver, instanceOf(Decorated.class));
         var textFormattingDriver = ((Decorated<TextFormattingWebDriver>) decoratedDriver).getOriginal();
-        assertEquals(expectedSupplier.get(), ((WrapsDriver) textFormattingDriver).getWrappedDriver());
+        assertEquals(expectedSupplier.get(), textFormattingDriver.getWrappedDriver());
 
         decoratedDriver.getCurrentUrl();
         verify(webDriverListener).beforeAnyWebDriverCall(textFormattingDriver,
