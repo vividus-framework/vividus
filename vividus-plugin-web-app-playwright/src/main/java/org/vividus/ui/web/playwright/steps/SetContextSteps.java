@@ -16,16 +16,27 @@
 
 package org.vividus.ui.web.playwright.steps;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
+import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.BrowserContext.WaitForConditionOptions;
 import com.microsoft.playwright.FrameLocator;
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 
+import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.steps.StringComparisonRule;
+import org.vividus.ui.web.playwright.BrowserContextProvider;
 import org.vividus.ui.web.playwright.UiContext;
+import org.vividus.ui.web.playwright.action.WaitActions;
 import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 
@@ -33,12 +44,17 @@ public class SetContextSteps
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(SetContextSteps.class);
 
+    private final BrowserContextProvider browserContextProvider;
     private final UiContext uiContext;
+    private final WaitActions waitActions;
     private final PlaywrightSoftAssert playwrightSoftAssert;
 
-    public SetContextSteps(UiContext uiContext, PlaywrightSoftAssert playwrightSoftAssert)
+    public SetContextSteps(BrowserContextProvider browserContextProvider, UiContext uiContext, WaitActions waitActions,
+            PlaywrightSoftAssert playwrightSoftAssert)
     {
+        this.browserContextProvider = browserContextProvider;
         this.uiContext = uiContext;
+        this.waitActions = waitActions;
         this.playwrightSoftAssert = playwrightSoftAssert;
     }
 
@@ -125,6 +141,50 @@ public class SetContextSteps
     public void switchingToDefault()
     {
         uiContext.reset();
+    }
+
+    /**
+     * Wait for a tab and switches the focus of future browser commands to the new
+     * <b>tab</b> with the specified <b>title</b>.
+     * <b>Title</b> references to the page title, which is set by {@code <title>} tag.
+     * <p>
+     * Actions performed at this step:
+     * <ul>
+     * <li>Searches among currently opened tabs for a tab with the specified <b>tabName</b></li>
+     * <li>If such tab is found switches focus to it. If tab is not found current focus stays unchanged</li>
+     * </ul>
+     * @param duration Duration in <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>
+     * @param comparisonRule String comparison rule: is equal to, contains, does not contain, matches
+     * @param title Value of the {@code <title>} tag of a desired tab
+     */
+    @When("I wait `$duration` until tab with title that $comparisonRule `$title` appears and switch to it")
+    public void waitForTabAndSwitch(Duration duration, StringComparisonRule comparisonRule, String title)
+    {
+        BrowserContext browserContext = browserContextProvider.get();
+        WaitForConditionOptions options = new WaitForConditionOptions();
+        options.setTimeout(duration.toMillis());
+        Matcher<String> titleMatcher = comparisonRule.createMatcher(title);
+
+        BooleanSupplier waitCondition = () ->
+        {
+            List<Page> pages = browserContext.pages();
+            for (Page page : pages)
+            {
+                if (titleMatcher.matches(page.title()))
+                {
+                    uiContext.reset();
+                    uiContext.setCurrentPage(page);
+                    page.bringToFront();
+                    return true;
+                }
+            }
+            return false;
+        };
+        Supplier<String> assertionMessage = () -> String.format("switch to the tab where title %s \"%s\"",
+                comparisonRule, title);
+
+        waitActions.runWithTimeoutAssertion(assertionMessage,
+                () -> browserContext.waitForCondition(waitCondition, options));
     }
 
     private FrameLocator getFrameLocator(String locator)

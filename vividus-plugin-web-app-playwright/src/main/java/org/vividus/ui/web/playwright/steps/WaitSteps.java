@@ -17,29 +17,32 @@
 package org.vividus.ui.web.playwright.steps;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import com.microsoft.playwright.Locator;
-import com.microsoft.playwright.TimeoutError;
+import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.WaitForSelectorState;
 
+import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
-import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
+import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.playwright.BrowserContextProvider;
 import org.vividus.ui.web.playwright.UiContext;
+import org.vividus.ui.web.playwright.action.WaitActions;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
 
 public class WaitSteps
 {
     private final UiContext uiContext;
-    private final ISoftAssert softAssert;
     private final BrowserContextProvider browserContextProvider;
+    private final WaitActions waitActions;
 
-    public WaitSteps(UiContext uiContext, ISoftAssert softAssert, BrowserContextProvider browserContextProvider)
+    public WaitSteps(UiContext uiContext, BrowserContextProvider browserContextProvider, WaitActions waitActions)
     {
         this.uiContext = uiContext;
-        this.softAssert = softAssert;
         this.browserContextProvider = browserContextProvider;
+        this.waitActions = waitActions;
     }
 
     /**
@@ -83,7 +86,24 @@ public class WaitSteps
                 .matches(uiContext.locateElement(locator).count());
         String assertionMessage = String.format("number of elements located by '%s' to be %s %d", locator,
                 comparisonRule, number);
-        runWithTimeoutAssertion(assertionMessage, () -> browserContextProvider.get().waitForCondition(waitCondition));
+        waitActions.runWithTimeoutAssertion(assertionMessage,
+                () -> browserContextProvider.get().waitForCondition(waitCondition));
+    }
+
+    /**
+     * Waits until the current page title matches the certain title using specified comparison rule.
+     * @param comparisonRule String comparison rule: "is equal to", "contains", "does not contain", "matches"
+     * @param pattern The expected title pattern of the current page
+     */
+    @When("I wait until page title $comparisonRule `$pattern`")
+    public void waitUntilPageTitleIs(StringComparisonRule comparisonRule, String pattern)
+    {
+        Page currentPage = uiContext.getCurrentPage();
+        Matcher<String> matcher = comparisonRule.createMatcher(pattern);
+        BooleanSupplier waitCondition = () -> matcher.matches(currentPage.title());
+        Supplier<String> assertionMessage = () -> String.format("current title %s \"%s\". Current title: \"%s\"",
+                comparisonRule, pattern, currentPage.title());
+        waitActions.runWithTimeoutAssertion(assertionMessage, () -> currentPage.waitForCondition(waitCondition));
     }
 
     private void waitForElementState(PlaywrightLocator locator, WaitForSelectorState state)
@@ -91,20 +111,7 @@ public class WaitSteps
         Locator.WaitForOptions waitOption = new Locator.WaitForOptions().setState(state);
         String assertionMessage = String.format("element located by '%s' to be %s", locator,
                 state.toString().toLowerCase());
-        runWithTimeoutAssertion(assertionMessage, () -> uiContext.locateElement(locator).waitFor(waitOption));
-    }
-
-    private void runWithTimeoutAssertion(String conditionDescription, Runnable timeoutOperation)
-    {
-        try
-        {
-            timeoutOperation.run();
-            softAssert.recordPassedAssertion("Passed wait condition: " + conditionDescription);
-        }
-        catch (TimeoutError e)
-        {
-            softAssert.recordFailedAssertion("Failed wait condition: " + conditionDescription + ". " + e.getMessage(),
-                    e);
-        }
+        waitActions.runWithTimeoutAssertion(assertionMessage,
+                () -> uiContext.locateElement(locator).waitFor(waitOption));
     }
 }

@@ -76,3 +76,24 @@ Then number of elements found by `id(header)` is equal to `0`
 When I reset context
 Then number of elements found by `id(header)` is equal to `1`
 ----
+
+==== Wait for tab and switch
+
+Waits for a tab with desired title and switches to it.
+
+[source,gherkin]
+----
+When I wait `$duration` until tab with title that $comparisonRule `$title` appears and switch to it
+----
+
+* `$duration` - The timeout duration to wait for a tab in {durations-format-link} format.
+* `$comparisonRule` - The tab title xref:parameters:string-comparison-rule.adoc[comparison rule].
+* `$title` - The expected tab title.
+
+.Wait for tab and switch to it
+[source,gherkin]
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/windows.html`
+When I click on element located by `id(timeout)`
+When I wait `PT3S` until tab with title that is equal to `Vividus test site` appears and switch to it
+----
