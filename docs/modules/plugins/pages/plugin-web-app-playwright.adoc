@@ -306,6 +306,8 @@ When I wait until number of elements located by `$locator` is $comparisonRule $n
 When I wait until number of elements located by `xpath(//a)` is equal to `5`
 ----
 
+include::plugins:partial$common-web-app-wait-steps.adoc[]
+
 === JavaScript steps
 ==== Execute JavaScript
 
