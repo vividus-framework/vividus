@@ -147,35 +147,6 @@ When I wait until element located by `$locator` stops moving
 When I wait until element located by `id(submitForm)` stops moving
 ----
 
-=== Verify elements state
-
-Verifies if the number of elements located by locator matches the number
-condition and all of them are in the desired state.
-
-[IMPORTANT]
-If you describe number condition as equal to 5 in case if there are 10 elements by this locator and only 5 of them in the desired state. You will get two failed assertions.
-The first one about number condition violation. The second one about state check failure.
-
-[WARNING]
-In case when <<_visibility_types>> are used and checked state are equal (For an example ':i' and 'NOT_VISIBLE') exception will be thrown. In such cases please use step: <<_validate_elements_number>>.
-Contradictory visibility parameters (locator - ':i' and checked state - 'VISIBLE') are also not allowed.
-
-[source,gherkin]
-----
-Then number of $state elements found by `$locator` is $comparisonRule `$quantity`
-----
-
-* `$state` - xref:parameters:state.adoc[State]
-* `$locator` - <<_locator>>.
-* `$comparisonRule` - xref:parameters:comparison-rule.adoc[The comparison rule].
-* `$quantity` - The expected number of elements.
-
-.Verify the number of elements in the state
-[source,gherkin]
-----
-Then number of VISIBLE elements found by `tagName(img)` is = `1`
-----
-
 === Saves the attribute value of the context
 
 Saves the attribute value of the context element into a variable.
