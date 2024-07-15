@@ -237,7 +237,7 @@ class ResourceCheckStepsTests
             validate(resourceValidations, imageUri, "#image", CheckStatus.PASSED, N_A);
             validate(resourceValidations, EXTERNAL_SECTION_LINK, EXTERNAL_SECTION_LINK_SELECTOR, CheckStatus.PASSED,
                     N_A);
-            validate(resourceValidations, gifImageUri, "Unable to build CSS selector for 'img' element",
+            validate(resourceValidations, gifImageUri, "html > body > img.image.\\(gif\\)",
                     CheckStatus.PASSED, N_A);
             validate(resourceValidations,
                     URI.create("https://images.ctfassets.net/us_cool_mint_pocketpaks_breath_strips.png"),
