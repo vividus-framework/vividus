@@ -16,12 +16,15 @@
 
 package org.vividus.ui.web.playwright.steps;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -29,6 +32,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,8 +55,10 @@ import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.action.ResourceFileLoader;
 import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.action.ElementActions;
+import org.vividus.ui.web.playwright.assertions.PlaywrightLocatorAssertions;
 import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
+import org.vividus.ui.web.playwright.locator.Visibility;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
@@ -230,6 +236,64 @@ class ElementStepsTests
         steps.assertElementCssProperty(CSS_NAME, StringComparisonRule.IS_EQUAL_TO, CSS_VALUE);
         verify(softAssert).assertThat(eq("Element css property value is"), eq(CSS_VALUE),
                 argThat(matcher -> matcher.matches(CSS_VALUE)));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ "VISIBLE", "ALL" })
+    void shouldAssertElementsNumberInState(Visibility visibility)
+    {
+        var playwrightLocator = getLocatorWithVisibility(visibility);
+        Locator locator = mock();
+        int number = 1;
+        when(uiContext.locateElement(playwrightLocator)).thenReturn(locator);
+        when(locator.count()).thenReturn(number);
+        Locator element = mock();
+        when(locator.all()).thenReturn(Collections.singletonList(element));
+        ComparisonRule comparisonRule = ComparisonRule.EQUAL_TO;
+        ElementState state = spy(ElementState.ENABLED);
+        try (var playwrightLocatorAssertions = mockStatic(PlaywrightLocatorAssertions.class))
+        {
+            doNothing().when(playwrightSoftAssert).runAssertion(eq("Element state is not ENABLED"),
+                    argThat(runnable -> {
+                        runnable.run();
+                        return true;
+                    }));
+            steps.assertElementsNumberInState(state, playwrightLocator, comparisonRule, number);
+            playwrightLocatorAssertions.verify(() -> PlaywrightLocatorAssertions.assertElementEnabled(element, false));
+        }
+    }
+
+    @Test
+    void shouldThrowAnExceptionIfLocatorVisibilityAndStateToCheckAreTheSame()
+    {
+        var visibility = Visibility.VISIBLE;
+        var state = ElementState.VISIBLE;
+        PlaywrightLocator locator = getLocatorWithVisibility(Visibility.VISIBLE);
+        var illegalArgumentException = assertThrows(IllegalArgumentException.class,
+                () -> steps.assertElementsNumberInState(state, locator, ComparisonRule.EQUAL_TO, 0));
+        assertEquals(String.format(
+                "Locator visibility: %s and the state: %s to validate are the same."
+                + " This makes no sense. Please consider validation of elements size instead.",
+                visibility, state), illegalArgumentException.getMessage());
+    }
+
+    @Test
+    void shouldThrowAnExceptionIfLocatorVisibilityAndStateToCheckAreDifferent()
+    {
+        var visibility = Visibility.VISIBLE;
+        var state = ElementState.NOT_VISIBLE;
+        PlaywrightLocator locator = getLocatorWithVisibility(visibility);
+        var illegalArgumentException = assertThrows(IllegalArgumentException.class,
+                () -> steps.assertElementsNumberInState(state, locator, ComparisonRule.EQUAL_TO, 0));
+        assertEquals(String.format("Contradictory input parameters. Locator visibility: '%s', the state: '%s'.",
+                visibility, state), illegalArgumentException.getMessage());
+    }
+
+    private static PlaywrightLocator getLocatorWithVisibility(Visibility visibility)
+    {
+        var locator = new PlaywrightLocator(XPATH, LOCATOR_VALUE);
+        locator.setVisibility(visibility);
+        return locator;
     }
 
     private void verifyIfAttributeIsNotPresent()

@@ -38,6 +38,7 @@ import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.action.ElementActions;
 import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
+import org.vividus.ui.web.playwright.locator.Visibility;
 import org.vividus.variable.VariableScope;
 
 public class ElementSteps
@@ -75,11 +76,13 @@ public class ElementSteps
      *                       <li>not equal to (!=)</li>
      *                       </ul>
      * @param number         The expected number of elements.
+     * @return               The locator of found elements.
      */
     @Then("number of elements found by `$locator` is $comparisonRule `$number`")
-    public void assertElementsNumber(PlaywrightLocator locator, ComparisonRule comparisonRule, int number)
+    public Locator assertElementsNumber(PlaywrightLocator locator, ComparisonRule comparisonRule, int number)
     {
-        int actualNumberOfElements = uiContext.locateElement(locator).count();
+        Locator elements = uiContext.locateElement(locator);
+        int actualNumberOfElements = elements.count();
         boolean matches = comparisonRule.getComparisonRule(number).matches(actualNumberOfElements);
         StringBuilder assertionMessage = new StringBuilder("The number of elements found by '")
                 .append(locator).append("' is ").append(actualNumberOfElements);
@@ -99,6 +102,7 @@ public class ElementSteps
                     .append(comparisonRule).append(' ').append(number);
         }
         softAssert.recordAssertion(matches, assertionMessage.toString());
+        return elements;
     }
 
     /**
@@ -271,6 +275,48 @@ public class ElementSteps
             PlaywrightAssertions.assertThat(fileInputLocator).hasCount(1);
             fileInputLocator.setInputFiles(fileForUpload.toPath());
         });
+    }
+
+    /**
+     * Verifies elements' located by locator state.
+     * Where state one of: ENABLED/DISABLED, SELECTED/NOT_SELECTED, VISIBLE/NOT_VISIBLE
+     * Step intended to verify strictly either number of elements and their state
+     * <p><i>In case when locator's visibility and checked state are equal (For an example ':v' and 'VISIBLE')
+     * exception will be thrown. In such cases please use step:
+     * 'Then number of elements found by `$locator` is $comparisonRule `$number`'.
+     * Contradictory visibility parameters (locator - ':v' and checked state - 'NOT_VISIBLE') are also not allowed.
+     * </i></p>
+     *
+     * @param state          Desired state of an element
+     * @param locator        Locator to locate element
+     * @param comparisonRule The rule to match the number of elements. The supported rules:
+     *                       <ul>
+     *                       <li>less than (&lt;)</li>
+     *                       <li>less than or equal to (&lt;=)</li>
+     *                       <li>greater than (&gt;)</li>
+     *                       <li>greater than or equal to (&gt;=)</li>
+     *                       <li>equal to (=)</li>
+     *                       <li>not equal to (!=)</li>
+     *                       </ul>
+     * @param number         The expected number of elements
+     */
+    @Then("number of $state elements found by `$locator` is $comparisonRule `$number`")
+    public void assertElementsNumberInState(
+            ElementState state, PlaywrightLocator locator, ComparisonRule comparisonRule, int number)
+    {
+        Visibility visibility = locator.getVisibility();
+        if (visibility == Visibility.VISIBLE && (state == ElementState.VISIBLE || state == ElementState.NOT_VISIBLE))
+        {
+            String errorMessage = String.format(state == ElementState.VISIBLE
+                    ? "Locator visibility: %s and the state: %s to validate are the same. This makes no sense. "
+                      + "Please consider validation of elements size instead."
+                    : "Contradictory input parameters. Locator visibility: '%s', the state: '%s'.",
+                    visibility, state);
+            throw new IllegalArgumentException(errorMessage);
+        }
+        String description = "Element state is not " + state;
+        assertElementsNumber(locator, comparisonRule, number).all().forEach(
+                element -> playwrightSoftAssert.runAssertion(description, () -> state.assertElementState(element)));
     }
 
     private void saveAttributeValueOfElement(Locator element, String attributeName, Set<VariableScope> scopes,

@@ -7,6 +7,10 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
         default-lazy-init="true" profile="web_pw">
 
+    <bean class="org.vividus.ui.web.playwright.PlaywrightAssertionConfiguration" init-method="init" lazy-init="false">
+        <property name="assertionTimeout" value="${ui.wait.timeout}" />
+    </bean>
+
     <bean class="org.vividus.ui.web.playwright.BrowserContextProvider"
         destroy-method="destroy">
         <constructor-arg index="0" value="${internal.playwright.browser}" />
