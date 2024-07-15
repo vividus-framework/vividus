@@ -154,6 +154,9 @@ class ResourceCheckStepsTests
               <p id='section'>Section</p>
               <a id='jump-link-using-name' href='#named-section'>Jump link using name</a>
               <p name='named-section'>Named Section</a>
+              <img class="vds-flex_1 vds-d_block lg:vds-d_flex vds-flex_column vds-items_flex-end
+               [&amp;_>_*:first-child]:vds-pt_0"
+                href="https://docs.vividus.dev/vividus/latest/_images/subscribe-to-releases.gif"></img>
             </body>
             </html>""";
 
@@ -228,13 +231,16 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(16));
+            assertThat(validationsToReport, hasSize(17));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations, URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
                     CheckStatus.PASSED, N_A);
             validate(resourceValidations, URI.create(SECTION_SELECTOR), JUMP_LINK_SELECTOR, CheckStatus.PASSED, N_A);
             validate(resourceValidations, SERENITY_URI, HTTP_ID, CheckStatus.PASSED, N_A);
             validate(resourceValidations, imageUri, "#image", CheckStatus.PASSED, N_A);
+            validate(resourceValidations,
+                    URI.create("https://docs.vividus.dev/vividus/latest/_images/subscribe-to-releases.gif"),
+                    "Unable to build CSS selector for 'img' element", CheckStatus.PASSED, N_A);
             validate(resourceValidations, EXTERNAL_SECTION_LINK, EXTERNAL_SECTION_LINK_SELECTOR, CheckStatus.PASSED,
                     N_A);
             validate(resourceValidations, gifImageUri, "html > body > img.image.\\(gif\\)",
