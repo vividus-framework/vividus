@@ -102,13 +102,12 @@ public class HttpClient implements IHttpClient, AutoCloseable
 
         HttpClientContext internalContext = Optional.ofNullable(context).orElseGet(HttpClientContext::create);
 
-        String userInfo = request.getAuthority().getUserInfo();
-        if (userInfo != null)
+        Optional.ofNullable(request.getAuthority()).map(URIAuthority::getUserInfo).ifPresent(userInfo ->
         {
             HttpHost host = RoutingSupport.normalize(HttpHost.create(uri), DefaultSchemePortResolver.INSTANCE);
             configureBasicAuth(usePreemptiveBasicAuthIfAvailable, userInfo, host, internalContext);
             request.setAuthority(new URIAuthority(host));
-        }
+        });
 
         HttpClientResponseHandler<HttpResponse> responseHandler = response -> {
             HttpResponse httpResponse = new HttpResponse();
