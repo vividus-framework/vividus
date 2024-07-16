@@ -429,3 +429,109 @@ When I select element located by `id(uploadfile)` and upload file `/folder/file_
 ----
 
 include::plugins:partial$ui-scrolling-steps.adoc[]
+
+=== Request validation steps
+:enable-recording-note: This step requires network recording to be turned on. It can be done in properties via "proxy.recording.enabled" or by switching on "@proxy" meta tag at the story or scenario level.
+
+==== Capture HTTP message
+
+Save the HTTP message part from the HTTP request with given URL-pattern into the variable with specified name and the scopes.
+
+NOTE: {enable-recording-note}
+
+The actions performed by the step:
+
+* extract HTTP messages from the network recording archive
+* find HTTP requests matching the provided HTTP methods and the URL regular expression
+* check that total number of the found HTTP messages is equal to `1`
+* save the HTTP message part to the specified variable
+
+[source,gherkin]
+----
+When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save $httpMessagePart to $scopes variable `$variableName`
+----
+* `$httpMethods` - The comma-separated set of HTTP methods to filter by, e.g. `GET, POST, PUT`.
+* `$urlPattern` - The regular expression to match HTTP request URL.
+* `$httpMessagePart` - The HTTP message part to save. One of:
+** `URL` - The request URL.
+** `URL query` - The request URL query parameters.
+** `request data` - The request data includes the following keys:
+*** `query` - The URL query is stored as a collection of key and value pairs, where key is the name of the query parameter and value is the list of query parameter values. The query parameter values are accessible via zero-based index.
+*** `resourceType` - The request's resource type as it was perceived by the rendering engine. `resourceType` will be one of the following: document, stylesheet, image, media, font, script, texttrack, xhr, fetch, eventsource, websocket, manifest, other.
+*** `requestBody.contentType` - The MIME type of posted data.
+*** `requestBody.text` - The posted data as plain text.
+*** `responseStatus` - The response status.
+** `response data` - The response data includes the following keys:
+*** `responsetBody.contentType` - The MIME type of received data.
+*** `responsetBody.text` - The received data as plain text.
+
+.Validate the URL of the matching HTTP request
+[source,gherkin,subs="attributes+"]
+----
+Given I am on page with URL `https://www.google.com/search?q=vividus`
+When I capture HTTP GET,POST request with URL pattern `.*/search.*=vividus` and save URL to scenario variable `URL`
+Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
+----
+
+.Validate the URL query of the matching HTTP request
+[source,gherkin,subs="attributes+"]
+----
+Given I am on page with URL `https://www.google.com/search?q=vividus`
+When I capture HTTP GET request with URL pattern `.*/search.*=vividus` and save URL query to scenario variable `query`
+Then `${query.q[0]}` is equal to `vividus`
+Then `${query.q}` is equal to `[vividus]`
+Then `${query}` is equal to `{q=[vividus]}`
+----
+
+.Validate the request and response data from the matching HTTP messages
+[source,gherkin,subs="attributes+"]
+----
+Given I am on page with URL `http://httpbingo.org/forms/post`
+When I click on element located by `xpath(//input[@value='cheese'])`
+When I click on element located by `xpath(//button)`
+When I capture HTTP POST request with URL pattern `http://httpbingo\.org/post` and save request data to SCENARIO variable `requestData`
+Then `${requestData.query}` is equal to `{}`
+Then `${requestData.resourceType}` is equal to `document`
+Then `${requestData.requestBody}` is not equal to `null`
+Then `${requestData.responseStatus}` is equal to `200`
+When I capture HTTP POST request with URL pattern `http://httpbingo\.org/post` and save response data to SCENARIO variable `responseData`
+Then `${responseData.responseBody}` matches `.*"topping":.*"cheese".*`
+----
+
+==== Wait for the HTTP request
+
+Waits for the HTTP requests matching the provided HTTP methods and URL regular expression.
+If no HTTP request is sent and wait timeout is reached, then the step will fail.
+
+NOTE: {enable-recording-note}
+
+[source,gherkin]
+----
+When I wait until HTTP $httpMethods request with URL pattern `$urlPattern` is captured
+----
+* `$httpMethods` - The comma-separated HTTP methods to filter by, e.g. `GET,POST,PUT`.
+* `$urlPattern` - The regular expression to match HTTP request URL.
+
+.Wait for the HTTP request
+[source,gherkin,subs="attributes+"]
+----
+Given I am on page with URL `https://www.google.com/search?q=vividus`
+When I wait until HTTP GET request with URL pattern `.*/search.*=vividus` is captured
+----
+
+==== Clear the network recordings
+
+The step clears recorded HTTP requests.
+
+[source,gherkin]
+----
+When I clear network recordings
+----
+
+.Clear the recorded data
+[source,gherkin,subs="attributes+"]
+----
+Given I am on page with URL `https://www.google.com/search?q=vividus`
+When I wait until HTTP GET request with URL pattern `.*/search.*=vividus` is captured
+When I clear network recordings
+----

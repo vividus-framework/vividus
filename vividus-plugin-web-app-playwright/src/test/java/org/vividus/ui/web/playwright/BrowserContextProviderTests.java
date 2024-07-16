@@ -55,6 +55,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.testcontext.SimpleTestContext;
+import org.vividus.ui.web.playwright.network.NetworkContext;
 
 @SuppressWarnings("PMD.CloseResource")
 @ExtendWith(MockitoExtension.class)
@@ -67,6 +68,7 @@ class BrowserContextProviderTests
     @Mock private BrowserType browserType;
     @Mock private LaunchOptions launchOptions;
     @Mock private Path tracesOutputDirectory;
+    @Mock private NetworkContext networkContext;
     private BrowserContextProvider browserContextProvider;
 
     @BeforeEach
@@ -76,7 +78,7 @@ class BrowserContextProviderTests
         BrowserContextConfiguration browserContextConfiguration = new BrowserContextConfiguration(tracingOptions,
                 duration, tracesOutputDirectory);
         browserContextProvider = new BrowserContextProvider(browserType, launchOptions, testContext,
-                browserContextConfiguration);
+                browserContextConfiguration, networkContext);
     }
 
     @Test
@@ -95,6 +97,7 @@ class BrowserContextProviderTests
             var actual = browserContextProvider.get();
 
             assertSame(browserContext, actual);
+            verify(networkContext).listenNetwork(actual);
             verify(browserContext).setDefaultTimeout(TIMEOUT_MILLIS);
             verifyNoMoreInteractions(browserContext);
             playwrightStaticMock.reset();

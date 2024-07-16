@@ -29,6 +29,7 @@ import com.microsoft.playwright.Tracing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.testcontext.TestContext;
+import org.vividus.ui.web.playwright.network.NetworkContext;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -41,22 +42,25 @@ public class BrowserContextProvider
     private final LaunchOptions launchOptions;
     private final TestContext testContext;
     private final BrowserContextConfiguration browserContextConfiguration;
+    private final NetworkContext networkContext;
 
     private PlaywrightContext playwrightContext;
 
     public BrowserContextProvider(BrowserType browserType, LaunchOptions launchOptions, TestContext testContext,
-            BrowserContextConfiguration browserContextConfiguration)
+            BrowserContextConfiguration browserContextConfiguration, NetworkContext networkContext)
     {
         this.browserType = browserType;
         this.launchOptions = launchOptions;
         this.testContext = testContext;
         this.browserContextConfiguration = browserContextConfiguration;
+        this.networkContext = networkContext;
     }
 
     public BrowserContext get()
     {
         return testContext.get(BROWSER_CONTEXT_KEY, () -> {
             BrowserContext browserContext = getPlaywrightContext().browser().newContext();
+            networkContext.listenNetwork(browserContext);
             if (browserContextConfiguration.isTracingEnabled())
             {
                 browserContext.tracing().start(browserContextConfiguration.getTracingOptions());
