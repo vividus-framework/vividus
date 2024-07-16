@@ -1,7 +1,7 @@
 project.description = 'VIVIDUS plugin for HTML testing'
 
 dependencies {
-    api(group: 'com.github.vividus-framework', name: 'jsoup', version: 'f97e0b9bfa')
+    api(group: 'com.github.vividus-framework', name: 'jsoup', version: '5c9060ab14')
 
     implementation project(':vividus-engine')
     implementation project(':vividus-soft-assert')

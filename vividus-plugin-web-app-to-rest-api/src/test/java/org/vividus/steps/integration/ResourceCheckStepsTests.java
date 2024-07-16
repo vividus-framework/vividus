@@ -240,7 +240,9 @@ class ResourceCheckStepsTests
             validate(resourceValidations, imageUri, "#image", CheckStatus.PASSED, N_A);
             validate(resourceValidations,
                     URI.create("https://docs.vividus.dev/vividus/latest/_images/subscribe-to-releases.gif"),
-                    "Unable to build CSS selector for 'img' element", CheckStatus.PASSED, N_A);
+                    "html > body > p:nth-child(20) > img.vds-flex_1.vds-d_block.lg\\:vds-d_flex.vds-flex_column"
+                    + ".vds-items_flex-end.\\[\\&_\\>_\\*\\:first-child\\]\\:vds-pt_0",
+                    CheckStatus.PASSED, N_A);
             validate(resourceValidations, EXTERNAL_SECTION_LINK, EXTERNAL_SECTION_LINK_SELECTOR, CheckStatus.PASSED,
                     N_A);
             validate(resourceValidations, gifImageUri, "html > body > img.image.\\(gif\\)",

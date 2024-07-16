@@ -38,7 +38,6 @@ import org.jbehave.core.annotations.Then;
 import org.jbehave.core.model.ExamplesTable;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Selector.SelectorParseException;
 import org.vividus.html.HtmlLocatorType;
 import org.vividus.html.JsoupUtils;
 import org.vividus.http.HttpMethod;
@@ -163,7 +162,7 @@ public class ResourceCheckSteps
             return Optional.empty();
         }
 
-        String elementCssSelector = getCssSelector(element);
+        String elementCssSelector = element.cssSelector();
         if (elementUriAsString.isEmpty())
         {
             return Optional.of(ResourceValidationError.EMPTY_HREF_SRC
@@ -245,18 +244,6 @@ public class ResourceCheckSteps
         }
 
         return element.attr("src");
-    }
-
-    private String getCssSelector(Element element)
-    {
-        try
-        {
-            return element.cssSelector();
-        }
-        catch (SelectorParseException exception)
-        {
-            return String.format("Unable to build CSS selector for '%s' element", element.tagName());
-        }
     }
 
     private URI resolveUri(String uri) throws URISyntaxException
