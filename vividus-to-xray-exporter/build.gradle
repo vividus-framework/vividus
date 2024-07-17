@@ -37,7 +37,7 @@ dependencies {
 
     implementation(group: 'org.zeroturnaround', name: 'zt-zip', version: '1.17')
 
-    implementation(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '3.4.0')
+    implementation(group: 'net.javacrumbs.json-unit', name: 'json-unit', version: '3.4.1')
 
     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
