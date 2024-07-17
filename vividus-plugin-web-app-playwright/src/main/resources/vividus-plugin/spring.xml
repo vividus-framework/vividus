@@ -21,6 +21,10 @@
         </constructor-arg>
     </bean>
 
+    <bean id="networkContext" class="org.vividus.ui.web.playwright.network.NetworkContext">
+        <constructor-arg index="2" value="${proxy.recording.enabled}"/>
+    </bean>
+
     <bean class="org.vividus.ui.web.playwright.BrowserContextConfiguration">
         <constructor-arg index="0">
             <bean class="com.microsoft.playwright.Tracing.StartOptions">
@@ -61,6 +65,7 @@
     <bean id="nestedSteps" class="org.vividus.ui.web.playwright.steps.NestedSteps" />
     <bean id="dropdownSteps" class="org.vividus.ui.web.playwright.steps.DropdownSteps" />
     <bean id="scrollSteps" class="org.vividus.ui.web.playwright.steps.ScrollSteps" />
+    <bean id="networkValidationSteps" class="org.vividus.ui.web.playwright.steps.NetworkValidationSteps" />
 
     <util:list id="stepBeanNames-WebPlaywrightUi" value-type="java.lang.String">
         <idref bean="cookieSteps" />
@@ -76,6 +81,11 @@
         <idref bean="nestedSteps" />
         <idref bean="dropdownSteps" />
         <idref bean="scrollSteps" />
+        <idref bean="networkValidationSteps" />
+    </util:list>
+
+    <util:list id="stepBeanNames-Playwright-Hooks">
+        <idref bean="networkContext" />
     </util:list>
 
     <util:map id="propertyEditors-WebPlaywrightUi" key-type="java.lang.Class">

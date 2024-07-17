@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ class ProxyStepsTests
     @Test
     void testClearProxyLog()
     {
-        proxySteps.clearProxyLog();
+        proxySteps.clearNetworkRecordings();
         verify(proxy).clearRecordedData();
     }
 
@@ -220,7 +220,7 @@ class ProxyStepsTests
     void testWaitRequestInProxyLog(HttpMethod actualHttpMethod, boolean waitSuccessful) throws IOException
     {
         mockHar(actualHttpMethod, HttpStatus.SC_OK);
-        proxySteps.waitRequestInProxyLog(EnumSet.of(HttpMethod.POST), URL_PATTERN);
+        proxySteps.waitRequestIsCaptured(EnumSet.of(HttpMethod.POST), URL_PATTERN);
         verify(waitActions).wait(eq(URL_PATTERN), argThat((Function<Pattern, Boolean> e) ->
                 "waiting for HTTP POST request with URL pattern www.test.com".equals(e.toString())
                         && e.apply(URL_PATTERN) == waitSuccessful));
@@ -230,7 +230,7 @@ class ProxyStepsTests
     void testWaitAnyOfRequestInProxyLog() throws IOException
     {
         mockHar(HttpMethod.PUT, HttpStatus.SC_OK);
-        proxySteps.waitRequestInProxyLog(EnumSet.of(HttpMethod.POST, HttpMethod.PUT), URL_PATTERN);
+        proxySteps.waitRequestIsCaptured(EnumSet.of(HttpMethod.POST, HttpMethod.PUT), URL_PATTERN);
         verify(waitActions).wait(eq(URL_PATTERN), argThat((Function<Pattern, Boolean> e) ->
                 "waiting for HTTP POST or PUT request with URL pattern www.test.com".equals(e.toString())
                         && e.apply(URL_PATTERN)));

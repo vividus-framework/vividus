@@ -9,7 +9,10 @@ Scenario: Verify step Then number of HTTP $httpMethods requests with URL pattern
 Given I am on page with URL `https://httpbingo.org/get`
 Then number of HTTP GET requests with URL pattern `https://httpbingo\.org/get` is EQUAL TO `1`
 
-Scenario: Verify step When I clear proxy log
+Scenario: Verify step When I clear network recordings
+Given I am on page with URL `http:/httpbingo.org/get`
+When I clear network recordings
+Then number of HTTP GET, POST requests with URL pattern `http://httpbingo\.org/get` is EQUAL TO `0`
 Given I am on page with URL `http:/httpbingo.org/get`
 When I clear proxy log
 Then number of HTTP GET, POST requests with URL pattern `http://httpbingo\.org/get` is EQUAL TO `0`
@@ -42,8 +45,9 @@ Then `${requestData.responseStatus}` is equal to `200`
 When I capture HTTP POST request with URL pattern `http://httpbingo\.org/post` and save response data to SCENARIO variable `responseData`
 Then `${responseData.responseBody}` matches `.*"topping":.*"cheese".*`
 
-Scenario: Verify step When I wait until HTTP $httpMethods request with URL pattern `$urlPattern` exists in proxy log
+Scenario: Verify step When I wait until HTTP $httpMethods request with URL pattern `$urlPattern` is captured
 Given I am on page with URL `http://httpbingo.org/get`
+When I wait until HTTP GET or POST request with URL pattern `http://httpbingo\.org/get` is captured
 When I wait until HTTP GET or POST request with URL pattern `http://httpbingo\.org/get` exists in proxy log
 Then number of HTTP GET or POST requests with URL pattern `http://httpbingo\.org/get` is EQUAL TO `1`
 

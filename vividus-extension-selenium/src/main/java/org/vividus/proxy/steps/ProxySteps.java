@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,10 +67,10 @@ public class ProxySteps
     @Inject private IWaitActions waitActions;
 
     /**
-     * Clears the proxy log
+     * Clears the network recordings
      */
-    @When("I clear proxy log")
-    public void clearProxyLog()
+    @When("I clear network recordings")
+    public void clearNetworkRecordings()
     {
         proxy.clearRecordedData();
     }
@@ -165,8 +165,8 @@ public class ProxySteps
      * @param httpMethods The "or"-separated HTTP methods to filter by, e.g. 'GET or POST or PUT'
      * @param urlPattern  The regular expression to match HTTP request URL
      */
-    @When("I wait until HTTP $httpMethods request with URL pattern `$urlPattern` exists in proxy log")
-    public void waitRequestInProxyLog(Set<HttpMethod> httpMethods, Pattern urlPattern)
+    @When("I wait until HTTP $httpMethods request with URL pattern `$urlPattern` is captured")
+    public void waitRequestIsCaptured(Set<HttpMethod> httpMethods, Pattern urlPattern)
     {
         waitActions.wait(urlPattern, new Function<>()
         {
