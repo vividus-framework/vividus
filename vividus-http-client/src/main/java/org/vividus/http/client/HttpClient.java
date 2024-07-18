@@ -19,6 +19,7 @@ package org.vividus.http.client;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
@@ -161,7 +162,8 @@ public class HttpClient implements IHttpClient, AutoCloseable
     private static void configureBasicAuth(boolean usePreemptiveBasicAuthIfAvailable, String plainUserInfo,
             HttpHost host, HttpClientContext internalContext)
     {
-        UserInfo userInfo = UriUtils.parseUserInfo(plainUserInfo);
+        String plainUserInfoDecoded = URLDecoder.decode(plainUserInfo, StandardCharsets.UTF_8);
+        UserInfo userInfo = UriUtils.parseUserInfo(plainUserInfoDecoded);
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(userInfo.user(),
                 userInfo.password().toCharArray());
         HttpHost normalizedHost = RoutingSupport.normalize(host, DefaultSchemePortResolver.INSTANCE);

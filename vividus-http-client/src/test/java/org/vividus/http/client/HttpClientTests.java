@@ -37,6 +37,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
@@ -84,8 +85,10 @@ class HttpClientTests
     private static final URI URI_TO_GO = URI.create(VIVIDUS_ORG);
 
     private static final String USER = "user";
-    private static final String PASSWORD = "pass";
+    private static final String PASSWORD = "pass%5E";
+    private static final String PASSWORD_DECODED = URLDecoder.decode(PASSWORD, StandardCharsets.UTF_8);
     private static final String BASIC_AUTH = USER + ":" + PASSWORD;
+    private static final String BASIC_AUTH_DECODED = URLDecoder.decode(BASIC_AUTH, StandardCharsets.UTF_8);
     private static final String SCHEME = "https";
     private static final String HOST = "www.vividus.org";
     private static final HttpHost HTTP_HOST = new HttpHost(SCHEME, HOST, 443);
@@ -164,7 +167,7 @@ class HttpClientTests
         var authScheme = authExchange.getAuthScheme();
         var authResponse = authScheme.generateAuthResponse(null, null, null);
         var expectedAuthResponse = "Basic " + Base64.getEncoder().encodeToString(
-                BASIC_AUTH.getBytes(StandardCharsets.UTF_8));
+                BASIC_AUTH_DECODED.getBytes(StandardCharsets.UTF_8));
         assertEquals(expectedAuthResponse, authResponse);
         assertNull(httpClientContext.getCredentialsProvider());
     }
@@ -202,7 +205,7 @@ class HttpClientTests
         assertInstanceOf(BasicCredentialsProvider.class, credentialsProvider);
         var credentials = credentialsProvider.getCredentials(new AuthScope(HTTP_HOST), null);
         assertEquals(USER, credentials.getUserPrincipal().getName());
-        assertArrayEquals(PASSWORD.toCharArray(), credentials.getPassword());
+        assertArrayEquals(PASSWORD_DECODED.toCharArray(), credentials.getPassword());
     }
 
     @Test

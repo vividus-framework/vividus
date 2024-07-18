@@ -160,3 +160,7 @@ Then JSON element from `${response-as-bytes}` by JSON path `$` is equal to `{
      "Content-Type": [ "application/x-www-form-urlencoded; charset=UTF-8" ]
   }
 }`ignoring extra fields
+
+Scenario: Verify using of encoded unsafe characters in user info for Basic Authentication
+When I execute HTTP GET request for resource with URL `https://username:password%5E@httpbin.org/basic-auth/username/password^`
+Then response code is equal to `200`
