@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.vividus.ui.web.playwright.assertions;
 
+import java.util.function.Supplier;
+
 import org.opentest4j.AssertionFailedError;
 import org.vividus.softassert.ISoftAssert;
 
@@ -30,13 +32,18 @@ public class PlaywrightSoftAssert
 
     public void runAssertion(String messageOnFailure, Runnable assertion)
     {
+        runAssertion(() -> messageOnFailure, assertion);
+    }
+
+    public void runAssertion(Supplier<String> messageOnFailure, Runnable assertion)
+    {
         try
         {
             assertion.run();
         }
         catch (AssertionFailedError e)
         {
-            softAssert.recordFailedAssertion(messageOnFailure + ". " + e.getMessage(), e);
+            softAssert.recordFailedAssertion(messageOnFailure.get() + ". " + e.getMessage(), e);
         }
     }
 }

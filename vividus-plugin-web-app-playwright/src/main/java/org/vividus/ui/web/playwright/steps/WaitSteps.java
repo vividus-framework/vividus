@@ -16,53 +16,64 @@
 
 package org.vividus.ui.web.playwright.steps;
 
+import java.time.Duration;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.options.WaitForSelectorState;
 
+import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matcher;
 import org.jbehave.core.annotations.When;
+import org.vividus.softassert.ISoftAssert;
 import org.vividus.steps.ComparisonRule;
 import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.web.playwright.BrowserContextProvider;
 import org.vividus.ui.web.playwright.UiContext;
 import org.vividus.ui.web.playwright.action.WaitActions;
 import org.vividus.ui.web.playwright.locator.PlaywrightLocator;
+import org.vividus.ui.web.playwright.locator.Visibility;
+import org.vividus.util.wait.DurationBasedWaiter;
 
 public class WaitSteps
 {
     private final UiContext uiContext;
     private final BrowserContextProvider browserContextProvider;
     private final WaitActions waitActions;
+    private final ISoftAssert softAssert;
 
-    public WaitSteps(UiContext uiContext, BrowserContextProvider browserContextProvider, WaitActions waitActions)
+    public WaitSteps(UiContext uiContext, BrowserContextProvider browserContextProvider, WaitActions waitActions,
+            ISoftAssert softAssert)
     {
         this.uiContext = uiContext;
         this.browserContextProvider = browserContextProvider;
         this.waitActions = waitActions;
+        this.softAssert = softAssert;
     }
 
     /**
      * Waits for appearance of an <b><i>element</i></b> with the specified <b>locator</b>
+     * Step supports only <b>VISIBLE</b> elements waiting. If locator will be configured to <b>ALL</b> exception will
+     * be thrown.
      * @param locator locator to locate element
      */
     @When("I wait until element located by `$locator` appears")
     public void waitForElementAppearance(PlaywrightLocator locator)
     {
-        waitForElementState(locator, WaitForSelectorState.VISIBLE);
+        waitForElementStateValidatingVisibility(locator, ElementState.VISIBLE);
     }
 
     /**
      * Waits for disappearance of an <b><i>element</i></b> with the specified <b>locator</b>
+     * Step supports only <b>VISIBLE</b> elements waiting. If locator will be configured to <b>ALL</b> exception will
+     * be thrown.
      * @param locator locator to locate element
      */
     @When("I wait until element located by `$locator` disappears")
     public void waitForElementDisappearance(PlaywrightLocator locator)
     {
-        waitForElementState(locator, WaitForSelectorState.HIDDEN);
+        waitForElementStateValidatingVisibility(locator, ElementState.NOT_VISIBLE);
     }
 
     /**
@@ -106,12 +117,55 @@ public class WaitSteps
         waitActions.runWithTimeoutAssertion(assertionMessage, () -> currentPage.waitForCondition(waitCondition));
     }
 
-    private void waitForElementState(PlaywrightLocator locator, WaitForSelectorState state)
+    /**
+     * Waits for <b><i>an element</i></b> with the specified <b>locator</b> to take a certain <b>state</b>
+     * in the specified search context
+     * @param locator to locate element
+     * @param state State value of the element
+     * (<i>Possible values:</i> <b>ENABLED, DISABLED, SELECTED, NOT_SELECTED, VISIBLE, NOT_VISIBLE</b>)
+     */
+    @When("I wait until state of element located by `$locator` is $state")
+    public void waitForElementState(PlaywrightLocator locator, ElementState state)
     {
-        Locator.WaitForOptions waitOption = new Locator.WaitForOptions().setState(state);
-        String assertionMessage = String.format("element located by '%s' to be %s", locator,
-                state.toString().toLowerCase());
-        waitActions.runWithTimeoutAssertion(assertionMessage,
-                () -> uiContext.locateElement(locator).waitFor(waitOption));
+        Supplier<String> conditionDescription = () -> String.format("element located by `%s` to be %s", locator, state);
+        waitActions.runTimeoutPlaywrightAssertion(conditionDescription, () -> {
+            Locator element = uiContext.locateElement(locator);
+            state.waitForElementState(element);
+        });
+    }
+
+    /**
+     * Waits <b>duration</b> with <b>pollingDuration</b> until <b>an element</b> by the specified <b>locator</b>
+     * becomes a <b>state</b> in the specified search context
+     * <br>Example:<br>
+     * <code>When I wait 'PT30S' with 'PT10S' polling until element located `id(text)` becomes NOT_VISIBLE</code>
+     * - wait until all elements with id=text becomes not visible for 30 seconds, polling every 10 seconds
+     *
+     * @param duration        Total waiting time according to
+     *                        <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> standard
+     * @param pollingDuration Defines the timeout between attempts according to
+     *                        <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> standard
+     * @param locator         Locator to search for elements
+     * @param state           State value of the element
+     * (<i>Possible values:</i> <b>ENABLED, DISABLED, SELECTED, NOT_SELECTED, VISIBLE, NOT_VISIBLE</b>)
+     */
+    @When("I wait `$duration` with `$pollingDuration` polling until element located by `$locator` becomes $state")
+    public void waitDurationWithPollingTillElementState(Duration duration, Duration pollingDuration,
+            PlaywrightLocator locator, ElementState state)
+    {
+        Locator element = uiContext.locateElement(locator);
+        boolean isElementInState = new DurationBasedWaiter(duration, pollingDuration).wait(
+                () -> state.isElementState(element), result -> result);
+        softAssert.assertTrue(String.format("The element located by `%s` has become %s", locator, state),
+                isElementInState);
+    }
+
+    private void waitForElementStateValidatingVisibility(PlaywrightLocator locator,
+            ElementState state)
+    {
+        Validate.isTrue(Visibility.VISIBLE == locator.getVisibility(),
+                "The step supports locators with VISIBLE visibility settings only, but the locator is `%s`",
+                locator.toString());
+        waitForElementState(locator, state);
     }
 }

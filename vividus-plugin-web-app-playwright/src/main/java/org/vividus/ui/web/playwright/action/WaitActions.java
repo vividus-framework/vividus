@@ -21,14 +21,20 @@ import java.util.function.Supplier;
 import com.microsoft.playwright.TimeoutError;
 
 import org.vividus.softassert.ISoftAssert;
+import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 
 public class WaitActions
 {
-    private final ISoftAssert softAssert;
+    private static final String PASSED_CONDITION = "Passed wait condition: ";
+    private static final String FAILED_CONDITION = "Failed wait condition: ";
 
-    public WaitActions(ISoftAssert softAssert)
+    private final ISoftAssert softAssert;
+    private final PlaywrightSoftAssert playwrightSoftAssert;
+
+    public WaitActions(ISoftAssert softAssert, PlaywrightSoftAssert playwrightSoftAssert)
     {
         this.softAssert = softAssert;
+        this.playwrightSoftAssert = playwrightSoftAssert;
     }
 
     public void runWithTimeoutAssertion(String conditionDescription, Runnable timeoutOperation)
@@ -41,12 +47,19 @@ public class WaitActions
         try
         {
             timeoutOperation.run();
-            softAssert.recordPassedAssertion("Passed wait condition: " + conditionDescription.get());
+            softAssert.recordPassedAssertion(PASSED_CONDITION + conditionDescription.get());
         }
         catch (TimeoutError e)
         {
-            softAssert.recordFailedAssertion(
-                    "Failed wait condition: " + conditionDescription.get() + ". " + e.getMessage(), e);
+            softAssert.recordFailedAssertion(FAILED_CONDITION + conditionDescription.get() + ". " + e.getMessage(), e);
         }
+    }
+
+    public void runTimeoutPlaywrightAssertion(Supplier<String> conditionDescription, Runnable timeoutAssertOperation)
+    {
+        playwrightSoftAssert.runAssertion(() -> FAILED_CONDITION + conditionDescription.get(), () -> {
+            timeoutAssertOperation.run();
+            softAssert.recordPassedAssertion(PASSED_CONDITION + conditionDescription.get());
+        });
     }
 }
