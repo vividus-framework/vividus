@@ -29,6 +29,18 @@ public enum ElementState
         {
             PlaywrightLocatorAssertions.assertElementEnabled(locator, false);
         }
+
+        @Override
+        public void waitForElementState(Locator locator)
+        {
+            PlaywrightLocatorAssertions.assertElementEnabled(locator, true);
+        }
+
+        @Override
+        public boolean isElementState(Locator locator)
+        {
+            return locator.isEnabled(new Locator.IsEnabledOptions().setTimeout(NO_WAIT_TIMEOUT));
+        }
     },
     DISABLED
     {
@@ -36,6 +48,18 @@ public enum ElementState
         public void assertElementState(Locator locator)
         {
             PlaywrightLocatorAssertions.assertElementDisabled(locator, false);
+        }
+
+        @Override
+        public void waitForElementState(Locator locator)
+        {
+            PlaywrightLocatorAssertions.assertElementDisabled(locator, true);
+        }
+
+        @Override
+        public boolean isElementState(Locator locator)
+        {
+            return locator.isDisabled(new Locator.IsDisabledOptions().setTimeout(NO_WAIT_TIMEOUT));
         }
     },
     SELECTED
@@ -45,6 +69,18 @@ public enum ElementState
         {
             PlaywrightLocatorAssertions.assertElementSelected(locator, false);
         }
+
+        @Override
+        public void waitForElementState(Locator locator)
+        {
+            PlaywrightLocatorAssertions.assertElementSelected(locator, true);
+        }
+
+        @Override
+        public boolean isElementState(Locator locator)
+        {
+            return isElementSelected(locator);
+        }
     },
     NOT_SELECTED
     {
@@ -52,6 +88,18 @@ public enum ElementState
         public void assertElementState(Locator locator)
         {
             PlaywrightLocatorAssertions.assertElementNotSelected(locator, false);
+        }
+
+        @Override
+        public void waitForElementState(Locator locator)
+        {
+            PlaywrightLocatorAssertions.assertElementNotSelected(locator, true);
+        }
+
+        @Override
+        public boolean isElementState(Locator locator)
+        {
+            return !isElementSelected(locator);
         }
     },
     VISIBLE
@@ -61,6 +109,18 @@ public enum ElementState
         {
             PlaywrightLocatorAssertions.assertElementVisible(locator, false);
         }
+
+        @Override
+        public void waitForElementState(Locator locator)
+        {
+            PlaywrightLocatorAssertions.assertElementVisible(locator, true);
+        }
+
+        @Override
+        public boolean isElementState(Locator locator)
+        {
+            return locator.isVisible();
+        }
     },
     NOT_VISIBLE
     {
@@ -69,7 +129,30 @@ public enum ElementState
         {
             PlaywrightLocatorAssertions.assertElementHidden(locator, false);
         }
+
+        @Override
+        public void waitForElementState(Locator locator)
+        {
+            PlaywrightLocatorAssertions.assertElementHidden(locator, true);
+        }
+
+        @Override
+        public boolean isElementState(Locator locator)
+        {
+            return locator.isHidden();
+        }
     };
 
+    private static final int NO_WAIT_TIMEOUT = 0;
+
     public abstract void assertElementState(Locator locator);
+
+    public abstract void waitForElementState(Locator locator);
+
+    public abstract boolean isElementState(Locator locator);
+
+    private static boolean isElementSelected(Locator locator)
+    {
+        return locator.isChecked(new Locator.IsCheckedOptions().setTimeout(NO_WAIT_TIMEOUT));
+    }
 }

@@ -250,41 +250,25 @@ include::plugins:partial$ui-size-and-coordinates-steps.adoc[]
 
 include::plugins:partial$common-web-app-text-steps.adoc[]
 
-=== Wait for element appearance
+include::plugins:partial$ui-wait-element-state-steps.adoc[]
 
-Waits for appearance of the element by the locator.
+=== Wait for element state
 
-[source,gherkin]
-----
-When I wait until element located by `$locator` appears
-----
-
-* `$locator` - <<_locator>>.
-
-.Wait for appearance of the element with the specified id
-[source,gherkin]
-----
-When I wait until element located by `id(welcome-image)` appears
-----
-
-
-=== Wait for element disappearance
-
-Waits for disappearance of the element by the locator.
-
-NOTE: If the element doesn't exist on the page/context, the step will immediately complete successfully.
+Waits for an element, located by the specified locator in the given search context, to change to the specified state.
 
 [source,gherkin]
 ----
-When I wait until element located by `$locator` disappears
+When I wait until state of element located by `$locator` is $state
 ----
 
-* `$locator` - <<_locator>>.
+* `$locator` - The <<_locator,locator>> used to find element.
+* `$state` - The expected element xref:parameters:state.adoc[state].
 
-.Wait for disappearance of the element with the specified id
+.Click on the button and wait until the element becomes invisible
 [source,gherkin]
 ----
-When I wait until element located by `id(welcome-image)` disappears
+When I click on element located by `id(signInButton)`
+When I wait until state of element located by `id(signInButton):a` is NOT VISIBLE
 ----
 
 === Wait for expected elements number

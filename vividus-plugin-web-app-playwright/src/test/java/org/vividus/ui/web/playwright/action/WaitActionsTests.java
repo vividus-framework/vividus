@@ -16,9 +16,13 @@
 
 package org.vividus.ui.web.playwright.action;
 
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+import java.util.function.Supplier;
 
 import com.microsoft.playwright.TimeoutError;
 
@@ -28,16 +32,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.softassert.SoftAssert;
+import org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert;
 
 @ExtendWith(MockitoExtension.class)
 class WaitActionsTests
 {
     private static final String CHECKED_CONDITION = "checked condition";
     private static final String TIMEOUT_ERROR_MESSAGE = "Timeout error message";
+    private static final String FAILED_ASSERTION_DESCRIPTION = "Failed wait condition: " + CHECKED_CONDITION;
+    private static final String PASSED_ASSERTION_DESCRIPTION = "Passed wait condition: " + CHECKED_CONDITION;
 
     @Mock private Runnable timeoutOperation;
 
     @Mock private SoftAssert softAssert;
+    @Mock private PlaywrightSoftAssert playwrightSoftAssert;
     @InjectMocks private WaitActions waitActions;
 
     @Test
@@ -45,7 +53,7 @@ class WaitActionsTests
     {
         waitActions.runWithTimeoutAssertion(CHECKED_CONDITION, timeoutOperation);
         verify(timeoutOperation).run();
-        verify(softAssert).recordPassedAssertion("Passed wait condition: " + CHECKED_CONDITION);
+        verify(softAssert).recordPassedAssertion(PASSED_ASSERTION_DESCRIPTION);
     }
 
     @Test
@@ -56,7 +64,20 @@ class WaitActionsTests
         waitActions.runWithTimeoutAssertion(CHECKED_CONDITION, timeoutOperation);
         verify(timeoutOperation).run();
         verify(softAssert).recordFailedAssertion(
-                String.format("Failed wait condition: %s. %s", CHECKED_CONDITION, TIMEOUT_ERROR_MESSAGE), timeoutError);
+                String.format("%s. %s", FAILED_ASSERTION_DESCRIPTION, TIMEOUT_ERROR_MESSAGE), timeoutError);
         verifyNoMoreInteractions(softAssert);
+    }
+
+    @Test
+    void shouldRunTimeoutPlaywrightAssertion()
+    {
+        doNothing().when(playwrightSoftAssert).runAssertion(
+                argThat((Supplier<String> description) -> description.get().equals(FAILED_ASSERTION_DESCRIPTION)),
+                argThat(runnable -> {
+                    runnable.run();
+                    return true;
+                }));
+        waitActions.runTimeoutPlaywrightAssertion(() -> CHECKED_CONDITION, timeoutOperation);
+        verify(softAssert).recordPassedAssertion(PASSED_ASSERTION_DESCRIPTION);
     }
 }
