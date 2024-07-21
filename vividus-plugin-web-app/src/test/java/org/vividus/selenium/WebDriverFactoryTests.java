@@ -58,6 +58,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junitpioneer.jupiter.ClearSystemProperty;
 import org.mockito.Mock;
+import org.mockito.MockedStatic.Verification;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.HasAuthentication;
@@ -384,15 +385,19 @@ class WebDriverFactoryTests
     static Stream<Arguments> chromiumBrowsers()
     {
         return Stream.of(
-                arguments(WebDriverType.CHROME, CHROME_BROWSER_NAME, ChromeDriver.class),
-                arguments(WebDriverType.EDGE, EDGE_BROWSER_NAME, EdgeDriver.class),
-                arguments(WebDriverType.OPERA, OPERA_BROWSER_NAME, ChromeDriver.class));
+                arguments(WebDriverType.CHROME, CHROME_BROWSER_NAME, ChromeDriver.class,
+                        (Verification) WebDriverManager::chromedriver),
+                arguments(WebDriverType.EDGE, EDGE_BROWSER_NAME, EdgeDriver.class,
+                        (Verification) WebDriverManager::edgedriver),
+                arguments(WebDriverType.OPERA, OPERA_BROWSER_NAME, ChromeDriver.class,
+                        (Verification) WebDriverManager::operadriver)
+        );
     }
 
     @ParameterizedTest
     @MethodSource("chromiumBrowsers")
     void shouldConfigureBasicAuthCredentialsForChromiumBrowsers(WebDriverType browserType, String browserName,
-            Class<RemoteWebDriver> mockDriverClass)
+            Class<RemoteWebDriver> mockDriverClass, Verification webDriverManagerVerification)
     {
         Pattern url1 = Pattern.compile(".*site1.*");
         String user1 = "admin";
@@ -419,8 +424,11 @@ class WebDriverFactoryTests
         {
             when(mock.getCapabilities()).thenReturn(new DesiredCapabilities(Map.of(BROWSER_NAME, browserName)));
             mockTimeouts(mock);
-        }))
+        });
+            var webDriverManagerStaticMock = mockStatic(WebDriverManager.class))
         {
+            WebDriverManager webDriverManager = mock();
+            webDriverManagerStaticMock.when(webDriverManagerVerification).thenReturn(webDriverManager);
             webDriverFactory.createWebDriver(new DesiredCapabilities());
             WebDriver driver = mockedConstruction.constructed().get(0);
             HasAuthentication hasAuthentication = (HasAuthentication) driver;
@@ -434,6 +442,7 @@ class WebDriverFactoryTests
                 UsernameAndPassword usernameAndPassword = (UsernameAndPassword) c.get();
                 return usernameAndPassword.username().equals(user2) && usernameAndPassword.password().equals(pass2);
             }));
+            verify(webDriverManager).setup();
         }
     }
 
