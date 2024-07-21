@@ -32,7 +32,7 @@ dependencies {
     implementation project(':vividus-facade-jira')
     implementation project(':vividus-exporter-commons')
 
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0')
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.15.0')
     implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.4')
 
     implementation(group: 'org.zeroturnaround', name: 'zt-zip', version: '1.17')
