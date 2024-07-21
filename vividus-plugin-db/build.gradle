@@ -11,7 +11,7 @@ dependencies {
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.13')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
     implementation(group: 'com.google.guava', name: 'guava', version: '33.2.1-jre')
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0')
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.15.0')
 
     testCompileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
