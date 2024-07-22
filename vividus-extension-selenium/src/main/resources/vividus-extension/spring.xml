@@ -167,7 +167,6 @@
     <bean id="executeScriptSteps" class="org.vividus.steps.ui.ExecuteScriptSteps" />
 
     <bean class="org.vividus.ui.converter.ParametersToAtomicActionConverter" />
-    <bean class="org.vividus.ui.converter.PointConverter" />
 
     <util:list id="stepBeanNames-UI" value-type="java.lang.String">
         <idref bean="executeScriptSteps" />

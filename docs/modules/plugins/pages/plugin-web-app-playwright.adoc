@@ -535,3 +535,119 @@ Given I am on page with URL `https://www.google.com/search?q=vividus`
 When I wait until HTTP GET request with URL pattern `.*/search.*=vividus` is captured
 When I clear network recordings
 ----
+
+=== Execute sequence of actions
+
+Executes the sequence of web actions.
+
+[source,gherkin]
+----
+When I execute sequence of actions: $actions
+----
+* `$actions` - table of actions to execute
++
+.Possible actions
+[cols="1,5,3", options="header"]
+|===
+
+|`type`
+|`argument`
+|Argument example
+
+|CLICK
+|Element locator or empty.
+|By.caseSensitiveText(Done)
+
+|DOUBLE_CLICK
+|Element locator. Empty value is not supported.
+|By.linkUrl(http://httpbin.org)
+
+|CLICK_AND_HOLD
+|Element locator or empty.
+|By.linkText(Click me)
+
+|RELEASE
+|Element locator or empty.
+|By.tagName(div)
+
+|ENTER_TEXT
+|Text to type.
+|Minsk City
+
+|PRESS_KEYS
+|Comma-separated https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values[keys] to press and release.
+|Backspace
+
+|KEY_DOWN
+|Comma-separated https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values[keys] to press one by one.
+|Control,Shift,Alt
+
+|KEY_UP
+|Comma-separated https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values[keys] to release one by one.
+|Control,Shift,Alt
+
+|MOVE_TO
+|Element locator.
+|By.id(username)
+
+|===
+
+[TIP]
+====
+Use special Playwright `Control` key - `ControlOrMeta` to make tests fully platform independent.
+====
+
+.Execute various web-actions
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type          |argument                                 |
+|CLICK         |By.placeholder(Enter your password)      |
+|CLICK         |                                         |
+|DOUBLE_CLICK  |By.fieldText(Hello World)                |
+|CLICK_AND_HOLD|By.xpath(//signature-pad-control/canvas) |
+|CLICK_AND_HOLD|                                         |
+|RELEASE       |By.xpath(//signature-pad-control/canvas) |
+|RELEASE       |                                         |
+|ENTER_TEXT    |Text                                     |
+|PRESS_KEYS    |Backspace                                |
+|KEY_DOWN      |Control,Shift                            |
+|KEY_UP        |Control,Shift                            |
+|MOVE_TO       |By.id(name)                              |
+----
+
+[TIP]
+====
+This step can be used to perform clipboard interactions.
+
+.Select all text in the focused field and copy it to the clipboard on Windows
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type      |argument   |
+|KEY_DOWN  |Control, a |
+|KEY_UP    |a, Control |
+|KEY_DOWN  |Control, c |
+|KEY_UP    |c, Control |
+----
+
+.Paste text from the clipboard to the focused field on MacOS
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type      |argument |
+|KEY_DOWN  |Meta, v  |
+|KEY_UP    |v, Meta  |
+----
+
+.Select all text in the focused field and copy it to the clipboard on any OS
+[source,gherkin]
+----
+When I execute sequence of actions:
+|type      |argument         |
+|KEY_DOWN  |ControlOrMeta, a |
+|KEY_UP    |a, ControlOrMeta |
+|KEY_DOWN  |ControlOrMeta, c |
+|KEY_UP    |c, ControlOrMeta |
+----
+====

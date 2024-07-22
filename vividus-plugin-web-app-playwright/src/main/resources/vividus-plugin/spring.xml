@@ -52,6 +52,17 @@
 
     <bean class="org.vividus.ui.web.playwright.assertions.PlaywrightSoftAssert" />
 
+    <bean class="org.vividus.ui.web.playwright.action.PlaywrightActions$Click" />
+    <bean class="org.vividus.ui.web.playwright.action.PlaywrightActions$DoubleClick" />
+    <bean class="org.vividus.ui.web.playwright.action.PlaywrightActions$ClickAndHold" />
+    <bean class="org.vividus.ui.web.playwright.action.PlaywrightActions$Release" />
+    <bean class="org.vividus.ui.web.playwright.action.PlaywrightActions$MoveTo" />
+    <bean class="org.vividus.ui.web.playwright.action.PlaywrightActions$MoveByOffset" />
+    <bean class="org.vividus.ui.web.playwright.action.PlaywrightActions$EnterText" />
+    <bean class="org.vividus.ui.web.playwright.action.PlaywrightActions$PressKeys" />
+    <bean class="org.vividus.ui.web.playwright.action.PlaywrightActions$KeyDown" />
+    <bean class="org.vividus.ui.web.playwright.action.PlaywrightActions$KeyUp" />
+
     <bean id="cookieSteps" class="org.vividus.ui.web.playwright.steps.CookieSteps" />
     <bean id="elementSteps" class="org.vividus.ui.web.playwright.steps.ElementSteps" />
     <bean id="fieldSteps" class="org.vividus.ui.web.playwright.steps.FieldSteps" />
@@ -66,6 +77,7 @@
     <bean id="dropdownSteps" class="org.vividus.ui.web.playwright.steps.DropdownSteps" />
     <bean id="scrollSteps" class="org.vividus.ui.web.playwright.steps.ScrollSteps" />
     <bean id="networkValidationSteps" class="org.vividus.ui.web.playwright.steps.NetworkValidationSteps" />
+    <bean id="actionsSequenceSteps" class="org.vividus.ui.web.playwright.steps.ActionsSequenceSteps" />
 
     <util:list id="stepBeanNames-WebPlaywrightUi" value-type="java.lang.String">
         <idref bean="cookieSteps" />
@@ -82,6 +94,7 @@
         <idref bean="dropdownSteps" />
         <idref bean="scrollSteps" />
         <idref bean="networkValidationSteps" />
+        <idref bean="actionsSequenceSteps" />
     </util:list>
 
     <util:list id="stepBeanNames-Playwright-Hooks">
@@ -98,5 +111,6 @@
 
     <bean class="org.vividus.ui.web.playwright.converter.StringToPlaywrightLocatorConverter" />
     <bean class="org.vividus.ui.web.playwright.converter.StringToPlaywrightLocatorSetConverter" />
+    <bean class="org.vividus.ui.web.playwright.converter.ParametersToPlaywrightActionConverter" />
 
  </beans>
