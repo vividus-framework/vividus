@@ -171,6 +171,52 @@ jobs:
           exit -1
         fi
 
+    - name: Playwright integration tests
+      if: (matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest')
+      run: |
+        ./gradlew :vividus-tests:debugStories --project-prop 'vividus.configuration-set.active=playwright-integration' --project-prop 'vividus.allure.history-directory=output/history/integration-tests' --project-prop 'vividus.allure.executor.name="Github Actions (Vividus)"' --project-prop 'vividus.allure.executor.type=github' --project-prop 'vividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions' --project-prop 'vividus.allure.executor.build-order=${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.build-name="Playwright Integration Tests ${GITHUB_RUN_ID}"' --project-prop 'vividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID}' --project-prop 'vividus.allure.executor.report-name="Playwright Integration tests report"' --project-prop "fileToSaveExitCode=$(pwd)/exitCode.txt" --no-daemon
+
+    - name: Playwright integration tests
+      if: matrix.platform == 'macos-latest'
+      run: |
+        ./gradlew :vividus-tests:debugStories -Pvividus.configuration-set.active=playwright-integration \
+                                              -Pvividus.batch-1.resource-exclude-patterns="Precondition*.story,TableTransformers.story,Load ExamplesTable from local file.story,VideoSteps.story" \
+                                              -Pvividus.allure.history-directory=output/history/integration-tests \
+                                              -Pvividus.allure.executor.name="Github Actions (Vividus)" \
+                                              -Pvividus.allure.executor.type=github \
+                                              -Pvividus.allure.executor.url=https://github.com/vividus-framework/vividus/actions \
+                                              -Pvividus.allure.executor.build-order=${GITHUB_RUN_ID} \
+                                              -Pvividus.allure.executor.build-name="Playwright Integration Tests ${GITHUB_RUN_ID}" \
+                                              -Pvividus.allure.executor.build-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                              -Pvividus.allure.executor.report-url=https://github.com/vividus-framework/vividus/actions/runs/${GITHUB_RUN_ID} \
+                                              -Pvividus.allure.executor.report-name="Playwright integration tests report" \
+                                              -PfileToSaveExitCode=$(pwd)/exitCode.txt --no-daemon
+    - name: Publish playwright integration tests report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Playwright Integration Tests - Allure report - ${{ matrix.platform }}
+        path: vividus-tests/output/reports/allure
+
+    - name: Validate successful exit code
+      if: (matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest')
+      shell: bash
+      run: |
+        exitCode=$(cat ./exitCode.txt)
+        if [[ $exitCode -ne '1' ]]; then
+          exit $exitCode
+        fi
+
+    - name: Validate failed exit code
+      if: (matrix.platform == 'ubuntu-latest' || matrix.platform == 'windows-latest') && failure()
+      shell: bash
+      run: |
+        exitCode=$(cat ./exitCode.txt)
+        if [[ $exitCode -ne '2' ]]; then
+        echo Exit code is $exitCode
+        exit -1
+        fi
+
     - name: System tests
       if: matrix.platform == 'ubuntu-latest'
       env:
