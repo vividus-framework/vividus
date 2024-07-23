@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.vividus.ui.web.playwright.steps;
 
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.inOrder;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,10 +32,12 @@ class PlaywrightSetupStepsTests
     @InjectMocks private PlaywrightSetupSteps playwrightSetupSteps;
 
     @Test
-    void shouldCloseBrowserContext()
+    void shouldClosePlaywrightContext()
     {
-        playwrightSetupSteps.closeBrowserContext();
+        playwrightSetupSteps.closePlaywrightContext();
 
-        verify(browserContextProvider).closeCurrentContext();
+        var ordered = inOrder(browserContextProvider);
+        ordered.verify(browserContextProvider).closeBrowserContext();
+        ordered.verify(browserContextProvider).closePlaywrightContext();
     }
 }

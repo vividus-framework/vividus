@@ -114,7 +114,7 @@ class BrowserContextProviderTests
 
             // Close context
             when(browserContext.pages()).thenReturn(List.of());
-            browserContextProvider.closeCurrentContext();
+            browserContextProvider.closeBrowserContext();
 
             verify(browserContext).close();
             verifyNoMoreInteractions(browserContext);
@@ -164,7 +164,7 @@ class BrowserContextProviderTests
 
             Page page = mock();
             when(browserContext.pages()).thenReturn(List.of(page));
-            browserContextProvider.closeCurrentContext();
+            browserContextProvider.closeBrowserContext();
 
             var ordered = inOrder(tracing, page, browserContext);
             var stopOptionsArgumentCaptor = ArgumentCaptor.forClass(Tracing.StopOptions.class);
@@ -197,7 +197,7 @@ class BrowserContextProviderTests
     }
 
     @Test
-    void shouldCloseAllInstancesOnDestroy()
+    void shouldClosePlaywrightContext()
     {
         try (var playwrightStaticMock = mockStatic(Playwright.class))
         {
@@ -207,30 +207,11 @@ class BrowserContextProviderTests
             when(browserType.launchBrowser(playwright, launchOptions)).thenReturn(browser);
             BrowserContext browserContext = mock();
             when(browser.newContext()).thenReturn(browserContext);
-
-            var actual = browserContextProvider.get();
-
-            assertSame(browserContext, actual);
-            verify(browserContext).setDefaultTimeout(TIMEOUT_MILLIS);
-            verifyNoMoreInteractions(browserContext);
-            playwrightStaticMock.reset();
-            reset(playwright, browser);
-
-            browserContextProvider.destroy();
-
+            browserContextProvider.get();
+            browserContextProvider.closePlaywrightContext();
             var ordered = inOrder(browser, playwright);
             ordered.verify(browser).close();
             ordered.verify(playwright).close();
-        }
-    }
-
-    @Test
-    void shouldDoNothingOnDestroyIfNoBrowserWasStarted()
-    {
-        try (var playwrightStaticMock = mockStatic(Playwright.class))
-        {
-            browserContextProvider.destroy();
-            playwrightStaticMock.verifyNoInteractions();
         }
     }
 }

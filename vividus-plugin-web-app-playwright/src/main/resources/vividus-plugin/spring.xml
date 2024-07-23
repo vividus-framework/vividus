@@ -11,8 +11,7 @@
         <property name="assertionTimeout" value="${ui.wait.timeout}" />
     </bean>
 
-    <bean class="org.vividus.ui.web.playwright.BrowserContextProvider"
-        destroy-method="destroy">
+    <bean class="org.vividus.ui.web.playwright.BrowserContextProvider">
         <constructor-arg index="0" value="${internal.playwright.browser}" />
         <constructor-arg index="1">
             <bean class="com.microsoft.playwright.BrowserType.LaunchOptions">
