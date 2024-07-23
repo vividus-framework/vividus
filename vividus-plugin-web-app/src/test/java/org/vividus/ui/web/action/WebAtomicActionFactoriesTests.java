@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.vividus.selenium.KeysManager;
 import org.vividus.ui.action.AtomicActionFactory;
+import org.vividus.ui.model.Point;
 
 @ExtendWith(MockitoExtension.class)
 class WebAtomicActionFactoriesTests
@@ -101,8 +101,8 @@ class WebAtomicActionFactoriesTests
         var point = spy(new Point(offset, offset));
         new WebAtomicActionFactories.MoveByOffset().addAction(baseAction, point);
         verify(baseAction).moveByOffset(offset, offset);
-        verify(point).getX();
-        verify(point).getY();
+        verify(point).x();
+        verify(point).y();
         verifyNoMoreInteractions(baseAction, point);
     }
 

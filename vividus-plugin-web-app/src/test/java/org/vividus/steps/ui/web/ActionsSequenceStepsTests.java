@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.Point;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Interactive;
@@ -48,6 +47,7 @@ import org.vividus.selenium.KeysManager;
 import org.vividus.selenium.locator.Locator;
 import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.AtomicAction;
+import org.vividus.ui.model.Point;
 import org.vividus.ui.web.action.WebAtomicActionFactories;
 import org.vividus.ui.web.action.search.WebLocatorType;
 
@@ -105,8 +105,8 @@ class ActionsSequenceStepsTests
         var offset = 15;
 
         when(baseValidations.assertElementExists(ELEMENT_EXISTS_MESSAGE, locator)).thenReturn(Optional.of(webElement));
-        when(point.getX()).thenReturn(offset);
-        when(point.getY()).thenReturn(offset);
+        when(point.x()).thenReturn(offset);
+        when(point.y()).thenReturn(offset);
 
         var keyToPress = "v";
         var keysToPress = List.of(keyToPress);

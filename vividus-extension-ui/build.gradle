@@ -1,6 +1,7 @@
 project.description = 'VIVIDUS extension for plugins testing application with graphical user interfaces'
 
  dependencies {
+     implementation project(':vividus-engine')
      implementation project(':vividus-util')
 
      testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.3')
