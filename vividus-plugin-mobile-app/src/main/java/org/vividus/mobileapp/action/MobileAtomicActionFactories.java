@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package org.vividus.mobileapp.action;
 
 import java.time.Duration;
 
-import org.openqa.selenium.Point;
 import org.openqa.selenium.WebElement;
 import org.vividus.ui.action.AtomicActionFactory;
+import org.vividus.ui.model.Point;
 
 @SuppressWarnings("PMD.MissingStaticMethodInNonInstantiatableClass")
 public final class MobileAtomicActionFactories
@@ -59,7 +59,7 @@ public final class MobileAtomicActionFactories
         public MoveByOffset()
         {
             super("MOVE_BY_OFFSET", Point.class,
-                    (TouchGestures gestures, Point arg) -> gestures.moveByOffset(arg.getX(), arg.getY()));
+                    (TouchGestures gestures, Point arg) -> gestures.moveByOffset(arg.x(), arg.y()));
         }
     }
 
