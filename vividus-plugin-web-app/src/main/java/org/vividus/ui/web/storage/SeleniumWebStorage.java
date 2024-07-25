@@ -21,41 +21,47 @@ import java.util.Set;
 
 import org.vividus.ui.web.action.WebJavascriptActions;
 
-public class WebStorage
+public class SeleniumWebStorage implements WebStorage
 {
     private final WebJavascriptActions javascriptActions;
 
-    public WebStorage(WebJavascriptActions javascriptActions)
+    public SeleniumWebStorage(WebJavascriptActions javascriptActions)
     {
         this.javascriptActions = javascriptActions;
     }
 
+    @Override
     public Set<String> getKeys(StorageType storageType)
     {
         return new HashSet<>(executeScript(storageType, "return Object.keys(%s)"));
     }
 
+    @Override
     public String getItem(StorageType storageType, String key)
     {
         return executeScript(storageType, "return %s.getItem(arguments[0])", key);
     }
 
+    @Override
     public void setItem(StorageType storageType, String key, String value)
     {
         executeScript(storageType, "%s.setItem(arguments[0], arguments[1])", key, value);
     }
 
+    @Override
     public String removeItem(StorageType storageType, String key)
     {
         return executeScript(storageType,
                 "var item = %1$s.getItem(arguments[0]); %1$s.removeItem(arguments[0]); return item", key);
     }
 
+    @Override
     public void clear(StorageType storageType)
     {
         executeScript(storageType, "%s.clear()");
     }
 
+    @Override
     public int getSize(StorageType storageType)
     {
         return executeScript(storageType, "return %s.length");

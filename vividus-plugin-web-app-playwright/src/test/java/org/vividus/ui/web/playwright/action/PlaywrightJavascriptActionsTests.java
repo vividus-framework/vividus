@@ -44,6 +44,17 @@ class PlaywrightJavascriptActionsTests
         var page = mock(Page.class);
         when(uiContext.getCurrentPage()).thenReturn(page);
         playwrightJavascriptActions.executeScript(JS_SCRIPT);
-        verify(page).evaluate(JS_SCRIPT);
+        verify(page).evaluate(JS_SCRIPT, null);
+    }
+
+    @Test
+    void shouldExecuteScriptWithArgument()
+    {
+        var page = mock(Page.class);
+        var script = "script";
+        var arg = "arg";
+        when(uiContext.getCurrentPage()).thenReturn(page);
+        playwrightJavascriptActions.executeScript(script, arg);
+        verify(page).evaluate(script, arg);
     }
 }
