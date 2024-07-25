@@ -52,13 +52,13 @@ function scrollEndEventListener(event) {
 }
 
 function isElementInsideOverflowContainer(element) {
-    let container = element.parentElement;
+    let container = element.parentElement ?? element.getRootNode().host;
     while (container) {
         const style = window.getComputedStyle(container);
         if (style.overflow !== 'visible' && (style.overflowX !== 'visible' || style.overflowY !== 'visible')) {
             return true;
         }
-        container = container.parentElement;
+        container = container.parentElement ?? container.getRootNode().host;
     }
     return false;
 }
