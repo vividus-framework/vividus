@@ -1,6 +1,8 @@
 project.description = 'VIVIDUS extension for web application testing plugins'
 
  dependencies {
+     implementation project(':vividus-engine')
+     implementation project(':vividus-soft-assert')
      implementation project(':vividus-http-client')
      implementation project(':vividus-util')
      implementation(group: 'com.google.guava', name: 'guava', version: '33.2.1-jre')
@@ -13,4 +15,5 @@ project.description = 'VIVIDUS extension for web application testing plugins'
      testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
      testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
      testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
+     testImplementation(group: 'com.github.valfirst', name: 'slf4j-test', version: '3.0.1')
  }

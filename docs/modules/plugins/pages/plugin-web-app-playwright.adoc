@@ -394,6 +394,8 @@ include::plugins:partial$ui-execution-on-each-element-steps.adoc[]
 
 include::plugins:partial$web-cookie-steps.adoc[]
 
+include::plugins:partial$web-storage-steps.adoc[]
+
 === Upload file
 
 Uploads the xref:ROOT:glossary.adoc#_resource[resource] or file via web interface.

@@ -82,7 +82,7 @@
 
     <bean id="cssSelectorFactory" class="org.vividus.ui.web.action.CssSelectorFactory" />
 
-    <bean class="org.vividus.ui.web.storage.WebStorage" />
+    <bean class="org.vividus.ui.web.storage.SeleniumWebStorage" />
 
     <bean id="abstractWebElementSearchAction" class="org.vividus.ui.web.action.search.AbstractWebElementSearchAction"
           parent="abstractElementAction" abstract="true" />
@@ -190,7 +190,6 @@
     </bean>
 
     <bean id="keyboardSteps" class="org.vividus.steps.ui.web.KeyboardSteps" />
-    <bean id="webStorageSteps" class="org.vividus.steps.ui.web.WebStorageSteps" />
     <bean id="nestedSteps" class="org.vividus.steps.ui.web.NestedSteps" />
 
     <bean id="pageSteps" class="org.vividus.steps.ui.web.PageSteps">
@@ -282,7 +281,6 @@
         <idref bean="nestedSteps" />
         <idref bean="actionsSequenceSteps" />
         <idref bean="webUiVividusSetupSteps" />
-        <idref bean="webStorageSteps" />
         <idref bean="dragAndDropSteps" />
         <idref bean="mouseSteps" />
         <idref bean="scrollSteps" />

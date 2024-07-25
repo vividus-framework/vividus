@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="
-        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd"
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
        default-lazy-init="true" profile="web">
 
     <bean id="webApplicationConfiguration" class="org.vividus.ui.web.configuration.WebApplicationConfiguration">
@@ -11,4 +13,10 @@
     </bean>
 
     <bean class="org.vividus.ui.web.action.SpringResourceFileLoader"/>
+
+    <bean id="webStorageSteps" class="org.vividus.steps.ui.web.WebStorageSteps" />
+
+    <util:list id="stepBeanNames-WebApp" value-type="java.lang.String">
+        <idref bean="webStorageSteps" />
+    </util:list>
 </beans>

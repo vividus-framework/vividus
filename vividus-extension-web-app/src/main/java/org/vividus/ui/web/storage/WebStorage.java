@@ -14,28 +14,21 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.playwright.action;
+package org.vividus.ui.web.storage;
 
-import org.vividus.ui.web.playwright.UiContext;
+import java.util.Set;
 
-public class PlaywrightJavascriptActions
+public interface WebStorage
 {
-    private final UiContext uiContext;
+    Set<String> getKeys(StorageType storageType);
 
-    public PlaywrightJavascriptActions(UiContext uiContext)
-    {
-        this.uiContext = uiContext;
-    }
+    String getItem(StorageType storageType, String key);
 
-    @SuppressWarnings("unchecked")
-    public <T> T executeScript(String script)
-    {
-        return executeScript(script, null);
-    }
+    void setItem(StorageType storageType, String key, String value);
 
-    @SuppressWarnings("unchecked")
-    public <T> T executeScript(String script, Object arg)
-    {
-        return (T) uiContext.getCurrentPage().evaluate(script, arg);
-    }
+    String removeItem(StorageType storageType, String key);
+
+    void clear(StorageType storageType);
+
+    int getSize(StorageType storageType);
 }
