@@ -502,27 +502,10 @@ Then all resources found by CSS selector `a,img` in ${source-code} are valid
 
 === Validate redirects
 
-Check that all URLs from xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] redirect to proper pages with correct redirects number. Validation fails if either actual final URL or number of redirects do not match the expected values.
-
-NOTE: The step throws the error in case if https://developer.mozilla.org/en-US/docs/Web/HTTP/Status[HTTP response status code] of checked URL out of range 200-207.
-
-[source,gherkin]
-----
-Then I validate HTTP redirects: $expectedRedirects
-----
-
-. `$expectedRedirects` - The xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] with redirect parameters containing the following columns:
-** [subs=+quotes]`*startUrl*` - The URL from which redirection starts.
-** [subs=+quotes]`*endUrl*` - The expected final URL to redirect to.
-** [subs=+quotes]`*redirectsNumber*` - The expected number of redirects between `startUrl` and `endUrl` (optional).
-
-.Validate redirects
-[source,gherkin]
-----
-Then I validate HTTP redirects:
-|startUrl                    |endUrl                          |redirectsNumber |
-|http://example.com/redirect |http://example.com/get-response |1               |
-----
+[WARNING]
+====
+The step xref:plugins:plugin-rest-api.adoc#_validate_redirects[has been moved] to `vividus-plugin-rest-api`.
+====
 
 === Validate SSL rating
 

@@ -18,7 +18,7 @@ package org.vividus.validator.model;
 
 import java.util.function.Consumer;
 
-import org.vividus.http.validation.model.CheckStatus;
+import org.vividus.http.validation.CheckStatus;
 
 public enum ResourceValidationError
 {
