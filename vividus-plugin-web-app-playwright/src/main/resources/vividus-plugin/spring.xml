@@ -77,6 +77,7 @@
     <bean id="scrollSteps" class="org.vividus.ui.web.playwright.steps.ScrollSteps" />
     <bean id="networkValidationSteps" class="org.vividus.ui.web.playwright.steps.NetworkValidationSteps" />
     <bean id="actionsSequenceSteps" class="org.vividus.ui.web.playwright.steps.ActionsSequenceSteps" />
+    <bean id="browserSteps" class="org.vividus.ui.web.playwright.steps.BrowserSteps" />
 
     <util:list id="stepBeanNames-WebPlaywrightUi" value-type="java.lang.String">
         <idref bean="cookieSteps" />
@@ -94,6 +95,7 @@
         <idref bean="scrollSteps" />
         <idref bean="networkValidationSteps" />
         <idref bean="actionsSequenceSteps" />
+        <idref bean="browserSteps" />
     </util:list>
 
     <util:list id="stepBeanNames-Playwright-Hooks">

@@ -1,0 +1,20 @@
+=== Close browser
+
+Closes the browser.
+
+[source,gherkin]
+----
+When I close browser
+----
+
+.Browser restart
+[source,gherkin]
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com`
+Then number of elements found by `xpath(//img)` is = `1`
+When I execute javascript `document.querySelector('[name="vividus-logo"]').remove()`
+Then number of elements found by `xpath(//img)` is = `0`
+When I close browser
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com`
+Then number of elements found by `xpath(//img)` is = `1`
+----

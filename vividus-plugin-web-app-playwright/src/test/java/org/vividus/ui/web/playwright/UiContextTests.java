@@ -39,7 +39,8 @@ import org.vividus.ui.web.playwright.locator.Visibility;
 class UiContextTests
 {
     private static final PlaywrightLocator PLAYWRIGHT_LOCATOR = new PlaywrightLocator("xpath", "//div");
-    private final UiContext uiContext = new UiContext(new SimpleTestContext());
+    private final SimpleTestContext testContext = new SimpleTestContext();
+    private final UiContext uiContext = new UiContext(testContext);
 
     static
     {
@@ -198,6 +199,15 @@ class UiContextTests
     {
         uiContext.resetToActiveFrame();
         assertNull(uiContext.getCurrentFrame());
+    }
+
+    @Test
+    void shouldRemovePlaywrightContext()
+    {
+        uiContext.reset();
+        assertEquals(1, testContext.size());
+        uiContext.removePlaywrightContext();
+        assertEquals(0, testContext.size());
     }
 
     private FrameLocator setupFrameMock(boolean visibility)

@@ -31,6 +31,8 @@ import org.vividus.ui.web.playwright.locator.Visibility;
 
 public class UiContext
 {
+    private static final Class<PlaywrightContext> PLAYWRIGHT_CONTEXT_KEY = PlaywrightContext.class;
+
     private final TestContext testContext;
 
     public UiContext(TestContext testContext)
@@ -102,6 +104,11 @@ public class UiContext
         return getInCurrentContext(context -> context, page -> page.locator("//html/body"), FrameLocator::owner);
     }
 
+    public void removePlaywrightContext()
+    {
+        testContext.remove(PLAYWRIGHT_CONTEXT_KEY);
+    }
+
     private <R> R getInCurrentContext(Function<Locator, R> elementContextAction, Function<Page, R> pageContextAction,
             Function<FrameLocator, R> frameContextAction)
     {
@@ -115,7 +122,7 @@ public class UiContext
 
     private PlaywrightContext getPlaywrightContext()
     {
-        return testContext.get(PlaywrightContext.class, PlaywrightContext::new);
+        return testContext.get(PLAYWRIGHT_CONTEXT_KEY, PlaywrightContext::new);
     }
 
     private static final class PlaywrightContext
