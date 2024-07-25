@@ -56,7 +56,14 @@ public class BrowserContextProvider
     public BrowserContext get()
     {
         return testContext.get(BROWSER_CONTEXT_KEY, () -> {
-            BrowserContext browserContext = getPlaywrightContext().browser.newContext();
+            PlaywrightContext context = getPlaywrightContext();
+            Browser browser = context.browser;
+            if (!browser.isConnected())
+            {
+                browser = launchBrowserWithCurrentOptions(context.playwright);
+                testContext.put(PLAYWRIGHT_CONTEXT_KEY, new PlaywrightContext(context.playwright, browser));
+            }
+            BrowserContext browserContext = browser.newContext();
             networkContext.listenNetwork(browserContext);
             if (browserContextConfiguration.isTracingEnabled())
             {
@@ -68,11 +75,11 @@ public class BrowserContextProvider
         });
     }
 
-    public PlaywrightContext getPlaywrightContext()
+    private PlaywrightContext getPlaywrightContext()
     {
         return testContext.get(PLAYWRIGHT_CONTEXT_KEY, () -> {
             Playwright playwright = Playwright.create();
-            Browser browser = browserType.launchBrowser(playwright, launchOptions);
+            Browser browser = launchBrowserWithCurrentOptions(playwright);
             return new PlaywrightContext(playwright, browser);
         });
     }
@@ -104,6 +111,17 @@ public class BrowserContextProvider
                     playwrightContext.playwright.close();
                     testContext.remove(PLAYWRIGHT_CONTEXT_KEY);
                 });
+    }
+
+    public void closeBrowserInstance()
+    {
+        Optional.ofNullable(testContext.get(PLAYWRIGHT_CONTEXT_KEY, PlaywrightContext.class))
+                .ifPresent(playwrightContext -> playwrightContext.browser.close());
+    }
+
+    private Browser launchBrowserWithCurrentOptions(Playwright playwright)
+    {
+        return browserType.launchBrowser(playwright, launchOptions);
     }
 
     private record PlaywrightContext(Playwright playwright, Browser browser)

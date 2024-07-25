@@ -637,3 +637,5 @@ When I execute sequence of actions:
 |KEY_UP    |c, ControlOrMeta |
 ----
 ====
+
+include::partial$common-web-app-browser-steps.adoc[]

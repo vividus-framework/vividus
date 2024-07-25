@@ -22,10 +22,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -90,6 +92,7 @@ class BrowserContextProviderTests
             Playwright playwright = mock();
             playwrightStaticMock.when(Playwright::create).thenReturn(playwright);
             Browser browser = mock();
+            when(browser.isConnected()).thenReturn(true);
             when(browserType.launchBrowser(playwright, launchOptions)).thenReturn(browser);
             BrowserContext browserContext = mock();
             when(browser.newContext()).thenReturn(browserContext);
@@ -120,6 +123,34 @@ class BrowserContextProviderTests
             verifyNoMoreInteractions(browserContext);
             verifyNoInteractions(tracesOutputDirectory);
         }
+    }
+
+    @Test
+    void shouldReCreateClosedBrowser()
+    {
+        Browser firstBrowserInstance = mock();
+        Browser secondBrowserInstance = mock();
+        Browser thirdBrowserInstance = mock();
+        when(browserType.launchBrowser(any(), any())).thenReturn(firstBrowserInstance).thenReturn(secondBrowserInstance)
+                .thenReturn(thirdBrowserInstance);
+        when(firstBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
+        when(firstBrowserInstance.isConnected()).thenReturn(true).thenReturn(false);
+        when(secondBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
+        when(secondBrowserInstance.isConnected()).thenReturn(false).thenReturn(false);
+        when(thirdBrowserInstance.newContext()).thenReturn(mock(BrowserContext.class));
+
+        browserContextProvider.get();
+        browserContextProvider.closeBrowserContext();
+        browserContextProvider.closeBrowserInstance();
+        browserContextProvider.get();
+        browserContextProvider.closeBrowserContext();
+        browserContextProvider.closeBrowserInstance();
+        browserContextProvider.get();
+
+        verify(firstBrowserInstance).close();
+        verify(secondBrowserInstance).close();
+        verify(browserType, times(3)).launchBrowser(any(), any());
+        verify(testContext, times(6)).put(any(), any());
     }
 
     static Stream<Arguments> tracingConfigurations()
