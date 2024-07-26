@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,18 @@ import org.vividus.encryption.NoDecryptionPasswordException;
 public class EncryptedPropertiesProcessor extends AbstractPropertiesProcessor
 {
     private static final String ENC = "ENC";
-    private final Decryptor decryptor;
+    private Decryptor decryptor;
 
-    EncryptedPropertiesProcessor(Properties properties)
+    public EncryptedPropertiesProcessor()
     {
         super(ENC);
+    }
+
+    @Override
+    public Properties processProperties(Properties properties)
+    {
         this.decryptor = new Decryptor(properties);
+        return super.processProperties(properties);
     }
 
     @Override

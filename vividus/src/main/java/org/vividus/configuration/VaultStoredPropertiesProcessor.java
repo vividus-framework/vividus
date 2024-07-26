@@ -27,7 +27,6 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.vault.client.RestTemplateCustomizer;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.config.EnvironmentVaultConfiguration;
@@ -39,14 +38,21 @@ public class VaultStoredPropertiesProcessor extends AbstractPropertiesProcessor 
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultStoredPropertiesProcessor.class);
     private static final Pattern SECRET_PATTERN = Pattern.compile("(?<engine>[^/]+)/(?<path>.+)/(?<key>[^/]+)$");
-    private final Properties properties;
+
+    private String vaultNamespace;
     private VaultTemplate vaultTemplate;
     private AnnotationConfigApplicationContext context;
 
-    VaultStoredPropertiesProcessor(Properties properties)
+    public VaultStoredPropertiesProcessor()
     {
         super("(?<!AZURE_KEY_)(?:VAULT|HASHI_CORP_VAULT)");
-        this.properties = properties;
+    }
+
+    @Override
+    public Properties processProperties(Properties properties)
+    {
+        this.vaultNamespace = properties.getProperty("vault.namespace");
+        return super.processProperties(properties);
     }
 
     @Override
@@ -94,10 +100,8 @@ public class VaultStoredPropertiesProcessor extends AbstractPropertiesProcessor 
         if (vaultTemplate == null)
         {
             context = new AnnotationConfigApplicationContext();
-            PropertiesPropertySource propertySource = new PropertiesPropertySource("properties", properties);
-            context.getEnvironment().getPropertySources().addFirst(propertySource);
 
-            Optional.ofNullable(properties.getProperty("vault.namespace")).ifPresent(namespace ->
+            Optional.ofNullable(vaultNamespace).ifPresent(namespace ->
                     context.registerBean(RestTemplateCustomizer.class, () -> restTemplate ->
                             restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor(namespace))
                     )

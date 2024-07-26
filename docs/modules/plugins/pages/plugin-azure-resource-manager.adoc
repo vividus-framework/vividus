@@ -221,3 +221,38 @@ resourceGroups/sample-resource-group/providers/Microsoft.KeyVault/vaults/sample-
 ----
 When I delete Azure resource with identifier `resourceGroups/TEST-RG/providers/Microsoft.DataFactory/factories/TEST-ADF/linkedservices/test-datalake` using API version `2018-06-01`
 ----
+
+== Secrets Management Tools
+
+=== https://learn.microsoft.com/en-us/azure/key-vault/[Azure Key Vault]
+
+==== Configuration
+
+Firstly, need to https://learn.microsoft.com/en-us/azure/key-vault/general/quick-create-portal#create-a-vault[create Key Vault in Azure].
+Then you will able to https://learn.microsoft.com/en-us/azure/key-vault/secrets/quick-create-portal[add/read/update/remove secrets] in existing Key Vault.
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="1,3,1", options="header"]
+|===
+|Property
+|Description
+|Example
+
+|[subs=+quotes]`*azure.key-vault.url*`
+|Azure Key Vault name
+|`https://autotestkeyvault.vault.azure.net/`
+
+|===
+
+==== How to refer Azure Key Vault secrets
+. Find the required secret in Azure Key Vault.
++
+image::azure-key-vault.png[Secrets in Azure Key Vault]
+
+. Put the name to properties using the case-sensitive wrapping `AZURE_KEY_VAULT(...)`
++
+[source,properties]
+----
+db.connection.test.username=AZURE_KEY_VAULT(dev-mysql-analytics-user)
+----
