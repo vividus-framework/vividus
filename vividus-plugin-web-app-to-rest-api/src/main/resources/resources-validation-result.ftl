@@ -79,7 +79,7 @@
                     </td>
                     <td>
                         Status code: ${(result.statusCode.isPresent())?then(result.statusCode.getAsInt(),'N/A')}
-                        <#include "resources-response-body-fragment.ftl">
+                        <#include "org/vividus/http/steps/attachment/resources-response-body-fragment.ftl">
                     </td>
                     <td>
                         <#assign pageURL = result.pageURL>

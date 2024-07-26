@@ -19,7 +19,6 @@ package org.vividus.http.expression;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -55,13 +54,13 @@ class PkceExpressionProcessorTests
                 processor.execute(String.format(GENERATE_CODE_CHALLENGE, CODE_VERIFIER_VALUE)));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
-    void testExecuteWithException() throws NoSuchAlgorithmException
+    void testExecuteWithException()
     {
-        try (MockedStatic<MessageDigest> md = mockStatic(MessageDigest.class))
+        try (MockedStatic<MessageDigest> messageDigestStaticMock = mockStatic(MessageDigest.class))
         {
-            when(MessageDigest.getInstance(ALGORITHM)).thenThrow(new NoSuchAlgorithmException());
+            messageDigestStaticMock.when(() -> MessageDigest.getInstance(ALGORITHM)).thenThrow(
+                    new NoSuchAlgorithmException());
             assertThrows(IllegalArgumentException.class, () ->
                     expressionProcessor.execute(String.format(GENERATE_CODE_CHALLENGE, CODE_VERIFIER_VALUE)));
         }

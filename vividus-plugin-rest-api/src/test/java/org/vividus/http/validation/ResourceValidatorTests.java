@@ -39,8 +39,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
-import org.vividus.http.validation.model.CheckStatus;
-import org.vividus.http.validation.model.ResourceValidation;
 import org.vividus.softassert.ISoftAssert;
 
 @ExtendWith(MockitoExtension.class)

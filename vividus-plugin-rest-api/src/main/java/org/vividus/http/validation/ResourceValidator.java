@@ -30,8 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.hc.core5.http.HttpStatus;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
-import org.vividus.http.validation.model.AbstractResourceValidation;
-import org.vividus.http.validation.model.CheckStatus;
 import org.vividus.softassert.ISoftAssert;
 
 public class ResourceValidator<T extends AbstractResourceValidation<T>>

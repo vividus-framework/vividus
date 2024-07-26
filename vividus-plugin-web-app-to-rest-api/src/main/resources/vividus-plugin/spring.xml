@@ -19,27 +19,11 @@
         <property name="uriToIgnoreRegex" value="${resource-checker.uri-to-ignore-regex}" />
     </bean>
 
-    <bean id="redirectValidationSteps" class="org.vividus.steps.integration.RedirectValidationSteps" />
-
     <bean id="sslLabsClient" class="org.vividus.ssllabs.SslLabsClient">
         <constructor-arg index="2" value="${ssl-labs.api-endpoint}"/>
     </bean>
 
     <bean id="sslLabsSteps" class="org.vividus.ssllabs.SslLabsSteps" />
-
-    <bean id="httpRedirectsProvider" class="org.vividus.http.HttpRedirectsProvider">
-        <property name="httpClient">
-            <bean class="org.vividus.http.client.HttpClient"
-                  factory-bean="httpClientFactory"
-                  factory-method="buildHttpClient">
-                <constructor-arg>
-                    <bean parent="httpClientConfig">
-                        <property name="circularRedirectsAllowed" value="${http.redirects-provider.circular-redirects-allowed}" />
-                    </bean>
-                </constructor-arg>
-            </bean>
-        </property>
-    </bean>
 
     <bean id="abstractFetchingUrlsTableTransformer"
           class="org.vividus.crawler.transformer.AbstractFetchingUrlsTableTransformer"
@@ -112,7 +96,6 @@
     <util:list id="stepBeanNames-WebAppToRestApi" value-type="java.lang.String">
         <idref bean="httpRequestSteps" />
         <idref bean="resourceCheckSteps" />
-        <idref bean="redirectValidationSteps" />
         <idref bean="sslLabsSteps" />
     </util:list>
  </beans>
