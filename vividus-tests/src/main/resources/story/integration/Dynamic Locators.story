@@ -1,4 +1,5 @@
 Meta:
+  @epic vividus-plugin-web-app
   @requirementId 2516
 
 Scenario: Should use dynamic locator
