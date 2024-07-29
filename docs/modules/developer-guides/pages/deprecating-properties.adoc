@@ -30,7 +30,7 @@ web\\.driver\\.CHROME\\.(.+)=web.driver.chrome.$1
 
 == Find deprecated properties
 
-All deprecated properties for the current xref:ROOT:tests-configuration.adoc#_profiles[profiles] and xref:ROOT:tests-configuration.adoc#_environments[environments] can be found in the execution log.
+All deprecated properties for the current xref:configuration:tests-configuration.adoc#_profiles[profiles] and xref:configuration:tests-configuration.adoc#_environments[environments] can be found in the execution log.
 
 [source]
 ----

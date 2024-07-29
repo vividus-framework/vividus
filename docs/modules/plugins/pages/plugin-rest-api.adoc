@@ -38,7 +38,7 @@ a|`true`
 
 |===
 
-See xref:ROOT:tests-configuration.adoc#_http_configuration[HTTP configuration] for more fine-grained control over the HTTP interactions.
+See xref:configuration:tests-configuration.adoc#_http_configuration[HTTP configuration] for more fine-grained control over the HTTP interactions.
 
 == Expressions
 

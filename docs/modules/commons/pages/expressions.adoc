@@ -981,7 +981,7 @@ Calculates the {resource-info}[resource] or file hash using the specified hashin
 === `decrypt`
 
 Decrypts an input string using the same algrotihm and password employed for
-the xref:ROOT:secrets-management.adoc#_how_to_use_an_encrypted_string[decryption] of properties.
+the xref:configuration:secrets-management.adoc#_how_to_use_an_encrypted_string[decryption] of properties.
 
 [source, subs="+quotes"]
 ----

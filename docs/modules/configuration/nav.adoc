@@ -1,0 +1,5 @@
+.Configuration
+* xref:tests-configuration.adoc[Tests Configuration]
+* xref:secrets-management.adoc[Secrets Management]
+* xref:reporting.adoc[Reporting]
+* xref:plugin-management.adoc[Plugin Management]

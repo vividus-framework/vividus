@@ -5,7 +5,7 @@ Everyone has to start somewhere and if you’re new to VIVIDUS, this is where to
 == Before you start
 In order to use VIVIDUS effectively, you need to know what it is and understand
 some of its fundamental concepts. So before you start using VIVIDUS in earnest,
-we highly recommend you read xref:ROOT:tests-configuration.adoc["How to cook VIVIDUS?"].
+we highly recommend you read xref:configuration:tests-configuration.adoc["How to cook VIVIDUS?"].
 
 == Prerequisites
 
