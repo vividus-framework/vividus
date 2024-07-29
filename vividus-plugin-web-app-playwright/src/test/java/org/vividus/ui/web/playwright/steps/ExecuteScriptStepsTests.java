@@ -36,7 +36,7 @@ import org.vividus.variable.VariableScope;
 class ExecuteScriptStepsTests
 {
     private static final String JS_RESULT_ASSERTION_MESSAGE = "Returned result is not null";
-    private static final String JS_CODE = "window.performance.timing";
+    private static final String JS_CODE = "return 'value'";
     private static final String VALUE = "value";
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
     private static final String VARIABLE_NAME = "variableName";
@@ -58,7 +58,7 @@ class ExecuteScriptStepsTests
     @Test
     void shouldExecuteJavaScriptAndSaveValue()
     {
-        when(playwrightJavascriptActions.executeScript(JS_CODE)).thenReturn(VALUE);
+        when(playwrightJavascriptActions.executeScript("async () => {%n%s%n}".formatted(JS_CODE))).thenReturn(VALUE);
         when(softAssert.assertNotNull(JS_RESULT_ASSERTION_MESSAGE, VALUE)).thenReturn(true);
         executeScriptSteps.saveValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
         verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, VALUE);

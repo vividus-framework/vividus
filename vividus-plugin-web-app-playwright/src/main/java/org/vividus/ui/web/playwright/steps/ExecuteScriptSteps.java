@@ -71,7 +71,8 @@ public class ExecuteScriptSteps
     @When("I execute javascript `$jsCode` and save result to $scopes variable `$variableName`")
     public void saveValueFromJS(String jsCode, Set<VariableScope> scopes, String variableName)
     {
-        assertAndSaveResult(() -> playwrightJavascriptActions.executeScript(jsCode), scopes, variableName);
+        String adaptedJsCode = "async () => {%n%s%n}".formatted(jsCode);
+        assertAndSaveResult(() -> playwrightJavascriptActions.executeScript(adaptedJsCode), scopes, variableName);
     }
 
     private void assertAndSaveResult(Supplier<Object> resultProvider, Set<VariableScope> scopes, String variableName)
