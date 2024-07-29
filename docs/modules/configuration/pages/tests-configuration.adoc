@@ -2,7 +2,7 @@
 
 == `configuration.properties`
 
-VIVIDUS configuration includes the following parts: xref:tests-configuration.adoc#_suites[suites], xref:ROOT:tests-configuration.adoc#_profiles[profiles] and xref:tests-configuration.adoc#_environments[environments].
+VIVIDUS configuration includes the following parts: xref:tests-configuration.adoc#_suites[suites], xref:configuration:tests-configuration.adoc#_profiles[profiles] and xref:tests-configuration.adoc#_environments[environments].
 
 [WARNING]
 ====
@@ -244,7 +244,7 @@ configuration.environments=dev
 #configuration.environments=prod
 ----
 
-Environment variables can also be declared in multiple files. Define common and specific properties for your environments and take the xref:ROOT:tests-configuration.adoc#_profiles_setup[same approach] of reusing and separating values.
+Environment variables can also be declared in multiple files. Define common and specific properties for your environments and take the xref:configuration:tests-configuration.adoc#_profiles_setup[same approach] of reusing and separating values.
 
 === Configuration sets
 

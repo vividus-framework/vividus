@@ -19,7 +19,7 @@ NOTE: The tasks are available only through the `gradlew` command.
 
 == Run stories
 
-The task runs test stories based on current xref:ROOT:tests-configuration.adoc[tests configuration] and tests state
+The task runs test stories based on current xref:configuration:tests-configuration.adoc[tests configuration] and tests state
 on the file system.
 
 :task-name: runStories
@@ -28,14 +28,14 @@ include::partial$stories-exec.adoc[]
 
 == Debug stories
 
-The task runs test stories omitting VIVIDUS initialization check based on current xref:ROOT:tests-configuration.adoc[tests configuration]
+The task runs test stories omitting VIVIDUS initialization check based on current xref:configuration:tests-configuration.adoc[tests configuration]
 and tests state on the file system.
 
 include::partial$stories-exec.adoc[task-name=debugStories]
 
 == Print available steps
 
-The task prints all the steps that are available for the xref:ROOT:tests-configuration.adoc[configured] profiles, environments and suites in the alphabetical order.
+The task prints all the steps that are available for the xref:configuration:tests-configuration.adoc[configured] profiles, environments and suites in the alphabetical order.
 
 .Options
 [cols="3,1,1,1", options="header"]

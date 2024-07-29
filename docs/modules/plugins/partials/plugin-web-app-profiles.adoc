@@ -1,6 +1,6 @@
 == Profiles
 
-Profiles allow to choose or parameterize browser that tests run on. See more details on the profiles and nesting strategy on the xref:ROOT:tests-configuration.adoc#_profiles[configuration page].
+Profiles allow to choose or parameterize browser that tests run on. See more details on the profiles and nesting strategy on the xref:configuration:tests-configuration.adoc#_profiles[configuration page].
 
 Web-application plugin contains significant number of built-in profiles. They can be found after plugin installation by the following path in Eclipse IDE:
 [source, DIR]

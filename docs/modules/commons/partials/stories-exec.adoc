@@ -14,7 +14,7 @@ gradlew {task-name}
 === Treat known issues only as a positive result
 
 Any known issues detected during stories run fail the overall execution with the corresponding
-xref:ROOT:tests-configuration.adoc#_exit_codes[exit code]. The following command-line option can be used to not treat
+xref:configuration:tests-configuration.adoc#_exit_codes[exit code]. The following command-line option can be used to not treat
 known issues as failures:
 
 .Enable treating of known issues as a positive result for current stories run
