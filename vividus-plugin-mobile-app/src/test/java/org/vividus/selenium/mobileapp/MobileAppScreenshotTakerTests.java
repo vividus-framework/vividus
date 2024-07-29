@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.mobileapp.screenshot.MobileAppAshotFactory;
-import org.vividus.selenium.screenshot.IScreenshotFileNameGenerator;
-import org.vividus.selenium.screenshot.Screenshot;
+import org.vividus.ui.screenshot.Screenshot;
+import org.vividus.ui.screenshot.ScreenshotFileNameGenerator;
 
 @ExtendWith(MockitoExtension.class)
 class MobileAppScreenshotTakerTests
@@ -45,7 +45,7 @@ class MobileAppScreenshotTakerTests
     private static final byte[] DATA = { 1, 0, 1};
 
     @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
+    @Mock private ScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private TakesScreenshot takesScreenshot;
     @Mock private MobileAppAshotFactory ashotFactory;
     @InjectMocks private MobileAppScreenshotTaker screenshotTaker;

@@ -130,7 +130,7 @@
 
     <bean class="org.vividus.ui.listener.UiContextListener" lazy-init="false" />
 
-    <bean class="org.vividus.selenium.screenshot.ScreenshotFileNameGenerator" />
+    <bean class="org.vividus.selenium.screenshot.SeleniumScreenshotFileNameGenerator" />
 
     <bean id="genericElementSteps" class="org.vividus.steps.ui.GenericElementSteps" />
     <bean id="genericWaitSteps" class="org.vividus.steps.ui.GenericWaitSteps" />
@@ -138,7 +138,7 @@
     <bean id="genericSetContextSteps" class="org.vividus.steps.ui.GenericSetContextSteps" />
     <bean id="genericNestedSteps" class="org.vividus.steps.ui.GenericNestedSteps" />
     <bean id="navigationSteps" class="org.vividus.steps.ui.NavigationSteps" />
-    <bean id="screenshotTakingSteps" class="org.vividus.steps.ui.ScreenshotTakingSteps" />
+    <bean id="screenshotTakingSteps" class="org.vividus.ui.steps.ScreenshotTakingSteps" />
     <bean id="barcodeSteps" class="org.vividus.steps.ui.BarcodeSteps" />
 
     <bean class="org.vividus.ui.action.search.IndexElementFilter" />

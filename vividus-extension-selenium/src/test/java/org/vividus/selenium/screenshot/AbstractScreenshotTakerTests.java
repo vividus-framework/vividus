@@ -44,6 +44,8 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.ui.screenshot.Screenshot;
+import org.vividus.ui.screenshot.ScreenshotFileNameGenerator;
 import org.vividus.ui.screenshot.ScreenshotParameters;
 import org.vividus.util.ResourceUtils;
 
@@ -59,7 +61,7 @@ class AbstractScreenshotTakerTests
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private TakesScreenshot takesScreenshot;
-    @Mock private IScreenshotFileNameGenerator screenshotFileNameGenerator;
+    @Mock private ScreenshotFileNameGenerator screenshotFileNameGenerator;
     @Mock private ScreenshotDebugger screenshotDebugger;
     @Mock private AshotFactory<ScreenshotParameters> ashotFactory;
     @InjectMocks private TestScreenshotTaker testScreenshotTaker;
@@ -170,7 +172,7 @@ class AbstractScreenshotTakerTests
     private static class TestScreenshotTaker extends AbstractScreenshotTaker<ScreenshotParameters>
     {
         TestScreenshotTaker(IWebDriverProvider webDriverProvider,
-                IScreenshotFileNameGenerator screenshotFileNameGenerator,
+                ScreenshotFileNameGenerator screenshotFileNameGenerator,
                 AshotFactory<ScreenshotParameters> ashotFactory, ScreenshotDebugger screenshotDebugger)
         {
             super(webDriverProvider, screenshotFileNameGenerator, ashotFactory, screenshotDebugger);
