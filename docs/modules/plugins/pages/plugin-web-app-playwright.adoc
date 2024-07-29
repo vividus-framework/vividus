@@ -452,7 +452,7 @@ When I capture HTTP $httpMethods request with URL pattern `$urlPattern` and save
 *** `responsetBody.text` - The received data as plain text.
 
 .Validate the URL of the matching HTTP request
-[source,gherkin,subs="attributes+"]
+[source,gherkin]
 ----
 Given I am on page with URL `https://www.google.com/search?q=vividus`
 When I capture HTTP GET,POST request with URL pattern `.*/search.*=vividus` and save URL to scenario variable `URL`
@@ -460,7 +460,7 @@ Then `${URL}` is equal to `https://www.google.com/search?q=vividus`
 ----
 
 .Validate the URL query of the matching HTTP request
-[source,gherkin,subs="attributes+"]
+[source,gherkin]
 ----
 Given I am on page with URL `https://www.google.com/search?q=vividus`
 When I capture HTTP GET request with URL pattern `.*/search.*=vividus` and save URL query to scenario variable `query`
