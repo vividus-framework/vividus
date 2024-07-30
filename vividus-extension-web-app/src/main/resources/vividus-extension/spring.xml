@@ -14,6 +14,8 @@
 
     <bean class="org.vividus.ui.web.action.SpringResourceFileLoader"/>
 
+    <bean class="org.vividus.ui.web.storage.WebStorage" />
+
     <bean id="webStorageSteps" class="org.vividus.steps.ui.web.WebStorageSteps" />
 
     <util:list id="stepBeanNames-WebApp" value-type="java.lang.String">

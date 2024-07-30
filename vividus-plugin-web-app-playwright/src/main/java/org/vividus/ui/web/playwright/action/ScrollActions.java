@@ -18,6 +18,7 @@ package org.vividus.ui.web.playwright.action;
 
 import com.microsoft.playwright.Locator;
 
+import org.vividus.ui.web.action.JavascriptActions;
 import org.vividus.util.ResourceUtils;
 
 public class ScrollActions
@@ -27,11 +28,11 @@ public class ScrollActions
             loadScript("scroll-element-into-viewport-center.js");
     private static final String SCROLL_TO_END_OF_PAGE = loadScript("scroll-to-end-of-page.js");
 
-    private final PlaywrightJavascriptActions javascriptActions;
+    private final JavascriptActions javascriptActions;
 
     private int stickyHeaderSizePercentage;
 
-    public ScrollActions(PlaywrightJavascriptActions javascriptActions)
+    public ScrollActions(JavascriptActions javascriptActions)
     {
         this.javascriptActions = javascriptActions;
     }

@@ -28,7 +28,8 @@ import org.vividus.ui.ViewportSizeProvider;
 import org.vividus.ui.action.JavascriptActions;
 import org.vividus.util.ResourceUtils;
 
-public class WebJavascriptActions extends JavascriptActions implements ViewportSizeProvider
+public class WebJavascriptActions extends JavascriptActions
+        implements ViewportSizeProvider, org.vividus.ui.web.action.JavascriptActions
 {
     private static final String TRIGGER_EVENT_FORMAT = "if(document.createEvent){var evObj = document"
             + ".createEvent('MouseEvents');evObj.initEvent('%1$s', true, false); arguments[0].dispatchEvent(evObj);} "

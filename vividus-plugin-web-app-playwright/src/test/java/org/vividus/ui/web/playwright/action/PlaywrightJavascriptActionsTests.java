@@ -20,6 +20,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import com.microsoft.playwright.Page;
 
 import org.junit.jupiter.api.Test;
@@ -35,7 +37,6 @@ class PlaywrightJavascriptActionsTests
     private static final String JS_SCRIPT = "document.querySelector('[name=\"vividus-logo\"]').remove()";
 
     @Mock private UiContext uiContext;
-
     @InjectMocks private PlaywrightJavascriptActions playwrightJavascriptActions;
 
     @Test
@@ -44,7 +45,7 @@ class PlaywrightJavascriptActionsTests
         var page = mock(Page.class);
         when(uiContext.getCurrentPage()).thenReturn(page);
         playwrightJavascriptActions.executeScript(JS_SCRIPT);
-        verify(page).evaluate(JS_SCRIPT, null);
+        verify(page).evaluate("async () => {%n%s%n}".formatted(JS_SCRIPT));
     }
 
     @Test
@@ -55,6 +56,6 @@ class PlaywrightJavascriptActionsTests
         var arg = "arg";
         when(uiContext.getCurrentPage()).thenReturn(page);
         playwrightJavascriptActions.executeScript(script, arg);
-        verify(page).evaluate(script, arg);
+        verify(page).evaluate(script, List.of(arg));
     }
 }

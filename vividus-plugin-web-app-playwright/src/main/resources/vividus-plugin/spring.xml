@@ -62,8 +62,6 @@
     <bean class="org.vividus.ui.web.playwright.action.PlaywrightActions$KeyDown" />
     <bean class="org.vividus.ui.web.playwright.action.PlaywrightActions$KeyUp" />
 
-    <bean class="org.vividus.ui.web.playwright.storage.PlaywrightWebStorage" />
-
     <bean class="org.vividus.ui.web.playwright.screenshot.PlaywrightScreenshotFileNameGenerator" />
 
     <bean class="org.vividus.ui.web.playwright.screenshot.PlaywrightScreenshotTaker" />

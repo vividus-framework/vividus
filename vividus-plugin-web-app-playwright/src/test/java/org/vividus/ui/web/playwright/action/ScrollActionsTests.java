@@ -27,17 +27,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.ui.web.playwright.UiContext;
+import org.vividus.ui.web.action.JavascriptActions;
 import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
 class ScrollActionsTests
 {
-    @Mock private UiContext uiContext;
-
     @Mock private Locator locator;
-
-    @Mock private PlaywrightJavascriptActions javascriptActions;
+    @Mock private JavascriptActions javascriptActions;
 
     @InjectMocks private ScrollActions scrollActions;
 
