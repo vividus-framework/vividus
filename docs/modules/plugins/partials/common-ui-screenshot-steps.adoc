@@ -1,0 +1,31 @@
+=== Taking screenshot steps
+==== Take screenshot
+
+Takes a screenshot and publish it to the report.
+
+[source,gherkin]
+----
+When I take screenshot
+----
+
+==== Take screenshot and save it to the file
+
+Takes a screenshot and saves it to the file at the specified path.
+
+TIP: The full path to the file with the taken screenshot is posted to logs and report.
+
+[source,gherkin]
+----
+When I take screenshot and save it to file at path `$screenshotFilePath`
+----
+
+* `$screenshotFilePath` - The path to the file to save the screenshot, the allowed values are:
++
+** an absolute path to the file, e.g. `C:\Windows\screenshot.png`;
+** a relative path (it is resolved from the current working directory, e.g. `screenshot.png`.
+
+.Take a screenshot and save it to the file
+[source,gherkin]
+----
+When I take screenshot and save it to file at path `${screenshot-directory}/start-page.png`
+----

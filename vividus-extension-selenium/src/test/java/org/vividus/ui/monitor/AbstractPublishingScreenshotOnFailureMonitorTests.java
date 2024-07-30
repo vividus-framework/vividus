@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,8 +65,8 @@ import org.vividus.report.ui.ImageCompressor;
 import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.softassert.event.AssertionFailedEvent;
+import org.vividus.ui.screenshot.Screenshot;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class AbstractPublishingScreenshotOnFailureMonitorTests
