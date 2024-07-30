@@ -70,16 +70,20 @@ By. prefix is optional.
 |Example
 
 |`id`
-|Locates elements whose `id` attribute matches the search value
+|Locates elements whose `id` attribute matches the specified search value.
 |id(submitBtn)
 
 |`css`
-|Locates elements matching a https://playwright.dev/java/docs/locators#locate-by-css-or-xpath[CSS selector]
+|Locates elements matching a https://playwright.dev/java/docs/locators#locate-by-css-or-xpath[CSS selector].
 |css(.menu-item)
 
 |`xPath`
-|Locates elements matching an https://playwright.dev/java/docs/locators#locate-by-css-or-xpath[xPath expression]
+|Locates elements matching an https://playwright.dev/java/docs/locators#locate-by-css-or-xpath[xPath expression].
 |xpath(//a)
+
+|`tagName`
+|Locates elements whose tag name matches the specified search value. This locator is translated to `css(<tagName>)` locator.
+|tagName(div)
 
 |===
 

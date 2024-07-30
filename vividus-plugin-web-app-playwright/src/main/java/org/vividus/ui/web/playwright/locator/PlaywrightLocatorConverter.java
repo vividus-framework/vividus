@@ -63,6 +63,7 @@ public final class PlaywrightLocatorConverter
 
     private static PlaywrightLocator convertToLocator(String type, String value)
     {
-        return new PlaywrightLocator(type, value);
+        String locatorType = "tagName".equalsIgnoreCase(type) ? "css" : type;
+        return new PlaywrightLocator(locatorType, value);
     }
 }

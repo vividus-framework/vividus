@@ -19,61 +19,50 @@ package org.vividus.ui.web.playwright.locator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class PlaywrightLocatorConverterTests
 {
-    static Stream<Arguments> actionAttributeSource()
+    @ParameterizedTest
+    @CsvSource({
+            "By.xpath(//div):all, ALL",
+            "By.xpath(//div):v, VISIBLE",
+            "By.xpath(//div), VISIBLE",
+            "xpath(//div), VISIBLE"
+    })
+    void shouldConvertToLocator(String testValue, Visibility expectedVisibility)
     {
-        return Stream.of(
-                Arguments.of(createExpectedLocator(Visibility.ALL),
-                        "By.xpath(//div):all"),
-                Arguments.of(createExpectedLocator(Visibility.VISIBLE),
-                        "By.xpath(//div):v"),
-                Arguments.of(createExpectedLocator(Visibility.VISIBLE),
-                        "By.xpath(//div)"),
-                Arguments.of(createExpectedLocator(Visibility.VISIBLE),
-                        "xpath(//div)"));
+        var expectedLocator = new PlaywrightLocator("xpath", "//div");
+        expectedLocator.setVisibility(expectedVisibility);
+        assertEquals(expectedLocator, PlaywrightLocatorConverter.convertToLocator(testValue));
     }
 
-    @ParameterizedTest
-    @MethodSource("actionAttributeSource")
-    void shouldConvertToLocator(PlaywrightLocator expected, String testValue)
+    @Test
+    void shouldConvertTagNameLocator()
     {
-        assertEquals(expected, PlaywrightLocatorConverter.convertToLocator(testValue));
+        var expectedLocator = new PlaywrightLocator("css", "div");
+        assertEquals(expectedLocator, PlaywrightLocatorConverter.convertToLocator("tagName(div)"));
     }
 
     @Test
     void testConvertToLocatorInvalidVisibilityType()
     {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+        var exception = assertThrows(IllegalArgumentException.class,
                 () -> PlaywrightLocatorConverter.convertToLocator("By.css(div):invalid"));
-        assertEquals("Illegal visibility type 'invalid'. Expected one of 'visible', 'all'",
-                exception.getMessage());
+        assertEquals("Illegal visibility type 'invalid'. Expected one of 'visible', 'all'", exception.getMessage());
     }
 
     @Test
     void shouldThrowExceptionWhenInvalidLocatorFormat()
     {
-        String locatorAsString = "InvalidLocatorFormat";
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            PlaywrightLocatorConverter.convertToLocator(locatorAsString);
-        });
-        String expectedMessage = "Invalid locator format. Expected matches [(?:By\\.)?([a-zA-Z-]+)\\((.*)\\)(:(.*))?]"
-                                 + " Actual: [" + locatorAsString + "]";
-        String actualMessage = exception.getMessage();
-        assertEquals(expectedMessage, actualMessage);
-    }
-
-    private static PlaywrightLocator createExpectedLocator(Visibility visibility)
-    {
-        PlaywrightLocator locator = new PlaywrightLocator("xpath", "//div");
-        locator.setVisibility(visibility);
-        return locator;
+        var locatorAsString = "InvalidLocatorFormat";
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> PlaywrightLocatorConverter.convertToLocator(locatorAsString));
+        var expectedMessage =
+                "Invalid locator format. Expected matches [(?:By\\.)?([a-zA-Z-]+)\\((.*)\\)(:(.*))?] Actual: ["
+                + locatorAsString + "]";
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }
