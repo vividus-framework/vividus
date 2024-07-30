@@ -5,6 +5,29 @@ The plugin provides functionality to interact with Web applications with help of
 :plugin-short-name: web-app-playwright
 include::partial$plugin-installation.adoc[]
 
+== Profiles
+
+The xref:configuration:tests-configuration.adoc#_profiles[profiles] allow to choose and/or parameterize browser that tests run on.
+
+=== Desktop
+
+The following profiles running desktop browsers are available out of the box:
+
+- `web_pw/desktop/chromium` - for Google Chrome, Microsoft Edge and other Chromium-based browsers, by default, Playwright uses open source https://playwright.dev/java/docs/browsers#chromium[Chromium] builds.
+- `web_pw/desktop/firefox` - https://playwright.dev/java/docs/browsers#firefox[Playwright's Firefox] version matches the recent Firefox Stable build.
+- `web_pw/desktop/webkit` - https://playwright.dev/java/docs/browsers#webkit[Playwright's WebKit] version matches the recent WebKit trunk build, before it is used in Apple Safari and other WebKit-based browsers.
+
+=== Headless
+
+https://en.wikipedia.org/wiki/Headless_browser[Headless mode] is a functionality that allows the execution of a full
+version of the browser while controlling it programmatically. It can be used without dedicated graphics or display,
+meaning that it runs without its “head”, the Graphical User Interface (GUI). The following profiles running browsers in
+headless mode are available:
+
+- `web_pw/headless/chromium` - for Google Chrome, Microsoft Edge and other Chromium-based browsers, by default, Playwright uses open source https://playwright.dev/java/docs/browsers#chromium[Chromium] builds.
+- `web_pw/headless/firefox` - https://playwright.dev/java/docs/browsers#firefox[Playwright's Firefox] version matches the recent Firefox Stable build.
+- `web_pw/headless/webkit` - https://playwright.dev/java/docs/browsers#webkit[Playwright's WebKit] version matches the recent WebKit trunk build, before it is used in Apple Safari and other WebKit-based browsers.
+
 == Properties
 
 NOTE: The properties marked with *bold* are mandatory.
