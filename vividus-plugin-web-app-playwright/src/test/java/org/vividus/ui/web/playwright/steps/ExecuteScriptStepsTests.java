@@ -29,7 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.SoftAssert;
-import org.vividus.ui.web.playwright.action.PlaywrightJavascriptActions;
+import org.vividus.ui.web.action.JavascriptActions;
 import org.vividus.variable.VariableScope;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +41,7 @@ class ExecuteScriptStepsTests
     private static final Set<VariableScope> VARIABLE_SCOPE = Set.of(VariableScope.SCENARIO);
     private static final String VARIABLE_NAME = "variableName";
 
-    @Mock private PlaywrightJavascriptActions playwrightJavascriptActions;
+    @Mock private JavascriptActions javascriptActions;
     @Mock private SoftAssert softAssert;
     @Mock private VariableContext variableContext;
 
@@ -52,13 +52,13 @@ class ExecuteScriptStepsTests
     {
         String jsCode = "document.querySelector('[name=\"vividus-logo\"]').remove()";
         executeScriptSteps.executeJavascript(jsCode);
-        verify(playwrightJavascriptActions).executeScript(jsCode);
+        verify(javascriptActions).executeScript(jsCode);
     }
 
     @Test
     void shouldExecuteJavaScriptAndSaveValue()
     {
-        when(playwrightJavascriptActions.executeScript("async () => {%n%s%n}".formatted(JS_CODE))).thenReturn(VALUE);
+        when(javascriptActions.executeScript(JS_CODE)).thenReturn(VALUE);
         when(softAssert.assertNotNull(JS_RESULT_ASSERTION_MESSAGE, VALUE)).thenReturn(true);
         executeScriptSteps.saveValueFromJS(JS_CODE, VARIABLE_SCOPE, VARIABLE_NAME);
         verify(variableContext).putVariable(VARIABLE_SCOPE, VARIABLE_NAME, VALUE);

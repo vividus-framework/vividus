@@ -23,19 +23,19 @@ import org.jbehave.core.annotations.When;
 import org.vividus.context.VariableContext;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.softassert.SoftAssert;
-import org.vividus.ui.web.playwright.action.PlaywrightJavascriptActions;
+import org.vividus.ui.web.action.JavascriptActions;
 import org.vividus.variable.VariableScope;
 
 public class ExecuteScriptSteps
 {
-    private final PlaywrightJavascriptActions playwrightJavascriptActions;
+    private final JavascriptActions javascriptActions;
     private final ISoftAssert softAssert;
     private final VariableContext variableContext;
 
-    public ExecuteScriptSteps(PlaywrightJavascriptActions playwrightJavascriptActions, SoftAssert softAssert,
+    public ExecuteScriptSteps(JavascriptActions javascriptActions, SoftAssert softAssert,
             VariableContext variableContext)
     {
-        this.playwrightJavascriptActions = playwrightJavascriptActions;
+        this.javascriptActions = javascriptActions;
         this.softAssert = softAssert;
         this.variableContext = variableContext;
     }
@@ -49,7 +49,7 @@ public class ExecuteScriptSteps
     @When("I execute javascript `$jsCode`")
     public void executeJavascript(String jsCode)
     {
-        playwrightJavascriptActions.executeScript(jsCode);
+        javascriptActions.executeScript(jsCode);
     }
 
     /**
@@ -71,8 +71,7 @@ public class ExecuteScriptSteps
     @When("I execute javascript `$jsCode` and save result to $scopes variable `$variableName`")
     public void saveValueFromJS(String jsCode, Set<VariableScope> scopes, String variableName)
     {
-        String adaptedJsCode = "async () => {%n%s%n}".formatted(jsCode);
-        assertAndSaveResult(() -> playwrightJavascriptActions.executeScript(adaptedJsCode), scopes, variableName);
+        assertAndSaveResult(() -> javascriptActions.executeScript(jsCode), scopes, variableName);
     }
 
     private void assertAndSaveResult(Supplier<Object> resultProvider, Set<VariableScope> scopes, String variableName)

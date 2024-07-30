@@ -16,9 +16,12 @@
 
 package org.vividus.ui.web.playwright.action;
 
+import java.util.List;
+
+import org.vividus.ui.web.action.JavascriptActions;
 import org.vividus.ui.web.playwright.UiContext;
 
-public class PlaywrightJavascriptActions
+public class PlaywrightJavascriptActions implements JavascriptActions
 {
     private final UiContext uiContext;
 
@@ -28,14 +31,13 @@ public class PlaywrightJavascriptActions
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T executeScript(String script)
+    @Override
+    public <T> T executeScript(String script, Object... args)
     {
-        return executeScript(script, null);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T executeScript(String script, Object arg)
-    {
-        return (T) uiContext.getCurrentPage().evaluate(script, arg);
+        if (args.length == 0)
+        {
+            return (T) uiContext.getCurrentPage().evaluate("async () => {%n%s%n}".formatted(script));
+        }
+        return (T) uiContext.getCurrentPage().evaluate(script, List.of(args));
     }
 }

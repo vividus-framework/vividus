@@ -16,19 +16,54 @@
 
 package org.vividus.ui.web.storage;
 
+import java.util.HashSet;
 import java.util.Set;
 
-public interface WebStorage
+import org.apache.commons.lang3.ArrayUtils;
+import org.vividus.ui.web.action.JavascriptActions;
+
+public class WebStorage
 {
-    Set<String> getKeys(StorageType storageType);
+    private final JavascriptActions javascriptActions;
 
-    String getItem(StorageType storageType, String key);
+    public WebStorage(JavascriptActions javascriptActions)
+    {
+        this.javascriptActions = javascriptActions;
+    }
 
-    void setItem(StorageType storageType, String key, String value);
+    public Set<String> getKeys(StorageType storageType)
+    {
+        return new HashSet<>(executeScript(storageType, "return Object.keys(%s)"));
+    }
 
-    String removeItem(StorageType storageType, String key);
+    public String getItem(StorageType storageType, String key)
+    {
+        return executeScript(storageType, "return %s.getItem('%s')", key);
+    }
 
-    void clear(StorageType storageType);
+    public void setItem(StorageType storageType, String key, String value)
+    {
+        executeScript(storageType, "%s.setItem('%s', '%s')", key, value);
+    }
 
-    int getSize(StorageType storageType);
+    public String removeItem(StorageType storageType, String key)
+    {
+        return executeScript(storageType, "var item = %1$s.getItem('%2$s'); %1$s.removeItem('%2$s'); return item", key);
+    }
+
+    public void clear(StorageType storageType)
+    {
+        executeScript(storageType, "%s.clear()");
+    }
+
+    public int getSize(StorageType storageType)
+    {
+        return executeScript(storageType, "return %s.length");
+    }
+
+    private <T> T executeScript(StorageType storageType, String format, Object... args)
+    {
+        Object[] allArgs = ArrayUtils.insert(0, args, storageType.getJavascriptPropertyName());
+        return javascriptActions.executeScript(String.format(format, allArgs));
+    }
 }

@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.web.playwright.storage;
+package org.vividus.ui.web.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -29,29 +28,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.ui.web.playwright.action.PlaywrightJavascriptActions;
-import org.vividus.ui.web.storage.StorageType;
+import org.vividus.ui.web.action.JavascriptActions;
 
 @ExtendWith(MockitoExtension.class)
-class PlaywrightWebStorageTests
+class WebStorageTests
 {
     private static final String KEY = "key";
     private static final String VALUE = "value";
 
-    @Mock private PlaywrightJavascriptActions javascriptActions;
-    @InjectMocks private PlaywrightWebStorage webStorage;
+    @Mock private JavascriptActions javascriptActions;
+    @InjectMocks private WebStorage webStorage;
 
     @Test
     void shouldReturnLocalStorageItemByKey()
     {
         webStorage.getItem(StorageType.LOCAL, KEY);
-        verify(javascriptActions).executeScript("key => localStorage.getItem(key)", KEY);
+        verify(javascriptActions).executeScript("return localStorage.getItem('key')");
     }
 
     @Test
     void shouldReturnLocalStorageKeySet()
     {
-        when(javascriptActions.executeScript("Object.keys(localStorage)")).thenReturn(List.of(KEY));
+        when(javascriptActions.executeScript("return Object.keys(localStorage)")).thenReturn(List.of(KEY));
         var keys = webStorage.getKeys(StorageType.LOCAL);
         assertEquals(Set.of(KEY), keys);
     }
@@ -60,16 +58,15 @@ class PlaywrightWebStorageTests
     void shouldSetLocalStorageItem()
     {
         webStorage.setItem(StorageType.LOCAL, KEY, VALUE);
-        verify(javascriptActions).executeScript("([key, value]) => localStorage.setItem(key, value)",
-                Arrays.asList(KEY, VALUE));
+        verify(javascriptActions).executeScript("localStorage.setItem('key', 'value')");
     }
 
     @Test
     void shouldRemoveLocalStorageItem()
     {
         when(javascriptActions.executeScript(
-                "key => {\nvar item = localStorage.getItem(key); localStorage.removeItem(key); return item\n}", KEY))
-                .thenReturn(VALUE);
+                "var item = localStorage.getItem('key'); localStorage.removeItem('key'); return item")).thenReturn(
+                VALUE);
         var actual = webStorage.removeItem(StorageType.LOCAL, KEY);
         assertEquals(VALUE, actual);
     }
@@ -84,7 +81,7 @@ class PlaywrightWebStorageTests
     @Test
     void shouldReturnLocalStorageSize()
     {
-        when(javascriptActions.executeScript("localStorage.length")).thenReturn(1);
+        when(javascriptActions.executeScript("return localStorage.length")).thenReturn(1);
         assertEquals(1, webStorage.getSize(StorageType.LOCAL));
     }
 
@@ -92,13 +89,13 @@ class PlaywrightWebStorageTests
     void shouldReturnSessionStorageItemByKey()
     {
         webStorage.getItem(StorageType.SESSION, KEY);
-        verify(javascriptActions).executeScript("key => sessionStorage.getItem(key)", KEY);
+        verify(javascriptActions).executeScript("return sessionStorage.getItem('key')");
     }
 
     @Test
     void shouldReturnSessionStorageKeySet()
     {
-        when(javascriptActions.executeScript("Object.keys(sessionStorage)")).thenReturn(List.of(KEY));
+        when(javascriptActions.executeScript("return Object.keys(sessionStorage)")).thenReturn(List.of(KEY));
         var keys = webStorage.getKeys(StorageType.SESSION);
         assertEquals(Set.of(KEY), keys);
     }
@@ -107,16 +104,15 @@ class PlaywrightWebStorageTests
     void shouldSetSessionStorageItem()
     {
         webStorage.setItem(StorageType.SESSION, KEY, VALUE);
-        verify(javascriptActions).executeScript("([key, value]) => sessionStorage.setItem(key, value)",
-                Arrays.asList(KEY, VALUE));
+        verify(javascriptActions).executeScript("sessionStorage.setItem('key', 'value')");
     }
 
     @Test
     void shouldRemoveSessionStorageItem()
     {
         when(javascriptActions.executeScript(
-                "key => {\nvar item = sessionStorage.getItem(key); sessionStorage.removeItem(key); return item\n}",
-                KEY)).thenReturn(VALUE);
+                "var item = sessionStorage.getItem('key'); sessionStorage.removeItem('key'); return item")).thenReturn(
+                VALUE);
         var actual = webStorage.removeItem(StorageType.SESSION, KEY);
         assertEquals(VALUE, actual);
     }
@@ -131,7 +127,7 @@ class PlaywrightWebStorageTests
     @Test
     void shouldReturnSessionStorageSize()
     {
-        when(javascriptActions.executeScript("sessionStorage.length")).thenReturn(1);
+        when(javascriptActions.executeScript("return sessionStorage.length")).thenReturn(1);
         assertEquals(1, webStorage.getSize(StorageType.SESSION));
     }
 }
