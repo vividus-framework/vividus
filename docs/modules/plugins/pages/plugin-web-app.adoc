@@ -5,6 +5,8 @@ The plugin provides functionality to interact with Web applications.
 :plugin-short-name: web-app
 include::partial$plugin-installation.adoc[]
 
+include::plugins:partial$plugin-web-app-profiles.adoc[]
+
 == Properties
 
 NOTE: The properties marked with *bold* are mandatory.
@@ -68,24 +70,53 @@ include::partial$common-web-app-properties.adoc[]
 
 |===
 
-=== How to configure user preferences for Chrome browser?
-In addition to the command line arguments, user preferences (see the _Preferences_ file in Chrome's user data directory or open `chrome://prefs-internals/` link in Chrome browser for examples) can be customised.
+=== Configure driver path
 
-Here is an example how to configure third-party cookies behaviour.
+While executing tests on the local machine it is allowed to use custom browser
+driver. This approach first requires manually downloading the driver (See
+https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/#quick-reference[Quick Reference Section]
+for download links). The path to the downloaded binary should be configured
+using the following property:
 
-.Add the following property to allow all cookies
-[source,properties]
+[source, properties]
 ----
-web.driver.chrome.experimental-options={"prefs": {"profile": {"cookie_controls_mode": 0}}}
+web.driver.<browser>.driver-executable-path=/path/to/driver/executable
 ----
-The allowed values for the preference from the example are:
 
-* `0` - allow all cookies;
-* `1` - block third-party cookies;
-* `2` - block third-party cookies in Incognito mode only.
+where `<browser>` is one of the following values:
 
-=== Configuring of Basic authentication for Chromium browsers
-Vividus allows users to add predefined configurations for https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#basic_authentication_scheme[Basic authentication]. This setting is only available for desktop Chromium browsers (Chrome, Opera, Microsoft Edge) and allows to define multiple configurations for authorization on different sites.
+- `chrome`
+- `firefox`
+- `safari`
+- `iexplore`
+- `edge`
+- `opera`
+
+=== Configure browser path
+
+While executing tests on the local machine it is allowed to configure path to
+browser executable file. In general cases it's not required, installed browsers
+are found automatically (except Opera browser). Also, for example, if browser is
+not installed, but only downloaded and unpacked into some folder, the path to
+the downloaded binary should be configured using the following property:
+
+[source, properties]
+----
+web.driver.<browser>.binary-path=/path/to/custom/browser/executable
+----
+
+where `<browser>` is one of the following values:
+
+- `chrome`
+- `firefox`
+- `edge`
+- `opera`
+
+=== Configure Basic authentication for Chromium browsers
+It is allowed to add predefined configurations for
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#basic_authentication_scheme[Basic authentication].
+This setting is only available for desktop Chromium browsers (Chrome, Opera, Microsoft Edge) and allows to define
+multiple configurations for authentication on different websites.
 
 [cols="4,3,3", options="header"]
 |===
@@ -107,7 +138,7 @@ Vividus allows users to add predefined configurations for https://developer.mozi
 
 |===
 
-.Setting up authorization for sites https://httpbingo.org and https://www.example.com
+.Set up authentication for websites https://httpbingo.org and https://www.example.com
 [source,properties]
 ----
 web-application.basic-authentication.httpbingo.url-regex=https:\/\/httpbingo\.org
@@ -118,6 +149,22 @@ web-application.basic-authentication.example.url-regex=.*example\.org
 web-application.basic-authentication.example.username=admin
 web-application.basic-authentication.example.password=qwerty123
 ----
+
+=== Configure user preferences for Chrome browser
+In addition to the command line arguments, user preferences (see the _Preferences_ file in Chrome's user data directory or open `chrome://prefs-internals/` link in Chrome browser for examples) can be customised.
+
+Here is an example how to configure third-party cookies behaviour.
+
+.Add the following property to allow all cookies
+[source,properties]
+----
+web.driver.chrome.experimental-options={"prefs": {"profile": {"cookie_controls_mode": 0}}}
+----
+The allowed values for the preference from the example are:
+
+* `0` - allow all cookies;
+* `1` - block third-party cookies;
+* `2` - block third-party cookies in Incognito mode only.
 
 include::partial$proxy-meta-tags.adoc[]
 
@@ -203,8 +250,6 @@ Then `${browser-window-height}` is = `600`
 ----
 
 include::partial$dynamic-variables-ui.adoc[]
-
-include::plugins:partial$plugin-web-app-profiles.adoc[]
 
 include::partial$locator-header.adoc[]
 include::plugins:partial$plugin-web-app-locators.adoc[]
