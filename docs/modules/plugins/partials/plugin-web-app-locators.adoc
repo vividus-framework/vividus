@@ -94,7 +94,7 @@ include::partial$visibility-types.adoc[]
 The filters are applied after elements search using one of the locators specified above.
 The elements not matching the filter condition are sorted out without any notice.
 
-[cols="1,2,3", options="header"]
+[cols="1a,2,3", options="header"]
 |===
 
 |Filter type
@@ -129,19 +129,35 @@ a|`tagName(div)->filter.attribute(class=burger-menu)` - `div` element has the `c
 |part of *href* attribute of the link element
 |id(v1)->filter.linkUrlPart(/url)
 
-|`tooltip`
+.^|`tooltip`
+[WARNING]
+====
+This filter type is deprecated and will be removed in VIVIDUS 0.7.0.
+====
 |title attribute value
 |id(v1)->filter.tooltip(title)
 
-|`imageSrcPart`
+.^|`imageSrcPart`
+[WARNING]
+====
+This filter type is deprecated and will be removed in VIVIDUS 0.7.0.
+====
 |src attribute should contain value
 |id(v1)->filter.imageSrcPart(part)
 
-|`placeholder`
+.^|`placeholder`
+[WARNING]
+====
+This filter type is deprecated and will be removed in VIVIDUS 0.7.0.
+====
 |Placeholder attribute should be equal to a value
 |id(v1)->filter.placeholder(placeholder-value)
 
-|`validationIconSource`
+.^|`validationIconSource`
+[WARNING]
+====
+This filter type is deprecated and will be removed in VIVIDUS 0.7.0.
+====
 |CSS property background-image should match
 |id(v1)->filter.validationIconSource(src)
 

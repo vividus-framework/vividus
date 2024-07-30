@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,17 @@
 package org.vividus.ui.web.action.search;
 
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.ui.action.search.IElementFilterAction;
 import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.web.action.IWebElementActions;
 
+@Deprecated(since = "0.6.14", forRemoval = true)
 public class ValidationIconSourceFilter implements IElementFilterAction
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValidationIconSourceFilter.class);
+
     private final IWebElementActions webElementActions;
 
     public ValidationIconSourceFilter(IWebElementActions webElementActions)
@@ -33,6 +38,7 @@ public class ValidationIconSourceFilter implements IElementFilterAction
     @Override
     public boolean matches(WebElement element, String validationIconSrc)
     {
+        LOGGER.warn("'validationIconSource' filter is deprecated  and will be removed in VIVIDUS 0.7.0");
         return validationIconSrc.equals(webElementActions.getCssValue(element, "background-image"));
     }
 

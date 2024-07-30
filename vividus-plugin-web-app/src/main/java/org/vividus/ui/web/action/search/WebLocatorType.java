@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,9 +99,11 @@ public enum WebLocatorType implements LocatorType
         }
     },
     TEXT_PART("Text part", GenericTextFilter.class),
+    @Deprecated(since = "0.6.14", forRemoval = true)
     PLACEHOLDER("Placeholder", PlaceholderFilter.class),
     STATE("State", StateFilter.class),
     DROP_DOWN_STATE("Drop down state", DropDownStateFilter.class),
+    @Deprecated(since = "0.6.14", forRemoval = true)
     VALIDATION_ICON_SOURCE("Validation icon source", ValidationIconSourceFilter.class),
     RELATIVE_TO_PARENT_WIDTH("Relative to parent width", RelativeToParentWidthFilter.class),
     CLASS_ATTRIBUTE_PART("Attribute class part", ClassAttributePartFilter.class),
