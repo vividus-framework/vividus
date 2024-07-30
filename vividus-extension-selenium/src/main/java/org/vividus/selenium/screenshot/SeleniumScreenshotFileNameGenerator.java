@@ -17,22 +17,16 @@
 package org.vividus.selenium.screenshot;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
+import org.vividus.ui.screenshot.ScreenshotFileNameGenerator;
 
 import jakarta.inject.Inject;
 
-public class ScreenshotFileNameGenerator implements IScreenshotFileNameGenerator
+public class SeleniumScreenshotFileNameGenerator implements ScreenshotFileNameGenerator
 {
-    private static final String DEFAULT_IMAGE_FORMAT = "png";
-
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss_SSS")
-            .withZone(ZoneId.systemDefault());
-
     @Inject private IGenericWebDriverManager webDriverManager;
 
     @Override

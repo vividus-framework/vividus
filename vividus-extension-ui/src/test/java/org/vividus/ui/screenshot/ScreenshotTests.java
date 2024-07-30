@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,19 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.screenshot;
+package org.vividus.ui.screenshot;
 
-public class Screenshot
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+
+import org.junit.jupiter.api.Test;
+
+class ScreenshotTests
 {
-    private final String fileName;
-    private final byte[] data;
-
-    public Screenshot(String fileName, byte[] data)
+    @Test
+    void shouldCloneSourceData()
     {
-        this.data = data.clone();
-        this.fileName = fileName;
-    }
-
-    public String getFileName()
-    {
-        return fileName;
-    }
-
-    public byte[] getData()
-    {
-        return data.clone();
+        byte[] data = new byte[1];
+        Screenshot screenshot = new Screenshot("filename", data);
+        assertNotSame(data, screenshot.getData());
     }
 }

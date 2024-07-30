@@ -119,6 +119,11 @@ public class BrowserContextProvider
                 .ifPresent(playwrightContext -> playwrightContext.browser.close());
     }
 
+    public boolean isBrowserContextInitialized()
+    {
+        return null != testContext.get(BROWSER_CONTEXT_KEY);
+    }
+
     private Browser launchBrowserWithCurrentOptions(Playwright playwright)
     {
         return browserType.launchBrowser(playwright, launchOptions);

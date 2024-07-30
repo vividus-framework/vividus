@@ -51,6 +51,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -244,5 +245,16 @@ class BrowserContextProviderTests
             ordered.verify(browser).close();
             ordered.verify(playwright).close();
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "BrowserContext, true",
+            ",               false"
+    })
+    void shouldCheckBrowserContextInitStatus(String browserContext, boolean initStatus)
+    {
+        when(testContext.get(BrowserContext.class)).thenReturn(browserContext);
+        assertEquals(initStatus, browserContextProvider.isBrowserContextInitialized());
     }
 }

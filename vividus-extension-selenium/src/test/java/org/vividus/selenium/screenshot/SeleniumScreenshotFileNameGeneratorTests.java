@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.openqa.selenium.Dimension;
 import org.vividus.selenium.manager.IGenericWebDriverManager;
 
 @ExtendWith(MockitoExtension.class)
-class ScreenshotFileNameGeneratorTests
+class SeleniumScreenshotFileNameGeneratorTests
 {
     private static final String FILE_DATE_PATTERN = "\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}_\\d{3}-";
     private static final String SEPARATOR = "-";
@@ -41,14 +41,14 @@ class ScreenshotFileNameGeneratorTests
     private static final String WIDTH_X_HEIGHT_EXTENSION = SEPARATOR + WIDTH + "x" + HEIGHT + ".png";
 
     @Mock private IGenericWebDriverManager webDriverManager;
-    @InjectMocks private ScreenshotFileNameGenerator screenshotFileNameGenerator;
+    @InjectMocks private SeleniumScreenshotFileNameGenerator seleniumScreenshotFileNameGenerator;
 
     @Test
     void testGenerateScreenshotFileNameWithoutBrowserName()
     {
         Dimension dimension = new Dimension(WIDTH, HEIGHT);
         when(webDriverManager.getSize()).thenReturn(dimension);
-        String screenshotFileName = screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME);
+        String screenshotFileName = seleniumScreenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME);
         assertTrue(screenshotFileName.matches(FILE_DATE_PATTERN + SCREENSHOT_NAME + WIDTH_X_HEIGHT_EXTENSION));
     }
 
@@ -61,7 +61,7 @@ class ScreenshotFileNameGeneratorTests
         when(webDriverManager.getCapabilities()).thenReturn(capabilities);
         String browserName = "firefox";
         when(capabilities.getBrowserName()).thenReturn(browserName);
-        String screenshotFileName = screenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME);
+        String screenshotFileName = seleniumScreenshotFileNameGenerator.generateScreenshotFileName(SCREENSHOT_NAME);
         assertTrue(screenshotFileName
                 .matches(FILE_DATE_PATTERN + SCREENSHOT_NAME + SEPARATOR + browserName + WIDTH_X_HEIGHT_EXTENSION));
     }

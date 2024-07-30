@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.screenshot;
+package org.vividus.ui.screenshot;
 
-public interface IScreenshotFileNameGenerator
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
+public interface ScreenshotFileNameGenerator
 {
+    String DEFAULT_IMAGE_FORMAT = "png";
+    DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss_SSS")
+            .withZone(ZoneId.systemDefault());
+
     String generateScreenshotFileName(String screenshotName);
 }

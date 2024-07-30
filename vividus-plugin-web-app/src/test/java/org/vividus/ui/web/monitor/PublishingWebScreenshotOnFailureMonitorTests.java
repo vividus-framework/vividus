@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.vividus.context.RunContext;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.selenium.screenshot.Screenshot;
 import org.vividus.selenium.screenshot.WebScreenshotTaker;
 import org.vividus.ui.context.IUiContext;
+import org.vividus.ui.screenshot.Screenshot;
 
 @ExtendWith(MockitoExtension.class)
 class PublishingWebScreenshotOnFailureMonitorTests

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.steps.ui;
+package org.vividus.ui.steps;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.info;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -45,8 +45,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.reporter.model.Attachment;
-import org.vividus.selenium.screenshot.Screenshot;
-import org.vividus.selenium.screenshot.ScreenshotTaker;
+import org.vividus.ui.screenshot.Screenshot;
+import org.vividus.ui.screenshot.ScreenshotTaker;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class ScreenshotTakingStepsTests
