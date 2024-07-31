@@ -5,7 +5,7 @@ dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-extension-azure')
-    implementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.25')
+    implementation platform(group: 'com.azure', name: 'azure-sdk-bom', version: '1.2.26')
     implementation(group: 'com.azure', name: 'azure-cosmos')
     implementation(group: 'com.google.guava', name: 'guava', version: '33.2.1-jre')
 
