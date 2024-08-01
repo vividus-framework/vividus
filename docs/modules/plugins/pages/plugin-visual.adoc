@@ -137,6 +137,7 @@ When I $visualAction baseline with `$baselineName` ignoring:$ignoringElement usi
 
 [source,gherkin]
 ----
+web.screenshot.strategy.custom.max-height=15000
 web.screenshot.strategy.custom.web-header-to-cut=80
 web.screenshot.strategy.custom.web-footer-to-cut=0
 web.screenshot.strategy.custom.scrollable-element=By.cssSelector(.page__inner)
