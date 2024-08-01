@@ -129,6 +129,8 @@ include::partial$screenshot-properties-based-configuration.adoc[]
 
 NOTE: Modifiers to cut web header or web footer have the default value `100` px (cutting headers and footers up to 100 pixels high).
 
+NOTE: All images with height greater than 15000px https://help.applitools.com/hc/en-us/articles/360006915092-Image-size-and-capacity-limitations[will be trimmed] on the server side.
+
 === Common visual testing actions use cases
 
 include::partial$establish.adoc[leveloffset=+1]

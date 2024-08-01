@@ -113,6 +113,10 @@ and screenshot configuration:
 |scrollableElement|webHeaderToCut|webFooterToCut|scrollTimeout|
 |id(scrollable)   |10            |0             |PT1S         |
 
+Scenario: Validation of full-page visual testing with screenshot height limitation (change action after establish)
+When I ESTABLISH baseline with name `full-page-with-limited-height` using screenshot configuration:
+|maxHeight |
+|50        |
 
 Scenario: Validation of step When I $actionType baseline with name `$name` for context element with acceptable diff percentage
 When I change context to element located by `xpath(//a[@href="#home"])`

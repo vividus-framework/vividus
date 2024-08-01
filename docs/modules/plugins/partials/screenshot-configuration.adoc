@@ -1,4 +1,5 @@
 ** `shootingStrategy` - The shooting strategy to use.
+** `maxHeight` - The maximum screenshot height in pixels. The area outside this size won't be captured. May be useful when having memory issues on large pages. *(Web only)*
 ** `webHeaderToCut` - The header to cut on each screenshot segment during scroll e.g. sticky header. *(Web only)*
 ** `webFooterToCut` - The footer to cut on each screenshot segment during scroll e.g. sticky footer. *(Web only)*
 ** `nativeHeaderToCut` - The native header to cut (e.g. system/browser bars). *(Web on mobile only)*
