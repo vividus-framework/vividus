@@ -1,7 +1,7 @@
 project.description = 'VIVIDUS soft assert'
 
 dependencies {
-    api(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
+    api(group: 'org.hamcrest', name: 'hamcrest', version: '3.0')
 
     implementation project(':vividus-test-context')
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.13')

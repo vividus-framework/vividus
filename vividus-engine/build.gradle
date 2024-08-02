@@ -3,7 +3,7 @@ project.description = 'VIVIDUS test engine'
 dependencies {
     api project(':vividus-test-context')
     api(group: 'org.vividus', name: 'jbehave-core', version: versions.jbehave)
-    api(group: 'org.hamcrest', name: 'hamcrest', version: '2.2')
+    api(group: 'org.hamcrest', name: 'hamcrest', version: '3.0')
 
     implementation project(':vividus-util')
     implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.15.0')
