@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,10 @@ public class AdjustingScrollableElementAwareViewportPastingDecorator extends Deb
 
     public AdjustingScrollableElementAwareViewportPastingDecorator(ShootingStrategy strategy,
             WebElement scrollableElement, WebJavascriptActions javascriptActions,
-            WebCutOptions webCutOptions)
+            WebCutOptions webCutOptions, int screenshotMaxHeight)
     {
-        super(strategy, "arguments[1]", webCutOptions.webHeaderToCut(), webCutOptions.webFooterToCut());
+        super(strategy, "arguments[1]", webCutOptions.webHeaderToCut(), webCutOptions.webFooterToCut(),
+                screenshotMaxHeight);
         this.javascriptActions = javascriptActions;
         this.scrollableElement = scrollableElement;
         this.webCutOptions = webCutOptions;

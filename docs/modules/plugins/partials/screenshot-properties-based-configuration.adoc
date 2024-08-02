@@ -4,6 +4,10 @@
 |Acceptable values
 |Description
 
+|`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.max-height`
+|size in pixels
+|Maximum screenshot height. The area outside this size won't be captured. May be useful when having memory issues on large pages.
+
 |`web.screenshot.strategy.<YOUR_STRATEGY_NAME>.web-header-to-cut`
 |size in pixels
 |Web header to cut (could be useful if your site has sticky header)

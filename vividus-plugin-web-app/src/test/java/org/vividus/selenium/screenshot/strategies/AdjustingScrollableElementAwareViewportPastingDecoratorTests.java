@@ -129,7 +129,7 @@ class AdjustingScrollableElementAwareViewportPastingDecoratorTests
         private TestAdjustingScrollableElementAwareViewportPastingDecorator(ShootingStrategy strategy,
                 WebElement scrollableElement, WebJavascriptActions javascriptActions, WebCutOptions webCutOptions)
         {
-            super(strategy, scrollableElement, javascriptActions, webCutOptions);
+            super(strategy, scrollableElement, javascriptActions, webCutOptions, 0);
         }
 
         @Override

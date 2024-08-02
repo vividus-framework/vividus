@@ -88,10 +88,10 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
         WebCutOptions webCutOptions = screenshotParameters.getWebCutOptions();
         return screenshotParameters.getScrollableElement().map(
                 e -> (DebuggingViewportPastingDecorator) new AdjustingScrollableElementAwareViewportPastingDecorator(
-                        toDecorate, e, javascriptActions, webCutOptions)
+                        toDecorate, e, javascriptActions, webCutOptions, screenshotParameters.getMaxHeight())
                 ).orElseGet(
                 () -> new DebuggingViewportPastingDecorator(toDecorate, webCutOptions.webHeaderToCut(),
-                        webCutOptions.webFooterToCut())
+                        webCutOptions.webFooterToCut(), screenshotParameters.getMaxHeight())
         );
     }
 
@@ -116,7 +116,8 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
             case "VIEWPORT_PASTING" ->
             {
                 shootingStrategy = new DebuggingViewportPastingDecorator(baseShootingStrategy,
-                        DEFAULT_STICKY_HEADER_HEIGHT, DEFAULT_STICKY_FOOTER_HEIGHT).withScrollTimeout(SCROLL_TIMEOUT);
+                        DEFAULT_STICKY_HEADER_HEIGHT, DEFAULT_STICKY_FOOTER_HEIGHT, 0)
+                                .withScrollTimeout(SCROLL_TIMEOUT);
                 yield CeilingJsCoordsProvider.getScrollAdjusted(javascriptActions);
             }
             default -> throw new IllegalArgumentException(
