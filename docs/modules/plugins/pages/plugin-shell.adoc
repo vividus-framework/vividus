@@ -7,7 +7,7 @@ The plugin provides functionality to execute commands via https://en.wikipedia.o
 .build.gradle
 [source,gradle,subs="attributes+"]
 ----
-implementation(group: 'org.vividus', name: 'vividus-plugin-shell', version: '{current-version}')
+implementation(group: 'org.vividus', name: 'vividus-plugin-shell')
 ----
 
 == Properties
