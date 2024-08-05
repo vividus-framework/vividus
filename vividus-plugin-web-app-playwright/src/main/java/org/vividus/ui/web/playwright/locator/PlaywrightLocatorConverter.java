@@ -19,7 +19,9 @@ package org.vividus.ui.web.playwright.locator;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
+import org.apache.commons.text.CaseUtils;
 import org.vividus.ui.locator.LocatorParser;
 
 public final class PlaywrightLocatorConverter
@@ -46,7 +48,7 @@ public final class PlaywrightLocatorConverter
         Matcher matcher = LOCATOR_PATTERN.matcher(locatorAsString);
         if (matcher.matches())
         {
-            String elementActionType = matcher.group(ATTRIBUTE_TYPE_GROUP).toLowerCase();
+            String elementActionType = matcher.group(ATTRIBUTE_TYPE_GROUP);
             String searchValue = matcher.group(SEARCH_VALUE_GROUP);
             String elementType = matcher.group(ELEMENT_TYPE_GROUP);
             PlaywrightLocator convertedLocator = convertToLocator(elementActionType, searchValue);
@@ -63,7 +65,14 @@ public final class PlaywrightLocatorConverter
 
     private static PlaywrightLocator convertToLocator(String type, String value)
     {
-        String locatorType = "tagName".equalsIgnoreCase(type) ? "css" : type;
-        return new PlaywrightLocator(locatorType, value);
+        return getLocatorType(type).createLocator(value);
+    }
+
+    private static PlaywrightLocatorType getLocatorType(String locatorType)
+    {
+        return Stream.of(PlaywrightLocatorType.values())
+                .filter(type -> CaseUtils.toCamelCase(type.name(), false, '_').equals(locatorType))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unsupported locator type: " + locatorType));
     }
 }
