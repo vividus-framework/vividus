@@ -26,6 +26,9 @@ subprojects {
             module('ch.qos.reload4j:reload4j') {
                 replacedBy('org.slf4j:log4j-over-slf4j', 'Redirect Reload4j (a drop-in replacement for Log4J 1.x) logs to SLF4J')
             }
+            module('org.jsoup:jsoup') {
+                replacedBy('com.github.vividus-framework:jsoup', 'Use jsoup build from the custom fork')
+            }
         }
     }
 }
