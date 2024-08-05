@@ -108,6 +108,10 @@ By. prefix is optional.
 |Locates elements whose tag name matches the specified search value. This locator is translated to `css(<tagName>)` locator.
 |tagName(div)
 
+|`className`
+|Locates elements whose class name matches the specified search value. This locator is translated to `css(.<className>)` locator.
+|className(bold)
+
 |===
 
 === Visibility types

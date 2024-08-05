@@ -65,4 +65,13 @@ class PlaywrightLocatorConverterTests
                 + locatorAsString + "]";
         assertEquals(expectedMessage, exception.getMessage());
     }
+
+    @Test
+    void shouldThrowExceptionWhenUnsupportedLocatorType()
+    {
+        var locatorAsString = "invalidType(locatorValue)";
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> PlaywrightLocatorConverter.convertToLocator(locatorAsString));
+        assertEquals("Unsupported locator type: invalidType", exception.getMessage());
+    }
 }
