@@ -29,6 +29,9 @@ subprojects {
             module('org.jsoup:jsoup') {
                 replacedBy('com.github.vividus-framework:jsoup', 'Use jsoup build from the custom fork')
             }
+            module('com.jayway.jsonpath:json-path') {
+                replacedBy('com.github.vividus-framework.JsonPath:json-path', 'Use JsonPath build from the custom fork')
+            }
         }
     }
 }
