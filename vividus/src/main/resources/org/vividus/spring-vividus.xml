@@ -78,6 +78,7 @@
     <bean id="FILTERING" class="org.vividus.transformer.FilteringTableTransformer" />
     <bean id="INDEXING" class="org.vividus.transformer.IndexingTableTransformer" />
     <bean id="INNER_JOIN" class="org.vividus.transformer.InnerJoinTableTransformer" />
+    <bean id="LEFT_JOIN" class="org.vividus.transformer.LeftJoinTableTransformer" />
     <bean id="ITERATING" class="org.vividus.transformer.IteratingTableTransformer" />
     <bean id="JOINING" class="org.vividus.transformer.JoiningTableTransformer" />
     <bean id="MERGING" class="org.vividus.transformer.MergingTableTransformer" />

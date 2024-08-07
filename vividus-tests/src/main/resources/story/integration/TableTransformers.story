@@ -344,6 +344,21 @@ Then `${innerJoinTable}` is equal to table:
 |row133 |3     |row53  |row43  |row333 |row233 |
 |row133 |3     |row533 |row433 |row333 |row233 |
 
+Scenario: Verify LEFT_JOIN transformer with table body
+When I initialize scenario variable `leftJoinTable` with values:
+{transformer=LEFT_JOIN, leftTableJoinColumn=joinID, rightTableJoinColumn=joinID, tables=/data/for-inner-join-transformer.table}
+|joinID|column4|column5|
+|5     |row45  |row51  |
+|1     |row41  |row51  |
+|6     |row41  |row51  |
+Then `${leftJoinTable}` is equal to table:
+|column1|joinID|column5|column4|column3|column2|
+|row11  |1     |row51  |row41  |row31  |row21  |
+|row12  |2     |       |       |row32  |row22  |
+|row13  |3     |       |       |row33  |row23  |
+|row133 |3     |       |       |row333 |row233 |
+|row14  |4     |       |       |row34  |row24  |
+
 Scenario: Verify SORTING transformer with default order
 When I initialize scenario variable `sortingTable` with values:
 {transformer=SORTING, byColumns=key1|key2}
