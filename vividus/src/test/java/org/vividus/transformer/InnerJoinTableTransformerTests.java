@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,30 @@ class InnerJoinTableTransformerTests
                 |row133|3|row533|row433|row333|row233|
                 """;
         assertInnerJoin(SECOND_TABLE, properties, expectedTable);
+    }
+
+    @Test
+    void shouldTransformDifferentJoinColumnNames()
+    {
+        Properties properties = createProperties("anotherJoinID", JOINT_COLUMN, PATH_1);
+        mockCreateExamplesTable(PATH_1, FIRST_TABLE);
+        String table = """
+                |anotherJoinID|column4|column5|
+                |5            |row45  |row51  |
+                |3            |row43  |row53  |
+                |1            |row41  |row51  |
+                |3            |row433 |row533 |
+                """;
+        mockCreateExamplesTable(table);
+        String expectedTable = """
+                |column1|anotherJoinID|column5|column4|column3|column2|joinID|
+                |row11|1|row51|row41|row31|row21|1|
+                |row13|3|row53|row43|row33|row23|3|
+                |row13|3|row533|row433|row33|row23|3|
+                |row133|3|row53|row43|row333|row233|3|
+                |row133|3|row533|row433|row333|row233|3|
+                """;
+        assertInnerJoin(table, properties, expectedTable);
     }
 
     @Test
