@@ -19,24 +19,30 @@ package org.vividus.transformer;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.ExamplesTable;
 
-public class InnerJoinTableTransformer extends AbstractJoinTableTransformer
+public final class LeftJoinTableTransformer extends AbstractJoinTableTransformer
 {
     @Override
     protected List<Map<String, String>> join(ExamplesTable leftTable, ExamplesTable rightTable,
             String leftTableJoinColumn, String rightTableJoinColumn)
     {
-        List<Map<String, String>> leftRows = leftTable.getRows();
-        List<Map<String, String>> rightRows = rightTable.getRows();
-        Map<String, List<Map<String, String>>> rightByColumn = rightRows.stream()
+        Map<String, List<Map<String, String>>> rightByColumn = rightTable.getRows().stream()
                 .collect(Collectors.groupingBy(m -> m.get(rightTableJoinColumn)));
-        return leftRows.stream()
-                       .flatMap(leftRow -> Optional.ofNullable(rightByColumn.get(leftRow.get(leftTableJoinColumn)))
-                               .stream()
-                               .flatMap(value -> value.stream().map(rightRow -> joinMaps(leftRow, rightRow))))
-                       .toList();
+
+        Map<String, String> emptyRightRow = rightTable.getHeaders().stream()
+                .filter(h -> !leftTable.getHeaders().contains(h))
+                .collect(Collectors.toMap(Function.identity(), k -> StringUtils.EMPTY));
+
+        return leftTable.getRows().stream()
+                .map(leftRow -> Optional.ofNullable(rightByColumn.get(leftRow.get(leftTableJoinColumn)))
+                        .map(rows -> rows.stream().map(rightRow -> joinMaps(leftRow, rightRow)))
+                        .orElseGet(() -> Stream.of(joinMaps(leftRow, emptyRightRow))))
+                .flatMap(Function.identity()).toList();
     }
 }
