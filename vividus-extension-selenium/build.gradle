@@ -35,7 +35,7 @@ configurations {
      implementation(group: 'com.google.zxing', name: 'javase')
 
      implementation(group: 'jakarta.inject', name: 'jakarta.inject-api', version: '2.0.1')
-     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.13')
+     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.14')
      implementation(group: 'org.slf4j', name: 'slf4j-api')
      implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.15.0')
      implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.1.11')
