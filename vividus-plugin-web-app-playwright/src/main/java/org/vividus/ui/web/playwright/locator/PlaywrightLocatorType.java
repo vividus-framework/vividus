@@ -39,7 +39,7 @@ public enum PlaywrightLocatorType
         @Override
         public PlaywrightLocator createLocator(String value)
         {
-            return new PlaywrightLocator("xpath", value);
+            return createXpathLocator(value);
         }
     },
     TAG_NAME
@@ -57,6 +57,74 @@ public enum PlaywrightLocatorType
         {
             return createCssLocator("." + value);
         }
+    },
+    LINK_TEXT
+    {
+        @Override
+        public PlaywrightLocator createLocator(String value)
+        {
+            return createXpathLocator(".//a[text()='%1$s' or @*='%1$s' or *='%1$s']", value);
+        }
+    },
+    LINK_URL
+    {
+        @Override
+        public PlaywrightLocator createLocator(String value)
+        {
+            return createCssLocator("a[href='%s']", value);
+        }
+    },
+    LINK_URL_PART
+    {
+        @Override
+        public PlaywrightLocator createLocator(String value)
+        {
+            return createCssLocator("a[href*='%s']", value);
+        }
+    },
+    IMAGE_SRC
+    {
+        @Override
+        public PlaywrightLocator createLocator(String value)
+        {
+            return createCssLocator("img[src='%s']", value);
+        }
+    },
+    IMAGE_SRC_PART
+    {
+        @Override
+        public PlaywrightLocator createLocator(String value)
+        {
+            return createCssLocator("img[src*='%s']", value);
+        }
+    },
+    FIELD_NAME
+    {
+        @Override
+        public PlaywrightLocator createLocator(String value)
+        {
+            // due to firefox bug, we can't use name() and must use local-name()
+            // as workaround 'body' represents CKE editor
+            return createXpathLocator(".//*[(local-name() = 'input' or local-name() = 'textarea' or "
+                    + "local-name()='body') and ((@* | text())='%1$s' or @id=(//label[text() = '%1$s']/@for))]", value);
+        }
+    },
+    RADIO_BUTTON
+    {
+        @Override
+        public PlaywrightLocator createLocator(String value)
+        {
+            return createXpathLocator(".//input[@type='radio' and ((@* | text())='%1$s' or "
+                                        + "@id=(//label[text() = '%1$s']/@for))]", value);
+        }
+    },
+    NAME
+    {
+        @Override
+        public PlaywrightLocator createLocator(String value)
+        {
+            return createXpathLocator(".//*[@*='%1$s' or text()='%1$s']", value);
+        }
     };
 
     public abstract PlaywrightLocator createLocator(String value);
@@ -64,5 +132,15 @@ public enum PlaywrightLocatorType
     private static PlaywrightLocator createCssLocator(String value)
     {
         return new PlaywrightLocator("css", value);
+    }
+
+    private static PlaywrightLocator createCssLocator(String locatorPattern, String value)
+    {
+        return createCssLocator(String.format(locatorPattern, value));
+    }
+
+    private static PlaywrightLocator createXpathLocator(String locatorPattern, Object... args)
+    {
+        return new PlaywrightLocator("xpath", String.format(locatorPattern, args));
     }
 }
