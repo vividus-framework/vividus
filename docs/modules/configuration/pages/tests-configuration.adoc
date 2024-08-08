@@ -41,7 +41,7 @@ NOTE: The properties marked with *bold* are mandatory.
 |The test project path to the folder with story-files
 
 |`batch-<batch-number>.resource-include-patterns`
-|`**/*.story`
+|`\**/*.story`
 |The comma-separated set of https://ant.apache.org/manual/dirtasks.html#patterns[ant-patterns] to match the stories to be included in the batch. Leading and trailing whitespaces in patterns are omitted.
 
 |`batch-<batch-number>.resource-exclude-patterns`
