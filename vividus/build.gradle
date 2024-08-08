@@ -59,7 +59,7 @@ dependencies {
     implementation project(':vividus-util')
 
     // Logging SLF4J + Log4j2
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.13')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.14')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
     implementation(group: 'org.slf4j', name: 'jcl-over-slf4j') // Replace commons-logging with SLF4J
     implementation(group: 'org.slf4j', name: 'jul-to-slf4j') // JUL to SLF4J bridge

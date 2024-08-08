@@ -7,7 +7,7 @@ dependencies {
     implementation project(':vividus-extension-selenium')
     implementation project(':vividus-plugin-mobile-app')
 
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.13')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.14')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.3')

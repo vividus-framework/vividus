@@ -6,7 +6,7 @@ dependencies {
     implementation project(':vividus-util')
     implementation project(':vividus-extension-azure')
     implementation(group: 'com.azure.resourcemanager', name: 'azure-resourcemanager-appservice', version: '2.41.0')
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.13')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.14')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.3')

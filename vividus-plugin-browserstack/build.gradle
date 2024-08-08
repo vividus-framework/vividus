@@ -9,7 +9,7 @@ dependencies {
 
     runtimeOnly project(':vividus-plugin-rest-api')
 
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.13')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.14')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
     implementation(group: 'com.browserstack', name: 'automate-client-java', version: '0.14')
     implementation(group: 'com.browserstack', name: 'browserstack-local-java', version: '1.1.4')
