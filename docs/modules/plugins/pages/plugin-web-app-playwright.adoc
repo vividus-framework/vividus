@@ -112,6 +112,39 @@ By. prefix is optional.
 |Locates elements whose class name matches the specified search value. This locator is translated to `css(.<className>)` locator.
 |className(bold)
 
+|`linkText`
+|Locates elements whose text of the link matches the specified search value.
+|linkText(Google)
+
+|`linkUrl`
+|Locates elements whose `href` attribute matches the specified search value. This locator is translated to `css([href='<tagName>'])` locator.
+|linkUrl(/faq)
+
+|`linkUrlPart`
+|Locates elements whose part of `href` attribute matches the specified search value. This locator is translated to `css([href*='<tagName>'])` locator.
+|linkUrlPart(faq)
+
+|`imageSrc`
+|Locates elements whose `src` attribute matches the specified search value. This locator is translated to `css(img[src='<imageSrc>'])` locator.
+|imgSrc(/images/kote.png)
+
+|`imageSrcPart`
+|Locates elements whose part of `src` attribute matches the specified search value. This locator is translated to `css(img[src*='<imageSrc>'])` locator.
+|imgSrcPart(kote.png)
+
+|`fieldName`
+|Locate elements that are either input or textarea and their text or any attribute value matches the specified search value.
+|fieldName(editor)
+
+|`radioButton`
+|Locate elements that are input with @type="radio" and their label text value matches the specified searh value
+|radioButton(One)
+
+|`name`
+|Locate elements where any attribute or text value matches the specified search value. This locator is translated to `xpath(.//\*[@*='<elementName>' or text()='<elementName>'])`
+locator.
+|elementName(OK)
+
 |===
 
 === Visibility types
