@@ -111,6 +111,7 @@ public enum WebLocatorType implements LocatorType
     FIELD_TEXT("Field text", FieldTextFilter.class),
     FIELD_TEXT_PART("Field text part", FieldTextPartFilter.class),
     DROP_DOWN_TEXT("Drop down text", DropDownTextFilter.class),
+    @Deprecated(since = "0.6.14", forRemoval = true)
     ELEMENT_NAME("Element name", ElementNameSearch.class),
     NAME("Name", ElementNameSearch.class),
     PARTIAL_LINK_TEXT("Partial link text", ByLocatorSearch.class)
