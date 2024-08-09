@@ -43,7 +43,7 @@ public class PlaywrightLocatorTypeTests
     void shouldCreateLocatorByXpath()
     {
         var xpath = "//div";
-        assertEquals(new PlaywrightLocator("xpath", xpath), PlaywrightLocatorType.XPATH.createLocator(xpath));
+        assertEquals(createXpathLocator(xpath), PlaywrightLocatorType.XPATH.createLocator(xpath));
     }
 
     @Test
@@ -58,6 +58,75 @@ public class PlaywrightLocatorTypeTests
     {
         var tagName = "div";
         assertEquals(createCssLocator(tagName), PlaywrightLocatorType.TAG_NAME.createLocator(tagName));
+    }
+
+    @Test
+    void shouldCreateLocatorByLinkText()
+    {
+        var expectedXpath = ".//a[text()='linkText' or @*='linkText' or *='linkText']";
+        assertEquals(createXpathLocator(expectedXpath), PlaywrightLocatorType.LINK_TEXT.createLocator("linkText"));
+    }
+
+    @Test
+    void shouldCreateLocatorByLinkUrl()
+    {
+        var linkUrl = "linkUrl";
+        assertEquals(createCssLocator("a[href='linkUrl']"), PlaywrightLocatorType.LINK_URL.createLocator(linkUrl));
+    }
+
+    @Test
+    void shouldCreateLocatorByLinkUrlPart()
+    {
+        var linkUrlPart = "linkUrlPart";
+        assertEquals(createCssLocator("a[href*='linkUrlPart']"),
+                PlaywrightLocatorType.LINK_URL_PART.createLocator(linkUrlPart));
+    }
+
+    @Test
+    void shouldCreateLocatorByImageSrc()
+    {
+        var imageSrc = "/image/src";
+        assertEquals(createCssLocator("img[src='/image/src']"),
+                PlaywrightLocatorType.IMAGE_SRC.createLocator(imageSrc));
+    }
+
+    @Test
+    void shouldCreateLocatorByImageSrcPart()
+    {
+        var imageSrcPart = "src";
+        assertEquals(createCssLocator("img[src*='src']"),
+                PlaywrightLocatorType.IMAGE_SRC_PART.createLocator(imageSrcPart));
+    }
+
+    @Test
+    void shouldCreateLocatorByElementName()
+    {
+        var elementName = "elementName";
+        assertEquals(createXpathLocator(".//*[@*='elementName' or text()='elementName']"),
+                PlaywrightLocatorType.NAME.createLocator(elementName));
+    }
+
+    @Test
+    void shouldCreateLocatorByFieldName()
+    {
+        var fieldName = "fieldName";
+        var expectedXpath = ".//*[(local-name() = 'input' or local-name() = 'textarea' or local-name()='body') and "
+                            + "((@* | text())='fieldName' or @id=(//label[text() = 'fieldName']/@for))]";
+        assertEquals(createXpathLocator(expectedXpath), PlaywrightLocatorType.FIELD_NAME.createLocator(fieldName));
+    }
+
+    @Test
+    void shouldCreateLocatorByRadioButton()
+    {
+        var radioButton = "radioButton";
+        var expectedXpath = ".//input[@type='radio' and ((@* | text())='radioButton' or "
+                            + "@id=(//label[text() = 'radioButton']/@for))]";
+        assertEquals(createXpathLocator(expectedXpath), PlaywrightLocatorType.RADIO_BUTTON.createLocator(radioButton));
+    }
+
+    private PlaywrightLocator createXpathLocator(String value)
+    {
+        return new PlaywrightLocator("xpath", value);
     }
 
     private PlaywrightLocator createCssLocator(String value)
