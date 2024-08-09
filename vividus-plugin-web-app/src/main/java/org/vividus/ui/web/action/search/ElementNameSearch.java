@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.List;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.LocatorType;
 import org.vividus.ui.action.search.SearchParameters;
@@ -27,6 +29,8 @@ import org.vividus.ui.util.XpathLocatorUtils;
 
 public class ElementNameSearch extends AbstractWebElementSearchAction implements IElementSearchAction
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElementNameSearch.class);
+
     public ElementNameSearch(LocatorType elementActionType)
     {
         super(elementActionType);
@@ -35,6 +39,7 @@ public class ElementNameSearch extends AbstractWebElementSearchAction implements
     @Override
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
     {
+        LOGGER.warn("'elementName' locator type is deprecated  and will be removed in VIVIDUS 0.7.0");
         String elementName = parameters.getValue();
         return findElementsByText(searchContext,
                 XpathLocatorUtils.getXPathLocator(".//*[@*=%1$s or text()=%1$s]", elementName), parameters, "*");
