@@ -9,7 +9,7 @@ dependencies {
     implementation project(':vividus-soft-assert')
     implementation project(':vividus-util')
 
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.14')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.16')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
     implementation(group: 'com.github.crawler-commons', name: 'crawler-commons', version: '1.4')
     implementation(group: 'com.github.valfirst.crawler4j', name: 'crawler4j-with-hsqldb', version: '5.0.3') {

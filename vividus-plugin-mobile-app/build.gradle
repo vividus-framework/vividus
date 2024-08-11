@@ -7,7 +7,7 @@ dependencies {
     implementation project(':vividus-reporter')
     implementation project(':vividus-soft-assert')
 
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.14')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.16')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
 
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.3')

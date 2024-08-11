@@ -8,7 +8,7 @@ dependencies {
     implementation platform(group: 'com.amazonaws', name: 'aws-java-sdk-bom', version: '1.12.751')
     implementation(group: 'com.amazonaws', name: 'aws-java-sdk-s3')
     implementation project(':vividus-extension-aws')
-    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.14')
+    implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.16')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
     implementation(group: 'jakarta.inject', name: 'jakarta.inject-api', version: '2.0.1')
 
