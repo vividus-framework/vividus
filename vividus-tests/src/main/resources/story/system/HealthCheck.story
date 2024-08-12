@@ -3,4 +3,4 @@ Meta:
 
 Scenario: Healthcheck
 Given I am on page with URL `${vividus-test-site-url}`
-Then number of elements found by `elementName(vividus-logo)` is = `1`
+Then number of elements found by `name(vividus-logo)` is = `1`

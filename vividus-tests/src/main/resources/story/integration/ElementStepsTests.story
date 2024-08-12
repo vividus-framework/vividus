@@ -55,18 +55,18 @@ Then the context element has a width of '13'% relative to the parent element
 Scenario: Deprecated step verification When I perform right click on an element located `$locator`
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
 Then number of elements found by `elementName(Foo)` is = `1`
-Then number of elements found by `elementName(Bar)` is = `0`
+Then number of elements found by `name(Bar)` is = `0`
 When I perform right click on element located `id(context-menu)`
-Then number of elements found by `elementName(Foo)` is = `0`
-Then number of elements found by `elementName(Bar)` is = `1`
+Then number of elements found by `name(Foo)` is = `0`
+Then number of elements found by `name(Bar)` is = `1`
 
 Scenario: Step verification When I perform right-click on an element located by `$locator`
 Given I am on page with URL `${vividus-test-site-url}/mouseEvents.html`
-Then number of elements found by `elementName(Foo)` is = `1`
-Then number of elements found by `elementName(Bar)` is = `0`
+Then number of elements found by `name(Foo)` is = `1`
+Then number of elements found by `name(Bar)` is = `0`
 When I perform right-click on element located by `id(context-menu)`
-Then number of elements found by `elementName(Foo)` is = `0`
-Then number of elements found by `elementName(Bar)` is = `1`
+Then number of elements found by `name(Foo)` is = `0`
+Then number of elements found by `name(Bar)` is = `1`
 
 Scenario: Deprecated step verification Then the context element has the CSS property '$cssName'='$cssValue'
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`

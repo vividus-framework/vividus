@@ -143,7 +143,7 @@ By. prefix is optional.
 |`name`
 |Locate elements where any attribute or text value matches the specified search value. This locator is translated to `xpath(.//\*[@*='<elementName>' or text()='<elementName>'])`
 locator.
-|elementName(OK)
+|name(OK)
 
 |===
 
