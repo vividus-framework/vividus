@@ -20,25 +20,25 @@ When I execute sequence of actions:
 
 Composite: Then an element with the name '$elementName' containing text '$text' exists
 Priority: 1
-Then number of elements found by `elementName(<elementName>)->filter.textPart(<text>)` is equal to `1`
+Then number of elements found by `name(<elementName>)->filter.textPart(<text>)` is equal to `1`
 
 Composite: Then an element with the name '$elementName' and text '$text' exists
-Then number of elements found by `elementName(<elementName>)->filter.caseSensitiveText(<text>)` is equal to `1`
+Then number of elements found by `name(<elementName>)->filter.caseSensitiveText(<text>)` is equal to `1`
 
 Composite: Then a [$state] element with the name '$elementName' and text '$text' exists
 Priority: 1
-!-- DEPRECATED: 0.7.0, Then number of elements found by `elementName(%2$s)->filter.caseSensitiveText(%3$s).state(%1$s)` is equal to `1`
-Then number of elements found by `elementName(<elementName>)->filter.caseSensitiveText(<text>).state(<state>)` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `name(%2$s)->filter.caseSensitiveText(%3$s).state(%1$s)` is equal to `1`
+Then number of elements found by `name(<elementName>)->filter.caseSensitiveText(<text>).state(<state>)` is equal to `1`
 
 Composite: Then an element with the name '$elementName' exists
-Then number of elements found by `elementName(<elementName>)` is equal to `1`
+Then number of elements found by `name(<elementName>)` is equal to `1`
 
 Composite: Then an element with the name '$elementName' does not exist
-Then number of elements found by `elementName(<elementName>)` is equal to `0`
+Then number of elements found by `name(<elementName>)` is equal to `0`
 
 Composite: Then a [$state] element with the name '$elementName' exists
-!-- DEPRECATED: 0.7.0, Then number of elements found by `elementName(%2$s)->filter.state(%1$s)` is equal to `1`
-Then number of elements found by `elementName(<elementName>)->filter.state(<state>)` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `name(%2$s)->filter.state(%1$s)` is equal to `1`
+Then number of elements found by `name(<elementName>)->filter.state(<state>)` is equal to `1`
 
 Composite: Then an element with the tag '$elementTag' and text '$text' exists
 Then number of elements found by `tagName(<elementTag>)->filter.caseSensitiveText(<text>)` is equal to `1`

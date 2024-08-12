@@ -38,5 +38,5 @@ Then `${browser-window-width}`  is = `600`
 Scenario: Verify `context-source-code` dynamic variable
 When I reset context
 Then `${context-source-code}` matches `^<html><head>.+`
-When I change context to element located by `elementName(vividus-logo)`
+When I change context to element located by `name(vividus-logo)`
 Then `${context-source-code}` matches `^<img name.+`
