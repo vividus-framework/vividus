@@ -127,6 +127,12 @@ a|`true` +
 |`false`
 |Inject special code into application to allow emulation of "touch id" action and QR code scan.
 
+|`mobitru.enable-recording`
+a|`true` +
+`false`
+|`false`
+|Enable the video recording for entire appium session. The output recording will be attached to an allure report
+
 |`mobitru.device-wait-timeout`
 |The duration in {durations-format-link} format.
 |`PT5M`

@@ -21,7 +21,6 @@ import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -41,6 +40,7 @@ import org.vividus.mobitru.client.exception.MobitruOperationException;
 import org.vividus.mobitru.client.model.Application;
 import org.vividus.mobitru.client.model.Device;
 import org.vividus.mobitru.client.model.DeviceSearchParameters;
+import org.vividus.mobitru.client.model.ScreenRecording;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.RetryTimesBasedWaiter;
 import org.vividus.util.wait.WaitMode;
@@ -57,6 +57,8 @@ public class MobitruFacadeImpl implements MobitruFacade
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     private static final int RETRY_TIMES = 20;
+    private static final Duration DOWNLOAD_RECORDING_POOLING_TIMEOUT = Duration.ofSeconds(5);
+    private static final int DOWNLOAD_RECORDING_RETRY_COUNT = 10;
 
     private final MobitruClient mobitruClient;
     private Duration waitForDeviceTimeout;
@@ -109,6 +111,33 @@ public class MobitruFacadeImpl implements MobitruFacade
         mobitruClient.returnDevice(deviceId);
     }
 
+    @Override
+    public void startDeviceScreenRecording(String deviceId) throws MobitruOperationException
+    {
+        mobitruClient.startDeviceScreenRecording(deviceId);
+    }
+
+    @Override
+    public String stopDeviceScreenRecording(String deviceId) throws MobitruOperationException
+    {
+        byte[] receivedRecordingInfo = mobitruClient.stopDeviceScreenRecording(deviceId);
+        ScreenRecording screenRecordingInfo = performMapperOperation(mapper ->
+                mapper.readValue(receivedRecordingInfo, ScreenRecording.class));
+        return screenRecordingInfo.getRecordingId();
+    }
+
+    @Override
+    public byte[] downloadDeviceScreenRecording(String recordingId) throws MobitruOperationException
+    {
+        Waiter waiter = new RetryTimesBasedWaiter(DOWNLOAD_RECORDING_POOLING_TIMEOUT,
+                DOWNLOAD_RECORDING_RETRY_COUNT);
+        Optional<byte[]> receivedRecording = performWaiterOperation(waiter,
+                () -> mobitruClient.downloadDeviceScreenRecording(recordingId),
+                "download device screen recording");
+        return receivedRecording.orElseThrow(() -> new MobitruOperationException(
+                String.format("Unable to download recording with id %s", recordingId)));
+    }
+
     private String takeDevice(Device device, Waiter deviceWaiter) throws MobitruOperationException
     {
         LOGGER.info("Trying to take device with configuration {}", device);
@@ -120,22 +149,13 @@ public class MobitruFacadeImpl implements MobitruFacade
     private String takeDevice(FailableSupplier<byte[], MobitruOperationException> takeDeviceActions,
             Supplier<String> unableToTakeDeviceErrorMessage, Waiter deviceWaiter) throws MobitruOperationException
     {
-        byte[] receivedDevice = deviceWaiter.wait(() -> {
-            try
-            {
-                return takeDeviceActions.get();
-            }
-            catch (MobitruDeviceTakeException e)
-            {
-                LOGGER.warn("Unable to take device, retrying attempt.", e);
-                return null;
-            }
-        }, Objects::nonNull);
-        if (null == receivedDevice)
+        Optional<byte[]> receivedDevice = performWaiterOperation(deviceWaiter, takeDeviceActions,
+                "take device");
+        if (receivedDevice.isEmpty())
         {
             throw new MobitruDeviceTakeException(unableToTakeDeviceErrorMessage.get());
         }
-        Device takenDevice = performMapperOperation(mapper -> mapper.readValue(receivedDevice, Device.class));
+        Device takenDevice = performMapperOperation(mapper -> mapper.readValue(receivedDevice.get(), Device.class));
         LOGGER.info("Device with configuration {} is taken", takenDevice);
         return (String) takenDevice.getDesiredCapabilities().get(UDID);
     }
@@ -211,6 +231,23 @@ public class MobitruFacadeImpl implements MobitruFacade
         {
             throw new MobitruOperationException(e);
         }
+    }
+
+    private Optional<byte[]> performWaiterOperation(Waiter waiter,
+                                                    FailableSupplier<byte[], MobitruOperationException> operation,
+                                                    String operationTitle)
+    {
+        return waiter.wait(() -> {
+            try
+            {
+                return Optional.of(operation.get());
+            }
+            catch (MobitruOperationException e)
+            {
+                LOGGER.warn(String.format("Unable to %s, retrying attempt.", operationTitle), e);
+                return Optional.empty();
+            }
+        }, Optional::isPresent);
     }
 
     private boolean isSearchForDevice(DesiredCapabilities desiredCapabilities)

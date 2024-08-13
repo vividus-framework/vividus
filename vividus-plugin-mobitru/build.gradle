@@ -6,6 +6,7 @@ dependencies {
     implementation project(':vividus-http-client')
     implementation project(':vividus-extension-selenium')
     implementation project(':vividus-plugin-mobile-app')
+    implementation project(':vividus-reporter')
 
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.16')
     implementation(group: 'org.slf4j', name: 'slf4j-api')

@@ -16,8 +16,10 @@
 
 package org.vividus.mobitru.client;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -57,14 +59,18 @@ import org.vividus.mobitru.client.model.DeviceSearchParameters;
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class MobitruFacadeImplTests
 {
+    private static final byte[] BINARY_RESPONSE = {1, 0, 1, 0};
     private static final String DEVICE_TAKEN_MESSAGE = "Device with configuration {} is taken";
     private static final String TRYING_TO_TAKE_DEVICE_MESSAGE = "Trying to take device with configuration {}";
     private static final String TRYING_TO_TAKE_DEVICE_UDID_MESSAGE = "Trying to take device with udid {}";
     private static final String RETRY_TO_TAKE_DEVICE_MESSAGE = "Unable to take device, retrying attempt.";
+    private static final String RETRY_TO_DOWNLOAD_RECORDING_MESSAGE =
+            "Unable to download device screen recording, retrying attempt.";
     private static final String UNABLE_TO_TAKE_DEVICE_WITH_CONFIGURATION_ERROR_FORMAT =
             "Unable to take device with configuration %s";
     private static final String UNABLE_TO_TAKE_DEVICE_WITH_UDID_ERROR_FORMAT = "Unable to take device with udid %s";
     private static final String UDID = "Z3CT103D2DZ";
+    private static final String RECORDING_ID = "15a02180-16f6-4eb9-b5e8-9e945f5e85fe";
     private static final String DEVICE_TYPE_CAPABILITY_NAME = "mobitru-device-search:type";
     private static final String PHONE = "phone";
     private static final String PLATFORM_NAME = "platformName";
@@ -72,7 +78,11 @@ class MobitruFacadeImplTests
     private static final String IOS = "ios";
     private static final String ANDROID = "android";
     private static final String NO_DEVICE = "no device";
+    private static final String NO_RECORDING = "no recording";
     private static final String CAPABILITIES_JSON_PREFIX = "{\"desiredCapabilities\":{\"platformName\":\"Android\",";
+    private static final String STOP_RECORDING_JSON = "{\"status\": \"recording has stopped\","
+            +
+            "\"recordingId\": \"15a02180-16f6-4eb9-b5e8-9e945f5e85fe\"}";
     private static final String CAPABILITIES_IOS_PLATFORM = "{\"desiredCapabilities\":{\"platformName\":\"IOS\"}}";
     private static final String CAPABILITIES_WITHOUT_UDID_JSON = CAPABILITIES_JSON_PREFIX
             + "\"platformVersion\":\"12\",\"deviceName\":\"SAMSUNG SM-G998B\"}}";
@@ -154,6 +164,31 @@ class MobitruFacadeImplTests
         assertEquals(List.of(LoggingEvent.info(TRYING_TO_TAKE_DEVICE_MESSAGE, requestedDevice),
                         LoggingEvent.warn(exception, RETRY_TO_TAKE_DEVICE_MESSAGE),
                         LoggingEvent.info(DEVICE_TAKEN_MESSAGE, getTestDevice())), LOGGER.getLoggingEvents());
+    }
+
+    @Test
+    void shouldStartDeviceSessionRecording()
+    {
+        assertDoesNotThrow(() -> mobitruFacadeImpl.startDeviceScreenRecording(UDID));
+    }
+
+    @Test
+    void shouldStopDeviceSessionRecording() throws MobitruOperationException
+    {
+        when(mobitruClient.stopDeviceScreenRecording(UDID)).
+                thenReturn(STOP_RECORDING_JSON.getBytes(StandardCharsets.UTF_8));
+        assertEquals(RECORDING_ID, mobitruFacadeImpl.stopDeviceScreenRecording(UDID));
+    }
+
+    @Test
+    void shouldDownloadDeviceSessionRecording() throws MobitruOperationException
+    {
+        var noRecordingException = new MobitruDeviceTakeException(NO_RECORDING);
+        when(mobitruClient.downloadDeviceScreenRecording(RECORDING_ID)).thenThrow(noRecordingException).
+                thenReturn(BINARY_RESPONSE);
+        assertSame(BINARY_RESPONSE, mobitruFacadeImpl.downloadDeviceScreenRecording(RECORDING_ID));
+        assertEquals(List.of(LoggingEvent.warn(noRecordingException,
+                        RETRY_TO_DOWNLOAD_RECORDING_MESSAGE)), LOGGER.getLoggingEvents());
     }
 
     @ParameterizedTest

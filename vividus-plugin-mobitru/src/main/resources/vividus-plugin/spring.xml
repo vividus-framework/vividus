@@ -21,6 +21,10 @@
         <property name="bundleId" value="${mobile-application.bundle-id}" />
     </bean>
 
+    <bean class="org.vividus.mobitru.recording.MobitruRecordingManager" >
+        <property name="enableRecording" value="${mobitru.enable-recording}" />
+    </bean>
+
     <bean class="org.vividus.mobitru.client.MobitruFacadeImpl" >
         <property name="waitForDeviceTimeout" value="${mobitru.device-wait-timeout}" />
     </bean>

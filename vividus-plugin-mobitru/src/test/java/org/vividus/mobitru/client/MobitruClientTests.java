@@ -55,6 +55,12 @@ class MobitruClientTests
     private static final String DEVICE_ID = "deviceid";
     private static final String TAKE_DEVICE_ENDPOINT = "/billing/unit/vividus/automation/api/device";
     private static final String UDID = "Z3CT103D2DZ";
+    private static final String DELIMITER = "/";
+    private static final String DEVICE_RECORDING_ENDPOINT = TAKE_DEVICE_ENDPOINT.
+            concat(DELIMITER).concat(UDID).
+            concat(DELIMITER).concat("recording");
+    private static final String RECORDING_ENDPOINT = "/billing/unit/vividus/automation/api/recording";
+    private static final String RECORDING_ID = "5eefb29c-78a4-4f39-ac52-bd54a22c5243";
 
     @Mock private IHttpClient httpClient;
     @Mock private HttpResponse httpResponse;
@@ -111,6 +117,65 @@ class MobitruClientTests
     }
 
     @Test
+    void shouldStartRecording() throws IOException, MobitruOperationException
+    {
+        var builder = mock(HttpRequestBuilder.class);
+        ClassicHttpRequest httpRequest = mock();
+        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        {
+            builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
+            when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
+            when(builder.withHttpMethod(HttpMethod.POST)).thenReturn(builder);
+            when(builder.withRelativeUrl(DEVICE_RECORDING_ENDPOINT)).thenReturn(builder);
+            when(builder.build()).thenReturn(httpRequest);
+            when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
+            when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_CREATED);
+            mobitruClient.startDeviceScreenRecording(UDID);
+        }
+    }
+
+    @Test
+    void shouldStopRecording() throws IOException, MobitruOperationException
+    {
+        var builder = mock(HttpRequestBuilder.class);
+        ClassicHttpRequest httpRequest = mock();
+        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        {
+            builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
+            builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
+            when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
+            when(builder.withHttpMethod(HttpMethod.DELETE)).thenReturn(builder);
+            when(builder.withRelativeUrl(DEVICE_RECORDING_ENDPOINT)).thenReturn(builder);
+            when(builder.build()).thenReturn(httpRequest);
+            when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
+            when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
+            when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_OK);
+            assertArrayEquals(RESPONSE, mobitruClient.stopDeviceScreenRecording(UDID));
+        }
+    }
+
+    @Test
+    void shouldDownloadRecording() throws IOException, MobitruOperationException
+    {
+        var builder = mock(HttpRequestBuilder.class);
+        ClassicHttpRequest httpRequest = mock();
+        try (MockedStatic<HttpRequestBuilder> builderMock = Mockito.mockStatic(HttpRequestBuilder.class))
+        {
+            builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
+            builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
+            when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
+            when(builder.withHttpMethod(HttpMethod.GET)).thenReturn(builder);
+            when(builder.withRelativeUrl(RECORDING_ENDPOINT.concat(DELIMITER).concat(RECORDING_ID)))
+                    .thenReturn(builder);
+            when(builder.build()).thenReturn(httpRequest);
+            when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
+            when(httpResponse.getResponseBody()).thenReturn(RESPONSE);
+            when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_OK);
+            assertArrayEquals(RESPONSE, mobitruClient.downloadDeviceScreenRecording(RECORDING_ID));
+        }
+    }
+
+    @Test
     void shouldTakeDeviceBySerial() throws IOException, MobitruOperationException
     {
         var builder = mock(HttpRequestBuilder.class);
@@ -120,7 +185,7 @@ class MobitruClientTests
             builderMock.when(HttpRequestBuilder::create).thenReturn(builder);
             when(builder.withEndpoint(ENDPOINT)).thenReturn(builder);
             when(builder.withHttpMethod(HttpMethod.POST)).thenReturn(builder);
-            when(builder.withRelativeUrl(TAKE_DEVICE_ENDPOINT.concat("/").concat(UDID))).thenReturn(builder);
+            when(builder.withRelativeUrl(TAKE_DEVICE_ENDPOINT.concat(DELIMITER).concat(UDID))).thenReturn(builder);
             when(builder.build()).thenReturn(httpRequest);
             when(httpClient.execute(httpRequest)).thenReturn(httpResponse);
             when(httpResponse.getResponseBody()).thenReturn(RESPONSE);

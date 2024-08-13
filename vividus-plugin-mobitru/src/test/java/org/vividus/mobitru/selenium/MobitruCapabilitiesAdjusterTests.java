@@ -23,6 +23,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -39,16 +40,19 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.mobitru.client.InstallApplicationOptions;
 import org.vividus.mobitru.client.MobitruFacade;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
+import org.vividus.testcontext.TestContext;
 
 @ExtendWith(MockitoExtension.class)
 class MobitruCapabilitiesAdjusterTests
 {
+    private static final String KEY = "mobitruDeviceId";
     private static final String UDID = "Z3CV103D2DO";
     private static final String STEAM_APK = "steam.apk";
     private static final String APPIUM_UDID = "appium:udid";
 
     @Mock private MobitruFacade mobitruFacade;
     @Mock private InstallApplicationOptions installApplicationOptions;
+    @Mock private TestContext testContext;
     @InjectMocks private MobitruCapabilitiesAdjuster mobitruCapabilitiesConfigurer;
 
     @Test
@@ -59,6 +63,7 @@ class MobitruCapabilitiesAdjusterTests
         when(mobitruFacade.takeDevice(capabilities)).thenReturn(UDID);
         var ordered = Mockito.inOrder(mobitruFacade);
         assertEquals(Map.of(APPIUM_UDID, UDID), mobitruCapabilitiesConfigurer.getExtraCapabilities(capabilities));
+        verify(testContext).put(KEY, UDID);
         ordered.verify(mobitruFacade).takeDevice(capabilities);
         ordered.verify(mobitruFacade).installApp(UDID, STEAM_APK, installApplicationOptions);
         verify(mobitruFacade, never()).returnDevice(UDID);
@@ -74,6 +79,7 @@ class MobitruCapabilitiesAdjusterTests
         when(mobitruFacade.takeDevice(capabilities)).thenReturn(UDID);
         var ordered = Mockito.inOrder(mobitruFacade);
         assertEquals(Map.of(), mobitruCapabilitiesConfigurer.getExtraCapabilities(capabilities));
+        verify(testContext).put(KEY, UDID);
         ordered.verify(mobitruFacade).takeDevice(capabilities);
         ordered.verify(mobitruFacade).installApp(UDID, STEAM_APK, installApplicationOptions);
         verify(mobitruFacade, never()).returnDevice(UDID);
@@ -88,6 +94,7 @@ class MobitruCapabilitiesAdjusterTests
         when(mobitruFacade.takeDevice(capabilities)).thenReturn(UDID);
         doThrow(exception).when(mobitruFacade).installApp(UDID, STEAM_APK, installApplicationOptions);
         var iae = assertThrows(IllegalStateException.class, () -> mobitruCapabilitiesConfigurer.adjust(capabilities));
+        verifyNoInteractions(testContext);
         verify(mobitruFacade).returnDevice(UDID);
         assertEquals(exception, iae.getCause());
     }
