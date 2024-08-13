@@ -53,5 +53,5 @@ dependencies {
     implementation project(':vividus-plugin-yaml')
 
     implementation(group: 'net.sourceforge.csvjdbc', name: 'csvjdbc', version: '1.0.42')
-    implementation(group: 'com.h2database', name: 'h2', version: '2.3.230')
+    implementation(group: 'com.h2database', name: 'h2', version: '2.3.232')
 }
