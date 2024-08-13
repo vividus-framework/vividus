@@ -3,6 +3,7 @@ Meta:
 
 Scenario: Step verification 'When I drag element located `$origin` and drop it at $location of element located `$target`'
 Given I am on page with URL `https://4qp6vjp319.codesandbox.io/`
+When I click on element located by `linktext(Yes, proceed to preview)`
 When I wait until element located by `xpath(//div[@id='root']/ul)` appears
 When I change context to element located by `xpath(//div[@id='root']/ul)`
 Then text matches `item 0.*item 1.*item 2.*item 3.*item 4.*item 5.*item 6.*`
