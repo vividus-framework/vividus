@@ -147,8 +147,8 @@ Then number of JSON elements from `${json-context}` by JSON path `$.product` is 
 
 |`variableName`
 a|The name of the variable containing source JSON, only variables of scopes `global` and `next_batches` are allowed.
-Exceptions are cases when the transformer using in xref:commons:vividus-steps.adoc#_initialize_variable_with_a_table[step]
-which initializes a variable with a table.
+The exception to this limitation is the case when the transformer is used in a
+xref:commons:vividus-steps.adoc#_initialize_variable_with_a_table[step] that initializes a variable with a table.
 
 |columns
 a|The semicolon-separated list of mappings between column names and {json-paths} used to get column values.

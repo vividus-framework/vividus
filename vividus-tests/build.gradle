@@ -1,6 +1,8 @@
 apply from: "${buildSystemPath}/vividus-test-subproject.gradle"
-sourceCompatibility = JavaVersion.VERSION_17
 project.description = 'VIVIDUS tests'
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+}
 
 tasks.publish.enabled = false
 
