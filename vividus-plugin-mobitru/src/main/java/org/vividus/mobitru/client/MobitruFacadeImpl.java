@@ -34,6 +34,7 @@ import org.apache.commons.lang3.function.FailableSupplier;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.spi.LoggingEventBuilder;
 import org.vividus.mobitru.client.exception.MobitruDeviceSearchException;
 import org.vividus.mobitru.client.exception.MobitruDeviceTakeException;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
@@ -133,7 +134,7 @@ public class MobitruFacadeImpl implements MobitruFacade
                 DOWNLOAD_RECORDING_RETRY_COUNT);
         Optional<byte[]> receivedRecording = performWaiterOperation(waiter,
                 () -> mobitruClient.downloadDeviceScreenRecording(recordingId),
-                "download device screen recording");
+                LOGGER.atDebug(), "download device screen recording");
         return receivedRecording.orElseThrow(() -> new MobitruOperationException(
                 String.format("Unable to download recording with id %s", recordingId)));
     }
@@ -150,7 +151,7 @@ public class MobitruFacadeImpl implements MobitruFacade
             Supplier<String> unableToTakeDeviceErrorMessage, Waiter deviceWaiter) throws MobitruOperationException
     {
         Optional<byte[]> receivedDevice = performWaiterOperation(deviceWaiter, takeDeviceActions,
-                "take device");
+                LOGGER.atWarn(), "take device");
         if (receivedDevice.isEmpty())
         {
             throw new MobitruDeviceTakeException(unableToTakeDeviceErrorMessage.get());
@@ -235,7 +236,7 @@ public class MobitruFacadeImpl implements MobitruFacade
 
     private Optional<byte[]> performWaiterOperation(Waiter waiter,
                                                     FailableSupplier<byte[], MobitruOperationException> operation,
-                                                    String operationTitle)
+                                                    LoggingEventBuilder operationLoggerBuilder, String operationTitle)
     {
         return waiter.wait(() -> {
             try
@@ -244,7 +245,9 @@ public class MobitruFacadeImpl implements MobitruFacade
             }
             catch (MobitruOperationException e)
             {
-                LOGGER.warn(String.format("Unable to %s, retrying attempt.", operationTitle), e);
+                operationLoggerBuilder
+                        .setCause(e)
+                        .log("Unable to {}, retrying attempt", operationTitle);
                 return Optional.empty();
             }
         }, Optional::isPresent);

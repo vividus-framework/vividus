@@ -43,28 +43,28 @@ import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.testcontext.TestContext;
 
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
-class MobitruRecordingManagerTests
+class MobitruRecordingListenerTests
 {
     private static final byte[] BINARY_RESPONSE = {1, 0, 1, 0};
     private static final String RECORDING_ID = "15a02180-16f6-4eb9-b5e8-9e945f5e85fe";
     private static final String KEY = "mobitruDeviceId";
     private static final String UDID = "Z3CV103D2DO";
 
-    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(MobitruRecordingManager.class);
+    private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(MobitruRecordingListener.class);
 
     @Mock private MobitruFacade mobitruFacade;
     @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private TestContext testContext;
-    @InjectMocks private MobitruRecordingManager mobitruRecordingManager;
+    @InjectMocks private MobitruRecordingListener mobitruRecordingListener;
 
     @Test
     void shouldStartRecording() throws MobitruOperationException
     {
-        mobitruRecordingManager.setEnableRecording(true);
+        mobitruRecordingListener.setEnableRecording(true);
         when(testContext.get(KEY)).thenReturn(UDID);
         var ordered = Mockito.inOrder(testContext, mobitruFacade);
         var event = mock(WebDriverCreateEvent.class);
-        mobitruRecordingManager.onSessionStart(event);
+        mobitruRecordingListener.onSessionStart(event);
         ordered.verify(testContext).get(KEY);
         ordered.verify(mobitruFacade).startDeviceScreenRecording(UDID);
     }
@@ -72,29 +72,29 @@ class MobitruRecordingManagerTests
     @Test
     void shouldStartRecordingAndDownload() throws MobitruOperationException
     {
-        mobitruRecordingManager.setEnableRecording(true);
+        mobitruRecordingListener.setEnableRecording(true);
         when(testContext.get(KEY)).thenReturn(UDID);
         when(mobitruFacade.stopDeviceScreenRecording(UDID)).thenReturn(RECORDING_ID);
         when(mobitruFacade.downloadDeviceScreenRecording(RECORDING_ID)).thenReturn(BINARY_RESPONSE);
         var ordered = Mockito.inOrder(testContext, mobitruFacade, attachmentPublisher);
         var event = mock(BeforeWebDriverQuitEvent.class);
-        mobitruRecordingManager.onSessionStop(event);
+        mobitruRecordingListener.onSessionStop(event);
         ordered.verify(testContext).get(KEY);
         ordered.verify(mobitruFacade).stopDeviceScreenRecording(UDID);
         ordered.verify(mobitruFacade).downloadDeviceScreenRecording(RECORDING_ID);
         ordered.verify(attachmentPublisher).publishAttachment(BINARY_RESPONSE,
-                "Mobitru device session recording");
+                String.format("mobitru_session_recording_%s.mp4", RECORDING_ID));
     }
 
     @Test
     void shouldLogWarnOnStartWithoutThrow() throws MobitruOperationException
     {
-        mobitruRecordingManager.setEnableRecording(true);
+        mobitruRecordingListener.setEnableRecording(true);
         when(testContext.get(KEY)).thenReturn(UDID);
         var exception = new MobitruOperationException(UDID);
         doThrow(exception).when(mobitruFacade).startDeviceScreenRecording(UDID);
         var event = mock(WebDriverCreateEvent.class);
-        assertDoesNotThrow(() -> mobitruRecordingManager.onSessionStart(event));
+        assertDoesNotThrow(() -> mobitruRecordingListener.onSessionStart(event));
         assertEquals(List.of(
                         LoggingEvent.warn(exception, "Unable to start recording on device with UUID {}", UDID)),
                 LOGGER.getLoggingEvents());
@@ -103,12 +103,12 @@ class MobitruRecordingManagerTests
     @Test
     void shouldLogWarnOnStopWithoutThrow() throws MobitruOperationException
     {
-        mobitruRecordingManager.setEnableRecording(true);
+        mobitruRecordingListener.setEnableRecording(true);
         when(testContext.get(KEY)).thenReturn(UDID);
         var exception = new MobitruOperationException(UDID);
         doThrow(exception).when(mobitruFacade).stopDeviceScreenRecording(UDID);
         var event = mock(BeforeWebDriverQuitEvent.class);
-        assertDoesNotThrow(() -> mobitruRecordingManager.onSessionStop(event));
+        assertDoesNotThrow(() -> mobitruRecordingListener.onSessionStop(event));
         assertEquals(List.of(
                         LoggingEvent.warn(exception,
                                 "Unable to stop or download recording on device with UUID {}", UDID)),

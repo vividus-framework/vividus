@@ -18,35 +18,74 @@ package org.vividus.mobitru.recording;
 
 import com.google.common.eventbus.Subscribe;
 
+import org.jbehave.core.annotations.AfterScenario;
+import org.jbehave.core.annotations.BeforeScenario;
+import org.jbehave.core.annotations.ScenarioType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.mobitru.client.MobitruFacade;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
 import org.vividus.reporter.event.IAttachmentPublisher;
+import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
 import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.testcontext.TestContext;
 
-public class MobitruRecordingManager
+public class MobitruRecordingListener
 {
     private static final String KEY = "mobitruDeviceId";
-    private static final Logger LOGGER = LoggerFactory.getLogger(MobitruRecordingManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MobitruRecordingListener.class);
 
     private final MobitruFacade mobitruFacade;
     private final IAttachmentPublisher attachmentPublisher;
+    private final IWebDriverProvider webDriverProvider;
     private boolean enableRecording;
     private final TestContext testContext;
 
-    public MobitruRecordingManager(MobitruFacade mobitruFacade, IAttachmentPublisher attachmentPublisher,
-                                   TestContext testContext)
+    public MobitruRecordingListener(MobitruFacade mobitruFacade, IAttachmentPublisher attachmentPublisher,
+                                    TestContext testContext, IWebDriverProvider webDriverProvider)
     {
         this.mobitruFacade = mobitruFacade;
         this.attachmentPublisher = attachmentPublisher;
         this.testContext = testContext;
+        this.webDriverProvider = webDriverProvider;
+    }
+
+    @BeforeScenario(uponType = ScenarioType.ANY)
+    public void startRecordingBeforeScenario()
+    {
+        //perform start recording if a web driver session is already exist,
+        //which means onSessionStart will be not executed
+        if (webDriverProvider.isWebDriverInitialized())
+        {
+            startRecordingIfEnabled();
+        }
     }
 
     @Subscribe
     public void onSessionStart(WebDriverCreateEvent event)
+    {
+        startRecordingIfEnabled();
+    }
+
+    @Subscribe
+    public void onSessionStop(BeforeWebDriverQuitEvent event)
+    {
+        publishRecordingIfEnabled();
+    }
+
+    @AfterScenario(uponType = ScenarioType.ANY)
+    public void publishRecordingAfterScenario()
+    {
+        //perform publish if a web driver session is still exist,
+        //which means onSessionStop method was not executed
+        if (webDriverProvider.isWebDriverInitialized())
+        {
+            publishRecordingIfEnabled();
+        }
+    }
+
+    private void startRecordingIfEnabled()
     {
         if (enableRecording)
         {
@@ -65,8 +104,7 @@ public class MobitruRecordingManager
         }
     }
 
-    @Subscribe
-    public void onSessionStop(BeforeWebDriverQuitEvent event)
+    private void publishRecordingIfEnabled()
     {
         if (enableRecording)
         {
@@ -75,7 +113,8 @@ public class MobitruRecordingManager
             {
                 String recordingId = mobitruFacade.stopDeviceScreenRecording(deviceId);
                 byte[] recording = mobitruFacade.downloadDeviceScreenRecording(recordingId);
-                attachmentPublisher.publishAttachment(recording, "Mobitru device session recording");
+                String attachmentName = String.format("mobitru_session_recording_%s.mp4", recordingId);
+                attachmentPublisher.publishAttachment(recording, attachmentName);
             }
             catch (MobitruOperationException e)
             {

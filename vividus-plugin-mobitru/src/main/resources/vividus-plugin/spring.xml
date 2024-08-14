@@ -21,7 +21,7 @@
         <property name="bundleId" value="${mobile-application.bundle-id}" />
     </bean>
 
-    <bean class="org.vividus.mobitru.recording.MobitruRecordingManager" >
+    <bean id="mobitruRecordingManager" class="org.vividus.mobitru.recording.MobitruRecordingListener" >
         <property name="enableRecording" value="${mobitru.enable-recording}" />
     </bean>
 
@@ -48,4 +48,7 @@
         <constructor-arg name="billingUnit" value="${selenium.grid.username}" />
         <property name="apiUrl" value="https://${selenium.grid.host}" />
     </bean>
+    <util:list id="stepBeanNames-MobileApp-Hooks">
+        <idref bean="mobitruRecordingManager" />
+    </util:list>
 </beans>

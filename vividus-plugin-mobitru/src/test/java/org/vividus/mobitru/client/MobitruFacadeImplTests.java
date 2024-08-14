@@ -63,9 +63,9 @@ class MobitruFacadeImplTests
     private static final String DEVICE_TAKEN_MESSAGE = "Device with configuration {} is taken";
     private static final String TRYING_TO_TAKE_DEVICE_MESSAGE = "Trying to take device with configuration {}";
     private static final String TRYING_TO_TAKE_DEVICE_UDID_MESSAGE = "Trying to take device with udid {}";
-    private static final String RETRY_TO_TAKE_DEVICE_MESSAGE = "Unable to take device, retrying attempt.";
-    private static final String RETRY_TO_DOWNLOAD_RECORDING_MESSAGE =
-            "Unable to download device screen recording, retrying attempt.";
+    private static final String RETRY_LOG_MESSAGE = "Unable to {}, retrying attempt";
+    private static final String TAKE_DEVICE_LOG_MESSAGE = "take device";
+    private static final String DOWNLOAD_RECORDING_LOG_MESSAGE = "download device screen recording";
     private static final String UNABLE_TO_TAKE_DEVICE_WITH_CONFIGURATION_ERROR_FORMAT =
             "Unable to take device with configuration %s";
     private static final String UNABLE_TO_TAKE_DEVICE_WITH_UDID_ERROR_FORMAT = "Unable to take device with udid %s";
@@ -124,7 +124,7 @@ class MobitruFacadeImplTests
                 LoggingEvent.info("Found devices: {}", System.lineSeparator() + "Device 1: " + failedTakeDevice
                         + System.lineSeparator() + "Device 2: " + takenDevice),
                 LoggingEvent.info(TRYING_TO_TAKE_DEVICE_MESSAGE, failedTakeDevice),
-                LoggingEvent.warn(deviceTakeException, RETRY_TO_TAKE_DEVICE_MESSAGE),
+                LoggingEvent.warn(deviceTakeException, RETRY_LOG_MESSAGE, TAKE_DEVICE_LOG_MESSAGE),
                 LoggingEvent.warn(UNABLE_TO_TAKE_DEVICE_WITH_CONFIGURATION_ERROR_FORMAT.formatted(
                         OBJECT_MAPPER.writeValueAsString(failedTakeDevice))),
                 LoggingEvent.info(TRYING_TO_TAKE_DEVICE_MESSAGE, takenDevice),
@@ -144,7 +144,7 @@ class MobitruFacadeImplTests
         var takenDevice = getTestDevice();
         assertEquals(List.of(
                 LoggingEvent.info(TRYING_TO_TAKE_DEVICE_UDID_MESSAGE, UDID),
-                LoggingEvent.warn(deviceTakeException, RETRY_TO_TAKE_DEVICE_MESSAGE),
+                LoggingEvent.warn(deviceTakeException, RETRY_LOG_MESSAGE, TAKE_DEVICE_LOG_MESSAGE),
                 LoggingEvent.info(DEVICE_TAKEN_MESSAGE, takenDevice)), LOGGER.getLoggingEvents());
     }
 
@@ -162,7 +162,7 @@ class MobitruFacadeImplTests
         assertEquals(UDID,
             mobitruFacadeImpl.takeDevice(desiredCapabilities));
         assertEquals(List.of(LoggingEvent.info(TRYING_TO_TAKE_DEVICE_MESSAGE, requestedDevice),
-                        LoggingEvent.warn(exception, RETRY_TO_TAKE_DEVICE_MESSAGE),
+                        LoggingEvent.warn(exception, RETRY_LOG_MESSAGE, TAKE_DEVICE_LOG_MESSAGE),
                         LoggingEvent.info(DEVICE_TAKEN_MESSAGE, getTestDevice())), LOGGER.getLoggingEvents());
     }
 
@@ -187,8 +187,8 @@ class MobitruFacadeImplTests
         when(mobitruClient.downloadDeviceScreenRecording(RECORDING_ID)).thenThrow(noRecordingException).
                 thenReturn(BINARY_RESPONSE);
         assertSame(BINARY_RESPONSE, mobitruFacadeImpl.downloadDeviceScreenRecording(RECORDING_ID));
-        assertEquals(List.of(LoggingEvent.warn(noRecordingException,
-                        RETRY_TO_DOWNLOAD_RECORDING_MESSAGE)), LOGGER.getLoggingEvents());
+        assertEquals(List.of(LoggingEvent.debug(noRecordingException, RETRY_LOG_MESSAGE,
+                DOWNLOAD_RECORDING_LOG_MESSAGE)), LOGGER.getLoggingEvents());
     }
 
     @ParameterizedTest
