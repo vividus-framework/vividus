@@ -106,7 +106,7 @@ class SiteMapParserTests
     void testIOExceptionThrown() throws IOException
     {
         var ioException = new IOException();
-        when(mockedHttpClient.doHttpGet(SITE_MAP_URL)).thenThrow(ioException);
+        when(mockedHttpClient.doHttpGet(SITE_MAP_URL, true)).thenThrow(ioException);
         var exception = assertThrows(SiteMapParseException.class, () -> siteMapParser.parse(false, SITE_MAP_URL));
         assertEquals(ioException, exception.getCause());
     }
@@ -171,7 +171,7 @@ class SiteMapParserTests
         httpResponse.setResponseBody(ResourceUtils.loadResourceAsByteArray(getClass(), resourceName));
         RedirectLocations locations = mock();
         httpResponse.setRedirectLocations(locations);
-        when(mockedHttpClient.doHttpGet(siteMapUrl)).thenReturn(httpResponse);
+        when(mockedHttpClient.doHttpGet(siteMapUrl, true)).thenReturn(httpResponse);
         return locations;
     }
 

@@ -57,7 +57,7 @@ public class SiteMapParser implements ISiteMapParser
     {
         try
         {
-            HttpResponse response = httpClient.doHttpGet(siteMapUrl);
+            HttpResponse response = httpClient.doHttpGet(siteMapUrl, true);
             URI cleanSiteMapUrl = UriUtils.removeUserInfo(getBaseUri(response, siteMapUrl));
             AbstractSiteMap siteMap = siteMapParser.parseSiteMap(response.getResponseBody(), cleanSiteMapUrl.toURL());
             if (siteMap.getType() == SitemapType.INDEX)
