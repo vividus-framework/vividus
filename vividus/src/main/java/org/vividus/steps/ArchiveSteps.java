@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.steps;
 
 import static org.hamcrest.Matchers.hasItem;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
@@ -68,6 +69,7 @@ public class ArchiveSteps
      */
     @When("I save content of `$archiveData` archive entries to variables:$parameters")
     public void saveArchiveEntriesToVariables(DataWrapper archiveData, List<ArchiveVariable> parameters)
+            throws IOException
     {
         List<String> expectedEntries = parameters.stream().map(ArchiveVariable::getPath).toList();
         Map<String, byte[]> zipEntries = ZipUtils.readZipEntriesFromBytes(archiveData.getBytes(),
@@ -109,7 +111,7 @@ public class ArchiveSteps
      *                    </ul>
      */
     @Then("`$archiveData` archive contains entries with names:$parameters")
-    public void verifyArchiveContainsEntries(DataWrapper archiveData, List<NamedEntry> parameters)
+    public void verifyArchiveContainsEntries(DataWrapper archiveData, List<NamedEntry> parameters) throws IOException
     {
         Set<String> entryNames = ZipUtils.readZipEntryNamesFromBytes(archiveData.getBytes());
         MutableBoolean reportNotPublished = new MutableBoolean(true);

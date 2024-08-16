@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import static org.vividus.steps.StringComparisonRule.DOES_NOT_CONTAIN;
 import static org.vividus.steps.StringComparisonRule.IS_EQUAL_TO;
 import static org.vividus.steps.StringComparisonRule.MATCHES;
 
+import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +69,7 @@ class ArchiveStepsTests
     @InjectMocks  private ArchiveSteps archiveSteps;
 
     @Test
-    void testSaveFilesContentToVariables()
+    void testSaveFilesContentToVariables() throws IOException
     {
         var json = "json";
         var image = "image";
@@ -87,7 +88,7 @@ class ArchiveStepsTests
     }
 
     @Test
-    void testSaveFilesContentToVariablesInvalidPath()
+    void testSaveFilesContentToVariablesInvalidPath() throws IOException
     {
         var path = "path";
         archiveSteps.saveArchiveEntriesToVariables(createArchiveData(),
@@ -99,7 +100,7 @@ class ArchiveStepsTests
     }
 
     @Test
-    void testVerifyArchiveContainsEntries()
+    void testVerifyArchiveContainsEntries() throws IOException
     {
         var archiveEntries = createArchiveEntries();
         lenient().doAnswer(getAssertionAnswer(false)).when(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + DUMMY),
@@ -122,7 +123,7 @@ class ArchiveStepsTests
     }
 
     @Test
-    void testVerifyArchiveContainsEntriesIsPassed()
+    void testVerifyArchiveContainsEntriesIsPassed() throws IOException
     {
         var archiveEntries = createArchiveEntries();
         doAnswer(getAssertionAnswer(true)).when(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + IMAGE_PNG),
@@ -143,7 +144,7 @@ class ArchiveStepsTests
     }
 
     @Test
-    void testVerifyArchiveContainsEntriesIsFailed()
+    void testVerifyArchiveContainsEntriesIsFailed() throws IOException
     {
         var archiveEntries = createArchiveEntries();
         doAnswer(getAssertionAnswer(false)).when(softAssert).assertThat(eq(CONTAINS_ENTRY_WITH_NAME + DUMMY),
@@ -165,7 +166,7 @@ class ArchiveStepsTests
     }
 
     @Test
-    void testVerifyArchiveContainsEntriesWithUserRulesIsFailed()
+    void testVerifyArchiveContainsEntriesWithUserRulesIsFailed() throws IOException
     {
         var archiveEntries = createArchiveEntries();
         doAnswer(getAssertionAnswer(false)).when(softAssert).assertThat(
@@ -189,7 +190,7 @@ class ArchiveStepsTests
     }
 
     @Test
-    void testVerifyArchiveContainsEntriesWithUserRulesIsPassed()
+    void testVerifyArchiveContainsEntriesWithUserRulesIsPassed() throws IOException
     {
         var archiveEntries = createArchiveEntries();
         doAnswer(getAssertionAnswer(true)).when(softAssert).assertThat(
@@ -205,7 +206,7 @@ class ArchiveStepsTests
     }
 
     @Test
-    void testVerifyArchiveContainsEntriesWithUserRules()
+    void testVerifyArchiveContainsEntriesWithUserRules() throws IOException
     {
         var archiveEntries = createArchiveEntries();
         doAnswer(getAssertionAnswer(true)).when(softAssert).assertThat(
