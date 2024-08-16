@@ -13,7 +13,7 @@ include::partial$plugin-installation.adoc[]
 
 `FROM_SITEMAP` transformer generates table based on the website sitemap.
 
-IMPORTANT: The use of `web-application.main-page-url` property for setting of main page for crawling is deprecated and will be removed in VIVIDUS 0.7.0, pelase see either `mainPageUrl` transformer parameter or `transformer.from-sitemap.main-page-url` property.
+IMPORTANT: The use of `web-application.main-page-url` property for setting of main page for crawling is deprecated and will be removed in VIVIDUS 0.7.0, please see either `mainPageUrl` transformer parameter or `transformer.from-sitemap.main-page-url` property.
 
 The properties outlined in the table below are applied to all FROM_SITEMAP transformers utilized in the tests, unless
 they override the values by specifiying the corresponding table parameters.
@@ -98,7 +98,7 @@ Examples:
 
 `FROM_HEADLESS_CRAWLING` transformer generates table based on the results of headless crawling.
 
-IMPORTANT: The use of `web-application.main-page-url` property for setting of main page for crawling is deprecated and will be removed in VIVIDUS 0.7.0, pelase see either `mainPageUrl` transformer parameter or `transformer.from-headless-crawling.main-page-url` property.
+IMPORTANT: The use of `web-application.main-page-url` property for setting of main page for crawling is deprecated and will be removed in VIVIDUS 0.7.0, please see either `mainPageUrl` transformer parameter or `transformer.from-headless-crawling.main-page-url` property.
 
 
 [cols="3,1,1,3", options="header"]
