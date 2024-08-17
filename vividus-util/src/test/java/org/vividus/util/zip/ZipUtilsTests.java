@@ -37,7 +37,7 @@ class ZipUtilsTests
     private static final String ZIP = "archive.zip";
 
     @Test
-    public void testReadArchiveEntriesFromBytes() throws IOException
+    void testReadArchiveEntriesFromBytes() throws IOException
     {
         ZipUtils.readZipEntriesFromBytes(ResourceUtils.loadResourceAsByteArray(getClass(), ZIP)).forEach(
             (name, content) -> Assertions.assertAll(
@@ -48,7 +48,7 @@ class ZipUtilsTests
     }
 
     @Test
-    public void testReadArchiveEntryNamesFromBytes() throws IOException
+    void testReadArchiveEntryNamesFromBytes() throws IOException
     {
         File file = FileUtils.toFile(ResourceUtils.findResource(getClass(), ZIP));
         Set<String> names = ZipUtils.readZipEntryNamesFromBytes(FileUtils.readFileToByteArray(file));
@@ -56,7 +56,7 @@ class ZipUtilsTests
     }
 
     @Test
-    public void testReadArchiveEntriesFromBytesFilter() throws IOException
+    void testReadArchiveEntriesFromBytesFilter() throws IOException
     {
         File file = FileUtils.toFile(ResourceUtils.findResource(getClass(), ZIP));
         Map<String, byte[]> zipEntries = ZipUtils.readZipEntriesFromBytes(FileUtils.readFileToByteArray(file),
