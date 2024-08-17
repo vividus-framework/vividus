@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,32 +21,23 @@ import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Map;
 import java.util.Set;
-import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.jupiter.api.Test;
 import org.vividus.util.ResourceUtils;
 
-@RunWith(PowerMockRunner.class)
-public class ZipUtilsTests
+class ZipUtilsTests
 {
     private static final String ZIP = "archive.zip";
 
     @Test
-    public void testReadArchiveEntriesFromBytes()
+    void testReadArchiveEntriesFromBytes() throws IOException
     {
         ZipUtils.readZipEntriesFromBytes(ResourceUtils.loadResourceAsByteArray(getClass(), ZIP)).forEach(
             (name, content) -> Assertions.assertAll(
@@ -57,7 +48,7 @@ public class ZipUtilsTests
     }
 
     @Test
-    public void testReadArchiveEntryNamesFromBytes() throws IOException
+    void testReadArchiveEntryNamesFromBytes() throws IOException
     {
         File file = FileUtils.toFile(ResourceUtils.findResource(getClass(), ZIP));
         Set<String> names = ZipUtils.readZipEntryNamesFromBytes(FileUtils.readFileToByteArray(file));
@@ -65,25 +56,11 @@ public class ZipUtilsTests
     }
 
     @Test
-    public void testReadArchiveEntriesFromBytesFilter() throws IOException
+    void testReadArchiveEntriesFromBytesFilter() throws IOException
     {
         File file = FileUtils.toFile(ResourceUtils.findResource(getClass(), ZIP));
         Map<String, byte[]> zipEntries = ZipUtils.readZipEntriesFromBytes(FileUtils.readFileToByteArray(file),
             name -> false);
         assertThat(zipEntries, anEmptyMap());
-    }
-
-    @Test
-    @PrepareForTest({ ZipUtils.class, ZipInputStream.class, ByteArrayInputStream.class })
-    public void testReadArchiveEntriesFromBytesException() throws Exception
-    {
-        PowerMockito.mockStatic(ZipInputStream.class);
-        PowerMockito.mockStatic(ByteArrayInputStream.class);
-        byte[] file = {};
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(file);
-        PowerMockito.whenNew(ByteArrayInputStream.class).withArguments(file).thenReturn(byteArrayInputStream);
-        PowerMockito.whenNew(ZipInputStream.class).withArguments(byteArrayInputStream).thenThrow(IOException.class);
-
-        assertThrows(UncheckedIOException.class, () -> ZipUtils.readZipEntriesFromBytes(file));
     }
 }

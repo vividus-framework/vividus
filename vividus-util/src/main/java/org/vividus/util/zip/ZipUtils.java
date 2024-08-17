@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.vividus.util.zip;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -37,38 +36,45 @@ public final class ZipUtils
     }
 
     /**
-    * Read entries from ZIP
-    * @param bytes bytes of ZIP file
-    * @return map contains archived file path and file body
-    */
-    public static Map<String, byte[]> readZipEntriesFromBytes(byte[] bytes)
+     * Read entries from ZIP
+     *
+     * @param bytes bytes of ZIP file
+     * @return map contains archived file path and file body
+     * @throws IOException in case of any error happened at I/O operations
+     */
+    public static Map<String, byte[]> readZipEntriesFromBytes(byte[] bytes) throws IOException
     {
         return readZipEntriesFromBytes(bytes, name -> true);
     }
 
     /**
      * Read names of entries from ZIP
+     *
      * @param bytes bytes of ZIP file
      * @return set contains names of entries
+     * @throws IOException in case of any error happened at I/O operations
      */
-    public static Set<String> readZipEntryNamesFromBytes(byte[] bytes)
+    public static Set<String> readZipEntryNamesFromBytes(byte[] bytes) throws IOException
     {
         return readZipEntriesFromBytes(bytes, name -> true, false).keySet();
     }
 
     /**
      * Filters entries by their name and reads them from ZIP
-     * @param bytes bytes of ZIP file
+     *
+     * @param bytes           bytes of ZIP file
      * @param entryNameFilter name predicate
      * @return map contains archived file path and file body
+     * @throws IOException in case of any error happened at I/O operations
      */
     public static Map<String, byte[]> readZipEntriesFromBytes(byte[] bytes, Predicate<String> entryNameFilter)
+            throws IOException
     {
         return readZipEntriesFromBytes(bytes, entryNameFilter, true);
     }
 
     private static Map<String, byte[]> readZipEntriesFromBytes(byte[] bytes, Predicate<String> entryNameFilter,
-            boolean readContent)
+            boolean readContent) throws IOException
     {
         Map<String, byte[]> zipEntries = new HashMap<>();
         try (ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(bytes)))
@@ -85,10 +91,6 @@ public final class ZipUtils
                 entry = zip.getNextEntry();
             }
             return zipEntries;
-        }
-        catch (IOException e)
-        {
-            throw new UncheckedIOException(e);
         }
     }
 }
