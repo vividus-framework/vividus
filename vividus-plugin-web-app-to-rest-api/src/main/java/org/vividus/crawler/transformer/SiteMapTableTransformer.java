@@ -26,16 +26,13 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.jbehave.core.model.ExamplesTable.TableProperties;
-import org.vividus.crawler.ISiteMapParser;
-import org.vividus.crawler.SiteMap;
 import org.vividus.crawler.SiteMapParseException;
+import org.vividus.crawler.SiteMapParser;
 import org.vividus.util.UriUtils;
-
-import crawlercommons.sitemaps.SiteMapURL;
 
 public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransformer
 {
-    private ISiteMapParser siteMapParser;
+    private SiteMapParser siteMapParser;
     private boolean ignoreErrors;
     private boolean strict;
 
@@ -55,17 +52,17 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
 
 
         URI mainApplicationPage = getMainApplicationPageUri(properties);
-        Set<String> urls = siteMaps.stream().filter(
-            s -> s.mainAppPage().equals(mainApplicationPage) && s.siteMapRelativeUrl().equals(siteMapRelativeUrl))
-            .findFirst().orElseGet(() ->
+        URI siteMapUrl = UriUtils.buildNewRelativeUrl(mainApplicationPage, siteMapRelativeUrl);
+        Set<String> urls = siteMaps.stream().filter(s -> s.siteMapUrl.equals(siteMapUrl)).findFirst()
+            .orElseGet(() ->
             {
-                Set<String> siteMapRelativeUrls;
+                Set<String> siteMapUrls;
                 try
                 {
-                    siteMapRelativeUrls = filterResults(siteMapParser.parse(strictParameter, mainApplicationPage,
-                            siteMapRelativeUrl).stream()
-                            .map(SiteMapURL::getUrl)
-                            .map(URL::toString));
+                    siteMapUrls = filterResults(siteMapParser.parse(strictParameter, siteMapUrl)
+                            .stream()
+                            .map(URL::toString)
+                    );
                 }
                 catch (SiteMapParseException e)
                 {
@@ -73,9 +70,9 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
                     {
                         throw new IllegalStateException(e);
                     }
-                    siteMapRelativeUrls = Set.of();
+                    siteMapUrls = Set.of();
                 }
-                SiteMap siteMap = new SiteMap(mainApplicationPage, siteMapRelativeUrl, siteMapRelativeUrls);
+                SiteMap siteMap = new SiteMap(siteMapUrl, siteMapUrls);
                 siteMaps.add(siteMap);
                 return siteMap;
             }).urls();
@@ -92,7 +89,7 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
         return UriUtils.createUri(uri);
     }
 
-    public void setSiteMapParser(ISiteMapParser siteMapParser)
+    public void setSiteMapParser(SiteMapParser siteMapParser)
     {
         this.siteMapParser = siteMapParser;
     }
@@ -105,5 +102,9 @@ public class SiteMapTableTransformer extends AbstractFetchingUrlsTableTransforme
     public void setStrict(boolean strict)
     {
         this.strict = strict;
+    }
+
+    private record SiteMap(URI siteMapUrl, Set<String> urls)
+    {
     }
 }

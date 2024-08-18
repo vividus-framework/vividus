@@ -32,30 +32,29 @@
         <property name="httpRedirectsProvider" ref="httpRedirectsProvider" />
     </bean>
 
-    <bean id="siteMapParser" class="org.vividus.crawler.SiteMapParser">
-        <property name="httpClient">
-            <bean class="org.vividus.http.client.HttpClient"
-                  factory-bean="httpClientFactory"
-                  factory-method="buildHttpClient">
-                <constructor-arg>
-                    <bean parent="httpClientConfig">
-                        <property name="headers">
-                            <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
-                                <constructor-arg value="sitemap.parser.http.header." />
-                            </bean>
-                        </property>
-                    </bean>
-                </constructor-arg>
-            </bean>
-        </property>
-        <property name="siteUrl" value="${sitemap.parser.site-url}" />
-        <property name="baseUrl" value="${sitemap.parser.base-url}" />
-        <property name="followRedirects" value="${sitemap.parser.follow-redirects}" />
-    </bean>
-
     <bean name="FROM_SITEMAP" class="org.vividus.crawler.transformer.SiteMapTableTransformer"
           parent="abstractFetchingUrlsTableTransformer">
-        <property name="siteMapParser" ref="siteMapParser" />
+        <property name="siteMapParser">
+            <bean class="org.vividus.crawler.CrawlerCommonsSiteMapParser">
+                <property name="httpClient">
+                    <bean class="org.vividus.http.client.HttpClient"
+                          factory-bean="httpClientFactory"
+                          factory-method="buildHttpClient">
+                        <constructor-arg>
+                            <bean parent="httpClientConfig">
+                                <property name="headers">
+                                    <bean factory-bean="propertyParser" factory-method="getPropertyValuesByPrefix">
+                                        <constructor-arg value="sitemap.parser.http.header." />
+                                    </bean>
+                                </property>
+                            </bean>
+                        </constructor-arg>
+                    </bean>
+                </property>
+                <property name="baseUrl" value="${sitemap.parser.base-url}" />
+                <property name="followRedirects" value="${sitemap.parser.follow-redirects}" />
+            </bean>
+        </property>
         <property name="ignoreErrors" value="${transformer.from-sitemap.ignore-errors}" />
         <property name="strict" value="${transformer.from-sitemap.strict}" />
         <property name="filterRedirects" value="${transformer.from-sitemap.filter-redirects}" />
