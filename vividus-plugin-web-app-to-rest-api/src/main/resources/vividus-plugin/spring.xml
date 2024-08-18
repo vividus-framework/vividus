@@ -82,15 +82,6 @@
         <property name="mainPageUrlProperty" value="transformer.from-headless-crawling.main-page-url" />
     </bean>
 
-    <bean id="FROM_HTML" class="org.vividus.crawler.transformer.HtmlDocumentTableTransformer">
-        <constructor-arg index="0">
-            <bean factory-bean="propertyMapper" factory-method="readValue">
-                <constructor-arg value="transformer.from-html." />
-                <constructor-arg value="org.vividus.crawler.transformer.HtmlDocumentTableTransformer$HttpConfiguration" />
-            </bean>
-        </constructor-arg>
-    </bean>
-
     <bean class="org.vividus.databind.BasicHeadersDeserializer" />
 
     <util:list id="stepBeanNames-WebAppToRestApi" value-type="java.lang.String">

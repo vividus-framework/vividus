@@ -7,6 +7,15 @@
         http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd"
     default-lazy-init="true">
 
+    <bean id="FROM_HTML" class="org.vividus.html.transfromer.HtmlDocumentTableTransformer">
+        <constructor-arg index="0">
+            <bean factory-bean="propertyMapper" factory-method="readValue">
+                <constructor-arg value="transformer.from-html." />
+                <constructor-arg value="org.vividus.html.transfromer.HtmlDocumentTableTransformer$HttpConfiguration" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
     <bean id="htmlSteps" class="org.vividus.steps.html.HtmlSteps" />
 
     <util:list id="stepBeanNames-Html" value-type="java.lang.String">
