@@ -80,10 +80,10 @@ dependencies {
     // Spring
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.1.12')
     implementation(group: 'org.springframework', name: 'spring-context')
-    implementation(group: 'org.springframework.vault', name: 'spring-vault-core', version: '3.1.1')
+    implementation(group: 'org.springframework.vault', name: 'spring-vault-core', version: '3.1.2')
 
     implementation(group: 'jakarta.inject', name: 'jakarta.inject-api', version: '2.0.1')
-    implementation(group: 'commons-cli', name: 'commons-cli', version: '1.8.0')
+    implementation(group: 'commons-cli', name: 'commons-cli', version: '1.9.0')
     // jasypt
     implementation(group: 'org.jasypt', name: 'jasypt-spring4', version: '1.9.3')
 
@@ -91,7 +91,7 @@ dependencies {
     implementation(group: 'org.apache.commons', name: 'commons-collections4', version: '4.4')
     implementation(group: 'commons-codec', name: 'commons-codec', version: '1.17.1')
     implementation(group: 'org.hamcrest', name: 'hamcrest', version: '3.0')
-    implementation(group: 'com.google.guava', name: 'guava', version: '33.2.1-jre')
+    implementation(group: 'com.google.guava', name: 'guava', version: '33.3.0-jre')
     implementation(group: 'io.github.classgraph', name: 'classgraph', version: '4.8.173')
     implementation(group:  'io.github.java-diff-utils', name: 'java-diff-utils', version: '4.12')
     implementation(group: 'org.apache.commons', name: 'commons-jexl3', version: '3.4.0')
@@ -99,7 +99,7 @@ dependencies {
 
     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.3')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.0')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.12.0')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
@@ -123,11 +123,11 @@ dependencies {
     integrationTestImplementation project(':vividus-plugin-winrm')
     integrationTestImplementation project(':vividus-plugin-xml')
     integrationTestImplementation project(':vividus-plugin-yaml')
-    integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.3')
+    integrationTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.0')
     integrationTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     integrationTestImplementation(group: 'org.junit-pioneer', name: 'junit-pioneer', version: '2.2.0')
 
-    systemTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.10.3')
+    systemTestImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.0')
     systemTestImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     systemTestImplementation platform(group: 'org.testcontainers', name: 'testcontainers-bom', version: '1.20.1')
     systemTestImplementation(group: 'org.testcontainers', name: 'testcontainers')

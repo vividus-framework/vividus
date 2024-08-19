@@ -308,7 +308,7 @@ class HeadlessCrawlerTableTransformerTests
     private LoggingEvent getMainAppPageWarn()
     {
         return warn("The use of {} property for setting of main page for crawling is deprecated and will "
-                + "be removed in VIVIDUS 0.7.0, pelase see use either {} transformer parameter or "
+                + "be removed in VIVIDUS 0.7.0, please see use either {} transformer parameter or "
                 + "{} property.",
                 "web-application.main-page-url", "mainPageUrl", MAIN_APP_PROP);
     }

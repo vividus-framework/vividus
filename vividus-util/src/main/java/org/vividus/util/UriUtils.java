@@ -205,7 +205,7 @@ public final class UriUtils
         return data.replace("+", "%2B");
     }
 
-    private static String decodeUrl(String url)
+    public static String decodeUrl(String url)
     {
         String query = substringBeforeLast(substringAfter(url, QUERY_SEPARATOR), "#");
         return decode(!query.isEmpty() ? url.replace(query, query.replace(ENCODED_AMPERSAND, DOUBLE_ENCODED_AMPERSAND))

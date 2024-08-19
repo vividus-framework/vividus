@@ -69,11 +69,9 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
 
     protected Set<String> filterResults(Stream<String> urls)
     {
-        Stream<String> results = urls;
+        Set<String> uniqueUrls = urls.collect(Collectors.toSet());
         if (filterRedirects)
         {
-            Set<String> uniqueUrls = urls.collect(Collectors.toSet());
-
             Set<String> result = new HashSet<>();
             Map<String, List<String>> redirectChains = new HashMap<>();
 
@@ -107,7 +105,7 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
             return result;
         }
 
-        return results.collect(Collectors.toSet());
+        return uniqueUrls;
     }
 
     private List<String> getRedirects(String urlAsString)
@@ -147,7 +145,7 @@ public abstract class AbstractFetchingUrlsTableTransformer implements ExtendedTa
                            .addArgument(mainPageParam)
                            .addArgument(mainPageUrlProperty)
                            .log("The use of {} property for setting of main page for crawling is deprecated and will "
-                                   + "be removed in VIVIDUS 0.7.0, pelase see use either {} transformer parameter or "
+                                   + "be removed in VIVIDUS 0.7.0, please see use either {} transformer parameter or "
                                    + "{} property.");
         }
 

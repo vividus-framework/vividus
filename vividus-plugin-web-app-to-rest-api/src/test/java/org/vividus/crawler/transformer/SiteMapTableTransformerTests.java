@@ -26,7 +26,10 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -44,12 +47,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.vividus.crawler.ISiteMapParser;
 import org.vividus.crawler.SiteMapParseException;
+import org.vividus.crawler.SiteMapParser;
 import org.vividus.http.HttpRedirectsProvider;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
-
-import crawlercommons.sitemaps.SiteMapURL;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class SiteMapTableTransformerTests
@@ -57,29 +58,29 @@ class SiteMapTableTransformerTests
     private static final String SOME_URL = "http://www.some.url";
     private static final String NO_URLS_FOUND_MESSAGE = "No URLs found in sitemap, or all URLs were filtered";
     private static final String SITEMAP = "Sitemap";
-    private static final String TRUE = "true";
-    private static final String FALSE = "false";
     private static final String IGNORE_ERRORS_PARAMETER_NAME = "ignoreErrors";
     private static final String STRICT_PARAMETER_NAME = "strict";
-    private static final String SITEMAP_XML = "/org/vividus/sitemap/sitemap.xml";
     private static final URI MAIN_APP_PAGE = URI.create(SOME_URL);
+    private static final String SITEMAP_RELATIVE_URL = "/org/vividus/sitemap/sitemap.xml";
+    private static final URI SITEMAP_XML = URI.create(SOME_URL + SITEMAP_RELATIVE_URL);
 
-    public static final SiteMapURL PRODUCT_URL = new SiteMapURL(SOME_URL + "/product", true);
-    private static final Set<SiteMapURL> SITEMAP_URLS = Set.of(
+    private static final String OUTGOING_ABSOLUTE_SIMPLE_URL = "http://www.some.url/product";
+    private static final String OUTGOING_ABSOLUTE_NOT_ENCODED_URL = "http://www.some.url/Juridisk erklæring";
+    private static final String OUTGOING_ABSOLUTE_ENCODED_URL = "http://www.some.url/Juridisk%20erkl%C3%A6ring";
+
+    private static final String PRODUCT_URL = SOME_URL + "/product";
+    private static final Set<String> SITEMAP_URLS = Set.of(
             PRODUCT_URL,
             /*
             Some sitemaps may contain invalid URLs: not encoded, it's not allowed according to the standard:
             https://www.sitemaps.org/protocol.html#escaping, but we are trying to handle such cases
             */
-            new SiteMapURL(SOME_URL + "/Juridisk erklæring", false)
-    );
-    private static final String OUTGOING_ABSOLUTE_SIMPLE_URL = "http://www.some.url/product";
-    private static final String OUTGOING_ABSOLUTE_NOT_ENCODED_URL = "http://www.some.url/Juridisk erklæring";
-    private static final String OUTGOING_ABSOLUTE_ENCODED_URL = "http://www.some.url/Juridisk%20erkl%C3%A6ring";
+            SOME_URL + "/Juridisk erklæring"
+        );
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(SiteMapTableTransformer.class);
 
-    @Mock private ISiteMapParser siteMapParser;
+    @Mock private SiteMapParser siteMapParser;
     @Mock private WebApplicationConfiguration webApplicationConfiguration;
     @Mock private HttpRedirectsProvider redirectsProvider;
     @InjectMocks private SiteMapTableTransformer siteMapTableTransformer;
@@ -87,12 +88,22 @@ class SiteMapTableTransformerTests
     private final Keywords keywords = new Keywords();
     private final ParameterConverters parameterConverters =  new ParameterConverters();
 
+    private static List<URL> getSiteMapUrls() throws MalformedURLException
+    {
+        List<URL> siteMapUrls = new ArrayList<>();
+        for (String siteMapUrl : SITEMAP_URLS)
+        {
+            siteMapUrls.add(new URL(siteMapUrl));
+        }
+        return siteMapUrls;
+    }
+
     @Test
-    void testFetchUrls() throws SiteMapParseException
+    void testFetchUrls() throws SiteMapParseException, MalformedURLException
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
-        boolean strict = true;
-        when(siteMapParser.parse(strict, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(SITEMAP_URLS);
+        var strict = true;
+        when(siteMapParser.parse(strict, SITEMAP_XML)).thenReturn(getSiteMapUrls());
         siteMapTableTransformer.setStrict(strict);
         var properties = createTableProperties();
         var actual = siteMapTableTransformer.fetchUrls(properties);
@@ -103,7 +114,7 @@ class SiteMapTableTransformerTests
 
         var ordered = inOrder(webApplicationConfiguration, siteMapParser);
         ordered.verify(webApplicationConfiguration).getMainApplicationPageUrl();
-        ordered.verify(siteMapParser).parse(strict, MAIN_APP_PAGE, SITEMAP_XML);
+        ordered.verify(siteMapParser).parse(strict, SITEMAP_XML);
         ordered.verify(webApplicationConfiguration).getMainApplicationPageUrl();
         ordered.verifyNoMoreInteractions();
     }
@@ -121,8 +132,8 @@ class SiteMapTableTransformerTests
     void testEmptySiteMapUrls() throws SiteMapParseException
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
-        boolean strict = false;
-        when(siteMapParser.parse(strict, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(Set.of());
+        var strict = false;
+        when(siteMapParser.parse(strict, SITEMAP_XML)).thenReturn(Set.of());
         siteMapTableTransformer.setStrict(strict);
         var properties = createTableProperties();
         var exception = assertThrows(SiteMapTableGenerationException.class,
@@ -135,11 +146,11 @@ class SiteMapTableTransformerTests
             throws SiteMapParseException
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
-        when(siteMapParser.parse(true, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(Set.of());
+        when(siteMapParser.parse(true, SITEMAP_XML)).thenReturn(Set.of());
         siteMapTableTransformer.setStrict(false);
         var properties = createTableProperties();
-        properties.getProperties().put(IGNORE_ERRORS_PARAMETER_NAME, TRUE);
-        properties.getProperties().put(STRICT_PARAMETER_NAME, TRUE);
+        properties.getProperties().put(IGNORE_ERRORS_PARAMETER_NAME, Boolean.TRUE.toString());
+        properties.getProperties().put(STRICT_PARAMETER_NAME, Boolean.TRUE.toString());
         assertEquals(Set.of(), siteMapTableTransformer.fetchUrls(properties));
     }
 
@@ -147,11 +158,11 @@ class SiteMapTableTransformerTests
     void testFetchUrlsEmptySiteMapUrlsIgnoreErrorsSetViaPropertyTrueViaTableFalse() throws SiteMapParseException
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
-        when(siteMapParser.parse(false, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(Set.of());
+        when(siteMapParser.parse(false, SITEMAP_XML)).thenReturn(Set.of());
         siteMapTableTransformer.setStrict(true);
         var properties = createTableProperties();
-        properties.getProperties().put(IGNORE_ERRORS_PARAMETER_NAME, FALSE);
-        properties.getProperties().put(STRICT_PARAMETER_NAME, FALSE);
+        properties.getProperties().put(IGNORE_ERRORS_PARAMETER_NAME, Boolean.FALSE.toString());
+        properties.getProperties().put(STRICT_PARAMETER_NAME, Boolean.FALSE.toString());
         siteMapTableTransformer.setIgnoreErrors(true);
         var exception = assertThrows(SiteMapTableGenerationException.class,
             () -> siteMapTableTransformer.transform("", null, properties));
@@ -162,9 +173,9 @@ class SiteMapTableTransformerTests
     void testTransformSitemapIsInvalid() throws SiteMapParseException
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
-        SiteMapParseException exception = new SiteMapParseException(SITEMAP, new IOException());
-        boolean strict = true;
-        when(siteMapParser.parse(strict, MAIN_APP_PAGE, SITEMAP_XML)).thenThrow(exception);
+        var exception = new SiteMapParseException(SITEMAP, new IOException());
+        var strict = true;
+        when(siteMapParser.parse(strict, SITEMAP_XML)).thenThrow(exception);
         siteMapTableTransformer.setStrict(strict);
         var properties = createTableProperties();
         var actualException = assertThrows(IllegalStateException.class,
@@ -177,8 +188,8 @@ class SiteMapTableTransformerTests
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         var exception = new SiteMapParseException(SITEMAP, new IOException());
-        boolean strict = true;
-        when(siteMapParser.parse(strict, MAIN_APP_PAGE, SITEMAP_XML)).thenThrow(exception);
+        var strict = true;
+        when(siteMapParser.parse(strict, SITEMAP_XML)).thenThrow(exception);
         siteMapTableTransformer.setStrict(strict);
         siteMapTableTransformer.setIgnoreErrors(true);
         assertEquals(Set.of(), siteMapTableTransformer.fetchUrls(createTableProperties()));
@@ -189,11 +200,11 @@ class SiteMapTableTransformerTests
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
         var exception = new SiteMapParseException(SITEMAP, new IOException());
-        boolean strict = true;
-        when(siteMapParser.parse(strict, MAIN_APP_PAGE, SITEMAP_XML)).thenThrow(exception);
+        var strict = true;
+        when(siteMapParser.parse(strict, SITEMAP_XML)).thenThrow(exception);
         siteMapTableTransformer.setStrict(strict);
         var properties = createTableProperties();
-        properties.getProperties().put(IGNORE_ERRORS_PARAMETER_NAME, TRUE);
+        properties.getProperties().put(IGNORE_ERRORS_PARAMETER_NAME, Boolean.TRUE.toString());
         assertEquals(Set.of(), siteMapTableTransformer.fetchUrls(properties));
     }
 
@@ -201,10 +212,10 @@ class SiteMapTableTransformerTests
     void testThrowHttpResponseException() throws SiteMapParseException, IOException
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
-        boolean strict = true;
-        when(siteMapParser.parse(strict, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(Set.of(PRODUCT_URL));
+        var strict = true;
+        when(siteMapParser.parse(strict, SITEMAP_XML)).thenReturn(Set.of(new URL(PRODUCT_URL)));
         siteMapTableTransformer.setStrict(strict);
-        String prop = "transformer.from-sitemap.main-page-url";
+        var prop = "transformer.from-sitemap.main-page-url";
         siteMapTableTransformer.setMainPageUrlProperty(prop);
         siteMapTableTransformer.setFilterRedirects(true);
         var httpResponseException = new HttpResponseException(HttpStatus.SC_NOT_FOUND, "");
@@ -214,7 +225,7 @@ class SiteMapTableTransformerTests
         assertThat(logger.getLoggingEvents(),
                 is(List.of(
                         warn("The use of {} property for setting of main page for crawling is deprecated and will "
-                                + "be removed in VIVIDUS 0.7.0, pelase see use either {} transformer parameter or "
+                                + "be removed in VIVIDUS 0.7.0, please see use either {} transformer parameter or "
                                 + "{} property.", "web-application.main-page-url", "mainPageUrl", prop),
                         warn(httpResponseException, "Exception during redirects receiving"))));
     }
@@ -223,8 +234,8 @@ class SiteMapTableTransformerTests
     void testNoRedirects() throws SiteMapParseException, IOException
     {
         when(webApplicationConfiguration.getMainApplicationPageUrl()).thenReturn(MAIN_APP_PAGE);
-        boolean strict = true;
-        when(siteMapParser.parse(strict, MAIN_APP_PAGE, SITEMAP_XML)).thenReturn(SITEMAP_URLS);
+        var strict = true;
+        when(siteMapParser.parse(strict, SITEMAP_XML)).thenReturn(getSiteMapUrls());
         siteMapTableTransformer.setStrict(strict);
         siteMapTableTransformer.setFilterRedirects(true);
         when(redirectsProvider.getRedirects(URI.create(OUTGOING_ABSOLUTE_SIMPLE_URL))).thenReturn(List.of());
@@ -235,6 +246,6 @@ class SiteMapTableTransformerTests
 
     private TableProperties createTableProperties()
     {
-        return new TableProperties("siteMapRelativeUrl=" + SITEMAP_XML, keywords, parameterConverters);
+        return new TableProperties("siteMapRelativeUrl=" + SITEMAP_RELATIVE_URL, keywords, parameterConverters);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.crawler.transformer;
+package org.vividus.html.transfromer;
 
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -61,9 +61,9 @@ public class HtmlDocumentTableTransformer implements TableTransformer
     @Override
     public String transform(String table, TableParsers parsers, TableProperties tableProperties)
     {
-        Properties propertes = tableProperties.getProperties();
-        String pageUrl = propertes.getProperty("pageUrl");
-        String variableName = propertes.getProperty("variableName");
+        Properties properties = tableProperties.getProperties();
+        String pageUrl = properties.getProperty("pageUrl");
+        String variableName = properties.getProperty("variableName");
 
         Validate.isTrue(pageUrl != null && variableName == null || pageUrl == null && variableName != null,
                 "Either 'pageUrl' or 'variableName' should be specified.");
