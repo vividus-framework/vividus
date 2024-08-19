@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.vividus.crawler.transformer;
+package org.vividus.html.transfromer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -43,7 +43,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
-import org.vividus.crawler.transformer.HtmlDocumentTableTransformer.HttpConfiguration;
+import org.vividus.html.transfromer.HtmlDocumentTableTransformer.HttpConfiguration;
 
 @ExtendWith(MockitoExtension.class)
 class HtmlDocumentTableTransformerTests
@@ -83,7 +83,7 @@ class HtmlDocumentTableTransformerTests
     }
 
     @Test
-    void shouldBuildTableByElementAttributeFromVariableValue() throws IOException
+    void shouldBuildTableByElementAttributeFromVariableValue()
     {
         when(variableContext.getVariable("html")).thenReturn(DOC);
         TableProperties tableProperties = new TableProperties("column=col, variableName=html, xpathSelector=//a/@href",
