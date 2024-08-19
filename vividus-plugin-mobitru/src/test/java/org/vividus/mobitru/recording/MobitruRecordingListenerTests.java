@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -76,7 +76,8 @@ class MobitruRecordingListenerTests
     }
 
     @Test
-    void shouldNotStartRecordingIfDisabled() {
+    void shouldNotStartRecordingIfDisabled()
+    {
         mobitruRecordingListener.setEnableRecording(false);
         var event = mock(WebDriverCreateEvent.class);
         mobitruRecordingListener.onSessionStart(event);
@@ -97,7 +98,8 @@ class MobitruRecordingListenerTests
     }
 
     @Test
-    void shouldNotStartRecordingIfDriverIsNotInitialized() {
+    void shouldNotStartRecordingIfDriverIsNotInitialized()
+    {
         mobitruRecordingListener.setEnableRecording(true);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(false);
         mobitruRecordingListener.startRecordingBeforeScenario();
@@ -124,7 +126,8 @@ class MobitruRecordingListenerTests
     }
 
     @Test
-    void shouldNotStopRecordingIfDisabled() {
+    void shouldNotStopRecordingIfDisabled()
+    {
         mobitruRecordingListener.setEnableRecording(false);
         var event = mock(BeforeWebDriverQuitEvent.class);
         mobitruRecordingListener.onSessionStop(event);
@@ -151,7 +154,8 @@ class MobitruRecordingListenerTests
     }
 
     @Test
-    void shouldNotPublishRecordingIfDriverIsNotInitialized() {
+    void shouldNotPublishRecordingIfDriverIsNotInitialized()
+    {
         mobitruRecordingListener.setEnableRecording(true);
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(false);
         mobitruRecordingListener.publishRecordingAfterScenario();
