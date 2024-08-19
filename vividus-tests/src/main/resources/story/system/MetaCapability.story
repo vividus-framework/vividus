@@ -1,6 +1,7 @@
 Meta:
     @capability.browserName IE
     @capability.browserVersion 11.0
+    @capability.bstack:options.osVersion 10
 
 Scenario: Browser should correspond options set in meta
 Given I am on page with URL `https://www.whatismybrowser.com`
