@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
 
@@ -75,6 +76,15 @@ class MobitruRecordingListenerTests
     }
 
     @Test
+    void shouldNotStartRecordingIfDisabled() {
+        mobitruRecordingListener.setEnableRecording(false);
+        var event = mock(WebDriverCreateEvent.class);
+        mobitruRecordingListener.onSessionStart(event);
+        verifyNoInteractions(mobitruFacade);
+        verifyNoInteractions(testContext);
+    }
+
+    @Test
     void shouldStartRecordingBeforeScenario() throws MobitruOperationException
     {
         mobitruRecordingListener.setEnableRecording(true);
@@ -84,6 +94,15 @@ class MobitruRecordingListenerTests
         mobitruRecordingListener.startRecordingBeforeScenario();
         ordered.verify(testContext).get(KEY);
         ordered.verify(mobitruFacade).startDeviceScreenRecording(UDID);
+    }
+
+    @Test
+    void shouldNotStartRecordingIfDriverIsNotInitialized() {
+        mobitruRecordingListener.setEnableRecording(true);
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(false);
+        mobitruRecordingListener.startRecordingBeforeScenario();
+        verifyNoInteractions(mobitruFacade);
+        verifyNoInteractions(testContext);
     }
 
     @Test
@@ -105,6 +124,15 @@ class MobitruRecordingListenerTests
     }
 
     @Test
+    void shouldNotStopRecordingIfDisabled() {
+        mobitruRecordingListener.setEnableRecording(false);
+        var event = mock(BeforeWebDriverQuitEvent.class);
+        mobitruRecordingListener.onSessionStop(event);
+        verifyNoInteractions(mobitruFacade);
+        verifyNoInteractions(testContext);
+    }
+
+    @Test
     void shouldPublishRecordingAfterScenario() throws MobitruOperationException
     {
         mobitruRecordingListener.setEnableRecording(true);
@@ -120,6 +148,16 @@ class MobitruRecordingListenerTests
         ordered.verify(mobitruFacade).stopDeviceScreenRecording(UDID);
         ordered.verify(attachmentPublisher).publishAttachment(BINARY_RESPONSE,
                 RECORDING_REPORT_NAME);
+    }
+
+    @Test
+    void shouldNotPublishRecordingIfDriverIsNotInitialized() {
+        mobitruRecordingListener.setEnableRecording(true);
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(false);
+        mobitruRecordingListener.publishRecordingAfterScenario();
+        verifyNoInteractions(mobitruFacade);
+        verifyNoInteractions(testContext);
+        verifyNoInteractions(attachmentPublisher);
     }
 
     @Test
