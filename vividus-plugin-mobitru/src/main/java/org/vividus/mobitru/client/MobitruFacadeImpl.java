@@ -42,6 +42,7 @@ import org.vividus.mobitru.client.model.Application;
 import org.vividus.mobitru.client.model.Device;
 import org.vividus.mobitru.client.model.DeviceSearchParameters;
 import org.vividus.mobitru.client.model.ScreenRecording;
+import org.vividus.mobitru.client.model.ScreenRecordingMetadata;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.RetryTimesBasedWaiter;
 import org.vividus.util.wait.WaitMode;
@@ -119,24 +120,20 @@ public class MobitruFacadeImpl implements MobitruFacade
     }
 
     @Override
-    public String stopDeviceScreenRecording(String deviceId) throws MobitruOperationException
+    public ScreenRecording stopDeviceScreenRecording(String deviceId) throws MobitruOperationException
     {
         byte[] receivedRecordingInfo = mobitruClient.stopDeviceScreenRecording(deviceId);
-        ScreenRecording screenRecordingInfo = performMapperOperation(mapper ->
-                mapper.readValue(receivedRecordingInfo, ScreenRecording.class));
-        return screenRecordingInfo.getRecordingId();
-    }
-
-    @Override
-    public byte[] downloadDeviceScreenRecording(String recordingId) throws MobitruOperationException
-    {
+        ScreenRecordingMetadata screenRecordingMetadataInfo = performMapperOperation(mapper ->
+                mapper.readValue(receivedRecordingInfo, ScreenRecordingMetadata.class));
+        String recordingId = screenRecordingMetadataInfo.recordingId();
         Waiter waiter = new RetryTimesBasedWaiter(DOWNLOAD_RECORDING_POOLING_TIMEOUT,
                 DOWNLOAD_RECORDING_RETRY_COUNT);
         Optional<byte[]> receivedRecording = performWaiterOperation(waiter,
                 () -> mobitruClient.downloadDeviceScreenRecording(recordingId),
                 LOGGER.atDebug(), "download device screen recording");
-        return receivedRecording.orElseThrow(() -> new MobitruOperationException(
+        byte[] receivedRecordingContent = receivedRecording.orElseThrow(() -> new MobitruOperationException(
                 String.format("Unable to download recording with id %s", recordingId)));
+        return new ScreenRecording(recordingId, receivedRecordingContent);
     }
 
     private String takeDevice(Device device, Waiter deviceWaiter) throws MobitruOperationException

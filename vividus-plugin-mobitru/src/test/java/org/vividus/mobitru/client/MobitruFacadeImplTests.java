@@ -19,7 +19,6 @@ package org.vividus.mobitru.client;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -55,6 +54,7 @@ import org.vividus.mobitru.client.exception.MobitruDeviceTakeException;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
 import org.vividus.mobitru.client.model.Device;
 import org.vividus.mobitru.client.model.DeviceSearchParameters;
+import org.vividus.mobitru.client.model.ScreenRecording;
 
 @ExtendWith({ TestLoggerFactoryExtension.class, MockitoExtension.class })
 class MobitruFacadeImplTests
@@ -173,20 +173,15 @@ class MobitruFacadeImplTests
     }
 
     @Test
-    void shouldStopDeviceSessionRecording() throws MobitruOperationException
-    {
-        when(mobitruClient.stopDeviceScreenRecording(UDID)).
-                thenReturn(STOP_RECORDING_JSON.getBytes(StandardCharsets.UTF_8));
-        assertEquals(RECORDING_ID, mobitruFacadeImpl.stopDeviceScreenRecording(UDID));
-    }
-
-    @Test
     void shouldDownloadDeviceSessionRecording() throws MobitruOperationException
     {
         var noRecordingException = new MobitruDeviceTakeException(NO_RECORDING);
+        when(mobitruClient.stopDeviceScreenRecording(UDID)).
+                thenReturn(STOP_RECORDING_JSON.getBytes(StandardCharsets.UTF_8));
         when(mobitruClient.downloadDeviceScreenRecording(RECORDING_ID)).thenThrow(noRecordingException).
                 thenReturn(BINARY_RESPONSE);
-        assertSame(BINARY_RESPONSE, mobitruFacadeImpl.downloadDeviceScreenRecording(RECORDING_ID));
+        assertEquals(new ScreenRecording(RECORDING_ID, BINARY_RESPONSE),
+                mobitruFacadeImpl.stopDeviceScreenRecording(UDID));
         assertEquals(List.of(LoggingEvent.debug(noRecordingException, RETRY_LOG_MESSAGE,
                 DOWNLOAD_RECORDING_LOG_MESSAGE)), LOGGER.getLoggingEvents());
     }

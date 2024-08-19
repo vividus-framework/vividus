@@ -37,6 +37,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.mobitru.client.MobitruFacade;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
+import org.vividus.mobitru.client.model.ScreenRecording;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
 import org.vividus.selenium.event.WebDriverCreateEvent;
@@ -74,14 +75,15 @@ class MobitruRecordingListenerTests
     {
         mobitruRecordingListener.setEnableRecording(true);
         when(testContext.get(KEY)).thenReturn(UDID);
-        when(mobitruFacade.stopDeviceScreenRecording(UDID)).thenReturn(RECORDING_ID);
-        when(mobitruFacade.downloadDeviceScreenRecording(RECORDING_ID)).thenReturn(BINARY_RESPONSE);
+        ScreenRecording recording = mock(ScreenRecording.class);
+        when(recording.recordingId()).thenReturn(RECORDING_ID);
+        when(recording.content()).thenReturn(BINARY_RESPONSE);
+        when(mobitruFacade.stopDeviceScreenRecording(UDID)).thenReturn(recording);
         var ordered = Mockito.inOrder(testContext, mobitruFacade, attachmentPublisher);
         var event = mock(BeforeWebDriverQuitEvent.class);
         mobitruRecordingListener.onSessionStop(event);
         ordered.verify(testContext).get(KEY);
         ordered.verify(mobitruFacade).stopDeviceScreenRecording(UDID);
-        ordered.verify(mobitruFacade).downloadDeviceScreenRecording(RECORDING_ID);
         ordered.verify(attachmentPublisher).publishAttachment(BINARY_RESPONSE,
                 String.format("mobitru_session_recording_%s.mp4", RECORDING_ID));
     }

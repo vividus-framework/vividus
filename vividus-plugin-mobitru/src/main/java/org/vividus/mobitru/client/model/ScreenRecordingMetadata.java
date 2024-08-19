@@ -16,6 +16,6 @@
 
 package org.vividus.mobitru.client.model;
 
-public record ScreenRecording(String recordingId, byte[] content)
+public record ScreenRecordingMetadata(String recordingId)
 {
 }

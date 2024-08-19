@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.mobitru.client.MobitruFacade;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
+import org.vividus.mobitru.client.model.ScreenRecording;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
@@ -111,10 +112,9 @@ public class MobitruRecordingListener
             String deviceId = getDeviceId();
             try
             {
-                String recordingId = mobitruFacade.stopDeviceScreenRecording(deviceId);
-                byte[] recording = mobitruFacade.downloadDeviceScreenRecording(recordingId);
-                String attachmentName = String.format("mobitru_session_recording_%s.mp4", recordingId);
-                attachmentPublisher.publishAttachment(recording, attachmentName);
+                ScreenRecording recording = mobitruFacade.stopDeviceScreenRecording(deviceId);
+                String attachmentName = String.format("mobitru_session_recording_%s.mp4", recording.recordingId());
+                attachmentPublisher.publishAttachment(recording.content(), attachmentName);
             }
             catch (MobitruOperationException e)
             {
