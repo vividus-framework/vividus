@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-package org.vividus.mobitru.client.model;
+package org.vividus.mobitru.selenium;
 
-public record ScreenRecording(String recordingId, byte[] content)
+import java.util.Optional;
+
+public interface MobitruSessionInfoStorage
 {
+    Optional<String> getDeviceId();
+
+    void saveDeviceId(String deviceId);
 }

@@ -41,7 +41,6 @@ import org.vividus.mobitru.client.exception.MobitruOperationException;
 import org.vividus.mobitru.client.model.Application;
 import org.vividus.mobitru.client.model.Device;
 import org.vividus.mobitru.client.model.DeviceSearchParameters;
-import org.vividus.mobitru.client.model.ScreenRecording;
 import org.vividus.mobitru.client.model.ScreenRecordingMetadata;
 import org.vividus.util.wait.DurationBasedWaiter;
 import org.vividus.util.wait.RetryTimesBasedWaiter;

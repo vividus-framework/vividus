@@ -21,8 +21,10 @@
         <property name="bundleId" value="${mobile-application.bundle-id}" />
     </bean>
 
-    <bean id="mobitruRecordingManager" class="org.vividus.mobitru.recording.MobitruRecordingListener" >
-        <property name="enableRecording" value="${mobitru.enable-recording}" />
+    <bean id="mobitruSessionInfoLocalStorage" class="org.vividus.mobitru.selenium.MobitruSessionInfoLocalStorage" />
+
+    <bean id="mobitruRecordingManager" class="org.vividus.mobitru.selenium.MobitruRecordingListener">
+        <constructor-arg index="0" value="${mobitru.video-recording-enabled}" />
     </bean>
 
     <bean class="org.vividus.mobitru.client.MobitruFacadeImpl" >
@@ -50,5 +52,6 @@
     </bean>
     <util:list id="stepBeanNames-MobileApp-Hooks">
         <idref bean="mobitruRecordingManager" />
+        <idref bean="mobitruSessionInfoLocalStorage" />
     </util:list>
 </beans>

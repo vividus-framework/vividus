@@ -18,7 +18,6 @@ package org.vividus.mobitru.client;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
-import org.vividus.mobitru.client.model.ScreenRecording;
 
 public interface MobitruFacade
 {
@@ -44,7 +43,7 @@ public interface MobitruFacade
      * Stop the screen recording on the device with specified UDID.
      *
      * @param deviceId The UDID of the device
-     * @return The ID of the recording artifact.
+     * @return The ID of the recorded artifact.
      * @throws MobitruOperationException In case of any issues during start the recording.
      */
     ScreenRecording stopDeviceScreenRecording(String deviceId) throws MobitruOperationException;
@@ -67,4 +66,8 @@ public interface MobitruFacade
      * @throws MobitruOperationException In case of any issues during device returning.
      */
     void returnDevice(String deviceId) throws MobitruOperationException;
+
+    record ScreenRecording(String recordingId, byte[] content)
+    {
+    }
 }
