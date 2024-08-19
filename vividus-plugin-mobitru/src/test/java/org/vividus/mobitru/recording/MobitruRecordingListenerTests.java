@@ -39,6 +39,7 @@ import org.vividus.mobitru.client.MobitruFacade;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
 import org.vividus.mobitru.client.model.ScreenRecording;
 import org.vividus.reporter.event.IAttachmentPublisher;
+import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.event.BeforeWebDriverQuitEvent;
 import org.vividus.selenium.event.WebDriverCreateEvent;
 import org.vividus.testcontext.TestContext;
@@ -48,11 +49,14 @@ class MobitruRecordingListenerTests
 {
     private static final byte[] BINARY_RESPONSE = {1, 0, 1, 0};
     private static final String RECORDING_ID = "15a02180-16f6-4eb9-b5e8-9e945f5e85fe";
+    private static final String RECORDING_REPORT_NAME = String.format("mobitru_session_recording_%s.mp4",
+            RECORDING_ID);
     private static final String KEY = "mobitruDeviceId";
     private static final String UDID = "Z3CV103D2DO";
 
     private static final TestLogger LOGGER = TestLoggerFactory.getTestLogger(MobitruRecordingListener.class);
 
+    @Mock private IWebDriverProvider webDriverProvider;
     @Mock private MobitruFacade mobitruFacade;
     @Mock private IAttachmentPublisher attachmentPublisher;
     @Mock private TestContext testContext;
@@ -71,7 +75,19 @@ class MobitruRecordingListenerTests
     }
 
     @Test
-    void shouldStartRecordingAndDownload() throws MobitruOperationException
+    void shouldStartRecordingBeforeScenario() throws MobitruOperationException
+    {
+        mobitruRecordingListener.setEnableRecording(true);
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
+        when(testContext.get(KEY)).thenReturn(UDID);
+        var ordered = Mockito.inOrder(testContext, mobitruFacade);
+        mobitruRecordingListener.startRecordingBeforeScenario();
+        ordered.verify(testContext).get(KEY);
+        ordered.verify(mobitruFacade).startDeviceScreenRecording(UDID);
+    }
+
+    @Test
+    void shouldStopRecordingAndDownload() throws MobitruOperationException
     {
         mobitruRecordingListener.setEnableRecording(true);
         when(testContext.get(KEY)).thenReturn(UDID);
@@ -85,7 +101,25 @@ class MobitruRecordingListenerTests
         ordered.verify(testContext).get(KEY);
         ordered.verify(mobitruFacade).stopDeviceScreenRecording(UDID);
         ordered.verify(attachmentPublisher).publishAttachment(BINARY_RESPONSE,
-                String.format("mobitru_session_recording_%s.mp4", RECORDING_ID));
+                RECORDING_REPORT_NAME);
+    }
+
+    @Test
+    void shouldPublishRecordingAfterScenario() throws MobitruOperationException
+    {
+        mobitruRecordingListener.setEnableRecording(true);
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
+        when(testContext.get(KEY)).thenReturn(UDID);
+        ScreenRecording recording = mock(ScreenRecording.class);
+        when(recording.recordingId()).thenReturn(RECORDING_ID);
+        when(recording.content()).thenReturn(BINARY_RESPONSE);
+        when(mobitruFacade.stopDeviceScreenRecording(UDID)).thenReturn(recording);
+        var ordered = Mockito.inOrder(testContext, mobitruFacade, attachmentPublisher);
+        mobitruRecordingListener.publishRecordingAfterScenario();
+        ordered.verify(testContext).get(KEY);
+        ordered.verify(mobitruFacade).stopDeviceScreenRecording(UDID);
+        ordered.verify(attachmentPublisher).publishAttachment(BINARY_RESPONSE,
+                RECORDING_REPORT_NAME);
     }
 
     @Test
