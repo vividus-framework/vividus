@@ -186,6 +186,19 @@ class MobitruFacadeImplTests
                 DOWNLOAD_RECORDING_LOG_MESSAGE)), LOGGER.getLoggingEvents());
     }
 
+    @Test
+    void shouldThrowExceptionIfRecordingIsNotDownloaded() throws MobitruOperationException
+    {
+        var noRecordingException = new MobitruDeviceTakeException(NO_RECORDING);
+        when(mobitruClient.stopDeviceScreenRecording(UDID)).
+                thenReturn(STOP_RECORDING_JSON.getBytes(StandardCharsets.UTF_8));
+        when(mobitruClient.downloadDeviceScreenRecording(RECORDING_ID)).thenThrow(noRecordingException);
+        var exception = assertThrows(MobitruOperationException.class,
+                () -> mobitruFacadeImpl.stopDeviceScreenRecording(UDID));
+        assertEquals(String.format("Unable to download recording with id %s", RECORDING_ID),
+                exception.getMessage());
+    }
+
     @ParameterizedTest
     @ValueSource(strings = { "appium:udid", UDID_CAP, "deviceName", "appium:deviceName" })
     void shouldThrowExceptionIfConflictingCapabilities(String capabilityName)
