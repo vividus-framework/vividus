@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -34,7 +36,7 @@ import org.apache.commons.lang3.function.FailableSupplier;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.spi.LoggingEventBuilder;
+import org.slf4j.event.Level;
 import org.vividus.mobitru.client.exception.MobitruDeviceSearchException;
 import org.vividus.mobitru.client.exception.MobitruDeviceTakeException;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
@@ -55,7 +57,7 @@ public class MobitruFacadeImpl implements MobitruFacade
     private static final String APPIUM_UDID = "appium:udid";
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     private static final int RETRY_TIMES = 20;
     private static final Duration DOWNLOAD_RECORDING_POOLING_TIMEOUT = Duration.ofSeconds(5);
@@ -86,8 +88,9 @@ public class MobitruFacadeImpl implements MobitruFacade
             //use different API in case if udid is provided in capabilities
             //it's required in some cases like if the device is already taken
             LOGGER.info("Trying to take device with udid {}", deviceUdid);
-            return takeDevice(() -> mobitruClient.takeDeviceBySerial(String.valueOf(deviceUdid)),
-                    () -> "Unable to take device with udid " + deviceUdid, getDefaultDeviceWaiter());
+            return takeDevice(getDefaultDeviceWaiter(),
+                    () -> mobitruClient.takeDeviceBySerial(String.valueOf(deviceUdid)),
+                    () -> "Unable to take device with udid " + deviceUdid);
         }
         Device device = new Device();
         device.setDesiredCapabilities(desiredCapabilities.asMap());
@@ -127,32 +130,27 @@ public class MobitruFacadeImpl implements MobitruFacade
         String recordingId = screenRecordingMetadataInfo.recordingId();
         Waiter waiter = new RetryTimesBasedWaiter(DOWNLOAD_RECORDING_POOLING_TIMEOUT,
                 DOWNLOAD_RECORDING_RETRY_COUNT);
-        Optional<byte[]> receivedRecording = performWaiterOperation(waiter,
-                () -> mobitruClient.downloadDeviceScreenRecording(recordingId),
-                LOGGER.atDebug(), "download device screen recording");
-        byte[] receivedRecordingContent = receivedRecording.orElseThrow(() -> new MobitruOperationException(
-                String.format("Unable to download recording with id %s", recordingId)));
-        return new ScreenRecording(recordingId, receivedRecordingContent);
+        byte[] recordingContent = performWaiterOperation(waiter,
+                () -> mobitruClient.downloadDeviceScreenRecording(recordingId), Level.DEBUG,
+                "download device screen recording",
+                e -> new MobitruOperationException("Unable to download recording with id " + recordingId, e));
+        return new ScreenRecording(recordingId, recordingContent);
     }
 
     private String takeDevice(Device device, Waiter deviceWaiter) throws MobitruOperationException
     {
         LOGGER.info("Trying to take device with configuration {}", device);
         String capabilities = performMapperOperation(mapper -> mapper.writeValueAsString(device));
-        return takeDevice(() -> mobitruClient.takeDevice(capabilities),
-                () -> "Unable to take device with configuration " + capabilities, deviceWaiter);
+        return takeDevice(deviceWaiter, () -> mobitruClient.takeDevice(capabilities),
+                () -> "Unable to take device with configuration " + capabilities);
     }
 
-    private String takeDevice(FailableSupplier<byte[], MobitruOperationException> takeDeviceActions,
-            Supplier<String> unableToTakeDeviceErrorMessage, Waiter deviceWaiter) throws MobitruOperationException
+    private String takeDevice(Waiter waiter, FailableSupplier<byte[], MobitruOperationException> takeDeviceOperation,
+            Supplier<String> unableToTakeDeviceErrorMessage) throws MobitruOperationException
     {
-        Optional<byte[]> receivedDevice = performWaiterOperation(deviceWaiter, takeDeviceActions,
-                LOGGER.atWarn(), "take device");
-        if (receivedDevice.isEmpty())
-        {
-            throw new MobitruDeviceTakeException(unableToTakeDeviceErrorMessage.get());
-        }
-        Device takenDevice = performMapperOperation(mapper -> mapper.readValue(receivedDevice.get(), Device.class));
+        byte[] receivedDevice = performWaiterOperation(waiter, takeDeviceOperation, Level.WARN, "take device",
+                e -> new MobitruDeviceTakeException(unableToTakeDeviceErrorMessage.get(), e));
+        Device takenDevice = performMapperOperation(mapper -> mapper.readValue(receivedDevice, Device.class));
         LOGGER.info("Device with configuration {} is taken", takenDevice);
         return (String) takenDevice.getDesiredCapabilities().get(UDID);
     }
@@ -167,7 +165,7 @@ public class MobitruFacadeImpl implements MobitruFacade
             {
                 return takeDevice(devicesIterator.next(), waiter);
             }
-            catch (MobitruDeviceTakeException e)
+            catch (MobitruOperationException e)
             {
                 if (!devicesIterator.hasNext())
                 {
@@ -210,10 +208,10 @@ public class MobitruFacadeImpl implements MobitruFacade
     {
         byte[] appsResponse = mobitruClient.getArtifacts();
         List<Application> applications = performMapperOperation(mapper -> mapper.readerForListOf(Application.class)
-            .readValue(appsResponse));
+                .readValue(appsResponse));
         return applications.stream().filter(a -> appRealName.equals(a.getRealName())).findFirst().orElseThrow(
                 () -> new MobitruOperationException(String.format("Unable to find application with the name `%s`."
-                                + " The available applications are: %s",
+                                                                  + " The available applications are: %s",
                         appRealName, applications))).getId();
     }
 
@@ -230,23 +228,24 @@ public class MobitruFacadeImpl implements MobitruFacade
         }
     }
 
-    private Optional<byte[]> performWaiterOperation(Waiter waiter,
-                                                    FailableSupplier<byte[], MobitruOperationException> operation,
-                                                    LoggingEventBuilder operationLoggerBuilder, String operationTitle)
+    private byte[] performWaiterOperation(Waiter waiter, FailableSupplier<byte[], MobitruOperationException> operation,
+            Level logLevel, String operationTitle,
+            Function<MobitruOperationException, ? extends MobitruOperationException> exceptionOnMissingResult)
+            throws MobitruOperationException
     {
-        return waiter.wait(() -> {
+        AtomicReference<MobitruOperationException> lastException = new AtomicReference<>(null);
+        return waiter.<Optional<byte[]>, RuntimeException>wait(() -> {
             try
             {
                 return Optional.of(operation.get());
             }
             catch (MobitruOperationException e)
             {
-                operationLoggerBuilder
-                        .setCause(e)
-                        .log("Unable to {}, retrying attempt", operationTitle);
+                LOGGER.atLevel(logLevel).setCause(e).log("Unable to {}, retrying attempt", operationTitle);
+                lastException.set(e);
                 return Optional.empty();
             }
-        }, Optional::isPresent);
+        }, Optional::isPresent).orElseThrow(() -> exceptionOnMissingResult.apply(lastException.get()));
     }
 
     private boolean isSearchForDevice(DesiredCapabilities desiredCapabilities)
@@ -260,7 +259,7 @@ public class MobitruFacadeImpl implements MobitruFacade
                     .filter(capabilities::containsKey).findFirst();
             Validate.isTrue(conflictingCapability.isEmpty(),
                     "Conflicting capabilities are found. `%s` capability can not be specified along with "
-                            + "`mobitru-device-search:` capabilities",
+                    + "`mobitru-device-search:` capabilities",
                     conflictingCapability.orElse(null));
         }
         return containsSearchCapabilities;
