@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package org.vividus.spring;
+package org.vividus.eventbus;
 
-import java.util.stream.Stream;
+import com.google.common.eventbus.EventBus;
 
-import com.google.common.eventbus.Subscribe;
-
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.vividus.eventbus.GlobalEventBus;
-
-public class SubscriberRegisteringBeanPostProcessor implements BeanPostProcessor
+public final class GlobalEventBus
 {
-    @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName)
+    private static final EventBus EVENT_BUS = new EventBus();
+
+    private GlobalEventBus()
     {
-        if (Stream.of(bean.getClass().getMethods()).anyMatch(m -> m.isAnnotationPresent(Subscribe.class)))
-        {
-            GlobalEventBus.getEventBus().register(bean);
-        }
-        return bean;
+    }
+
+    @SuppressWarnings("SimpleAccessorNameNotation")
+    public static EventBus getEventBus()
+    {
+        return EVENT_BUS;
     }
 }
