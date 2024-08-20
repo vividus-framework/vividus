@@ -89,7 +89,6 @@ jobs:
             ./gradlew build sonarqube -Dsonar.host.url=https://sonarcloud.io \
                                       -Dsonar.organization=vividus \
                                       -Dsonar.projectKey=vividus-framework_vividus \
-                                      -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=768m" \
                                       -Ptest.testLogging.exceptionFormat=full
           else
             echo No SONAR_TOKEN, SonarQube analysis will be skipped
