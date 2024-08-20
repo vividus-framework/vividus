@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package org.vividus.mobitru.client.exception;
+package org.vividus.mobitru.selenium;
 
-public class MobitruOperationException extends Exception
+import java.util.Optional;
+
+public interface MobitruSessionInfoStorage
 {
-    private static final long serialVersionUID = 2937564722344733292L;
+    Optional<String> getDeviceId();
 
-    public MobitruOperationException(String message)
-    {
-        super(message);
-    }
-
-    public MobitruOperationException(Throwable cause)
-    {
-        super(cause);
-    }
-
-    public MobitruOperationException(String message, Throwable cause)
-    {
-        super(message, cause);
-    }
+    void saveDeviceId(String deviceId);
 }

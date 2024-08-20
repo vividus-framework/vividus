@@ -23,6 +23,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -49,6 +50,7 @@ class MobitruCapabilitiesAdjusterTests
 
     @Mock private MobitruFacade mobitruFacade;
     @Mock private InstallApplicationOptions installApplicationOptions;
+    @Mock private MobitruSessionInfoStorage mobitruSessionInfoStorage;
     @InjectMocks private MobitruCapabilitiesAdjuster mobitruCapabilitiesConfigurer;
 
     @Test
@@ -59,6 +61,7 @@ class MobitruCapabilitiesAdjusterTests
         when(mobitruFacade.takeDevice(capabilities)).thenReturn(UDID);
         var ordered = Mockito.inOrder(mobitruFacade);
         assertEquals(Map.of(APPIUM_UDID, UDID), mobitruCapabilitiesConfigurer.getExtraCapabilities(capabilities));
+        verify(mobitruSessionInfoStorage).saveDeviceId(UDID);
         ordered.verify(mobitruFacade).takeDevice(capabilities);
         ordered.verify(mobitruFacade).installApp(UDID, STEAM_APK, installApplicationOptions);
         verify(mobitruFacade, never()).returnDevice(UDID);
@@ -74,6 +77,7 @@ class MobitruCapabilitiesAdjusterTests
         when(mobitruFacade.takeDevice(capabilities)).thenReturn(UDID);
         var ordered = Mockito.inOrder(mobitruFacade);
         assertEquals(Map.of(), mobitruCapabilitiesConfigurer.getExtraCapabilities(capabilities));
+        verify(mobitruSessionInfoStorage).saveDeviceId(UDID);
         ordered.verify(mobitruFacade).takeDevice(capabilities);
         ordered.verify(mobitruFacade).installApp(UDID, STEAM_APK, installApplicationOptions);
         verify(mobitruFacade, never()).returnDevice(UDID);
@@ -88,6 +92,7 @@ class MobitruCapabilitiesAdjusterTests
         when(mobitruFacade.takeDevice(capabilities)).thenReturn(UDID);
         doThrow(exception).when(mobitruFacade).installApp(UDID, STEAM_APK, installApplicationOptions);
         var iae = assertThrows(IllegalStateException.class, () -> mobitruCapabilitiesConfigurer.adjust(capabilities));
+        verifyNoInteractions(mobitruSessionInfoStorage);
         verify(mobitruFacade).returnDevice(UDID);
         assertEquals(exception, iae.getCause());
     }

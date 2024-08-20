@@ -21,6 +21,12 @@
         <property name="bundleId" value="${mobile-application.bundle-id}" />
     </bean>
 
+    <bean id="mobitruSessionInfoLocalStorage" class="org.vividus.mobitru.selenium.MobitruSessionInfoLocalStorage" />
+
+    <bean id="mobitruRecordingManager" class="org.vividus.mobitru.selenium.MobitruRecordingListener">
+        <constructor-arg index="0" value="${mobitru.video-recording-enabled}" />
+    </bean>
+
     <bean class="org.vividus.mobitru.client.MobitruFacadeImpl" >
         <property name="waitForDeviceTimeout" value="${mobitru.device-wait-timeout}" />
     </bean>
@@ -44,4 +50,8 @@
         <constructor-arg name="billingUnit" value="${selenium.grid.username}" />
         <property name="apiUrl" value="https://${selenium.grid.host}" />
     </bean>
+    <util:list id="stepBeanNames-MobileApp-Hooks">
+        <idref bean="mobitruRecordingManager" />
+        <idref bean="mobitruSessionInfoLocalStorage" />
+    </util:list>
 </beans>

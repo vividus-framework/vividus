@@ -79,6 +79,29 @@ public class MobitruClient
         executeRequest(DEVICE_PATH + "/" + deviceId, HttpMethod.DELETE, UnaryOperator.identity(), HttpStatus.SC_OK);
     }
 
+    public void startDeviceScreenRecording(String deviceId) throws MobitruOperationException
+    {
+        performDeviceRecordingRequest(deviceId, HttpMethod.POST, HttpStatus.SC_CREATED);
+    }
+
+    public byte[] stopDeviceScreenRecording(String deviceId) throws MobitruOperationException
+    {
+        return performDeviceRecordingRequest(deviceId, HttpMethod.DELETE, HttpStatus.SC_OK);
+    }
+
+    private byte[] performDeviceRecordingRequest(String deviceId, HttpMethod httpMethod, int status)
+            throws MobitruOperationException
+    {
+        String url = String.format("%s/%s/recording", DEVICE_PATH, deviceId);
+        return executeRequest(url, httpMethod, UnaryOperator.identity(), status);
+    }
+
+    public byte[] downloadDeviceScreenRecording(String recordingId) throws MobitruOperationException
+    {
+        return executeRequest("/recording/" + recordingId, HttpMethod.GET,
+                UnaryOperator.identity(), HttpStatus.SC_OK);
+    }
+
     public void installApp(String deviceId, String appId, InstallApplicationOptions options)
             throws MobitruOperationException
     {

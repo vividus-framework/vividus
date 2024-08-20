@@ -14,24 +14,8 @@
  * limitations under the License.
  */
 
-package org.vividus.mobitru.client.exception;
+package org.vividus.mobitru.client.model;
 
-public class MobitruOperationException extends Exception
+public record ScreenRecordingMetadata(String recordingId)
 {
-    private static final long serialVersionUID = 2937564722344733292L;
-
-    public MobitruOperationException(String message)
-    {
-        super(message);
-    }
-
-    public MobitruOperationException(Throwable cause)
-    {
-        super(cause);
-    }
-
-    public MobitruOperationException(String message, Throwable cause)
-    {
-        super(message, cause);
-    }
 }
