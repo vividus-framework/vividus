@@ -9,7 +9,7 @@
 
     <bean id="contextStartedEventListener" class="org.vividus.ContextStartedEventListener" />
 
-    <bean id="eventBus" class="com.google.common.eventbus.EventBus" />
+    <bean id="eventBus" class="org.vividus.eventbus.GlobalEventBus" factory-method="getEventBus" />
 
     <bean id="issueStateProvider" class="org.vividus.issue.IssueStateProvider" />
 
