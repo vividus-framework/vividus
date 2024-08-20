@@ -25,7 +25,7 @@ import org.jbehave.core.annotations.ScenarioType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.mobitru.client.MobitruFacade;
-import org.vividus.mobitru.client.MobitruFacade.ScreenRecording;
+import org.vividus.mobitru.client.ScreenRecording;
 import org.vividus.mobitru.client.exception.MobitruOperationException;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.event.BeforeWebDriverQuitEvent;

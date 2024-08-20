@@ -49,7 +49,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.vividus.mobitru.client.MobitruFacade.ScreenRecording;
 import org.vividus.mobitru.client.exception.MobitruDeviceSearchException;
 import org.vividus.mobitru.client.exception.MobitruDeviceTakeException;
 import org.vividus.mobitru.client.exception.MobitruOperationException;

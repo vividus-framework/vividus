@@ -66,8 +66,4 @@ public interface MobitruFacade
      * @throws MobitruOperationException In case of any issues during device returning.
      */
     void returnDevice(String deviceId) throws MobitruOperationException;
-
-    record ScreenRecording(String recordingId, byte[] content)
-    {
-    }
 }
