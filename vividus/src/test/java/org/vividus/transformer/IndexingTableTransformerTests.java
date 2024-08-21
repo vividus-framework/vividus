@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,10 @@ class IndexingTableTransformerTests
 {
     @ParameterizedTest
     @CsvSource({
-        "order=ASCENDING,  '|k|index|\n|value|0|\n|value2|1|'",
-        "order=DESCENDING, '|k|index|\n|value|1|\n|value2|0|'"
+        "order=ASCENDING,                   '|k|index|\n|value|0|\n|value2|1|'",
+        "order=DESCENDING,                  '|k|index|\n|value|1|\n|value2|0|'",
+        "'order=ASCENDING, startIndex=1',   '|k|index|\n|value|1|\n|value2|2|'",
+        "'order=DESCENDING, startIndex=-1', '|k|index|\n|value|0|\n|value2|-1|'"
     })
     void shouldAddIndexColumnAccordingWithOrder(String properties, String expectedTable)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.vividus.transformer;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.IntUnaryOperator;
 
 import org.apache.commons.lang3.Validate;
@@ -38,11 +39,14 @@ public class IndexingTableTransformer implements TableTransformer
         Validate.isTrue(!headers.contains(INDEX),
             "Unable to add column with row indices to the table, because it has `index` column.");
         Order order = properties.getMandatoryNonBlankProperty("order", Order.class);
+        int startIndex = Optional.ofNullable(properties.getProperties().getProperty("startIndex"))
+                .map(Integer::valueOf)
+                .orElse(0);
         List<List<String>> rows = tableRows.getRows();
         IntUnaryOperator indexer = order.getIndexer(rows);
         for (int i = 0; i < rows.size(); i++)
         {
-            rows.get(i).add(Integer.toString(indexer.applyAsInt(i)));
+            rows.get(i).add(Integer.toString(indexer.applyAsInt(i) + startIndex));
         }
         headers.add(INDEX);
         return ExamplesTableProcessor.buildExamplesTable(headers, rows, properties);

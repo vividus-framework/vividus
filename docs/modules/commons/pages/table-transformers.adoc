@@ -632,47 +632,76 @@ Examples:
 
 == INDEXING
 
-`INDEXING` transformer adds a column with the rows indices in the specified order. Indices are zero-based
+`INDEXING` transformer adds a column with the rows indices in the specified order.
 
-[cols="1,3", options="header"]
+[cols="1,1,3", options="header"]
 |===
-|Parameter|Description
+|Parameter
+|Default value
+|Description
 
-|`order`|The mandatory indexing order: `ASCENDING` or `DESCENDING`.
+|[subs=+quotes]`*order*`
+|
+|The indexing order: `ASCENDING` or `DESCENDING`.
+
+|`startIndex`
+|`0`
+|The start index. Negative integer numbers are allowed.
 |===
 
-.ASCENDING order example
+
+.Usage of `INDEXING` transformer with `ASCENDING` order. The following transformer:
 [source,gherkin]
 ----
 {transformer=INDEXING, order=ASCENDING}
 |key   |
-|value |
+|value1|
 |value2|
 ----
 
-.ASCENDING order resulting table
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
+
 [source,gherkin]
 ----
 |key   |index|
-|value |0    |
+|value1|0    |
 |value2|1    |
 ----
 
-.DESCENDING order example
+.Usage of `INDEXING` transformer with `DESCENDING` order. The following transformer:
 [source,gherkin]
 ----
 {transformer=INDEXING, order=DESCENDING}
 |key   |
-|value |
+|value1|
 |value2|
 ----
 
-.DESCENDING order resulting table
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
+
 [source,gherkin]
 ----
 |key   |index|
-|value |1    |
+|value1|1    |
 |value2|0    |
+----
+
+.Usage of `INDEXING` transformer starting from `1` with `ASCENDING` order. The following transformer:
+[source,gherkin]
+----
+{transformer=INDEXING, order=ASCENDING, startIndex=1}
+|key   |
+|value1|
+|value2|
+----
+
+will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]:
+
+[source,gherkin]
+----
+|key   |index|
+|value1|1    |
+|value2|2    |
 ----
 
 == LEFT_JOIN

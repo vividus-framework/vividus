@@ -300,7 +300,7 @@ When I initialize scenario variable `sitemapTransformerTable` with values:
 Then `${sitemapTransformerTable}` is equal to table:
 |sitemapUrl |
 
-Scenario: Verify INDEXING transformer ASCENDING order
+Scenario: Verify INDEXING transformer with ASCENDING order
 Then `<index>` is = `<expected>`
 Examples:
 {transformer=INDEXING, order=ASCENDING}
@@ -309,7 +309,16 @@ Examples:
 |1       |
 |2       |
 
-Scenario: Verify INDEXING transformer DESCENDING order
+Scenario: Verify INDEXING transformer starting from 1 with ASCENDING order
+Then `<index>` is = `<expected>`
+Examples:
+{transformer=INDEXING, order=ASCENDING, startIndex=1}
+|expected|
+|1       |
+|2       |
+|3       |
+
+Scenario: Verify INDEXING transformer with DESCENDING order
 Then `<index>` is = `<expected>`
 Examples:
 {transformer=INDEXING, order=DESCENDING}
@@ -317,6 +326,15 @@ Examples:
 |2       |
 |1       |
 |0       |
+
+Scenario: Verify INDEXING transformer staring from -5 with DESCENDING order
+Then `<index>` is = `<expected>`
+Examples:
+{transformer=INDEXING, order=DESCENDING, startIndex=-5}
+|expected|
+|-3      |
+|-4      |
+|-5      |
 
 Scenario: Verify INNER_JOIN transformer with empty table (should not be executed)
 Meta:
