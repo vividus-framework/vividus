@@ -27,7 +27,7 @@ Show HTTP response
 <script type="text/javascript">
     (function() {
             let code = document.querySelector('#pretty-code');
-            <#include "templates/html-formatter-fragment.ftl">
+            <#include "/templates/html-formatter-fragment.ftl">
         hljs.highlightElement(code);
     })();
 </script>
