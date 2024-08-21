@@ -77,15 +77,15 @@ Composite: Then an element by the cssSelector '$cssSelector' exists
 Then number of elements found by `cssSelector(<cssSelector>)` is equal to `1`
 
 Composite: When I hover a mouse over a button with the name '$buttonName'
-!-- DEPRECATED: 0.8.0, When I hover mouse over element located by `buttonName(%1$s)`
+!-- DEPRECATED: 0.7.0, When I hover mouse over element located by `buttonName(%1$s)`
 When I hover mouse over element located `By.buttonName(<buttonName>)`
 
 Composite: When I click on a button with the name '$buttonName'
-!-- DEPRECATED: 0.8.0, When I click on element located by `buttonName(%1$s)`
+!-- DEPRECATED: 0.7.0, When I click on element located by `buttonName(%1$s)`
 When I click on element located by `buttonName(<buttonName>)`
 
 Composite: When I click on a button with the image src '$imageSrc'
-!-- DEPRECATED: 0.8.0, When I click on element located by `xpath(.//button[./img[@src='%1$s']])`
+!-- DEPRECATED: 0.7.0, When I click on element located by `xpath(.//button[./img[@src='%1$s']])`
 When I click on element located by `xpath(.//button[./img[@src='<imageSrc>']])`
 
 Composite: Then a [$state] button with the name '$buttonName' exists
@@ -93,19 +93,19 @@ Composite: Then a [$state] button with the name '$buttonName' exists
 Then number of elements found by `buttonName(<buttonName>)->filter.state(<state>)` is equal to `1`
 
 Composite: Then a button with the name '$buttonName' exists
-!-- DEPRECATED: 0.8.0, Then number of elements found by `buttonName(%1$s)` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `buttonName(%1$s)` is equal to `1`
 Then number of elements found by `buttonName(<buttonName>)` is equal to `1`
 
 Composite: Then a button with the name '$buttonName' does not exist
-!-- DEPRECATED: 0.8.0, Then number of elements found by `buttonName(%1$s)` is equal to `0`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `buttonName(%1$s)` is equal to `0`
 Then number of elements found by `buttonName(<buttonName>)` is equal to `0`
 
 Composite: Then a button with image with the src '$imageSrc' exists
-!-- DEPRECATED: 0.8.0, Then number of elements found by `xpath(.//button[./img[@src='%1$s']])` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `xpath(.//button[./img[@src='%1$s']])` is equal to `1`
 Then number of elements found by `xpath(.//button[./img[@src='<imageSrc>']])` is equal to `1`
 
 Composite: Then a button with the tooltip '$tooltip' and image with the src '$imageSrc' exists
-!-- DEPRECATED: 0.8.0, Then number of elements found by `xpath(.//button[./img[@src='%2$s'] and @title='%1$s'])` is equal to `1`
+!-- DEPRECATED: 0.7.0, Then number of elements found by `xpath(.//button[./img[@src='%2$s'] and @title='%1$s'])` is equal to `1`
 Then number of elements found by `xpath(.//button[./img[@src='<imageSrc>'] and @title='<tooltip>'])` is equal to `1`
 
 Composite: Given I am on the main application page
