@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ public class StatusCodeValidatingHandler implements HttpResponseHandler
     @SuppressWarnings("MagicNumber")
     public StatusCodeValidatingHandler(int minInclusiveStatusCode, int maxInclusiveStatusCode, String serviceName)
     {
-        isTrue(minInclusiveStatusCode < maxInclusiveStatusCode,
-                "Min allowed status code must be less than max status code");
+        isTrue(minInclusiveStatusCode <= maxInclusiveStatusCode,
+                "Min allowed status code must be less than or equal to max status code");
         isTrue(minInclusiveStatusCode >= HttpStatus.SC_CONTINUE,
                 "Min status code must be greater than or equal to %d, but got %d", HttpStatus.SC_CONTINUE,
                 minInclusiveStatusCode);
@@ -54,13 +54,23 @@ public class StatusCodeValidatingHandler implements HttpResponseHandler
     public void handle(HttpResponse httpResponse) throws IOException
     {
         int status = httpResponse.getStatusCode();
-        if (status >= minInclusiveStatusCode && status < maxInclusiveStatusCode)
+        if (status >= minInclusiveStatusCode && status <= maxInclusiveStatusCode)
         {
             return;
         }
         LOGGER.atError().addArgument(serviceName).addArgument(httpResponse).log("{} response: {}");
-        throw new IOException(
-                String.format("The status code is expected to be between %d and %d inclusively, but got: %d",
-                        minInclusiveStatusCode, maxInclusiveStatusCode, status));
+        String exceptionMessage;
+        if (minInclusiveStatusCode == maxInclusiveStatusCode)
+        {
+            exceptionMessage = String.format("The status code is expected to be %d, but got: %d",
+                    minInclusiveStatusCode, status);
+        }
+        else
+        {
+            exceptionMessage = String.format(
+                    "The status code is expected to be between %d and %d inclusively, but got: %d",
+                    minInclusiveStatusCode, maxInclusiveStatusCode, status);
+        }
+        throw new IOException(exceptionMessage);
     }
 }

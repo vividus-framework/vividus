@@ -47,6 +47,15 @@
                                         <constructor-arg value="sitemap.parser.http.header." />
                                     </bean>
                                 </property>
+                                <property name="httpResponseHandlers">
+                                    <list>
+                                        <bean class="org.vividus.http.handler.StatusCodeValidatingHandler" >
+                                            <constructor-arg index="0" value="200" />
+                                            <constructor-arg index="1" value="200" />
+                                            <constructor-arg index="2" value="Sitemap download" />
+                                        </bean>
+                                    </list>
+                                </property>
                             </bean>
                         </constructor-arg>
                     </bean>
