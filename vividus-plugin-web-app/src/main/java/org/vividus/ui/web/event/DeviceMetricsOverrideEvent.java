@@ -16,7 +16,7 @@
 
 package org.vividus.ui.web.event;
 
-public class PageResizeEvent
+public class DeviceMetricsOverrideEvent
 {
     // Empty event class
 }

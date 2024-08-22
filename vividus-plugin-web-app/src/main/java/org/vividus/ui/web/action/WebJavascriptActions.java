@@ -28,7 +28,7 @@ import org.vividus.selenium.TextUtils;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.ViewportSizeProvider;
 import org.vividus.ui.action.JavascriptActions;
-import org.vividus.ui.web.event.PageResizeEvent;
+import org.vividus.ui.web.event.DeviceMetricsOverrideEvent;
 import org.vividus.util.ResourceUtils;
 
 public class WebJavascriptActions extends JavascriptActions
@@ -237,7 +237,7 @@ public class WebJavascriptActions extends JavascriptActions
 
     @SuppressWarnings("unused")
     @Subscribe
-    public void onPageResize(PageResizeEvent event)
+    public void onDeviceMetricsOverride(DeviceMetricsOverrideEvent event)
     {
         devicePixelRatio.remove();
     }

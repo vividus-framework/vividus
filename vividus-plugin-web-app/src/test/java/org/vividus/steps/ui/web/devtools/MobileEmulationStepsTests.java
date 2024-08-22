@@ -18,6 +18,7 @@ package org.vividus.steps.ui.web.devtools;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +35,7 @@ import org.openqa.selenium.chromium.HasCdp;
 import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
+import org.vividus.ui.web.event.DeviceMetricsOverrideEvent;
 import org.vividus.util.json.JsonUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,6 +76,7 @@ class MobileEmulationStepsTests
             "deviceScaleFactor", 3,
             "mobile", true
         ));
+        verify(eventBus).post(any(DeviceMetricsOverrideEvent.class));
     }
 
     @Test
@@ -85,6 +88,7 @@ class MobileEmulationStepsTests
         steps.clearDeviceMetrics();
 
         verify(havingCdpDriver).executeCdpCommand("Emulation.clearDeviceMetricsOverride", Map.of());
+        verify(eventBus).post(any(DeviceMetricsOverrideEvent.class));
     }
 
     @Test

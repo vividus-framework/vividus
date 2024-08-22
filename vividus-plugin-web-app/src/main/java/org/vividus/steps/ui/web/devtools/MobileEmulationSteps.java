@@ -27,7 +27,7 @@ import org.openqa.selenium.chromium.HasCdp;
 import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.manager.IWebDriverManager;
-import org.vividus.ui.web.event.PageResizeEvent;
+import org.vividus.ui.web.event.DeviceMetricsOverrideEvent;
 import org.vividus.util.json.JsonUtils;
 
 public class MobileEmulationSteps
@@ -60,7 +60,7 @@ public class MobileEmulationSteps
     public void overrideDeviceMetrics(String jsonConfiguration)
     {
         executeCdpCommand("Emulation.setDeviceMetricsOverride", jsonUtils.toObject(jsonConfiguration, Map.class));
-        eventBus.post(new PageResizeEvent());
+        eventBus.post(new DeviceMetricsOverrideEvent());
     }
 
     /**
@@ -74,7 +74,7 @@ public class MobileEmulationSteps
     public void clearDeviceMetrics()
     {
         executeCdpCommand("Emulation.clearDeviceMetricsOverride", Map.of());
-        eventBus.post(new PageResizeEvent());
+        eventBus.post(new DeviceMetricsOverrideEvent());
     }
 
     private void executeCdpCommand(String command, Map<String, Object> metrics)
