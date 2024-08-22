@@ -18,6 +18,8 @@ package org.vividus.ui.web.action;
 
 import java.util.Map;
 
+import com.google.common.eventbus.Subscribe;
+
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.Browser;
@@ -26,6 +28,7 @@ import org.vividus.selenium.TextUtils;
 import org.vividus.selenium.manager.IWebDriverManager;
 import org.vividus.ui.ViewportSizeProvider;
 import org.vividus.ui.action.JavascriptActions;
+import org.vividus.ui.web.event.PageResizeEvent;
 import org.vividus.util.ResourceUtils;
 
 public class WebJavascriptActions extends JavascriptActions
@@ -230,6 +233,13 @@ public class WebJavascriptActions extends JavascriptActions
     public void waitUntilScrollFinished()
     {
         executeAsyncScript(WAIT_FOR_SCROLL);
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe
+    public void onPageResize(PageResizeEvent event)
+    {
+        devicePixelRatio.remove();
     }
 
     public void setStickyHeaderSizePercentage(int stickyHeaderSizePercentage)

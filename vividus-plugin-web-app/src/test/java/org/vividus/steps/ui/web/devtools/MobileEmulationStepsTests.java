@@ -23,6 +23,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import com.google.common.eventbus.EventBus;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,12 +42,13 @@ class MobileEmulationStepsTests
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private IWebDriverManager webDriverManager;
     @Mock private HasCdp havingCdpDriver;
+    @Mock private EventBus eventBus;
     private MobileEmulationSteps steps;
 
     @BeforeEach
     void init()
     {
-        this.steps = new MobileEmulationSteps(webDriverProvider, webDriverManager, new JsonUtils());
+        this.steps = new MobileEmulationSteps(webDriverProvider, webDriverManager, new JsonUtils(), eventBus);
     }
 
     @Test
