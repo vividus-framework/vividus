@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,24 +25,25 @@ import org.jbehave.core.expressions.DelegatingExpressionProcessor;
 import org.jbehave.core.expressions.SingleArgExpressionProcessor;
 import org.springframework.web.util.UriUtils;
 
-public class UriEncodingExpressionProcessors extends DelegatingExpressionProcessor
+public class UriExpressionProcessors extends DelegatingExpressionProcessor
 {
     @SuppressWarnings("checkstyle:SingleSpaceSeparator")
-    public UriEncodingExpressionProcessors()
+    public UriExpressionProcessors()
     {
         super(List.of(
-            createEncodingExpression("encodeUri",               UriUtils::encode),
-            createEncodingExpression("encodeUriUserInfo",       UriUtils::encodeUserInfo),
-            createEncodingExpression("encodeUriHost",           UriUtils::encodeHost),
-            createEncodingExpression("encodeUriPath",           UriUtils::encodePath),
-            createEncodingExpression("encodeUriPathSegment",    UriUtils::encodePathSegment),
-            createEncodingExpression("encodeUriQuery",          UriUtils::encodeQuery),
-            createEncodingExpression("encodeUriQueryParameter", UriUtils::encodeQueryParam),
-            createEncodingExpression("encodeUriFragment",       UriUtils::encodeFragment)
+            createUriExpression("encodeUri",               UriUtils::encode),
+            createUriExpression("encodeUriUserInfo",       UriUtils::encodeUserInfo),
+            createUriExpression("encodeUriHost",           UriUtils::encodeHost),
+            createUriExpression("encodeUriPath",           UriUtils::encodePath),
+            createUriExpression("encodeUriPathSegment",    UriUtils::encodePathSegment),
+            createUriExpression("encodeUriQuery",          UriUtils::encodeQuery),
+            createUriExpression("encodeUriQueryParameter", UriUtils::encodeQueryParam),
+            createUriExpression("encodeUriFragment",       UriUtils::encodeFragment),
+            createUriExpression("decodeUri",               UriUtils::decode)
         ));
     }
 
-    private static SingleArgExpressionProcessor<String> createEncodingExpression(String expressionName,
+    private static SingleArgExpressionProcessor<String> createUriExpression(String expressionName,
             BiFunction<String, Charset, String> transformer)
     {
         return new SingleArgExpressionProcessor<>(expressionName,
