@@ -154,6 +154,26 @@ https://user@vividus.dev:vividus.dev/path/segment?a&b=c#fragment)}`
 
 |===
 
+=== `decodeUri`
+
+Decodes percent-encoded URI into human-readable format.
+
+[source, subs="+quotes"]
+----
+#{decodeUri(*$uri*)}
+----
+
+* *`$uri`* - The URI to decode.
+
+.Decode URI from context link into human-readable format
+[source,gherkin]
+----
+When I save `href` attribute value of context element to scenario variable `href`
+Then `${href}` is equal to `https://example.com/path%20with%20spaces`
+Given I initialize scenario variable `decodedHref` with value `#{decodeUri(${href})}`
+Then `${decodedHref}` is equal to `https://example.com/path with spaces`
+----
+
 === `generateCodeChallenge`
 
 https://oauth.net/2/pkce/[Proof Key for Code Exchange (PKCE)] - an extension of the OAuth 2.0 protocol that helps

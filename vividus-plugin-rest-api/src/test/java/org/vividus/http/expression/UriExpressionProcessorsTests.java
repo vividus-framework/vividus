@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-class UriEncodingExpressionProcessorsTests
+class UriExpressionProcessorsTests
 {
-    private final ExpressionProcessor<?> processor = new UriEncodingExpressionProcessors();
+    private final ExpressionProcessor<?> processor = new UriExpressionProcessors();
 
     @Test
     void testExecuteWithUnsupportedException()
@@ -40,6 +40,7 @@ class UriEncodingExpressionProcessorsTests
         // CHECKSTYLE:OFF
         // @formatter:off
         "encodeUri(https://user@vividus.dev:vividus.бел/path/segment?a&b=c#fragment), https%3A%2F%2Fuser%40vividus.dev%3Avividus.%D0%B1%D0%B5%D0%BB%2Fpath%2Fsegment%3Fa%26b%3Dc%23fragment",
+        "decodeUri(https%3A%2F%2Fuser%40vividus.dev%3Avividus.%D0%B1%D0%B5%D0%BB%2Fpath%2Fsegment%3Fa%26b%3Dc%23fragment), https://user@vividus.dev:vividus.бел/path/segment?a&b=c#fragment",
         // @formatter:on
         // CHECKSTYLE:ON
         "encodeUriUserInfo(user@vividus.dev:pass), user%40vividus.dev:pass",
