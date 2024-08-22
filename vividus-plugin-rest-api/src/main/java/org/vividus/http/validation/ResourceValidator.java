@@ -34,15 +34,20 @@ import org.vividus.softassert.ISoftAssert;
 
 public class ResourceValidator<T extends AbstractResourceValidation<T>>
 {
+    private static final Set<Integer> NOT_ALLOWED_HEAD_STATUS_CODES = Set.of(
+            // twitter.com for HEAD requests returns response with 403 status code
+            HttpStatus.SC_FORBIDDEN,
+            HttpStatus.SC_NOT_FOUND,
+            HttpStatus.SC_METHOD_NOT_ALLOWED,
+            HttpStatus.SC_NOT_IMPLEMENTED,
+            HttpStatus.SC_SERVICE_UNAVAILABLE
+    );
+
     private final IHttpClient httpClient;
 
     private final ISoftAssert softAssert;
 
     private final Set<Integer> allowedStatusCodes = Set.of(HttpStatus.SC_OK);
-    private final Set<Integer> notAllowedHeadStatusCodes = Set.of(HttpStatus.SC_METHOD_NOT_ALLOWED,
-                                                                  HttpStatus.SC_SERVICE_UNAVAILABLE,
-                                                                  HttpStatus.SC_NOT_FOUND,
-                                                                  HttpStatus.SC_NOT_IMPLEMENTED);
 
     private final Map<URI, T> cache = new ConcurrentHashMap<>();
     private boolean publishResponseBody;
@@ -73,7 +78,7 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
         {
             int statusCode = httpClient.doHttpHead(uri).getStatusCode();
             HttpResponse response = null;
-            if (notAllowedHeadStatusCodes.contains(statusCode))
+            if (NOT_ALLOWED_HEAD_STATUS_CODES.contains(statusCode))
             {
                 response = httpClient.doHttpGet(uri);
                 statusCode = response.getStatusCode();
