@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,6 +89,9 @@ class DataFactoryStepsTests
 
     private static final String FILTER_LOG_MESSAGE = "Collecting pipeline runs filtered by: {}";
 
+    private static final String LAST_UPDATED_AFTER = "2021-11-15T00:00:00+03:00";
+    private static final String LAST_UPDATED_BEFORE = "2021-11-16T00:00:00+03:00";
+
     private final TestLogger logger = TestLoggerFactory.getTestLogger(DataFactorySteps.class);
 
     @Mock private AzureProfile azureProfile;
@@ -135,9 +138,9 @@ class DataFactoryStepsTests
     {
         shouldCollectPipelineRuns();
         assertThat(logger.getLoggingEvents(), is(List.of(info(FILTER_LOG_MESSAGE,
-                "{\"lastUpdatedAfter\":\"2021-11-14T21:00:00Z\",\"lastUpdatedBefore\":\"2021-11-15T21:00:00Z\","
-                        + "\"filters\":[{\"operand\":\"PipelineName\",\"operator\":\"Equals\","
-                        + "\"values\":[\"pipelineName\"]}]}")))
+                "{\"lastUpdatedAfter\":\"" + LAST_UPDATED_AFTER + "\",\"lastUpdatedBefore\":\"" + LAST_UPDATED_BEFORE
+                + "\"," + "\"filters\":[{\"operand\":\"PipelineName\",\"operator\":\"Equals\","
+                + "\"values\":[\"pipelineName\"]}]}")))
         );
     }
 
@@ -229,10 +232,10 @@ class DataFactoryStepsTests
 
             var filter1 = new RunFilter();
             filter1.setFilterType(RunFilterType.LAST_UPDATED_AFTER);
-            filter1.setFilterValue(OffsetDateTime.parse("2021-11-15T00:00:00+03:00"));
+            filter1.setFilterValue(OffsetDateTime.parse(LAST_UPDATED_AFTER));
             var filter2 = new RunFilter();
             filter2.setFilterType(RunFilterType.LAST_UPDATED_BEFORE);
-            filter2.setFilterValue(OffsetDateTime.parse("2021-11-16T00:00:00+03:00"));
+            filter2.setFilterValue(OffsetDateTime.parse(LAST_UPDATED_BEFORE));
 
             var scopes = Set.of(VariableScope.SCENARIO);
             var variableName = "varName";
