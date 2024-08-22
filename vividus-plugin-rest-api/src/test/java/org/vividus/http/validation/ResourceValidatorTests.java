@@ -33,6 +33,8 @@ import java.net.URI;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -87,23 +89,29 @@ class ResourceValidatorTests
     void shouldValidateResourceAndNotRetryWithGetIfStatusCodeNotInNotAllowedSet() throws IOException
     {
         when(httpClient.doHttpHead(FIRST)).thenReturn(httpResponse);
-        var forbidden = 403;
+        var forbidden = 401;
         when(httpResponse.getStatusCode()).thenReturn(forbidden);
-        when(softAssert.assertThat(eq("Status code for https://vividus.org is 403. expected one of [200]"),
+        when(softAssert.assertThat(eq("Status code for https://vividus.org is 401. expected one of [200]"),
                 eq(forbidden), argThat(MATCHER))).thenReturn(false);
         var resourceValidation = new ResourceValidation(FIRST);
         var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.FAILED, result.getCheckStatus());
     }
 
-    @Test
-    void shouldValidateResourceAndRetryWithGetWhenHeadStatusCodeInNotAllowedSet() throws IOException
+    @ParameterizedTest
+    @ValueSource(ints = {
+            403,
+            404,
+            405,
+            501,
+            503
+    })
+    void shouldValidateResourceAndRetryWithGetWhenHeadStatusCodeInNotAllowedSet(int statusCode) throws IOException
     {
         when(httpClient.doHttpHead(FIRST)).thenReturn(httpResponse);
         when(httpClient.doHttpGet(FIRST)).thenReturn(httpResponse);
         when(softAssert.assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER))).thenReturn(true);
-        var notFound = 404;
-        when(httpResponse.getStatusCode()).thenReturn(notFound).thenReturn(OK);
+        when(httpResponse.getStatusCode()).thenReturn(statusCode).thenReturn(OK);
         var resourceValidation = new ResourceValidation(FIRST);
         var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, result.getCheckStatus());
