@@ -1,1 +1,1 @@
-implementation(group: 'org.postgresql', name: 'postgresql', version: '42.7.3')
+implementation(group: 'org.postgresql', name: 'postgresql', version: '42.7.4')
