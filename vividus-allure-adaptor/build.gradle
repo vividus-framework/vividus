@@ -24,7 +24,7 @@ dependencies {
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.16')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
     implementation(group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-properties')
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.16.0')
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0')
     implementation(group: 'com.github.qa-guru.allure-notifications', name: 'allure-notifications-api', version: '159844a132')
 
     compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)

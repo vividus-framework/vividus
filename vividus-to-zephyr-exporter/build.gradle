@@ -32,7 +32,7 @@ dependencies {
     implementation project(':vividus-exporter-commons')
 
     implementation(group: 'com.google.guava', name: 'guava', version: '33.3.0-jre')
-    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.16.0')
+    implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0')
 
     testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test')
     testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.0')
