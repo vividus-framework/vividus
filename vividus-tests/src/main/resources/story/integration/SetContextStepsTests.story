@@ -102,6 +102,8 @@ Then number of elements found by `cssSelector(img)` is = `1`
 Scenario: Verify deprecated step: "When I attempt to close current window with possibility to handle alert" with alert
 Meta:
     @requirementId 2314
+    @skip
+    @issueId https://issues.chromium.org/issues/351858989?pli=1
 When I open URL `${vividus-test-site-url}/onbeforeunloadAlert.html` in new tab
 Then an alert is not present
 When I click on element located by `xpath(//a[text() = 'here'])`
@@ -119,6 +121,8 @@ Then number of elements found by `xpath(//img[@name='vividus-logo'])` is equal t
 Scenario: Verify step: "When I attempt to close current tab with possibility to handle alert" with alert
 Meta:
     @requirementId 2314
+    @skip
+    @issueId https://issues.chromium.org/issues/351858989?pli=1
 When I open URL `${vividus-test-site-url}/onbeforeunloadAlert.html` in new tab
 Then an alert is not present
 When I click on element located by `xpath(//a[text() = 'here'])`
