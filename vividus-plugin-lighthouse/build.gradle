@@ -8,7 +8,7 @@ dependencies {
     implementation project(':vividus-reporter')
     implementation project(':vividus-util')
 
-    implementation(group: 'com.google.apis', name: 'google-api-services-pagespeedonline', version: 'v5-rev20240509-2.0.0')
+    implementation(group: 'com.google.apis', name: 'google-api-services-pagespeedonline', version: 'v5-rev20240829-2.0.0')
     implementation platform(group: 'org.slf4j', name: 'slf4j-bom', version: '2.0.16')
     implementation(group: 'org.slf4j', name: 'slf4j-api')
 
