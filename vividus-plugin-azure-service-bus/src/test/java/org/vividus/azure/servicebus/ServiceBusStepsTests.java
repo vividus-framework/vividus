@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -32,6 +33,7 @@ import com.azure.core.util.BinaryData;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 
 import org.hamcrest.Matcher;
+import org.jbehave.core.model.ExamplesTable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,6 +49,7 @@ import org.vividus.variable.VariableScope;
 public class ServiceBusStepsTests
 {
     private static final String SERVICE_BUS_KEY = "key";
+    private static final String MESSAGE = "msg";
 
     @Mock private ServiceBusService serviceBusService;
     @Mock private VariableContext variableContext;
@@ -58,9 +61,21 @@ public class ServiceBusStepsTests
     @Test
     void testSendMessageToServiceBus()
     {
-        String msg = "msg";
-        serviceBusSteps.sendMessageToServiceBus(SERVICE_BUS_KEY, msg);
-        verify(serviceBusService).send(SERVICE_BUS_KEY, msg);
+        serviceBusSteps.sendMessageToServiceBus(SERVICE_BUS_KEY, MESSAGE);
+        verify(serviceBusService).send(SERVICE_BUS_KEY, MESSAGE);
+    }
+
+    @Test
+    void testSendMessageWithCustomPropertiesToServiceBus()
+    {
+        var customPropertiesTable = new ExamplesTable("""
+                |key       |type   |value|
+                |keyString |STRING |test |
+                |keyNumber |NUMBER |5    |
+                |keyBoolean|BOOLEAN|true |""");
+        Map<String, Object> customProperties = Map.of("keyString", "test", "keyNumber", 5L, "keyBoolean", true);
+        serviceBusSteps.sendMessageToServiceBus(SERVICE_BUS_KEY, MESSAGE, customPropertiesTable);
+        verify(serviceBusService).send(SERVICE_BUS_KEY, MESSAGE, customProperties);
     }
 
     @Test

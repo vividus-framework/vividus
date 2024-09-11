@@ -67,6 +67,11 @@ public class ServiceBusService
 
     public void send(String clientKey, String message)
     {
+        send(clientKey, message, Map.of());
+    }
+
+    public void send(String clientKey, String message, Map<String, Object> customProperties)
+    {
         ServiceBusConnectionParameters serviceBusConnectionParameters = getServiceBusClientConfig(clientKey);
 
         String namespace = serviceBusConnectionParameters.getNamespace();
@@ -87,7 +92,9 @@ public class ServiceBusService
 
         try (ServiceBusSenderClient client = senderBuilder.buildClient())
         {
-            client.sendMessage(new ServiceBusMessage(message));
+            ServiceBusMessage busMessage = new ServiceBusMessage(message);
+            busMessage.getApplicationProperties().putAll(customProperties);
+            client.sendMessage(busMessage);
             LOGGER.info("The message was successfully sent to {} in {} namespace", name, namespace);
         }
         catch (ServiceBusException e)
