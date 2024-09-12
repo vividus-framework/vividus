@@ -216,3 +216,11 @@ Then `${cssPropertyValue}` is = `none`
 Scenario: Step verification Then elements located by `$locator` are sorted by text in $sortingOrder order
 Given I am on page with URL `${vividus-test-site-url}/sortedListOfElement.html`
 Then elements located by `tagName(h3)` are sorted by text in ASCENDING order
+
+Scenario: Validate CSS factory selector generation for inputs containing special symbols
+Given I am on page with URL `${vividus-test-site-url}/selector.html`
+When I find GREATER_THAN `0` elements by `tagName(button)` and for each element do
+|step                                         |
+|When I click on element located by `xpath(.)`|
+When I save `innerText` attribute value of element located `id(count)` to scenario variable `count`
+Then `${count}` is equal to `2`
