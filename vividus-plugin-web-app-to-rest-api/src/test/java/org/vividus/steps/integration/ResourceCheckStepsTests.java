@@ -186,8 +186,8 @@ class ResourceCheckStepsTests
           + "</body>\r\n"
           + "</html>\r\n";
 
-    @Mock(lenient = true)
-    private ResourceValidator resourceValidator;
+    @Mock
+    private ResourceValidator<WebPageResourceValidation> resourceValidator;
     @Mock
     private AttachmentPublisher attachmentPublisher;
     @Mock
@@ -207,8 +207,10 @@ class ResourceCheckStepsTests
     @BeforeEach
     void beforeEach()
     {
+        //noinspection unchecked
         doAnswer(a ->
         {
+            //noinspection rawtypes
             FailableRunnable runnable = a.getArgument(0);
             runnable.run();
             return null;
@@ -267,7 +269,6 @@ class ResourceCheckStepsTests
     void shouldConsiderResourceAsBrokenIfUnableToResolveTheUrlFromHtmlDocument()
             throws InterruptedException, ExecutionException
     {
-        mockResourceValidator();
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
@@ -309,7 +310,6 @@ class ResourceCheckStepsTests
     void shouldConsiderResourceAsBrokenIfUnableToResolveTheUrlFromPage(String pageUrl, String message,
             BiConsumer<ISoftAssert, String> softAssertVerifier) throws InterruptedException, ExecutionException
     {
-        mockResourceValidator();
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
@@ -427,7 +427,6 @@ class ResourceCheckStepsTests
     @Test
     void shouldNotAppendSchemeToUrlIfMainAppUrlIsNotSet() throws InterruptedException, ExecutionException, IOException
     {
-        mockResourceValidator();
         runExecutor();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
@@ -455,7 +454,6 @@ class ResourceCheckStepsTests
     @Test
     void shouldReportBrokenUrlWhenExceptionOccurs() throws IOException, InterruptedException, ExecutionException
     {
-        mockResourceValidator();
         runExecutor();
         IOException ioException = new IOException();
         doThrow(ioException).when(httpRequestExecutor).executeHttpRequest(HttpMethod.GET, FIRST_PAGE_URL,
@@ -481,7 +479,6 @@ class ResourceCheckStepsTests
     @Test
     void shouldReportBrokenUrlWhenNoBodyReturned() throws IOException, InterruptedException, ExecutionException
     {
-        mockResourceValidator();
         runExecutor();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
@@ -585,7 +582,6 @@ class ResourceCheckStepsTests
     void shouldFilterJumpLinkDuringContextValidation() throws InterruptedException, ExecutionException
     {
         String contextHtml = "<a id='jump-link' href='#section'>Jump link</a>";
-        mockResourceValidator();
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
