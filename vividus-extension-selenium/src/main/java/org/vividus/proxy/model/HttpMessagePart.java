@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,9 @@ import com.browserup.harreader.model.HarContent;
 import com.browserup.harreader.model.HarEntry;
 import com.browserup.harreader.model.HarPostData;
 import com.browserup.harreader.model.HarPostDataParam;
-import com.browserup.harreader.model.HarQueryParam;
 import com.browserup.harreader.model.HarRequest;
+
+import de.sstoehr.harreader.model.HarQueryParam;
 
 public enum HttpMessagePart
 {

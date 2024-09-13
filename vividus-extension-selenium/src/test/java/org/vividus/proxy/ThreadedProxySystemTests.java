@@ -83,7 +83,7 @@ class ThreadedProxySystemTests
                 verify(localProxy, atLeastOnce()).start(portCapturer.capture(), eq(address));
                 when(localProxy.getProxyServer()).thenReturn(mobProxy);
                 when(mobProxy.getPort()).thenReturn(portCapturer.getValue());
-                int timeout = RandomUtils.nextInt(0, 100);
+                int timeout = RandomUtils.insecure().randomInt(0, 100);
                 Sleeper.sleep(Duration.ofMillis(timeout));
 
                 threadedProxy.stop();

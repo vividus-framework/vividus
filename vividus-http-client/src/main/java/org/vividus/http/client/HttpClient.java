@@ -136,7 +136,7 @@ public class HttpClient implements IHttpClient, AutoCloseable
         HttpResponse httpResponse = httpHost == null ? closeableHttpClient.execute(request, internalContext,
                 responseHandler) : closeableHttpClient.execute(httpHost, request, internalContext, responseHandler);
         watch.stop();
-        httpResponse.setResponseTimeInMs(watch.getTime());
+        httpResponse.setResponseTimeInMs(watch.getDuration().toMillis());
         httpResponse.setRedirectLocations(internalContext.getRedirectLocations());
 
         for (HttpResponseHandler handler : httpResponseHandlers)
