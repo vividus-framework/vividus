@@ -33,7 +33,7 @@ function escapeSpecialChars(string) {
         result += '\\' + first.toString(16) + ' ';
         string = string.substring(1);
     }
-    result += string.replace(/[: '.!#?,()]/g, '\\$&');
+    result += string.replace(/[:; '".!#?,()$%&*+/<=>@^`{|}~[\\\]]/g, '\\$&');
     return result;
 }
 
