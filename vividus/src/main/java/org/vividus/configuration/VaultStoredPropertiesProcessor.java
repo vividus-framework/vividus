@@ -16,7 +16,6 @@
 
 package org.vividus.configuration;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Properties;
@@ -35,18 +34,25 @@ import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBac
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
 
-public class VaultStoredPropertiesProcessor extends AbstractPropertiesProcessor implements Closeable
+public class VaultStoredPropertiesProcessor extends AbstractPropertiesProcessor
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultStoredPropertiesProcessor.class);
     private static final Pattern SECRET_PATTERN = Pattern.compile("(?<engine>[^/]+)/(?<path>.+)/(?<key>[^/]+)$");
-    private final Properties properties;
+
+    private Properties properties;
     private VaultTemplate vaultTemplate;
     private AnnotationConfigApplicationContext context;
 
-    VaultStoredPropertiesProcessor(Properties properties)
+    public VaultStoredPropertiesProcessor()
     {
         super("(?<!AZURE_KEY_)(?:VAULT|HASHI_CORP_VAULT)");
+    }
+
+    @Override
+    public Properties processProperties(Properties properties)
+    {
         this.properties = properties;
+        return super.processProperties(properties);
     }
 
     @Override

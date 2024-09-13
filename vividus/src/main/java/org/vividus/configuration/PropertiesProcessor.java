@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,19 @@
 
 package org.vividus.configuration;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Properties;
 
-public interface PropertiesProcessor
+public interface PropertiesProcessor extends Closeable
 {
     Properties processProperties(Properties properties);
 
     String processProperty(String propertyName, String propertyValue);
+
+    @Override
+    default void close() throws IOException
+    {
+        // Nothing to do
+    }
 }
