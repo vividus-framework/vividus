@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -144,13 +145,11 @@ public final class ConfigurationResolver
         deprecatedPropertiesHandler.removeDeprecated(properties);
         resolveSpelExpressions(properties, false);
 
-        try (VaultStoredPropertiesProcessor vaultProcessor = new VaultStoredPropertiesProcessor(properties))
+        try (PropertiesProcessor propertiesProcessor = new DelegatingPropertiesProcessor(
+                ServiceLoader.load(PropertiesProcessor.class)))
         {
-            PropertiesProcessor propertiesProcessor = new DelegatingPropertiesProcessor(List.of(
-                    new EncryptedPropertiesProcessor(properties), vaultProcessor
-            ));
-            new SystemPropertiesInitializer(propertiesProcessor).setSystemProperties(properties);
             properties = propertiesProcessor.processProperties(properties);
+            new SystemPropertiesInitializer(propertiesProcessor).setSystemProperties(properties);
         }
 
         instance = new ConfigurationResolver(properties);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ class EncryptedPropertiesProcessorTests
         var properties = new Properties();
         properties.setProperty(ENCRYPTOR_PASSWORD_PROPERTY, PASSWORD);
         properties.setProperty(PROPERTY_KEY, encryptedValue);
-        var propertiesDecrypted = new EncryptedPropertiesProcessor(properties).processProperties(properties);
+        var propertiesDecrypted = new EncryptedPropertiesProcessor().processProperties(properties);
         assertEquals(decryptedValue, propertiesDecrypted.getProperty(PROPERTY_KEY));
     }
 
@@ -77,7 +77,7 @@ class EncryptedPropertiesProcessorTests
         {
             var properties = new Properties();
             properties.put(PROPERTY_KEY, propertyValue);
-            var decryptedProperties = new EncryptedPropertiesProcessor(properties).processProperties(properties);
+            var decryptedProperties = new EncryptedPropertiesProcessor().processProperties(properties);
             assertEquals(propertyValue, decryptedProperties.get(PROPERTY_KEY));
             assertThat(stringDecryptorMockedConstruction.constructed(), hasSize(1));
             verifyNoInteractions(stringDecryptorMockedConstruction.constructed().get(0));
@@ -94,7 +94,7 @@ class EncryptedPropertiesProcessorTests
         var properties = new Properties();
         properties.setProperty(PROPERTY_KEY, String.format("ENC(%s)", value));
         properties.setProperty(ENCRYPTOR_PASSWORD_PROPERTY, password);
-        var processor = new EncryptedPropertiesProcessor(properties);
+        var processor = new EncryptedPropertiesProcessor();
         var exception = assertThrows(DecryptionFailedException.class, () -> processor.processProperties(properties));
         assertEquals("Unable to decrypt the value '" + value + "' from the property with the name 'key'",
                 exception.getMessage());
@@ -108,7 +108,7 @@ class EncryptedPropertiesProcessorTests
     {
         var properties = new Properties();
         properties.setProperty(PROPERTY_KEY, ENCRYPTED_VALUE_PLACEHOLDER);
-        var processor = new EncryptedPropertiesProcessor(properties);
+        var processor = new EncryptedPropertiesProcessor();
         var exception = assertThrows(DecryptionFailedException.class, () -> processor.processProperties(properties));
         assertEquals("Encrypted properties are found, but no password for decryption is provided",
                 exception.getMessage());

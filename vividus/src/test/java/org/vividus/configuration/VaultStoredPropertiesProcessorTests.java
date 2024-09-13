@@ -80,7 +80,7 @@ class VaultStoredPropertiesProcessorTests
     })
     void shouldRejectInvalidSecretPaths(String fullSecretPath) throws IOException
     {
-        try (var processor = new VaultStoredPropertiesProcessor(new Properties()))
+        try (var processor = new VaultStoredPropertiesProcessor())
         {
             var propertyName = "invalid-property";
             var exception = assertThrows(IllegalArgumentException.class,
@@ -102,10 +102,12 @@ class VaultStoredPropertiesProcessorTests
         MutablePropertySources propertySources = mock();
         var result = "pa$$w0rd";
 
-        try (var processor = new VaultStoredPropertiesProcessor(properties);
+        try (var processor = new VaultStoredPropertiesProcessor();
                 var annotationConfigApplicationContextConstruction = mockConstruction(
                         AnnotationConfigApplicationContext.class,
                         (mock, context) -> {
+                            processor.processProperties(properties);
+
                             ConfigurableEnvironment configurableEnvironment = mock();
                             when(mock.getEnvironment()).thenReturn(configurableEnvironment);
 
@@ -176,7 +178,7 @@ class VaultStoredPropertiesProcessorTests
     })
     void shouldPrintLogAboutDeprecation(String propertyValue) throws IOException
     {
-        try (var processor = new VaultStoredPropertiesProcessor(new Properties()))
+        try (var processor = new VaultStoredPropertiesProcessor())
         {
             processor.processProperty("old-property-name", propertyValue);
         }
@@ -194,7 +196,7 @@ class VaultStoredPropertiesProcessorTests
     })
     void shouldNotPrintLogAboutDeprecation(String propertyValue) throws IOException
     {
-        try (var processor = new VaultStoredPropertiesProcessor(new Properties()))
+        try (var processor = new VaultStoredPropertiesProcessor())
         {
             processor.processProperty("new-property-name", propertyValue);
         }
