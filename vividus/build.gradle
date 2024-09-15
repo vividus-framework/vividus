@@ -75,7 +75,7 @@ dependencies {
     implementation(group: 'de.vandermeer', name: 'asciitable', version: '0.3.2')
 
     // Meta filters based on Groovy
-    implementation(group: 'org.apache.groovy', name: 'groovy', version: '4.0.22')
+    implementation(group: 'org.apache.groovy', name: 'groovy', version: '4.0.23')
 
     // Spring
     implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.1.13')
