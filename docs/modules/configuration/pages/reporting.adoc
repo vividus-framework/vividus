@@ -2,12 +2,17 @@
 
 == Configure report layout
 
-[cols="3,1,1,3", options="header"]
+[cols="3,2,1,3", options="header"]
 |===
 |Property Name
 |Acceptable values
 |Default
 |Description
+
+|`report.title`
+|Any short description of the report.
+|`VIVIDUS Report`
+|The provided title is displayed on *Summary* widget of *Overview* tab. Also it is used as HTML title of the document.
 
 |`report.show-parameters-section`
 a|`true` +
