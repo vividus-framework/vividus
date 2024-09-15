@@ -4,7 +4,8 @@
 .side-nav__brand:after {
   content: 'VIVIDUS';
   padding-left: 15px;
-  font-size: 20px;
+  font-size: 22px;
+  font-weight: normal;
 }
 .side-nav__footer :last-child .side-nav__collapse .side-nav__text::after {
   content: 'Powered by Allure';
