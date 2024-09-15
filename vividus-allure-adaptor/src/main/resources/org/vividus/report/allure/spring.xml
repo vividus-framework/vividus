@@ -60,6 +60,7 @@
 
     <bean id="allureReportGenerator" class="org.vividus.report.allure.AllureReportGenerator"
         destroy-method="end">
+        <constructor-arg index="0" value="${report.title}" />
         <constructor-arg>
             <bean class="org.vividus.report.allure.notification.NotificationsSender" />
         </constructor-arg>

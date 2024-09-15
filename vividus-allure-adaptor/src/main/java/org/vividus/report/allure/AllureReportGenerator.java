@@ -93,6 +93,8 @@ public class AllureReportGenerator implements IAllureReportGenerator
     private final File resultsDirectory =
             new File((String) PropertiesUtils.loadAllureProperties().get("allure.results.directory"));
 
+    private final String reportTitle;
+
     private final IPropertyMapper propertyMapper;
     private final ResourcePatternResolver resourcePatternResolver;
     private final AllurePluginsProvider allurePluginsProvider;
@@ -102,9 +104,11 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
     private boolean started;
 
-    public AllureReportGenerator(IPropertyMapper propertyMapper, ResourcePatternResolver resourcePatternResolver,
-            AllurePluginsProvider allurePluginsProvider, NotificationsSender notificationsSender)
+    public AllureReportGenerator(String reportTitle, IPropertyMapper propertyMapper,
+            ResourcePatternResolver resourcePatternResolver, AllurePluginsProvider allurePluginsProvider,
+            NotificationsSender notificationsSender)
     {
+        this.reportTitle = reportTitle;
         this.propertyMapper = propertyMapper;
         this.resourcePatternResolver = resourcePatternResolver;
         this.allurePluginsProvider = allurePluginsProvider;
@@ -267,7 +271,7 @@ public class AllureReportGenerator implements IAllureReportGenerator
                 new Allure2Plugin()
         );
         Configuration configuration = new ConfigurationBuilder()
-                .withReportName("VIVIDUS Report")
+                .withReportName(reportTitle)
                 .withReportLanguage("en")
                 .withExtensions(extensions)
                 .withPlugins(allurePluginsProvider.getPlugins())

@@ -87,6 +87,7 @@ class AllureReportGeneratorTests
     private static final String EXECUTOR_JSON = "executor.json";
     private static final String ALLURE_EXECUTOR_PROPERTY_PREFIX = "allure.executor.";
     private static final String INDEX_HTML = "index.html";
+    private static final String VIVIDUS_REPORT = "VIVIDUS Report";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AllureReportGenerator.class);
 
@@ -108,7 +109,7 @@ class AllureReportGeneratorTests
         resultsDirectory = tempDir.resolve("allure-results");
         Files.createDirectories(resultsDirectory);
         System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
-        allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver,
+        allureReportGenerator = new AllureReportGenerator(VIVIDUS_REPORT, propertyMapper, resourcePatternResolver,
                 allurePluginsProvider, notificationsSender);
     }
 
@@ -187,7 +188,7 @@ class AllureReportGeneratorTests
         File reportDirectory = tempDir.toFile();
         resultsDirectory = tempDir.resolve("allure-results-to-be-created");
         System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
-        allureReportGenerator = new AllureReportGenerator(propertyMapper, resourcePatternResolver,
+        allureReportGenerator = new AllureReportGenerator(VIVIDUS_REPORT, propertyMapper, resourcePatternResolver,
                 allurePluginsProvider, notificationsSender);
         when(propertyMapper.readValue(ALLURE_EXECUTOR_PROPERTY_PREFIX, ExecutorInfo.class)).thenReturn(
                 Optional.empty());
@@ -294,7 +295,7 @@ class AllureReportGeneratorTests
     private void assertSummaryJson(Path reportDirectory) throws IOException
     {
         assertFile(reportDirectory, "widgets/summary.json",
-                "{\"reportName\":\"VIVIDUS Report\","
+                "{\"reportName\":\"" + VIVIDUS_REPORT + "\","
                     + "\"testRuns\":[],"
                     + "\"statistic\":{\"failed\":0,\"broken\":0,\"skipped\":0,\"passed\":0,\"unknown\":0,\"total\":0},"
                     + "\"time\":{}"
