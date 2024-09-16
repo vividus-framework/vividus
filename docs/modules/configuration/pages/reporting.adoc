@@ -23,6 +23,22 @@ story-level xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] if any of them
 contains numerous records, the Parameters section can become lengthy, thus increasing the difficulty of navigating to
 the actual Execution body. The property can be used to hide the Parameters section, making navigation easier.
 
+|`report.translations.<lang>.<translation key>`
+|Alternative translation for the specified key.
+|
+a|This family of properties allows overriding text values in report controls, such as labels, buttons, etc. These values
+represent translations for the chosen language. The list of languages and default translations can be found in the
+official report repository, for example, here is translation configuration for English:
+https://github.com/allure-framework/allure2/blob/main/allure-generator/src/main/javascript/translations/en.json[en.json].
+
+To override a translation value it is necessary to provide translation key, which is essentially a path to the value in
+JSON file. For example, to specify custom English message for duration chart without data the following property should
+be used:
+[source,properties]
+----
+report.translations.en.chart.duration.empty=No data to display
+----
+
 |===
 
 
