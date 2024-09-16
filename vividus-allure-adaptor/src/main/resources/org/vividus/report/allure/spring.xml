@@ -52,6 +52,15 @@
         <constructor-arg index="2" ref="pluginFilesLoader" />
     </bean>
 
+    <bean class="org.vividus.report.allure.plugin.CustomTranslationsPlugin">
+        <constructor-arg>
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="report.translations." />
+                <constructor-arg value="java.util.Map" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
     <bean class="org.vividus.report.allure.AllureRunContext" />
 
     <bean class="org.vividus.report.allure.adapter.VerificationErrorAdapter" />
