@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ import io.qameta.allure.plugin.DefaultPlugin;
 public class CustomTranslationsPlugin extends DefaultPlugin
 {
     private static final String INDEX_JS = "index.js";
-    private final Map<String, Path> pluginFiles;
+    private final Map<String, Path> pluginFiles = new HashMap<>();
 
     @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     public CustomTranslationsPlugin(PropertyMappedCollection<Map<String, ?>> customTranslations, JsonUtils jsonUtils)
@@ -42,20 +43,24 @@ public class CustomTranslationsPlugin extends DefaultPlugin
     {
         super(new PluginConfiguration()
                         .setId("custom-translations")
-                        .setJsFiles(List.of(INDEX_JS)),
+                        .setJsFiles(List.of()),
                 List.of(), null);
 
-        List<String> jsFileLines = new ArrayList<>();
-        jsFileLines.add("'use strict';");
-        customTranslations.getData().forEach((lang, value) -> jsFileLines.add(
-                    "allure.api.addTranslation('%s', %s);".formatted(lang, jsonUtils.toJson(value))
-                )
-        );
+        if (!customTranslations.getData().isEmpty())
+        {
+            List<String> jsFileLines = new ArrayList<>();
+            jsFileLines.add("'use strict';");
+            customTranslations.getData().forEach((lang, value) -> jsFileLines.add(
+                        "allure.api.addTranslation('%s', %s);".formatted(lang, jsonUtils.toJson(value))
+                    )
+            );
 
-        Path indexJs = ResourceUtils.createTempFile("index", ".js");
-        Files.write(indexJs, jsFileLines);
+            Path indexJs = ResourceUtils.createTempFile("index", ".js");
+            Files.write(indexJs, jsFileLines);
 
-        this.pluginFiles = Map.of(INDEX_JS, indexJs);
+            this.pluginFiles.put(INDEX_JS, Path.of(indexJs.toUri()));
+            getConfig().setJsFiles(List.of(INDEX_JS));
+        }
     }
 
     @Override

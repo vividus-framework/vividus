@@ -46,4 +46,11 @@ class CustomTranslationsPluginTests
                 allure.api.addTranslation('en', {"tab":{"suites":{"name":"Batches Tab"}}});
                 """.replaceAll("\r\n|\n", System.lineSeparator()), Files.readString(indexJsPath));
     }
+
+    @Test
+    void shouldNotGenerateIndexJsIfNoTranslationsAreProvided() throws IOException
+    {
+        var plugin = new CustomTranslationsPlugin(new PropertyMappedCollection<>(Map.of()), new JsonUtils());
+        assertEquals(0, plugin.getPluginFiles().size());
+    }
 }
