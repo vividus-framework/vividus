@@ -143,7 +143,7 @@ multiple configurations for authentication on different websites.
 ----
 web-application.basic-authentication.httpbingo.url-regex=https:\/\/httpbingo\.org
 web-application.basic-authentication.httpbingo.username=user
-web-application.basic-authentication.httpbingo.password=passwd
+web-application.basic-authentication.httpbingo.password=password
 
 web-application.basic-authentication.example.url-regex=.*example\.org
 web-application.basic-authentication.example.username=admin
