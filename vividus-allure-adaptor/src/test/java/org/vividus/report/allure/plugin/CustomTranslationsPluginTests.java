@@ -20,9 +20,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.vividus.util.json.JsonUtils;
 import org.vividus.util.property.PropertyMappedCollection;
 
@@ -30,6 +34,29 @@ class CustomTranslationsPluginTests
 {
     @Test
     void shouldGenerateIndexJs() throws IOException
+    {
+        assertEquals("""
+                'use strict';
+                allure.api.addTranslation('en', {"tab":{"suites":{"name":"Batches Tab"}}});
+                """.replaceAll("\r\n|\n", System.lineSeparator()), Files.readString(generateIndexJs()));
+    }
+
+    @Test
+    @DisabledOnOs(OS.WINDOWS)
+    void shouldGenerateIndexJsWith644Permissions() throws IOException
+    {
+        var permissions = PosixFilePermissions.toString(Files.getPosixFilePermissions(generateIndexJs()));
+        assertEquals("rw-r--r--", permissions);
+    }
+
+    @Test
+    void shouldNotGenerateIndexJsIfNoTranslationsAreProvided() throws IOException
+    {
+        var plugin = new CustomTranslationsPlugin(new PropertyMappedCollection<>(Map.of()), new JsonUtils());
+        assertEquals(0, plugin.getPluginFiles().size());
+    }
+
+    private Path generateIndexJs() throws IOException
     {
         var plugin = new CustomTranslationsPlugin(new PropertyMappedCollection<>(Map.of("en", Map.of(
                 "tab", Map.of(
@@ -40,17 +67,6 @@ class CustomTranslationsPluginTests
         ))), new JsonUtils());
         var pluginFiles = plugin.getPluginFiles();
         assertEquals(1, pluginFiles.size());
-        var indexJsPath = pluginFiles.get("index.js");
-        assertEquals("""
-                'use strict';
-                allure.api.addTranslation('en', {"tab":{"suites":{"name":"Batches Tab"}}});
-                """.replaceAll("\r\n|\n", System.lineSeparator()), Files.readString(indexJsPath));
-    }
-
-    @Test
-    void shouldNotGenerateIndexJsIfNoTranslationsAreProvided() throws IOException
-    {
-        var plugin = new CustomTranslationsPlugin(new PropertyMappedCollection<>(Map.of()), new JsonUtils());
-        assertEquals(0, plugin.getPluginFiles().size());
+        return pluginFiles.get("index.js");
     }
 }
