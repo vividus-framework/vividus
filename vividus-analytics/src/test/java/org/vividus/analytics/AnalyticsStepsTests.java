@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,20 +33,18 @@ import java.util.Map;
 
 import com.google.common.eventbus.EventBus;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.analytics.model.AnalyticsEvent;
 import org.vividus.analytics.model.AnalyticsEventBatch;
-import org.vividus.reporter.environment.EnvironmentConfigurer;
-import org.vividus.reporter.environment.PropertyCategory;
-import org.vividus.reporter.environment.StaticConfigurationDataEntry;
+import org.vividus.reporter.metadata.MetaDataCategory;
+import org.vividus.reporter.metadata.MetaDataProvider;
 import org.vividus.results.ResultsProvider;
 import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Statistic;
@@ -76,103 +75,97 @@ class AnalyticsStepsTests
     @Captor private ArgumentCaptor<AnalyticsEventBatch> analyticsEventBatchCaptor;
     @InjectMocks private AnalyticsSteps reporter;
 
-    @BeforeEach
-    void beforeEach()
-    {
-        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(List::clear);
-    }
-
-    @AfterEach
-    void afterEach()
-    {
-        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(List::clear);
-    }
-
     @Test
     void shouldPostTestsStartBeforeTestsWhenNoModulesAvailable()
     {
-        configureCommonProperties();
-        reporter.postBeforeStoriesAnalytics();
-        verify(eventBus).post(analyticsEventBatchCaptor.capture());
-        AnalyticsEventBatch batch = analyticsEventBatchCaptor.getValue();
-        assertThat(batch.events(), hasSize(1));
-        AnalyticsEvent event = batch.events().get(0);
-        Map<String, String> payload = event.getPayload();
-        assertAll(
-            () -> assertEquals(START, payload.get(SESSION_CONTROL)),
-            () -> assertEquals(VIVIDUS, payload.get(EVENT_CATEGORY)),
-            () -> assertEquals(Runtime.version().toString(), payload.get(CUSTOM_DIMENSION2)),
-            () -> assertEquals("not detected", payload.get(CUSTOM_DIMENSION3)),
-            () -> assertEquals(START_TESTS, payload.get(EVENT_ACTION)));
+        try (var metaDataProviderMock = mockStatic(MetaDataProvider.class))
+        {
+            configureCommonProperties(metaDataProviderMock);
+            reporter.postBeforeStoriesAnalytics();
+            verify(eventBus).post(analyticsEventBatchCaptor.capture());
+            AnalyticsEventBatch batch = analyticsEventBatchCaptor.getValue();
+            assertThat(batch.events(), hasSize(1));
+            AnalyticsEvent event = batch.events().get(0);
+            Map<String, String> payload = event.getPayload();
+            assertAll(() -> assertEquals(START, payload.get(SESSION_CONTROL)),
+                    () -> assertEquals(VIVIDUS, payload.get(EVENT_CATEGORY)),
+                    () -> assertEquals(Runtime.version().toString(), payload.get(CUSTOM_DIMENSION2)),
+                    () -> assertEquals("not detected", payload.get(CUSTOM_DIMENSION3)),
+                    () -> assertEquals(START_TESTS, payload.get(EVENT_ACTION))
+            );
+        }
     }
 
     @Test
     void shouldPostVividusVersionAndPluginsInformationAndStatistic()
     {
-        configureCommonProperties();
-        String vividusVersion = "0.1.1";
-        StaticConfigurationDataEntry vividusVersionConfig = new StaticConfigurationDataEntry();
-        vividusVersionConfig.setCategory(PropertyCategory.VIVIDUS);
-        vividusVersionConfig.setDescription(VIVIDUS);
-        vividusVersionConfig.setValue(vividusVersion);
-        EnvironmentConfigurer.addConfigurationDataEntry(vividusVersionConfig);
-        String plugin = "vividus-plugin-web-ui";
-        String pluginVersion = "0.1.2";
-        StaticConfigurationDataEntry pluginVersionConfig = new StaticConfigurationDataEntry();
-        pluginVersionConfig.setCategory(PropertyCategory.VIVIDUS);
-        pluginVersionConfig.setDescription(plugin);
-        pluginVersionConfig.setValue(pluginVersion);
-        EnvironmentConfigurer.addConfigurationDataEntry(pluginVersionConfig);
-        reporter.postBeforeStoriesAnalytics();
+        try (var metaDataProviderMock = mockStatic(MetaDataProvider.class))
+        {
+            configureCommonProperties(metaDataProviderMock);
 
-        Statistic storyStatistics = mock(Statistic.class);
-        when(storyStatistics.getTotal()).thenReturn(9L);
-        Statistic stepStatistics = mock(Statistic.class);
-        when(stepStatistics.getTotal()).thenReturn(40L);
-        Statistic scenarioStatistics = mock(Statistic.class);
-        when(scenarioStatistics.getTotal()).thenReturn(20L);
-        when(resultsProvider.getStatistics()).thenReturn(Map.of(
-            ExecutableEntity.STORY, storyStatistics,
-            ExecutableEntity.STEP, stepStatistics,
-            ExecutableEntity.SCENARIO, scenarioStatistics
-        ));
-        when(resultsProvider.getDuration()).thenReturn(Duration.ofSeconds(1));
+            String vividusVersion = "0.1.1";
+            String plugin = "vividus-plugin-web-ui";
+            String pluginVersion = "0.1.2";
 
-        reporter.postAfterStoriesAnalytics();
-        verify(eventBus, times(2)).post(analyticsEventBatchCaptor.capture());
-        List<AnalyticsEventBatch> batches = analyticsEventBatchCaptor.getAllValues();
-        assertThat(batches, hasSize(2));
+            metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategoryAsMap(MetaDataCategory.VIVIDUS))
+                    .thenReturn(Map.of(
+                            VIVIDUS, vividusVersion,
+                            plugin, pluginVersion
+                    ));
+            reporter.postBeforeStoriesAnalytics();
 
-        AnalyticsEventBatch beforeBatch = batches.get(0);
-        List<AnalyticsEvent> events = beforeBatch.events();
-        assertThat(events, hasSize(2));
-        AnalyticsEvent analyticsEvent = getAndRemove(events, CUSTOM_DIMENSION2);
-        Map<String, String> payload = analyticsEvent.getPayload();
-        assertAll(
-            () -> assertEquals(START, payload.get(SESSION_CONTROL)),
-            () -> assertEquals(VIVIDUS, payload.get(EVENT_CATEGORY)),
-            () -> assertEquals(Runtime.version().toString(), payload.get(CUSTOM_DIMENSION2)),
-            () -> assertEquals(vividusVersion, payload.get(CUSTOM_DIMENSION3)),
-            () -> assertEquals(START_TESTS, payload.get(EVENT_ACTION)));
-        AnalyticsEvent analyticsEvent1 = getAndRemove(events, CUSTOM_DIMENSION5);
-        Map<String, String> payload1 = analyticsEvent1.getPayload();
-        assertAll(
-            () -> assertNull(payload1.get(SESSION_CONTROL)),
-            () -> assertNull(payload1.get(CUSTOM_DIMENSION2)),
-            () -> assertNull(payload1.get(CUSTOM_DIMENSION3)),
-            () -> assertEquals(plugin, payload1.get(EVENT_CATEGORY)),
-            () -> assertEquals(pluginVersion, payload1.get(CUSTOM_DIMENSION5)),
-            () -> assertEquals("use", payload1.get(EVENT_ACTION)));
+            Statistic storyStatistics = mock(Statistic.class);
+            when(storyStatistics.getTotal()).thenReturn(9L);
+            Statistic stepStatistics = mock(Statistic.class);
+            when(stepStatistics.getTotal()).thenReturn(40L);
+            Statistic scenarioStatistics = mock(Statistic.class);
+            when(scenarioStatistics.getTotal()).thenReturn(20L);
+            when(resultsProvider.getStatistics()).thenReturn(Map.of(
+                ExecutableEntity.STORY, storyStatistics,
+                ExecutableEntity.STEP, stepStatistics,
+                ExecutableEntity.SCENARIO, scenarioStatistics
+            ));
+            when(resultsProvider.getDuration()).thenReturn(Duration.ofSeconds(1));
 
-        AnalyticsEventBatch afterBatch = batches.get(1);
-        Map<String, String> payload2 = afterBatch.events().get(0).getPayload();
-        assertAll(
-            () -> assertEquals("9", payload2.get("cm1")),
-            () -> assertEquals("40", payload2.get("cm2")),
-            () -> assertEquals("1", payload2.get("cm3")),
-            () -> assertEquals("20", payload2.get("cm4")),
-            () -> assertEquals("end", payload2.get(SESSION_CONTROL)),
-            () -> assertEquals("finishTests", payload2.get(EVENT_ACTION)));
+            reporter.postAfterStoriesAnalytics();
+            verify(eventBus, times(2)).post(analyticsEventBatchCaptor.capture());
+            List<AnalyticsEventBatch> batches = analyticsEventBatchCaptor.getAllValues();
+            assertThat(batches, hasSize(2));
+
+            AnalyticsEventBatch beforeBatch = batches.get(0);
+            List<AnalyticsEvent> events = beforeBatch.events();
+            assertThat(events, hasSize(2));
+            AnalyticsEvent analyticsEvent = getAndRemove(events, CUSTOM_DIMENSION2);
+            Map<String, String> payload = analyticsEvent.getPayload();
+            assertAll(
+                () -> assertEquals(START, payload.get(SESSION_CONTROL)),
+                () -> assertEquals(VIVIDUS, payload.get(EVENT_CATEGORY)),
+                () -> assertEquals(Runtime.version().toString(), payload.get(CUSTOM_DIMENSION2)),
+                () -> assertEquals(vividusVersion, payload.get(CUSTOM_DIMENSION3)),
+                () -> assertEquals(START_TESTS, payload.get(EVENT_ACTION))
+            );
+            AnalyticsEvent analyticsEvent1 = getAndRemove(events, CUSTOM_DIMENSION5);
+            Map<String, String> payload1 = analyticsEvent1.getPayload();
+            assertAll(
+                () -> assertNull(payload1.get(SESSION_CONTROL)),
+                () -> assertNull(payload1.get(CUSTOM_DIMENSION2)),
+                () -> assertNull(payload1.get(CUSTOM_DIMENSION3)),
+                () -> assertEquals(plugin, payload1.get(EVENT_CATEGORY)),
+                () -> assertEquals(pluginVersion, payload1.get(CUSTOM_DIMENSION5)),
+                () -> assertEquals("use", payload1.get(EVENT_ACTION))
+            );
+
+            AnalyticsEventBatch afterBatch = batches.get(1);
+            Map<String, String> payload2 = afterBatch.events().get(0).getPayload();
+            assertAll(
+                () -> assertEquals("9", payload2.get("cm1")),
+                () -> assertEquals("40", payload2.get("cm2")),
+                () -> assertEquals("1", payload2.get("cm3")),
+                () -> assertEquals("20", payload2.get("cm4")),
+                () -> assertEquals("end", payload2.get(SESSION_CONTROL)),
+                () -> assertEquals("finishTests", payload2.get(EVENT_ACTION))
+            );
+        }
     }
 
     private AnalyticsEvent getAndRemove(List<AnalyticsEvent> events, String criteria)
@@ -185,17 +178,11 @@ class AnalyticsStepsTests
         return analyticsEvent;
     }
 
-    private void configureCommonProperties()
+    private void configureCommonProperties(MockedStatic<MetaDataProvider> metaDataProviderMock)
     {
-        StaticConfigurationDataEntry profilesConfig = new StaticConfigurationDataEntry();
-        profilesConfig.setCategory(PropertyCategory.CONFIGURATION);
-        profilesConfig.setDescription("Profiles");
-        profilesConfig.setValue("web/desktop/chrome");
-        EnvironmentConfigurer.addConfigurationDataEntry(profilesConfig);
-        StaticConfigurationDataEntry remoteConfig = new StaticConfigurationDataEntry();
-        profilesConfig.setCategory(PropertyCategory.PROFILE);
-        profilesConfig.setDescription("Remote Execution");
-        profilesConfig.setValue("ON");
-        EnvironmentConfigurer.addConfigurationDataEntry(remoteConfig);
+        metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategoryAsMap(MetaDataCategory.CONFIGURATION))
+                .thenReturn(Map.of("Profiles", "web/desktop/chrome"));
+        metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategoryAsMap(MetaDataCategory.PROFILE))
+                .thenReturn(Map.of("Remote Execution", "ON"));
     }
 }

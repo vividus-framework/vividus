@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.vividus.reporter.environment;
+package org.vividus.reporter.metadata;
 
-public class ConfigurationDataEntry
+public class MetaDataEntry extends AbstractMetaDataEntry
 {
     private String description;
-    private PropertyCategory category;
-    private boolean addToReport = true;
+    private String value;
 
     public String getDescription()
     {
@@ -32,23 +31,13 @@ public class ConfigurationDataEntry
         this.description = description;
     }
 
-    public PropertyCategory getCategory()
+    public String getValue()
     {
-        return category;
+        return value;
     }
 
-    public void setCategory(PropertyCategory category)
+    public void setValue(String value)
     {
-        this.category = category;
-    }
-
-    public boolean isAddToReport()
-    {
-        return addToReport;
-    }
-
-    public void setAddToReport(boolean addToReport)
-    {
-        this.addToReport = addToReport;
+        this.value = value;
     }
 }

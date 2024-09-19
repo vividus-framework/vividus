@@ -27,12 +27,14 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
+import org.apache.commons.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.reporter.environment.ConfigurationDataEntry;
-import org.vividus.reporter.environment.EnvironmentConfigurer;
-import org.vividus.reporter.environment.PropertyCategory;
+import org.vividus.reporter.metadata.MetaDataCategory;
+import org.vividus.reporter.metadata.MetaDataEntry;
+import org.vividus.reporter.metadata.MetaDataProvider;
 import org.vividus.results.ResultsProvider;
 import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Failure;
@@ -79,31 +81,35 @@ public final class TestInfoLogger
     {
         logInfoMessage(() ->
         {
-            int maxKeyLength = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION
-                    .values()
-                    .stream()
+            int maxKeyLength = Stream.of(MetaDataCategory.values())
+                    .map(MetaDataProvider::getMetaDataByCategory)
                     .flatMap(List::stream)
-                    .map(ConfigurationDataEntry::getDescription)
+                    .map(MetaDataEntry::getDescription)
                     .mapToInt(String::length)
                     .max().orElse(0);
             String propertyFormat = "   %-" + maxKeyLength + "s %s%n";
             try (Formatter message = new Formatter())
             {
                 message.format(NEW_LINE);
-                EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.forEach((category, config) -> {
-                    Map<String, String> dataForCategory = EnvironmentConfigurer.getConfigurationDataAsMap(config);
-                    if (category == PropertyCategory.CONFIGURATION && dataForCategory.get(CONFIGURATION_SET) != null)
+                Stream.of(MetaDataCategory.values()).forEach(category -> {
+                    Map<String, String> asMap = MetaDataProvider.getMetaDataByCategoryAsMap(category);
+                    if (category == MetaDataCategory.CONFIGURATION && asMap.get(CONFIGURATION_SET) != null)
                     {
                         String configurationSetFormat = "%s%n %-" + maxKeyLength + "s   %s%n";
                         message.format(configurationSetFormat, HORIZONTAL_RULE, "Configuration set:",
-                                dataForCategory.get(CONFIGURATION_SET));
-                        config.removeIf(e -> CONFIGURATION_SET.equals(e.getDescription()));
+                                asMap.get(CONFIGURATION_SET));
+                        asMap.remove(CONFIGURATION_SET);
                     }
                     else
                     {
-                        message.format(CATEGORY_FORMAT, HORIZONTAL_RULE, category.getCategoryName());
+                        String categoryName = category.name();
+                        if (category != MetaDataCategory.VIVIDUS)
+                        {
+                            categoryName = WordUtils.capitalize(categoryName.toLowerCase());
+                        }
+                        message.format(CATEGORY_FORMAT, HORIZONTAL_RULE, categoryName);
                     }
-                    config.forEach(c -> message.format(propertyFormat, c.getDescription(), c.getValue()));
+                    asMap.forEach((description, value) -> message.format(propertyFormat, description, value));
                 });
                 logExecutionStatistics(message);
                 return message.toString();

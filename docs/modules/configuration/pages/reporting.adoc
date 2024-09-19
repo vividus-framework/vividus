@@ -48,10 +48,10 @@ VIVIDUS allows to add custom data to be displayed in the report.
 Static data format:
 [source,properties]
 ----
-environment-configurer.static.<data-identifier>.description=<description>
-environment-configurer.static.<data-identifier>.value=<value>
-environment-configurer.static.<data-identifier>.category=<category>
-environment-configurer.static.<data-identifier>.add-to-report=<show-in-report>
+meta-data.static.<data-identifier>.description=<description>
+meta-data.static.<data-identifier>.value=<value>
+meta-data.static.<data-identifier>.category=<category>
+meta-data.static.<data-identifier>.add-to-report=<show-in-report>
 ----
 
 where:
@@ -65,18 +65,18 @@ where:
 .Enable reporting of user's variable `visual-action`
 [source,properties]
 ----
-environment-configurer.static.visual-action.description=Visual Action
-environment-configurer.static.visual-action.value=${variables.visual-action}
-environment-configurer.static.visual-action.category=ENVIRONMENT
+meta-data.static.visual-action.description=Visual Action
+meta-data.static.visual-action.value=${variables.visual-action}
+meta-data.static.visual-action.category=ENVIRONMENT
 ----
 
 Dynamic data format:
 [source,properties]
 ----
-environment-configurer.dynamic.<data-identifier>.description=<description-pattern>
-environment-configurer.dynamic.<data-identifier>.propertyRegex=<property-regex>
-environment-configurer.dynamic.<data-identifier>.category=<category>
-environment-configurer.dynamic.<data-identifier>.add-to-report=<show-in-report>
+meta-data.dynamic.<data-identifier>.description-pattern=<description-pattern>
+meta-data.dynamic.<data-identifier>.property-regex=<property-regex>
+meta-data.dynamic.<data-identifier>.category=<category>
+meta-data.dynamic.<data-identifier>.add-to-report=<show-in-report>
 ----
 
 where:
@@ -90,9 +90,9 @@ where:
 .Enable reporting of locations for all batches
 [source,properties]
 ----
-environment-configurer.dynamic.batch-location.description=Batch %s Location
-environment-configurer.dynamic.batch-location.property-regex=batch-(.+).resource-location
-environment-configurer.dynamic.batch-location.category=SUITE
+meta-data.dynamic.batch-location.description-pattern=Batch %s Location
+meta-data.dynamic.batch-location.property-regex=batch-(.+).resource-location
+meta-data.dynamic.batch-location.category=SUITE
 ----
 
 == Add external links to report

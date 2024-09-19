@@ -27,6 +27,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
@@ -39,9 +41,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.report.allure.model.AllureCategory;
 import org.vividus.report.allure.notification.NotificationsSender;
-import org.vividus.reporter.environment.EnvironmentConfigurer;
-import org.vividus.reporter.environment.PropertyCategory;
-import org.vividus.reporter.environment.StaticConfigurationDataEntry;
+import org.vividus.reporter.metadata.MetaDataCategory;
+import org.vividus.reporter.metadata.MetaDataEntry;
+import org.vividus.reporter.metadata.MetaDataProvider;
 import org.vividus.util.property.IPropertyMapper;
 
 import freemarker.template.Template;
@@ -184,22 +186,15 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
     private static void writeEnvironmentProperties(File resultsDirectory) throws IOException
     {
-        Map<String, String> reportExecutionConfig = new LinkedHashMap<>();
-        Map<PropertyCategory, List<StaticConfigurationDataEntry>> testConfig =
-                EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION;
-        putTestConfigToReportExecutionConfig(testConfig.get(PropertyCategory.CONFIGURATION), reportExecutionConfig);
-        putTestConfigToReportExecutionConfig(testConfig.get(PropertyCategory.PROFILE), reportExecutionConfig);
-        putTestConfigToReportExecutionConfig(testConfig.get(PropertyCategory.SUITE), reportExecutionConfig);
-        putTestConfigToReportExecutionConfig(testConfig.get(PropertyCategory.ENVIRONMENT), reportExecutionConfig);
-        File targetFile = Paths.get(resultsDirectory.getPath(), "environment.properties").toFile();
-        new JavaPropsMapper().writeValue(targetFile, reportExecutionConfig);
-    }
+        Map<String, String> reportEnvironmentProperties = Stream.of(MetaDataCategory.values())
+                .map(MetaDataProvider::getMetaDataByCategory)
+                .flatMap(List::stream)
+                .filter(MetaDataEntry::isAddToReport)
+                .collect(Collectors.toMap(MetaDataEntry::getDescription, MetaDataEntry::getValue, (e1, e2) -> e1,
+                        LinkedHashMap::new));
 
-    private static void putTestConfigToReportExecutionConfig(List<StaticConfigurationDataEntry> testConfiguration,
-            Map<String, String> reportConfiguration)
-    {
-        testConfiguration.stream().filter(StaticConfigurationDataEntry::isAddToReport)
-                .forEach(c -> reportConfiguration.put(c.getDescription(), c.getValue()));
+        File targetFile = Paths.get(resultsDirectory.getPath(), "environment.properties").toFile();
+        new JavaPropsMapper().writeValue(targetFile, reportEnvironmentProperties);
     }
 
     private File resolveHistoryDir(File root)

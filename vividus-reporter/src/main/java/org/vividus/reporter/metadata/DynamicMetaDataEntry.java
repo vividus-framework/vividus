@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-package org.vividus.reporter.environment;
+package org.vividus.reporter.metadata;
 
 import java.util.regex.Pattern;
 
-public class DynamicConfigurationDataEntry extends ConfigurationDataEntry
+public class DynamicMetaDataEntry extends AbstractMetaDataEntry
 {
+    private String descriptionPattern;
     private Pattern propertyRegex;
+
+    public String getDescriptionPattern()
+    {
+        return descriptionPattern;
+    }
+
+    public void setDescriptionPattern(String descriptionPattern)
+    {
+        this.descriptionPattern = descriptionPattern;
+    }
 
     public Pattern getPropertyRegex()
     {

@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package org.vividus.reporter.environment;
+package org.vividus.reporter.metadata;
 
-public class StaticConfigurationDataEntry extends ConfigurationDataEntry
+public enum MetaDataCategory
 {
-    private String value;
-
-    public String getValue()
-    {
-        return value;
-    }
-
-    public void setValue(String value)
-    {
-        this.value = value;
-    }
+    CONFIGURATION,
+    PROFILE,
+    SUITE,
+    ENVIRONMENT,
+    VIVIDUS;
 }

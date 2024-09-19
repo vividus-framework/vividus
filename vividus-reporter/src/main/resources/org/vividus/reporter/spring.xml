@@ -22,7 +22,7 @@
         </property>
     </bean>
 
-    <bean id="environmentConfigurer" class="org.vividus.reporter.environment.EnvironmentConfigurer"
+    <bean id="environmentConfigurer" class="org.vividus.reporter.metadata.MetaDataProvider"
         lazy-init="false" init-method="init">
         <property name="propertyMapper" ref="propertyMapper" />
         <property name="propertyParser" ref="propertyParser" />

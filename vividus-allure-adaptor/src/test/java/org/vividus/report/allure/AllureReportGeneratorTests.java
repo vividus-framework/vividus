@@ -45,7 +45,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import com.github.valfirst.slf4jtest.LoggingEvent;
@@ -54,7 +53,6 @@ import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,9 +64,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.report.allure.notification.NotificationsSender;
-import org.vividus.reporter.environment.EnvironmentConfigurer;
-import org.vividus.reporter.environment.PropertyCategory;
-import org.vividus.reporter.environment.StaticConfigurationDataEntry;
+import org.vividus.reporter.metadata.MetaDataCategory;
+import org.vividus.reporter.metadata.MetaDataEntry;
+import org.vividus.reporter.metadata.MetaDataProvider;
 import org.vividus.util.property.PropertyMapper;
 
 import io.qameta.allure.Constants;
@@ -112,12 +110,6 @@ class AllureReportGeneratorTests
         System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
         allureReportGenerator = new AllureReportGenerator(VIVIDUS_REPORT, propertyMapper, resourcePatternResolver,
                 allurePluginsProvider, notificationsSender);
-    }
-
-    @AfterEach
-    void afterEach()
-    {
-        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(List::clear);
     }
 
     @Test
@@ -228,7 +220,7 @@ class AllureReportGeneratorTests
         Files.createDirectories(historyDirectory);
         allureReportGenerator.setHistoryDirectory(historyDirectory.toFile());
         allureReportGenerator.setReportDirectory(reportDirectory);
-        try (var fileUtils = mockStatic(FileUtils.class))
+        try (var fileUtils = mockStatic(FileUtils.class); var metaDataProvider = mockStatic(MetaDataProvider.class))
         {
             var text = "text";
             fileUtils.when(() -> FileUtils.readFileToString(any(File.class), eq(StandardCharsets.UTF_8))).thenReturn(
@@ -238,7 +230,7 @@ class AllureReportGeneratorTests
             var folder = mockResource("/allure-customization/folder/");
             Resource[] resources = { resource, folder };
             when(resourcePatternResolver.getResources(ALLURE_CUSTOMIZATION_PATTERN)).thenReturn(resources);
-            prepareEnvironmentConfiguration();
+            prepareEnvironmentProperties(metaDataProvider);
 
             allureReportGenerator.start();
             allureReportGenerator.end();
@@ -263,32 +255,33 @@ class AllureReportGeneratorTests
         }
     }
 
-    private void prepareEnvironmentConfiguration()
+    private void prepareEnvironmentProperties(MockedStatic<MetaDataProvider> metaDataProviderMock)
     {
-        StaticConfigurationDataEntry suite = new StaticConfigurationDataEntry();
+        MetaDataEntry suite = new MetaDataEntry();
         suite.setDescription("Suite");
         suite.setValue("allure-test");
-        StaticConfigurationDataEntry os = new StaticConfigurationDataEntry();
+        MetaDataEntry os = new MetaDataEntry();
         os.setDescription("Operating System");
         os.setValue("Mac OS X");
-        StaticConfigurationDataEntry filters = new StaticConfigurationDataEntry();
+        MetaDataEntry filters = new MetaDataEntry();
         filters.setDescription("Global Meta Filters");
         filters.setValue("groovy: !skip");
-        StaticConfigurationDataEntry page = new StaticConfigurationDataEntry();
+        MetaDataEntry page = new MetaDataEntry();
         page.setDescription("Main Application Page");
         page.setValue("https://vividus.dev/");
-        StaticConfigurationDataEntry browser = new StaticConfigurationDataEntry();
+        MetaDataEntry browser = new MetaDataEntry();
         browser.setDescription("Browser");
         browser.setValue("Chrome");
         browser.setAddToReport(false);
 
-        Map<PropertyCategory, List<StaticConfigurationDataEntry>> environmentConfiguration =
-                EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION;
-        environmentConfiguration.get(PropertyCategory.CONFIGURATION).add(suite);
-        environmentConfiguration.get(PropertyCategory.PROFILE).add(os);
-        environmentConfiguration.get(PropertyCategory.SUITE).add(filters);
-        environmentConfiguration.get(PropertyCategory.ENVIRONMENT).add(page);
-        environmentConfiguration.get(PropertyCategory.PROFILE).add(browser);
+        metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategory(MetaDataCategory.CONFIGURATION))
+                .thenReturn(List.of(suite));
+        metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategory(MetaDataCategory.PROFILE))
+                .thenReturn(List.of(os, browser));
+        metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategory(MetaDataCategory.SUITE))
+                .thenReturn(List.of(filters));
+        metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategory(MetaDataCategory.ENVIRONMENT))
+                .thenReturn(List.of(page));
     }
 
     private ExecutorInfo createExecutorInfo()

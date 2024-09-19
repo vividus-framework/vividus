@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,30 @@
  * limitations under the License.
  */
 
-package org.vividus.reporter.environment;
+package org.vividus.reporter.metadata;
 
-import org.apache.commons.text.WordUtils;
-
-public enum PropertyCategory
+public abstract class AbstractMetaDataEntry
 {
-    CONFIGURATION,
-    PROFILE,
-    SUITE,
-    ENVIRONMENT,
-    VIVIDUS;
+    private MetaDataCategory category;
+    private boolean addToReport = true;
 
-    public String getCategoryName()
+    public MetaDataCategory getCategory()
     {
-        return WordUtils.capitalize(name().toLowerCase());
+        return category;
+    }
+
+    public void setCategory(MetaDataCategory category)
+    {
+        this.category = category;
+    }
+
+    public boolean isAddToReport()
+    {
+        return addToReport;
+    }
+
+    public void setAddToReport(boolean addToReport)
+    {
+        this.addToReport = addToReport;
     }
 }
