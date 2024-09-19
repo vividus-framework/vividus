@@ -68,6 +68,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.report.allure.notification.NotificationsSender;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
+import org.vividus.reporter.environment.StaticConfigurationDataEntry;
 import org.vividus.util.property.PropertyMapper;
 
 import io.qameta.allure.Constants;
@@ -116,7 +117,7 @@ class AllureReportGeneratorTests
     @AfterEach
     void afterEach()
     {
-        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(Map::clear);
+        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(List::clear);
     }
 
     @Test
@@ -264,12 +265,30 @@ class AllureReportGeneratorTests
 
     private void prepareEnvironmentConfiguration()
     {
-        Map<PropertyCategory, Map<String, String>> environmentConfiguration =
+        StaticConfigurationDataEntry suite = new StaticConfigurationDataEntry();
+        suite.setDescription("Suite");
+        suite.setValue("allure-test");
+        StaticConfigurationDataEntry os = new StaticConfigurationDataEntry();
+        os.setDescription("Operating System");
+        os.setValue("Mac OS X");
+        StaticConfigurationDataEntry filters = new StaticConfigurationDataEntry();
+        filters.setDescription("Global Meta Filters");
+        filters.setValue("groovy: !skip");
+        StaticConfigurationDataEntry page = new StaticConfigurationDataEntry();
+        page.setDescription("Main Application Page");
+        page.setValue("https://vividus.dev/");
+        StaticConfigurationDataEntry browser = new StaticConfigurationDataEntry();
+        browser.setDescription("Browser");
+        browser.setValue("Chrome");
+        browser.setAddToReport(false);
+
+        Map<PropertyCategory, List<StaticConfigurationDataEntry>> environmentConfiguration =
                 EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION;
-        environmentConfiguration.get(PropertyCategory.CONFIGURATION).put("Suite", "allure-test");
-        environmentConfiguration.get(PropertyCategory.PROFILE).put("Operating System", "Mac OS X");
-        environmentConfiguration.get(PropertyCategory.SUITE).put("Global Meta Filters", "groovy: !skip");
-        environmentConfiguration.get(PropertyCategory.ENVIRONMENT).put("Main Application Page", "https://vividus.dev/");
+        environmentConfiguration.get(PropertyCategory.CONFIGURATION).add(suite);
+        environmentConfiguration.get(PropertyCategory.PROFILE).add(os);
+        environmentConfiguration.get(PropertyCategory.SUITE).add(filters);
+        environmentConfiguration.get(PropertyCategory.ENVIRONMENT).add(page);
+        environmentConfiguration.get(PropertyCategory.PROFILE).add(browser);
     }
 
     private ExecutorInfo createExecutorInfo()

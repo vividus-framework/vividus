@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Set;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vividus.reporter.environment.ConfigurationDataEntry;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
 import org.vividus.results.ResultsProvider;
@@ -82,26 +82,28 @@ public final class TestInfoLogger
             int maxKeyLength = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION
                     .values()
                     .stream()
-                    .map(Map::keySet)
-                    .flatMap(Set::stream)
+                    .flatMap(List::stream)
+                    .map(ConfigurationDataEntry::getDescription)
                     .mapToInt(String::length)
                     .max().orElse(0);
             String propertyFormat = "   %-" + maxKeyLength + "s %s%n";
             try (Formatter message = new Formatter())
             {
                 message.format(NEW_LINE);
-                EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.forEach((category, properties) -> {
-                    if (category == PropertyCategory.CONFIGURATION && properties.get(CONFIGURATION_SET) != null)
+                EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.forEach((category, config) -> {
+                    Map<String, String> dataForCategory = EnvironmentConfigurer.getConfigurationDataAsMap(config);
+                    if (category == PropertyCategory.CONFIGURATION && dataForCategory.get(CONFIGURATION_SET) != null)
                     {
                         String configurationSetFormat = "%s%n %-" + maxKeyLength + "s   %s%n";
                         message.format(configurationSetFormat, HORIZONTAL_RULE, "Configuration set:",
-                            properties.remove(CONFIGURATION_SET));
+                                dataForCategory.get(CONFIGURATION_SET));
+                        config.removeIf(e -> CONFIGURATION_SET.equals(e.getDescription()));
                     }
                     else
                     {
                         message.format(CATEGORY_FORMAT, HORIZONTAL_RULE, category.getCategoryName());
                     }
-                    properties.forEach((name, value) -> message.format(propertyFormat, name, value));
+                    config.forEach(c -> message.format(propertyFormat, c.getDescription(), c.getValue()));
                 });
                 logExecutionStatistics(message);
                 return message.toString();

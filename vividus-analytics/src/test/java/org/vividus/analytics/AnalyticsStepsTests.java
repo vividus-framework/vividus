@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.vividus.analytics.model.AnalyticsEvent;
 import org.vividus.analytics.model.AnalyticsEventBatch;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
+import org.vividus.reporter.environment.StaticConfigurationDataEntry;
 import org.vividus.results.ResultsProvider;
 import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Statistic;
@@ -78,13 +79,13 @@ class AnalyticsStepsTests
     @BeforeEach
     void beforeEach()
     {
-        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(Map::clear);
+        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(List::clear);
     }
 
     @AfterEach
     void afterEach()
     {
-        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(Map::clear);
+        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(List::clear);
     }
 
     @Test
@@ -110,10 +111,18 @@ class AnalyticsStepsTests
     {
         configureCommonProperties();
         String vividusVersion = "0.1.1";
-        EnvironmentConfigurer.addProperty(PropertyCategory.VIVIDUS, VIVIDUS, vividusVersion);
+        StaticConfigurationDataEntry vividusVersionConfig = new StaticConfigurationDataEntry();
+        vividusVersionConfig.setCategory(PropertyCategory.VIVIDUS);
+        vividusVersionConfig.setDescription(VIVIDUS);
+        vividusVersionConfig.setValue(vividusVersion);
+        EnvironmentConfigurer.addConfigurationDataEntry(vividusVersionConfig);
         String plugin = "vividus-plugin-web-ui";
         String pluginVersion = "0.1.2";
-        EnvironmentConfigurer.addProperty(PropertyCategory.VIVIDUS, plugin, pluginVersion);
+        StaticConfigurationDataEntry pluginVersionConfig = new StaticConfigurationDataEntry();
+        pluginVersionConfig.setCategory(PropertyCategory.VIVIDUS);
+        pluginVersionConfig.setDescription(plugin);
+        pluginVersionConfig.setValue(pluginVersion);
+        EnvironmentConfigurer.addConfigurationDataEntry(pluginVersionConfig);
         reporter.postBeforeStoriesAnalytics();
 
         Statistic storyStatistics = mock(Statistic.class);
@@ -178,7 +187,15 @@ class AnalyticsStepsTests
 
     private void configureCommonProperties()
     {
-        EnvironmentConfigurer.addProperty(PropertyCategory.CONFIGURATION, "Profiles", "web/desktop/chrome");
-        EnvironmentConfigurer.addProperty(PropertyCategory.PROFILE, "Remote Execution", "ON");
+        StaticConfigurationDataEntry profilesConfig = new StaticConfigurationDataEntry();
+        profilesConfig.setCategory(PropertyCategory.CONFIGURATION);
+        profilesConfig.setDescription("Profiles");
+        profilesConfig.setValue("web/desktop/chrome");
+        EnvironmentConfigurer.addConfigurationDataEntry(profilesConfig);
+        StaticConfigurationDataEntry remoteConfig = new StaticConfigurationDataEntry();
+        profilesConfig.setCategory(PropertyCategory.PROFILE);
+        profilesConfig.setDescription("Remote Execution");
+        profilesConfig.setValue("ON");
+        EnvironmentConfigurer.addConfigurationDataEntry(remoteConfig);
     }
 }

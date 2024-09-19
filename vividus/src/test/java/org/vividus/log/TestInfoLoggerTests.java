@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
 import org.vividus.reporter.environment.EnvironmentConfigurer;
 import org.vividus.reporter.environment.PropertyCategory;
+import org.vividus.reporter.environment.StaticConfigurationDataEntry;
 import org.vividus.results.ResultsProvider;
 import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Failure;
@@ -134,7 +135,10 @@ class TestInfoLoggerTests
     @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "PMD.AvoidDuplicateLiterals"})
     void shouldLogMetadataWithConfigurationSet()
     {
-        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.get(PropertyCategory.CONFIGURATION).put("Set", "active");
+        StaticConfigurationDataEntry setConfig = new StaticConfigurationDataEntry();
+        setConfig.setDescription("Set");
+        setConfig.setValue("active");
+        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.get(PropertyCategory.CONFIGURATION).add(setConfig);
         shouldLogMetadata(" Configuration set:\\s+active\\s+", "", Optional.empty());
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.vividus.reporter.environment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.AfterEach;
@@ -38,8 +38,9 @@ import org.vividus.util.property.PropertyMappedCollection;
 class EnvironmentConfigurerTests
 {
     private static final String PREFIX = "environment-configurer.";
-    private static final String DYNAMIC = "dynamic";
-    private static final String DYNAMIC_PROPERTY_PREFIX = PREFIX + DYNAMIC + ".";
+    private static final String DYNAMIC_PROPERTY_PREFIX = PREFIX + "dynamic" + ".";
+    private static final String STATIC_PROPERTY_PREFIX = PREFIX + "static" + '.';
+    private static final String KEY = "Some Key";
     private static final String VALUE = "value";
 
     @Mock
@@ -54,29 +55,32 @@ class EnvironmentConfigurerTests
     @BeforeEach
     void beforeEach()
     {
-        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(Map::clear);
+        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(List::clear);
     }
 
     @AfterEach
     void afterEach()
     {
-        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(Map::clear);
+        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.values().forEach(List::clear);
     }
 
     @Test
     void testInit() throws Exception
     {
+        StaticConfigurationDataEntry vividusConfig = new StaticConfigurationDataEntry();
+        vividusConfig.setCategory(PropertyCategory.VIVIDUS);
+        vividusConfig.setDescription(KEY);
+        vividusConfig.setValue(VALUE);
+
         PropertyCategory category = PropertyCategory.VIVIDUS;
-        when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicEnvironmentConfigurationProperty.class))
+        when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicConfigurationDataEntry.class))
                 .thenReturn(new PropertyMappedCollection<>(Map.of()));
-        when(propertyMapper.readValues(PREFIX, Map.class)).thenReturn(new PropertyMappedCollection<>(
-                Map.of(
-                        PropertyCategory.VIVIDUS.toString(), Map.of("some-key", VALUE),
-                        DYNAMIC, Map.of(DYNAMIC, VALUE))
-        ));
+        when(propertyMapper.readValues(STATIC_PROPERTY_PREFIX, StaticConfigurationDataEntry.class))
+                .thenReturn(new PropertyMappedCollection<>(Map.of(PropertyCategory.VIVIDUS.toString(), vividusConfig)));
         environmentConfigurer.init();
-        Map<String, String> vividusProps = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.get(category);
-        assertEquals(Map.of("Some Key", VALUE), vividusProps);
+        List<StaticConfigurationDataEntry> vividusConfigurationList = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION
+                .get(category);
+        assertEquals(List.of(vividusConfig), vividusConfigurationList);
     }
 
     @Test
@@ -86,19 +90,21 @@ class EnvironmentConfigurerTests
         String propertyKey = "propertyWithoutRegex";
         Pattern propertyWithoutRegex = Pattern.compile(propertyKey);
         PropertyCategory category = PropertyCategory.VIVIDUS;
-        DynamicEnvironmentConfigurationProperty dynamicProperty = new DynamicEnvironmentConfigurationProperty();
+        DynamicConfigurationDataEntry dynamicProperty = new DynamicConfigurationDataEntry();
         dynamicProperty.setCategory(category);
-        dynamicProperty.setDescriptionPattern(descriptionPattern);
+        dynamicProperty.setDescription(descriptionPattern);
         dynamicProperty.setPropertyRegex(propertyWithoutRegex);
-        when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicEnvironmentConfigurationProperty.class))
+        when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicConfigurationDataEntry.class))
                 .thenReturn(new PropertyMappedCollection<>(Map.of(VALUE, dynamicProperty)));
-        when(propertyMapper.readValues(PREFIX, Map.class)).thenReturn(new PropertyMappedCollection<>(Map.of()));
+        when(propertyMapper.readValues(STATIC_PROPERTY_PREFIX, StaticConfigurationDataEntry.class))
+                .thenReturn(new PropertyMappedCollection<>(Map.of()));
         when(propertyParser.getPropertiesByRegex(propertyWithoutRegex)).thenReturn(Map.of(propertyKey, VALUE));
         environmentConfigurer.init();
-        Map<String, String> vividusProps = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.get(category);
-        assertEquals(1, vividusProps.size());
-        Entry<String, String> entry = vividusProps.entrySet().iterator().next();
-        assertEquals(descriptionPattern, entry.getKey());
+        List<StaticConfigurationDataEntry> vividusConfigurationList = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION
+                .get(category);
+        assertEquals(1, vividusConfigurationList.size());
+        StaticConfigurationDataEntry entry = vividusConfigurationList.iterator().next();
+        assertEquals(descriptionPattern, entry.getDescription());
         assertEquals(VALUE, entry.getValue());
     }
 
@@ -108,21 +114,23 @@ class EnvironmentConfigurerTests
         String descriptionPattern = "description %s Pattern";
         Pattern propertyRegex = Pattern.compile("property(.*)regex");
         PropertyCategory category = PropertyCategory.VIVIDUS;
-        DynamicEnvironmentConfigurationProperty dynamicProperty = new DynamicEnvironmentConfigurationProperty();
+        DynamicConfigurationDataEntry dynamicProperty = new DynamicConfigurationDataEntry();
         dynamicProperty.setCategory(category);
-        dynamicProperty.setDescriptionPattern(descriptionPattern);
+        dynamicProperty.setDescription(descriptionPattern);
         dynamicProperty.setPropertyRegex(propertyRegex);
-        when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicEnvironmentConfigurationProperty.class))
+        when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicConfigurationDataEntry.class))
                 .thenReturn(new PropertyMappedCollection<>(Map.of(VALUE, dynamicProperty)));
-        when(propertyMapper.readValues(PREFIX, Map.class)).thenReturn(new PropertyMappedCollection<>(Map.of()));
+        when(propertyMapper.readValues(STATIC_PROPERTY_PREFIX, StaticConfigurationDataEntry.class))
+                .thenReturn(new PropertyMappedCollection<>(Map.of()));
         String index = "123";
         when(propertyParser.getPropertiesByRegex(propertyRegex)).thenReturn(
                 Map.of("property" + index + "regex", VALUE));
         environmentConfigurer.init();
-        Map<String, String> vividusProps = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.get(category);
-        assertEquals(1, vividusProps.size());
-        Entry<String, String> entry = vividusProps.entrySet().iterator().next();
-        assertEquals(String.format(descriptionPattern, index), entry.getKey());
+        List<StaticConfigurationDataEntry> vividusConfigurationList = EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION
+                .get(category);
+        assertEquals(1, vividusConfigurationList.size());
+        StaticConfigurationDataEntry entry = vividusConfigurationList.iterator().next();
+        assertEquals(String.format(descriptionPattern, index), entry.getDescription());
         assertEquals(VALUE, entry.getValue());
     }
 
@@ -130,7 +138,18 @@ class EnvironmentConfigurerTests
     void testAddPropertyNullKey()
     {
         PropertyCategory category = PropertyCategory.VIVIDUS;
-        EnvironmentConfigurer.addProperty(category, null, null);
+        StaticConfigurationDataEntry config = new StaticConfigurationDataEntry();
+        config.setCategory(category);
+        EnvironmentConfigurer.addConfigurationDataEntry(config);
         assertEquals(0, EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.get(category).size());
+    }
+
+    @Test
+    void testGetConfigurationDataAsMap()
+    {
+        StaticConfigurationDataEntry config = new StaticConfigurationDataEntry();
+        config.setDescription(KEY);
+        config.setValue(VALUE);
+        assertEquals(Map.of(KEY, VALUE), EnvironmentConfigurer.getConfigurationDataAsMap(List.of(config)));
     }
 }

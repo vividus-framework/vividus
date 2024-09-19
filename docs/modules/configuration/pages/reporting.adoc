@@ -41,6 +41,59 @@ report.translations.en.chart.duration.empty=No data to display
 
 |===
 
+== Add custom information
+
+VIVIDUS allows to add custom data to be displayed in the report.
+
+Static data format:
+[source,properties]
+----
+environment-configurer.static.<data-identifier>.description=<description>
+environment-configurer.static.<data-identifier>.value=<value>
+environment-configurer.static.<data-identifier>.category=<category>
+environment-configurer.static.<data-identifier>.add-to-report=<show-in-report>
+----
+
+where:
+
+* `data-identifier` - The unique identifier of data configuration.
+* `description` - The description of the data to be used in the report.
+* `value` - The data value.
+* `category` - The category under which the data will be published. Available values `ENVIRONMENT`, `SUITE`, `PROFILE`, `CONFIGURATION`.
+* `show-in-report` - Whether to show data in the report (optional value, default `true`). It can be useful if necessary to show data in the end of test execution log, but hide in the report.
+
+.Enable reporting of user's variable `visual-action`
+[source,properties]
+----
+environment-configurer.static.visual-action.description=Visual Action
+environment-configurer.static.visual-action.value=${variables.visual-action}
+environment-configurer.static.visual-action.category=ENVIRONMENT
+----
+
+Dynamic data format:
+[source,properties]
+----
+environment-configurer.dynamic.<data-identifier>.description=<description-pattern>
+environment-configurer.dynamic.<data-identifier>.propertyRegex=<property-regex>
+environment-configurer.dynamic.<data-identifier>.category=<category>
+environment-configurer.dynamic.<data-identifier>.add-to-report=<show-in-report>
+----
+
+where:
+
+* `data-identifier` - The unique identifier of data configuration.
+* `description-pattern` - The pattern according to which the data's description for report will be generated.
+* `property-regex` - The regular expression for properties with dynamic data.
+* `category` - The category under which the data will be published. Available values `ENVIRONMENT`, `SUITE`, `PROFILE`, `CONFIGURATION`.
+* `show-in-report` - Whether to show data in the report (optional value, default `true`). It can be useful if necessary to show data in the end of test execution log, but hide in the report.
+
+.Enable reporting of locations for all batches
+[source,properties]
+----
+environment-configurer.dynamic.batch-location.description=Batch %s Location
+environment-configurer.dynamic.batch-location.property-regex=batch-(.+).resource-location
+environment-configurer.dynamic.batch-location.category=SUITE
+----
 
 == Add external links to report
 
