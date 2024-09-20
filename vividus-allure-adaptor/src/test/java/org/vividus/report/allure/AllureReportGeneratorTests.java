@@ -64,9 +64,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.vividus.report.allure.notification.NotificationsSender;
-import org.vividus.reporter.metadata.MetaDataCategory;
-import org.vividus.reporter.metadata.MetaDataEntry;
-import org.vividus.reporter.metadata.MetaDataProvider;
+import org.vividus.reporter.metadata.MetadataCategory;
+import org.vividus.reporter.metadata.MetadataEntry;
+import org.vividus.reporter.metadata.MetadataProvider;
 import org.vividus.util.property.PropertyMapper;
 
 import io.qameta.allure.Constants;
@@ -220,7 +220,7 @@ class AllureReportGeneratorTests
         Files.createDirectories(historyDirectory);
         allureReportGenerator.setHistoryDirectory(historyDirectory.toFile());
         allureReportGenerator.setReportDirectory(reportDirectory);
-        try (var fileUtils = mockStatic(FileUtils.class); var metaDataProvider = mockStatic(MetaDataProvider.class))
+        try (var fileUtils = mockStatic(FileUtils.class); var metadataProvider = mockStatic(MetadataProvider.class))
         {
             var text = "text";
             fileUtils.when(() -> FileUtils.readFileToString(any(File.class), eq(StandardCharsets.UTF_8))).thenReturn(
@@ -230,7 +230,7 @@ class AllureReportGeneratorTests
             var folder = mockResource("/allure-customization/folder/");
             Resource[] resources = { resource, folder };
             when(resourcePatternResolver.getResources(ALLURE_CUSTOMIZATION_PATTERN)).thenReturn(resources);
-            prepareEnvironmentProperties(metaDataProvider);
+            prepareEnvironmentProperties(metadataProvider);
 
             allureReportGenerator.start();
             allureReportGenerator.end();
@@ -255,32 +255,32 @@ class AllureReportGeneratorTests
         }
     }
 
-    private void prepareEnvironmentProperties(MockedStatic<MetaDataProvider> metaDataProviderMock)
+    private void prepareEnvironmentProperties(MockedStatic<MetadataProvider> metadataProviderMock)
     {
-        MetaDataEntry suite = new MetaDataEntry();
-        suite.setDescription("Suite");
+        var suite = new MetadataEntry();
+        suite.setName("Suite");
         suite.setValue("allure-test");
-        MetaDataEntry os = new MetaDataEntry();
-        os.setDescription("Operating System");
+        var os = new MetadataEntry();
+        os.setName("Operating System");
         os.setValue("Mac OS X");
-        MetaDataEntry filters = new MetaDataEntry();
-        filters.setDescription("Global Meta Filters");
+        var filters = new MetadataEntry();
+        filters.setName("Global Meta Filters");
         filters.setValue("groovy: !skip");
-        MetaDataEntry page = new MetaDataEntry();
-        page.setDescription("Main Application Page");
+        var page = new MetadataEntry();
+        page.setName("Main Application Page");
         page.setValue("https://vividus.dev/");
-        MetaDataEntry browser = new MetaDataEntry();
-        browser.setDescription("Browser");
+        var browser = new MetadataEntry();
+        browser.setName("Browser");
         browser.setValue("Chrome");
-        browser.setAddToReport(false);
+        browser.setShowInReport(false);
 
-        metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategory(MetaDataCategory.CONFIGURATION))
+        metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategory(MetadataCategory.CONFIGURATION))
                 .thenReturn(List.of(suite));
-        metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategory(MetaDataCategory.PROFILE))
+        metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategory(MetadataCategory.PROFILE))
                 .thenReturn(List.of(os, browser));
-        metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategory(MetaDataCategory.SUITE))
+        metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategory(MetadataCategory.SUITE))
                 .thenReturn(List.of(filters));
-        metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategory(MetaDataCategory.ENVIRONMENT))
+        metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategory(MetadataCategory.ENVIRONMENT))
                 .thenReturn(List.of(page));
     }
 

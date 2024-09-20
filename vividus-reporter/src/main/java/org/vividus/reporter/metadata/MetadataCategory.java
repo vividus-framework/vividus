@@ -16,30 +16,11 @@
 
 package org.vividus.reporter.metadata;
 
-import java.util.regex.Pattern;
-
-public class DynamicMetaDataEntry extends AbstractMetaDataEntry
+public enum MetadataCategory
 {
-    private String descriptionPattern;
-    private Pattern propertyRegex;
-
-    public String getDescriptionPattern()
-    {
-        return descriptionPattern;
-    }
-
-    public void setDescriptionPattern(String descriptionPattern)
-    {
-        this.descriptionPattern = descriptionPattern;
-    }
-
-    public Pattern getPropertyRegex()
-    {
-        return propertyRegex;
-    }
-
-    public void setPropertyRegex(Pattern propertyRegex)
-    {
-        this.propertyRegex = propertyRegex;
-    }
+    CONFIGURATION,
+    PROFILE,
+    SUITE,
+    ENVIRONMENT,
+    VIVIDUS;
 }

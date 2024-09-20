@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -38,7 +39,7 @@ import org.vividus.util.property.PropertyMappedCollection;
 @ExtendWith(MockitoExtension.class)
 class MetaDataProviderTests
 {
-    private static final String PREFIX = "meta-data.";
+    private static final String PREFIX = "metadata.";
     private static final String DYNAMIC_PROPERTY_PREFIX = PREFIX + "dynamic" + ".";
     private static final String STATIC_PROPERTY_PREFIX = PREFIX + "static" + '.';
     private static final String KEY = "Some Key";
@@ -46,94 +47,94 @@ class MetaDataProviderTests
 
     @Mock private IPropertyMapper propertyMapper;
     @Mock private IPropertyParser propertyParser;
-    @InjectMocks private MetaDataProvider metaDataProvider;
+    @InjectMocks private MetadataProvider metadataProvider;
 
     @BeforeEach
     void beforeEach()
     {
-        MetaDataProvider.reset();
+        MetadataProvider.reset();
     }
 
     @AfterEach
     void afterEach()
     {
-        MetaDataProvider.reset();
+        MetadataProvider.reset();
     }
 
     @Test
-    void testInit() throws Exception
+    void testInit() throws IOException
     {
-        MetaDataCategory category = MetaDataCategory.CONFIGURATION;
-        MetaDataEntry metaDataEntry = new MetaDataEntry();
-        metaDataEntry.setCategory(category);
-        metaDataEntry.setDescription(KEY);
-        metaDataEntry.setValue(VALUE);
+        var category = MetadataCategory.CONFIGURATION;
+        var metadataEntry = new MetadataEntry();
+        metadataEntry.setCategory(category);
+        metadataEntry.setName(KEY);
+        metadataEntry.setValue(VALUE);
 
-        when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicMetaDataEntry.class)).thenReturn(
+        when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicMetadataEntry.class)).thenReturn(
                 new PropertyMappedCollection<>(Map.of()));
-        when(propertyMapper.readValues(STATIC_PROPERTY_PREFIX, MetaDataEntry.class)).thenReturn(
-                new PropertyMappedCollection<>(Map.of(category.toString(), metaDataEntry)));
-        metaDataProvider.init();
+        when(propertyMapper.readValues(STATIC_PROPERTY_PREFIX, MetadataEntry.class)).thenReturn(
+                new PropertyMappedCollection<>(Map.of(category.toString(), metadataEntry)));
+        metadataProvider.init();
 
         assertAll(
-                () -> assertEquals(List.of(metaDataEntry), MetaDataProvider.getMetaDataByCategory(category)),
-                () -> assertEquals(Map.of(KEY, VALUE), MetaDataProvider.getMetaDataByCategoryAsMap(category))
+                () -> assertEquals(List.of(metadataEntry), MetadataProvider.getMetaDataByCategory(category)),
+                () -> assertEquals(Map.of(KEY, VALUE), MetadataProvider.getMetaDataByCategoryAsMap(category))
         );
     }
 
     @Test
-    void testInitDynamicNoRegex() throws Exception
+    void testInitDynamicNoRegex() throws IOException
     {
-        String descriptionPattern = "descriptionPattern";
-        String propertyKey = "propertyWithoutRegex";
-        Pattern propertyWithoutRegex = Pattern.compile(propertyKey);
-        MetaDataCategory category = MetaDataCategory.VIVIDUS;
-        DynamicMetaDataEntry dynamicProperty = new DynamicMetaDataEntry();
-        dynamicProperty.setCategory(category);
-        dynamicProperty.setDescriptionPattern(descriptionPattern);
-        dynamicProperty.setPropertyRegex(propertyWithoutRegex);
-        when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicMetaDataEntry.class))
-                .thenReturn(new PropertyMappedCollection<>(Map.of(VALUE, dynamicProperty)));
-        when(propertyMapper.readValues(STATIC_PROPERTY_PREFIX, MetaDataEntry.class))
+        var namePattern = "namePattern";
+        var propertyKey = "propertyWithoutRegex";
+        var propertyWithoutRegex = Pattern.compile(propertyKey);
+        var category = MetadataCategory.VIVIDUS;
+        var dynamicMetadataEntry = new DynamicMetadataEntry();
+        dynamicMetadataEntry.setCategory(category);
+        dynamicMetadataEntry.setNamePattern(namePattern);
+        dynamicMetadataEntry.setPropertyRegex(propertyWithoutRegex);
+        when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicMetadataEntry.class))
+                .thenReturn(new PropertyMappedCollection<>(Map.of(VALUE, dynamicMetadataEntry)));
+        when(propertyMapper.readValues(STATIC_PROPERTY_PREFIX, MetadataEntry.class))
                 .thenReturn(new PropertyMappedCollection<>(Map.of()));
         when(propertyParser.getPropertiesByRegex(propertyWithoutRegex)).thenReturn(Map.of(propertyKey, VALUE));
-        metaDataProvider.init();
-        List<MetaDataEntry> vividusMetaData = MetaDataProvider.getMetaDataByCategory(category);
+        metadataProvider.init();
+        List<MetadataEntry> vividusMetaData = MetadataProvider.getMetaDataByCategory(category);
         assertEquals(1, vividusMetaData.size());
-        MetaDataEntry entry = vividusMetaData.iterator().next();
-        assertEquals(descriptionPattern, entry.getDescription());
+        MetadataEntry entry = vividusMetaData.iterator().next();
+        assertEquals(namePattern, entry.getName());
         assertEquals(VALUE, entry.getValue());
     }
 
     @Test
     void testInitDynamicRegex() throws Exception
     {
-        String descriptionPattern = "description %s Pattern";
-        Pattern propertyRegex = Pattern.compile("property(.*)regex");
-        MetaDataCategory category = MetaDataCategory.VIVIDUS;
-        DynamicMetaDataEntry dynamicProperty = new DynamicMetaDataEntry();
-        dynamicProperty.setCategory(category);
-        dynamicProperty.setDescriptionPattern(descriptionPattern);
-        dynamicProperty.setPropertyRegex(propertyRegex);
-        when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicMetaDataEntry.class))
-                .thenReturn(new PropertyMappedCollection<>(Map.of(VALUE, dynamicProperty)));
-        when(propertyMapper.readValues(STATIC_PROPERTY_PREFIX, MetaDataEntry.class))
+        var namePattern = "Name %s Pattern";
+        var propertyRegex = Pattern.compile("property(.*)regex");
+        var category = MetadataCategory.VIVIDUS;
+        var dynamicMetadataEntry = new DynamicMetadataEntry();
+        dynamicMetadataEntry.setCategory(category);
+        dynamicMetadataEntry.setNamePattern(namePattern);
+        dynamicMetadataEntry.setPropertyRegex(propertyRegex);
+        when(propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicMetadataEntry.class))
+                .thenReturn(new PropertyMappedCollection<>(Map.of(VALUE, dynamicMetadataEntry)));
+        when(propertyMapper.readValues(STATIC_PROPERTY_PREFIX, MetadataEntry.class))
                 .thenReturn(new PropertyMappedCollection<>(Map.of()));
-        String index = "123";
+        var index = "123";
         when(propertyParser.getPropertiesByRegex(propertyRegex)).thenReturn(
                 Map.of("property" + index + "regex", VALUE));
-        metaDataProvider.init();
-        List<MetaDataEntry> vividusMetaData = MetaDataProvider.getMetaDataByCategory(category);
+        metadataProvider.init();
+        List<MetadataEntry> vividusMetaData = MetadataProvider.getMetaDataByCategory(category);
         assertEquals(1, vividusMetaData.size());
-        MetaDataEntry entry = vividusMetaData.iterator().next();
-        assertEquals(String.format(descriptionPattern, index), entry.getDescription());
+        MetadataEntry entry = vividusMetaData.iterator().next();
+        assertEquals(String.format(namePattern, index), entry.getName());
         assertEquals(VALUE, entry.getValue());
     }
 
     @Test
     void testAddPropertyNullKey()
     {
-        MetaDataProvider.addVividusMetaData(null, null);
-        assertEquals(0, MetaDataProvider.getMetaDataByCategory(MetaDataCategory.VIVIDUS).size());
+        MetadataProvider.addVividusMetaData(null, null);
+        assertEquals(0, MetadataProvider.getMetaDataByCategory(MetadataCategory.VIVIDUS).size());
     }
 }

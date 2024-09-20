@@ -32,9 +32,9 @@ import java.util.stream.Stream;
 import org.apache.commons.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.reporter.metadata.MetaDataCategory;
-import org.vividus.reporter.metadata.MetaDataEntry;
-import org.vividus.reporter.metadata.MetaDataProvider;
+import org.vividus.reporter.metadata.MetadataCategory;
+import org.vividus.reporter.metadata.MetadataEntry;
+import org.vividus.reporter.metadata.MetadataProvider;
 import org.vividus.results.ResultsProvider;
 import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Failure;
@@ -81,19 +81,19 @@ public final class TestInfoLogger
     {
         logInfoMessage(() ->
         {
-            int maxKeyLength = Stream.of(MetaDataCategory.values())
-                    .map(MetaDataProvider::getMetaDataByCategory)
+            int maxKeyLength = Stream.of(MetadataCategory.values())
+                    .map(MetadataProvider::getMetaDataByCategory)
                     .flatMap(List::stream)
-                    .map(MetaDataEntry::getDescription)
+                    .map(MetadataEntry::getName)
                     .mapToInt(String::length)
                     .max().orElse(0);
             String propertyFormat = "   %-" + maxKeyLength + "s %s%n";
             try (Formatter message = new Formatter())
             {
                 message.format(NEW_LINE);
-                Stream.of(MetaDataCategory.values()).forEach(category -> {
-                    Map<String, String> asMap = MetaDataProvider.getMetaDataByCategoryAsMap(category);
-                    if (category == MetaDataCategory.CONFIGURATION && asMap.get(CONFIGURATION_SET) != null)
+                Stream.of(MetadataCategory.values()).forEach(category -> {
+                    Map<String, String> asMap = MetadataProvider.getMetaDataByCategoryAsMap(category);
+                    if (category == MetadataCategory.CONFIGURATION && asMap.get(CONFIGURATION_SET) != null)
                     {
                         String configurationSetFormat = "%s%n %-" + maxKeyLength + "s   %s%n";
                         message.format(configurationSetFormat, HORIZONTAL_RULE, "Configuration set:",
@@ -103,7 +103,7 @@ public final class TestInfoLogger
                     else
                     {
                         String categoryName = category.name();
-                        if (category != MetaDataCategory.VIVIDUS)
+                        if (category != MetadataCategory.VIVIDUS)
                         {
                             categoryName = WordUtils.capitalize(categoryName.toLowerCase());
                         }

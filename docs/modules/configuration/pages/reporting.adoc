@@ -41,58 +41,74 @@ report.translations.en.chart.duration.empty=No data to display
 
 |===
 
-== Add custom information
+== Add metadata
 
-VIVIDUS allows to add custom data to be displayed in the report.
+It is allowed to add metadata to be displayed in the report and the output logs. There are 2 types of metadata
+configuration: static and dynamic.
 
-Static data format:
+=== Static metadata
+
+To add custom metadata the following properties are needed to be set:
 [source,properties]
 ----
-meta-data.static.<data-identifier>.description=<description>
-meta-data.static.<data-identifier>.value=<value>
-meta-data.static.<data-identifier>.category=<category>
-meta-data.static.<data-identifier>.add-to-report=<show-in-report>
+metadata.static.<data-identifier>.name=<name>
+metadata.static.<data-identifier>.value=<value>
+metadata.static.<data-identifier>.category=<category>
+metadata.static.<data-identifier>.show-in-report=<true or false>
 ----
 
 where:
 
-* `data-identifier` - The unique identifier of data configuration.
-* `description` - The description of the data to be used in the report.
-* `value` - The data value.
-* `category` - The category under which the data will be published. Available values `ENVIRONMENT`, `SUITE`, `PROFILE`, `CONFIGURATION`.
-* `show-in-report` - Whether to show data in the report (optional value, default `true`). It can be useful if necessary to show data in the end of test execution log, but hide in the report.
+* `data-identifier` - The unique identifier of metadata configuration (It is to group information about single metadata
+entry and not used in the report or the output logs).
+* `name` - The short name of the metadata entry.
+* `value` - The actual metadata value to be shown.
+* `category` - The category under which the metadata will be published. Available values `ENVIRONMENT`, `SUITE`,
+`PROFILE`, `CONFIGURATION`.
+* `show-in-report` - Whether to show metadata in the report (optional value, default `true`). It can be useful if
+necessary to show metadata in the end of test execution log, but hide in the report.
 
-.Enable reporting of user's variable `visual-action`
+.Enable reporting of global variable `visual-action`
 [source,properties]
 ----
-meta-data.static.visual-action.description=Visual Action
-meta-data.static.visual-action.value=${variables.visual-action}
-meta-data.static.visual-action.category=ENVIRONMENT
+metadata.static.visual-action.name=Visual Action
+metadata.static.visual-action.value=${variables.visual-action}
+metadata.static.visual-action.category=ENVIRONMENT
 ----
 
-Dynamic data format:
+=== Dynamic metadata
+
+Sometimes it might be needed to add custom metadata which should be mapped to dynamic properties (e.g. batches
+configuration), in this case the following properties are needed to be set:
+
 [source,properties]
 ----
-meta-data.dynamic.<data-identifier>.description-pattern=<description-pattern>
-meta-data.dynamic.<data-identifier>.property-regex=<property-regex>
-meta-data.dynamic.<data-identifier>.category=<category>
-meta-data.dynamic.<data-identifier>.add-to-report=<show-in-report>
+metadata.dynamic.<data-identifier>.name-pattern=<name-pattern>
+metadata.dynamic.<data-identifier>.property-regex=<property-regex>
+metadata.dynamic.<data-identifier>.category=<category>
+metadata.dynamic.<data-identifier>.show-in-report=<true or false>
 ----
 
 where:
 
-* `data-identifier` - The unique identifier of data configuration.
-* `description-pattern` - The pattern according to which the data's description for report will be generated.
-* `property-regex` - The regular expression for properties with dynamic data.
-* `category` - The category under which the data will be published. Available values `ENVIRONMENT`, `SUITE`, `PROFILE`, `CONFIGURATION`.
-* `show-in-report` - Whether to show data in the report (optional value, default `true`). It can be useful if necessary to show data in the end of test execution log, but hide in the report.
+* `data-identifier` - The unique identifier of metadata configuration (It is to group information about single metadata
+entry and not used in the report or the output logs).
+* `name-pattern` - The pattern according to which the metadata name will be generated. The pattern can use a special
+placeholder `%s` which will be replaced with a value of the first captured group from the property regular expression
+described below.
+* `property-regex` - The regular expression to find properties by key. The first captured group can be used in the name
+pattern.
+* `category` - The category under which the metadata will be published. Available values `ENVIRONMENT`, `SUITE`,
+`PROFILE`, `CONFIGURATION`.
+* `show-in-report` - Whether to show metadata in the report (optional value, default `true`). It can be useful if
+necessary to show metadata in the end of test execution log, but hide in the report.
 
 .Enable reporting of locations for all batches
 [source,properties]
 ----
-meta-data.dynamic.batch-location.description-pattern=Batch %s Location
-meta-data.dynamic.batch-location.property-regex=batch-(.+).resource-location
-meta-data.dynamic.batch-location.category=SUITE
+metadata.dynamic.batch-location.name-pattern=Batch %s Location
+metadata.dynamic.batch-location.property-regex=batch-(.+).resource-location
+metadata.dynamic.batch-location.category=SUITE
 ----
 
 == Add external links to report

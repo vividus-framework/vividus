@@ -16,28 +16,30 @@
 
 package org.vividus.reporter.metadata;
 
-public abstract class AbstractMetaDataEntry
+import java.util.regex.Pattern;
+
+public class DynamicMetadataEntry extends AbstractMetadataEntry
 {
-    private MetaDataCategory category;
-    private boolean addToReport = true;
+    private String namePattern;
+    private Pattern propertyRegex;
 
-    public MetaDataCategory getCategory()
+    public String getNamePattern()
     {
-        return category;
+        return namePattern;
     }
 
-    public void setCategory(MetaDataCategory category)
+    public void setNamePattern(String namePattern)
     {
-        this.category = category;
+        this.namePattern = namePattern;
     }
 
-    public boolean isAddToReport()
+    public Pattern getPropertyRegex()
     {
-        return addToReport;
+        return propertyRegex;
     }
 
-    public void setAddToReport(boolean addToReport)
+    public void setPropertyRegex(Pattern propertyRegex)
     {
-        this.addToReport = addToReport;
+        this.propertyRegex = propertyRegex;
     }
 }

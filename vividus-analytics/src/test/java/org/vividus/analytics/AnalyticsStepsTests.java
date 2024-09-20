@@ -43,8 +43,8 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.analytics.model.AnalyticsEvent;
 import org.vividus.analytics.model.AnalyticsEventBatch;
-import org.vividus.reporter.metadata.MetaDataCategory;
-import org.vividus.reporter.metadata.MetaDataProvider;
+import org.vividus.reporter.metadata.MetadataCategory;
+import org.vividus.reporter.metadata.MetadataProvider;
 import org.vividus.results.ResultsProvider;
 import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Statistic;
@@ -78,9 +78,9 @@ class AnalyticsStepsTests
     @Test
     void shouldPostTestsStartBeforeTestsWhenNoModulesAvailable()
     {
-        try (var metaDataProviderMock = mockStatic(MetaDataProvider.class))
+        try (var metadataProviderMock = mockStatic(MetadataProvider.class))
         {
-            configureCommonProperties(metaDataProviderMock);
+            configureCommonProperties(metadataProviderMock);
             reporter.postBeforeStoriesAnalytics();
             verify(eventBus).post(analyticsEventBatchCaptor.capture());
             AnalyticsEventBatch batch = analyticsEventBatchCaptor.getValue();
@@ -99,15 +99,15 @@ class AnalyticsStepsTests
     @Test
     void shouldPostVividusVersionAndPluginsInformationAndStatistic()
     {
-        try (var metaDataProviderMock = mockStatic(MetaDataProvider.class))
+        try (var metadataProviderMock = mockStatic(MetadataProvider.class))
         {
-            configureCommonProperties(metaDataProviderMock);
+            configureCommonProperties(metadataProviderMock);
 
             String vividusVersion = "0.1.1";
             String plugin = "vividus-plugin-web-ui";
             String pluginVersion = "0.1.2";
 
-            metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategoryAsMap(MetaDataCategory.VIVIDUS))
+            metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategoryAsMap(MetadataCategory.VIVIDUS))
                     .thenReturn(Map.of(
                             VIVIDUS, vividusVersion,
                             plugin, pluginVersion
@@ -178,11 +178,11 @@ class AnalyticsStepsTests
         return analyticsEvent;
     }
 
-    private void configureCommonProperties(MockedStatic<MetaDataProvider> metaDataProviderMock)
+    private void configureCommonProperties(MockedStatic<MetadataProvider> metadataProviderMock)
     {
-        metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategoryAsMap(MetaDataCategory.CONFIGURATION))
+        metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategoryAsMap(MetadataCategory.CONFIGURATION))
                 .thenReturn(Map.of("Profiles", "web/desktop/chrome"));
-        metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategoryAsMap(MetaDataCategory.PROFILE))
+        metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategoryAsMap(MetadataCategory.PROFILE))
                 .thenReturn(Map.of("Remote Execution", "ON"));
     }
 }

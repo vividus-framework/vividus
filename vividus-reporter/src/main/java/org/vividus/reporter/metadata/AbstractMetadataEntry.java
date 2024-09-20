@@ -16,28 +16,28 @@
 
 package org.vividus.reporter.metadata;
 
-public class MetaDataEntry extends AbstractMetaDataEntry
+public abstract class AbstractMetadataEntry
 {
-    private String description;
-    private String value;
+    private MetadataCategory category;
+    private boolean showInReport = true;
 
-    public String getDescription()
+    public MetadataCategory getCategory()
     {
-        return description;
+        return category;
     }
 
-    public void setDescription(String description)
+    public void setCategory(MetadataCategory category)
     {
-        this.description = description;
+        this.category = category;
     }
 
-    public String getValue()
+    public boolean isShowInReport()
     {
-        return value;
+        return showInReport;
     }
 
-    public void setValue(String value)
+    public void setShowInReport(boolean showInReport)
     {
-        this.value = value;
+        this.showInReport = showInReport;
     }
 }

@@ -29,18 +29,18 @@ import java.util.stream.Collectors;
 import org.vividus.util.property.IPropertyMapper;
 import org.vividus.util.property.IPropertyParser;
 
-public class MetaDataProvider
+public class MetadataProvider
 {
-    private static final List<MetaDataEntry> META_DATA = new LinkedList<>();
+    private static final List<MetadataEntry> META_DATA = new LinkedList<>();
 
-    private static final String PROPERTY_PREFIX = "meta-data.";
+    private static final String PROPERTY_PREFIX = "metadata.";
     private static final String DYNAMIC_PROPERTY_PREFIX = PROPERTY_PREFIX + "dynamic.";
     private static final String STATIC_PROPERTY_PREFIX = PROPERTY_PREFIX + "static.";
 
     static
     {
         ModuleVersionProvider.getAvailableModulesByRegex("org\\.vividus.*").forEach(
-                MetaDataProvider::addVividusMetaData);
+                MetadataProvider::addVividusMetaData);
     }
 
     private IPropertyMapper propertyMapper;
@@ -48,10 +48,10 @@ public class MetaDataProvider
 
     public void init() throws IOException
     {
-        propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicMetaDataEntry.class).getData().values().stream()
+        propertyMapper.readValues(DYNAMIC_PROPERTY_PREFIX, DynamicMetadataEntry.class).getData().values().stream()
                 .flatMap(dynamicMetaDataEntry ->
                 {
-                    String descriptionPattern = dynamicMetaDataEntry.getDescriptionPattern();
+                    String namePattern = dynamicMetaDataEntry.getNamePattern();
                     Pattern propertyRegex = dynamicMetaDataEntry.getPropertyRegex();
 
                     return propertyParser.getPropertiesByRegex(propertyRegex).entrySet().stream().map(e ->
@@ -59,31 +59,30 @@ public class MetaDataProvider
                         Matcher matcher = propertyRegex.matcher(e.getKey());
                         matcher.matches();
 
-                        MetaDataEntry entry = new MetaDataEntry();
+                        MetadataEntry entry = new MetadataEntry();
                         entry.setCategory(dynamicMetaDataEntry.getCategory());
-                        entry.setDescription(matcher.groupCount() > 0 ? descriptionPattern.formatted(matcher.group(1))
-                                : descriptionPattern);
+                        entry.setName(matcher.groupCount() > 0 ? namePattern.formatted(matcher.group(1)) : namePattern);
                         entry.setValue(e.getValue());
-                        entry.setAddToReport(dynamicMetaDataEntry.isAddToReport());
+                        entry.setShowInReport(dynamicMetaDataEntry.isShowInReport());
 
                         return entry;
                     });
                 })
-                .sorted(Comparator.comparing(MetaDataEntry::getDescription))
+                .sorted(Comparator.comparing(MetadataEntry::getName))
                 .forEach(META_DATA::add);
 
-        META_DATA.addAll(propertyMapper.readValues(STATIC_PROPERTY_PREFIX, MetaDataEntry.class).getData().values());
+        META_DATA.addAll(propertyMapper.readValues(STATIC_PROPERTY_PREFIX, MetadataEntry.class).getData().values());
     }
 
-    static void addVividusMetaData(String description, String value)
+    static void addVividusMetaData(String name, String value)
     {
-        if (description != null)
+        if (name != null)
         {
-            MetaDataEntry entry = new MetaDataEntry();
-            entry.setCategory(MetaDataCategory.VIVIDUS);
-            entry.setDescription(description);
+            MetadataEntry entry = new MetadataEntry();
+            entry.setCategory(MetadataCategory.VIVIDUS);
+            entry.setName(name);
             entry.setValue(value);
-            entry.setAddToReport(false);
+            entry.setShowInReport(false);
 
             META_DATA.add(entry);
         }
@@ -94,18 +93,18 @@ public class MetaDataProvider
         META_DATA.clear();
     }
 
-    public static List<MetaDataEntry> getMetaDataByCategory(MetaDataCategory category)
+    public static List<MetadataEntry> getMetaDataByCategory(MetadataCategory category)
     {
         return META_DATA.stream()
                 .filter(entry -> entry.getCategory() == category)
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    public static Map<String, String> getMetaDataByCategoryAsMap(MetaDataCategory category)
+    public static Map<String, String> getMetaDataByCategoryAsMap(MetadataCategory category)
     {
         return META_DATA.stream()
                 .filter(entry -> entry.getCategory() == category)
-                .collect(Collectors.toMap(MetaDataEntry::getDescription, MetaDataEntry::getValue, (a, b) -> b,
+                .collect(Collectors.toMap(MetadataEntry::getName, MetadataEntry::getValue, (a, b) -> b,
                         LinkedHashMap::new));
     }
 

@@ -47,9 +47,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
-import org.vividus.reporter.metadata.MetaDataCategory;
-import org.vividus.reporter.metadata.MetaDataEntry;
-import org.vividus.reporter.metadata.MetaDataProvider;
+import org.vividus.reporter.metadata.MetadataCategory;
+import org.vividus.reporter.metadata.MetadataEntry;
+import org.vividus.reporter.metadata.MetadataProvider;
 import org.vividus.results.ResultsProvider;
 import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Failure;
@@ -134,18 +134,18 @@ class TestInfoLoggerTests
     @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "PMD.AvoidDuplicateLiterals"})
     void shouldLogMetadataWithConfigurationSet()
     {
-        MetaDataCategory category = MetaDataCategory.CONFIGURATION;
-        MetaDataEntry setMetaData = new MetaDataEntry();
-        setMetaData.setDescription("Set");
+        var category = MetadataCategory.CONFIGURATION;
+        var setMetaData = new MetadataEntry();
+        setMetaData.setName("Set");
         setMetaData.setValue("active");
         setMetaData.setCategory(category);
 
-        try (var metaDataProviderMock = mockStatic(MetaDataProvider.class))
+        try (var metadataProviderMock = mockStatic(MetadataProvider.class))
         {
-            metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategory(category)).thenReturn(
+            metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategory(category)).thenReturn(
                     List.of(setMetaData));
-            metaDataProviderMock.when(() -> MetaDataProvider.getMetaDataByCategoryAsMap(category)).thenReturn(
-                    new HashMap<>(Map.of(setMetaData.getDescription(), setMetaData.getValue())));
+            metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategoryAsMap(category)).thenReturn(
+                    new HashMap<>(Map.of(setMetaData.getName(), setMetaData.getValue())));
             shouldLogMetadata(" Configuration set:\\s+active\\s+", "", Optional.empty());
         }
     }

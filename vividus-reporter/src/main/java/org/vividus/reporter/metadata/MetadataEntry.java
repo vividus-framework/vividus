@@ -16,11 +16,28 @@
 
 package org.vividus.reporter.metadata;
 
-public enum MetaDataCategory
+public class MetadataEntry extends AbstractMetadataEntry
 {
-    CONFIGURATION,
-    PROFILE,
-    SUITE,
-    ENVIRONMENT,
-    VIVIDUS;
+    private String name;
+    private String value;
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public String getValue()
+    {
+        return value;
+    }
+
+    public void setValue(String value)
+    {
+        this.value = value;
+    }
 }

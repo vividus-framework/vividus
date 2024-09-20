@@ -28,8 +28,8 @@ import org.jbehave.core.annotations.BeforeStories;
 import org.vividus.analytics.model.AnalyticsEvent;
 import org.vividus.analytics.model.AnalyticsEventBatch;
 import org.vividus.analytics.model.CustomDefinitions;
-import org.vividus.reporter.metadata.MetaDataCategory;
-import org.vividus.reporter.metadata.MetaDataProvider;
+import org.vividus.reporter.metadata.MetadataCategory;
+import org.vividus.reporter.metadata.MetadataProvider;
 import org.vividus.results.ResultsProvider;
 import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Statistic;
@@ -51,14 +51,14 @@ public class AnalyticsSteps
     public void postBeforeStoriesAnalytics()
     {
         Map<String, String> payload = new HashMap<>();
-        Map<String, String> configuration = MetaDataProvider.getMetaDataByCategoryAsMap(MetaDataCategory.CONFIGURATION);
-        Map<String, String> modules = MetaDataProvider.getMetaDataByCategoryAsMap(MetaDataCategory.VIVIDUS);
+        Map<String, String> configuration = MetadataProvider.getMetaDataByCategoryAsMap(MetadataCategory.CONFIGURATION);
+        Map<String, String> modules = MetadataProvider.getMetaDataByCategoryAsMap(MetadataCategory.VIVIDUS);
 
         CustomDefinitions.PROFILES.add(payload, configuration.get("Profiles"));
         CustomDefinitions.JAVA.add(payload, Runtime.version().toString());
         CustomDefinitions.VIVIDUS.add(payload, modules.getOrDefault("vividus", "not detected"));
         CustomDefinitions.REMOTE.add(payload,
-                MetaDataProvider.getMetaDataByCategoryAsMap(MetaDataCategory.PROFILE).get("Remote Execution"));
+                MetadataProvider.getMetaDataByCategoryAsMap(MetadataCategory.PROFILE).get("Remote Execution"));
         payload.put(SESSION_CONTROL, "start");
 
         List<AnalyticsEvent> events = new ArrayList<>();
