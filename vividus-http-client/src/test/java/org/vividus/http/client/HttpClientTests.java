@@ -46,6 +46,7 @@ import java.util.List;
 import org.apache.hc.client5.http.ClientProtocolException;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.AuthenticationException;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpHead;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
@@ -86,7 +87,6 @@ class HttpClientTests
 
     private static final String USER = "user";
     private static final String PASSWORD = "pass%5E";
-    private static final String PASSWORD_DECODED = URLDecoder.decode(PASSWORD, StandardCharsets.UTF_8);
     private static final String BASIC_AUTH = USER + ":" + PASSWORD;
     private static final String BASIC_AUTH_DECODED = URLDecoder.decode(BASIC_AUTH, StandardCharsets.UTF_8);
     private static final String SCHEME = "https";
@@ -204,8 +204,10 @@ class HttpClientTests
         var credentialsProvider = httpClientContext.getCredentialsProvider();
         assertInstanceOf(BasicCredentialsProvider.class, credentialsProvider);
         var credentials = credentialsProvider.getCredentials(new AuthScope(HTTP_HOST), null);
+        assertInstanceOf(UsernamePasswordCredentials.class, credentials);
         assertEquals(USER, credentials.getUserPrincipal().getName());
-        assertArrayEquals(PASSWORD_DECODED.toCharArray(), credentials.getPassword());
+        String decodedPassword = URLDecoder.decode(PASSWORD, StandardCharsets.UTF_8);
+        assertArrayEquals(decodedPassword.toCharArray(), ((UsernamePasswordCredentials) credentials).getUserPassword());
     }
 
     @Test
