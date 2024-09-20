@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package org.vividus.reporter.environment;
+package org.vividus.reporter.metadata;
 
 import java.util.regex.Pattern;
 
-public class DynamicEnvironmentConfigurationProperty
+public class DynamicMetadataEntry extends AbstractMetadataEntry
 {
-    private String descriptionPattern;
+    private String namePattern;
     private Pattern propertyRegex;
-    private PropertyCategory category;
 
-    public String getDescriptionPattern()
+    public String getNamePattern()
     {
-        return descriptionPattern;
+        return namePattern;
     }
 
-    public void setDescriptionPattern(String descriptionPattern)
+    public void setNamePattern(String namePattern)
     {
-        this.descriptionPattern = descriptionPattern;
+        this.namePattern = namePattern;
     }
 
     public Pattern getPropertyRegex()
@@ -42,15 +41,5 @@ public class DynamicEnvironmentConfigurationProperty
     public void setPropertyRegex(Pattern propertyRegex)
     {
         this.propertyRegex = propertyRegex;
-    }
-
-    public PropertyCategory getCategory()
-    {
-        return category;
-    }
-
-    public void setCategory(PropertyCategory category)
-    {
-        this.category = category;
     }
 }

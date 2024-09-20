@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,11 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesRegex;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +39,6 @@ import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
 
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,8 +47,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
-import org.vividus.reporter.environment.EnvironmentConfigurer;
-import org.vividus.reporter.environment.PropertyCategory;
+import org.vividus.reporter.metadata.MetadataCategory;
+import org.vividus.reporter.metadata.MetadataEntry;
+import org.vividus.reporter.metadata.MetadataProvider;
 import org.vividus.results.ResultsProvider;
 import org.vividus.results.model.ExecutableEntity;
 import org.vividus.results.model.Failure;
@@ -123,19 +125,29 @@ class TestInfoLoggerTests
 
     @ParameterizedTest
     @MethodSource("sourceOfFailures")
-    @Order(1)
     void shouldLogMetadata(String failuresMessage, Optional<List<Failure>> failures)
     {
         shouldLogMetadata(" Configuration:\\s+", failuresMessage, failures);
     }
 
     @Test
-    @Order(2)
     @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "PMD.AvoidDuplicateLiterals"})
     void shouldLogMetadataWithConfigurationSet()
     {
-        EnvironmentConfigurer.ENVIRONMENT_CONFIGURATION.get(PropertyCategory.CONFIGURATION).put("Set", "active");
-        shouldLogMetadata(" Configuration set:\\s+active\\s+", "", Optional.empty());
+        var category = MetadataCategory.CONFIGURATION;
+        var setMetaData = new MetadataEntry();
+        setMetaData.setName("Set");
+        setMetaData.setValue("active");
+        setMetaData.setCategory(category);
+
+        try (var metadataProviderMock = mockStatic(MetadataProvider.class))
+        {
+            metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategory(category)).thenReturn(
+                    List.of(setMetaData));
+            metadataProviderMock.when(() -> MetadataProvider.getMetaDataByCategoryAsMap(category)).thenReturn(
+                    new HashMap<>(Map.of(setMetaData.getName(), setMetaData.getValue())));
+            shouldLogMetadata(" Configuration set:\\s+active\\s+", "", Optional.empty());
+        }
     }
 
     @SuppressWarnings({ "MultipleStringLiterals", "MultipleStringLiteralsExtended", "PMD.AvoidDuplicateLiterals"})
@@ -167,7 +179,7 @@ class TestInfoLoggerTests
                         + "-{80}\\s+"
                         + " Environment:\\s+"
                         + "-{80}\\s+"
-                        + " Vividus:.*"
+                        + " VIVIDUS:.*"
                         + " Execution statistics:\\s+.+"
                         + "-{40}\\s+"
                         + "               Story   Scenario     Step\\s+"
