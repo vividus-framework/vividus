@@ -169,7 +169,7 @@ public class HttpClient implements IHttpClient, AutoCloseable
         HttpHost normalizedHost = RoutingSupport.normalize(host, DefaultSchemePortResolver.INSTANCE);
         if (usePreemptiveBasicAuthIfAvailable)
         {
-            BasicScheme authScheme = new BasicScheme(StandardCharsets.UTF_8);
+            BasicScheme authScheme = new BasicScheme();
             authScheme.initPreemptive(credentials);
             internalContext.resetAuthExchange(normalizedHost, authScheme);
         }

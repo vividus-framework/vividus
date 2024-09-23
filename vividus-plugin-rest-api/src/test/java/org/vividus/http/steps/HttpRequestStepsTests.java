@@ -98,7 +98,7 @@ class HttpRequestStepsTests
         return Stream.of(
                 arguments("|name|type|value|\n|part|STRING|content|", """
                         Content-Disposition: form-data; name="part"\r
-                        Content-Type: text/plain; charset=ISO-8859-1\r
+                        Content-Type: text/plain; charset=UTF-8\r
                         \r
                         content\r
                         """),
