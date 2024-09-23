@@ -106,7 +106,7 @@ class HttpRequestExecutorTests
         httpRequestExecutor.executeHttpRequest(HttpMethod.GET, URL, Optional.empty());
 
         verify(httpClient).execute(argThat(ClassicHttpRequest.class::isInstance),
-                argThat(e -> e != null && e.getAttribute("http.cookie-store") != null));
+                argThat(e -> e != null && e.getCookieStore() == cookieStore));
         InOrder orderedHttpTestContext = inOrder(httpTestContext);
         verifyHttpTestContext(orderedHttpTestContext, httpResponse);
         orderedHttpTestContext.verify(httpTestContext).releaseRequestData();

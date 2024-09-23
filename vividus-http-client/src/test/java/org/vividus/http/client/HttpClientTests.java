@@ -240,7 +240,7 @@ class HttpClientTests
         var request = new HttpGet(URI_TO_GO);
         var context = HttpClientContext.create();
         RedirectLocations redirectLocations = mock();
-        context.setAttribute(HttpClientContext.REDIRECT_LOCATIONS, redirectLocations);
+        context.setRedirectLocations(redirectLocations);
         var responseHandlerMatcher = responseHandlerMatcher(GET, HttpStatus.SC_OK, mock());
         when(closeableHttpClient.execute(eq(httpHost), eq(request), eq(context),
                 argThat(responseHandlerMatcher))).thenReturn(new HttpResponse());

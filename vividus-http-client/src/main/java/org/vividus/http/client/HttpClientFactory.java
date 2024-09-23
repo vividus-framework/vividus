@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ package org.vividus.http.client;
 import static org.apache.commons.lang3.Validate.isTrue;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.List;
 import java.util.Optional;
 
+import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
 import org.apache.hc.client5.http.auth.AuthScope;
@@ -38,13 +38,15 @@ import org.apache.hc.client5.http.impl.auth.BasicScheme;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.impl.win.WinHttpClients;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.client5.http.ssl.HttpsSupport;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.client5.http.ssl.TlsSocketStrategy;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.http.message.BasicHeader;
+import org.apache.hc.core5.ssl.SSLContexts;
 import org.apache.hc.core5.util.Timeout;
 import org.vividus.http.keystore.IKeyStoreFactory;
 
@@ -90,7 +92,7 @@ public class HttpClientFactory implements IHttpClientFactory
                         .setConnectTimeout(Timeout.ofMilliseconds(config.getConnectTimeout()))
                         .setSocketTimeout(Timeout.ofMilliseconds(config.getSocketTimeout()))
                         .build())
-                .setSSLSocketFactory(buildSslSocketFactory(config.getSslConfig()))
+                .setTlsSocketStrategy(createTlsSocketStrategy(config.getSslConfig()))
                 .build());
 
         Optional.ofNullable(config.getFirstRequestInterceptor()).ifPresent(builder::addRequestInterceptorFirst);
@@ -117,29 +119,28 @@ public class HttpClientFactory implements IHttpClientFactory
         return httpClient;
     }
 
-    private SSLConnectionSocketFactory buildSslSocketFactory(SslConfig sslConfig) throws GeneralSecurityException
+    private TlsSocketStrategy createTlsSocketStrategy(SslConfig sslConfig) throws GeneralSecurityException
     {
-        SSLConnectionSocketFactoryBuilder builder = SSLConnectionSocketFactoryBuilder.create();
-        createSslContext(sslConfig.isSslCertificateCheckEnabled()).ifPresent(builder::setSslContext);
-        if (!sslConfig.isSslHostnameVerificationEnabled())
-        {
-            builder.setHostnameVerifier(NoopHostnameVerifier.INSTANCE);
-        }
-        return builder.build();
+        SSLContext sslContext = createSslContext(sslConfig.isSslCertificateCheckEnabled());
+        HostnameVerifier hostnameVerifier =
+                sslConfig.isSslHostnameVerificationEnabled() ? HttpsSupport.getDefaultHostnameVerifier()
+                        : NoopHostnameVerifier.INSTANCE;
+
+        return new DefaultClientTlsStrategy(sslContext, hostnameVerifier);
     }
 
-    private Optional<SSLContext> createSslContext(boolean sslCertificateCheckEnabled) throws GeneralSecurityException
+    private SSLContext createSslContext(boolean sslCertificateCheckEnabled) throws GeneralSecurityException
     {
         if (!sslCertificateCheckEnabled)
         {
-            return Optional.of(sslContextFactory.getTrustingAllSslContext());
+            return sslContextFactory.getTrustingAllSslContext();
         }
         Optional<KeyStore> keyStore = keyStoreFactory.getKeyStore();
         if (keyStore.isPresent())
         {
-            return Optional.of(sslContextFactory.getSslContext(keyStore.get(), privateKeyPassword));
+            return sslContextFactory.getSslContext(keyStore.get(), privateKeyPassword);
         }
-        return Optional.empty();
+        return SSLContexts.createSystemDefault();
     }
 
     @SuppressFBWarnings("NP_NULL_ON_SOME_PATH")
@@ -163,7 +164,7 @@ public class HttpClientFactory implements IHttpClientFactory
         {
             builder.addRequestInterceptorFirst((req, entity, ctx) ->
             {
-                BasicScheme scheme = new BasicScheme(StandardCharsets.UTF_8);
+                BasicScheme scheme = new BasicScheme();
                 scheme.initPreemptive(credentials);
                 String authResponse = scheme.generateAuthResponse(null, req, ctx);
                 req.addHeader(new BasicHeader(HttpHeaders.AUTHORIZATION, authResponse));
