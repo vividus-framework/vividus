@@ -204,8 +204,8 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
         ParameterConverters parameterConverters = new ParameterConverters();
         parameterConverters.addConverters(
             new FunctionalParameterConverter<String, Set<Locator>>(value -> Set.of(locator)) { },
-            new FunctionalParameterConverter<String, Dimension>(StringToDimensionParameterConverter::convert) { },
-            new FunctionalParameterConverter<String, URI>(URI::create) { },
+            new FunctionalParameterConverter<>(StringToDimensionParameterConverter::convert) { },
+            new FunctionalParameterConverter<>(URI::create) { },
             new StringToAccessibilitySettingsConverter(new FluentTrimmedEnumConverter())
         );
         return new ExamplesTableFactory(new Keywords(), null, parameterConverters, new ParameterControls(),
