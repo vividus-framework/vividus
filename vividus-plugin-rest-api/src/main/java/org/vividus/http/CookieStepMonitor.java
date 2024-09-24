@@ -16,10 +16,25 @@
 
 package org.vividus.http;
 
-public enum CookieStoreLevel
+import java.lang.reflect.Method;
+
+import org.jbehave.core.steps.NullStepMonitor;
+
+public class CookieStepMonitor extends NullStepMonitor
 {
-    GLOBAL,
-    STORY,
-    SCENARIO,
-    STEP
+    private final CookieStoreProvider cookieStoreProvider;
+
+    public CookieStepMonitor(CookieStoreProvider cookieStoreProvider)
+    {
+        this.cookieStoreProvider = cookieStoreProvider;
+    }
+
+    @Override
+    public void afterPerforming(String step, boolean dryRun, Method method)
+    {
+        if (!dryRun)
+        {
+            cookieStoreProvider.resetStepCookies();
+        }
+    }
 }
