@@ -37,17 +37,18 @@ a|`true`
 |Enable logging of HTTP request/response headers and bodies (applied to the following content types only: `text/*`, `application/json`, `application/xml`)
 
 |`rest-api.http.cookie-store-level`
-a|`global`
-`story`
-`scenario`
+a|`global` +
+`story` +
+`scenario` +
 `step`
 |`global`
-a|The property that allows to configure level of storing cookies during execution requests:
+a|Configure the level of cookie storage:
 
-* `global` - maintains cookies across the entire test suite and across all threads. Cookies set in one test are available and shared in all subsequent tests until cleared or the suite completes.
-* `story` - cookies are saved only for the duration of a single story and cleared at the beginning of a new story.
-* `scenario` - reset cookies after each scenario.
-* `step` - reset cookies after each step.
+* `global` - cookies are stored globally and are accessible across the entire suite from all threads: cookies set in
+one scenario are available and reused in all subsequent scenarios and stories.
+* `story` - cookies are reused within the scope of a single story and are cleared upon its completion.
+* `scenario` - cookies are reused within the scope of a single scenario and are cleared upon its completion.
+* `step` - cookies are cleared after each executed step.
 
 |===
 
