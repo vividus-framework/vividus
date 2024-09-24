@@ -131,4 +131,6 @@
     <bean class="org.vividus.http.expression.PkceExpressionProcessor" />
     <bean class="org.vividus.http.expression.RemoveWrappingDoubleQuotesExpressionProcessor" />
     <bean class="org.vividus.http.expression.UriExpressionProcessors" />
+
+    <bean class="org.vividus.http.CookieStepMonitor" />
 </beans>

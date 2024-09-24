@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,22 @@ class CookieStoreProviderTests
     @CsvSource({
             "GLOBAL,   org.apache.hc.client5.http.cookie.BasicCookieStore",
             "STORY,    org.vividus.http.client.ThreadedBasicCookieStore",
-            "SCENARIO, org.vividus.http.client.ThreadedBasicCookieStore"
+            "SCENARIO, org.vividus.http.client.ThreadedBasicCookieStore",
+            "STEP,     org.vividus.http.client.ThreadedBasicCookieStore"
     })
     void shouldCreateCookieStore(CookieStoreLevel cookieStoreLevel, Class<?> clazz)
     {
         CookieStoreProvider cookieStoreProvider = new CookieStoreProvider(cookieStoreLevel);
         assertEquals(clazz, cookieStoreProvider.getCookieStore().getClass());
+    }
+
+    @ParameterizedTest
+    @EnumSource(names = "STEP", mode = Mode.EXCLUDE)
+    void shouldNotClearCookieStoreAfterStep(CookieStoreLevel cookieStoreLevel)
+    {
+        CookieStoreProvider cookieStoreProvider = createProviderWithCookie(cookieStoreLevel);
+        cookieStoreProvider.resetStepCookies();
+        assertEquals(List.of(COOKIE), cookieStoreProvider.getCookieStore().getCookies());
     }
 
     @ParameterizedTest
@@ -59,6 +69,14 @@ class CookieStoreProviderTests
         CookieStoreProvider cookieStoreProvider = createProviderWithCookie(cookieStoreLevel);
         cookieStoreProvider.resetStoryCookies();
         assertEquals(List.of(COOKIE), cookieStoreProvider.getCookieStore().getCookies());
+    }
+
+    @Test
+    void shouldClearCookieStoreAfterStep()
+    {
+        CookieStoreProvider cookieStoreProvider = createProviderWithCookie(CookieStoreLevel.STEP);
+        cookieStoreProvider.resetStepCookies();
+        assertEquals(List.of(), cookieStoreProvider.getCookieStore().getCookies());
     }
 
     @Test
