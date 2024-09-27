@@ -652,7 +652,7 @@ jobs:
                                                   -Pvividus.configuration.profiles=mobitru/mobile_app,mobile_app/android \
                                                   -Pvividus.selenium.grid.username=${MOBITRU_USER} \
                                                   -Pvividus.selenium.grid.password=${MOBITRU_KEY} \
-                                                  -Pvividus.selenium.grid.capabilities.platformVersion=12 \
+                                                  -Pvividus.selenium.grid.capabilities.platformVersion=13 \
                                                   -Pvividus.allure.history-directory=output/history/mt-android-system-tests \
                                                   -Pvividus.allure.report-directory=output/reports/mt-android-allure \
                                                   -Pvividus.allure.executor.name="Github Actions (Vividus)" \
