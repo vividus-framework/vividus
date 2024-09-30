@@ -93,5 +93,5 @@ WARNING: Default Selenium grid URL is set to `selenium.grid.url=http://localhost
 The following profiles running mobile browsers are available out of the box:
 
 - `web/phone/android`
-- `web/phone/ios`
+- `web/phone/iphone`
 - `web/tablet/ipad`
