@@ -515,121 +515,6 @@ will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTabl
 |value1 |
 ----
 
-== JOINING
-
-`JOINING` transformer joins values from rows/columns of the table.
-
-[cols="1,3", options="header"]
-|===
-|Parameter
-|Description
-
-|`joinMode`
-|_rows_ or _columns_
-
-|`joinedColumn`
-|[_columns_ mode only] name of the new column with joined values
-
-|`columnsToJoin`
-|[_columns_ mode only] colon-separated list of the columns to join
-|===
-
-[IMPORTANT]
-`JOINING` transformer should be the last while joining columns/rows of the table which created using another transformer.
-
-.Usage of JOINING transformer with `columns` join mode
-[source,gherkin]
-----
-Scenario: Verify JOINING transformer in default columns mode
-Then `<joinedColumn>` is equal to `A B`
-Examples:
-{transformer=JOINING, joinMode=columns, joinedColumn=joinedColumn}
-|column1|column2|
-|A      |B      |
-----
-
-.Usage of JOINING transformer with `columns` join mode and definition of columns to join
-[source,gherkin]
-----
-Scenario: Verify JOINING transformer in configured columns mode
-Then `<joinedColumn>` is equal to `B D`
-Examples:
-{transformer=JOINING, joinMode=columns, joinedColumn=joinedColumn, columnsToJoin=column2;column4}
-|column1|column2|column3|column4|
-|A      |B      |C      |D      |
-----
-
-.Usage of JOINING transformer with `rows` join mode
-[source,gherkin]
-----
-Scenario: Verify JOINING transformer in default rows mode
-Then `<column1>` is equal to `A B`
-Then `<column2>` is equal to `C D`
-Examples:
-{transformer=JOINING, joinMode=rows}
-|column1|column2|
-|A      |C      |
-|B      |D      |
-----
-
-.Usage of JOINING transformer in the chain of transformers
-[source,gherkin]
-----
-{transformer=MERGING, mergeMode=columns, tables=
-  \{transformer=FROM_EXCEL\, path=/TestTemplate.xlsx\, sheet=Mapping\, range=A4:A5\, column=header1\, joinValues=true\};
-  \{transformer=FROM_EXCEL\, path=/TestTemplate.xlsx\, sheet=Mapping\, range=B4:B5\, column=header2\, joinValues=true\}
-}
-{transformer=JOINING, joinMode=columns, joinedColumn=header}
-----
-
-.Usage of JOINING transformer with table body containing path to table file
-[source,gherkin]
-----
-{transformer=JOINING, joinMode=columns, joinedColumn=header}
-/test1.table
-----
-
-== CARTESIAN_PRODUCT
-
-`CARTESIAN_PRODUCT` transformer creates a https://en.wikipedia.org/wiki/Cartesian_product[cartesian product] from several tables.
-
-[cols="1,3", options="header"]
-|===
-|Parameter
-|Description
-
-|`tables`
-|paths to examples tables or transformers to create a cartesian product
-
-|===
-
-[IMPORTANT]
-====
-* headers of input tables must be different
-* number of input tables must be more than 1
-* if any of tables is empty - the resulting table will also be empty
-====
-
-.Usage of CARTESIAN_PRODUCT transformer
-[source,gherkin]
-----
-{transformer=CARTESIAN_PRODUCT, tables=story/tables/test1.table;story/tables/test2.table}
-----
-
-.Usage of CARTESIAN_PRODUCT transformer with table body
-[source,gherkin]
-----
-{transformer=CARTESIAN_PRODUCT, tables=/data/some-table.table}
-|column1|
-|value1 |
-----
-
-.Usage of CARTESIAN_PRODUCT transformer with nested transformers
-[source,gherkin]
-----
-{transformer=CARTESIAN_PRODUCT, tables=\{transformer=REPEATING\, times=100\};\{transformer=FROM_CSV\, csvPath=/data/csv.csv\}}
-----
-
 == INDEXING
 
 `INDEXING` transformer adds a column with the rows indices in the specified order.
@@ -702,6 +587,80 @@ will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTabl
 |key   |index|
 |value1|1    |
 |value2|2    |
+----
+
+== JOINING
+
+`JOINING` transformer joins values from rows/columns of the table.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`joinMode`
+|_rows_ or _columns_
+
+|`joinedColumn`
+|[_columns_ mode only] name of the new column with joined values
+
+|`columnsToJoin`
+|[_columns_ mode only] colon-separated list of the columns to join
+|===
+
+[IMPORTANT]
+`JOINING` transformer should be the last while joining columns/rows of the table which created using another transformer.
+
+.Usage of JOINING transformer with `columns` join mode
+[source,gherkin]
+----
+Scenario: Verify JOINING transformer in default columns mode
+Then `<joinedColumn>` is equal to `A B`
+Examples:
+{transformer=JOINING, joinMode=columns, joinedColumn=joinedColumn}
+|column1|column2|
+|A      |B      |
+----
+
+.Usage of JOINING transformer with `columns` join mode and definition of columns to join
+[source,gherkin]
+----
+Scenario: Verify JOINING transformer in configured columns mode
+Then `<joinedColumn>` is equal to `B D`
+Examples:
+{transformer=JOINING, joinMode=columns, joinedColumn=joinedColumn, columnsToJoin=column2;column4}
+|column1|column2|column3|column4|
+|A      |B      |C      |D      |
+----
+
+.Usage of JOINING transformer with `rows` join mode
+[source,gherkin]
+----
+Scenario: Verify JOINING transformer in default rows mode
+Then `<column1>` is equal to `A B`
+Then `<column2>` is equal to `C D`
+Examples:
+{transformer=JOINING, joinMode=rows}
+|column1|column2|
+|A      |C      |
+|B      |D      |
+----
+
+.Usage of JOINING transformer in the chain of transformers
+[source,gherkin]
+----
+{transformer=MERGING, mergeMode=columns, tables=
+  \{transformer=FROM_EXCEL\, path=/TestTemplate.xlsx\, sheet=Mapping\, range=A4:A5\, column=header1\, joinValues=true\};
+  \{transformer=FROM_EXCEL\, path=/TestTemplate.xlsx\, sheet=Mapping\, range=B4:B5\, column=header2\, joinValues=true\}
+}
+{transformer=JOINING, joinMode=columns, joinedColumn=header}
+----
+
+.Usage of JOINING transformer with table body containing path to table file
+[source,gherkin]
+----
+{transformer=JOINING, joinMode=columns, joinedColumn=header}
+/test1.table
 ----
 
 == LEFT_JOIN
@@ -821,4 +780,45 @@ will result in the following xref:ROOT:glossary.adoc#_examplestable[ExamplesTabl
    column=joinID
  \}
 }
+----
+
+== CARTESIAN_PRODUCT
+
+`CARTESIAN_PRODUCT` transformer creates a https://en.wikipedia.org/wiki/Cartesian_product[cartesian product] from several tables.
+
+[cols="1,3", options="header"]
+|===
+|Parameter
+|Description
+
+|`tables`
+|paths to examples tables or transformers to create a cartesian product
+
+|===
+
+[IMPORTANT]
+====
+* headers of input tables must be different
+* number of input tables must be more than 1
+* if any of tables is empty - the resulting table will also be empty
+====
+
+.Usage of CARTESIAN_PRODUCT transformer
+[source,gherkin]
+----
+{transformer=CARTESIAN_PRODUCT, tables=story/tables/test1.table;story/tables/test2.table}
+----
+
+.Usage of CARTESIAN_PRODUCT transformer with table body
+[source,gherkin]
+----
+{transformer=CARTESIAN_PRODUCT, tables=/data/some-table.table}
+|column1|
+|value1 |
+----
+
+.Usage of CARTESIAN_PRODUCT transformer with nested transformers
+[source,gherkin]
+----
+{transformer=CARTESIAN_PRODUCT, tables=\{transformer=REPEATING\, times=100\};\{transformer=FROM_CSV\, csvPath=/data/csv.csv\}}
 ----
