@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -32,6 +33,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hc.core5.net.URIBuilder;
 import org.jbehave.core.annotations.Then;
@@ -66,8 +68,9 @@ public class ResourceCheckSteps
     private final WebApplicationConfiguration webApplicationConfiguration;
     private final ContextCopyingExecutor executor;
     private final HttpTestContext httpTestContext;
-    private Pattern excludeHrefsPattern;
 
+    private List<String> attributesToCheck;
+    private Pattern excludeHrefsPattern;
     private Optional<String> uriToIgnoreRegex;
 
     public ResourceCheckSteps(ResourceValidator<WebPageResourceValidation> resourceValidator,
@@ -156,6 +159,7 @@ public class ResourceCheckSteps
 
     private Optional<WebPageResourceValidation> parseElement(Element element, boolean contextCheck)
     {
+        String attributesToCheckAsString = String.join("/", attributesToCheck);
         String elementUriAsString = getElementUri(element).trim();
         if (elementUriAsString.startsWith("data:"))
         {
@@ -166,8 +170,8 @@ public class ResourceCheckSteps
         if (elementUriAsString.isEmpty())
         {
             return Optional.of(ResourceValidationError.EMPTY_HREF_SRC
-                    .onAssertion(softAssert::recordFailedAssertion, elementCssSelector)
-                    .createValidation(null, elementCssSelector));
+                    .onAssertion(softAssert::recordFailedAssertion, elementCssSelector, attributesToCheckAsString)
+                    .createValidation(null, elementCssSelector, attributesToCheckAsString));
         }
         try
         {
@@ -213,8 +217,8 @@ public class ResourceCheckSteps
         {
             return Optional.of(ResourceValidationError.INVALID_HREF_SRC
                     .onAssertion(msg -> softAssert.recordFailedAssertion(msg, e), elementCssSelector,
-                            elementUriAsString)
-                    .createValidation(null, elementCssSelector, elementUriAsString));
+                            attributesToCheckAsString, elementUriAsString)
+                    .createValidation(null, elementCssSelector, attributesToCheckAsString, elementUriAsString));
         }
     }
 
@@ -228,22 +232,25 @@ public class ResourceCheckSteps
         return Optional.ofNullable(uri.getScheme()).map(ALLOWED_SCHEMES::contains).orElse(false);
     }
 
-    private static String getElementUri(Element element)
+    private String getElementUri(Element element)
     {
-        String href = element.attr(HREF_ATTR);
-        if (!href.isEmpty())
+        Optional<String> attributeToCheck = attributesToCheck.stream().filter(a -> !element.attr(a).isEmpty())
+                .findFirst();
+        String attributeWithValue = attributeToCheck.orElse(StringUtils.EMPTY);
+
+        if (attributeWithValue.equals(HREF_ATTR))
         {
-            if (URL_FRAGMENT.equals(href) || isJumpLink(href))
+            String hrefToCheck = element.attr(attributeWithValue);
+            if (URL_FRAGMENT.equals(hrefToCheck) || isJumpLink(hrefToCheck))
             {
-                return href;
+                return hrefToCheck;
             }
 
-            String absUrl = element.absUrl(HREF_ATTR);
+            String absoluteUrl = element.absUrl(attributeWithValue);
             // For scripts e.g. href="javascript:alert('...');" the abs url will be empty
-            return absUrl.isEmpty() ? href : absUrl;
+            return absoluteUrl.isEmpty() ? hrefToCheck : absoluteUrl;
         }
-
-        return element.attr("src");
+        return attributeToCheck.map(element::attr).orElse(StringUtils.EMPTY);
     }
 
     private URI resolveUri(String uri) throws URISyntaxException
@@ -372,6 +379,11 @@ public class ResourceCheckSteps
     {
         return ResourceValidationError.MAIN_PAGE_IS_NOT_SET.onAssertion(softAssert::recordFailedAssertion, pageUrl)
                 .createValidation(pageUrl, null, pageUrl);
+    }
+
+    public void setAttributesToCheck(List<String> attributesToCheck)
+    {
+        this.attributesToCheck = attributesToCheck;
     }
 
     public void setUriToIgnoreRegex(Optional<String> uriToIgnoreRegex)

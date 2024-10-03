@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -207,6 +208,7 @@ class ResourceCheckStepsTests
     @BeforeEach
     void beforeEach()
     {
+        resourceCheckSteps.setAttributesToCheck(List.of("href", "src"));
         //noinspection unchecked
         doAnswer(a ->
         {

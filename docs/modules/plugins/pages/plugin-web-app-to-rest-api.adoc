@@ -352,6 +352,11 @@ a|Reasons:
 |Default
 |Description
 
+|`resource-checker.attributes-to-check`
+|HTML Attributes
+|`href,src`
+|A comma-separated list of HTML attributes where resource links will be searched. If values present in multiple attributes, the link will be fetched from the first one.
+
 |`resource-checker.publish-response-body`
 a|`true`
 `false`
