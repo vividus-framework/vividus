@@ -16,6 +16,7 @@
                 <property name="publishResponseBody" value="${resource-checker.publish-response-body}" />
             </bean>
         </constructor-arg>
+        <property name="attributesToCheck" value="${resource-checker.attributes-to-check}" />
         <property name="uriToIgnoreRegex" value="${resource-checker.uri-to-ignore-regex}" />
     </bean>
 
