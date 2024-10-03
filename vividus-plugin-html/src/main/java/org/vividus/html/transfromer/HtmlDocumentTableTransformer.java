@@ -26,14 +26,11 @@ import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.apache.commons.lang3.Validate;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
-import org.jbehave.core.model.TableTransformers.TableTransformer;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -41,13 +38,18 @@ import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.context.VariableContext;
+import org.vividus.transformer.ExtendedTableTransformer;
 import org.vividus.util.ExamplesTableProcessor;
+import org.vividus.util.ResourceUtils;
 
-public class HtmlDocumentTableTransformer implements TableTransformer
+public class HtmlDocumentTableTransformer implements ExtendedTableTransformer
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(HtmlDocumentTableTransformer.class);
 
     private static final String SLASH = "/";
+    private static final String PAGE_URL_PROPERTY_KEY = "pageUrl";
+    private static final String VARIABLE_NAME_PROPERTY_KEY = "variableName";
+    private static final String PATH_PROPERTY_KEY = "path";
 
     private final Optional<HttpConfiguration> httpConfiguration;
     private final VariableContext variableContext;
@@ -61,23 +63,24 @@ public class HtmlDocumentTableTransformer implements TableTransformer
     @Override
     public String transform(String table, TableParsers parsers, TableProperties tableProperties)
     {
-        Properties properties = tableProperties.getProperties();
-        String pageUrl = properties.getProperty("pageUrl");
-        String variableName = properties.getProperty("variableName");
-
-        Validate.isTrue(pageUrl != null && variableName == null || pageUrl == null && variableName != null,
-                "Either 'pageUrl' or 'variableName' should be specified.");
-
+        Map.Entry<String, String> entry = processCompetingMandatoryProperties(tableProperties.getProperties(),
+                PAGE_URL_PROPERTY_KEY, VARIABLE_NAME_PROPERTY_KEY, PATH_PROPERTY_KEY);
+        String sourceKey = entry.getKey();
+        String sourceValue = entry.getValue();
         Supplier<Document> documentSuppler;
-        if (pageUrl == null)
+        if (VARIABLE_NAME_PROPERTY_KEY.equals(sourceKey))
         {
-            documentSuppler = () -> Jsoup.parse((String) variableContext.getVariable(variableName));
+            documentSuppler = () -> Jsoup.parse((String) variableContext.getVariable(sourceValue));
         }
-        else
+        else if (PAGE_URL_PROPERTY_KEY.equals(sourceKey))
         {
             LOGGER.atWarn().log("The 'pageUrl' transformer parameter is deprecated and will be removed VIVIDUS 0.7.0, "
                     + "please use 'variableName' parameter instead.");
-            documentSuppler = () -> createDocument(pageUrl);
+            documentSuppler = () -> createDocument(sourceValue);
+        }
+        else
+        {
+            documentSuppler = () -> Jsoup.parse(ResourceUtils.loadResource(getClass(), sourceValue));
         }
 
         String column = tableProperties.getMandatoryNonBlankProperty("column", String.class);

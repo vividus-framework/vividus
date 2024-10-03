@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,15 @@
 package org.vividus.transformer;
 
 import static org.apache.commons.lang3.Validate.isTrue;
+import static org.apache.commons.lang3.Validate.notBlank;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +39,7 @@ public interface ExtendedTableTransformer extends TableTransformer
         isTrue(StringUtils.isBlank(tableAsString), "Input table must be empty");
     }
 
+    @Deprecated(since = "0.6.13", forRemoval = true)
     default <T extends Entry<String, Function<String, R>>, R> R processCompetingMandatoryProperties(
             TableProperties tableProperties, T processor1, T processor2)
     {
@@ -52,5 +60,29 @@ public interface ExtendedTableTransformer extends TableTransformer
                     propertyName1, propertyName2);
             return processor2.getValue().apply(propertyValue2);
         }
+    }
+
+    /**
+     * Validates that only one property actually defined in the transformer and checks that its value is not empty
+     * @param properties TableTransformer properties
+     * @param propertyKeys Array of competing mandatory property keys
+     * @return Entry with property key and value
+     */
+    default Entry<String, String> processCompetingMandatoryProperties(Properties properties, String... propertyKeys)
+    {
+        Map<String, String> actualProperties = new HashMap<>();
+        List.of(propertyKeys).forEach(v -> Optional.ofNullable(properties.getProperty(v))
+                .ifPresent(o -> actualProperties.put(v, o)));
+
+        String propertyKeysForErrorMsg = String.join("', '", Arrays.copyOf(propertyKeys, propertyKeys.length - 1));
+        isTrue(actualProperties.size() == 1, "One of either '" + propertyKeysForErrorMsg + "' or '"
+                + propertyKeys[propertyKeys.length - 1] + "' should be specified");
+
+        Map.Entry<String, String> mandatoryProperty = actualProperties.entrySet().iterator().next();
+        String mandatoryPropertyKey = mandatoryProperty.getKey();
+        String mandatoryPropertyValue = mandatoryProperty.getValue();
+        notBlank(mandatoryPropertyValue, String.format("ExamplesTable property '%s' is blank", mandatoryPropertyKey));
+
+        return mandatoryProperty;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.steps.ParameterConverters;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -34,6 +36,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class ExtendedTableTransformerTests
 {
+    private static final String PATH_KEY = "path";
+    private static final String OLD_PATH_KEY = "oldPath";
+
     static Stream<Arguments> processValues()
     {
         return Stream.of(
@@ -69,5 +74,54 @@ class ExtendedTableTransformerTests
         ExtendedTableTransformer transformer = (tableAsString, tableParsers, properties) -> null;
         return transformer.processCompetingMandatoryProperties(tableProperties, entry("key-1", identity()),
                 entry("key-2", identity()));
+    }
+
+    @Test
+    void testProcessPropertiesByKeysSuccess()
+    {
+        String propertiesAsString = "path=value1, key2=value2";
+        Map.Entry<String, String> actual = processCompetingMandatoryPropertiesByKeys(propertiesAsString,
+                PATH_KEY, OLD_PATH_KEY);
+        assertEquals(PATH_KEY, actual.getKey());
+        assertEquals("value1", actual.getValue());
+    }
+
+    @Test
+    void testProcessPropertiesByKeysConflictTwoValues()
+    {
+        String propertiesAsString = "path=value1, oldPath=value2";
+        String expected = "One of either 'path' or 'oldPath' should be specified";
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> processCompetingMandatoryPropertiesByKeys(propertiesAsString, PATH_KEY, OLD_PATH_KEY));
+        assertEquals(expected, exception.getMessage());
+    }
+
+    @Test
+    void testProcessPropertiesByKeysConflictFourValues()
+    {
+        String propertiesAsString = "path=value1, oldPath=value2, newPath=value3, somePath=value4";
+        String expected = "One of either 'path', 'oldPath', 'newPath' or 'somePath' should be specified";
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> processCompetingMandatoryPropertiesByKeys(propertiesAsString,
+                        PATH_KEY, OLD_PATH_KEY, "newPath", "somePath"));
+        assertEquals(expected, exception.getMessage());
+    }
+
+    @Test
+    void testProcessPropertiesByKeysEmptyValue()
+    {
+        String propertiesAsString = "path= , key=value2";
+        String expected = "ExamplesTable property 'path' is blank";
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> processCompetingMandatoryPropertiesByKeys(propertiesAsString, PATH_KEY, OLD_PATH_KEY));
+        assertEquals(expected, exception.getMessage());
+    }
+
+    private Map.Entry<String, String> processCompetingMandatoryPropertiesByKeys(String propertiesAsString,
+                                                                                String... keys)
+    {
+        var tableProperties = new TableProperties(propertiesAsString, new Keywords(), new ParameterConverters());
+        ExtendedTableTransformer transformer = (tableAsString, tableParsers, properties) -> null;
+        return transformer.processCompetingMandatoryProperties(tableProperties.getProperties(), keys);
     }
 }
