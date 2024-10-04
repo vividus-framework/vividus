@@ -30,6 +30,45 @@ The supported environments are only:
 Azure subscription must be configured via `AZURE_SUBSCRIPTION_ID` environment variable.
 
 
+=== Secrets Management Tools
+
+==== https://learn.microsoft.com/en-us/azure/key-vault/[Azure Key Vault]
+
+===== Configuration
+
+NOTE: The properties marked with *bold* are mandatory.
+
+[cols="1,3,1", options="header"]
+|===
+|Property
+|Description
+|Example
+|Default value
+
+|[subs=+quotes]`*azure.key-vault.name*`
+|Azure Key Vault Name with secret values for properties
+|`autotestkeyvault`
+|
+
+|[subs=+quotes]`azure.key-vault.api-version`
+|Client API version
+|`7.1`
+|`7.5`
+
+|===
+
+===== How to refer Azure Key Vault secrets
+. Find the required secret in Azure Key Vault.
++
+image::azure-key-vault.png[Secrets in Azure Key Vault]
+
+. Put the name to properties using the case-sensitive wrapping `AZURE_KEY_VAULT(...)`
++
+[source,properties]
+----
+db.connection.test.username=AZURE_KEY_VAULT(dev-mysql-analytics-user)
+----
+
 === Steps
 
 ==== Get information about Azure resource
