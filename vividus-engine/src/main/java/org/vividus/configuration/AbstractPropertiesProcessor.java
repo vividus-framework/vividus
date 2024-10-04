@@ -25,7 +25,7 @@ public abstract class AbstractPropertiesProcessor implements PropertiesProcessor
 {
     private final Pattern propertyPattern;
 
-    AbstractPropertiesProcessor(String processorRegexMarker)
+    protected AbstractPropertiesProcessor(String processorRegexMarker)
     {
         this.propertyPattern = Pattern.compile("(" + processorRegexMarker + "\\((.+?)\\)" + ")");
     }
