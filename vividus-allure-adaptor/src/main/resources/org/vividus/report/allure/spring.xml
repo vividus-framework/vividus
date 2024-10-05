@@ -61,6 +61,27 @@
         </constructor-arg>
     </bean>
 
+    <bean class="org.vividus.report.allure.plugin.LayoutConfiguringPlugin">
+        <constructor-arg>
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="report.tabs." />
+                <constructor-arg value="org.vividus.report.allure.plugin.LayoutConfiguringPlugin.Component" />
+            </bean>
+        </constructor-arg>
+        <constructor-arg>
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="report.tabs.overview.widgets." />
+                <constructor-arg value="org.vividus.report.allure.plugin.LayoutConfiguringPlugin.Component" />
+            </bean>
+        </constructor-arg>
+        <constructor-arg>
+            <bean factory-bean="propertyMapper" factory-method="readValues">
+                <constructor-arg value="report.tabs.graph.charts." />
+                <constructor-arg value="org.vividus.report.allure.plugin.LayoutConfiguringPlugin.Component" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
     <bean class="org.vividus.report.allure.AllureRunContext" />
 
     <bean class="org.vividus.report.allure.adapter.VerificationErrorAdapter" />

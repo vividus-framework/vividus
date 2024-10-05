@@ -38,14 +38,14 @@ class CustomTranslationsPluginTests
         assertEquals("""
                 'use strict';
                 allure.api.addTranslation('en', {"tab":{"suites":{"name":"Batches Tab"}}});
-                """.replaceAll("\r\n|\n", System.lineSeparator()), Files.readString(generateIndexJs()));
+                """, Files.readString(generatePluginJsFile()).replace("\r", ""));
     }
 
     @Test
     @DisabledOnOs(OS.WINDOWS)
     void shouldGenerateIndexJsWith644Permissions() throws IOException
     {
-        var permissions = PosixFilePermissions.toString(Files.getPosixFilePermissions(generateIndexJs()));
+        var permissions = PosixFilePermissions.toString(Files.getPosixFilePermissions(generatePluginJsFile()));
         assertEquals("rw-r--r--", permissions);
     }
 
@@ -56,7 +56,7 @@ class CustomTranslationsPluginTests
         assertEquals(0, plugin.getPluginFiles().size());
     }
 
-    private Path generateIndexJs() throws IOException
+    private Path generatePluginJsFile() throws IOException
     {
         var plugin = new CustomTranslationsPlugin(new PropertyMappedCollection<>(Map.of("en", Map.of(
                 "tab", Map.of(

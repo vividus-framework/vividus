@@ -1,6 +1,6 @@
 = Reporting Configuration
 
-== Configure report layout
+== Configure report translations and layout
 
 [cols="3,2,1,3", options="header"]
 |===
@@ -38,6 +38,122 @@ be used:
 ----
 report.translations.en.chart.duration.empty=No data to display
 ----
+
+4+^.^|[#_report_layout]_Report Layout_
+
+|`report.tabs.categories.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Categories[] tab
+
+|`report.tabs.suites.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Suites[] (aka menu:Batches[]) tab
+
+|`report.tabs.graph.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Graphs[] tab
+
+|`report.tabs.timeline.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Timeline[] tab
+
+|`report.tabs.behaviors.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Behaviors[] tab
+
+|`report.tabs.overview.widgets.summary.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Summary[] widget on menu:Overview[] tab
+
+|`report.tabs.overview.widgets.suites.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Suites[] (aka menu:Batches[]) widget on menu:Overview[] tab
+
+|`report.tabs.overview.widgets.environment.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Environment[] widget on menu:Overview[] tab
+
+|`report.tabs.overview.widgets.history-trend.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Trend[] widget on menu:Overview[] tab
+
+|`report.tabs.overview.widgets.categories.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Categories[] widget on menu:Overview[] tab
+
+|`report.tabs.overview.widgets.behaviors.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Features by Stories[] widget on menu:Overview[] tab
+
+|`report.tabs.overview.widgets.executors.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Executors[] widget on menu:Overview[] tab
+
+|`report.tabs.graph.charts.status-chart.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Status[] chart on menu:Graphs[] tab
+
+|`report.tabs.graph.charts.severity.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Severity[] chart on menu:Graphs[] tab
+
+|`report.tabs.graph.charts.duration.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Duration[] chart on menu:Graphs[] tab
+
+|`report.tabs.graph.charts.duration-trend.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Duration Trend[] chart on menu:Graphs[] tab
+
+|`report.tabs.graph.charts.retry-trend.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Retry Trend[] chart on menu:Graphs[] tab
+
+|`report.tabs.graph.charts.categories-trend.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Categories Trend[] chart on menu:Graphs[] tab
+
+|`report.tabs.graph.charts.history-trend.enabled`
+a|`true` +
+`false`
+|`true`
+|Show or hide menu:Trend[] chart on menu:Graphs[] tab
 
 |===
 
