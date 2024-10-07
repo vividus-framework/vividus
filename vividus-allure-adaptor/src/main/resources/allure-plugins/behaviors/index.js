@@ -1,4 +1,4 @@
-// Copy of https://github.com/allure-framework/allure2/blob/2.23.0/plugins/behaviors-plugin/src/dist/static/index.js
+// Copy of https://github.com/allure-framework/allure2/blob/2.30.0/plugins/behaviors-plugin/src/dist/static/index.js
 'use strict';
 
 allure.api.addTranslation('en', {
