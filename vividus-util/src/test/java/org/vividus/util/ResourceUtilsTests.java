@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -187,5 +187,25 @@ public class ResourceUtilsTests
     {
         Path tempFilePath = ResourceUtils.createTempFile("test.json");
         assertThat(tempFilePath.toString(), matchesPattern(".+test.+\\.json"));
+    }
+
+    @Test
+    public void testLoadResourceOrFileAsString()
+    {
+        String fileAsString = ResourceUtils.loadResourceOrFileAsString(RESOURCE_NAME);
+        assertEquals(ROOT_RESOURCE_CONTENT, normalizeLineFeeds(fileAsString));
+    }
+
+    @Test
+    @PrepareForTest(ResourceUtils.class)
+    public void testLoadResourceOrFileAsStringWithIoException() throws IOException
+    {
+        PowerMockito.spy(ResourceUtils.class);
+        IOException ioException = new IOException("some IOException");
+
+        PowerMockito.when(ResourceUtils.loadResourceOrFileAsByteArray(RESOURCE_NAME)).thenThrow(ioException);
+        UncheckedIOException exception = assertThrows(UncheckedIOException.class,
+                () -> ResourceUtils.loadResourceOrFileAsString(RESOURCE_NAME));
+        assertEquals(ioException, exception.getCause());
     }
 }

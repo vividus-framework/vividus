@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Predicate;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -88,17 +89,52 @@ public final class ResourceUtils
      */
     public static byte[] loadResourceOrFileAsByteArray(String resourceNameOrFilePath) throws IOException
     {
+        Path path = loadResourceOrFile(resourceNameOrFilePath).toPath();
+        return Files.readAllBytes(path);
+    }
+
+    /**
+     * Loads resource or file as String
+     *
+     * @param resourceNameOrFilePath Resource name or file path to load
+     * @return Resource or file content as String
+     */
+    public static String loadResourceOrFileAsString(String resourceNameOrFilePath)
+    {
+        try
+        {
+            return new String(loadResourceOrFileAsByteArray(resourceNameOrFilePath), StandardCharsets.UTF_8);
+        }
+        catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Loads resource or file as file
+     *
+     * @param resourceNameOrFilePath Resource name or file path to load
+     * @return File
+     */
+    private static File loadResourceOrFile(String resourceNameOrFilePath)
+    {
         String resourcePath = ensureRootPath(resourceNameOrFilePath);
+        Predicate<File> isValidFile = f -> f.exists() && f.isFile();
         URL resource = ResourceUtils.class.getResource(resourcePath);
         if (resource != null)
         {
-            return IOUtils.toByteArray(resource);
+            File resourceFile = loadFile(resource);
+            if (isValidFile.test(resourceFile))
+            {
+                return resourceFile;
+            }
         }
-        Path path = Paths.get(resourceNameOrFilePath);
-        File file = path.toFile();
-        if (file.exists() && file.isFile())
+
+        File file = new File(resourceNameOrFilePath);
+        if (isValidFile.test(file))
         {
-            return Files.readAllBytes(path);
+            return file;
         }
         throw new IllegalArgumentException(
                 "Neither resource with name '" + resourcePath + "' nor file at path '" + resourceNameOrFilePath
@@ -130,6 +166,16 @@ public final class ResourceUtils
     public static File loadFile(Class<?> clazz, String filePath)
     {
         URL resourceUrl = findResource(clazz, filePath);
+        return loadFile(resourceUrl);
+    }
+
+    /**
+     * Loads File from resource
+     * @param resourceUrl Resource
+     * @return File
+     */
+    public static File loadFile(URL resourceUrl)
+    {
         try
         {
             return Paths.get(resourceUrl.toURI()).toFile();

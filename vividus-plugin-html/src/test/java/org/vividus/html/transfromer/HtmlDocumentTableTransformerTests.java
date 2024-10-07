@@ -104,7 +104,8 @@ class HtmlDocumentTableTransformerTests
     @Test
     void shouldBuildTableByElementAttributeFromResource()
     {
-        TableProperties tableProperties = new TableProperties("column=col, path=index.html, xpathSelector=//a/text()",
+        TableProperties tableProperties = new TableProperties("column=col,"
+                + " path=org/vividus/html/transfromer/index.html, xpathSelector=//a/text()",
                 new Keywords(), new ParameterConverters());
         HtmlDocumentTableTransformer transformer = new HtmlDocumentTableTransformer(Optional.empty(),
                 variableContext);

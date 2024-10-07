@@ -19,7 +19,7 @@ package org.vividus.csv.transformer;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.Validate.isTrue;
 import static org.apache.commons.lang3.Validate.notEmpty;
-import static org.vividus.util.ResourceUtils.findResource;
+import static org.vividus.util.ResourceUtils.loadResourceOrFileAsByteArray;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
@@ -89,8 +88,7 @@ public class CsvTableTransformer implements ExtendedTableTransformer
     {
         try
         {
-            return new CsvReader(csvFormat).readCsvFile(findResource(getClass(), path))
-                    .stream().map(CSVRecord::toMap).toList();
+            return new CsvReader(csvFormat).readCsvBytes(loadResourceOrFileAsByteArray(path));
         }
         catch (IOException e)
         {

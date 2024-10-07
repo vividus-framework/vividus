@@ -80,7 +80,7 @@ public class HtmlDocumentTableTransformer implements ExtendedTableTransformer
         }
         else
         {
-            documentSuppler = () -> Jsoup.parse(ResourceUtils.loadResource(getClass(), sourceValue));
+            documentSuppler = () -> Jsoup.parse(ResourceUtils.loadResourceOrFileAsString(sourceValue));
         }
 
         String column = tableProperties.getMandatoryNonBlankProperty("column", String.class);

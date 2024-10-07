@@ -64,7 +64,8 @@ class JsonTableTransformerTests
     @Test
     void testTransformFromPath()
     {
-        var tableProperties = createProperties("path=data.json" + EXAMPLE_TABLE_COLUMNS_CONFIG);
+        var tableProperties = createProperties("path=org/vividus/json/transformer/data.json"
+                + EXAMPLE_TABLE_COLUMNS_CONFIG);
         var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
         assertEquals(EXPECTED_TABLE, table);
     }
@@ -102,6 +103,6 @@ class JsonTableTransformerTests
 
     private static String readJsonData()
     {
-        return ResourceUtils.loadResource(JsonTableTransformerTests.class, "data.json");
+        return ResourceUtils.loadResourceOrFileAsString("org/vividus/json/transformer/data.json");
     }
 }

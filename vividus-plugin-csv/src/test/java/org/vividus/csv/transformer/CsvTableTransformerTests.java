@@ -24,11 +24,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.when;
-import static org.vividus.util.ResourceUtils.findResource;
+import static org.vividus.util.ResourceUtils.loadResourceOrFileAsByteArray;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URL;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -80,8 +79,8 @@ class CsvTableTransformerTests
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "csvPath=test.csv",
-            "csvPath=test-with-semicolon.csv, delimiterChar=;"
+            "csvPath=org/vividus/csv/transformer/test.csv",
+            "csvPath=org/vividus/csv/transformer/test-with-semicolon.csv, delimiterChar=;"
     })
     void shouldCreateExamplesTableFromCsvDeprecatedProperty(String propertiesAsString)
     {
@@ -114,8 +113,8 @@ class CsvTableTransformerTests
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "path=test.csv",
-            "path=test-with-semicolon.csv, delimiterChar=;"
+            "path=org/vividus/csv/transformer/test.csv",
+            "path=org/vividus/csv/transformer/test-with-semicolon.csv, delimiterChar=;"
     })
     void shouldCreateExamplesTableFromCsv(String propertiesAsString)
     {
@@ -126,8 +125,10 @@ class CsvTableTransformerTests
 
     @ParameterizedTest
     @CsvSource({
-        "'path=test.csv,delimiterChar=--',     'CSV delimiter must be a single char, but value ''--'' has length of 2'",
-        "'path=test.csv,delimiterChar= ',      'CSV delimiter must be a single char, but value '''' has length of 0'"
+        "'path=org/vividus/csv/transformer/test.csv,delimiterChar=--',"
+                + "'CSV delimiter must be a single char, but value ''--'' has length of 2'",
+        "'path=org/vividus/csv/transformer/test.csv,delimiterChar= ',"
+                + "'CSV delimiter must be a single char, but value '''' has length of 0'"
     })
     void shouldThrowErrorIfInvalidParametersAreProvided(String propertiesAsString, String errorMessage)
     {
@@ -140,18 +141,18 @@ class CsvTableTransformerTests
 
     @SuppressWarnings("try")
     @Test
-    void testCsvFileReaderExceptionCatching()
+    void testCsvFileReaderExceptionCatching() throws IOException
     {
-        var csvFileName = "test.csv";
+        var csvFileName = "org/vividus/csv/transformer/test.csv";
         var tableProperties = new TableProperties("path=" + csvFileName, keywords, converters);
 
-        URL csvResource = findResource(getClass(), csvFileName);
+        byte[] csvResourceAsBytes = loadResourceOrFileAsByteArray(csvFileName);
         var ioException = new IOException();
         try (MockedConstruction<CsvReader> ignored = mockConstruction(CsvReader.class,
                 (mock, context) -> {
                     assertEquals(1, context.getCount());
                     assertEquals(List.of(CSVFormat.DEFAULT), context.arguments());
-                    when(mock.readCsvFile(csvResource)).thenThrow(ioException);
+                    when(mock.readCsvBytes(csvResourceAsBytes)).thenThrow(ioException);
                 }))
         {
             var transformer = new CsvTableTransformer(CSVFormat.DEFAULT, variableContext);

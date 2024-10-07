@@ -53,7 +53,7 @@ public class JsonTableTransformer implements ExtendedTableTransformer
         String sourceKey = entry.getKey();
         String sourceValue = entry.getValue();
         String jsonData = VARIABLE_NAME_PROPERTY_KEY.equals(sourceKey) ? variableContext.getVariable(sourceValue)
-                : ResourceUtils.loadResource(getClass(), sourceValue);
+                : ResourceUtils.loadResourceOrFileAsString(sourceValue);
 
         String columns = tableProperties.getMandatoryNonBlankProperty("columns", String.class);
         Map<String, String> columnsPerJsonPaths = Splitter.on(';').withKeyValueSeparator(Splitter.on('=').limit(2))
