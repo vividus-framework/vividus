@@ -11,9 +11,13 @@ function getCssSelectorForElement(element, selectorParts) {
 }
 
 function buildElementIdentifier(element) {
-    if (element.id) {
-        return '#' + escapeSpecialChars(element.id);
+    // Even though the id attribute is expected to be unique according to specification, not everyone follows it. Detection
+    // of non-unique id attributes is not a goal of CSS selector factory, please consider usage of accessibility analyzers.
+    var elementId = element.id;
+    if (isUniqueId(elementId)) {
+        return buildByIdCssSelector(elementId);
     }
+
     var identifier = escapeColon(element.tagName.toLowerCase());
     if (!element.parentNode) {
         return identifier;
@@ -24,6 +28,14 @@ function buildElementIdentifier(element) {
         identifier += ':nth-child(' + (childIndex + 1) + ')';
     }
     return identifier;
+}
+
+function isUniqueId(elementId) {
+    return document.querySelectorAll(buildByIdCssSelector(elementId)).length == 1;
+}
+
+function buildByIdCssSelector(elementId) {
+    return '#' + escapeSpecialChars(elementId);
 }
 
 function escapeSpecialChars(string) {
