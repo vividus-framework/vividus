@@ -920,7 +920,7 @@ Quotes the input literal so that metacharacters or escape sequences in the input
 .Verify the data
 [source,gherkin]
 ----
-Then `${frontEndData}` matches `#{quorePattern(${backEndData})}.*`
+Then `${frontEndData}` matches `#{quoteRegExp(${backEndData})}.*`
 ----
 
 == Hash calculations
