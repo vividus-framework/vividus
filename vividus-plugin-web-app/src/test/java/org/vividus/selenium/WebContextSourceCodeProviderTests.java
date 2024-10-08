@@ -20,6 +20,7 @@ import static com.github.valfirst.slf4jtest.LoggingEvent.debug;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -73,6 +74,7 @@ class WebContextSourceCodeProviderTests
     @Test
     void shouldReturnWholePageForDriverContext()
     {
+        sourceCodeProvider.setCollectShadowDomSourceCode(true);
         var webDriver = mock(WebDriver.class);
         when(uiContext.getSearchContext()).thenReturn(webDriver);
         var pageSource = "<html/>";
@@ -85,9 +87,23 @@ class WebContextSourceCodeProviderTests
                 sourceCodeProvider.getSourceCode());
     }
 
+    @SuppressFBWarnings("VA_FORMAT_STRING_USES_NEWLINE")
+    @Test
+    void shouldReturnWholePageForDriverContextNoShadowDom()
+    {
+        sourceCodeProvider.setCollectShadowDomSourceCode(false);
+        var webDriver = mock(WebDriver.class);
+        when(uiContext.getSearchContext()).thenReturn(webDriver);
+        var pageSource = "<html></html>";
+        when(webDriver.getPageSource()).thenReturn(pageSource);
+        assertEquals(Map.of(APPLICATION_SOURCE_CODE, pageSource), sourceCodeProvider.getSourceCode());
+        verifyNoInteractions(webJavascriptActions);
+    }
+
     @Test
     void shouldReturnElementSourceForElementContext()
     {
+        sourceCodeProvider.setCollectShadowDomSourceCode(true);
         var webElement = mock(WebElement.class);
         when(uiContext.getSearchContext()).thenReturn(webElement);
         var elementSource = "<div/>";
@@ -101,6 +117,7 @@ class WebContextSourceCodeProviderTests
     @Test
     void shouldHandleStaleElementsCorrectly()
     {
+        sourceCodeProvider.setCollectShadowDomSourceCode(true);
         var webElement = mock(WebElement.class);
         when(uiContext.getSearchContext()).thenReturn(webElement);
         when(webJavascriptActions.executeScript(OUTER_HTML_SCRIPT, webElement)).thenThrow(
@@ -113,6 +130,7 @@ class WebContextSourceCodeProviderTests
     @Test
     void shouldReturnEmptyValueForNullSearchContext()
     {
+        sourceCodeProvider.setCollectShadowDomSourceCode(true);
         when(uiContext.getSearchContext()).thenReturn(null);
         when(webJavascriptActions.executeScript(any(String.class))).thenReturn(Map.of());
         assertEquals(Map.of(), sourceCodeProvider.getSourceCode());

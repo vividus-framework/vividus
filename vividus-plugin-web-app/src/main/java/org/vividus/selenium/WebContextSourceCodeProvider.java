@@ -37,6 +37,8 @@ public class WebContextSourceCodeProvider implements ContextSourceCodeProvider
     private final IUiContext uiContext;
     private final WebJavascriptActions webJavascriptActions;
 
+    private boolean collectShadowDomSourceCode;
+
     protected WebContextSourceCodeProvider(IUiContext uiContext, WebJavascriptActions webJavascriptActions)
     {
         this.uiContext = uiContext;
@@ -62,7 +64,10 @@ public class WebContextSourceCodeProvider implements ContextSourceCodeProvider
         {
             sources.put(APPLICATION_SOURCE_CODE, sourceCode);
         }
-        sources.putAll(getShadowDomSourceCode(elementInContext, searchContext));
+        if (collectShadowDomSourceCode)
+        {
+            sources.putAll(getShadowDomSourceCode(elementInContext, searchContext));
+        }
         return sources;
     }
 
@@ -102,5 +107,10 @@ public class WebContextSourceCodeProvider implements ContextSourceCodeProvider
             LOGGER.debug("Unable to get sources of the stale element");
             return null;
         }
+    }
+
+    public void setCollectShadowDomSourceCode(boolean collectShadowDomSourceCode)
+    {
+        this.collectShadowDomSourceCode = collectShadowDomSourceCode;
     }
 }

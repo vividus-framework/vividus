@@ -216,7 +216,9 @@
     <bean class="org.vividus.ui.web.monitor.PublishingWebScreenshotOnFailureMonitor"
           parent="abstractPublishingScreenshotOnFailureMonitor"/>
 
-    <bean class="org.vividus.selenium.WebContextSourceCodeProvider" />
+    <bean class="org.vividus.selenium.WebContextSourceCodeProvider">
+        <property name="collectShadowDomSourceCode" value="${ui.publish-shadow-dom-source-on-failure}" />
+    </bean>
 
     <bean class="org.vividus.ui.listener.SourceCodePublishingOnFailureListener" lazy-init="false">
         <property name="publishSourceOnFailure" value="${ui.publish-source-on-failure}" />

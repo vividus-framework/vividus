@@ -68,6 +68,12 @@ include::partial$common-web-app-properties.adoc[]
 |`25`
 |Before the click VIVIDUS scrolls element into the viewport, the property defines top edge indent in viewport percent for the scroll
 
+|`ui.publish-shadow-dom-source-on-failure`
+a|`true` +
+`false`
+|`true`
+|Whether to publish the source code of Shadow DOM elements on failure or not
+
 |===
 
 === Configure driver path
