@@ -14,7 +14,7 @@ function buildElementIdentifier(element) {
     // Even though the id attribute is expected to be unique according to specification, not everyone follows it. Detection
     // of non-unique id attributes is not a goal of CSS selector factory, please consider usage of accessibility analyzers.
     var elementId = element.id;
-    if (isUniqueId(elementId)) {
+    if (elementId.length > 0 && isUniqueId(elementId)) {
         return buildByIdCssSelector(elementId);
     }
 

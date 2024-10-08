@@ -223,4 +223,4 @@ When I find GREATER_THAN `0` elements by `tagName(button)` and for each element 
 |step                                         |
 |When I click on element located by `xpath(.)`|
 When I save `innerText` attribute value of element located `id(count)` to scenario variable `count`
-Then `${count}` is equal to `4`
+Then `${count}` is equal to `6`
