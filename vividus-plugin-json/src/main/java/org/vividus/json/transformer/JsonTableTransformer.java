@@ -78,6 +78,5 @@ public class JsonTableTransformer implements ExtendedTableTransformer
         {
             throw new UncheckedIOException(e);
         }
-
     }
 }

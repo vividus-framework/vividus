@@ -150,11 +150,6 @@ public final class ResourceUtils
     public static File loadFile(Class<?> clazz, String filePath)
     {
         URL resourceUrl = findResource(clazz, filePath);
-        return toFile(resourceUrl);
-    }
-
-    private static File toFile(URL resourceUrl)
-    {
         try
         {
             return Paths.get(resourceUrl.toURI()).toFile();
