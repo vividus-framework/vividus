@@ -22,9 +22,9 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.when;
-import static org.vividus.util.ResourceUtils.loadResourceOrFileAsByteArray;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -141,25 +141,23 @@ class CsvTableTransformerTests
 
     @SuppressWarnings("try")
     @Test
-    void testCsvFileReaderExceptionCatching() throws IOException
+    void testCsvFileReaderExceptionCatching()
     {
         var csvFileName = "org/vividus/csv/transformer/test.csv";
         var tableProperties = new TableProperties("path=" + csvFileName, keywords, converters);
 
-        byte[] csvResourceAsBytes = loadResourceOrFileAsByteArray(csvFileName);
         var ioException = new IOException();
         try (MockedConstruction<CsvReader> ignored = mockConstruction(CsvReader.class,
                 (mock, context) -> {
                     assertEquals(1, context.getCount());
                     assertEquals(List.of(CSVFormat.DEFAULT), context.arguments());
-                    when(mock.readCsvBytes(csvResourceAsBytes)).thenThrow(ioException);
+                    when(mock.readCsvStream(any())).thenThrow(ioException);
                 }))
         {
             var transformer = new CsvTableTransformer(CSVFormat.DEFAULT, variableContext);
             var exception = assertThrows(UncheckedIOException.class,
                     () -> transformer.transform(EMPTY_EXAMPLES_TABLE, null, tableProperties));
-            assertEquals("Problem during CSV file reading", exception.getMessage());
-            assertEquals(ioException, exception.getCause());
+            assertException(exception, ioException);
         }
     }
 
@@ -207,8 +205,13 @@ class CsvTableTransformerTests
             var transformer = new CsvTableTransformer(CSVFormat.DEFAULT, variableContext);
             var exception = assertThrows(UncheckedIOException.class,
                     () -> transformer.transform(EMPTY_EXAMPLES_TABLE, null, tableProperties));
-            assertEquals("Problem during CSV String reading", exception.getMessage());
-            assertEquals(ioException, exception.getCause());
+            assertException(exception, ioException);
         }
+    }
+
+    private static void assertException(UncheckedIOException exception, IOException expectedCause)
+    {
+        assertEquals("Problem during CSV data reading", exception.getMessage());
+        assertEquals(expectedCause, exception.getCause());
     }
 }

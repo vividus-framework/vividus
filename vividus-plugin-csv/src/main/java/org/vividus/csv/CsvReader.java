@@ -18,15 +18,12 @@ package org.vividus.csv;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.apache.commons.csv.CSVFormat;
@@ -46,43 +43,19 @@ public class CsvReader
         this.csvFormat = csvFormat;
     }
 
-    public List<Map<String, String>> readCsvFile(Path path, String... header) throws IOException
-    {
-        try (Reader reader = new InputStreamReader(Files.newInputStream(path), StandardCharsets.UTF_8))
-        {
-            return collectCsv(reader, header);
-        }
-    }
-
     public List<Map<String, String>> readCsvString(String csvString, String... header) throws IOException
     {
-        return readCsvBytes(csvString.getBytes(StandardCharsets.UTF_8), header);
+        return readCsvStream(new ByteArrayInputStream(csvString.getBytes(StandardCharsets.UTF_8)), header);
     }
 
-    public List<Map<String, String>> readCsvBytes(byte[] csvAsBytes, String... header) throws IOException
+    public List<Map<String, String>> readCsvStream(InputStream inputStream, String... header) throws IOException
     {
-        try (Reader reader = new InputStreamReader(new ByteArrayInputStream(csvAsBytes),
-                StandardCharsets.UTF_8))
+        try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8))
         {
-            return collectCsv(reader, header);
+            CSVFormat formatWithHeaders = csvFormat.builder().setHeader(header).build();
+            return StreamSupport.stream(formatWithHeaders.parse(reader).spliterator(), false)
+                    .map(CSVRecord::toMap)
+                    .toList();
         }
-    }
-
-    public List<CSVRecord> readCsvFile(URL resourceUrl, String... header) throws IOException
-    {
-        try (Reader reader = new InputStreamReader(resourceUrl.openStream(), StandardCharsets.UTF_8))
-        {
-            return readCsvFile(reader, header).toList();
-        }
-    }
-
-    private List<Map<String, String>> collectCsv(Reader reader, String... header) throws IOException
-    {
-        return readCsvFile(reader, header).map(CSVRecord::toMap).toList();
-    }
-
-    private Stream<CSVRecord> readCsvFile(Reader reader, String... header) throws IOException
-    {
-        return StreamSupport.stream(csvFormat.builder().setHeader(header).build().parse(reader).spliterator(), false);
     }
 }

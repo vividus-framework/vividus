@@ -18,6 +18,7 @@ package org.vividus.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -25,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.function.Predicate;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -89,52 +89,36 @@ public final class ResourceUtils
      */
     public static byte[] loadResourceOrFileAsByteArray(String resourceNameOrFilePath) throws IOException
     {
-        Path path = loadResourceOrFile(resourceNameOrFilePath).toPath();
-        return Files.readAllBytes(path);
+        return loadResourceOrFile(resourceNameOrFilePath, IOUtils::toByteArray, Files::readAllBytes);
     }
 
     /**
-     * Loads resource or file as String
+     * Loads resource or file as {@link InputStream}
      *
      * @param resourceNameOrFilePath Resource name or file path to load
-     * @return Resource or file content as String
+     * @return {@link InputStream} from resource or file
+     * @throws IOException if an I/O error occurs
      */
-    public static String loadResourceOrFileAsString(String resourceNameOrFilePath)
+    public static InputStream loadResourceOrFileAsStream(String resourceNameOrFilePath) throws IOException
     {
-        try
-        {
-            return new String(loadResourceOrFileAsByteArray(resourceNameOrFilePath), StandardCharsets.UTF_8);
-        }
-        catch (IOException e)
-        {
-            throw new UncheckedIOException(e);
-        }
+        return loadResourceOrFile(resourceNameOrFilePath, URL::openStream, Files::newInputStream);
     }
 
-    /**
-     * Loads resource or file as file
-     *
-     * @param resourceNameOrFilePath Resource name or file path to load
-     * @return File
-     */
-    private static File loadResourceOrFile(String resourceNameOrFilePath)
+    private static <T> T loadResourceOrFile(String resourceNameOrFilePath, ResourceReader<URL, T> resourceReader,
+            ResourceReader<Path, T> fileReader) throws IOException
     {
         String resourcePath = ensureRootPath(resourceNameOrFilePath);
-        Predicate<File> isValidFile = f -> f.exists() && f.isFile();
         URL resource = ResourceUtils.class.getResource(resourcePath);
         if (resource != null)
         {
-            File resourceFile = loadFile(resource);
-            if (isValidFile.test(resourceFile))
-            {
-                return resourceFile;
-            }
+            return resourceReader.read(resource);
         }
 
-        File file = new File(resourceNameOrFilePath);
-        if (isValidFile.test(file))
+        Path path = Paths.get(resourceNameOrFilePath);
+        File file = path.toFile();
+        if (file.exists() && file.isFile())
         {
-            return file;
+            return fileReader.read(path);
         }
         throw new IllegalArgumentException(
                 "Neither resource with name '" + resourcePath + "' nor file at path '" + resourceNameOrFilePath
@@ -166,15 +150,10 @@ public final class ResourceUtils
     public static File loadFile(Class<?> clazz, String filePath)
     {
         URL resourceUrl = findResource(clazz, filePath);
-        return loadFile(resourceUrl);
+        return toFile(resourceUrl);
     }
 
-    /**
-     * Loads File from resource
-     * @param resourceUrl Resource
-     * @return File
-     */
-    public static File loadFile(URL resourceUrl)
+    private static File toFile(URL resourceUrl)
     {
         try
         {
@@ -235,7 +214,7 @@ public final class ResourceUtils
         return StringUtils.prependIfMissing(resourceName, "/");
     }
 
-    private static <T> T loadResource(Class<?> clazz, String resourceName, ResourceReader<T> resourceReader)
+    private static <T> T loadResource(Class<?> clazz, String resourceName, ResourceReader<URL, T> resourceReader)
     {
         URL resource = findResource(clazz, resourceName);
         try
@@ -248,8 +227,8 @@ public final class ResourceUtils
         }
     }
 
-    private interface ResourceReader<R>
+    private interface ResourceReader<T, R>
     {
-        R read(URL resource) throws IOException;
+        R read(T resource) throws IOException;
     }
 }

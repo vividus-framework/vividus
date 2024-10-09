@@ -20,6 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
@@ -32,7 +35,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
-import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
 class JsonTableTransformerTests
@@ -52,7 +54,7 @@ class JsonTableTransformerTests
     @InjectMocks private JsonTableTransformer jsonTableTransformer;
 
     @Test
-    void testTransformFromVariable()
+    void testTransformFromVariable() throws IOException
     {
         when(variableContext.getVariable("varName")).thenReturn(readJsonData());
 
@@ -71,7 +73,7 @@ class JsonTableTransformerTests
     }
 
     @Test
-    void testTransformFromVariableWithComplexJsonPath()
+    void testTransformFromVariableWithComplexJsonPath() throws IOException
     {
         when(variableContext.getVariable("varWithJson")).thenReturn(readJsonData());
         var tableProperties = createProperties("columns=type=$..[?(@.codes[0].code==\"107214\")].type,"
@@ -101,8 +103,8 @@ class JsonTableTransformerTests
         return new TableProperties(propertiesAsString, new Keywords(), new ParameterConverters());
     }
 
-    private static String readJsonData()
+    private String readJsonData() throws IOException
     {
-        return ResourceUtils.loadResourceOrFileAsString("org/vividus/json/transformer/data.json");
+        return new String(this.getClass().getResourceAsStream("data.json").readAllBytes(), StandardCharsets.UTF_8);
     }
 }

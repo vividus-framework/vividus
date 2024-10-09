@@ -19,7 +19,7 @@ package org.vividus.csv.transformer;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.Validate.isTrue;
 import static org.apache.commons.lang3.Validate.notEmpty;
-import static org.vividus.util.ResourceUtils.loadResourceOrFileAsByteArray;
+import static org.vividus.util.ResourceUtils.loadResourceOrFileAsStream;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -77,41 +77,34 @@ public class CsvTableTransformer implements ExtendedTableTransformer
             csvFormat = csvFormat.builder().setDelimiter(delimiter.charAt(0)).build();
         }
 
-        List<Map<String, String>> result = VARIABLE_NAME_PROPERTY.equals(sourceKey)
-                ? readCsvFromVariable(csvFormat, sourceValue)
-                : readCsvFromFile(csvFormat, sourceValue);
-        return ExamplesTableProcessor.buildExamplesTable(result.get(0).keySet(), extractValues(result),
-                tableProperties, true);
-    }
-
-    private List<Map<String, String>> readCsvFromFile(CSVFormat csvFormat, String path)
-    {
         try
         {
-            return new CsvReader(csvFormat).readCsvBytes(loadResourceOrFileAsByteArray(path));
+            List<Map<String, String>> result = VARIABLE_NAME_PROPERTY.equals(sourceKey)
+                    ? readCsvFromVariable(csvFormat, sourceValue)
+                    : readCsvFromFile(csvFormat, sourceValue);
+            return ExamplesTableProcessor.buildExamplesTable(result.get(0).keySet(), extractValues(result),
+                    tableProperties, true);
         }
         catch (IOException e)
         {
-            throw new UncheckedIOException("Problem during CSV file reading", e);
+            throw new UncheckedIOException("Problem during CSV data reading", e);
         }
     }
 
-    private List<Map<String, String>> readCsvFromVariable(CSVFormat csvFormat, String variableName)
+    private List<Map<String, String>> readCsvFromFile(CSVFormat csvFormat, String path) throws IOException
     {
-        try
-        {
-            String variableValue = variableContext.getVariable(variableName);
-            isTrue(StringUtils.isNotEmpty(variableValue), "Variable '%s' is not set or empty."
-                    + " Please check that variable is defined and has 'global' or 'next_batches' scope", variableName);
-            List<Map<String, String>> result = new CsvReader(csvFormat).readCsvString(variableValue);
-            notEmpty(result, "Unable to create examples table based on '%s' variable value."
-                    + " Please check that value has proper csv format", variableName);
-            return result;
-        }
-        catch (IOException e)
-        {
-            throw new UncheckedIOException("Problem during CSV String reading", e);
-        }
+        return new CsvReader(csvFormat).readCsvStream(loadResourceOrFileAsStream(path));
+    }
+
+    private List<Map<String, String>> readCsvFromVariable(CSVFormat csvFormat, String variableName) throws IOException
+    {
+        String variableValue = variableContext.getVariable(variableName);
+        isTrue(StringUtils.isNotEmpty(variableValue), "Variable '%s' is not set or empty."
+                + " Please check that variable is defined and has 'global' or 'next_batches' scope", variableName);
+        List<Map<String, String>> result = new CsvReader(csvFormat).readCsvString(variableValue);
+        notEmpty(result, "Unable to create examples table based on '%s' variable value."
+                + " Please check that value has proper csv format", variableName);
+        return result;
     }
 
     /**

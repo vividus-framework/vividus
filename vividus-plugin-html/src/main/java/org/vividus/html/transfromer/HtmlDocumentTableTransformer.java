@@ -23,12 +23,13 @@ import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
+import org.apache.commons.lang3.function.FailableSupplier;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.jsoup.Connection;
@@ -67,7 +68,7 @@ public class HtmlDocumentTableTransformer implements ExtendedTableTransformer
                 PAGE_URL_PROPERTY_KEY, VARIABLE_NAME_PROPERTY_KEY, PATH_PROPERTY_KEY);
         String sourceKey = entry.getKey();
         String sourceValue = entry.getValue();
-        Supplier<Document> documentSuppler;
+        FailableSupplier<Document, IOException> documentSuppler;
         if (VARIABLE_NAME_PROPERTY_KEY.equals(sourceKey))
         {
             documentSuppler = () -> Jsoup.parse((String) variableContext.getVariable(sourceValue));
@@ -80,7 +81,8 @@ public class HtmlDocumentTableTransformer implements ExtendedTableTransformer
         }
         else
         {
-            documentSuppler = () -> Jsoup.parse(ResourceUtils.loadResourceOrFileAsString(sourceValue));
+            documentSuppler = () -> Jsoup.parse(ResourceUtils.loadResourceOrFileAsStream(sourceValue),
+                    StandardCharsets.UTF_8.name(), "");
         }
 
         String column = tableProperties.getMandatoryNonBlankProperty("column", String.class);
@@ -105,26 +107,26 @@ public class HtmlDocumentTableTransformer implements ExtendedTableTransformer
             getter = Element::outerHtml;
         }
 
-        return documentSuppler.get().selectXpath(xpathSelector)
+        try
+        {
+            return documentSuppler.get().selectXpath(xpathSelector)
                                     .stream()
                                     .map(getter)
                                     .collect(collectingAndThen(toList(), attrs -> ExamplesTableProcessor
                                             .buildExamplesTableFromColumns(List.of(column), List.of(attrs),
                                                     tableProperties)));
-    }
-
-    private Document createDocument(String pageUrl)
-    {
-        try
-        {
-            Connection connection = Jsoup.connect(pageUrl);
-            httpConfiguration.ifPresent(cfg -> connection.headers(cfg.getHeaders()));
-            return connection.get();
         }
         catch (IOException e)
         {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private Document createDocument(String pageUrl) throws IOException
+    {
+        Connection connection = Jsoup.connect(pageUrl);
+        httpConfiguration.ifPresent(cfg -> connection.headers(cfg.getHeaders()));
+        return connection.get();
     }
 
     public static final class HttpConfiguration

@@ -16,12 +16,16 @@
 
 package org.vividus.json.transformer;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Splitter;
 
+import org.apache.commons.lang3.function.FailableFunction;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
 import org.vividus.context.VariableContext;
@@ -52,20 +56,28 @@ public class JsonTableTransformer implements ExtendedTableTransformer
                 VARIABLE_NAME_PROPERTY_KEY, PATH_PROPERTY_KEY);
         String sourceKey = entry.getKey();
         String sourceValue = entry.getValue();
-        String jsonData = VARIABLE_NAME_PROPERTY_KEY.equals(sourceKey) ? variableContext.getVariable(sourceValue)
-                : ResourceUtils.loadResourceOrFileAsString(sourceValue);
+        FailableFunction<Collection<String>, List<?>, IOException> jsonDataMapper = VARIABLE_NAME_PROPERTY_KEY.equals(
+                sourceKey) ? paths -> JsonPathUtils.getData((String) variableContext.getVariable(sourceValue), paths)
+                : paths -> JsonPathUtils.getData(ResourceUtils.loadResourceOrFileAsStream(sourceValue), paths);
 
         String columns = tableProperties.getMandatoryNonBlankProperty("columns", String.class);
         Map<String, String> columnsPerJsonPaths = Splitter.on(';').withKeyValueSeparator(Splitter.on('=').limit(2))
                 .split(columns);
 
-        List<List<String>> values = JsonPathUtils.getData(jsonData, columnsPerJsonPaths.values()).stream().map(e ->
+        try
         {
-            List<Object> columnValues = e instanceof List ? (List<Object>) e : Collections.singletonList(e);
-            return columnValues.stream().map(String::valueOf).toList();
-        }).toList();
+            List<List<String>> values = jsonDataMapper.apply(columnsPerJsonPaths.values()).stream().map(e ->
+            {
+                List<Object> columnValues = e instanceof List ? (List<Object>) e : Collections.singletonList(e);
+                return columnValues.stream().map(String::valueOf).toList();
+            }).toList();
+            return ExamplesTableProcessor.buildExamplesTableFromColumns(columnsPerJsonPaths.keySet(), values,
+                    tableProperties);
+        }
+        catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
 
-        return ExamplesTableProcessor.buildExamplesTableFromColumns(columnsPerJsonPaths.keySet(), values,
-                tableProperties);
     }
 }

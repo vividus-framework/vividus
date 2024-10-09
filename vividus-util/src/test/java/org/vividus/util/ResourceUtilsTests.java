@@ -190,22 +190,11 @@ public class ResourceUtilsTests
     }
 
     @Test
-    public void testLoadResourceOrFileAsString()
+    public void shouldLoadResourceOrFileAsStream() throws IOException
     {
-        String fileAsString = ResourceUtils.loadResourceOrFileAsString(RESOURCE_NAME);
-        assertEquals(ROOT_RESOURCE_CONTENT, normalizeLineFeeds(fileAsString));
-    }
-
-    @Test
-    @PrepareForTest(ResourceUtils.class)
-    public void testLoadResourceOrFileAsStringWithIoException() throws IOException
-    {
-        PowerMockito.spy(ResourceUtils.class);
-        IOException ioException = new IOException("some IOException");
-
-        PowerMockito.when(ResourceUtils.loadResourceOrFileAsByteArray(RESOURCE_NAME)).thenThrow(ioException);
-        UncheckedIOException exception = assertThrows(UncheckedIOException.class,
-                () -> ResourceUtils.loadResourceOrFileAsString(RESOURCE_NAME));
-        assertEquals(ioException, exception.getCause());
+        try (var inputStream = ResourceUtils.loadResourceOrFileAsStream(RESOURCE_NAME))
+        {
+            assertEquals(ROOT_RESOURCE_CONTENT, new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+        }
     }
 }
