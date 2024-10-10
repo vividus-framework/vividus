@@ -519,3 +519,14 @@ Then `${documentTable}` is equal to table:
 |<a name="ElementName">Named anchor.</a>                                          |
 |<a href="#notFound">Link to unexistent element</a>                               |
 |<a href="#" title="Link title" onclick="onLinkClick(event)">Link with tooltip</a>|
+
+Scenario: Verify FROM_HTML transformer from resource
+When I initialize scenario variable `documentTable` with values:
+{transformer=FROM_HTML, column=col, path=/data/links.html, xpathSelector=//a/text()}
+Then `${documentTable}` is equal to table:
+|col                                        |
+|Link to an element                         |
+|Link to the anchor with name "ElementName" |
+|Named anchor.                              |
+|Link to unexistent element                 |
+|Link with tooltip                          |

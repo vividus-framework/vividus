@@ -8,6 +8,24 @@ Then `<country>` is equal to `Belarus`
 Then `<capital>` is equal to `Minsk`
 Then `<data>` is equal to `{"sheet": [{"cols": 1, "name": "A", "rows": 2}], "name": "tests"}`
 Examples:
+{transformer=FROM_CSV, path=/data/csv.csv}
+
+Scenario: Verify FROM_CSV transformer from variable
+Meta:
+    @feature table-transformers
+Then `<country>` is equal to `Belarus`
+Then `<capital>` is equal to `Minsk`
+Examples:
+{transformer=FROM_CSV, variableName=csv-transformer-test}
+
+Scenario: Verify FROM_CSV transformer with deprecated property
+Meta:
+    @feature table-transformers
+!-- Deprecated
+Then `<country>` is equal to `Belarus`
+Then `<capital>` is equal to `Minsk`
+Then `<data>` is equal to `{"sheet": [{"cols": 1, "name": "A", "rows": 2}], "name": "tests"}`
+Examples:
 {transformer=FROM_CSV, csvPath=/data/csv.csv}
 
 Scenario: Verify FROM_CSV transformer with custom delimiter
@@ -17,7 +35,7 @@ Then `<country>` is equal to `Belarus`
 Then `<capital>` is equal to `Minsk`
 Then `<data>` is equal to `{"sheet": [{"cols": 1, "name": "A", "rows": 2}], "name": "tests"}`
 Examples:
-{transformer=FROM_CSV, csvPath=/data/csv-with-semicolon.csv, delimiterChar=;}
+{transformer=FROM_CSV, path=/data/csv-with-semicolon.csv, delimiterChar=;}
 
 Scenario: Execute SQL against CSV
 Meta:

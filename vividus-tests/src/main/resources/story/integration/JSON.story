@@ -238,3 +238,25 @@ Then JSON element from `
    "b",
    "c"
 ]` IGNORING_ARRAY_ORDER
+
+Scenario: Verify FROM_JSON transformer from resource
+When I initialize scenario variable `documentTable` with values:
+{transformer=FROM_JSON, path=/data/data.json, columns=column_code=$.superCodes..code;column_type=$.superCodes..type}
+Then `${documentTable}` is equal to table:
+|column_code|column_type|
+|107214     |A          |
+|107224     |B          |
+|107314     |C          |
+|107324     |D          |
+|107XX4     |E          |
+|1          |F          |
+
+Scenario: Verify FROM_JSON transformer from variable
+When I initialize scenario variable `documentTable` with values:
+{transformer=FROM_JSON, variableName=json, columns=author=$..book..author;title=$..book..title}
+Then `${documentTable}` is equal to table:
+|author           |title                 |
+|Nigel Rees       |Sayings of the Century|
+|Evelyn Waugh     |Sword of Honour       |
+|Herman Melville  |Moby Dick             |
+|J. R. R. Tolkien |The Lord of the Rings |

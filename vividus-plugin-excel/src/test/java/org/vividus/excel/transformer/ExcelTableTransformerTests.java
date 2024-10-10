@@ -47,6 +47,7 @@ class ExcelTableTransformerTests
     private static final String EXTEND_RANGE_VALUE = "A1:B3";
     private static final String JOIN_VALUES = "joinValues";
     private static final String TRUE = "true";
+    private static final String EXPECTED_ERROR_MSG = "One of either 'range' or 'addresses' should be specified";
 
     private final ExcelTableTransformer transformer = new ExcelTableTransformer(false);
 
@@ -77,8 +78,7 @@ class ExcelTableTransformerTests
         properties.getProperties().setProperty(ADDRESSES, "1,3,5");
         var exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform("", null, properties));
-        assertEquals("Only one ExamplesTable property must be set, but found both 'range' and 'addresses'",
-                exception.getMessage());
+        assertEquals(EXPECTED_ERROR_MSG, exception.getMessage());
     }
 
     @Test
@@ -87,8 +87,7 @@ class ExcelTableTransformerTests
         properties.getProperties().setProperty(COLUMN, DATA);
         var exception = assertThrows(IllegalArgumentException.class,
             () -> transformer.transform("", null, properties));
-        assertEquals("One of ExamplesTable properties must be set: either 'range' or 'addresses'",
-                exception.getMessage());
+        assertEquals(EXPECTED_ERROR_MSG, exception.getMessage());
     }
 
     @Test

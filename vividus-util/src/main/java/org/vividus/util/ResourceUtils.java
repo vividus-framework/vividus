@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.vividus.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -88,17 +89,36 @@ public final class ResourceUtils
      */
     public static byte[] loadResourceOrFileAsByteArray(String resourceNameOrFilePath) throws IOException
     {
+        return loadResourceOrFile(resourceNameOrFilePath, IOUtils::toByteArray, Files::readAllBytes);
+    }
+
+    /**
+     * Loads resource or file as {@link InputStream}
+     *
+     * @param resourceNameOrFilePath Resource name or file path to load
+     * @return {@link InputStream} from resource or file
+     * @throws IOException if an I/O error occurs
+     */
+    public static InputStream loadResourceOrFileAsStream(String resourceNameOrFilePath) throws IOException
+    {
+        return loadResourceOrFile(resourceNameOrFilePath, URL::openStream, Files::newInputStream);
+    }
+
+    private static <T> T loadResourceOrFile(String resourceNameOrFilePath, ResourceReader<URL, T> resourceReader,
+            ResourceReader<Path, T> fileReader) throws IOException
+    {
         String resourcePath = ensureRootPath(resourceNameOrFilePath);
         URL resource = ResourceUtils.class.getResource(resourcePath);
         if (resource != null)
         {
-            return IOUtils.toByteArray(resource);
+            return resourceReader.read(resource);
         }
+
         Path path = Paths.get(resourceNameOrFilePath);
         File file = path.toFile();
         if (file.exists() && file.isFile())
         {
-            return Files.readAllBytes(path);
+            return fileReader.read(path);
         }
         throw new IllegalArgumentException(
                 "Neither resource with name '" + resourcePath + "' nor file at path '" + resourceNameOrFilePath
@@ -189,7 +209,7 @@ public final class ResourceUtils
         return StringUtils.prependIfMissing(resourceName, "/");
     }
 
-    private static <T> T loadResource(Class<?> clazz, String resourceName, ResourceReader<T> resourceReader)
+    private static <T> T loadResource(Class<?> clazz, String resourceName, ResourceReader<URL, T> resourceReader)
     {
         URL resource = findResource(clazz, resourceName);
         try
@@ -202,8 +222,8 @@ public final class ResourceUtils
         }
     }
 
-    private interface ResourceReader<R>
+    private interface ResourceReader<T, R>
     {
-        R read(URL resource) throws IOException;
+        R read(T resource) throws IOException;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.configuration.Keywords;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
@@ -32,37 +35,45 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
-import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
 class JsonTableTransformerTests
 {
+    private static final String EXAMPLE_TABLE_COLUMNS_CONFIG = ",columns=column_code=$.superCodes..code;"
+            + "column_codeSystem=$.superCodes..codeSystem;column_type=$.superCodes..type";
+    private static final String EXPECTED_TABLE = """
+            |column_code|column_codeSystem|column_type|
+            |107214|VIVIDUS|A|
+            |107224|VIVIDUS|B|
+            |107314|VIVIDUS|C|
+            |107324|VIVIDUS|D|
+            |107XX4|VIVIDUS|E|
+            |1|true|F|""";
+
     @Mock private VariableContext variableContext;
     @InjectMocks private JsonTableTransformer jsonTableTransformer;
 
     @Test
-    void testTransformFromVariable()
+    void testTransformFromVariable() throws IOException
     {
         when(variableContext.getVariable("varName")).thenReturn(readJsonData());
 
-        var tableProperties = createProperties("variableName=varName"
-                + ",columns=column_code=$.superCodes..code;"
-                + "column_codeSystem=$.superCodes..codeSystem;"
-                + "column_type=$.superCodes..type");
+        var tableProperties = createProperties("variableName=varName" + EXAMPLE_TABLE_COLUMNS_CONFIG);
         var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
-        var expectedTable = """
-                |column_code|column_codeSystem|column_type|
-                |107214|VIVIDUS|A|
-                |107224|VIVIDUS|B|
-                |107314|VIVIDUS|C|
-                |107324|VIVIDUS|D|
-                |107XX4|VIVIDUS|E|
-                |1|true|F|""";
-        assertEquals(expectedTable, table);
+        assertEquals(EXPECTED_TABLE, table);
     }
 
     @Test
-    void testTransformFromVariableWithComplexJsonPath()
+    void testTransformFromPath()
+    {
+        var tableProperties = createProperties("path=org/vividus/json/transformer/data.json"
+                + EXAMPLE_TABLE_COLUMNS_CONFIG);
+        var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
+        assertEquals(EXPECTED_TABLE, table);
+    }
+
+    @Test
+    void testTransformFromVariableWithComplexJsonPath() throws IOException
     {
         when(variableContext.getVariable("varWithJson")).thenReturn(readJsonData());
         var tableProperties = createProperties("columns=type=$..[?(@.codes[0].code==\"107214\")].type,"
@@ -74,17 +85,17 @@ class JsonTableTransformerTests
 
     @ParameterizedTest
     @CsvSource({
-            "'columns=key=value\\,url', variableName",
-            "variableName=any,          columns"
+            "'columns=key=value\\,url', 'One of either ''variableName'' or ''path'' should be specified'",
+            "variableName=any,          '''columns'' is not set in ExamplesTable properties'",
+            "'path= ',                  'ExamplesTable property ''path'' is blank'",
+            "'variableName= ',          'ExamplesTable property ''variableName'' is blank'"
     })
-    void shouldThrowAnErrorOnMissingParameters(String propertiesAsString,
-            String nameOfMissingProperty)
+    void shouldThrowAnErrorOnMissingParameters(String propertiesAsString, String expectedErrorMsg)
     {
         var properties = createProperties(propertiesAsString);
         var exception = assertThrows(IllegalArgumentException.class,
                 () -> jsonTableTransformer.transform(StringUtils.EMPTY, null, properties));
-        assertEquals("'" + nameOfMissingProperty + "' is not set in ExamplesTable properties",
-                exception.getMessage());
+        assertEquals(expectedErrorMsg, exception.getMessage());
     }
 
     private TableProperties createProperties(String propertiesAsString)
@@ -92,8 +103,8 @@ class JsonTableTransformerTests
         return new TableProperties(propertiesAsString, new Keywords(), new ParameterConverters());
     }
 
-    private static String readJsonData()
+    private String readJsonData() throws IOException
     {
-        return ResourceUtils.loadResource(JsonTableTransformerTests.class, "data.json");
+        return new String(this.getClass().getResourceAsStream("data.json").readAllBytes(), StandardCharsets.UTF_8);
     }
 }

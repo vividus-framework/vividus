@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,10 @@ package org.vividus.csv;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
 import org.junit.jupiter.api.Test;
 
 class CsvReaderTests
@@ -41,56 +36,30 @@ class CsvReaderTests
             SECOND_VALUE);
     private static final List<Map<String, String>> CSV_RECORDS = List.of(CSV_RECORD);
 
-    private final CsvReader csvReader = new CsvReader();
-
     @Test
-    void testReadCsvFromPath() throws IOException, URISyntaxException
+    void testReadCsvWithEscapedDataFromPath() throws IOException
     {
-        Path filePath = Paths.get(getCsvResource().toURI());
-        List<Map<String, String>> result = csvReader.readCsvFile(filePath, FIRST_HEADER, SECOND_HEADER);
-        assertEquals(CSV_RECORDS, result);
-    }
-
-    @Test
-    void testReadCsvWithEscapedDataFromPath() throws IOException, URISyntaxException
-    {
-        Path filePath = Paths.get(getCsvResource("unittest-escaped.csv").toURI());
-        var csvFormat = CSVFormat.DEFAULT.builder().setDelimiter(',').setEscape('\\').build();
-        List<Map<String, String>> result = new CsvReader(csvFormat).readCsvFile(filePath, FIRST_HEADER, SECOND_HEADER);
-        assertEquals(List.of(Map.of(FIRST_HEADER, FIRST_VALUE, SECOND_HEADER, "value2 with \" inside")), result);
+        try (var inputStream = getClass().getResourceAsStream("unittest-escaped.csv"))
+        {
+            var csvFormat = CSVFormat.DEFAULT.builder().setDelimiter(',').setEscape('\\').build();
+            var result = new CsvReader(csvFormat).readCsvStream(inputStream, FIRST_HEADER, SECOND_HEADER);
+            assertEquals(List.of(Map.of(FIRST_HEADER, FIRST_VALUE, SECOND_HEADER, "value2 with \" inside")), result);
+        }
     }
 
     @Test
     void testReadCsvFromStringWithoutHeaders() throws IOException
     {
-        String csv = FIRST_VALUE + COMMA + SECOND_VALUE;
-        List<Map<String, String>> result = csvReader.readCsvString(csv, FIRST_HEADER, SECOND_HEADER);
+        var csv = FIRST_VALUE + COMMA + SECOND_VALUE;
+        var result = new CsvReader().readCsvString(csv, FIRST_HEADER, SECOND_HEADER);
         assertEquals(CSV_RECORDS, result);
     }
 
     @Test
     void testReadCsvFromStringWithHeaders() throws IOException
     {
-        String csv = FIRST_HEADER + COMMA + SECOND_HEADER + "\n" + FIRST_VALUE + COMMA + SECOND_VALUE;
-        List<Map<String, String>> result = csvReader.readCsvString(csv);
+        var csv = FIRST_HEADER + COMMA + SECOND_HEADER + "\n" + FIRST_VALUE + COMMA + SECOND_VALUE;
+        var result = new CsvReader().readCsvString(csv);
         assertEquals(CSV_RECORDS, result);
-    }
-
-    @Test
-    void testReadCsvFromUrl() throws IOException
-    {
-        URL url = getCsvResource();
-        List<CSVRecord> result = csvReader.readCsvFile(url, FIRST_HEADER, SECOND_HEADER);
-        assertEquals(CSV_RECORDS, result.stream().map(CSVRecord::toMap).toList());
-    }
-
-    private URL getCsvResource()
-    {
-        return getCsvResource("unittest.csv");
-    }
-
-    private URL getCsvResource(String resourceName)
-    {
-        return getClass().getResource(resourceName);
     }
 }
