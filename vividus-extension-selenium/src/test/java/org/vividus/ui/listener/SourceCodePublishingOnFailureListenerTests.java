@@ -26,8 +26,10 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
@@ -38,6 +40,10 @@ class SourceCodePublishingOnFailureListenerTests
 {
     private static final String SOURCES = "<html/>";
     private static final String HTML = "HTML";
+    private static final String SOURCE_CODE_KEY = "sourceCode";
+    private static final String FORMAT_KEY = "format";
+    private static final String TEMPLATES_SOURCE_CODE_FTL = "/templates/source-code.ftl";
+    private static final String TEMPLATES_SHADOW_CODE_FTL = "/templates/shadow-code.ftl";
 
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private ContextSourceCodeProvider contextSourceCodeProvider;
@@ -72,8 +78,44 @@ class SourceCodePublishingOnFailureListenerTests
         listener.setPublishSourceOnFailure(true);
         listener.onAssertionFailure(null);
         verify(webDriverProvider).isWebDriverInitialized();
-        verify(attachmentPublisher).publishAttachment("/templates/source-code.ftl",
-                Map.of("sourceCode", SOURCES, "format", HTML), "Application source code");
+        verify(attachmentPublisher).publishAttachment(TEMPLATES_SOURCE_CODE_FTL,
+                Map.of(SOURCE_CODE_KEY, SOURCES, FORMAT_KEY, HTML), APPLICATION_SOURCE_CODE);
+        verifyNoMoreInteractions(webDriverProvider, contextSourceCodeProvider, attachmentPublisher);
+    }
+
+    @Test
+    void shouldPublishSourceCodeWithShadowDom()
+    {
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
+        Map<String, String> applicationSourceCode = Map.of(APPLICATION_SOURCE_CODE, SOURCES);
+        when(contextSourceCodeProvider.getSourceCode()).thenReturn(applicationSourceCode);
+        when(contextSourceCodeProvider.getShadowDomSourceCode()).thenReturn(applicationSourceCode);
+        listener.setFormat(HTML);
+        listener.setPublishSourceOnFailure(true);
+        listener.setPublishShadowDomSourceOnFailure(true);
+        listener.onAssertionFailure(null);
+        verify(webDriverProvider).isWebDriverInitialized();
+        InOrder inOrder = Mockito.inOrder(attachmentPublisher);
+        inOrder.verify(attachmentPublisher).publishAttachment(TEMPLATES_SOURCE_CODE_FTL,
+            Map.of(SOURCE_CODE_KEY, SOURCES, FORMAT_KEY, HTML), APPLICATION_SOURCE_CODE);
+        inOrder.verify(attachmentPublisher).publishAttachment(TEMPLATES_SHADOW_CODE_FTL,
+                Map.of("shadowDomSources", applicationSourceCode), "Shadow DOM sources");
+        verifyNoMoreInteractions(webDriverProvider, contextSourceCodeProvider, attachmentPublisher);
+    }
+
+    @Test
+    void shouldPublishSourceCodeWithShadowDomEmpty()
+    {
+        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
+        when(contextSourceCodeProvider.getSourceCode()).thenReturn(Map.of(APPLICATION_SOURCE_CODE, SOURCES));
+        when(contextSourceCodeProvider.getShadowDomSourceCode()).thenReturn(Map.of());
+        listener.setFormat(HTML);
+        listener.setPublishSourceOnFailure(true);
+        listener.setPublishShadowDomSourceOnFailure(true);
+        listener.onAssertionFailure(null);
+        verify(webDriverProvider).isWebDriverInitialized();
+        verify(attachmentPublisher).publishAttachment(TEMPLATES_SOURCE_CODE_FTL,
+                Map.of(SOURCE_CODE_KEY, SOURCES, FORMAT_KEY, HTML), APPLICATION_SOURCE_CODE);
         verifyNoMoreInteractions(webDriverProvider, contextSourceCodeProvider, attachmentPublisher);
     }
 

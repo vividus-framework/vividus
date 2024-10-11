@@ -32,6 +32,7 @@ public class SourceCodePublishingOnFailureListener
     private final IAttachmentPublisher attachmentPublisher;
 
     private boolean publishSourceOnFailure;
+    private boolean publishShadowDomSourceOnFailure;
     private String format;
 
     public SourceCodePublishingOnFailureListener(IWebDriverProvider webDriverProvider,
@@ -48,6 +49,10 @@ public class SourceCodePublishingOnFailureListener
         if (publishSourceOnFailure && webDriverProvider.isWebDriverInitialized())
         {
             contextSourceCodeProvider.getSourceCode().forEach(this::publishSource);
+            if (publishShadowDomSourceOnFailure)
+            {
+                publishShadowDomSource();
+            }
         }
     }
 
@@ -57,9 +62,24 @@ public class SourceCodePublishingOnFailureListener
             Map.of("sourceCode", source, "format", format), title);
     }
 
+    private void publishShadowDomSource()
+    {
+        Map<String, String> shadowDomSourceCode = contextSourceCodeProvider.getShadowDomSourceCode();
+        if (!shadowDomSourceCode.isEmpty())
+        {
+            attachmentPublisher.publishAttachment("/templates/shadow-code.ftl",
+                    Map.of("shadowDomSources", shadowDomSourceCode), "Shadow DOM sources");
+        }
+    }
+
     public void setPublishSourceOnFailure(boolean publishSourceOnFailure)
     {
         this.publishSourceOnFailure = publishSourceOnFailure;
+    }
+
+    public void setPublishShadowDomSourceOnFailure(boolean publishShadowDomSourceOnFailure)
+    {
+        this.publishShadowDomSourceOnFailure = publishShadowDomSourceOnFailure;
     }
 
     public void setFormat(String format)
