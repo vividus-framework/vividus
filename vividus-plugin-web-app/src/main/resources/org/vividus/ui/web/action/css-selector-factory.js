@@ -1,9 +1,9 @@
 function getCssSelectorForElement(element, selectorParts) {
     selectorParts = Array.isArray(selectorParts) ? selectorParts : [];
     if (isElementNode(element)) {
-        var identifier = buildElementIdentifier(element);
+        const identifier = buildElementIdentifier(element);
         selectorParts.unshift(identifier);
-        if (!element.id && element.parentNode) {
+        if (!isByIdCssSelector(identifier) && element.parentNode) {
             return getCssSelectorForElement(element.parentNode, selectorParts);
         }
     }
@@ -36,6 +36,10 @@ function isUniqueId(elementId) {
 
 function buildByIdCssSelector(elementId) {
     return '#' + escapeSpecialChars(elementId);
+}
+
+function isByIdCssSelector(identifier) {
+    return identifier.startsWith('#');
 }
 
 function escapeSpecialChars(string) {
