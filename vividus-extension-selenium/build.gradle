@@ -40,6 +40,7 @@ configurations {
      implementation(group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0')
      implementation platform(group: 'org.springframework', name: 'spring-framework-bom', version: '6.1.14')
      implementation(group: 'org.springframework', name: 'spring-core')
+     implementation(group: 'org.springframework', name: 'spring-context')
 
      compileOnly(group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion)
 

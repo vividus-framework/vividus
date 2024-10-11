@@ -38,4 +38,10 @@ public class MobileContextSourceCodeProvider implements ContextSourceCodeProvide
                        .map(sc -> Map.of(APPLICATION_SOURCE_CODE, sc))
                        .orElseGet(Map::of);
     }
+
+    @Override
+    public Map<String, String> getShadowDomSourceCode()
+    {
+        throw new UnsupportedOperationException("Method is not supported in the mobile context");
+    }
 }

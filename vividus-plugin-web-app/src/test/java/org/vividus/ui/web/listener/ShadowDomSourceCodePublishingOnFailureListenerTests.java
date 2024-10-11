@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.listener;
+package org.vividus.ui.web.listener;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.vividus.ui.ContextSourceCodeProvider.APPLICATION_SOURCE_CODE;
 
 import java.util.Map;
 
@@ -34,16 +33,14 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.ContextSourceCodeProvider;
 
 @ExtendWith(MockitoExtension.class)
-class SourceCodePublishingOnFailureListenerTests
+public class ShadowDomSourceCodePublishingOnFailureListenerTests
 {
-    private static final String SOURCES = "<html/>";
-    private static final String HTML = "HTML";
-
     @Mock private IWebDriverProvider webDriverProvider;
     @Mock private ContextSourceCodeProvider contextSourceCodeProvider;
     @Mock private IAttachmentPublisher attachmentPublisher;
 
-    @InjectMocks private SourceCodePublishingOnFailureListener listener;
+    @InjectMocks
+    private ShadowDomSourceCodePublishingOnFailureListener listener;
 
     @Test
     void shouldNoPublishSourceCodeWhenWebDriverIsNotInitialized()
@@ -58,12 +55,12 @@ class SourceCodePublishingOnFailureListenerTests
     void shouldPublishSourceCode()
     {
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(contextSourceCodeProvider.getSourceCode()).thenReturn(Map.of(APPLICATION_SOURCE_CODE, SOURCES));
-        listener.setSourceCodeAttachmentFormat(HTML);
+        Map<String, String> sourceCode = Map.of("Shadow element", "<html/>");
+        when(contextSourceCodeProvider.getShadowDomSourceCode()).thenReturn(sourceCode);
         listener.onAssertionFailure(null);
         verify(webDriverProvider).isWebDriverInitialized();
-        verify(attachmentPublisher).publishAttachment("/templates/source-code.ftl",
-                Map.of("sourceCode", SOURCES, "format", HTML), "Application source code");
+        verify(attachmentPublisher).publishAttachment("/templates/shadow-code.ftl",
+                Map.of("shadowDomSources", sourceCode), "Shadow DOM sources");
         verifyNoMoreInteractions(webDriverProvider, contextSourceCodeProvider, attachmentPublisher);
     }
 
@@ -71,7 +68,7 @@ class SourceCodePublishingOnFailureListenerTests
     void shouldNotPublishMissingSource()
     {
         when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        when(contextSourceCodeProvider.getSourceCode()).thenReturn(Map.of());
+        when(contextSourceCodeProvider.getShadowDomSourceCode()).thenReturn(Map.of());
         listener.onAssertionFailure(null);
         verify(webDriverProvider).isWebDriverInitialized();
         verifyNoInteractions(attachmentPublisher);

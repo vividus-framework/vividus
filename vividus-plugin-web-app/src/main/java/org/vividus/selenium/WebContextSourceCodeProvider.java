@@ -18,6 +18,7 @@ package org.vividus.selenium;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -36,8 +37,6 @@ public class WebContextSourceCodeProvider implements ContextSourceCodeProvider
 
     private final IUiContext uiContext;
     private final WebJavascriptActions webJavascriptActions;
-
-    private boolean collectShadowDomSourceCode;
 
     protected WebContextSourceCodeProvider(IUiContext uiContext, WebJavascriptActions webJavascriptActions)
     {
@@ -64,17 +63,20 @@ public class WebContextSourceCodeProvider implements ContextSourceCodeProvider
         {
             sources.put(APPLICATION_SOURCE_CODE, sourceCode);
         }
-        if (collectShadowDomSourceCode)
-        {
-            sources.putAll(getShadowDomSourceCode(elementInContext, searchContext));
-        }
         return sources;
     }
 
-    private Map<String, String> getShadowDomSourceCode(boolean elementInContext, SearchContext searchContext)
+    @Override
+    public Map<String, String> getShadowDomSourceCode()
     {
-        return elementInContext ? getShadowRootSource("arguments[0]", searchContext)
+        Optional<SearchContext> searchContextOpt = uiContext.getOptionalSearchContext();
+        if (searchContextOpt.isPresent())
+        {
+            SearchContext searchContext = searchContextOpt.get();
+            return searchContext instanceof WebElement ? getShadowRootSource("arguments[0]", searchContext)
                                 : getShadowRootSource("document.documentElement");
+        }
+        return Map.of();
     }
 
     private Map<String, String> getShadowRootSource(String rootElement, Object... args)
@@ -86,7 +88,7 @@ public class WebContextSourceCodeProvider implements ContextSourceCodeProvider
                 + "    Array.from(element.querySelectorAll('*'))"
                 + "         .filter(node => node.shadowRoot)"
                 + "         .forEach(e => {\n"
-                + "                           sources.set('Shadow dom sources. Selector: '"
+                + "                           sources.set('Shadow dom source. Selector: '"
                 + "                               + getCssSelectorForElement(e),"
                 + "                           e.shadowRoot.innerHTML);\n"
                 + "                           getShadowSource(e.shadowRoot);\n"
@@ -107,10 +109,5 @@ public class WebContextSourceCodeProvider implements ContextSourceCodeProvider
             LOGGER.debug("Unable to get sources of the stale element");
             return null;
         }
-    }
-
-    public void setCollectShadowDomSourceCode(boolean collectShadowDomSourceCode)
-    {
-        this.collectShadowDomSourceCode = collectShadowDomSourceCode;
     }
 }
