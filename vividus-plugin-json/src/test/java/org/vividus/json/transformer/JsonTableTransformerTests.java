@@ -18,10 +18,11 @@ package org.vividus.json.transformer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.io.UncheckedIOException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbehave.core.configuration.Keywords;
@@ -33,8 +34,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.context.VariableContext;
+import org.vividus.util.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
 class JsonTableTransformerTests
@@ -54,7 +57,7 @@ class JsonTableTransformerTests
     @InjectMocks private JsonTableTransformer jsonTableTransformer;
 
     @Test
-    void testTransformFromVariable() throws IOException
+    void shouldTransformFromVariableToComplexTable()
     {
         when(variableContext.getVariable("varName")).thenReturn(readJsonData());
 
@@ -64,7 +67,17 @@ class JsonTableTransformerTests
     }
 
     @Test
-    void testTransformFromPath()
+    void shouldTransformFromVariableToSimpleTable()
+    {
+        when(variableContext.getVariable("json")).thenReturn(readJsonData());
+
+        var tableProperties = createProperties("variableName=json,columns=key=$.key");
+        var table = jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties);
+        assertEquals("|key|\n|value|", table);
+    }
+
+    @Test
+    void shouldTransformFromPathToComplexTable()
     {
         var tableProperties = createProperties("path=org/vividus/json/transformer/data.json"
                 + EXAMPLE_TABLE_COLUMNS_CONFIG);
@@ -73,7 +86,7 @@ class JsonTableTransformerTests
     }
 
     @Test
-    void testTransformFromVariableWithComplexJsonPath() throws IOException
+    void testTransformFromVariableWithComplexJsonPath()
     {
         when(variableContext.getVariable("varWithJson")).thenReturn(readJsonData());
         var tableProperties = createProperties("columns=type=$..[?(@.codes[0].code==\"107214\")].type,"
@@ -98,13 +111,28 @@ class JsonTableTransformerTests
         assertEquals(expectedErrorMsg, exception.getMessage());
     }
 
+    @Test
+    void shouldThrowExceptionOnFailedAttemptToLoadResource()
+    {
+        try (MockedStatic<ResourceUtils> resourceUtilsStaticMock = mockStatic(ResourceUtils.class))
+        {
+            var path = "org/vividus/json/transformer/lost.json";
+            var tableProperties = createProperties("path=" + path + EXAMPLE_TABLE_COLUMNS_CONFIG);
+            var ioException = new IOException();
+            resourceUtilsStaticMock.when(() -> ResourceUtils.loadResourceOrFileAsStream(path)).thenThrow(ioException);
+            var uncheckedIOException = assertThrows(UncheckedIOException.class,
+                    () -> jsonTableTransformer.transform(StringUtils.EMPTY, null, tableProperties));
+            assertEquals(ioException, uncheckedIOException.getCause());
+        }
+    }
+
     private TableProperties createProperties(String propertiesAsString)
     {
         return new TableProperties(propertiesAsString, new Keywords(), new ParameterConverters());
     }
 
-    private String readJsonData() throws IOException
+    private String readJsonData()
     {
-        return new String(this.getClass().getResourceAsStream("data.json").readAllBytes(), StandardCharsets.UTF_8);
+        return ResourceUtils.loadResource(this.getClass(), "data.json");
     }
 }
