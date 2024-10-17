@@ -39,7 +39,7 @@ NOTE: The table transformers properties marked with *bold* are mandatory.
 |Description
 
 |`path`
-a|The relative path of the CSV file
+a|The xref:ROOT:glossary.adoc#_resource[CSV resource name] or the CSV file path.
 
 IMPORTANT: The `path` parameter can not be used together with the `variableName` or `csvPath` parameter.
 
@@ -51,7 +51,7 @@ which initializes a variable with a table.
 IMPORTANT: The `variableName` parameter can not be used together with the `path` or `csvPath` parameter.
 
 |`csvPath`
-a|The relative path of the CSV file
+a|The xref:ROOT:glossary.adoc#_resource[CSV resource name] or the CSV file path.
 
 WARNING: The `csvPath` parameter is deprecated and will be removed in VIVIDUS 0.7.0, please use `path` instead.
 

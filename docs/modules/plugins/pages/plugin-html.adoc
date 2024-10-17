@@ -32,7 +32,7 @@ which initializes a variable with a table.
 IMPORTANT: The `variableName` parameter can not be used together with the `pageUrl` or `path` parameter.
 
 |`path`
-a|The relative path of the HTML file
+a|The xref:ROOT:glossary.adoc#_resource[HTML resource name] or the HTML file path.
 
 IMPORTANT: The `path` parameter can not be used together with the `variableName` or `pageUrl` parameter.
 

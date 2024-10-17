@@ -153,7 +153,7 @@ xref:commons:vividus-steps.adoc#_initialize_variable_with_a_table[step] that ini
 IMPORTANT: The `variableName` parameter can not be used together with the `path` parameter.
 
 |`path`
-a|The relative path of the JSON file
+a|The xref:ROOT:glossary.adoc#_resource[JSON resource name] or the JSON file path.
 
 IMPORTANT: The `path` parameter can not be used together with the `variableName` parameter.
 
