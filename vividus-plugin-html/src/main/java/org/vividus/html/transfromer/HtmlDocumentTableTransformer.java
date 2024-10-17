@@ -23,17 +23,15 @@ import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.function.FailableSupplier;
 import org.jbehave.core.model.ExamplesTable.TableProperties;
 import org.jbehave.core.model.TableParsers;
-import org.jbehave.core.model.TableTransformers.TableTransformer;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -41,13 +39,18 @@ import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.context.VariableContext;
+import org.vividus.transformer.ExtendedTableTransformer;
 import org.vividus.util.ExamplesTableProcessor;
+import org.vividus.util.ResourceUtils;
 
-public class HtmlDocumentTableTransformer implements TableTransformer
+public class HtmlDocumentTableTransformer implements ExtendedTableTransformer
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(HtmlDocumentTableTransformer.class);
 
     private static final String SLASH = "/";
+    private static final String PAGE_URL_PROPERTY_KEY = "pageUrl";
+    private static final String VARIABLE_NAME_PROPERTY_KEY = "variableName";
+    private static final String PATH_PROPERTY_KEY = "path";
 
     private final Optional<HttpConfiguration> httpConfiguration;
     private final VariableContext variableContext;
@@ -61,23 +64,25 @@ public class HtmlDocumentTableTransformer implements TableTransformer
     @Override
     public String transform(String table, TableParsers parsers, TableProperties tableProperties)
     {
-        Properties properties = tableProperties.getProperties();
-        String pageUrl = properties.getProperty("pageUrl");
-        String variableName = properties.getProperty("variableName");
-
-        Validate.isTrue(pageUrl != null && variableName == null || pageUrl == null && variableName != null,
-                "Either 'pageUrl' or 'variableName' should be specified.");
-
-        Supplier<Document> documentSuppler;
-        if (pageUrl == null)
+        Map.Entry<String, String> entry = processCompetingMandatoryProperties(tableProperties.getProperties(),
+                PAGE_URL_PROPERTY_KEY, VARIABLE_NAME_PROPERTY_KEY, PATH_PROPERTY_KEY);
+        String sourceKey = entry.getKey();
+        String sourceValue = entry.getValue();
+        FailableSupplier<Document, IOException> documentSuppler;
+        if (VARIABLE_NAME_PROPERTY_KEY.equals(sourceKey))
         {
-            documentSuppler = () -> Jsoup.parse((String) variableContext.getVariable(variableName));
+            documentSuppler = () -> Jsoup.parse((String) variableContext.getVariable(sourceValue));
         }
-        else
+        else if (PAGE_URL_PROPERTY_KEY.equals(sourceKey))
         {
             LOGGER.atWarn().log("The 'pageUrl' transformer parameter is deprecated and will be removed VIVIDUS 0.7.0, "
                     + "please use 'variableName' parameter instead.");
-            documentSuppler = () -> createDocument(pageUrl);
+            documentSuppler = () -> createDocument(sourceValue);
+        }
+        else
+        {
+            documentSuppler = () -> Jsoup.parse(ResourceUtils.loadResourceOrFileAsStream(sourceValue),
+                    StandardCharsets.UTF_8.name(), "");
         }
 
         String column = tableProperties.getMandatoryNonBlankProperty("column", String.class);
@@ -102,26 +107,26 @@ public class HtmlDocumentTableTransformer implements TableTransformer
             getter = Element::outerHtml;
         }
 
-        return documentSuppler.get().selectXpath(xpathSelector)
+        try
+        {
+            return documentSuppler.get().selectXpath(xpathSelector)
                                     .stream()
                                     .map(getter)
                                     .collect(collectingAndThen(toList(), attrs -> ExamplesTableProcessor
                                             .buildExamplesTableFromColumns(List.of(column), List.of(attrs),
                                                     tableProperties)));
-    }
-
-    private Document createDocument(String pageUrl)
-    {
-        try
-        {
-            Connection connection = Jsoup.connect(pageUrl);
-            httpConfiguration.ifPresent(cfg -> connection.headers(cfg.getHeaders()));
-            return connection.get();
         }
         catch (IOException e)
         {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private Document createDocument(String pageUrl) throws IOException
+    {
+        Connection connection = Jsoup.connect(pageUrl);
+        httpConfiguration.ifPresent(cfg -> connection.headers(cfg.getHeaders()));
+        return connection.get();
     }
 
     public static final class HttpConfiguration

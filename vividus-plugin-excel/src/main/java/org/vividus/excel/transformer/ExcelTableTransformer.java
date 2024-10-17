@@ -16,7 +16,6 @@
 
 package org.vividus.excel.transformer;
 
-import static java.util.Map.entry;
 import static org.apache.commons.lang3.Validate.notBlank;
 
 import java.io.IOException;
@@ -88,9 +87,12 @@ public class ExcelTableTransformer implements ExtendedTableTransformer
 
     private List<String> extractData(IExcelSheetParser sheetParser, TableProperties properties)
     {
-        return processCompetingMandatoryProperties(properties,
-                entry(RANGE, range -> extractDataFromRange(sheetParser, properties, range)),
-                entry("addresses", addresses -> extractDataFromAddresses(sheetParser, addresses)));
+        Map.Entry<String, String> excelSource = processCompetingMandatoryProperties(properties.getProperties(),
+                RANGE, "addresses");
+        String excelSourceValue = excelSource.getValue();
+
+        return RANGE.equals(excelSource.getKey()) ? extractDataFromRange(sheetParser, properties, excelSourceValue)
+                : extractDataFromAddresses(sheetParser, excelSourceValue);
     }
 
     private List<String> extractDataFromRange(IExcelSheetParser sheetParser, TableProperties properties, String range)

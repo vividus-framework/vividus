@@ -16,6 +16,7 @@
 
 package org.vividus.html.transfromer;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -65,21 +66,27 @@ class HtmlDocumentTableTransformerTests
         |/r|
         |/g|
         |/b|""";
+    private static final String WRONG_PARAMS_EXPECTED_ERROR_MSG = "One of either ''pageUrl'', ''variableName''"
+            + " or ''path'' should be specified";
 
     @Mock private VariableContext variableContext;
 
     @ParameterizedTest
     @CsvSource(value = {
-        "pageUrl=https://example.com, variableName=html",
-        "column=col"
-    }, delimiterString = "none")
-    void shouldFailOnInvalidInputParameters(String parameters)
+        "'pageUrl=https://example.com, variableName=html', '" + WRONG_PARAMS_EXPECTED_ERROR_MSG + "'",
+        "'column=col', '" + WRONG_PARAMS_EXPECTED_ERROR_MSG + "'",
+        "'pageUrl=https://example.com, path=index.html', '" + WRONG_PARAMS_EXPECTED_ERROR_MSG + "'",
+        "'pageUrl=https://example.com, path=index.html, variableName=html', '" + WRONG_PARAMS_EXPECTED_ERROR_MSG + "'",
+        "'path= ', 'ExamplesTable property ''path'' is blank'",
+        "'variableName= ', 'ExamplesTable property ''variableName'' is blank'"
+    })
+    void shouldFailOnInvalidInputParameters(String parameters, String expectedErrorMsg)
     {
         TableProperties tableProperties = new TableProperties(parameters, new Keywords(), new ParameterConverters());
         HtmlDocumentTableTransformer transformer = new HtmlDocumentTableTransformer(Optional.empty(), variableContext);
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class,
-                () -> transformer.transform("", null, tableProperties));
-        assertEquals("Either 'pageUrl' or 'variableName' should be specified.", thrown.getMessage());
+                () -> transformer.transform(EMPTY, null, tableProperties));
+        assertEquals(expectedErrorMsg, thrown.getMessage());
     }
 
     @Test
@@ -90,8 +97,23 @@ class HtmlDocumentTableTransformerTests
                 new Keywords(), new ParameterConverters());
         HtmlDocumentTableTransformer transformer = new HtmlDocumentTableTransformer(Optional.empty(),
                 variableContext);
-        String table = transformer.transform("", null, tableProperties);
+        String table = transformer.transform(EMPTY, null, tableProperties);
         assertEquals(RELS, table);
+    }
+
+    @Test
+    void shouldBuildTableByElementAttributeFromResource()
+    {
+        TableProperties tableProperties = new TableProperties("column=col,"
+                + " path=org/vividus/html/transfromer/index.html, xpathSelector=//a/text()",
+                new Keywords(), new ParameterConverters());
+        HtmlDocumentTableTransformer transformer = new HtmlDocumentTableTransformer(Optional.empty(),
+                variableContext);
+        String table = transformer.transform(EMPTY, null, tableProperties);
+        String expectedTable = """
+                |col|
+                |More information...|""";
+        assertEquals(expectedTable, table);
     }
 
     @Test
@@ -138,7 +160,7 @@ class HtmlDocumentTableTransformerTests
                     new Keywords(), new ParameterConverters());
             HtmlDocumentTableTransformer transformer = new HtmlDocumentTableTransformer(httpConfiguration,
                     variableContext);
-            String table = transformer.transform("", null, tableProperties);
+            String table = transformer.transform(EMPTY, null, tableProperties);
             tableConsumer.accept(table);
             verify(connection).get();
             connectionConsumer.accept(connection);

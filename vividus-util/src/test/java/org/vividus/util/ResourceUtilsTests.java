@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,16 +118,6 @@ public class ResourceUtilsTests
                 normalizeBytes(ResourceUtils.loadResourceAsByteArray(ResourceUtils.class, RESOURCE_NAME)));
     }
 
-    private byte[] normalizeBytes(byte[] bytes)
-    {
-        return normalizeLineFeeds(new String(bytes, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8);
-    }
-
-    private static String normalizeLineFeeds(String input)
-    {
-        return input.replaceAll("\r\n|\n", System.lineSeparator());
-    }
-
     @Test
     public void testFileLoadingIsSuccessful()
     {
@@ -187,5 +177,25 @@ public class ResourceUtilsTests
     {
         Path tempFilePath = ResourceUtils.createTempFile("test.json");
         assertThat(tempFilePath.toString(), matchesPattern(".+test.+\\.json"));
+    }
+
+    @Test
+    public void shouldLoadResourceOrFileAsStream() throws IOException
+    {
+        try (var inputStream = ResourceUtils.loadResourceOrFileAsStream(RESOURCE_NAME))
+        {
+            var actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            assertEquals(ROOT_RESOURCE_CONTENT, normalizeLineFeeds(actual));
+        }
+    }
+
+    private byte[] normalizeBytes(byte[] bytes)
+    {
+        return normalizeLineFeeds(new String(bytes, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static String normalizeLineFeeds(String input)
+    {
+        return input.replaceAll("\r\n|\n", System.lineSeparator());
     }
 }
