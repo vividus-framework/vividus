@@ -49,6 +49,7 @@ import org.vividus.html.transfromer.HtmlDocumentTableTransformer.HttpConfigurati
 @ExtendWith(MockitoExtension.class)
 class HtmlDocumentTableTransformerTests
 {
+    private static final String HTML = "html";
     private static final String PAGE_URL = "https://example.com";
     private static final String DOC = """
         <!DOCTYPE html>
@@ -66,6 +67,11 @@ class HtmlDocumentTableTransformerTests
         |/r|
         |/g|
         |/b|""";
+    private static final String URI_TABLE = """
+       |col|
+       |https://www.example.com/r|
+       |https://www.example.com/g|
+       |https://www.example.com/b|""";
     private static final String WRONG_PARAMS_EXPECTED_ERROR_MSG = "One of either ''pageUrl'', ''variableName''"
             + " or ''path'' should be specified";
 
@@ -92,28 +98,38 @@ class HtmlDocumentTableTransformerTests
     @Test
     void shouldBuildTableByElementAttributeFromVariableValue()
     {
-        when(variableContext.getVariable("html")).thenReturn(DOC);
-        TableProperties tableProperties = new TableProperties("column=col, variableName=html, xpathSelector=//a/@href",
-                new Keywords(), new ParameterConverters());
-        HtmlDocumentTableTransformer transformer = new HtmlDocumentTableTransformer(Optional.empty(),
-                variableContext);
-        String table = transformer.transform(EMPTY, null, tableProperties);
+        when(variableContext.getVariable(HTML)).thenReturn(DOC);
+        String table = createTableWithProperties("column=col, variableName=html, xpathSelector=//a/@href");
         assertEquals(RELS, table);
+    }
+
+    @Test
+    void shouldBuildTableWithAbsoluteUrlsByElementAttributeFromVariableValue()
+    {
+        when(variableContext.getVariable(HTML)).thenReturn(DOC);
+        String table = createTableWithProperties(
+                "column=col, variableName=html, xpathSelector=//a/@abs:href, baseUri=https://www.example.com/");
+        assertEquals(URI_TABLE, table);
     }
 
     @Test
     void shouldBuildTableByElementAttributeFromResource()
     {
-        TableProperties tableProperties = new TableProperties("column=col,"
-                + " path=org/vividus/html/transfromer/index.html, xpathSelector=//a/text()",
-                new Keywords(), new ParameterConverters());
-        HtmlDocumentTableTransformer transformer = new HtmlDocumentTableTransformer(Optional.empty(),
-                variableContext);
-        String table = transformer.transform(EMPTY, null, tableProperties);
+        String table = createTableWithProperties("column=col,"
+                + " path=org/vividus/html/transfromer/index.html, xpathSelector=//a/text()");
         String expectedTable = """
                 |col|
                 |More information...|""";
         assertEquals(expectedTable, table);
+    }
+
+    @Test
+    void shouldBuildTableWithAbsoluteUrlsByElementAttributeFromFile()
+    {
+        String table = createTableWithProperties(
+                "column=col, path=org/vividus/html/transfromer/index.html, xpathSelector=//img/@abs:src,"
+                        + " baseUri=https://www.example.com/");
+        assertEquals(URI_TABLE, table);
     }
 
     @Test
@@ -143,6 +159,14 @@ class HtmlDocumentTableTransformerTests
                 |<a href="/r">R</a>|
                 |<a href="/g">G</a>|
                 |<a href="/b">B</a>|""", t), Mockito::verifyNoMoreInteractions);
+    }
+
+    private String createTableWithProperties(String propertiesAsString)
+    {
+        TableProperties tableProperties = new TableProperties(propertiesAsString, new Keywords(),
+                new ParameterConverters());
+        HtmlDocumentTableTransformer transformer = new HtmlDocumentTableTransformer(Optional.empty(), variableContext);
+        return transformer.transform(EMPTY, null, tableProperties);
     }
 
     private void performTest(Optional<HttpConfiguration> httpConfiguration, String xpathSelector,

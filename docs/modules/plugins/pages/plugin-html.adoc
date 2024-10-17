@@ -48,6 +48,9 @@ By using XPath selector we can extract element's HTML content, attributes and te
 * `//a/text()` - extract the link text, e.g. `Say Hello`
 * `//a/@href` - extract the link `href` attribute, e.g. `/hello`
 
+|`baseUri`
+|The base URI  can be used to get an absolute URL from an attribute that may be a relative URL: make sure to add the prefix `abs:` before the attribute name to https://jsoup.org/cookbook/extracting-data/working-with-urls[xPath selector], e.g. `//a/@abs:href`. If defined `pageUrl` parameter as the base URI implicitly using value of this parameter.
+
 |===
 
 [cols="3,1,1,3", options="header"]

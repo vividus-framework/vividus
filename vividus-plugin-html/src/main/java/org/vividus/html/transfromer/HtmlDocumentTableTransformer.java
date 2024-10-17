@@ -64,6 +64,7 @@ public class HtmlDocumentTableTransformer implements ExtendedTableTransformer
     @Override
     public String transform(String table, TableParsers parsers, TableProperties tableProperties)
     {
+        String baseUri = tableProperties.getProperties().getProperty("baseUri", "");
         Map.Entry<String, String> entry = processCompetingMandatoryProperties(tableProperties.getProperties(),
                 PAGE_URL_PROPERTY_KEY, VARIABLE_NAME_PROPERTY_KEY, PATH_PROPERTY_KEY);
         String sourceKey = entry.getKey();
@@ -71,7 +72,7 @@ public class HtmlDocumentTableTransformer implements ExtendedTableTransformer
         FailableSupplier<Document, IOException> documentSuppler;
         if (VARIABLE_NAME_PROPERTY_KEY.equals(sourceKey))
         {
-            documentSuppler = () -> Jsoup.parse((String) variableContext.getVariable(sourceValue));
+            documentSuppler = () -> Jsoup.parse((String) variableContext.getVariable(sourceValue), baseUri);
         }
         else if (PAGE_URL_PROPERTY_KEY.equals(sourceKey))
         {
@@ -82,7 +83,7 @@ public class HtmlDocumentTableTransformer implements ExtendedTableTransformer
         else
         {
             documentSuppler = () -> Jsoup.parse(ResourceUtils.loadResourceOrFileAsStream(sourceValue),
-                    StandardCharsets.UTF_8.name(), "");
+                    StandardCharsets.UTF_8.name(), baseUri);
         }
 
         String column = tableProperties.getMandatoryNonBlankProperty("column", String.class);

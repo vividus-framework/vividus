@@ -530,3 +530,13 @@ Then `${documentTable}` is equal to table:
 |Named anchor.                              |
 |Link to unexistent element                 |
 |Link with tooltip                          |
+
+Scenario: Verify FROM_HTML transformer with JSOUP "abs:" prefix for Href attribute
+When I initialize scenario variable `absoluteUrls` with values:
+{transformer=FROM_HTML, column=url, variableName=pageSource, xpathSelector=//a[@href]/@abs:href, baseUri=${vividus-test-site-url}/links.html}
+Then `${absoluteUrls}` is equal to table:
+|url                                                                |
+|https://vividus-test-site-a92k.onrender.com/links.html#ElementId   |
+|https://vividus-test-site-a92k.onrender.com/links.html#ElementName |
+|https://vividus-test-site-a92k.onrender.com/links.html#notFound    |
+|https://vividus-test-site-a92k.onrender.com/links.html#            |
