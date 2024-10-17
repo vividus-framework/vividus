@@ -118,16 +118,6 @@ public class ResourceUtilsTests
                 normalizeBytes(ResourceUtils.loadResourceAsByteArray(ResourceUtils.class, RESOURCE_NAME)));
     }
 
-    private byte[] normalizeBytes(byte[] bytes)
-    {
-        return normalizeLineFeeds(new String(bytes, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8);
-    }
-
-    private static String normalizeLineFeeds(String input)
-    {
-        return input.replaceAll("\r\n|\n", System.lineSeparator());
-    }
-
     @Test
     public void testFileLoadingIsSuccessful()
     {
@@ -194,7 +184,18 @@ public class ResourceUtilsTests
     {
         try (var inputStream = ResourceUtils.loadResourceOrFileAsStream(RESOURCE_NAME))
         {
-            assertEquals(ROOT_RESOURCE_CONTENT, new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+            var actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            assertEquals(ROOT_RESOURCE_CONTENT, normalizeLineFeeds(actual));
         }
+    }
+
+    private byte[] normalizeBytes(byte[] bytes)
+    {
+        return normalizeLineFeeds(new String(bytes, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static String normalizeLineFeeds(String input)
+    {
+        return input.replaceAll("\r\n|\n", System.lineSeparator());
     }
 }
