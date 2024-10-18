@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package org.vividus.ui.listener;
+package org.vividus.ui.web.listener;
 
 import java.util.Map;
 
 import com.google.common.eventbus.Subscribe;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -29,20 +28,18 @@ import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.softassert.event.AssertionFailedEvent;
 import org.vividus.ui.ContextSourceCodeProvider;
 
-@Conditional(AttachSourceCodePropertyCondition.class)
+@Conditional(AttachShadowDomSourcePropertyCondition.class)
 @Component
 @Lazy(false)
-public class SourceCodePublishingOnFailureListener
+public class ShadowDomSourceCodePublishingOnFailureListener
 {
     private final IWebDriverProvider webDriverProvider;
     private final ContextSourceCodeProvider contextSourceCodeProvider;
     private final IAttachmentPublisher attachmentPublisher;
 
-    @Autowired
-    private String sourceCodeAttachmentFormat;
-
-    public SourceCodePublishingOnFailureListener(IWebDriverProvider webDriverProvider,
-            ContextSourceCodeProvider contextSourceCodeProvider, IAttachmentPublisher attachmentPublisher)
+    public ShadowDomSourceCodePublishingOnFailureListener(IWebDriverProvider webDriverProvider,
+                                                          ContextSourceCodeProvider contextSourceCodeProvider,
+                                                          IAttachmentPublisher attachmentPublisher)
     {
         this.webDriverProvider = webDriverProvider;
         this.contextSourceCodeProvider = contextSourceCodeProvider;
@@ -54,18 +51,12 @@ public class SourceCodePublishingOnFailureListener
     {
         if (webDriverProvider.isWebDriverInitialized())
         {
-            contextSourceCodeProvider.getSourceCode().forEach(this::publishSource);
+            Map<String, String> shadowDomSourceCode = contextSourceCodeProvider.getShadowDomSourceCode();
+            if (!shadowDomSourceCode.isEmpty())
+            {
+                attachmentPublisher.publishAttachment("/templates/shadow-code.ftl",
+                        Map.of("shadowDomSources", shadowDomSourceCode), "Shadow DOM sources");
+            }
         }
-    }
-
-    private void publishSource(String title, String source)
-    {
-        attachmentPublisher.publishAttachment("/templates/source-code.ftl",
-            Map.of("sourceCode", source, "format", sourceCodeAttachmentFormat), title);
-    }
-
-    public void setSourceCodeAttachmentFormat(String sourceCodeAttachmentFormat)
-    {
-        this.sourceCodeAttachmentFormat = sourceCodeAttachmentFormat;
     }
 }
