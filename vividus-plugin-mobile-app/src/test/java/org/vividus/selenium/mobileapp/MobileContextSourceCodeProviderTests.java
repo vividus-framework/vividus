@@ -17,6 +17,7 @@
 package org.vividus.selenium.mobileapp;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -44,5 +45,13 @@ class MobileContextSourceCodeProviderTests
         when(webDriver.getPageSource()).thenReturn(source);
         when(webDriverProvider.get()).thenReturn(webDriver);
         assertEquals(Map.of("Application source code", source), sourceCodeProvider.getSourceCode());
+    }
+
+    @Test
+    void shouldReturnException()
+    {
+        UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class,
+                sourceCodeProvider::getShadowDomSourceCode);
+        assertEquals("Method is not supported in the mobile context", exception.getMessage());
     }
 }

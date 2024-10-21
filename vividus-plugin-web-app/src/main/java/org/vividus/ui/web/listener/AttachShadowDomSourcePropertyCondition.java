@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package org.vividus.ui;
+package org.vividus.ui.web.listener;
 
-import java.util.Map;
+import org.vividus.condition.AbstractBooleanPropertyCondition;
 
-public interface ContextSourceCodeProvider
+public class AttachShadowDomSourcePropertyCondition extends AbstractBooleanPropertyCondition
 {
-    String APPLICATION_SOURCE_CODE = "Application source code";
-
-    Map<String, String> getSourceCode();
-
-    Map<String, String> getShadowDomSourceCode();
+    public AttachShadowDomSourcePropertyCondition()
+    {
+        super("ui.publish-source-on-failure", "ui.publish-shadow-dom-source-on-failure");
+    }
 }
