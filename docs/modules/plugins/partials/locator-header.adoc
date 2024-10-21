@@ -25,7 +25,7 @@ ui.locator.<locatorName>.pattern
 ui.locator.<locatorName>.locator-type
 ----
 
-. `locatorName` - The name of the reusable locator. Supported characters are `A-Z, a-z, -`.
+. `locatorName` - The name of the reusable locator. Supported characters are `A-Z, a-z, -, .`.
 . `pattern` - The pattern of the reusable locator.
 . `locator-type` - The base locator type.
 

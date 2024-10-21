@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ public class PropertyMapper implements IPropertyMapper
         return readValues(propertyPrefix, null, keyMapper, valueType, keysSize -> new TreeMap<>(keyComparator));
     }
 
-    private <T> PropertyMappedCollection<T> readValues(String propertyPrefix, String basePropertyPrefix,
+    protected <T> PropertyMappedCollection<T> readValues(String propertyPrefix, String basePropertyPrefix,
             UnaryOperator<String> keyMapper, Class<T> valueType, IntFunction<Map<String, T>> mapProducer)
             throws IOException
     {
@@ -144,12 +144,17 @@ public class PropertyMapper implements IPropertyMapper
         return (Class<T>) (type instanceof ParameterizedType parameterizedType ? parameterizedType.getRawType() : type);
     }
 
-    private Set<String> getKeys(Set<String> propertyNames, String propertyPrefix)
+    protected Set<String> getKeys(Set<String> propertyNames, String propertyPrefix)
     {
         return propertyNames.stream().map(propertyName ->
         {
             String propertyNameWithoutPrefix = StringUtils.removeStart(propertyName, propertyPrefix);
             return StringUtils.substringBefore(propertyNameWithoutPrefix, propertyPrefixSeparator);
         }).collect(toSet());
+    }
+
+    protected String getPropertyPrefixSeparator()
+    {
+        return propertyPrefixSeparator;
     }
 }

@@ -14,6 +14,8 @@
         </constructor-arg>
     </bean>
 
+    <bean id="dotNotationNamePropertyMapper" class="org.vividus.util.property.DotNotationNamePropertyMapper" parent="propertyMapper" />
+
     <bean id="jsonUtils-LowerCamelCase" class="org.vividus.util.json.JsonUtils">
         <constructor-arg>
             <util:constant static-field="com.fasterxml.jackson.databind.PropertyNamingStrategies.LOWER_CAMEL_CASE"/>

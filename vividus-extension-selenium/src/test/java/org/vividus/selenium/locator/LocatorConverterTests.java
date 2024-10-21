@@ -50,9 +50,9 @@ class LocatorConverterTests
 {
     private static final String VALUE = "value";
     private static final String INVALID_LOCATOR_MESSAGE = "Invalid locator format. "
-            + "Expected matches [(?:By\\.)?([a-zA-Z-]+)\\((.*)\\)(:(.*))?] Actual: [";
+            + "Expected matches [(?:By\\.)?([a-zA-Z.-]+)\\((.*)\\)(:(.*))?] Actual: [";
     private static final char CLOSING_BRACKET = ']';
-    private static final String INVALID_LOCATOR = "To.xpath(.a)";
+    private static final String INVALID_LOCATOR = "To>xpath(.a)";
     private static final String SEARCH = "search";
 
     @Mock private ElementActionService service;
@@ -144,6 +144,16 @@ class LocatorConverterTests
         when(dynamicLocators.getNullable("fus-ro-dah")).thenReturn(Optional.of(locatorPattern));
         assertEquals(createAttributes(TestLocatorType.SEARCH, "Fus ro dah!", Visibility.VISIBLE),
                 locatorConverter.convertToLocator("By.fus-ro-dah(ro)"));
+    }
+
+    @Test
+    void shouldCreateLocatorsWithDots()
+    {
+        lenient().when(service.getSearchLocatorTypes()).thenReturn(Set.of(TestLocatorType.SEARCH));
+        var locatorPattern = new LocatorPattern(SEARCH, "Fus? %s! dah...");
+        when(dynamicLocators.getNullable("fus.ro.dah")).thenReturn(Optional.of(locatorPattern));
+        assertEquals(createAttributes(TestLocatorType.SEARCH, "Fus? ro! dah...", Visibility.VISIBLE),
+                locatorConverter.convertToLocator("By.fus.ro.dah(ro)"));
     }
 
     @Test
