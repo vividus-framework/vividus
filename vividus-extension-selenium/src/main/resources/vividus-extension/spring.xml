@@ -121,7 +121,7 @@
 
     <bean class="org.vividus.selenium.locator.LocatorConverter">
         <property name="dynamicLocators">
-            <bean factory-bean="propertyMapper" factory-method="readValuesCaseInsensitively">
+            <bean factory-bean="dotNotationNamePropertyMapper" factory-method="readValuesCaseInsensitively">
                 <constructor-arg value="ui.locator." />
                 <constructor-arg value="org.vividus.ui.action.search.LocatorPattern" />
             </bean>
