@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,9 +127,7 @@ public class PropertyMapper implements IPropertyMapper
         for (String key : keys)
         {
             String propertyFamily = propertyPrefix + key + propertyPrefixSeparator;
-            Map<String, String> objectProps = properties.entrySet().stream()
-                    .filter(e -> e.getKey().startsWith(propertyFamily))
-                    .collect(toMap(e -> StringUtils.removeStart(e.getKey(), propertyFamily), Entry::getValue));
+            Map<String, String> objectProps = collectObjectProperties(properties, propertyFamily);
             baseProperties.forEach(objectProps::putIfAbsent);
             T value = javaPropsMapper.readMapAs(objectProps, valueType);
             result.put(keyMapper.apply(key), value);
@@ -144,12 +142,24 @@ public class PropertyMapper implements IPropertyMapper
         return (Class<T>) (type instanceof ParameterizedType parameterizedType ? parameterizedType.getRawType() : type);
     }
 
-    private Set<String> getKeys(Set<String> propertyNames, String propertyPrefix)
+    protected Set<String> getKeys(Set<String> propertyNames, String propertyPrefix)
     {
         return propertyNames.stream().map(propertyName ->
         {
             String propertyNameWithoutPrefix = StringUtils.removeStart(propertyName, propertyPrefix);
             return StringUtils.substringBefore(propertyNameWithoutPrefix, propertyPrefixSeparator);
         }).collect(toSet());
+    }
+
+    protected Map<String, String> collectObjectProperties(Map<String, String> properties, String propertyFamily)
+    {
+        return properties.entrySet().stream()
+                .filter(e -> e.getKey().startsWith(propertyFamily))
+                .collect(toMap(e -> StringUtils.removeStart(e.getKey(), propertyFamily), Entry::getValue));
+    }
+
+    protected String getPropertyPrefixSeparator()
+    {
+        return propertyPrefixSeparator;
     }
 }
