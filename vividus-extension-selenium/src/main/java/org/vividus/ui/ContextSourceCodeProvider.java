@@ -23,6 +23,4 @@ public interface ContextSourceCodeProvider
     String APPLICATION_SOURCE_CODE = "Application source code";
 
     Map<String, String> getSourceCode();
-
-    Map<String, String> getShadowDomSourceCode();
 }

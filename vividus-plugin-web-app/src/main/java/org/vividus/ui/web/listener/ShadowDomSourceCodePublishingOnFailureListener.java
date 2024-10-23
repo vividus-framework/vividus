@@ -25,8 +25,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.WebAppContextSourceCodeProvider;
 import org.vividus.softassert.event.AssertionFailedEvent;
-import org.vividus.ui.ContextSourceCodeProvider;
 
 @Conditional(AttachShadowDomSourcePropertyCondition.class)
 @Component
@@ -34,11 +34,11 @@ import org.vividus.ui.ContextSourceCodeProvider;
 public class ShadowDomSourceCodePublishingOnFailureListener
 {
     private final IWebDriverProvider webDriverProvider;
-    private final ContextSourceCodeProvider contextSourceCodeProvider;
+    private final WebAppContextSourceCodeProvider contextSourceCodeProvider;
     private final IAttachmentPublisher attachmentPublisher;
 
     public ShadowDomSourceCodePublishingOnFailureListener(IWebDriverProvider webDriverProvider,
-                                                          ContextSourceCodeProvider contextSourceCodeProvider,
+                                                          WebAppContextSourceCodeProvider contextSourceCodeProvider,
                                                           IAttachmentPublisher attachmentPublisher)
     {
         this.webDriverProvider = webDriverProvider;

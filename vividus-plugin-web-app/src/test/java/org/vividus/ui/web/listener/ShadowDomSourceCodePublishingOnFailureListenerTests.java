@@ -30,13 +30,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
-import org.vividus.ui.ContextSourceCodeProvider;
+import org.vividus.selenium.WebAppContextSourceCodeProvider;
 
 @ExtendWith(MockitoExtension.class)
 public class ShadowDomSourceCodePublishingOnFailureListenerTests
 {
     @Mock private IWebDriverProvider webDriverProvider;
-    @Mock private ContextSourceCodeProvider contextSourceCodeProvider;
+    @Mock private WebAppContextSourceCodeProvider contextSourceCodeProvider;
     @Mock private IAttachmentPublisher attachmentPublisher;
 
     @InjectMocks

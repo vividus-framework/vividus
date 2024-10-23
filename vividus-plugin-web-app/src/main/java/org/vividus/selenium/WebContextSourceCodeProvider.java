@@ -26,12 +26,11 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vividus.ui.ContextSourceCodeProvider;
 import org.vividus.ui.context.IUiContext;
 import org.vividus.ui.web.action.CssSelectorFactory;
 import org.vividus.ui.web.action.WebJavascriptActions;
 
-public class WebContextSourceCodeProvider implements ContextSourceCodeProvider
+public class WebContextSourceCodeProvider implements WebAppContextSourceCodeProvider
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebContextSourceCodeProvider.class);
 

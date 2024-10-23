@@ -14,28 +14,13 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.mobileapp;
+package org.vividus.selenium;
 
 import java.util.Map;
-import java.util.Optional;
 
-import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.ui.ContextSourceCodeProvider;
 
-public class MobileContextSourceCodeProvider implements ContextSourceCodeProvider
+public interface WebAppContextSourceCodeProvider extends ContextSourceCodeProvider
 {
-    private final IWebDriverProvider webDriverProvider;
-
-    public MobileContextSourceCodeProvider(IWebDriverProvider webDriverProvider)
-    {
-        this.webDriverProvider = webDriverProvider;
-    }
-
-    @Override
-    public Map<String, String> getSourceCode()
-    {
-        return Optional.ofNullable(webDriverProvider.get().getPageSource())
-                       .map(sc -> Map.of(APPLICATION_SOURCE_CODE, sc))
-                       .orElseGet(Map::of);
-    }
+    Map<String, String> getShadowDomSourceCode();
 }
