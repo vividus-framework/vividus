@@ -6,7 +6,7 @@ dependencies {
     implementation(group: 'org.mongodb', name: 'mongodb-driver-sync', version: '5.2.0')
     implementation(group: 'jakarta.inject', name: 'jakarta.inject-api', version: '2.0.1')
 
-    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.2')
+    testImplementation platform(group: 'org.junit', name: 'junit-bom', version: '5.11.3')
     testImplementation(group: 'org.junit.jupiter', name: 'junit-jupiter')
     testImplementation platform(group: 'org.mockito', name: 'mockito-bom', version: '5.14.2')
     testImplementation(group: 'org.mockito', name: 'mockito-junit-jupiter')
