@@ -18,13 +18,13 @@ package org.vividus.selenium;
 
 import static com.github.valfirst.slf4jtest.LoggingEvent.debug;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
@@ -53,7 +53,7 @@ class WebContextSourceCodeProviderTests
             + "    Array.from(element.querySelectorAll('*'))"
             + "         .filter(node => node.shadowRoot)"
             + "         .forEach(e => {\n"
-            + "                           sources.set('Shadow dom sources. Selector: '"
+            + "                           sources.set('Shadow dom source. Selector: '"
             + "                               + getCssSelectorForElement(e),"
             + "                           e.shadowRoot.innerHTML);\n"
             + "                           getShadowSource(e.shadowRoot);\n"
@@ -74,55 +74,74 @@ class WebContextSourceCodeProviderTests
     @Test
     void shouldReturnWholePageForDriverContext()
     {
-        sourceCodeProvider.setCollectShadowDomSourceCode(true);
         var webDriver = mock(WebDriver.class);
         when(uiContext.getSearchContext()).thenReturn(webDriver);
         var pageSource = "<html/>";
         when(webDriver.getPageSource()).thenReturn(pageSource);
-        var sourceTitle = "Shadow dom sources. Selector: div";
-        var script = CssSelectorFactory.CSS_SELECTOR_FACTORY_SCRIPT
-                + String.format(SHADOW_DOM_SCRIPT, "document.documentElement");
-        when(webJavascriptActions.executeScript(script)).thenReturn(Map.of(sourceTitle, pageSource));
-        assertEquals(Map.of(APPLICATION_SOURCE_CODE, pageSource, sourceTitle, pageSource),
-                sourceCodeProvider.getSourceCode());
+        assertEquals(Map.of(APPLICATION_SOURCE_CODE, pageSource), sourceCodeProvider.getSourceCode());
     }
 
     @SuppressFBWarnings("VA_FORMAT_STRING_USES_NEWLINE")
     @Test
+    void shouldReturnWholePageForDriverContextShadowDom()
+    {
+        var webDriver = mock(WebDriver.class);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
+
+        var elementSource = "<div/>";
+        var sourceTitle = "Shadow dom source. Selector: a";
+        Map<String, String> shadowDomSources = Map.of(sourceTitle, elementSource);
+
+        var script = CssSelectorFactory.CSS_SELECTOR_FACTORY_SCRIPT
+                + String.format(SHADOW_DOM_SCRIPT, "document.documentElement");
+        when(webJavascriptActions.executeScript(script)).thenReturn(shadowDomSources);
+
+        assertEquals(shadowDomSources, sourceCodeProvider.getShadowDomSourceCode());
+    }
+
+    @SuppressFBWarnings("VA_FORMAT_STRING_USES_NEWLINE")
+    @Test
+    void shouldReturnElementSourceForElementContextShadowDom()
+    {
+        var webElement = mock(WebElement.class);
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webElement));
+
+        var elementSource = "<table/>";
+        var sourceTitle = "Shadow dom source. Selector: b";
+        Map<String, String> shadowDomSources = Map.of(sourceTitle, elementSource);
+
+        var script = CssSelectorFactory.CSS_SELECTOR_FACTORY_SCRIPT + String.format(SHADOW_DOM_SCRIPT, "arguments[0]");
+        when(webJavascriptActions.executeScript(script, webElement)).thenReturn(shadowDomSources);
+
+        assertEquals(Map.of(sourceTitle, elementSource), sourceCodeProvider.getShadowDomSourceCode());
+    }
+
+    @Test
     void shouldReturnWholePageForDriverContextNoShadowDom()
     {
-        sourceCodeProvider.setCollectShadowDomSourceCode(false);
-        var webDriver = mock(WebDriver.class);
-        when(uiContext.getSearchContext()).thenReturn(webDriver);
-        var pageSource = "<html></html>";
-        when(webDriver.getPageSource()).thenReturn(pageSource);
-        assertEquals(Map.of(APPLICATION_SOURCE_CODE, pageSource), sourceCodeProvider.getSourceCode());
+        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.empty());
+        assertEquals(Map.of(), sourceCodeProvider.getShadowDomSourceCode());
         verifyNoInteractions(webJavascriptActions);
     }
 
     @Test
     void shouldReturnElementSourceForElementContext()
     {
-        sourceCodeProvider.setCollectShadowDomSourceCode(true);
         var webElement = mock(WebElement.class);
         when(uiContext.getSearchContext()).thenReturn(webElement);
-        var elementSource = "<div/>";
-        var sourceTitle = "Shadow dom sources. Selector: a";
-        mockShadowDomSourcesRetrieval(webElement, Map.of(sourceTitle, elementSource));
+        var elementSource = "<h1/>";
         when(webJavascriptActions.executeScript(OUTER_HTML_SCRIPT, webElement)).thenReturn(elementSource);
-        assertEquals(Map.of(APPLICATION_SOURCE_CODE, elementSource, sourceTitle, elementSource),
+        assertEquals(Map.of(APPLICATION_SOURCE_CODE, elementSource),
                 sourceCodeProvider.getSourceCode());
     }
 
     @Test
     void shouldHandleStaleElementsCorrectly()
     {
-        sourceCodeProvider.setCollectShadowDomSourceCode(true);
         var webElement = mock(WebElement.class);
         when(uiContext.getSearchContext()).thenReturn(webElement);
         when(webJavascriptActions.executeScript(OUTER_HTML_SCRIPT, webElement)).thenThrow(
                 StaleElementReferenceException.class);
-        mockShadowDomSourcesRetrieval(webElement, Map.of());
         assertEquals(Map.of(), sourceCodeProvider.getSourceCode());
         assertEquals(logger.getLoggingEvents(), List.of(debug("Unable to get sources of the stale element")));
     }
@@ -130,16 +149,7 @@ class WebContextSourceCodeProviderTests
     @Test
     void shouldReturnEmptyValueForNullSearchContext()
     {
-        sourceCodeProvider.setCollectShadowDomSourceCode(true);
         when(uiContext.getSearchContext()).thenReturn(null);
-        when(webJavascriptActions.executeScript(any(String.class))).thenReturn(Map.of());
         assertEquals(Map.of(), sourceCodeProvider.getSourceCode());
-    }
-
-    @SuppressFBWarnings("VA_FORMAT_STRING_USES_NEWLINE")
-    private void mockShadowDomSourcesRetrieval(WebElement webElement, Map<String, String> sources)
-    {
-        var script = CssSelectorFactory.CSS_SELECTOR_FACTORY_SCRIPT + String.format(SHADOW_DOM_SCRIPT, "arguments[0]");
-        when(webJavascriptActions.executeScript(script, webElement)).thenReturn(sources);
     }
 }
