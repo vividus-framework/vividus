@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,8 +122,17 @@ public class BlobStorageSteps
                     containerName, storageAccountKey).downloadStreamWithResponse(outputStream, null, null, null,
                     false, null, Context.NONE);
             String contentType = blobDownloadResponse.getHeaders().getValue(HttpHeaderName.CONTENT_TYPE);
-            Object blobContent = MediaTypeRegistry.getDefaultRegistry().isInstanceOf(contentType,
-                    MediaType.TEXT_PLAIN) ? outputStream.toString(StandardCharsets.UTF_8) : outputStream.toByteArray();
+            Object blobContent;
+            // Need to check JSON as there is a bug in Tika: https://issues.apache.org/jira/browse/TIKA-4336
+            if ("application/json".equals(contentType) || MediaTypeRegistry.getDefaultRegistry().isInstanceOf(
+                    contentType, MediaType.TEXT_PLAIN))
+            {
+                blobContent = outputStream.toString(StandardCharsets.UTF_8);
+            }
+            else
+            {
+                blobContent = outputStream.toByteArray();
+            }
             variableContext.putVariable(scopes, variableName, blobContent);
         }
     }
