@@ -96,7 +96,7 @@ tasks.register('copyRuntimeLibs', Copy) {
 tasks.register('createDockerfile', com.bmuschko.gradle.docker.tasks.image.Dockerfile) {
     dependsOn copyRuntimeLibs
 
-    from('eclipse-temurin:17-jre-alpine')
+    from('eclipse-temurin:21-jre-alpine')
     label(['maintainer': 'Vividus Team "vividus.team@vividus.dev"'])
     instruction('RUN apk add gcompat')
     workingDir('vividus')
