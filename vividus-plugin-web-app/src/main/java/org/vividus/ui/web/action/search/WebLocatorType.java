@@ -17,6 +17,7 @@
 package org.vividus.ui.web.action.search;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -28,12 +29,22 @@ import org.vividus.ui.action.search.ByLocatorSearch;
 import org.vividus.ui.action.search.GenericTextFilter;
 import org.vividus.ui.action.search.IElementAction;
 import org.vividus.ui.action.search.LocatorType;
+import org.vividus.ui.util.RelativeLocatorUtils;
 import org.vividus.ui.util.XpathLocatorUtils;
 import org.vividus.ui.web.util.WebXpathLocatorUtils;
 
 public enum WebLocatorType implements LocatorType
 {
     LINK_TEXT("Link text", LinkTextSearch.class),
+    RELATIVE("Relative", RelativeElementSearch.class)
+    {
+        @Override
+        public By buildBy(String value)
+        {
+            By relativeLocator = RelativeLocatorUtils.convertRelativeStringToBy(value);
+            return By.xpath("./div");
+        }
+    },
     LINK_URL("URL", LinkUrlSearch.class),
     LINK_URL_PART("URL part", LinkUrlPartSearch.class),
     CASE_SENSITIVE_TEXT("Case sensitive text", CaseSensitiveTextSearch.class),

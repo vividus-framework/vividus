@@ -21,3 +21,17 @@ Meta:
 Given I am on page with URL `${vividus-test-site-url}/inputs.html`
 When I enter `A  B` in field located by `xpath(//input[@id='text'])`
 Then number of elements found by `unnormalizedXPath(//div[text()='A  B'])` is = `1`
+
+Scenario: Verify relative locator
+Given I am on page with URL `${vividus-test-site-url}/inputs.html`
+Then number of elements found by `id(text)` is = `1`
+Then number of elements found by `id(story)` is = `1`
+Then number of elements found by `relative(id(text).below(id(story)))` is = `1`
+Then number of elements found by `relative(id(text).below(id(stories)))` is = `1`
+Then number of elements found by `relative(id(text).above(id(story)))` is = `1`
+Then number of elements found by `relative(id(texted).above(id(story)))` is = `1`
+Then number of elements found by `relative(id(text).above(id(story)))` is = `0`
+Then number of elements found by `relative(id(text).below(id(story)))` is = `0`
+Then number of elements found by `relative(id(text).above(id(stories)))` is = `0`
+Then number of elements found by `relative(id(texted).above(id(story)))` is = `0`
+
