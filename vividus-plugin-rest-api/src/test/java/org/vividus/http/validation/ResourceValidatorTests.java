@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -91,11 +92,15 @@ class ResourceValidatorTests
         when(httpClient.doHttpHead(FIRST)).thenReturn(httpResponse);
         var forbidden = 401;
         when(httpResponse.getStatusCode()).thenReturn(forbidden);
-        when(softAssert.assertThat(eq("Status code for https://vividus.org is 401. expected one of [200]"),
-                eq(forbidden), argThat(MATCHER))).thenReturn(false);
+        String failure = "Status code for https://vividus.org is 401. expected one of [200]";
+        when(softAssert.assertThat(eq(failure), eq(forbidden), argThat(MATCHER))).thenReturn(false);
         var resourceValidation = new ResourceValidation(FIRST);
         var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.FAILED, result.getCheckStatus());
+        var cachedResult = resourceValidator.perform(resourceValidation);
+        assertEquals(CheckStatus.FAILED, cachedResult.getCheckStatus());
+        verify(softAssert, times(2)).assertThat(eq(failure), eq(forbidden), argThat(MATCHER));
+        verify(httpClient).doHttpHead(FIRST);
     }
 
     @ParameterizedTest
@@ -175,6 +180,11 @@ class ResourceValidatorTests
         var resourceValidation = new ResourceValidation(FIRST);
         var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.BROKEN, result.getCheckStatus());
-        verify(softAssert).recordFailedAssertion("Exception occured during check of: https://vividus.org", ioException);
+        var errMsgPart = "Exception occured during check of: https://vividus.org";
+        verify(softAssert).recordFailedAssertion(errMsgPart, ioException);
+        var cachedResult = resourceValidator.perform(resourceValidation);
+        assertEquals(CheckStatus.BROKEN, cachedResult.getCheckStatus());
+        verify(softAssert).recordFailedAssertion(errMsgPart + System.lineSeparator() + ioException);
+        verify(httpClient).doHttpHead(FIRST);
     }
 }

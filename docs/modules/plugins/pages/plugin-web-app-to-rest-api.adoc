@@ -338,7 +338,7 @@ a|Reasons:
 * the resource is jump link which cannot be verified from the current context (if only part of the document is checked).
 
 |`SKIPPED`
-|A resource validation has already been performed, i.e. if the same resource might be present on several pages so we do not need to validate it twice.
+|A resource validation has already been performed, i.e. if the same resource might be present on several pages so we do not need to validate it twice. `FAILED` and `BROKEN` resource validations will still have their respective statuses despite the validations have been already performed.
 
 |===
 
