@@ -27,6 +27,7 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hc.core5.http.HttpStatus;
 import org.vividus.http.client.HttpResponse;
 import org.vividus.http.client.IHttpClient;
@@ -42,6 +43,8 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
             HttpStatus.SC_NOT_IMPLEMENTED,
             HttpStatus.SC_SERVICE_UNAVAILABLE
     );
+
+    private static final String EXCEPTION_MESSAGE = "Exception occured during check of: %s";
 
     private final IHttpClient httpClient;
 
@@ -63,7 +66,16 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
         return cache.compute(resourceValidation.getUriOrError().getLeft(), (uri, rv) -> Optional.ofNullable(rv)
                 .map(r -> {
                     T cachedResult = r.copy();
-                    cachedResult.setCheckStatus(CheckStatus.SKIPPED);
+                    cachedResult.setCheckStatus(r.getCheckStatus());
+
+                    switch (r.getCheckStatus())
+                    {
+                        case FAILED -> assertForStatusCode(uri, r.getStatusCode().getAsInt());
+                        case BROKEN -> softAssert.recordFailedAssertion(EXCEPTION_MESSAGE.formatted(uri)
+                                + System.lineSeparator() + r.getUriOrError().getRight());
+                        default -> cachedResult.setCheckStatus(CheckStatus.SKIPPED);
+                    }
+
                     return cachedResult;
                 }).orElseGet(() -> {
                     validateResource(uri, resourceValidation);
@@ -85,9 +97,7 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
             }
             resourceValidation.setStatusCode(OptionalInt.of(statusCode));
 
-            CheckStatus checkStatus = softAssert.assertThat(
-                    String.format("Status code for %s is %d. expected one of %s", uri, statusCode, allowedStatusCodes),
-                    statusCode, is(oneOf(allowedStatusCodes.toArray()))) ? CheckStatus.PASSED : CheckStatus.FAILED;
+            CheckStatus checkStatus = assertForStatusCode(uri, statusCode);
 
             if (publishResponseBody && response != null && checkStatus == CheckStatus.FAILED)
             {
@@ -97,9 +107,17 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
         }
         catch (IOException e)
         {
-            softAssert.recordFailedAssertion("Exception occured during check of: " + uri, e);
+            softAssert.recordFailedAssertion(EXCEPTION_MESSAGE.formatted(uri), e);
             resourceValidation.setCheckStatus(CheckStatus.BROKEN);
+            resourceValidation.setUriOrError(Pair.of(uri, e.toString()));
         }
+    }
+
+    private CheckStatus assertForStatusCode(URI uri, int statusCode)
+    {
+        return softAssert.assertThat(
+                String.format("Status code for %s is %d. expected one of %s", uri, statusCode, allowedStatusCodes),
+                statusCode, is(oneOf(allowedStatusCodes.toArray()))) ? CheckStatus.PASSED : CheckStatus.FAILED;
     }
 
     public void setPublishResponseBody(boolean publishResponseBody)
