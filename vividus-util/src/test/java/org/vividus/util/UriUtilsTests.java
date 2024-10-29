@@ -147,6 +147,7 @@ class UriUtilsTests
     // CHECKSTYLE:OFF
     @CsvSource({
         "http://somehost:8080/path,                                   http://somehost:8080/path",
+        "https://example.com?conditionType=%3D,                       https://example.com?conditionType=%3D",
         "http://somehost:8080/path?name=goodvalue&a=b#fragment,       http://somehost:8080/path?name=goodvalue&a=b#fragment",
         "http://somehost:8080/pa | th?name=bad|value&a=b#fra| gme nt, http://somehost:8080/pa%20%7C%20th?name=bad%7Cvalue&a=b#fra%7C%20gme%20nt",
         "http://somehost:8080/path?name=bad|value&a=b#fragment,       http://somehost:8080/path?name=bad%7Cvalue&a=b#fragment",
