@@ -373,7 +373,7 @@ jobs:
 
           ./gradlew :vividus-tests:debugStories -Pvividus.configuration.suites=health_check \
                                                 -Pvividus.configuration.profiles=mobitru/web,web/phone/iphone \
-                                                -Pvividus.selenium.grid.capabilities.appium\:platformVersion=17 \
+                                                -Pvividus.selenium.grid.capabilities.appium\:platformVersion=18 \
                                                 -Pvividus.selenium.grid.username=${MOBITRU_USER} \
                                                 -Pvividus.selenium.grid.password=${MOBITRU_KEY}
 
