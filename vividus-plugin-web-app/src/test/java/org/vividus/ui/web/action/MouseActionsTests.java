@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,33 +95,23 @@ class MouseActionsTests
     @InjectMocks private MouseActions mouseActions;
     @Captor private ArgumentCaptor<Collection<Sequence>> sequencesCaptor;
 
-    private void verifyWebElement(int clickAttempts, boolean alertPresent, boolean newPageLoaded, ClickResult result)
+    private void verifyWebElement(int clickAttempts, boolean newPageLoaded, ClickResult result)
     {
         verify(webElement, times(clickAttempts)).click();
         assertTrue(result.isClicked());
         assertEquals(newPageLoaded, result.isNewPageLoaded());
         InOrder ordered = inOrder(alertActions, waitActions, eventBus, uiContext);
-        ordered.verify(alertActions).isAlertPresent(webDriver);
-        if (!alertPresent)
-        {
-            ordered.verify(waitActions).waitForPageLoad();
-            ordered.verify(alertActions).waitForAlert(webDriver);
-            ordered.verify(eventBus)
-                    .post(ArgumentMatchers.<PageLoadEndEvent>argThat(arg -> arg.newPageLoaded() == newPageLoaded));
-        }
+        ordered.verify(waitActions).waitForPageLoad();
+        ordered.verify(alertActions).waitForAlert(webDriver);
+        ordered.verify(eventBus).post(
+                ArgumentMatchers.<PageLoadEndEvent>argThat(arg -> arg.newPageLoaded() == newPageLoaded));
         ordered.verifyNoMoreInteractions();
     }
 
-    private void testClick(boolean alertPresent, boolean newPageLoaded)
+    private void testClick(boolean newPageLoaded)
     {
         ClickResult result = mouseActions.click(webElement);
-        verifyWebElement(1, alertPresent, newPageLoaded, result);
-    }
-
-    private void testClickWithElementNotClickableException()
-    {
-        ClickResult result = mouseActions.click(webElement);
-        verifyWebElement(2, false, false, result);
+        verifyWebElement(1, newPageLoaded, result);
     }
 
     @Test
@@ -130,7 +120,7 @@ class MouseActionsTests
         WebElement body = mockBodySearch();
         doThrow(WebDriverException.class).when(body).isDisplayed();
         when(alertActions.waitForAlert(webDriver)).thenReturn(Boolean.FALSE);
-        testClick(false, true);
+        testClick(true);
         verify(uiContext).reset();
     }
 
@@ -139,24 +129,14 @@ class MouseActionsTests
     {
         mockBodySearch();
         when(alertActions.waitForAlert(webDriver)).thenReturn(Boolean.TRUE);
-        testClick(false, false);
-        verifyNoInteractions(uiContext);
-    }
-
-    @Test
-    void clickElementWithAlert()
-    {
-        boolean alertPresent = true;
-        mockBodySearch();
-        when(alertActions.isAlertPresent(webDriver)).thenReturn(alertPresent);
-        testClick(alertPresent, false);
+        testClick(false);
         verifyNoInteractions(uiContext);
     }
 
     @Test
     void clickElementNull()
     {
-        mouseActions.click((WebElement) null);
+        mouseActions.click(null);
         verifyNoInteractions(webDriverProvider);
         verifyNoInteractions(uiContext);
     }
@@ -165,7 +145,7 @@ class MouseActionsTests
     void clickElementExpectedException()
     {
         mockBodySearch();
-        testClick(false, false);
+        testClick(false);
         verify(alertActions).waitForAlert(webDriver);
         verifyNoInteractions(uiContext);
     }
@@ -221,24 +201,14 @@ class MouseActionsTests
     }
 
     @Test
-    void clickElementNotClickableExceptionNoExceptionChrome()
-    {
-        mockBodySearch();
-
-        WebDriverException e = new WebDriverException(OTHER_ELEMENT_WOULD_RECEIVE_CLICK);
-        doThrow(e).doNothing().when(webElement).click();
-        testClickWithElementNotClickableException();
-    }
-
-    @Test
     void shouldNotRetryClickOnMatchingError()
     {
         mockBodySearch();
 
         WebDriverException e = new WebDriverException(OTHER_ELEMENT_WOULD_RECEIVE_CLICK);
         doThrow(e).doNothing().when(webElement).click();
-        when(alertActions.isAlertPresent(webDriver)).thenReturn(Boolean.FALSE);
-        testClickWithElementNotClickableException();
+        ClickResult result = mouseActions.click(webElement);
+        verifyWebElement(2, false, result);
     }
 
     private WebElement mockBodySearch()
