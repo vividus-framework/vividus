@@ -34,7 +34,7 @@ public class LayoutConfiguringPlugin extends DynamicPlugin
     public LayoutConfiguringPlugin(PropertyMappedCollection<Component> tabs,
             PropertyMappedCollection<Component> widgets, PropertyMappedCollection<Component> charts) throws IOException
     {
-        super("layout-configuration", () -> {
+        super("layout-configuration", "index.js", () -> {
             List<String> jsFileLines = new ArrayList<>();
 
             String tabsToExclude = tabs.getData().entrySet().stream()

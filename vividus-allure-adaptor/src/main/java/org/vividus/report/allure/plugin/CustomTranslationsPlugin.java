@@ -32,7 +32,7 @@ public class CustomTranslationsPlugin extends DynamicPlugin
     public CustomTranslationsPlugin(PropertyMappedCollection<Map<String, ?>> customTranslations, JsonUtils jsonUtils)
             throws IOException
     {
-        super("custom-translations", () -> {
+        super("custom-translations", "index.js", () -> {
             List<String> jsFileLines = new ArrayList<>();
             customTranslations.getData().forEach((lang, value) -> jsFileLines.add(
                             "allure.api.addTranslation('%s', %s);".formatted(lang, jsonUtils.toJson(value))

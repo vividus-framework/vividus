@@ -157,6 +157,27 @@ a|`true` +
 
 |===
 
+== Configure brand logo and title
+
+image::report-logo-title.png[Report logo and title, 256, float=right]
+VIVIDUS provides the capability to change logo and title in your generated report.
+
+To change the brand logo in report use the property `report.brand.logo-path=<path>` where `path` is the relative to `src/main/resources` path to `.svg` image.
+
+.Use custom brand logo
+[source,properties]
+----
+report.brand.logo-path=/customer-data/logo-icon.svg
+----
+
+To change the brand title in report use the property `report.brand.title=<title>` where `title` is the desired title.
+
+.Use custom brand title
+[source,properties]
+----
+report.brand.title=MY BRAND
+----
+
 == Add metadata
 
 It is allowed to add metadata to be displayed in the report and the output logs. There are 2 types of metadata

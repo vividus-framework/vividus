@@ -16,6 +16,8 @@
 
 package org.vividus.report.allure.plugin;
 
+import static org.apache.commons.lang3.Validate.isTrue;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,9 +26,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.vividus.util.ResourceUtils;
 
@@ -36,24 +40,32 @@ import io.qameta.allure.plugin.DefaultPlugin;
 
 public class DynamicPlugin extends DefaultPlugin
 {
-    private static final String INDEX_JS = "index.js";
+    private static final String JS_EXTENSION = ".js";
+    private static final String CSS_EXTENSION = ".css";
 
     private final Map<String, Path> pluginFiles = new HashMap<>();
 
     @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
-    public DynamicPlugin(String pluginId, Supplier<List<String>> jsFileLinesSupplier) throws IOException
+    public DynamicPlugin(String pluginId, String fileToGenerate, Supplier<List<String>> fileLinesSupplier)
+            throws IOException
     {
         super(new PluginConfiguration()
                         .setId(pluginId)
-                        .setJsFiles(List.of()),
+                        .setJsFiles(List.of())
+                        .setCssFiles(List.of()),
                 List.of(), null);
 
-        List<String> jsFileLines = jsFileLinesSupplier.get();
+        List<String> fileLines = fileLinesSupplier.get();
 
-        if (!jsFileLines.isEmpty())
+        if (!fileLines.isEmpty())
         {
-            Path indexJs = ResourceUtils.createTempFile("index", ".js");
-            Files.write(indexJs, Stream.of(List.of("'use strict';"), jsFileLines).flatMap(List::stream).toList());
+            isTrue(StringUtils.endsWithAny(fileToGenerate, JS_EXTENSION, CSS_EXTENSION),
+                    "Generation of only JavaScript and CSS files is supported.");
+
+            Path tempFile = ResourceUtils.createTempFile(fileToGenerate);
+            List<String> extensionSpecificLines = isJsFile(fileToGenerate)
+                    ? List.of("'use strict';") : List.of();
+            Files.write(tempFile, Stream.of(extensionSpecificLines, fileLines).flatMap(List::stream).toList());
 
             /*
               For UNIX like operating systems default access for temp files is 600, whereas for regular files the
@@ -62,14 +74,20 @@ public class DynamicPlugin extends DefaultPlugin
              */
             if (SystemUtils.IS_OS_UNIX)
             {
-                Files.setPosixFilePermissions(indexJs,
+                Files.setPosixFilePermissions(tempFile,
                         Set.of(PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_READ,
                                 PosixFilePermission.GROUP_READ, PosixFilePermission.OTHERS_READ));
             }
-
-            pluginFiles.put(INDEX_JS, Path.of(indexJs.toUri()));
-            getConfig().setJsFiles(List.of(INDEX_JS));
+            pluginFiles.put(fileToGenerate, Path.of(tempFile.toUri()));
+            Consumer<List<String>> fileConsumer = isJsFile(fileToGenerate)
+                    ? f -> getConfig().setJsFiles(f) : f -> getConfig().setCssFiles(f);
+            fileConsumer.accept(List.of(fileToGenerate));
         }
+    }
+
+    private boolean isJsFile(String fileToGenerate)
+    {
+        return fileToGenerate.endsWith(JS_EXTENSION);
     }
 
     @Override

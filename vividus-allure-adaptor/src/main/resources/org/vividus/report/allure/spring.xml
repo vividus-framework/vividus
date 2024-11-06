@@ -22,28 +22,7 @@
     </bean>
 
     <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
-        <constructor-arg index="0" value="vividus-logo" />
-        <constructor-arg index="1">
-            <util:list value-type="java.lang.String">
-                <value>styles.css</value>
-                <value>vividus-logo.svg</value>
-            </util:list>
-        </constructor-arg>
-        <constructor-arg index="2" ref="pluginFilesLoader" />
-    </bean>
-
-    <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
         <constructor-arg index="0" value="vividus-step-formatting" />
-        <constructor-arg index="1">
-            <util:list value-type="java.lang.String">
-                <value>styles.css</value>
-            </util:list>
-        </constructor-arg>
-        <constructor-arg index="2" ref="pluginFilesLoader" />
-    </bean>
-
-    <bean class="org.vividus.report.allure.plugin.EmbeddedPlugin">
-        <constructor-arg index="0" value="vividus-title" />
         <constructor-arg index="1">
             <util:list value-type="java.lang.String">
                 <value>styles.css</value>
@@ -80,6 +59,14 @@
                 <constructor-arg value="org.vividus.report.allure.plugin.LayoutConfiguringPlugin.Component" />
             </bean>
         </constructor-arg>
+    </bean>
+
+    <bean class="org.vividus.report.allure.plugin.BrandLogoPlugin">
+        <constructor-arg value="${report.brand.logo-path}" />
+    </bean>
+
+    <bean class="org.vividus.report.allure.plugin.BrandTitlePlugin">
+        <constructor-arg value="${report.brand.title}" />
     </bean>
 
     <bean class="org.vividus.report.allure.AllureRunContext" />
