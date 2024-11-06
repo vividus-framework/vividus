@@ -77,7 +77,7 @@ project.description = 'Vividus'
 
 ext {
     versions = [
-        jbehave:                '6.0.0-alpha.4',
+        jbehave:                '6.0.0-alpha.5',
         powermock:              'a0be5c4bbe',
         // eyes and eyesUniversal versions should be updated and tested together
         eyes:                   '5.69.5',
