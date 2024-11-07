@@ -17,7 +17,6 @@
 package org.vividus.report.allure.plugin;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -37,19 +36,7 @@ public class BrandLogoPlugin extends DynamicPlugin
     public BrandLogoPlugin(String logoPath, PluginFilesLoader pluginFilesLoader) throws IOException
     {
         super("brand-logo", "styles.css", () -> List.of(CSS_TEMPLATE.formatted(FilenameUtils.getName(logoPath))));
-        Path brandLogo = loadBrandLogo(logoPath, pluginFilesLoader);
+        Path brandLogo = pluginFilesLoader.loadResource(logoPath);
         getPluginFiles().put(brandLogo.getFileName().toString(), brandLogo);
-    }
-
-    private Path loadBrandLogo(String logoPath, PluginFilesLoader pluginFilesLoader)
-    {
-        try
-        {
-            return pluginFilesLoader.loadResource(logoPath);
-        }
-        catch (IOException | URISyntaxException e)
-        {
-            throw new IllegalStateException(e);
-        }
     }
 }
