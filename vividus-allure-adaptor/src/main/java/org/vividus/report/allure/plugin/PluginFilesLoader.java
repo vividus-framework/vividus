@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,30 +34,30 @@ public class PluginFilesLoader
 
     public Path loadPluginFile(String pluginId, String fileName)
     {
+        return loadResource("/allure-plugins/" + pluginId + "/" + fileName);
+    }
+
+    public Path loadResource(String resourceLocation)
+    {
         try
         {
-            return loadResource("/allure-plugins/" + pluginId + "/" + fileName);
+            URI resource = ResourceUtils.findResource(getClass(), resourceLocation).toURI();
+            try
+            {
+                return Paths.get(resource);
+            }
+            catch (FileSystemNotFoundException e)
+            {
+                if (fileSystem == null)
+                {
+                    fileSystem = FileSystems.newFileSystem(resource, Map.of());
+                }
+                return fileSystem.provider().getPath(resource);
+            }
         }
         catch (IOException | URISyntaxException e)
         {
             throw new IllegalStateException(e);
-        }
-    }
-
-    private Path loadResource(String resourceLocation) throws URISyntaxException, IOException
-    {
-        URI resource = ResourceUtils.findResource(getClass(), resourceLocation).toURI();
-        try
-        {
-            return Paths.get(resource);
-        }
-        catch (FileSystemNotFoundException e)
-        {
-            if (fileSystem == null)
-            {
-                fileSystem = FileSystems.newFileSystem(resource, Map.of());
-            }
-            return fileSystem.provider().getPath(resource);
         }
     }
 

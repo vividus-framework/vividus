@@ -17,28 +17,26 @@
 package org.vividus.report.allure.plugin;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
-import org.vividus.util.json.JsonUtils;
-import org.vividus.util.property.PropertyMappedCollection;
+import org.apache.commons.io.FilenameUtils;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-public class CustomTranslationsPlugin extends DynamicPlugin
+public class BrandLogoPlugin extends DynamicPlugin
 {
-    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
-    public CustomTranslationsPlugin(PropertyMappedCollection<Map<String, ?>> customTranslations, JsonUtils jsonUtils)
-            throws IOException
+    private static final String CSS_TEMPLATE = """
+            .side-nav__brand {%n\
+              background: url('%s') no-repeat left center !important;%n\
+              background-size: 44px 44px !important;%n\
+            }""";
+
+    @SuppressFBWarnings({ "CT_CONSTRUCTOR_THROW", "NP_NULL_ON_SOME_PATH" })
+    public BrandLogoPlugin(String logoPath, PluginFilesLoader pluginFilesLoader) throws IOException
     {
-        super("custom-translations", "index.js", () -> {
-            List<String> jsFileLines = new ArrayList<>();
-            customTranslations.getData().forEach((lang, value) -> jsFileLines.add(
-                            "allure.api.addTranslation('%s', %s);".formatted(lang, jsonUtils.toJson(value))
-                    )
-            );
-            return jsFileLines;
-        });
+        super("brand-logo", "styles.css", () -> List.of(CSS_TEMPLATE.formatted(FilenameUtils.getName(logoPath))));
+        Path brandLogo = pluginFilesLoader.loadResource(logoPath);
+        getPluginFiles().put(brandLogo.getFileName().toString(), brandLogo);
     }
 }
