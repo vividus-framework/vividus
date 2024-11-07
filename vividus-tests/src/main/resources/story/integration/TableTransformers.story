@@ -539,3 +539,8 @@ Then `${absoluteUrls}` is equal to table:
 |https://vividus-test-site-a92k.onrender.com/links.html#ElementName |
 |https://vividus-test-site-a92k.onrender.com/links.html#notFound    |
 |https://vividus-test-site-a92k.onrender.com/links.html#            |
+
+Scenario: Verify loading of external tables chain
+When I initialize story variable `table` with values:
+/data/with-external-reference.table
+Then `${table[0].name}` matches `[A-Za-z]+`
