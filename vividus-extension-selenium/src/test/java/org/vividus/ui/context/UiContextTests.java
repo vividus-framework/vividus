@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,22 @@ class UiContextTests extends UiContextTestsBase
     {
         uiContext.setTestContext(getContext());
         assertNull(uiContext.getSearchContext());
+    }
+
+    @Test
+    void testGetOptionalSearchContextSafely()
+    {
+        uiContext.setTestContext(getContext());
+        uiContext.putSearchContext(searchContextMock, searchContextSetter);
+        Optional<SearchContext> actualSearchContext = uiContext.getOptionalSearchContextSafely();
+        assertEquals(Optional.of(searchContextMock), actualSearchContext);
+    }
+
+    @Test
+    void testGetOptionalSearchContextSafelyNotFound()
+    {
+        uiContext.setTestContext(getContext());
+        assertEquals(Optional.empty(), uiContext.getOptionalSearchContextSafely());
     }
 
     @Test

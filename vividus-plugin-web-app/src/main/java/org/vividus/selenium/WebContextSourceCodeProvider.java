@@ -68,7 +68,7 @@ public class WebContextSourceCodeProvider implements WebAppContextSourceCodeProv
     @Override
     public Map<String, String> getShadowDomSourceCode()
     {
-        Optional<SearchContext> searchContextOpt = uiContext.getOptionalSearchContext();
+        Optional<SearchContext> searchContextOpt = uiContext.getOptionalSearchContextSafely();
         if (searchContextOpt.isPresent())
         {
             SearchContext searchContext = searchContextOpt.get();
