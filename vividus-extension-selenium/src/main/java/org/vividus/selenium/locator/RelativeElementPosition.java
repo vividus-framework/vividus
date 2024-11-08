@@ -75,8 +75,48 @@ public enum RelativeElementPosition
         {
             return relativeBy.near(element);
         }
+    },
+    NEAR_XPX
+    {
+        @Override
+        public RelativeLocator.RelativeBy apply(RelativeLocator.RelativeBy relativeBy, By locator)
+        {
+            return relativeBy.near(locator);
+        }
+
+        @Override
+        public RelativeLocator.RelativeBy apply(RelativeLocator.RelativeBy relativeBy, WebElement element)
+        {
+            return relativeBy.near(element);
+        }
+
+        @Override
+        public RelativeLocator.RelativeBy apply(RelativeLocator.RelativeBy relativeBy, By locator,
+                                                int atMostDistanceInPixels)
+        {
+            return relativeBy.near(locator, atMostDistanceInPixels);
+        }
+
+        @Override
+        public RelativeLocator.RelativeBy apply(RelativeLocator.RelativeBy relativeBy, WebElement element,
+                                                int atMostDistanceInPixels)
+        {
+            return relativeBy.near(element, atMostDistanceInPixels);
+        }
     };
 
     public abstract RelativeLocator.RelativeBy apply(RelativeLocator.RelativeBy relativeBy, By locator);
     public abstract RelativeLocator.RelativeBy apply(RelativeLocator.RelativeBy relativeBy, WebElement element);
+
+    public RelativeLocator.RelativeBy apply(RelativeLocator.RelativeBy relativeBy, By locator,
+                                            int atMostDistanceInPixels)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    public RelativeLocator.RelativeBy apply(RelativeLocator.RelativeBy relativeBy, WebElement element,
+                                            int atMostDistanceInPixels)
+    {
+        throw new UnsupportedOperationException();
+    }
 }

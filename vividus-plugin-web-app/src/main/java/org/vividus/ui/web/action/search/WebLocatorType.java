@@ -41,8 +41,7 @@ public enum WebLocatorType implements LocatorType
         @Override
         public By buildBy(String value)
         {
-            By relativeLocator = RelativeLocatorUtils.convertRelativeStringToBy(value);
-            return By.xpath("./div");
+            return By.xpath("");
         }
     },
     LINK_URL("URL", LinkUrlSearch.class),

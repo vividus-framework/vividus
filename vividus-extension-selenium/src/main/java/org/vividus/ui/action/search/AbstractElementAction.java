@@ -17,14 +17,18 @@
 package org.vividus.ui.action.search;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.locators.RelativeLocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vividus.ui.action.ElementActions;
@@ -32,6 +36,8 @@ import org.vividus.ui.action.IExpectedSearchContextCondition;
 import org.vividus.ui.action.IWaitActions;
 
 import jakarta.inject.Inject;
+
+import static org.apache.commons.lang3.StringUtils.SPACE;
 
 public abstract class AbstractElementAction implements IElementAction
 {
@@ -107,7 +113,58 @@ public abstract class AbstractElementAction implements IElementAction
 
     private static String convertLocatorToReadableForm(By locator)
     {
+        if (locator instanceof RelativeLocator.RelativeBy)
+        {
+            return formatRelativeLocator((RelativeLocator.RelativeBy) locator);
+        }
         return StringUtils.removeStart(locator.toString(), "By.");
+    }
+
+    private static String formatRelativeLocator(RelativeLocator.RelativeBy locator)
+    {
+        String rawLocatorString = locator.getRemoteParameters().value().toString();
+
+        Pattern rootPattern = Pattern.compile("root=\\{([^}]+)}");
+        Matcher rootMatcher = rootPattern.matcher(rawLocatorString);
+        String rootElement = rootMatcher.find() ? rootMatcher.group(1) : "unknown";
+
+        String filtersString = StringUtils.substringAfter(rawLocatorString, "filters=");
+        Pattern filterPattern = Pattern.compile("\\{(.*?)},?");
+
+        Matcher filterMatcher = filterPattern.matcher(filtersString);
+
+        List<String> filters = new ArrayList<>();
+        Pattern kindPattern = Pattern.compile("kind=(\\w+)");
+        Pattern filterLocatorPattern = Pattern.compile("->\\s(.+:.+)]{2}");
+        while (filterMatcher.find())
+        {
+            String filter = filterMatcher.group(1);
+            Matcher kindMatcher = kindPattern.matcher(filter);
+            if (kindMatcher.find())
+            {
+                String kind = kindMatcher.group(1);
+                Matcher filterLocatorMatcher = filterLocatorPattern.matcher(filter);
+                String filterLocator = filterLocatorMatcher.find() ? filterLocatorMatcher.group(1) : "unknown locator";
+
+                filters.add(kind + " of the element with " + filterLocator);
+            }
+        }
+
+        StringBuilder result = new StringBuilder();
+        result.append(rootElement).append(" and placed");
+        if (filters.size() == 1)
+        {
+            result.append(SPACE).append(filters.get(0));
+        }
+        else
+        {
+            result.append(":").append(System.lineSeparator());
+            for (String filter : filters)
+            {
+                result.append("  - ").append(filter).append(System.lineSeparator());
+            }
+        }
+        return result.toString();
     }
 
     protected List<WebElement> filterElementsByVisibility(List<WebElement> elements, Visibility visibility,

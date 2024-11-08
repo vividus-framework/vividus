@@ -40,9 +40,11 @@ public class LocatorConverter
     private static final int ATTRIBUTE_TYPE_GROUP = 1;
     private static final String EMPTY = "";
     private static final int ELEMENT_TYPE_GROUP = 3;
-    private static final int VISIBILITY_GROUP = 4;
+    private static final int VISIBILITY_GROUP = 3;
+    private static final int FILTERS_GROUP = 4;
     private static final char CLOSING_BRACKET = ']';
-    private static final String LOCATOR_FORMAT = "(?:By\\.)?([a-zA-Z.-]+)\\((.*)\\)(:(.*))?";
+//    private static final String LOCATOR_FORMAT = "(?:By\\.)?([a-zA-Z.-]+)\\((.*)\\)(:(.*))?";
+    private static final String LOCATOR_FORMAT = "(?:By\\.)?([a-zA-Z.-]+)\\((.*?)\\)(?::([a-zA-Z]+))?(?:->filter\\.((?:[a-zA-Z]+\\([^\\)]+\\)(?:\\.[a-zA-Z]+\\([^\\)]+\\))*)?))?$";
     private static final String ESCAPED_COMMA = "\\,";
     private static final Pattern LOCATOR_PATTERN = Pattern.compile(LOCATOR_FORMAT);
     private static final Pattern FILTER_PATTERN = Pattern.compile("([a-zA-Z]+)\\(([^()]*)\\)");
@@ -58,22 +60,25 @@ public class LocatorConverter
 
     public Locator convertToLocator(String locatorAsString)
     {
-        String[] locatorParts = locatorAsString.split("->filter\\.");
-        String locator = locatorParts.length == 0 ? locatorAsString : locatorParts[0];
-        String filters = locatorParts.length == 2 ? locatorParts[1] : EMPTY;
-        Matcher matcher = LOCATOR_PATTERN.matcher(locator);
+//        String[] locatorParts = splitFilters(locatorAsString);
+//        String locator = locatorParts[0];
+//        String filters = locatorParts[1];
+        Matcher matcher = LOCATOR_PATTERN.matcher(locatorAsString);
         if (matcher.matches())
         {
             String elementActionType = matcher.group(ATTRIBUTE_TYPE_GROUP).toLowerCase();
             String searchValue = matcher.group(SEARCH_VALUE_GROUP);
-            String elementType = matcher.group(ELEMENT_TYPE_GROUP);
+//            String elementType = matcher.group(ELEMENT_TYPE_GROUP);
+            String visibilityType = matcher.group(VISIBILITY_GROUP);
+
             Locator convertedLocator = convertToLocator(elementActionType, searchValue);
-            if (elementType != null)
+            if (visibilityType != null)
             {
-                String visibilityType = matcher.group(VISIBILITY_GROUP);
+//                String visibilityType = matcher.group(VISIBILITY_GROUP);
                 convertedLocator.getSearchParameters().setVisibility(Visibility.getElementType(visibilityType));
             }
-            if (!filters.isEmpty())
+            String filters = matcher.group(FILTERS_GROUP);
+            if (filters != null)
             {
                 Matcher filterMatcher = FILTER_PATTERN.matcher(filters);
                 while (filterMatcher.find())
@@ -151,5 +156,18 @@ public class LocatorConverter
     public void setDynamicLocators(PropertyMappedCollection<LocatorPattern> dynamicLocators)
     {
         this.dynamicLocators = dynamicLocators;
+    }
+
+    private String[] splitFilters(String locatorAsString)
+    {
+        final String filterKey = "->filter.";
+        int filterIndex = locatorAsString.lastIndexOf(filterKey);
+        if (filterIndex == -1)
+        {
+            return new String[]{locatorAsString, EMPTY};
+        }
+        String locator = locatorAsString.substring(0, filterIndex);
+        String filters = locatorAsString.substring(filterIndex + filterKey.length());
+        return new String[]{locator, filters};
     }
 }
