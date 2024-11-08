@@ -86,7 +86,7 @@ class WebContextSourceCodeProviderTests
     void shouldReturnWholePageForDriverContextShadowDom()
     {
         var webDriver = mock(WebDriver.class);
-        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webDriver));
+        when(uiContext.getOptionalSearchContextSafely()).thenReturn(Optional.of(webDriver));
 
         var elementSource = "<div/>";
         var sourceTitle = "Shadow dom source. Selector: a";
@@ -104,7 +104,7 @@ class WebContextSourceCodeProviderTests
     void shouldReturnElementSourceForElementContextShadowDom()
     {
         var webElement = mock(WebElement.class);
-        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.of(webElement));
+        when(uiContext.getOptionalSearchContextSafely()).thenReturn(Optional.of(webElement));
 
         var elementSource = "<table/>";
         var sourceTitle = "Shadow dom source. Selector: b";
@@ -119,7 +119,7 @@ class WebContextSourceCodeProviderTests
     @Test
     void shouldReturnWholePageForDriverContextNoShadowDom()
     {
-        when(uiContext.getOptionalSearchContext()).thenReturn(Optional.empty());
+        when(uiContext.getOptionalSearchContextSafely()).thenReturn(Optional.empty());
         assertEquals(Map.of(), sourceCodeProvider.getShadowDomSourceCode());
         verifyNoInteractions(webJavascriptActions);
     }
