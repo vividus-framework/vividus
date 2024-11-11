@@ -1,5 +1,36 @@
 project.description = 'VIVIDUS utilities'
 
+//Additional SourceSets can be added to the jacocoOfflineSourceSets as needed by
+project.ext.jacocoOfflineSourceSets = [ 'main' ]
+tasks.register('doJacocoOfflineInstrumentation') {
+    dependsOn = [classes, project.configurations.jacocoAnt]
+    inputs.files classes.outputs.files
+    File outputDir = layout.buildDirectory.dir('instrumentedClasses').get().asFile
+    outputs.dir outputDir
+    doFirst {
+        project.delete(outputDir)
+        ant.taskdef(
+            resource: 'org/jacoco/ant/antlib.xml',
+            classpath: project.configurations.jacocoAnt.asPath,
+            uri: 'jacoco'
+        )
+        jacocoOfflineSourceSets.each { sourceSetName ->
+            def instrumentedClassedDir = "${outputDir}/${sourceSetName}"
+            files(sourceSets[sourceSetName].output.classesDirs).each { classesDir ->
+                if (classesDir.exists()) {
+                    ant.'jacoco:instrument'(destdir: instrumentedClassedDir) {
+                        fileset(dir: classesDir, includes: '**/*.class')
+                    }
+                    //Replace the classes dir in the test classpath with the instrumented one
+                    sourceSets.test.runtimeClasspath -= files(classesDir)
+                    sourceSets.test.runtimeClasspath = files(instrumentedClassedDir) + sourceSets.test.runtimeClasspath
+                }
+            }
+        }
+    }
+}
+test.dependsOn doJacocoOfflineInstrumentation
+
 //https://github.com/powermock/powermock/issues/1094
 test {
     jvmArgs = [
