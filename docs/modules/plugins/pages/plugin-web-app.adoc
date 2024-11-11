@@ -1713,6 +1713,55 @@ When I reset mobile device emulation
 When I reset mobile device emulation
 ----
 
+=== Geolocation emulation
+
+==== Emulate Geolocation
+
+Set the current Geolocation to coordinates with the specified latitude and longitude.
+
+IMPORTANT: The step is only supported by Chrome browser.
+
+[source,gherkin]
+----
+When I emulate Geolocation using coordinates with latitude `$latitude` and longitude `$longitude`
+----
+
+* `$latitude` - The https://en.wikipedia.org/wiki/Latitude[latitude].
+* `$longitude` - The https://en.wikipedia.org/wiki/Longitude[longitude].
+
+.Set Geolocation to New York, USA
+[source,gherkin]
+----
+Given I am on page with URL `https://my-location.org`
+Then text `Brooklyn, NY` does not exist
+When I emulate Geolocation using coordinates with latitude `40.678207` and longitude `-73.944390`
+When I refresh page
+Then text `Brooklyn, NY` exists
+----
+
+==== Reset Geolocation emulation
+
+Resets the emulated Geolocation position.
+
+IMPORTANT: The step is only supported by Chrome browser.
+
+[source,gherkin]
+----
+When I reset Geolocation emulation
+----
+
+.Set Geolocation emulation and reset it
+[source,gherkin]
+----
+Given I am on page with URL `https://my-location.org`
+When I emulate Geolocation using coordinates with latitude `40.678207` and longitude `-73.944390`
+When I refresh page
+Then text `Brooklyn, NY` exists
+When I reset Geolocation emulation
+When I refresh page
+Then text `Brooklyn, NY` does not exist
+----
+
 == Tips & Tricks
 
 === Validate URL host of the opened page
