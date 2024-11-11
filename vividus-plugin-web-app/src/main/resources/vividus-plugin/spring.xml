@@ -73,6 +73,7 @@
     <bean id="webElementActions" class="org.vividus.ui.web.action.WebElementActions" />
     <bean id="windowsActions" class="org.vividus.ui.web.action.WindowsActions" />
     <bean class="org.vividus.ui.web.action.FrameActions" />
+    <bean class="org.vividus.ui.web.action.CdpActions" />
 
     <bean class="org.vividus.ui.web.action.WebWaitActions" parent="waitActions">
         <property name="pageStartsToLoadTimeout" value="${web.wait.page-starts-to-load-timeout}" />
@@ -203,6 +204,7 @@
     <bean id="browserSteps" class="org.vividus.steps.ui.web.BrowserSteps" />
     <bean id="performanceSteps" class="org.vividus.steps.ui.web.PerformanceSteps" />
     <bean id="mobileEmulationSteps" class="org.vividus.steps.ui.web.devtools.MobileEmulationSteps" />
+    <bean id="geolocationEmulationSteps" class="org.vividus.steps.ui.web.devtools.GeolocationEmulationSteps" />
     <bean id="scriptSteps" class="org.vividus.steps.ui.web.ScriptSteps" />
     <bean id="scrollSteps" class="org.vividus.steps.ui.web.ScrollSteps" />
     <bean id="setContextSteps" class="org.vividus.steps.ui.web.SetContextSteps" />
@@ -289,6 +291,7 @@
         <idref bean="windowSteps" />
         <idref bean="browserSteps" />
         <idref bean="mobileEmulationSteps" />
+        <idref bean="geolocationEmulationSteps" />
     </util:list>
 
     <util:map id="propertyEditors-WebUi" key-type="java.lang.Class">
