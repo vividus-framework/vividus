@@ -19,6 +19,7 @@ package org.vividus.http.validation;
 public enum CheckStatus
 {
     FAILED(1),
+    BLOCKED(1),
     BROKEN(2),
     PASSED(3),
     FILTERED(4),

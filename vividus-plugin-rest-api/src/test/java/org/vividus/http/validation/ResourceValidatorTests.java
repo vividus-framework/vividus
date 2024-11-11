@@ -26,11 +26,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Optional;
 
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpStatus;
 import org.hamcrest.Matcher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,6 +57,7 @@ class ResourceValidatorTests
     private static final URI FIRST = URI.create("https://vividus.org");
     private static final ArgumentMatcher<Matcher<? super Integer>> MATCHER =
         m -> "is one of {<200>}".equals(m.toString());
+    private static final String AKAMAI_GRN = "Akamai-GRN";
 
     @Mock private IHttpClient httpClient;
     @Mock private ISoftAssert softAssert;
@@ -68,6 +73,35 @@ class ResourceValidatorTests
         var resourceValidation = new ResourceValidation(FIRST);
         var result = resourceValidator.perform(resourceValidation);
         assertEquals(CheckStatus.PASSED, result.getCheckStatus());
+    }
+
+    @Test
+    void shouldValidateBlockedByAkamaiResource() throws IOException
+    {
+        when(httpClient.doHttpHead(FIRST)).thenReturn(httpResponse);
+        when(httpClient.doHttpGet(FIRST)).thenReturn(httpResponse);
+        when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_FORBIDDEN);
+        Header header = mock(Header.class);
+        when(httpResponse.getHeaderByName(AKAMAI_GRN)).thenReturn(Optional.of(header));
+        var resourceValidation = new ResourceValidation(FIRST);
+        resourceValidator.perform(resourceValidation);
+        var result = resourceValidator.perform(resourceValidation);
+        assertEquals(CheckStatus.BLOCKED, result.getCheckStatus());
+        verify(softAssert, times(2)).recordFailedAssertion(
+                "Request to https://vividus.org has been blocked by Akamai Web Application Firewall");
+        verifyNoMoreInteractions(httpClient);
+    }
+
+    @Test
+    void shouldValidateForbiddenResource() throws IOException
+    {
+        when(httpClient.doHttpHead(FIRST)).thenReturn(httpResponse);
+        when(httpClient.doHttpGet(FIRST)).thenReturn(httpResponse);
+        when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_FORBIDDEN);
+        when(httpResponse.getHeaderByName(AKAMAI_GRN)).thenReturn(Optional.empty());
+        var resourceValidation = new ResourceValidation(FIRST);
+        var result = resourceValidator.perform(resourceValidation);
+        assertEquals(CheckStatus.FAILED, result.getCheckStatus());
     }
 
     @Test
@@ -170,6 +204,22 @@ class ResourceValidatorTests
         resourceValidator.setPublishResponseBody(false);
         var resultNotFoundDisabledPublishing  = resourceValidator.perform(resourceValidationNotFoundUrl);
         assertNull(resultNotFoundDisabledPublishing.getResponseBody());
+    }
+
+    @Test
+    void shouldNotPublishResponseBodyForSuccessfulRequest() throws IOException
+    {
+        resourceValidator.setPublishResponseBody(true);
+
+        when(httpClient.doHttpHead(FIRST)).thenReturn(httpResponse);
+        when(httpResponse.getStatusCode()).thenReturn(HttpStatus.SC_OK);
+        when(httpResponse.getResponseBodyAsString()).thenReturn("body");
+        when(softAssert.assertThat(eq(PASSED_CHECK_MESSAGE), eq(OK), argThat(MATCHER))).thenReturn(true);
+
+        var resourceValidation = new ResourceValidation(FIRST);
+        var result = resourceValidator.perform(resourceValidation);
+        assertEquals(CheckStatus.PASSED, result.getCheckStatus());
+        assertNull(result.getResponseBody());
     }
 
     @Test

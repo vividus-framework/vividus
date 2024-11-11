@@ -71,6 +71,7 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
                     switch (r.getCheckStatus())
                     {
                         case FAILED -> assertForStatusCode(uri, r.getStatusCode().getAsInt());
+                        case BLOCKED -> recordBlockedByAkamaiRequest(uri);
                         case BROKEN -> softAssert.recordFailedAssertion(EXCEPTION_MESSAGE.formatted(uri)
                                 + System.lineSeparator() + r.getUriOrError().getRight());
                         default -> cachedResult.setCheckStatus(CheckStatus.SKIPPED);
@@ -88,8 +89,9 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
     {
         try
         {
-            int statusCode = httpClient.doHttpHead(uri).getStatusCode();
-            HttpResponse response = null;
+            HttpResponse response = httpClient.doHttpHead(uri);
+            int statusCode = response.getStatusCode();
+
             if (NOT_ALLOWED_HEAD_STATUS_CODES.contains(statusCode))
             {
                 response = httpClient.doHttpGet(uri);
@@ -97,9 +99,9 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
             }
             resourceValidation.setStatusCode(OptionalInt.of(statusCode));
 
-            CheckStatus checkStatus = assertForStatusCode(uri, statusCode);
+            CheckStatus checkStatus = evaluateStatus(uri, response);
 
-            if (publishResponseBody && response != null && checkStatus == CheckStatus.FAILED)
+            if (publishResponseBody && response.getResponseBodyAsString() != null && checkStatus == CheckStatus.FAILED)
             {
                 resourceValidation.setResponseBody(response.getResponseBodyAsString());
             }
@@ -111,6 +113,21 @@ public class ResourceValidator<T extends AbstractResourceValidation<T>>
             resourceValidation.setCheckStatus(CheckStatus.BROKEN);
             resourceValidation.setUriOrError(Pair.of(uri, e.toString()));
         }
+    }
+
+    private CheckStatus evaluateStatus(URI uri, HttpResponse response)
+    {
+        int statusCode = response.getStatusCode();
+        return statusCode == HttpStatus.SC_FORBIDDEN && response.getHeaderByName("Akamai-GRN").isPresent()
+                ? recordBlockedByAkamaiRequest(uri)
+                : assertForStatusCode(uri, statusCode);
+    }
+
+    private CheckStatus recordBlockedByAkamaiRequest(URI uri)
+    {
+        softAssert.recordFailedAssertion(
+                "Request to %s has been blocked by Akamai Web Application Firewall".formatted(uri));
+        return CheckStatus.BLOCKED;
     }
 
     private CheckStatus assertForStatusCode(URI uri, int statusCode)
