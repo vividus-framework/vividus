@@ -14,6 +14,10 @@
             background-color: #DFF0D8;
             color: #3C763D;
         }
+        .blocked {
+            background-color: #F2DEDE;
+            color: #A94442;
+        }
         .failed {
             background-color: #F2DEDE;
             color: #A94442;

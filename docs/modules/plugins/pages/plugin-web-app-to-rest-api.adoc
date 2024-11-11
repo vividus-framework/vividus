@@ -315,6 +315,9 @@ Steps to check resource availability using HTTP requests.
 |`FAILED`
 |An HTTP request to the resource returns a status code other than https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/200[200 OK].
 
+|`BLOCKED`
+|An HTTP request has been blocked by https://techdocs.akamai.com/property-mgr/docs/web-app-firewall[Akamai Web Application Firewall] and requires manual validation.
+
 |`BROKEN`
 a|Reasons:
 
