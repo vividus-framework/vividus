@@ -401,11 +401,11 @@ When I find > `0` JSON elements from `
 {
   "accounts": [
     {
-      "accountId": 00,
+      "accountId": 0,
       "status": "Active"
     },
     {
-      "accountId": 01,
+      "accountId": 1,
       "status": "Active"
     },
     {
