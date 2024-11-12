@@ -16,39 +16,26 @@
 
 package org.vividus.report.allure.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
+
+import org.junit.jupiter.api.Test;
 
 import io.qameta.allure.entity.Status;
 
-public class AllureCategory
+class AllureCategoryTests
 {
-    private String name;
-    private List<Status> matchedStatuses;
-
-    public String getName()
+    @Test
+    void shouldParseAllureStatusesFromString()
     {
-        return name;
-    }
-
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-
-    public List<Status> getMatchedStatuses()
-    {
-        return matchedStatuses;
-    }
-
-    public void setMatchedStatuses(List<Status> matchedStatuses)
-    {
-        this.matchedStatuses = matchedStatuses;
-    }
-
-    public void setStatuses(String statuses)
-    {
-        this.matchedStatuses = Stream.of(statuses.split(",")).map(s -> Status.valueOf(s.strip().toUpperCase()))
-                .toList();
+        AllureCategory category = new AllureCategory();
+        category.setName("category");
+        category.setStatuses("broken, FAILED");
+        assertEquals(2, category.getMatchedStatuses().size());
+        assertIterableEquals(List.of("broken", "failed"),
+                category.getMatchedStatuses().stream().map(Status::value).collect(Collectors.toList()));
     }
 }

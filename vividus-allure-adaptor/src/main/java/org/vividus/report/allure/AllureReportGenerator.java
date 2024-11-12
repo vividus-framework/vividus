@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -159,10 +160,27 @@ public class AllureReportGenerator implements IAllureReportGenerator
 
     private void writeCategoriesInfo() throws IOException
     {
-        List<AllureCategory> categories = List.of(
-                new AllureCategory("Test defects", List.of(Status.BROKEN)),
-                new AllureCategory("Product defects", List.of(Status.FAILED)),
-                new AllureCategory("Known issues", List.of(Status.UNKNOWN)));
+        Map<String, AllureCategory> userCategories = propertyMapper
+                .readValues("report.tabs.categories.", AllureCategory.class).getData();
+
+        List<AllureCategory> categories;
+        if (userCategories.isEmpty())
+        {
+            AllureCategory testDefects = new AllureCategory();
+            testDefects.setName("Test defects");
+            testDefects.setMatchedStatuses(List.of(Status.BROKEN));
+            AllureCategory productDefects = new AllureCategory();
+            productDefects.setName("Product defects");
+            productDefects.setMatchedStatuses(List.of(Status.FAILED));
+            AllureCategory knownIssues = new AllureCategory();
+            knownIssues.setName("Known issues");
+            knownIssues.setMatchedStatuses(List.of(Status.UNKNOWN));
+            categories = List.of(testDefects, productDefects, knownIssues);
+        }
+        else
+        {
+            categories = new ArrayList<>(userCategories.values());
+        }
         createJsonFileInResultsDirectory("categories.json", categories);
     }
 

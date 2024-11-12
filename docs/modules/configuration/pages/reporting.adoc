@@ -178,6 +178,40 @@ To change the brand title in report use the property `report.brand.title=<title>
 report.brand.title=MY BRAND
 ----
 
+== Configure categories
+
+It is possible to customize the names of categories in the report, as well as the statuses of tests that will be categorized under these names. +
+Use the following properties:
+
+[source,properties]
+----
+report.tabs.categories.<category-identifier>.name=<name>
+report.tabs.categories.<category-identifier>.statuses=<statuses>
+----
+
+* `category-identifier` - The unique identifier of category.
+* `name` - The desired category name to be displayed in the report.
+* `statuses` - The comma-separated list of test statuses included in this category. Possible values:
+https://allurereport.org/docs/test-statuses/#failed[failed],
+https://allurereport.org/docs/test-statuses/#broken[broken],
+unknown (in context of VIVIDUS - test cases with xref:tests-configuration.adoc#_known_issues[Known issues]),
+https://allurereport.org/docs/test-statuses/#skipped[skipped],
+https://allurereport.org/docs/test-statuses/#passed[passed].
+
+[NOTE]
+====
+User categories take precedence over default categories. So if you create your own configuration for failed and broken tests,
+but ignore test cases from `Known issues` category (`unknown` status), these defects will not be displayed in the  `Categories` tab.
+This rule does not apply to `Test defects`(`broken` status) and `Product defects`(`failed` status) categories: if user configuration is not defined, the default categories will be shown.
+====
+
+.Create test category with name `Defects of the tested application` which including all tests with `broken` and `failed` statuses.
+[source,properties]
+----
+report.tabs.categories.defects.name=Defects of the tested application
+report.tabs.categories.defects.statuses=failed, broken
+----
+
 == Add metadata
 
 It is allowed to add metadata to be displayed in the report and the output logs. There are 2 types of metadata
