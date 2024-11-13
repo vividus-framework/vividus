@@ -45,6 +45,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.github.valfirst.slf4jtest.LoggingEvent;
@@ -63,10 +64,12 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.vividus.report.allure.model.AllureCategory;
 import org.vividus.report.allure.notification.NotificationsSender;
 import org.vividus.reporter.metadata.MetadataCategory;
 import org.vividus.reporter.metadata.MetadataEntry;
 import org.vividus.reporter.metadata.MetadataProvider;
+import org.vividus.util.property.PropertyMappedCollection;
 import org.vividus.util.property.PropertyMapper;
 
 import io.qameta.allure.Constants;
@@ -84,7 +87,9 @@ class AllureReportGeneratorTests
     private static final String REPORT = "report";
 
     private static final String EXECUTOR_JSON = "executor.json";
+    private static final String CATEGORIES_JSON = "categories.json";
     private static final String ALLURE_EXECUTOR_PROPERTY_PREFIX = "allure.executor.";
+    private static final String ALLURE_TABS_CATEGORIES_PREFIX = "report.tabs.categories.";
     private static final String INDEX_HTML = "index.html";
     private static final String VIVIDUS_REPORT = "VIVIDUS Report";
 
@@ -164,6 +169,8 @@ class AllureReportGeneratorTests
         ExecutorInfo executorInfo = createExecutorInfo();
         when(propertyMapper.readValue(ALLURE_EXECUTOR_PROPERTY_PREFIX, ExecutorInfo.class)).thenReturn(
                 Optional.of(executorInfo));
+        when(propertyMapper.readValues(ALLURE_TABS_CATEGORIES_PREFIX, AllureCategory.class))
+                .thenReturn(new PropertyMappedCollection<>(Map.of()));
         testEnd(reportDirectory);
         assertThat(logger.getLoggingEvents(), is(List.of(
             buildCleanUpDirectoryLogEvent(RESULTS, resultsDirectory.toFile()),
@@ -173,18 +180,21 @@ class AllureReportGeneratorTests
             buildReportGeneratedLogEvent(tempDir)
         )));
         assertExecutorJson(executorInfo);
+        assertCategoriesJson();
     }
 
     @Test
     void testEndWhenResultsDirectoryDoesNotExist() throws IOException
     {
-        File reportDirectory = tempDir.toFile();
         resultsDirectory = tempDir.resolve("allure-results-to-be-created");
         System.setProperty(ALLURE_RESULTS_DIRECTORY_PROPERTY, resultsDirectory.toAbsolutePath().toString());
         allureReportGenerator = new AllureReportGenerator(VIVIDUS_REPORT, propertyMapper, resourcePatternResolver,
                 allurePluginsProvider, notificationsSender);
         when(propertyMapper.readValue(ALLURE_EXECUTOR_PROPERTY_PREFIX, ExecutorInfo.class)).thenReturn(
                 Optional.empty());
+        when(propertyMapper.readValues(ALLURE_TABS_CATEGORIES_PREFIX, AllureCategory.class))
+                .thenReturn(new PropertyMappedCollection<>(Map.of()));
+        File reportDirectory = tempDir.toFile();
         testEnd(reportDirectory);
         assertThat(logger.getLoggingEvents(), is(List.of(
             buildCleanUpDirectoryLogEvent(RESULTS, resultsDirectory.toFile()),
@@ -195,6 +205,20 @@ class AllureReportGeneratorTests
         )));
         assertFalse(resultsDirectory.resolve(EXECUTOR_JSON).toFile().exists());
         verify(notificationsSender).sendNotifications(reportDirectory);
+    }
+
+    @Test
+    void shouldTestUserDefinedDefectCategories() throws IOException
+    {
+        AllureCategory category = new AllureCategory();
+        category.setName("Failed and broken tests");
+        category.setStatuses("Failed, BROKEN");
+        when(propertyMapper.readValues(ALLURE_TABS_CATEGORIES_PREFIX, AllureCategory.class)).thenReturn(
+                new PropertyMappedCollection<>(Map.of("failed", category)));
+
+        testEnd(tempDir.toFile());
+        assertResultFile(CATEGORIES_JSON, """
+                [{"name":"Failed and broken tests","matchedStatuses":["failed","broken"]}]""");
     }
 
     private LoggingEvent buildCleanUpDirectoryLogEvent(String directoryDescription, File directory)
@@ -244,7 +268,6 @@ class AllureReportGeneratorTests
                             eq(historyDirectory.toFile())));
 
             assertEnvironmentProperties();
-            assertCategoriesJson();
 
             var reportDirectoryPath = reportDirectory.toPath();
             assertIndexHtml(reportDirectoryPath);
@@ -361,7 +384,7 @@ class AllureReportGeneratorTests
 
     private void assertCategoriesJson() throws IOException
     {
-        assertResultFile("categories.json",
+        assertResultFile(CATEGORIES_JSON,
                   "["
                 + "{\"name\":\"Test defects\","
                 + "\"matchedStatuses\":[\"broken\"]},"
