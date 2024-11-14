@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,15 @@
 
 package org.vividus.ui.web.action.search;
 
+import java.util.AbstractMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
@@ -31,25 +40,17 @@ import org.vividus.steps.ui.validation.IBaseValidations;
 import org.vividus.ui.action.search.IElementSearchAction;
 import org.vividus.ui.action.search.SearchParameters;
 
-import java.util.AbstractMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
 public class RelativeElementSearch extends AbstractWebElementSearchAction implements IElementSearchAction
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(RelativeElementSearch.class);
 
-    private static final String LOCATOR_ARGUMENTS_PATTERN = "(?::([a-zA-Z]+))?(?:->filter\\.((?:[a-zA-Z.]+\\([^\\)]+\\))+))?)";
-    //    private static final Pattern ITEM_TO_FIND_LOCATOR_PATTERN = Pattern.compile("^(\\w+\\([^)]+\\))");
-    private static final Pattern ITEM_TO_FIND_LOCATOR_PATTERN = Pattern.compile("^(\\w+\\([^)]*\\)" + LOCATOR_ARGUMENTS_PATTERN);
-//    private static final Pattern RELATIVE_LOCATORS_PATTERN = Pattern.compile("\\.(\\w+)\\((\\w+\\([^)]+\\))\\)");
-    private static final Pattern RELATIVE_LOCATORS_PATTERN = Pattern.compile(">>(\\w+)\\((\\w+\\([^)]*\\)" + LOCATOR_ARGUMENTS_PATTERN + "\\)");
-    private static final Pattern NEAR_XPX_PATTERN = Pattern.compile("^near(\\d+)px$");
+    private static final String LOCATOR_ARGUMENTS_PATTERN =
+            "(?::([a-zA-Z]+))?(?:->filter\\.((?:[a-zA-Z.]+\\([^\\)]+\\))+))?)";
+    private static final Pattern ROOT_ELEMENTS_LOCATOR_PATTERN =
+            Pattern.compile("^(\\w+\\([^)]*\\)" + LOCATOR_ARGUMENTS_PATTERN);
+    private static final Pattern RELATIVE_LOCATOR_PATTERN = Pattern.compile(">>(\\w+)\\((\\w+\\([^)]*\\)"
+            + LOCATOR_ARGUMENTS_PATTERN + "\\)");
+    private static final Pattern NEAR_XPX_PATTERN = Pattern.compile("^near(?:(\\d+)(?:px|PX|Px))?$");
 
     private StringToLocatorConverter converter;
     private IBaseValidations baseValidations;
@@ -62,79 +63,92 @@ public class RelativeElementSearch extends AbstractWebElementSearchAction implem
     @Override
     public List<WebElement> search(SearchContext searchContext, SearchParameters parameters)
     {
-        return convertRelativeStringToBy(searchContext, parameters);
+        String searchParams = parameters.getValue();
+        Matcher rootElementsMatcher = ROOT_ELEMENTS_LOCATOR_PATTERN.matcher(searchParams);
+        if (rootElementsMatcher.find())
+        {
+            String rootElementsLocatorString = rootElementsMatcher.group(0);
+            return searchRelativeElements(rootElementsLocatorString, searchContext, parameters);
+        }
+        throw new IllegalArgumentException("Incorrect relative locator format - unable to parse root element locator");
     }
 
-    private List<WebElement> convertRelativeStringToBy(SearchContext searchContext, SearchParameters parameters)
+    private List<WebElement> searchRelativeElements(String rootElementsLocatorString, SearchContext searchContext,
+                                                    SearchParameters parameters)
     {
         String searchParams = parameters.getValue();
-        Matcher itemToFindMatcher = ITEM_TO_FIND_LOCATOR_PATTERN.matcher(searchParams);
-        if (itemToFindMatcher.find())
+
+        Optional<By> rootElementByOpt = createRootElementBy(rootElementsLocatorString);
+        if (rootElementByOpt.isEmpty())
         {
-            final String itemToFindLocatorString = itemToFindMatcher.group(0);
-            String relativePart = searchParams.substring(itemToFindLocatorString.length());
-
-            Locator itemToFindLocator = converter.convert(itemToFindLocatorString);
-            List<WebElement> webElements = baseValidations.assertIfElementsExist("main element", itemToFindLocator);
-            if (!webElements.isEmpty())
-            {
-                By itemToFindBy = itemToFindLocator.getLocatorType().buildBy(itemToFindLocator.getSearchParameters().getValue());
-                RelativeLocator.RelativeBy relativeBy = RelativeLocator.with(itemToFindBy);
-
-                for (Map.Entry<String, Map.Entry<String, String>> relativeLocator : getRelativeLocators(relativePart).entrySet())
-                {
-                    Map.Entry<String, String> relativeLocatorEntry = relativeLocator.getValue();
-                    Locator locator = converter.convert(relativeLocatorEntry.getKey());
-                    Optional<WebElement> element = baseValidations.assertElementExists("relative element", searchContext, locator);
-                    if (element.isEmpty())
-                    {
-                        return List.of();
-                    }
-                    WebElement webElement = unwrapElement(element.get());
-                    String relativePositionString = relativeLocatorEntry.getValue();
-                    RelativeElementPosition relativeElementPosition = findRelativePosition(relativePositionString);
-                    if (RelativeElementPosition.NEAR_XPX == relativeElementPosition)
-                    {
-                        Matcher nearMatcher = NEAR_XPX_PATTERN.matcher(relativePositionString);
-                        if (nearMatcher.matches())
-                        {
-                            int atMostDistanceInPixels = Integer.parseInt(nearMatcher.group(1));
-                            relativeBy = relativeElementPosition.apply(relativeBy, webElement, atMostDistanceInPixels);
-                        }
-                    }
-                    else
-                    {
-                        relativeBy = relativeElementPosition.apply(relativeBy, webElement);
-                    }
-                }
-                List<WebElement> elements = findElements(searchContext, relativeBy, parameters);
-                if (elements.isEmpty())
-                {
-                    LOGGER.atInfo()
-                            .addArgument(itemToFindBy.toString())
-                            .log("Element located {} was found. But it doesn't place in proper position"
-                                    + " relative to other element in locator");
-                }
-                return elements;
-            }
             return List.of();
         }
-        throw new IllegalArgumentException("Invalid relative locator format");
+        By rootElementBy = rootElementByOpt.get();
+        String relativePart = searchParams.substring(rootElementsLocatorString.length());
+        Optional<By> relativeLocatorOpt = applyRelativeFiltersToLocator(rootElementBy, relativePart, searchContext);
+
+        if (relativeLocatorOpt.isPresent())
+        {
+            List<WebElement> elements = findElements(searchContext, relativeLocatorOpt.get(), parameters);
+            if (elements.isEmpty())
+            {
+                LOGGER.atInfo()
+                        .addArgument(rootElementBy)
+                        .log("Element located {} was found. But it doesn't place in proper position"
+                                + " relative to other element in locator");
+            }
+            return elements;
+        }
+        return List.of();
     }
 
-    private WebElement unwrapElement(WebElement webElement)
+    private Optional<By> createRootElementBy(String itemToFindLocatorString)
     {
-        if (webElement instanceof WrapsElement)
+        Locator rootElementLocator = converter.convert(itemToFindLocatorString);
+        List<WebElement> rootElements = baseValidations
+                .assertIfElementsExist("root elements", rootElementLocator);
+        if (!rootElements.isEmpty())
         {
-            return unwrapElement(((WrapsElement) webElement).getWrappedElement());
+            return Optional.of(rootElementLocator.getLocatorType()
+                    .buildBy(rootElementLocator.getSearchParameters().getValue()));
         }
-        return webElement;
+        return Optional.empty();
+    }
+
+    private Optional<By> applyRelativeFiltersToLocator(By rootElementBy, String relativePart,
+                                                       SearchContext searchContext)
+    {
+        RelativeLocator.RelativeBy relativeBy = RelativeLocator.with(rootElementBy);
+
+        for (Map.Entry<String, Map.Entry<String, String>> relativeLocator : getRelativeLocators(relativePart)
+                .entrySet())
+        {
+            Map.Entry<String, String> relativeLocatorEntry = relativeLocator.getValue();
+
+            String relativePositionString = relativeLocatorEntry.getValue();
+            RelativeElementPosition relativeElementPosition = findRelativePosition(relativePositionString);
+
+            Locator relativeElementLocator = converter.convert(relativeLocatorEntry.getKey());
+            Optional<WebElement> relativeElementOpt = baseValidations
+                    .assertElementExists("relative element", searchContext, relativeElementLocator);
+            if (relativeElementOpt.isEmpty())
+            {
+                return Optional.empty();
+            }
+            WebElement relativeWebElement = unwrapElement(relativeElementOpt.get());
+
+            relativeBy = RelativeElementPosition.NEAR == relativeElementPosition
+                    ? applyRelativeNearPosition(relativeBy, relativeWebElement, relativeElementPosition,
+                    relativePositionString)
+                    : relativeElementPosition.apply(relativeBy, relativeWebElement);
+        }
+        return Optional.of(relativeBy);
     }
 
     private Map<String, Map.Entry<String, String>> getRelativeLocators(String relativePart)
     {
-        Matcher relativeMatcher = RELATIVE_LOCATORS_PATTERN.matcher(relativePart);
         Map<String, Map.Entry<String, String>> relativeLocators = new LinkedHashMap<>();
+        Matcher relativeMatcher = RELATIVE_LOCATOR_PATTERN.matcher(relativePart);
         while (relativeMatcher.find())
         {
             String action = relativeMatcher.group(1);
@@ -146,19 +160,47 @@ public class RelativeElementSearch extends AbstractWebElementSearchAction implem
 
     private RelativeElementPosition findRelativePosition(String relativePosition)
     {
-        String typeInLowerCase = relativePosition.toLowerCase();
+        String elementRelativePositionInLowerCase = relativePosition.toLowerCase();
         return Stream.of(RelativeElementPosition.values())
                 .filter(t -> {
                     String relativePositionKey = StringUtils.replace(t.name().toLowerCase(), "_", "");
-                    if ("nearxpx".equals(relativePositionKey))
+                    if (RelativeElementPosition.NEAR == t)
                     {
-
-                        return NEAR_XPX_PATTERN.matcher(typeInLowerCase).matches();
+                        return relativePosition.startsWith(relativePositionKey);
                     }
-                    return relativePositionKey.equals(typeInLowerCase);
+                    return relativePositionKey.equals(elementRelativePositionInLowerCase);
                 })
-                .findFirst().orElseThrow(() -> new IllegalArgumentException(
-                        String.format("Unsupported relative element position: %s", relativePosition)));
+                .findFirst().orElseThrow(() -> new IllegalArgumentException("Unsupported relative element position: "
+                        + relativePosition));
+    }
+
+    private WebElement unwrapElement(WebElement webElement)
+    {
+        if (webElement instanceof WrapsElement)
+        {
+            return unwrapElement(((WrapsElement) webElement).getWrappedElement());
+        }
+        return webElement;
+    }
+
+    private RelativeLocator.RelativeBy applyRelativeNearPosition(RelativeLocator.RelativeBy relativeBy,
+                                                                 WebElement webElement,
+                                                                 RelativeElementPosition relativeElementPosition,
+                                                                 String relativePositionString)
+    {
+        Matcher nearMatcher = NEAR_XPX_PATTERN.matcher(relativePositionString);
+        if (nearMatcher.matches())
+        {
+            String distanceInPixelsString = nearMatcher.group(1);
+            if (null != distanceInPixelsString)
+            {
+                int atMostDistanceInPixels = Integer.parseInt(distanceInPixelsString);
+                return relativeElementPosition.apply(relativeBy, webElement, atMostDistanceInPixels);
+            }
+            return relativeElementPosition.apply(relativeBy, webElement);
+        }
+        throw new IllegalArgumentException(String.format("Invalid near position format."
+                + " Expected matches [%s]. Actual [%s]", NEAR_XPX_PATTERN, relativePositionString));
     }
 
     public void setConverter(StringToLocatorConverter converter)

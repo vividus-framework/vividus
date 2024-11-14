@@ -16,6 +16,9 @@
 
 package org.vividus.ui.action.search;
 
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.SPACE;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +40,6 @@ import org.vividus.ui.action.IWaitActions;
 
 import jakarta.inject.Inject;
 
-import static org.apache.commons.lang3.StringUtils.SPACE;
-
 public abstract class AbstractElementAction implements IElementAction
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractElementAction.class);
@@ -46,6 +47,7 @@ public abstract class AbstractElementAction implements IElementAction
     private static final String NUMBER_OF_ELEMENTS_MESSAGE = "The total number of elements found by \"{}\" is {}";
     private static final String NUMBER_OF_FILTERED_ELEMENTS_MESSAGE =
             NUMBER_OF_ELEMENTS_MESSAGE + ", the number of {} elements is {}";
+    private static final String UNKNOWN_LOCATOR = "unknown locator";
 
     private IWaitActions waitActions;
     @Inject private ElementActions elementActions;
@@ -122,20 +124,40 @@ public abstract class AbstractElementAction implements IElementAction
 
     private static String formatRelativeLocator(RelativeLocator.RelativeBy locator)
     {
-        String rawLocatorString = locator.getRemoteParameters().value().toString();
+        String relativeElementParametersValue = locator.getRemoteParameters().value().toString();
 
-        Pattern rootPattern = Pattern.compile("root=\\{([^}]+)}");
-        Matcher rootMatcher = rootPattern.matcher(rawLocatorString);
-        String rootElement = rootMatcher.find() ? rootMatcher.group(1) : "unknown";
+        Pattern rootElementPattern = Pattern.compile("root=\\{([^}]+)}");
+        Matcher rootElementMatcher = rootElementPattern.matcher(relativeElementParametersValue);
+        String rootElement = rootElementMatcher.find() ? rootElementMatcher.group(1) : UNKNOWN_LOCATOR;
 
-        String filtersString = StringUtils.substringAfter(rawLocatorString, "filters=");
+        StringBuilder result = new StringBuilder();
+        result.append(rootElement).append(" and placed");
+
+        List<String> filters = getRelativeFilters(relativeElementParametersValue);
+        int numberOfFilters = filters.size();
+        if (numberOfFilters == 1)
+        {
+            result.append(SPACE).append(filters.get(0));
+        }
+        else if (numberOfFilters > 1)
+        {
+            result.append(':').append(System.lineSeparator());
+            filters.forEach(f -> result.append("  - ").append(f).append(System.lineSeparator()));
+        }
+        else
+        {
+            return "Unable to find relative filters for the element located " + rootElement;
+        }
+        return result.toString();
+    }
+
+    private static List<String> getRelativeFilters(String filtersString)
+    {
         Pattern filterPattern = Pattern.compile("\\{(.*?)},?");
+        Pattern kindPattern = Pattern.compile("kind=(\\w+)");
 
         Matcher filterMatcher = filterPattern.matcher(filtersString);
-
         List<String> filters = new ArrayList<>();
-        Pattern kindPattern = Pattern.compile("kind=(\\w+)");
-        Pattern filterLocatorPattern = Pattern.compile("->\\s(.+:.+)]{2}");
         while (filterMatcher.find())
         {
             String filter = filterMatcher.group(1);
@@ -143,28 +165,26 @@ public abstract class AbstractElementAction implements IElementAction
             if (kindMatcher.find())
             {
                 String kind = kindMatcher.group(1);
-                Matcher filterLocatorMatcher = filterLocatorPattern.matcher(filter);
-                String filterLocator = filterLocatorMatcher.find() ? filterLocatorMatcher.group(1) : "unknown locator";
-
-                filters.add(kind + " of the element with " + filterLocator);
+                String filterString = formatRelativeFilterLocators(filter);
+                filters.add(kind + filterString);
             }
         }
+        return filters;
+    }
 
-        StringBuilder result = new StringBuilder();
-        result.append(rootElement).append(" and placed");
-        if (filters.size() == 1)
+    private static String formatRelativeFilterLocators(String filter)
+    {
+        Pattern filterLocatorPattern = Pattern.compile("->\\s(.+:.+)](?:, (\\d+))?]");
+        Matcher filterLocatorMatcher = filterLocatorPattern.matcher(filter);
+        String filterLocator = UNKNOWN_LOCATOR;
+        String nearPixels = EMPTY;
+        if (filterLocatorMatcher.find())
         {
-            result.append(SPACE).append(filters.get(0));
+            filterLocator = filterLocatorMatcher.group(1);
+            nearPixels = filterLocatorMatcher.group(2);
+            nearPixels = nearPixels != null ? SPACE + nearPixels + "px" : EMPTY;
         }
-        else
-        {
-            result.append(":").append(System.lineSeparator());
-            for (String filter : filters)
-            {
-                result.append("  - ").append(filter).append(System.lineSeparator());
-            }
-        }
-        return result.toString();
+        return nearPixels + " of the element with " + filterLocator;
     }
 
     protected List<WebElement> filterElementsByVisibility(List<WebElement> elements, Visibility visibility,

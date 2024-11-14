@@ -16,7 +16,6 @@ Then number of elements found by `id(block1)` is = `1`
 Then number of elements found by `id(block2)` is = `1`
 Then number of elements found by `relative(id(block1)>>toRightOf(id(block2)))` is = `0`
 
-
 Scenario: Verify complex success
 Given I am on page with URL `${vividus-test-site-url}/relativeLocator.html`
 Then number of elements found by `relative(id(block5)>>toLeftOf(id(block7))>>toLeftOf(id(block9))>>toRightOf(id(block3))>>toRightOf(id(block4))>>above(id(block8))>>above(id(block9))>>below(id(block2))>>below(id(block7)))` is = `1`
