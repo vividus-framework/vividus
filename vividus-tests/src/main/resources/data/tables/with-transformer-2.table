@@ -1,0 +1,2 @@
+{transformer=REPLACING, replacing=to_replace2, replacement=to_replace3}
+/data/tables/with-transformer-1.table

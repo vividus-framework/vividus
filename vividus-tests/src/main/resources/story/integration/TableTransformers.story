@@ -541,6 +541,12 @@ Then `${absoluteUrls}` is equal to table:
 |https://vividus-test-site-a92k.onrender.com/links.html#            |
 
 Scenario: Verify loading of external tables chain
-When I initialize story variable `table` with values:
+When I initialize scenario variable `table` with values:
 /data/with-external-reference.table
 Then `${table[0].name}` matches `[A-Za-z]+`
+
+Scenario: Verify the order of applying transformers from external tables
+When I initialize scenario variable `table` with values:
+{transformer=REPLACING, replacing=to_replace3, replacement=value_to_check}
+/data/tables/with-transformer-2.table
+Then `${table[0].column}` is equal to `value_to_check`
