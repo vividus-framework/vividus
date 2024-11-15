@@ -93,14 +93,8 @@
     <bean id="abstractStateFilter" class="org.vividus.ui.web.action.search.AbstractStateFilter"
           abstract="true" />
 
-    <bean class="org.vividus.ui.web.action.search.RelativeElementSearch" parent="abstractWebElementSearchAction" >
-        <property name="converter" >
-            <bean class="org.vividus.spring.StringToLocatorConverter" />
-        </property>
-        <property name="baseValidations">
-            <bean class="org.vividus.steps.ui.validation.BaseValidations" />
-        </property>
-    </bean>
+    <bean class="org.vividus.spring.StringToLocatorConverter" />
+    <bean class="org.vividus.ui.web.action.search.RelativeElementSearch" parent="abstractWebElementSearchAction" />
 
     <bean class="org.vividus.ui.web.action.search.LinkTextSearch" parent="abstractWebElementSearchAction" />
     <bean class="org.vividus.ui.web.action.search.LinkUrlPartSearch" parent="abstractWebElementSearchAction">

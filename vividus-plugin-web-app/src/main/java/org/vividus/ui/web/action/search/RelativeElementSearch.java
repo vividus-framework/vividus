@@ -52,12 +52,14 @@ public class RelativeElementSearch extends AbstractWebElementSearchAction implem
             + LOCATOR_ARGUMENTS_PATTERN + "\\)");
     private static final Pattern NEAR_XPX_PATTERN = Pattern.compile("^near(?:(\\d+)(?:px|PX|Px))?$");
 
-    private StringToLocatorConverter converter;
-    private IBaseValidations baseValidations;
+    private final StringToLocatorConverter converter;
+    private final IBaseValidations baseValidations;
 
-    public RelativeElementSearch()
+    public RelativeElementSearch(StringToLocatorConverter converter, IBaseValidations baseValidations)
     {
         super(WebLocatorType.RELATIVE);
+        this.converter = converter;
+        this.baseValidations = baseValidations;
     }
 
     @Override
@@ -201,15 +203,5 @@ public class RelativeElementSearch extends AbstractWebElementSearchAction implem
         }
         throw new IllegalArgumentException(String.format("Invalid near position format."
                 + " Expected matches [%s]. Actual [%s]", NEAR_XPX_PATTERN, relativePositionString));
-    }
-
-    public void setConverter(StringToLocatorConverter converter)
-    {
-        this.converter = converter;
-    }
-
-    public void setBaseValidations(IBaseValidations baseValidations)
-    {
-        this.baseValidations = baseValidations;
     }
 }
