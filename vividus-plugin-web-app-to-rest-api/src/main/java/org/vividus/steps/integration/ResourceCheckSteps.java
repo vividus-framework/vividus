@@ -16,8 +16,6 @@
 
 package org.vividus.steps.integration;
 
-import static org.vividus.util.UriUtils.buildNewUrl;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -111,7 +109,9 @@ public class ResourceCheckSteps
     {
         softAssert.runIgnoringTestFailFast(() -> execute(() ->
         {
-            Document document = JsoupUtils.getDocument(html);
+            String mainPageUrl = Optional.ofNullable(webApplicationConfiguration.getMainApplicationPageUrlUnsafely())
+                    .map(URI::toString).orElse("");
+            Document document = JsoupUtils.getDocument(html, mainPageUrl);
             Collection<Element> resourcesToValidate = htmlLocatorType.findElements(document, htmlLocator);
             boolean contextCheck = document.head().getElementsByTag(HTML_TITLE_TAG).isEmpty();
             Stream<WebPageResourceValidation> validations = createResourceValidations(resourcesToValidate,
@@ -256,20 +256,12 @@ public class ResourceCheckSteps
     private URI resolveUri(String uri) throws URISyntaxException
     {
         URI uriToCheck = new URI(uri);
-        if (isNotAbsolute(uriToCheck))
+        if (isNotAbsolute(uriToCheck) && webApplicationConfiguration.getMainApplicationPageUrlUnsafely() != null)
         {
-            URI mainApplicationPageUrl = webApplicationConfiguration.getMainApplicationPageUrlUnsafely();
-            if (mainApplicationPageUrl != null)
+            String scheme = webApplicationConfiguration.getMainApplicationPageUrlUnsafely().getScheme();
+            if (scheme != null)
             {
-                if (uri.length() <= 1 || uri.charAt(1) != '/')
-                {
-                    return buildNewUrl(mainApplicationPageUrl, uri);
-                }
-                String scheme = mainApplicationPageUrl.getScheme();
-                if (scheme != null)
-                {
-                    return new URIBuilder(uri).setScheme(scheme).build();
-                }
+                return new URIBuilder(uri).setScheme(scheme).build();
             }
         }
         return uriToCheck;
