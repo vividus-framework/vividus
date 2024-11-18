@@ -222,7 +222,6 @@ class ResourceCheckStepsTests
     @Test
     void shouldCheckDesiredResourcesAndPostAttachment() throws InterruptedException, ExecutionException
     {
-        mockResourceValidator();
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.empty());
         resourceCheckSteps.init();
@@ -333,7 +332,6 @@ class ResourceCheckStepsTests
     @Test
     void shouldCheckResourcesFromPages() throws IOException, InterruptedException, ExecutionException
     {
-        mockResourceValidator();
         runExecutor();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
@@ -381,7 +379,6 @@ class ResourceCheckStepsTests
     @Test
     void shouldCheckResourcesFromPagesWithEmptyResource() throws IOException, InterruptedException, ExecutionException
     {
-        mockResourceValidator();
         runExecutor();
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(httpTestContext.getResponse()).thenReturn(httpResponse);
@@ -401,11 +398,11 @@ class ResourceCheckStepsTests
             validateError(resourceValidations.next(), "Element doesn't contain href/src attributes", "#video-id",
                     THIRD_PAGE_URL);
             validateError(resourceValidations.next(), INVALID_HREF_ATTR_MESSAGE, "#link-id-2", THIRD_PAGE_URL);
-            validateError(resourceValidations.next(), "Jump link points to missing element with section id or name",
-                    JUMP_LINK_SELECTOR, THIRD_PAGE_URL);
+            String error = "Jump link points to missing element with %s id or name";
+            validateError(resourceValidations.next(), error.formatted("named-section"), JUMP_LINK_USING_NAME_SELECTOR,
+                    THIRD_PAGE_URL);
+            validateError(resourceValidations.next(), error.formatted("section"), JUMP_LINK_SELECTOR, THIRD_PAGE_URL);
             validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, "#link-id", CheckStatus.PASSED);
-            validate(resourceValidations.next(), URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
-                    CheckStatus.FILTERED);
             return true;
         }), eq(REPORT_NAME));
         verify(softAssert).recordFailedAssertion("Element by selector #video-id doesn't contain href/src attributes");
@@ -537,21 +534,10 @@ class ResourceCheckStepsTests
         assertEquals(exception, illegalStateException.getCause());
     }
 
-    private void mockResourceValidator()
-    {
-        when(resourceValidator.perform(any(WebPageResourceValidation.class)))
-            .thenAnswer(invocation -> {
-                WebPageResourceValidation resourceValidation = invocation.getArgument(0);
-                resourceValidation.setCheckStatus(CheckStatus.PASSED);
-                return resourceValidation;
-            });
-    }
-
     @Test
     void shouldFilterResourceByRegExpCheckDesiredResourcesAnPostAttachment()
             throws InterruptedException, ExecutionException
     {
-        mockResourceValidator();
         runExecutor();
         resourceCheckSteps.setUriToIgnoreRegex(Optional.of("(?!https).*"));
         resourceCheckSteps.init();
@@ -563,6 +549,9 @@ class ResourceCheckStepsTests
                     .get(RESULTS);
             assertThat(validationsToReport, hasSize(13));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
+            validate(resourceValidations, URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
+                    CheckStatus.PASSED, N_A);
+            validate(resourceValidations, URI.create(SECTION_SELECTOR), JUMP_LINK_SELECTOR, CheckStatus.PASSED, N_A);
             validate(resourceValidations, EXTERNAL_SECTION_LINK, EXTERNAL_SECTION_LINK_SELECTOR, CheckStatus.PASSED,
                     N_A);
             validate(resourceValidations, VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED, N_A);
@@ -571,9 +560,6 @@ class ResourceCheckStepsTests
             validate(resourceValidations, VIVIDUS_QUERY_URI_1, SELECTOR_QUERY_1, CheckStatus.PASSED, N_A);
             validate(resourceValidations, VIVIDUS_QUERY_URI_2, SELECTOR_QUERY_2, CheckStatus.PASSED, N_A);
             validate(resourceValidations, SHARP_URI, SHARP_ID, CheckStatus.FILTERED, N_A);
-            validate(resourceValidations, URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
-                    CheckStatus.FILTERED, N_A);
-            validate(resourceValidations, URI.create(SECTION_SELECTOR), JUMP_LINK_SELECTOR, CheckStatus.FILTERED, N_A);
             validate(resourceValidations, FTP_URI, FTP_ID, CheckStatus.FILTERED, N_A);
             validate(resourceValidations, SERENITY_URI, HTTP_ID, CheckStatus.FILTERED, N_A);
             validate(resourceValidations, JS_URI, JS_ID, CheckStatus.FILTERED, N_A);

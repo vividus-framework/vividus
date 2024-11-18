@@ -167,17 +167,16 @@ public class ResourceCheckSteps
                 return urlResolutionError(uriToValidate, elementCssSelector);
             }
 
-            Pair<URI, String> elementUri = Pair.of(uriToValidate, null);
-            WebPageResourceValidation validation = new WebPageResourceValidation(elementUri, elementCssSelector);
             boolean jumpLink = isJumpLink(elementUriAsString);
-            if (!jumpLink && !isSchemaAllowed(uriToValidate)
-                          || excludeHrefsPattern.matcher(uriToValidate.toString()).matches())
+            if (!jumpLink)
             {
-                validation.setCheckStatus(CheckStatus.FILTERED);
-                return Optional.of(validation);
+                if (!isSchemaAllowed(uriToValidate)
+                        || excludeHrefsPattern.matcher(uriToValidate.toString()).matches())
+                {
+                    return createValidation(uriToValidate, elementCssSelector, CheckStatus.FILTERED);
+                }
             }
-
-            if (jumpLink)
+            else
             {
                 String fragment = uriToValidate.getFragment();
                 Element root = element.root();
@@ -199,10 +198,9 @@ public class ResourceCheckSteps
                             .onAssertion(softAssert::recordFailedAssertion, elementCssSelector, fragment)
                             .createValidation(null, elementCssSelector, fragment));
                 }
-                validation.setCheckStatus(CheckStatus.PASSED);
             }
 
-            return Optional.of(validation);
+            return createValidation(uriToValidate, elementCssSelector, CheckStatus.PASSED);
         }
         catch (URISyntaxException e)
         {
@@ -211,6 +209,13 @@ public class ResourceCheckSteps
                             attributesToCheckAsString, elementUriAsString)
                     .createValidation(null, elementCssSelector, attributesToCheckAsString, elementUriAsString));
         }
+    }
+
+    private Optional<WebPageResourceValidation> createValidation(URI uri, String elementCssSelector, CheckStatus status)
+    {
+        WebPageResourceValidation validation = new WebPageResourceValidation(Pair.of(uri, null), elementCssSelector);
+        validation.setCheckStatus(status);
+        return Optional.of(validation);
     }
 
     private Optional<WebPageResourceValidation> urlResolutionError(URI uri, String elementCssSelector)
