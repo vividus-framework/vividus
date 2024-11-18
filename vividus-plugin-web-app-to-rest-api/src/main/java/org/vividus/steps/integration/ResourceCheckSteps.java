@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -115,19 +114,7 @@ public class ResourceCheckSteps
             Collection<Element> resourcesToValidate = htmlLocatorType.findElements(document, htmlLocator);
             boolean contextCheck = document.head().getElementsByTag(HTML_TITLE_TAG).isEmpty();
             Stream<WebPageResourceValidation> validations = createResourceValidations(resourcesToValidate,
-                    resourceValidation -> {
-                        URI uriToCheck = resourceValidation.getUriOrError().getLeft();
-                        if (uriToCheck != null && isNotAbsolute(uriToCheck))
-                        {
-                            String message = String.format(
-                                    "Unable to resolve %s resource since the main application page URL is not set",
-                                    uriToCheck);
-                            softAssert.recordFailedAssertion(message);
-
-                            resourceValidation.setError(message);
-                            resourceValidation.setCheckStatus(CheckStatus.BROKEN);
-                        }
-                    }, contextCheck);
+                    contextCheck);
             validateResources(validations);
         }));
     }
@@ -147,13 +134,12 @@ public class ResourceCheckSteps
     }
 
     private Stream<WebPageResourceValidation> createResourceValidations(Collection<Element> elements,
-            Consumer<WebPageResourceValidation> resourceValidator, boolean contextCheck)
+            boolean contextCheck)
     {
         return elements.stream()
                 .map(e -> parseElement(e, contextCheck))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .peek(resourceValidator)
                 .parallel();
     }
 
@@ -176,6 +162,11 @@ public class ResourceCheckSteps
         try
         {
             URI uriToValidate = resolveUri(elementUriAsString);
+            if (isNotAbsolute(uriToValidate))
+            {
+                return urlResolutionError(uriToValidate, elementCssSelector);
+            }
+
             Pair<URI, String> elementUri = Pair.of(uriToValidate, null);
             WebPageResourceValidation validation = new WebPageResourceValidation(elementUri, elementCssSelector);
             boolean jumpLink = isJumpLink(elementUriAsString);
@@ -188,7 +179,7 @@ public class ResourceCheckSteps
 
             if (jumpLink)
             {
-                String fragment = elementUri.getLeft().getFragment();
+                String fragment = uriToValidate.getFragment();
                 Element root = element.root();
                 boolean targetNotPresent = root.getElementById(fragment) == null
                                         && root.getElementsByAttributeValue("name", fragment).isEmpty();
@@ -220,6 +211,20 @@ public class ResourceCheckSteps
                             attributesToCheckAsString, elementUriAsString)
                     .createValidation(null, elementCssSelector, attributesToCheckAsString, elementUriAsString));
         }
+    }
+
+    private Optional<WebPageResourceValidation> urlResolutionError(URI uri, String elementCssSelector)
+    {
+        String cause = uri.getHost() != null ? "page URL doesn't have scheme" : "page URL is not set";
+        String error = "Unable to resolve %s resource since the main application %s".formatted(uri, cause);
+
+        softAssert.recordFailedAssertion(error);
+
+        WebPageResourceValidation validation = new WebPageResourceValidation();
+        validation.setError(error);
+        validation.setCssSelector(elementCssSelector);
+        validation.setCheckStatus(CheckStatus.BROKEN);
+        return Optional.of(validation);
     }
 
     private static boolean isJumpLink(String url)
@@ -322,9 +327,8 @@ public class ResourceCheckSteps
                             return Optional.ofNullable(httpTestContext.getResponse().getResponseBodyAsString())
                                     .map(response -> htmlLocatorType
                                             .findElements(JsoupUtils.getDocument(response, pageUrl), htmlLocator))
-                                    .map(elements -> createResourceValidations(elements,
-                                            rV -> rV.setPageURL(pageUrl), false
-                                    ))
+                                    .map(elements -> createResourceValidations(elements, false)
+                                            .peek(rV -> rV.setPageURL(pageUrl)))
                                     .orElseGet(() -> Stream.of(createMissingPageBodyValidation(pageUrl)));
                         }
                         catch (IOException toReport)

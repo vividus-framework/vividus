@@ -448,7 +448,9 @@ class ResourceCheckStepsTests
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
             assertThat(validationsToReport, hasSize(1));
-            validate(validationsToReport.iterator().next(), resourceUri, SHORTCUT_SELECTOR, CheckStatus.FILTERED);
+            String error = "Unable to resolve //images.ctfassets.net/icon.png resource since the main application "
+                    + "page URL doesn't have scheme";
+            validateError(validationsToReport.iterator().next(), error, SHORTCUT_SELECTOR, page);
             return true;
         }), eq(REPORT_NAME));
     }
