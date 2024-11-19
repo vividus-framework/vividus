@@ -73,10 +73,11 @@
          <property name="dryRun" value="${bdd.configuration.dry-run}" />
          <property name="resetStateBeforeScenario" value="#{!T(java.lang.Boolean).parseBoolean('${story.fail-fast}')}" />
          <property name="skipStoryIfGivenStoryFailed" value="${bdd.configuration.skip-story-if-given-story-failed}" />
-        <property name="storyIndexFormat">
-            <bean class="java.text.DecimalFormat">
-                <constructor-arg value="${story.example-index-format}" />
-            </bean>
+         <property name="metaByRow" value="${engine.filtering-by-table-meta-enabled}" />
+         <property name="storyIndexFormat">
+             <bean class="java.text.DecimalFormat">
+                 <constructor-arg value="${story.example-index-format}" />
+             </bean>
         </property>
     </bean>
 
