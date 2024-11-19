@@ -169,6 +169,7 @@ class ResourceCheckStepsTests
           + "</head>"
           + "<body>"
           + "  <a id='about' href='https://vividus.org/about'>About</a>"
+          + "  <a id='non-ascii-symbols' href='https://vividus.org/ábout'>About</a>"
           + "</body>"
           + "</html>";
 
@@ -352,7 +353,7 @@ class ResourceCheckStepsTests
             @SuppressWarnings(UNCHECKED)
             Set<WebPageResourceValidation> validationsToReport = ((Map<String, Set<WebPageResourceValidation>>) m)
                     .get(RESULTS);
-            assertThat(validationsToReport, hasSize(14));
+            assertThat(validationsToReport, hasSize(15));
             Iterator<WebPageResourceValidation> resourceValidations = validationsToReport.iterator();
             validate(resourceValidations.next(), URI.create(NAMED_SECTION_SELECTOR), JUMP_LINK_USING_NAME_SELECTOR,
                     CheckStatus.PASSED);
@@ -367,6 +368,8 @@ class ResourceCheckStepsTests
             validate(resourceValidations.next(), URI.create(FIRST_PAGE_URL + "/products?name=smetanka"),
                     SELECTOR_QUERY_2, CheckStatus.PASSED);
             validate(resourceValidations.next(), VIVIDUS_URI, HTTPS_ID, CheckStatus.PASSED);
+            validate(resourceValidations.next(), URI.create("https://vividus.org/%C3%A1bout"), "#non-ascii-symbols",
+                    CheckStatus.PASSED);
             validate(resourceValidations.next(), VIVIDUS_ABOUT_URI, ABOUT_ID, CheckStatus.PASSED);
             validate(resourceValidations.next(), SHARP_URI, SHARP_ID, CheckStatus.FILTERED);
             validate(resourceValidations.next(), FTP_URI, FTP_ID, CheckStatus.FILTERED);

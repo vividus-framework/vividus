@@ -48,6 +48,7 @@ import org.vividus.reporter.event.AttachmentPublisher;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.testcontext.ContextCopyingExecutor;
 import org.vividus.ui.web.configuration.WebApplicationConfiguration;
+import org.vividus.util.UriUtils;
 import org.vividus.validator.model.ResourceValidationError;
 import org.vividus.validator.model.WebPageResourceValidation;
 
@@ -167,16 +168,7 @@ public class ResourceCheckSteps
                 return urlResolutionError(uriToValidate, elementCssSelector);
             }
 
-            boolean jumpLink = isJumpLink(elementUriAsString);
-            if (!jumpLink)
-            {
-                if (!isSchemaAllowed(uriToValidate)
-                        || excludeHrefsPattern.matcher(uriToValidate.toString()).matches())
-                {
-                    return createValidation(uriToValidate, elementCssSelector, CheckStatus.FILTERED);
-                }
-            }
-            else
+            if (isJumpLink(elementUriAsString))
             {
                 String fragment = uriToValidate.getFragment();
                 Element root = element.root();
@@ -198,9 +190,17 @@ public class ResourceCheckSteps
                             .onAssertion(softAssert::recordFailedAssertion, elementCssSelector, fragment)
                             .createValidation(null, elementCssSelector, fragment));
                 }
+
+                return createValidation(uriToValidate, elementCssSelector, CheckStatus.PASSED);
             }
 
-            return createValidation(uriToValidate, elementCssSelector, CheckStatus.PASSED);
+            if (!isSchemaAllowed(uriToValidate) || excludeHrefsPattern.matcher(uriToValidate.toString()).matches())
+            {
+                return createValidation(uriToValidate, elementCssSelector, CheckStatus.FILTERED);
+            }
+
+            URI encodedUri = UriUtils.createUri(uriToValidate.toString());
+            return createValidation(encodedUri, elementCssSelector, CheckStatus.PASSED);
         }
         catch (URISyntaxException e)
         {
