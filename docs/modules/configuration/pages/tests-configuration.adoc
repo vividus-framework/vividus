@@ -142,6 +142,10 @@ e.g., `0`, `#`, specify the way indices are displayed.
 |`false`
 |Skips the story in case of failure in the given story
 
+|`engine.filtering-by-table-meta-enabled`
+|`false`
+|Enabled filtering of scenario by meta defined in examples table rows
+
 |`bdd.configuration.formats`
 |`JSON,XML`
 |Available formats of the output files with test execution results
