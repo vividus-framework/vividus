@@ -353,7 +353,7 @@ Use *\\* for escaping of special characters in regular expressions
 Meta tags can be used to reach several goals:
 
 * Grouping of stories and scenarios in the report.
-* Dynamic selection of tests to execute by meta tags.
+* <<#_dynamic_selection>> of tests to execute by meta tags.
 * Management of capabilities for the particular tests.
 
 === Levels
@@ -422,6 +422,78 @@ bdd.all-meta-filters=groovy: !this.'test-stand'
 [source,properties]
 ----
 bdd.all-meta-filters=groovy: !this['test-stand']
+----
+
+=== Dynamic selection
+
+Dynamic tests selection allows to filter tests based on meta information applied to stories, scenarios or examples table rows.
+
+==== Story level filtering
+
+The following example demonstrates a story that should run only on development application environment,
+to make it possible we annotate the story using custom `@environment` meta tag with `dev` value and configure
+meta filters to select only those stories that annotated with that value.
+
+[source,properties]
+----
+bdd.meta-filters=environment || environment.toString().tokenize(' ').contains('dev')
+----
+
+[source,gherkin]
+----
+Meta: @environment dev
+
+Scenario: My scenario for dev environment
+...
+----
+
+==== Scenario level filtering
+
+The following example demonstrates a scenario that should run only on development application environment,
+to make it possible we annotate the scenario using custom `@environment` meta tag with `dev` value and configure
+meta filters to select only those scenarios that annotated with that value, as a result first scenario will be
+executed, whereas the second one will be skipped as its `@environment` doesn't match `dev`.
+
+[source,properties]
+----
+bdd.meta-filters=environment || environment.toString().tokenize(' ').contains('dev')
+----
+
+[source,gherkin]
+----
+Scenario: My scenario for dev environment
+Meta: @environment dev
+...
+
+Scenario: My scenario for qa environment
+Meta: @environment qa
+...
+----
+
+==== Table row filtering
+
+IMPORTANT: This type of filtering requires table meta filtering to be turned on either by specifyin `{metaByRow=true}` property
+on the table, or by using `engine.filtering-by-table-meta-enabled=true` property.
+
+The following example demonstrates a scenario that has several example table rows each containing data for a specific
+environment, to run the scenario with a particular data row we annotate the row using custom `@environment` meta tag
+with `dev` value and configure meta filters to select only those rows that annotated with that value, as a result the
+scenario will be executed only with the first row, whereas the rest of the rows will be skipped.
+
+[source,properties]
+----
+bdd.meta-filters=environment || environment.toString().tokenize(' ').contains('dev')
+----
+
+[source,gherkin]
+----
+Scenario: My scenario
+...
+Examples:
+|Meta:             |data  |
+|@environment dev  |data 1|
+|@environment qa   |data 2|
+|@environment stage|data 3|
 ----
 
 === 1D tags (@key)
