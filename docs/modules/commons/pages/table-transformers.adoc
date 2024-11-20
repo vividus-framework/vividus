@@ -17,6 +17,32 @@ corresponding plugins articles).
 |header n|value 1n| .... |value mn|
 ----
 
+== RESOLVING_VARIABLES_EAGERLY
+
+Normally the variable placeholders in xref:ROOT:glossary.adoc#_examplestable[ExamplesTable]s are resolved prior to scenario execution,
+but there might be cases where the variable placeholders resolution is required during the processing of transformers chain.
+
+IMPORTANT: `RESOLVING_VARIABLES_EAGERLY` transformer supports only `NEXT_BATCHES` variables and global variables defined in properties.
+
+.Usage of RESOLVING_VARIABLES_EAGERLY transformer
+[source,gherkin]
+----
+{transformer=RESOLVING_VARIABLES_EAGERLY}
+{transformer=X}
+{transformer=Y}
+|value          |
+|${variable_ref}|
+----
+
+.Usage of RESOLVING_VARIABLES_EAGERLY transformer in conjuction with meta filtering
+[source,gherkin]
+----
+{transformer=RESOLVING_VARIABLES_EAGERLY}
+|Meta:             |value          |
+|@env ${currentEnv}|${variable_ref}|
+----
+
+
 == RESOLVING_EXPRESSIONS_EAGERLY
 
 `RESOLVING_EXPRESSIONS_EAGERLY` transformer processes expressions which are used inside xref:ROOT:glossary.adoc#_examplestable[ExamplesTable] eagerly, i.e. at the table loading stage.

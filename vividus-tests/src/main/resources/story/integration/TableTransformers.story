@@ -95,6 +95,16 @@ Given I initialize scenario variable `tableSize` with value `#{evalGroovy(return
 Then `${tableSize}` is equal to `1`
 
 
+Scenario: Verify RESOLVING_VARIABLES_EAGERLY transformer
+Then `<city>` is equal to `Vancouver`
+Examples:
+{transformer=RESOLVING_VARIABLES_EAGERLY}
+|Meta:                |city     |
+|@locale in           |Mumbai   |
+|@locale ${userLocale}|Vancouver|
+|@locale lt           |Vilnius  |
+
+
 Scenario: Verify RESOLVING_SELF_REFERENCES_EAGERLY transformer chained
 Then `<column1>` is equal to `A`
 Then `<column2>` is equal to `A`
