@@ -496,6 +496,9 @@ Examples:
 |@environment stage|data 3|
 ----
 
+TIP: Table row filtering can be paired up with xref:ROOT:commons:table-transformers.adoc#_resolving_variables_eagerly[RESOLVING_VARIABLES_EAGERLY transformer]
+to make the filtering process more dynamic by using variables initialized during test run.
+
 === 1D tags (@key)
 [cols="1,4", options="header"]
 |===

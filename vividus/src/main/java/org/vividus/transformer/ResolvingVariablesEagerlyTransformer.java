@@ -16,13 +16,12 @@
 
 package org.vividus.transformer;
 
-import org.jbehave.core.embedder.StoryControls;
-import org.jbehave.core.expressions.ExpressionResolver;
+import org.vividus.steps.PlaceholderResolver;
 
-public class ResolvingExpressionsEagerlyTransformer extends AbstractResolvingTransformer
+public class ResolvingVariablesEagerlyTransformer extends AbstractResolvingTransformer
 {
-    public ResolvingExpressionsEagerlyTransformer(ExpressionResolver expressionResolver, StoryControls storyControls)
+    public ResolvingVariablesEagerlyTransformer(PlaceholderResolver resolver)
     {
-        super(v -> String.valueOf(expressionResolver.resolveExpressions(storyControls.dryRun(), v)));
+        super(v -> String.valueOf(resolver.resolvePlaceholders(v, String.class)));
     }
 }
