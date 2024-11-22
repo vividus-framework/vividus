@@ -39,16 +39,6 @@ import java.util.stream.Stream;
 
 import com.browserup.bup.filters.RequestFilter;
 import com.browserup.bup.util.HttpMessageInfo;
-import com.browserup.harreader.model.Har;
-import com.browserup.harreader.model.HarCreatorBrowser;
-import com.browserup.harreader.model.HarEntry;
-import com.browserup.harreader.model.HarLog;
-import com.browserup.harreader.model.HarPostData;
-import com.browserup.harreader.model.HarPostDataParam;
-import com.browserup.harreader.model.HarQueryParam;
-import com.browserup.harreader.model.HarRequest;
-import com.browserup.harreader.model.HarResponse;
-import com.browserup.harreader.model.HttpMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.hc.core5.http.HttpStatus;
@@ -74,6 +64,16 @@ import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.action.IWaitActions;
 import org.vividus.variable.VariableScope;
 
+import de.sstoehr.harreader.model.Har;
+import de.sstoehr.harreader.model.HarCreatorBrowser;
+import de.sstoehr.harreader.model.HarEntry;
+import de.sstoehr.harreader.model.HarLog;
+import de.sstoehr.harreader.model.HarPostData;
+import de.sstoehr.harreader.model.HarPostDataParam;
+import de.sstoehr.harreader.model.HarQueryParam;
+import de.sstoehr.harreader.model.HarRequest;
+import de.sstoehr.harreader.model.HarResponse;
+import de.sstoehr.harreader.model.HttpMethod;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;

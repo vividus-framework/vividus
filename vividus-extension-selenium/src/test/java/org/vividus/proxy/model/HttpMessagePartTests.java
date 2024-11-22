@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.List;
 import java.util.Map;
 
-import com.browserup.harreader.model.HarContent;
-import com.browserup.harreader.model.HarEntry;
-import com.browserup.harreader.model.HarPostData;
-import com.browserup.harreader.model.HarPostDataParam;
-import com.browserup.harreader.model.HarQueryParam;
-import com.browserup.harreader.model.HarRequest;
-import com.browserup.harreader.model.HarResponse;
-import com.browserup.harreader.model.HttpMethod;
-
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.Test;
+
+import de.sstoehr.harreader.model.HarContent;
+import de.sstoehr.harreader.model.HarEntry;
+import de.sstoehr.harreader.model.HarPostData;
+import de.sstoehr.harreader.model.HarPostDataParam;
+import de.sstoehr.harreader.model.HarQueryParam;
+import de.sstoehr.harreader.model.HarRequest;
+import de.sstoehr.harreader.model.HarResponse;
+import de.sstoehr.harreader.model.HttpMethod;
 
 class HttpMessagePartTests
 {

@@ -23,13 +23,12 @@ import static java.util.stream.Collectors.toList;
 import java.util.List;
 import java.util.Map;
 
-import com.browserup.harreader.model.HarContent;
-import com.browserup.harreader.model.HarEntry;
-import com.browserup.harreader.model.HarPostData;
-import com.browserup.harreader.model.HarPostDataParam;
-import com.browserup.harreader.model.HarRequest;
-
+import de.sstoehr.harreader.model.HarContent;
+import de.sstoehr.harreader.model.HarEntry;
+import de.sstoehr.harreader.model.HarPostData;
+import de.sstoehr.harreader.model.HarPostDataParam;
 import de.sstoehr.harreader.model.HarQueryParam;
+import de.sstoehr.harreader.model.HarRequest;
 
 public enum HttpMessagePart
 {
