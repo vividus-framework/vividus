@@ -26,8 +26,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.browserup.bup.util.HttpMessageInfo;
-import com.browserup.harreader.model.HarEntry;
-import com.browserup.harreader.model.HttpMethod;
+import com.browserup.harreader.filter.HarLogFilter;
 
 import org.apache.hc.core5.http.HttpStatus;
 import org.hamcrest.Matcher;
@@ -45,6 +44,8 @@ import org.vividus.ui.monitor.CaptureHarOnFailure;
 import org.vividus.ui.monitor.TakeScreenshotOnFailure;
 import org.vividus.variable.VariableScope;
 
+import de.sstoehr.harreader.model.HarEntry;
+import de.sstoehr.harreader.model.HttpMethod;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
@@ -315,8 +316,7 @@ public class ProxySteps
 
     private List<HarEntry> getLogEntries(Set<HttpMethod> httpMethods, Pattern urlPattern)
     {
-        return proxy.getRecordedData().getLog()
-                .findEntries(urlPattern)
+        return HarLogFilter.findEntries(proxy.getRecordedData().getLog(), urlPattern)
                 .stream()
                 .filter(entry -> entry.getResponse().getStatus() != HttpStatus.SC_MOVED_TEMPORARILY
                         && httpMethods.contains(entry.getRequest().getMethod()))

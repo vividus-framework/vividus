@@ -20,16 +20,16 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.browserup.harreader.model.HarContent;
-import com.browserup.harreader.model.HarEntry;
-import com.browserup.harreader.model.HarPostData;
-import com.browserup.harreader.model.HarPostDataParam;
-import com.browserup.harreader.model.HarRequest;
-
+import de.sstoehr.harreader.model.HarContent;
+import de.sstoehr.harreader.model.HarEntry;
+import de.sstoehr.harreader.model.HarPostData;
+import de.sstoehr.harreader.model.HarPostDataParam;
 import de.sstoehr.harreader.model.HarQueryParam;
+import de.sstoehr.harreader.model.HarRequest;
 
 public enum HttpMessagePart
 {
@@ -56,12 +56,21 @@ public enum HttpMessagePart
         {
             HarRequest request = harEntry.getRequest();
             HarPostData postData = request.getPostData();
-            return Map.of(
-                    "query", getQueryParameters(request),
-                    "requestBody", createBodyData(postData.getMimeType(), postData.getText()),
-                    "requestBodyParameters", getRequestBodyParameters(postData),
-                    "responseStatus", harEntry.getResponse().getStatus()
-            );
+            Map<String, Object> requestData = new HashMap<>();
+            requestData.put("query", getQueryParameters(request));
+            requestData.put("responseStatus", harEntry.getResponse().getStatus());
+
+            // As per spec text and params fields are mutually exclusive.
+            if (postData.getText() != null)
+            {
+                requestData.put("requestBody", createBodyData(postData.getMimeType(), postData.getText()));
+            }
+            else
+            {
+                requestData.put("requestBodyParameters", getRequestBodyParameters(postData));
+            }
+
+            return requestData;
         }
     },
     RESPONSE_DATA

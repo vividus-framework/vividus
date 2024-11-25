@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.browserup.harreader.model.HttpMethod;
-
 import org.jbehave.core.steps.ParameterConverters.FunctionalParameterConverter;
 
+import de.sstoehr.harreader.model.HttpMethod;
 import jakarta.inject.Named;
 
 @Named

@@ -39,16 +39,6 @@ import java.util.stream.Stream;
 
 import com.browserup.bup.filters.RequestFilter;
 import com.browserup.bup.util.HttpMessageInfo;
-import com.browserup.harreader.model.Har;
-import com.browserup.harreader.model.HarCreatorBrowser;
-import com.browserup.harreader.model.HarEntry;
-import com.browserup.harreader.model.HarLog;
-import com.browserup.harreader.model.HarPostData;
-import com.browserup.harreader.model.HarPostDataParam;
-import com.browserup.harreader.model.HarQueryParam;
-import com.browserup.harreader.model.HarRequest;
-import com.browserup.harreader.model.HarResponse;
-import com.browserup.harreader.model.HttpMethod;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.hc.core5.http.HttpStatus;
@@ -74,6 +64,15 @@ import org.vividus.steps.StringComparisonRule;
 import org.vividus.ui.action.IWaitActions;
 import org.vividus.variable.VariableScope;
 
+import de.sstoehr.harreader.model.Har;
+import de.sstoehr.harreader.model.HarCreatorBrowser;
+import de.sstoehr.harreader.model.HarEntry;
+import de.sstoehr.harreader.model.HarLog;
+import de.sstoehr.harreader.model.HarPostData;
+import de.sstoehr.harreader.model.HarQueryParam;
+import de.sstoehr.harreader.model.HarRequest;
+import de.sstoehr.harreader.model.HarResponse;
+import de.sstoehr.harreader.model.HttpMethod;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -188,14 +187,11 @@ class ProxyStepsTests
             Map<String, Object> map = (Map<String, Object>) value;
             Map<String, List<String>> urlQuery = (Map<String, List<String>>) map.get("query");
             Map<String, String> requestBody = (Map<String, String>) map.get("requestBody");
-            Map<String, List<String>> formData = (Map<String, List<String>>) map.get("requestBodyParameters");
             Integer responseStatus = (Integer) map.get("responseStatus");
             assertAll(
                     () -> assertEquals(List.of(VALUE1, VALUE2), urlQuery.get(KEY1)),
                     () -> assertEquals(List.of(VALUE2), urlQuery.get(KEY2)),
                     () -> assertEquals(MIME_TYPE, requestBody.get(MIME_TYPE)),
-                    () -> assertEquals(List.of(VALUE1, VALUE2), formData.get(KEY1)),
-                    () -> assertEquals(List.of(VALUE2), formData.get(KEY2)),
                     () -> assertEquals(statusCode, responseStatus)
             );
             return true;
@@ -402,11 +398,6 @@ class ProxyStepsTests
         HarPostData postData = new HarPostData();
         postData.setMimeType(MIME_TYPE);
         postData.setText(TEXT);
-        postData.setParams(List.of(
-                createHarPostDataParam(KEY1, VALUE1),
-                createHarPostDataParam(KEY1, VALUE2),
-                createHarPostDataParam(KEY2, VALUE2)
-        ));
 
         HarRequest request = new HarRequest();
         request.setMethod(httpMethod);
@@ -433,13 +424,5 @@ class ProxyStepsTests
         harQueryParam.setName(key);
         harQueryParam.setValue(value);
         return harQueryParam;
-    }
-
-    private HarPostDataParam createHarPostDataParam(String key, String value)
-    {
-        HarPostDataParam postDataParam = new HarPostDataParam();
-        postDataParam.setName(key);
-        postDataParam.setValue(value);
-        return postDataParam;
     }
 }
