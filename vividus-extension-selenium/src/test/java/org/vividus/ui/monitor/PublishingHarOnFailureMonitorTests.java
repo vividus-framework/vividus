@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,21 @@
 
 package org.vividus.ui.monitor;
 
-import static com.github.valfirst.slf4jtest.LoggingEvent.error;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
+import java.io.Writer;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -38,12 +39,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.browserup.harreader.HarReader;
-import com.browserup.harreader.HarReaderException;
-import com.browserup.harreader.model.Har;
-import com.browserup.harreader.model.HarEntry;
-import com.browserup.harreader.model.HarLog;
-import com.browserup.harreader.model.HarPage;
+import com.github.valfirst.slf4jtest.LoggingEvent;
 import com.github.valfirst.slf4jtest.TestLogger;
 import com.github.valfirst.slf4jtest.TestLoggerFactory;
 import com.github.valfirst.slf4jtest.TestLoggerFactoryExtension;
@@ -59,7 +55,10 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.event.Level;
 import org.vividus.context.RunContext;
 import org.vividus.model.RunningScenario;
 import org.vividus.model.RunningStory;
@@ -67,6 +66,16 @@ import org.vividus.proxy.IProxy;
 import org.vividus.reporter.event.AttachmentPublishEvent;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.testcontext.TestContext;
+
+import de.sstoehr.harreader.HarReader;
+import de.sstoehr.harreader.HarReaderException;
+import de.sstoehr.harreader.HarWriter;
+import de.sstoehr.harreader.HarWriterException;
+import de.sstoehr.harreader.model.Har;
+import de.sstoehr.harreader.model.HarEntry;
+import de.sstoehr.harreader.model.HarLog;
+import de.sstoehr.harreader.model.HarPage;
+import de.sstoehr.harreader.model.HarTiming;
 
 @ExtendWith({ MockitoExtension.class, TestLoggerFactoryExtension.class })
 class PublishingHarOnFailureMonitorTests
@@ -171,8 +180,8 @@ class PublishingHarOnFailureMonitorTests
         var monitor = createMonitor(false);
         monitor.beforePerforming(I_DO_ACTION, false, getCapturingHarMethod());
         monitor.onAssertionFailure(null);
-        assertEquals("{\"log\":{\"version\":\"1.1\",\"creator\":{\"name\":\"\",\"version\":\"\"},\"pages\":[],"
-                + "\"entries\":[]}}", captureAttachmentPublishEvent());
+        assertEquals("{\"log\":{\"version\":\"1.1\",\"creator\":{},\"pages\":[],\"entries\":[]}}",
+                captureAttachmentPublishEvent());
         assertThat(logger.getLoggingEvents(), empty());
         verifyNoMoreInteractions(testContext);
     }
@@ -200,19 +209,28 @@ class PublishingHarOnFailureMonitorTests
         verify(testContext).put(PublishingHarOnFailureMonitor.class, Date.from(dateAfterLastCapturing));
     }
 
+    @SuppressWarnings("PMD.UnusedLocalVariable")
     @Test
-    void shouldLogErrorIfHarPublishingIsFailed() throws IOException
+    void shouldLogErrorIfHarPublishingIsFailed()
     {
-        mockScenarioAndStoryMeta();
-        var exception = new IOException();
-        var har = mock(Har.class);
-        when(har.deepCopy()).thenThrow(exception);
-        when(proxy.getRecordedData()).thenReturn(har);
-        when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
-        var monitor = createMonitor(true);
-        monitor.beforePerforming(I_DO_ACTION, false, null);
-        monitor.onAssertionFailure(null);
-        assertThat(logger.getLoggingEvents(), equalTo(List.of(error(exception, ERROR_MESSAGE))));
+        var exception = mock(HarWriterException.class);
+        try (MockedConstruction<HarWriter> harReaderConstruction = Mockito.mockConstruction(HarWriter.class,
+                (m, c) -> doThrow(exception).when(m).writeTo(any(Writer.class), any())))
+        {
+            mockScenarioAndStoryMeta();
+            var har = mock(Har.class);
+            when(proxy.getRecordedData()).thenReturn(har);
+            when(webDriverProvider.isWebDriverInitialized()).thenReturn(true);
+            var monitor = createMonitor(true);
+            monitor.beforePerforming(I_DO_ACTION, false, null);
+            monitor.onAssertionFailure(null);
+            List<LoggingEvent> events = logger.getLoggingEvents();
+            assertThat(events, hasSize(1));
+            LoggingEvent errorEvent = events.get(0);
+            assertEquals(Level.ERROR, errorEvent.getLevel());
+            assertEquals(exception, errorEvent.getThrowable().get().getCause());
+            assertEquals(ERROR_MESSAGE, errorEvent.getMessage());
+        }
     }
 
     private void mockScenarioAndStoryMeta()
@@ -257,6 +275,15 @@ class PublishingHarOnFailureMonitorTests
         var harEntry = new HarEntry();
         harEntry.setComment(comment);
         harEntry.setStartedDateTime(Date.from(startedDateTime));
+        harEntry.getResponse().setStatus(0);
+        HarTiming timing = harEntry.getTimings();
+        timing.setBlocked(-1);
+        timing.setDns(-1);
+        timing.setConnect(-1);
+        timing.setSend(-1);
+        timing.setWait(-1);
+        timing.setReceive(-1);
+        timing.setSsl(-1);
         return harEntry;
     }
 

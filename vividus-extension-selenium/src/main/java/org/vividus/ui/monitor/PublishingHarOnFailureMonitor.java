@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,15 @@
 package org.vividus.ui.monitor;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-import com.browserup.harreader.model.Har;
-import com.browserup.harreader.model.HarEntry;
-import com.browserup.harreader.model.HarLog;
+import com.browserup.harreader.filter.HarLogFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Suppliers;
 import com.google.common.eventbus.EventBus;
 
 import org.vividus.context.RunContext;
@@ -31,6 +33,16 @@ import org.vividus.proxy.IProxy;
 import org.vividus.reporter.model.Attachment;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.testcontext.TestContext;
+
+import de.sstoehr.harreader.HarReader;
+import de.sstoehr.harreader.HarReaderException;
+import de.sstoehr.harreader.HarReaderMode;
+import de.sstoehr.harreader.HarWriter;
+import de.sstoehr.harreader.HarWriterException;
+import de.sstoehr.harreader.jackson.MapperFactory;
+import de.sstoehr.harreader.model.Har;
+import de.sstoehr.harreader.model.HarEntry;
+import de.sstoehr.harreader.model.HarLog;
 
 public class PublishingHarOnFailureMonitor extends AbstractPublishingAttachmentOnFailureMonitor
 {
@@ -41,6 +53,8 @@ public class PublishingHarOnFailureMonitor extends AbstractPublishingAttachmentO
 
     private final boolean publishHarOnFailure;
 
+    private final MapperFactory mapperFactory;
+
     public PublishingHarOnFailureMonitor(boolean publishHarOnFailure, EventBus eventBus, RunContext runContext,
             IWebDriverProvider webDriverProvider, IProxy proxy, TestContext testContext)
     {
@@ -48,23 +62,49 @@ public class PublishingHarOnFailureMonitor extends AbstractPublishingAttachmentO
         this.publishHarOnFailure = publishHarOnFailure;
         this.proxy = proxy;
         this.testContext = testContext;
+        this.mapperFactory = new MapperFactory()
+        {
+            private final Supplier<ObjectMapper> objectMapper = Suppliers.memoize(ObjectMapper::new);
+
+            @Override
+            public ObjectMapper instance(HarReaderMode mode)
+            {
+                return instance();
+            }
+
+            @Override
+            public ObjectMapper instance()
+            {
+                return objectMapper.get();
+            }
+        };
     }
 
     @Override
     protected Optional<Attachment> createAttachment() throws IOException
     {
-        Har har = proxy.getRecordedData().deepCopy();
-        HarLog harLog = har.getLog();
-        Date savedDateTime = testContext.get(RECENT_HAR_ENTRY_TIMESTAMP_KEY);
-        if (savedDateTime != null)
+        try (StringWriter writer = new StringWriter())
         {
-            harLog.getEntries().removeIf(entry -> savedDateTime.after(entry.getStartedDateTime()));
-            harLog.getPages().removeIf(page -> savedDateTime.after(page.getStartedDateTime()));
+            HarWriter harWriter = new HarWriter(mapperFactory);
+            harWriter.writeTo(writer, proxy.getRecordedData());
+            HarReader reader = new HarReader(mapperFactory);
+            Har har = reader.readFromString(writer.toString());
+            HarLog harLog = har.getLog();
+            Date savedDateTime = testContext.get(RECENT_HAR_ENTRY_TIMESTAMP_KEY);
+            if (savedDateTime != null)
+            {
+                harLog.getEntries().removeIf(entry -> savedDateTime.after(entry.getStartedDateTime()));
+                harLog.getPages().removeIf(page -> savedDateTime.after(page.getStartedDateTime()));
+            }
+            HarLogFilter.findMostRecentEntry(harLog)
+                    .map(HarEntry::getStartedDateTime)
+                    .ifPresent(date -> testContext.put(RECENT_HAR_ENTRY_TIMESTAMP_KEY, date));
+            return Optional.of(new Attachment(harWriter.writeAsBytes(har), "har-on-failure.har"));
         }
-        harLog.findMostRecentEntry()
-                .map(HarEntry::getStartedDateTime)
-                .ifPresent(date -> testContext.put(RECENT_HAR_ENTRY_TIMESTAMP_KEY, date));
-        return Optional.of(new Attachment(har.asBytes(), "har-on-failure.har"));
+        catch (HarWriterException | HarReaderException thrown)
+        {
+            throw new IllegalStateException(thrown);
+        }
     }
 
     @Override
