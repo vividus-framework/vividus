@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.vividus.selenium.manager;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -44,6 +46,8 @@ import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.Browser;
 import org.vividus.selenium.IWebDriverProvider;
+import org.vividus.selenium.cdp.BrowserPermissions;
+import org.vividus.selenium.cdp.CdpWebDriverSessionAttribute;
 import org.vividus.selenium.session.WebDriverSessionInfo;
 
 @ExtendWith(MockitoExtension.class)
@@ -157,6 +161,16 @@ class WebDriverManagerTests
         when(capabilities.getBrowserName()).thenReturn("chrome-headless-shell");
 
         assertTrue(WebDriverManager.isBrowser(capabilities, Browser.CHROME));
+    }
+
+    @Test
+    void shouldReturnBrowserPermissions()
+    {
+        BrowserPermissions permissions = new BrowserPermissions();
+        when(webDriverSessionInfo.get(eq(CdpWebDriverSessionAttribute.BROWSER_PERMISSIONS), any()))
+                .thenReturn(permissions);
+        BrowserPermissions actual = webDriverManager.getBrowserPermissions();
+        assertEquals(permissions, actual);
     }
 
     @ParameterizedTest

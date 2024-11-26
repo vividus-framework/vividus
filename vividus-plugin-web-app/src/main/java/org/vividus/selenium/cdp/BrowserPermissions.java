@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.manager;
+package org.vividus.selenium.cdp;
 
-import java.util.Optional;
-
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.remote.Browser;
-import org.vividus.selenium.cdp.BrowserPermissions;
-
-public interface IWebDriverManager extends IGenericWebDriverManager
+public class BrowserPermissions
 {
-    boolean isElectronApp();
+    private boolean geolocationEnabled;
 
-    boolean isBrowserAnyOf(Browser... browsers);
+    public boolean isGeolocationEnabled()
+    {
+        return geolocationEnabled;
+    }
 
-    Optional<Dimension> getScreenResolution();
-
-    boolean isRemoteExecution();
-
-    BrowserPermissions getBrowserPermissions();
+    public void setGeolocationEnabled(boolean geolocationEnabled)
+    {
+        this.geolocationEnabled = geolocationEnabled;
+    }
 }

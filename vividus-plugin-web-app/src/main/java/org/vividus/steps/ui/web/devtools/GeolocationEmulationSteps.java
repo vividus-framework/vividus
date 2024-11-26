@@ -16,18 +16,27 @@
 
 package org.vividus.steps.ui.web.devtools;
 
+import java.util.List;
 import java.util.Map;
 
 import org.jbehave.core.annotations.When;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.vividus.selenium.cdp.BrowserPermissions;
+import org.vividus.selenium.manager.WebDriverManager;
 import org.vividus.ui.web.action.CdpActions;
 
 public class GeolocationEmulationSteps
 {
-    private final CdpActions cdpActions;
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeolocationEmulationSteps.class);
 
-    public GeolocationEmulationSteps(CdpActions cdpActions)
+    private final CdpActions cdpActions;
+    private final WebDriverManager webDriverManager;
+
+    public GeolocationEmulationSteps(CdpActions cdpActions, WebDriverManager webDriverManager)
     {
         this.cdpActions = cdpActions;
+        this.webDriverManager = webDriverManager;
     }
 
     /**
@@ -43,6 +52,14 @@ public class GeolocationEmulationSteps
     @When("I emulate Geolocation using coordinates with latitude `$latitude` and longitude `$longitude`")
     public void emulateGeolocation(double latitude, double longitude)
     {
+        BrowserPermissions permissions = webDriverManager.getBrowserPermissions();
+        if (!permissions.isGeolocationEnabled())
+        {
+            cdpActions.executeCdpCommand("Browser.grantPermissions", Map.of("permissions", List.of("geolocation")));
+            permissions.setGeolocationEnabled(true);
+            LOGGER.info("The browser has been granted the permission to track geolocation");
+        }
+
         cdpActions.executeCdpCommand("Emulation.setGeolocationOverride",
                 Map.of("latitude", latitude, "longitude", longitude, "accuracy", 1));
     }

@@ -14,23 +14,11 @@
  * limitations under the License.
  */
 
-package org.vividus.selenium.manager;
+package org.vividus.selenium.cdp;
 
-import java.util.Optional;
+import org.vividus.selenium.session.WebDriverSessionAttribute;
 
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.remote.Browser;
-import org.vividus.selenium.cdp.BrowserPermissions;
-
-public interface IWebDriverManager extends IGenericWebDriverManager
+public enum CdpWebDriverSessionAttribute implements WebDriverSessionAttribute
 {
-    boolean isElectronApp();
-
-    boolean isBrowserAnyOf(Browser... browsers);
-
-    Optional<Dimension> getScreenResolution();
-
-    boolean isRemoteExecution();
-
-    BrowserPermissions getBrowserPermissions();
+    BROWSER_PERMISSIONS
 }
