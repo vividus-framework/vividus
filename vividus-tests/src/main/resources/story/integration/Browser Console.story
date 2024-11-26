@@ -17,6 +17,16 @@ Then there are no browser console INFOS
 Then there are no browser console ERRORS
 
 
+Scenario: Verify step: When I clear browser console logs
+When I execute javascript `console.log('info')` with arguments:
+When I execute javascript `console.warn('warninig')` with arguments:
+When I execute javascript `console.error('error')` with arguments:
+When I clear browser console logs
+Then there are no browser console INFOS
+Then there are no browser console WARNINGS
+Then there are no browser console ERRORS
+
+
 Scenario: Verify steps: Then there are no browser console $logEntries by regex `$regex`, Then there are no browser console $logEntries by regex '$regex'
 When I execute javascript `console.error('error')` with arguments:
 Then there are no browser console ERRORS by regex `.*message.*`

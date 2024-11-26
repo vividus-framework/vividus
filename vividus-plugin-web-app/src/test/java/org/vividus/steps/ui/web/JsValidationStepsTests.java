@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
@@ -39,6 +40,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
@@ -51,6 +53,7 @@ import org.vividus.context.VariableContext;
 import org.vividus.reporter.event.IAttachmentPublisher;
 import org.vividus.selenium.IWebDriverProvider;
 import org.vividus.selenium.logging.BrowserLogLevel;
+import org.vividus.selenium.logging.BrowserLogManager;
 import org.vividus.softassert.ISoftAssert;
 import org.vividus.ui.action.WaitActions;
 import org.vividus.ui.action.WaitResult;
@@ -161,6 +164,20 @@ class JsValidationStepsTests
         var ordered = inOrder(attachmentPublisher, variableContext);
         ordered.verify(variableContext, times(savesVariable)).putVariable(scopes, variableName, List.of(infoEntry));
         verifyAttachmentPublisher(Map.of(URL, List.of(infoEntry)), ordered);
+    }
+
+    @Test
+    void shouldClearBrowserConsoleLogs()
+    {
+        try (MockedStatic<BrowserLogManager> mockedManager = mockStatic(BrowserLogManager.class))
+        {
+            WebDriver webDriver = mock(WebDriver.class);
+            when(webDriverProvider.get()).thenReturn(webDriver);
+
+            jsValidationSteps.clearBrowserConsoleLogs();
+
+            mockedManager.verify(() -> BrowserLogManager.resetBuffer(webDriver));
+        }
     }
 
     private Map<String, Collection<LogEntry>> testCheckJsErrors(String logErrorMessage, Runnable action)
