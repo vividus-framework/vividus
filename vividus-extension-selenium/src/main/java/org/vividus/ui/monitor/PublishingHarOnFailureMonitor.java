@@ -24,6 +24,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.browserup.harreader.filter.HarLogFilter;
+import com.fasterxml.jackson.core.JsonFactoryBuilder;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Suppliers;
 import com.google.common.eventbus.EventBus;
@@ -64,7 +66,24 @@ public class PublishingHarOnFailureMonitor extends AbstractPublishingAttachmentO
         this.testContext = testContext;
         this.mapperFactory = new MapperFactory()
         {
-            private final Supplier<ObjectMapper> objectMapper = Suppliers.memoize(ObjectMapper::new);
+            /*
+             * Increase the limit for allowed HAR size in string format to avoid the following exception:
+             *
+             * <code>
+             * Caused by: com.fasterxml.jackson.core.exc.StreamConstraintsException: String value length
+             * (20054016) exceeds the maximum allowed (20000000, from `StreamReadConstraints.getMaxStringLength()`)
+             * </code>
+             */
+            private static final int ALLOWED_HAR_SIZE = 40_000_000;
+
+            private final Supplier<ObjectMapper> objectMapper = Suppliers.memoize(() ->
+            {
+                return new ObjectMapper(
+                        new JsonFactoryBuilder()
+                                .streamReadConstraints(
+                                        StreamReadConstraints.builder().maxStringLength(ALLOWED_HAR_SIZE).build())
+                                .build());
+            });
 
             @Override
             public ObjectMapper instance(HarReaderMode mode)
