@@ -1,4 +1,8 @@
 === Proxy Steps
+
+IMPORTANT: The maximum size the HAR file being published on failure is 40 MB, in case of exceeding the limit
+and getting an error please re-structure the scenarios to include <<#_clear_the_recordings>> step.
+
 ==== Check the number of HTTP requests
 :proxy: This step requires proxy to be turned on. It can be done in properties or by switching on @proxy meta tag at the story level.
 :har-attached: In case of failure the full HTTP archive (HAR) is attached to the report.
