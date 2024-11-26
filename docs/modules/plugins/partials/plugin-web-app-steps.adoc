@@ -459,6 +459,24 @@ Then `${logs}` matches `.*Application ready in \d+ seconds.*`
 
 include::plugins:partial$ui-execution-on-each-element-steps.adoc[]
 
+==== Clear browser console logs
+
+Clears browser console logs of all types.
+
+NOTE: The `console.clear();` JS command doesn't affect the logs fetched by Selenium.
+
+[source,gherkin]
+----
+When I clear browser console logs
+----
+
+.Clear browser console logs
+----
+Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
+When I clear browser console logs
+Then there are browser console ERRORS by regex `.*`
+----
+
 === Context steps
 ==== Switch to the default context of page
 

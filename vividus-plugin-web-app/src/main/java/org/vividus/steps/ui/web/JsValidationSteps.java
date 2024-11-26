@@ -159,6 +159,17 @@ public class JsValidationSteps
         publishAttachment(messages);
     }
 
+    /**
+     * Clears browser console logs of all types.
+     *
+     * <b>NOTE:</b> <code>console.clear()</code> JS command doesn't affect the logs fetched by Selenium.
+     */
+    @When("I clear browser console logs")
+    public void clearBrowserConsoleLogs()
+    {
+        BrowserLogManager.resetBuffer(webDriverProvider.get());
+    }
+
     private void checkLogMessagesAbsence(Set<LogEntry> logEntries, Set<BrowserLogLevel> logLevels)
     {
         softAssert.assertEquals("Current page contains no JavaScript " + toString(logLevels), 0,
