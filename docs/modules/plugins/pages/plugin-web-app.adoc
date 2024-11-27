@@ -1719,7 +1719,11 @@ When I reset mobile device emulation
 
 Set the current Geolocation to coordinates with the specified latitude and longitude.
 
-IMPORTANT: The step is only supported by Chrome browser.
+[IMPORTANT]
+====
+* The step is only supported by Chrome browser.
+* The step automatically grants the permission to track geolocation in the browser.
+====
 
 [source,gherkin]
 ----
