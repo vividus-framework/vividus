@@ -92,6 +92,23 @@ class WebDriverCookieManagerTests
     }
 
     @Test
+    void shouldAddHttpCookie()
+    {
+        String domain = "api_domain";
+        configureMockedWebDriver();
+        BasicClientCookie httpCookie = new BasicClientCookie(COOKIE_NAME, ZERO);
+        httpCookie.setPath(PATH);
+        httpCookie.setDomain(domain);
+        cookieManager.addHttpClientCookie(httpCookie);
+        verify(options).addCookie(cookieCaptor.capture());
+        Cookie cookie = cookieCaptor.getValue();
+        assertEquals(COOKIE_NAME, cookie.getName());
+        assertEquals(ZERO, cookie.getValue());
+        assertEquals(PATH, cookie.getPath());
+        assertEquals(domain, cookie.getDomain());
+    }
+
+    @Test
     void shouldDeleteCookie()
     {
         configureMockedWebDriver();

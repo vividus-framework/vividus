@@ -98,6 +98,26 @@ class PlaywrightCookieManagerTests
     }
 
     @Test
+    void shouldAddHttpCookie()
+    {
+        String domain = "api_domain";
+        BasicClientCookie httpCookie = new BasicClientCookie(COOKIE_NAME, ZERO);
+        httpCookie.setPath(PATH);
+        httpCookie.setDomain(domain);
+
+        ArgumentCaptor<List<Cookie>> cookieCaptor = ArgumentCaptor.captor();
+        when(browserContextProvider.get()).thenReturn(browserContext);
+        cookieManager.addHttpClientCookie(httpCookie);
+        verify(browserContext).addCookies(cookieCaptor.capture());
+
+        Cookie cookie = cookieCaptor.getValue().get(0);
+        assertEquals(COOKIE_NAME, cookie.name);
+        assertEquals(ZERO, cookie.value);
+        assertEquals(PATH, cookie.path);
+        assertEquals(domain, cookie.domain);
+    }
+
+    @Test
     void shouldGetCookie()
     {
         when(browserContextProvider.get()).thenReturn(browserContext);

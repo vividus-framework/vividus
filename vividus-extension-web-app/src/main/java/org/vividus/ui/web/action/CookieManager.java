@@ -18,11 +18,14 @@ package org.vividus.ui.web.action;
 
 import java.util.Collection;
 
+import org.apache.hc.client5.http.cookie.Cookie;
 import org.apache.hc.client5.http.cookie.CookieStore;
 
 public interface CookieManager<T>
 {
     void addCookie(String cookieName, String cookieValue, String path, String urlAsString);
+
+    void addHttpClientCookie(Cookie httpCookie);
 
     void deleteAllCookies();
 
