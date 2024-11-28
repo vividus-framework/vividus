@@ -16,6 +16,8 @@
 
 package org.vividus.selenium.screenshot;
 
+import static pazone.ashot.ShootingStrategies.scaling;
+
 import java.util.Optional;
 
 import org.openqa.selenium.WebElement;
@@ -25,7 +27,6 @@ import org.vividus.ui.web.screenshot.WebCutOptions;
 import org.vividus.ui.web.screenshot.WebScreenshotParameters;
 
 import pazone.ashot.AShot;
-import pazone.ashot.ShootingStrategies;
 import pazone.ashot.ShootingStrategy;
 import pazone.ashot.coordinates.CoordsProvider;
 
@@ -78,7 +79,7 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
                 scrollbarHandler);
 
         return new AShot()
-                .shootingStrategy(decorated)
+                .shootingStrategy(scaling(decorated, screenshotParameters.getScaleFactor()))
                 .coordsProvider(scrollBarHidingCoordsProvider);
     }
 
@@ -126,7 +127,10 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
         shootingStrategy = decorateWithScrollbarHiding(shootingStrategy, Optional.empty());
         shootingStrategy = screenshotParameters == null
                 ? shootingStrategy
-                : decorateWithCropping(shootingStrategy, screenshotParameters);
+                : scaling(
+                    decorateWithCropping(shootingStrategy, screenshotParameters),
+                    screenshotParameters.getScaleFactor()
+                );
 
         return new AShot().shootingStrategy(shootingStrategy)
                 .coordsProvider(new ScrollBarHidingCoordsProviderDecorator(coordsProvider, scrollbarHandler));
@@ -134,6 +138,6 @@ public class WebAshotFactory extends AbstractAshotFactory<WebScreenshotParameter
 
     private ShootingStrategy getBaseShootingStrategy()
     {
-        return ShootingStrategies.scaling((float) javascriptActions.getDevicePixelRatio());
+        return scaling((float) javascriptActions.getDevicePixelRatio());
     }
 }
