@@ -457,8 +457,6 @@ When I wait until browser console infos by regex `.*Application ready.*` appear 
 Then `${logs}` matches `.*Application ready in \d+ seconds.*`
 ----
 
-include::plugins:partial$ui-execution-on-each-element-steps.adoc[]
-
 ==== Clear browser console logs
 
 Clears browser console logs of all types.
@@ -476,6 +474,8 @@ Given I am on page with URL `https://vividus-test-site-a92k.onrender.com/`
 When I clear browser console logs
 Then there are browser console ERRORS by regex `.*`
 ----
+
+include::plugins:partial$ui-execution-on-each-element-steps.adoc[]
 
 === Context steps
 ==== Switch to the default context of page
