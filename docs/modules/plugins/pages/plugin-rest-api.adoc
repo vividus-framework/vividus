@@ -976,6 +976,24 @@ When I save value of HTTP cookie with name `cookieName` to scenario variable `va
 Then '${value}' is equal to 'newCookieValue'
 ----
 
+=== Remove all HTTP cookies
+
+Removes all cookies from the HTTP context.
+
+[source,gherkin]
+----
+When I remove all HTTP cookies
+----
+
+.Clear the cookies from the previous HTTP response and proceed with the next request without including any cookies
+[source,gherkin]
+----
+When I execute HTTP GET request for resource with URL `https://httpbin.org/cookies/set/cookieName/cookieValue`
+When I save value of HTTP cookie with name `cookieName` to scenario variable `value`
+When I remove all HTTP cookies
+When I execute HTTP GET request for resource with URL `https://httpbin.org/cookies/set/newCookieName/newCookieValue`
+----
+
 == JSON Steps
 
 :json-path: https://github.com/json-path/JsonPath#path-examples[JSON Path]

@@ -115,6 +115,15 @@ public class HttpCookieSteps
         }
     }
 
+    /**
+     * Removes all cookies from the HTTP context
+     */
+    @When("I remove all HTTP cookies")
+    public void removeAllHttpCookies()
+    {
+        cookieStoreProvider.getCookieStore().clear();
+    }
+
     private boolean assertCookiesPresent(String cookieName, int size)
     {
         return softAssert.assertThat(String.format("Number of cookies with name '%s'", cookieName), size,
