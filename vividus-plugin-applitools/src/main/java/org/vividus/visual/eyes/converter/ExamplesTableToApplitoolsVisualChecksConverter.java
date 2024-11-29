@@ -63,12 +63,13 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     private static final String ELEMENTS_TO_IGNORE_OPTION = "elementsToIgnore";
     private static final String AREAS_TO_IGNORE_OPTION = "areasToIgnore";
     private static final String ACCESSIBILITY_STANDARD_OPTION = "accessibilityStandard";
+    private static final String SCALE_RATIO = "scaleRatio";
 
     private static final List<String> SUPPORTED_OPTIONS = List.of(BASELINE_NAME_OPTION, ACTION_OPTION,
             EXECUTE_API_KEY_OPTION, READ_API_KEY_OPTION, HOST_APP_OPTION, HOST_OS_OPTION, VIEWPORT_SIZE_OPTION,
             MATCH_LEVEL_OPTION, DISABLE_BROWSER_FETCHING, SERVER_URI_OPTION, APP_NAME_OPTION, BATCH_NAME_OPTION,
             BASELINE_ENV_NAME_OPTION, ELEMENTS_TO_IGNORE_OPTION, AREAS_TO_IGNORE_OPTION, ACCESSIBILITY_STANDARD_OPTION,
-            LAYOUT_BREAKPOINTS);
+            LAYOUT_BREAKPOINTS, SCALE_RATIO);
 
     private String executeApiKey;
     private String readApiKey;
@@ -128,7 +129,8 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
                 params.valueAs(READ_API_KEY_OPTION, String.class, readApiKey),
                 params.valueAs(ELEMENTS_TO_IGNORE_OPTION, targetType, Set.of()),
                 params.valueAs(AREAS_TO_IGNORE_OPTION, targetType, Set.of()),
-                params.valueAs(ACCESSIBILITY_STANDARD_OPTION, AccessibilitySettings.class, null)
+                params.valueAs(ACCESSIBILITY_STANDARD_OPTION, AccessibilitySettings.class, null),
+                params.valueAs(SCALE_RATIO, Double.class, null)
             );
 
             return check;
@@ -140,7 +142,7 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     {
         ApplitoolsVisualCheck check = createCheck(batchName, baselineName, action);
         configureEyes(check, executeApiKey, hostApp, hostOS, viewportSize, matchLevel, disableBrowserFetching,
-                layoutBreakpoints, serverUri, appName, baselineEnvName, readApiKey, Set.of(), Set.of(), null);
+                layoutBreakpoints, serverUri, appName, baselineEnvName, readApiKey, Set.of(), Set.of(), null, null);
         return check;
     }
 
@@ -153,7 +155,7 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
     private void configureEyes(ApplitoolsVisualCheck check, String executeApiKey, String hostApp, String hostOS,
             Dimension viewportSize, MatchLevel matchLevel, Boolean disableBrowserFetching, Boolean layoutBreakpoints,
             URI serverUri, String appName, String baselineEnvName, String readApiKey, Set<Locator> elements,
-            Set<Locator> areas, AccessibilitySettings settings)
+            Set<Locator> areas, AccessibilitySettings settings, Double scaleRatio)
     {
         check.setScreenshotParameters(screenshotParametersFactory.create());
         check.setReadApiKey(readApiKey);
@@ -175,7 +177,8 @@ public class ExamplesTableToApplitoolsVisualChecksConverter extends
                 .setServerUrl(Optional.ofNullable(serverUri).map(URI::toString).orElse(null))
                 .setAppName(appName)
                 .setBaselineEnvName(baselineEnvName)
-                .setAccessibilityValidation(settings);
+                .setAccessibilityValidation(settings)
+                .setScaleRatio(scaleRatio);
 
         boolean saveTests = check.getAction() == VisualActionType.ESTABLISH;
         configuration.setSaveFailedTests(saveTests);

@@ -83,8 +83,8 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
         when(baselineIndexer.createIndexedBaseline(BASELINE)).thenReturn(BASELINE);
 
          // CHECKSTYLE:OFF
-        String table = "|executeApiKey  |readApiKey  |hostApp |hostOS |viewportSize|matchLevel|disableBrowserFetching|layoutBreakpoints|serverUri          |appName |batchName |baselineEnvName  |elementsToIgnore|areasToIgnore|baselineName |action   |accessibilityStandard|" + System.lineSeparator()
-                     + "|execute-api-key|read-api-key|host-app|host-os|1x1         |EXACT     |true                  |true             |https://example.com|app-name|batch-name|baseline-env-name|elements        |areas        |baseline-name|ESTABLISH|WCAG 2.1 - AA        |";
+        String table = "|executeApiKey  |readApiKey  |hostApp |hostOS |viewportSize|matchLevel|disableBrowserFetching|layoutBreakpoints|serverUri          |appName |batchName |baselineEnvName  |elementsToIgnore|areasToIgnore|baselineName |action   |accessibilityStandard|scaleRatio|" + System.lineSeparator()
+                     + "|execute-api-key|read-api-key|host-app|host-os|1x1         |EXACT     |true                  |true             |https://example.com|app-name|batch-name|baseline-env-name|elements        |areas        |baseline-name|ESTABLISH|WCAG 2.1 - AA        |0.75      |";
         // CHECKSTYLE:ON
         ExamplesTable applitoolsCheckTable = createTable(table);
 
@@ -114,6 +114,7 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
             () -> assertTrue(configuration.isDisableBrowserFetching()),
             () -> assertTrue(configuration.isDefaultLayoutBreakpointsSet()),
             () -> assertEquals(BATCH, configuration.getBatch().getName()),
+            () -> assertEquals(0.75d, configuration.getScaleRatio()),
             () -> assertEquals(AccessibilityLevel.AA, settings.getLevel()),
             () -> assertEquals(AccessibilityGuidelinesVersion.WCAG_2_1, settings.getGuidelinesVersion())
         );
@@ -184,7 +185,8 @@ class ExamplesTableToApplitoolsVisualChecksConverterTests
             () -> assertFalse(configuration.isDisableBrowserFetching()),
             () -> assertFalse(configuration.isDefaultLayoutBreakpointsSet()),
             () -> assertEquals(BATCH, configuration.getBatch().getName()),
-            () -> assertNull(configuration.getAccessibilityValidation())
+            () -> assertNull(configuration.getAccessibilityValidation()),
+            () -> assertNull(configuration.getScaleRatio())
         );
     }
 
