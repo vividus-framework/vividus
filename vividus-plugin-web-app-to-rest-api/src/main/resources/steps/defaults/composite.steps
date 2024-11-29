@@ -7,5 +7,5 @@ Composite: Then all resources by selector `$cssSelector` are valid on:$pages
 Then all resources found by CSS selector `<cssSelector>` are valid on:<pages>
 
 Composite: When I set browser cookies to the API context
-!-- DEPRECATED: 0.8.0, When I set browser cookies to the API context
+!-- DEPRECATED: 0.8.0, When I set browser cookies to HTTP context
 When I set browser cookies to HTTP context
