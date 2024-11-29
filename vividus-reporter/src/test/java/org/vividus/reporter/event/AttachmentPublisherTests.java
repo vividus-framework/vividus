@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 the original author or authors.
+ * Copyright 2019-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ import freemarker.template.TemplateException;
 class AttachmentPublisherTests
 {
     private static final String TEMPLATE_NAME = "templateName";
-    private static final String TITLE = "title";
+    private static final String TITLE = "title.html";
     private static final String TEXT_HTML = "text/html";
 
     private final TestLogger logger = TestLoggerFactory.getTestLogger(AttachmentPublisher.class);
@@ -98,7 +98,7 @@ class AttachmentPublisherTests
     void testPublishPreparedAttachment()
     {
         byte[] attachmentContent = {};
-        attachmentPublisher.publishAttachment(attachmentContent, TITLE + ".html");
+        attachmentPublisher.publishAttachment(attachmentContent, TITLE);
         verify(eventBus).post(argThat(arg ->
         {
             if (arg instanceof AttachmentPublishEvent)
