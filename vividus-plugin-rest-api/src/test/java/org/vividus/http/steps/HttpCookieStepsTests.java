@@ -181,6 +181,13 @@ class HttpCookieStepsTests
                 cookie.getClass().getName()), exception.getMessage());
     }
 
+    @Test
+    void shouldRemoveAllCookies()
+    {
+        httpCookieSteps.removeAllHttpCookies();
+        verify(cookieStore).clear();
+    }
+
     private BasicClientCookie createCookie(String name, String path)
     {
         BasicClientCookie cookie = new BasicClientCookie(name, VALUE);
