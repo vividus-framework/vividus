@@ -185,8 +185,8 @@ class AbstractPublishingScreenshotOnFailureMonitorTests
     void shouldTakeScreenshotOfSearchContext() throws NoSuchMethodException
     {
         enableScreenshotPublishing(true);
-        String title = "2019-03-07_19-11-38_898-Assertion_Failure-chrome-1440x836";
-        Screenshot screenshot = new Screenshot(title + ".png", new byte[] { 1 });
+        var title = "2019-03-07_19-11-38_898-Assertion_Failure-chrome-1440x836.png";
+        var screenshot = new Screenshot(title, new byte[] { 1 });
         TestPublishingScreenshotOnFailureMonitor spy = spy(monitor);
         doReturn(Optional.of(screenshot)).when(spy).takeScreenshot(ASSERTION_FAILURE);
         spy.onAssertionFailure(mock(AssertionFailedEvent.class));

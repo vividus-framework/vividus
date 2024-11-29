@@ -302,7 +302,7 @@ class PublishingHarOnFailureMonitorTests
         var event = eventCaptor.getValue();
         assertThat(event, instanceOf(AttachmentPublishEvent.class));
         var attachment = ((AttachmentPublishEvent) event).attachment();
-        assertEquals("har-on-failure", attachment.getTitle());
+        assertEquals("har-on-failure.har", attachment.getTitle());
         return new String(attachment.getContent(), StandardCharsets.UTF_8);
     }
 
